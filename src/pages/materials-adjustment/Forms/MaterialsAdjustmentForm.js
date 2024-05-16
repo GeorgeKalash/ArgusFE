@@ -1,7 +1,6 @@
 // ** MUI Imports
 import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
-import { useError } from 'src/error'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 
 // ** MUI Imports
@@ -24,7 +23,7 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
 
-export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, setErrorMessage, expanded }) {
+export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, expanded }) {
   const { height } = useWindowDimensions()
   const [isLoading, setIsLoading] = useState(false)
   const [isPosted, setIsPosted] = useState(false)
@@ -38,10 +37,8 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
     plantId: '',
     siteId: '',
     description: '',
-    date: null,
-    isOnPostClicked: false
+    date: null
   })
-  const { stack: stackError } = useError()
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
@@ -56,71 +53,9 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
       siteId: yup.string().required('This field is required')
     }),
     onSubmit: async obj => {
-      try {
-        const copy = { ...obj }
-        copy.date = formatDateToApi(copy.date)
-        if (formik.values.isOnPostClicked) {
-          handlePost(copy)
-          formik.setFieldValue('isOnPostClicked', false)
-        } else {
-          await postADJ(copy)
-          setEditMode(true)
-          invalidate()
-        }
-      } catch (error) {
-        setErrorMessage(error)
-      }
-    }
-  })
+      const copy = { ...obj }
+      copy.date = formatDateToApi(copy.date)
 
-  const detailsFormik = useFormik({
-    enableReinitialize: true,
-    validateOnChange: true,
-    initialValues: {
-      rows: [
-        {
-          itemId: '',
-          sku: '',
-          itemName: '',
-          qty: '',
-          totalCost: '',
-          totalQty: '',
-          muQty: '',
-          qtyInBase: '',
-          notes: '',
-          seqNo: ''
-        }
-      ]
-    },
-    validationSchema: yup.object({
-      itemId: yup.string().required('This field is required')
-    })
-  })
-
-  const totalQty = detailsFormik.values.rows.reduce((qtySum, row) => {
-    // Parse qty as a number, assuming it's a numeric value
-    const qtyValue = parseFloat(row.qty) || 0
-
-    return qtySum + qtyValue
-  }, 0)
-
-  const handlePost = obj => {
-    postRequest({
-      extension: InventoryRepository.MaterialsAdjustment.post,
-      record: JSON.stringify(obj)
-    })
-      .then(res => {
-        invalidate()
-        setIsPosted(true)
-        toast.success('Record Deleted Successfully')
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const postADJ = async obj => {
-    try {
       const updatedRows = detailsFormik.values.rows.map((adjDetail, index) => {
         const seqNo = index + 1 // Adding 1 to make it 1-based index
         if (adjDetail.muQty === null) {
@@ -157,28 +92,65 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
       })
       toast.success('Record Updated Successfully')
       invalidate()
+      setEditMode(true)
       formik.setFieldValue('recordId', res.recordId)
-    } catch (error) {
-      setErrorMessage(error)
     }
+  })
+
+  const detailsFormik = useFormik({
+    enableReinitialize: true,
+    validateOnChange: true,
+    initialValues: {
+      rows: [
+        {
+          itemId: '',
+          sku: '',
+          itemName: '',
+          qty: '',
+          totalCost: '',
+          totalQty: '',
+          muQty: '',
+          qtyInBase: '',
+          notes: '',
+          seqNo: ''
+        }
+      ]
+    },
+    validationSchema: yup.object({
+      itemId: yup.string().required('This field is required')
+    })
+  })
+
+  const totalQty = detailsFormik.values.rows.reduce((qtySum, row) => {
+    // Parse qty as a number, assuming it's a numeric value
+    const qtyValue = parseFloat(row.qty) || 0
+
+    return qtySum + qtyValue
+  }, 0)
+
+  const handlePost = async () => {
+    const values = { ...formik.values }
+    values.date = formatDateToApi(values.date)
+
+    await postRequest({
+      extension: InventoryRepository.MaterialsAdjustment.post,
+      record: JSON.stringify(values)
+    })
+    invalidate()
+    setIsPosted(true)
+    toast.success('Record Deleted Successfully')
   }
 
-  const lookupSKU = searchQry => {
+  const lookupSKU = async searchQry => {
     setItemStore([])
 
     if (searchQry) {
       var parameters = `_filter=${searchQry}&_categoryId=0&_msId=0&_startAt=0&_size=1000`
-      getRequest({
+      await getRequest({
         extension: InventoryRepository.Item.snapshot,
         parameters: parameters
       })
-        .then(res => {
-          setItemStore(res.list)
-          console.log('lookup ', res.list)
-        })
-        .catch(error => {
-          setErrorMessage(error)
-        })
+      setItemStore(res.list)
     }
   }
 
@@ -238,55 +210,48 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
     }
   ]
 
-  const fillDetailsGrid = adjId => {
+  const fillDetailsGrid = async adjId => {
     var parameters = `_filter=&_adjustmentId=${adjId}`
-    getRequest({
+
+    const res = await getRequest({
       extension: InventoryRepository.MaterialsAdjustmentDetail.qry,
       parameters: parameters
     })
-      .then(res => {
-        // Create a new list by modifying each object in res.list
-        const modifiedList = res.list.map(item => ({
-          ...item,
-          totalCost: item.unitCost * item.qty // Modify this based on your calculation
-        }))
 
-        console.log('response ', modifiedList)
-
-        detailsFormik.setValues({
-          ...detailsFormik.values,
-          rows: modifiedList
-        })
-        console.log('detailsFormik ', detailsFormik.values.rows)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+    // Create a new list by modifying each object in res.list
+    const modifiedList = res.list.map(item => ({
+      ...item,
+      totalCost: item.unitCost * item.qty // Modify this based on your calculation
+    }))
+    detailsFormik.setValues({
+      ...detailsFormik.values,
+      rows: modifiedList
+    })
   }
-  useEffect(() => {
-    console.log('heightttt ', height)
-  }, [height])
+
+  const actions = [
+    {
+      key: 'Post',
+      condition: true,
+      onClick: handlePost,
+      disabled: !editMode || isPosted
+    }
+  ]
+  useEffect(() => {}, [height])
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          setIsLoading(true)
-          fillDetailsGrid(recordId)
+      if (recordId) {
+        setIsLoading(true)
+        fillDetailsGrid(recordId)
 
-          const res = await getRequest({
-            extension: InventoryRepository.MaterialsAdjustment.get,
-            parameters: `_recordId=${recordId}`
-          })
-          setIsPosted(res.record.status === 3 ? true : false)
-          res.record.date = formatDateFromApi(res.record.date)
-          console.log('debug date ', res.record.date)
-          setInitialData(res.record)
-        }
-      } catch (error) {
-        setErrorMessage(error)
-      } finally {
-        setIsLoading(false)
+        const res = await getRequest({
+          extension: InventoryRepository.MaterialsAdjustment.get,
+          parameters: `_recordId=${recordId}`
+        })
+        setIsPosted(res.record.status === 3 ? true : false)
+        res.record.date = formatDateFromApi(res.record.date)
+        setInitialData(res.record)
       }
     })()
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -301,7 +266,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
       isPosted={isPosted}
       postVisible={true}
       previewReport={editMode}
-
+      actions={actions}
     >
       <Grid container>
         <Grid container xs={12} style={{ overflow: 'hidden' }}>

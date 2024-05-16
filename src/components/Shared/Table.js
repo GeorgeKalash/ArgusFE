@@ -19,6 +19,7 @@ import DeleteDialog from './DeleteDialog'
 
 // ** Resources
 import { ControlAccessLevel, TrxType } from 'src/resources/AccessLevels'
+import { HIDDEN, accessLevel } from 'src/services/api/maxAccess'
 
 const ODD_OPACITY = 0.2
 
@@ -90,8 +91,6 @@ const TableContainer = styled(Box)({
 
 const PaginationContainer = styled(Box)({
   width: '100%',
-  position: 'fixed',
-  bottom: '0',
   backgroundColor: '#fff',
   borderTop: '1px solid #ccc'
 })
@@ -101,6 +100,7 @@ const Table = ({
   paginationType = 'api',
   handleCheckedRows,
   height,
+  addedHeight = '0px',
   actionColumnHeader = null,
   showCheckboxColumn = false,
   checkTitle = '',
@@ -112,7 +112,6 @@ const Table = ({
   const [checkedRows, setCheckedRows] = useState({})
   const [filteredRows, setFilteredRows] = useState({})
   const [deleteDialogOpen, setDeleteDialogOpen] = useState([false, {}])
-
   const pageSize = props.pageSize ? props.pageSize : 50
   const originalGridData = props.gridData && props.gridData.list && props.gridData.list
   const api = props?.api ? props?.api : props.paginationParameters
@@ -129,9 +128,7 @@ const Table = ({
       if (paginationType === 'api' && gridData) {
         const startAt = gridData._startAt ?? 0
         const totalRecords = gridData?.count ? gridData?.count : 0
-
         const page = Math.ceil(gridData.count ? (startAt === 0 ? 1 : (startAt + 1) / pageSize) : 1)
-
         const pageCount = Math.ceil(gridData.count ? gridData.count / pageSize : 1)
 
         const incrementPage = () => {
@@ -181,9 +178,9 @@ const Table = ({
         )
       } else {
         if (gridData && gridData.list) {
-          var _gridData = props.gridData.list
-          const pageCount = Math.ceil(originalGridData.length ? originalGridData.length / pageSize : 1)
-          const totalRecords = originalGridData.length
+          var _gridData = props.gridData?.list
+          const pageCount = Math.ceil(originalGridData?.length ? originalGridData?.length / pageSize : 1)
+          const totalRecords = originalGridData?.length
 
           const incrementPage = () => {
             if (page < pageCount) {
@@ -270,29 +267,23 @@ const Table = ({
     }
   }
 
-  const columns = props.columns
+  const columns = props.columns.filter(
+    ({ field }) =>
+      accessLevel({
+        maxAccess: props.maxAccess,
+        name: field
+      }) !== HIDDEN
+  )
 
   const handleCheckboxChange = row => {
     setCheckedRows(prevCheckedRows => {
-      // Create a new object with all the previous checked rows
       const newCheckedRows = { ...prevCheckedRows }
-
-      // Create the key based on the presence of seqNo
       const key = row.seqNo ? `${row.recordId}-${row.seqNo}` : row.recordId
-
-      // Update the newCheckedRows object with the current row
       newCheckedRows[key] = row
-
-      // Check if newCheckedRows[key] is defined and has checked property
       const filteredRows = !newCheckedRows[key]?.checked ? [newCheckedRows[key]] : []
-
-      // Pass the entire updated rows in the callback
       handleCheckedRows(filteredRows)
-
-      // Log the updated checkedRows after the state has been updated
       console.log('checkedRows 4 ', newCheckedRows)
 
-      // Return the updated state for the next render
       return filteredRows
     })
   }
@@ -302,9 +293,7 @@ const Table = ({
 
     return match && match.accessLevel === ControlAccessLevel.Hidden
   }
-
   const filteredColumns = columns.filter(column => !shouldRemoveColumn(column))
-
   if (props.onEdit || props.onDelete || props.popupComponent) {
     const deleteBtnVisible = maxAccess ? props.onDelete && maxAccess > TrxType.EDIT : props.onDelete ? true : false
     filteredColumns.push({
@@ -339,10 +328,13 @@ const Table = ({
       }
     })
   }
+  const paginationHeight = pagination ? '9px' : '10px'
 
-  const paginationHeight = pagination ? '41px' : '10px'
-  const tableHeight = height ? `${height}px` : `calc(100vh - 48px - 48px - ${paginationHeight})`
-
+  const tableHeight = height
+    ? typeof height === 'string' && height?.includes('calc')
+      ? height
+      : `${height}px`
+    : `calc(100vh - 48px - 48px - ${paginationHeight} - ${addedHeight})`
   useEffect(() => {
     if (props.gridData && props.gridData.list && paginationType === 'client') {
       var slicedGridData = props.gridData.list.slice((page - 1) * pageSize, page * pageSize)
@@ -372,14 +364,9 @@ const Table = ({
                 ? props.style
                 : {
                     zIndex: 0
-
-                    // marginBottom: 0,
-                    // pb: 0,
-                    // maxHeight: tableHeight, overflow: 'auto', position: 'relative',
                   }
             }
           >
-            {/* <ScrollableTable> */}
             <StripedDataGrid
               rows={
                 gridData?.list
@@ -388,7 +375,7 @@ const Table = ({
                     : gridData?.list
                   : []
               }
-              sx={{ minHeight: tableHeight, overflow: 'auto', position: 'relative', pb: 2 }}
+              sx={{ minHeight: tableHeight, overflow: 'auto', position: 'relative' }}
               density='compact'
               components={{
                 LoadingOverlay: LinearProgress,
@@ -430,10 +417,6 @@ const Table = ({
                 ...filteredColumns
               ]}
             />
-            {/* </ScrollableTable> */}
-            {/* <PaginationContainer>
-                    <CustomPagination />
-                </PaginationContainer> */}
           </TableContainer>
           <DeleteDialog
             open={deleteDialogOpen}

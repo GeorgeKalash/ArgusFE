@@ -1,47 +1,29 @@
-import { useGridApiContext } from '@mui/x-data-grid'
-import CustomTextField from 'src/components/Inputs/CustomTextField'
-import { getFormattedNumber, getNumberWithoutCommas } from 'src/lib/numberField-helper'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 export default function NumberfieldEdit({ column: { props }, id, field, value, update }) {
-  const api = useGridApiContext()
-
-  const handleNumberFieldNewValue = (newValue, oldValue, min, max) => {
-    const regex = /^[0-9,]+(\.\d+)?$/
-    if (newValue && regex.test(newValue)) {
-      newValue = newValue.replace(/[^0-9.]/g, '')
-      const _newValue = getNumberWithoutCommas(newValue)
-
-      return _newValue;
-
-      // console.log(_newValue)
-      // if ((min && _newValue < min) || (max && _newValue > max)) return oldValue
-      // else return getFormattedNumber(newValue)
-    }
-  }
-
-return (
-    <CustomTextField
-      value={getFormattedNumber(value)}
+  return (
+    <CustomNumberField
+      value={value}
       label={''}
-      language={'number'}
       readOnly={props?.readOnly}
+      decimalScale={props?.decimalScale} // much number after .
       autoFocus
-      dataGrid={true}
+      hasBorder={false}
       onChange={e => {
         update({
           id,
           field,
-          value: handleNumberFieldNewValue(
-            e.target.value,
-            value
-          )
+          value: Number(e.target.value)
         })
       }}
-      onClear={() =>api.current.setEditCellValue({
-        id,
-        field,
-        value: ''
-      })}
+      onClear={() =>
+        update({
+          id,
+          field,
+          value: ''
+        })
+      }
+      {...props}
     />
   )
 }

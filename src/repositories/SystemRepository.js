@@ -11,6 +11,7 @@ export const SystemRepository = {
     qry: service + 'qryDT',
     get: service + 'getDT',
     set: service + 'setDT',
+    snapshot: service + 'snapshotDT',
     del: service + 'delDT'
   },
   DocumentTypeMap: {
@@ -144,5 +145,20 @@ export const SystemRepository = {
   },
   FiscalYears: {
     qry: service + 'qryFY'
+  },
+  ModuleClassRES: {
+    qry: service + 'qryRES'
+  },
+  ResourceControl: {
+    qry: service + 'qryResourceControls'
+  },
+  UserFunction: {
+    get: service + 'getUFU'
+  },
+  RecordRemarks: {
+    qry: service + 'qryRMK',
+    set: service + 'setRMK',
+    get: service + 'getRMK',
+    del: service + 'delRMK'
   }
 }

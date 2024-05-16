@@ -2,7 +2,7 @@
 import { useState, useContext } from 'react'
 
 // ** MUI Imports
-import {Box } from '@mui/material'
+import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
 
 // ** Custom Imports
@@ -13,7 +13,7 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
-import { formatDateDefault } from 'src/lib/date-helper';
+import { formatDateDefault } from 'src/lib/date-helper'
 
 // ** Windows
 import JournalVoucherWindow from './Windows/JournalVoucherWindow'
@@ -27,7 +27,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 
 const JournalVoucher = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
- 
+
   const [selectedRecordId, setSelectedRecordId] = useState(null)
 
   //states
@@ -46,12 +46,28 @@ const JournalVoucher = () => {
   const {
     query: { data },
     labels: _labels,
+    search,
+    clear,
+
+    paginationParameters,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: GeneralLedgerRepository.JournalVoucher.qry,
-    datasetId: ResourceIds.JournalVoucher
+    datasetId: ResourceIds.JournalVoucher,
+    search: {
+      endpointId: GeneralLedgerRepository.JournalVoucher.snapshot,
+      searchFn: fetchWithSearch
+    }
   })
+  async function fetchWithSearch({ qry }) {
+    const response = await getRequest({
+      extension: GeneralLedgerRepository.JournalVoucher.snapshot,
+      parameters: `_filter=${qry}`
+    })
+
+    return response
+  }
 
   const invalidate = useInvalidate({
     endpointId: GeneralLedgerRepository.JournalVoucher.qry
@@ -79,9 +95,7 @@ const JournalVoucher = () => {
       headerName: _labels.status,
       flex: 1
     }
-    
   ]
-
 
   const add = () => {
     setWindowOpen(true)
@@ -100,12 +114,18 @@ const JournalVoucher = () => {
     invalidate()
     toast.success('Record Deleted Successfully')
   }
-  
 
   return (
     <>
       <Box>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <GridToolbar
+          onAdd={add}
+          maxAccess={access}
+          onSearch={search}
+          onSearchClear={clear}
+          labels={_labels}
+          inputSearch={true}
+        />
         <Table
           columns={columns}
           gridData={data}
@@ -114,7 +134,8 @@ const JournalVoucher = () => {
           onDelete={del}
           isLoading={false}
           pageSize={50}
-          paginationType='client'
+          paginationType='api'
+          paginationParameters={paginationParameters}
           maxAccess={access}
         />
       </Box>

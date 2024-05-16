@@ -24,11 +24,11 @@ const CreditInvoice = () => {
   const [plantId, setPlantId] = useState(null)
   const { stack } = useWindow()
 
-  const getPlantId = async () => {
-    const userData = window.sessionStorage.getItem('userData')
-      ? JSON.parse(window.sessionStorage.getItem('userData'))
-      : null
+  const userData = window.sessionStorage.getItem('userData')
+    ? JSON.parse(window.sessionStorage.getItem('userData'))
+    : null
 
+  const getPlantId = async () => {
     const parameters = `_userId=${userData && userData.userId}&_key=plantId`
 
     try {
@@ -108,9 +108,7 @@ const CreditInvoice = () => {
         } else {
           throw new Error('The user does not have a default plant')
         }
-      } catch (error) {
-        console.error(error)
-      }
+      } catch (error) {}
     } else {
       openForm(recordId)
     }
@@ -122,11 +120,12 @@ const CreditInvoice = () => {
         _labels,
         maxAccess: access,
         plantId: plantId,
+        userData: userData,
         recordId
       },
       width: 900,
-      height: 600,
-      title: _labels[1]
+      height: 650,
+      title: _labels.creditInvoice
     })
   }
 
@@ -154,43 +153,43 @@ const CreditInvoice = () => {
           columns={[
             {
               field: 'reference',
-              headerName: _labels[4],
+              headerName: _labels.reference,
               flex: 1
             },
             {
               field: 'date',
-              headerName: _labels[2],
+              headerName: _labels.date,
               flex: 1,
               valueGetter: ({ row }) => formatDateDefault(row?.date)
             },
             {
               field: 'plantRef',
-              headerName: _labels[3]
+              headerName: _labels.plant
             },
             {
               field: 'corName',
-              headerName: _labels[5],
+              headerName: _labels.correspondent,
               flex: 1
             },
             {
               field: 'currencyRef',
-              headerName: _labels[8],
+              headerName: _labels.currency,
               flex: 1
             },
             {
               field: 'cashAccountName',
-              headerName: _labels[8],
+              headerName: _labels.cashAccount,
               flex: 1
             },
             {
               field: 'amount',
-              headerName: _labels[10],
+              headerName: _labels.amount,
               flex: 1,
               valueGetter: ({ row }) => getFormattedNumber(row?.amount)
             },
             {
               field: 'statusName',
-              headerName: _labels[21],
+              headerName: _labels.status,
               flex: 1
             }
           ]}

@@ -1,140 +1,69 @@
 import { Box } from '@mui/material'
-import { useContext, useState } from 'react'
+import { useContext } from 'react'
 import { useResourceQuery } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import TransactionForm from './forms/TransactionForm'
 import { useWindow } from 'src/windows'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import Table from 'src/components/Shared/Table'
-import { formatDateDefault, formatDateFromApi } from 'src/lib/date-helper'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
-import { SystemRepository } from 'src/repositories/SystemRepository'
+import { formatDateDefault } from 'src/lib/date-helper'
 import { CTTRXrepository } from 'src/repositories/CTTRXRepository'
-import useResourceParams from 'src/hooks/useResourceParams'
 
 export default function CurrencyTrading() {
   const { getRequest } = useContext(RequestsContext)
-
   const { stack } = useWindow()
 
- //error
- const [errorMessage, setErrorMessage] = useState(null)
-
- const getPlantId = async () => {
-  const userData = window.sessionStorage.getItem('userData')
-    ? JSON.parse(window.sessionStorage.getItem('userData'))
-    : null;
-
-    console.log(userData)
-  const parameters = `_userId=${userData && userData.userId}&_key=plantId`;
-
-  try {
-    const res = await getRequest({
-      extension: SystemRepository.UserDefaults.get,
-      parameters: parameters,
-    });
-
-    if (res.record.value) {
-      return res.record.value;
-    }
-
-    return '';
-  } catch (error) {
-    setErrorMessage(error);
-
-     return '';
+  function openForm(recordId) {
+    stack({
+      Component: TransactionForm,
+      props: {
+        labels,
+        maxAccess: access,
+        recordId
+      },
+      width: 1200,
+      height: 600,
+      title: 'Cash Invoice'
+    })
   }
-};
- async function openFormWindow(recordId) {
-    if(!recordId){
-    try {
-      const plantId = await getPlantId();
-      if (plantId !== '') {
-        openForm('' , plantId)
-      } else {
-        setErrorMessage({ error: 'The user does not have a default plant' });
-      }
-    } catch (error) {
-      console.error(error);
-    }}else{
-      openForm(recordId)
-    }
 
-  }
-function openForm(recordId,plantId ){
-  stack({
-    Component: TransactionForm,
-    props: {
-      labels,
-      maxAccess: access,
-      plantId: plantId,
-      recordId
-    },
-    width: 1200,
-    height:600,
-    title: 'Cash Invoice'
-  })
-}
-
-
-
-const {
-  query: { data },
-  search,
-  clear,
-  labels: labels,
-  access
-} = useResourceQuery({
-  endpointId: CTTRXrepository.CurrencyTrading.snapshot,
-  datasetId: 35208,
-  search: {
+  const {
+    query: { data },
+    filterBy,
+    clearFilter,
+    labels: labels,
+    access
+  } = useResourceQuery({
     endpointId: CTTRXrepository.CurrencyTrading.snapshot,
-    searchFn: fetchWithSearch,
+    datasetId: 35208,
+    filter: {
+      endpointId: CTTRXrepository.CurrencyTrading.snapshot,
+      filterFn: fetchWithSearch
+    }
+  })
+  async function fetchWithSearch({ options = {}, filters }) {
+    return await getRequest({
+      extension: CTTRXrepository.CurrencyTrading.snapshot,
+      parameters: `_filter=${filters.qry}&_category=1`
+    })
   }
-})
-async function fetchWithSearch({options = {} , qry}) {
-  const { _startAt = 0, _pageSize = 50 } = options
-
-  return await getRequest({
-        extension: CTTRXrepository.CurrencyTrading.snapshot,
-        parameters: `_filter=${qry}&_category=1`
-      })
-}
-
-  // const { labels: labels, access: access } = useResourceParams({
-  //   datasetId: 35208
-  // })
-
-  // const search = inp => {
-  //   setData({count : 0, list: [] , message :"",  statusId:1})
-  //    const input = inp
-  //    if(input){
-  //     var parameters = `_filter=${input}`
-
-  //   getRequest({
-  //     extension: CTTRXrepository.CurrencyTrading.snapshot,
-  //     parameters: parameters
-  //   })
-  //     .then(res => {
-  //       setData(res)
-  //     })
-  //     .catch(error => {
-  //       setErrorMessage(error)
-  //     })
-
-  //   }else{
-
-  //     setData({count : 0, list: [] , message :"",  statusId:1})
-  //   }
-
-  // }
-
 
   return (
     <Box>
-      { labels && access && (
+      {labels && access && (
         <>
-          <GridToolbar maxAccess={access}  onSearch={search} onSearchClear={clear}  labels={labels} inputSearch={true}/>
+          <GridToolbar
+            maxAccess={access}
+            onSearch={value => {
+              filterBy('qry', value)
+            }}
+            onSearchClear={() => {
+              clearFilter('qry')
+            }}
+            labels={labels}
+            inputSearch={true}
+          />
+
           <Table
             columns={[
               {
@@ -175,9 +104,9 @@ async function fetchWithSearch({options = {} , qry}) {
               }
             ]}
             onEdit={obj => {
-              openFormWindow(obj.recordId)
+              openForm(obj.recordId)
             }}
-            gridData={data ? data : {list: []}}
+            gridData={data ? data : { list: [] }}
             rowId={['recordId']}
             isLoading={false}
             pageSize={50}
@@ -186,8 +115,6 @@ async function fetchWithSearch({options = {} , qry}) {
           />
         </>
       )}
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage}  />
-
     </Box>
   )
 }

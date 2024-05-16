@@ -1,4 +1,3 @@
-
 import React, { useContext } from 'react'
 import { Box } from '@mui/material'
 import Table from 'src/components/Shared/Table'
@@ -7,181 +6,151 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-import {  formatDateDefault} from 'src/lib/date-helper'
+import { formatDateDefault } from 'src/lib/date-helper'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useWindow } from 'src/windows'
 import ClientTemplateForm from './forms/ClientTemplateForm'
-import useResourceParams from 'src/hooks/useResourceParams'
 import { useResourceQuery } from 'src/hooks/resource'
+import { useError } from 'src/error'
 
 const ClientsList = () => {
-
   const { stack } = useWindow()
-
-  //control
   const { getRequest } = useContext(RequestsContext)
-
-  //error
-  const [errorMessage, setErrorMessage] = useState(null)
+  const { stack: stackError } = useError()
 
   const {
     query: { data },
-    search,
-    clear,
-    labels: _labels,
+    filterBy,
+    clearFilter,
+    labels: labels,
     access
   } = useResourceQuery({
     endpointId: CTCLRepository.CtClientIndividual.snapshot,
     datasetId: ResourceIds.ClientMaster,
-    search: {
+    filter: {
       endpointId: CTCLRepository.CtClientIndividual.snapshot,
-      searchFn: fetchWithSearch,
+      filterFn: fetchWithSearch,
+      default: { category: 1 }
     }
   })
-  async function fetchWithSearch({options = {} , qry}) {
-    const { _startAt = 0, _pageSize = 50 } = options
-
-    return await getRequest({
-          extension: CTCLRepository.CtClientIndividual.snapshot,
-          parameters: `_filter=${qry}&_category=1`
-        })
+  async function fetchWithSearch({ options = {}, filters }) {
+    return (
+      filters.qry &&
+      (await getRequest({
+        extension: CTCLRepository.CtClientIndividual.snapshot,
+        parameters: `_filter=${filters.qry}&_category=1`
+      }))
+    )
   }
 
   const columns = [
     {
-      field: 'categoryName',
-      headerName: _labels?.category,
-      flex: 1,
-      editable: false
-    },
-    {
       field: 'reference',
-      headerName: _labels.reference,
+      headerName: labels.reference,
       flex: 1,
       editable: false
     },
     {
       field: 'name',
-      headerName: _labels.name,
+      headerName: labels.name,
       flex: 1,
       editable: false
     },
 
     {
       field: 'flName',
-      headerName: _labels.flName,
+      headerName: labels.flName,
       flex: 1,
       editable: false
     },
     {
       field: 'cellPhone',
-      headerName: _labels.cellPhone,
-      flex: 1,
-      editable: false
-    },
-    {
-      field: 'plantName',
-      headerName: _labels.plant,
+      headerName: labels.cellPhone,
       flex: 1,
       editable: false
     },
     {
       field: 'nationalityName',
-      headerName: _labels.nationality,
+      headerName: labels.nationality,
       flex: 1,
       editable: false
     },
     {
       field: 'statusName',
-      headerName: _labels.status,
+      headerName: labels.status,
       flex: 1,
-      editable: false,
+      editable: false
     },
 
     {
       field: 'createdDate',
-      headerName: _labels.createdDate,
+      headerName: labels.createdDate,
       flex: 1,
       editable: false,
       valueGetter: ({ row }) => formatDateDefault(row?.createdDate)
-
     },
     {
       field: 'expiryDate',
-      headerName: _labels.expiryDate,
+      headerName: labels.expiryDate,
       flex: 1,
       editable: false,
       valueGetter: ({ row }) => formatDateDefault(row?.expiryDate)
-
-    },
-    {
-      field: 'otp',
-      headerName: _labels.otp,
-      flex: 1,
-      editable: false,
-
     }
   ]
 
-  function openForm (recordId, _plantId){
+  function openForm(recordId, _plantId) {
     stack({
       Component: ClientTemplateForm,
       props: {
-        setErrorMessage: setErrorMessage,
-        _labels : _labels,
+        labels: labels,
         maxAccess: access,
-        recordId: recordId ? recordId : null ,
+        recordId: recordId ? recordId : null,
         plantId: _plantId,
         maxAccess: access
       },
       width: 1100,
       height: 600,
-      title: _labels.pageTitle
+      title: labels.pageTitle
     })
   }
 
   const addClient = async () => {
     try {
-      const plantId = await getPlantId();
+      const plantId = await getPlantId()
       if (plantId !== '') {
-        openForm('' , plantId)
+        openForm('', plantId)
       } else {
-        setErrorMessage({ error: 'The user does not have a default plant' });
+        stackError({
+          message: 'The user does not have a default plant'
+        })
       }
-    } catch (error) {
-      console.error(error);
-    }
-  };
+    } catch (error) {}
+  }
 
   const getPlantId = async () => {
     const userData = window.sessionStorage.getItem('userData')
       ? JSON.parse(window.sessionStorage.getItem('userData'))
-      : null;
-    const parameters = `_userId=${userData && userData.userId}&_key=plantId`;
+      : null
+    const parameters = `_userId=${userData && userData.userId}&_key=plantId`
 
     try {
       const res = await getRequest({
         extension: SystemRepository.UserDefaults.get,
-        parameters: parameters,
-      });
+        parameters: parameters
+      })
 
       if (res.record.value) {
-        return res.record.value;
+        return res.record.value
       }
 
-      return '';
-    } catch (error) {
-      setErrorMessage(error);
+      return ''
+    } catch (error) {}
+  }
 
-       return '';
-    }
-  };
-
-  const editClient= obj => {
+  const editClient = obj => {
     const _recordId = obj.recordId
     openForm(_recordId, '')
   }
@@ -195,12 +164,21 @@ const ClientsList = () => {
           height: '100%'
         }}
       >
-
-<GridToolbar onAdd={addClient} maxAccess={access} onSearch={search} onSearchClear={clear} labels={_labels}  inputSearch={true}/>
-
- <Table
+        <GridToolbar
+          onAdd={addClient}
+          maxAccess={access}
+          onSearch={value => {
+            filterBy('qry', value)
+          }}
+          onSearchClear={() => {
+            clearFilter('qry')
+          }}
+          labels={labels}
+          inputSearch={true}
+        />
+        <Table
           columns={columns}
-          gridData={data ? data : {list: []}}
+          gridData={data ? data : { list: [] }}
           rowId={['recordId']}
           isLoading={false}
           maxAccess={access}
@@ -208,12 +186,7 @@ const ClientsList = () => {
           pageSize={50}
           paginationType='client'
         />
-
-<ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage}  />
-
       </Box>
-
-
     </>
   )
 }

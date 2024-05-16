@@ -18,7 +18,6 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 
-
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 
@@ -31,52 +30,47 @@ const Plants = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
 
-  async function fetchWithSearch({ qry}) {
+  async function fetchWithSearch({ qry }) {
+    const response = await getRequest({
+      extension: SystemRepository.Plant.snapshot,
+      parameters: `_filter=${qry}`
+    })
 
-  const response=  await getRequest({
-    extension: SystemRepository.Plant.snapshot,
-    parameters: `_filter=${qry}`
-  })
-
-return response
-
-}
-
-const {
-  query: { data },
-  search,
-  clear,
-  refetch,
-  labels: _labels,
-  paginationParameters,
-  invalidate,
-  access
-} = useResourceQuery({
-  queryFn: fetchGridData,
-   endpointId: SystemRepository.Plant.page,
-   datasetId: ResourceIds.Plants,
-   search: {
-    endpointId: SystemRepository.Plant.snapshot,
-    searchFn: fetchWithSearch,
+    return response
   }
-})
 
-
-async function fetchGridData(options={}) {
-  const { _startAt = 0, _pageSize = 50 } = options
-
-  const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}`
-  var parameters = defaultParams
-
-   const response =  await getRequest({
-    extension: SystemRepository.Plant.page,
-    parameters: parameters
+  const {
+    query: { data },
+    search,
+    clear,
+    refetch,
+    labels: _labels,
+    paginationParameters,
+    invalidate,
+    access
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: SystemRepository.Plant.page,
+    datasetId: ResourceIds.Plants,
+    search: {
+      endpointId: SystemRepository.Plant.snapshot,
+      searchFn: fetchWithSearch
+    }
   })
 
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50 } = options
 
-return {...response,  _startAt: _startAt}
+    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}`
+    var parameters = defaultParams
 
-}
+    const response = await getRequest({
+      extension: SystemRepository.Plant.page,
+      parameters: parameters
+    })
+
+    return { ...response, _startAt: _startAt }
+  }
 
   const columns = [
     {
@@ -96,7 +90,6 @@ return {...response,  _startAt: _startAt}
     }
   ]
 
-
   const delPlant = obj => {
     postRequest({
       extension: SystemRepository.Plant.del,
@@ -106,8 +99,7 @@ return {...response,  _startAt: _startAt}
         invalidate()
         toast.success('Record Deleted Successfully')
       })
-      .catch(error => {
-      })
+      .catch(error => {})
   }
 
   const addPlant = () => {
@@ -118,17 +110,17 @@ return {...response,  _startAt: _startAt}
     openForm(obj.recordId)
   }
 
-  function openForm (recordId){
+  function openForm(recordId) {
     stack({
       Component: PlantWindow,
       props: {
         labels: _labels,
-        recordId: recordId? recordId : null,
+        recordId: recordId ? recordId : null,
         editMode: recordId && true
       },
       width: 1000,
       height: 600,
-      title: "Plant"
+      title: _labels.plant
     })
   }
 
@@ -141,7 +133,14 @@ return {...response,  _startAt: _startAt}
           height: '100%'
         }}
       >
-        <GridToolbar onAdd={addPlant} maxAccess={access}  onSearch={search} onSearchClear={clear} labels={_labels}  inputSearch={true}/>
+        <GridToolbar
+          onAdd={addPlant}
+          maxAccess={access}
+          onSearch={search}
+          onSearchClear={clear}
+          labels={_labels}
+          inputSearch={true}
+        />
         <Table
           columns={columns}
           gridData={data}
@@ -156,7 +155,6 @@ return {...response,  _startAt: _startAt}
           maxAccess={access}
         />
       </Box>
-
     </>
   )
 }

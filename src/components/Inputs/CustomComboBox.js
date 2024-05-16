@@ -4,8 +4,6 @@ import { ControlAccessLevel, TrxType } from 'src/resources/AccessLevels'
 import { Box } from '@mui/material'
 import Paper from '@mui/material/Paper'
 
-
-
 const CustomComboBox = ({
   type = 'text', //any valid HTML5 input type
   name,
@@ -29,7 +27,7 @@ const CustomComboBox = ({
   sx,
   columnsInDropDown,
   editMode = false,
-  dataGrid=false,
+  hasBorder = true,
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
@@ -51,48 +49,18 @@ const CustomComboBox = ({
       value={value}
       size={size}
       options={store}
-
+      key={value}
       PaperComponent={({ children }) => <Paper style={{ width: `${displayFieldWidth * 100}%` }}>{children}</Paper>}
-      getOptionLabel={option => {
-        if (typeof option === 'object') {
-          // Check if the option is an object
-          if (Array.isArray(displayField)) {
-            // Check if displayField is an array
-            let text = '';
-            displayField.forEach(header => {
-              if (option[header]) {
-                text += `${option[header]} `;
-              } else {
-                text += `${header} `;
-              }
-            });
+      getOptionLabel={(option, value) => {
+        if (Array.isArray(displayField)) {
+          const text = displayField
+            .map(header => (option[header] ? option[header]?.toString() : header === '->' && header))
+            ?.filter(item => item)
+            ?.join(' ')
 
-            return text.trim(); // Trim to remove extra spaces
-          } else {
-            // If displayField is not an array, use it directly
-            return option[displayField] || '';
-          }
-        } else {
-          // If the option is not an object, return the option itself
-          return option;
+          if (text) return text
         }
-      }}
-
-      getOptionLabels={option => {
-        if (option.length == 1) {
-        }
-        if (typeof option === 'object') {
-          if (columnsInDropDown && columnsInDropDown.length > 0) {
-            let search = ''
-            {
-              columnsInDropDown.map((header, i) => {
-                search += `${option[header.key]} `
-              })
-            }
-
-            return search
-          }
-
+        if (typeof option === 'object' && !Array.isArray(displayField)) {
           return `${option[displayField]}`
         } else {
           const selectedOption = store.find(item => {
@@ -100,6 +68,21 @@ const CustomComboBox = ({
           })
           if (selectedOption) return selectedOption[displayField]
           else return ''
+        }
+      }}
+      filterOptions={(options, { inputValue }) => {
+        if (columnsInDropDown) {
+          return options.filter(option =>
+            columnsInDropDown
+              .map(header => header.key)
+              .some(field => option[field]?.toString()?.toLowerCase()?.toString()?.includes(inputValue?.toLowerCase()))
+          )
+        } else {
+          var displayFields = Array.isArray(displayField) ? displayField : [displayField]
+
+          return options.filter(option =>
+            displayFields.some(field => option[field]?.toString()?.toLowerCase()?.includes(inputValue?.toLowerCase()))
+          )
         }
       }}
       isOptionEqualToValue={(option, value) => option[valueField] == getOptionBy}
@@ -159,17 +142,16 @@ const CustomComboBox = ({
           InputProps={{
             ...params.InputProps,
             style: {
-              border: 'none', // Set width to 100%
-            },
+              border: 'none' // Set width to 100%
+            }
           }}
           sx={{
             '& .MuiOutlinedInput-root': {
               '& fieldset': {
-                border: dataGrid && 'none', // Hide border
-              },
-            },
+                border: !hasBorder && 'none' // Hide border
+              }
+            }
           }}
-
         />
       )}
     />

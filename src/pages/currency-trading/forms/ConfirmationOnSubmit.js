@@ -3,9 +3,8 @@ import { useFormik } from 'formik'
 import { Grid } from '@mui/material'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FormShell from 'src/components/Shared/FormShell'
-import * as yup from 'yup'
 
-export default function ConfirmationOnSubmit({ formik, labels , window }) {
+export default function ConfirmationOnSubmit({ formik, labels, window }) {
   const fetchFormik = useFormik({
     enableReinitialize: false,
     validateOnChange: true,
@@ -16,7 +15,6 @@ export default function ConfirmationOnSubmit({ formik, labels , window }) {
       cellPhoneRepeat: ''
     },
     validate: values => {
-      console.log(values)
       const errors = {}
 
       if (!formik.values.clientId && !values.cellPhoneRepeat) {
@@ -25,9 +23,9 @@ export default function ConfirmationOnSubmit({ formik, labels , window }) {
         errors.cellPhoneRepeat = 'Cell Phone must match'
       }
 
-      if (!formik.values.clientId && !values.idNoRepeat) {
+      if (!values.idNoRepeat) {
         errors.idNoRepeat = 'Id number Confirm is required'
-      } else if (!formik.values.clientId && values.idNo.toString() != values.idNoRepeat.toString()) {
+      } else if (values.idNo.toString() != values.idNoRepeat.toString()) {
         errors.idNoRepeat = 'Id Number  must match'
       }
 
@@ -39,7 +37,6 @@ export default function ConfirmationOnSubmit({ formik, labels , window }) {
 
       formik.handleSubmit()
       window.close()
-
     }
   })
 

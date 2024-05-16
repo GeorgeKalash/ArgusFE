@@ -33,6 +33,10 @@ import { SystemFunction } from 'src/resources/SystemFunction'
 import CreditInvoiceForm from '../credit-invoice/Forms/CreditInvoiceForm'
 import { KVSRepository } from 'src/repositories/KVSRepository'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
+import TransactionForm from '../currency-trading/forms/TransactionForm'
+import OutwardsTab from '../outwards-transfer/Tabs/OutwardsTab'
+import ClientTemplateForm from '../clients-list/forms/ClientTemplateForm'
+import { RTCLRepository } from 'src/repositories/RTCLRepository'
 
 const DocumentsOnHold = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -131,36 +135,85 @@ const DocumentsOnHold = () => {
   }
 
   const popupComponent = async obj => {
-    //Calling the relevant component
     let relevantComponent
+    let recordId = obj.recordId
     let labels
     let relevantAccess
+    let windowHeight
+    let windowWidth
+    let title
 
-    if (
-      obj.functionId == SystemFunction.CurrencyCreditOrderSale ||
-      obj.functionId == SystemFunction.CurrencyCreditOrderPurchase
-    ) {
-      relevantComponent = CreditOrderForm
-      labels = await getLabels(ResourceIds.CreditOrder)
-      relevantAccess = await getAccess(ResourceIds.CreditOrder)
-    }
-    if (obj.functionId == SystemFunction.CreditInvoiceSales || obj.functionId == SystemFunction.CreditInvoicePurchase) {
-      relevantComponent = CreditInvoiceForm
-      labels = await getLabels(ResourceIds.CreditInvoice)
-      relevantAccess = await getAccess(ResourceIds.CreditInvoice)
+    switch (obj.functionId) {
+      case SystemFunction.CurrencyCreditOrderSale:
+      case SystemFunction.CurrencyCreditOrderPurchase:
+        relevantComponent = CreditOrderForm
+        labels = await getLabels(ResourceIds.CreditOrder)
+        relevantAccess = await getAccess(ResourceIds.CreditOrder)
+        windowHeight = 600
+        windowWidth = 950
+        title = labels[1]
+        break
+
+      case SystemFunction.CreditInvoiceSales:
+      case SystemFunction.CreditInvoicePurchase:
+        relevantComponent = CreditInvoiceForm
+        labels = await getLabels(ResourceIds.CreditInvoice)
+        relevantAccess = await getAccess(ResourceIds.CreditInvoice)
+        windowHeight = 600
+        windowWidth = 950
+        title = labels[1]
+        break
+
+      case SystemFunction.CurrencyPurchase:
+      case SystemFunction.CurrencySale:
+        relevantComponent = TransactionForm
+        labels = await getLabels(ResourceIds.CashInvoice)
+        relevantAccess = await getAccess(ResourceIds.CashInvoice)
+        windowHeight = 600
+        windowWidth = 1200
+        title = labels.cashInvoice
+        break
+      case SystemFunction.KYC:
+        await getRequest({
+          extension: RTCLRepository.CtClientIndividual.get,
+          parameters: `_recordId=${obj.recordId}`
+        }).then(res => {
+          recordId = res.record.clientId
+        })
+
+        relevantComponent = ClientTemplateForm
+        labels = await getLabels(ResourceIds.ClientMaster)
+        relevantAccess = await getAccess(ResourceIds.ClientMaster)
+        windowHeight = 600
+        windowWidth = 1100
+        title = labels.pageTitle
+
+        break
+
+      case SystemFunction.Outwards:
+        relevantComponent = OutwardsTab
+        labels = await getLabels(ResourceIds.OutwardsTransfer)
+        relevantAccess = await getAccess(ResourceIds.OutwardsTransfer)
+        windowHeight = 600
+        windowWidth = 1100
+        title = labels.OutwardsTransfer
+
+      default:
+        // Handle default case if needed
+        break
     }
 
     if (relevantComponent && labels && relevantAccess) {
       stack({
         Component: relevantComponent,
         props: {
-          recordId: obj.recordId,
+          recordId: recordId,
           labels: labels,
           maxAccess: relevantAccess
         },
-        width: 950,
-        height: 600,
-        title: labels[1]
+        width: windowWidth,
+        height: windowHeight,
+        title: title
       })
     }
   }

@@ -1,203 +1,202 @@
-// ** React Imports
-import { useEffect, useState, useContext } from 'react'
-
-// ** MUI Imports
-import { Box } from '@mui/material'
-
-// ** Third Party Imports
-import { useFormik } from 'formik'
-import * as yup from 'yup'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
-import Table from 'src/components/Shared/Table'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
-import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { getNewLean, populateLean } from 'src/Models/Manufacturing/Lean'
-
-// ** Helpers
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
-import MaterialsAdjustmentWindow from 'src/pages/materials-adjustment/Windows/MaterialsAdjustmentWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
-
-// ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
-import { useWindowDimensions } from 'src/lib/useWindowDimensions'
 import { useWindow } from 'src/windows'
 import MaterialsAdjustmentForm from '../materials-adjustment/Forms/MaterialsAdjustmentForm'
 import useResourceParams from 'src/hooks/useResourceParams'
+import { DataGrid } from 'src/components/Shared/DataGrid'
+import FormShell from 'src/components/Shared/FormShell'
+import { useForm } from 'src/hooks/form'
+import * as yup from 'yup'
+import { Box } from '@mui/material'
+import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 
 const GateKeeper = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { height } = useWindowDimensions()
+  const { stack } = useWindow()
 
-  //states
-  const [errorMessage, setErrorMessage] = useState(null)
-  const [selectedRows, setSelectedRows] = useState({})
-
-  async function getGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
-
-    return await getRequest({
-      extension: ManufacturingRepository.LeanProductionPlanning.preview,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_status=2`
-    })
-  }
-
-  const {
-    query: { data },
-    labels: _labels,
-    access
-  } = useResourceQuery({
-    queryFn: getGridData,
+  const { labels: _labels, access } = useResourceQuery({
+    queryFn: fetchGridData,
     endpointId: ManufacturingRepository.LeanProductionPlanning.preview,
     datasetId: ResourceIds.GateKeeper
-  })
-
-  const { labels: _labelsADJ, access: accessADJ } = useResourceParams({
-    datasetId: ResourceIds.MaterialsAdjustment
   })
 
   const invalidate = useInvalidate({
     endpointId: ManufacturingRepository.LeanProductionPlanning.preview
   })
 
+  const { labels: _labelsADJ, access: accessADJ } = useResourceParams({
+    datasetId: ResourceIds.MaterialsAdjustment
+  })
+
+  const { formik } = useForm({
+    access,
+    enableReinitialize: true,
+    validateOnChange: true,
+    validationSchema: yup.object({}),
+    initialValues: {
+      rows: [
+        {
+          id: 1,
+          recordId: '',
+          functionId: '',
+          seqNo: '',
+          reference: '',
+          date: null,
+          itemId: '',
+          sku: '',
+          itemName: '',
+          qty: '',
+          qtyProduced: '',
+          status: '',
+          checked: false
+        }
+      ]
+    },
+    onSubmit: async values => {
+      const copy = { ...values }
+      let checkedObjects = copy.rows.filter(obj => obj.checked)
+
+      if (checkedObjects.length > 0) {
+        checkedObjects = checkedObjects.map(({ date, ...rest }) => ({
+          date: formatDateToApi(date),
+          ...rest
+        }))
+
+        const resultObject = {
+          leanProductions: checkedObjects
+        }
+
+        const res = await postRequest({
+          extension: ManufacturingRepository.MaterialsAdjustment.generate,
+          record: JSON.stringify(resultObject)
+        })
+        if (res.recordId) {
+          toast.success('Record Generated Successfully')
+          invalidate()
+          stack({
+            Component: MaterialsAdjustmentForm,
+            props: {
+              recordId: res.recordId,
+              labels: _labelsADJ,
+              maxAccess: accessADJ
+            },
+            width: 900,
+            height: 600,
+            title: _labelsADJ[1]
+          })
+        }
+      }
+    }
+  })
+  async function fetchGridData() {
+    const response = await getRequest({
+      extension: ManufacturingRepository.LeanProductionPlanning.preview,
+      parameters: `_status=2`
+    })
+
+    const data = response.list.map((item, index) => ({
+      ...item,
+      id: index + 1,
+      balance: item.qty - (item.qtyProduced ?? 0),
+      date: formatDateFromApi(item?.date)
+    }))
+    formik.setValues({ rows: data })
+  }
+
   const columns = [
     {
-      field: 'sku',
-      headerName: _labels[1],
-      flex: 1
+      component: 'checkbox',
+      label: ' ',
+      name: 'checked',
+      async onChange({ row: { update, newRow } }) {
+        update({
+          produceNow: newRow.checked ? newRow.balance : ''
+        })
+      }
     },
     {
-      field: 'qty',
-      headerName: _labels[2],
-      flex: 1
+      component: 'textfield',
+      name: 'sku',
+      label: _labels[1],
+      flex: 2,
+      props: {
+        readOnly: true
+      }
     },
     {
-      field: 'itemName',
-      headerName: _labels[4],
-      flex: 1
+      component: 'numberfield',
+      name: 'qty',
+      label: _labels[2],
+      props: {
+        readOnly: true
+      }
     },
     {
-      field: 'date',
-      headerName: _labels[6],
-      flex: 1,
-      valueFormatter: params => {
-        const dateString = params.value
-        const timestamp = parseInt(dateString.match(/\d+/)[0], 10)
-
-        if (!isNaN(timestamp)) {
-          const formattedDate = new Date(timestamp).toLocaleDateString('en-GB')
-
-          return formattedDate
-        } else {
-          return 'Invalid Date'
+      component: 'numberfield',
+      name: 'qtyProduced',
+      label: _labels.produced,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      name: 'balance',
+      label: _labels.balance,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      name: 'produceNow',
+      label: _labels.producedNow,
+      async onChange({ row: { update, newRow } }) {
+        console.log('check row', newRow)
+        if (newRow.produceNow > newRow.balance) {
+          update({
+            produceNow: newRow.balance
+          })
         }
+      }
+    },
+    {
+      component: 'textfield',
+      name: 'itemName',
+      label: _labels.itemName,
+      flex: 2,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'date',
+      name: 'date',
+      label: _labels[6],
+      flex: 2,
+      props: {
+        readOnly: true
       }
     }
   ]
 
-  const gateKeeperValidation = useFormik({
-    enableReinitialize: true,
-    validateOnChange: true,
-    validate: values => {},
-    initialValues: {
-      rows: [{}]
-    },
-    onSubmit: values => {
-      generateLean()
-    }
-  })
-
-  const handleSubmit = () => {
-    gateKeeperValidation.handleSubmit()
-  }
-
-  const handleCheckedRows = checkedRows => {
-    setSelectedRows(prevSelectedRows => [...prevSelectedRows, ...checkedRows])
-  }
-
-  useEffect(() => {}, [selectedRows])
-
-  const { stack } = useWindow()
-
-  const generateLean = () => {
-    // Filter out objects where checked is truthy
-    const checkedObjects = selectedRows.filter(obj => obj.checked)
-
-    const resultObject = {
-      leanProductions: checkedObjects
-    }
-
-    postRequest({
-      extension: ManufacturingRepository.MaterialsAdjustment.generate,
-      record: JSON.stringify(resultObject)
-    })
-      .then(res => {
-        invalidate()
-        setSelectedRows([])
-
-        // Call MaterialsAdjustmentForm component here
-        stack({
-          Component: MaterialsAdjustmentForm,
-          props: {
-            recordId: res.recordId,
-            labels: _labelsADJ,
-            maxAccess: accessADJ
-          },
-          width: 900,
-          height: 600,
-          title: _labelsADJ[1]
-        })
-
-        toast.success('Record Generated Successfully')
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  useEffect(() => {
-    setSelectedRows([])
-  }, [])
-
   return (
-    <Box
-      sx={{
-        height: `${height - 80}px`
-      }}
-    >
-      <CustomTabPanel index={0} value={0}>
-        <Box sx={{ width: '100%' }}>
-          <Table
-            columns={columns}
-            gridData={data}
-            rowId={['recordId','seqNo']}
-            isLoading={false}
-            maxAccess={access}
-            showCheckboxColumn={true}
-            handleCheckedRows={handleCheckedRows}
-            pagination={false}
-          />
-        </Box>
-        <Box
-          sx={{
-            position: 'fixed',
-            bottom: -20,
-            left: 0,
-            width: '100%',
-            margin: 0
-          }}
-        >
-          <WindowToolbar onSave={handleSubmit} smallBox={true} />
-        </Box>
-      </CustomTabPanel>
-
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
+    <Box>
+      <FormShell form={formik} infoVisible={false} isCleared={false}>
+        <DataGrid
+          onChange={value => formik.setFieldValue('rows', value)}
+          value={formik.values.rows}
+          error={formik.errors.rows}
+          columns={columns}
+          height={`calc(100vh - 150px)`}
+          allowAddNewLine={false}
+          allowDelete={false}
+        />
+      </FormShell>
     </Box>
   )
 }

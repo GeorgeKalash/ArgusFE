@@ -14,17 +14,17 @@ import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { useFormik } from 'formik'
+import { useInvalidate } from 'src/hooks/resource'
 
-const PlantForm = ({
-  _labels,
-  maxAccess,
-  store,
-  editMode
-}) => {
+const PlantForm = ({ _labels, maxAccess, store, setStore, editMode }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const {recordId } = store
+  const { recordId } = store
 
- const[initialValues , setInitialData] = useState({
+  const invalidate = useInvalidate({
+    endpointId: SystemRepository.Plant.page
+  })
+
+  const [initialValues, setInitialData] = useState({
     recordId: recordId || null,
     addressId: null,
     address: null,
@@ -37,8 +37,8 @@ const PlantForm = ({
     costCenterName: null,
     groupId: null,
     groupName: null,
-    segmentName: null,
- })
+    segmentName: null
+  })
 
   const formik = useFormik({
     enableReinitialize: true,
@@ -53,31 +53,28 @@ const PlantForm = ({
     }
   })
 
-  const postPlant = obj => {
-    const recordId = obj.recordId
-    postRequest({
+  const postPlant = async obj => {
+    await postRequest({
       extension: SystemRepository.Plant.set,
       record: JSON.stringify(obj)
     })
       .then(res => {
-
         if (res.recordId) {
           toast.success('Record Added Successfully')
 
           setStore(prevStore => ({
             ...prevStore,
-            plant: obj ,  editMode: true, recordId: res.recordId
-          }));
-
-        }
-        else toast.success('Record Edited Successfully')
+            plant: obj,
+            recordId: res.recordId
+          }))
+          invalidate()
+        } else toast.success('Record Edited Successfully')
       })
-      .catch(error => {
-      })
+      .catch(error => {})
   }
 
-  useEffect(()=>{
-  var parameters = `_filter=` + '&_recordId=' + recordId
+  useEffect(() => {
+    var parameters = `_filter=` + '&_recordId=' + recordId
     if (recordId) {
       getRequest({
         extension: SystemRepository.Plant.get,
@@ -89,21 +86,14 @@ const PlantForm = ({
           setStore(prevStore => ({
             ...prevStore,
             plant: result
-          }));
+          }))
         })
         .catch(error => {})
-      }
-  },[recordId])
+    }
+  }, [recordId])
 
-return (
-
-    <FormShell
-     form={formik}
-     resourceId={ResourceIds.Plants}
-     maxAccess={maxAccess}
-     editMode={editMode}
-
-    >
+  return (
+    <FormShell form={formik} resourceId={ResourceIds.Plants} maxAccess={maxAccess} editMode={editMode}>
       <Grid container spacing={4}>
         <Grid item xs={12}>
           <CustomTextField
@@ -164,7 +154,7 @@ return (
           <ResourceComboBox
             name='costCenterId'
             endpointId={GeneralLedgerRepository.CostCenter.qry}
-            parameters = {`_params=&_startAt=0&_pageSize=1000`}
+            parameters={`_params=&_startAt=0&_pageSize=1000`}
             label={_labels.costCenter}
             valueField='recordId'
             displayField='name'
@@ -184,32 +174,12 @@ return (
             label={_labels.plantGrp}
             valueField='recordId'
             displayField='name'
-            values={ formik.values}
+            values={formik.values}
             onChange={(event, newValue) => {
               formik.setFieldValue('groupId', newValue?.recordId)
             }}
             error={formik.touched.groupId && Boolean(formik.errors.groupId)}
             helperText={formik.touched.groupId && formik.errors.groupId}
-            maxAccess={maxAccess}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <ResourceComboBox
-            name='segmentRef'
-            label={_labels.segment}
-            valueField='reference'
-            displayField='reference'
-            endpointId={FinancialRepository.Segment.qry}
-            values={ formik.values}
-            columnsInDropDown= {[
-              { key: 'reference', value: 'Reference' },
-              { key: 'name', value: 'Name' },
-            ]}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('segmentRef', newValue?.reference)
-            }}
-            error={formik.touched.segmentRef && Boolean(formik.errors.segmentRef)}
-            helperText={formik.touched.segmentRef && formik.errors.segmentRef}
             maxAccess={maxAccess}
           />
         </Grid>

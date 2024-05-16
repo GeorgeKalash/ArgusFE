@@ -3,10 +3,8 @@ import { Box, Autocomplete, TextField, Paper } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search' // Import the icon you want to use
 import ClearIcon from '@mui/icons-material/Clear'
 import { InputAdornment, IconButton } from '@mui/material'
-
-const CustomPaper = props => {
-  return <Paper sx={{ position: 'absolute', width: '100%', zIndex: 999, mt: 1 }} {...props} />
-}
+import { useEffect, useState } from 'react'
+import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
 
 const CustomLookup = ({
   type = 'text', //any valid HTML5 input type
@@ -15,6 +13,7 @@ const CustomLookup = ({
   firstValue,
   secondValue,
   secondDisplayField = true,
+  columnsInDropDown,
   store = [],
   setStore,
   onKeyUp,
@@ -24,6 +23,7 @@ const CustomLookup = ({
   onChange,
   error,
   firstFieldWidth = secondDisplayField ? '50%' : '100%',
+  displayFieldWidth = 1,
   helperText,
   variant = 'outlined', //outlined, standard, filled
   size = 'small', //small, medium
@@ -32,19 +32,39 @@ const CustomLookup = ({
   disabled = false,
   readOnly = false,
   editMode,
-  dataGrid = false,
+  hasBorder = true,
+  hidden = false,
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
-  const _readOnly = editMode ? editMode && maxAccess < 3 : readOnly
+  const [freeSolo, setFreeSolo] = useState(false)
 
-  return (
+  useEffect(() => {
+    store.length < 1 && setFreeSolo(false)
+    firstValue && setFreeSolo(true)
+  }, [store, firstValue])
+
+  const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
+
+  const _readOnly =
+    maxAccess < 3 ||
+    accessLevel === DISABLED ||
+    (readOnly && accessLevel !== MANDATORY && accessLevel !== FORCE_ENABLED)
+
+  const _hidden = accessLevel ? accessLevel === HIDDEN : hidden
+
+  const isRequired = required || accessLevel === MANDATORY
+
+  return _hidden ? (
+    <></>
+  ) : (
     <Box
       sx={{
         position: 'relative',
         width: '100%',
         height: '40px',
-        mb: error && helperText ? 6 : 0
+        mb: error && helperText ? 6 : 0,
+        display: 'block'
       }}
     >
       <Box display={'flex'}>
@@ -58,7 +78,7 @@ const CustomLookup = ({
             }),
             '& .MuiOutlinedInput-root': {
               '& fieldset': {
-                border: dataGrid && 'none' // Hide border
+                border: !hasBorder && 'none' // Hide border
               }
             },
             width: firstFieldWidth
@@ -66,36 +86,96 @@ const CustomLookup = ({
         >
           <Autocomplete
             name={name}
+            key={firstValue}
+            defaultValue={firstValue}
             value={firstValue}
             size={size}
             options={store}
-            getOptionLabel={option => (typeof option === 'object' ? `${option[valueField] ? option[valueField] : ''}` : option )}
+            filterOptions={(options, { inputValue }) => {
+              if (displayField) {
+                return options.filter(option => option)
+              }
+            }}
+            getOptionLabel={option =>
+              typeof option === 'object' ? `${option[valueField] ? option[valueField] : ''}` : option
+            }
             isOptionEqualToValue={(option, value) => (value ? option[valueField] === value[valueField] : '')}
             onChange={(event, newValue) => onChange(name, newValue)}
-            PaperComponent={CustomPaper}
-            renderOption={(props, option) => (
-              <Box>
-                {props.id.endsWith('-0') && (
-                  <li className={props.className}>
-                    {secondDisplayField && <Box sx={{ flex: 1 }}>{valueField.toUpperCase()}</Box>}
-                    {secondDisplayField && <Box sx={{ flex: 1 }}>{displayField.toUpperCase()}</Box>}
-                  </li>
-                )}
-                <li {...props}>
-                  <Box sx={{ flex: 1 }}>{option[valueField]}</Box>
-                  {secondDisplayField && <Box sx={{ flex: 1 }}>{option[displayField]}</Box>}
-                </li>
-              </Box>
+            PaperComponent={({ children }) => (
+              <Paper sx={{ position: 'absolute', width: `${displayFieldWidth * 100}%`, zIndex: 999, mt: 1 }}>
+                {children}
+              </Paper>
             )}
+            renderOption={(props, option) => {
+              if (columnsInDropDown && columnsInDropDown.length > 0) {
+                return (
+                  <Box>
+                    {props.id.endsWith('-0') && (
+                      <li className={props.className}>
+                        {columnsInDropDown.map((header, i) => {
+                          return (
+                            columnsInDropDown.length > 1 && (
+                              <Box key={i} sx={{ flex: 1, fontWeight: 'bold' }}>
+                                {header.value.toUpperCase()}
+                              </Box>
+                            )
+                          )
+                        })}
+                      </li>
+                    )}
+                    <li {...props}>
+                      {columnsInDropDown.map((header, i) => {
+                        return (
+                          <Box key={i} sx={{ flex: 1 }}>
+                            {option[header.key]}
+                          </Box>
+                        )
+                      })}
+                    </li>
+                  </Box>
+                )
+              } else {
+                return (
+                  <Box>
+                    {props.id.endsWith('-0') && (
+                      <li className={props.className}>
+                        {secondDisplayField && (
+                          <Box sx={{ flex: 1, fontWeight: 'bold' }}>{valueField.toUpperCase()}</Box>
+                        )}
+                        {secondDisplayField && (
+                          <Box sx={{ flex: 1, fontWeight: 'bold' }}>{displayField.toUpperCase()}</Box>
+                        )}
+                      </li>
+                    )}
+                    <li {...props}>
+                      <Box sx={{ flex: 1 }}>{option[valueField]}</Box>
+                      {secondDisplayField && <Box sx={{ flex: 1 }}>{option[displayField]}</Box>}
+                    </li>
+                  </Box>
+                )
+              }
+            }}
             renderInput={params => (
               <TextField
                 {...params}
-                onChange={e => (e.target.value ? onLookup(e.target.value) : setStore([]))}
+                onChange={e => {
+                  if (e.target.value) {
+                    onLookup(e.target.value)
+                    setFreeSolo(true)
+                  } else {
+                    setStore([])
+                    setFreeSolo(false)
+                  }
+                }}
+                onBlur={() => setFreeSolo(true)}
                 type={type}
                 variant={variant}
                 label={label}
-                required={required}
-                onKeyUp={onKeyUp}
+                required={isRequired}
+                onKeyUp={() => {
+                  onKeyUp
+                  setFreeSolo(true)
+                }}
                 autoFocus={autoFocus}
                 error={error}
                 helperText={helperText} // style={{ textAlign: 'right', width: firstFieldWidth }}
@@ -130,7 +210,7 @@ const CustomLookup = ({
               />
             )}
             readOnly={_readOnly}
-            freeSolo={_readOnly}
+            freeSolo={_readOnly || freeSolo}
             disabled={disabled}
           />
         </Box>
@@ -151,7 +231,7 @@ const CustomLookup = ({
               variant={variant}
               placeholder={displayField.toUpperCase()}
               value={secondValue ? secondValue : ''}
-              required={required}
+              required={isRequired}
               disabled={disabled}
               InputProps={{
                 readOnly: true

@@ -12,8 +12,10 @@ export default function ResourceComboBox({
   values = {},
   parameters = '_filter=',
   filter = () => true,
+  value,
   ...rest
 }) {
+  const { store: data } = rest
   const { getRequest } = useContext(RequestsContext)
 
   const { getAllKvsByDataset } = useContext(CommonContext)
@@ -28,23 +30,25 @@ export default function ResourceComboBox({
           callback: setStore
         })
       else
-      endpointId &&   getRequest({
-          extension: endpointId,
-          parameters
-        }).then(res => {
-          setStore(res.list)
-        })
+        endpointId &&
+          getRequest({
+            extension: endpointId,
+            parameters
+          })
+            .then(res => {
+              setStore(res.list)
+            })
+            .catch(error => {})
   }, [parameters])
 
-  const filteredStore = store.filter(filter)
+  const filteredStore = data ? data : store.filter(filter)
 
-  const value =
-    typeof values[name] === 'object'
+  const _value =
+    (typeof values[name] === 'object'
       ? values[name]
       : (datasetId
           ? filteredStore.find(item => item[valueField] === values[name]?.toString())
-          : filteredStore.find(item => item[valueField] === values[name])) ?? ''
+          : filteredStore.find(item => item[valueField] === values[name])) ?? '') || value
 
-
-  return <CustomComboBox {...{ ...rest, name, store: filteredStore, valueField, value }} />
+  return <CustomComboBox {...{ ...rest, name, store: filteredStore, valueField, value: _value, name }} />
 }

@@ -30,7 +30,6 @@ const MaterialsAdjustment = () => {
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
-  const [errorMessage, setErrorMessage] = useState(null)
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -40,7 +39,7 @@ const MaterialsAdjustment = () => {
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_size=50&_params=&_dgId=0&_sortBy=recordId&_trxType=1`
     })
 
-    return {...response,  _startAt: _startAt}
+    return { ...response, _startAt: _startAt }
   }
 
   const {
@@ -129,7 +128,7 @@ const MaterialsAdjustment = () => {
 
   return (
     <>
-      <Box sx={{mt:10}}>
+      <Box sx={{ mt: 10 }}>
         <Table
           columns={columns}
           gridData={data}
@@ -150,14 +149,12 @@ const MaterialsAdjustment = () => {
             setWindowOpen(false)
             setSelectedRecordId(null)
           }}
-          setErrorMessage={setErrorMessage}
           labels={_labels}
           maxAccess={access}
           recordId={selectedRecordId}
           setSelectedRecordId={setSelectedRecordId}
         />
       )}
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )
 }

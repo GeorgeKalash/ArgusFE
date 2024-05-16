@@ -33,6 +33,7 @@ const Window = ({
   editMode = false,
   disabledSubmit,
   disabledInfo,
+  canExpand = true,
   onApply,
   disabledApply,
   ...props
@@ -131,15 +132,17 @@ const Window = ({
                 <Typography sx={{ fontSize: '1.2rem', fontWeight: 600 }}>{Title}</Typography>
               </Box>
               <Box>
-                <IconButton
-                  tabIndex={-1}
-                  edge='end'
-                  onClick={() => setExpanded(!expanded)}
-                  data-is-expanded={expanded}
-                  aria-label='expand'
-                >
-                  <OpenInFullIcon /> {/* Add the icon for expanding */}
-                </IconButton>
+                {canExpand && (
+                  <IconButton
+                    tabIndex={-1}
+                    edge='end'
+                    onClick={() => setExpanded(!expanded)}
+                    data-is-expanded={expanded}
+                    aria-label='expand'
+                  >
+                    <OpenInFullIcon /> {/* Add the icon for expanding */}
+                  </IconButton>
+                )}
                 <IconButton tabIndex={-1} edge='end' onClick={onClose} aria-label='clear input'>
                   <ClearIcon />
                 </IconButton>
