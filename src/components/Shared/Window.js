@@ -54,7 +54,7 @@ const Window = ({
     : true
 
   const containerWidth = `calc(calc(100 * var(--vw)) - ${navCollapsed ? '10px' : '310px'})`
-  const containerHeight = `calc(calc(100 * var(--vh)) - 83px)`
+  const containerHeight = `calc(calc(100 * var(--vh)) - 55px)`
   const containerHeightPanel = `calc(calc(100 * var(--vh)) - 180px)`
   const heightPanel = height - 120
 
@@ -70,7 +70,7 @@ const Window = ({
     <Box
       id='parent'
       sx={{
-        bottom: 42,
+        bottom: 10,
         position: 'absolute',
         width: containerWidth,
         height: containerHeight,
@@ -130,7 +130,7 @@ const Window = ({
               }}
             >
               <Box>
-                <Typography sx={{ fontSize: '1.2rem', fontWeight: 600,color:'white !important' }}>{Title}</Typography>
+                <Typography sx={{ fontSize: '1.2rem', fontWeight: 600, color:'white !important' }}>{Title}</Typography>
               </Box>
               <Box>
                 {canExpand && (
