@@ -15,15 +15,10 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { useForm } from 'src/hooks/form'
 
 export default function DescriptionTemplateForms({ labels, maxAccess, recordId }) {
-  const [isLoading, setIsLoading] = useState(false)
   const [editMode, setEditMode] = useState(!!recordId)
-
-  const [initialValues, setInitialData] = useState({
-    recordId: null,
-    name: ''
-  })
 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -31,8 +26,12 @@ export default function DescriptionTemplateForms({ labels, maxAccess, recordId }
     endpointId: FinancialRepository.DescriptionTemplate.page
   })
 
-  const formik = useFormik({
-    initialValues,
+  const { formik } = useForm({
+    initialValues: {
+      recordId: null,
+      name: ''
+    },
+    maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -48,9 +47,9 @@ export default function DescriptionTemplateForms({ labels, maxAccess, recordId }
 
       if (!recordId) {
         toast.success('Record Added Successfully')
-        setInitialData({
-          ...obj, // Spread the existing properties
-          recordId: response.recordId // Update only the recordId field
+        formik.setValues({
+          ...obj,
+          recordId: response.recordId
         })
       } else toast.success('Record Edited Successfully')
       setEditMode(true)
@@ -63,19 +62,14 @@ export default function DescriptionTemplateForms({ labels, maxAccess, recordId }
     ;(async function () {
       try {
         if (recordId) {
-          setIsLoading(true)
-
           const res = await getRequest({
             extension: FinancialRepository.DescriptionTemplate.get,
             parameters: `_recordId=${recordId}`
           })
 
-          setInitialData(res.record)
+          formik.setValues(res.record)
         }
-      } catch (exception) {
-        setErrorMessage(error)
-      }
-      setIsLoading(false)
+      } catch (exception) {}
     })()
   }, [])
 

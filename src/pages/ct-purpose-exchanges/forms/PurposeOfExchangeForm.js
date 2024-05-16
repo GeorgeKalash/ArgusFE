@@ -55,8 +55,8 @@ export default function PurposeOfExchangeForm({ labels, maxAccess, recordId, set
       } else {
         setStore(prev => ({ ...prev, name: obj.name }))
         toast.success('Record Edited Successfully')
-        setEditMode(true)
       }
+      setEditMode(true)
       invalidate()
     }
   })

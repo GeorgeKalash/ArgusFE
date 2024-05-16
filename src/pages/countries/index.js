@@ -5,23 +5,18 @@ import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { getFormattedNumberMax, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
+import { getFormattedNumberMax } from 'src/lib/numberField-helper'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import CountryWindow from './Windows/CountryWindow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { useWindow } from 'src/windows'
+import CountryForm from './forms/CountryForm'
 
 const Countries = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const [selectedRecordId, setSelectedRecordId] = useState(null)
-
-  //states
-  const [windowOpen, setWindowOpen] = useState(false)
-  const [errorMessage, setErrorMessage] = useState(null)
-
+  const { stack } = useWindow()
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
@@ -94,12 +89,25 @@ const Countries = () => {
   }
 
   const add = () => {
-    setWindowOpen(true)
+    openForm()
   }
 
   const edit = obj => {
-    setSelectedRecordId(obj.recordId)
-    setWindowOpen(true)
+    openForm(obj?.recordId)
+  }
+
+  function openForm(recordId) {
+    stack({
+      Component: CountryForm,
+      props: {
+        labels: _labels,
+        recordId: recordId,
+        maxAccess: access
+      },
+      width: 700,
+      height: 640,
+      title: _labels.country
+    })
   }
 
   return (
@@ -121,21 +129,6 @@ const Countries = () => {
           maxAccess={access}
         />
       </Grow>
-
-      {windowOpen && (
-        <CountryWindow
-          onClose={() => {
-            setWindowOpen(false)
-            setSelectedRecordId(null)
-          }}
-          _labels={_labels}
-          maxAccess={access}
-          recordId={selectedRecordId}
-          setSelectedRecordId={setSelectedRecordId}
-          onInfo={() => setWindowInfo(true)}
-        />
-      )}
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </VertLayout>
   )
 }

@@ -73,27 +73,28 @@ export default function ProfessionsForm({ labels, maxAccess, recordId, setStore 
           ...obj,
           recordId: response.recordId
         })
-      } else {
-        toast.success('Record Edited Successfully')
-        setEditMode(true)
-      }
+      } else toast.success('Record Edited Successfully')
+
+      setEditMode(true)
       invalidate()
     }
   })
 
   useEffect(() => {
     ;(async function () {
-      if (recordId) {
-        const res = await getRequest({
-          extension: RemittanceSettingsRepository.Profession.get,
-          parameters: `_recordId=${recordId}`
-        })
-        setStore({
-          recordId: res.record.recordId,
-          name: res.record.name
-        })
-        formik.setValues(res.record)
-      }
+      try {
+        if (recordId) {
+          const res = await getRequest({
+            extension: RemittanceSettingsRepository.Profession.get,
+            parameters: `_recordId=${recordId}`
+          })
+          setStore({
+            recordId: res.record.recordId,
+            name: res.record.name
+          })
+          formik.setValues(res.record)
+        }
+      } catch (exception) {}
     })()
   }, [])
 
