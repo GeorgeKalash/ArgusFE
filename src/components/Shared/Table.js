@@ -303,6 +303,31 @@ const Table = ({
     })
   }
 
+{/* <DeleteDialog
+    open={deleteDialogOpen}
+    fullScreen={false}
+    onClose={() => setDeleteDialogOpen([false, {}])}
+    onConfirm={obj => {
+      setDeleteDialogOpen([false, {}])
+      props.onDelete(obj)
+    }}
+  /> */}
+
+
+  function openDelete(obj) {
+    stack({
+      Component: DeleteDialog,
+      props: {
+        open:([true,{}]),
+        fullScreen: false,
+        onConfirm: () => props.onDelete(obj),
+      },
+      width: 450,
+      height: 170,
+      title: 'Delete'
+    })
+  }
+
   const shouldRemoveColumn = column => {
     const match = columnsAccess && columnsAccess.find(item => item.controlId === column.id)
 
@@ -341,7 +366,7 @@ const Table = ({
                   if (props.deleteConfirmationType == 'strict') {
                     openDeleteConfirmation(params.row)
                   } else {
-                    setDeleteDialogOpen([true, params.row])
+                    openDelete(params.row)
                   }
                 }}
                 color='error'
@@ -431,14 +456,15 @@ const Table = ({
                 ...filteredColumns
               ]}
             />
-          <DeleteDialog
+          {/* <DeleteDialog
             open={deleteDialogOpen}
+            fullScreen={false}
             onClose={() => setDeleteDialogOpen([false, {}])}
             onConfirm={obj => {
               setDeleteDialogOpen([false, {}])
               props.onDelete(obj)
             }}
-          />
+          /> */}
         </>
       ) : (
         'NO ACCESS'

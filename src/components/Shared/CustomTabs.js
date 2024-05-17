@@ -46,8 +46,7 @@ export const CustomTabs = ({tabs ,activeTab,  setActiveTab }) => {
               borderBottom: '0px !important',
               mr: '2px !important',
               fontWeight: '1.5rem',
-              pr:'0px !important',
-              pl:'0px !important'
+              px:'5px !important'
             }}/>
         ))}
       </Tabs>

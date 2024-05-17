@@ -40,8 +40,8 @@ const Window = ({
 }) => {
   const { settings } = useSettings()
   const { navCollapsed } = settings
-
   const [expanded, setExpanded] = useState(false)
+  const [position, setPosition] = useState({ x: 0, y: 0 })
 
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
 
@@ -54,7 +54,7 @@ const Window = ({
     : true
 
   const containerWidth = `calc(calc(100 * var(--vw)) - ${navCollapsed ? '10px' : '310px'})`
-  const containerHeight = `calc(calc(100 * var(--vh)) - 55px)`
+  const containerHeight = `calc(calc(100 * var(--vh)) - 40px)`
   const containerHeightPanel = `calc(calc(100 * var(--vh)) - 180px)`
   const heightPanel = height - 120
 
@@ -66,11 +66,23 @@ const Window = ({
     }
   }, [expanded])
 
+  const handleExpandToggle = () => {
+    if (!expanded) {
+      setPosition({ x: 0, y: 0 })
+    }
+    setExpanded(!expanded)
+  }
+
+  const handleDrag = (e, ui) => {
+    const { x, y } = position
+    setPosition({ x: x + ui.deltaX, y: y + ui.deltaY })
+  }
+
   return (
     <Box
       id='parent'
       sx={{
-        bottom: 10,
+        bottom: 0,
         position: 'absolute',
         width: containerWidth,
         height: containerHeight,
@@ -84,24 +96,21 @@ const Window = ({
         handle='#draggable-dialog-title'
         cancel={'[class*="MuiDialogContent-root"]'}
         bounds='parent'
-        sx={{
-          width: expanded && '100%',
-          minHeight: expanded && '100%',
-          backgroundColor: 'red'
-        }}
+        position={position}
+        onDrag={handleDrag}
       >
         <Box sx={{ position: 'relative' }}>
           <Paper
-            sx={{
+             sx={{
+              transition: 'width 0.3s, height 0.3s',
               ...(controlled
                 ? {
-                    height: expanded ? containerHeight : height // Expand height to 100% when expanded
+                    height: expanded ? containerHeight : height
                   }
                 : {
-                    minHeight: expanded ? containerHeight : height // Expand height to 100% when expanded
+                    minHeight: expanded ? containerHeight : height
                   }),
-              width: expanded ? containerWidth : width // Expand width to 100% when expanded
-              // ... (other styles)
+              width: expanded ? containerWidth : width
             }}
             style={
               controlled
@@ -137,7 +146,7 @@ const Window = ({
                   <IconButton
                     tabIndex={-1}
                     edge='end'
-                    onClick={() => setExpanded(!expanded)}
+                    onClick={handleExpandToggle}
                     data-is-expanded={expanded}
                     aria-label='expand'
                     sx={{ color:'white !important'}}

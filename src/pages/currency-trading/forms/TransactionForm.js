@@ -952,7 +952,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId }
                         maxAccess={maxAccess}
                       />
                     </Grid>
-
                     <Grid container xs={12}>
                       <Grid item xs={7}>
                         <FormField
@@ -995,7 +994,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId }
                         </Button>
                       </Grid>
                     </Grid>
-
                     <Grid item xs={7}>
                       <CustomDatePicker
                         name='expiry_date'

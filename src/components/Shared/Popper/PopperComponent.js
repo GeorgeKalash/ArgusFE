@@ -1,4 +1,3 @@
-// PopperComponent.jsx
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { Box } from '@mui/material'
@@ -17,9 +16,7 @@ const PopperComponent = ({ children, anchorEl, open }) => {
     <Box
       sx={{
         zIndex:'2 !important',
-        '& .MuiAutocomplete-noOptions': {
-          display: open ? 'block' : 'none'
-        }
+        display: open ? 'block' : 'none'
       }}
       style={{
         position: 'absolute',
