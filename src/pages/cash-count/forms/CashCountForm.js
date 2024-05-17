@@ -182,8 +182,8 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
           releaseStatus: header.releaseStatus,
           date: formatDateFromApi(header.date),
           time: header.time,
-          items: items.map(({ ...rest }, index) => ({
-            id: index,
+          items: items.map(({ id, ...rest }, index) => ({
+            id: index + 1,
             enabled: true,
             flag: true,
             ...rest

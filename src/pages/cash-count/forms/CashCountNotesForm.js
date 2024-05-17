@@ -14,7 +14,6 @@ import { CachCountSettingsRepository } from 'src/repositories/CachCountSettingsR
 
 export default function CashCountNotesForm({ labels, maxAccess, recordId, formik2, row, window }) {
   const [editMode, setEditMode] = useState(!!recordId)
-  console.log('row', row)
 
   const { formik } = useForm({
     maxAccess,
@@ -44,35 +43,35 @@ export default function CashCountNotesForm({ labels, maxAccess, recordId, formik
       formik2.setValues({
         ...formik2.values,
         currencyNotes: [
-          ...formik2.values.currencyNotes.filter(note => note.seqNo === row.seqNo), // Spread existing currencyNotes from formik2
+          ...formik2.values.currencyNotes.filter(note => note.seqNo !== row.id), // Spread existing currencyNotes from formik2
           ...currencyNotes // Spread new currencyNotes from formik
         ]
       })
 
       // formik2.setValues({ ...formik2.values, currencyNotes: { currencyNotes, ...formik.values.currencyNotes } })
 
-      // const total = obj.currencyNotes.reduce((acc, { subTotal }) => {
-      //   return acc + (subTotal || 0)
-      // }, 0)
-      // formik2.values.forceNotesCount && formik2.setFieldValue(`items[${row.id - 1}].counted`, total)
+      const total = obj.currencyNotes.reduce((acc, { subTotal }) => {
+        return acc + (subTotal || 0)
+      }, 0)
+
+      formik2.values.forceNotesCount && formik2.setFieldValue(`items[${row.id}].counted`, total)
       window.close()
     }
   })
   useEffect(() => {
-    console.log('formik', formik2, row?.seqNo)
     formik.setValues([{ id: 1, seqNo: 1, cashCountId: '', note: '', qty: '', subTotal: '' }])
-    row?.seqNo &&
+    row?.id &&
       formik.setValues({
         currencyNotes: formik2.values.currencyNotes
-          .filter(note => note.seqNo !== row.seqNo)
-          .map(({ id, ...rest }, index) => ({
+          .filter(note => note.seqNo == row.id)
+          ?.map(({ id, ...rest }, index) => ({
             id: index + 1,
             ...rest
           }))
       })
   }, [recordId])
 
-  const total = formik.values?.currencyNotes.reduce((acc, { subTotal }) => {
+  const total = formik.values?.currencyNotes?.reduce((acc, { subTotal }) => {
     return acc + (subTotal || 0)
   }, 0)
 
