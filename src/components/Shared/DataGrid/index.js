@@ -256,7 +256,7 @@ export function DataGrid({
   }
 
   return (
-    <Box sx={{height: height ? height : 'auto', flex:'1 !important' }}>
+    <Box sx={{ height: height ? height : 'auto', flex: '1 !important' }}>
       {/* Container with scroll */}
       <MUIDataGrid
         hideFooter
@@ -306,7 +306,7 @@ export function DataGrid({
         apiRef={apiRef}
         editMode='cell'
         sx={{
-          display:'flex !important', 
+          display: 'flex !important',
           flex: '1 !important',
           '& .MuiDataGrid-cell': {
             padding: '0 !important'
@@ -335,7 +335,11 @@ export function DataGrid({
                     backgroundColor: bg,
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: (column.component === 'checkbox' || column.component === 'button') && 'center',
+                    justifyContent:
+                      (column.component === 'checkbox' ||
+                        column.component === 'button' ||
+                        column.component === 'icon') &&
+                      'center',
                     border: `1px solid ${error?.[cell.rowIndex]?.[params.field] ? '#ff0000' : 'transparent'}`
                   }}
                 >
@@ -381,7 +385,11 @@ export function DataGrid({
                     padding: '0 0px',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: (column.component === 'checkbox' || column.component === 'button') && 'center'
+                    justifyContent:
+                      (column.component === 'checkbox' ||
+                        column.component === 'button' ||
+                        column.component === 'icon') &&
+                      'center'
                   }}
                 >
                   <Component

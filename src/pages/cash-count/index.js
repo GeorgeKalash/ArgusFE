@@ -22,30 +22,29 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { CTTRXrepository } from 'src/repositories/CTTRXRepository'
 import CashCountForm from './forms/CashCountForm'
+import { CCTRXrepository } from 'src/repositories/CCTRXRepository'
+import { formatDateDefault } from 'src/lib/date-helper'
 
 const CashCount = () => {
   const { stack } = useWindow()
   const { getRequest, postRequest } = useContext(RequestsContext)
 
-  async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
-
+  async function fetchGridData() {
     return await getRequest({
-      extension: CTTRXrepository.CashCount.qry,
-
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      extension: CCTRXrepository.CashCount.qry,
+      parameters: `&filter=`
     })
   }
 
   const {
     query: { data },
     labels: _labels,
-    paginationParameters,
     refetch,
+    invalidate,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: CTTRXrepository.CashCount.qry,
+    endpointId: CCTRXrepository.CashCount.qry,
     datasetId: ResourceIds.Transaction
   })
 
@@ -56,8 +55,39 @@ const CashCount = () => {
       flex: 1
     },
     {
-      field: 'name',
-      headerName: _labels.name,
+      field: 'date',
+      headerName: _labels.date,
+      flex: 1,
+      valueGetter: ({ row }) => formatDateDefault(row?.date)
+    },
+    {
+      field: 'plantName',
+      headerName: _labels.plant,
+      flex: 1
+    },
+    {
+      field: 'cashAccountName',
+      headerName: _labels.cashAccount,
+      flex: 1
+    },
+    {
+      field: 'time',
+      headerName: _labels.time,
+      flex: 1
+    },
+    {
+      field: 'statusName',
+      headerName: _labels.status,
+      flex: 1
+    },
+    {
+      field: 'rsName',
+      headerName: _labels.releaseStatus,
+      flex: 1
+    },
+    {
+      field: 'wipName',
+      headerName: _labels.wip,
       flex: 1
     }
   ]
@@ -65,7 +95,6 @@ const CashCount = () => {
   const add = () => {
     openForm()
   }
-
   function openForm(recordId) {
     stack({
       Component: CashCountForm,
@@ -76,7 +105,7 @@ const CashCount = () => {
       },
       width: 1100,
       height: 700,
-      title: _labels.group
+      title: _labels.cashCount
     })
   }
 
@@ -86,7 +115,7 @@ const CashCount = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: DocumentReleaseRepository.DRGroup.del,
+      extension: CCTRXrepository.CashCount.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -108,8 +137,7 @@ const CashCount = () => {
           isLoading={false}
           pageSize={50}
           refetch={refetch}
-          paginationParameters={paginationParameters}
-          paginationType='api'
+          paginationType='client'
           maxAccess={access}
         />
       </Grow>
