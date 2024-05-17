@@ -11,8 +11,10 @@ const GridToolbar = ({
   initialLoad,
   onAdd,
   openRPB,
+  refreshGrid,
   disableRPB = false,
   onGo,
+  onRefresh = false,
   paramsArray,
   children,
   labels,
@@ -78,6 +80,13 @@ const GridToolbar = ({
           <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
             <Button onClick={openRPB} variant='contained' disabled={disableRPB}>
               OPEN RPB
+            </Button>
+          </Box>
+        )}
+        {onRefresh && (
+          <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
+            <Button variant='contained' onClick={refreshGrid}>
+              Refresh
             </Button>
           </Box>
         )}

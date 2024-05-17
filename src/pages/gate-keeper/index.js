@@ -13,6 +13,7 @@ import { useForm } from 'src/hooks/form'
 import * as yup from 'yup'
 import { Box } from '@mui/material'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
+import GridToolbar from 'src/components/Shared/GridToolbar'
 
 const GateKeeper = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -102,7 +103,8 @@ const GateKeeper = () => {
       ...item,
       id: index + 1,
       balance: item.qty - (item.qtyProduced ?? 0),
-      date: formatDateFromApi(item?.date)
+      date: formatDateFromApi(item?.date),
+      checked: false
     }))
     formik.setValues({ rows: data })
   }
@@ -187,12 +189,13 @@ const GateKeeper = () => {
   return (
     <Box>
       <FormShell form={formik} infoVisible={false} isCleared={false}>
+        <GridToolbar onRefresh={true} refreshGrid={() => invalidate()} />
         <DataGrid
           onChange={value => formik.setFieldValue('rows', value)}
           value={formik.values.rows}
           error={formik.errors.rows}
           columns={columns}
-          height={`calc(100vh - 150px)`}
+          height={`calc(100vh - 210px)`}
           allowAddNewLine={false}
           allowDelete={false}
         />
