@@ -16,6 +16,7 @@ import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import toast from 'react-hot-toast'
 import { useError } from 'src/error'
 import { SystemFunction } from 'src/resources/SystemFunction'
+import { LOShipmentForm } from 'src/components/Shared/LOShipmentForm'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import FormGrid from 'src/components/form/layout/FormGrid'
@@ -23,11 +24,13 @@ import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { useWindow } from 'src/windows'
 
 export default function CashTransferTab({ labels, recordId, maxAccess, plantId, cashAccountId, dtId }) {
   const [editMode, setEditMode] = useState(!!recordId)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
+  const { stack } = useWindow()
   const [isClosed, setIsClosed] = useState(false)
   const [isPosted, setIsPosted] = useState(false)
 
@@ -221,6 +224,19 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
       }
     }
   }
+
+  const shipmentClicked = () => {
+    stack({
+      Component: LOShipmentForm,
+      props: {
+        recordId: recordId,
+        functionId: SystemFunction.CashTransfer
+      },
+      width: 950,
+      title: 'Shipments'
+    })
+  }
+
   useEffect(() => {
     ;(async function () {
       if (recordId) {
@@ -261,6 +277,12 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
       condition: true,
       onClick: onPost,
       disabled: !editMode || isPosted || !isClosed
+    },
+    {
+      key: 'Shipment',
+      condition: true,
+      onClick: shipmentClicked,
+      disabled: !editMode
     }
   ]
 

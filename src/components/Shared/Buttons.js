@@ -98,6 +98,12 @@ export const Buttons = [
     main: false
   },
   {
+    key: 'Shipment',
+    color: '#90278e',
+    image: 'shipment.png',
+    main: false
+  },
+  {
     key: 'RecordRemarks',
     color: '#90278e',
     image: 'notes.png',
