@@ -225,7 +225,6 @@ export const LOShipmentForm = ({ recordId, functionId }) => {
             value={formik.values.serialGrid}
             error={formik.errors.serialGrid}
             maxAccess={maxAccess}
-            width={'50%'}
             columns={[
               {
                 component: 'numberfield',
@@ -235,7 +234,7 @@ export const LOShipmentForm = ({ recordId, functionId }) => {
               },
               {
                 component: 'textfield',
-                label: labels.refrence,
+                label: labels.reference,
                 name: 'reference',
                 props: {
                   maxLength: 20
