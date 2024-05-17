@@ -1,1 +1,250 @@
-export const LOShipmentForm = ({}) => {}
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import FormShell from './FormShell'
+import { ResourceIds } from 'src/resources/ResourceIds'
+import { Grid } from '@mui/material'
+import CustomTextField from '../Inputs/CustomTextField'
+import ResourceComboBox from './ResourceComboBox'
+import { DataGrid } from './DataGrid'
+import { useForm } from 'src/hooks/form'
+import { LogisticsRepository } from 'src/repositories/LogisticsRepository'
+import * as yup from 'yup'
+import { useResourceQuery } from 'src/hooks/resource'
+import { useContext, useEffect } from 'react'
+import { RequestsContext } from 'src/providers/RequestsContext'
+import { DataSets } from 'src/resources/DataSets'
+import CustomNumberField from '../Inputs/CustomNumberField'
+import { getFormattedNumber } from 'src/lib/numberField-helper'
+import toast from 'react-hot-toast'
+
+export const LOShipmentForm = ({ recordId, functionId }) => {
+  const { postRequest, getRequest } = useContext(RequestsContext)
+
+  const { formik } = useForm({
+    initialValues: {
+      recordId: recordId,
+      functionId: functionId,
+      policyNo: '',
+      carrierId: '',
+      typeGrid: [{ id: 1, recordId: '', functionId: '', seqNo: '', packageType: '', qty: '', amount: '' }],
+      serialGrid: [{ id: 1, recordId: '', functionId: '', seqNo: '', reference: '' }]
+    },
+    enableReinitialize: true,
+    validateOnChange: true,
+    validationSchema: yup.object({
+      //policyNo: yup.string().required(),
+      carrierId: yup.string().required(),
+      typeGrid: yup
+        .array()
+        .of(
+          yup.object().shape({
+            packageTypeName: yup.string().required(),
+            qty: yup.string().nullable().required(),
+            amount: yup.string().nullable().required()
+          })
+        )
+        .required(),
+      serialGrid: yup
+        .array()
+        .of(
+          yup.object().shape({
+            seqNo: yup.string().required(),
+            reference: yup.string().nullable().required()
+          })
+        )
+        .required()
+    }),
+    onSubmit: async values => {
+      const packageRows = formik.values.typeGrid.map((packageDetail, index) => {
+        return {
+          ...packageDetail,
+          seqNo: index + 1,
+          recordId: recordId,
+          functionId: functionId
+        }
+      })
+
+      const packageRefRows = formik.values.serialGrid.map(packageRefDetail => {
+        return {
+          ...packageRefDetail,
+          recordId: recordId,
+          functionId: functionId
+        }
+      })
+
+      const resultObject = {
+        header: {
+          recordId: values.recordId,
+          functionId: values.functionId,
+          carrierId: values.carrierId,
+          policyNo: values.policyNo
+        },
+        packages: packageRows,
+        packageReferences: packageRefRows
+      }
+
+      await postRequest({
+        extension: LogisticsRepository.shipment.set2,
+        record: JSON.stringify(resultObject)
+      })
+
+      toast.success('Record Updated Successfully')
+    }
+  })
+
+  const { labels: labels, maxAccess } = useResourceQuery({
+    datasetId: ResourceIds.LOSHipments
+  })
+
+  const totalQty = formik.values.typeGrid.reduce((qty, row) => {
+    const qtyValue = parseFloat(row.qty?.toString().replace(/,/g, '')) || 0
+
+    return qty + qtyValue
+  }, 0)
+
+  const totalAmount = formik.values.typeGrid.reduce((amount, row) => {
+    const amountValue = parseFloat(row.amount?.toString().replace(/,/g, '')) || 0
+
+    return amount + amountValue
+  }, 0)
+  useEffect(() => {
+    ;(async function () {
+      if (recordId && functionId) {
+        /*  const res = await getRequest({
+          extension: LogisticsRepository.shipment.get,
+          parameters: `_recordId=${recordId}&_functionId=${functionId}`
+        })
+        formik.setValues({
+          ...res.record.header,
+          ttNo: res.record.packages,
+          serialGrid: res.record.packageReferences
+        })*/
+      }
+    })()
+  }, [])
+
+  return (
+    <FormShell resourceId={ResourceIds.LOSHipments} form={formik} editMode={true} isCleared={false} isInfo={false}>
+      <VertLayout>
+        <Fixed>
+          <Grid container spacing={2}>
+            <Grid item xs={6}>
+              <ResourceComboBox
+                endpointId={LogisticsRepository.LoCarrier.qry}
+                name='carrierId'
+                label={labels.carrier}
+                values={formik.values}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                required
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik && formik.setFieldValue('carrierId', newValue ? newValue.recordId : '')
+                }}
+                error={formik.touched.carrierId && Boolean(formik.errors.carrierId)}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <CustomTextField
+                name='policyNo'
+                label={labels.policyNo}
+                value={formik.values.policyNo}
+                maxAccess={maxAccess}
+                maxLength='30'
+                required
+              />
+            </Grid>
+          </Grid>
+        </Fixed>
+        <Grow>
+          <DataGrid
+            onChange={value => formik.setFieldValue('typeGrid', value)}
+            value={formik.values.typeGrid}
+            error={formik.errors.typeGrid}
+            maxAccess={maxAccess}
+            columns={[
+              {
+                component: 'resourcecombobox',
+                label: labels.type,
+                name: 'packageTypeName',
+                props: {
+                  datasetId: DataSets.PACKAGE_TYPE,
+                  displayField: 'value',
+                  valueField: 'key',
+                  mapping: [
+                    { from: 'key', to: 'packageType' },
+                    { from: 'value', to: 'packageTypeName' }
+                  ]
+                }
+              },
+              {
+                component: 'numberfield',
+                name: 'qty',
+                label: labels.qty,
+                defaultValue: ''
+              },
+              {
+                component: 'numberfield',
+                label: labels.amount,
+                name: 'amount',
+                defaultValue: ''
+              }
+            ]}
+          />
+        </Grow>
+        <Fixed>
+          <Grid container spacing={2} sx={{ pt: 5, justifyContent: 'flex-end' }}>
+            <Grid item xs={3}>
+              <CustomTextField
+                name='totalQty'
+                maxAccess={maxAccess}
+                value={getFormattedNumber(totalQty.toFixed(2))}
+                label={labels.totalQty}
+                readOnly={true}
+              />
+            </Grid>
+            <Grid item xs={3} sx={{ pl: 3 }}>
+              <CustomNumberField
+                name='totalAmount'
+                maxAccess={maxAccess}
+                value={getFormattedNumber(totalAmount.toFixed(2))}
+                label={labels.totalAmount}
+                readOnly={true}
+              />
+            </Grid>
+          </Grid>
+        </Fixed>
+        <Grow>
+          <DataGrid
+            onChange={value => formik.setFieldValue('serialGrid', value)}
+            value={formik.values.serialGrid}
+            error={formik.errors.serialGrid}
+            maxAccess={maxAccess}
+            width={'50%'}
+            columns={[
+              {
+                component: 'numberfield',
+                name: 'seqNo',
+                label: labels.seqNo,
+                defaultValue: ''
+              },
+              {
+                component: 'textfield',
+                label: labels.refrence,
+                name: 'reference',
+                props: {
+                  maxLength: 20
+                }
+              }
+            ]}
+          />
+        </Grow>
+      </VertLayout>
+    </FormShell>
+  )
+}

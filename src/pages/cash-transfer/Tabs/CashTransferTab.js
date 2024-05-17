@@ -447,6 +447,8 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
             onChange={value => formik.setFieldValue('transfers', value)}
             value={formik.values.transfers}
             error={formik.errors.transfers}
+            allowDelete={!isClosed}
+            allowAddNewLine={!isClosed}
             maxAccess={maxAccess}
             columns={[
               {
