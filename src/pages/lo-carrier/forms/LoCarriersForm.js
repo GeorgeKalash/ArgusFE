@@ -9,9 +9,7 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-// ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 
 import { LogisticsRepository } from 'src/repositories/LogisticsRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
@@ -22,7 +20,6 @@ import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-
 
 export default function LoCarriersForms({
   labels,
@@ -48,7 +45,6 @@ export default function LoCarriersForms({
     cashAccountId: null,
     cashAccountRef: '',
     cashAccountName: ''
-
   })
 
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -140,8 +136,6 @@ export default function LoCarriersForms({
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
                 error={formik.touched.name && Boolean(formik.errors.name)}
-
-                // helperText={formik.touched.name && formik.errors.name}
               />
             </Grid>
             <Grid item xs={12}>
@@ -161,8 +155,6 @@ export default function LoCarriersForms({
                   }
                 }}
                 error={formik.touched.type && Boolean(formik.errors.type)}
-
-                // helperText={formik.touched.type && formik.errors.type}
               />
             </Grid>
             <Grid item xs={12}>
@@ -177,8 +169,6 @@ export default function LoCarriersForms({
                   formik.setFieldValue('siteId', newValue?.recordId)
                 }}
                 error={formik.touched.siteId && Boolean(formik.errors.siteId)}
-
-                // helperText={formik.touched.siteId && formik.errors.siteId}
               />
             </Grid>
             <Grid item xs={12}>
@@ -205,44 +195,42 @@ export default function LoCarriersForms({
                   }
                 }}
                 error={formik.touched.bpId && Boolean(formik.errors.bpId)}
-
-                // helperText={formik.touched.bpId && formik.errors.bpId}
               />
             </Grid>
- <Grid item xs={12}>
-          <ResourceLookup
-            endpointId={CashBankRepository.CashAccount.snapshot}
-            parameters={{
-              _type: 2
-            }}
-            valueField='recordId'
-            displayField='reference'
-            name='cashAccountRef'
-            label={labels.cashAccount}
-            secondDisplayField={true}
-            form={formik}
-            firstValue={formik.values.cashAccountRef}
-            secondValue={formik.values.cashAccountName}
-            columnsInDropDown={[
-              { key: 'reference', value: 'Reference' },
-              { key: 'name', value: 'Name' }
-            ]}
-            onChange={(event, newValue) => {
-              if (newValue) {
-                formik.setFieldValue('cashAccountId', newValue?.recordId)
-                formik.setFieldValue('cashAccountRef', newValue?.reference)
-                formik.setFieldValue('cashAccountName', newValue?.name)
-              } else {
-                formik.setFieldValue('cashAccountId', null)
-                formik.setFieldValue('cashAccountRef', null)
-                formik.setFieldValue('cashAccountName', null)
-              }
-            }}
-            errorCheck={'cashAccountId'}
-            maxAccess={maxAccess}
-            error={formik.touched.cashAccountId && Boolean(formik.errors.cashAccountId)}
-          />
-           </Grid>
+            <Grid item xs={12}>
+              <ResourceLookup
+                endpointId={CashBankRepository.CashAccount.snapshot}
+                parameters={{
+                  _type: 2
+                }}
+                valueField='recordId'
+                displayField='reference'
+                name='cashAccountRef'
+                label={labels.cashAccount}
+                secondDisplayField={true}
+                form={formik}
+                firstValue={formik.values.cashAccountRef}
+                secondValue={formik.values.cashAccountName}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                onChange={(event, newValue) => {
+                  if (newValue) {
+                    formik.setFieldValue('cashAccountId', newValue?.recordId)
+                    formik.setFieldValue('cashAccountRef', newValue?.reference)
+                    formik.setFieldValue('cashAccountName', newValue?.name)
+                  } else {
+                    formik.setFieldValue('cashAccountId', null)
+                    formik.setFieldValue('cashAccountRef', null)
+                    formik.setFieldValue('cashAccountName', null)
+                  }
+                }}
+                errorCheck={'cashAccountId'}
+                maxAccess={maxAccess}
+                error={formik.touched.cashAccountId && Boolean(formik.errors.cashAccountId)}
+              />
+            </Grid>
           </Grid>
         </Grow>
       </VertLayout>

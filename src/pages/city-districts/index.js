@@ -28,11 +28,14 @@ const CityDistricts = () => {
 
   const { stack } = useWindow()
 
+  const invalidate = useInvalidate({
+    endpointId: SystemRepository.CityDistrict.page
+  })
+
   const {
     query: { data },
     labels: _labels,
     refetch,
-    invalidate,
     paginationParameters,
     access
   } = useResourceQuery({

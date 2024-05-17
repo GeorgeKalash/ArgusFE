@@ -17,7 +17,6 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
 
 export default function DocumentTypeMapForm({ labels, maxAccess, recordId, record }) {
-  const [isLoading, setIsLoading] = useState(false)
   const [editMode, setEditMode] = useState(!!recordId)
 
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -81,7 +80,6 @@ export default function DocumentTypeMapForm({ labels, maxAccess, recordId, recor
     ;(async function () {
       try {
         if (record && record.fromFunctionId && record.fromDTId && record.toFunctionId) {
-          setIsLoading(true)
           setEditMode(true)
 
           const res = await getRequest({
@@ -95,7 +93,6 @@ export default function DocumentTypeMapForm({ labels, maxAccess, recordId, recor
           })
         }
       } catch (exception) {}
-      setIsLoading(false)
     })()
   }, [])
 

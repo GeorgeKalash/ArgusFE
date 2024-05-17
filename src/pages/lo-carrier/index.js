@@ -4,7 +4,6 @@ import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { LogisticsRepository } from 'src/repositories/LogisticsRepository'
-import LoCarriersWindow from './Windows/LoCarriersWindow'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -12,27 +11,32 @@ import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepos
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { useWindow } from 'src/windows'
+import LoCarriersForms from './forms/LoCarriersForm'
 
 const LoCarrier = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [businessPartnerStore, setBusinessPartnerStore] = useState([])
-  const [selectedRecordId, setSelectedRecordId] = useState(null)
-  const [windowOpen, setWindowOpen] = useState(false)
-  const [errorMessage, setErrorMessage] = useState(null)
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    return await getRequest({
+    const response = await getRequest({
       extension: LogisticsRepository.LoCarrier.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
+
+    return { ...response, _startAt: _startAt }
   }
+
+  const { stack } = useWindow()
 
   const {
     query: { data },
     labels: _labels,
-    access
+    access,
+    paginationParameters,
+    refetch
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: LogisticsRepository.LoCarrier.page,
@@ -71,12 +75,27 @@ const LoCarrier = () => {
   ]
 
   const add = () => {
-    setWindowOpen(true)
+    openForm()
   }
 
   const edit = obj => {
-    setSelectedRecordId(obj.recordId)
-    setWindowOpen(true)
+    openForm(obj?.recordId)
+  }
+
+  function openForm(recordId) {
+    stack({
+      Component: LoCarriersForms,
+      props: {
+        labels: _labels,
+        recordId: recordId,
+        maxAccess: access,
+        lookupBusinessPartners: lookupBusinessPartners,
+        businessPartnerStore: businessPartnerStore,
+        setBusinessPartnerStore: setBusinessPartnerStore
+      },
+
+      title: _labels.currency
+    })
   }
 
   const del = async obj => {
@@ -102,27 +121,12 @@ const LoCarrier = () => {
           onDelete={del}
           isLoading={false}
           pageSize={50}
-          paginationType='client'
+          paginationType='api'
+          paginationParameters={paginationParameters}
+          refetch={refetch}
           maxAccess={access}
         />
       </Grow>
-      {windowOpen && (
-        <LoCarriersWindow
-          onClose={() => {
-            setWindowOpen(false)
-            setSelectedRecordId(null)
-          }}
-          labels={_labels}
-          maxAccess={access}
-          recordId={selectedRecordId}
-          setSelectedRecordId={setSelectedRecordId}
-          lookupBusinessPartners={lookupBusinessPartners}
-          businessPartnerStore={businessPartnerStore}
-          setBusinessPartnerStore={setBusinessPartnerStore}
-        />
-      )}
-
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </VertLayout>
   )
 }

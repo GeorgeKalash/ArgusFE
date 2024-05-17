@@ -25,14 +25,14 @@ export default function CommissionTypesForm({ labels, maxAccess, recordId }) {
   })
 
   const { formik } = useForm({
-    initialValues: { recordId: null, reference: '', name: '', typeName: '' },
+    initialValues: { recordId: null, reference: '', name: '', type: '' },
     enableReinitialize: true,
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
       reference: yup.string().required(' '),
       name: yup.string().required(' '),
-      typeName: yup.string().required(' ')
+      type: yup.string().required(' ')
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
@@ -103,7 +103,7 @@ export default function CommissionTypesForm({ labels, maxAccess, recordId }) {
             <Grid item xs={12}>
               <ResourceComboBox
                 datasetId={DataSets.CT_COMMISSION_TYPES}
-                name='typeName'
+                name='type'
                 label={labels.type}
                 valueField='key'
                 displayField='value'
@@ -111,9 +111,9 @@ export default function CommissionTypesForm({ labels, maxAccess, recordId }) {
                 required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('typeName', newValue?.key)
+                  formik.setFieldValue('type', newValue?.key)
                 }}
-                error={formik.touched.typeName && Boolean(formik.errors.typeName)}
+                error={formik.touched.type && Boolean(formik.errors.type)}
               />
             </Grid>
           </Grid>
