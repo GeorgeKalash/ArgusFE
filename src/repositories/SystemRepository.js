@@ -161,5 +161,9 @@ export const SystemRepository = {
     set: service + 'setRMK',
     get: service + 'getRMK',
     del: service + 'delRMK'
+  },
+  SystemChecks: {
+    qry: service + 'qryCHK',
+    set: service + 'set2CHK'
   }
 }
