@@ -39,6 +39,11 @@ const ProductionRequestLog = () => {
 
   const columns = [
     {
+      field: 'reference',
+      headerName: _labels.reference,
+      flex: 1
+    },
+    {
       field: 'sku',
       headerName: _labels[3],
       flex: 1
