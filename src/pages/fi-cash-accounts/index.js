@@ -5,18 +5,16 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import CashAccountWindow from './Windows/CashAccountWindow'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import CashAccountForm from './forms/CashAccountForm'
+import { useWindow } from 'src/windows'
 
 const CashAccounts = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const [selectedRecordId, setSelectedRecordId] = useState(null)
-  const [windowOpen, setWindowOpen] = useState(false)
-  const [errorMessage, setErrorMessage] = useState(null)
+  const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -102,7 +100,7 @@ const CashAccounts = () => {
   ]
 
   const del = async obj => {
-    postRequest({
+    await postRequest({
       extension: CashBankRepository.CashAccount.del,
       record: JSON.stringify(obj)
     })
@@ -111,12 +109,25 @@ const CashAccounts = () => {
   }
 
   const add = () => {
-    setWindowOpen(true)
+    openForm()
   }
 
   const edit = obj => {
-    setSelectedRecordId(obj.recordId)
-    setWindowOpen(true)
+    openForm(obj?.recordId)
+  }
+  function openForm(recordId) {
+    stack({
+      Component: CashAccountForm,
+      props: {
+        labels: _labels,
+        recordId: recordId ? recordId : null,
+        maxAccess: access,
+        invalidate: invalidate
+      },
+      width: 600,
+      height: 600,
+      title: _labels.cashAccount
+    })
   }
 
   return (
@@ -146,19 +157,6 @@ const CashAccounts = () => {
           paginationType='api'
         />
       </Grow>
-      {windowOpen && (
-        <CashAccountWindow
-          onClose={() => {
-            setWindowOpen(false)
-            setSelectedRecordId(null)
-          }}
-          labels={_labels}
-          maxAccess={access}
-          recordId={selectedRecordId}
-          setSelectedRecordId={setSelectedRecordId}
-        />
-      )}
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </VertLayout>
   )
 }
