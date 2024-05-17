@@ -1,16 +1,7 @@
 import { useState, useContext } from 'react'
-
-// ** MUI Imports
-import { Box } from '@mui/material'
-
-// ** Third Party Imports
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -19,7 +10,6 @@ import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import DocumentTypeForm from '../document-types/forms/DocumentTypeForm'
 import { useWindow } from 'src/windows'
 import DocumentTypeMapForm from './forms/DocumentTypeMapForm'
 
