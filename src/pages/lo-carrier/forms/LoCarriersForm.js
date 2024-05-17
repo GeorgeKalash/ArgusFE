@@ -1,62 +1,48 @@
-// ** MUI Imports
 import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
-import { useFormik } from 'formik'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-
 import { LogisticsRepository } from 'src/repositories/LogisticsRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { DataSets } from 'src/resources/DataSets'
-import CustomLookup from 'src/components/Inputs/CustomLookup'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
+import { useForm } from 'src/hooks/form'
 
-export default function LoCarriersForms({
-  labels,
-  maxAccess,
-  recordId,
-  lookupBusinessPartners,
-  businessPartnerStore,
-  setBusinessPartnerStore
-}) {
-  const [isLoading, setIsLoading] = useState(false)
+export default function LoCarriersForms({ labels, maxAccess, recordId }) {
   const [editMode, setEditMode] = useState(!!recordId)
 
-  const [initialValues, setInitialData] = useState({
-    recordId: null,
-    reference: '',
-    name: '',
-    type: null,
-    siteId: null,
-    bpId: null,
-    bpName: null,
-
-    bpRef: null,
-    cashAccountId: null,
-    cashAccountRef: '',
-    cashAccountName: ''
-  })
-
   const { getRequest, postRequest } = useContext(RequestsContext)
-
-  //const editMode = !!recordId
 
   const invalidate = useInvalidate({
     endpointId: LogisticsRepository.LoCarrier.page
   })
 
-  const formik = useFormik({
-    initialValues,
+  const { formik } = useForm({
+    initialValues: {
+      recordId: null,
+      reference: '',
+      name: '',
+      type: null,
+      siteId: null,
+      bpId: null,
+      bpName: null,
+
+      bpRef: null,
+      cashAccountId: null,
+      cashAccountRef: '',
+      cashAccountName: ''
+    },
+    maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -74,9 +60,9 @@ export default function LoCarriersForms({
 
       if (!recordId) {
         toast.success('Record Added Successfully')
-        setInitialData({
-          ...obj, // Spread the existing properties
-          recordId: response.recordId // Update only the recordId field
+        formik.setValues({
+          ...obj,
+          recordId: response.recordId
         })
       } else toast.success('Record Edited Successfully')
       setEditMode(true)
@@ -89,19 +75,14 @@ export default function LoCarriersForms({
     ;(async function () {
       try {
         if (recordId) {
-          setIsLoading(true)
-
           const res = await getRequest({
             extension: LogisticsRepository.LoCarrier.get,
             parameters: `_recordId=${recordId}`
           })
 
-          setInitialData(res.record)
+          formik.setValues(res.record)
         }
-      } catch (exception) {
-        setErrorMessage(error)
-      }
-      setIsLoading(false)
+      } catch (exception) {}
     })()
   }, [])
 
@@ -121,8 +102,6 @@ export default function LoCarriersForms({
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('reference', '')}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
-
-                // helperText={formik.touched.reference && formik.errors.reference}
               />
             </Grid>
             <Grid item xs={12}>
@@ -172,29 +151,25 @@ export default function LoCarriersForms({
               />
             </Grid>
             <Grid item xs={12}>
-              <CustomLookup
+              <ResourceLookup
+                endpointId={BusinessPartnerRepository.MasterData.snapshot}
                 name='bpRef'
-                maxAccess={maxAccess}
                 label={labels.businessPartner}
                 valueField='reference'
                 displayField='name'
-                store={businessPartnerStore}
-                setStore={setBusinessPartnerStore}
-                firstValue={formik.values.bpRef}
-                secondValue={formik.values.bpName}
-                onLookup={lookupBusinessPartners}
+                valueShow='bpRef'
+                secondValueShow='bpName'
+                form={formik}
                 onChange={(event, newValue) => {
-                  if (newValue) {
-                    formik.setFieldValue('bpId', newValue?.recordId)
-                    formik.setFieldValue('bpRef', newValue?.reference)
-                    formik.setFieldValue('bpName', newValue?.name)
-                  } else {
-                    formik.setFieldValue('bpId', null)
-                    formik.setFieldValue('bpRef', null)
-                    formik.setFieldValue('bpName', null)
-                  }
+                  formik.setValues({
+                    ...formik.values,
+                    bpId: newValue?.recordId || '',
+                    bpRef: newValue?.reference || '',
+                    bpName: newValue?.name || ''
+                  })
                 }}
-                error={formik.touched.bpId && Boolean(formik.errors.bpId)}
+                errorCheck={'bpId'}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>

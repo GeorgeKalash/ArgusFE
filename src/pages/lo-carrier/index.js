@@ -1,13 +1,11 @@
-import { useState, useContext } from 'react'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { LogisticsRepository } from 'src/repositories/LogisticsRepository'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
@@ -16,7 +14,6 @@ import LoCarriersForms from './forms/LoCarriersForm'
 
 const LoCarrier = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const [businessPartnerStore, setBusinessPartnerStore] = useState([])
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -28,7 +25,6 @@ const LoCarrier = () => {
 
     return { ...response, _startAt: _startAt }
   }
-
   const { stack } = useWindow()
 
   const {
@@ -46,20 +42,6 @@ const LoCarrier = () => {
   const invalidate = useInvalidate({
     endpointId: LogisticsRepository.LoCarrier.page
   })
-
-  const lookupBusinessPartners = searchQry => {
-    var parameters = `_size=30&_startAt=0&_filter=${searchQry}`
-    getRequest({
-      extension: BusinessPartnerRepository.MasterData.snapshot,
-      parameters: parameters
-    })
-      .then(res => {
-        setBusinessPartnerStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
 
   const columns = [
     {
@@ -88,13 +70,10 @@ const LoCarrier = () => {
       props: {
         labels: _labels,
         recordId: recordId,
-        maxAccess: access,
-        lookupBusinessPartners: lookupBusinessPartners,
-        businessPartnerStore: businessPartnerStore,
-        setBusinessPartnerStore: setBusinessPartnerStore
+        maxAccess: access
       },
 
-      title: _labels.currency
+      title: _labels.carrier
     })
   }
 
