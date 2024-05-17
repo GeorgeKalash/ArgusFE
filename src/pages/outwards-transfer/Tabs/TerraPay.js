@@ -37,7 +37,6 @@ export default function TerraPay({ setTerraPay, terraPay = {}, window, outwardsD
       const copy = { ...values }
       copy.quotation.creditorReceivingCountry = ''
       copy.quotation.requestCurrency = ''
-      console.log(copy)
       setTerraPay(copy)
       window.close()
     }

@@ -615,30 +615,33 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     terraPay.transaction.amount = formFields.amount
     terraPay.transaction.debitorMSIDSN = formFields.cellPhone
 
-    terraPay.quotation.requestDate = terraPay.quotation.requestDate
-      ? formatDateToApi(terraPay.quotation.requestDate)
-      : null
-    terraPay.transaction.requestDate = terraPay.transaction.requestDate
-      ? formatDateToApi(terraPay.transaction.requestDate)
-      : null
-    terraPay.transaction.senderKyc.dateOfBirth = terraPay.transaction.senderKyc.dateOfBirth
-      ? formatDateToApi(terraPay.transaction.senderKyc.dateOfBirth)
-      : null
-    terraPay.transaction.senderKyc.idDocument.issueDate = terraPay.transaction.senderKyc.idDocument.issueDate
-      ? formatDateToApi(terraPay.transaction.senderKyc.idDocument.issueDate)
-      : null
-    terraPay.transaction.senderKyc.idDocument.expiryDate = terraPay.transaction.senderKyc.idDocument.expiryDate
-      ? formatDateToApi(terraPay.transaction.senderKyc.idDocument.expiryDate)
-      : null
-    terraPay.transaction.recipientKyc.dateOfBirth = terraPay.transaction.recipientKyc.dateOfBirth
-      ? formatDateToApi(terraPay.transaction.recipientKyc.dateOfBirth)
-      : null
-    terraPay.transaction.recipientKyc.idDocument.issueDate = terraPay.transaction.recipientKyc.idDocument.issueDate
-      ? formatDateToApi(terraPay.transaction.recipientKyc.idDocument.issueDate)
-      : null
-    terraPay.transaction.recipientKyc.idDocument.expiryDate = terraPay.transaction.recipientKyc.idDocument.expiryDate
-      ? formatDateToApi(terraPay.transaction.recipientKyc.idDocument.expiryDate)
-      : null
+    if (!/^\/Date\(/.test(terraPay.quotation.requestDate)) {
+      //CONDITION IS ENOUGH ON ONE DATE TO CHECK IF FORMATTED BEFORE
+      terraPay.quotation.requestDate = terraPay.quotation.requestDate
+        ? formatDateToApi(terraPay.quotation.requestDate)
+        : null
+      terraPay.transaction.requestDate = terraPay.transaction.requestDate
+        ? formatDateToApi(terraPay.transaction.requestDate)
+        : null
+      terraPay.transaction.senderKyc.dateOfBirth = terraPay.transaction.senderKyc.dateOfBirth
+        ? formatDateToApi(terraPay.transaction.senderKyc.dateOfBirth)
+        : null
+      terraPay.transaction.senderKyc.idDocument.issueDate = terraPay.transaction.senderKyc.idDocument.issueDate
+        ? formatDateToApi(terraPay.transaction.senderKyc.idDocument.issueDate)
+        : null
+      terraPay.transaction.senderKyc.idDocument.expiryDate = terraPay.transaction.senderKyc.idDocument.expiryDate
+        ? formatDateToApi(terraPay.transaction.senderKyc.idDocument.expiryDate)
+        : null
+      terraPay.transaction.recipientKyc.dateOfBirth = terraPay.transaction.recipientKyc.dateOfBirth
+        ? formatDateToApi(terraPay.transaction.recipientKyc.dateOfBirth)
+        : null
+      terraPay.transaction.recipientKyc.idDocument.issueDate = terraPay.transaction.recipientKyc.idDocument.issueDate
+        ? formatDateToApi(terraPay.transaction.recipientKyc.idDocument.issueDate)
+        : null
+      terraPay.transaction.recipientKyc.idDocument.expiryDate = terraPay.transaction.recipientKyc.idDocument.expiryDate
+        ? formatDateToApi(terraPay.transaction.recipientKyc.idDocument.expiryDate)
+        : null
+    }
 
     console.log('last')
     console.log(terraPay)
