@@ -20,6 +20,8 @@ import DeleteDialog from './DeleteDialog'
 // ** Resources
 import { ControlAccessLevel, TrxType } from 'src/resources/AccessLevels'
 import { HIDDEN, accessLevel } from 'src/services/api/maxAccess'
+import { useWindow } from 'src/windows'
+import StrictDeleteConfirmation from './StrictDeleteConfirmation'
 
 const ODD_OPACITY = 0.2
 
@@ -37,7 +39,7 @@ const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
   '& .MuiDataGrid-row:last-child': {
     borderBottom: `1px solid ${theme.palette.mode === 'light' ? '#cccccc' : '#303030'}`
   },
-  '& .MuiDataGrid-overlayWrapperInner' :{
+  '& .MuiDataGrid-overlayWrapperInner': {
     marginTop: '-1px'
   },
   '& .MuiDataGrid-virtualScroller': {
@@ -102,6 +104,8 @@ const Table = ({
   checkTitle = '',
   ...props
 }) => {
+  const { stack } = useWindow()
+
   const [gridData, setGridData] = useState(props.gridData)
   const [startAt, setStartAt] = useState(0)
   const [page, setPage] = useState(1)
@@ -283,6 +287,20 @@ const Table = ({
     })
   }
 
+  function openDeleteConfirmation(obj) {
+    stack({
+      Component: StrictDeleteConfirmation,
+      props: {
+        action() {
+          props.onDelete(obj)
+        }
+      },
+      width: 500,
+      height: 300,
+      title: 'Delete Confirmation'
+    })
+  }
+
   const shouldRemoveColumn = column => {
     const match = columnsAccess && columnsAccess.find(item => item.controlId === column.id)
 
@@ -291,6 +309,7 @@ const Table = ({
   const filteredColumns = columns.filter(column => !shouldRemoveColumn(column))
   if (props.onEdit || props.onDelete || props.popupComponent) {
     const deleteBtnVisible = maxAccess ? props.onDelete && maxAccess > TrxType.EDIT : props.onDelete ? true : false
+
     filteredColumns.push({
       field: actionColumnHeader,
       headerName: actionColumnHeader,
@@ -302,7 +321,7 @@ const Table = ({
         const isWIP = row.wip === 2
 
         return (
-          <>
+          <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
             {props.onEdit && (
               <IconButton size='small' onClick={() => props.onEdit(params.row)}>
                 <Icon icon='mdi:application-edit-outline' fontSize={18} />
@@ -314,15 +333,26 @@ const Table = ({
               </IconButton>
             )}
             {!isStatus3 && deleteBtnVisible && !isWIP && (
-              <IconButton size='small' onClick={() => setDeleteDialogOpen([true, params.row])} color='error'>
+              <IconButton
+                size='small'
+                onClick={() => {
+                  if (props.deleteConfirmationType == 'strict') {
+                    openDeleteConfirmation(params.row)
+                  } else {
+                    setDeleteDialogOpen([true, params.row])
+                  }
+                }}
+                color='error'
+              >
                 <Icon icon='mdi:delete-forever' fontSize={18} />
               </IconButton>
             )}
-          </>
+          </Box>
         )
       }
     })
   }
+
   useEffect(() => {
     if (props.gridData && props.gridData.list && paginationType === 'client') {
       var slicedGridData = props.gridData.list.slice((page - 1) * pageSize, page * pageSize)
@@ -346,55 +376,65 @@ const Table = ({
     <>
       {maxAccess && maxAccess > TrxType.NOACCESS ? (
         <>
-            <StripedDataGrid
-              rows={
-                gridData?.list
-                  ? page < 2 && paginationType === 'api'
-                    ? gridData?.list.slice(0, 50) 
-                    : gridData?.list
-                  : []
-              }
-              sx={{ overflow: 'auto', position: 'relative', display:'flex', flex: 1, zIndex:'0 !important', marginBottom: pagination? 0:5, height: height? height:'auto' }}
-              density='compact'
-              components={{
-                LoadingOverlay: LinearProgress,
-                Footer: CustomPagination,
-                NoRowsOverlay: () => (
-                  <Stack height='100%' alignItems='center' justifyContent='center'>
-                    This Screen Has No Data
-                  </Stack>
-                )
-              }}
-              loading={props.isLoading}
-              getRowId={getRowId}
-              disableRowSelectionOnClick
-              disableColumnMenu
-              getRowClassName={params => (params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd')}
-              {...props}
-              columns={[
-                ...(showCheckboxColumn
-                  ? [
-                      {
-                        field: 'checkbox',
-                        headerName: checkTitle,
-                        renderCell: params => (
-                          <TableCell padding='checkbox'>
-                            <Checkbox
-                              checked={params.row.checked || false}
-                              onChange={() => {
-                                handleCheckboxChange(params.row)
-                                params.row.checked = !params.row.checked
-                              }}
-                            />
-                          </TableCell>
-                        )
-                      }
-                    ]
-                  : []),
-                ...filteredColumns
-              ]}
-            />
+          <StripedDataGrid
+            rows={
+              gridData?.list
+                ? page < 2 && paginationType === 'api'
+                  ? gridData?.list.slice(0, 50)
+                  : gridData?.list
+                : []
+            }
+            sx={{
+              overflow: 'auto',
+              position: 'relative',
+              display: 'flex',
+              flex: 1,
+              zIndex: '0 !important',
+              marginBottom: pagination ? 0 : 5,
+              height: height ? height : 'auto'
+            }}
+            density='compact'
+            components={{
+              LoadingOverlay: LinearProgress,
+              Footer: CustomPagination,
+              NoRowsOverlay: () => (
+                <Stack height='100%' alignItems='center' justifyContent='center'>
+                  This Screen Has No Data
+                </Stack>
+              )
+            }}
+            loading={props.isLoading}
+            getRowId={getRowId}
+            disableRowSelectionOnClick
+            disableColumnMenu
+            getRowClassName={params => (params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd')}
+            {...props}
+            columns={[
+              ...(showCheckboxColumn
+                ? [
+                    {
+                      field: 'checkbox',
+                      headerName: checkTitle,
+                      renderCell: params => (
+                        <TableCell padding='checkbox'>
+                          <Checkbox
+                            checked={params.row.checked || false}
+                            onChange={() => {
+                              handleCheckboxChange(params.row)
+                              params.row.checked = !params.row.checked
+                            }}
+                          />
+                        </TableCell>
+                      )
+                    }
+                  ]
+                : []),
+              ...filteredColumns
+            ]}
+          />
+
           <DeleteDialog
+            fullScreen={false}
             open={deleteDialogOpen}
             onClose={() => setDeleteDialogOpen([false, {}])}
             onConfirm={obj => {

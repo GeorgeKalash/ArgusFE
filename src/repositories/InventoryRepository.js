@@ -21,7 +21,23 @@ export const InventoryRepository = {
     qry: service + 'qrySI',
     get: service + 'getSI',
     set: service + 'setSI',
-    del: service + 'delSI'
+    del: service + 'delSI',
+    page: service + 'pageSI',
+    snapshot: service + 'snapshotSI'
+  },
+
+  SiteGroups: {
+    qry: service + 'qrySGP',
+    get: service + 'getSGP',
+    set: service + 'setSGP',
+    del: service + 'delSGP'
+  },
+  SiteGroups: {
+    qry: service + 'qrySGP',
+    get: service + 'getSGP',
+    set: service + 'setSGP',
+    del: service + 'delSGP',
+    snapshot: service + 'snapshotSGP'
   },
   MaterialsAdjustment: {
     qry: service + 'qryADJ',

@@ -17,6 +17,7 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import { MasterSource } from 'src/resources/MasterSource'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
@@ -63,7 +64,7 @@ export default function AccountGroupsForm({ labels, maxAccess, recordId }) {
         toast.success('Record Added Successfully')
         setInitialData({
           ...obj,
-          recordId: response.recordId // Update only the recordId field
+          recordId: response.recordId
         })
       } else toast.success('Record Edited Successfully')
       setEditMode(true)
@@ -92,8 +93,24 @@ export default function AccountGroupsForm({ labels, maxAccess, recordId }) {
     })()
   }, [])
 
+  const actions = [
+    {
+      key: 'Integration Account',
+      condition: true,
+      onClick: 'onClickGIA',
+      disabled: !editMode
+    }
+  ]
+
   return (
-    <FormShell resourceId={ResourceIds.FlAccountGroups} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell
+      resourceId={ResourceIds.FlAccountGroups}
+      form={formik}
+      maxAccess={maxAccess}
+      editMode={editMode}
+      actions={actions}
+      masterSource={MasterSource.AccountGroup}
+    >
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>

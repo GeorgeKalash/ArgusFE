@@ -7,7 +7,6 @@ import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepositor
 import ChartOfAccountsWindow from './windows/ChartOfAccountsWindow'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
-
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
@@ -92,12 +91,15 @@ const ChartOfAccounts = () => {
   }
 
   const del = async obj => {
-    await postRequest({
-      extension: GeneralLedgerRepository.ChartOfAccounts.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success('Record Deleted Successfully')
+    try {
+      await postRequest({
+        extension: GeneralLedgerRepository.ChartOfAccounts.del,
+        record: JSON.stringify(obj)
+      })
+
+      invalidate()
+      toast.success('Record Deleted Successfully')
+    } catch (err) {}
   }
 
   return (
@@ -119,6 +121,7 @@ const ChartOfAccounts = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
+          deleteConfirmationType={'strict'}
           isLoading={false}
           pageSize={50}
           paginationParameters={paginationParameters}
