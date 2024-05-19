@@ -87,7 +87,6 @@ export default function GroupsForm({ labels, maxAccess, recordId }) {
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('reference', '')}
             error={formik.touched.reference && Boolean(formik.errors.reference)}
-            helperText={formik.touched.reference && formik.errors.reference}
           />
         </Grid>
         <Grid item xs={12}>
@@ -101,7 +100,6 @@ export default function GroupsForm({ labels, maxAccess, recordId }) {
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('name', '')}
             error={formik.touched.name && Boolean(formik.errors.name)}
-            helperText={formik.touched.name && formik.errors.name}
           />
         </Grid>
         <Grid item xs={12}>
@@ -126,7 +124,6 @@ export default function GroupsForm({ labels, maxAccess, recordId }) {
               }
             }}
             error={formik.touched.nraId && Boolean(formik.errors.nraId)}
-            helperText={formik.touched.nraId && formik.errors.nraId}
           />
         </Grid>
       </Grid>

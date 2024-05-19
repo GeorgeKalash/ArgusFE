@@ -104,7 +104,6 @@ export default function InterfaceForm({ labels, recordId, maxAccess }) {
             maxAccess={maxAccess}
             onClear={() => formik.setFieldValue('reference', '')}
             error={formik.touched.reference && Boolean(formik.errors.reference)}
-            helperText={formik.touched.reference && formik.errors.reference}
           />
         </Grid>
         <Grid item xs={12}>
@@ -118,7 +117,6 @@ export default function InterfaceForm({ labels, recordId, maxAccess }) {
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('name', '')}
             error={formik.touched.name && Boolean(formik.errors.name)}
-            helperText={formik.touched.name && formik.errors.name}
           />
         </Grid>
         <Grid item xs={12}>
@@ -132,7 +130,6 @@ export default function InterfaceForm({ labels, recordId, maxAccess }) {
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('path', '')}
             error={formik.touched.path && Boolean(formik.errors.path)}
-            helperText={formik.touched.path && formik.errors.path}
           />
         </Grid>
         <Grid item xs={12}>
@@ -146,7 +143,6 @@ export default function InterfaceForm({ labels, recordId, maxAccess }) {
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('description', '')}
             error={formik.touched.description && Boolean(formik.errors.description)}
-            helperText={formik.touched.description && formik.errors.description}
           />
         </Grid>
       </Grid>

@@ -35,10 +35,10 @@ export default function OperationsForms({ labels, maxAccess, recordId }) {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      reference: yup.string().required(),
-      name: yup.string().required(),
-      workCenterId: yup.string().required(),
-      maxLossPct: yup.number().min(0, 'min').max(100, 'max').required()
+      reference: yup.string().required(' '),
+      name: yup.string().required(' '),
+      workCenterId: yup.string().required(' '),
+      maxLossPct: yup.number().min(0, 'min').max(100, 'max').required(' ')
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId

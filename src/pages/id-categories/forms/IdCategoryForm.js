@@ -35,7 +35,7 @@ export default function IdCategoryForm({ labels, maxAccess, recordId }) {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required('This field is required')
+      name: yup.string().required(' ')
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId

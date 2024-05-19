@@ -1,6 +1,5 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
-import { useFormik } from 'formik'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -88,7 +87,6 @@ export default function SmsTemplatesForms({ labels, maxAccess, recordId }) {
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
                 error={formik.touched.name && Boolean(formik.errors.name)}
-                helperText={formik.touched.name && formik.errors.name}
               />
             </Grid>
             <Grid item xs={12}>
@@ -102,7 +100,6 @@ export default function SmsTemplatesForms({ labels, maxAccess, recordId }) {
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('smsBody', '')}
                 error={formik.touched.smsBody && Boolean(formik.errors.smsBody)}
-                helperText={formik.touched.smsBody && formik.errors.smsBody}
               />
             </Grid>
           </Grid>

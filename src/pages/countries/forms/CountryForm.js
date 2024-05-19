@@ -105,7 +105,6 @@ export default function CountryForm({ labels, maxAccess, recordId }) {
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('reference', '')}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
-                helperText={formik.touched.reference && formik.errors.reference}
                 maxAccess={maxAccess}
               />
             </Grid>
@@ -118,7 +117,6 @@ export default function CountryForm({ labels, maxAccess, recordId }) {
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
                 error={formik.touched.name && Boolean(formik.errors.name)}
-                helperText={formik.touched.name && formik.errors.name}
                 maxAccess={maxAccess}
               />
             </Grid>
@@ -131,7 +129,6 @@ export default function CountryForm({ labels, maxAccess, recordId }) {
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('flName', '')}
                 error={formik.touched.flName && Boolean(formik.errors.flName)}
-                helperText={formik.touched.flName && formik.errors.flName}
                 maxLength='30'
                 maxAccess={maxAccess}
               />
@@ -148,7 +145,6 @@ export default function CountryForm({ labels, maxAccess, recordId }) {
                   formik && formik.setFieldValue('currencyId', newValue?.recordId)
                 }}
                 error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
-                helperText={formik.touched.currencyId && formik.errors.currencyId}
                 maxAccess={maxAccess}
               />
             </Grid>
@@ -164,7 +160,6 @@ export default function CountryForm({ labels, maxAccess, recordId }) {
                   formik && formik.setFieldValue('regionId', newValue?.recordId)
                 }}
                 error={formik.touched.regionId && Boolean(formik.errors.regionId)}
-                helperText={formik.touched.regionId && formik.errors.regionId}
                 maxAccess={maxAccess}
                 parameters='_startAt=0&_pageSize=1000'
               />
@@ -177,7 +172,6 @@ export default function CountryForm({ labels, maxAccess, recordId }) {
                 onChange={e => formik.setFieldValue('ibanLength', getFormattedNumberMax(e.target.value, 5, 0))}
                 onClear={() => formik.setFieldValue('ibanLength', '')}
                 error={formik.touched.ibanLength && Boolean(formik.errors.ibanLength)}
-                helperText={formik.touched.ibanLength && formik.errors.ibanLength}
                 maxAccess={maxAccess}
               />
             </Grid>

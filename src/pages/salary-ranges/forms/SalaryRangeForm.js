@@ -29,11 +29,11 @@ export default function SalaryRangeForm({ labels, maxAccess, recordId }) {
     validationSchema: yup.object({
       min: yup
         .string()
-        .required('This field is required')
+        .required(' ')
         .test('minValue', 'Minimum value is 1', value => {
           return value > 0
         }),
-      max: yup.string().required('This field is required')
+      max: yup.string().required(' ')
     }),
     onSubmit: async obj => {
       try {

@@ -91,7 +91,6 @@ export default function ReleaseIndicatorForm({ labels, maxAccess, recordId, wind
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('reference', '')}
             error={formik.touched.reference && Boolean(formik.errors.reference)}
-            helperText={formik.touched.reference && formik.errors.reference}
           />
         </Grid>
         <Grid item xs={12}>
@@ -106,7 +105,6 @@ export default function ReleaseIndicatorForm({ labels, maxAccess, recordId, wind
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('name', '')}
             error={formik.touched.name && Boolean(formik.errors.name)}
-            helperText={formik.touched.name && formik.errors.name}
           />
         </Grid>
         <Grid item xs={12}>
@@ -121,7 +119,6 @@ export default function ReleaseIndicatorForm({ labels, maxAccess, recordId, wind
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('recordId', '')}
             error={formik.touched.recordId && Boolean(formik.errors.recordId)}
-            helperText={formik.touched.recordId && formik.errors.recordId}
           />
         </Grid>
         <Grid item xs={12}>
@@ -139,7 +136,6 @@ export default function ReleaseIndicatorForm({ labels, maxAccess, recordId, wind
               formik && formik.setFieldValue('changeability', newValue?.key)
             }}
             error={formik.touched.changeability && Boolean(formik.errors.changeability)}
-            helperText={formik.touched.changeability && formik.errors.changeability}
           />
         </Grid>
 
