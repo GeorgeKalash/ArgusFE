@@ -9,8 +9,8 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
-import TaxCodesForm from './forms/TaxCodesForm'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
+import TaxCodesWindow from './Window/TaxCodesWindow'
 
 const TaxCodes = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -77,14 +77,14 @@ const TaxCodes = () => {
 
   function openForm(recordId) {
     stack({
-      Component: TaxCodesForm,
+      Component: TaxCodesWindow,
       props: {
         labels: _labels,
         recordId: recordId,
         maxAccess: access
       },
-      width: 500,
-      height: 360,
+      width: 800,
+      height: 660,
       title: _labels.taxCodes
     })
   }

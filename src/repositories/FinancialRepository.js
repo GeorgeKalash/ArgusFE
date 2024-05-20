@@ -55,5 +55,12 @@ export const FinancialRepository = {
     get: service + 'getTXC',
     set: service + 'setTXC',
     del: service + 'delTXC'
+  },
+  TaxHistoryPack: {
+    qry: service + 'qryTAH',
+    page: service + 'pageTAH',
+    get: service + 'getTAH',
+    set2: service + 'set2TAH',
+    del: service + 'delTAH'
   }
 }

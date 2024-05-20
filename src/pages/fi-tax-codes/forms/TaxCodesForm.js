@@ -13,7 +13,8 @@ import { useForm } from 'src/hooks/form'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { MasterSource } from 'src/resources/MasterSource'
 
-export default function TaxCodesForm({ labels, maxAccess, recordId }) {
+export default function TaxCodesForm({ labels, maxAccess, setStore, store }) {
+  const { recordId } = store
   const [editMode, setEditMode] = useState(!!recordId)
 
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -40,6 +41,10 @@ export default function TaxCodesForm({ labels, maxAccess, recordId }) {
       })
 
       if (!recordId) {
+        setStore(prevStore => ({
+          ...prevStore,
+          recordId: res.recordId
+        }))
         toast.success('Record Added Successfully')
         formik.setValues({
           ...obj,
