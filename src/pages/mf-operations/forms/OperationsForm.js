@@ -12,6 +12,7 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useForm } from 'src/hooks/form'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 export default function OperationsForms({ labels, maxAccess, recordId }) {
   const [editMode, setEditMode] = useState(!!recordId)
@@ -106,11 +107,11 @@ export default function OperationsForms({ labels, maxAccess, recordId }) {
           />
         </Grid>
         <Grid item xs={12}>
-          <CustomTextField
+          <CustomNumberField
             name='maxLossPct'
+            type='numeric'
             label={labels.maxLossPct}
             value={formik.values.maxLossPct}
-            type='numeric'
             numberField={true}
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('maxLossPct', '')}
