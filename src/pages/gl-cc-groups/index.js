@@ -101,7 +101,7 @@ const CostCenterGroup = () => {
           onDelete={del}
           isLoading={false}
           pageSize={50}
-          paginationType='client'
+          paginationType='api'
           maxAccess={access}
           refetch={refetch}
           paginationParameters={paginationParameters}

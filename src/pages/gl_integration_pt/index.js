@@ -103,7 +103,7 @@ const IntegrationPT = () => {
           onDelete={del}
           isLoading={false}
           pageSize={50}
-          paginationType='client'
+          paginationType='api'
           maxAccess={access}
           paginationParameters={paginationParameters}
           refetch={refetch}

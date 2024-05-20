@@ -154,7 +154,7 @@ const CashAccounts = () => {
           maxAccess={access}
           refetch={refetch}
           paginationParameters={paginationParameters}
-          paginationType='api'
+          paginationType='client'
         />
       </Grow>
     </VertLayout>

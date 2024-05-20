@@ -107,7 +107,7 @@ const AccountGroups = () => {
           pageSize={50}
           refetch={refetch}
           paginationParameters={paginationParameters}
-          paginationType='api'
+          paginationType='client'
           maxAccess={access}
         />
       </Grow>

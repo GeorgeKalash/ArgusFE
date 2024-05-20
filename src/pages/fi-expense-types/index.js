@@ -129,7 +129,7 @@ const ExpenseTypes = () => {
           onDelete={del}
           isLoading={false}
           pageSize={50}
-          paginationType='client'
+          paginationType='api'
           refetch={refetch}
           maxAccess={access}
         />

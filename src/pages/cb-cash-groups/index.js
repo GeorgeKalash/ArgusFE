@@ -97,7 +97,7 @@ const CbCashGroup = () => {
           onDelete={del}
           isLoading={false}
           pageSize={50}
-          paginationType='client'
+          paginationType='api'
           maxAccess={access}
         />
       </Grow>
