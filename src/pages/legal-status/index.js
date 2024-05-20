@@ -60,10 +60,6 @@ const LegalStatus = () => {
     openForm()
   }
 
-  const edit = obj => {
-    openForm(obj?.recordId)
-  }
-
   function openForm(recordId) {
     stack({
       Component: LegalStatusForm,
@@ -76,15 +72,6 @@ const LegalStatus = () => {
       height: 300,
       title: _labels.legalStatus
     })
-  }
-
-  const del = async obj => {
-    await postRequest({
-      extension: BusinessPartnerRepository.LegalStatus.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success('Record Deleted Successfully')
   }
 
   return (
