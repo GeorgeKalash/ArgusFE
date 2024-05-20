@@ -23,11 +23,11 @@ import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import { useError } from 'src/error'
 
-export default function BenificiaryBankForm({ clientId, dispersalType, beneficiaryId, corId, countryId, seqNo }) {
+export default function BenificiaryBankForm({ clientId, dispersalType, beneficiary, corId, countryId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [maxAccess, setMaxAccess] = useState({ record: [] })
   const { stack: stackError } = useError()
-  const [editMode, setEditMode] = useState(beneficiaryId)
+  const [editMode, setEditMode] = useState(beneficiary?.beneficiaryId)
 
   useEffect(() => {
     ;(async function () {
@@ -41,22 +41,22 @@ export default function BenificiaryBankForm({ clientId, dispersalType, beneficia
         const maxAccess = { record: controls }
         setMaxAccess(maxAccess)
       }
-      if (beneficiaryId) {
+      if (beneficiary?.beneficiaryId) {
         const RTBEB = await getRequest({
           extension: RemittanceOutwardsRepository.BeneficiaryBank.get,
-          parameters: `_clientId=${clientId}&_beneficiaryId=${beneficiaryId}&_seqNo=${seqNo}`
+          parameters: `_clientId=${clientId}&_beneficiaryId=${beneficiary?.beneficiaryId}&_seqNo=${beneficiary?.beneficiarySeqNo}`
         })
 
         const RTBEN = await getRequest({
           extension: RemittanceOutwardsRepository.Beneficiary.get,
-          parameters: `_clientId=${clientId}&_beneficiaryId=${beneficiaryId}&_seqNo=${seqNo}`
+          parameters: `_clientId=${clientId}&_beneficiaryId=${beneficiary?.beneficiaryId}&_seqNo=${beneficiary?.beneficiarySeqNo}`
         })
 
         const obj = {
           //RTBEN
           clientId: clientId,
-          beneficiaryId: beneficiaryId,
-          recordId: clientId * 1000 + beneficiaryId,
+          beneficiaryId: beneficiary?.beneficiaryId,
+          recordId: clientId * 1000 + beneficiary?.beneficiaryId,
           name: RTBEN?.record?.name,
           dispersalType: dispersalType,
           nationalityId: RTBEN?.record?.nationalityId,
@@ -120,7 +120,7 @@ export default function BenificiaryBankForm({ clientId, dispersalType, beneficia
     addressLine2: '',
     clientRef: '',
     clientName: '',
-    countryId: '',
+    countryId: countryId || '',
     seqNo: 1,
 
     //RTBEB
@@ -209,12 +209,6 @@ export default function BenificiaryBankForm({ clientId, dispersalType, beneficia
     datasetId: ResourceIds.BeneficiaryBank
   })
 
-  console.log('here')
-  console.log(clientId)
-  console.log(formik.values.clientId)
-  console.log(editMode)
-  console.log(formik.values)
-
   return (
     <FormShell
       resourceId={ResourceIds.BeneficiaryBank}
@@ -300,7 +294,7 @@ export default function BenificiaryBankForm({ clientId, dispersalType, beneficia
                 formik.setFieldValue('bankId', newValue ? newValue.recordId : '')
               }}
               error={formik.touched.bankId && Boolean(formik.errors.bankId)}
-              readOnly={formik?.values?.countryId == '' || countryId || editMode}
+              readOnly={!formik?.values?.countryId || !countryId || editMode}
             />
           </FormGrid>
 

@@ -1,22 +1,15 @@
-// ** MUI Imports
 import { Grid, FormControlLabel, Checkbox } from '@mui/material'
-
 import { useEffect, useState, useContext } from 'react'
-
-// ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import * as yup from 'yup'
 import { useError } from 'src/error'
-
-// ** Helpers
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import FormShell from 'src/components/Shared/FormShell'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
-
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { DataSets } from 'src/resources/DataSets'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
@@ -36,11 +29,6 @@ const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, co
   useEffect(() => {
     ;(async function () {
       if (countryId && corId && dispersalType) {
-        console.log('here')
-        console.log(countryId)
-        console.log(corId)
-        console.log(dispersalType)
-
         const qryCCL = await getRequest({
           extension: RemittanceSettingsRepository.CorrespondentControl.qry,
           parameters: `_countryId=${countryId}&_corId=${corId}&_resourceId=${ResourceIds.BeneficiaryCash}`

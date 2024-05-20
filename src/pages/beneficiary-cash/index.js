@@ -1,21 +1,9 @@
-// ** React Importsport
-import { useState, useContext } from 'react'
-
-// ** MUI Imports
-import { Box } from '@mui/material'
-
-// ** Custom Imports
+import { useContext } from 'react'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
-
-// ** Helpers
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
-
+import { useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
 import BenificiaryCashForm from 'src/components/Shared/BenificiaryCashForm'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
@@ -26,8 +14,6 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const BeneficiaryCash = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
-
-  //states
   const { stack } = useWindow()
 
   const {
@@ -58,10 +44,6 @@ const BeneficiaryCash = () => {
       })
     }
   }
-
-  //const invalidate = useInvalidate({
-  // endpointId: RemittanceOutwardsRepository.Beneficiary.snapshot
-  // })
 
   async function openForm(beneficiaryId, clientId) {
     stack({

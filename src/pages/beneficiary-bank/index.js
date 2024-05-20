@@ -1,20 +1,9 @@
-// ** React Importsport
-import { useState, useContext } from 'react'
-
-// ** MUI Imports
-import { Box } from '@mui/material'
-
-// ** Custom Imports
+import { useContext } from 'react'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
-
-// ** Helpers
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
-
+import { useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
 import BenificiaryBankForm from 'src/components/Shared/BenificiaryBankForm'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
@@ -25,8 +14,6 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const BeneficiaryBank = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
-
-  //states
   const { stack } = useWindow()
 
   const {
@@ -58,18 +45,13 @@ const BeneficiaryBank = () => {
     }
   }
 
-  //const invalidate = useInvalidate({
-  // endpointId: RemittanceOutwardsRepository.Beneficiary.snapshot
-  //})
-
   async function openForm(beneficiaryId, clientId) {
     stack({
       Component: BenificiaryBankForm,
       props: {
         clientId: clientId,
-        beneficiaryId: beneficiaryId,
-        dispersalType: 2,
-        seqNo: 1
+        beneficiary: { beneficiaryId: beneficiaryId, beneficiarySeqNo: 1 },
+        dispersalType: 2
       },
       width: 700,
       height: 500,
@@ -147,9 +129,6 @@ const BeneficiaryBank = () => {
   const editBenBank = obj => {
     openForm(obj.beneficiaryId, obj.clientId)
   }
-
-  console.log('data')
-  console.log(data)
 
   return (
     <VertLayout>

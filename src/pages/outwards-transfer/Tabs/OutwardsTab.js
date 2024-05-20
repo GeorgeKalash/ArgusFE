@@ -64,6 +64,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     currencyId: '',
     idNo: '',
     beneficiaryId: '',
+    beneficiarySeqNo: '',
     beneficiaryName: '',
     clientId: '',
     clientRef: '',
@@ -426,7 +427,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
           dispersalType: formik.values.dispersalType,
           corId: formik.values.corId ? formik.values.corId : 0,
           countryId: formik.values.countryId,
-          beneficiaryId: formik.values.beneficiaryId
+          beneficiary: { beneficiaryId: formik.values.beneficiaryId, beneficiarySeqNo: formik.values.beneficiarySeqNo }
         },
         width: 900,
         height: 600,
@@ -1231,6 +1232,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                 onChange={async (event, newValue) => {
                   formik.setFieldValue('beneficiaryId', newValue?.beneficiaryId)
                   formik.setFieldValue('beneficiaryName', newValue?.name)
+                  formik.setFieldValue('beneficiarySeqNo', newValue?.seqNo)
                 }}
                 errorCheck={'beneficiaryId'}
               />
