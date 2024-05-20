@@ -1,138 +1,120 @@
-import { useState, useContext } from 'react'
-import { Box } from '@mui/material'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { SystemRepository } from 'src/repositories/SystemRepository'
-import { getFormattedNumberMax } from 'src/lib/numberField-helper'
+import { CachCountSettingsRepository } from 'src/repositories/CachCountSettingsRepository'
+import CcCashNotesForm from './forms/CcCashNotesForm'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { useWindow } from 'src/windows'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { useWindow } from 'src/windows'
-import CountryForm from './forms/CountryForm'
+import { getFormattedNumber } from 'src/lib/numberField-helper'
 
-const Countries = () => {
+const CcCashNotes = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: SystemRepository.Country.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      extension: CachCountSettingsRepository.CcCashNotes.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=&_currencyId=0`
     })
 
     return { ...response, _startAt: _startAt }
   }
 
   const {
+    invalidate,
     query: { data },
-    labels: _labels,
+    labels: labels,
     paginationParameters,
     refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SystemRepository.Country.page,
-    datasetId: ResourceIds.Countries
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: SystemRepository.Country.page
+    endpointId: CachCountSettingsRepository.CcCashNotes.page,
+    datasetId: ResourceIds.CashNote
   })
 
   const columns = [
     {
-      field: 'reference',
-      headerName: _labels.reference,
-      flex: 1
-    },
-    {
-      field: 'name',
-      headerName: _labels.name,
-      flex: 1
-    },
-    {
-      field: 'flName',
-      headerName: _labels.fLang,
+      field: 'currencyRef',
+      headerName: labels.currencyRef,
       flex: 1
     },
     {
       field: 'currencyName',
-      headerName: _labels.currency,
+      headerName: labels.currencyName,
       flex: 1
     },
-    {
-      field: 'regionName',
-      headerName: _labels.geoRegion,
-      flex: 1
-    },
-    {
-      field: 'ibanLength',
-      headerName: _labels.ibanLength,
-      flex: 1,
-      align: 'right',
 
-      valueGetter: ({ row }) => getFormattedNumberMax(row?.ibanLength, 5, 0)
+    {
+      field: 'note',
+      headerName: labels.note,
+      flex: 1,
+      valueGetter: ({ row }) => getFormattedNumber(row?.note)
     }
   ]
 
+  const add = () => {
+    openForm()
+  }
+
+  const popup = obj => {
+    openForm(obj?.currencyId, obj?.note)
+  }
+
   const del = async obj => {
     await postRequest({
-      extension: SystemRepository.Country.del,
+      extension: CachCountSettingsRepository.CcCashNotes.del,
       record: JSON.stringify(obj)
     })
     invalidate()
     toast.success('Record Deleted Successfully')
   }
 
-  const add = () => {
-    openForm()
-  }
-
-  const edit = obj => {
-    openForm(obj?.recordId)
-  }
-
-  function openForm(recordId) {
+  function openForm(currencyId, note) {
     stack({
-      Component: CountryForm,
+      Component: CcCashNotesForm,
       props: {
-        labels: _labels,
-        recordId: recordId,
+        labels: labels,
+        note: note ? note : null,
+        currencyId: currencyId ? currencyId : null,
         maxAccess: access
       },
-      width: 700,
-      height: 640,
-      title: _labels.country
+      width: 600,
+      height: 300,
+      title: labels.CcCashNotes
     })
   }
 
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <GridToolbar onAdd={add} maxAccess={access} labels={labels} />
       </Fixed>
       <Grow>
         <Table
           columns={columns}
           gridData={data}
-          rowId={['recordId']}
-          onEdit={edit}
+          rowId={['currencyId', 'note']}
+          onEdit={popup}
           onDelete={del}
           isLoading={false}
-          refetch={refetch}
           pageSize={50}
           paginationParameters={paginationParameters}
           paginationType='api'
           maxAccess={access}
+          refetch={refetch}
         />
       </Grow>
     </VertLayout>
   )
 }
 
-export default Countries
+export default CcCashNotes
