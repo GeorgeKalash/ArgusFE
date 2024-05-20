@@ -75,9 +75,7 @@ export default function CbBanksForms({ labels, maxAccess, recordId, setStore }) 
             name: res.record.name
           })
         }
-      } catch (exception) {
-        // Handle error if needed
-      }
+      } catch (exception) {}
     })()
   }, [])
 

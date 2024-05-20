@@ -41,8 +41,8 @@ export default function AccountGroupsForm({ labels, maxAccess, recordId, invalid
       if (!obj.recordId) {
         toast.success('Record Added Successfully')
         formik.setValues({
-          ...obj, // Spread the existing properties
-          recordId: response.recordId // Update only the recordId field
+          ...obj,
+          recordId: response.recordId
         })
       } else toast.success('Record Edited Successfully')
       invalidate()

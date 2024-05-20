@@ -31,8 +31,6 @@ export default function GlIntegrationForm({ labels, maxAccess, recordId, invalid
       name: yup.string().required('This field is required')
     }),
     onSubmit: async obj => {
-      // const recordId = obj.recordId
-
       const response = await postRequest({
         extension: GeneralLedgerRepository.IntegrationPostTypes.set,
         record: JSON.stringify(obj)
@@ -41,8 +39,8 @@ export default function GlIntegrationForm({ labels, maxAccess, recordId, invalid
       if (!obj.recordId) {
         toast.success('Record Added Successfully')
         formik.setValues({
-          ...obj, // Spread the existing properties
-          recordId: response.recordId // Update only the recordId field
+          ...obj,
+          recordId: response.recordId
         })
       } else toast.success('Record Edited Successfully')
 

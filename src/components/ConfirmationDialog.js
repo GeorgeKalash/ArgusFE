@@ -1,4 +1,3 @@
-// ** MUI Imports
 import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button, Box } from '@mui/material'
 import Window from './Shared/Window'
 
@@ -10,7 +9,7 @@ const ConfirmationDialog = ({
   cancelButtonAction,
   fullScreen = true
 }) => {
-  return !fullScreen ? ( //dialog full screen or page
+  return !fullScreen ? (
     openCondition && (
       <Window Title='Confirmation' width={450} height={120} canExpand={false} onClose={closeCondition}>
         <Box
