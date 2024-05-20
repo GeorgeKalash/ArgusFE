@@ -11,6 +11,7 @@ import GeneralLedger from 'src/components/Shared/GeneralLedger'
 
 import Approvals from './Approvals'
 import ResourceRecordRemarks from './ResourceRecordRemarks'
+import GlobalIntegrationGrid from './GlobalIntegrationGrid'
 
 export default function FormShell({
   form,
@@ -24,6 +25,7 @@ export default function FormShell({
   infoVisible = true,
   postVisible = false,
   resourceId,
+  masterSource,
   functionId,
   maxAccess,
   isPosted = false,
@@ -86,6 +88,7 @@ export default function FormShell({
       title: 'Resource Record Remarks'
     })
   }
+  console.log('formikk test ', form)
 
   return (
     <>
@@ -134,6 +137,18 @@ export default function FormShell({
               title: 'General Ledger'
             })
           }
+          onClickGIA={() =>
+            stack({
+              Component: GlobalIntegrationGrid,
+              props: {
+                masterId: form.values?.recordId,
+                masterSource: masterSource
+              },
+              width: 700,
+              height: 500,
+              title: 'Integration Account'
+            })
+          }
           onClientRelation={() =>
             stack({
               Component: ClientRelationForm,
@@ -174,6 +189,7 @@ export default function FormShell({
           isClosed={isClosed}
           clientRelation={clientRelation}
           resourceId={resourceId}
+          masterSource={masterSource}
           recordId={form.values?.recordId}
           selectedReport={selectedReport}
           setSelectedReport={setSelectedReport}

@@ -85,10 +85,11 @@ export const SystemRepository = {
     snapshot: service + 'snapshotCDI'
   },
   Address: {
-    qry: service + '',
+    qry: service + 'qryADD',
     get: service + 'getADD',
     set: service + 'setADD',
-    del: service + ''
+    del: service + '',
+    snapshot: service + 'snapshotADD'
   },
   PlantGroup: {
     qry: service + 'qryPLG',
@@ -163,5 +164,9 @@ export const SystemRepository = {
     set: service + 'setRMK',
     get: service + 'getRMK',
     del: service + 'delRMK'
+  },
+  SystemChecks: {
+    qry: service + 'qryCHK',
+    set: service + 'set2CHK'
   }
 }

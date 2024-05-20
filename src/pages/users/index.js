@@ -864,8 +864,6 @@ const Users = () => {
           tabs={tabs}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
-
-          //Users
           usersValidation={usersValidation}
           notificationGrpStore={notificationGrpStore}
           languageStore={languageStore}
@@ -878,8 +876,6 @@ const Users = () => {
           emailPresent={emailPresent}
           passwordState={passwordState}
           setPasswordState={setPasswordState}
-
-          //Defaults
           defaultsValidation={defaultsValidation}
           siteStore={siteStore}
           plantStore={plantStore}
@@ -887,14 +883,10 @@ const Users = () => {
           setCashAccStore={setCashAccStore}
           cashAccStore={cashAccStore}
           lookupCashAcc={lookupCashAcc}
-
-          //Security Grp
           securityGrpGridData={securityGrpGridData}
           getSecurityGrpGridData={getSecurityGrpGridData}
           delSecurityGrp={delSecurityGrp}
           addSecurityGrp={addSecurityGrp}
-
-          //Row Access
           moduleStore={moduleStore}
           rowGridData={rowGridData}
           handleRowAccessSubmit={handleRowAccessSubmit}
@@ -911,7 +903,8 @@ const Users = () => {
           initialAllListData={initialAllListData}
           initialSelectedListData={initialSelectedListData}
           handleListsDataChange={handleListsDataChange}
-          itemSelectorLabels={itemSelectorLabels}
+          itemSelectorLabels={{ title1: _labels.all, title2: _labels.selected }}
+          formik={securityGrpValidation}
           maxAccess={access}
         />
       )}

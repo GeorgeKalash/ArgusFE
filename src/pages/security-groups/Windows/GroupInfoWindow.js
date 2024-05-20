@@ -1,57 +1,24 @@
-// ** Custom Imports
-import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import GroupInfoTab from 'src/pages/security-groups/Tabs/GroupInfoTab'
-import UsersTab from 'src/pages/security-groups/Tabs/UsersTab'
+import SGUsersTab from 'src/pages/security-groups/Tabs/SGUsersTab'
+import { CustomTabs } from 'src/components/Shared/CustomTabs'
+import { useState } from 'react'
 
-const GroupInfoWindow = ({
-  onClose,
-  width,
-  height,
-  onSave,
-  labels,
-  maxAccess,
-  tabs,
-  activeTab,
-  setActiveTab,
+const GroupInfoWindow = ({ labels, maxAccess, recordId, height }) => {
+  const [activeTab, setActiveTab] = useState(0)
+  const [storeRecordId, setRecordId] = useState(recordId)
+  const tabs = [{ label: labels?.groupInfo }, { label: labels?.users, disabled: !storeRecordId }]
 
-  //group info tab
-  groupInfoValidation,
-
-  //users tab
-  usersValidation,
-  usersGridData,
-  getUsersGridData,
-  delUsers,
-  addUsers
-}) => {
   return (
-    <Window
-      id='GroupInfoWindow'
-      Title={labels.groupInfo}
-      onClose={onClose}
-      width={width}
-      height={height}
-      onSave={onSave}
-      tabs={tabs}
-      activeTab={activeTab}
-      setActiveTab={setActiveTab}
-    >
-      <CustomTabPanel index={0} value={activeTab}>
-        <GroupInfoTab labels={labels} groupInfoValidation={groupInfoValidation} maxAccess={maxAccess} />
+    <>
+      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
+      <CustomTabPanel height={height} index={0} value={activeTab}>
+        <GroupInfoTab labels={labels} maxAccess={maxAccess} storeRecordId={storeRecordId} setRecordId={setRecordId} />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
-        <UsersTab
-          labels={labels}
-          usersValidation={usersValidation}
-          maxAccess={maxAccess}
-          usersGridData={usersGridData}
-          getUsersGridData={getUsersGridData}
-          delUsers={delUsers}
-          addUsers={addUsers}
-        />
+        <SGUsersTab maxAccess={maxAccess} labels={labels} storeRecordId={storeRecordId} />
       </CustomTabPanel>
-    </Window>
+    </>
   )
 }
 

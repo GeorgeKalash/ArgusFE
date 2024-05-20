@@ -92,6 +92,12 @@ export const Buttons = [
     main: false
   },
   {
+    key: 'Integration Account',
+    color: '#231f20',
+    image: 'intAccount.png',
+    main: false
+  },
+  {
     key: 'Client Relation',
     color: '#AC48AE',
     image: 'clientRelations.png',

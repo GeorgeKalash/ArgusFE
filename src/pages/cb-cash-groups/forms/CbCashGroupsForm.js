@@ -9,6 +9,7 @@ import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
+import { MasterSource } from 'src/resources/MasterSource'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
@@ -77,12 +78,23 @@ export default function CbCashGroupsForms({ labels, maxAccess, recordId }) {
     })()
   }, [])
 
+  const actions = [
+    {
+      key: 'Integration Account',
+      condition: true,
+      onClick: 'onClickGIA',
+      disabled: !editMode
+    }
+  ]
+
   return (
     <FormShell
+      actions={actions}
       resourceId={ResourceIds.CbCashGroups}
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}
+      masterSource={MasterSource.CashAccountGroup}
     >
       <VertLayout>
         <Grow>
