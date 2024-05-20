@@ -14,7 +14,6 @@ import { useResourceQuery } from 'src/hooks/resource'
 import { useContext, useEffect } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { DataSets } from 'src/resources/DataSets'
-import CustomNumberField from '../Inputs/CustomNumberField'
 import { getFormattedNumber } from 'src/lib/numberField-helper'
 import toast from 'react-hot-toast'
 
@@ -33,7 +32,7 @@ export const LOShipmentForm = ({ recordId, functionId }) => {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      //policyNo: yup.string().required(),
+      policyNo: yup.string().required(),
       carrierId: yup.string().required(),
       typeGrid: yup
         .array()
@@ -75,8 +74,8 @@ export const LOShipmentForm = ({ recordId, functionId }) => {
 
       const resultObject = {
         header: {
-          recordId: values.recordId,
-          functionId: values.functionId,
+          recordId: recordId,
+          functionId: functionId,
           carrierId: values.carrierId,
           policyNo: values.policyNo
         },
@@ -97,13 +96,13 @@ export const LOShipmentForm = ({ recordId, functionId }) => {
     datasetId: ResourceIds.LOSHipments
   })
 
-  const totalQty = formik.values.typeGrid.reduce((qty, row) => {
+  const totalQty = formik.values?.typeGrid?.reduce((qty, row) => {
     const qtyValue = parseFloat(row.qty?.toString().replace(/,/g, '')) || 0
 
     return qty + qtyValue
   }, 0)
 
-  const totalAmount = formik.values.typeGrid.reduce((amount, row) => {
+  const totalAmount = formik.values?.typeGrid?.reduce((amount, row) => {
     const amountValue = parseFloat(row.amount?.toString().replace(/,/g, '')) || 0
 
     return amount + amountValue
@@ -111,15 +110,26 @@ export const LOShipmentForm = ({ recordId, functionId }) => {
   useEffect(() => {
     ;(async function () {
       if (recordId && functionId) {
-        /*  const res = await getRequest({
+        const res = await getRequest({
           extension: LogisticsRepository.shipment.get,
           parameters: `_recordId=${recordId}&_functionId=${functionId}`
         })
+
+        const packages = res.record.packages.map((item, index) => ({
+          ...item,
+          id: index + 1
+        }))
+
+        const packageReferences = res.record.packageReferences.map((item, index) => ({
+          ...item,
+          id: index + 1
+        }))
+
         formik.setValues({
           ...res.record.header,
-          ttNo: res.record.packages,
-          serialGrid: res.record.packageReferences
-        })*/
+          typeGrid: packages,
+          serialGrid: packageReferences
+        })
       }
     })()
   }, [])
@@ -154,95 +164,100 @@ export const LOShipmentForm = ({ recordId, functionId }) => {
                 name='policyNo'
                 label={labels.policyNo}
                 value={formik.values.policyNo}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('policyNo', '')}
                 maxAccess={maxAccess}
                 maxLength='30'
                 required
+                error={formik.touched.policyNo && Boolean(formik.errors.policyNo)}
               />
             </Grid>
           </Grid>
         </Fixed>
-        <Grow>
-          <DataGrid
-            onChange={value => formik.setFieldValue('typeGrid', value)}
-            value={formik.values.typeGrid}
-            error={formik.errors.typeGrid}
-            maxAccess={maxAccess}
-            columns={[
-              {
-                component: 'resourcecombobox',
-                label: labels.type,
-                name: 'packageTypeName',
-                props: {
-                  datasetId: DataSets.PACKAGE_TYPE,
-                  displayField: 'value',
-                  valueField: 'key',
-                  mapping: [
-                    { from: 'key', to: 'packageType' },
-                    { from: 'value', to: 'packageTypeName' }
-                  ]
+        <Grid container xs={12}>
+          <Grow>
+            <DataGrid
+              onChange={value => formik.setFieldValue('typeGrid', value)}
+              value={formik.values.typeGrid}
+              error={formik.errors.typeGrid}
+              maxAccess={maxAccess}
+              columns={[
+                {
+                  component: 'resourcecombobox',
+                  label: labels.type,
+                  name: 'packageTypeName',
+                  props: {
+                    datasetId: DataSets.PACKAGE_TYPE,
+                    displayField: 'value',
+                    valueField: 'key',
+                    mapping: [
+                      { from: 'key', to: 'packageType' },
+                      { from: 'value', to: 'packageTypeName' }
+                    ]
+                  }
+                },
+                {
+                  component: 'numberfield',
+                  name: 'qty',
+                  label: labels.qty,
+                  defaultValue: ''
+                },
+                {
+                  component: 'numberfield',
+                  label: labels.amount,
+                  name: 'amount',
+                  defaultValue: ''
                 }
-              },
-              {
-                component: 'numberfield',
-                name: 'qty',
-                label: labels.qty,
-                defaultValue: ''
-              },
-              {
-                component: 'numberfield',
-                label: labels.amount,
-                name: 'amount',
-                defaultValue: ''
-              }
-            ]}
-          />
-        </Grow>
-        <Fixed>
-          <Grid container spacing={2} sx={{ pt: 5, justifyContent: 'flex-end' }}>
-            <Grid item xs={3}>
-              <CustomTextField
-                name='totalQty'
-                maxAccess={maxAccess}
-                value={getFormattedNumber(totalQty.toFixed(2))}
-                label={labels.totalQty}
-                readOnly={true}
-              />
+              ]}
+            />
+            <Grid container spacing={2} sx={{ pt: 5, justifyContent: 'flex-end' }}>
+              <Grid item xs={3}>
+                <CustomTextField
+                  name='totalQty'
+                  maxAccess={maxAccess}
+                  value={getFormattedNumber(totalQty)}
+                  label={labels.totalQty}
+                  readOnly={true}
+                />
+              </Grid>
+              <Grid item xs={3} sx={{ pl: 3 }}>
+                <CustomTextField
+                  name='totalAmount'
+                  maxAccess={maxAccess}
+                  value={getFormattedNumber(totalAmount.toFixed(2))}
+                  label={labels.totalAmount}
+                  readOnly={true}
+                />
+              </Grid>
             </Grid>
-            <Grid item xs={3} sx={{ pl: 3 }}>
-              <CustomNumberField
-                name='totalAmount'
-                maxAccess={maxAccess}
-                value={getFormattedNumber(totalAmount.toFixed(2))}
-                label={labels.totalAmount}
-                readOnly={true}
-              />
-            </Grid>
-          </Grid>
-        </Fixed>
-        <Grow>
-          <DataGrid
-            onChange={value => formik.setFieldValue('serialGrid', value)}
-            value={formik.values.serialGrid}
-            error={formik.errors.serialGrid}
-            maxAccess={maxAccess}
-            columns={[
-              {
-                component: 'numberfield',
-                name: 'seqNo',
-                label: labels.seqNo,
-                defaultValue: ''
-              },
-              {
-                component: 'textfield',
-                label: labels.reference,
-                name: 'reference',
-                props: {
-                  maxLength: 20
+          </Grow>
+        </Grid>
+        <Grid container xs={6}>
+          <Grow>
+            <DataGrid
+              onChange={value => formik.setFieldValue('serialGrid', value)}
+              value={formik.values.serialGrid}
+              error={formik.errors.serialGrid}
+              maxAccess={maxAccess}
+              columns={[
+                {
+                  component: 'numberfield',
+                  name: 'seqNo',
+                  label: labels.seqNo,
+                  defaultValue: ''
+                },
+                {
+                  component: 'textfield',
+                  label: labels.reference,
+                  name: 'reference',
+                  props: {
+                    maxLength: 20
+                  }
                 }
-              }
-            ]}
-          />
-        </Grow>
+              ]}
+            />
+          </Grow>
+        </Grid>
       </VertLayout>
     </FormShell>
   )

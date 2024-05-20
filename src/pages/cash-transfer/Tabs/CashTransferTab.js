@@ -233,6 +233,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
         functionId: SystemFunction.CashTransfer
       },
       width: 950,
+      height: 670,
       title: 'Shipments'
     })
   }
