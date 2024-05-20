@@ -31,7 +31,7 @@ const CcCashNotes = () => {
   const {
     invalidate,
     query: { data },
-    labels: labels,
+    labels: _labels,
     paginationParameters,
     refetch,
     access
@@ -44,18 +44,18 @@ const CcCashNotes = () => {
   const columns = [
     {
       field: 'currencyRef',
-      headerName: labels.currencyRef,
+      headerName: _labels.currencyRef,
       flex: 1
     },
     {
       field: 'currencyName',
-      headerName: labels.currencyName,
+      headerName: _labels.currencyName,
       flex: 1
     },
 
     {
       field: 'note',
-      headerName: labels.note,
+      headerName: _labels.note,
       flex: 1,
       valueGetter: ({ row }) => getFormattedNumber(row?.note)
     }
@@ -82,21 +82,21 @@ const CcCashNotes = () => {
     stack({
       Component: CcCashNotesForm,
       props: {
-        labels: labels,
+        labels: _labels,
         note: note ? note : null,
         currencyId: currencyId ? currencyId : null,
         maxAccess: access
       },
       width: 600,
       height: 300,
-      title: labels.CcCashNotes
+      title: _labels.CcCashNotes
     })
   }
 
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} labels={labels} />
+        <GridToolbar onAdd={add} maxAccess={access} labels={_labels} />
       </Fixed>
       <Grow>
         <Table
