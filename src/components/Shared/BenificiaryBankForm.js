@@ -5,6 +5,7 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FormShell from 'src/components/Shared/FormShell'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
+import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { DataSets } from 'src/resources/DataSets'
@@ -19,14 +20,18 @@ import FormGrid from 'src/components/form/layout/FormGrid'
 import { useForm } from 'src/hooks/form'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
+import { CTCLRepository } from 'src/repositories/CTCLRepository'
+import { useError } from 'src/error'
 
-export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId, corId, countryId }) {
+export default function BenificiaryBankForm({ clientId, dispersalType, beneficiaryId, corId, countryId, seqNo }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const [maxAccess, setMaxAccess] = useState(null)
+  const [maxAccess, setMaxAccess] = useState({ record: [] })
+  const { stack: stackError } = useError()
+  const [editMode, setEditMode] = useState(beneficiaryId)
 
   useEffect(() => {
     ;(async function () {
-      if (countryId || corId || dispersalType) {
+      if (countryId && corId && dispersalType) {
         const qryCCL = await getRequest({
           extension: RemittanceSettingsRepository.CorrespondentControl.qry,
           parameters: `_countryId=${countryId}&_corId=${corId}&_resourceId=${ResourceIds.BeneficiaryBank}`
@@ -39,12 +44,12 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
       if (beneficiaryId) {
         const RTBEB = await getRequest({
           extension: RemittanceOutwardsRepository.BeneficiaryBank.get,
-          parameters: `_clientId=${clientId}&_beneficiaryId=${beneficiaryId}`
+          parameters: `_clientId=${clientId}&_beneficiaryId=${beneficiaryId}&_seqNo=${seqNo}`
         })
 
         const RTBEN = await getRequest({
           extension: RemittanceOutwardsRepository.Beneficiary.get,
-          parameters: `_clientId=${clientId}&_beneficiaryId=${beneficiaryId}`
+          parameters: `_clientId=${clientId}&_beneficiaryId=${beneficiaryId}&_seqNo=${seqNo}`
         })
 
         const obj = {
@@ -67,6 +72,10 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
           shortName: RTBEN?.record?.shortName,
           addressLine1: RTBEN?.record?.addressLine1,
           addressLine2: RTBEN?.record?.addressLine2,
+          clientRef: RTBEN?.record?.clientRef,
+          clientName: RTBEN?.record?.clientName,
+          countryId: RTBEN?.record?.countryId,
+          seqNo: RTBEN?.record?.seqNo,
 
           //RTBEB
           bankId: RTBEB?.record?.bankId,
@@ -80,7 +89,8 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
           state: RTBEB?.record?.state,
           city: RTBEB?.record?.city,
           zipcode: RTBEB?.record?.zipcode,
-          remarks: RTBEB?.record?.remarks
+          remarks: RTBEB?.record?.remarks,
+          seqNo: RTBEB?.record?.seqNo
         }
 
         formik.setValues(obj)
@@ -108,6 +118,10 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
     shortName: '',
     addressLine1: '',
     addressLine2: '',
+    clientRef: '',
+    clientName: '',
+    countryId: '',
+    seqNo: 1,
 
     //RTBEB
     bankId: null,
@@ -121,7 +135,8 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
     state: '',
     city: '',
     zipcode: '',
-    remarks: ''
+    remarks: '',
+    seqNo: 1
   })
 
   const { formik } = useForm({
@@ -130,12 +145,16 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
+      clientId: yup.string().required(' '),
+      countryId: yup.string().required(' '),
       name: yup.string().required(' '),
       bankId: yup.string().required(' ')
     }),
     onSubmit: async values => {
       const header = {
         clientId: values.clientId,
+        clientRef: values.clientRef,
+        clientName: values.clientName,
         beneficiaryId: values.beneficiaryId,
         gender: values.gender,
         rtId: values.rtId,
@@ -151,7 +170,9 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
         cobId: values.cobId,
         shortName: values.shortName,
         addressLine1: values.addressLine1,
-        addressLine2: values.addressLine2
+        addressLine2: values.addressLine2,
+        countryId: values.countryId,
+        seqNo: values.seqNo
       }
 
       const bankInfo = {
@@ -167,7 +188,8 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
         branchName: values.branchName,
         city: values.city,
         state: values.state,
-        zipcode: values.zipcode
+        zipcode: values.zipcode,
+        seqNo: values.seqNo
       }
       const data = { header: header, beneficiaryBank: bankInfo }
 
@@ -179,6 +201,7 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
       if (res.recordId) {
         toast.success('Record Updated Successfully')
       }
+      setEditMode(true)
     }
   })
 
@@ -186,33 +209,83 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
     datasetId: ResourceIds.BeneficiaryBank
   })
 
+  console.log('here')
+  console.log(clientId)
+  console.log(formik.values.clientId)
+  console.log(editMode)
+  console.log(formik.values)
+
   return (
     <FormShell
       resourceId={ResourceIds.BeneficiaryBank}
       form={formik}
-      editMode={formik?.values?.beneficiaryId}
+      editMode={editMode}
+      setEditMode={setEditMode}
       height={480}
       maxAccess={maxAccess}
+      disabledSubmit={editMode}
     >
       <Grid container>
         {/* First Column */}
         <Grid container rowGap={2} xs={6} sx={{ px: 2, pt: 2 }}>
-          <FormGrid hideonempty xs={12}>
-            <CustomTextField
-              name='name'
-              label={_labels.name}
-              value={formik.values.name}
+          <Grid container xs={12}>
+            <ResourceLookup
+              endpointId={CTCLRepository.ClientCorporate.snapshot}
+              parameters={{
+                _category: 0
+              }}
+              valueField='reference'
+              displayField='name'
+              name='clientId'
+              label={_labels.client}
+              form={formik}
               required
-              onChange={formik.handleChange}
-              maxLength='50'
-              error={formik.touched.name && Boolean(formik.errors.name)}
+              readOnly={editMode}
+              displayFieldWidth={2}
+              valueShow='clientRef'
+              secondValueShow='clientName'
               maxAccess={maxAccess}
+              onChange={async (event, newValue) => {
+                if (newValue?.status == -1) {
+                  stackError({
+                    message: `Chosen Client Must Be Active.`
+                  })
+
+                  return
+                }
+                formik.setFieldValue('clientId', newValue ? newValue.recordId : '')
+                formik.setFieldValue('clientName', newValue ? newValue.name : '')
+                formik.setFieldValue('clientRef', newValue ? newValue.reference : '')
+              }}
+              errorCheck={'clientId'}
+            />
+          </Grid>
+          <FormGrid xs={12}>
+            <ResourceComboBox
+              endpointId={SystemRepository.Country.qry}
+              name='countryId'
+              label={_labels.benCountry}
+              valueField='recordId'
+              displayField={['reference', 'name']}
+              columnsInDropDown={[
+                { key: 'reference', value: 'Reference' },
+                { key: 'name', value: 'Name' }
+              ]}
+              readOnly={formik.values.countryId != '' || countryId || editMode}
+              values={formik.values}
+              onChange={(event, newValue) => {
+                formik.setFieldValue('countryId', newValue ? newValue.recordId : '')
+                formik.setFieldValue('bankId', '')
+              }}
+              error={formik.touched.countryId && Boolean(formik.errors.countryId)}
+              maxAccess={maxAccess}
+              required
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
             <ResourceComboBox
-              endpointId={countryId && CashBankRepository.CbBank.qry2}
-              parameters={countryId && `_countryId=${countryId}`}
+              endpointId={(countryId || formik.values.countryId) && CashBankRepository.CbBank.qry2}
+              parameters={countryId ? `_countryId=${countryId}` : `_countryId=${formik.values.countryId}`}
               name='bankId'
               label={_labels.bank}
               valueField='recordId'
@@ -227,6 +300,7 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
                 formik.setFieldValue('bankId', newValue ? newValue.recordId : '')
               }}
               error={formik.touched.bankId && Boolean(formik.errors.bankId)}
+              readOnly={formik?.values?.countryId == '' || countryId || editMode}
             />
           </FormGrid>
 
@@ -239,6 +313,7 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
               maxLength='50'
               error={formik.touched.accountRef && Boolean(formik.errors.accountRef)}
               maxAccess={maxAccess}
+              readOnly={editMode}
             />
           </FormGrid>
 
@@ -251,6 +326,7 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
               onChange={formik.handleChange}
               maxLength='100'
               error={formik.touched.branchName && Boolean(formik.errors.branchName)}
+              readOnly={editMode}
               maxAccess={maxAccess}
             />
           </FormGrid>
@@ -263,6 +339,7 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
               maxLength='20'
               error={formik.touched.branchCode && Boolean(formik.errors.branchCode)}
               maxAccess={maxAccess}
+              readOnly={editMode}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
@@ -274,6 +351,7 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
               onClear={() => formik.setFieldValue('birthDate', '')}
               error={formik.touched.birthDate && Boolean(formik.errors.birthDate)}
               maxAccess={maxAccess}
+              readOnly={editMode}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
@@ -293,6 +371,7 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
               }}
               error={formik.touched.cobId && Boolean(formik.errors.cobId)}
               maxAccess={maxAccess}
+              readOnly={editMode}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
@@ -312,6 +391,7 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
               }}
               maxAccess={maxAccess}
               error={formik.touched.accountType && Boolean(formik.errors.accountType)}
+              readOnly={editMode}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
@@ -325,6 +405,7 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('addressLine1', '')}
               error={formik.touched.addressLine1 && Boolean(formik.errors.addressLine1)}
+              readOnly={editMode}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
@@ -338,6 +419,7 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('addressLine2', '')}
               error={formik.touched.addressLine2 && Boolean(formik.errors.addressLine2)}
+              readOnly={editMode}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
@@ -361,6 +443,7 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
                 formik.setFieldValue('nationalityId', newValue ? newValue.recordId : '')
               }}
               error={formik.touched.nationalityId && Boolean(formik.errors.nationalityId)}
+              readOnly={editMode}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
@@ -371,6 +454,7 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
               onChange={formik.handleChange}
               error={formik.touched.state && Boolean(formik.errors.state)}
               maxAccess={maxAccess}
+              readOnly={editMode}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
@@ -381,11 +465,25 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
               onChange={formik.handleChange}
               error={formik.touched.city && Boolean(formik.errors.city)}
               maxAccess={maxAccess}
+              readOnly={editMode}
             />
           </FormGrid>
         </Grid>
         {/* Second Column */}
         <Grid container rowGap={2} xs={6} sx={{ px: 2, pt: 2 }}>
+          <FormGrid hideonempty xs={12}>
+            <CustomTextField
+              name='name'
+              label={_labels.name}
+              value={formik.values.name}
+              required
+              onChange={formik.handleChange}
+              maxLength='50'
+              error={formik.touched.name && Boolean(formik.errors.name)}
+              maxAccess={maxAccess}
+              readOnly={editMode}
+            />
+          </FormGrid>
           <FormGrid hideonempty xs={12}>
             <CustomTextField
               name='shortName'
@@ -395,6 +493,7 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
               maxLength='50'
               error={formik.touched.shortName && Boolean(formik.errors.shortName)}
               maxAccess={maxAccess}
+              readOnly={editMode}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
@@ -409,6 +508,7 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
               onClear={() => formik.setFieldValue('cellPhone', '')}
               error={formik.touched.cellPhone && Boolean(formik.errors.cellPhone)}
               maxAccess={maxAccess}
+              readOnly={editMode}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
@@ -430,6 +530,7 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
               maxAccess={maxAccess}
               error={formik.touched.gender && Boolean(formik.errors.gender)}
               helperText={formik.touched.gender && formik.errors.gender}
+              readOnly={editMode}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
@@ -445,6 +546,7 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
                   formik.setFieldValue('rtId', newValue ? newValue?.recordId : '')
                 }}
                 error={formik.touched.rtId && Boolean(formik.errors.rtId)}
+                readOnly={editMode}
               />
             </Grid>
           </FormGrid>
@@ -457,6 +559,7 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
               onChange={formik.handleChange}
               error={formik.touched.zipcode && Boolean(formik.errors.zipcode)}
               maxAccess={maxAccess}
+              readOnly={editMode}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
@@ -468,6 +571,7 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
               onChange={formik.handleChange}
               error={formik.touched.swiftCode && Boolean(formik.errors.swiftCode)}
               maxAccess={maxAccess}
+              readOnly={editMode}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
@@ -479,6 +583,7 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
               onChange={formik.handleChange}
               error={formik.touched.routingNo && Boolean(formik.errors.routingNo)}
               maxAccess={maxAccess}
+              readOnly={editMode}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
@@ -490,6 +595,7 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
               onChange={formik.handleChange}
               error={formik.touched.IBAN && Boolean(formik.errors.IBAN)}
               maxAccess={maxAccess}
+              readOnly={editMode}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
@@ -518,6 +624,7 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('remarks', '')}
               error={formik.touched.remarks && Boolean(formik.errors.remarks)}
+              readOnly={editMode}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
