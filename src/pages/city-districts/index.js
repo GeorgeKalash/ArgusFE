@@ -68,7 +68,7 @@ const CityDistricts = () => {
   ]
 
   const del = async obj => {
-    postRequest({
+    await postRequest({
       extension: SystemRepository.CityDistrict.del,
       record: JSON.stringify(obj)
     })
