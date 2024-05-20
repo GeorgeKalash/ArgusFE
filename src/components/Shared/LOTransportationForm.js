@@ -30,7 +30,7 @@ export const LOTransportationForm = ({ recordId, functionId }) => {
       deliveryType: '',
       departurePort: '',
       arrivalPort: '',
-      customNo: '',
+      customsNo: '',
       doNo: '',
       grossWgt: '',
       netWgt: ''
@@ -43,7 +43,7 @@ export const LOTransportationForm = ({ recordId, functionId }) => {
       deliveryType: yup.string().required(),
       departurePort: yup.string().required(),
       arrivalPort: yup.string().required(),
-      customNo: yup.string().required(),
+      customsNo: yup.string().required(),
       doNo: yup.string().required(),
       grossWgt: yup.string().required(),
       netWgt: yup.string().required()
@@ -69,8 +69,7 @@ export const LOTransportationForm = ({ recordId, functionId }) => {
           extension: LogisticsRepository.Transportation.get,
           parameters: `_recordId=${recordId}&_functionId=${functionId}`
         })
-
-        formik.setValues(res.record)
+        if (res.record) formik.setValues(res.record)
       }
     })()
   }, [])
@@ -161,15 +160,15 @@ export const LOTransportationForm = ({ recordId, functionId }) => {
           </Grid>
           <Grid item xs={12}>
             <CustomTextField
-              name='customNo'
+              name='customsNo'
               label={labels.customsNo}
-              value={formik.values.customNo}
+              value={formik.values.customsNo}
               onChange={formik.handleChange}
-              onClear={() => formik.setFieldValue('customNo', '')}
+              onClear={() => formik.setFieldValue('customsNo', '')}
               maxAccess={maxAccess}
               maxLength='20'
               required
-              error={formik.touched.customNo && Boolean(formik.errors.customNo)}
+              error={formik.touched.customsNo && Boolean(formik.errors.customsNo)}
             />
           </Grid>
           <Grid item xs={12}>
