@@ -126,5 +126,6 @@ export const ResourceIds = {
   ExchangeRates: 32103,
   CbBankAccounts: 33105,
   CashNote: 37101,
-  LOSHipments: 40301
+  LOShipments: 40301,
+  LOTransportation: 40302
 }

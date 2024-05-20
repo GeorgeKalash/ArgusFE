@@ -15,8 +15,12 @@ export const LogisticsRepository = {
     page: service + 'pageCAR',
     del: service + 'delCAR'
   },
-  shipment: {
-    get: service + 'get2SHP',
+  Shipment: {
+    get2: service + 'get2SHP',
     set2: service + 'set2SHP'
+  },
+  Transportation: {
+    get: service + 'getTPT',
+    set: service + 'setTPT'
   }
 }

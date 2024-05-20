@@ -99,8 +99,14 @@ export const Buttons = [
   },
   {
     key: 'Shipment',
-    color: '#90278e',
+    color: '#843c54',
     image: 'shipment.png',
+    main: false
+  },
+  {
+    key: 'Transportation',
+    color: '#064b38',
+    image: 'transportation.png',
     main: false
   },
   {

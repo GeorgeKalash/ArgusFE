@@ -84,7 +84,7 @@ export const LOShipmentForm = ({ recordId, functionId }) => {
       }
 
       await postRequest({
-        extension: LogisticsRepository.shipment.set2,
+        extension: LogisticsRepository.Shipment.set2,
         record: JSON.stringify(resultObject)
       })
 
@@ -93,7 +93,7 @@ export const LOShipmentForm = ({ recordId, functionId }) => {
   })
 
   const { labels: labels, maxAccess } = useResourceQuery({
-    datasetId: ResourceIds.LOSHipments
+    datasetId: ResourceIds.LOShipments
   })
 
   const totalQty = formik.values?.typeGrid?.reduce((qty, row) => {
@@ -111,7 +111,7 @@ export const LOShipmentForm = ({ recordId, functionId }) => {
     ;(async function () {
       if (recordId && functionId) {
         const res = await getRequest({
-          extension: LogisticsRepository.shipment.get,
+          extension: LogisticsRepository.Shipment.get2,
           parameters: `_recordId=${recordId}&_functionId=${functionId}`
         })
 
@@ -135,7 +135,7 @@ export const LOShipmentForm = ({ recordId, functionId }) => {
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.LOSHipments} form={formik} editMode={true} isCleared={false} isInfo={false}>
+    <FormShell resourceId={ResourceIds.LOShipments} form={formik} editMode={true} isCleared={false} isInfo={false}>
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>

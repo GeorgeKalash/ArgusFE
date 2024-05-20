@@ -29,6 +29,7 @@ import { LOShipmentForm } from 'src/components/Shared/LOShipmentForm'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { LOTransportationForm } from 'src/components/Shared/LOTransportationForm'
 
 export default function CreditInvoiceForm({ _labels, maxAccess, recordId, plantId, userData }) {
   const { height } = useWindowDimensions()
@@ -676,6 +677,18 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, plantI
     })
   }
 
+  const transportationClicked = () => {
+    stack({
+      Component: LOTransportationForm,
+      props: {
+        recordId: formik.values.recordId,
+        functionId: formik.values.functionId
+      },
+      width: 600,
+      title: 'Transportation'
+    })
+  }
+
   const actions = [
     {
       key: 'GL',
@@ -706,6 +719,12 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, plantI
       condition: true,
       onClick: shipmentClicked,
       disabled: !editMode
+    },
+    {
+      key: 'Transportation',
+      condition: true,
+      onClick: transportationClicked,
+      disabled: !editMode
     }
   ]
 
@@ -722,9 +741,8 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, plantI
     >
       <VertLayout>
         <Fixed>
-          <Grid container xs={12} style={{ display: 'flex', marginTop: '10px' }}>
-            {/* First Column */}
-            <Grid item xs={3} style={{ marginRight: '10px' }}>
+          <Grid container xs={12} style={{ marginTop: '10px' }}>
+            <Grid item xs={4}>
               <CustomDatePicker
                 name='date'
                 required
@@ -738,9 +756,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, plantI
                 helperText={formik.touched.date && formik.errors.date}
               />
             </Grid>
-
-            {/* Second Column */}
-            <Grid item style={{ marginRight: '10px', width: '420px' }}>
+            <Grid item xs={4} sx={{ pl: 1 }}>
               <ResourceComboBox
                 endpointId={SystemRepository.Plant.qry}
                 name='plantId'
@@ -761,9 +777,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, plantI
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
               />
             </Grid>
-
-            {/* Third Column */}
-            <Grid item style={{ marginRight: '10px', width: '190px' }}>
+            <Grid item xs={4} sx={{ pl: 1 }}>
               <CustomTextField
                 name='reference'
                 label={_labels.reference}
@@ -777,70 +791,66 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, plantI
               />
             </Grid>
           </Grid>
-
-          <Grid container xs={12}>
-            {/* First Column */}
-            <Grid container rowGap={1} xs={9} style={{ marginTop: '10px' }}>
-              <Grid item xs={12}>
-                <ResourceLookup
-                  endpointId={RemittanceSettingsRepository.Correspondent.snapshot}
-                  valueField='reference'
-                  displayField='name'
-                  name='corId'
-                  label={_labels.correspondent}
-                  form={formik}
-                  firstFieldWidth='30%'
-                  required
-                  valueShow='corRef'
-                  secondValueShow='corName'
-                  readOnly={isPosted || isCancelled || detailsFormik?.values?.rows[0]?.currencyId}
-                  onChange={async (event, newValue) => {
-                    if (newValue) {
-                      const baseCurrency = await getBaseCurrency()
-                      getCorrespondentById(newValue?.recordId, baseCurrency, formik.values.plantId)
-                      formik.setFieldValue('corId', newValue?.recordId)
-                      formik.setFieldValue('corName', newValue?.name || '')
-                      formik.setFieldValue('corRef', newValue?.reference || '')
-                    } else {
-                      formik.setFieldValue('corId', null)
-                      formik.setFieldValue('corName', null)
-                      formik.setFieldValue('corRef', null)
-                    }
-                  }}
-                  errorCheck={'corId'}
-                />
-              </Grid>
+          <Grid container xs={8} style={{ marginTop: '10px' }}>
+            <Grid item xs={12}>
+              <ResourceLookup
+                endpointId={RemittanceSettingsRepository.Correspondent.snapshot}
+                valueField='reference'
+                displayField='name'
+                name='corId'
+                label={_labels.correspondent}
+                form={formik}
+                firstFieldWidth='30%'
+                required
+                valueShow='corRef'
+                secondValueShow='corName'
+                readOnly={isPosted || isCancelled || detailsFormik?.values?.rows[0]?.currencyId}
+                onChange={async (event, newValue) => {
+                  if (newValue) {
+                    const baseCurrency = await getBaseCurrency()
+                    getCorrespondentById(newValue?.recordId, baseCurrency, formik.values.plantId)
+                    formik.setFieldValue('corId', newValue?.recordId)
+                    formik.setFieldValue('corName', newValue?.name || '')
+                    formik.setFieldValue('corRef', newValue?.reference || '')
+                  } else {
+                    formik.setFieldValue('corId', null)
+                    formik.setFieldValue('corName', null)
+                    formik.setFieldValue('corRef', null)
+                  }
+                }}
+                errorCheck={'corId'}
+              />
             </Grid>
-          </Grid>
-          <Grid item xs={9} style={{ marginTop: '8px' }}>
-            <ResourceLookup
-              endpointId={CashBankRepository.CashAccount.snapshot}
-              parameters={{
-                _type: 0
-              }}
-              firstFieldWidth='30%'
-              valueField='accountNo'
-              displayField='name'
-              name='cashAccountId'
-              required
-              label={_labels.cashAccount}
-              form={formik}
-              readOnly={isPosted || isCancelled}
-              valueShow='cashAccountRef'
-              secondValueShow='cashAccountName'
-              onChange={(event, newValue) => {
-                if (newValue) {
-                  formik.setFieldValue('cashAccountId', newValue?.recordId)
-                  formik.setFieldValue('cashAccountRef', newValue?.accountNo)
-                  formik.setFieldValue('cashAccountName', newValue?.name)
-                } else {
-                  formik.setFieldValue('cashAccountId', null)
-                  formik.setFieldValue('cashAccountRef', null)
-                  formik.setFieldValue('cashAccountName', null)
-                }
-              }}
-              errorCheck={'cashAccountId'}
-            />
+            <Grid item xs={12} sx={{ pt: 2 }}>
+              <ResourceLookup
+                endpointId={CashBankRepository.CashAccount.snapshot}
+                parameters={{
+                  _type: 0
+                }}
+                firstFieldWidth='30%'
+                valueField='accountNo'
+                displayField='name'
+                name='cashAccountId'
+                required
+                label={_labels.cashAccount}
+                form={formik}
+                readOnly={isPosted || isCancelled}
+                valueShow='cashAccountRef'
+                secondValueShow='cashAccountName'
+                onChange={(event, newValue) => {
+                  if (newValue) {
+                    formik.setFieldValue('cashAccountId', newValue?.recordId)
+                    formik.setFieldValue('cashAccountRef', newValue?.accountNo)
+                    formik.setFieldValue('cashAccountName', newValue?.name)
+                  } else {
+                    formik.setFieldValue('cashAccountId', null)
+                    formik.setFieldValue('cashAccountRef', null)
+                    formik.setFieldValue('cashAccountName', null)
+                  }
+                }}
+                errorCheck={'cashAccountId'}
+              />
+            </Grid>
           </Grid>
           <Grid container xs={12}>
             <RadioGroup
