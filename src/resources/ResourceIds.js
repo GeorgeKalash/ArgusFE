@@ -123,7 +123,7 @@ export const ResourceIds = {
   PriceLevels: 51101,
   CommissionSchedule: 51118,
   ProductionRequestLog: 42321,
-  Transaction: 37301,
+  CashCountTransaction: 37301,
   ExchangeRates: 32103,
   CbBankAccounts: 33105,
   CashNote: 37101

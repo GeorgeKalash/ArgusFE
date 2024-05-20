@@ -33,8 +33,9 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
 
   const getDefaultDT = async () => {
     const userData = getStorageData('userData')
+
     const _userId = userData.userId
-    const parameters = `_userId=${_userId}&_functionId=${SystemFunction.Transaction}`
+    const parameters = `_userId=${_userId}&_functionId=${SystemFunction.CashCountTransaction}`
     try {
       const { record } = await getRequest({
         extension: SystemRepository.UserFunction.get,
@@ -73,7 +74,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
   }
 
   const invalidate = useInvalidate({
-    endpointId: CCTRXrepository.CashCount.qry
+    endpointId: CCTRXrepository.CashCountTransaction.qry
   })
 
   const { formik } = useForm({
@@ -88,7 +89,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
       forceNotesCount: false,
       wip: 1,
       status: 1,
-      releaseStatus: 1,
+      releaseStatus: '',
       date: new Date(),
       time: '',
       items: [
@@ -103,17 +104,15 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
           system: '',
           variation: '',
           flag: '',
-          enabled: 'true'
+          enabled: 'true',
+          currencyNotes: [{ id: 1, seqNo: 1, cashCountId: '', note: '', qty: '', subTotal: '' }]
         }
-      ],
-      currencyNotes: [{ id: 1, seqNo: 1, cashCountId: '', note: '', qty: '', subTotal: '' }]
+      ]
     },
     enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({}),
     onSubmit: async obj => {
-      const recordId = obj.recordId
-
       const payload = {
         header: {
           recordId: obj.recordId,
@@ -131,20 +130,22 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
         },
         items: obj.items.map(({ id, flag, enabled, cashCountId, ...rest }, index) => ({
           seqNo: index + 1,
-          cashCountId: cashCountId,
+          cashCountId: cashCountId || 0,
           ...rest
-        })),
-        currencyNotes: obj.currencyNotes
+        }))
+
+        // currencyNotes: obj.items.currencyNotes
       }
+      console.log('payload', payload)
 
       const response = await postRequest({
-        extension: CCTRXrepository.CashCount.set2,
+        extension: CCTRXrepository.CashCountTransaction.set2,
         record: JSON.stringify(payload)
       })
-
-      if (!recordId) {
+      const _recordId = response.recordId
+      if (!_recordId) {
         toast.success('Record Added Successfully')
-        getData(recordId)
+        getData(_recordId)
       } else toast.success('Record Edited Successfully')
       setEditMode(true)
 
@@ -165,9 +166,11 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
         const {
           record: { header, items, currencyNotes }
         } = await getRequest({
-          extension: CCTRXrepository.CashCount.get2,
+          extension: CCTRXrepository.CashCountTransaction.get2,
           parameters: `_recordId=${recordId}`
         })
+        setIsClosed(header.wip === 2 ? true : false)
+        setIsPosted(header.status === 3 ? true : false)
 
         formik.setValues({
           recordId: header.recordId,
@@ -187,22 +190,53 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
             enabled: true,
             flag: true,
             ...rest
-          })),
-          currencyNotes: currencyNotes.map(({ qty, note, ...rest }, index) => ({
-            id: index + 1,
-            qty,
-            note,
-            subTotal: qty * note,
-            ...rest
           }))
+
+          // currencyNotes: currencyNotes.map(({ qty, note, ...rest }, index) => ({
+          //   id: index + 1,
+          //   qty,
+          //   note,
+          //   subTotal: qty * note,
+          //   ...rest
+          // }))
         })
       }
     } catch (exception) {}
   }
+  console.log('formik', formik)
+
+  async function onReopen() {
+    const obj = formik.values
+
+    const data = {
+      recordId: obj.recordId,
+      dtId: obj.dtId,
+      plantId: obj.plantId,
+      shiftId: obj.shiftId,
+      currencyId: obj.currencyId,
+      cashAccountId: obj.cashAccountId,
+      reference: obj.reference,
+      date: obj.date,
+      time: obj.time,
+      status: obj.status,
+      wip: obj.wip,
+      releaseStatus: obj.releaseStatus
+    }
+
+    const res = await postRequest({
+      extension: CCTRXrepository.CashCountTransaction.reopen,
+      record: JSON.stringify(data)
+    })
+    if (res.recordId) {
+      toast.success('Record Reopened Successfully')
+      invalidate()
+      setIsClosed(false)
+    }
+  }
 
   const onClose = () => {
     postRequest({
-      extension: CCTRXrepository.CashCount.close,
+      extension: CCTRXrepository.CashCountTransaction.close,
       record: JSON.stringify(formik.values)
     })
       .then(res => {
@@ -217,7 +251,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
 
   const onPost = () => {
     postRequest({
-      extension: CCTRXrepository.CashCount.post,
+      extension: CCTRXrepository.CashCountTransaction.post,
       record: JSON.stringify(formik.values)
     })
       .then(res => {
@@ -232,26 +266,45 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
 
   const actions = [
     {
-      key: 'Post',
+      key: 'Posts',
       condition: true,
       onClick: onPost,
       disabled: !editMode || isPosted
+    },
+    {
+      key: 'Post',
+      condition: true,
+      onClick: onPost,
+      disabled: !editMode || isPosted || !isClosed
     },
     {
       key: 'Close',
       condition: !isClosed,
       onClick: onClose,
       disabled: isClosed || !editMode
+    },
+    {
+      key: 'Approval',
+      condition: true,
+      onClick: 'onApproval',
+      disabled: !isClosed
+    },
+    {
+      key: 'Reopen',
+      condition: isClosed,
+      onClick: onReopen,
+      disabled: !isClosed || !editMode || formik.values.releaseStatus === 3
     }
   ]
 
   return (
     <FormShell
-      resourceId={ResourceIds.CashAccounts}
+      resourceId={ResourceIds.CashCountTransaction}
       form={formik}
       actions={actions}
       maxAccess={maxAccess}
       editMode={editMode}
+      functionId={SystemFunction.CashCountTransaction}
     >
       <VertLayout>
         <Fixed>
@@ -407,13 +460,14 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
                 name: 'enabled',
                 label: labels.enabled,
                 onClick: (e, row) => {
+                  console.log('row', row)
                   stack({
                     Component: CashCountNotes,
                     props: {
                       labels: labels,
                       maxAccess: maxAccess,
                       formik2: formik,
-                      row
+                      row: row
                     },
                     width: 700,
                     title: labels?.currencyNotes

@@ -31,7 +31,7 @@ const CashCount = () => {
 
   async function fetchGridData() {
     return await getRequest({
-      extension: CCTRXrepository.CashCount.qry,
+      extension: CCTRXrepository.CashCountTransaction.qry,
       parameters: `&filter=`
     })
   }
@@ -44,8 +44,8 @@ const CashCount = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: CCTRXrepository.CashCount.qry,
-    datasetId: ResourceIds.Transaction
+    endpointId: CCTRXrepository.CashCountTransaction.qry,
+    datasetId: ResourceIds.CashCountTransaction
   })
 
   const columns = [
@@ -115,7 +115,7 @@ const CashCount = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: CCTRXrepository.CashCount.del,
+      extension: CCTRXrepository.CashCountTransaction.del,
       record: JSON.stringify(obj)
     })
     invalidate()

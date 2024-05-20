@@ -15,13 +15,19 @@ import { CachCountSettingsRepository } from 'src/repositories/CachCountSettingsR
 export default function CashCountNotesForm({ labels, maxAccess, recordId, formik2, row, window }) {
   const [editMode, setEditMode] = useState(!!recordId)
 
+  const getRowIndexById = id => {
+    return formik2.values.items.findIndex(item => item.id === row.id)
+  }
+
+  const rowIndex = getRowIndexById(1)
+
   const { formik } = useForm({
     maxAccess,
     initialValues: {
       total: 0,
-      currencyNotes: [{ id: 1, seqNo: 1, cashCountId: '', note: '', qty: '', subTotal: '' }]
+      currencyNotes: [{ id: 1, seqNo: 1, cashCountId: 0, note: '', qty: '', subTotal: '' }]
     },
-    enableReinitialize: true,
+    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       currencyNotes: yup
@@ -37,24 +43,17 @@ export default function CashCountNotesForm({ labels, maxAccess, recordId, formik
     onSubmit: async obj => {
       const currencyNotes = obj.currencyNotes.map(({ id, seqNo, cashCountId, ...rest }) => ({
         seqNo: row.id,
-        cashCountId: row.cashCountId,
+        cashCountId: row.cashCountId || 0,
         ...rest
       }))
-      formik2.setValues({
-        ...formik2.values,
-        currencyNotes: [
-          ...formik2.values.currencyNotes.filter(note => note.seqNo !== row.id), // Spread existing currencyNotes from formik2
-          ...currencyNotes // Spread new currencyNotes from formik
-        ]
-      })
-
-      // formik2.setValues({ ...formik2.values, currencyNotes: { currencyNotes, ...formik.values.currencyNotes } })
+      console.log(`items[${rowIndex}].currencyNotes`, currencyNotes)
+      formik2.setFieldValue(`items[${rowIndex}].currencyNotes`, currencyNotes)
+      formik2.values.forceNotesCount && formik2.setFieldValue(`items[${rowIndex}].counted`, total)
 
       const total = obj.currencyNotes.reduce((acc, { subTotal }) => {
         return acc + (subTotal || 0)
       }, 0)
 
-      formik2.values.forceNotesCount && formik2.setFieldValue(`items[${row.id}].counted`, total)
       window.close()
     }
   })
@@ -62,12 +61,13 @@ export default function CashCountNotesForm({ labels, maxAccess, recordId, formik
     formik.setValues([{ id: 1, seqNo: 1, cashCountId: '', note: '', qty: '', subTotal: '' }])
     row?.id &&
       formik.setValues({
-        currencyNotes: formik2.values.currencyNotes
-          .filter(note => note.seqNo == row.id)
-          ?.map(({ id, ...rest }, index) => ({
-            id: index + 1,
-            ...rest
-          }))
+        currencyNotes: row.currencyNotes?.map(({ id, qty, note, ...rest }, index) => ({
+          id: index + 1,
+          qty,
+          note,
+          subTotal: qty * note,
+          ...rest
+        }))
       })
   }, [recordId])
 
@@ -76,7 +76,14 @@ export default function CashCountNotesForm({ labels, maxAccess, recordId, formik
   }, 0)
 
   return (
-    <FormShell resourceId={ResourceIds.CashAccounts} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell
+      resourceId={ResourceIds.CashAccounts}
+      form={formik}
+      maxAccess={maxAccess}
+      editMode={editMode}
+      isCleared={false}
+      isInfo={false}
+    >
       <VertLayout>
         <Grow>
           <DataGrid
@@ -84,18 +91,6 @@ export default function CashCountNotesForm({ labels, maxAccess, recordId, formik
             value={formik.values.currencyNotes}
             error={formik.errors.currencyNotes}
             columns={[
-              // {
-              //   component: 'numberfield',
-              //   label: labels.note,
-              //   name: 'note',
-              //   async onChange({ row: { update, newRow } }) {
-              //     const qty = newRow.qty || 0
-              //     const note = newRow.note || 0
-              //     update({
-              //       subTotal: note * qty
-              //     })
-              //   }
-              // },
               {
                 component: 'resourcecombobox',
                 label: labels.note,
@@ -113,8 +108,8 @@ export default function CashCountNotesForm({ labels, maxAccess, recordId, formik
                   displayFieldWidth: 2
                 },
                 async onChange({ row: { update, newRow } }) {
-                  const qty = newRow.qty || 0
-                  const note = newRow.note || 0
+                  const qty = newRow?.qty || 0
+                  const note = newRow?.note || 0
                   update({
                     subTotal: note * qty
                   })
@@ -126,8 +121,8 @@ export default function CashCountNotesForm({ labels, maxAccess, recordId, formik
                 label: labels.qty,
                 name: 'qty',
                 async onChange({ row: { update, newRow } }) {
-                  const note = newRow.note || 0
-                  const qty = newRow.qty || 0
+                  const note = newRow?.note || 0
+                  const qty = newRow?.qty || 0
                   update({
                     subTotal: qty * note
                   })
