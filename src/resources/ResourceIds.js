@@ -125,5 +125,6 @@ export const ResourceIds = {
   ProductionRequestLog: 42321,
   ExchangeRates: 32103,
   CbBankAccounts: 33105,
-  CashNote: 37101
+  CashNote: 37101,
+  POSUsers:54104
 }
