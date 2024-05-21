@@ -26,6 +26,7 @@ import { RTCLRepository } from 'src/repositories/RTCLRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import CashCountForm from '../cash-count/forms/CashCountForm'
 
 const DocumentsOnHold = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -152,7 +153,14 @@ const DocumentsOnHold = () => {
         windowWidth = 950
         title = labels[1]
         break
+      case SystemFunction.CashCountTransaction:
+        relevantComponent = CashCountForm
+        labels = await getLabels(ResourceIds.CashCountTransaction)
+        relevantAccess = await getAccess(ResourceIds.CashCountTransaction)
 
+        windowWidth = 1200
+        title = labels.CashCount
+        break
       case SystemFunction.CurrencyPurchase:
       case SystemFunction.CurrencySale:
         relevantComponent = TransactionForm

@@ -2,7 +2,7 @@ import edit from './edit'
 import { Button } from '@mui/material'
 
 export default {
-  view({ row, column, field }) {
+  view({ row, column, field, update }) {
     return (
       <Button
         sx={{
@@ -13,7 +13,7 @@ export default {
           objectFit: 'contain'
         }}
         autoFocus
-        onClick={e => column.onClick(e, row)}
+        onClick={e => column.onClick(e, row, update)}
         variant='contained'
         disabled={!row[field]}
       >

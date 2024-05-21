@@ -248,6 +248,12 @@ export function DataGrid({
     return updatedRow
   }
 
+  async function updateState({ newRow }) {
+    apiRef.current.updateRows([newRow])
+
+    handleRowChange(newRow)
+  }
+
   const handleRowClick = params => {
     const selectedRow = value.find(row => row.id === params.row.id)
     if (onSelectionChange) {
@@ -326,6 +332,12 @@ export function DataGrid({
 
               const cell = findCell(params)
 
+              async function update({ newRow }) {
+                updateState({
+                  newRow
+                })
+              }
+
               return (
                 <Box
                   sx={{
@@ -343,7 +355,7 @@ export function DataGrid({
                     border: `1px solid ${error?.[cell.rowIndex]?.[params.field] ? '#ff0000' : 'transparent'}`
                   }}
                 >
-                  <Component {...params} column={column} />
+                  <Component {...params} update={update} column={column} />
                 </Box>
               )
             },

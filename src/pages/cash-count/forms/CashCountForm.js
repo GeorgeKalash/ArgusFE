@@ -19,10 +19,11 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import CashCountNotes from './CashCountNotesForm'
 import { useWindow } from 'src/windows'
 import { CCTRXrepository } from 'src/repositories/CCTRXRepository'
-import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
+import { formatDateFromApi, formatDateToApi, getTimeInTimeZone } from 'src/lib/date-helper'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { getStorageData } from 'src/storage/storage'
 import { useInvalidate } from 'src/hooks/resource'
+import { useError } from 'src/error'
 
 export default function CashCountForm({ labels, maxAccess, recordId }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -30,6 +31,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
   const { stack } = useWindow()
   const [isClosed, setIsClosed] = useState(false)
   const [isPosted, setIsPosted] = useState(false)
+  const { stack: stackError } = useError()
 
   const getDefaultDT = async () => {
     const userData = getStorageData('userData')
@@ -91,7 +93,8 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
       status: 1,
       releaseStatus: '',
       date: new Date(),
-      time: '',
+      startTime: '',
+      endTime: '',
       items: [
         {
           id: 1,
@@ -111,8 +114,34 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
     },
     enableReinitialize: false,
     validateOnChange: true,
-    validationSchema: yup.object({}),
+    validationSchema: yup.object({
+      items: yup
+        .array()
+        .of(
+          yup.object().shape({
+            currencyId: yup.string().required(' '),
+            counted: yup.string().required(' '),
+            system: yup.string().required(' '),
+            flag: yup.mixed().required('Variation is required').nullable(true)
+          })
+        )
+        .required(' '),
+      reference: yup.string().required(' '),
+      cashAccountRef: yup.string().required(' '),
+      plantId: yup.string().required(' ')
+    }),
     onSubmit: async obj => {
+      for (let i = 0; i < obj.items.length; i++) {
+        const { id, currencyRef, currencyNotes, ...rest } = obj.items[i]
+        if (!currencyNotes || currencyNotes.length === 0) {
+          stackError({
+            message: `Currency Notes for ${currencyRef} Cannot Be Empty.`
+          })
+
+          return
+        }
+      }
+
       const payload = {
         header: {
           recordId: obj.recordId,
@@ -123,27 +152,26 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
           cashAccountId: obj.cashAccountId,
           reference: obj.reference,
           date: formatDateToApi(new Date()),
-          time: obj.time,
+          startTime: obj.startTime,
+          endTime: obj.endTime,
           status: obj.status,
           wip: obj.wip,
           releaseStatus: obj.releaseStatus
         },
-        items: obj.items.map(({ id, flag, enabled, cashCountId, ...rest }, index) => ({
+        items: obj.items.map(({ id, flag, enabled, cashCountId, currencyNotes, ...rest }, index) => ({
           seqNo: index + 1,
           cashCountId: cashCountId || 0,
+          currencyNotes: currencyNotes || [],
           ...rest
         }))
-
-        // currencyNotes: obj.items.currencyNotes
       }
-      console.log('payload', payload)
 
       const response = await postRequest({
         extension: CCTRXrepository.CashCountTransaction.set2,
         record: JSON.stringify(payload)
       })
       const _recordId = response.recordId
-      if (!_recordId) {
+      if (!obj.recordId) {
         toast.success('Record Added Successfully')
         getData(_recordId)
       } else toast.success('Record Edited Successfully')
@@ -154,6 +182,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
   })
   useEffect(() => {
     !editMode && getDefaultDT()
+    getTime()
   }, [])
 
   useEffect(() => {
@@ -164,13 +193,13 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
     try {
       if (recordId) {
         const {
-          record: { header, items, currencyNotes }
+          record: { header, items }
         } = await getRequest({
           extension: CCTRXrepository.CashCountTransaction.get2,
           parameters: `_recordId=${recordId}`
         })
         setIsClosed(header.wip === 2 ? true : false)
-        setIsPosted(header.status === 3 ? true : false)
+        setIsPosted(header.status === 4 ? true : false)
 
         formik.setValues({
           recordId: header.recordId,
@@ -184,26 +213,18 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
           status: header.status,
           releaseStatus: header.releaseStatus,
           date: formatDateFromApi(header.date),
-          time: header.time,
+          startTime: getTimeInTimeZone(header.startTime),
+          endTime: header.endTime,
           items: items.map(({ id, ...rest }, index) => ({
             id: index + 1,
             enabled: true,
             flag: true,
             ...rest
           }))
-
-          // currencyNotes: currencyNotes.map(({ qty, note, ...rest }, index) => ({
-          //   id: index + 1,
-          //   qty,
-          //   note,
-          //   subTotal: qty * note,
-          //   ...rest
-          // }))
         })
       }
     } catch (exception) {}
   }
-  console.log('formik', formik)
 
   async function onReopen() {
     const obj = formik.values
@@ -217,7 +238,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
       cashAccountId: obj.cashAccountId,
       reference: obj.reference,
       date: obj.date,
-      time: obj.time,
+      startTime: obj.startTime,
       status: obj.status,
       wip: obj.wip,
       releaseStatus: obj.releaseStatus
@@ -275,7 +296,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
       key: 'Post',
       condition: true,
       onClick: onPost,
-      disabled: !editMode || isPosted || !isClosed
+      disabled: !editMode || !isPosted || !isClosed
     },
     {
       key: 'Close',
@@ -296,6 +317,29 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
       disabled: !isClosed || !editMode || formik.values.releaseStatus === 3
     }
   ]
+
+  const getTime = async () => {
+    const { record } = await getRequest({
+      extension: SystemRepository.TimeZone.get,
+      parameters: ``
+    })
+    if (record) {
+      !editMode && formik.setFieldValue('startTime', getTimeInTimeZone(record?.utcDate, record?.timeZone))
+    }
+  }
+
+  const getSystem = async currencyId => {
+    const cashAccountId = formik.values?.cashAccountId
+    if (currencyId && cashAccountId) {
+      const { record } = await getRequest({
+        extension: CashBankRepository.AccountBalance.get,
+        parameters: `_currencyId=` + currencyId + `&_cashAccountId=` + formik.values?.cashAccountId
+      })
+      if (record) {
+        return record.balance
+      }
+    }
+  }
 
   return (
     <FormShell
@@ -379,7 +423,15 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
               />
             </Grid>
             <Grid item xs={7}>
-              <CustomTextField name='time' label={labels.time} value={formik.values.time} readOnly={true} />
+              <CustomTextField
+                name='startTime'
+                label={labels.startTime}
+                value={formik.values.startTime}
+                readOnly={true}
+              />
+            </Grid>
+            <Grid item xs={7}>
+              <CustomTextField name='endTime' label={labels.endTime} value={formik.values.endTime} readOnly={true} />
             </Grid>
             <Grid item xs={6}>
               <FormControlLabel
@@ -388,7 +440,10 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
                     name='forceNotesCount'
                     checked={formik.values?.forceNotesCount}
                     onChange={formik.handleChange}
-                    disabled={formik.values.items?.length}
+                    disabled={
+                      formik.values.items &&
+                      (formik.values?.items[0]?.currencyId || formik.values?.items[0]?.currencyId)
+                    }
                   />
                 }
                 label={labels.forceNotesCount}
@@ -423,8 +478,10 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
                   displayFieldWidth: 2
                 },
                 async onChange({ row: { update, newRow } }) {
+                  const balance = await getSystem(newRow?.currencyId)
                   update({
-                    enabled: true
+                    enabled: true,
+                    system: balance
                   })
                 }
               },
@@ -436,8 +493,10 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
                   disabled: formik.values.forceNotesCount && true
                 },
                 async onChange({ row: { update, newRow } }) {
+                  console.log(newRow)
                   const counted = newRow.counted || 0
                   const system = newRow.system || 0
+
                   update({
                     variation: system - counted,
                     flag: system === counted ? true : false
@@ -459,15 +518,15 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
                 component: 'button',
                 name: 'enabled',
                 label: labels.enabled,
-                onClick: (e, row) => {
-                  console.log('row', row)
+                onClick: (e, row, update) => {
                   stack({
                     Component: CashCountNotes,
                     props: {
                       labels: labels,
                       maxAccess: maxAccess,
-                      formik2: formik,
-                      row: row
+                      forceNotesCount: formik.values.forceNotesCount,
+                      row,
+                      update
                     },
                     width: 700,
                     title: labels?.currencyNotes
