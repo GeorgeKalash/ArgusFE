@@ -67,7 +67,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
         currencyName: '',
         currencyRef: '',
         amount: '',
-        balance: ''
+        balance: 0
       }
     ]
   })
@@ -134,6 +134,8 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
     }
   })
 
+  const [shipmentEditMode, setShipmentEditMode] = useState(formik.values.wip == 1 && formik.values.status == 1)
+
   const onClose = async () => {
     const obj = formik.values
     const copy = { ...obj }
@@ -150,6 +152,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
       toast.success('Record Closed Successfully')
       invalidate()
       setIsClosed(true)
+      setShipmentEditMode(true)
     }
   }
 
@@ -169,6 +172,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
       toast.success('Record Closed Successfully')
       invalidate()
       setIsClosed(false)
+      setShipmentEditMode(false)
     }
   }
 
@@ -201,7 +205,8 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
     const modifiedList = res.list.map(item => ({
       ...item,
       id: item.seqNo,
-      amount: parseFloat(item.amount).toFixed(2)
+      amount: parseFloat(item.amount).toFixed(2),
+      balance: parseFloat(item?.balance).toFixed(2) ?? 0
     }))
 
     formik.setValues({
@@ -224,13 +229,15 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
       }
     }
   }
+  console.log('shipmentEditMode ', shipmentEditMode)
 
   const shipmentClicked = () => {
     stack({
       Component: LOShipmentForm,
       props: {
         recordId: recordId,
-        functionId: SystemFunction.CashTransfer
+        functionId: SystemFunction.CashTransfer,
+        editMode: shipmentEditMode
       },
       width: 950,
       height: 670,
@@ -283,7 +290,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
       key: 'Shipment',
       condition: true,
       onClick: shipmentClicked,
-      disabled: !editMode
+      disabled: (editMode && formik.values.fromPlantId == formik.values.toPlantId) || !editMode
     }
   ]
 
@@ -485,7 +492,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
                 component: 'numberfield',
                 name: 'balance',
                 label: labels.balance,
-                defaultValue: '',
+                defaultValue: '0',
                 props: { disabled: isClosed || isPosted }
               }
             ]}

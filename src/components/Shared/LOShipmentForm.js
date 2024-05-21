@@ -17,7 +17,7 @@ import { DataSets } from 'src/resources/DataSets'
 import { getFormattedNumber } from 'src/lib/numberField-helper'
 import toast from 'react-hot-toast'
 
-export const LOShipmentForm = ({ recordId, functionId }) => {
+export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
 
   const { formik } = useForm({
@@ -152,6 +152,7 @@ export const LOShipmentForm = ({ recordId, functionId }) => {
                   { key: 'name', value: 'Name' }
                 ]}
                 required
+                readOnly={editMode}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik && formik.setFieldValue('carrierId', newValue ? newValue.recordId : '')
@@ -168,6 +169,7 @@ export const LOShipmentForm = ({ recordId, functionId }) => {
                 onClear={() => formik.setFieldValue('policyNo', '')}
                 maxAccess={maxAccess}
                 maxLength='30'
+                readOnly={editMode}
                 required
                 error={formik.touched.policyNo && Boolean(formik.errors.policyNo)}
               />
@@ -193,20 +195,25 @@ export const LOShipmentForm = ({ recordId, functionId }) => {
                     mapping: [
                       { from: 'key', to: 'packageType' },
                       { from: 'value', to: 'packageTypeName' }
-                    ]
+                    ],
+                    readOnly: editMode
                   }
                 },
                 {
                   component: 'numberfield',
                   name: 'qty',
                   label: labels.qty,
-                  defaultValue: ''
+                  defaultValue: '',
+                  props: {
+                    readOnly: editMode
+                  }
                 },
                 {
                   component: 'numberfield',
                   label: labels.amount,
                   name: 'amount',
-                  defaultValue: ''
+                  defaultValue: '',
+                  props: { readOnly: editMode }
                 }
               ]}
             />
@@ -244,14 +251,16 @@ export const LOShipmentForm = ({ recordId, functionId }) => {
                   component: 'numberfield',
                   name: 'seqNo',
                   label: labels.seqNo,
-                  defaultValue: ''
+                  defaultValue: '',
+                  props: { readOnly: editMode }
                 },
                 {
                   component: 'textfield',
                   label: labels.reference,
                   name: 'reference',
                   props: {
-                    maxLength: 20
+                    maxLength: 20,
+                    readOnly: editMode
                   }
                 }
               ]}
