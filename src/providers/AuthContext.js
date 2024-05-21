@@ -67,7 +67,9 @@ const AuthProvider = ({ children }) => {
     const fetchData = async () => {
       const matchHostname = window.location.hostname.match(/^(.+)\.softmachine\.co$/)
 
+
       const accountName = matchHostname ? matchHostname[1] : 'byc-deploy'
+
 
       try {
         const response = await axios({

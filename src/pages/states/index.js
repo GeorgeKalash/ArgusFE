@@ -1,26 +1,20 @@
 import { useState, useContext } from 'react'
-import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import StatesWindow from './Windows/StatesWindow'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import StatesForm from './forms/StatesForm'
+import { useWindow } from 'src/windows'
 
 const States = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-
-  const [selectedRecordId, setSelectedRecordId] = useState(null)
-
-  //states
-  const [windowOpen, setWindowOpen] = useState(false)
-  const [errorMessage, setErrorMessage] = useState(null)
+  const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, _countryId = 0 } = options
@@ -63,12 +57,25 @@ const States = () => {
   ]
 
   const add = () => {
-    setWindowOpen(true)
+    openForm()
   }
 
   const edit = obj => {
-    setSelectedRecordId(obj.recordId)
-    setWindowOpen(true)
+    openForm(obj?.recordId)
+  }
+
+  function openForm(recordId) {
+    stack({
+      Component: StatesForm,
+      props: {
+        labels: _labels,
+        recordId: recordId,
+        maxAccess: access
+      },
+      width: 500,
+      height: 300,
+      title: _labels.State
+    })
   }
 
   const del = async obj => {
@@ -100,19 +107,6 @@ const States = () => {
           paginationType='api'
         />
       </Grow>
-      {windowOpen && (
-        <StatesWindow
-          onClose={() => {
-            setWindowOpen(false)
-            setSelectedRecordId(null)
-          }}
-          labels={_labels}
-          maxAccess={access}
-          recordId={selectedRecordId}
-          setSelectedRecordId={setSelectedRecordId}
-        />
-      )}
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </VertLayout>
   )
 }

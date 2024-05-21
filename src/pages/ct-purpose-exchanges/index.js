@@ -21,14 +21,18 @@ const PurposeExchange = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    return await getRequest({
+    const response = await getRequest({
       extension: CurrencyTradingSettingsRepository.PurposeExchange.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
+
+    return { ...response, _startAt: _startAt }
   }
 
   const {
     query: { data },
+    paginationParameters,
+    refetch,
     labels: _labels,
     access
   } = useResourceQuery({
@@ -99,7 +103,9 @@ const PurposeExchange = () => {
           onDelete={del}
           isLoading={false}
           pageSize={50}
-          paginationType='client'
+          paginationParameters={paginationParameters}
+          refetch={refetch}
+          paginationType='api'
           maxAccess={access}
         />
       </Grow>
