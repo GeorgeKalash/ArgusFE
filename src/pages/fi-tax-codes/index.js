@@ -84,7 +84,7 @@ const TaxCodes = () => {
         maxAccess: access
       },
       width: 800,
-      height: 660,
+      height: 460,
       title: _labels.taxCodes
     })
   }
