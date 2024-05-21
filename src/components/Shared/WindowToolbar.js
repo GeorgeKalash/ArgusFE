@@ -22,7 +22,6 @@ const WindowToolbar = ({
   onClickGL,
   onGenerateReport,
   disabledSubmit,
-  print,
   disabledApply,
   editMode = false,
   infoVisible = true,
@@ -38,7 +37,6 @@ const WindowToolbar = ({
 }) => {
   const functionMapping = {
     actions,
-    print,
     isSaved,
     isInfo,
 
@@ -102,7 +100,7 @@ const WindowToolbar = ({
   }
 
   return (
-    <DialogActions sx={{padding:'8px !important'}}>
+    <DialogActions sx={{ padding: '8px !important' }}>
       <style>
         {`
           .button-container {
@@ -139,16 +137,16 @@ const WindowToolbar = ({
       >
         {previewReport ? (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
-             <CustomComboBox
-                    label={'Select a report template'}
-                    valueField='caption'
-                    displayField='layoutName'
-                    store={reportStore}
-                    value={selectedReport}
-                    onChange={(e, newValue) => setSelectedReport(newValue)}
-                    sx={{ width: 250 }}
-                    disableClearable
-                  />
+            <CustomComboBox
+              label={'Select a report template'}
+              valueField='caption'
+              displayField='layoutName'
+              store={reportStore}
+              value={selectedReport}
+              onChange={(e, newValue) => setSelectedReport(newValue)}
+              sx={{ width: 250 }}
+              disableClearable
+            />
             <Button
               sx={{ width: '20px', height: '35px', ml: 1 }}
               variant='contained'
@@ -169,7 +167,6 @@ const WindowToolbar = ({
         ) : (
           <Box></Box>
         )}
-
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           {Buttons.filter(button => actions.some(action => action.key === button.key)).map((button, index) => {
             const correspondingAction = actions.find(action => action.key === button.key)
@@ -239,7 +236,7 @@ const WindowToolbar = ({
                       border: button.border,
                       width: '20px',
                       height: '35px',
-                      objectFit: 'contain',
+                      objectFit: 'contain'
                     }}
                     disabled={isDisabled}
                   >

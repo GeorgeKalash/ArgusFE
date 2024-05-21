@@ -14,7 +14,6 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useForm } from 'src/hooks/form'
 
 export default function PlantGroupsForm({ labels, maxAccess, recordId }) {
-  const [isLoading, setIsLoading] = useState(false)
   const [editMode, setEditMode] = useState(!!recordId)
 
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -62,8 +61,6 @@ export default function PlantGroupsForm({ labels, maxAccess, recordId }) {
     ;(async function () {
       try {
         if (recordId) {
-          setIsLoading(true)
-
           const res = await getRequest({
             extension: SystemRepository.PlantGroup.get,
             parameters: `_recordId=${recordId}`
@@ -72,7 +69,6 @@ export default function PlantGroupsForm({ labels, maxAccess, recordId }) {
           formik.setValues(res.record)
         }
       } catch (error) {}
-      setIsLoading(false)
     })()
   }, [])
 

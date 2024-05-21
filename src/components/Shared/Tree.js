@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react'
+import React, { useRef, useEffect, useState, useMemo } from 'react'
 import TreeView from '@mui/lab/TreeView'
 import TreeItem from '@mui/lab/TreeItem'
 import { styled } from '@mui/material/styles'
@@ -68,7 +68,6 @@ const StyledTreeItem = styled(TreeItem)(({ theme, depth }) => ({
 }))
 
 function Tree({ data, expanded, height }) {
-  const [treeData, setTreeData] = useState([])
   const componentRef = useRef()
   const printComponentRef = useRef()
 
@@ -78,7 +77,7 @@ function Tree({ data, expanded, height }) {
     removeAfterPrint: true
   })
 
-  useEffect(() => {
+  const treeData = useMemo(() => {
     if (data) {
       const map = new Map(data.list.map(item => [item.recordId, { ...item, children: [] }]))
       data.list.forEach(item => {
@@ -89,9 +88,11 @@ function Tree({ data, expanded, height }) {
           }
         }
       })
-      const tree = [...map.values()].filter(item => !item.parentId)
-      setTreeData(tree)
+
+      return [...map.values()].filter(item => !item.parentId)
     }
+
+    return []
   }, [data])
 
   const renderTree = nodes => (
