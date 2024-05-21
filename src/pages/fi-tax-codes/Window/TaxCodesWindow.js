@@ -14,7 +14,7 @@ const TaxCodesWindow = ({ height, recordId, labels, maxAccess, expanded }) => {
     TaxHistoryViewList: []
   })
 
-  const tabs = [{ label: 'main' }, { label: 'history', disabled: !store.recordId }]
+  const tabs = [{ label: labels.taxCodes }, { label: labels.History, disabled: !store.recordId }]
 
   return (
     <>
