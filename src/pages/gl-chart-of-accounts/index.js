@@ -100,7 +100,7 @@ const ChartOfAccounts = () => {
   }
 
   const add = () => {
-    openForm('')
+    openForm()
   }
 
   function openForm(recordId) {

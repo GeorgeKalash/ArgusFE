@@ -8,7 +8,7 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import * as yup from 'yup'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
@@ -271,7 +271,7 @@ const GLSettings = () => {
               <Grid key={name} item xs={12} sx={{ marginTop: '7px' }}>
                 <CustomTextField
                   name={name}
-                  label={`Segment Name ${idx + 1}`}
+                  label={_labels['segName' + idx]}
                   onBlur={handleBlur}
                   onFocus={e => setFocus(e.target.name)}
                   value={formik.values[name]}
