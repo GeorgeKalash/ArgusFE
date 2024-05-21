@@ -19,32 +19,30 @@ const FiDimensions = () => {
 
   const [tempDimCount, setTempDimCount] = useState(null)
 
-  const [initialValues, setInitialData] = useState({
-    DimCount: null,
-    tpaDimension1: null,
-    tpaDimension2: null,
-    tpaDimension3: null,
-    tpaDimension4: null,
-    tpaDimension5: null,
-    tpaDimension6: null,
-    tpaDimension7: null,
-    tpaDimension8: null,
-    tpaDimension9: null,
-    tpaDimension10: null,
-    tpaDimension11: null,
-    tpaDimension12: null,
-    tpaDimension13: null,
-    tpaDimension14: null,
-    tpaDimension15: null,
-    tpaDimension16: null,
-    tpaDimension17: null,
-    tpaDimension18: null,
-    tpaDimension19: null,
-    tpaDimension20: null
-  })
-
   const { formik } = useForm({
-    initialValues: initialValues,
+    initialValues: {
+      DimCount: '',
+      tpaDimension1: '',
+      tpaDimension2: '',
+      tpaDimension3: '',
+      tpaDimension4: '',
+      tpaDimension5: '',
+      tpaDimension6: '',
+      tpaDimension7: '',
+      tpaDimension8: '',
+      tpaDimension9: '',
+      tpaDimension10: '',
+      tpaDimension11: '',
+      tpaDimension12: '',
+      tpaDimension13: '',
+      tpaDimension14: '',
+      tpaDimension15: '',
+      tpaDimension16: '',
+      tpaDimension17: '',
+      tpaDimension18: '',
+      tpaDimension19: '',
+      tpaDimension20: ''
+    },
     enableReinitialize: true,
     validateOnChange: true,
 
@@ -75,7 +73,7 @@ const FiDimensions = () => {
   }, [])
 
   const getDataResult = () => {
-    const myObject = {}
+    const fetchedValues = {}
     var parameters = `_filter=`
     getRequest({
       extension: SystemRepository.Defaults.qry,
@@ -83,18 +81,17 @@ const FiDimensions = () => {
     })
       .then(res => {
         const filteredList = res.list.filter(obj => {
-          return Object.keys(initialValues).includes(obj.key)
+          return Object.keys(formik.values).includes(obj.key)
         })
 
         filteredList.forEach(obj => {
           if (obj.value && !isNaN(obj.value) && obj.value.trim() !== '') {
-            myObject[obj.key] = parseInt(obj.value)
+            fetchedValues[obj.key] = parseInt(obj.value)
           } else {
-            myObject[obj.key] = obj.value
+            fetchedValues[obj.key] = obj.value
           }
         })
-
-        formik.setValues(myObject)
+        formik.setValues(fetchedValues)
       })
       .catch(error => {})
   }
@@ -111,7 +108,6 @@ const FiDimensions = () => {
         dataToPost.push({ key: dimKey, value: obj[dimKey] })
       }
     }
-    console.log(dataToPost)
     postRequest({
       extension: SystemRepository.Defaults.set,
       record: JSON.stringify({ sysDefaults: dataToPost })
@@ -149,7 +145,7 @@ const FiDimensions = () => {
   return (
     <VertLayout>
       <Grow>
-        <Grid container spacing={3} width={900} sx={{ marginLeft: '0.5rem' }}>
+        <Grid container spacing={3} width={'50%'} sx={{ marginLeft: '0.5rem' }}>
           <Grid item xs={12} sx={{ marginTop: '0.5rem' }}>
             <CustomTextField
               name='DimCount'
@@ -158,7 +154,7 @@ const FiDimensions = () => {
               onChange={handleDimCountChange}
               onBlur={handleDimCountBlur}
               numberField={true}
-              removeClear={true}
+              clearable={true}
               type='number'
               error={formik.touched.DimCount && Boolean(formik.errors.DimCount)}
               inputProps={{
