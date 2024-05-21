@@ -27,7 +27,6 @@ const BPMasterDataWindow = ({ labels, maxAccess, defaultValue, recordId, height 
   return (
     <>
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-
       <CustomTabPanel index={0} height={height} value={activeTab}>
         <BPMasterDataForm
           labels={labels}
@@ -38,12 +37,11 @@ const BPMasterDataWindow = ({ labels, maxAccess, defaultValue, recordId, height 
           setEditMode={setEditMode}
         />
       </CustomTabPanel>
-
       <CustomTabPanel height={height} index={1} value={activeTab}>
         <IDNumberForm store={store} maxAccess={maxAccess} labels={labels} />
       </CustomTabPanel>
       <CustomTabPanel index={2} height={height} value={activeTab}>
-        <RelationList store={store} labels={labels} maxAccess={maxAccess} height={height - 100} />
+        <RelationList store={store} labels={labels} maxAccess={maxAccess}/>
       </CustomTabPanel>
       <CustomTabPanel index={3} height={height} value={activeTab}>
         <AddressMasterDataForm
@@ -51,7 +49,6 @@ const BPMasterDataWindow = ({ labels, maxAccess, defaultValue, recordId, height 
           setStore={setStore}
           labels={labels}
           maxAccess={maxAccess}
-          height={height - 100}
         />
       </CustomTabPanel>
     </>

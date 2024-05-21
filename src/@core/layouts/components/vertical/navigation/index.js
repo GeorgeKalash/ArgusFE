@@ -1,41 +1,34 @@
-// ** React Import
 import { useEffect, useRef, useState, useContext } from 'react'
-import * as React from 'react';
-
-// ** Next Imports
-import Image from 'next/image';
-
-// ** MUI Imports
+import * as React from 'react'
 import List from '@mui/material/List'
 import Box from '@mui/material/Box'
-import TextField from '@mui/material/TextField';
-import SearchIcon from '@mui/icons-material/Search';
-import SettingsIcon from '@mui/icons-material/Settings';
-import GradeIcon from '@mui/icons-material/Grade';
+import TextField from '@mui/material/TextField'
+import SearchIcon from '@mui/icons-material/Search'
+import SettingsIcon from '@mui/icons-material/Settings'
+import GradeIcon from '@mui/icons-material/Grade'
 import { createTheme, responsiveFontSizes, styled, ThemeProvider } from '@mui/material/styles'
-
-// ** Third Party Components
 import PerfectScrollbar from 'react-perfect-scrollbar'
-
-// ** Theme Config
 import themeConfig from 'src/configs/themeConfig'
-
-// ** Component Imports
 import Drawer from './Drawer'
 import VerticalNavItems from './VerticalNavItems'
 import VerticalNavHeader from './VerticalNavHeader'
-import Dropdown from './Dropdown';
-
-// ** Theme Options
+import Dropdown from './Dropdown'
 import themeOptions from 'src/@core/theme/ThemeOptions'
-
-// ** Util Import
 import { hexToRGBA } from 'src/@core/utils/hex-to-rgba'
-
-import { useRouter } from 'next/router';
-import { MenuContext } from 'src/providers/MenuContext';
-
+import { useRouter } from 'next/router'
+import { MenuContext } from 'src/providers/MenuContext'
 import { useAuth } from 'src/hooks/useAuth'
+import IconButton from '@mui/material/IconButton'
+import Icon from 'src/@core/components/icon'
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'
+
+function ArrowBackIcon (){
+return <KeyboardArrowRightIcon
+sx={{
+  transform: 'rotate(180Deg)'
+}}
+ />
+}
 
 const StyledBoxForShadow = styled(Box)(({ theme }) => ({
   top: 60,
@@ -57,30 +50,30 @@ const StyledBoxForShadow = styled(Box)(({ theme }) => ({
   }
 }))
 
-const Navigation = props => {  
+const Navigation = props => {
+  const {
+    saveSettings,
+    toggleNavVisibility,
+    menuLockedIcon: userMenuLockedIcon,
+    menuUnlockedIcon: userMenuUnlockedIcon,
+  } = props
 
   const router = useRouter();
-  
-  // ** Props
   const { hidden, settings, afterNavMenuContent, beforeNavMenuContent, navMenuContent: userNavMenuContent } = props 
   const {  setLastOpenedPage } = useContext(MenuContext)
-
-  // ** States
-  // const [navHover, setNavHover] = useState(false)
+  const [isShrunk, setIsShrunk] = useState(false);
   const [currentActiveGroup, setCurrentActiveGroup] = useState([])
-  const [filteredMenu, setFilteredMenu] = useState([]) //menu
+  const [filteredMenu, setFilteredMenu] = useState([]) 
   const [openFolders, setOpenFolders] = useState([]);
-  const menu = props.verticalNavItems //menu
+  const menu = props.verticalNavItems 
   const gear = useContext(MenuContext)
   const [isArabic, setIsArabic] = useState(false)
   const auth = useAuth()
-
-  // ** Ref
   const shadowRef = useRef(null)
-
-  // ** Var
   const { navCollapsed } = settings
   const { afterVerticalNavMenuContentPosition, beforeVerticalNavMenuContentPosition } = themeConfig
+  const MenuLockedIcon = () => userMenuLockedIcon || <ArrowBackIcon />
+  const MenuUnlockedIcon = () => userMenuUnlockedIcon || <KeyboardArrowRightIcon />
 
   const navMenuContentProps = {
     ...props,
@@ -236,11 +229,6 @@ const Navigation = props => {
     setFilteredMenu(props.verticalNavItems)
   }, [props.verticalNavItems])
 
-  // useEffect(() => {
-  //   if (navCollapsed)
-  //     setOpenFolders([])
-  // }, [navCollapsed])
-
   const ScrollWrapper = hidden ? Box : PerfectScrollbar
 
   return (
@@ -256,28 +244,29 @@ const Navigation = props => {
         {(beforeVerticalNavMenuContentPosition === 'static' || !beforeNavMenuContent) && (
           <StyledBoxForShadow ref={shadowRef} />
         )}
-        <Box sx={{ display: 'flex', alignItems: 'center', px: 4, pb:'10px' }}>
-          <TextField
-            label="Search"
-            variant="outlined"
+        <Box sx={{ display: 'flex', alignItems: 'center', px: 2, pb:'10px', pt:2 }}>
+        <TextField
+            placeholder='Filter here...'
+            variant='outlined'
             fullWidth
-            size="small"
+            size='small'
             onChange={handleSearch}
             autoComplete='off'
-            InputLabelProps={{
-              sx: { color: 'rgba(231, 227, 252, 0.87) !important',backgroundColor:'#383838',padding:'0px 3px !important',
-              display:  navCollapsed ? 'none':'flex',},
-            }}
             InputProps={{
-              sx: { 
+              sx: {
                 display: 'flex',
                 alignItems: navCollapsed ? 'center !important' : 'left',
                 justifyContent: navCollapsed ? 'center !important' : 'left',
-                border: '1px solid rgba(231, 227, 252, 0.87)',
+                border: 'transparent',
+                background:'#231f20',
                 fieldset: {
-                  borderColor: 'transparent !important', },},
-              endAdornment: <SearchIcon 
-              sx={{ border: '0px' }}  />,
+                  borderColor: 'transparent !important'
+                },
+                height:'30px',
+                borderRadius:'5px',
+                pr:1
+              },
+              endAdornment: <SearchIcon sx={{ border: '0px', fontSize:20 }} />
             }}
           />
           <TextField sx={{display:'none'}}/>
@@ -328,9 +317,7 @@ const Navigation = props => {
                 sx={{
                   pt: 0,
                   transition: 'padding .25s ease',
-                  '& > :first-child': { mt: '0' },
-
-                  // pr: !navCollapsed || (navCollapsed && navHover) ? '10px' : 1.25
+                  '& > :first-child': { mt: '0' }
 
                 }}
               >
@@ -355,6 +342,36 @@ const Navigation = props => {
           ? afterNavMenuContent(navMenuContentProps)
           : null}
       </Drawer>
+      {hidden ? (
+        <IconButton
+          disableRipple
+          onClick={toggleNavVisibility}
+          sx={{ p: 0, backgroundColor: 'transparent !important' }}
+        >
+          <Icon icon='mdi:close' fontSize={15} />
+        </IconButton>
+            ) : userMenuLockedIcon === null && userMenuUnlockedIcon === null ? null : (
+        <IconButton
+          disableRipple
+          disableFocusRipple
+          onClick={() => saveSettings({ ...settings, navCollapsed: !navCollapsed })}
+          sx={{
+            p: 0,
+            color: 'white',
+            backgroundColor: '#231f20 !important',
+            borderRadius:'0 !important',
+            width:'10px !important',
+            '& svg': {
+              fontSize: '1.2rem',
+              transition: 'opacity .25s ease-in-out'
+            }
+          }}
+        >
+          {navCollapsed ? 
+          (isArabic ? MenuLockedIcon():MenuUnlockedIcon()) :
+          (isArabic ? MenuUnlockedIcon():MenuLockedIcon())}
+        </IconButton>
+      )}
     </ThemeProvider>
   )
 }
