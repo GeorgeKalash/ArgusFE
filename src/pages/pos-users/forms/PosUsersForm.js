@@ -71,7 +71,7 @@ export default function PosUsersForm({ labels, maxAccess, userId, invalidate }) 
                 <ResourceComboBox
                   endpointId={SystemRepository.PosUsers.qry}
                   name='userId'
-                  label={labels.userId}
+                  label={labels.user}
                   valueField='recordId'
                   parameters={`_size=1000&_filter=&_startAt=0&_sortBy=fullName`}
                   displayField={['email']}
@@ -92,7 +92,7 @@ export default function PosUsersForm({ labels, maxAccess, userId, invalidate }) 
               <ResourceComboBox
                 endpointId={PointofSaleRepository.PosUsersPOS.qry}
                 name='posId'
-                label={labels.posId}
+                label={labels.pos}
                 valueField='recordId'
                 displayField={['reference']}
                 columnsInDropDown={[{ key: 'reference', value: 'reference' }]}
@@ -109,7 +109,7 @@ export default function PosUsersForm({ labels, maxAccess, userId, invalidate }) 
               <ResourceComboBox
                 endpointId={SaleRepository.PosUsers.qry}
                 name='spId'
-                label={labels.name}
+                label={labels.spName}
                 valueField='recordId'
                 displayField='name'
                 columnsInDropDown={[{ key: 'name', value: 'name' }]}
