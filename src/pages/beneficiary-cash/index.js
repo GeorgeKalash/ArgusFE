@@ -49,10 +49,9 @@ const BeneficiaryCash = () => {
     stack({
       Component: BenificiaryCashForm,
       props: {
-        clientId: clientId,
-        beneficiaryId: beneficiaryId,
-        dispersalType: 1,
-        seqNo: 1
+        client: { clientId: clientId },
+        beneficiary: { beneficiaryId: beneficiaryId, beneficiarySeqNo: 1 },
+        dispersalType: 1
       },
       width: 700,
       height: 500,

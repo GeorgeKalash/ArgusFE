@@ -1,4 +1,3 @@
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import { useContext, useState } from 'react'
 import FormShell from 'src/components/Shared/FormShell'
@@ -36,7 +35,7 @@ const BeneficiaryWindow = ({ clientId }) => {
     endpointId: RemittanceOutwardsRepository.Beneficiary.qry,
     datasetId: ResourceIds.Beneficiary
   })
-  async function fetchGridData(options = {}) {
+  async function fetchGridData() {
     return await getRequest({
       extension: RemittanceOutwardsRepository.Beneficiary.qry,
       parameters: `_clientId=${clientId}`
@@ -86,9 +85,9 @@ const BeneficiaryWindow = ({ clientId }) => {
       stack({
         Component: BenificiaryCashForm,
         props: {
-          clientId: clientId,
+          client: { clientId: clientId },
           dispersalType: dispersalType,
-          beneficiaryId: beneficiaryId,
+          beneficiary: { beneficiaryId: beneficiaryId },
           corId: 0,
           countryId: nationalityId
         },
@@ -100,7 +99,7 @@ const BeneficiaryWindow = ({ clientId }) => {
       stack({
         Component: BenificiaryBankForm,
         props: {
-          clientId: clientId,
+          client: { clientId: clientId },
           dispersalType: dispersalType,
           beneficiary: { beneficiaryId: beneficiaryId },
           corId: 0,

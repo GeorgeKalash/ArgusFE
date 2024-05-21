@@ -409,10 +409,14 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
       stack({
         Component: BenificiaryCashForm,
         props: {
-          clientId: formik.values.clientId,
+          client: {
+            clientId: formik.values.clientId,
+            clientRef: formik.values.clientRef,
+            clientName: formik.values.clientName
+          },
           corId: formik.values.corId ? formik.values.corId : 0,
           countryId: formik.values.countryId,
-          beneficiaryId: formik.values.beneficiaryId,
+          beneficiary: { beneficiaryId: formik.values.beneficiaryId, beneficiarySeqNo: formik.values.beneficiarySeqNo },
           dispersalType: formik.values.dispersalType
         },
         width: 700,
@@ -423,7 +427,11 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
       stack({
         Component: BenificiaryBankForm,
         props: {
-          clientId: formik.values.clientId,
+          client: {
+            clientId: formik.values.clientId,
+            clientRef: formik.values.clientRef,
+            clientName: formik.values.clientName
+          },
           dispersalType: formik.values.dispersalType,
           corId: formik.values.corId ? formik.values.corId : 0,
           countryId: formik.values.countryId,
