@@ -14,6 +14,7 @@ import { useWindow } from 'src/windows'
 import ProductLegCommissionForm from './productLegCommissionForm'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 
 const ProductLegForm = ({ store, labels, expanded, editMode, maxAccess }) => {
   const { recordId: pId, countries, _seqNo } = store
@@ -135,89 +136,78 @@ const ProductLegForm = ({ store, labels, expanded, editMode, maxAccess }) => {
     store.currencyId && (
       <FormShell form={formik} resourceId={ResourceIds.ProductMaster} maxAccess={maxAccess} editMode={editMode}>
         <VertLayout>
-          <Grow>
-            <Grid container gap={2}>
-              <Grid container xs={12} spacing={3}>
-                <Grid item xs={3}>
-                  <ResourceComboBox
-                    endpointId={SystemRepository.Plant.qry}
-                    name='plantId'
-                    label={labels.plant}
-                    valueField='recordId'
-                    values={store}
-                    readOnly={true}
-                    displayField={['reference', 'name']}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                  />
-                </Grid>
-                <Grid item xs={3}>
-                  <ResourceComboBox
-                    store={countries}
-                    name='countryId'
-                    label={labels.country}
-                    readOnly={true}
-                    valueField='countryId'
-                    displayField={['countryRef', 'countryName']}
-                    columnsInDropDown={[
-                      { key: 'countryRef', value: 'Reference' },
-                      { key: 'countryName', value: 'Name' }
-                    ]}
-                    values={store}
-                  />
-                </Grid>
-                <Grid item xs={3}>
-                  <ResourceComboBox
-                    name='currencyId'
-                    label={labels.currency}
-                    endpointId={SystemRepository.Currency.qry}
-                    valueField='recordId'
-                    values={store}
-                    displayField={['reference', 'name']}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    readOnly={true}
-                  />
-                </Grid>
-
-                <Grid item xs={3}>
-                  {}
-                  <ResourceComboBox
-                    store={store?.dispersals}
-                    name='dispersalId'
-                    label={labels.dispersal}
-                    valueField='recordId'
-                    values={store}
-                    displayField={['reference', 'name']}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    readOnly={true}
-                  />
-                </Grid>
-              </Grid>
-              <Grid xs={12}>
-                <DataGrid
-                  onChange={value => formik.setFieldValue('productLegs', value)}
-                  value={formik.values.productLegs}
-                  error={formik.errors.productLegs}
-                  columns={columns}
-                />
-              </Grid>
-            </Grid>
-            <Grid xs={12}>
-              <DataGrid
-                onChange={value => formik.setFieldValue('productLegs', value)}
-                value={formik.values.productLegs}
-                error={formik.errors.productLegs}
-                columns={columns}
+          <Fixed>
+          <Grid container xs={12} spacing={3}>
+            <Grid item xs={3}>
+              <ResourceComboBox
+                endpointId={SystemRepository.Plant.qry}
+                name='plantId'
+                label={labels.plant}
+                valueField='recordId'
+                values={store}
+                readOnly={true}
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
               />
             </Grid>
+            <Grid item xs={3}>
+              <ResourceComboBox
+                store={countries}
+                name='countryId'
+                label={labels.country}
+                readOnly={true}
+                valueField='countryId'
+                displayField={['countryRef', 'countryName']}
+                columnsInDropDown={[
+                  { key: 'countryRef', value: 'Reference' },
+                  { key: 'countryName', value: 'Name' }
+                ]}
+                values={store}
+              />
+            </Grid>
+            <Grid item xs={3}>
+              <ResourceComboBox
+                name='currencyId'
+                label={labels.currency}
+                endpointId={SystemRepository.Currency.qry}
+                valueField='recordId'
+                values={store}
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                readOnly={true}
+              />
+            </Grid>
+            <Grid item xs={3}>
+              {}
+              <ResourceComboBox
+                store={store?.dispersals}
+                name='dispersalId'
+                label={labels.dispersal}
+                valueField='recordId'
+                values={store}
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                readOnly={true}
+              />
+            </Grid>
+          </Grid>
+          </Fixed>
+          <Grow>
+            <DataGrid
+              onChange={value => formik.setFieldValue('productLegs', value)}
+              value={formik.values.productLegs}
+              error={formik.errors.productLegs}
+              columns={columns}
+            />
           </Grow>
         </VertLayout>
       </FormShell>

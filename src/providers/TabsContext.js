@@ -19,13 +19,14 @@ function CustomTabPanel(props) {
       id={`simple-tabpanel-${index}`}
       aria-labelledby={`simple-tab-${index}`}
       sx={{
-        display: value !== index ? 'none !important' : 'flex !important',
-        position: 'relative',
-        flexDirection: 'column',
+        display: value !== index ? 'none !important' : 'flex !important', 
+        flexDirection: 'column', 
         width: '100%',
-        flex: '1 !important',
-        overflow: 'auto',
-        paddingTop: '5px'
+        flex :'1 !important', 
+        overflow:'auto',
+        paddingTop:'5px',
+        position: 'relative',
+        backgroundColor:'white'
       }}
       {...other}
     >
@@ -177,23 +178,32 @@ const TabsProvider = ({ children }) => {
 
   return (
     <>
-      <Box
-        sx={{
-          display: 'flex !important',
-          flexDirection: 'column',
-          width: '100%',
-          flex: '1 !important',
-          overflow: 'auto'
-        }}
-      >
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+      <Box sx={{ display: 'flex !important', flexDirection: 'column', width: '100%',flex :'1 !important', overflow:'auto' }}>
+        <Box sx={{ backgroundColor:'#231f20',pt:'5px'}}>
           <Tabs
             value={currentTabIndex}
             onChange={handleChange}
-            variant='scrollable'
-            scrollButtons='auto'
-            aria-label='scrollable auto tabs example'
-            sx={{ maxHeight: '40px' }}
+            variant="scrollable"
+            scrollButtons="auto"
+            aria-label="scrollable auto tabs example"
+            sx={{
+              minHeight: '35px !important',
+              '.MuiTab-root': { 
+                color: 'white',  
+                backgroundColor:'grey',
+                '&:hover': {
+                  color:'grey',
+                  backgroundColor: '#ddd'
+                }
+              },
+              '.Mui-selected': { 
+                color: '#231f20',  
+                backgroundColor: 'white'
+              },
+              '.MuiTabs-indicator': {
+                backgroundColor: 'white'
+              }
+            }}
           >
             {openTabs.length > 0 &&
               openTabs.map((activeTab, i) => {
@@ -216,7 +226,18 @@ const TabsProvider = ({ children }) => {
                         </IconButton>
                       }
                       iconPosition='end'
-                      sx={{ minHeight: '40px' }}
+                      sx={{ 
+                        minHeight: '35px !important',
+                        borderTopLeftRadius: 5,
+                        borderTopRightRadius: 5,
+                        py: '0px !important',
+                        mb: '0px !important',
+                        borderBottom: '0px !important',
+                        mr: '2px !important',
+                        fontWeight: '1.5rem',
+                        pr:'0px !important',
+                        pl:'10px !important'
+                      }}
                     />
                   )
                 )
