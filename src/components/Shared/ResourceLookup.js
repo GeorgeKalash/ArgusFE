@@ -21,9 +21,6 @@ export const ResourceLookup = ({
   const [errorMessage, setErrorMessage] = useState()
   const [store, setStore] = useState([])
 
-  // useEffect(() => {
-  //   setStore([])
-  // }, [parameters])
 
   const onLookup = searchQry => {
     setStore([])
