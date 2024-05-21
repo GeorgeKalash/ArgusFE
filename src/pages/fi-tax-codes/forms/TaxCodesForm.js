@@ -43,7 +43,7 @@ export default function TaxCodesForm({ labels, maxAccess, setStore, store }) {
       if (!recordId) {
         setStore(prevStore => ({
           ...prevStore,
-          recordId: res.recordId
+          recordId: response.recordId
         }))
         toast.success('Record Added Successfully')
         formik.setValues({
@@ -95,6 +95,18 @@ export default function TaxCodesForm({ labels, maxAccess, setStore, store }) {
           <Grid container spacing={4}>
             <Grid item xs={12}>
               <CustomTextField
+                name='reference'
+                label={labels.reference}
+                value={formik.values.reference}
+                required
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('reference', '')}
+                error={formik.touched.reference && Boolean(formik.errors.reference)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
                 name='name'
                 label={labels.name}
                 value={formik.values.name}
@@ -104,19 +116,6 @@ export default function TaxCodesForm({ labels, maxAccess, setStore, store }) {
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
                 error={formik.touched.name && Boolean(formik.errors.name)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomTextField
-                name='reference'
-                label={labels.reference}
-                value={formik.values.reference}
-                required
-                rows={2}
-                maxAccess={maxAccess}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('reference', '')}
-                error={formik.touched.reference && Boolean(formik.errors.reference)}
               />
             </Grid>
 
