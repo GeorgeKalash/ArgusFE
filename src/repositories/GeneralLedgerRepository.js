@@ -1,4 +1,4 @@
-import GlobalIntegration from "src/pages/global-integration"
+import GlobalIntegration from 'src/pages/global-integration'
 
 const service = 'GL.asmx/'
 
@@ -47,6 +47,7 @@ export const GeneralLedgerRepository = {
     del: service + 'delAC'
   },
   JournalVoucher: {
+    snapshot: service + 'snapshotJV',
     page: service + 'pageJV',
     qry: service + 'qryJV',
     get: service + 'getJV',
@@ -63,7 +64,7 @@ export const GeneralLedgerRepository = {
   },
   IntegrationAccounts: {
     qry: service + 'qryIA',
-    set2: service + 'set2IA',
+    set2: service + 'set2IA'
   },
   Account: {
     snapshot: service + 'snapshotAC'

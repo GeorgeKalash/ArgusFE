@@ -1,6 +1,5 @@
 import { Grid, FormControlLabel, Checkbox } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
-import { useFormik } from 'formik'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -13,27 +12,10 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { getFormattedNumberMax, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { useForm } from 'src/hooks/form'
 
-export default function CountryForm({ _labels, maxAccess, recordId }) {
-  const [isLoading, setIsLoading] = useState(false)
+export default function CountryForm({ labels, maxAccess, recordId }) {
   const [editMode, setEditMode] = useState(!!recordId)
-
-  const [initialValues, setInitialData] = useState({
-    recordId: null,
-    name: '',
-    reference: '',
-    flName: '',
-    currencyId: null,
-    regionId: null,
-    ibanLength: '',
-    isInactive: false,
-    currencyRef: null,
-    currencyName: null,
-    regionRef: null,
-    regionName: null,
-    isoCode1: '',
-    isoCode2: ''
-  })
 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -41,8 +23,24 @@ export default function CountryForm({ _labels, maxAccess, recordId }) {
     endpointId: SystemRepository.Country.page
   })
 
-  const formik = useFormik({
-    initialValues,
+  const { formik } = useForm({
+    initialValues: {
+      recordId: null,
+      name: '',
+      reference: '',
+      flName: '',
+      currencyId: null,
+      regionId: null,
+      ibanLength: '',
+      isInactive: false,
+      currencyRef: null,
+      currencyName: null,
+      regionRef: null,
+      regionName: null,
+      isoCode1: '',
+      isoCode2: ''
+    },
+    maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -51,9 +49,9 @@ export default function CountryForm({ _labels, maxAccess, recordId }) {
         .transform((value, originalValue) => validateNumberField(value, originalValue))
         .min(0, 'Value must be greater than or equal to 0')
         .max(32767, 'Value must be less than or equal to 32,767'),
-      name: yup.string().required('This field is required'),
-      reference: yup.string().required('This field is required'),
-      flName: yup.string().required('This field is required')
+      name: yup.string().required(' '),
+      reference: yup.string().required(' '),
+      flName: yup.string().required(' ')
     }),
     onSubmit: async obj => {
       obj.ibanLength = getNumberWithoutCommas(obj.ibanLength)
@@ -66,7 +64,7 @@ export default function CountryForm({ _labels, maxAccess, recordId }) {
 
       if (!recordId) {
         toast.success('Record Added Successfully')
-        setInitialData({
+        formik.setValues({
           ...obj,
           recordId: response.recordId
         })
@@ -81,19 +79,14 @@ export default function CountryForm({ _labels, maxAccess, recordId }) {
     ;(async function () {
       try {
         if (recordId) {
-          setIsLoading(true)
-
           const res = await getRequest({
             extension: SystemRepository.Country.get,
             parameters: `_recordId=${recordId}`
           })
 
-          setInitialData(res.record)
+          formik.setValues(res.record)
         }
-      } catch (exception) {
-        setErrorMessage(error)
-      }
-      setIsLoading(false)
+      } catch (exception) {}
     })()
   }, [])
 
@@ -105,40 +98,37 @@ export default function CountryForm({ _labels, maxAccess, recordId }) {
             <Grid item xs={12}>
               <CustomTextField
                 name='reference'
-                label={_labels.reference}
+                label={labels.reference}
                 value={formik.values.reference}
                 readOnly={editMode}
                 required
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('reference', '')}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
-                helperText={formik.touched.reference && formik.errors.reference}
                 maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
               <CustomTextField
                 name='name'
-                label={_labels.name}
+                label={labels.name}
                 value={formik.values.name}
                 required
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
                 error={formik.touched.name && Boolean(formik.errors.name)}
-                helperText={formik.touched.name && formik.errors.name}
                 maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
               <CustomTextField
                 name='flName'
-                label={_labels.fLang}
+                label={labels.fLang}
                 value={formik.values.flName}
                 required
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('flName', '')}
                 error={formik.touched.flName && Boolean(formik.errors.flName)}
-                helperText={formik.touched.flName && formik.errors.flName}
                 maxLength='30'
                 maxAccess={maxAccess}
               />
@@ -147,7 +137,7 @@ export default function CountryForm({ _labels, maxAccess, recordId }) {
               <ResourceComboBox
                 endpointId={SystemRepository.Currency.qry}
                 name='currencyId'
-                label={_labels.currency}
+                label={labels.currency}
                 valueField='recordId'
                 displayField='name'
                 values={formik.values}
@@ -155,7 +145,6 @@ export default function CountryForm({ _labels, maxAccess, recordId }) {
                   formik && formik.setFieldValue('currencyId', newValue?.recordId)
                 }}
                 error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
-                helperText={formik.touched.currencyId && formik.errors.currencyId}
                 maxAccess={maxAccess}
               />
             </Grid>
@@ -163,7 +152,7 @@ export default function CountryForm({ _labels, maxAccess, recordId }) {
               <ResourceComboBox
                 endpointId={SystemRepository.GeographicRegion.qry}
                 name='regionId'
-                label={_labels.geoRegion}
+                label={labels.geoRegion}
                 valueField='recordId'
                 displayField='name'
                 values={formik.values}
@@ -171,7 +160,6 @@ export default function CountryForm({ _labels, maxAccess, recordId }) {
                   formik && formik.setFieldValue('regionId', newValue?.recordId)
                 }}
                 error={formik.touched.regionId && Boolean(formik.errors.regionId)}
-                helperText={formik.touched.regionId && formik.errors.regionId}
                 maxAccess={maxAccess}
                 parameters='_startAt=0&_pageSize=1000'
               />
@@ -179,19 +167,18 @@ export default function CountryForm({ _labels, maxAccess, recordId }) {
             <Grid item xs={12}>
               <CustomTextField
                 name='ibanLength'
-                label={_labels.ibanLength}
+                label={labels.ibanLength}
                 value={formik.values.ibanLength && getFormattedNumberMax(formik.values.ibanLength, 5, 0)}
                 onChange={e => formik.setFieldValue('ibanLength', getFormattedNumberMax(e.target.value, 5, 0))}
                 onClear={() => formik.setFieldValue('ibanLength', '')}
                 error={formik.touched.ibanLength && Boolean(formik.errors.ibanLength)}
-                helperText={formik.touched.ibanLength && formik.errors.ibanLength}
                 maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
               <CustomTextField
                 name='isoCode1'
-                label={_labels.IsoCode1}
+                label={labels.IsoCode1}
                 value={formik.values.isoCode1}
                 maxLength='3'
                 onChange={formik.handleChange}
@@ -203,7 +190,7 @@ export default function CountryForm({ _labels, maxAccess, recordId }) {
             <Grid item xs={12}>
               <CustomTextField
                 name='isoCode2'
-                label={_labels.IsoCode2}
+                label={labels.IsoCode2}
                 value={formik.values.isoCode2}
                 maxLength='3'
                 onChange={formik.handleChange}
@@ -222,7 +209,7 @@ export default function CountryForm({ _labels, maxAccess, recordId }) {
                     onChange={formik.handleChange}
                   />
                 }
-                label={_labels.isInactive}
+                label={labels.isInactive}
               />
             </Grid>
           </Grid>
