@@ -11,7 +11,16 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { CachCountSettingsRepository } from 'src/repositories/CachCountSettingsRepository'
 
-export default function CashCountNotesForm({ labels, maxAccess, recordId, forceNotesCount, row, update, window }) {
+export default function CashCountNotesForm({
+  labels,
+  maxAccess,
+  recordId,
+  forceNotesCount,
+  row,
+  update,
+  readOnly,
+  window
+}) {
   const { formik } = useForm({
     maxAccess,
     initialValues: {
@@ -96,7 +105,8 @@ export default function CashCountNotesForm({ labels, maxAccess, recordId, forceN
                     { key: 'note', value: 'Note' },
                     { key: 'currencyRef', value: 'Currency' }
                   ],
-                  displayFieldWidth: 2
+                  displayFieldWidth: 2,
+                  readOnly: readOnly
                 },
                 async onChange({ row: { update, newRow } }) {
                   const qty = newRow?.qty || 0
@@ -111,6 +121,9 @@ export default function CashCountNotesForm({ labels, maxAccess, recordId, forceN
                 component: 'numberfield',
                 label: labels.qty,
                 name: 'qty',
+                props: {
+                  readOnly: readOnly
+                },
                 async onChange({ row: { update, newRow } }) {
                   const note = newRow?.note || 0
                   const qty = newRow?.qty || 0
@@ -126,6 +139,7 @@ export default function CashCountNotesForm({ labels, maxAccess, recordId, forceN
                 props: { readOnly: true }
               }
             ]}
+            allowDelete={!readOnly}
           />
         </Grow>
         <Fixed>
