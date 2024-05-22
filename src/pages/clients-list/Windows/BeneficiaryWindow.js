@@ -87,7 +87,7 @@ const BeneficiaryWindow = ({ clientId }) => {
         props: {
           client: { clientId: clientId },
           dispersalType: dispersalType,
-          beneficiary: { beneficiaryId: beneficiaryId },
+          beneficiary: { beneficiaryId: beneficiaryId, beneficiarySeqNo: obj.seqNo },
           corId: 0,
           countryId: nationalityId
         },
@@ -101,7 +101,7 @@ const BeneficiaryWindow = ({ clientId }) => {
         props: {
           client: { clientId: clientId },
           dispersalType: dispersalType,
-          beneficiary: { beneficiaryId: beneficiaryId },
+          beneficiary: { beneficiaryId: beneficiaryId, beneficiarySeqNo: obj.seqNo },
           corId: 0,
           countryId: nationalityId
         },
