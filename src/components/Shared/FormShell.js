@@ -11,6 +11,7 @@ import GeneralLedger from 'src/components/Shared/GeneralLedger'
 import Approvals from './Approvals'
 import ResourceRecordRemarks from './ResourceRecordRemarks'
 import GlobalIntegrationGrid from './GlobalIntegrationGrid'
+import AccountBalance from './AccountBalance'
 
 export default function FormShell({
   form,

@@ -88,13 +88,13 @@ export const Buttons = [
   {
     key: 'Account Balance',
     color: '#275915',
-    image: 'intAccount.png',
+    image: 'popup-window.png',
     main: false
   },
   {
     key: 'Client Relation',
     color: '#AC48AE',
-    image: 'popup-window.png',
+    image: 'clientRelations.png',
     main: false
   },
   {
