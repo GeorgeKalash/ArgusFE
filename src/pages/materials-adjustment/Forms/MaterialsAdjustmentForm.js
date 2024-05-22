@@ -23,12 +23,13 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
 
-export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, expanded }) {
+export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, expanded, window }) {
   const { height } = useWindowDimensions()
   const [isLoading, setIsLoading] = useState(false)
   const [isPosted, setIsPosted] = useState(false)
   const [itemStore, setItemStore] = useState([])
   const [editMode, setEditMode] = useState(!!recordId)
+  console.log('window test ', window)
 
   const [initialValues, setInitialData] = useState({
     recordId: null,
@@ -94,6 +95,8 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, e
       invalidate()
       setEditMode(true)
       formik.setFieldValue('recordId', res.recordId)
+      handlePost()
+      window.close()
     }
   })
 
@@ -229,14 +232,6 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, e
     })
   }
 
-  const actions = [
-    {
-      key: 'Post',
-      condition: true,
-      onClick: handlePost,
-      disabled: !editMode || isPosted
-    }
-  ]
   useEffect(() => {}, [height])
 
   useEffect(() => {
@@ -266,7 +261,6 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, e
       isPosted={isPosted}
       postVisible={true}
       previewReport={editMode}
-      actions={actions}
     >
       <Grid container>
         <Grid container xs={12} style={{ overflow: 'hidden' }}>
