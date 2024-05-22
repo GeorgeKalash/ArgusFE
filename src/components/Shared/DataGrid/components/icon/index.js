@@ -3,8 +3,6 @@ import edit from './edit'
 
 export default {
   view({ row, column, field }) {
-    console.log(row, column, field)
-
     return (
       <>
         {row?.[field] ? (
