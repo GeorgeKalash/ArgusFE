@@ -97,7 +97,7 @@ const AccountBalance = () => {
         height={440}
         columns={columns}
         gridData={gridData}
-        rowId={['recordId']}
+        rowId={['currencyId']}
         isLoading={!gridData}
         maxAccess={access}
         pagination={false}
