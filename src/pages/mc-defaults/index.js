@@ -20,6 +20,9 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const MCDefault = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -91,87 +94,71 @@ const MCDefault = () => {
   }
 
   return (
-    <>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%',
-          marginTop: '10px'
-        }}
-      >
-        <Grid container spacing={5} sx={{ pl: '10px' }} lg={4} md={7} sm={7} xs={12}>
-          <Grid item xs={12}>
-            <ResourceComboBox
-              endpointId={MultiCurrencyRepository.RateType.qry}
-              name='mc_defaultRTSA'
-              label={_labels.mc_defaultRTSA}
-              valueField='recordId'
-              displayField='name'
-              values={formik.values}
-              onChange={(event, newValue) => {
-                formik.setFieldValue('mc_defaultRTSA', newValue?.recordId || '')
-              }}
-              error={formik.touched.mc_defaultRTSA && Boolean(formik.errors.mc_defaultRTSA)}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <ResourceComboBox
-              endpointId={MultiCurrencyRepository.RateType.qry}
-              name='mc_defaultRTPU'
-              label={_labels.mc_defaultRTPU}
-              valueField='recordId'
-              displayField='name'
-              values={formik.values}
-              onChange={(event, newValue) => {
-                formik.setFieldValue('mc_defaultRTPU', newValue?.recordId || '')
-              }}
-              error={formik.touched.mc_defaultRTPU && Boolean(formik.errors.mc_defaultRTPU)}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <ResourceComboBox
-              endpointId={MultiCurrencyRepository.RateType.qry}
-              name='mc_defaultRTMF'
-              label={_labels.mc_defaultRTMF}
-              valueField='recordId'
-              displayField='name'
-              values={formik.values}
-              onChange={(event, newValue) => {
-                formik.setFieldValue('mc_defaultRTMF', newValue?.recordId || '')
-              }}
-              error={formik.touched.mc_defaultRTMF && Boolean(formik.errors.mc_defaultRTMF)}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <ResourceComboBox
-              endpointId={MultiCurrencyRepository.RateType.qry}
-              name='mc_defaultRTFI'
-              label={_labels.mc_defaultRTFI}
-              valueField='recordId'
-              displayField='name'
-              values={formik.values}
-              onChange={(event, newValue) => {
-                formik.setFieldValue('mc_defaultRTFI', newValue?.recordId || '')
-              }}
-              error={formik.touched.mc_defaultRTFI && Boolean(formik.errors.mc_defaultRTFI)}
-            />
-          </Grid>
-          <Grid
-            sx={{
-              position: 'fixed',
-              bottom: 0,
-              left: 0,
-              width: '100%',
-              padding: 3,
-              textAlign: 'center'
+    <VertLayout>
+      <Grow>
+      <Grid container spacing={5} sx={{ pl: '10px', pt:'10px' }} lg={4} md={7} sm={7} xs={12}>
+        <Grid item xs={12}>
+          <ResourceComboBox
+            endpointId={MultiCurrencyRepository.RateType.qry}
+            name='mc_defaultRTSA'
+            label={_labels.mc_defaultRTSA}
+            valueField='recordId'
+            displayField='name'
+            values={formik.values}
+            onChange={(event, newValue) => {
+              formik.setFieldValue('mc_defaultRTSA', newValue?.recordId || '')
             }}
-          >
-            <WindowToolbar onSave={handleSubmit} isSaved={true} />
-          </Grid>
+            error={formik.touched.mc_defaultRTSA && Boolean(formik.errors.mc_defaultRTSA)}
+          />
         </Grid>
-      </Box>
-    </>
+        <Grid item xs={12}>
+          <ResourceComboBox
+            endpointId={MultiCurrencyRepository.RateType.qry}
+            name='mc_defaultRTPU'
+            label={_labels.mc_defaultRTPU}
+            valueField='recordId'
+            displayField='name'
+            values={formik.values}
+            onChange={(event, newValue) => {
+              formik.setFieldValue('mc_defaultRTPU', newValue?.recordId || '')
+            }}
+            error={formik.touched.mc_defaultRTPU && Boolean(formik.errors.mc_defaultRTPU)}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <ResourceComboBox
+            endpointId={MultiCurrencyRepository.RateType.qry}
+            name='mc_defaultRTMF'
+            label={_labels.mc_defaultRTMF}
+            valueField='recordId'
+            displayField='name'
+            values={formik.values}
+            onChange={(event, newValue) => {
+              formik.setFieldValue('mc_defaultRTMF', newValue?.recordId || '')
+            }}
+            error={formik.touched.mc_defaultRTMF && Boolean(formik.errors.mc_defaultRTMF)}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <ResourceComboBox
+            endpointId={MultiCurrencyRepository.RateType.qry}
+            name='mc_defaultRTFI'
+            label={_labels.mc_defaultRTFI}
+            valueField='recordId'
+            displayField='name'
+            values={formik.values}
+            onChange={(event, newValue) => {
+              formik.setFieldValue('mc_defaultRTFI', newValue?.recordId || '')
+            }}
+            error={formik.touched.mc_defaultRTFI && Boolean(formik.errors.mc_defaultRTFI)}
+          />
+        </Grid>
+        </Grid>
+      </Grow>
+      <Fixed>
+        <WindowToolbar onSave={handleSubmit} isSaved={true} />
+      </Fixed>
+    </VertLayout>
   )
 }
 

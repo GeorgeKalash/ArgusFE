@@ -11,13 +11,9 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemFunction } from 'src/resources/SystemFunction'
-
 import { formatDateToApi, formatDateFromApi } from 'src/lib/date-helper'
-
-// ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
-
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 
@@ -118,7 +114,6 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId }) {
       actions={actions}
       resourceId={ResourceIds.JournalVoucher}
       form={formik}
-      height={300}
       functionId={SystemFunction.JournalVoucher}
       maxAccess={maxAccess}
       editMode={editMode}
@@ -192,7 +187,7 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId }) {
             label={labels.notes}
             value={formik.values.notes}
             maxLength='100'
-            rows={2}
+            rows={3}
             maxAccess={maxAccess}
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('notes', '')}

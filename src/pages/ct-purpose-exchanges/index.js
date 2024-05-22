@@ -9,6 +9,9 @@ import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import PurposeOfExchangeWindow from './windows/PurposeOfExchangeWindow'
 import { useWindow } from 'src/windows'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const PurposeExchange = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -18,14 +21,18 @@ const PurposeExchange = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    return await getRequest({
+    const response = await getRequest({
       extension: CurrencyTradingSettingsRepository.PurposeExchange.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
+
+    return { ...response, _startAt: _startAt }
   }
 
   const {
     query: { data },
+    paginationParameters,
+    refetch,
     labels: _labels,
     access
   } = useResourceQuery({
@@ -60,7 +67,7 @@ const PurposeExchange = () => {
         maxAccess: access
       },
       width: 600,
-      height: 600,
+      height: 500,
       title: _labels.purposeOfExchange
     })
   }
@@ -83,9 +90,11 @@ const PurposeExchange = () => {
   }
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar onAdd={add} maxAccess={access} />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
@@ -94,11 +103,13 @@ const PurposeExchange = () => {
           onDelete={del}
           isLoading={false}
           pageSize={50}
-          paginationType='client'
+          paginationParameters={paginationParameters}
+          refetch={refetch}
+          paginationType='api'
           maxAccess={access}
         />
-      </Box>
-    </>
+      </Grow>
+    </VertLayout>
   )
 }
 

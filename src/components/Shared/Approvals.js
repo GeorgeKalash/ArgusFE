@@ -1,12 +1,12 @@
 import React, { useContext } from 'react'
-import CustomTabPanel from './CustomTabPanel'
-
 import Table from './Table'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 import { useResourceQuery } from 'src/hooks/resource'
 import { formatDateDefault } from 'src/lib/date-helper'
 import { RequestsContext } from 'src/providers/RequestsContext'
+import { VertLayout } from './Layouts/VertLayout'
+import { Grow } from './Layouts/Grow'
 
 const Approvals = props => {
   const { recordId, functionId } = props
@@ -71,17 +71,18 @@ const Approvals = props => {
   }
 
   return (
-    <CustomTabPanel>
-      <Table
-        height={200}
-        columns={columns}
-        gridData={data}
-        rowId={['recordId']}
-        isLoading={false}
-        maxAccess={access}
-        pagination={false}
-      />
-    </CustomTabPanel>
+    <VertLayout>
+      <Grow>
+        <Table
+          columns={columns}
+          gridData={data}
+          rowId={['recordId']}
+          isLoading={false}
+          maxAccess={access}
+          pagination={false}
+        />
+      </Grow>
+    </VertLayout>
   )
 }
 
