@@ -90,17 +90,18 @@ export default function FormShell({
 
   return (
     <>
-      <DialogContent 
-      sx={{ 
-        display: 'flex !important', 
-        flex: 1, 
-        flexDirection: 'column', 
-        overflow: 'auto',
-        '.MuiBox-root':{
-          paddingTop:'5px !important',
-          px:'0px !important'
-        },
-       }}>
+      <DialogContent
+        sx={{
+          display: 'flex !important',
+          flex: 1,
+          flexDirection: 'column',
+          overflow: 'auto',
+          '.MuiBox-root': {
+            paddingTop: '5px !important',
+            px: '0px !important'
+          }
+        }}
+      >
         {children}
       </DialogContent>
       {windowToolbarVisible && (
@@ -155,6 +156,17 @@ export default function FormShell({
               width: 700,
               height: 500,
               title: 'Integration Account'
+            })
+          }
+          onClickAC={() =>
+            stack({
+              Component: AccountBalance,
+              props: {
+                recordId: form.values?.recordId
+              },
+              width: 1000,
+              height: 620,
+              title: 'Account Balance'
             })
           }
           onClientRelation={() =>

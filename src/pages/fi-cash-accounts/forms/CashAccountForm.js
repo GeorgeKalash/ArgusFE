@@ -89,6 +89,12 @@ export default function CashAccountForm({ labels, recordId, maxAccess, invalidat
       condition: true,
       onClick: 'onClickGIA',
       disabled: !editMode
+    },
+    {
+      key: 'Account Balance',
+      condition: true,
+      onClick: 'onClickAC',
+      disabled: !editMode
     }
   ]
 
