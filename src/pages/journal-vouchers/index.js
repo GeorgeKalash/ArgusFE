@@ -8,14 +8,12 @@ import { formatDateDefault } from 'src/lib/date-helper'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { SystemFunction } from 'src/resources/SystemFunction'
-import documentType from 'src/lib/docRefBehaivors'
 import JournalVoucherForm from './forms/JournalVoucherForm'
-import { useError } from 'src/error'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
-import useDocumentTypeAdd from 'src/hooks/dcocumentReferenceBehaviorsAdd'
+import useDocumentType from 'src/hooks/dcocumentReferenceBehaviors'
 
 const JournalVoucher = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -86,7 +84,7 @@ const JournalVoucher = () => {
     }
   ]
 
-  const stackObj = {
+  const action = {
     Component: JournalVoucherForm,
     props: {
       labels: _labels,
@@ -99,7 +97,7 @@ const JournalVoucher = () => {
     title: _labels.generalJournal
   }
 
-  const { sectionAction } = useDocumentTypeAdd({ functionId: SystemFunction.JournalVoucher, stackObj })
+  const { sectionAction } = useDocumentType({ functionId: SystemFunction.JournalVoucher, action })
 
   const add = async () => {
     await sectionAction()
