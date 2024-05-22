@@ -22,6 +22,7 @@ import { RTCLRepository } from 'src/repositories/RTCLRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import CashCountForm from '../cash-count/forms/CashCountForm'
 import CashTransferTab from '../cash-transfer/Tabs/CashTransferTab'
 
 const DocumentsOnHold = () => {
@@ -124,6 +125,7 @@ const DocumentsOnHold = () => {
     let relevantAccess
 
     let windowWidth
+    let windowHeight
     let title
 
     switch (obj.functionId) {
@@ -146,7 +148,15 @@ const DocumentsOnHold = () => {
         windowWidth = 950
         title = labels[1]
         break
+      case SystemFunction.CashCountTransaction:
+        relevantComponent = CashCountForm
+        labels = await getLabels(ResourceIds.CashCountTransaction)
+        relevantAccess = await getAccess(ResourceIds.CashCountTransaction)
 
+        windowWidth = 1100
+        windowHeight = 700
+        title = labels.CashCount
+        break
       case SystemFunction.CurrencyPurchase:
       case SystemFunction.CurrencySale:
         relevantComponent = TransactionForm
@@ -206,7 +216,7 @@ const DocumentsOnHold = () => {
           maxAccess: relevantAccess
         },
         width: windowWidth,
-
+        height: windowHeight,
         title: title
       })
     }
