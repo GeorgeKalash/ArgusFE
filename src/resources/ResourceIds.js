@@ -126,7 +126,7 @@ export const ResourceIds = {
   ExchangeRates: 32103,
   CbBankAccounts: 33105,
   CashNote: 37101,
-  TaxSchedules: 31107
+  TaxSchedules: 31107,
   LOShipments: 40301,
   LOTransportation: 40302
 }
