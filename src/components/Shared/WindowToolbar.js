@@ -108,6 +108,7 @@ const WindowToolbar = ({
           .button-container {
             position: relative;
             display: inline-block;
+            
           }
           .toast {
             position: absolute;
@@ -194,9 +195,10 @@ const WindowToolbar = ({
                         opacity: 0.8
                       },
                       border: button.border,
-                      width: '20px',
+                      width: '50px !important',
                       height: '35px',
-                      objectFit: 'contain'
+                      objectFit: 'contain',
+                      minWidth: '30px !important'
                     }}
                     disabled={isDisabled}
                   >
@@ -235,9 +237,10 @@ const WindowToolbar = ({
                         opacity: 0.8
                       },
                       border: button.border,
-                      width: '20px',
+                      width: '50px !important',
                       height: '35px',
-                      objectFit: 'contain'
+                      objectFit: 'contain',
+                      minWidth: '30px !important'
                     }}
                     disabled={isDisabled}
                   >

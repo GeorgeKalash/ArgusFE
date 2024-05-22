@@ -65,8 +65,6 @@ const AccountBalance = ({ recordId }) => {
     }
   ]
 
-  console.log(formik.values, 'lllllll')
-
   return (
     <div style={{ padding: '10px' }}>
       <Grid container spacing={2} sx={{ paddingBottom: '25px' }}>
