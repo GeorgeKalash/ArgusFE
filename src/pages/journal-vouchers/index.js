@@ -1,4 +1,4 @@
-import { useContext } from 'react'
+import { useContext, useState } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
@@ -9,18 +9,18 @@ import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import documentType from 'src/lib/docRefBehaivors'
-import { useWindow } from 'src/windows'
 import JournalVoucherForm from './forms/JournalVoucherForm'
 import { useError } from 'src/error'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import JournalVoucherForm from './forms/JournalVoucherForm'
 import { useWindow } from 'src/windows'
 import useDocumentTypeAdd from 'src/hooks/dcocumentReferenceBehaviorsAdd'
 
 const JournalVoucher = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const [selectedRecordId, setSelectedRecordId] = useState()
+
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {

@@ -26,8 +26,7 @@ export default function JournalVoucherForm({ labels, access, recordId, general =
 
   const {
     query: { documentType },
-    maxAccess: maxAccess,
-    onChangeNra
+    maxAccess: maxAccess
   } = useDocumentType({
     functionId: SystemFunction.JournalVoucher,
     access: access,

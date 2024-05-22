@@ -195,7 +195,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     search: null
   }
 
-  const { maxAccess: maxAccess } = useDocumentType({
+  const { maxAccess } = useDocumentType({
     functionId: fId,
     access: access,
     hasDT: false
@@ -287,12 +287,6 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       }
     })()
   }, [])
-
-  // useEffect(() => {
-  //   if (data?.errorMessage) {
-  //     stackError({ message: data?.errorMessage })
-  //   }
-  // }, [data])
 
   function getData(id) {
     const _recordId = recordId ? recordId : id

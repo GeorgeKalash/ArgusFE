@@ -6,8 +6,6 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 
 export function useDocumentType({ functionId, access, nraId, hasDT }) {
   const { getRequest } = useContext(RequestsContext)
-
-  // const [fId, setFId] = useState(functionId)
   const { stack: stackError } = useError()
 
   const queryFn = async nraId => {

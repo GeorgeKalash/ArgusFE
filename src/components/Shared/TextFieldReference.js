@@ -16,7 +16,6 @@ export const TextFieldReference = ({ endpointId, param = '', setReferenceRequire
 
     const fetchData = async () => {
       const result = await Reference(getRequest, endpointId, param)
-      console.log(result)
       if (!result.error) {
         setState({ readOnly: result.readOnly, mandatory: result.mandatory })
         setReferenceRequired(result.mandatory)
