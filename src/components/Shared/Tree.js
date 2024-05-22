@@ -8,6 +8,9 @@ import { useReactToPrint } from 'react-to-print'
 import WindowToolbar from './WindowToolbar'
 
 import { Box, Grid } from '@mui/material'
+import { VertLayout } from './Layouts/VertLayout'
+import { Fixed } from './Layouts/Fixed'
+import { Grow } from './Layouts/Grow'
 
 const getAllNodeIds = nodes => {
   let nodeIds = []
@@ -111,14 +114,8 @@ function Tree({ data, expanded, height }) {
   ]
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%'
-      }}
-    >
-      <div>
+    <VertLayout>
+      <Grow>
         <div ref={componentRef}>
           <StyledTreeView
             height={`${expanded ? `calc(100vh - 180px)` : `${height}px`}`}
@@ -128,26 +125,18 @@ function Tree({ data, expanded, height }) {
           >
             {treeData.map(node => renderTree(node))}
           </StyledTreeView>
-        </div>
-        <div style={{ display: 'none', visibility: 'hidden' }}>
-          <div ref={printComponentRef}>
-            <PrintableTree nodes={treeData} />
+
+          <div style={{ display: 'none', visibility: 'hidden' }}>
+            <div ref={printComponentRef}>
+              <PrintableTree nodes={treeData} />
+            </div>
           </div>
         </div>
-      </div>
-      <Grid
-        sx={{
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          width: '100%',
-
-          textAlign: 'center'
-        }}
-      >
+      </Grow>
+      <Fixed>
         <WindowToolbar actions={actions} isCleared={false} isSaved={false} isInfo={false} />
-      </Grid>
-    </Box>
+      </Fixed>
+    </VertLayout>
   )
 }
 
