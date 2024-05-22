@@ -1,11 +1,17 @@
 // ** MUI Imports
-import { Box, Button, Grid, Tooltip, Typography } from '@mui/material'
+import { Box, Button, Grid, Tooltip, Typography, Autocomplete, DialogActions, TextField } from '@mui/material'
 import Icon from 'src/@core/components/icon'
 import CustomTextField from '../Inputs/CustomTextField'
-import { useState } from 'react'
+import { useState, useEffect, useContext } from 'react'
+import { RequestsContext } from 'src/providers/RequestsContext'
+
+import PreviewReport from './PreviewReport'
+import { useWindow } from 'src/windows'
 
 // ** Resources
 import { TrxType } from 'src/resources/AccessLevels'
+import { SystemRepository } from 'src/repositories/SystemRepository'
+import CustomComboBox from '../Inputs/CustomComboBox'
 
 const GridToolbar = ({
   initialLoad,
@@ -22,12 +28,58 @@ const GridToolbar = ({
   inputSearch,
   search,
   onSearch,
+
+  previewReport,
+
   onSearchClear,
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
   const addBtnVisible = onAdd && maxAccess > TrxType.GET
   const [searchValue, setSearchValue] = useState('')
+  const { getRequest } = useContext(RequestsContext)
+  const { stack } = useWindow()
+  const [selectedReport, setSelectedReport] = useState(null)
+  const [reportStore, setReportStore] = useState([])
+
+  useEffect(() => {
+    getReportLayout()
+  }, [previewReport])
+
+  useEffect(() => {
+    if (reportStore.length > 0) {
+      setSelectedReport(reportStore[0])
+    } else {
+      setSelectedReport(null)
+    }
+  }, [reportStore])
+
+  const getReportLayout = () => {
+    setReportStore([])
+    if (previewReport) {
+      var parameters = `_resourceId=${previewReport}`
+      getRequest({
+        extension: SystemRepository.ReportLayout,
+        parameters: parameters
+      })
+        .then(res => {
+          if (res?.list) {
+            const formattedReports = res.list.map(item => ({
+              api_url: item.api,
+              reportClass: item.instanceName,
+              parameters: item.parameters,
+              layoutName: item.layoutName,
+              assembly: 'ArgusRPT.dll'
+            }))
+            setReportStore(formattedReports)
+            if (formattedReports.length > 0) {
+              setSelectedReport(formattedReports[0])
+            }
+          }
+        })
+        .catch(error => {})
+    }
+  }
 
   const formatDataForApi = paramsArray => {
     const formattedData = paramsArray.map(({ fieldId, value }) => `${fieldId}|${value}`).join('^')
@@ -40,31 +92,49 @@ const GridToolbar = ({
   }
 
   return (
-    <Box display={'flex'} sx={{ justifyContent: 'space-between' }}>
-      {children && children}
-      <Box sx={{ display: 'flex', pb: 2, pr: 2 }}>
+    <Box
+      sx={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        width: '100%',
+        pt: '5px'
+      }}
+    >
+      <Grid container spacing={4} sx={{ display: 'flex', padding: 2 }}>
+        {children && children}
         {initialLoad && (
-          <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
+          <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', pl: 2 }}>
             <Button onClick={initialLoad} variant='contained'>
               <Icon icon='mdi:reload' />
             </Button>
-          </Box>
+          </Grid>
         )}
         {onAdd && addBtnVisible && (
-          <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
+          <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', pl: 2 }}>
             <Tooltip title='Add'>
               <Button
                 onClick={onAdd}
                 variant='contained'
                 style={{ backgroundColor: 'transparent', border: '1px solid #4eb558' }}
+                sx={{
+                  mr: 1,
+                  '&:hover': {
+                    opacity: 0.8
+                  },
+                  width: '20px',
+                  height: '35px',
+                  objectFit: 'contain'
+                }}
               >
                 <img src='/images/buttonsIcons/add.png' alt='Add' />
               </Button>
             </Tooltip>
-          </Box>
+          </Grid>
         )}
+
         {inputSearch && (
-          <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2, zIndex: 0 }}>
+          <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', pl: 2, zIndex: 0 }}>
             <CustomTextField
               name='search'
               value={searchValue}
@@ -73,15 +143,16 @@ const GridToolbar = ({
               onChange={e => setSearchValue(e.target.value)}
               onSearch={onSearch}
               search={true}
+              height={35}
             />
-          </Box>
+          </Grid>
         )}
         {openRPB && (
-          <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
+          <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', pl: 2 }}>
             <Button onClick={openRPB} variant='contained' disabled={disableRPB}>
               OPEN RPB
             </Button>
-          </Box>
+          </Grid>
         )}
         {onRefresh && (
           <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
@@ -91,7 +162,7 @@ const GridToolbar = ({
           </Box>
         )}
         {onGo && (
-          <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
+          <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', pl: 2 }}>
             <Button
               disabled={paramsArray.length === 0}
               onClick={() => onGo({ _startAt: 0, _pageSize: 30, params: formatDataForApi(paramsArray) })}
@@ -99,9 +170,9 @@ const GridToolbar = ({
             >
               GO
             </Button>
-          </Box>
+          </Grid>
         )}
-      </Box>
+      </Grid>
       {paramsArray && paramsArray.length > 0 && (
         <Box sx={{ pl: 2 }}>
           <Grid container>
@@ -114,6 +185,43 @@ const GridToolbar = ({
             })}
           </Grid>
         </Box>
+      )}
+      {previewReport ? (
+        <Box sx={{ display: 'flex', alignItems: 'center', paddingRight: '2rem' }}>
+          <CustomComboBox
+            label={'Select a report template'}
+            valueField='caption'
+            displayField='layoutName'
+            store={reportStore}
+            value={selectedReport}
+            onChange={(e, newValue) => setSelectedReport(newValue)}
+            sx={{ width: 250 }}
+            disableClearable
+          />
+          <Button
+            sx={{ ml: 2 }}
+            variant='contained'
+            disabled={!selectedReport}
+            onClick={() =>
+              stack({
+                Component: PreviewReport,
+                props: {
+                  selectedReport: selectedReport
+                },
+                width: 1000,
+                height: 500,
+                title: 'Preview Report'
+              })
+            }
+            size='small'
+          >
+            <Tooltip title='Preview'>
+              <img src='/images/buttonsIcons/preview.png' alt='Preview' />
+            </Tooltip>
+          </Button>
+        </Box>
+      ) : (
+        <Box></Box>
       )}
     </Box>
   )

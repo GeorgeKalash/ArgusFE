@@ -64,7 +64,6 @@ const UsersWindow = ({
       Title={labels.users}
       onClose={onClose}
       width={width}
-      height={height}
       onSave={onSave}
       usersValidation={usersValidation}
       tabs={tabs}

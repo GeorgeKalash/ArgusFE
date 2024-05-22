@@ -6,12 +6,14 @@ import useResourceParams from 'src/hooks/useResourceParams'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import toast from 'react-hot-toast'
 import { DataGrid } from './DataGrid'
-import * as yup from 'yup'
 import { useForm } from 'src/hooks/form'
 import { DataSets } from 'src/resources/DataSets'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { CommonContext } from 'src/providers/CommonContext'
 import CustomTextField from '../Inputs/CustomTextField'
+import { Fixed } from './Layouts/Fixed'
+import { Grow } from './Layouts/Grow'
+import { VertLayout } from './Layouts/VertLayout'
 
 export const InterfacesForm = ({ recordId, expanded, height, resourceId, name }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -131,17 +133,20 @@ export const InterfacesForm = ({ recordId, expanded, height, resourceId, name })
 
   return (
     <FormShell form={formik} resourceId={resourceId} maxAccess={access} infoVisible={false} editMode={true}>
-      <Grid sx={{ pb: 1, width: '50%' }}>
-        <CustomTextField label={_labels.name} value={name} readOnly />
-      </Grid>
-      <DataGrid
-        onChange={value => formik.setFieldValue('rows', value)}
-        value={formik.values.rows}
-        error={formik.errors.rows}
-        columns={columns}
-        height={`${expanded ? `calc(100vh - 280px)` : `${height - 130}px`}`}
-        allowDelete={false}
-      />
+      <VertLayout>
+      <Grow>
+        <Grid sx={{width:'50%'}}>
+          <CustomTextField label={_labels.name} value={name} readOnly />
+        </Grid>
+        <DataGrid
+          onChange={value => formik.setFieldValue('rows', value)}
+          value={formik.values.rows}
+          error={formik.errors.rows}
+          columns={columns}
+          allowDelete={false}
+        />
+      </Grow>
+      </VertLayout>
     </FormShell>
   )
 }

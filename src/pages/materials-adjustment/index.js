@@ -22,6 +22,8 @@ const MaterialsAdjustment = () => {
     })
 
     return { ...response, _startAt: _startAt }
+
+    return { ...response, _startAt: _startAt }
   }
 
   const {
@@ -126,6 +128,7 @@ const MaterialsAdjustment = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
+          deleteConfirmationType={'strict'}
           isLoading={false}
           pageSize={50}
           refetch={refetch}

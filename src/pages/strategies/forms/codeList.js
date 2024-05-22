@@ -20,6 +20,9 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import CodeForm from './CodeForm'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useResourceQuery } from 'src/hooks/resource'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const CodeList = ({ store, labels, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -89,32 +92,29 @@ const CodeList = ({ store, labels, maxAccess }) => {
         store
       },
       width: 500,
-      height: 400,
+      height: 300,
       title: labels.code
     })
   }
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%'
-      }}
-    >
-      <GridToolbar onAdd={addCode} maxAccess={maxAccess} />
-      <Table
-        columns={columns}
-        gridData={data}
-        rowId={['codeId']}
-        isLoading={false}
-        pageSize={50}
-        pagination={false}
-        onDelete={delCode}
-        maxAccess={maxAccess}
-        height={200}
-      />
-    </Box>
+    <VertLayout>
+      <Fixed>
+        <GridToolbar onAdd={addCode} maxAccess={maxAccess} />
+      </Fixed>
+      <Grow>
+        <Table
+          columns={columns}
+          gridData={data}
+          rowId={['codeId']}
+          isLoading={false}
+          pageSize={50}
+          pagination={false}
+          onDelete={delCode}
+          maxAccess={maxAccess}
+        />
+      </Grow>
+    </VertLayout>
   )
 }
 

@@ -1,6 +1,8 @@
 import Table from 'src/components/Shared/Table'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const ProductsWindow = ({ labels, width, height, gridData, maxAccess, form }) => {
   const columns = [
@@ -45,22 +47,23 @@ const ProductsWindow = ({ labels, width, height, gridData, maxAccess, form }) =>
     <FormShell
       resourceId={ResourceIds.OutwardsTransfer}
       form={form}
-      height={480}
       maxAccess={maxAccess}
       infoVisible={false}
     >
-      <Table
-        width={width}
-        height={height}
-        columns={columns}
-        gridData={gridData}
-        rowId={['productId']}
-        isLoading={false}
-        pagination={false}
-        maxAccess={maxAccess}
-        showCheckboxColumn={true}
-        handleCheckedRows={() => {}}
-      />
+      <VertLayout>
+        <Grow>
+          <Table
+          columns={columns}
+          gridData={gridData}
+          rowId={['productId']}
+          isLoading={false}
+          pagination={false}
+          maxAccess={maxAccess}
+          showCheckboxColumn={true}
+          handleCheckedRows={() => {}}
+        />
+        </Grow>
+      </VertLayout>
     </FormShell>
   )
 }

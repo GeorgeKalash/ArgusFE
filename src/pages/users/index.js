@@ -36,6 +36,9 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const Users = () => {
   const { getRequest, postRequest, getIdentityRequest } = useContext(RequestsContext)
@@ -221,7 +224,7 @@ const Users = () => {
     })
       .then(res => {
         setGridData(res)
-        console.log('res response ',res)
+        console.log('res response ', res)
       })
       .catch(error => {
         setErrorMessage(error)
@@ -278,39 +281,38 @@ const Users = () => {
     setSecurityGrpGridData([])
   }
 
-  const editUsers = async (obj) => {
+  const editUsers = async obj => {
     try {
-      const _recordId = obj.recordId;
-      const defaultParams = `_recordId=${_recordId}`;
-      var parameters = defaultParams;
-  
+      const _recordId = obj.recordId
+      const defaultParams = `_recordId=${_recordId}`
+      var parameters = defaultParams
+
       const res = await getRequest({
         extension: SystemRepository.Users.get,
         parameters: parameters
-      });
+      })
 
       setCurrentRecord(res.record.recordId)
-      usersValidation.setValues(populateUserInfo(res.record));
+      usersValidation.setValues(populateUserInfo(res.record))
 
-      setEditMode(true);
-      setWindowOpen(true);
-      fillActiveStatusStore();
-        fillUserTypeStore()
-        fillLanguageStore()
-        fillNotificationGrpStore()
-        fillSiteStore()
-        fillPlantStore()
-        fillSalesPersonStore()
-        getSecurityGrpGridData(res.record.recordId)
-        setPasswordState(true)
-        getDefaultsById(obj)
-        setRowGridData([])
-        getRowAccessGridData(20110)
-        fillModuleStore()
-        setActiveTab(0)
-      
+      setEditMode(true)
+      setWindowOpen(true)
+      fillActiveStatusStore()
+      fillUserTypeStore()
+      fillLanguageStore()
+      fillNotificationGrpStore()
+      fillSiteStore()
+      fillPlantStore()
+      fillSalesPersonStore()
+      getSecurityGrpGridData(res.record.recordId)
+      setPasswordState(true)
+      getDefaultsById(obj)
+      setRowGridData([])
+      getRowAccessGridData(20110)
+      fillModuleStore()
+      setActiveTab(0)
     } catch (error) {
-      setErrorMessage(error);
+      setErrorMessage(error)
     }
   }
 
@@ -690,7 +692,7 @@ const Users = () => {
     validateOnChange: true,
     validationSchema: yup.object({}),
     initialValues: {
-       recordId: '',
+      recordId: '',
       name: '',
       hasAccess: false
     },
@@ -706,17 +708,17 @@ const Users = () => {
   }
 
   const handleCheckedRows = checkedRows => {
-    console.log('hanle checked rows ',checkedRows)
+    console.log('hanle checked rows ', checkedRows)
   }
 
   const getRowAccessGridData = classId => {
     setRowGridData([])
-    console.log('rowAccessUser class ',classId)
+    console.log('rowAccessUser class ', classId)
 
     classId = classId || 20110
     const userId = currentRecord
 
-    console.log('rowAccessUser userId ',userId)
+    console.log('rowAccessUser userId ', userId)
 
     const plantRequestPromise = getRequest({
       extension: SystemRepository.Plant.qry,
@@ -730,14 +732,13 @@ const Users = () => {
 
     const salesPersonRequestPromise = getRequest({
       extension: SaleRepository.SalesPerson.qry,
-      parameters:'_filter='
+      parameters: '_filter='
     })
 
-    const rowAccessUserPromise  = getRequest({
-        extension: AccessControlRepository.RowAccessUserView.qry,
-        parameters: `_resourceId=${classId}&_userId=${userId}`
-      });
-    
+    const rowAccessUserPromise = getRequest({
+      extension: AccessControlRepository.RowAccessUserView.qry,
+      parameters: `_resourceId=${classId}&_userId=${userId}`
+    })
 
     let rar = {
       recordId: null,
@@ -746,9 +747,8 @@ const Users = () => {
       classId: null
     }
 
-
-    Promise.all([cashAccountRequestPromise, plantRequestPromise, salesPersonRequestPromise,rowAccessUserPromise]).then(
-      ([cashAccountRequest, plantRequest, salesPersonRequest,rowAccessUser]) => {
+    Promise.all([cashAccountRequestPromise, plantRequestPromise, salesPersonRequestPromise, rowAccessUserPromise]).then(
+      ([cashAccountRequest, plantRequest, salesPersonRequest, rowAccessUser]) => {
         //Plant
         if (classId == 20110 || classId === 'undefined') {
           // Use map to transform each item in res.list
@@ -787,22 +787,22 @@ const Users = () => {
             }
           })
         }
-       
-        console.log('rowAccessUser list ',rowAccessUser.list)
-        if(classId !== 'undefined'){
-        for (let i = 0; i < rar.length; i++) {
-          let rowId = rar[i].recordId;
-          rowAccessUser.list.forEach(storedItem => {
-              let storedId = storedItem.recordId.toString();
+
+        console.log('rowAccessUser list ', rowAccessUser.list)
+        if (classId !== 'undefined') {
+          for (let i = 0; i < rar.length; i++) {
+            let rowId = rar[i].recordId
+            rowAccessUser.list.forEach(storedItem => {
+              let storedId = storedItem.recordId.toString()
               if (storedId == rowId) {
-                rar[i].hasAccess = true;
+                rar[i].hasAccess = true
               }
-          });
-      }
-        
-      let resultObject = { list: rar };
-      setRowGridData(resultObject)
-    }
+            })
+          }
+
+          let resultObject = { list: rar }
+          setRowGridData(resultObject)
+        }
       }
     )
   }
@@ -835,16 +835,12 @@ const Users = () => {
   }, [access])
 
   return (
-    <>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%'
-        }}
-      >
+    <VertLayout>
+      <Fixed>
         <GridToolbar onAdd={addUsers} maxAccess={access} />
-        <Table
+      </Fixed>
+      <Grow>
+      <Table
           columns={columns}
           gridData={gridData}
           rowId={['recordId']}
@@ -856,12 +852,11 @@ const Users = () => {
           maxAccess={access}
           paginationType='client'
         />
-      </Box>
+      </Grow>
       {windowOpen && (
         <UsersWindow
           onClose={() => setWindowOpen(false)}
           width={800}
-          height={400}
           onSave={handleSubmit}
           labels={_labels}
           maxAccess={access}
@@ -869,8 +864,6 @@ const Users = () => {
           tabs={tabs}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
-
-          //Users
           usersValidation={usersValidation}
           notificationGrpStore={notificationGrpStore}
           languageStore={languageStore}
@@ -883,8 +876,6 @@ const Users = () => {
           emailPresent={emailPresent}
           passwordState={passwordState}
           setPasswordState={setPasswordState}
-
-          //Defaults
           defaultsValidation={defaultsValidation}
           siteStore={siteStore}
           plantStore={plantStore}
@@ -892,14 +883,10 @@ const Users = () => {
           setCashAccStore={setCashAccStore}
           cashAccStore={cashAccStore}
           lookupCashAcc={lookupCashAcc}
-
-          //Security Grp
           securityGrpGridData={securityGrpGridData}
           getSecurityGrpGridData={getSecurityGrpGridData}
           delSecurityGrp={delSecurityGrp}
           addSecurityGrp={addSecurityGrp}
-
-          //Row Access
           moduleStore={moduleStore}
           rowGridData={rowGridData}
           handleRowAccessSubmit={handleRowAccessSubmit}
@@ -916,12 +903,13 @@ const Users = () => {
           initialAllListData={initialAllListData}
           initialSelectedListData={initialSelectedListData}
           handleListsDataChange={handleListsDataChange}
-          itemSelectorLabels={itemSelectorLabels}
+          itemSelectorLabels={{ title1: _labels.all, title2: _labels.selected }}
+          formik={securityGrpValidation}
           maxAccess={access}
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+    </VertLayout>
   )
 }
 

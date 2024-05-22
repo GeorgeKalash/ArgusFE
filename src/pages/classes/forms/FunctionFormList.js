@@ -1,25 +1,15 @@
-// ** React Importsport
 import { useContext, useEffect, useState } from 'react'
-
-// ** MUI Imports
 import { Box } from '@mui/material'
-
-// ** Third Party Imports
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import Table from 'src/components/Shared/Table'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-
-// ** Forms
 import FunctionForm from '../forms/FunctionForm'
-
-// ** Helpers
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 import { useWindow } from 'src/windows'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const FunctionFormList = (
  { 
@@ -58,7 +48,7 @@ const FunctionFormList = (
         functionId: functionId
       },
       width: 400,
-      height: 400,
+      height:350,
       title: labels.functions
     })
   }
@@ -103,9 +93,11 @@ const FunctionFormList = (
   },[recordId])
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar onAdd={addFunction} maxAccess={maxAccess} />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={FunctionGridData}
@@ -115,10 +107,9 @@ const FunctionFormList = (
           isLoading={false}
           maxAccess={maxAccess}
           pagination={false}
-          height={height-100}
         />
-      </Box>
-    </>
+      </Grow>
+    </VertLayout>
   )
 }
 

@@ -1,28 +1,17 @@
-// ** React Importsport
-import { useState, useContext } from 'react'
-
-// ** MUI Imports
-import { Box } from '@mui/material'
-
-// ** Third Party Imports
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
-
-// ** Windows
 import CharacteristicsWindow from './Windows/CharacteristicsWindow'
-
-// ** Helpers
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 import { formatDateDefault } from 'src/lib/date-helper'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const Characteristics = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -100,7 +89,6 @@ const Characteristics = () => {
         maxAccess: access,
       },
       width: 600,
-      height: 600,
       title: _labels.characteristics
     })
   }
@@ -110,9 +98,11 @@ const Characteristics = () => {
   }
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar onAdd={addCharacteristics} maxAccess={access} />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
@@ -126,8 +116,8 @@ const Characteristics = () => {
           pageSize={50}
           maxAccess={access}
         />
-      </Box>
-    </>
+      </Grow>
+    </VertLayout>
   )
 }
 
