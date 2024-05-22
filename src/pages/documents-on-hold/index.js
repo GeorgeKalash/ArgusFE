@@ -131,6 +131,7 @@ const DocumentsOnHold = () => {
     let relevantAccess
 
     let windowWidth
+    let windowHeight
     let title
 
     switch (obj.functionId) {
@@ -158,7 +159,8 @@ const DocumentsOnHold = () => {
         labels = await getLabels(ResourceIds.CashCountTransaction)
         relevantAccess = await getAccess(ResourceIds.CashCountTransaction)
 
-        windowWidth = 1200
+        windowWidth = 1100
+        windowHeight = 700
         title = labels.CashCount
         break
       case SystemFunction.CurrencyPurchase:
@@ -209,7 +211,7 @@ const DocumentsOnHold = () => {
           maxAccess: relevantAccess
         },
         width: windowWidth,
-
+        height: windowHeight,
         title: title
       })
     }
