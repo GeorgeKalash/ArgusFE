@@ -9,7 +9,7 @@ export function useDocumentTypeAdd({ functionId, stackObj }) {
   const { stack: stackError } = useError()
   const { stack } = useWindow()
 
-  const documentTypeAdd = async () => {
+  const sectionAction = async () => {
     const general = await documentType(getRequest, functionId)
     if (!general?.errorMessage) {
       stack(stackObj)
@@ -18,7 +18,7 @@ export function useDocumentTypeAdd({ functionId, stackObj }) {
     }
   }
 
-  return { documentTypeAdd }
+  return { sectionAction }
 }
 
 export default useDocumentTypeAdd

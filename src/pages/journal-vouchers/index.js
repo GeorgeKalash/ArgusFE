@@ -99,10 +99,10 @@ const JournalVoucher = () => {
     title: _labels.generalJournal
   }
 
-  const { documentTypeAdd } = useDocumentTypeAdd({ functionId: SystemFunction.JournalVoucher, stackObj })
+  const { sectionAction } = useDocumentTypeAdd({ functionId: SystemFunction.JournalVoucher, stackObj })
 
   const add = async () => {
-    await documentTypeAdd()
+    await sectionAction()
   }
 
   const edit = obj => {
