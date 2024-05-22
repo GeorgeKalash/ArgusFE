@@ -96,10 +96,10 @@ const GridToolbar = ({
         justifyContent: 'space-between',
         alignItems: 'center',
         width: '100%',
-        pt:'5px'
+        pt: '5px'
       }}
     >
-      <Grid container spacing={4} sx={{ display: 'flex', padding:2  }}>
+      <Grid container spacing={4} sx={{ display: 'flex', padding: 2 }}>
         {children && children}
         {initialLoad && (
           <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', pl: 2 }}>
@@ -122,7 +122,7 @@ const GridToolbar = ({
                   },
                   width: '20px',
                   height: '35px',
-                  objectFit: 'contain',
+                  objectFit: 'contain'
                 }}
               >
                 <img src='/images/buttonsIcons/add.png' alt='Add' />
