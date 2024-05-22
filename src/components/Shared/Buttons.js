@@ -86,6 +86,12 @@ export const Buttons = [
     main: false
   },
   {
+    key: 'Account Balance',
+    color: '#275915',
+    image: 'popup-window.png',
+    main: false
+  },
+  {
     key: 'Client Relation',
     color: '#AC48AE',
     image: 'clientRelations.png',

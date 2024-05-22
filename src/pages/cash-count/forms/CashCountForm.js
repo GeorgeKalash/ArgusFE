@@ -306,7 +306,13 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
       key: 'Reopen',
       condition: isClosed,
       onClick: onReopen,
-      disabled: !isClosed || !editMode || formik.values.status === 3
+      disabled: !isClosed || !editMode || formik.values.releaseStatus === 3
+    },
+    {
+      key: 'Account Balance',
+      condition: true,
+      onClick: 'onClickAC',
+      disabled: false
     }
   ]
 
@@ -335,9 +341,9 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
 
   return (
     <FormShell
+      actions={actions}
       resourceId={ResourceIds.CashCountTransaction}
       form={formik}
-      actions={actions}
       maxAccess={maxAccess}
       editMode={editMode}
       functionId={SystemFunction.CashCountTransaction}

@@ -299,6 +299,12 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
       condition: true,
       onClick: shipmentClicked,
       disabled: (editMode && formik.values.fromPlantId == formik.values.toPlantId) || !editMode
+    },
+    {
+      key: 'Account Balance',
+      condition: true,
+      onClick: 'onClickAC',
+      disabled: false
     }
   ]
 
