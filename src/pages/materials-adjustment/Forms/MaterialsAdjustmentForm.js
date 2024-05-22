@@ -1,9 +1,6 @@
-// ** MUI Imports
 import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
-
-// ** MUI Imports
 import { Grid, Box } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import { useFormik } from 'formik'
@@ -14,8 +11,6 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useWindowDimensions } from 'src/lib/useWindowDimensions'
-
-// ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
@@ -29,7 +24,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, e
   const [isPosted, setIsPosted] = useState(false)
   const [itemStore, setItemStore] = useState([])
   const [editMode, setEditMode] = useState(!!recordId)
-  console.log('window test ', window)
+  const { getRequest, postRequest } = useContext(RequestsContext)
 
   const [initialValues, setInitialData] = useState({
     recordId: null,
@@ -40,7 +35,6 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, e
     description: '',
     date: null
   })
-  const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
     endpointId: InventoryRepository.MaterialsAdjustment.qry
@@ -58,16 +52,14 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, e
       copy.date = formatDateToApi(copy.date)
 
       const updatedRows = detailsFormik.values.rows.map((adjDetail, index) => {
-        const seqNo = index + 1 // Adding 1 to make it 1-based index
+        const seqNo = index + 1
         if (adjDetail.muQty === null) {
-          // If muQty is null, set qtyInBase to 0
           return {
             ...adjDetail,
             qtyInBase: 0,
             seqNo: seqNo
           }
         } else {
-          // If muQty is not null, calculate qtyInBase
           return {
             ...adjDetail,
             qtyInBase: adjDetail.muQty * adjDetail.qty,
@@ -141,7 +133,6 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, e
     })
     invalidate()
     setIsPosted(true)
-    toast.success('Record Deleted Successfully')
   }
 
   const lookupSKU = async searchQry => {
