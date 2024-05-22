@@ -98,7 +98,7 @@ const GridToolbar = ({
         justifyContent: 'space-between',
         alignItems: 'center',
         width: '100%',
-        pt:'5px'
+        pt: '5px'
       }}
     >
       {children && children}
@@ -124,7 +124,7 @@ const GridToolbar = ({
                   },
                   width: '20px',
                   height: '35px',
-                  objectFit: 'contain',
+                  objectFit: 'contain'
                 }}
               >
                 <img src='/images/buttonsIcons/add.png' alt='Add' />
@@ -148,14 +148,24 @@ const GridToolbar = ({
           </Box>
         )}
         {onTree && (
-          <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
-            <Button
-              onClick={onTree}
-              variant='contained'
-              style={{ backgroundColor: 'black', border: '1px solid #4eb558' }}
-            >
-              <img src='/images/buttonsIcons/tree.png' alt='tree' />
-            </Button>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-start', pl: 2 }}>
+            <Tooltip title='Add'>
+              <Button
+                onClick={onTree}
+                variant='contained'
+                sx={{
+                  mr: 1,
+                  '&:hover': {
+                    opacity: 0.8
+                  },
+                  width: '20px',
+                  height: '35px',
+                  objectFit: 'contain'
+                }}
+              >
+                <img src='/images/buttonsIcons/tree.png' alt='Add' />
+              </Button>
+            </Tooltip>
           </Box>
         )}
         {openRPB && (
