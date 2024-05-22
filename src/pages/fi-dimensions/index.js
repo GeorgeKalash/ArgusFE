@@ -6,9 +6,8 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import * as yup from 'yup'
-import FormShell from 'src/components/Shared/FormShell'
 import { useForm } from 'src/hooks/form'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -96,7 +95,7 @@ const FiDimensions = () => {
       .catch(error => {})
   }
 
-  const { labels: _labels, access } = useResourceQuery({
+  const { labels: _labels } = useResourceQuery({
     datasetId: ResourceIds.FI_dimensions
   })
 
@@ -122,23 +121,24 @@ const FiDimensions = () => {
     formik.handleSubmit()
   }
 
-  useEffect(() => {
-    const dimCount = formik.values.DimCount
+  const handleDimCountChange = event => {
+    setTempDimCount(event.target.value)
+  }
+
+  function clearExcessFields(currentCount) {
+    const dimCount = currentCount
     for (let i = 1; i <= 20; i++) {
       const dimKey = `tpaDimension${i}`
       if (i > dimCount) {
         formik.setFieldValue(dimKey, null)
       }
     }
-  }, [formik.values.DimCount])
-
-  const handleDimCountChange = event => {
-    setTempDimCount(event.target.value)
   }
 
   const handleDimCountBlur = () => {
     if (tempDimCount !== null) {
       formik.setFieldValue('DimCount', tempDimCount)
+      clearExcessFields(tempDimCount)
     }
   }
 
