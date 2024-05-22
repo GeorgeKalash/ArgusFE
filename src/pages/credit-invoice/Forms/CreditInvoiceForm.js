@@ -1,7 +1,6 @@
-import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
-import { Grid, Box, FormControlLabel, Checkbox, RadioGroup, Radio } from '@mui/material'
+import { Grid, FormControlLabel, RadioGroup, Radio } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import { useError } from 'src/error'
 import { useFormik } from 'formik'
@@ -21,19 +20,18 @@ import { SystemFunction } from 'src/resources/SystemFunction'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { CTTRXrepository } from 'src/repositories/CTTRXRepository'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
-import { FormatLineSpacing } from '@mui/icons-material'
-import CustomLookup from 'src/components/Inputs/CustomLookup'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { useWindow } from 'src/windows'
 import WorkFlow from 'src/components/Shared/WorkFlow'
 import { DataGrid } from 'src/components/Shared/DataGrid'
-
+import { LOShipmentForm } from 'src/components/Shared/LOShipmentForm'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { LOTransportationForm } from 'src/components/Shared/LOTransportationForm'
 
-export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expanded, plantId, userData }) {
+export default function CreditInvoiceForm({ _labels, maxAccess, recordId, plantId, userData }) {
   const { height } = useWindowDimensions()
   const [isLoading, setIsLoading] = useState(false)
   const [isPosted, setIsPosted] = useState(false)
@@ -666,6 +664,33 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
     })
   }
 
+  const shipmentClicked = () => {
+    stack({
+      Component: LOShipmentForm,
+      props: {
+        recordId: formik.values.recordId,
+        functionId: formik.values.functionId,
+        editMode: formik.values.status != 1
+      },
+      width: 950,
+      height: 670,
+      title: 'Shipments'
+    })
+  }
+
+  const transportationClicked = () => {
+    stack({
+      Component: LOTransportationForm,
+      props: {
+        recordId: formik.values.recordId,
+        functionId: formik.values.functionId,
+        editMode: formik.values.status != 1
+      },
+      width: 600,
+      title: 'Transportation'
+    })
+  }
+
   const actions = [
     {
       key: 'GL',
@@ -690,6 +715,18 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
       condition: true,
       onClick: onWorkFlowClick,
       disabled: !editMode
+    },
+    {
+      key: 'Shipment',
+      condition: true,
+      onClick: shipmentClicked,
+      disabled: !editMode
+    },
+    {
+      key: 'Transportation',
+      condition: true,
+      onClick: transportationClicked,
+      disabled: !editMode
     }
   ]
 
@@ -705,98 +742,88 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
       disabledSubmit={isPosted || isCancelled}
     >
       <VertLayout>
-          <Fixed>
-            <Grid container xs={12} style={{ display: 'flex', marginTop: '10px' }}>
-              {/* First Column */}
-              <Grid item xs={3} style={{ marginRight: '10px' }}>
-                <CustomDatePicker
-                  name='date'
-                  required
-                  label={_labels.date}
-                  readOnly={isPosted || isCancelled}
-                  value={formik?.values?.date}
-                  onChange={formik.setFieldValue}
-                  maxAccess={maxAccess}
-                  onClear={() => formik.setFieldValue('date', '')}
-                  error={formik.touched.date && Boolean(formik.errors.date)}
-                  helperText={formik.touched.date && formik.errors.date}
-                />
-              </Grid>
-
-              {/* Second Column */}
-              <Grid item style={{ marginRight: '10px', width: '420px' }}>
-                <ResourceComboBox
-                  endpointId={SystemRepository.Plant.qry}
-                  name='plantId'
-                  label={_labels.plant}
-                  readOnly={true}
-                  values={formik.values}
-                  valueField='recordId'
-                  displayField={['reference', 'name']}
-                  columnsInDropDown={[
-                    { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
-                  ]}
-                  required
-                  maxAccess={maxAccess}
-                  onChange={(event, newValue) => {
-                    formik && formik.setFieldValue('plantId', newValue?.recordId)
-                  }}
-                  error={formik.touched.plantId && Boolean(formik.errors.plantId)}
-                />
-              </Grid>
-
-              {/* Third Column */}
-              <Grid item style={{ marginRight: '10px', width: '190px' }}>
-                <CustomTextField
-                  name='reference'
-                  label={_labels.reference}
-                  value={formik?.values?.reference}
-                  maxAccess={maxAccess}
-                  maxLength='30'
-                  readOnly={true}
-                  required
-                  error={formik.touched.reference && Boolean(formik.errors.reference)}
-                  helperText={formik.touched.reference && formik.errors.reference}
-                />
-              </Grid>
+        <Fixed>
+          <Grid container xs={12} style={{ marginTop: '10px' }}>
+            <Grid item xs={4}>
+              <CustomDatePicker
+                name='date'
+                required
+                label={_labels.date}
+                readOnly={isPosted || isCancelled}
+                value={formik?.values?.date}
+                onChange={formik.setFieldValue}
+                maxAccess={maxAccess}
+                onClear={() => formik.setFieldValue('date', '')}
+                error={formik.touched.date && Boolean(formik.errors.date)}
+                helperText={formik.touched.date && formik.errors.date}
+              />
             </Grid>
-
-            <Grid container xs={12}>
-              {/* First Column */}
-              <Grid container rowGap={1} xs={9} style={{ marginTop: '10px' }}>
-                <Grid item xs={12}>
-                  <ResourceLookup
-                    endpointId={RemittanceSettingsRepository.Correspondent.snapshot}
-                    valueField='reference'
-                    displayField='name'
-                    name='corId'
-                    label={_labels.correspondent}
-                    form={formik}
-                    firstFieldWidth='30%'
-                    required
-                    valueShow='corRef'
-                    secondValueShow='corName'
-                    readOnly={isPosted || isCancelled || detailsFormik?.values?.rows[0]?.currencyId}
-                    onChange={async (event, newValue) => {
-                      if (newValue) {
-                        const baseCurrency = await getBaseCurrency()
-                        getCorrespondentById(newValue?.recordId, baseCurrency, formik.values.plantId)
-                        formik.setFieldValue('corId', newValue?.recordId)
-                        formik.setFieldValue('corName', newValue?.name || '')
-                        formik.setFieldValue('corRef', newValue?.reference || '')
-                      } else {
-                        formik.setFieldValue('corId', null)
-                        formik.setFieldValue('corName', null)
-                        formik.setFieldValue('corRef', null)
-                      }
-                    }}
-                    errorCheck={'corId'}
-                  />
-                </Grid>
-              </Grid>
+            <Grid item xs={4} sx={{ pl: 1 }}>
+              <ResourceComboBox
+                endpointId={SystemRepository.Plant.qry}
+                name='plantId'
+                label={_labels.plant}
+                readOnly={true}
+                values={formik.values}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                required
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik && formik.setFieldValue('plantId', newValue?.recordId)
+                }}
+                error={formik.touched.plantId && Boolean(formik.errors.plantId)}
+              />
             </Grid>
-            <Grid item xs={9} style={{ marginTop: '8px' }}>
+            <Grid item xs={4} sx={{ pl: 1 }}>
+              <CustomTextField
+                name='reference'
+                label={_labels.reference}
+                value={formik?.values?.reference}
+                maxAccess={maxAccess}
+                maxLength='30'
+                readOnly={true}
+                required
+                error={formik.touched.reference && Boolean(formik.errors.reference)}
+                helperText={formik.touched.reference && formik.errors.reference}
+              />
+            </Grid>
+          </Grid>
+          <Grid container xs={8} style={{ marginTop: '10px' }}>
+            <Grid item xs={12}>
+              <ResourceLookup
+                endpointId={RemittanceSettingsRepository.Correspondent.snapshot}
+                valueField='reference'
+                displayField='name'
+                name='corId'
+                label={_labels.correspondent}
+                form={formik}
+                firstFieldWidth='30%'
+                required
+                valueShow='corRef'
+                secondValueShow='corName'
+                readOnly={isPosted || isCancelled || detailsFormik?.values?.rows[0]?.currencyId}
+                onChange={async (event, newValue) => {
+                  if (newValue) {
+                    const baseCurrency = await getBaseCurrency()
+                    getCorrespondentById(newValue?.recordId, baseCurrency, formik.values.plantId)
+                    formik.setFieldValue('corId', newValue?.recordId)
+                    formik.setFieldValue('corName', newValue?.name || '')
+                    formik.setFieldValue('corRef', newValue?.reference || '')
+                  } else {
+                    formik.setFieldValue('corId', null)
+                    formik.setFieldValue('corName', null)
+                    formik.setFieldValue('corRef', null)
+                  }
+                }}
+                errorCheck={'corId'}
+              />
+            </Grid>
+            <Grid item xs={12} sx={{ pt: 2 }}>
               <ResourceLookup
                 endpointId={CashBankRepository.CashAccount.snapshot}
                 parameters={{
@@ -826,87 +853,82 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
                 errorCheck={'cashAccountId'}
               />
             </Grid>
-            <Grid container xs={12}>
-              <RadioGroup
-                row
-                value={formik.values.functionId}
-                defaultValue={SystemFunction.CreditInvoicePurchase}
-                onChange={e => setOperationType(e.target.value)}
-              >
-                <FormControlLabel
-                  value={SystemFunction.CreditInvoicePurchase}
-                  control={<Radio />}
-                  label={_labels.purchase}
-                  disabled={detailsFormik?.values?.rows[0]?.currencyId}
-                />
-                <FormControlLabel
-                  value={SystemFunction.CreditInvoiceSales}
-                  control={<Radio />}
-                  label={_labels.sale}
-                  disabled={detailsFormik?.values?.rows[0]?.currencyId}
-                />
-              </RadioGroup>
-            </Grid>
-            </Fixed>
-            <Grow>
-                <DataGrid
-                  onChange={value => detailsFormik.setFieldValue('rows', value)}
-                  value={detailsFormik.values.rows}
-                  error={detailsFormik.errors.rows}
-                  columns={columns}
-                  bg={
-                    formik.values.functionId &&
-                    (formik.values.functionId != SystemFunction.CreditInvoicePurchase
-                      ? '#C7F6C7'
-                      : 'rgb(245, 194, 193)')
-                  }
-                />
-            </Grow>
-            <Fixed>
-            <Grid
-              container
-              rowGap={1}
-              xs={12}
+          </Grid>
+          <Grid container xs={12}>
+            <RadioGroup
+              row
+              value={formik.values.functionId}
+              defaultValue={SystemFunction.CreditInvoicePurchase}
+              onChange={e => setOperationType(e.target.value)}
             >
-              {/* First Column (moved to the left) */}
-              <Grid container rowGap={1} xs={8} style={{ marginTop: '10px' }}>
-                <CustomTextArea
-                  name='notes'
-                  label={_labels.notes}
-                  value={formik.values.notes}
-                  rows={3}
-                  readOnly={isPosted || isCancelled}
-                  maxAccess={maxAccess}
-                  onChange={formik.handleChange}
-                  onClear={() => formik.setFieldValue('notes', '')}
-                  error={formik.touched.notes && Boolean(formik.errors.notes)}
-                  helperText={formik.touched.notes && formik.errors.notes}
+              <FormControlLabel
+                value={SystemFunction.CreditInvoicePurchase}
+                control={<Radio />}
+                label={_labels.purchase}
+                disabled={detailsFormik?.values?.rows[0]?.currencyId}
+              />
+              <FormControlLabel
+                value={SystemFunction.CreditInvoiceSales}
+                control={<Radio />}
+                label={_labels.sale}
+                disabled={detailsFormik?.values?.rows[0]?.currencyId}
+              />
+            </RadioGroup>
+          </Grid>
+        </Fixed>
+        <Grow>
+          <DataGrid
+            onChange={value => detailsFormik.setFieldValue('rows', value)}
+            value={detailsFormik.values.rows}
+            error={detailsFormik.errors.rows}
+            columns={columns}
+            bg={
+              formik.values.functionId &&
+              (formik.values.functionId != SystemFunction.CreditInvoicePurchase ? '#C7F6C7' : 'rgb(245, 194, 193)')
+            }
+          />
+        </Grow>
+        <Fixed>
+          <Grid container rowGap={1} xs={12}>
+            {/* First Column (moved to the left) */}
+            <Grid container rowGap={1} xs={8} style={{ marginTop: '10px' }}>
+              <CustomTextArea
+                name='notes'
+                label={_labels.notes}
+                value={formik.values.notes}
+                rows={3}
+                readOnly={isPosted || isCancelled}
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('notes', '')}
+                error={formik.touched.notes && Boolean(formik.errors.notes)}
+                helperText={formik.touched.notes && formik.errors.notes}
+              />
+            </Grid>
+            {/* Second Column  */}
+            <Grid container rowGap={1} xs={4} sx={{ px: 2 }} style={{ marginTop: '10px' }}>
+              <Grid item xs={12}>
+                <CustomTextField
+                  name='totalCUR'
+                  label={`Total ${toCurrencyRef !== null ? toCurrencyRef : ''}`}
+                  value={getFormattedNumber(totalCUR.toFixed(2))}
+                  numberField={true}
+                  readOnly={true}
                 />
               </Grid>
-              {/* Second Column  */}
-              <Grid container rowGap={1} xs={4} sx={{ px: 2 }} style={{ marginTop: '10px' }}>
-                <Grid item xs={12}>
-                  <CustomTextField
-                    name='totalCUR'
-                    label={`Total ${toCurrencyRef !== null ? toCurrencyRef : ''}`}
-                    value={getFormattedNumber(totalCUR.toFixed(2))}
-                    numberField={true}
-                    readOnly={true}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomTextField
-                    name='baseAmount'
-                    label={`Total ${baseCurrencyRef !== null ? baseCurrencyRef : ''}`}
-                    style={{ textAlign: 'right' }}
-                    value={getFormattedNumber(totalLoc.toFixed(2))}
-                    numberField={true}
-                    readOnly={true}
-                  />
-                </Grid>
+              <Grid item xs={12}>
+                <CustomTextField
+                  name='baseAmount'
+                  label={`Total ${baseCurrencyRef !== null ? baseCurrencyRef : ''}`}
+                  style={{ textAlign: 'right' }}
+                  value={getFormattedNumber(totalLoc.toFixed(2))}
+                  numberField={true}
+                  readOnly={true}
+                />
               </Grid>
             </Grid>
-            </Fixed>
+          </Grid>
+        </Fixed>
       </VertLayout>
     </FormShell>
   )

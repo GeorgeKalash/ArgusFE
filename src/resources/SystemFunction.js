@@ -98,3 +98,7 @@ export const SystemFunction = {
   KYC: Module.Remittance * 100 + 0,
   Outwards: Module.Remittance * 100 + 2
 }
+
+export const getSystemFunctionModule = functionId => {
+  return Math.floor(functionId / 100)
+}

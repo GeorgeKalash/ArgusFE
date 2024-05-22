@@ -1,6 +1,4 @@
 import { useState, useContext } from 'react'
-import { Box } from '@mui/material'
-import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -11,9 +9,7 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { formatDateDefault } from 'src/lib/date-helper'
-import CreditOrder from '../credit-order'
 import CreditOrderForm from '../credit-order/Forms/CreditOrderForm'
-import useResourceParams from 'src/hooks/useResourceParams'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import CreditInvoiceForm from '../credit-invoice/Forms/CreditInvoiceForm'
 import { KVSRepository } from 'src/repositories/KVSRepository'
@@ -26,22 +22,21 @@ import { RTCLRepository } from 'src/repositories/RTCLRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import CashTransferTab from '../cash-transfer/Tabs/CashTransferTab'
 
 const DocumentsOnHold = () => {
-  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { getRequest } = useContext(RequestsContext)
 
   const [selectedRecordId, setSelectedRecordId] = useState(null)
   const [selectedFunctioId, setSelectedFunctioId] = useState(null)
   const [selectedSeqNo, setSelectedSeqNo] = useState(null)
-
-  //states
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
   const [gridData, setGridData] = useState([])
+  const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
-    console.log('request')
 
     const response = await getRequest({
       extension: DocumentReleaseRepository.DocumentsOnHold.qry,
@@ -103,7 +98,6 @@ const DocumentsOnHold = () => {
     setSelectedFunctioId(obj.functionId)
     setWindowOpen(true)
   }
-  const { stack } = useWindow()
 
   async function getLabels(datasetId) {
     const res = await getRequest({
@@ -162,6 +156,7 @@ const DocumentsOnHold = () => {
         windowWidth = 1200
         title = labels.cashInvoice
         break
+
       case SystemFunction.KYC:
         await getRequest({
           extension: RTCLRepository.CtClientIndividual.get,
@@ -186,6 +181,16 @@ const DocumentsOnHold = () => {
 
         windowWidth = 1100
         title = labels.OutwardsTransfer
+        break
+
+      case SystemFunction.CashTransfer:
+        relevantComponent = CashTransferTab
+        labels = await getLabels(ResourceIds.CashTransfer)
+        relevantAccess = await getAccess(ResourceIds.CashTransfer)
+
+        windowWidth = 1100
+        title = labels.CashTransfer
+        break
 
       default:
         // Handle default case if needed
