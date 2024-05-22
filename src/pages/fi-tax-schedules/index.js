@@ -11,7 +11,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 
-// import TaxSchedulesWindow from './Window/TaxSchedulesWindow'
+import TaxSchedulesWindow from './Window/TaxSchedulesWindow'
 
 const TaxSchedules = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -76,19 +76,19 @@ const TaxSchedules = () => {
     toast.success('Record Deleted Successfully')
   }
 
-  //   function openForm(recordId) {
-  //     stack({
-  //       Component: TaxSchedulesWindow,
-  //       props: {
-  //         labels: _labels,
-  //         recordId: recordId,
-  //         maxAccess: access
-  //       },
-  //       width: 800,
-  //       height: 460,
-  //       title: _labels.taxSchedules
-  //     })
-  //   }
+  function openForm(recordId) {
+    stack({
+      Component: TaxSchedulesWindow,
+      props: {
+        labels: _labels,
+        recordId: recordId,
+        maxAccess: access
+      },
+      width: 800,
+      height: 460,
+      title: _labels.taxSchedules
+    })
+  }
 
   return (
     <VertLayout>
