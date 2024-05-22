@@ -140,7 +140,9 @@ const CustomTextField = ({
         '& .MuiOutlinedInput-root': {
           '& fieldset': {
             border: !hasBorder && 'none' // Hide border
-          }
+          },
+        height:`${props.height}px !important`
+
         }
       }}
       required={required}

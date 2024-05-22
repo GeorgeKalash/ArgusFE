@@ -38,9 +38,9 @@ export default function CityForm({ labels, recordId, maxAccess }) {
     validateOnChange: true,
 
     validationSchema: yup.object({
-      name: yup.string().required(),
-      reference: yup.string().required(),
-      countryId: yup.string().required()
+      name: yup.string().required(' '),
+      reference: yup.string().required(' '),
+      countryId: yup.string().required(' ')
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
@@ -52,6 +52,10 @@ export default function CityForm({ labels, recordId, maxAccess }) {
 
       if (!recordId) {
         toast.success('Record Added Successfully')
+        formik.setValues({
+          ...obj,
+          recordId: response.recordId
+        })
       } else toast.success('Record Edited Successfully')
       setEditMode(true)
 

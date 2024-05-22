@@ -1,7 +1,5 @@
-// ** MUI Imports
 import { Grid, FormControlLabel, Checkbox } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
-import { useFormik } from 'formik'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -9,33 +7,14 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { DataSets } from 'src/resources/DataSets'
-
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { useForm } from 'src/hooks/form'
 
-export default function DocumentTypeMapForm({ labels, maxAccess, recordId, fromFunctionId, fromDTId, toFunctionId }) {
-  const [isLoading, setIsLoading] = useState(false)
+export default function DocumentTypeMapForm({ labels, maxAccess, recordId, record }) {
   const [editMode, setEditMode] = useState(!!recordId)
-
-  const [initialValues, setInitialData] = useState({
-    recordId: recordId || null,
-    fromFunctionId: '',
-    fromDTId: '',
-    toFunctionId: '',
-    decimals: '',
-    profileId: '',
-    currencyType: '',
-    currencyTypeName: '',
-    sale: false,
-    useSameReference: false,
-    dtId: '',
-    symbol: '',
-    fromFunctionName: '',
-    toFunctionName: '',
-    fromDTName: ''
-  })
 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -43,15 +22,33 @@ export default function DocumentTypeMapForm({ labels, maxAccess, recordId, fromF
     endpointId: SystemRepository.DocumentTypeMap.qry
   })
 
-  const formik = useFormik({
-    initialValues,
+  const { formik } = useForm({
+    initialValues: {
+      recordId: recordId || null,
+      fromFunctionId: '',
+      fromDTId: '',
+      toFunctionId: '',
+      decimals: '',
+      profileId: '',
+      currencyType: '',
+      currencyTypeName: '',
+      sale: false,
+      useSameReference: false,
+      dtId: '',
+      symbol: '',
+      fromFunctionName: '',
+      toFunctionName: '',
+      fromDTName: '',
+      ...record
+    },
+    maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      fromFunctionId: yup.string().required(),
-      fromDTId: yup.string().required(),
-      toFunctionId: yup.string().required(),
-      dtId: yup.string().required()
+      fromFunctionId: yup.string().required(' '),
+      fromDTId: yup.string().required(' '),
+      toFunctionId: yup.string().required(' '),
+      dtId: yup.string().required(' ')
     }),
     onSubmit: async obj => {
       const fromFunctionId = formik.values.fromFunctionId
@@ -68,37 +65,32 @@ export default function DocumentTypeMapForm({ labels, maxAccess, recordId, fromF
         setEditMode(false)
       } else toast.success('Record Edited Successfully')
       setEditMode(true)
-      setInitialData({
-        ...obj, // Spread the existing properties
+      formik.setValues({
+        ...obj,
         recordId: String(obj.fromFunctionId) + String(obj.fromDTId) + String(obj.toFunctionId)
       })
-      console.log('record check 11 ', String(obj.fromFunctionId) + String(obj.fromDTId) + String(obj.toFunctionId))
-      console.log('record check 22 ', formik.values)
+
       invalidate()
     }
   })
   useEffect(() => {
     ;(async function () {
       try {
-        if (fromFunctionId && fromDTId && toFunctionId) {
-          setIsLoading(true)
+        if (record && record.fromFunctionId && record.fromDTId && record.toFunctionId) {
+          setEditMode(true)
 
           const res = await getRequest({
             extension: SystemRepository.DocumentTypeMap.get,
             parameters: `_fromFunctionId=${fromFunctionId}&_fromDTId=${fromDTId}&_toFunctionId=${toFunctionId}`
           })
 
-          setInitialData({
+          formik.setValues({
             ...res.record,
             recordId: String(res.record.fromFunctionId) + String(res.record.fromDTId) + String(res.record.toFunctionId)
           })
         }
-      } catch (exception) {
-        setErrorMessage(error)
-      }
-      setIsLoading(false)
+      } catch (exception) {}
     })()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
