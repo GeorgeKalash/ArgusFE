@@ -20,6 +20,7 @@ const WindowToolbar = ({
   onApproval,
   onClickGIA,
   onClickGL,
+  onClickAC,
   onGenerateReport,
   disabledSubmit,
   disabledApply,
@@ -56,6 +57,7 @@ const WindowToolbar = ({
     onApproval,
     onClientRelation,
     onClickGL: () => onClickGL(recordId),
+    onClickAC: () => onClickAC(recordId),
     onClickGIA: () => onClickGIA(recordId)
   }
   const { getRequest } = useContext(RequestsContext)

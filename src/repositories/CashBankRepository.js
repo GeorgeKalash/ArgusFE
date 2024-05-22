@@ -50,6 +50,7 @@ export const CashBankRepository = {
     snapshot: service + 'snapshotACC'
   },
   AccountBalance: {
+    qry: service + 'qryABA',
     get: service + 'getABA'
   }
 }
