@@ -223,18 +223,16 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
     })
   }
 
-  const getAccView = async () => {
-    if (cashAccountId) {
-      const defaultParams = `_recordId=${cashAccountId}`
+  const getAccView = async cashId => {
+    const defaultParams = `_recordId=${cashId}`
 
-      const res = await getRequest({
-        extension: CashBankRepository.CashAccount.get,
-        parameters: defaultParams
-      })
-      if (res.record) {
-        formik.setFieldValue('fromCARef', res.record.accountNo)
-        formik.setFieldValue('fromCAName', res.record.name)
-      }
+    const res = await getRequest({
+      extension: CashBankRepository.CashAccount.get,
+      parameters: defaultParams
+    })
+    if (res.record) {
+      formik.setFieldValue('fromCARef', res.record.accountNo)
+      formik.setFieldValue('fromCAName', res.record.name)
     }
   }
 
@@ -254,18 +252,20 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
 
   useEffect(() => {
     ;(async function () {
+      let cashId = ''
       if (recordId) {
         const res = await getRequest({
           extension: CashBankRepository.CashTransfer.get,
           parameters: `_recordId=${recordId}`
         })
         res.record.date = formatDateFromApi(res.record.date)
+        cashId = res.record.fromCashAccountId
         setIsClosed(res.record.wip === 2 ? true : false)
         setIsPosted(res.record.status === 4 ? false : true)
         setDisableSubmit(res.record.status === 3 ? true : false)
         await fillCurrencyTransfer(recordId, res.record)
       }
-      getAccView()
+      getAccView(cashId ? cashId : cashAccountId)
     })()
   }, [])
 

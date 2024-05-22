@@ -52,10 +52,8 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
         extension: SystemRepository.UserDefaults.get,
         parameters: `_userId=${_userId}&_key=cashAccountId`
       })
-
-      if (cashAccountRecord) {
-        const cashAccountId = cashAccountRecord.value
-
+      const cashAccountId = cashAccountRecord?.value
+      if (cashAccountId) {
         const { record: cashAccountResult } = await getRequest({
           extension: CashBankRepository.CbBankAccounts.get,
           parameters: `_recordId=${cashAccountId}`
@@ -115,6 +113,9 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
     enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
+      reference: yup.string().required(' '),
+      cashAccountRef: yup.string().required(' '),
+      plantId: yup.string().required(' '),
       items: yup
         .array()
         .of(
@@ -124,10 +125,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
             system: yup.string().required(' ')
           })
         )
-        .required(' '),
-      reference: yup.string().required(' '),
-      cashAccountRef: yup.string().required(' '),
-      plantId: yup.string().required(' ')
+        .required(' ')
     }),
     onSubmit: async obj => {
       for (let i = 0; i < obj.items.length; i++) {
@@ -179,6 +177,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
       invalidate()
     }
   })
+
   useEffect(() => {
     !editMode && getDefaultDT()
     getTime()
@@ -198,7 +197,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
           parameters: `_recordId=${recordId}`
         })
         setIsClosed(header.wip === 2 ? true : false)
-        setIsPosted(header.status === 4 ? true : false)
+        setIsPosted(header.status === 3 ? true : false)
 
         formik.setValues({
           recordId: header.recordId,
@@ -286,16 +285,10 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
 
   const actions = [
     {
-      key: 'Posts',
-      condition: true,
-      onClick: onPost,
-      disabled: !editMode || isPosted
-    },
-    {
       key: 'Post',
       condition: true,
       onClick: onPost,
-      disabled: !editMode || !isPosted || !isClosed
+      disabled: !editMode || formik.values.status !== 4 || isPosted
     },
     {
       key: 'Close',
@@ -325,7 +318,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
 
   const getTime = async () => {
     const { record } = await getRequest({
-      extension: SystemRepository.TimeZone.get,
+      extension: SystemRepository.TimeZone?.get,
       parameters: ``
     })
     if (record) {
@@ -354,6 +347,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
       maxAccess={maxAccess}
       editMode={editMode}
       functionId={SystemFunction.CashCountTransaction}
+      disabledSubmit={isClosed}
     >
       <VertLayout>
         <Fixed>
@@ -367,6 +361,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
                 name='cashAccountRef'
                 required
                 label={labels.cashAccount}
+                readOnly={isPosted || isClosed}
                 valueField='reference'
                 displayField='name'
                 valueShow='cashAccountRef'
@@ -380,7 +375,6 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
                     cashAccountName: newValue?.name || ''
                   })
                 }}
-                errorCheck={'cashAccountId'}
                 maxAccess={maxAccess}
               />
             </Grid>
@@ -406,12 +400,13 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
                 ]}
                 values={formik.values}
                 required
+                readOnly={isPosted || isClosed}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   const plantId = newValue?.recordId || ''
                   formik.setFieldValue('plantId', plantId)
                 }}
-                error={formik.errors && Boolean(formik.errors.plantId)}
+                error={formik.touched.plantId && Boolean(formik.errors.plantId)}
               />
             </Grid>
             <Grid item xs={6}>
@@ -433,6 +428,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
                 }}
                 onClear={() => formik.setFieldValue('reference', '')}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
+                readOnly={editMode}
               />
             </Grid>
 
@@ -469,6 +465,8 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
                 label: labels.currency,
                 name: 'currencyId',
                 props: {
+                  readOnly: isPosted || isClosed,
+
                   endpointId: SystemRepository.Currency.qry,
                   valueField: 'recordId',
                   displayField: 'reference',
@@ -498,7 +496,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
                 name: 'counted',
                 label: labels.count,
                 props: {
-                  readOnly: formik.values.forceNotesCount && true
+                  readOnly: formik.values.forceNotesCount || isPosted || isClosed
                 },
                 async onChange({ row: { update, newRow } }) {
                   console.log(newRow)
@@ -522,8 +520,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
               {
                 component: 'icon',
                 label: labels.flag,
-                name: 'flag',
-                disabled: true
+                name: 'flag'
               },
               {
                 component: 'button',
@@ -533,6 +530,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
                   stack({
                     Component: CashCountNotes,
                     props: {
+                      readOnly: isPosted || isClosed,
                       labels: labels,
                       maxAccess: maxAccess,
                       forceNotesCount: formik.values.forceNotesCount,
@@ -545,6 +543,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
                 }
               }
             ]}
+            allowDelete={!isPosted || !isClosed}
           />
         </Grow>
       </VertLayout>
