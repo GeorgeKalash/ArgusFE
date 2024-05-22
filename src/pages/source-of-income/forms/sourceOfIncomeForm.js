@@ -11,19 +11,10 @@ import { DataSets } from 'src/resources/DataSets'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
+import { useForm } from 'src/hooks/form'
 
 export default function SourceOfIncomeForm({ labels, maxAccess, recordId, setStore }) {
-  const [isLoading, setIsLoading] = useState(false)
-
   const [editMode, setEditMode] = useState(!!recordId)
-
-  const [initialValues, setInitialData] = useState({
-    recordId: null,
-    name: '',
-    reference: '',
-    incomeType: '',
-    flName: ''
-  })
 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -31,15 +22,16 @@ export default function SourceOfIncomeForm({ labels, maxAccess, recordId, setSto
     endpointId: RemittanceSettingsRepository.SourceOfIncome.page
   })
 
-  const formik = useFormik({
-    initialValues,
+  const { formik } = useForm({
+    initialValues: { recordId: null, name: '', reference: '', incomeType: '', flName: '' },
+    maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required('This field is required'),
-      reference: yup.string().required('This field is required'),
-      incomeType: yup.string().required('This field is required'),
-      flName: yup.string().required('This field is required')
+      name: yup.string().required(' '),
+      reference: yup.string().required(' '),
+      incomeType: yup.string().required(' '),
+      flName: yup.string().required(' ')
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
@@ -55,7 +47,7 @@ export default function SourceOfIncomeForm({ labels, maxAccess, recordId, setSto
           name: obj.name
         })
         toast.success('Record Added Successfully')
-        setInitialData({
+        formik.setValues({
           ...obj,
           recordId: response.recordId
         })
@@ -70,8 +62,6 @@ export default function SourceOfIncomeForm({ labels, maxAccess, recordId, setSto
     ;(async function () {
       try {
         if (recordId) {
-          setIsLoading(true)
-
           const res = await getRequest({
             extension: RemittanceSettingsRepository.SourceOfIncome.get,
             parameters: `_recordId=${recordId}`
@@ -80,22 +70,14 @@ export default function SourceOfIncomeForm({ labels, maxAccess, recordId, setSto
             recordId: res.record.recordId,
             name: res.record.name
           })
-          setInitialData(res.record)
+          formik.setValues(res.record)
         }
-      } catch (exception) {
-        setErrorMessage(error)
-      }
-      setIsLoading(false)
+      } catch (exception) {}
     })()
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.SourceOfIncome}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={editMode}
-    >
+    <FormShell resourceId={ResourceIds.SourceOfIncome} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <Grid container spacing={4}>
         <Grid item xs={12}>
           <CustomTextField

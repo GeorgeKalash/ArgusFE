@@ -18,6 +18,7 @@ const WindowToolbar = ({
   isCleared,
   recordId,
   onApproval,
+  onClickGIA,
   onClickGL,
   onGenerateReport,
   disabledSubmit,
@@ -54,7 +55,8 @@ const WindowToolbar = ({
     onApply,
     onApproval,
     onClientRelation,
-    onClickGL: () => onClickGL(recordId)
+    onClickGL: () => onClickGL(recordId),
+    onClickGIA: () => onClickGIA(recordId)
   }
   const { getRequest } = useContext(RequestsContext)
 
@@ -129,8 +131,7 @@ const WindowToolbar = ({
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          width: '100%',
-          paddingTop: 4
+          width: '100%'
         }}
       >
         {previewReport ? (

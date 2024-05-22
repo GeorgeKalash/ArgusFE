@@ -1,7 +1,6 @@
 // ** MUI Imports
 import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
-import { useFormik } from 'formik'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -12,29 +11,24 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
-
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
+import { useForm } from 'src/hooks/form'
 
 export default function RateTypesForm({ labels, maxAccess, recordId }) {
-  const [isLoading, setIsLoading] = useState(false)
-  const [editMode, setEditMode] = useState(!!recordId)
-
-  const [initialValues, setInitialData] = useState({
-    recordId: null,
-    reference: '',
-    name: ''
-  })
-
   const { getRequest, postRequest } = useContext(RequestsContext)
-
-  //const editMode = !!recordId
+  const editMode = !!recordId
 
   const invalidate = useInvalidate({
     endpointId: MultiCurrencyRepository.RateType.page
   })
 
-  const formik = useFormik({
-    initialValues,
+  const { formik } = useForm({
+    initialValues: {
+      recordId: recordId || null,
+      reference: '',
+      name: ''
+    },
+    maxAccess: maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -42,22 +36,18 @@ export default function RateTypesForm({ labels, maxAccess, recordId }) {
       name: yup.string().required('This field is required')
     }),
     onSubmit: async obj => {
-      const recordId = obj.recordId
-
       const response = await postRequest({
         extension: MultiCurrencyRepository.RateType.set,
         record: JSON.stringify(obj)
       })
 
-      if (!recordId) {
+      if (!obj.recordId) {
         toast.success('Record Added Successfully')
-        setInitialData({
-          ...obj, // Spread the existing properties
-          recordId: response.recordId // Update only the recordId field
+        formik.setValues({
+          ...obj,
+          recordId: response.recordId
         })
       } else toast.success('Record Edited Successfully')
-      setEditMode(true)
-
       invalidate()
     }
   })
@@ -66,19 +56,13 @@ export default function RateTypesForm({ labels, maxAccess, recordId }) {
     ;(async function () {
       try {
         if (recordId) {
-          setIsLoading(true)
-
           const res = await getRequest({
             extension: MultiCurrencyRepository.RateType.get,
             parameters: `_recordId=${recordId}`
           })
-
-          setInitialData(res.record)
+          formik.setValues(res.record)
         }
-      } catch (exception) {
-        setErrorMessage(error)
-      }
-      setIsLoading(false)
+      } catch (e) {}
     })()
   }, [])
 

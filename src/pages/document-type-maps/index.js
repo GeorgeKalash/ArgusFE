@@ -1,41 +1,22 @@
 import { useState, useContext } from 'react'
-
-// ** MUI Imports
-import { Box } from '@mui/material'
-
-// ** Third Party Imports
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-// ** Windows
-import DocumentTypeMapWindow from './Windows/DocumentTypeMapWindow'
-
-// ** Helpers
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { useWindow } from 'src/windows'
+import DocumentTypeMapForm from './forms/DocumentTypeMapForm'
 
 const DocumentTypeMaps = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const [selectedRecordId, setSelectedRecordId] = useState(null)
 
-  //states
-  const [windowOpen, setWindowOpen] = useState(false)
-  const [errorMessage, setErrorMessage] = useState(null)
-
-  const [selectedFromFunctionId, setSelectedFromFunctionId] = useState(null)
-  const [selectedFromDTId, setSelectedFromDTId] = useState(null)
-  const [selectedToFunctionId, setSelectedToFunctionId] = useState(null)
+  const { stack } = useWindow()
 
   async function fetchGridData() {
     return await getRequest({
@@ -92,21 +73,29 @@ const DocumentTypeMaps = () => {
     toast.success('Record Deleted Successfully')
   }
 
-  const add = () => {
-    setWindowOpen(true)
-    setSelectedFromFunctionId(null)
-    setSelectedFromDTId(null)
-    setSelectedToFunctionId(null)
-    setSelectedRecordId(null)
+  const edit = obj => {
+    openForm(obj)
   }
 
-  const edit = obj => {
-    setSelectedFromFunctionId(obj.fromFunctionId)
-    setSelectedFromDTId(obj.fromDTId)
-    setSelectedToFunctionId(obj.toFunctionId)
-    const rec = String(obj.fromFunctionId) + String(obj.fromDTId) + String(obj.toFunctionId)
-    setSelectedRecordId(rec)
-    setWindowOpen(true)
+  const add = () => {
+    openForm()
+  }
+
+  function openForm(record) {
+    stack({
+      Component: DocumentTypeMapForm,
+      props: {
+        labels: _labels,
+        record: record,
+        maxAccess: access,
+        recordId: record
+          ? String(record.fromFunctionId) + String(record.fromDTId) + String(record.toFunctionId)
+          : undefined
+      },
+      width: 600,
+      height: 450,
+      title: _labels.documentTypeMap
+    })
   }
 
   return (
@@ -129,23 +118,6 @@ const DocumentTypeMaps = () => {
           maxAccess={access}
         />
       </Grow>
-
-      {windowOpen && (
-        <DocumentTypeMapWindow
-          onClose={() => {
-            setWindowOpen(false)
-            setSelectedRecordId(null)
-          }}
-          labels={_labels}
-          maxAccess={access}
-          recordId={selectedRecordId}
-          setSelectedRecordId={setSelectedRecordId}
-          fromFunctionId={selectedFromFunctionId}
-          fromDTId={selectedFromDTId}
-          toFunctionId={selectedToFunctionId}
-        />
-      )}
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </VertLayout>
   )
 }

@@ -1,11 +1,10 @@
-import { useState, useContext } from 'react'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 import { formatDateDefault } from 'src/lib/date-helper'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { SystemFunction } from 'src/resources/SystemFunction'
@@ -16,17 +15,13 @@ import { useError } from 'src/error'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import JournalVoucherForm from './forms/JournalVoucherForm'
+import { useWindow } from 'src/windows'
 import useDocumentTypeAdd from 'src/hooks/dcocumentReferenceBehaviorsAdd'
 
 const JournalVoucher = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
-  const { stack: stackError } = useError()
-
-  const [selectedRecordId, setSelectedRecordId] = useState(null)
-
-  //states
-  const [errorMessage, setErrorMessage] = useState(null)
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -133,6 +128,21 @@ const JournalVoucher = () => {
     toast.success('Record Deleted Successfully')
   }
 
+  function openForm(recordId) {
+    stack({
+      Component: JournalVoucherForm,
+      props: {
+        labels: _labels,
+        recordId: recordId ? recordId : null,
+        maxAccess: access,
+        invalidate: invalidate
+      },
+      width: 600,
+      height: 600,
+      title: _labels.generalJournal
+    })
+  }
+
   return (
     <VertLayout>
       <Fixed>
@@ -160,8 +170,6 @@ const JournalVoucher = () => {
           maxAccess={access}
         />
       </Grow>
-
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </VertLayout>
   )
 }
