@@ -131,8 +131,7 @@ const WindowToolbar = ({
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          width: '100%',
-          paddingTop: 4
+          width: '100%'
         }}
       >
         {previewReport ? (

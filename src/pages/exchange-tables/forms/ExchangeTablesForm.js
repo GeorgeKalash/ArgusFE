@@ -1,48 +1,34 @@
-// ** MUI Imports
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
-import { useFormik } from 'formik'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-
-// ** Custom Imports
-import CustomTextField from 'src/components/Inputs/CustomTextField'
-
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
+import { SystemRepository } from 'src/repositories/SystemRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataSets } from 'src/resources/DataSets'
-import { SystemRepository } from 'src/repositories/SystemRepository'
+import { useForm } from 'src/hooks/form'
+import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-export default function ExchangeTablesForm({ labels, maxAccess, recordId }) {
-  const [isLoading, setIsLoading] = useState(false)
-  const [editMode, setEditMode] = useState(!!recordId)
-
-  const [initialValues, setInitialData] = useState({
-    recordId: null,
-    reference: '',
-    name: '',
-    currencyId: '',
-    rateCalcMethod: '',
-    rateAgainst: '',
-    rateAgainstCurrencyId: ''
-  })
-
+export default function ExchangeTablesForm({ labels, maxAccess, recordId, invalidate }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const editMode = !!recordId
 
-  //const editMode = !!recordId
-
-  const invalidate = useInvalidate({
-    endpointId: MultiCurrencyRepository.ExchangeTable.page
-  })
-
-  const formik = useFormik({
-    initialValues,
+  const { formik } = useForm({
+    initialValues: {
+      recordId: recordId || null,
+      reference: '',
+      name: '',
+      currencyId: '',
+      rateCalcMethod: '',
+      rateAgainst: '',
+      rateAgainstCurrencyId: ''
+    },
+    maxAccess: maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -54,22 +40,18 @@ export default function ExchangeTablesForm({ labels, maxAccess, recordId }) {
       rateAgainstCurrencyId: yup.string().required(' ')
     }),
     onSubmit: async obj => {
-      const recordId = obj.recordId
-
       const response = await postRequest({
         extension: MultiCurrencyRepository.ExchangeTable.set,
         record: JSON.stringify(obj)
       })
 
-      if (!recordId) {
+      if (!obj.recordId) {
         toast.success('Record Added Successfully')
-        setInitialData({
-          ...obj, // Spread the existing properties
-          recordId: response.recordId // Update only the recordId field
+        formik.setValues({
+          ...obj,
+          recordId: response.recordId
         })
       } else toast.success('Record Edited Successfully')
-      setEditMode(true)
-
       invalidate()
     }
   })
@@ -78,21 +60,15 @@ export default function ExchangeTablesForm({ labels, maxAccess, recordId }) {
     ;(async function () {
       try {
         if (recordId) {
-          setIsLoading(true)
-
           const res = await getRequest({
             extension: MultiCurrencyRepository.ExchangeTable.get,
             parameters: `_recordId=${recordId}`
           })
-
-          setInitialData(res.record)
+          formik.setValues(res.record)
         }
-      } catch (exception) {
-        setErrorMessage(error)
-      }
-      setIsLoading(false)
+      } catch (e) {}
     })()
-  }, [])
+  }, [recordId])
 
   return (
     <FormShell resourceId={ResourceIds.ExchangeTables} form={formik} maxAccess={maxAccess} editMode={editMode}>
@@ -110,8 +86,6 @@ export default function ExchangeTablesForm({ labels, maxAccess, recordId }) {
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('reference', '')}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
-
-                // helperText={formik.touched.reference && formik.errors.reference}
               />
             </Grid>
             <Grid item xs={12}>
@@ -125,8 +99,6 @@ export default function ExchangeTablesForm({ labels, maxAccess, recordId }) {
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
                 error={formik.touched.name && Boolean(formik.errors.name)}
-
-                // helperText={formik.touched.name && formik.errors.name}
               />
             </Grid>
             <Grid item xs={12}>
@@ -145,11 +117,9 @@ export default function ExchangeTablesForm({ labels, maxAccess, recordId }) {
                 required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('currencyId', newValue?.recordId)
+                  formik.setFieldValue('currencyId', newValue?.recordId || null)
                 }}
                 error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
-
-                // helperText={formik.touched.currencyId && formik.errors.currencyId}
               />
             </Grid>
             <Grid item xs={12}>
@@ -163,11 +133,9 @@ export default function ExchangeTablesForm({ labels, maxAccess, recordId }) {
                 required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('rateCalcMethod', newValue?.key)
+                  formik.setFieldValue('rateCalcMethod', newValue?.key || null)
                 }}
                 error={formik.touched.rateCalcMethod && Boolean(formik.errors.rateCalcMethod)}
-
-                // helperText={formik.touched.rateCalcMethod && formik.errors.rateCalcMethod}
               />
             </Grid>
             <Grid item xs={12}>
@@ -181,11 +149,9 @@ export default function ExchangeTablesForm({ labels, maxAccess, recordId }) {
                 required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('rateAgainst', newValue?.key)
+                  formik.setFieldValue('rateAgainst', newValue?.key || null)
                 }}
                 error={formik.touched.rateAgainst && Boolean(formik.errors.rateAgainst)}
-
-                // helperText={formik.touched.rateAgainst && formik.errors.rateAgainst}
               />
             </Grid>
             <Grid item xs={12}>
@@ -204,11 +170,9 @@ export default function ExchangeTablesForm({ labels, maxAccess, recordId }) {
                 required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('rateAgainstCurrencyId', newValue?.recordId)
+                  formik.setFieldValue('rateAgainstCurrencyId', newValue?.recordId || null)
                 }}
                 error={formik.touched.rateAgainstCurrencyId && Boolean(formik.errors.rateAgainstCurrencyId)}
-
-                // helperText={formik.touched.rateAgainstCurrencyId && formik.errors.rateAgainstCurrencyId}
               />
             </Grid>
           </Grid>
