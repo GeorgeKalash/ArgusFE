@@ -256,7 +256,7 @@ export function DataGrid({
   }
 
   return (
-    <Box sx={{height: height ? height : 'auto', flex:'1 !important' }}>
+    <Box sx={{ height: height ? height : 'auto', flex: '1 !important' }}>
       {/* Container with scroll */}
       <MUIDataGrid
         hideFooter
@@ -306,10 +306,16 @@ export function DataGrid({
         apiRef={apiRef}
         editMode='cell'
         sx={{
-          display:'flex !important', 
+          display: 'flex !important',
           flex: '1 !important',
           '& .MuiDataGrid-cell': {
             padding: '0 !important'
+          },
+          '& .MuiDataGrid-columnHeaders': {
+            backgroundColor: bg
+          },
+          '& .MuiDataGrid-columnHeaderTitle': {
+            fontWeight: '900'
           }
         }}
         onRowClick={handleRowClick} // Handle row click event
