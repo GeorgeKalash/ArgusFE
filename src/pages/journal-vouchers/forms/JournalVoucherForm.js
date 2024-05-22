@@ -19,7 +19,6 @@ import { useForm } from 'src/hooks/form'
 import useDocumentType from 'src/hooks/dcocumentReferenceBehaviors'
 
 export default function JournalVoucherForm({ labels, access, recordId, general = {} }) {
-  const [isLoading, setIsLoading] = useState(false)
   const [editMode, setEditMode] = useState(!!recordId)
   const [responseValue, setResponseValue] = useState(null)
   const [nraId, setNraId] = useState()
@@ -94,8 +93,6 @@ export default function JournalVoucherForm({ labels, access, recordId, general =
     ;(async function () {
       try {
         if (recordId) {
-          setIsLoading(true)
-
           const res = await getRequest({
             extension: GeneralLedgerRepository.JournalVoucher.get,
             parameters: `_recordId=${recordId}`
