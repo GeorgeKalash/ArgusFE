@@ -1,11 +1,9 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
-import { useFormik } from 'formik'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
@@ -17,34 +15,29 @@ import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { MasterSource } from 'src/resources/MasterSource'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { useForm } from 'src/hooks/form'
 
-export default function CashAccountForm({ labels, recordId, maxAccess }) {
+export default function CashAccountForm({ labels, recordId, maxAccess, invalidate }) {
   const [isLoading, setIsLoading] = useState(false)
-  const [editMode, setEditMode] = useState(!!recordId)
-
-  const [initialValues, setInitialData] = useState({
-    recordId: null,
-    name: '',
-    reference: '',
-    accountNo: '',
-    currencyId: null,
-    plantId: null,
-    activeStatus: null,
-    groupId: null,
-    accountName: '',
-    accountRef: '',
-    accountId: null,
-    type: 2
-  })
+  const editMode = !!recordId
 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
-  const invalidate = useInvalidate({
-    endpointId: CashBankRepository.CashAccount.qry
-  })
-
-  const formik = useFormik({
-    initialValues,
+  const { formik } = useForm({
+    initialValues: {
+      recordId: recordId || null,
+      name: '',
+      reference: '',
+      accountNo: '',
+      currencyId: null,
+      plantId: null,
+      activeStatus: null,
+      groupId: null,
+      accountName: '',
+      accountRef: '',
+      accountId: null,
+      type: 2
+    },
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -61,15 +54,13 @@ export default function CashAccountForm({ labels, recordId, maxAccess }) {
         record: JSON.stringify(obj)
       })
 
-      if (!recordId) {
+      if (!obj.recordId) {
         toast.success('Record Added Successfully')
-        setInitialData({
+        formik.setValues({
           ...obj,
           recordId: response.recordId
         })
       } else toast.success('Record Edited Successfully')
-      setEditMode(true)
-
       invalidate()
     }
   })
@@ -87,9 +78,7 @@ export default function CashAccountForm({ labels, recordId, maxAccess }) {
 
           formik.setValues(res.record)
         }
-      } catch (exception) {
-        setErrorMessage(error)
-      }
+      } catch (exception) {}
       setIsLoading(false)
     })()
   }, [])

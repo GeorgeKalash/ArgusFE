@@ -457,6 +457,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
             allowDelete={!isClosed}
             allowAddNewLine={!isClosed}
             maxAccess={maxAccess}
+            name='currencies'
             columns={[
               {
                 component: 'resourcecombobox',

@@ -4,21 +4,17 @@ import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
-import CommissionTypesWindow from './Windows/CommissionTypesWindow'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import CommissionTypesForm from './forms/CommissionTypesForm'
+import { useWindow } from 'src/windows'
 
 const CommissionTypes = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
- 
-  const [selectedRecordId, setSelectedRecordId] = useState(null)
-
-  const [windowOpen, setWindowOpen] = useState(false)
-  const [errorMessage, setErrorMessage] = useState(null)
+  const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -28,8 +24,7 @@ const CommissionTypes = () => {
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
 
-    return {...response,  _startAt: _startAt}
-
+    return { ...response, _startAt: _startAt }
   }
 
   const {
@@ -66,14 +61,12 @@ const CommissionTypes = () => {
     }
   ]
 
-
   const add = () => {
-    setWindowOpen(true)
+    openForm()
   }
 
   const edit = obj => {
-    setSelectedRecordId(obj.recordId)
-    setWindowOpen(true)
+    openForm(obj?.recordId)
   }
 
   const del = async obj => {
@@ -84,7 +77,20 @@ const CommissionTypes = () => {
     invalidate()
     toast.success('Record Deleted Successfully')
   }
-  
+
+  function openForm(recordId) {
+    stack({
+      Component: CommissionTypesForm,
+      props: {
+        labels: _labels,
+        recordId: recordId,
+        maxAccess: access
+      },
+      width: 500,
+      height: 300,
+      title: _labels.CommissionTypes
+    })
+  }
 
   return (
     <VertLayout>
@@ -93,33 +99,20 @@ const CommissionTypes = () => {
       </Fixed>
       <Grow>
         <Table
-            columns={columns}
-            gridData={data}
-            rowId={['recordId']}
-            onEdit={edit}
-            onDelete={del}
-            isLoading={false}
-            refetch={refetch}
-            pageSize={50}
-            paginationParameters={paginationParameters}
-            maxAccess={access}
-            paginationType='api'
-          />
-      </Grow>
-      {windowOpen && (
-        <CommissionTypesWindow
-          onClose={() => {
-            setWindowOpen(false)
-            setSelectedRecordId(null)
-          }}
-          labels={_labels}
+          columns={columns}
+          gridData={data}
+          rowId={['recordId']}
+          onEdit={edit}
+          onDelete={del}
+          isLoading={false}
+          refetch={refetch}
+          pageSize={50}
+          paginationParameters={paginationParameters}
           maxAccess={access}
-          recordId={selectedRecordId}
-          setSelectedRecordId={setSelectedRecordId}
+          paginationType='api'
         />
-      )}
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-      </VertLayout>
+      </Grow>
+    </VertLayout>
   )
 }
 

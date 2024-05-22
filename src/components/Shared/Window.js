@@ -40,8 +40,8 @@ const Window = ({
 }) => {
   const { settings } = useSettings()
   const { navCollapsed } = settings
-
   const [expanded, setExpanded] = useState(false)
+  const [position, setPosition] = useState({ x: 0, y: 0 })
 
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
 
@@ -53,14 +53,8 @@ const Window = ({
     ? false
     : true
 
-  // const handleKeyDown = event => {
-  //   if (event.key === 'Enter') {
-  //     onSave()
-  //   }
-  // }
-
-  const containerWidth = `calc(calc(100 * var(--vw)) - ${navCollapsed ? '68px' : '300px'})`
-  const containerHeight = `calc(calc(100 * var(--vh)) - 48px)`
+  const containerWidth = `calc(calc(100 * var(--vw)) - ${navCollapsed ? '10px' : '310px'})`
+  const containerHeight = `calc(calc(100 * var(--vh)) - 40px)`
   const containerHeightPanel = `calc(calc(100 * var(--vh)) - 180px)`
   const heightPanel = height - 120
 
@@ -71,6 +65,18 @@ const Window = ({
       transactionLogInfo.style.height = expanded ? '30vh' : '18vh'
     }
   }, [expanded])
+
+  const handleExpandToggle = () => {
+    if (!expanded) {
+      setPosition({ x: 0, y: 0 })
+    }
+    setExpanded(!expanded)
+  }
+
+  const handleDrag = (e, ui) => {
+    const { x, y } = position
+    setPosition({ x: x + ui.deltaX, y: y + ui.deltaY })
+  }
 
   return (
     <Box
@@ -90,24 +96,21 @@ const Window = ({
         handle='#draggable-dialog-title'
         cancel={'[class*="MuiDialogContent-root"]'}
         bounds='parent'
-        sx={{
-          width: expanded && '100%',
-          minHeight: expanded && '100%',
-          backgroundColor: 'red'
-        }}
+        position={position}
+        onDrag={handleDrag}
       >
         <Box sx={{ position: 'relative' }}>
           <Paper
-            sx={{
+             sx={{
+              transition: 'width 0.3s, height 0.3s',
               ...(controlled
                 ? {
-                    height: expanded ? containerHeight : height // Expand height to 100% when expanded
+                    height: expanded ? containerHeight : height
                   }
                 : {
-                    minHeight: expanded ? containerHeight : height // Expand height to 100% when expanded
+                    minHeight: expanded ? containerHeight : height
                   }),
-              width: expanded ? containerWidth : width // Expand width to 100% when expanded
-              // ... (other styles)
+              width: expanded ? containerWidth : width
             }}
             style={
               controlled
@@ -122,28 +125,36 @@ const Window = ({
               id='draggable-dialog-title'
               sx={{
                 cursor: 'move',
-                py: 2,
+                pl: '15px !important',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'space-between'
+                justifyContent: 'space-between',
+                py: '0px !important', 
+                margin: '0px !important', 
+                backgroundColor: '#231f20',
+                borderTopLeftRadius: '5px',
+                borderTopRightRadius: '5px',
+                borderBottomLeftRadius: '0px',
+                borderBottomRightRadius: '0px'
               }}
             >
               <Box>
-                <Typography sx={{ fontSize: '1.2rem', fontWeight: 600 }}>{Title}</Typography>
+                <Typography sx={{ fontSize: '1.2rem', fontWeight: 600, color:'white !important' }}>{Title}</Typography>
               </Box>
               <Box>
                 {canExpand && (
                   <IconButton
                     tabIndex={-1}
                     edge='end'
-                    onClick={() => setExpanded(!expanded)}
+                    onClick={handleExpandToggle}
                     data-is-expanded={expanded}
                     aria-label='expand'
+                    sx={{ color:'white !important'}}
                   >
                     <OpenInFullIcon /> {/* Add the icon for expanding */}
                   </IconButton>
                 )}
-                <IconButton tabIndex={-1} edge='end' onClick={onClose} aria-label='clear input'>
+                <IconButton tabIndex={-1} edge='end' sx={{ color:'white !important'}} onClick={onClose} aria-label='clear input'>
                   <ClearIcon />
                 </IconButton>
               </Box>
