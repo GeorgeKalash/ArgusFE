@@ -48,6 +48,7 @@ export default function CashCountNotesForm({ labels, maxAccess, recordId, forceN
     }
   })
   useEffect(() => {
+    console.log(row?.currencyNotes, row?.id)
     row?.id &&
       row?.currencyNotes?.length > 0 &&
       formik.setFieldValue(
@@ -122,7 +123,7 @@ export default function CashCountNotesForm({ labels, maxAccess, recordId, forceN
                 component: 'numberfield',
                 label: labels.subTotal,
                 name: 'subTotal',
-                disable: true
+                props: { readOnly: true }
               }
             ]}
           />

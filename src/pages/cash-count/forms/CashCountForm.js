@@ -107,7 +107,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
           system: '',
           variation: '',
           flag: '',
-          enabled: 'true',
+          enabled: false,
           currencyNotes: [{ id: 1, seqNo: 1, cashCountId: '', note: '', qty: '', subTotal: '' }]
         }
       ]
@@ -121,8 +121,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
           yup.object().shape({
             currencyId: yup.string().required(' '),
             counted: yup.string().required(' '),
-            system: yup.string().required(' '),
-            flag: yup.mixed().required('Variation is required').nullable(true)
+            system: yup.string().required(' ')
           })
         )
         .required(' '),
@@ -352,8 +351,8 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
     >
       <VertLayout>
         <Fixed>
-          <Grid container spacing={4} sx={{ mb: 3 }}>
-            <Grid item xs={7}>
+          <Grid container spacing={4}>
+            <Grid item xs={6}>
               <ResourceLookup
                 endpointId={CashBankRepository.CashAccount.snapshot}
                 parameters={{
@@ -379,7 +378,16 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
                 maxAccess={maxAccess}
               />
             </Grid>
-            <Grid item xs={7}>
+            <Grid item xs={6} sx={{ mt: 4 }}>
+              <CustomDatePicker
+                name='date'
+                label={labels.date}
+                value={formik.values.date}
+                onChange={formik.setFieldValue}
+                readOnly={true}
+              />
+            </Grid>
+            <Grid item xs={6}>
               <ResourceComboBox
                 endpointId={SystemRepository.Plant.qry}
                 name='plantId'
@@ -400,7 +408,15 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
                 error={formik.errors && Boolean(formik.errors.plantId)}
               />
             </Grid>
-            <Grid item xs={7}>
+            <Grid item xs={6}>
+              <CustomTextField
+                name='startTime'
+                label={labels.startTime}
+                value={formik.values.startTime}
+                readOnly={true}
+              />
+            </Grid>
+            <Grid item xs={6}>
               <CustomTextField
                 name='reference'
                 label={labels.reference}
@@ -413,27 +429,11 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
               />
             </Grid>
-            <Grid item xs={7}>
-              <CustomDatePicker
-                name='date'
-                label={labels.date}
-                value={formik.values.date}
-                onChange={formik.setFieldValue}
-                readOnly={true}
-              />
-            </Grid>
-            <Grid item xs={7}>
-              <CustomTextField
-                name='startTime'
-                label={labels.startTime}
-                value={formik.values.startTime}
-                readOnly={true}
-              />
-            </Grid>
-            <Grid item xs={7}>
+
+            <Grid item xs={6}>
               <CustomTextField name='endTime' label={labels.endTime} value={formik.values.endTime} readOnly={true} />
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={12}>
               <FormControlLabel
                 control={
                   <Checkbox
@@ -478,11 +478,13 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
                   displayFieldWidth: 2
                 },
                 async onChange({ row: { update, newRow } }) {
-                  const balance = await getSystem(newRow?.currencyId)
-                  update({
-                    enabled: true,
-                    system: balance
-                  })
+                  if (newRow?.currencyId) {
+                    const balance = await getSystem(newRow?.currencyId)
+                    update({
+                      enabled: true,
+                      system: balance
+                    })
+                  }
                 }
               },
               {
@@ -490,7 +492,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
                 name: 'counted',
                 label: labels.count,
                 props: {
-                  disabled: formik.values.forceNotesCount && true
+                  readOnly: formik.values.forceNotesCount && true
                 },
                 async onChange({ row: { update, newRow } }) {
                   console.log(newRow)
@@ -506,7 +508,10 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
               {
                 component: 'numberfield',
                 label: labels.system,
-                name: 'system'
+                name: 'system',
+                props: {
+                  readOnly: true
+                }
               },
               {
                 component: 'icon',
@@ -517,7 +522,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
               {
                 component: 'button',
                 name: 'enabled',
-                label: labels.enabled,
+                label: labels.currencyNotes,
                 onClick: (e, row, update) => {
                   stack({
                     Component: CashCountNotes,
