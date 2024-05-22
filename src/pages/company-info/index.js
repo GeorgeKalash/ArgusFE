@@ -11,6 +11,7 @@ import toast from 'react-hot-toast'
 import { useForm } from 'src/hooks/form'
 import ImageUpload from 'src/components/Inputs/ImageUpload'
 import { getStorageData } from 'src/storage/storage'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 
 export function PostImage(postRequest, obj, initialValues) {
   if (obj?.attachment?.file) {
@@ -127,8 +128,8 @@ const CompanyInfo = () => {
   }
 
   return (
-    <Box sx={{ height: `calc(100vh - 48px)`, display: 'flex', flexDirection: 'column', zIndex: 1 }}>
-      <FormShell resourceId={ResourceIds.CompanyInfo} form={formik} maxAccess={maxAccess}>
+    <FormShell resourceId={ResourceIds.CompanyInfo} form={formik} maxAccess={maxAccess}>
+      <VertLayout>
         <Grid container spacing={4}>
           <Grid item xs={12}>
             <CustomTextField
@@ -239,8 +240,8 @@ const CompanyInfo = () => {
             />
           </Grid>
         </Grid>
-      </FormShell>
-    </Box>
+      </VertLayout>
+    </FormShell>
   )
 }
 
