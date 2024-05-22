@@ -48,7 +48,7 @@ return getRequest({
 
   return (
     
-   plantId && accessADJ &&  <TransactionForm labels={_labelsADJ} maxAccess={accessADJ}  plantId={plantId} />
+   plantId && access &&  <TransactionForm labels={_labelsADJ} maxAccess={access}  plantId={plantId} />
     
   )
 }

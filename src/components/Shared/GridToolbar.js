@@ -96,25 +96,35 @@ const GridToolbar = ({
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        width: '100%'
+        width: '100%',
+        pt:'5px'
       }}
     >
       {children && children}
       <Box sx={{ display: 'flex', pb: 2, pr: 2 }}>
         {initialLoad && (
-          <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-start', pl: 2 }}>
             <Button onClick={initialLoad} variant='contained'>
               <Icon icon='mdi:reload' />
             </Button>
           </Box>
         )}
         {onAdd && addBtnVisible && (
-          <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-start', pl: 2 }}>
             <Tooltip title='Add'>
               <Button
                 onClick={onAdd}
                 variant='contained'
                 style={{ backgroundColor: 'transparent', border: '1px solid #4eb558' }}
+                sx={{
+                  mr: 1,
+                  '&:hover': {
+                    opacity: 0.8
+                  },
+                  width: '20px',
+                  height: '35px',
+                  objectFit: 'contain',
+                }}
               >
                 <img src='/images/buttonsIcons/add.png' alt='Add' />
               </Button>
@@ -123,7 +133,7 @@ const GridToolbar = ({
         )}
 
         {inputSearch && (
-          <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2, zIndex: 0 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-start', pl: 2, zIndex: 0 }}>
             <CustomTextField
               name='search'
               value={searchValue}
@@ -132,18 +142,19 @@ const GridToolbar = ({
               onChange={e => setSearchValue(e.target.value)}
               onSearch={onSearch}
               search={true}
+              height={35}
             />
           </Box>
         )}
         {openRPB && (
-          <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-start', pl: 2 }}>
             <Button onClick={openRPB} variant='contained' disabled={disableRPB}>
               OPEN RPB
             </Button>
           </Box>
         )}
         {onGo && (
-          <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-start', pl: 2 }}>
             <Button
               disabled={paramsArray.length === 0}
               onClick={() => onGo({ _startAt: 0, _pageSize: 30, params: formatDataForApi(paramsArray) })}

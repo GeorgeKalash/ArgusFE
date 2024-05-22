@@ -1,37 +1,36 @@
-import { useState, useContext } from 'react'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
-import GroupLegalDocumentWindow from './Windows/GroupLegalDocumentWindow'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import GroupLegalDocumentForm from './forms/GroupLegalDocumentForm'
+import { useWindow } from 'src/windows'
 
 const GroupLegalDocument = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const [selectedRecordId, setSelectedRecordId] = useState(null)
-  const [windowOpen, setWindowOpen] = useState(false)
-  const [errorMessage, setErrorMessage] = useState(null)
-
-  const [selectedGroupId, setSelectedGroupId] = useState(null)
-  const [selectedIncId, setSelectedIncId] = useState(null)
+  const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    return await getRequest({
+    const response = await getRequest({
       extension: BusinessPartnerRepository.GroupLegalDocument.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
+
+    return { ...response, _startAt: _startAt }
   }
 
   const {
     query: { data },
+    paginationParameters,
+    refetch,
     labels: _labels,
     access
   } = useResourceQuery({
@@ -67,18 +66,27 @@ const GroupLegalDocument = () => {
     }
   ]
 
-  const add = () => {
-    setWindowOpen(true)
-    setSelectedGroupId(null)
-    setSelectedIncId(null)
+  const edit = obj => {
+    openForm(obj)
   }
 
-  const edit = obj => {
-    // setSelectedRecordId(obj.recordId)
-    setWindowOpen(true)
+  const add = () => {
+    openForm()
+  }
 
-    setSelectedGroupId(obj.groupId)
-    setSelectedIncId(obj.incId)
+  function openForm(record) {
+    stack({
+      Component: GroupLegalDocumentForm,
+      props: {
+        labels: _labels,
+        record: record,
+        maxAccess: access,
+        recordId: record ? record.groupId * 10000 + record.incId : undefined
+      },
+      width: 600,
+      height: 370,
+      title: _labels.groupLegalDocument
+    })
   }
 
   const del = async obj => {
@@ -104,27 +112,12 @@ const GroupLegalDocument = () => {
           onDelete={del}
           isLoading={false}
           pageSize={50}
-          paginationType='client'
+          paginationType='api'
+          paginationParameters={paginationParameters}
+          refetch={refetch}
           maxAccess={access}
         />
       </Grow>
-
-      {windowOpen && (
-        <GroupLegalDocumentWindow
-          onClose={() => {
-            setWindowOpen(false)
-            setSelectedRecordId(null)
-          }}
-          labels={_labels}
-          maxAccess={access}
-          recordId={selectedRecordId}
-          setSelectedRecordId={setSelectedRecordId}
-          groupId={selectedGroupId}
-          incId={selectedIncId}
-        />
-      )}
-
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </VertLayout>
   )
 }
