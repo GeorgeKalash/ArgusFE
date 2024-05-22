@@ -162,9 +162,6 @@ export default function FormShell({
           onClickAC={() =>
             stack({
               Component: AccountBalance,
-              props: {
-                recordId: form.values?.recordId
-              },
               width: 1000,
               height: 620,
               title: 'Account Balance'

@@ -8,7 +8,7 @@ import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useResourceQuery } from 'src/hooks/resource'
 
-const AccountBalance = ({ recordId }) => {
+const AccountBalance = () => {
   const { getRequest } = useContext(RequestsContext)
   const [gridData, setGridData] = useState({})
 
@@ -72,7 +72,7 @@ const AccountBalance = ({ recordId }) => {
           <ResourceLookup
             endpointId={CashBankRepository.CashAccount.snapshot}
             parameters={{
-              _type: 2
+              _type: 0
             }}
             name='cashAccountRef'
             label={_labels.cashAccount}
