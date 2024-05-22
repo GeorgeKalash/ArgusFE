@@ -1,5 +1,4 @@
 import { useContext, useState } from 'react'
-import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import Table from 'src/components/Shared/Table'

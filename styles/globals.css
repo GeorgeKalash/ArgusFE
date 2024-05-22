@@ -1,6 +1,6 @@
 html,
 body {
-  min-height: 100vh;
+  height: calc(100 * var(--vh)) !important;
   zoom: var(--zoom);
   --zoom: 1;
   --vh: calc(1vh / var(--zoom));
@@ -94,22 +94,23 @@ body {
 }
 
 code {
-  font-family: 'Inter', sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
-    'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue';
+  font-family: 'Inter', sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue';
   padding: 0.1rem 0.4rem;
   font-size: 90%;
   color: #d400ff;
   border-radius: 0.1335rem;
 }
+
 code:not([class*='language-']):before,
 code:not([class*='language-']):after {
   content: '`';
 }
+
 code[class*='language-'] {
   padding: 0;
 }
 
-/* styles/Sidebar.css */
+/* Sidebar Styles */
 .sidebar {
   padding-left: 10px;
   overflow-y: auto;
@@ -117,9 +118,9 @@ code[class*='language-'] {
 }
 
 .node {
-  width: '100%';
-  padding-top: 8px;
-  padding-bottom: 8px;
+  width: 100%;
+  padding-top: 4px;
+  padding-bottom: 4px;
   cursor: pointer;
   white-space: nowrap;
   position: relative;
@@ -127,11 +128,11 @@ code[class*='language-'] {
 
 .folder {
   font-size: 14px;
-  width: '100%';
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: 'red';
+  background-color: red;
   padding-bottom: 8px;
 }
 
@@ -179,21 +180,16 @@ code[class*='language-'] {
 .node .text {
   display: flex;
   align-items: center;
-  line-height:0 !important;
+  line-height: 0 !important;
 }
 
 .css-5chs84-MuiPaper-root-MuiMenu-paper-MuiPopover-paper {
-  background-color:#231f20 !important;
+  background-color: #231f20 !important;
 }
+
 .MuiTabs-scrollButtons.Mui-disabled {
   display: none;
-  -webkit-transform: scaleX(0);
   transform: scaleX(0);
   transform-origin: left center;
-  transition: -webkit-transform 0.3s ease-in-out, transform 0.3s ease-in-out;
+  transition: transform 0.3s ease-in-out;
 }
-
-
-/***** phone verification *****/
-
-

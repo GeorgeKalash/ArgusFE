@@ -39,12 +39,14 @@ const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
   '& .MuiDataGrid-row:last-child': {
     borderBottom: `1px solid ${theme.palette.mode === 'light' ? '#cccccc' : '#303030'}`
   },
-  '& .MuiDataGrid-overlayWrapperInner': {
-    marginTop: '-1px'
-  },
+
+  // '& .MuiDataGrid-overlayWrapperInner' :{
+  //   marginTop: '-1px'
+  // },
   '& .MuiDataGrid-virtualScroller': {
     // remove the space left for the header
-    marginTop: '0!important'
+    marginTop: '0px !important',
+    overflowX:'hidden !important'
   },
   '& .MuiDataGrid-columnsContainer': {
     backgroundColor: theme.palette.mode === 'light' ? '#fafafa' : '#1d1d1d'
@@ -301,6 +303,31 @@ const Table = ({
     })
   }
 
+{/* <DeleteDialog
+    open={deleteDialogOpen}
+    fullScreen={false}
+    onClose={() => setDeleteDialogOpen([false, {}])}
+    onConfirm={obj => {
+      setDeleteDialogOpen([false, {}])
+      props.onDelete(obj)
+    }}
+  /> */}
+
+
+  function openDelete(obj) {
+    stack({
+      Component: DeleteDialog,
+      props: {
+        open:([true,{}]),
+        fullScreen: false,
+        onConfirm: () => props.onDelete(obj),
+      },
+      width: 450,
+      height: 170,
+      title: 'Delete'
+    })
+  }
+
   const shouldRemoveColumn = column => {
     const match = columnsAccess && columnsAccess.find(item => item.controlId === column.id)
 
@@ -339,7 +366,7 @@ const Table = ({
                   if (props.deleteConfirmationType == 'strict') {
                     openDeleteConfirmation(params.row)
                   } else {
-                    setDeleteDialogOpen([true, params.row])
+                    openDelete(params.row)
                   }
                 }}
                 color='error'
@@ -376,72 +403,68 @@ const Table = ({
     <>
       {maxAccess && maxAccess > TrxType.NOACCESS ? (
         <>
-          <StripedDataGrid
-            rows={
-              gridData?.list
-                ? page < 2 && paginationType === 'api'
-                  ? gridData?.list.slice(0, 50)
-                  : gridData?.list
-                : []
-            }
-            sx={{
-              overflow: 'auto',
-              position: 'relative',
-              display: 'flex',
-              flex: 1,
-              zIndex: '0 !important',
-              marginBottom: pagination ? 0 : 5,
-              height: height ? height : 'auto'
-            }}
-            density='compact'
-            components={{
-              LoadingOverlay: LinearProgress,
-              Footer: CustomPagination,
-              NoRowsOverlay: () => (
-                <Stack height='100%' alignItems='center' justifyContent='center'>
-                  This Screen Has No Data
-                </Stack>
-              )
-            }}
-            loading={props.isLoading}
-            getRowId={getRowId}
-            disableRowSelectionOnClick
-            disableColumnMenu
-            getRowClassName={params => (params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd')}
-            {...props}
-            columns={[
-              ...(showCheckboxColumn
-                ? [
-                    {
-                      field: 'checkbox',
-                      headerName: checkTitle,
-                      renderCell: params => (
-                        <TableCell padding='checkbox'>
-                          <Checkbox
-                            checked={params.row.checked || false}
-                            onChange={() => {
-                              handleCheckboxChange(params.row)
-                              params.row.checked = !params.row.checked
-                            }}
-                          />
-                        </TableCell>
-                      )
-                    }
-                  ]
-                : []),
-              ...filteredColumns
-            ]}
-          />
-
-          <DeleteDialog
-            fullScreen={false}
+            <StripedDataGrid
+              rows={
+                gridData?.list
+                  ? page < 2 && paginationType === 'api'
+                    ? gridData?.list.slice(0, 50) 
+                    : gridData?.list
+                  : []
+              }
+              
+              sx={{ 
+                '& .MuiDataGrid-overlayWrapperInner':{
+                  height:'300px !important'
+                },
+                overflow: 'auto', position: 'relative', display:'flex', flex: 1, zIndex:'0 !important', marginBottom: pagination? 0:5, height: height? height:'auto' }}
+              density='compact'
+              components={{
+                LoadingOverlay: LinearProgress,
+                Footer: CustomPagination,
+                NoRowsOverlay: () => (
+                  <Stack height='100%' alignItems='center' justifyContent='center'>
+                    This Screen Has No Data
+                  </Stack>
+                )
+              }}
+              loading={props.isLoading}
+              getRowId={getRowId}
+              disableRowSelectionOnClick
+              disableColumnMenu
+              getRowClassName={params => (params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd')}
+              {...props}
+              columns={[
+                ...(showCheckboxColumn
+                  ? [
+                      {
+                        field: 'checkbox',
+                        headerName: checkTitle,
+                        renderCell: params => (
+                          <TableCell padding='checkbox'>
+                            <Checkbox
+                              checked={params.row.checked || false}
+                              onChange={() => {
+                                handleCheckboxChange(params.row)
+                                params.row.checked = !params.row.checked
+                              }}
+                            />
+                          </TableCell>
+                        )
+                      }
+                    ]
+                  : []),
+                ...filteredColumns
+              ]}
+            />
+          {/* <DeleteDialog
             open={deleteDialogOpen}
+            fullScreen={false}
             onClose={() => setDeleteDialogOpen([false, {}])}
             onConfirm={obj => {
               setDeleteDialogOpen([false, {}])
               props.onDelete(obj)
             }}
-          />
+          /> */}
         </>
       ) : (
         'NO ACCESS'
