@@ -135,6 +135,8 @@ const GlobalIntegrationGrid = ({ masterSource, masterId }) => {
     } catch (error) {}
   }
 
+  console.log(formik, 'aaaaa')
+
   return (
     <VertLayout>
       <Grow>

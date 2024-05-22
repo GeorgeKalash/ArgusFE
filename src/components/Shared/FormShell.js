@@ -141,6 +141,7 @@ export default function FormShell({
               Component: GlobalIntegrationGrid,
               props: {
                 masterId: form.values?.recordId,
+
                 masterSource: masterSource
               },
               width: 700,
