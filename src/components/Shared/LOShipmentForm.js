@@ -183,6 +183,8 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
               value={formik.values.typeGrid}
               error={formik.errors.typeGrid}
               maxAccess={maxAccess}
+              allowAddNewLine={!editMode}
+              allowDelete={!editMode}
               columns={[
                 {
                   component: 'resourcecombobox',
@@ -246,6 +248,8 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
               value={formik.values.serialGrid}
               error={formik.errors.serialGrid}
               maxAccess={maxAccess}
+              allowAddNewLine={!editMode}
+              allowDelete={!editMode}
               columns={[
                 {
                   component: 'numberfield',

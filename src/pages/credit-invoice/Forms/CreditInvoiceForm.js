@@ -669,7 +669,8 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, plantI
       Component: LOShipmentForm,
       props: {
         recordId: formik.values.recordId,
-        functionId: formik.values.functionId
+        functionId: formik.values.functionId,
+        editMode: formik.values.status != 1
       },
       width: 950,
       height: 670,
@@ -682,7 +683,8 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, plantI
       Component: LOTransportationForm,
       props: {
         recordId: formik.values.recordId,
-        functionId: formik.values.functionId
+        functionId: formik.values.functionId,
+        editMode: formik.values.status != 1
       },
       width: 600,
       title: 'Transportation'

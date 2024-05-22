@@ -32,7 +32,8 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
   const { stack: stackError } = useError()
   const { stack } = useWindow()
   const [isClosed, setIsClosed] = useState(false)
-  const [isPosted, setIsPosted] = useState(false)
+  const [isPosted, setIsPosted] = useState(true)
+  const [disableSubmit, setDisableSubmit] = useState(false)
 
   const invalidate = useInvalidate({
     endpointId: CashBankRepository.CashTransfer.snapshot
@@ -128,17 +129,16 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
           extension: CashBankRepository.CashTransfer.get,
           parameters: `_recordId=${res.recordId}`
         })
+
         formik.setFieldValue('reference', res2.record.reference)
         invalidate()
       }
     }
   })
 
-  const [shipmentEditMode, setShipmentEditMode] = useState(formik.values.wip == 1 && formik.values.status == 1)
-
   const onClose = async () => {
-    const obj = formik.values
-    const copy = { ...obj }
+    const { transfers, ...rest } = formik.values
+    const copy = { ...rest }
 
     copy.date = formatDateToApi(copy.date)
     copy.wip = copy.wip === '' ? 1 : copy.wip
@@ -152,13 +152,12 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
       toast.success('Record Closed Successfully')
       invalidate()
       setIsClosed(true)
-      setShipmentEditMode(true)
     }
   }
 
   const onReopen = async () => {
-    const obj = formik.values
-    const copy = { ...obj }
+    const { transfers, ...rest } = formik.values
+    const copy = { ...rest }
 
     copy.date = formatDateToApi(copy.date)
     copy.wip = copy.wip === '' ? 1 : copy.wip
@@ -172,7 +171,6 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
       toast.success('Record Closed Successfully')
       invalidate()
       setIsClosed(false)
-      setShipmentEditMode(false)
     }
   }
 
@@ -191,6 +189,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
       toast.success('Record Posted Successfully')
       invalidate()
       setIsPosted(true)
+      setDisableSubmit(true)
     }
   }
 
@@ -229,7 +228,6 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
       }
     }
   }
-  console.log('shipmentEditMode ', shipmentEditMode)
 
   const shipmentClicked = () => {
     stack({
@@ -237,7 +235,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
       props: {
         recordId: recordId,
         functionId: SystemFunction.CashTransfer,
-        editMode: shipmentEditMode
+        editMode: isClosed
       },
       width: 950,
       height: 670,
@@ -254,7 +252,8 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
         })
         res.record.date = formatDateFromApi(res.record.date)
         setIsClosed(res.record.wip === 2 ? true : false)
-        setIsPosted(res.record.status === 3 ? true : false)
+        setIsPosted(res.record.status === 4 ? false : true)
+        setDisableSubmit(res.record.status === 3 ? true : false)
         await fillCurrencyTransfer(recordId, res.record)
       }
       getAccView()
@@ -266,13 +265,13 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
       key: 'Close',
       condition: !isClosed,
       onClick: onClose,
-      disabled: isClosed || !editMode || isPosted
+      disabled: isClosed || !editMode
     },
     {
       key: 'Reopen',
       condition: isClosed,
       onClick: onReopen,
-      disabled: !isClosed || !editMode || (formik.values.releaseStatus === 3 && formik.values.status === 3) || isPosted
+      disabled: !isClosed || !editMode || (formik.values.releaseStatus === 3 && formik.values.status === 3)
     },
     {
       key: 'Approval',
@@ -284,7 +283,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
       key: 'Post',
       condition: true,
       onClick: onPost,
-      disabled: !editMode || isPosted || !isClosed
+      disabled: isPosted
     },
     {
       key: 'Shipment',
@@ -302,7 +301,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
       maxAccess={maxAccess}
       functionId={SystemFunction.CashTransfer}
       actions={actions}
-      disabledSubmit={isPosted}
+      disabledSubmit={disableSubmit}
     >
       <VertLayout>
         <Fixed>
@@ -378,7 +377,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
                 <CustomDatePicker
                   name='date'
                   required
-                  readOnly={isClosed || isPosted}
+                  readOnly={isClosed}
                   label={labels.date}
                   value={formik?.values?.date}
                   onChange={formik.setFieldValue}
@@ -401,7 +400,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
                     { key: 'name', value: 'Name' }
                   ]}
                   required
-                  readOnly={isClosed || isPosted}
+                  readOnly={isClosed}
                   maxAccess={maxAccess}
                   onChange={(event, newValue) => {
                     if (newValue) formik.setFieldValue('toPlantId', newValue?.recordId)
@@ -425,7 +424,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
                   name='toCashAccountId'
                   displayFieldWidth={2}
                   required
-                  readOnly={!formik.values.toPlantId || isClosed || isPosted}
+                  readOnly={!formik.values.toPlantId || isClosed}
                   label={labels.toCashAcc}
                   form={formik}
                   filter={{ plantId: formik.values.toPlantId }}
@@ -464,7 +463,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
                 label: labels.currency,
                 name: 'currencyName',
                 props: {
-                  disabled: isClosed || isPosted,
+                  disabled: isClosed,
                   endpointId: SystemRepository.Currency.qry,
                   displayField: 'reference',
                   valueField: 'recordId',
@@ -486,14 +485,14 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
                 label: labels.amount,
                 name: 'amount',
                 defaultValue: '',
-                props: { disabled: isClosed || isPosted }
+                props: { disabled: isClosed }
               },
               {
                 component: 'numberfield',
                 name: 'balance',
                 label: labels.balance,
                 defaultValue: '0',
-                props: { disabled: isClosed || isPosted }
+                props: { disabled: isClosed }
               }
             ]}
           />
@@ -505,7 +504,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
               label={labels.note}
               value={formik.values.notes}
               rows={3}
-              readOnly={isClosed || isPosted}
+              readOnly={isClosed}
               maxLength='100'
               editMode={editMode}
               maxAccess={maxAccess}
