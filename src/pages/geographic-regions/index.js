@@ -1,25 +1,19 @@
-import { useState, useContext } from 'react'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import GeographicRegionsWindow from './Windows/GeographicRegionsWindow'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import GeographicRegionsForm from './forms/GeographicRegionsForm'
+import { useWindow } from 'src/windows'
 
 const GeographicRegions = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
- 
-  const [selectedRecordId, setSelectedRecordId] = useState(null)
-
-  //states
-  const [windowOpen, setWindowOpen] = useState(false)
-  const [errorMessage, setErrorMessage] = useState(null)
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -29,9 +23,10 @@ const GeographicRegions = () => {
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
 
-    return {...response,  _startAt: _startAt}
-
+    return { ...response, _startAt: _startAt }
   }
+
+  const { stack } = useWindow()
 
   const {
     query: { data },
@@ -62,14 +57,26 @@ const GeographicRegions = () => {
     }
   ]
 
-
   const add = () => {
-    setWindowOpen(true)
+    openForm()
   }
 
   const edit = obj => {
-    setSelectedRecordId(obj.recordId)
-    setWindowOpen(true)
+    openForm(obj?.recordId)
+  }
+
+  function openForm(recordId) {
+    stack({
+      Component: GeographicRegionsForm,
+      props: {
+        labels: _labels,
+        recordId: recordId,
+        maxAccess: access
+      },
+      width: 500,
+      height: 270,
+      title: _labels.GeographicRegions
+    })
   }
 
   const del = async obj => {
@@ -80,7 +87,6 @@ const GeographicRegions = () => {
     invalidate()
     toast.success('Record Deleted Successfully')
   }
-  
 
   return (
     <VertLayout>
@@ -102,19 +108,6 @@ const GeographicRegions = () => {
           paginationType='api'
         />
       </Grow>
-      {windowOpen && (
-        <GeographicRegionsWindow
-          onClose={() => {
-            setWindowOpen(false)
-            setSelectedRecordId(null)
-          }}
-          labels={_labels}
-          maxAccess={access}
-          recordId={selectedRecordId}
-          setSelectedRecordId={setSelectedRecordId}
-        />
-      )}
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </VertLayout>
   )
 }

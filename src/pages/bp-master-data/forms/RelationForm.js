@@ -1,4 +1,4 @@
-import { Grid, Box} from '@mui/material'
+import { Grid, Box } from '@mui/material'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
@@ -13,7 +13,6 @@ import { formatDateFromApi, formatDateToApiFunction } from 'src/lib/date-helper'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-
 
 const RelationForm = ({ bpId, recordId, labels, maxAccess, getRelationGridData, window, editMode }) => {
   const [businessPartnerStore, setBusinessPartnerStore] = useState([])
@@ -45,7 +44,7 @@ const RelationForm = ({ bpId, recordId, labels, maxAccess, getRelationGridData, 
   })
 
   const postRelation = obj => {
-    obj.startDate =  obj.startDate ? formatDateToApiFunction(obj.startDate) : ''
+    obj.startDate = obj.startDate ? formatDateToApiFunction(obj.startDate) : ''
     obj.endDate = obj.endDate ? formatDateToApiFunction(obj.endDate) : ''
 
     postRequest({
@@ -96,9 +95,9 @@ const RelationForm = ({ bpId, recordId, labels, maxAccess, getRelationGridData, 
           <Grid container gap={2}>
             <Grid item xs={12}>
               <ResourceLookup
-              endpointId={BusinessPartnerRepository.MasterData.snapshot}
+                endpointId={BusinessPartnerRepository.MasterData.snapshot}
                 name='toBPId'
-                label= {labels.businessPartner}
+                label={labels.businessPartner}
                 form={formik}
                 required
                 displayFieldWidth={2}
@@ -115,7 +114,6 @@ const RelationForm = ({ bpId, recordId, labels, maxAccess, getRelationGridData, 
                   })
                 }}
                 error={formik.touched.toBPId && Boolean(formik.errors.toBPId)}
-                helperText={formik.touched.toBPId && formik.errors.toBPId}
                 maxAccess={maxAccess}
               />
             </Grid>
@@ -136,7 +134,6 @@ const RelationForm = ({ bpId, recordId, labels, maxAccess, getRelationGridData, 
                   formik && formik.setFieldValue('relationId', newValue?.recordId)
                 }}
                 error={formik.touched.relationId && Boolean(formik.errors.relationId)}
-                helperText={formik.touched.relationId && formik.errors.relationId}
               />
             </Grid>
             <Grid item xs={12}>
@@ -148,7 +145,6 @@ const RelationForm = ({ bpId, recordId, labels, maxAccess, getRelationGridData, 
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('startDate', '')}
                 error={formik.touched.startDate && Boolean(formik.errors.startDate)}
-                helperText={formik.touched.startDate && formik.errors.startDate}
               />
             </Grid>
             <Grid item xs={12}>
@@ -160,7 +156,6 @@ const RelationForm = ({ bpId, recordId, labels, maxAccess, getRelationGridData, 
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('endDate', '')}
                 error={formik.touched.endDate && Boolean(formik.errors.endDate)}
-                helperText={formik.touched.endDate && formik.errors.endDate}
               />
             </Grid>
           </Grid>

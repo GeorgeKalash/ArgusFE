@@ -1,9 +1,10 @@
-import { useState, useContext } from 'react'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
+
 import { ResourceIds } from 'src/resources/ResourceIds'
 import ChartOfAccountsForm from './forms/ChartOfAccountsForm'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
@@ -18,15 +19,19 @@ const ChartOfAccounts = () => {
 
   const { stack } = useWindow()
 
-  8
+  const invalidate = useInvalidate({
+    endpointId: GeneralLedgerRepository.ChartOfAccounts.page
+  })
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    return await getRequest({
+    const response = await getRequest({
       extension: GeneralLedgerRepository.ChartOfAccounts.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_params=`
     })
+
+    return { ...response, _startAt: _startAt }
   }
 
   const {
@@ -45,10 +50,6 @@ const ChartOfAccounts = () => {
       endpointId: GeneralLedgerRepository.ChartOfAccounts.snapshot,
       searchFn: fetchWithSearch
     }
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: GeneralLedgerRepository.ChartOfAccounts.page
   })
 
   async function fetchWithSearch({ options = {}, qry }) {
