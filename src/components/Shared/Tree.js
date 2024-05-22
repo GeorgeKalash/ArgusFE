@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState, useMemo } from 'react'
+import React, { useRef, useMemo } from 'react'
 import TreeView from '@mui/lab/TreeView'
 import TreeItem from '@mui/lab/TreeItem'
 import { styled } from '@mui/material/styles'
@@ -7,10 +7,7 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import { useReactToPrint } from 'react-to-print'
 import WindowToolbar from './WindowToolbar'
 
-import { Box, Grid } from '@mui/material'
-import { VertLayout } from './Layouts/VertLayout'
-import { Fixed } from './Layouts/Fixed'
-import { Grow } from './Layouts/Grow'
+import { DialogActions, DialogContent } from '@mui/material'
 
 const getAllNodeIds = nodes => {
   let nodeIds = []
@@ -46,11 +43,6 @@ const PrintableTree = ({ nodes }) => {
 }
 
 const StyledTreeView = styled(TreeView)(({ height }) => ({
-  flexGrow: 1,
-  maxWidth: '100%',
-  height: height,
-  overflowY: 'auto',
-
   '@media print': {
     height: 'auto',
     maxHeight: '100%',
@@ -114,29 +106,35 @@ function Tree({ data, expanded, height }) {
   ]
 
   return (
-    <VertLayout>
-      <Grow>
-        <div ref={componentRef}>
-          <StyledTreeView
-            height={`${expanded ? `calc(100vh - 180px)` : `${height}px`}`}
-            aria-label='plant tree'
-            defaultCollapseIcon={<ExpandMoreIcon />}
-            defaultExpandIcon={<ChevronRightIcon />}
-          >
-            {treeData.map(node => renderTree(node))}
-          </StyledTreeView>
+    <>
+      <DialogContent
+        sx={{
+          padding: 0
+        }}
+      >
+        <StyledTreeView
+          height={`${expanded ? `calc(100vh - 180px)` : `${height}px`}`}
+          aria-label='plant tree'
+          defaultCollapseIcon={<ExpandMoreIcon />}
+          defaultExpandIcon={<ChevronRightIcon />}
+        >
+          {treeData.map(node => renderTree(node))}
+        </StyledTreeView>
 
-          <div style={{ display: 'none', visibility: 'hidden' }}>
-            <div ref={printComponentRef}>
-              <PrintableTree nodes={treeData} />
-            </div>
+        <div style={{ display: 'none', visibility: 'hidden' }}>
+          <div ref={printComponentRef}>
+            <PrintableTree nodes={treeData} />
           </div>
         </div>
-      </Grow>
-      <Fixed>
+      </DialogContent>
+      <DialogActions
+        sx={{
+          padding: 0
+        }}
+      >
         <WindowToolbar actions={actions} isCleared={false} isSaved={false} isInfo={false} />
-      </Fixed>
-    </VertLayout>
+      </DialogActions>
+    </>
   )
 }
 
