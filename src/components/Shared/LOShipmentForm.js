@@ -3,7 +3,7 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import FormShell from './FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { Grid } from '@mui/material'
+import { Box, Grid } from '@mui/material'
 import CustomTextField from '../Inputs/CustomTextField'
 import ResourceComboBox from './ResourceComboBox'
 import { DataGrid } from './DataGrid'
@@ -176,101 +176,110 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
             </Grid>
           </Grid>
         </Fixed>
-        <Grid container xs={12}>
-          <Grow>
-            <DataGrid
-              onChange={value => formik.setFieldValue('typeGrid', value)}
-              value={formik.values.typeGrid}
-              error={formik.errors.typeGrid}
-              maxAccess={maxAccess}
-              allowAddNewLine={!editMode}
-              allowDelete={!editMode}
-              columns={[
-                {
-                  component: 'resourcecombobox',
-                  label: labels.type,
-                  name: 'packageTypeName',
-                  props: {
-                    datasetId: DataSets.PACKAGE_TYPE,
-                    displayField: 'value',
-                    valueField: 'key',
-                    mapping: [
-                      { from: 'key', to: 'packageType' },
-                      { from: 'value', to: 'packageTypeName' }
-                    ],
-                    readOnly: editMode
-                  }
-                },
-                {
-                  component: 'numberfield',
-                  name: 'qty',
-                  label: labels.qty,
-                  defaultValue: '',
-                  props: {
-                    readOnly: editMode
-                  }
-                },
-                {
-                  component: 'numberfield',
-                  label: labels.amount,
-                  name: 'amount',
-                  defaultValue: '',
-                  props: { readOnly: editMode }
-                }
-              ]}
-            />
-            <Grid container spacing={2} sx={{ pt: 5, justifyContent: 'flex-end' }}>
-              <Grid item xs={3}>
-                <CustomTextField
-                  name='totalQty'
+        <Grid item xs={6} sx={{ display: 'flex', flex: 1 }}>
+          <VertLayout>
+            <Grow>
+              <Grid container spacing={2} sx={{ flex: '1 !important', pt: 2 }}>
+                <DataGrid
+                  onChange={value => formik.setFieldValue('typeGrid', value)}
+                  value={formik.values.typeGrid}
+                  error={formik.errors.typeGrid}
                   maxAccess={maxAccess}
-                  value={getFormattedNumber(totalQty)}
-                  label={labels.totalQty}
-                  readOnly={true}
+                  allowAddNewLine={!editMode}
+                  allowDelete={!editMode}
+                  columns={[
+                    {
+                      component: 'resourcecombobox',
+                      label: labels.type,
+                      name: 'packageTypeName',
+                      props: {
+                        datasetId: DataSets.PACKAGE_TYPE,
+                        displayField: 'value',
+                        valueField: 'key',
+                        mapping: [
+                          { from: 'key', to: 'packageType' },
+                          { from: 'value', to: 'packageTypeName' }
+                        ],
+                        readOnly: editMode
+                      }
+                    },
+                    {
+                      component: 'numberfield',
+                      name: 'qty',
+                      label: labels.qty,
+                      defaultValue: '',
+                      props: {
+                        readOnly: editMode
+                      }
+                    },
+                    {
+                      component: 'numberfield',
+                      label: labels.amount,
+                      name: 'amount',
+                      defaultValue: '',
+                      props: { readOnly: editMode }
+                    }
+                  ]}
                 />
               </Grid>
-              <Grid item xs={3} sx={{ pl: 3 }}>
-                <CustomTextField
-                  name='totalAmount'
+            </Grow>
+          </VertLayout>
+          <VertLayout>
+            <Grow>
+              <Grid container sx={{ flex: '1 !important', pl: 2 }}>
+                <DataGrid
+                  onChange={value => formik.setFieldValue('serialGrid', value)}
+                  value={formik.values.serialGrid}
+                  error={formik.errors.serialGrid}
                   maxAccess={maxAccess}
-                  value={getFormattedNumber(totalAmount.toFixed(2))}
-                  label={labels.totalAmount}
-                  readOnly={true}
+                  allowAddNewLine={!editMode}
+                  allowDelete={!editMode}
+                  columns={[
+                    {
+                      component: 'numberfield',
+                      name: 'seqNo',
+                      label: labels.seqNo,
+                      defaultValue: '',
+                      props: { readOnly: editMode }
+                    },
+                    {
+                      component: 'textfield',
+                      label: labels.reference,
+                      name: 'reference',
+                      props: {
+                        maxLength: 20,
+                        readOnly: editMode
+                      }
+                    }
+                  ]}
                 />
               </Grid>
+            </Grow>
+          </VertLayout>
+        </Grid>
+
+        <Fixed>
+          <Grid container spacing={2} sx={{ pt: 5, justifyContent: 'flex-end' }}>
+            <Grid item xs={3}>
+              <CustomTextField
+                name='totalQty'
+                maxAccess={maxAccess}
+                value={getFormattedNumber(totalQty)}
+                label={labels.totalQty}
+                readOnly={true}
+              />
             </Grid>
-          </Grow>
-        </Grid>
-        <Grid container xs={6}>
-          <Grow>
-            <DataGrid
-              onChange={value => formik.setFieldValue('serialGrid', value)}
-              value={formik.values.serialGrid}
-              error={formik.errors.serialGrid}
-              maxAccess={maxAccess}
-              allowAddNewLine={!editMode}
-              allowDelete={!editMode}
-              columns={[
-                {
-                  component: 'numberfield',
-                  name: 'seqNo',
-                  label: labels.seqNo,
-                  defaultValue: '',
-                  props: { readOnly: editMode }
-                },
-                {
-                  component: 'textfield',
-                  label: labels.reference,
-                  name: 'reference',
-                  props: {
-                    maxLength: 20,
-                    readOnly: editMode
-                  }
-                }
-              ]}
-            />
-          </Grow>
-        </Grid>
+            <Grid item xs={3} sx={{ pl: 3 }}>
+              <CustomTextField
+                name='totalAmount'
+                maxAccess={maxAccess}
+                value={getFormattedNumber(totalAmount.toFixed(2))}
+                label={labels.totalAmount}
+                readOnly={true}
+              />
+            </Grid>
+          </Grid>
+        </Fixed>
       </VertLayout>
     </FormShell>
   )

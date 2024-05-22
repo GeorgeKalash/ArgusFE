@@ -82,7 +82,16 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
       fromPlantId: yup.string().required(),
       date: yup.string().required(),
       toPlantId: yup.string().required(),
-      toCashAccountId: yup.string().required()
+      toCashAccountId: yup.string().required(),
+      transfers: yup
+        .array()
+        .of(
+          yup.object().shape({
+            currencyName: yup.string().required(),
+            amount: yup.string().nullable().required()
+          })
+        )
+        .required()
     }),
     onSubmit: async values => {
       const copy = { ...values }
@@ -237,7 +246,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
         functionId: SystemFunction.CashTransfer,
         editMode: isClosed
       },
-      width: 950,
+      width: 1500,
       height: 670,
       title: 'Shipments'
     })
