@@ -16,7 +16,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 const FiDimensions = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
-  const [tempDimCount, setTempDimCount] = useState(null)
+  const [stagingDimCount, setStagingDimCount] = useState(null)
 
   const { formik } = useForm({
     initialValues: {
@@ -56,7 +56,7 @@ const FiDimensions = () => {
             .test(`is-tpaDimension${num}-required`, `Dimension ${num} is required`, function (value) {
               const { DimCount } = this.parent
 
-              return DimCount >= num ? value != null : true
+              return DimCount >= num ? !!value : true
             })
         ])
       )
@@ -122,7 +122,7 @@ const FiDimensions = () => {
   }
 
   const handleDimCountChange = event => {
-    setTempDimCount(event.target.value)
+    setStagingDimCount(event.target.value)
   }
 
   function clearExcessFields(currentCount) {
@@ -130,15 +130,17 @@ const FiDimensions = () => {
     for (let i = 1; i <= 20; i++) {
       const dimKey = `tpaDimension${i}`
       if (i > dimCount) {
-        formik.setFieldValue(dimKey, null)
+        formik.setFieldValue(dimKey, '')
       }
     }
   }
 
   const handleDimCountBlur = () => {
-    if (tempDimCount !== null) {
-      formik.setFieldValue('DimCount', tempDimCount)
-      clearExcessFields(tempDimCount)
+    if (stagingDimCount !== null) {
+      formik.setFieldValue('DimCount', stagingDimCount)
+      process.nextTick(() => {
+        clearExcessFields(stagingDimCount)
+      })
     }
   }
 
@@ -150,7 +152,7 @@ const FiDimensions = () => {
             <CustomTextField
               name='DimCount'
               label={_labels.DimCount}
-              value={tempDimCount === null ? formik.values.DimCount : tempDimCount}
+              value={stagingDimCount === null ? formik.values.DimCount : stagingDimCount}
               onChange={handleDimCountChange}
               onBlur={handleDimCountBlur}
               numberField={true}
@@ -171,7 +173,7 @@ const FiDimensions = () => {
           <Grid item xs={12} md={6} sx={{ marginTop: '0.3rem' }}>
             <Grid container spacing={2}>
               {Array.from({ length: 10 }).map((_, index) => (
-                <Grid item xs={12} key={1}>
+                <Grid item xs={12} key={index}>
                   <CustomTextField
                     key={index}
                     name={`tpaDimension${index + 1}`}
@@ -200,7 +202,7 @@ const FiDimensions = () => {
                     value={formik.values[`tpaDimension${index + 11}`]}
                     onClear={() => formik.setFieldValue(`tpaDimension${index + 11}`, '')}
                     onChange={formik.handleChange}
-                    error={formik.values.DimCount > index + 10 && Boolean(formik.errors[`tpaDimension${index + 11}`])}
+                    error={formik.errors[`tpaDimension${index + 11}`]}
                     inputProps={{
                       readOnly: formik.values.DimCount <= index + 10 || formik.values.DimCount === 'null'
                     }}
