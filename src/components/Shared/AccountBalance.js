@@ -71,31 +71,29 @@ const AccountBalance = () => {
   return (
     <VertLayout>
       <Fixed>
-        <Grid container spacing={2} sx={{ padding: '1rem' }}>
-          <Grid item xs={6}>
-            <ResourceLookup
-              endpointId={CashBankRepository.CashAccount.snapshot}
-              parameters={{
-                _type: 0
-              }}
-              name='cashAccountRef'
-              label={_labels.cashAccount}
-              valueField='reference'
-              displayField='name'
-              valueShow='cashAccountRef'
-              secondValueShow='cashAccountName'
-              form={formik}
-              onChange={(event, newValue) => {
-                formik.setValues({
-                  cashAccountId: newValue?.recordId || '',
-                  cashAccountRef: newValue?.reference || '',
-                  cashAccountName: newValue?.name || ''
-                })
-              }}
-              errorCheck={'cashAccountId'}
-              maxAccess={access}
-            />
-          </Grid>
+        <Grid item xs={3} width={'50%'} paddingLeft={'0.5rem'} marginTop={'1rem'} marginBottom={'1rem'}>
+          <ResourceLookup
+            endpointId={CashBankRepository.CashAccount.snapshot}
+            parameters={{
+              _type: 0
+            }}
+            name='cashAccountRef'
+            label={_labels.cashAccount}
+            valueField='reference'
+            displayField='name'
+            valueShow='cashAccountRef'
+            secondValueShow='cashAccountName'
+            form={formik}
+            onChange={(event, newValue) => {
+              formik.setValues({
+                cashAccountId: newValue?.recordId || '',
+                cashAccountRef: newValue?.reference || '',
+                cashAccountName: newValue?.name || ''
+              })
+            }}
+            errorCheck={'cashAccountId'}
+            maxAccess={access}
+          />
         </Grid>
       </Fixed>
       <Grow>
