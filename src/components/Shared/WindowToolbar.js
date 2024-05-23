@@ -20,6 +20,7 @@ const WindowToolbar = ({
   onApproval,
   onClickGIA,
   onClickGL,
+  onClickAC,
   onGenerateReport,
   disabledSubmit,
   disabledApply,
@@ -56,6 +57,7 @@ const WindowToolbar = ({
     onApproval,
     onClientRelation,
     onClickGL: () => onClickGL(recordId),
+    onClickAC: () => onClickAC(recordId),
     onClickGIA: () => onClickGIA(recordId)
   }
   const { getRequest } = useContext(RequestsContext)
@@ -100,12 +102,13 @@ const WindowToolbar = ({
   }
 
   return (
-    <DialogActions sx={{padding:'8px !important'}}>
+    <DialogActions sx={{ padding: '8px !important' }}>
       <style>
         {`
           .button-container {
             position: relative;
             display: inline-block;
+            
           }
           .toast {
             position: absolute;
@@ -131,22 +134,21 @@ const WindowToolbar = ({
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          width: '100%',
-          paddingTop: 4
+          width: '100%'
         }}
       >
         {previewReport ? (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
-             <CustomComboBox
-                    label={'Select a report template'}
-                    valueField='caption'
-                    displayField='layoutName'
-                    store={reportStore}
-                    value={selectedReport}
-                    onChange={(e, newValue) => setSelectedReport(newValue)}
-                    sx={{ width: 250 }}
-                    disableClearable
-                  />
+            <CustomComboBox
+              label={'Select a report template'}
+              valueField='caption'
+              displayField='layoutName'
+              store={reportStore}
+              value={selectedReport}
+              onChange={(e, newValue) => setSelectedReport(newValue)}
+              sx={{ width: 250 }}
+              disableClearable
+            />
             <Button
               sx={{ width: '20px', height: '35px', ml: 1 }}
               variant='contained'
@@ -167,7 +169,6 @@ const WindowToolbar = ({
         ) : (
           <Box></Box>
         )}
-
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           {Buttons.filter(button => actions.some(action => action.key === button.key)).map((button, index) => {
             const correspondingAction = actions.find(action => action.key === button.key)
@@ -194,9 +195,10 @@ const WindowToolbar = ({
                         opacity: 0.8
                       },
                       border: button.border,
-                      width: '20px',
+                      width: '50px !important',
                       height: '35px',
-                      objectFit: 'contain'
+                      objectFit: 'contain',
+                      minWidth: '30px !important'
                     }}
                     disabled={isDisabled}
                   >
@@ -235,9 +237,10 @@ const WindowToolbar = ({
                         opacity: 0.8
                       },
                       border: button.border,
-                      width: '20px',
+                      width: '50px !important',
                       height: '35px',
                       objectFit: 'contain',
+                      minWidth: '30px !important'
                     }}
                     disabled={isDisabled}
                   >

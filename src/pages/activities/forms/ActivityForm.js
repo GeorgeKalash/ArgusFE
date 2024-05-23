@@ -1,6 +1,5 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
-import { useFormik } from 'formik'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -13,27 +12,20 @@ import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTrad
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { useForm } from 'src/hooks/form'
 
 export default function ActivityForm({ labels, maxAccess, recordId }) {
-  const [isLoading, setIsLoading] = useState(false)
   const [editMode, setEditMode] = useState(!!recordId)
 
-  const [initialValues, setInitialData] = useState({
-    recordId: null,
-    name: '',
-    reference: '',
-    flName: '',
-    industry: ''
-  })
-
-  const { getRequest, postRequest } = useContext(RequestsContext) 
+  const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
     endpointId: CurrencyTradingSettingsRepository.Activity.qry
   })
 
-  const formik = useFormik({
-    initialValues,
+  const { formik } = useForm({
+    initialValues: { recordId: null, name: '', reference: '', flName: '', industry: '' },
+    maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -51,9 +43,9 @@ export default function ActivityForm({ labels, maxAccess, recordId }) {
 
       if (!recordId) {
         toast.success('Record Added Successfully')
-        setInitialData({
-          ...obj, 
-          recordId: response.recordId 
+        formik.setValues({
+          ...obj,
+          recordId: response.recordId
         })
       } else toast.success('Record Edited Successfully')
       setEditMode(true)
@@ -66,29 +58,19 @@ export default function ActivityForm({ labels, maxAccess, recordId }) {
     ;(async function () {
       try {
         if (recordId) {
-          setIsLoading(true)
-
           const res = await getRequest({
             extension: CurrencyTradingSettingsRepository.Activity.get,
             parameters: `_recordId=${recordId}`
           })
 
-          setInitialData(res.record)
+          formik.setValues(res.record)
         }
-      } catch (exception) {
-        setErrorMessage(error)
-      }
-      setIsLoading(false)
+      } catch (exception) {}
     })()
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.Activity}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={editMode}
-    >
+    <FormShell resourceId={ResourceIds.Activity} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -125,9 +107,7 @@ export default function ActivityForm({ labels, maxAccess, recordId }) {
                 value={formik.values.flName}
                 rows={2}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('flName', newValue?.flName || '')
-                }}
+                onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('flName', '')}
                 error={formik.touched.flName && Boolean(formik.errors.flName)}
               />

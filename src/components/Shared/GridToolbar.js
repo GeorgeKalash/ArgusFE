@@ -1,6 +1,5 @@
 // ** MUI Imports
 import { Box, Button, Grid, Tooltip, Typography, Autocomplete, DialogActions, TextField } from '@mui/material'
-
 import Icon from 'src/@core/components/icon'
 import CustomTextField from '../Inputs/CustomTextField'
 import { useState, useEffect, useContext } from 'react'
@@ -18,6 +17,7 @@ const GridToolbar = ({
   initialLoad,
   onAdd,
   openRPB,
+  onTree,
   disableRPB = false,
   onGo,
   paramsArray,
@@ -96,34 +96,44 @@ const GridToolbar = ({
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        width: '100%'
+        width: '100%',
+        pt: '5px'
       }}
     >
-      {children && children}
-      <Box sx={{ display: 'flex', pb: 2, pr: 2 }}>
+      <Grid container spacing={4} sx={{ display: 'flex', padding: 2 }}>
+        {children && children}
         {initialLoad && (
-          <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
+          <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', pl: 2 }}>
             <Button onClick={initialLoad} variant='contained'>
               <Icon icon='mdi:reload' />
             </Button>
-          </Box>
+          </Grid>
         )}
         {onAdd && addBtnVisible && (
-          <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
+          <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', pl: 2 }}>
             <Tooltip title='Add'>
               <Button
                 onClick={onAdd}
                 variant='contained'
                 style={{ backgroundColor: 'transparent', border: '1px solid #4eb558' }}
+                sx={{
+                  mr: 1,
+                  '&:hover': {
+                    opacity: 0.8
+                  },
+                  width: '20px',
+                  height: '35px',
+                  objectFit: 'contain'
+                }}
               >
                 <img src='/images/buttonsIcons/add.png' alt='Add' />
               </Button>
             </Tooltip>
-          </Box>
+          </Grid>
         )}
 
         {inputSearch && (
-          <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2, zIndex: 0 }}>
+          <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', pl: 2, zIndex: 0 }}>
             <CustomTextField
               name='search'
               value={searchValue}
@@ -132,18 +142,40 @@ const GridToolbar = ({
               onChange={e => setSearchValue(e.target.value)}
               onSearch={onSearch}
               search={true}
+              height={35}
             />
+          </Grid>
+        )}
+        {onTree && (
+          <Box sx={{ display: 'flex', justifyContent: 'flex-start', pl: 2 }}>
+            <Tooltip title='Add'>
+              <Button
+                onClick={onTree}
+                variant='contained'
+                sx={{
+                  mr: 1,
+                  '&:hover': {
+                    opacity: 0.8
+                  },
+                  width: '20px',
+                  height: '35px',
+                  objectFit: 'contain'
+                }}
+              >
+                <img src='/images/buttonsIcons/tree.png' alt='Add' />
+              </Button>
+            </Tooltip>
           </Box>
         )}
         {openRPB && (
-          <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
+          <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', pl: 2 }}>
             <Button onClick={openRPB} variant='contained' disabled={disableRPB}>
               OPEN RPB
             </Button>
-          </Box>
+          </Grid>
         )}
         {onGo && (
-          <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
+          <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', pl: 2 }}>
             <Button
               disabled={paramsArray.length === 0}
               onClick={() => onGo({ _startAt: 0, _pageSize: 30, params: formatDataForApi(paramsArray) })}
@@ -151,9 +183,9 @@ const GridToolbar = ({
             >
               GO
             </Button>
-          </Box>
+          </Grid>
         )}
-      </Box>
+      </Grid>
       {paramsArray && paramsArray.length > 0 && (
         <Box sx={{ pl: 2 }}>
           <Grid container>

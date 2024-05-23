@@ -1,10 +1,10 @@
 import { Button } from '@mui/material'
 
-export default function TextFieldEdit({ column, row, field }) {
+export default function TextFieldEdit({ column, row, field, update }) {
   return (
     <Button
       auto
-      onClick={e => column.onClick(e, row)} // Corrected the usage of 'row'
+      onClick={e => column.onClick(e, row, update)} // Corrected the usage of 'row'
       variant='contained'
       disabled={!row[field]}
       sx={{
