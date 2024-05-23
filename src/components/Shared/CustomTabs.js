@@ -22,7 +22,7 @@ export const CustomTabs = ({ tabs, activeTab, setActiveTab }) => {
               }
             },
             '.Mui-disabled': {
-              color: '#6A6A6A',
+              color: '#6A6A6A !important',
               backgroundColor: '#333333'
             },
             '.Mui-selected': {
