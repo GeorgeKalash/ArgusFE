@@ -2,13 +2,11 @@ import React, { useContext, useEffect, useState } from 'react'
 import CustomTextField from '../Inputs/CustomTextField'
 
 import { RequestsContext } from 'src/providers/RequestsContext'
-import ErrorWindow from './ErrorWindow'
 import { reference } from 'src/lib/reference-helper'
 
 export const TextFieldReference = ({ endpointId, param = '', setReferenceRequired, editMode, ...rest }) => {
   const { getRequest } = useContext(RequestsContext)
   const [state, setState] = useState({ readOnly: false, mandatory: true })
-  const [errorMessage, setErrorMessage] = useState(null)
 
   useEffect(() => {
     setReferenceRequired(true)
@@ -18,8 +16,6 @@ export const TextFieldReference = ({ endpointId, param = '', setReferenceRequire
       if (!result.error) {
         setState({ readOnly: result.readOnly, mandatory: result.mandatory })
         setReferenceRequired(result.mandatory)
-      } else {
-        setErrorMessage(result.error)
       }
     }
     if (!editMode) {
@@ -32,8 +28,6 @@ export const TextFieldReference = ({ endpointId, param = '', setReferenceRequire
 
   return (
     <>
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-
       <CustomTextField
         {...{
           required: state.mandatory,

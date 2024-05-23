@@ -30,7 +30,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import useDocumentType from 'src/hooks/dcocumentReferenceBehaviors'
+import useDocumentType from 'src/hooks/documentReferenceBehaviors'
 import { useForm } from 'src/hooks/form'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 

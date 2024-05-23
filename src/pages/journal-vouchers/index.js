@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
@@ -13,11 +13,10 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
-import useDocumentType from 'src/hooks/dcocumentReferenceBehaviors'
+import useDocumentType from 'src/hooks/documentReferenceBehaviors'
 
 const JournalVoucher = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const [selectedRecordId, setSelectedRecordId] = useState()
 
   const { stack } = useWindow()
 
@@ -84,37 +83,28 @@ const JournalVoucher = () => {
     }
   ]
 
-  const action = {
-    Component: JournalVoucherForm,
-    props: {
-      labels: _labels,
-      access: access,
-      recordId: selectedRecordId,
-      setSelectedRecordId: setSelectedRecordId
-    },
-    width: 500,
-    height: 500,
-    title: _labels.generalJournal
-  }
-
-  const { sectionAction } = useDocumentType({ functionId: SystemFunction.JournalVoucher, action })
-
-  const add = async () => {
-    await sectionAction()
-  }
-
-  const edit = obj => {
+  const openForm = recordId => {
     stack({
       Component: JournalVoucherForm,
       props: {
         labels: _labels,
         access: access,
-        recordId: obj.recordId
+        recordId: recordId
       },
       width: 500,
       height: 500,
       title: _labels.generalJournal
     })
+  }
+
+  const { proxyAction } = useDocumentType({ functionId: SystemFunction.JournalVoucher, action: openForm })
+
+  const add = async () => {
+    await proxyAction()
+  }
+
+  const edit = obj => {
+    openForm(obj.recordId)
   }
 
   const del = async obj => {
@@ -124,21 +114,6 @@ const JournalVoucher = () => {
     })
     invalidate()
     toast.success('Record Deleted Successfully')
-  }
-
-  function openForm(recordId) {
-    stack({
-      Component: JournalVoucherForm,
-      props: {
-        labels: _labels,
-        recordId: recordId ? recordId : null,
-        maxAccess: access,
-        invalidate: invalidate
-      },
-      width: 600,
-      height: 600,
-      title: _labels.generalJournal
-    })
   }
 
   return (

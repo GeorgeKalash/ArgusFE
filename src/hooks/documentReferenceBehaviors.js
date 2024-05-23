@@ -1,19 +1,17 @@
 import { useQuery } from '@tanstack/react-query'
 import { useContext } from 'react'
 import { useError } from 'src/error'
-import documentType from 'src/lib/docRefBehaivors'
+import documentType from 'src/lib/docRefBehaviors'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useWindow } from 'src/windows'
 
 export function useDocumentType({ functionId, access, nraId, hasDT, action }) {
   const { getRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
-  const { stack } = useWindow()
 
-  const sectionAction = async () => {
+  const proxyAction = async () => {
     const general = await documentType(getRequest, functionId)
     if (!general?.errorMessage) {
-      stack(action)
+      await action()
     } else {
       stackError({ message: general?.errorMessage })
     }
@@ -41,7 +39,7 @@ export function useDocumentType({ functionId, access, nraId, hasDT, action }) {
     access,
     query: query,
     maxAccess: query?.data?.maxAccess,
-    sectionAction
+    proxyAction
   }
 }
 
