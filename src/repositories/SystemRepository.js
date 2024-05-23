@@ -168,5 +168,8 @@ export const SystemRepository = {
   SystemChecks: {
     qry: service + 'qryCHK',
     set: service + 'set2CHK'
+  },
+  TimeZone: {
+    get: service + 'getTZN'
   }
 }

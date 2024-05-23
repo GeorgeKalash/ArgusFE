@@ -21,12 +21,10 @@ export function WindowProvider({ children }) {
       }}
     >
       {children}
-      {stack.map(({ Component, title, width = 800, props, onClose, height }, index) => (
+      {stack.map(({ Component, title, width = 800, props, onClose, canExpand, height }, index) => (
         <Window
           key={index}
-          sx={{display:'flex !important',
-            flex:'1'
-          }}
+          sx={{ display: 'flex !important', flex: '1' }}
           Title={title}
           controlled={true}
           onClose={() => {
@@ -35,6 +33,7 @@ export function WindowProvider({ children }) {
           }}
           width={width}
           height={height}
+          canExpand={canExpand}
         >
           <Component
             {...props}
