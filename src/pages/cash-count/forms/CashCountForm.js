@@ -106,7 +106,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
           variation: '',
           flag: '',
           enabled: false,
-          currencyNotes: [{ id: 1, seqNo: 1, cashCountId: '', note: '', qty: '', subTotal: '' }]
+          currencyNotes: []
         }
       ]
     },
@@ -128,17 +128,6 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
         .required(' ')
     }),
     onSubmit: async obj => {
-      for (let i = 0; i < obj.items.length; i++) {
-        const { id, currencyRef, currencyNotes, ...rest } = obj.items[i]
-        if (!currencyNotes || currencyNotes.length === 0) {
-          stackError({
-            message: `Currency Notes for ${currencyRef} Cannot Be Empty.`
-          })
-
-          return
-        }
-      }
-
       const payload = {
         header: {
           recordId: obj.recordId,
@@ -213,10 +202,12 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
           date: formatDateFromApi(header.date),
           startTime: getTimeInTimeZone(header.startTime),
           endTime: header.endTime,
-          items: items.map(({ id, ...rest }, index) => ({
-            id: index + 1,
+          items: items.map(({ seqNo, variation, ...rest }, index) => ({
+            id: seqNo,
+            seqNo,
             enabled: true,
-            flag: true,
+            variation,
+            flag: variation === 0 ? true : false,
             ...rest
           }))
         })
