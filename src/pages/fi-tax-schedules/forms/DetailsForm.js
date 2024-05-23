@@ -21,7 +21,19 @@ const DetailsForm = ({ store, setStore, maxAccess, labels, expanded, editMode })
     enableReinitialize: true,
     validateOnChange: true,
     maxAccess,
-
+    initialValues: {
+      TaxDetail: [
+        {
+          id: 1,
+          taxId: recordId || null,
+          taxCodeId: '',
+          taxBase: '',
+          amount: '',
+          taxCodeName: '',
+          seqNo: ''
+        }
+      ]
+    },
     validationSchema: yup.object({
       TaxDetail: yup
         .array()
@@ -36,19 +48,6 @@ const DetailsForm = ({ store, setStore, maxAccess, labels, expanded, editMode })
         .required(' ')
     }),
 
-    initialValues: {
-      TaxDetail: [
-        {
-          id: 1,
-          taxId: recordId || null,
-          taxCodeId: '',
-          taxBase: '',
-          amount: '',
-          taxCodeName: '',
-          seqNo: ''
-        }
-      ]
-    },
     onSubmit: values => {
       postHistory(values)
     }
@@ -112,68 +111,65 @@ const DetailsForm = ({ store, setStore, maxAccess, labels, expanded, editMode })
   }, [recordId])
 
   return (
-    <>
-      <FormShell
-        form={formik}
-        resourceId={ResourceIds.TaxCodes}
-        maxAccess={maxAccess}
-        infoVisible={false}
-        editMode={editMode}
-      >
-        <VertLayout>
-          <Grow>
-            <DataGrid
-              onChange={value => formik.setFieldValue('TaxDetail', value)}
-              value={formik.values.TaxDetail}
-              error={formik.errors.TaxDetail}
-              columns={[
-                {
-                  component: 'resourcecombobox',
-                  label: labels.taxCode,
-                  name: 'taxCodeId',
-                  props: {
-                    endpointId: FinancialRepository.TaxCodes.qry,
-                    displayField: 'name',
-                    valueField: 'recordId',
-                    mapping: [
-                      { from: 'recordId', to: 'taxCodeId' },
+    <FormShell
+      form={formik}
+      resourceId={ResourceIds.TaxCodes}
+      maxAccess={maxAccess}
+      infoVisible={false}
+      editMode={editMode}
+    >
+      <VertLayout>
+        <Grow>
+          <DataGrid
+            onChange={value => formik.setFieldValue('TaxDetail', value)}
+            value={formik.values.TaxDetail}
+            error={formik.errors.TaxDetail}
+            columns={[
+              {
+                component: 'resourcecombobox',
+                label: labels.taxCode,
+                name: 'taxCodeId',
+                props: {
+                  endpointId: FinancialRepository.TaxCodes.qry,
+                  displayField: 'name',
+                  valueField: 'recordId',
+                  mapping: [
+                    { from: 'recordId', to: 'taxCodeId' },
 
-                      { from: 'name', to: 'taxCodeName' }
-                    ],
-                    columnsInDropDown: [
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]
-                  }
-                },
-                {
-                  component: 'resourcecombobox',
-                  label: labels.taxBase,
-                  name: 'taxBase',
-                  props: {
-                    datasetId: DataSets.FI_TAX_BASE,
-                    displayField: 'value',
-                    valueField: 'key',
-                    mapping: [
-                      { from: 'value', to: 'taxBaseName' },
-                      { from: 'key', to: 'taxBase' }
-                    ]
-                  }
-                },
-
-                {
-                  component: 'numberfield',
-                  label: labels.amount,
-                  name: 'amount',
-                  decimalScale: 2
+                    { from: 'name', to: 'taxCodeName' }
+                  ],
+                  columnsInDropDown: [
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' }
+                  ]
                 }
-              ]}
-              height={`${expanded ? height - 280 : 380}px`}
-            />
-          </Grow>
-        </VertLayout>
-      </FormShell>
-    </>
+              },
+              {
+                component: 'resourcecombobox',
+                label: labels.taxBase,
+                name: 'taxBase',
+                props: {
+                  datasetId: DataSets.FI_TAX_BASE,
+                  displayField: 'value',
+                  valueField: 'key',
+                  mapping: [
+                    { from: 'value', to: 'taxBaseName' },
+                    { from: 'key', to: 'taxBase' }
+                  ]
+                }
+              },
+
+              {
+                component: 'numberfield',
+                label: labels.amount,
+                name: 'amount',
+                decimalScale: 2
+              }
+            ]}
+          />
+        </Grow>
+      </VertLayout>
+    </FormShell>
   )
 }
 
