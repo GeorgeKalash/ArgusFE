@@ -1,5 +1,4 @@
 import { useContext, useState } from 'react'
-import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import Table from 'src/components/Shared/Table'
@@ -9,6 +8,9 @@ import ProfessionsWindow from './Windows/ProfessionsWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useWindow } from 'src/windows'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 
 const Professions = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -101,10 +103,11 @@ const Professions = () => {
   }
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar onAdd={add} maxAccess={access} />
-
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
@@ -118,8 +121,8 @@ const Professions = () => {
           paginationType='api'
           maxAccess={access}
         />
-      </Box>
-    </>
+      </Grow>
+    </VertLayout>
   )
 }
 

@@ -1,31 +1,21 @@
-// ** React Importsport
 import { useState, useContext } from 'react'
-
-// ** MUI Imports
-import { Box } from '@mui/material'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
-
-// ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
-
 import { useWindow } from 'src/windows'
 import OutwardsTab from './Tabs/OutwardsTab'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import toast from 'react-hot-toast'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const OutwardsTransfer = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
-
-  //states
   const [errorMessage, setErrorMessage] = useState(null)
   const { stack } = useWindow()
 
@@ -204,8 +194,8 @@ const OutwardsTransfer = () => {
   }
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar
           onAdd={addOutwards}
           maxAccess={access}
@@ -218,6 +208,8 @@ const OutwardsTransfer = () => {
           labels={_labels}
           inputSearch={true}
         />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data ? data : { list: [] }}
@@ -230,10 +222,9 @@ const OutwardsTransfer = () => {
           maxAccess={access}
           refetch={refetch}
         />
-      </Box>
-
+      </Grow>
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+    </VertLayout>
   )
 }
 

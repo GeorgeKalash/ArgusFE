@@ -18,6 +18,12 @@ export const Buttons = [
     main: false
   },
   {
+    key: 'Delete',
+    color: '#231f20',
+    image: 'delete-icon.png',
+    main: false
+  },
+  {
     key: 'Close',
     color: 'transparent',
     image: 'close.png',
@@ -74,6 +80,18 @@ export const Buttons = [
     main: false
   },
   {
+    key: 'Integration Account',
+    color: '#231f20',
+    image: 'intAccount.png',
+    main: false
+  },
+  {
+    key: 'Account Balance',
+    color: '#275915',
+    image: 'popup-window.png',
+    main: false
+  },
+  {
     key: 'Client Relation',
     color: '#AC48AE',
     image: 'clientRelations.png',
@@ -83,6 +101,18 @@ export const Buttons = [
     key: 'GL',
     color: '#231f20',
     image: 'gl.png',
+    main: false
+  },
+  {
+    key: 'Shipment',
+    color: '#843c54',
+    image: 'shipment.png',
+    main: false
+  },
+  {
+    key: 'Transportation',
+    color: '#064b38',
+    image: 'transportation.png',
     main: false
   },
   {

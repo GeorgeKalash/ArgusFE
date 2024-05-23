@@ -1,50 +1,43 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
-import { useFormik } from 'formik'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-
-// ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import {ResourceLookup} from 'src/components/Shared/ResourceLookup'
+import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { DataSets } from 'src/resources/DataSets'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
+import { MasterSource } from 'src/resources/MasterSource'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { useForm } from 'src/hooks/form'
 
-export default function CashAccountForm ({ labels, recordId, maxAccess }) {
+export default function CashAccountForm({ labels, recordId, maxAccess, invalidate }) {
   const [isLoading, setIsLoading] = useState(false)
-  const [editMode, setEditMode] = useState(!!recordId)
-
-  const [initialValues, setInitialData] = useState({
-    recordId: null,
-    name: '',
-    reference: '',
-    accountNo:'',
-    currencyId: null,
-    plantId: null,
-    activeStatus: null,
-    groupId: null,
-    accountName: '',
-    accountRef: '',
-    accountId: null,
-    type:2
-  })
+  const editMode = !!recordId
 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
-  const invalidate = useInvalidate({
-    endpointId: CashBankRepository.CashAccount.qry
-  })
-
-  const formik = useFormik({
-    initialValues,
+  const { formik } = useForm({
+    initialValues: {
+      recordId: recordId || null,
+      name: '',
+      reference: '',
+      accountNo: '',
+      currencyId: null,
+      plantId: null,
+      activeStatus: null,
+      groupId: null,
+      accountName: '',
+      accountRef: '',
+      accountId: null,
+      type: 2
+    },
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -61,15 +54,13 @@ export default function CashAccountForm ({ labels, recordId, maxAccess }) {
         record: JSON.stringify(obj)
       })
 
-      if (!recordId) {
+      if (!obj.recordId) {
         toast.success('Record Added Successfully')
-        setInitialData({
-          ...obj, 
-          recordId: response.recordId 
+        formik.setValues({
+          ...obj,
+          recordId: response.recordId
         })
       } else toast.success('Record Edited Successfully')
-      setEditMode(true)
-
       invalidate()
     }
   })
@@ -87,24 +78,34 @@ export default function CashAccountForm ({ labels, recordId, maxAccess }) {
 
           formik.setValues(res.record)
         }
-      } catch (exception) {
-        setErrorMessage(error)
-      }
+      } catch (exception) {}
       setIsLoading(false)
     })()
   }, [])
+
+  const actions = [
+    {
+      key: 'Integration Account',
+      condition: true,
+      onClick: 'onClickGIA',
+      disabled: !editMode
+    }
+  ]
 
   return (
     <FormShell
       resourceId={ResourceIds.CashAccounts}
       form={formik}
-      height={400}
       maxAccess={maxAccess}
       editMode={editMode}
+      actions={actions}
+      masterSource={MasterSource.CashAccount}
     >
-      <Grid container spacing={4}>
-        <Grid item xs={12}>
-            <CustomTextField
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={4}>
+            <Grid item xs={12}>
+              <CustomTextField
                 name='name'
                 label={labels.name}
                 value={formik.values.name}
@@ -114,10 +115,10 @@ export default function CashAccountForm ({ labels, recordId, maxAccess }) {
                 maxLength='40'
                 maxAccess={maxAccess}
                 error={formik.touched.name && Boolean(formik.errors.name)}
-            />
-        </Grid>
-        <Grid item xs={12}>
-            <CustomTextField
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
                 name='reference'
                 label={labels.reference}
                 value={formik.values.reference}
@@ -127,10 +128,10 @@ export default function CashAccountForm ({ labels, recordId, maxAccess }) {
                 maxLength='10'
                 maxAccess={maxAccess}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
-            />
-        </Grid>
-        <Grid item xs={12}>
-            <ResourceComboBox
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
                 endpointId={SystemRepository.Currency.qry}
                 name='currencyId'
                 label={labels.currency}
@@ -140,17 +141,17 @@ export default function CashAccountForm ({ labels, recordId, maxAccess }) {
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
                 ]}
-                values={formik.values}   
+                values={formik.values}
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('currencyId', '')}
                 onChange={(event, newValue) => {
-                    formik && formik.setFieldValue('currencyId', newValue?.recordId)
+                  formik && formik.setFieldValue('currencyId', newValue?.recordId)
                 }}
                 error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
-            />
-        </Grid>
-        <Grid item xs={12}>
-            <ResourceComboBox
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
                 endpointId={SystemRepository.Plant.qry}
                 name='plantId'
                 label={labels.plant}
@@ -160,17 +161,17 @@ export default function CashAccountForm ({ labels, recordId, maxAccess }) {
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
                 ]}
-                values={formik.values}   
+                values={formik.values}
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('plantId', '')}
                 onChange={(event, newValue) => {
-                    formik && formik.setFieldValue('plantId', newValue?.recordId)
+                  formik && formik.setFieldValue('plantId', newValue?.recordId)
                 }}
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
-            />
-        </Grid>
-        <Grid item xs={12}>
-            <ResourceComboBox
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
                 datasetId={DataSets.ACTIVE_STATUS}
                 name='activeStatus'
                 label={labels.activeStatus}
@@ -180,13 +181,13 @@ export default function CashAccountForm ({ labels, recordId, maxAccess }) {
                 values={formik.values}
                 onClear={() => formik.setFieldValue('activeStatus', '')}
                 onChange={(event, newValue) => {
-                    formik.setFieldValue('activeStatus', newValue?.key)
+                  formik.setFieldValue('activeStatus', newValue?.key)
                 }}
                 error={formik.touched.activeStatus && Boolean(formik.errors.activeStatus)}
-            />
-        </Grid>
-        <Grid item xs={12}>
-            <ResourceComboBox
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
                 endpointId={CashBankRepository.CbCashGroup.qry}
                 name='groupId'
                 label={labels.groupId}
@@ -196,17 +197,17 @@ export default function CashAccountForm ({ labels, recordId, maxAccess }) {
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
                 ]}
-                values={formik.values}   
+                values={formik.values}
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('groupId', '')}
                 onChange={(event, newValue) => {
-                    formik && formik.setFieldValue('groupId', newValue?.recordId)
+                  formik && formik.setFieldValue('groupId', newValue?.recordId)
                 }}
                 error={formik.touched.groupId && Boolean(formik.errors.groupId)}
-            />
-        </Grid>
-        <Grid item xs={12}>
-            <ResourceLookup
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceLookup
                 endpointId={FinancialRepository.Account.snapshot}
                 valueField='reference'
                 displayField='name'
@@ -219,19 +220,21 @@ export default function CashAccountForm ({ labels, recordId, maxAccess }) {
                 errorCheck={'accountId'}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                if (newValue) {
+                  if (newValue) {
                     formik.setFieldValue('accountId', newValue?.recordId)
                     formik.setFieldValue('accountRef', newValue?.reference)
                     formik.setFieldValue('accountName', newValue?.name)
-                } else {
+                  } else {
                     formik.setFieldValue('accountId', '')
                     formik.setFieldValue('accountRef', null)
                     formik.setFieldValue('accountName', null)
-                }
+                  }
                 }}
-            />
-        </Grid>
-      </Grid>
+              />
+            </Grid>
+          </Grid>
+        </Grow>
+      </VertLayout>
     </FormShell>
   )
 }

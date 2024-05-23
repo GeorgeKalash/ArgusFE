@@ -160,7 +160,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     mobileVerified: '',
     isRelativeDiplomat: false,
     professionId: '',
-    clientRemittance: { reference: '' }
+    cltRemReference: ''
   })
 
   const handleCopy = event => {
@@ -322,9 +322,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
           isRelativeDiplomat: obj.clientRemittance?.isRelativeDiplomat,
           trxAmountPerYear: obj.clientRemittance?.trxAmountPerYear,
           trxCountPerYear: obj.clientRemittance?.trxCountPerYear,
-          clientRemittance: {
-            reference: obj.clientRemittance.reference
-          }
+          cltRemReference: obj.clientRemittance?.reference
         })
 
         setEditMode(true)
@@ -484,7 +482,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     }
 
     const obj4 = {
-      reference: obj.clientRemittance?.reference,
+      reference: obj.cltRemReference,
       salaryRangeId: obj.salaryRangeId,
       riskLevel: obj.riskLevel,
       smsLanguage: obj.smsLanguage,
@@ -738,15 +736,15 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
               </Grid>
               <Grid item xs={12}>
                 <CustomTextField
-                  name='clientRemittance.reference'
+                  name='cltRemReference'
                   label={labels.lastKYC}
-                  value={clientIndividualFormik?.values?.clientRemittance?.reference}
+                  value={clientIndividualFormik?.values?.cltRemReference}
                   maxAccess={maxAccess}
                   maxLength='30'
                   readOnly
                   error={
-                    clientIndividualFormik.touched.clientRemittance?.reference &&
-                    Boolean(clientIndividualFormik.errors.reference)
+                    clientIndividualFormik.touched.cltRemReference &&
+                    Boolean(clientIndividualFormik.errors.cltRemReference)
                   }
                 />
               </Grid>

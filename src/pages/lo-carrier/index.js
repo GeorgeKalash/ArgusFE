@@ -1,51 +1,38 @@
-// ** React Imports
-import { useState, useContext } from 'react'
-
-// ** MUI Imports
-import {Box } from '@mui/material'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { LogisticsRepository } from 'src/repositories/LogisticsRepository'
-
-// ** Windows
-import LoCarriersWindow from './Windows/LoCarriersWindow'
-
-// ** Helpers
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
-
-// ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { useWindow } from 'src/windows'
+import LoCarriersForms from './forms/LoCarriersForm'
 
 const LoCarrier = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const [businessPartnerStore, setBusinessPartnerStore] = useState([])
-  const [selectedRecordId, setSelectedRecordId] = useState(null)
-
-  //states
-  const [windowOpen, setWindowOpen] = useState(false)
-  const [errorMessage, setErrorMessage] = useState(null)
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    return await getRequest({
+    const response = await getRequest({
       extension: LogisticsRepository.LoCarrier.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
+
+    return { ...response, _startAt: _startAt }
   }
+  const { stack } = useWindow()
 
   const {
     query: { data },
     labels: _labels,
-    access
+    access,
+    paginationParameters,
+    refetch
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: LogisticsRepository.LoCarrier.page,
@@ -56,41 +43,38 @@ const LoCarrier = () => {
     endpointId: LogisticsRepository.LoCarrier.page
   })
 
-  const lookupBusinessPartners = searchQry => {
-    var parameters = `_size=30&_startAt=0&_filter=${searchQry}`
-    getRequest({
-      extension: BusinessPartnerRepository.MasterData.snapshot,
-      parameters: parameters
-    })
-      .then(res => {
-        setBusinessPartnerStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
   const columns = [
     {
-        field: 'reference',
-        headerName: _labels.reference,
-        flex: 1
+      field: 'reference',
+      headerName: _labels.reference,
+      flex: 1
     },
     {
       field: 'name',
       headerName: _labels.name,
       flex: 1
-    },
+    }
   ]
 
-
   const add = () => {
-    setWindowOpen(true)
+    openForm()
   }
 
   const edit = obj => {
-    setSelectedRecordId(obj.recordId)
-    setWindowOpen(true)
+    openForm(obj?.recordId)
+  }
+
+  function openForm(recordId) {
+    stack({
+      Component: LoCarriersForms,
+      props: {
+        labels: _labels,
+        recordId: recordId,
+        maxAccess: access
+      },
+
+      title: _labels.carrier
+    })
   }
 
   const del = async obj => {
@@ -101,12 +85,13 @@ const LoCarrier = () => {
     invalidate()
     toast.success('Record Deleted Successfully')
   }
-  
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar onAdd={add} maxAccess={access} />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
@@ -115,27 +100,13 @@ const LoCarrier = () => {
           onDelete={del}
           isLoading={false}
           pageSize={50}
-          paginationType='client'
+          paginationType='api'
+          paginationParameters={paginationParameters}
+          refetch={refetch}
           maxAccess={access}
         />
-      </Box>
-      {windowOpen && (
-        <LoCarriersWindow
-          onClose={() => {
-            setWindowOpen(false)
-            setSelectedRecordId(null)
-          }}
-          labels={_labels}
-          maxAccess={access}
-          recordId={selectedRecordId}
-          setSelectedRecordId={setSelectedRecordId}
-          lookupBusinessPartners={lookupBusinessPartners}
-          businessPartnerStore={businessPartnerStore}
-          setBusinessPartnerStore={setBusinessPartnerStore}
-        />
-      )}
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+      </Grow>
+    </VertLayout>
   )
 }
 

@@ -7,7 +7,7 @@ export const ManufacturingRepository = {
     qry: service + 'qryLBG',
     set: service + 'setLBG',
     get: service + 'getLBG',
-    del: service + 'delLGB'
+    del: service + 'delLBG'
   },
   ProductionLine: {
     page: service + 'pageLIN',

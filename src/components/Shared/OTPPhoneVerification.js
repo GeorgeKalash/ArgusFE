@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react'
 import Grid from '@mui/system/Unstable_Grid/Grid'
 import { RequestsContext } from 'src/providers/RequestsContext'
-
-// ** Global css styles
 import styles from '../../../styles/phoneVerification.module.css'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import toast from 'react-hot-toast'

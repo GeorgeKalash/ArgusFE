@@ -8,65 +8,49 @@ import IDNumberForm from '../forms/IDNumberForm'
 import AddressMasterDataForm from '../forms/AddressMasterDataForm'
 import RelationList from 'src/pages/bp-master-data/forms/RelationList'
 
-const BPMasterDataWindow = ({
-  labels,
-  maxAccess,
-  defaultValue,
-  recordId,
-  height
-}) => {
+const BPMasterDataWindow = ({ labels, maxAccess, defaultValue, recordId, height }) => {
   const [activeTab, setActiveTab] = useState(0)
 
-  const [store , setStore] = useState({
-    recordId : recordId || null,
+  const [store, setStore] = useState({
+    recordId: recordId || null,
     category: null
   })
   const [editMode, setEditMode] = useState(!!recordId)
 
-
-  const tabs=[
+  const tabs = [
     { label: labels.general },
     { label: labels.idNumber, disabled: !editMode },
     { label: labels.relation, disabled: !editMode },
     { label: labels.address, disabled: !editMode }
   ]
 
-
-
-return (
+  return (
     <>
-    <CustomTabs  tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-
-        <CustomTabPanel index={0}   height={height} value={activeTab}>
-          <BPMasterDataForm labels={labels} maxAccess={maxAccess} defaultValue={defaultValue}
-           store={store} setStore={setStore} setEditMode={setEditMode}  />
-        </CustomTabPanel>
-
-        <CustomTabPanel height={height} index={1} value={activeTab}>
-            <IDNumberForm
-              store={store}
-              maxAccess={maxAccess}
-              labels={labels}
-
-            />
-        </CustomTabPanel>
-        <CustomTabPanel index={2} height={height}  value={activeTab}>
-          <RelationList
-            store={store}
-            labels={labels}
-            maxAccess={maxAccess}
-            height={height-100}
-          />
-        </CustomTabPanel>
-        <CustomTabPanel index={3} height={height}  value={activeTab}>
-          <AddressMasterDataForm
-            store={store}
-            setStore={setStore}
-            labels={labels}
-            maxAccess={maxAccess}
-            height={height-100}
-          />
-        </CustomTabPanel>
+      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
+      <CustomTabPanel index={0} height={height} value={activeTab}>
+        <BPMasterDataForm
+          labels={labels}
+          maxAccess={maxAccess}
+          defaultValue={defaultValue}
+          store={store}
+          setStore={setStore}
+          setEditMode={setEditMode}
+        />
+      </CustomTabPanel>
+      <CustomTabPanel height={height} index={1} value={activeTab}>
+        <IDNumberForm store={store} maxAccess={maxAccess} labels={labels} />
+      </CustomTabPanel>
+      <CustomTabPanel index={2} height={height} value={activeTab}>
+        <RelationList store={store} labels={labels} maxAccess={maxAccess}/>
+      </CustomTabPanel>
+      <CustomTabPanel index={3} height={height} value={activeTab}>
+        <AddressMasterDataForm
+          store={store}
+          setStore={setStore}
+          labels={labels}
+          maxAccess={maxAccess}
+        />
+      </CustomTabPanel>
     </>
   )
 }

@@ -23,8 +23,8 @@ export default function CurrencyTrading() {
       : null
 
     const parameters = `_userId=${userData && userData.userId}&_key=plantId`
-
-    return getRequest({
+    
+return getRequest({
       extension: SystemRepository.UserDefaults.get,
       parameters: parameters
     })
@@ -47,8 +47,8 @@ export default function CurrencyTrading() {
   }, [access])
 
   return (
-    <Box sx={{ height: `calc(100vh - 48px)`, display: 'flex', flexDirection: 'column', zIndex: 1 }}>
-      {plantId && access && <TransactionForm labels={_labelsADJ} maxAccess={access} plantId={plantId} />}
-    </Box>
+    
+   plantId && access &&  <TransactionForm labels={_labelsADJ} maxAccess={access}  plantId={plantId} />
+    
   )
 }

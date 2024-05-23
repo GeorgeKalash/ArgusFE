@@ -1,8 +1,10 @@
-import { Autocomplete, Box, Button, DialogActions, TextField, Tooltip } from '@mui/material'
+import { Autocomplete, Box, Button, DialogActions, TextField } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { Buttons } from './Buttons'
+import ResourceComboBox from './ResourceComboBox'
+import CustomComboBox from '../Inputs/CustomComboBox'
 
 const WindowToolbar = ({
   onSave,
@@ -16,7 +18,9 @@ const WindowToolbar = ({
   isCleared,
   recordId,
   onApproval,
+  onClickGIA,
   onClickGL,
+  onClickAC,
   onGenerateReport,
   disabledSubmit,
   disabledApply,
@@ -36,6 +40,7 @@ const WindowToolbar = ({
     actions,
     isSaved,
     isInfo,
+
     isCleared,
     disabledSubmit,
     disabledApply,
@@ -51,11 +56,14 @@ const WindowToolbar = ({
     onApply,
     onApproval,
     onClientRelation,
-    onClickGL: () => onClickGL(recordId)
+    onClickGL: () => onClickGL(recordId),
+    onClickAC: () => onClickAC(recordId),
+    onClickGIA: () => onClickGIA(recordId)
   }
   const { getRequest } = useContext(RequestsContext)
 
   const [reportStore, setReportStore] = useState([])
+  const [tooltip, setTooltip] = useState('')
 
   const getReportLayout = () => {
     setReportStore([])
@@ -77,9 +85,7 @@ const WindowToolbar = ({
               }))
             )
         })
-        .catch(error => {
-          console.log(error)
-        })
+        .catch(error => {})
     }
   }
 
@@ -87,33 +93,77 @@ const WindowToolbar = ({
     getReportLayout()
   }, [])
 
+  const handleButtonMouseEnter = text => {
+    setTooltip(text)
+  }
+
+  const handleButtonMouseLeave = () => {
+    setTooltip(null)
+  }
+
   return (
-    <DialogActions>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+    <DialogActions sx={{ padding: '8px !important' }}>
+      <style>
+        {`
+          .button-container {
+            position: relative;
+            display: inline-block;
+            
+          }
+          .toast {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #333333ad;
+            color: white;
+            padding: 3px 7px;
+            border-radius: 7px;
+            opacity: 0;
+            transition: opacity 0.3s, top 0.3s;
+            z-index: 1;
+          }
+          .button-container:hover .toast {
+            opacity: 1;
+            top: -40px;
+          }
+        `}
+      </style>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          width: '100%'
+        }}
+      >
         {previewReport ? (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Autocomplete
-              size='small'
-              options={reportStore}
+            <CustomComboBox
+              label={'Select a report template'}
+              valueField='caption'
+              displayField='layoutName'
+              store={reportStore}
               value={selectedReport}
-              getOptionLabel={option => option.layoutName || option.caption || ''}
               onChange={(e, newValue) => setSelectedReport(newValue)}
-              renderInput={params => (
-                <TextField {...params} label='Select a report template' variant='outlined' fullWidth />
-              )}
               sx={{ width: 250 }}
               disableClearable
             />
             <Button
-              sx={{ ml: 2 }}
+              sx={{ width: '20px', height: '35px', ml: 1 }}
               variant='contained'
               disabled={!selectedReport}
               onClick={onGenerateReport}
               size='small'
             >
-              <Tooltip title='Preview'>
+              <div
+                className='button-container'
+                onMouseEnter={() => handleButtonMouseEnter('Preview')}
+                onMouseLeave={handleButtonMouseLeave}
+              >
                 <img src='/images/buttonsIcons/preview.png' alt='Preview' />
-              </Tooltip>
+                {tooltip && <div className='toast'>{tooltip}</div>}
+              </div>
             </Button>
           </Box>
         ) : (
@@ -128,7 +178,12 @@ const WindowToolbar = ({
 
             return (
               isVisible && (
-                <Tooltip title={button.key} key={index}>
+                <div
+                  className='button-container'
+                  onMouseEnter={() => (isDisabled ? null : handleButtonMouseEnter(button.key))}
+                  onMouseLeave={handleButtonMouseLeave}
+                  key={index}
+                >
                   <Button
                     onClick={handleClick}
                     variant='contained'
@@ -140,15 +195,17 @@ const WindowToolbar = ({
                         opacity: 0.8
                       },
                       border: button.border,
-                      width: 20,
-                      height: 35,
-                      objectFit: 'contain'
+                      width: '50px !important',
+                      height: '35px',
+                      objectFit: 'contain',
+                      minWidth: '30px !important'
                     }}
                     disabled={isDisabled}
                   >
                     <img src={`/images/buttonsIcons/${button.image}`} alt={button.key} />
                   </Button>
-                </Tooltip>
+                  {tooltip && <div className='toast'>{tooltip}</div>}
+                </div>
               )
             )
           })}
@@ -163,7 +220,12 @@ const WindowToolbar = ({
 
             return (
               isVisible && (
-                <Tooltip title={button.key} key={index}>
+                <div
+                  className='button-container'
+                  onMouseEnter={() => (isDisabled ? null : handleButtonMouseEnter(button.key))}
+                  onMouseLeave={handleButtonMouseLeave}
+                  key={index}
+                >
                   <Button
                     onClick={handleClick}
                     variant='contained'
@@ -175,15 +237,17 @@ const WindowToolbar = ({
                         opacity: 0.8
                       },
                       border: button.border,
-                      width: 20,
-                      height: 35,
-                      objectFit: 'contain'
+                      width: '50px !important',
+                      height: '35px',
+                      objectFit: 'contain',
+                      minWidth: '30px !important'
                     }}
                     disabled={isDisabled}
                   >
                     <img src={`/images/buttonsIcons/${button.image}`} alt={button.key} />
                   </Button>
-                </Tooltip>
+                  {tooltip && <div className='toast'>{tooltip}</div>}
+                </div>
               )
             )
           })}

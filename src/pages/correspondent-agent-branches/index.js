@@ -11,6 +11,11 @@ import toast from 'react-hot-toast'
 import { useWindow } from 'src/windows'
 import { useResourceQuery } from 'src/hooks/resource'
 import { useInvalidate } from 'src/hooks/resource'
+import ErrorWindow from 'src/components/Shared/ErrorWindow'
+
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 
 const Agent = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -92,16 +97,12 @@ const Agent = () => {
   }
 
   return (
-    <>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%'
-        }}
-      >
-        <GridToolbar onAdd={add} maxAccess={access} labels={_labels} />
-        <Table
+    <VertLayout>
+      <Fixed>
+      <GridToolbar onAdd={add} maxAccess={access} labels={_labels} />
+      </Fixed>
+      <Grow>
+      <Table
           columns={columns}
           gridData={data}
           rowId={['recordId']}
@@ -114,8 +115,8 @@ const Agent = () => {
           pageSize={50}
           maxAccess={access}
         />
-      </Box>
-    </>
+      </Grow>
+    </VertLayout>
   )
 }
 
