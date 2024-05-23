@@ -17,6 +17,7 @@ const GridToolbar = ({
   initialLoad,
   onAdd,
   openRPB,
+  onTree,
   disableRPB = false,
   onGo,
   paramsArray,
@@ -136,6 +137,27 @@ const GridToolbar = ({
                 height={35}
               />
             </Grid>
+          )}
+          {onTree && (
+            <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: '7px !important' }}>
+              <Tooltip title='Add'>
+                <Button
+                  onClick={onTree}
+                  variant='contained'
+                  sx={{
+                    mr: 1,
+                    '&:hover': {
+                      opacity: 0.8
+                    },
+                    width: '20px',
+                    height: '35px',
+                    objectFit: 'contain'
+                  }}
+                >
+                  <img src='/images/buttonsIcons/tree.png' alt='Add' />
+                </Button>
+              </Tooltip>
+            </Box>
           )}
           {openRPB && (
             <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', py: '7px !important' }}>
