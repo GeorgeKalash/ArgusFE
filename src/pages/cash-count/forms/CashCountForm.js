@@ -498,7 +498,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
                   const system = newRow.system || 0
 
                   update({
-                    variation: system - counted,
+                    variation: counted - system,
                     flag: system === counted ? true : false
                   })
                 }
