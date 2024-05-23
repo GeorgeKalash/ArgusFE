@@ -28,7 +28,7 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
       policyNo: '',
       carrierId: '',
       typeGrid: [{ id: 1, recordId: '', functionId: '', seqNo: '', packageType: '', qty: '', amount: '' }],
-      serialGrid: [{ id: 1, recordId: '', functionId: '', seqNo: '', reference: '' }]
+      serialGrid: [{ id: 1, recordId: '', functionId: '', seqNo: 1, reference: '' }]
     },
     enableReinitialize: true,
     validateOnChange: true,
@@ -92,7 +92,6 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
       toast.success('Record Updated Successfully')
     }
   })
-  console.log('formik check ', formik.touched.carrierId)
 
   const { labels: labels, maxAccess } = useResourceQuery({
     datasetId: ResourceIds.LOShipments
@@ -109,6 +108,7 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
 
     return amount + amountValue
   }, 0)
+  function loadSerialsGrid() {}
   useEffect(() => {
     ;(async function () {
       if (recordId && functionId) {
@@ -190,6 +190,7 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
                     maxAccess={maxAccess}
                     allowAddNewLine={!editMode}
                     allowDelete={!editMode}
+                    onSelectionChange={row => row && loadSerialsGrid()}
                     columns={[
                       {
                         component: 'resourcecombobox',
@@ -259,13 +260,14 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
                     maxAccess={maxAccess}
                     allowAddNewLine={!editMode}
                     allowDelete={!editMode}
+                    autoIncrement={true}
                     columns={[
                       {
                         component: 'numberfield',
                         name: 'seqNo',
                         label: labels.seqNo,
                         defaultValue: '',
-                        props: { readOnly: editMode }
+                        props: { readOnly: true }
                       },
                       {
                         component: 'textfield',

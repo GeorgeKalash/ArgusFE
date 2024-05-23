@@ -26,7 +26,8 @@ export function DataGrid({
   allowAddNewLine = true,
   onSelectionChange,
   rowSelectionModel,
-  disabled = false
+  disabled = false,
+  autoIncrement = false
 }) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState([false, {}])
 
@@ -166,6 +167,7 @@ export function DataGrid({
       columns.filter(({ name }) => name !== idName).map(({ name, defaultValue }) => [name, defaultValue])
     )
 
+    autoIncrement && (defaultValues.seqNo = highestIndex)
     onChange([
       ...value,
       {
