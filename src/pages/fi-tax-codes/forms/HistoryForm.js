@@ -131,7 +131,6 @@ const HistoryForm = ({ store, setStore, maxAccess, labels, expanded, editMode })
                   component: 'numberfield',
                   label: labels.amount,
                   name: 'amount',
-                  max: 11,
                   decimalScale: 2
                 }
               ]}
