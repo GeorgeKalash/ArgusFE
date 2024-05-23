@@ -1,6 +1,4 @@
-import Window from 'src/components/Shared/Window'
 import PurposeOfExchangeForm from '../forms/PurposeOfExchangeForm'
-import InterfaceForm from 'src/pages/interface/forms/InterfaceForm'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import { useState } from 'react'
 import { CustomTabs } from 'src/components/Shared/CustomTabs'
@@ -33,7 +31,7 @@ const PurposeOfExchangeWindow = ({ labels, maxAccess, recordId, height }) => {
           name={store.name}
         />
       </CustomTabPanel>
-      </VertLayout>
+    </VertLayout>
   )
 }
 

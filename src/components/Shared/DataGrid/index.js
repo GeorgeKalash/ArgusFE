@@ -10,6 +10,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useError } from 'src/error'
 import DeleteDialog from '../DeleteDialog'
 import { HIDDEN, accessLevel } from 'src/services/api/maxAccess'
+import { useWindow } from 'src/windows'
 
 export function DataGrid({
   idName = 'id',
@@ -192,22 +193,32 @@ export function DataGrid({
     width: '20',
     renderCell({ id: idName }) {
       return (
-        <IconButton
-          disabled={disabled}
-          tabIndex='-1'
-          icon='pi pi-trash'
-          onClick={() => setDeleteDialogOpen([true, idName])}
-        >
+        <IconButton disabled={disabled} tabIndex='-1' icon='pi pi-trash' onClick={() => openDelete(idName)}>
           <GridDeleteIcon />
         </IconButton>
       )
     }
   }
 
+  function openDelete(id) {
+    stack({
+      Component: DeleteDialog,
+      props: {
+        open: [true, {}],
+        fullScreen: false,
+        onConfirm: () => deleteRow(id)
+      },
+      width: 450,
+      height: 170,
+      canExpand: false,
+      title: 'Delete'
+    })
+  }
+
   const currentEditCell = useRef(null)
 
-  const { stack } = useError()
-
+  const { stack: stackError } = useError()
+  const { stack } = useWindow()
   const stagedChanges = useRef(null)
 
   function stageRowUpdate({ changes }) {
@@ -246,6 +257,12 @@ export function DataGrid({
     stagedChanges.current = null
 
     return updatedRow
+  }
+
+  async function updateState({ newRow }) {
+    apiRef.current.updateRows([newRow])
+
+    handleRowChange(newRow)
   }
 
   const handleRowClick = params => {
@@ -291,7 +308,7 @@ export function DataGrid({
           console.error('[Datagrid - ERROR]: Please handle all errors inside onChange of your respective field.')
           console.error('[Datagrid - ERROR]:', e)
 
-          stack({ message: 'Error occured while updating row.' })
+          stackError({ message: 'Error occured while updating row.' })
         }}
         onCellKeyDown={handleCellKeyDown}
         columnVisibilityModel={{
@@ -332,6 +349,12 @@ export function DataGrid({
 
               const cell = findCell(params)
 
+              async function update({ newRow }) {
+                updateState({
+                  newRow
+                })
+              }
+
               return (
                 <Box
                   sx={{
@@ -341,11 +364,15 @@ export function DataGrid({
                     backgroundColor: bg,
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: (column.component === 'checkbox' || column.component === 'button') && 'center',
+                    justifyContent:
+                      (column.component === 'checkbox' ||
+                        column.component === 'button' ||
+                        column.component === 'icon') &&
+                      'center',
                     border: `1px solid ${error?.[cell.rowIndex]?.[params.field] ? '#ff0000' : 'transparent'}`
                   }}
                 >
-                  <Component {...params} column={column} />
+                  <Component {...params} update={update} column={column} />
                 </Box>
               )
             },
@@ -387,7 +414,11 @@ export function DataGrid({
                     padding: '0 0px',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: (column.component === 'checkbox' || column.component === 'button') && 'center'
+                    justifyContent:
+                      (column.component === 'checkbox' ||
+                        column.component === 'button' ||
+                        column.component === 'icon') &&
+                      'center'
                   }}
                 >
                   <Component
@@ -407,14 +438,14 @@ export function DataGrid({
           actionsColumn
         ]}
       />
-      <DeleteDialog
+      {/* <DeleteDialog
         open={deleteDialogOpen}
         onClose={() => setDeleteDialogOpen([false, {}])}
         onConfirm={obj => {
           setDeleteDialogOpen([false, {}])
           deleteRow(obj)
         }}
-      />
+      /> */}
     </Box>
   )
 }

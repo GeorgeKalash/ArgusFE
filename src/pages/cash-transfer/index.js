@@ -18,8 +18,6 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 
 const CashTransfer = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
-
-  //states
   const [errorMessage, setErrorMessage] = useState(null)
   const { stack } = useWindow()
 
@@ -38,15 +36,11 @@ const CashTransfer = () => {
       filterFn: fetchWithSearch
     }
   })
-  async function fetchWithSearch({ options = {}, filters }) {
-    const { _startAt = 0, _pageSize = 50 } = options
-
+  async function fetchWithSearch({ filters }) {
     return await getRequest({
       extension: CashBankRepository.CashTransfer.snapshot,
       parameters: `_filter=${filters.qry}`
     })
-
-    return
   }
 
   const invalidate = useInvalidate({
@@ -181,6 +175,11 @@ const CashTransfer = () => {
     {
       field: 'statusName',
       headerName: _labels.status,
+      flex: 1
+    },
+    {
+      field: 'wipName',
+      headerName: _labels.wip,
       flex: 1
     }
   ]

@@ -16,6 +16,8 @@ import { CTDRRepository } from 'src/repositories/CTDRRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
+import { getSystemFunctionModule } from 'src/resources/SystemFunction'
+import { Module } from 'src/resources/Module'
 
 export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, recordId, setWindowOpen }) {
   const [isLoading, setIsLoading] = useState(false)
@@ -53,10 +55,19 @@ export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, re
         response: responseValue
       }
       try {
-        const response = await postRequest({
-          extension: CTDRRepository.DocumentsOnHold.set,
-          record: JSON.stringify(data)
-        })
+        const checkModule = getSystemFunctionModule(functionId)
+        if (checkModule === Module.CurrencyTrading || checkModule === Module.Remittance) {
+          await postRequest({
+            extension: CTDRRepository.DocumentsOnHold.set,
+            record: JSON.stringify(data)
+          })
+        } else {
+          await postRequest({
+            extension: DocumentReleaseRepository.DocumentsOnHold.set,
+            record: JSON.stringify(data)
+          })
+        }
+
         if (!functionId && !seqNo && !recordId && responseValue !== null) {
           toast.success('Record Added Successfully')
         } else {

@@ -15,7 +15,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 const CbBank = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
-  
+
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 

@@ -75,40 +75,34 @@ const TabsProvider = ({ children }) => {
     return null
   }
 
-  const [activeTabs, setActiveTabs] = useState([])
+  const [openTabs, setOpenTabs] = useState([])
   const [initialLoadDone, setInitialLoadDone] = useState(false)
-  const [value, setValue] = useState(0)
+  const [currentTabIndex, setCurrentTabIndex] = useState(0)
   const [TabsIndex, setTabsIndex] = useState()
-  const [length, setLength] = useState(1)
-  const [closing, setClosing] = useState(false)
 
   const handleChange = (event, newValue) => {
-    setValue(newValue)
+    setCurrentTabIndex(newValue)
   }
 
   const handleCloseAllTabs = () => {
     router.push('/default/')
-    setActiveTabs([])
-    setLength(0)
-    setValue()
+    setOpenTabs([])
+    setCurrentTabIndex()
   }
 
   const handleCloseOtherTab = Tab => {
-    const tab = activeTabs[Tab]
+    const tab = openTabs[Tab]
     router.push(tab.route)
-    setActiveTabs([])
-    setActiveTabs([tab])
-    setLength(0)
-    setValue(0)
+    setOpenTabs([])
+    setOpenTabs([tab])
+    setCurrentTabIndex(0)
   }
 
   const closeTab = tabRoute => {
-    setClosing(true)
+    const index = openTabs.findIndex(tab => tab.route === tabRoute)
+    const activeTabsLength = openTabs.length
 
-    const index = activeTabs.findIndex(tab => tab.route === tabRoute)
-    const activeTabsLength = activeTabs.length
-
-    setActiveTabs(prevState => {
+    setOpenTabs(prevState => {
       return prevState.filter(tab => tab.route !== tabRoute)
     })
 
@@ -118,33 +112,24 @@ const TabsProvider = ({ children }) => {
       return
     }
 
-    if (value === index) {
+    if (currentTabIndex === index) {
       const newValue = index === activeTabsLength - 1 ? index - 1 : index + 1
-      setValue(newValue)
+      setCurrentTabIndex(newValue)
 
-      router.push(activeTabs[newValue].route)
-    } else if (index < value) {
-      setValue(currentValue => currentValue - 1)
+      router.push(openTabs[newValue].route)
+    } else if (index < currentTabIndex) {
+      setCurrentTabIndex(currentValue => currentValue - 1)
     }
-
-    setClosing(false)
   }
 
   useEffect(() => {
     if (router.asPath === '/default/') {
-      setActiveTabs([])
-      setLength(1)
+      setOpenTabs([])
     } else {
       if (initialLoadDone && router.asPath != '/default/') {
-        if (closing && value) {
-          if (activeTabs[value]?.route != router.asPath) {
-            router.push(activeTabs[value]?.route)
-          }
-        }
-
-        const isTabOpen = activeTabs.some((activeTab, index) => {
+        const isTabOpen = openTabs.some((activeTab, index) => {
           if (activeTab.page === children || activeTab.route === router.asPath) {
-            setValue(index)
+            setCurrentTabIndex(index)
 
             return true
           }
@@ -153,8 +138,8 @@ const TabsProvider = ({ children }) => {
         })
         if (isTabOpen) return
         else {
-          const newValueState = activeTabs.length
-          setActiveTabs(prevState => {
+          const newValueState = openTabs.length
+          setOpenTabs(prevState => {
             return [
               ...prevState,
               {
@@ -166,7 +151,7 @@ const TabsProvider = ({ children }) => {
               }
             ]
           })
-          setValue(newValueState)
+          setCurrentTabIndex(newValueState)
         }
       }
     }
@@ -176,8 +161,8 @@ const TabsProvider = ({ children }) => {
     if (router.asPath === '/default/') {
       return
     } else {
-      if (!activeTabs[0] && router.route != '/default/' && router.asPath && menu.length > 0) {
-        setActiveTabs([
+      if (!openTabs[0] && router.route != '/default/' && router.asPath && menu.length > 0) {
+        setOpenTabs([
           {
             page: children,
             route: router.asPath,
@@ -188,9 +173,8 @@ const TabsProvider = ({ children }) => {
         ])
         setInitialLoadDone(true)
       }
-      setClosing(false)
     }
-  }, [activeTabs, router, menu, gear])
+  }, [openTabs, router, menu, gear])
 
   return (
     <>
@@ -205,7 +189,7 @@ const TabsProvider = ({ children }) => {
       >
         <Box sx={{ backgroundColor: '#231f20', pt: '5px' }}>
           <Tabs
-            value={value}
+            value={currentTabIndex}
             onChange={handleChange}
             variant='scrollable'
             scrollButtons='auto'
@@ -236,44 +220,48 @@ const TabsProvider = ({ children }) => {
               }
             }}
           >
-            {activeTabs.length > 0 &&
-              activeTabs.map((activeTab, i) => (
-                <Tab
-                  key={i}
-                  label={activeTab?.label}
-                  onClick={() => router?.push(activeTab.route)}
-                  onContextMenu={event => OpenItems(event, i)}
-                  icon={
-                    <IconButton
-                      size='small'
-                      onClick={event => {
-                        event.stopPropagation()
-                        closeTab(activeTab.route)
+            {openTabs.length > 0 &&
+              openTabs.map((activeTab, i) => {
+                return (
+                  !activeTab.isDefault && (
+                    <Tab
+                      key={i}
+                      label={activeTab?.label}
+                      onClick={() => router?.push(activeTab.route)}
+                      onContextMenu={event => OpenItems(event, i)}
+                      icon={
+                        <IconButton
+                          size='small'
+                          onClick={event => {
+                            event.stopPropagation()
+                            closeTab(activeTab.route)
+                          }}
+                        >
+                          <CloseIcon fontSize='small' />
+                        </IconButton>
+                      }
+                      iconPosition='end'
+                      sx={{
+                        minHeight: '35px !important',
+                        borderTopLeftRadius: 5,
+                        borderTopRightRadius: 5,
+                        py: '0px !important',
+                        mb: '0px !important',
+                        borderBottom: '0px !important',
+                        mr: '2px !important',
+                        fontWeight: '1.5rem',
+                        pr: '0px !important',
+                        pl: '10px !important'
                       }}
-                    >
-                      <CloseIcon fontSize='small' />
-                    </IconButton>
-                  }
-                  iconPosition='end'
-                  sx={{
-                    minHeight: '35px !important',
-                    borderTopLeftRadius: 5,
-                    borderTopRightRadius: 5,
-                    py: '0px !important',
-                    mb: '0px !important',
-                    borderBottom: '0px !important',
-                    mr: '2px !important',
-                    fontWeight: '1.5rem',
-                    pr: '0px !important',
-                    pl: '10px !important'
-                  }}
-                />
-              ))}
+                    />
+                  )
+                )
+              })}
           </Tabs>
         </Box>
-        {activeTabs.length > 0 &&
-          activeTabs.map((activeTab, i) => (
-            <CustomTabPanel key={i} index={i} value={value}>
+        {openTabs.length > 0 &&
+          openTabs.map((activeTab, i) => (
+            <CustomTabPanel key={activeTab.route} index={i} value={currentTabIndex}>
               {activeTab.page}
             </CustomTabPanel>
           ))}
@@ -289,7 +277,7 @@ const TabsProvider = ({ children }) => {
       >
         <MenuItem
           onClick={event => {
-            closeTab(activeTabs[TabsIndex]?.route)
+            closeTab(openTabs[TabsIndex]?.route)
             event.stopPropagation()
             handleClose()
           }}
