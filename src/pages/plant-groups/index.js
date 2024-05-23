@@ -90,7 +90,7 @@ const Plant = () => {
         recordId: recordId ? recordId : null,
         maxAccess: access
       },
-      width: 400,
+      width: 600,
       height: 350,
       title: _labels.plantGroup
     })

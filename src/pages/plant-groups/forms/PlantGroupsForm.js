@@ -14,8 +14,6 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useForm } from 'src/hooks/form'
 
 export default function PlantGroupsForm({ labels, maxAccess, recordId }) {
-  const [editMode, setEditMode] = useState(!!recordId)
-
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
@@ -33,8 +31,8 @@ export default function PlantGroupsForm({ labels, maxAccess, recordId }) {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required(),
-      reference: yup.string().required()
+      name: yup.string().required(' '),
+      reference: yup.string().required(' ')
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
@@ -51,11 +49,11 @@ export default function PlantGroupsForm({ labels, maxAccess, recordId }) {
           recordId: response.recordId
         })
       } else toast.success('Record Edited Successfully')
-      setEditMode(true)
 
       invalidate()
     }
   })
+  const editMode = !!formik.values.recordId || !!recordId
 
   useEffect(() => {
     ;(async function () {
@@ -87,7 +85,6 @@ export default function PlantGroupsForm({ labels, maxAccess, recordId }) {
             label={labels.reference}
             value={formik.values.reference}
             required
-            rows={2}
             maxAccess={maxAccess}
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('reference', '')}
