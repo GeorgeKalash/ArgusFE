@@ -57,7 +57,6 @@ export default function CashCountNotesForm({
     }
   })
   useEffect(() => {
-    console.log(row?.currencyNotes, row?.id)
     row?.id &&
       row?.currencyNotes?.length > 0 &&
       formik.setFieldValue(
