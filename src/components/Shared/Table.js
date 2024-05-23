@@ -37,8 +37,9 @@ const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
   },
   '& .MuiDataGrid-columnHeaders': {
     position: 'sticky',
-    backgroundColor: theme.palette.background.paper
+    backgroundColor: '#F5F5F5'
   },
+
   '& .MuiDataGrid-columnHeaderTitle': {
     fontWeight: '900'
   },
