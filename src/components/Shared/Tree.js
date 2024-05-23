@@ -42,7 +42,7 @@ const PrintableTree = ({ nodes }) => {
   )
 }
 
-const StyledTreeView = styled(TreeView)(({ height }) => ({
+const StyledTreeView = styled(TreeView)(({}) => ({
   '@media print': {
     height: 'auto',
     maxHeight: '100%',
@@ -62,7 +62,7 @@ const StyledTreeItem = styled(TreeItem)(({ theme, depth }) => ({
   }
 }))
 
-function Tree({ data, expanded, height }) {
+function Tree({ data, expanded }) {
   const componentRef = useRef()
   const printComponentRef = useRef()
 
@@ -113,7 +113,6 @@ function Tree({ data, expanded, height }) {
         }}
       >
         <StyledTreeView
-          height={`${expanded ? `calc(100vh - 180px)` : `${height}px`}`}
           aria-label='plant tree'
           defaultCollapseIcon={<ExpandMoreIcon />}
           defaultExpandIcon={<ChevronRightIcon />}
