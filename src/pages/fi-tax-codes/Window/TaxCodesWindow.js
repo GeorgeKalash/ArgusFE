@@ -5,7 +5,7 @@ import { useState } from 'react'
 import TaxCodesForm from '../forms/TaxCodesForm'
 import HistoryForm from '../forms/HistoryForm'
 
-const TaxCodesWindow = ({ height, recordId, labels, maxAccess, expanded }) => {
+const TaxCodesWindow = ({ height, recordId, labels, maxAccess }) => {
   const [activeTab, setActiveTab] = useState(0)
   const [editMode, setEditMode] = useState(recordId)
 
@@ -37,7 +37,6 @@ const TaxCodesWindow = ({ height, recordId, labels, maxAccess, expanded }) => {
           setStore={setStore}
           maxAccess={maxAccess}
           store={store}
-          expanded={expanded}
         />
       </CustomTabPanel>
     </>

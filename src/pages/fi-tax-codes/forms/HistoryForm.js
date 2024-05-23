@@ -12,7 +12,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
 
-const HistoryForm = ({ store, setStore, maxAccess, labels, expanded, editMode }) => {
+const HistoryForm = ({ store, setStore, maxAccess, labels, editMode }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { height } = useWindowDimensions()
@@ -134,7 +134,6 @@ const HistoryForm = ({ store, setStore, maxAccess, labels, expanded, editMode })
                   decimalScale: 2
                 }
               ]}
-              height={`${expanded ? height - 280 : 380}px`}
             />
           </Grow>
         </VertLayout>
