@@ -327,6 +327,12 @@ export function DataGrid({
           flex: '1 !important',
           '& .MuiDataGrid-cell': {
             padding: '0 !important'
+          },
+          '& .MuiDataGrid-columnHeaders': {
+            backgroundColor: bg
+          },
+          '& .MuiDataGrid-columnHeaderTitle': {
+            fontWeight: '900'
           }
         }}
         onRowClick={handleRowClick} // Handle row click event

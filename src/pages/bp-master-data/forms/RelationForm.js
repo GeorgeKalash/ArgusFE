@@ -101,20 +101,27 @@ const RelationForm = ({ bpId, recordId, labels, maxAccess, getRelationGridData, 
                 form={formik}
                 required
                 displayFieldWidth={2}
-                valueField='reference'
-                displayField='name'
+                valueField='recordId'
+                displayField='reference'
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
                 firstValue={formik.values.toBPRef}
                 secondValue={formik.values.toBPName}
                 onChange={(event, newValue) => {
-                  formik.setValues({
-                    ...formik.values,
-                    toBPId: newValue?.recordId || '',
-                    toBPRef: newValue?.reference || '',
-                    toBPName: newValue?.name || ''
-                  })
+                  if (newValue) {
+                    formik.setFieldValue('toBPId', newValue?.recordId)
+                    formik.setFieldValue('toBPRef', newValue?.reference)
+                    formik.setFieldValue('toBPName', newValue?.name)
+                  } else {
+                    formik.setFieldValue('toBPId', '')
+                    formik.setFieldValue('toBPRef', '')
+                    formik.setFieldValue('toBPName', '')
+                  }
                 }}
-                error={formik.touched.toBPId && Boolean(formik.errors.toBPId)}
                 maxAccess={maxAccess}
+                error={formik.touched.toBPId && Boolean(formik.errors.toBPId)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -131,7 +138,7 @@ const RelationForm = ({ bpId, recordId, labels, maxAccess, getRelationGridData, 
                 values={formik.values}
                 required
                 onChange={(event, newValue) => {
-                  formik && formik.setFieldValue('relationId', newValue?.recordId)
+                  formik && formik.setFieldValue('relationId', newValue?.recordId || '')
                 }}
                 error={formik.touched.relationId && Boolean(formik.errors.relationId)}
               />
