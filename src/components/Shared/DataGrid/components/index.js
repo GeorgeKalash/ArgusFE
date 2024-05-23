@@ -6,7 +6,7 @@ import date from './date'
 import numberfield from './numberfield'
 import checkbox from './checkbox'
 import button from './button'
-
+import icon from './icon'
 
 export default {
   textfield,
@@ -16,5 +16,6 @@ export default {
   date,
   numberfield,
   checkbox,
+  icon,
   button
 }

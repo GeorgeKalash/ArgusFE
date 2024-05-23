@@ -9,6 +9,7 @@ export const ResourceIds = {
   GLSettings: 30110,
   WorkCenters: 42101,
   Cities: 20125,
+  PlantGroups: 20123,
   Labor: 42103,
   Currencies: 20106,
   GroupLegalDocument: 21109,
@@ -123,8 +124,12 @@ export const ResourceIds = {
   PriceLevels: 51101,
   CommissionSchedule: 51118,
   ProductionRequestLog: 42321,
+  CashCountTransaction: 37301,
   ExchangeRates: 32103,
   CbBankAccounts: 33105,
   CashNote: 37101,
-  POSUsers:54104
+  POSUsers: 54104,
+  LOShipments: 40301,
+  LOTransportation: 40302,
+  AccountBalance: 33107
 }
