@@ -499,12 +499,11 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
                   readOnly: formik.values.forceNotesCount || isPosted || isClosed
                 },
                 async onChange({ row: { update, newRow } }) {
-                  console.log(newRow)
                   const counted = newRow.counted || 0
                   const system = newRow.system || 0
 
                   update({
-                    variation: system - counted,
+                    variation: counted - system,
                     flag: system === counted ? true : false
                   })
                 }
