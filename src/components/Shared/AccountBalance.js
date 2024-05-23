@@ -7,6 +7,9 @@ import { ResourceLookup } from './ResourceLookup'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useResourceQuery } from 'src/hooks/resource'
+import { Fixed } from './Layouts/Fixed'
+import { Grow } from './Layouts/Grow'
+import { VertLayout } from './Layouts/VertLayout'
 
 const AccountBalance = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -66,43 +69,46 @@ const AccountBalance = () => {
   ]
 
   return (
-    <div style={{ padding: '10px' }}>
-      <Grid container spacing={2} sx={{ paddingBottom: '25px' }}>
-        <Grid item xs={5}>
-          <ResourceLookup
-            endpointId={CashBankRepository.CashAccount.snapshot}
-            parameters={{
-              _type: 0
-            }}
-            name='cashAccountRef'
-            label={_labels.cashAccount}
-            valueField='reference'
-            displayField='name'
-            valueShow='cashAccountRef'
-            secondValueShow='cashAccountName'
-            form={formik}
-            onChange={(event, newValue) => {
-              formik.setValues({
-                cashAccountId: newValue?.recordId || '',
-                cashAccountRef: newValue?.reference || '',
-                cashAccountName: newValue?.name || ''
-              })
-            }}
-            errorCheck={'cashAccountId'}
-            maxAccess={access}
-          />
+    <VertLayout>
+      <Fixed>
+        <Grid container spacing={2} sx={{ padding: '1rem' }}>
+          <Grid item xs={6}>
+            <ResourceLookup
+              endpointId={CashBankRepository.CashAccount.snapshot}
+              parameters={{
+                _type: 0
+              }}
+              name='cashAccountRef'
+              label={_labels.cashAccount}
+              valueField='reference'
+              displayField='name'
+              valueShow='cashAccountRef'
+              secondValueShow='cashAccountName'
+              form={formik}
+              onChange={(event, newValue) => {
+                formik.setValues({
+                  cashAccountId: newValue?.recordId || '',
+                  cashAccountRef: newValue?.reference || '',
+                  cashAccountName: newValue?.name || ''
+                })
+              }}
+              errorCheck={'cashAccountId'}
+              maxAccess={access}
+            />
+          </Grid>
         </Grid>
-      </Grid>
-      <Table
-        height={440}
-        columns={columns}
-        gridData={gridData}
-        rowId={['currencyId']}
-        isLoading={!gridData}
-        maxAccess={access}
-        pagination={false}
-      />
-    </div>
+      </Fixed>
+      <Grow>
+        <Table
+          columns={columns}
+          gridData={gridData}
+          rowId={['currencyId']}
+          isLoading={!gridData}
+          maxAccess={access}
+          pagination={false}
+        />
+      </Grow>
+    </VertLayout>
   )
 }
 
