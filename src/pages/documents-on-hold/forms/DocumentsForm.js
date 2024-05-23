@@ -1,35 +1,24 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import { useFormik } from 'formik'
-import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-
+import ApprovalsDialog from 'src/components/Shared/ApprovalsDialog.js'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
-
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
-import ConfirmationDialog from 'src/components/ConfirmationDialog'
-import {
-  formatDateToApi,
-  formatDateToApiFunction,
-  formatDateFromApi,
-  formatDateDefault,
-  formatDateFromApiInline
-} from 'src/lib/date-helper'
+import { formatDateToApi, formatDateFromApi } from 'src/lib/date-helper'
 import { CTDRRepository } from 'src/repositories/CTDRRepository'
-
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { useWindow } from 'src/windows'
 
-export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, recordId, onClose, setWindowOpen }) {
+export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, recordId, setWindowOpen }) {
   const [isLoading, setIsLoading] = useState(false)
-
-  const [confirmationWindowOpen, setConfirmationWindowOpen] = useState(false)
   const [responseValue, setResponseValue] = useState(null)
 
   const [initialValues, setInitialData] = useState({
@@ -43,20 +32,17 @@ export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, re
     notes: '',
     responseDate: ''
   })
-
   const { getRequest, postRequest } = useContext(RequestsContext)
-
-  //const editMode = !!recordId
 
   const invalidate = useInvalidate({
     endpointId: DocumentReleaseRepository.DocumentsOnHold.qry
   })
+  const { stack } = useWindow()
 
   const formik = useFormik({
     initialValues,
     enableReinitialize: true,
     validateOnChange: true,
-
     onSubmit: async obj => {
       const data = {
         ...obj,
@@ -66,17 +52,11 @@ export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, re
         recordId: initialValues.recordId,
         response: responseValue
       }
-
-      // obj.response = responseValue
-
-      // obj.date = formatDateToApi(obj.date)
-
       try {
         const response = await postRequest({
           extension: CTDRRepository.DocumentsOnHold.set,
           record: JSON.stringify(data)
         })
-
         if (!functionId && !seqNo && !recordId && responseValue !== null) {
           toast.success('Record Added Successfully')
         } else {
@@ -89,7 +69,6 @@ export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, re
       }
     }
   })
-
   useEffect(() => {
     ;(async function () {
       try {
@@ -99,10 +78,8 @@ export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, re
           extension: DocumentReleaseRepository.DocumentsOnHold.get,
           parameters: `_functionId=${functionId}&_seqNo=${seqNo}&_recordId=${recordId}`
         })
-
         setInitialData({
           ...res.record,
-
           date: formatDateFromApi(res.record.date)
         })
       } catch (exception) {}
@@ -110,13 +87,29 @@ export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, re
     })()
   }, [])
 
+  function openConfirmation(responseValue) {
+    setResponseValue(responseValue)
+    stack({
+      Component: ApprovalsDialog,
+      props: {
+        fullScreen: false,
+        responseValue: responseValue,
+        onConfirm: () => {
+          formik.submitForm()
+        }
+      },
+      width: 450,
+      height: 170,
+      title: 'Confirmation'
+    })
+  }
+
   const actions = [
     {
       key: 'Reject',
       condition: true,
       onClick: () => {
-        setConfirmationWindowOpen(true)
-        setResponseValue(-1)
+        openConfirmation(-1)
       },
       disabled: false
     },
@@ -124,8 +117,7 @@ export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, re
       key: 'Approve',
       condition: true,
       onClick: () => {
-        setConfirmationWindowOpen(true)
-        setResponseValue(2)
+        openConfirmation(2)
       },
       disabled: false
     }
@@ -133,15 +125,6 @@ export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, re
 
   return (
     <VertLayout>
-      <ConfirmationDialog
-        DialogText={`Are you sure you want to ${responseValue === 2 ? 'approve' : 'reject'} this document`}
-        cancelButtonAction={() => setConfirmationWindowOpen(false)}
-        openCondition={confirmationWindowOpen}
-        okButtonAction={() => {
-          formik.submitForm()
-          setConfirmationWindowOpen(false)
-        }}
-      />
       <FormShell
         actions={actions}
         resourceId={ResourceIds.DocumentsOnHold}
