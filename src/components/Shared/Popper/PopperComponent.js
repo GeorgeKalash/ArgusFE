@@ -36,7 +36,7 @@ const PopperComponent = ({ children, anchorEl, open }) => {
   }, [anchorEl])
 
   const zoom = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--zoom'))
-  const thresholdPercentage = 0.25
+  const thresholdPercentage = 0.35
 
   const canRenderBelow = window.innerHeight / zoom - (rect && rect.bottom) > window.innerHeight * thresholdPercentage
 
