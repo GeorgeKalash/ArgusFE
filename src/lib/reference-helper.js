@@ -1,6 +1,6 @@
 import { SystemRepository } from 'src/repositories/SystemRepository'
 
-const Reference = async (getRequest, endpointId, param) => {
+const reference = async (getRequest, endpointId, param) => {
   let parameters = '_key=' + param
 
   try {
@@ -29,4 +29,4 @@ const Reference = async (getRequest, endpointId, param) => {
   return { readOnly: false, mandatory: true }
 }
 
-export { Reference }
+export { reference }

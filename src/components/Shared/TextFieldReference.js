@@ -2,9 +2,8 @@ import React, { useContext, useEffect, useState } from 'react'
 import CustomTextField from '../Inputs/CustomTextField'
 
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 import ErrorWindow from './ErrorWindow'
-import { Reference } from 'src/lib/reference-helper'
+import { reference } from 'src/lib/reference-helper'
 
 export const TextFieldReference = ({ endpointId, param = '', setReferenceRequired, editMode, ...rest }) => {
   const { getRequest } = useContext(RequestsContext)
@@ -15,7 +14,7 @@ export const TextFieldReference = ({ endpointId, param = '', setReferenceRequire
     setReferenceRequired(true)
 
     const fetchData = async () => {
-      const result = await Reference(getRequest, endpointId, param)
+      const result = await reference(getRequest, endpointId, param)
       if (!result.error) {
         setState({ readOnly: result.readOnly, mandatory: result.mandatory })
         setReferenceRequired(result.mandatory)
