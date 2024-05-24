@@ -36,7 +36,7 @@ const Frame = styled.div`
 
 const Card = styled.div`
   width: 100%;
-  padding: 40px;
+  padding: 20px;
   background: white;
   box-shadow: 4px 8px 16px 0 #12233e;
   display: flex;
@@ -49,6 +49,7 @@ const Profile = styled.div`
   flex-direction: column;
   align-items: center;
   flex: 0;
+  padding: 5px;
 `
 
 const Avatar = styled.div`
@@ -123,11 +124,11 @@ const SideData = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  padding: 20px;
+  padding: 10px;
   background: #b3cde8;
   border-radius: 10px;
   box-shadow: 2px 4px 8px 0 #12233e;
-  margin: 0 20px;
+  margin: 0 10px;
 `
 
 const DataHalf = styled.div`
@@ -136,23 +137,23 @@ const DataHalf = styled.div`
   align-items: center;
   justify-content: center;
   width: 100%;
-  padding: 10px;
+  padding: 5px;
   background: #e0f2ff;
   border-radius: 10px;
   box-shadow: 1px 2px 4px 0 #12233e;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 `
 
 const ChartContainer = styled.div`
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   justify-content: center;
   align-items: center;
   width: 100%;
   height: 300px;
   canvas {
-    width: 100% !important;
-    height: 100% !important;
+    width: 50% !important;
+    height: 70% !important;
   }
 `
 
@@ -204,10 +205,10 @@ const UserDashboard = () => {
             display: true,
             text: 'Units Sold',
             font: {
-              size: 18,
+              size: 24,
               weight: 'bold'
             },
-            color: '#FFFFFF'
+            color: '#176FB5'
           }
         }
       }
@@ -240,10 +241,10 @@ const UserDashboard = () => {
             display: true,
             text: 'Clients Acquired',
             font: {
-              size: 18,
+              size: 24,
               weight: 'bold'
             },
-            color: '#FFFFFF'
+            color: '#176FB5'
           }
         }
       }
