@@ -50,6 +50,7 @@ export default function AgentBranchForm({ _labels, maxAccess, store, setStore, e
       if (response.recordId) {
         toast.success('Record Added Successfully')
         setStore(prevStore => ({
+          //store
           ...prevStore,
           agentBranch: obj,
           recordId: response.recordId
