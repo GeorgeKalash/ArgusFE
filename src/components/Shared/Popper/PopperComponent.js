@@ -1,9 +1,30 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import ReactDOM from 'react-dom'
 import { Box } from '@mui/material'
 
 const PopperComponent = ({ children, anchorEl, open }) => {
+  const [isVisible, setIsVisible] = useState(true)
   const [rect, setRect] = useState(anchorEl?.getBoundingClientRect())
+  const popperRef = useRef(null)
+
+  useEffect(() => {
+    const handleIntersection = entries => {
+      entries.forEach(entry => {
+        setIsVisible(entry.isIntersecting)
+      })
+    }
+
+    const observer = new IntersectionObserver(handleIntersection)
+    if (popperRef.current) {
+      observer.observe(popperRef.current)
+    }
+
+    return () => {
+      if (popperRef.current) {
+        observer.unobserve(popperRef.current)
+      }
+    }
+  }, [])
 
   useEffect(() => {
     const handleScroll = () => {
@@ -35,6 +56,23 @@ const PopperComponent = ({ children, anchorEl, open }) => {
     }
   }, [anchorEl])
 
+  useEffect(() => {
+    if (open && anchorEl) {
+      const handleIntersection = entries => {
+        entries.forEach(entry => {
+          setIsVisible(entry.isIntersecting)
+        })
+      }
+
+      const observer = new IntersectionObserver(handleIntersection)
+      observer.observe(anchorEl)
+
+      return () => {
+        observer.unobserve(anchorEl)
+      }
+    }
+  }, [open, anchorEl])
+
   const zoom = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--zoom'))
   const thresholdPercentage = 0.35
 
@@ -42,9 +80,10 @@ const PopperComponent = ({ children, anchorEl, open }) => {
 
   return ReactDOM.createPortal(
     <Box
+      ref={popperRef}
       sx={{
         zIndex: '2 !important',
-        display: open ? 'block' : 'none'
+        display: open && isVisible ? 'block' : 'none'
       }}
       style={{
         position: 'absolute',
