@@ -1,5 +1,4 @@
 import React from 'react'
-import { Box } from '@mui/material'
 import { useContext } from 'react'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import Table from 'src/components/Shared/Table'
@@ -11,7 +10,6 @@ import toast from 'react-hot-toast'
 import { useWindow } from 'src/windows'
 import { useResourceQuery } from 'src/hooks/resource'
 import { useInvalidate } from 'src/hooks/resource'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'

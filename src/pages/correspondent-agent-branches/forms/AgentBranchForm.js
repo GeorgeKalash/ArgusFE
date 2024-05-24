@@ -11,9 +11,10 @@ import { useInvalidate } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-export default function AgentBranchForm({ _labels, maxAccess, store, setStore, editMode, setEditMode }) {
-  
+export default function AgentBranchForm({ _labels, maxAccess, store, setStore, editMode }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId } = store
 
@@ -39,8 +40,6 @@ export default function AgentBranchForm({ _labels, maxAccess, store, setStore, e
       swiftCode: yup.string().required(' ')
     }),
     onSubmit: async obj => {
-      console.log(obj)
-
       //const recordIdd = obj.recordId
 
       const response = await postRequest({
@@ -48,21 +47,16 @@ export default function AgentBranchForm({ _labels, maxAccess, store, setStore, e
         record: JSON.stringify(obj)
       })
 
-      console.log('saved')
-      console.log(response)
-
       if (response.recordId) {
-        console.log('in')
         toast.success('Record Added Successfully')
         setStore(prevStore => ({
           ...prevStore,
           agentBranch: obj,
           recordId: response.recordId
         }))
-        console.log(store)
+        formik.setFieldValue('recordId', response.recordId)
         invalidate()
       } else toast.success('Record Edited Successfully')
-      setEditMode(true)
     }
   })
 
@@ -73,10 +67,12 @@ export default function AgentBranchForm({ _labels, maxAccess, store, setStore, e
           extension: RemittanceSettingsRepository.CorrespondentAgentBranches.get,
           parameters: `_recordId=${recordId}`
         })
-        setInitialData(res.record)
+
+        //setInitialData(res.record)
+        formik.setValues(res.record)
         setStore(prevStore => ({
           ...prevStore,
-          agentBranch: res
+          agentBranch: res.record
         }))
       }
     })()
@@ -89,38 +85,41 @@ export default function AgentBranchForm({ _labels, maxAccess, store, setStore, e
       maxAccess={maxAccess}
       editMode={editMode}
     >
-      <Grid container spacing={4}>
-        <Grid item xs={12}>
-          <ResourceComboBox
-            name='agentId'
-            endpointId={RemittanceSettingsRepository.CorrespondentAgents.qry}
-            //parameters = {`_params=&_startAt=0&_pageSize=1000`}
-            label={_labels?.agent}
-            valueField='recordId'
-            displayField='name'
-            required
-            values={formik.values}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('agentId', newValue?.recordId)
-            }}
-            error={formik.touched.agentId && Boolean(formik.errors.agentId)}
-            maxAccess={maxAccess}
-          />
-        </Grid>
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={4}>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                name='agentId'
+                endpointId={RemittanceSettingsRepository.CorrespondentAgents.qry}
+                label={_labels?.agent}
+                valueField='recordId'
+                displayField='name'
+                required
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('agentId', newValue?.recordId)
+                }}
+                error={formik.touched.agentId && Boolean(formik.errors.agentId)}
+                maxAccess={maxAccess}
+              />
+            </Grid>
 
-        <Grid item xs={12}>
-          <CustomTextField
-            name='swiftCode'
-            label={_labels?.swiftCode}
-            value={formik.values?.swiftCode}
-            required
-            maxLength='20'
-            onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('swiftCode', '')}
-            error={formik.touched.swiftCode && Boolean(formik.errors.swiftCode)}
-          />
-        </Grid>
-      </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='swiftCode'
+                label={_labels?.swiftCode}
+                value={formik.values?.swiftCode}
+                required
+                maxLength='20'
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('swiftCode', '')}
+                error={formik.touched.swiftCode && Boolean(formik.errors.swiftCode)}
+              />
+            </Grid>
+          </Grid>
+        </Grow>
+      </VertLayout>
     </FormShell>
   )
 }

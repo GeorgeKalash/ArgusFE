@@ -24,13 +24,8 @@ const AgentBranchWindow = ({ labels, editMode, maxAccess, recordId, height }) =>
     const addressId = address.addressId
     if (!store.agentBranch.addressId) {
       const res = { ...store.agentBranch, addressId: addressId }
-      console.log('res')
-      console.log(store)
-      console.log(addressId)
-      console.log(res)
       if (res) {
-        const data = { ...res, recordId: store?.recordId, agentId: store.agentBranch.record.agentId }
-        console.log(data)
+        const data = { ...res, recordId: store?.recordId, agentId: store.agentBranch?.agentId }
         await postRequest({
           extension: RemittanceSettingsRepository.CorrespondentAgentBranches.set,
           record: JSON.stringify(data)
