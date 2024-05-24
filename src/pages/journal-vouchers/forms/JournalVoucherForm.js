@@ -19,12 +19,9 @@ import { useForm } from 'src/hooks/form'
 import useDocumentType from 'src/hooks/documentReferenceBehaviors'
 
 export default function JournalVoucherForm({ labels, access, recordId, general = {} }) {
-  const [nraId, setNraId] = useState()
-
-  const { documentType, maxAccess } = useDocumentType({
+  const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.JournalVoucher,
-    access: access,
-    nraId
+    access: access
   })
 
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -132,8 +129,7 @@ export default function JournalVoucherForm({ labels, access, recordId, general =
             values={formik.values}
             onChange={async (event, newValue) => {
               formik.setFieldValue('dtId', newValue?.recordId)
-
-              setNraId(newValue?.nraId ?? 'naraId')
+              changeDT(newValue)
             }}
             error={formik.touched.dtId && Boolean(formik.errors.dtId)}
             maxAccess={maxAccess}

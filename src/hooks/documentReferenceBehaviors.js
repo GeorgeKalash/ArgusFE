@@ -1,12 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
-import { useContext } from 'react'
+import { useContext, useState } from 'react'
 import { useError } from 'src/error'
 import documentType from 'src/lib/docRefBehaviors'
 import { RequestsContext } from 'src/providers/RequestsContext'
 
-export function useDocumentType({ functionId, access, nraId, hasDT, action }) {
+export function useDocumentType({ functionId, access, hasDT, action }) {
   const { getRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
+  const [nraId, setNraId] = useState()
 
   const proxyAction = async () => {
     const general = await documentType(getRequest, functionId)
@@ -39,6 +40,9 @@ export function useDocumentType({ functionId, access, nraId, hasDT, action }) {
     access,
     documentType: query.data,
     maxAccess: query?.data?.maxAccess,
+    changeDT(value) {
+      setNraId(value?.nraId ?? 'nraId')
+    },
     proxyAction
   }
 }
