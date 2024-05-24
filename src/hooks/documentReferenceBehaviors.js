@@ -4,12 +4,14 @@ import { useError } from 'src/error'
 import documentType from 'src/lib/docRefBehaviors'
 import { RequestsContext } from 'src/providers/RequestsContext'
 
-export function useDocumentType({ functionId, access, hasDT, action }) {
+export function useDocumentType({ functionId, access, hasDT, action, enabled = true }) {
   const { getRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
   const [nraId, setNraId] = useState()
+  const [proxyState, setProxyState] = useState(enabled)
 
   const proxyAction = async () => {
+    setProxyState(true)
     const general = await documentType(getRequest, functionId)
     if (!general?.errorMessage) {
       await action()
@@ -31,7 +33,7 @@ export function useDocumentType({ functionId, access, hasDT, action }) {
 
   const query = useQuery({
     retry: false,
-    enabled: !!functionId,
+    enabled: proxyState && !!functionId,
     queryKey: [functionId, nraId],
     queryFn: nraId || nraId === 'naraId' ? () => queryFn(nraId) : () => queryFn()
   })

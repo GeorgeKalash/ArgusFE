@@ -200,6 +200,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     access: access,
     hasDT: false
   })
+  console.log('maxAccess-cash', maxAccess)
 
   const { formik } = useForm({
     maxAccess,
@@ -656,7 +657,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
               <FieldSet title='Transaction'>
                 <Grid container spacing={4}>
                   <Grid item xs={4}>
-                    <FormField name='reference' Component={CustomTextField} readOnly={editMode} />
+                    <FormField name='reference' maxAccess={maxAccess} Component={CustomTextField} readOnly={editMode} />
                   </Grid>
                   <FormGrid hideonempty item xs={4}>
                     <CustomDatePicker
@@ -686,7 +687,13 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                     <RadioGroup
                       row
                       value={formik.values.functionId}
-                      onChange={e => setOperationType(parseInt(e.target.value), setFId(e.target.value))}
+                      onChange={e =>
+                        setOperationType(
+                          parseInt(e.target.value),
+                          setFId(e.target.value),
+                          formik.setFieldValue('reference', '')
+                        )
+                      }
                     >
                       <FormControlLabel
                         value={SystemFunction.CurrencyPurchase}

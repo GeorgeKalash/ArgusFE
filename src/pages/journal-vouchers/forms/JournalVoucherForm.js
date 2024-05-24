@@ -46,8 +46,7 @@ export default function JournalVoucherForm({ labels, access, recordId, general =
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.string().required('This field is required'),
-      currencyId: yup.string().required('This field is required'),
-      dtId: yup.string().required('This field is required')
+      currencyId: yup.string().required('This field is required')
     }),
     onSubmit: async obj => {
       const data = {
@@ -78,7 +77,6 @@ export default function JournalVoucherForm({ labels, access, recordId, general =
   })
 
   const editMode = !!formik.values.recordId || !!recordId
-
   useEffect(() => {
     ;(async function () {
       try {
