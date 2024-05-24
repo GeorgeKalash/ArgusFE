@@ -71,14 +71,14 @@ const Avatar = styled.div`
     top: -8px;
     width: 316px;
     height: 316px;
-    border-color: #1e3a5f #1e3a5f #1e3a5f transparent;
+    border-color: #93c6e0 #93c6e0 #93c6e0 transparent;
   }
   .circle:nth-child(2) {
     left: -12px;
     top: -12px;
     width: 328px;
     height: 328px;
-    border-color: #1e3a5f transparent #1e3a5f #1e3a5f;
+    border-color: #93c6e0 transparent #93c6e0 #93c6e0;
   }
   &:hover .circle:first-child {
     transform: rotate(360deg);
@@ -133,7 +133,7 @@ const SideData = styled.div`
 
 const DataHalf = styled.div`
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
   width: 100%;
@@ -173,29 +173,11 @@ const CircleIcon = styled.div`
   margin-bottom: 10px;
 `
 
-const ChartContainer = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: 300px;
-  canvas {
-    width: 50% !important;
-    height: 70% !important;
-  }
-`
-
 const CompositeBarContainer = styled.div`
-  width: 100%;
-  padding: 20px;
-  background: #e0f2ff;
-  border-radius: 10px;
-  box-shadow: 1px 2px 4px 0 #12233e;
-  margin-bottom: 20px;
+  width: 50%;
   canvas {
     width: 100% !important;
-    height: 200px !important;
+    height: 250px !important;
   }
 `
 
@@ -263,8 +245,8 @@ const UserDashboard = () => {
   }, [data.pctToTarget, data.teamPctToTarget])
 
   useEffect(() => {
-    const ctx1 = document.getElementById('chart1').getContext('2d')
-    const ctx2 = document.getElementById('chart2').getContext('2d')
+    const ctx3a = document.getElementById('compositebara').getContext('2d')
+    const ctx3b = document.getElementById('compositebarb').getContext('2d')
 
     const commonOptions = {
       responsive: true,
@@ -322,11 +304,6 @@ const UserDashboard = () => {
       })
     }
 
-    const chart1 = createChart(ctx1, 'Units Sold', data.myYearlyGrowthInUnitsSoldList)
-    const chart2 = createChart(ctx2, 'Clients Acquired', data.myYearlyGrowthInClientsAcquiredList)
-    const ctx3a = document.getElementById('compositebara').getContext('2d')
-    const ctx3b = document.getElementById('compositebarb').getContext('2d')
-
     const compositeBarA = new Chart(ctx3a, {
       type: 'bar',
       data: {
@@ -362,10 +339,8 @@ const UserDashboard = () => {
     })
 
     return () => {
-      chart1.destroy()
-      chart2.destroy()
-      compositebara.destroy()
-      compositebarb.destroy()
+      compositeBarA.destroy()
+      compositeBarB.destroy()
     }
   }, [data.myYearlyGrowthInUnitsSoldList, data.myYearlyGrowthInClientsAcquiredList])
 
@@ -398,8 +373,7 @@ const UserDashboard = () => {
         <Card>
           <SideData className='left-data'>
             <DataHalf>
-              <Span className='big'>Performance</Span>
-              <Span className='small'>{data.performanceVsTeamAverage.toFixed(0)}</Span>
+              <Span className='big'>SoftMachine</Span>
             </DataHalf>{' '}
             <DataHalf>
               <CircleContainer>
@@ -429,12 +403,10 @@ const UserDashboard = () => {
             <DataHalf>
               <CompositeBarContainer>
                 <canvas id='compositebara'></canvas>
+              </CompositeBarContainer>
+              <CompositeBarContainer>
                 <canvas id='compositebarb'></canvas>
               </CompositeBarContainer>
-              <ChartContainer>
-                <canvas id='chart1'></canvas>
-                <canvas id='chart2'></canvas>
-              </ChartContainer>
             </DataHalf>
 
             <DataHalf>
