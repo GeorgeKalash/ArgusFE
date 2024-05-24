@@ -265,7 +265,6 @@ const UserDashboard = () => {
   useEffect(() => {
     const ctx1 = document.getElementById('chart1').getContext('2d')
     const ctx2 = document.getElementById('chart2').getContext('2d')
-    const ctx3 = document.getElementById('composite-bar').getContext('2d')
 
     const commonOptions = {
       responsive: true,
@@ -325,8 +324,10 @@ const UserDashboard = () => {
 
     const chart1 = createChart(ctx1, 'Units Sold', data.myYearlyGrowthInUnitsSoldList)
     const chart2 = createChart(ctx2, 'Clients Acquired', data.myYearlyGrowthInClientsAcquiredList)
+    const ctx3a = document.getElementById('compositebara').getContext('2d')
+    const ctx3b = document.getElementById('compositebarb').getContext('2d')
 
-    const compositeBar = new Chart(ctx3, {
+    const compositeBarA = new Chart(ctx3a, {
       type: 'bar',
       data: {
         labels: data.myYearlyGrowthInUnitsSoldList.map(item => item.year),
@@ -337,7 +338,17 @@ const UserDashboard = () => {
             backgroundColor: '#6673FD',
             borderColor: '#6673FD',
             borderWidth: 1
-          },
+          }
+        ]
+      },
+      options: commonOptions
+    })
+
+    const compositeBarB = new Chart(ctx3b, {
+      type: 'bar',
+      data: {
+        labels: data.myYearlyGrowthInClientsAcquiredList.map(item => item.year),
+        datasets: [
           {
             label: 'Clients Acquired',
             data: data.myYearlyGrowthInClientsAcquiredList.map(item => item.qty),
@@ -353,7 +364,8 @@ const UserDashboard = () => {
     return () => {
       chart1.destroy()
       chart2.destroy()
-      compositeBar.destroy()
+      compositebara.destroy()
+      compositebarb.destroy()
     }
   }, [data.myYearlyGrowthInUnitsSoldList, data.myYearlyGrowthInClientsAcquiredList])
 
@@ -416,13 +428,15 @@ const UserDashboard = () => {
           <SideData className='right-data'>
             <DataHalf>
               <CompositeBarContainer>
-                <canvas id='composite-bar'></canvas>
+                <canvas id='compositebara'></canvas>
+                <canvas id='compositebarb'></canvas>
               </CompositeBarContainer>
-              <CompositeBarContainer>
+              <ChartContainer>
                 <canvas id='chart1'></canvas>
                 <canvas id='chart2'></canvas>
-              </CompositeBarContainer>
+              </ChartContainer>
             </DataHalf>
+
             <DataHalf>
               <ProgressBarsWrapper>
                 <ProgressBarContainer>
