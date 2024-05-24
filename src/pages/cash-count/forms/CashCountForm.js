@@ -236,11 +236,14 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
       extension: CCTRXrepository.CashCountTransaction.reopen,
       record: JSON.stringify(data)
     })
-    if (res.recordId) {
-      toast.success('Record Reopened Successfully')
-      invalidate()
-      getData(obj?.recordId)
-    }
+      .then(() => {
+        if (res.recordId) {
+          toast.success('Record Reopened Successfully')
+          invalidate()
+          getData(obj?.recordId)
+        }
+      })
+      .catch(error => {})
   }
 
   const onClose = () => {
