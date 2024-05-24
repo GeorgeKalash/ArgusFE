@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext, useRef } from 'react'
+import { useEffect, useState, useContext } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { DashboardRepository } from 'src/repositories/DashboardRepository'
 import styled, { createGlobalStyle } from 'styled-components'
@@ -59,14 +59,12 @@ const Avatar = styled.div`
   cursor: pointer;
   background: #b3cde8;
   margin-bottom: 40px;
-
   .circle {
     position: absolute;
     border-radius: 50%;
     border: 2px solid;
     transition: all 1.5s ease-in-out;
   }
-
   .circle:first-child {
     left: -8px;
     top: -8px;
@@ -74,7 +72,6 @@ const Avatar = styled.div`
     height: 316px;
     border-color: #1e3a5f #1e3a5f #1e3a5f transparent;
   }
-
   .circle:nth-child(2) {
     left: -12px;
     top: -12px;
@@ -82,15 +79,12 @@ const Avatar = styled.div`
     height: 328px;
     border-color: #1e3a5f transparent #1e3a5f #1e3a5f;
   }
-
   &:hover .circle:first-child {
     transform: rotate(360deg);
   }
-
   &:hover .circle:nth-child(2) {
     transform: rotate(-360deg);
   }
-
   .pic {
     position: relative;
     width: 100%;
@@ -99,7 +93,6 @@ const Avatar = styled.div`
     background-size: cover;
     background-position: center;
   }
-
   .pic:after {
     content: '';
     position: absolute;
@@ -114,12 +107,10 @@ const Span = styled.span`
   display: block;
   text-transform: capitalize;
   text-align: center;
-
   &.big {
     font-size: 36px;
     font-weight: 600;
   }
-
   &.small {
     font-size: 24px;
     font-weight: 300;
@@ -154,10 +145,15 @@ const DataHalf = styled.div`
 
 const ChartContainer = styled.div`
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  justify-content: center;
   align-items: center;
   width: 100%;
-  height: 300px; /* Adjust height as needed */
+  height: 300px;
+  canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
 `
 
 const UserDashboard = () => {
@@ -174,97 +170,90 @@ const UserDashboard = () => {
     teamPctToTarget: 0.0,
     newClientsAcquired: 0
   })
-
-  const chart1Ref = useRef(null)
-  const chart2Ref = useRef(null)
-
   useEffect(() => {
     getDataResult()
   }, [])
-
   useEffect(() => {
-    if (chart1Ref.current && chart2Ref.current) {
-      const ctx1 = chart1Ref.current.getContext('2d')
-      const ctx2 = chart2Ref.current.getContext('2d')
+    const ctx1 = document.getElementById('chart1').getContext('2d')
+    const ctx2 = document.getElementById('chart2').getContext('2d')
 
-      const chart1 = new Chart(ctx1, {
-        type: 'bar',
-        data: {
-          labels: ['Jan', 'Feb', 'Mar', 'Apr'],
-          datasets: [
-            {
-              label: 'Units Sold',
-              data: [10, 20, 30, 40],
-              backgroundColor: ['#93C6E0', '#5DA9D4', '#378DC8', '#176FB5'],
-              borderColor: ['#176FB5', '#176FB5', '#176FB5', '#176FB5'],
-              borderWidth: 1
-            }
-          ]
+    const chart1 = new Chart(ctx1, {
+      type: 'bar',
+      data: {
+        labels: data.myYearlyGrowthInUnitsSoldList.map(item => item.year),
+        datasets: [
+          {
+            label: 'Units Sold',
+            data: data.myYearlyGrowthInUnitsSoldList.map(item => item.qty),
+            backgroundColor: ['#93C6E0', '#5DA9D4', '#378DC8', '#176FB5'],
+            borderColor: ['#176FB5', '#176FB5', '#176FB5', '#176FB5'],
+            borderWidth: 1
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true
+          }
         },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            y: {
-              beginAtZero: true
-            }
-          },
-          plugins: {
-            title: {
-              display: true,
-              text: 'Units Sold',
-              font: {
-                size: 18,
-                weight: 'bold'
-              },
-              color: '#FFFFFF'
-            }
+        plugins: {
+          title: {
+            display: true,
+            text: 'Units Sold',
+            font: {
+              size: 18,
+              weight: 'bold'
+            },
+            color: '#FFFFFF'
           }
         }
-      })
-
-      const chart2 = new Chart(ctx2, {
-        type: 'bar',
-        data: {
-          labels: ['Jan', 'Feb', 'Mar', 'Apr'],
-          datasets: [
-            {
-              label: 'Clients Acquired',
-              data: [5, 15, 25, 35],
-              backgroundColor: ['#93C6E0', '#5DA9D4', '#378DC8', '#176FB5'],
-              borderColor: ['#176FB5', '#176FB5', '#176FB5', '#176FB5'],
-              borderWidth: 1
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            y: {
-              beginAtZero: true
-            }
-          },
-          plugins: {
-            title: {
-              display: true,
-              text: 'Clients Acquired',
-              font: {
-                size: 18,
-                weight: 'bold'
-              },
-              color: '#FFFFFF'
-            }
-          }
-        }
-      })
-
-      return () => {
-        chart1.destroy()
-        chart2.destroy()
       }
+    })
+
+    const chart2 = new Chart(ctx2, {
+      type: 'bar',
+      data: {
+        labels: data.myYearlyGrowthInClientsAcquiredList.map(item => item.year),
+        datasets: [
+          {
+            label: 'Clients Acquired',
+            data: data.myYearlyGrowthInClientsAcquiredList.map(item => item.qty),
+            backgroundColor: ['#93C6E0', '#5DA9D4', '#378DC8', '#176FB5'],
+            borderColor: ['#176FB5', '#176FB5', '#176FB5', '#176FB5'],
+            borderWidth: 1
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        },
+        plugins: {
+          title: {
+            display: true,
+            text: 'Clients Acquired',
+            font: {
+              size: 18,
+              weight: 'bold'
+            },
+            color: '#FFFFFF'
+          }
+        }
+      }
+    })
+
+    return () => {
+      chart1.destroy()
+      chart2.destroy()
     }
-  }, [])
+  }, [data.myYearlyGrowthInUnitsSoldList, data.myYearlyGrowthInClientsAcquiredList])
 
   const getDataResult = () => {
     getRequest({
@@ -313,8 +302,8 @@ const UserDashboard = () => {
           <SideData className='right-data'>
             <DataHalf>
               <ChartContainer>
-                <canvas ref={chart1Ref} id='chart1'></canvas>
-                <canvas ref={chart2Ref} id='chart2'></canvas>
+                <canvas id='chart1'></canvas>
+                <canvas id='chart2'></canvas>
               </ChartContainer>
             </DataHalf>
             <DataHalf>
