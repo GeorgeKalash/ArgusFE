@@ -74,9 +74,21 @@ export const Buttons = [
     main: false
   },
   {
+    key: 'Print',
+    color: '#231f20',
+    image: 'print.png',
+    main: false
+  },
+  {
     key: 'Invoice',
     color: '#231f20',
     image: 'invoice.png',
+    main: false
+  },
+  {
+    key: 'Tree',
+    color: '#231f20',
+    image: 'tree.png',
     main: false
   },
   {
