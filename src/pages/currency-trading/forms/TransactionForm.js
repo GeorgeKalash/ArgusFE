@@ -200,7 +200,6 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     access: access,
     hasDT: false
   })
-  console.log('maxAccess-cash', maxAccess)
 
   const { formik } = useForm({
     maxAccess,

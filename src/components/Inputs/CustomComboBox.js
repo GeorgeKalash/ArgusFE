@@ -40,7 +40,6 @@ const CustomComboBox = ({
   const _disabled = disabled || fieldAccess === ControlAccessLevel.Disabled
   const _required = required || fieldAccess === ControlAccessLevel.Mandatory
   const _hidden = fieldAccess === ControlAccessLevel.Hidden
-  console.log('maxAccess', maxAccess, fieldAccess, _readOnly, _disabled, _required, _hidden)
 
   return (
     <Autocomplete

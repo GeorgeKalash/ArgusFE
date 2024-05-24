@@ -33,7 +33,6 @@ const mergeWithMaxAccess = (maxAccess, reference, dcTypeRequired) => {
           accessLevel: reference?.mandatory ? MANDATORY : DISABLED
         })
       } else if (reference?.readOnly) {
-        console.log('reference?.mandatory', reference?.mandatory)
         controls.push({
           sgId: 18,
           resourceId: ResourceIds.JournalVoucher,
@@ -44,7 +43,6 @@ const mergeWithMaxAccess = (maxAccess, reference, dcTypeRequired) => {
         maxAccess.record.controls = maxAccess.record.controls.filter(obj => obj.controlId != 'reference')
       }
     }
-    console.log('dcTypeRequired-merge', dcTypeRequired)
 
     if (dcTypeRequired) {
       controls.push({
@@ -54,7 +52,6 @@ const mergeWithMaxAccess = (maxAccess, reference, dcTypeRequired) => {
         accessLevel: MANDATORY
       })
     }
-    console.log('controls', controls)
   }
 
   return maxAccess
@@ -106,7 +103,6 @@ const documentType = async (getRequest, functionId, maxAccess = '', selectNraId 
   if (docType && selectNraId === undefined) {
     if (dtId) {
       const dcTypNumberRange = await fetchData(getRequest, dtId, 'DcTypNumberRange') //DT
-      console.log('dcTypNumberRange', dcTypNumberRange)
       nraId = dcTypNumberRange?.nraId
       activeStatus = dcTypNumberRange?.activeStatus < 0 ? false : true
       if (!nraId) {
@@ -116,7 +112,6 @@ const documentType = async (getRequest, functionId, maxAccess = '', selectNraId 
     if ((!dtId || !activeStatus) && hasDT) {
       const documentType = await fetchData(getRequest, functionId, 'DocumentType') //qryDT
       dcTypeRequired = documentType?.list?.filter(item => item?.activeStatus === 1).length > 0
-      console.log('dcTypeRequired', dcTypeRequired)
     }
   }
   if (selectNraId === 'naraId' || selectNraId === undefined) {
@@ -143,7 +138,6 @@ const documentType = async (getRequest, functionId, maxAccess = '', selectNraId 
     }
     if (maxAccess) maxAccess = await mergeWithMaxAccess(maxAccess, reference, dcTypeRequired)
   } else if (!nraId) {
-    console.log('nraId', nraId, dcTypeRequired, maxAccess)
     if (maxAccess) maxAccess = await mergeWithMaxAccess(maxAccess, reference, dcTypeRequired)
   }
 
