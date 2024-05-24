@@ -28,49 +28,57 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
       functionId: functionId,
       policyNo: '',
       carrierId: '',
-      typeGrid: [{ id: 1, recordId: '', functionId: '', seqNo: '', packageType: '', qty: '', amount: '' }],
-      serialGrid: [{ id: 1, recordId: '', functionId: '', seqNo: 1, reference: '' }]
+      packages: [
+        {
+          id: 1,
+          recordId: '',
+          functionId: '',
+          seqNo: '',
+          packageType: '',
+          qty: '',
+          amount: '',
+          packageReferences: [{ id: 1, recordId: '', functionId: '', seqNo: 1, reference: '' }]
+        }
+      ]
     },
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       policyNo: yup.string().required(),
       carrierId: yup.string().required(),
-      typeGrid: yup
+      packages: yup
         .array()
         .of(
           yup.object().shape({
             packageTypeName: yup.string().required(),
-            qty: yup.string().nullable().required(),
-            amount: yup.string().nullable().required()
+            qty: yup.string().required(),
+            amount: yup.string().required(),
+            packageReferences: yup
+              .array()
+              .of(
+                yup.object().shape({
+                  seqNo: yup.string().required(),
+                  reference: yup.string().required()
+                })
+              )
+              .required()
           })
         )
-        .required(),
-      serialGrid: yup
-        .array()
-        .of(
-          yup.object().shape({
-            seqNo: yup.string().required(),
-            reference: yup.string().nullable().required()
-          })
-        )
+
         .required()
     }),
     onSubmit: async values => {
-      const packageRows = formik.values.typeGrid.map((packageDetail, index) => {
+      const packageRows = formik.values.packages.map((packageDetail, index) => {
         return {
           ...packageDetail,
           seqNo: index + 1,
           recordId: recordId,
-          functionId: functionId
-        }
-      })
-
-      const packageRefRows = formik.values.serialGrid.map(packageRefDetail => {
-        return {
-          ...packageRefDetail,
-          recordId: recordId,
-          functionId: functionId
+          functionId: functionId,
+          packageReferences: packageDetail.packageReferences.map(packageRefDetail => ({
+            ...packageRefDetail,
+            recordId: recordId,
+            functionId: functionId
+          }))
         }
       })
 
@@ -81,8 +89,7 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
           carrierId: values.carrierId,
           policyNo: values.policyNo
         },
-        packages: packageRows,
-        packageReferences: packageRefRows
+        packages: packageRows
       }
 
       await postRequest({
@@ -98,13 +105,13 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
     datasetId: ResourceIds.LOShipments
   })
 
-  const totalQty = formik.values?.typeGrid?.reduce((qty, row) => {
+  const totalQty = formik.values?.packages?.reduce((qty, row) => {
     const qtyValue = parseFloat(row.qty?.toString().replace(/,/g, '')) || 0
 
     return qty + qtyValue
   }, 0)
 
-  const totalAmount = formik.values?.typeGrid?.reduce((amount, row) => {
+  const totalAmount = formik.values?.packages?.reduce((amount, row) => {
     const amountValue = parseFloat(row.amount?.toString().replace(/,/g, '')) || 0
 
     return amount + amountValue
@@ -118,12 +125,12 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
           parameters: `_recordId=${recordId}&_functionId=${functionId}`
         })
 
-        const packages = res.record.packages.map((item, index) => ({
+        /*const packages = res.record.packages.map((item, index) => ({
           ...item,
           id: index + 1
         }))
 
-        const packageReferences = res.record.packageReferences.map((item, index) => ({
+        const packageReferences = res.record.packages.packageReferences.map((item, index) => ({
           ...item,
           id: index + 1
         }))
@@ -133,12 +140,15 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
         }
         formik.setValues({
           ...res.record.header,
-          typeGrid: packages,
-          serialGrid: packageReferences
-        })
+          packages: packages.map(pkg => ({
+            ...pkg,
+            packageReferences: packageReferences
+          }))
+        })*/
       }
     })()
   }, [])
+  console.log('check formik ', formik.values)
 
   const handleDataGridChange = newRows => {
     const updatedRows = newRows.map(row => {
@@ -150,8 +160,7 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
 
       return row
     })
-    console.log('check updatedRows ', updatedRows)
-    formik.setFieldValue('serialGrid', updatedRows)
+    formik.setFieldValue('packageReferences', updatedRows)
   }
 
   return (
@@ -202,9 +211,9 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
               <Grid container direction='row' wrap='nowrap' sx={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
                 <Grow>
                   <DataGrid
-                    onChange={value => formik.setFieldValue('typeGrid', value)}
-                    value={formik.values.typeGrid}
-                    error={formik.errors.typeGrid}
+                    onChange={value => formik.setFieldValue('packages', value)}
+                    value={formik.values.packages}
+                    error={formik.errors.packages}
                     maxAccess={maxAccess}
                     allowAddNewLine={!editMode}
                     allowDelete={!editMode}
@@ -273,8 +282,7 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
                 <Grow>
                   <DataGrid
                     onChange={value => handleDataGridChange(value)}
-                    value={formik.values.serialGrid}
-                    error={formik.errors.serialGrid}
+                    value={formik.values.packages.packageReferences} //error={formik.errors.packages.packageReferences}
                     maxAccess={maxAccess}
                     allowAddNewLine={!editMode}
                     allowDelete={false}
