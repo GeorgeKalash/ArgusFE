@@ -57,7 +57,7 @@ const CashEnquiry = () => {
     },
     {
       field: 'baseAmount',
-      headerName: _labels.baseAmount,
+      headerName: _labels.BaseAmount,
       flex: 1
     },
     {
