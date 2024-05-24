@@ -387,21 +387,21 @@ const UserDashboard = () => {
           <SideData className='left-data'>
             <DataHalf>
               <Span className='big'>Performance</Span>
-              <Span className='small'>{data.performanceVsTeamAverage}</Span>
+              <Span className='small'>{data.performanceVsTeamAverage.toFixed(0)}</Span>
             </DataHalf>{' '}
             <DataHalf>
               <CircleContainer>
                 <Circle>
-                  <CircleIcon>15</CircleIcon>
-                  <Span>Sales</Span>
+                  <CircleIcon>{data.unitsSold}</CircleIcon>
+                  <Span>Units Sold</Span>
                 </Circle>
                 <Circle>
-                  <CircleIcon>12</CircleIcon>
-                  <Span>Revenue</Span>
+                  <CircleIcon>{data.newClientsAcquired}</CircleIcon>
+                  <Span>New Clients Acquired</Span>
                 </Circle>
                 <Circle>
-                  <CircleIcon>45%</CircleIcon>
-                  <Span>Success</Span>
+                  <CircleIcon>{data.pctToTarget.toFixed(0)}%</CircleIcon>
+                  <Span>Percentage To Target</Span>
                 </Circle>
               </CircleContainer>
             </DataHalf>
@@ -424,16 +424,17 @@ const UserDashboard = () => {
               </CompositeBarContainer>
             </DataHalf>
             <DataHalf>
-              <Span className='big'>Progress to Target</Span>
               <ProgressBarsWrapper>
                 <ProgressBarContainer>
-                  <ProgressBarLabel>Individual</ProgressBarLabel>
+                  <ProgressBarLabel>Percentage To Target</ProgressBarLabel>
+                  <ProgressBarLabel>{progress.pctToTarget.toFixed(0)}%</ProgressBarLabel>
                   <ProgressBarBackground>
                     <ProgressBar style={{ width: `${progress.pctToTarget}%` }} />
                   </ProgressBarBackground>
                 </ProgressBarContainer>
                 <ProgressBarContainer>
-                  <ProgressBarLabel>Team</ProgressBarLabel>
+                  <ProgressBarLabel>Team Percentage To Target</ProgressBarLabel>
+                  <ProgressBarLabel>{progress.teamPctToTarget.toFixed(0)}%</ProgressBarLabel>
                   <ProgressBarBackground>
                     <ProgressBar style={{ width: `${progress.teamPctToTarget}%` }} />
                   </ProgressBarBackground>
