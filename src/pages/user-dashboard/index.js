@@ -72,7 +72,7 @@ const Avatar = styled.div`
     top: -8px;
     width: 316px;
     height: 316px;
-    border-color: #1e3a5f #1e3a5f #1e3a5f transparent;
+    border-color: #93c6e0 #93c6e0 #93c6e0 transparent;
   }
 
   .circle:nth-child(2) {
@@ -80,7 +80,7 @@ const Avatar = styled.div`
     top: -12px;
     width: 328px;
     height: 328px;
-    border-color: #1e3a5f transparent #1e3a5f #1e3a5f;
+    border-color: #93c6e0 transparent #93c6e0 #93c6e0;
   }
 
   &:hover .circle:first-child {
@@ -141,7 +141,7 @@ const SideData = styled.div`
 
 const DataHalf = styled.div`
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
   width: 100%;
@@ -152,8 +152,44 @@ const DataHalf = styled.div`
   margin-bottom: 20px;
 `
 
-const ChartContainer = styled.div`
+const Circle = styled.div`
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 33%;
+`
+
+const CircleIcon = styled.div`
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: bold;
+  color: #176fb5;
+  margin-bottom: 10px;
+`
+
+const CompositeBarContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 300px;
+  canvas {
+    width: 50% !important;
+    height: 70% !important;
+  }
+`
+
+const ProgressBarsWrapper = styled.div`
+  display: flex;
+  width: 100%;
   justify-content: space-between;
   align-items: center;
   width: 100%;
@@ -187,82 +223,73 @@ const UserDashboard = () => {
       const ctx1 = chart1Ref.current.getContext('2d')
       const ctx2 = chart2Ref.current.getContext('2d')
 
-      const chart1 = new Chart(ctx1, {
-        type: 'bar',
-        data: {
-          labels: ['Label 1', 'Label 2', 'Label 3', 'Label 4'],
-          datasets: [
-            {
-              label: 'Units Sold',
-              data: [10, 20, 30, 40],
-              backgroundColor: ['#93C6E0', '#5DA9D4', '#378DC8', '#176FB5'],
-              borderColor: ['#176FB5', '#176FB5', '#176FB5', '#176FB5'],
-              borderWidth: 1
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            y: {
-              beginAtZero: true
-            }
+  useEffect(() => {
+    const ctx3a = document.getElementById('compositebara').getContext('2d')
+    const ctx3b = document.getElementById('compositebarb').getContext('2d')
+
+    const commonOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      },
+      plugins: {
+        title: {
+          display: true,
+          font: {
+            size: 24,
+            weight: 'bold'
           },
-          plugins: {
-            title: {
-              display: true,
-              text: 'Units Sold',
-              font: {
-                size: 18,
-                weight: 'bold'
-              },
-              color: '#FFFFFF'
+          color: '#6673FD'
+        },
+        tooltip: {
+          enabled: true,
+          callbacks: {
+            label: function (context) {
+              return `${context.dataset.label}: ${context.raw}`
             }
           }
         }
-      })
-
-      const chart2 = new Chart(ctx2, {
-        type: 'bar',
-        data: {
-          labels: ['Label 1', 'Label 2', 'Label 3', 'Label 4'],
-          datasets: [
-            {
-              label: 'Units Sold',
-              data: [10, 20, 30, 40],
-              backgroundColor: ['#93C6E0', '#5DA9D4', '#378DC8', '#176FB5'],
-              borderColor: ['#176FB5', '#176FB5', '#176FB5', '#176FB5'],
-              borderWidth: 1
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            y: {
-              beginAtZero: true
-            }
-          },
-          plugins: {
-            title: {
-              display: true,
-              text: 'Units Sold',
-              font: {
-                size: 18,
-                weight: 'bold'
-              },
-              color: '#FFFFFF'
-            }
-          }
-        }
-      })
-
-      return () => {
-        chart1.destroy()
-        chart2.destroy()
       }
+    }
+
+    const compositeBarA = new Chart(ctx3a, {
+      type: 'bar',
+      data: {
+        labels: data.myYearlyGrowthInUnitsSoldList.map(item => item.year),
+        datasets: [
+          {
+            label: 'Units Sold',
+            data: data.myYearlyGrowthInUnitsSoldList.map(item => item.qty),
+            backgroundColor: '#6673FD',
+            borderColor: '#6673FD',
+            borderWidth: 1
+          }
+        }
+      })
+
+    const compositeBarB = new Chart(ctx3b, {
+      type: 'bar',
+      data: {
+        labels: data.myYearlyGrowthInClientsAcquiredList.map(item => item.year),
+        datasets: [
+          {
+            label: 'Clients Acquired',
+            data: data.myYearlyGrowthInClientsAcquiredList.map(item => item.qty),
+            backgroundColor: '#93C6E0',
+            borderColor: '#93C6E0',
+            borderWidth: 1
+          }
+        ]
+      },
+      options: commonOptions
+    })
+
+    return () => {
+      compositeBarA.destroy()
+      compositeBarB.destroy()
     }
   }, [])
 
@@ -295,12 +322,24 @@ const UserDashboard = () => {
         <Card>
           <SideData className='left-data'>
             <DataHalf>
-              <Span className='big'>Units Sold</Span>
-              <Span className='small'>{data.unitsSold}</Span>
-            </DataHalf>
-            <DataHalf>
               <Span className='big'>Performance</Span>
               <Span className='small'>{data.performanceVsTeamAverage}</Span>
+            </DataHalf>
+            <DataHalf>
+              <CircleContainer>
+                <Circle>
+                  <CircleIcon>15</CircleIcon>
+                  <Span>Sales</Span>
+                </Circle>
+                <Circle>
+                  <CircleIcon>12</CircleIcon>
+                  <Span>Revenue</Span>
+                </Circle>
+                <Circle>
+                  <CircleIcon>45%</CircleIcon>
+                  <Span>Success</Span>
+                </Circle>
+              </CircleContainer>
             </DataHalf>
           </SideData>
           <Profile>
@@ -312,14 +351,29 @@ const UserDashboard = () => {
           </Profile>
           <SideData className='right-data'>
             <DataHalf>
-              <ChartContainer>
-                <canvas ref={chart1Ref} id='chart1'></canvas>
-                <canvas ref={chart2Ref} id='chart2'></canvas>
-              </ChartContainer>
+              <CompositeBarContainer>
+                <canvas id='compositebara'></canvas>
+              </CompositeBarContainer>
+              <CompositeBarContainer>
+                <canvas id='compositebarb'></canvas>
+              </CompositeBarContainer>
             </DataHalf>
             <DataHalf>
-              <Span className='big'>New Clients</Span>
-              <Span className='small'>{data.newClientsAcquired}</Span>
+              <Span className='big'>Progress to Target</Span>
+              <ProgressBarsWrapper>
+                <ProgressBarContainer>
+                  <ProgressBarLabel>Individual</ProgressBarLabel>
+                  <ProgressBarBackground>
+                    <ProgressBar style={{ width: `${progress.pctToTarget}%` }} />
+                  </ProgressBarBackground>
+                </ProgressBarContainer>
+                <ProgressBarContainer>
+                  <ProgressBarLabel>Team</ProgressBarLabel>
+                  <ProgressBarBackground>
+                    <ProgressBar style={{ width: `${progress.teamPctToTarget}%` }} />
+                  </ProgressBarBackground>
+                </ProgressBarContainer>
+              </ProgressBarsWrapper>
             </DataHalf>
           </SideData>
         </Card>
