@@ -56,11 +56,7 @@ export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, re
       }
       try {
         const checkModule = getSystemFunctionModule(functionId)
-        if (
-          checkModule === Module.CurrencyTrading ||
-          checkModule === Module.Remittance ||
-          checkModule === Module.CashCount
-        ) {
+        if (checkModule === Module.CurrencyTrading || checkModule === Module.Remittance) {
           await postRequest({
             extension: CTDRRepository.DocumentsOnHold.set,
             record: JSON.stringify(data)
