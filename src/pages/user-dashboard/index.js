@@ -1,8 +1,8 @@
-import { useEffect, useState, useContext, useRef } from 'react'
+import { useEffect, useState, useContext } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { DashboardRepository } from 'src/repositories/DashboardRepository'
 import styled, { createGlobalStyle } from 'styled-components'
-import Chart from 'chart.js/auto'
+import { BarChart } from '@mui/x-charts/BarChart'
 
 const GlobalStyle = createGlobalStyle`
   @import url('https://fonts.googleapis.com/css?family=Open+Sans:700,600,300');
@@ -157,7 +157,7 @@ const ChartContainer = styled.div`
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  height: 130px; /* Adjust height as needed */
+  height: 300px; /* Adjust height as needed */
 `
 
 const UserDashboard = () => {
@@ -175,95 +175,8 @@ const UserDashboard = () => {
     newClientsAcquired: 0
   })
 
-  const chart1Ref = useRef(null)
-  const chart2Ref = useRef(null)
-
   useEffect(() => {
     getDataResult()
-  }, [])
-
-  useEffect(() => {
-    if (chart1Ref.current && chart2Ref.current) {
-      const ctx1 = chart1Ref.current.getContext('2d')
-      const ctx2 = chart2Ref.current.getContext('2d')
-
-      const chart1 = new Chart(ctx1, {
-        type: 'bar',
-        data: {
-          labels: ['Label 1', 'Label 2', 'Label 3', 'Label 4'],
-          datasets: [
-            {
-              label: 'Units Sold',
-              data: [10, 20, 30, 40],
-              backgroundColor: ['#93C6E0', '#5DA9D4', '#378DC8', '#176FB5'],
-              borderColor: ['#176FB5', '#176FB5', '#176FB5', '#176FB5'],
-              borderWidth: 1
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            y: {
-              beginAtZero: true
-            }
-          },
-          plugins: {
-            title: {
-              display: true,
-              text: 'Units Sold',
-              font: {
-                size: 18,
-                weight: 'bold'
-              },
-              color: '#FFFFFF'
-            }
-          }
-        }
-      })
-
-      const chart2 = new Chart(ctx2, {
-        type: 'bar',
-        data: {
-          labels: ['Label 1', 'Label 2', 'Label 3', 'Label 4'],
-          datasets: [
-            {
-              label: 'Units Sold',
-              data: [10, 20, 30, 40],
-              backgroundColor: ['#93C6E0', '#5DA9D4', '#378DC8', '#176FB5'],
-              borderColor: ['#176FB5', '#176FB5', '#176FB5', '#176FB5'],
-              borderWidth: 1
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            y: {
-              beginAtZero: true
-            }
-          },
-          plugins: {
-            title: {
-              display: true,
-              text: 'Units Sold',
-              font: {
-                size: 18,
-                weight: 'bold'
-              },
-              color: '#FFFFFF'
-            }
-          }
-        }
-      })
-
-      return () => {
-        chart1.destroy()
-        chart2.destroy()
-      }
-    }
   }, [])
 
   const getDataResult = () => {
@@ -312,9 +225,28 @@ const UserDashboard = () => {
           </Profile>
           <SideData className='right-data'>
             <DataHalf>
+              <Span className='big'>Yearly Growth</Span>
               <ChartContainer>
-                <canvas ref={chart1Ref} id='chart1'></canvas>
-                <canvas ref={chart2Ref} id='chart2'></canvas>
+                <BarChart
+                  series={[
+                    {
+                      label: 'Units Sold',
+                      data: data.myYearlyGrowthInUnitsSoldList.map(item => ({
+                        x: item.month,
+                        y: item.unitsSold
+                      }))
+                    },
+                    {
+                      label: 'Clients Acquired',
+                      data: data.myYearlyGrowthInClientsAcquiredList.map(item => ({
+                        x: item.month,
+                        y: item.clientsAcquired
+                      }))
+                    }
+                  ]}
+                  xAxis={[{ scaleType: 'band', dataKey: 'x' }]}
+                  yAxis={[{ scaleType: 'linear', dataKey: 'y' }]}
+                />
               </ChartContainer>
             </DataHalf>
             <DataHalf>
