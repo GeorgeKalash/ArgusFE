@@ -11,6 +11,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { CashCountSettingsRepository } from 'src/repositories/CashCountSettingsRepository'
 import { RequestsContext } from 'src/providers/RequestsContext'
+import CustomTextField from 'src/components/Inputs/CustomTextField'
 
 export default function CashCountNotesForm({
   labels,
@@ -43,15 +44,14 @@ export default function CashCountNotesForm({
         .required('Operations array is required')
     }),
     onSubmit: async obj => {
-      const currencyNotes = obj.currencyNotes.map(
-        ({ id, seqNo, cashCountId, qty, ...rest }) =>
-          qty && {
-            seqNo: row.id,
-            qty,
-            cashCountId: row?.cashCountId < 1 ? 0 : row?.cashCountId,
-            ...rest
-          }
-      )
+      const currencyNotes = obj.currencyNotes
+        .filter(item => item.qty > 0)
+        ?.map(({ id, seqNo, cashCountId, qty, ...rest }) => ({
+          seqNo: row.id,
+          qty,
+          cashCountId: row?.cashCountId < 1 ? 0 : row?.cashCountId,
+          ...rest
+        }))
       update({ newRow: { ...row, currencyNotes } })
 
       const counted = obj.currencyNotes.reduce((acc, { subTotal }) => {
@@ -122,6 +122,11 @@ export default function CashCountNotesForm({
       isInfo={false}
     >
       <VertLayout>
+        <Fixed>
+          <Grid container xs={6}>
+            <CustomTextField name='reference' label={labels.currency} value={row.currencyRef} readOnly />
+          </Grid>
+        </Fixed>
         <Grow>
           <DataGrid
             onChange={value => formik.setFieldValue('currencyNotes', value)}
@@ -133,7 +138,7 @@ export default function CashCountNotesForm({
                 label: labels.note,
                 name: 'note',
                 props: {
-                  readOnly: readOnly
+                  readOnly: true
                 }
               },
 
@@ -159,7 +164,8 @@ export default function CashCountNotesForm({
                 props: { readOnly: true }
               }
             ]}
-            allowDelete={!readOnly}
+            allowDelete={false}
+            allowAddNewLine={false}
           />
         </Grow>
         <Fixed>

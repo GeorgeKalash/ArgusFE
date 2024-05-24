@@ -239,7 +239,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
     if (res.recordId) {
       toast.success('Record Reopened Successfully')
       invalidate()
-      setIsClosed(false)
+      getData(obj?.recordId)
     }
   }
 
@@ -252,7 +252,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
         if (res?.recordId) {
           toast.success('Record Posted Successfully')
           invalidate()
-          setIsClosed(true)
+          getData(res?.recordId)
         }
       })
       .catch(error => {})
@@ -532,7 +532,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
                 }
               }
             ]}
-            allowDelete={!isPosted || !isClosed}
+            allowDelete={!isClosed || !isPosted}
           />
         </Grow>
       </VertLayout>
