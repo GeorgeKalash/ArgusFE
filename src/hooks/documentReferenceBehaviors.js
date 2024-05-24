@@ -30,14 +30,14 @@ export function useDocumentType({ functionId, access, nraId, hasDT, action }) {
 
   const query = useQuery({
     retry: false,
-    enabled: functionId && true,
+    enabled: !!functionId,
     queryKey: [functionId, nraId],
     queryFn: nraId || nraId === 'naraId' ? () => queryFn(nraId) : () => queryFn()
   })
 
   return {
     access,
-    query: query,
+    documentType: query.data,
     maxAccess: query?.data?.maxAccess,
     proxyAction
   }

@@ -19,30 +19,14 @@ import { useForm } from 'src/hooks/form'
 import useDocumentType from 'src/hooks/documentReferenceBehaviors'
 
 export default function JournalVoucherForm({ labels, access, recordId, general = {} }) {
-  const [editMode, setEditMode] = useState(!!recordId)
-  const [responseValue, setResponseValue] = useState(null)
   const [nraId, setNraId] = useState()
 
-  const {
-    query: { documentType },
-    maxAccess: maxAccess
-  } = useDocumentType({
+  const { documentType, maxAccess } = useDocumentType({
     functionId: SystemFunction.JournalVoucher,
     access: access,
     nraId
   })
 
-  const [initialValues, setInitialData] = useState({
-    recordId: null,
-    reference: '',
-    date: new Date(),
-    notes: '',
-    currencyId: '',
-    dtId: documentType?.dtId,
-    status: 1,
-    rateCalcMethod: 1,
-    exRate: 1
-  })
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
@@ -51,8 +35,17 @@ export default function JournalVoucherForm({ labels, access, recordId, general =
 
   const { formik } = useForm({
     maxAccess,
-    initialValues,
-    enableReinitialize: true,
+    initialValues: {
+      recordId: null,
+      reference: '',
+      date: new Date(),
+      notes: '',
+      currencyId: '',
+      dtId: documentType?.dtId,
+      status: 1,
+      rateCalcMethod: 1,
+      exRate: 1
+    },
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.string().required('This field is required'),
@@ -63,8 +56,7 @@ export default function JournalVoucherForm({ labels, access, recordId, general =
       const data = {
         ...obj,
         date: formatDateToApi(obj.date),
-        recordId: recordId,
-        response: responseValue
+        recordId: recordId
       }
       try {
         const response = await postRequest({
@@ -82,12 +74,13 @@ export default function JournalVoucherForm({ labels, access, recordId, general =
 
           formik.setValues(res.record)
         } else toast.success('Record Edited Successfully')
-        setEditMode(true)
 
         invalidate()
       } catch (error) {}
     }
   })
+
+  const editMode = !!formik.values.recordId || !!recordId
 
   useEffect(() => {
     ;(async function () {
@@ -116,10 +109,6 @@ export default function JournalVoucherForm({ labels, access, recordId, general =
       disabled: !editMode
     }
   ]
-
-  useEffect(() => {
-    documentType?.dtId && formik.setFieldValue('dtId', documentType?.dtId)
-  }, [documentType?.dtId])
 
   return (
     <FormShell
