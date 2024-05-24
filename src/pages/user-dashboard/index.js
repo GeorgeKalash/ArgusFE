@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext } from 'react'
+import { useEffect, useState, useContext, useRef } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { DashboardRepository } from 'src/repositories/DashboardRepository'
 import styled, { createGlobalStyle } from 'styled-components'
@@ -36,7 +36,7 @@ const Frame = styled.div`
 
 const Card = styled.div`
   width: 100%;
-  padding: 20px;
+  padding: 40px;
   background: white;
   box-shadow: 4px 8px 16px 0 #12233e;
   display: flex;
@@ -49,7 +49,6 @@ const Profile = styled.div`
   flex-direction: column;
   align-items: center;
   flex: 0;
-  padding: 5px;
 `
 
 const Avatar = styled.div`
@@ -60,12 +59,14 @@ const Avatar = styled.div`
   cursor: pointer;
   background: #b3cde8;
   margin-bottom: 40px;
+
   .circle {
     position: absolute;
     border-radius: 50%;
     border: 2px solid;
     transition: all 1.5s ease-in-out;
   }
+
   .circle:first-child {
     left: -8px;
     top: -8px;
@@ -73,6 +74,7 @@ const Avatar = styled.div`
     height: 316px;
     border-color: #1e3a5f #1e3a5f #1e3a5f transparent;
   }
+
   .circle:nth-child(2) {
     left: -12px;
     top: -12px;
@@ -80,12 +82,15 @@ const Avatar = styled.div`
     height: 328px;
     border-color: #1e3a5f transparent #1e3a5f #1e3a5f;
   }
+
   &:hover .circle:first-child {
     transform: rotate(360deg);
   }
+
   &:hover .circle:nth-child(2) {
     transform: rotate(-360deg);
   }
+
   .pic {
     position: relative;
     width: 100%;
@@ -94,6 +99,7 @@ const Avatar = styled.div`
     background-size: cover;
     background-position: center;
   }
+
   .pic:after {
     content: '';
     position: absolute;
@@ -108,10 +114,12 @@ const Span = styled.span`
   display: block;
   text-transform: capitalize;
   text-align: center;
+
   &.big {
     font-size: 36px;
     font-weight: 600;
   }
+
   &.small {
     font-size: 24px;
     font-weight: 300;
@@ -124,11 +132,11 @@ const SideData = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  padding: 10px;
+  padding: 20px;
   background: #b3cde8;
   border-radius: 10px;
   box-shadow: 2px 4px 8px 0 #12233e;
-  margin: 0 10px;
+  margin: 0 20px;
 `
 
 const DataHalf = styled.div`
@@ -137,89 +145,19 @@ const DataHalf = styled.div`
   align-items: center;
   justify-content: center;
   width: 100%;
-  padding: 5px;
+  padding: 10px;
   background: #e0f2ff;
   border-radius: 10px;
   box-shadow: 1px 2px 4px 0 #12233e;
-  margin-bottom: 10px;
-`
-
-const CircleContainer = styled.div`
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
   margin-bottom: 20px;
 `
 
-const Circle = styled.div`
+const ChartContainer = styled.div`
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 33%;
-`
-
-const CircleIcon = styled.div`
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  background: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  font-weight: bold;
-  color: #176fb5;
-  margin-bottom: 10px;
-`
-
-const CompositeBarContainer = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: 300px;
-  canvas {
-    width: 50% !important;
-    height: 70% !important;
-  }
-`
-
-const ProgressBarsWrapper = styled.div`
-  display: flex;
-  width: 100%;
   justify-content: space-between;
   align-items: center;
-`
-
-const ProgressBarContainer = styled.div`
-  width: 48%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-`
-
-const ProgressBarLabel = styled.span`
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 5px;
-`
-
-const ProgressBarBackground = styled.div`
   width: 100%;
-  height: 20px;
-  background-color: #e0f2ff;
-  border-radius: 10px;
-  box-shadow: 1px 2px 4px 0 #12233e;
-  overflow: hidden;
-  margin: 20px 0;
-`
-
-const ProgressBar = styled.div`
-  height: 100%;
-  background-color: #176fb5;
-  transition: width 1.5s ease-in-out;
+  height: 130px; /* Adjust height as needed */
 `
 
 const UserDashboard = () => {
@@ -237,89 +175,96 @@ const UserDashboard = () => {
     newClientsAcquired: 0
   })
 
-  const [progress, setProgress] = useState({ pctToTarget: 0, teamPctToTarget: 0 })
+  const chart1Ref = useRef(null)
+  const chart2Ref = useRef(null)
 
   useEffect(() => {
     getDataResult()
   }, [])
 
   useEffect(() => {
-    if (data.pctToTarget > 0 || data.teamPctToTarget > 0) {
-      setProgress({ pctToTarget: data.pctToTarget, teamPctToTarget: data.teamPctToTarget })
-    }
-  }, [data.pctToTarget, data.teamPctToTarget])
+    if (chart1Ref.current && chart2Ref.current) {
+      const ctx1 = chart1Ref.current.getContext('2d')
+      const ctx2 = chart2Ref.current.getContext('2d')
 
-  useEffect(() => {
-    const ctx3a = document.getElementById('compositebara').getContext('2d')
-    const ctx3b = document.getElementById('compositebarb').getContext('2d')
-
-    const commonOptions = {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        y: {
-          beginAtZero: true
-        }
-      },
-      plugins: {
-        title: {
-          display: true,
-          font: {
-            size: 24,
-            weight: 'bold'
-          },
-          color: '#6673FD'
+      const chart1 = new Chart(ctx1, {
+        type: 'bar',
+        data: {
+          labels: ['Label 1', 'Label 2', 'Label 3', 'Label 4'],
+          datasets: [
+            {
+              label: 'Units Sold',
+              data: [10, 20, 30, 40],
+              backgroundColor: ['#93C6E0', '#5DA9D4', '#378DC8', '#176FB5'],
+              borderColor: ['#176FB5', '#176FB5', '#176FB5', '#176FB5'],
+              borderWidth: 1
+            }
+          ]
         },
-        tooltip: {
-          enabled: true,
-          callbacks: {
-            label: function (context) {
-              return `${context.dataset.label}: ${context.raw}`
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          },
+          plugins: {
+            title: {
+              display: true,
+              text: 'Units Sold',
+              font: {
+                size: 18,
+                weight: 'bold'
+              },
+              color: '#FFFFFF'
             }
           }
         }
+      })
+
+      const chart2 = new Chart(ctx2, {
+        type: 'bar',
+        data: {
+          labels: ['Label 1', 'Label 2', 'Label 3', 'Label 4'],
+          datasets: [
+            {
+              label: 'Units Sold',
+              data: [10, 20, 30, 40],
+              backgroundColor: ['#93C6E0', '#5DA9D4', '#378DC8', '#176FB5'],
+              borderColor: ['#176FB5', '#176FB5', '#176FB5', '#176FB5'],
+              borderWidth: 1
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          },
+          plugins: {
+            title: {
+              display: true,
+              text: 'Units Sold',
+              font: {
+                size: 18,
+                weight: 'bold'
+              },
+              color: '#FFFFFF'
+            }
+          }
+        }
+      })
+
+      return () => {
+        chart1.destroy()
+        chart2.destroy()
       }
     }
-
-    const compositeBarA = new Chart(ctx3a, {
-      type: 'bar',
-      data: {
-        labels: data.myYearlyGrowthInUnitsSoldList.map(item => item.year),
-        datasets: [
-          {
-            label: 'Units Sold',
-            data: data.myYearlyGrowthInUnitsSoldList.map(item => item.qty),
-            backgroundColor: '#6673FD',
-            borderColor: '#6673FD',
-            borderWidth: 1
-          }
-        ]
-      },
-      options: commonOptions
-    })
-
-    const compositeBarB = new Chart(ctx3b, {
-      type: 'bar',
-      data: {
-        labels: data.myYearlyGrowthInClientsAcquiredList.map(item => item.year),
-        datasets: [
-          {
-            label: 'Clients Acquired',
-            data: data.myYearlyGrowthInClientsAcquiredList.map(item => item.qty),
-            backgroundColor: '#93C6E0',
-            borderColor: '#93C6E0',
-            borderWidth: 1
-          }
-        ]
-      },
-      options: commonOptions
-    })
-
-    return () => {
-      compositeBarA.destroy()
-      compositeBarB.destroy()
-    }
-  }, [data.myYearlyGrowthInUnitsSoldList, data.myYearlyGrowthInClientsAcquiredList])
+  }, [])
 
   const getDataResult = () => {
     getRequest({
@@ -350,24 +295,12 @@ const UserDashboard = () => {
         <Card>
           <SideData className='left-data'>
             <DataHalf>
-              <Span className='big'>Performance</Span>
-              <Span className='small'>{data.performanceVsTeamAverage}</Span>
+              <Span className='big'>Units Sold</Span>
+              <Span className='small'>{data.unitsSold}</Span>
             </DataHalf>
             <DataHalf>
-              <CircleContainer>
-                <Circle>
-                  <CircleIcon>15</CircleIcon>
-                  <Span>Sales</Span>
-                </Circle>
-                <Circle>
-                  <CircleIcon>12</CircleIcon>
-                  <Span>Revenue</Span>
-                </Circle>
-                <Circle>
-                  <CircleIcon>45%</CircleIcon>
-                  <Span>Success</Span>
-                </Circle>
-              </CircleContainer>
+              <Span className='big'>Performance</Span>
+              <Span className='small'>{data.performanceVsTeamAverage}</Span>
             </DataHalf>
           </SideData>
           <Profile>
@@ -379,27 +312,14 @@ const UserDashboard = () => {
           </Profile>
           <SideData className='right-data'>
             <DataHalf>
-              <CompositeBarContainer>
-                <canvas id='compositebara'></canvas>
-                <canvas id='compositebarb'></canvas>
-              </CompositeBarContainer>
+              <ChartContainer>
+                <canvas ref={chart1Ref} id='chart1'></canvas>
+                <canvas ref={chart2Ref} id='chart2'></canvas>
+              </ChartContainer>
             </DataHalf>
             <DataHalf>
-              <Span className='big'>Progress to Target</Span>
-              <ProgressBarsWrapper>
-                <ProgressBarContainer>
-                  <ProgressBarLabel>Individual</ProgressBarLabel>
-                  <ProgressBarBackground>
-                    <ProgressBar style={{ width: `${progress.pctToTarget}%` }} />
-                  </ProgressBarBackground>
-                </ProgressBarContainer>
-                <ProgressBarContainer>
-                  <ProgressBarLabel>Team</ProgressBarLabel>
-                  <ProgressBarBackground>
-                    <ProgressBar style={{ width: `${progress.teamPctToTarget}%` }} />
-                  </ProgressBarBackground>
-                </ProgressBarContainer>
-              </ProgressBarsWrapper>
+              <Span className='big'>New Clients</Span>
+              <Span className='small'>{data.newClientsAcquired}</Span>
             </DataHalf>
           </SideData>
         </Card>
