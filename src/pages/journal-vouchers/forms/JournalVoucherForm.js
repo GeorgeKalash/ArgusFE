@@ -19,11 +19,14 @@ import { useForm } from 'src/hooks/form'
 import useDocumentType from 'src/hooks/documentReferenceBehaviors'
 
 export default function JournalVoucherForm({ labels, access, recordId, general = {} }) {
-  const { documentType, maxAccess, changeDT } = useDocumentType({
+  const {
+    documentType,
+    maxAccess: maxAccess,
+    changeDT
+  } = useDocumentType({
     functionId: SystemFunction.JournalVoucher,
     access: access
   })
-
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({

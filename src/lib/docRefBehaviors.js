@@ -90,7 +90,7 @@ const fetchData = async (getRequest, id, repository) => {
   return await getData(getRequest, extension, parameters)
 }
 
-const documentType = async (getRequest, functionId, maxAccess = '', selectNraId = undefined, hasDT = true) => {
+const documentType = async (getRequest, functionId, maxAccess, selectNraId = undefined, hasDT = true) => {
   const docType = selectNraId === undefined && (await fetchData(getRequest, functionId, 'dtId')) // ufu
   const dtId = docType?.dtId
   let nraId
