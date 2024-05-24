@@ -19,7 +19,7 @@ const GlobalStyle = createGlobalStyle`
     justify-content: center;
     align-items: center;
     font-family: 'Open Sans', Helvetica, sans-serif;
-    background: linear-gradient(to bottom left, #04293C, #04293C);
+    background: linear-gradient(to bottom left, #383838, #383838);
     background-size: 125% 125%;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -38,7 +38,7 @@ const Frame = styled.div`
 const Card = styled.div`
   width: 100%;
   padding: 20px;
-  background: #04293c;
+  background: #383838;
 
   display: flex;
   justify-content: space-between;
@@ -59,7 +59,7 @@ const Avatar = styled.div`
   height: 300px;
   border-radius: 50%;
   cursor: pointer;
-  background: #04293c;
+  background: #383838;
   margin-bottom: 40px;
   .circle {
     position: absolute;
@@ -127,7 +127,7 @@ const SideData = styled.div`
   align-items: center;
   justify-content: space-between;
   padding: 10px;
-  background: #04293c;
+  background: #383838;
   border-radius: 10px;
   margin: 0 10px;
 `
@@ -139,7 +139,7 @@ const DataHalf = styled.div`
   justify-content: center;
   width: 100%;
   padding: 5px;
-  background: #04293c;
+  background: #383838;
   border-radius: 10px;
   border-top: 2px solid #93c6e0;
   flex: 1;
@@ -233,7 +233,8 @@ const UserDashboard = () => {
     unitsSold: 0.0,
     performanceVsTeamAverage: 0.0,
     teamPctToTarget: 0.0,
-    newClientsAcquired: 0
+    newClientsAcquired: 0,
+    name: ''
   })
   const [progress, setProgress] = useState({ pctToTarget: 0, teamPctToTarget: 0 })
   useEffect(() => {
@@ -329,7 +330,8 @@ const UserDashboard = () => {
           unitsSold: res.record.unitsSold || 0.0,
           performanceVsTeamAverage: res.record.performanceVsTeamAverage || 0.0,
           teamPctToTarget: res.record.teamPctToTarget || 0.0,
-          newClientsAcquired: res.record.newClientsAcquired || 0
+          newClientsAcquired: res.record.newClientsAcquired || 0,
+          name: res.record.salesPerson.name || ''
         })
       })
       .catch(error => {
@@ -344,7 +346,9 @@ const UserDashboard = () => {
       <Frame>
         <Card>
           <SideData className='left-data'>
-            <DataHalf>{/* Top content here */}</DataHalf>
+            <DataHalf>
+              <Span>{data.name}</Span>
+            </DataHalf>
             <DataHalf>
               <CircleContainer>
                 <Circle>
