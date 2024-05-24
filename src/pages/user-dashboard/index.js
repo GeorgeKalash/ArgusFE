@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext, useRef } from 'react'
+import { useEffect, useState, useContext } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { DashboardRepository } from 'src/repositories/DashboardRepository'
 import styled, { createGlobalStyle } from 'styled-components'
@@ -19,10 +19,11 @@ const GlobalStyle = createGlobalStyle`
     justify-content: center;
     align-items: center;
     font-family: 'Open Sans', Helvetica, sans-serif;
-    background: linear-gradient(to bottom left, #1E3A5F, #B3CDE8);
+    background: linear-gradient(to bottom left, #04293C, #04293C);
     background-size: 125% 125%;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    color: white; /* Set global text color to white */
   }
 `
 
@@ -36,12 +37,12 @@ const Frame = styled.div`
 
 const Card = styled.div`
   width: 100%;
-  padding: 40px;
-  background: white;
-  box-shadow: 4px 8px 16px 0 #12233e;
+  padding: 20px;
+  background: #04293c;
+
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: stretch; /* Ensure children have the same height */
 `
 
 const Profile = styled.div`
@@ -49,6 +50,7 @@ const Profile = styled.div`
   flex-direction: column;
   align-items: center;
   flex: 0;
+  padding: 5px;
 `
 
 const Avatar = styled.div`
@@ -57,16 +59,14 @@ const Avatar = styled.div`
   height: 300px;
   border-radius: 50%;
   cursor: pointer;
-  background: #b3cde8;
+  background: #04293c;
   margin-bottom: 40px;
-
   .circle {
     position: absolute;
     border-radius: 50%;
     border: 2px solid;
     transition: all 1.5s ease-in-out;
   }
-
   .circle:first-child {
     left: -8px;
     top: -8px;
@@ -74,7 +74,6 @@ const Avatar = styled.div`
     height: 316px;
     border-color: #93c6e0 #93c6e0 #93c6e0 transparent;
   }
-
   .circle:nth-child(2) {
     left: -12px;
     top: -12px;
@@ -82,15 +81,12 @@ const Avatar = styled.div`
     height: 328px;
     border-color: #93c6e0 transparent #93c6e0 #93c6e0;
   }
-
   &:hover .circle:first-child {
     transform: rotate(360deg);
   }
-
   &:hover .circle:nth-child(2) {
     transform: rotate(-360deg);
   }
-
   .pic {
     position: relative;
     width: 100%;
@@ -99,7 +95,6 @@ const Avatar = styled.div`
     background-size: cover;
     background-position: center;
   }
-
   .pic:after {
     content: '';
     position: absolute;
@@ -114,12 +109,11 @@ const Span = styled.span`
   display: block;
   text-transform: capitalize;
   text-align: center;
-
+  color: white; /* Set Span text color to white */
   &.big {
     font-size: 36px;
     font-weight: 600;
   }
-
   &.small {
     font-size: 24px;
     font-weight: 300;
@@ -127,16 +121,15 @@ const Span = styled.span`
 `
 
 const SideData = styled.div`
-  flex: 1;
+  flex: 1; /* Allow it to grow and fill available space */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  padding: 20px;
-  background: #b3cde8;
+  padding: 10px;
+  background: #04293c;
   border-radius: 10px;
-  box-shadow: 2px 4px 8px 0 #12233e;
-  margin: 0 20px;
+  margin: 0 10px;
 `
 
 const DataHalf = styled.div`
@@ -145,10 +138,19 @@ const DataHalf = styled.div`
   align-items: center;
   justify-content: center;
   width: 100%;
-  padding: 10px;
-  background: #e0f2ff;
+  padding: 5px;
+  background: #04293c;
   border-radius: 10px;
-  box-shadow: 1px 2px 4px 0 #12233e;
+  border-top: 2px solid #93c6e0;
+  flex: 1;
+  height: 50%; /* Set specific height */
+  margin: 10px 0; /* Add margin for spacing */
+`
+
+const CircleContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
   margin-bottom: 20px;
 `
 
@@ -171,19 +173,14 @@ const CircleIcon = styled.div`
   font-size: 24px;
   font-weight: bold;
   color: #176fb5;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
 `
 
 const CompositeBarContainer = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: 300px;
+  width: 50%;
   canvas {
-    width: 50% !important;
-    height: 70% !important;
+    width: 100% !important;
+    height: 250px !important;
   }
 `
 
@@ -192,8 +189,36 @@ const ProgressBarsWrapper = styled.div`
   width: 100%;
   justify-content: space-between;
   align-items: center;
+`
+
+const ProgressBarContainer = styled.div`
+  width: 40%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`
+
+const ProgressBarLabel = styled.span`
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: white; /* Set ProgressBarLabel text color to white */
+`
+
+const ProgressBarBackground = styled.div`
   width: 100%;
-  height: 130px; /* Adjust height as needed */
+  height: 20px;
+  background-color: #e0f2ff;
+  border-radius: 10px;
+
+  overflow: hidden;
+  margin: 20px 0;
+`
+
+const ProgressBar = styled.div`
+  height: 100%;
+  background-color: #176fb5;
+  transition: width 1.5s ease-in-out;
 `
 
 const UserDashboard = () => {
@@ -210,19 +235,15 @@ const UserDashboard = () => {
     teamPctToTarget: 0.0,
     newClientsAcquired: 0
   })
-
-  const chart1Ref = useRef(null)
-  const chart2Ref = useRef(null)
-
+  const [progress, setProgress] = useState({ pctToTarget: 0, teamPctToTarget: 0 })
   useEffect(() => {
     getDataResult()
   }, [])
-
   useEffect(() => {
-    if (chart1Ref.current && chart2Ref.current) {
-      const ctx1 = chart1Ref.current.getContext('2d')
-      const ctx2 = chart2Ref.current.getContext('2d')
-
+    if (data.pctToTarget > 0 || data.teamPctToTarget > 0) {
+      setProgress({ pctToTarget: data.pctToTarget, teamPctToTarget: data.teamPctToTarget })
+    }
+  }, [data.pctToTarget, data.teamPctToTarget])
   useEffect(() => {
     const ctx3a = document.getElementById('compositebara').getContext('2d')
     const ctx3b = document.getElementById('compositebarb').getContext('2d')
@@ -267,8 +288,10 @@ const UserDashboard = () => {
             borderColor: '#6673FD',
             borderWidth: 1
           }
-        }
-      })
+        ]
+      },
+      options: commonOptions
+    })
 
     const compositeBarB = new Chart(ctx3b, {
       type: 'bar',
@@ -291,7 +314,7 @@ const UserDashboard = () => {
       compositeBarA.destroy()
       compositeBarB.destroy()
     }
-  }, [])
+  }, [data.myYearlyGrowthInUnitsSoldList, data.myYearlyGrowthInClientsAcquiredList])
 
   const getDataResult = () => {
     getRequest({
@@ -317,27 +340,24 @@ const UserDashboard = () => {
   return (
     <>
       <GlobalStyle />
-      {errorMessage && <div>Error: {errorMessage}</div>}
+      {errorMessage && <div style={{ color: 'white' }}>Error: {errorMessage}</div>}{' '}
       <Frame>
         <Card>
           <SideData className='left-data'>
-            <DataHalf>
-              <Span className='big'>Performance</Span>
-              <Span className='small'>{data.performanceVsTeamAverage}</Span>
-            </DataHalf>
+            <DataHalf>{/* Top content here */}</DataHalf>
             <DataHalf>
               <CircleContainer>
                 <Circle>
-                  <CircleIcon>15</CircleIcon>
-                  <Span>Sales</Span>
+                  <CircleIcon>{data.unitsSold}</CircleIcon>
+                  <Span>Units Sold</Span>
                 </Circle>
                 <Circle>
-                  <CircleIcon>12</CircleIcon>
-                  <Span>Revenue</Span>
+                  <CircleIcon>{data.newClientsAcquired}</CircleIcon>
+                  <Span>New Clients Acquired</Span>
                 </Circle>
                 <Circle>
-                  <CircleIcon>45%</CircleIcon>
-                  <Span>Success</Span>
+                  <CircleIcon>{data.pctToTarget.toFixed(0)}%</CircleIcon>
+                  <Span>Percentage To Target</Span>
                 </Circle>
               </CircleContainer>
             </DataHalf>
@@ -359,16 +379,17 @@ const UserDashboard = () => {
               </CompositeBarContainer>
             </DataHalf>
             <DataHalf>
-              <Span className='big'>Progress to Target</Span>
               <ProgressBarsWrapper>
                 <ProgressBarContainer>
-                  <ProgressBarLabel>Individual</ProgressBarLabel>
+                  <ProgressBarLabel>Percentage To Target:</ProgressBarLabel>
+                  <ProgressBarLabel>{progress.pctToTarget.toFixed(0)}%</ProgressBarLabel>
                   <ProgressBarBackground>
                     <ProgressBar style={{ width: `${progress.pctToTarget}%` }} />
                   </ProgressBarBackground>
                 </ProgressBarContainer>
                 <ProgressBarContainer>
-                  <ProgressBarLabel>Team</ProgressBarLabel>
+                  <ProgressBarLabel>Team Percentage To Target</ProgressBarLabel>
+                  <ProgressBarLabel>{progress.teamPctToTarget.toFixed(0)}%</ProgressBarLabel>
                   <ProgressBarBackground>
                     <ProgressBar style={{ width: `${progress.teamPctToTarget}%` }} />
                   </ProgressBarBackground>
