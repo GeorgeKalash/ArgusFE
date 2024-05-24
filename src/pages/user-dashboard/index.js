@@ -143,6 +143,35 @@ const DataHalf = styled.div`
   margin-bottom: 20px;
 `
 
+const CircleContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 20px;
+`
+
+const Circle = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 33%;
+`
+
+const CircleIcon = styled.div`
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: bold;
+  color: #176fb5;
+  margin-bottom: 10px;
+`
+
 const ChartContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -154,6 +183,42 @@ const ChartContainer = styled.div`
     width: 100% !important;
     height: 100% !important;
   }
+`
+
+const ProgressBarsWrapper = styled.div`
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+`
+
+const ProgressBarContainer = styled.div`
+  width: 48%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`
+
+const ProgressBarLabel = styled.span`
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 5px;
+`
+
+const ProgressBarBackground = styled.div`
+  width: 100%;
+  height: 20px;
+  background-color: #e0f2ff;
+  border-radius: 10px;
+  box-shadow: 1px 2px 4px 0 #12233e;
+  overflow: hidden;
+  margin: 20px 0;
+`
+
+const ProgressBar = styled.div`
+  height: 100%;
+  background-color: #176fb5;
+  transition: width 1.5s ease-in-out;
 `
 
 const UserDashboard = () => {
@@ -170,9 +235,19 @@ const UserDashboard = () => {
     teamPctToTarget: 0.0,
     newClientsAcquired: 0
   })
+
+  const [progress, setProgress] = useState({ pctToTarget: 0, teamPctToTarget: 0 })
+
   useEffect(() => {
     getDataResult()
   }, [])
+
+  useEffect(() => {
+    if (data.pctToTarget > 0 || data.teamPctToTarget > 0) {
+      setProgress({ pctToTarget: data.pctToTarget, teamPctToTarget: data.teamPctToTarget })
+    }
+  }, [data.pctToTarget, data.teamPctToTarget])
+
   useEffect(() => {
     const ctx1 = document.getElementById('chart1').getContext('2d')
     const ctx2 = document.getElementById('chart2').getContext('2d')
@@ -284,12 +359,24 @@ const UserDashboard = () => {
         <Card>
           <SideData className='left-data'>
             <DataHalf>
-              <Span className='big'>Units Sold</Span>
-              <Span className='small'>{data.unitsSold}</Span>
-            </DataHalf>
-            <DataHalf>
               <Span className='big'>Performance</Span>
               <Span className='small'>{data.performanceVsTeamAverage}</Span>
+            </DataHalf>{' '}
+            <DataHalf>
+              <CircleContainer>
+                <Circle>
+                  <CircleIcon>15</CircleIcon>
+                  <Span>Sales</Span>
+                </Circle>
+                <Circle>
+                  <CircleIcon>12</CircleIcon>
+                  <Span>Revenue</Span>
+                </Circle>
+                <Circle>
+                  <CircleIcon>45%</CircleIcon>
+                  <Span>Success</Span>
+                </Circle>
+              </CircleContainer>
             </DataHalf>
           </SideData>
           <Profile>
@@ -307,8 +394,21 @@ const UserDashboard = () => {
               </ChartContainer>
             </DataHalf>
             <DataHalf>
-              <Span className='big'>New Clients</Span>
-              <Span className='small'>{data.newClientsAcquired}</Span>
+              <Span className='big'>Progress to Target</Span>
+              <ProgressBarsWrapper>
+                <ProgressBarContainer>
+                  <ProgressBarLabel>Individual</ProgressBarLabel>
+                  <ProgressBarBackground>
+                    <ProgressBar style={{ width: `${progress.pctToTarget}%` }} />
+                  </ProgressBarBackground>
+                </ProgressBarContainer>
+                <ProgressBarContainer>
+                  <ProgressBarLabel>Team</ProgressBarLabel>
+                  <ProgressBarBackground>
+                    <ProgressBar style={{ width: `${progress.teamPctToTarget}%` }} />
+                  </ProgressBarBackground>
+                </ProgressBarContainer>
+              </ProgressBarsWrapper>
             </DataHalf>
           </SideData>
         </Card>
