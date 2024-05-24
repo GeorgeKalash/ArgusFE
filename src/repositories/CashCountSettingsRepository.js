@@ -1,6 +1,6 @@
 const service = 'CCSET.asmx/'
 
-export const CachCountSettingsRepository = {
+export const CashCountSettingsRepository = {
   CcCashNotes: {
     qry: service + 'qryNOT',
     get: service + 'getNOT',

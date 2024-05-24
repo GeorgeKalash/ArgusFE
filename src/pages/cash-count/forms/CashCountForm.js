@@ -121,8 +121,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
         .of(
           yup.object().shape({
             currencyId: yup.string().required(' '),
-            counted: yup.string().required(' '),
-            system: yup.string().required(' ')
+            counted: yup.string().required(' ')
           })
         )
         .required(' ')

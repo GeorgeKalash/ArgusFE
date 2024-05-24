@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useEffect } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -9,7 +9,8 @@ import { DataGrid } from 'src/components/Shared/DataGrid'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
-import { CachCountSettingsRepository } from 'src/repositories/CachCountSettingsRepository'
+import { CashCountSettingsRepository } from 'src/repositories/CashCountSettingsRepository'
+import { RequestsContext } from 'src/providers/RequestsContext'
 
 export default function CashCountNotesForm({
   labels,
@@ -21,6 +22,8 @@ export default function CashCountNotesForm({
   readOnly,
   window
 }) {
+  const { getRequest } = useContext(RequestsContext)
+
   const { formik } = useForm({
     maxAccess,
     initialValues: {
@@ -34,18 +37,21 @@ export default function CashCountNotesForm({
         .array()
         .of(
           yup.object().shape({
-            note: yup.string().required('currency  is required'),
-            qty: yup.string().required('Country  is required')
+            note: yup.string().required('currency  is required')
           })
         )
         .required('Operations array is required')
     }),
     onSubmit: async obj => {
-      const currencyNotes = obj.currencyNotes.map(({ id, seqNo, cashCountId, ...rest }) => ({
-        seqNo: row.id,
-        cashCountId: row?.cashCountId < 1 ? 0 : row?.cashCountId,
-        ...rest
-      }))
+      const currencyNotes = obj.currencyNotes.map(
+        ({ id, seqNo, cashCountId, qty, ...rest }) =>
+          qty && {
+            seqNo: row.id,
+            qty,
+            cashCountId: row?.cashCountId < 1 ? 0 : row?.cashCountId,
+            ...rest
+          }
+      )
       update({ newRow: { ...row, currencyNotes } })
 
       const counted = obj.currencyNotes.reduce((acc, { subTotal }) => {
@@ -57,19 +63,51 @@ export default function CashCountNotesForm({
     }
   })
   useEffect(() => {
-    row?.id &&
-      row?.currencyNotes?.length > 0 &&
-      formik.setFieldValue(
-        'currencyNotes',
-        row.currencyNotes?.map(({ id, qty, note, ...rest }, index) => ({
-          id: index + 1,
-          qty,
-          note,
-          subTotal: qty * note,
-          ...rest
-        }))
-      )
+    row?.id && getGridData()
   }, [recordId])
+
+  const getGridData = async () => {
+    const parameters = `_currencyId=` + row.currencyId
+
+    const { list } = await getRequest({
+      extension: CashCountSettingsRepository.CcCashNotes.qry,
+      parameters: parameters
+    })
+
+    const currencyNotes = row.currencyNotes?.map(({ id, qty, note, ...rest }, index) => ({
+      id: index + 1,
+      qty,
+      note,
+      subTotal: qty * note,
+      ...rest
+    }))
+
+    const notes = list?.map(({ ...rest }, index) => ({
+      id: index + 1,
+      ...rest
+    }))
+
+    const finalList = notes.map(x => {
+      const n = {
+        id: x.id,
+        note: x.note,
+        seqNo: null,
+        qty: '',
+        subTotal: 0
+      }
+
+      const currencyNote = currencyNotes?.find(y => n.note === y.note)
+
+      if (currencyNote) {
+        n.qty = currencyNote.qty
+        n.seqNo = currencyNote.seqNo
+        n.subTotal = currencyNote.subTotal
+      }
+
+      return n
+    })
+    formik.setFieldValue('currencyNotes', finalList)
+  }
 
   const total = formik.values?.currencyNotes?.reduce((acc, { subTotal }) => {
     return acc + (subTotal || 0)
@@ -91,28 +129,11 @@ export default function CashCountNotesForm({
             error={formik.errors.currencyNotes}
             columns={[
               {
-                component: 'resourcecombobox',
+                component: 'numberfield',
                 label: labels.note,
                 name: 'note',
                 props: {
-                  endpointId: CachCountSettingsRepository.CcCashNotes.qry,
-                  parameters: `_currencyId=` + row.currencyId,
-                  valueField: 'note',
-                  displayField: 'note',
-                  mapping: [{ from: 'note', to: 'note' }],
-                  columnsInDropDown: [
-                    { key: 'note', value: 'Note' },
-                    { key: 'currencyRef', value: 'Currency' }
-                  ],
-                  displayFieldWidth: 2,
                   readOnly: readOnly
-                },
-                async onChange({ row: { update, newRow } }) {
-                  const qty = newRow?.qty || 0
-                  const note = newRow?.note || 0
-                  update({
-                    subTotal: note * qty
-                  })
                 }
               },
 
