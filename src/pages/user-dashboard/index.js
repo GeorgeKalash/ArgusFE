@@ -173,7 +173,7 @@ const CircleIcon = styled.div`
   margin-bottom: 10px;
 `
 
-const ChartContainer = styled.div`
+const CompositeBarContainer = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -183,19 +183,6 @@ const ChartContainer = styled.div`
   canvas {
     width: 50% !important;
     height: 70% !important;
-  }
-`
-
-const CompositeBarContainer = styled.div`
-  width: 100%;
-  padding: 20px;
-  background: #e0f2ff;
-  border-radius: 10px;
-  box-shadow: 1px 2px 4px 0 #12233e;
-  margin-bottom: 20px;
-  canvas {
-    width: 100% !important;
-    height: 200px !important;
   }
 `
 
@@ -263,8 +250,8 @@ const UserDashboard = () => {
   }, [data.pctToTarget, data.teamPctToTarget])
 
   useEffect(() => {
-    const ctx1 = document.getElementById('chart1').getContext('2d')
-    const ctx2 = document.getElementById('chart2').getContext('2d')
+    const ctx3a = document.getElementById('compositebara').getContext('2d')
+    const ctx3b = document.getElementById('compositebarb').getContext('2d')
 
     const commonOptions = {
       responsive: true,
@@ -293,39 +280,6 @@ const UserDashboard = () => {
         }
       }
     }
-
-    const createChart = (ctx, label, data) => {
-      return new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: data.map(item => item.year),
-          datasets: [
-            {
-              label,
-              data: data.map(item => item.qty),
-              backgroundColor: '#6673FD',
-              borderColor: '#6673FD',
-              borderWidth: 1
-            }
-          ]
-        },
-        options: {
-          ...commonOptions,
-          plugins: {
-            ...commonOptions.plugins,
-            title: {
-              ...commonOptions.plugins.title,
-              text: label
-            }
-          }
-        }
-      })
-    }
-
-    const chart1 = createChart(ctx1, 'Units Sold', data.myYearlyGrowthInUnitsSoldList)
-    const chart2 = createChart(ctx2, 'Clients Acquired', data.myYearlyGrowthInClientsAcquiredList)
-    const ctx3a = document.getElementById('compositebara').getContext('2d')
-    const ctx3b = document.getElementById('compositebarb').getContext('2d')
 
     const compositeBarA = new Chart(ctx3a, {
       type: 'bar',
@@ -362,10 +316,8 @@ const UserDashboard = () => {
     })
 
     return () => {
-      chart1.destroy()
-      chart2.destroy()
-      compositebara.destroy()
-      compositebarb.destroy()
+      compositeBarA.destroy()
+      compositeBarB.destroy()
     }
   }, [data.myYearlyGrowthInUnitsSoldList, data.myYearlyGrowthInClientsAcquiredList])
 
@@ -400,7 +352,7 @@ const UserDashboard = () => {
             <DataHalf>
               <Span className='big'>Performance</Span>
               <Span className='small'>{data.performanceVsTeamAverage}</Span>
-            </DataHalf>{' '}
+            </DataHalf>
             <DataHalf>
               <CircleContainer>
                 <Circle>
@@ -431,12 +383,7 @@ const UserDashboard = () => {
                 <canvas id='compositebara'></canvas>
                 <canvas id='compositebarb'></canvas>
               </CompositeBarContainer>
-              <ChartContainer>
-                <canvas id='chart1'></canvas>
-                <canvas id='chart2'></canvas>
-              </ChartContainer>
             </DataHalf>
-
             <DataHalf>
               <Span className='big'>Progress to Target</Span>
               <ProgressBarsWrapper>
