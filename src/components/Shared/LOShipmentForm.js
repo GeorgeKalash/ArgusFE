@@ -11,7 +11,7 @@ import { useForm } from 'src/hooks/form'
 import { LogisticsRepository } from 'src/repositories/LogisticsRepository'
 import * as yup from 'yup'
 import { useResourceQuery } from 'src/hooks/resource'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { DataSets } from 'src/resources/DataSets'
 import { getFormattedNumber } from 'src/lib/numberField-helper'
@@ -20,6 +20,7 @@ import FieldSet from './FieldSet'
 
 export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
+  const [seqCounter, setSeqCounter] = useState(1)
 
   const { formik } = useForm({
     initialValues: {
@@ -126,7 +127,10 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
           ...item,
           id: index + 1
         }))
-
+        if (packageReferences.length > 0) {
+          const lastSeqNo = packageReferences[packageReferences.length - 1].seqNo
+          setSeqCounter(lastSeqNo ? lastSeqNo + 1 : 1)
+        }
         formik.setValues({
           ...res.record.header,
           typeGrid: packages,
@@ -136,11 +140,25 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
     })()
   }, [])
 
+  const handleDataGridChange = newRows => {
+    const updatedRows = newRows.map(row => {
+      console.log('check row ', row)
+      if (!row.seqNo && row.seqNo !== 0) {
+        row.seqNo = seqCounter
+        setSeqCounter(seqCounter + 1)
+      }
+
+      return row
+    })
+    console.log('check updatedRows ', updatedRows)
+    formik.setFieldValue('serialGrid', updatedRows)
+  }
+
   return (
     <FormShell resourceId={ResourceIds.LOShipments} form={formik} editMode={true} isCleared={false} isInfo={false}>
       <VertLayout>
         <Fixed>
-          <Grid container spacing={2}>
+          <Grid container direction='row' wrap='nowrap' spacing={2}>
             <Grid item xs={6}>
               <ResourceComboBox
                 endpointId={LogisticsRepository.LoCarrier.qry}
@@ -179,9 +197,9 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
           </Grid>
         </Fixed>
         <Grow>
-          <Grid container sx={{ flex: 1, flexDirection: 'row' }}>
+          <Grid container xs={12} direction='row' wrap='nowrap' sx={{ flex: 1, flexDirection: 'row' }}>
             <FieldSet sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-              <Grid container sx={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+              <Grid container direction='row' wrap='nowrap' sx={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
                 <Grow>
                   <DataGrid
                     onChange={value => formik.setFieldValue('typeGrid', value)}
@@ -227,7 +245,7 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
                   />
                 </Grow>
                 <Fixed>
-                  <Grid container sx={{ pt: 5, justifyContent: 'flex-end' }}>
+                  <Grid container direction='row' wrap='nowrap' sx={{ pt: 5, justifyContent: 'flex-end' }}>
                     <Grid item xs={3}>
                       <CustomTextField
                         name='totalQty'
@@ -250,17 +268,16 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
                 </Fixed>
               </Grid>
             </FieldSet>
-            <Grid item xs={4} sx={{ display: 'flex', flex: 1, pl: 10 }}>
-              <FieldSet sx={{ flex: 1 }}>
+            <Grid item xs={4} sx={{ display: 'flex', flex: 1, pl: 7 }}>
+              <FieldSet xs={4} sx={{ flex: 1 }}>
                 <Grow>
                   <DataGrid
-                    onChange={value => formik.setFieldValue('serialGrid', value)}
+                    onChange={value => handleDataGridChange(value)}
                     value={formik.values.serialGrid}
                     error={formik.errors.serialGrid}
                     maxAccess={maxAccess}
                     allowAddNewLine={!editMode}
-                    allowDelete={!editMode}
-                    autoIncrement={true}
+                    allowDelete={false}
                     columns={[
                       {
                         component: 'numberfield',
