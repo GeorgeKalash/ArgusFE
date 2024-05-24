@@ -157,6 +157,19 @@ const ChartContainer = styled.div`
   }
 `
 
+const CompositeBarContainer = styled.div`
+  width: 100%;
+  padding: 20px;
+  background: #e0f2ff;
+  border-radius: 10px;
+  box-shadow: 1px 2px 4px 0 #12233e;
+  margin-bottom: 20px;
+  canvas {
+    width: 100% !important;
+    height: 200px !important;
+  }
+`
+
 const UserDashboard = () => {
   const [errorMessage, setErrorMessage] = useState(null)
   const { getRequest } = useContext(RequestsContext)
@@ -171,14 +184,76 @@ const UserDashboard = () => {
     teamPctToTarget: 0.0,
     newClientsAcquired: 0
   })
+
   useEffect(() => {
     getDataResult()
   }, [])
+
   useEffect(() => {
     const ctx1 = document.getElementById('chart1').getContext('2d')
     const ctx2 = document.getElementById('chart2').getContext('2d')
+    const ctx3 = document.getElementById('composite-bar').getContext('2d')
 
-    const chart1 = new Chart(ctx1, {
+    const commonOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      },
+      plugins: {
+        title: {
+          display: true,
+          font: {
+            size: 24,
+            weight: 'bold'
+          },
+          color: '#6673FD'
+        },
+        tooltip: {
+          enabled: true,
+          callbacks: {
+            label: function (context) {
+              return `${context.dataset.label}: ${context.raw}`
+            }
+          }
+        }
+      }
+    }
+
+    const createChart = (ctx, label, data) => {
+      return new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: data.map(item => item.year),
+          datasets: [
+            {
+              label,
+              data: data.map(item => item.qty),
+              backgroundColor: '#6673FD',
+              borderColor: '#6673FD',
+              borderWidth: 1
+            }
+          ]
+        },
+        options: {
+          ...commonOptions,
+          plugins: {
+            ...commonOptions.plugins,
+            title: {
+              ...commonOptions.plugins.title,
+              text: label
+            }
+          }
+        }
+      })
+    }
+
+    const chart1 = createChart(ctx1, 'Units Sold', data.myYearlyGrowthInUnitsSoldList)
+    const chart2 = createChart(ctx2, 'Clients Acquired', data.myYearlyGrowthInClientsAcquiredList)
+
+    const compositeBar = new Chart(ctx3, {
       type: 'bar',
       data: {
         labels: data.myYearlyGrowthInUnitsSoldList.map(item => item.year),
@@ -186,73 +261,26 @@ const UserDashboard = () => {
           {
             label: 'Units Sold',
             data: data.myYearlyGrowthInUnitsSoldList.map(item => item.qty),
-            backgroundColor: ['#93C6E0', '#5DA9D4', '#378DC8', '#176FB5'],
-            borderColor: ['#176FB5', '#176FB5', '#176FB5', '#176FB5'],
+            backgroundColor: '#6673FD',
+            borderColor: '#6673FD',
             borderWidth: 1
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          y: {
-            beginAtZero: true
-          }
-        },
-        plugins: {
-          title: {
-            display: true,
-            text: 'Units Sold',
-            font: {
-              size: 24,
-              weight: 'bold'
-            },
-            color: '#176FB5'
-          }
-        }
-      }
-    })
-
-    const chart2 = new Chart(ctx2, {
-      type: 'bar',
-      data: {
-        labels: data.myYearlyGrowthInClientsAcquiredList.map(item => item.year),
-        datasets: [
+          },
           {
             label: 'Clients Acquired',
             data: data.myYearlyGrowthInClientsAcquiredList.map(item => item.qty),
-            backgroundColor: ['#93C6E0', '#5DA9D4', '#378DC8', '#176FB5'],
-            borderColor: ['#176FB5', '#176FB5', '#176FB5', '#176FB5'],
+            backgroundColor: '#93C6E0',
+            borderColor: '#93C6E0',
             borderWidth: 1
           }
         ]
       },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          y: {
-            beginAtZero: true
-          }
-        },
-        plugins: {
-          title: {
-            display: true,
-            text: 'Clients Acquired',
-            font: {
-              size: 24,
-              weight: 'bold'
-            },
-            color: '#176FB5'
-          }
-        }
-      }
+      options: commonOptions
     })
 
     return () => {
       chart1.destroy()
       chart2.destroy()
+      compositeBar.destroy()
     }
   }, [data.myYearlyGrowthInUnitsSoldList, data.myYearlyGrowthInClientsAcquiredList])
 
@@ -290,7 +318,7 @@ const UserDashboard = () => {
             </DataHalf>
             <DataHalf>
               <Span className='big'>Performance</Span>
-              <Span className='small'>{data.performanceVsTeamAverage}</Span>
+              <Span className='small'>{data.performanceVsTeamAverage.toFixed(2)}</Span>
             </DataHalf>
           </SideData>
           <Profile>
@@ -302,10 +330,13 @@ const UserDashboard = () => {
           </Profile>
           <SideData className='right-data'>
             <DataHalf>
-              <ChartContainer>
+              <CompositeBarContainer>
+                <canvas id='composite-bar'></canvas>
+              </CompositeBarContainer>
+              <CompositeBarContainer>
                 <canvas id='chart1'></canvas>
                 <canvas id='chart2'></canvas>
-              </ChartContainer>
+              </CompositeBarContainer>
             </DataHalf>
             <DataHalf>
               <Span className='big'>New Clients</Span>
