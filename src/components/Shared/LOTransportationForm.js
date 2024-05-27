@@ -14,6 +14,7 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { DataSets } from 'src/resources/DataSets'
 import toast from 'react-hot-toast'
 import CustomNumberField from '../Inputs/CustomNumberField'
+import { SystemRepository } from 'src/repositories/SystemRepository'
 
 export const LOTransportationForm = ({ recordId, functionId, editMode }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -30,7 +31,10 @@ export const LOTransportationForm = ({ recordId, functionId, editMode }) => {
       customsNo: '',
       doNo: '',
       grossWgt: '',
-      netWgt: ''
+      netWgt: '',
+      policyNo: '',
+      tripNo: '',
+      arrivalCountryId: ''
     },
     enableReinitialize: true,
     validateOnChange: true,
@@ -41,6 +45,9 @@ export const LOTransportationForm = ({ recordId, functionId, editMode }) => {
       departurePort: yup.string().required(),
       arrivalPort: yup.string().required(),
       customsNo: yup.string().required(),
+      policyNo: yup.string().required(),
+      tripNo: yup.string().required(),
+      arrivalCountryId: yup.string().required(),
       doNo: yup.string().required(),
       grossWgt: yup.string().required(),
       netWgt: yup.string().required()
@@ -75,8 +82,8 @@ export const LOTransportationForm = ({ recordId, functionId, editMode }) => {
     <FormShell resourceId={ResourceIds.LOTransportation} form={formik} editMode={true} isCleared={false} isInfo={false}>
       <VertLayout>
         <Grow>
-          <Grid container xs={12}>
-            <Grid item xs={12}>
+          <Grid container spacing={2}>
+            <Grid item xs={6}>
               <ResourceComboBox
                 datasetId={DataSets.DELIVERY_TYPE}
                 name='deliveryType'
@@ -93,7 +100,7 @@ export const LOTransportationForm = ({ recordId, functionId, editMode }) => {
                 error={formik.touched.deliveryType && Boolean(formik.errors.deliveryType)}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={6}>
               <ResourceComboBox
                 datasetId={DataSets.TRANSPORTER}
                 name='transporter'
@@ -110,7 +117,7 @@ export const LOTransportationForm = ({ recordId, functionId, editMode }) => {
                 error={formik.touched.transporter && Boolean(formik.errors.transporter)}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={6}>
               <ResourceComboBox
                 datasetId={DataSets.LO_TYPE}
                 name='type'
@@ -127,7 +134,7 @@ export const LOTransportationForm = ({ recordId, functionId, editMode }) => {
                 error={formik.touched.type && Boolean(formik.errors.type)}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={6}>
               <ResourceComboBox
                 datasetId={DataSets.PORT}
                 name='departurePort'
@@ -144,7 +151,7 @@ export const LOTransportationForm = ({ recordId, functionId, editMode }) => {
                 error={formik.touched.departurePort && Boolean(formik.errors.departurePort)}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={6}>
               <ResourceComboBox
                 datasetId={DataSets.PORT}
                 name='arrivalPort'
@@ -161,7 +168,35 @@ export const LOTransportationForm = ({ recordId, functionId, editMode }) => {
                 error={formik.touched.arrivalPort && Boolean(formik.errors.arrivalPort)}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={6}>
+              <CustomNumberField
+                name='policyNo'
+                label={labels.policyNo}
+                value={formik.values.policyNo}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('policyNo', '')}
+                maxAccess={maxAccess}
+                maxLength='20'
+                required
+                readOnly={editMode}
+                error={formik.touched.policyNo && Boolean(formik.errors.policyNo)}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <CustomNumberField
+                name='tripNo'
+                label={labels.tripNo}
+                value={formik.values.tripNo}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('tripNo', '')}
+                maxAccess={maxAccess}
+                maxLength='20'
+                required
+                readOnly={editMode}
+                error={formik.touched.tripNo && Boolean(formik.errors.tripNo)}
+              />
+            </Grid>
+            <Grid item xs={6}>
               <CustomTextField
                 name='customsNo'
                 label={labels.customsNo}
@@ -175,7 +210,7 @@ export const LOTransportationForm = ({ recordId, functionId, editMode }) => {
                 error={formik.touched.customsNo && Boolean(formik.errors.customsNo)}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={6}>
               <CustomTextField
                 name='doNo'
                 label={labels.doNo}
@@ -189,7 +224,7 @@ export const LOTransportationForm = ({ recordId, functionId, editMode }) => {
                 error={formik.touched.doNo && Boolean(formik.errors.doNo)}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={6}>
               <CustomNumberField
                 required
                 name='netWgt'
@@ -200,7 +235,7 @@ export const LOTransportationForm = ({ recordId, functionId, editMode }) => {
                 error={formik.touched.netWgt && Boolean(formik.errors.netWgt)}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={6}>
               <CustomNumberField
                 name='grossWgt'
                 required
@@ -209,6 +244,27 @@ export const LOTransportationForm = ({ recordId, functionId, editMode }) => {
                 label={labels.netGross}
                 value={formik.values.grossWgt}
                 error={formik.touched.grossWgt && Boolean(formik.errors.grossWgt)}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <ResourceComboBox
+                endpointId={SystemRepository.Country.qry}
+                name='arrivalCountryId'
+                label={labels.country}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                valueField='recordId'
+                displayField='name'
+                required
+                readOnly={editMode}
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('arrivalCountryId', newValue?.recordId)
+                }}
+                error={formik.touched.arrivalCountryId && Boolean(formik.errors.arrivalCountryId)}
               />
             </Grid>
           </Grid>
