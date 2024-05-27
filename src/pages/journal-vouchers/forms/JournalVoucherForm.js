@@ -19,11 +19,7 @@ import { useForm } from 'src/hooks/form'
 import useDocumentType from 'src/hooks/documentReferenceBehaviors'
 
 export default function JournalVoucherForm({ labels, access, recordId, general = {} }) {
-  const {
-    documentType,
-    maxAccess: maxAccess,
-    changeDT
-  } = useDocumentType({
+  const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.JournalVoucher,
     access: access
   })
@@ -125,6 +121,7 @@ export default function JournalVoucherForm({ labels, access, recordId, general =
             filter={!editMode ? item => item.activeStatus === 1 : undefined}
             name='dtId'
             label={labels.documentType}
+            readOnly={editMode}
             valueField='recordId'
             displayField='name'
             values={formik.values}
