@@ -38,7 +38,7 @@ const mergeWithMaxAccess = (maxAccess, reference, dcTypeRequired) => {
         accessLevel: reference?.mandatory && DISABLED
       })
     } else {
-      maxAccess.record.controls = maxAccess.record.controls.filter(obj => obj.controlId != 'reference')
+      controls = maxAccess.record.controls.filter(obj => obj.controlId != 'reference')
     }
   }
 
