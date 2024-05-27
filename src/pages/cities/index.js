@@ -32,7 +32,7 @@ const City = () => {
     access,
     search,
     clear,
-
+    refetch,
     paginationParameters
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -122,6 +122,7 @@ const City = () => {
           onSearchClear={clear}
           labels={_labels}
           inputSearch={true}
+          refetch={refetch}
         />
       </Fixed>
       <Grow>
