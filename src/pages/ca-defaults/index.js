@@ -81,7 +81,7 @@ const CADefault = () => {
               onClear={() => formik.setFieldValue('min_catfr_approval', '')}
               name='min_catfr_approval'
               onChange={formik.handleChange}
-              label={_labels.netWgt}
+              label={_labels.mata}
               value={formik.values.min_catfr_approval}
               error={formik.touched.min_catfr_approval && Boolean(formik.errors.min_catfr_approval)}
             />
