@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Grid } from '@mui/material'
+import { Button, Grid } from '@mui/material'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
@@ -312,6 +312,24 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
     }
   ]
 
+  const getGridData = async () => {
+    console.log('test')
+    try {
+      const res = await getRequest({
+        extension: CashBankRepository.AccountBalance.qry,
+        parameters: `_cashAccountId=${formik.values.fromCashAccountId}`
+      })
+      formik.setFieldValue(
+        'transfers',
+        res.list.map(({ id, ...rest }, index) => ({
+          id: index + 1,
+
+          ...rest
+        }))
+      )
+    } catch (error) {}
+  }
+
   return (
     <FormShell
       resourceId={ResourceIds.CashTransfer}
@@ -325,7 +343,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
       <VertLayout>
         <Fixed>
           <Grid container>
-            <Grid container rowGap={2} xs={6}>
+            <Grid container rowGap={2} xs={6} spacing={2}>
               <Grid item xs={12}>
                 <CustomTextField
                   name='reference'
@@ -385,7 +403,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
                 />
               </Grid>
             </Grid>
-            <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
+            <Grid container rowGap={2} xs={6} sx={{ px: 2 }} spacing={2}>
               <Grid item xs={12}>
                 <CustomDatePicker
                   name='date'
@@ -454,6 +472,24 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
                   error={formik.touched.toCashAccountId && Boolean(formik.errors.toCashAccountId)}
                 />
               </Grid>
+            </Grid>
+            <Grid xs={12} spacing={2}>
+              <Button
+                sx={{
+                  backgroundColor: '#09235C',
+                  '&:hover': {
+                    backgroundColor: '#09235C',
+                    opacity: 0.8
+                  },
+                  width: '50px !important',
+                  height: '35px',
+                  objectFit: 'contain',
+                  minWidth: '30px !important'
+                }}
+                onClick={getGridData}
+              >
+                <img src={`/images/buttonsIcons/Bulk.png`} alt={1} />
+              </Button>
             </Grid>
           </Grid>
         </Fixed>
