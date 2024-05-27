@@ -140,6 +140,12 @@ export const Buttons = [
     main: false
   },
   {
+    key: 'Rebuild',
+    color: '#231F20',
+    image: 'rebuild.png',
+    main: false
+  },
+  {
     key: 'Clear',
     condition: 'isCleared',
     onClick: 'onClear',

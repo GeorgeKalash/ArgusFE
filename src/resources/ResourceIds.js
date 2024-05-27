@@ -131,5 +131,6 @@ export const ResourceIds = {
   CashNote: 37101,
   LOShipments: 40301,
   LOTransportation: 40302,
-  AccountBalance: 33107
+  AccountBalance: 33107,
+  CARebuildAccountBalance: 33501
 }
