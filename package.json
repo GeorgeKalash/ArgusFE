@@ -80,6 +80,7 @@
     "react-hook-form": "7.43.9",
     "react-hot-toast": "2.4.1",
     "react-i18next": "12.2.2",
+    "react-input-mask": "^2.0.4",
     "react-number-format": "^5.3.4",
     "react-perfect-scrollbar": "1.5.8",
     "react-popper": "2.3.0",
