@@ -7,6 +7,9 @@ import { ResourceLookup } from './ResourceLookup'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useResourceQuery } from 'src/hooks/resource'
+import { Fixed } from './Layouts/Fixed'
+import { Grow } from './Layouts/Grow'
+import { VertLayout } from './Layouts/VertLayout'
 
 const AccountBalance = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -66,9 +69,9 @@ const AccountBalance = () => {
   ]
 
   return (
-    <div style={{ padding: '10px' }}>
-      <Grid container spacing={2} sx={{ paddingBottom: '25px' }}>
-        <Grid item xs={5}>
+    <VertLayout>
+      <Fixed>
+        <Grid item xs={3} width={'50%'} paddingLeft={'0.5rem'} marginTop={'1rem'} marginBottom={'1rem'}>
           <ResourceLookup
             endpointId={CashBankRepository.CashAccount.snapshot}
             parameters={{
@@ -92,17 +95,18 @@ const AccountBalance = () => {
             maxAccess={access}
           />
         </Grid>
-      </Grid>
-      <Table
-        height={440}
-        columns={columns}
-        gridData={gridData}
-        rowId={['currencyId']}
-        isLoading={!gridData}
-        maxAccess={access}
-        pagination={false}
-      />
-    </div>
+      </Fixed>
+      <Grow>
+        <Table
+          columns={columns}
+          gridData={gridData}
+          rowId={['currencyId']}
+          isLoading={!gridData}
+          maxAccess={access}
+          pagination={false}
+        />
+      </Grow>
+    </VertLayout>
   )
 }
 
