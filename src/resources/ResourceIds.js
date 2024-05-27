@@ -121,6 +121,7 @@ export const ResourceIds = {
   InstantCash: 36306,
   GlobalAuthorization: 23105,
   InterfaceMap: 36120,
+  FiOpeningBalances: 31301,
   SiteGroups: 41113,
   PriceLevels: 51101,
   CommissionSchedule: 51118,
