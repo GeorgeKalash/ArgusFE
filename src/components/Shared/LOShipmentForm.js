@@ -21,6 +21,12 @@ import FieldSet from './FieldSet'
 export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const [seqCounter, setSeqCounter] = useState(1)
+  const [selectedRowId, setSelectedRowId] = useState(null)
+  const [enableSerials, setEnableSerials] = useState(true)
+
+  const [store, setStore] = useState([
+    { typeId: '', packageSeqNo: '', function: '', recordId: '', seqNo: 1, id: 1, reference: '' }
+  ])
 
   const { formik } = useForm({
     initialValues: {
@@ -37,7 +43,9 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
           packageType: '',
           qty: '',
           amount: '',
-          packageReferences: [{ id: 1, recordId: '', functionId: '', seqNo: 1, reference: '' }]
+          packageReferences: [
+            { id: 1, typeId: '', packageSeqNo: '', recordId: '', functionId: '', seqNo: 1, reference: '' }
+          ]
         }
       ]
     },
@@ -64,7 +72,6 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
               .required()
           })
         )
-
         .required()
     }),
     onSubmit: async values => {
@@ -74,11 +81,12 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
           seqNo: index + 1,
           recordId: recordId,
           functionId: functionId,
-          packageReferences: packageDetail.packageReferences.map(packageRefDetail => ({
-            ...packageRefDetail,
-            recordId: recordId,
-            functionId: functionId
-          }))
+          packageReferences:
+            packageDetail.packageReferences?.map(packageRefDetail => ({
+              ...packageRefDetail,
+              recordId: recordId,
+              functionId: functionId
+            })) || []
         }
       })
 
@@ -101,7 +109,7 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
     }
   })
 
-  const { labels: labels, maxAccess } = useResourceQuery({
+  const { labels, maxAccess } = useResourceQuery({
     datasetId: ResourceIds.LOShipments
   })
 
@@ -116,7 +124,88 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
 
     return amount + amountValue
   }, 0)
-  function loadSerialsGrid() {}
+
+  function loadSerialsGrid(row) {
+    setSelectedRowId(row.id)
+    setEnableSerials(false)
+
+    if (row.seqNo) {
+      let newList = []
+      for (let i = 0; i < store.length; i++) {
+        if (store[i].typeId === row.packageType) {
+          newList.push({
+            ...store[i],
+            packageSeqNo: store[i].seqNo
+          })
+        }
+      }
+      setSeqCounter(newList[newList.length - 1].seqNo + 1)
+      formik.setValues(prevValues => ({
+        ...prevValues,
+        packages: prevValues.packages.map(packageItem => {
+          if (packageItem.packageType === newList[0].typeId) {
+            return {
+              ...packageItem,
+              packageReferences: newList
+            }
+          } else {
+            return packageItem
+          }
+        })
+      }))
+    } else {
+      formik.setValues(prevValues => ({
+        ...prevValues,
+        packages: prevValues.packages.map(packageItem => {
+          if (packageItem.id === row.id) {
+            return {
+              ...packageItem,
+              packageReferences: [{ id: 1, seqNo: 1, reference: '', packageSeqNo: packageItem.seqNo }]
+            }
+          } else {
+            return packageItem
+          }
+        })
+      }))
+    }
+  }
+
+  const handleSerialsGridChange = newRows => {
+    const updatedRows = newRows.map(row => {
+      if (!row.seqNo && row.seqNo !== 0) {
+        row.seqNo = seqCounter
+        setSeqCounter(seqCounter + 1)
+      }
+
+      return row
+    })
+    formik.setValues(prevValues => ({
+      ...prevValues,
+      packages: prevValues.packages.map(packageItem => {
+        if (packageItem.id === newRows[0].id) {
+          console.log('check package ', packageItem)
+          console.log('check package 2 ', newRows[0])
+
+          return {
+            ...packageItem,
+            packageReferences: updatedRows
+          }
+        } else {
+          return packageItem
+        }
+      })
+    }))
+  }
+
+  const handlePackageGridChange = newRows => {
+    newRows.map(row => {
+      if (!!row.seqNo) {
+        formik.setFieldValue('packages[1].packageReferences', [{ id: 1, seqNo: 1 }])
+      }
+    })
+    formik.setFieldValue('packages', newRows)
+  }
+
   useEffect(() => {
     ;(async function () {
       if (recordId && functionId) {
@@ -125,43 +214,44 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
           parameters: `_recordId=${recordId}&_functionId=${functionId}`
         })
 
-        /*const packages = res.record.packages.map((item, index) => ({
+        const packages = res.record.packages.map((item, index) => ({
           ...item,
           id: index + 1
         }))
 
-        const packageReferences = res.record.packages.packageReferences.map((item, index) => ({
-          ...item,
-          id: index + 1
-        }))
-        if (packageReferences.length > 0) {
-          const lastSeqNo = packageReferences[packageReferences.length - 1].seqNo
+        let packageReferencesList = []
+        for (let i = 0; i < res.record.packages.length; i++) {
+          const modifiedPackageReferences = res.record.packages[i]?.packageReferences.map((data, index) => {
+            return {
+              ...data,
+              typeId: res.record.packages[i].packageType,
+              packageSeqNo: res.record.packages[i].seqNo,
+              id: index + 1
+            }
+          })
+          if (modifiedPackageReferences) {
+            packageReferencesList.push(...modifiedPackageReferences)
+          }
+        }
+        setStore(packageReferencesList || [{ id: 1, seqNo: 1 }])
+
+        if (packageReferencesList?.length > 0) {
+          const lastSeqNo = packageReferencesList[packageReferencesList.length - 1].seqNo
           setSeqCounter(lastSeqNo ? lastSeqNo + 1 : 1)
         }
+
         formik.setValues({
           ...res.record.header,
           packages: packages.map(pkg => ({
             ...pkg,
-            packageReferences: packageReferences
+            packageReferences: [{ id: 1, seqNo: 1 }]
           }))
-        })*/
+        })
       }
     })()
   }, [])
-  console.log('check formik ', formik.values)
 
-  const handleDataGridChange = newRows => {
-    const updatedRows = newRows.map(row => {
-      console.log('check row ', row)
-      if (!row.seqNo && row.seqNo !== 0) {
-        row.seqNo = seqCounter
-        setSeqCounter(seqCounter + 1)
-      }
-
-      return row
-    })
-    formik.setFieldValue('packageReferences', updatedRows)
-  }
+  //console.log('formik check ', formik.values)
 
   return (
     <FormShell resourceId={ResourceIds.LOShipments} form={formik} editMode={true} isCleared={false} isInfo={false}>
@@ -206,18 +296,18 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
           </Grid>
         </Fixed>
         <Grow>
-          <Grid container xs={12} direction='row' wrap='nowrap' sx={{ flex: 1, flexDirection: 'row' }}>
+          <Grid container direction='row' wrap='nowrap' sx={{ flex: 1, flexDirection: 'row' }}>
             <FieldSet sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
               <Grid container direction='row' wrap='nowrap' sx={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
                 <Grow>
                   <DataGrid
-                    onChange={value => formik.setFieldValue('packages', value)}
+                    onChange={value => handlePackageGridChange(value)}
                     value={formik.values.packages}
                     error={formik.errors.packages}
                     maxAccess={maxAccess}
                     allowAddNewLine={!editMode}
                     allowDelete={!editMode}
-                    onSelectionChange={row => row && loadSerialsGrid()}
+                    onSelectionChange={row => row && loadSerialsGrid(row)}
                     columns={[
                       {
                         component: 'resourcecombobox',
@@ -281,11 +371,15 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
               <FieldSet xs={4} sx={{ flex: 1 }}>
                 <Grow>
                   <DataGrid
-                    onChange={value => handleDataGridChange(value)}
-                    value={formik.values.packages.packageReferences} //error={formik.errors.packages.packageReferences}
+                    onChange={value => handleSerialsGridChange(value)}
+                    value={
+                      formik.values.packages.find(packageItem => packageItem.id === selectedRowId)
+                        ?.packageReferences || [{ seqNo: 1, id: 1 }]
+                    }
                     maxAccess={maxAccess}
                     allowAddNewLine={!editMode}
                     allowDelete={false}
+                    disabled={enableSerials}
                     columns={[
                       {
                         component: 'numberfield',
