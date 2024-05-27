@@ -686,13 +686,11 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                     <RadioGroup
                       row
                       value={formik.values.functionId}
-                      onChange={e =>
-                        setOperationType(
-                          parseInt(e.target.value),
-                          setFId(e.target.value),
-                          formik.setFieldValue('reference', '')
-                        )
-                      }
+                      onChange={e => {
+                        setOperationType(parseInt(e.target.value))
+                        setFId(e.target.value)
+                        formik.setFieldValue('reference', '')
+                      }}
                     >
                       <FormControlLabel
                         value={SystemFunction.CurrencyPurchase}
