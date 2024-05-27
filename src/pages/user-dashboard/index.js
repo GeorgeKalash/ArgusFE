@@ -136,13 +136,9 @@ const SideData = styled.div`
   background: #231f20;
   border-radius: 15px;
   margin: 0 10px;
-  overflow-y: auto; /* Enable vertical scrolling */
-
-  /* Hide scrollbar for Internet Explorer, Edge and Firefox */
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
-
-  /* Hide scrollbar for WebKit browsers (Chrome, Safari) */
+  overflow-y: auto;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
   &::-webkit-scrollbar {
     display: none;
   }
@@ -245,6 +241,11 @@ const getChartOptions = label => ({
     }
   },
   plugins: {
+    legend: {
+      labels: {
+        color: '#f0f0f0' // Set legend text color to white
+      }
+    },
     title: {
       display: true,
       text: label,
@@ -348,7 +349,10 @@ const UserDashboard = () => {
     performanceVsTeamAverage: 0.0,
     teamPctToTarget: 0.0,
     newClientsAcquired: 0,
-    name: ''
+    distanceToNextCommissionLeg: 0,
+    commissionAcquired: 0,
+    name: '',
+    teamRace: []
   })
 
   const [progress, setProgress] = useState({ pctToTarget: 0, teamPctToTarget: 0 })
@@ -368,6 +372,7 @@ const UserDashboard = () => {
       extension: DashboardRepository.SalesPersonDashboard.spDB
     })
       .then(res => {
+        console.log(res.record) // Log the response data to check the structure
         setData({
           imageUrl: res.record.imageUrl || '',
           myYearlyGrowthInUnitsSoldList: res.record.myYearlyGrowthInUnitsSoldList || [],
@@ -377,13 +382,27 @@ const UserDashboard = () => {
           performanceVsTeamAverage: res.record.performanceVsTeamAverage || 0.0,
           teamPctToTarget: res.record.teamPctToTarget || 0.0,
           newClientsAcquired: res.record.newClientsAcquired || 0,
-          name: res.record.salesPerson.name || ''
+          distanceToNextCommissionLeg: res.distanceToNextCommissionLeg || 0,
+          commissionAcquired: res.commissionAcquired || 0,
+          name: res.record.salesPerson.name || '',
+          teamRace: res.record.teamRace || []
         })
       })
       .catch(error => {
         setErrorMessage(error.message)
       })
   }
+
+  const list1 = [
+    { name: 'Units Sold', key: 'unitsSold' },
+    { name: 'New Clients Acquired', key: 'newClientsAcquired' },
+    { name: 'Percentage To Target', key: 'pctToTarget', isPercentage: true }
+  ]
+
+  const list2 = [
+    { name: 'distance To Next Commission', key: 'distanceToNextCommissionLeg' },
+    { name: 'commission Acquired', key: 'commissionAcquired' }
+  ]
 
   return (
     <>
@@ -393,30 +412,18 @@ const UserDashboard = () => {
         <Card>
           <SideData>
             <DataHalf>
-              <CircularData data={data} />
+              <CircularData data={data} list={list1} />
             </DataHalf>
             <DataHalf>
-              <CircularData data={data} />
-            </DataHalf>
-            <DataHalf>
-              <CircularData data={data} />
-            </DataHalf>
-            <DataHalf>
-              <CircularData data={data} />
-            </DataHalf>
-            <DataHalf>
-              <CircularData data={data} />
-            </DataHalf>
-            <DataHalf>
-              <CircularData data={data} />
+              <CircularData data={data} list={list2} />
             </DataHalf>
             <DataHalf>
               <CompositeBarContainer>
                 <LineChart
                   id='lineChart'
-                  labels={data.myYearlyGrowthInUnitsSoldList.map(item => item.year)}
-                  data={data.myYearlyGrowthInUnitsSoldList.map(item => item.qty)}
-                  label='Units Sold Line Chart'
+                  labels={data.teamRace.map(item => item.spRef)}
+                  data={data.teamRace.map(item => item.commission)}
+                  label='Team Commissions'
                 />
               </CompositeBarContainer>
             </DataHalf>
@@ -435,6 +442,8 @@ const UserDashboard = () => {
                   label='Units Sold'
                 />
               </CompositeBarContainer>
+            </DataHalf>
+            <DataHalf>
               <CompositeBarContainer>
                 <CompositeBarChart
                   id='compositebarb'
@@ -449,29 +458,6 @@ const UserDashboard = () => {
                 <ProgressBarComponent label='Percentage To Target' percentage={progress.pctToTarget} />
                 <ProgressBarComponent label='Team Percentage To Target' percentage={progress.teamPctToTarget} />
               </ProgressBarsWrapper>
-            </DataHalf>
-            <DataHalf>
-              <ProgressBarsWrapper>
-                <ProgressBarComponent label='Team Percentage To Target' percentage={progress.teamPctToTarget} />
-              </ProgressBarsWrapper>
-            </DataHalf>
-            <DataHalf>
-              <CircularData data={data} />
-            </DataHalf>
-            <DataHalf>
-              <CircularData data={data} />
-            </DataHalf>
-            <DataHalf>
-              <CircularData data={data} />
-            </DataHalf>
-            <DataHalf>
-              <CircularData data={data} />
-            </DataHalf>
-            <DataHalf>
-              <CircularData data={data} />
-            </DataHalf>
-            <DataHalf>
-              <CircularData data={data} />
             </DataHalf>
           </SideData>
         </Card>

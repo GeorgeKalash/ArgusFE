@@ -1,5 +1,6 @@
-import styled from 'styled-components'
+import React from 'react'
 import { CircularItem } from './circularItem'
+import styled from 'styled-components'
 
 const CircleContainer = styled.div`
   display: flex;
@@ -8,10 +9,15 @@ const CircleContainer = styled.div`
   margin-bottom: 20px;
 `
 
-export const CircularData = ({ data }) => (
+export const CircularData = ({ data, list }) => (
   <CircleContainer>
-    <CircularItem name='Units Sold' number={data.unitsSold} />
-    <CircularItem name='New Clients Acquired' number={data.newClientsAcquired} />
-    <CircularItem name='Percentage To Target' number={data.pctToTarget.toFixed(0)} isPercentage={true} />
+    {list.map((item, index) => (
+      <CircularItem
+        key={index}
+        name={item.name}
+        number={item.isPercentage ? data[item.key].toFixed(0) : data[item.key]}
+        isPercentage={item.isPercentage}
+      />
+    ))}
   </CircleContainer>
 )
