@@ -9,7 +9,7 @@ import { DataGrid } from 'src/components/Shared/DataGrid'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
-import { CashCountSettingsRepository } from 'src/repositories/CashCountSettingsRepository'
+import { CashCountRepository } from 'src/repositories/CashCountRepository'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 
@@ -70,7 +70,7 @@ export default function CashCountNotesForm({
     const parameters = `_currencyId=` + row.currencyId
 
     const { list } = await getRequest({
-      extension: CashCountSettingsRepository.CcCashNotes.qry,
+      extension: CashCountRepository.CcCashNotes.qry,
       parameters: parameters
     })
 

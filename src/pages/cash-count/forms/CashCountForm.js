@@ -18,7 +18,7 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import CashCountNotes from './CashCountNotesForm'
 import { useWindow } from 'src/windows'
-import { CCrepository } from 'src/repositories/CCRepository'
+import { CashCountRepository } from 'src/repositories/CashCountRepository'
 import { formatDateFromApi, formatDateToApi, getTimeInTimeZone } from 'src/lib/date-helper'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { getStorageData } from 'src/storage/storage'
@@ -74,7 +74,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
   }
 
   const invalidate = useInvalidate({
-    endpointId: CCrepository.CashCountTransaction.qry
+    endpointId: CashCountRepository.CashCountTransaction.qry
   })
 
   const { formik } = useForm({
@@ -152,7 +152,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
       }
 
       const response = await postRequest({
-        extension: CCrepository.CashCountTransaction.set2,
+        extension: CashCountRepository.CashCountTransaction.set2,
         record: JSON.stringify(payload)
       })
       const _recordId = response.recordId
@@ -181,7 +181,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
         const {
           record: { header, items }
         } = await getRequest({
-          extension: CCrepository.CashCountTransaction.get2,
+          extension: CashCountRepository.CashCountTransaction.get2,
           parameters: `_recordId=${recordId}`
         })
         setIsClosed(header.wip === 2 ? true : false)
@@ -233,7 +233,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
     }
 
     const res = await postRequest({
-      extension: CCrepository.CashCountTransaction.reopen,
+      extension: CashCountRepository.CashCountTransaction.reopen,
       record: JSON.stringify(data)
     })
       .then(() => {
@@ -248,7 +248,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
 
   const onClose = () => {
     postRequest({
-      extension: CCrepository.CashCountTransaction.close,
+      extension: CashCountRepository.CashCountTransaction.close,
       record: JSON.stringify(formik.values)
     })
       .then(res => {
@@ -263,7 +263,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
 
   const onPost = () => {
     postRequest({
-      extension: CCrepository.CashCountTransaction.post,
+      extension: CashCountRepository.CashCountTransaction.post,
       record: JSON.stringify(formik.values)
     })
       .then(res => {

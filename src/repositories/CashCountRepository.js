@@ -1,6 +1,6 @@
 const service = 'CC.asmx/'
 
-export const CCrepository = {
+export const CashCountRepository = {
   CashCountTransaction: {
     qry: service + 'qryTRX',
     get2: service + 'get2TRX',
@@ -9,5 +9,12 @@ export const CCrepository = {
     close: service + 'closeTRX',
     reopen: service + 'reopenTRX',
     del: service + 'delTRX'
+  },
+  CcCashNotes: {
+    qry: service + 'qryNOT',
+    get: service + 'getNOT',
+    set: service + 'setNOT',
+    del: service + 'delNOT',
+    page: service + 'pageNOT'
   }
 }
