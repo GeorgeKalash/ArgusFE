@@ -1,6 +1,6 @@
-const service = 'CCTRX.asmx/'
+const service = 'CC.asmx/'
 
-export const CCTRXrepository = {
+export const CCrepository = {
   CashCountTransaction: {
     qry: service + 'qryTRX',
     get2: service + 'get2TRX',

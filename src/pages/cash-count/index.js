@@ -21,7 +21,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import CashCountForm from './forms/CashCountForm'
-import { CCTRXrepository } from 'src/repositories/CCTRXRepository'
+import { CCrepository } from 'src/repositories/CCRepository'
 import { formatDateDefault } from 'src/lib/date-helper'
 
 const CashCount = () => {
@@ -30,8 +30,8 @@ const CashCount = () => {
 
   async function fetchGridData() {
     return await getRequest({
-      extension: CCTRXrepository.CashCountTransaction.qry,
-      parameters: `&filter=`
+      extension: CCrepository.CashCountTransaction.qry,
+      parameters: `_filter=`
     })
   }
 
@@ -43,7 +43,7 @@ const CashCount = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: CCTRXrepository.CashCountTransaction.qry,
+    endpointId: CCrepository.CashCountTransaction.qry,
     datasetId: ResourceIds.CashCountTransaction
   })
 
@@ -114,7 +114,7 @@ const CashCount = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: CCTRXrepository.CashCountTransaction.del,
+      extension: CCrepository.CashCountTransaction.del,
       record: JSON.stringify(obj)
     })
     invalidate()
