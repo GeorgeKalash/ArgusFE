@@ -8,6 +8,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
+import { formatDateDefault } from 'src/lib/date-helper'
 
 const CashEnquiry = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -37,7 +38,8 @@ const CashEnquiry = () => {
     {
       field: 'date',
       headerName: _labels.date,
-      flex: 1
+      flex: 1,
+      valueGetter: ({ row }) => formatDateDefault(row?.date)
     },
     {
       field: 'functionName',
