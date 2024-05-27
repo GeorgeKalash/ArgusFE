@@ -281,12 +281,14 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
       })
       formik.setFieldValue(
         'transfers',
-        res.list.map(({ id, balance, ...rest }, index) => ({
-          id: index + 1,
-          balance,
-          amount: balance || '',
-          ...rest
-        }))
+        res.list
+          .filter(item => item.balance != 0)
+          .map(({ id, balance, ...rest }, index) => ({
+            id: index + 1,
+            balance,
+            amount: balance || '',
+            ...rest
+          }))
       )
     } catch (error) {}
   }
