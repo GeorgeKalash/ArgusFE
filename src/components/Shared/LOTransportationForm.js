@@ -257,7 +257,7 @@ export const LOTransportationForm = ({ recordId, functionId, editMode }) => {
                 ]}
                 values={formik.values}
                 valueField='recordId'
-                displayField='name'
+                displayField={['reference', 'name']}
                 required
                 readOnly={editMode}
                 maxAccess={maxAccess}
