@@ -273,7 +273,31 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
     })()
   }, [])
 
+  const getDataGrid = async () => {
+    try {
+      const res = await getRequest({
+        extension: CashBankRepository.AccountBalance.qry,
+        parameters: `_cashAccountId=${formik.values.fromCashAccountId}`
+      })
+      formik.setFieldValue(
+        'transfers',
+        res.list.map(({ id, balance, ...rest }, index) => ({
+          id: index + 1,
+          balance,
+          amount: balance || '',
+          ...rest
+        }))
+      )
+    } catch (error) {}
+  }
+
   const actions = [
+    {
+      key: 'Bulk',
+      condition: !isClosed,
+      onClick: getDataGrid,
+      disabled: editMode || formik.values.transfers.some(transfer => transfer.currencyId)
+    },
     {
       key: 'Close',
       condition: !isClosed,
@@ -311,24 +335,6 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
       disabled: false
     }
   ]
-
-  const getGridData = async () => {
-    console.log('test')
-    try {
-      const res = await getRequest({
-        extension: CashBankRepository.AccountBalance.qry,
-        parameters: `_cashAccountId=${formik.values.fromCashAccountId}`
-      })
-      formik.setFieldValue(
-        'transfers',
-        res.list.map(({ id, ...rest }, index) => ({
-          id: index + 1,
-
-          ...rest
-        }))
-      )
-    } catch (error) {}
-  }
 
   return (
     <FormShell
@@ -471,26 +477,6 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
                   maxAccess={maxAccess}
                   error={formik.touched.toCashAccountId && Boolean(formik.errors.toCashAccountId)}
                 />
-              </Grid>
-            </Grid>
-            <Grid container item xs={12} md={6} spacing={4}>
-              <Grid item xs={12}>
-                <Button
-                  sx={{
-                    backgroundColor: '#09235C',
-                    '&:hover': {
-                      backgroundColor: '#09235C',
-                      opacity: 0.8
-                    },
-                    width: '50px !important',
-                    height: '35px',
-                    objectFit: 'contain',
-                    minWidth: '30px !important'
-                  }}
-                  onClick={getGridData}
-                >
-                  <img src={`/images/buttonsIcons/Bulk.png`} alt={1} />
-                </Button>
               </Grid>
             </Grid>
           </Grid>
