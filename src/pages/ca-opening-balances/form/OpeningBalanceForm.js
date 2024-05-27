@@ -21,7 +21,7 @@ export default function OpeningBalanceForm({ labels, maxAccess, recordId, record
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
-    endpointId: CashBankRepository.OpeningBalance.qry
+    endpointId: CashBankRepository.OpeningBalance.page
   })
 
   const { formik } = useForm({
@@ -174,6 +174,7 @@ export default function OpeningBalanceForm({ labels, maxAccess, recordId, record
                 onClear={() => formik.setFieldValue('amount', '')}
                 error={formik.touched.amount && Boolean(formik.errors.amount)}
                 maxLength={10}
+                decimalScale={2}
               />
             </Grid>
           </Grid>

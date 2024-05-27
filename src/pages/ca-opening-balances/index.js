@@ -11,6 +11,7 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import OpeningBalanceForm from './form/OpeningBalanceForm'
+import { getFormattedNumber } from 'src/lib/numberField-helper'
 
 const OpeningBalance = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -20,10 +21,12 @@ const OpeningBalance = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    return await getRequest({
-      extension: CashBankRepository.OpeningBalance.qry,
+    const response = await getRequest({
+      extension: CashBankRepository.OpeningBalance.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
+
+    return { ...response, _startAt: _startAt }
   }
 
   const {
@@ -34,12 +37,12 @@ const OpeningBalance = () => {
     refetch
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: CashBankRepository.OpeningBalance.qry,
+    endpointId: CashBankRepository.OpeningBalance.page,
     datasetId: ResourceIds.OpeningBalance
   })
 
   const invalidate = useInvalidate({
-    endpointId: CashBankRepository.OpeningBalance.qry
+    endpointId: CashBankRepository.OpeningBalance.page
   })
 
   const columns = [
@@ -61,7 +64,8 @@ const OpeningBalance = () => {
     {
       field: 'amount',
       headerName: _labels.amount,
-      flex: 1
+      flex: 1,
+      valueGetter: ({ row }) => getFormattedNumber(row?.amount)
     }
   ]
 
@@ -115,7 +119,7 @@ const OpeningBalance = () => {
           pageSize={50}
           paginationParameters={paginationParameters}
           refetch={refetch}
-          paginationType='client'
+          paginationType='api'
           maxAccess={access}
         />
       </Grow>
