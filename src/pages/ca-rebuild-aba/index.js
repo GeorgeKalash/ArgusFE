@@ -1,11 +1,12 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import * as yup from 'yup'
+
+import { useContext } from 'react'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
@@ -27,10 +28,9 @@ export default function CARebuildAccountBalance() {
     maxAccess: access,
     validateOnChange: true,
 
-    // validationSchema: yup.object({
-    //   reference: yup.string().required(' '),
-    //   name: yup.string().required(' ')
-    // }),
+    validationSchema: yup.object({
+      fiscalYear: yup.string().required(' ')
+    }),
     onSubmit: async obj => {
       const response = await postRequest({
         extension: CashBankRepository.AccountBalance.rebuild,
