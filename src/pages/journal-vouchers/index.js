@@ -99,8 +99,7 @@ const JournalVoucher = () => {
 
   const { proxyAction } = useDocumentType({
     functionId: SystemFunction.JournalVoucher,
-    action: openForm,
-    enabled: false
+    action: openForm
   })
 
   const add = async () => {
