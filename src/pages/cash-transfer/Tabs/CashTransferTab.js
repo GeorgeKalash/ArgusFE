@@ -342,8 +342,8 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
     >
       <VertLayout>
         <Fixed>
-          <Grid container>
-            <Grid container rowGap={2} xs={6} spacing={2}>
+          <Grid container spacing={2}>
+            <Grid container item xs={12} md={6} spacing={4}>
               <Grid item xs={12}>
                 <CustomTextField
                   name='reference'
@@ -403,7 +403,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
                 />
               </Grid>
             </Grid>
-            <Grid container rowGap={2} xs={6} sx={{ px: 2 }} spacing={2}>
+            <Grid container item xs={12} md={6} spacing={4}>
               <Grid item xs={12}>
                 <CustomDatePicker
                   name='date'
@@ -473,23 +473,25 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
                 />
               </Grid>
             </Grid>
-            <Grid xs={12} spacing={2}>
-              <Button
-                sx={{
-                  backgroundColor: '#09235C',
-                  '&:hover': {
+            <Grid container item xs={12} md={6} spacing={4}>
+              <Grid item xs={12}>
+                <Button
+                  sx={{
                     backgroundColor: '#09235C',
-                    opacity: 0.8
-                  },
-                  width: '50px !important',
-                  height: '35px',
-                  objectFit: 'contain',
-                  minWidth: '30px !important'
-                }}
-                onClick={getGridData}
-              >
-                <img src={`/images/buttonsIcons/Bulk.png`} alt={1} />
-              </Button>
+                    '&:hover': {
+                      backgroundColor: '#09235C',
+                      opacity: 0.8
+                    },
+                    width: '50px !important',
+                    height: '35px',
+                    objectFit: 'contain',
+                    minWidth: '30px !important'
+                  }}
+                  onClick={getGridData}
+                >
+                  <img src={`/images/buttonsIcons/Bulk.png`} alt={1} />
+                </Button>
+              </Grid>
             </Grid>
           </Grid>
         </Fixed>
