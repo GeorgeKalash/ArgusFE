@@ -31,16 +31,17 @@ const GlobalStyle = createGlobalStyle`
 const Frame = styled.div`
   width: 100%;
   height: 100%;
+  flex: 1;
   display: flex;
-  justify-content: center;
-  align-items: center;
+  justify-content: flex-start;
+  align-items: flex-start;
 `
 
 const Card = styled.div`
   width: 100%;
   padding: 30px;
   background: #383838;
-  border-radius: 15px;
+  height: 100% !important;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
   display: flex;
   justify-content: space-between;
@@ -130,11 +131,21 @@ const SideData = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
+  height: 100%;
   padding: 20px;
   background: #231f20;
   border-radius: 15px;
   margin: 0 10px;
+  overflow-y: auto; /* Enable vertical scrolling */
+
+  /* Hide scrollbar for Internet Explorer, Edge and Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+
+  /* Hide scrollbar for WebKit browsers (Chrome, Safari) */
+  &::-webkit-scrollbar {
+    display: none;
+  }
 `
 
 const DataHalf = styled.div`
@@ -147,12 +158,13 @@ const DataHalf = styled.div`
   background: #444;
   border-radius: 15px;
   border-top: 2px solid #93c6e0;
-  flex: 1;
+  flex: 0;
   margin: 10px 0;
 `
 
 const CompositeBarContainer = styled.div`
-  width: 50%;
+  flex: 1;
+  display: flex;
   padding: 10px;
   canvas {
     width: 100% !important;
@@ -163,15 +175,16 @@ const CompositeBarContainer = styled.div`
 const ProgressBarsWrapper = styled.div`
   display: flex;
   width: 100%;
-  justify-content: space-between;
+  justify-content: space-between !important;
   align-items: center;
 `
 
 const ProgressBarContainer = styled.div`
-  width: 45%;
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 100%;
 `
 
 const ProgressBarLabel = styled.span`
@@ -182,7 +195,7 @@ const ProgressBarLabel = styled.span`
 `
 
 const ProgressBarBackground = styled.div`
-  width: 100%;
+  width: 90%;
   height: 20px;
   background-color: #e0f2ff;
   border-radius: 10px;
@@ -281,6 +294,37 @@ const CompositeBarChart = ({ id, labels, data, label }) => {
   return <canvas id={id}></canvas>
 }
 
+const LineChart = ({ id, labels, data, label }) => {
+  useEffect(() => {
+    const ctx = document.getElementById(id).getContext('2d')
+
+    const chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          {
+            label,
+            data,
+            fill: false,
+            borderColor: '#6673FD',
+            backgroundColor: '#6673FD',
+            borderWidth: 1,
+            tension: 0.1
+          }
+        ]
+      },
+      options: getChartOptions(label)
+    })
+
+    return () => {
+      chart.destroy()
+    }
+  }, [id, labels, data, label])
+
+  return <canvas id={id}></canvas>
+}
+
 const ProgressBarComponent = ({ label, percentage }) => (
   <ProgressBarContainer>
     <ProgressBarLabel>{label}:</ProgressBarLabel>
@@ -349,14 +393,37 @@ const UserDashboard = () => {
         <Card>
           <SideData>
             <DataHalf>
-              <Span className='big'>{data.name}</Span>
+              <CircularData data={data} />
             </DataHalf>
             <DataHalf>
               <CircularData data={data} />
             </DataHalf>
+            <DataHalf>
+              <CircularData data={data} />
+            </DataHalf>
+            <DataHalf>
+              <CircularData data={data} />
+            </DataHalf>
+            <DataHalf>
+              <CircularData data={data} />
+            </DataHalf>
+            <DataHalf>
+              <CircularData data={data} />
+            </DataHalf>
+            <DataHalf>
+              <CompositeBarContainer>
+                <LineChart
+                  id='lineChart'
+                  labels={data.myYearlyGrowthInUnitsSoldList.map(item => item.year)}
+                  data={data.myYearlyGrowthInUnitsSoldList.map(item => item.qty)}
+                  label='Units Sold Line Chart'
+                />
+              </CompositeBarContainer>
+            </DataHalf>
           </SideData>
           <Profile>
             <ProfileAvatar imageUrl={data.imageUrl} />
+            <Span className='big'>{data.name}</Span>
           </Profile>
           <SideData>
             <DataHalf>
@@ -382,6 +449,29 @@ const UserDashboard = () => {
                 <ProgressBarComponent label='Percentage To Target' percentage={progress.pctToTarget} />
                 <ProgressBarComponent label='Team Percentage To Target' percentage={progress.teamPctToTarget} />
               </ProgressBarsWrapper>
+            </DataHalf>
+            <DataHalf>
+              <ProgressBarsWrapper>
+                <ProgressBarComponent label='Team Percentage To Target' percentage={progress.teamPctToTarget} />
+              </ProgressBarsWrapper>
+            </DataHalf>
+            <DataHalf>
+              <CircularData data={data} />
+            </DataHalf>
+            <DataHalf>
+              <CircularData data={data} />
+            </DataHalf>
+            <DataHalf>
+              <CircularData data={data} />
+            </DataHalf>
+            <DataHalf>
+              <CircularData data={data} />
+            </DataHalf>
+            <DataHalf>
+              <CircularData data={data} />
+            </DataHalf>
+            <DataHalf>
+              <CircularData data={data} />
             </DataHalf>
           </SideData>
         </Card>
