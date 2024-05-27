@@ -17,44 +17,47 @@ const getData = async (getRequest, extension, parameters) => {
 }
 
 const mergeWithMaxAccess = (maxAccess, reference, dcTypeRequired) => {
-  let controls
-  if (maxAccess && maxAccess?.record && typeof maxAccess?.record === 'object') {
-    controls = maxAccess.record.controls
+  let controls = maxAccess.record.controls
 
-    let obj = controls.find(obj => obj.controlId === 'reference')
-    if (obj) {
-      obj.accessLevel = reference?.mandatory ? MANDATORY : DISABLED
-    } else {
-      if (reference?.mandatory) {
-        controls.push({
-          sgId: 18,
-          resourceId: ResourceIds.JournalVoucher,
-          controlId: 'reference',
-          accessLevel: reference?.mandatory ? MANDATORY : DISABLED
-        })
-      } else if (reference?.readOnly) {
-        controls.push({
-          sgId: 18,
-          resourceId: ResourceIds.JournalVoucher,
-          controlId: 'reference',
-          accessLevel: reference?.mandatory && DISABLED
-        })
-      } else {
-        maxAccess.record.controls = maxAccess.record.controls.filter(obj => obj.controlId != 'reference')
-      }
-    }
-
-    if (dcTypeRequired) {
+  let obj = controls.find(obj => obj.controlId === 'reference')
+  if (obj) {
+    obj.accessLevel = reference?.mandatory ? MANDATORY : DISABLED
+  } else {
+    if (reference?.mandatory) {
       controls.push({
         sgId: 18,
         resourceId: ResourceIds.JournalVoucher,
-        controlId: 'dtId',
-        accessLevel: MANDATORY
+        controlId: 'reference',
+        accessLevel: reference?.mandatory ? MANDATORY : DISABLED
       })
+    } else if (reference?.readOnly) {
+      controls.push({
+        sgId: 18,
+        resourceId: ResourceIds.JournalVoucher,
+        controlId: 'reference',
+        accessLevel: reference?.mandatory && DISABLED
+      })
+    } else {
+      maxAccess.record.controls = maxAccess.record.controls.filter(obj => obj.controlId != 'reference')
     }
   }
 
-  return maxAccess
+  if (dcTypeRequired) {
+    controls.push({
+      sgId: 18,
+      resourceId: ResourceIds.JournalVoucher,
+      controlId: 'dtId',
+      accessLevel: MANDATORY
+    })
+  }
+
+  return {
+    ...maxAccess,
+    record: {
+      ...maxAccess.record,
+      controls
+    }
+  }
 }
 
 const fetchData = async (getRequest, id, repository) => {
