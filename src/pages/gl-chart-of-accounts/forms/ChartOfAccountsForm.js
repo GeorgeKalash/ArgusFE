@@ -11,12 +11,10 @@ import { DataSets } from 'src/resources/DataSets'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 import { useForm } from 'src/hooks/form'
-import { SystemRepository } from 'src/repositories/SystemRepository'
-import SegmentedInput from 'src/components/Shared/SegmentInput'
+import SegmentedInput from 'src/components/Shared/SegmentedInput'
 
-export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
+export default function ChartOfAccountsForm({ labels, maxAccess, recordId, onChange }) {
   const [editMode, setEditMode] = useState(!!recordId)
-  const [segments, setSegments] = useState([])
 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -50,15 +48,12 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
     onSubmit: async (values, { setSubmitting }) => {
       setSubmitting(true)
 
-      const payload = {
-        ...values,
-        segments: values.accountRef.split('-')
-      }
       try {
         const response = await postRequest({
           extension: GeneralLedgerRepository.ChartOfAccounts.set,
-          record: JSON.stringify(payload)
+          record: JSON.stringify(values)
         })
+
         toast.success(`Record ${values.recordId ? 'Edited' : 'Added'} Successfully`)
 
         setEditMode(true)
@@ -78,37 +73,10 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
       })
         .then(res => {
           formik.setValues(res.record)
-          setSegments(
-            res.record.accountRef.split('-').map((seg, index) => ({
-              key: `GLACSeg${index}`,
-              value: seg.length
-            }))
-          )
         })
         .catch(error => {})
-    } else {
-      getSegmentsValues()
     }
   }, [recordId])
-
-  const getSegmentsValues = () => {
-    getRequest({
-      extension: SystemRepository.Defaults.qry,
-      parameters: '_filter='
-    })
-      .then(res => {
-        const defaultSegments = res.list
-          .filter(obj => ['GLACSeg0', 'GLACSeg1', 'GLACSeg2', 'GLACSeg3', 'GLACSeg4'].includes(obj.key))
-          .map(obj => ({
-            key: obj.key,
-            value: parseInt(obj.value)
-          }))
-          .filter(obj => obj.value)
-
-        setSegments(defaultSegments)
-      })
-      .catch(error => {})
-  }
 
   return (
     <FormShell resourceId={ResourceIds.ChartOfAccounts} form={formik} maxAccess={maxAccess} editMode={editMode}>
@@ -130,11 +98,14 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
         </Grid>
         <Grid item xs={12}>
           <SegmentedInput
-            segments={segments}
             readOnly={editMode}
             name='accountRef'
             setFieldValue={formik.setFieldValue}
-            values={formik.values.accountRef}
+            value={formik.values.accountRef}
+            onChange={({ segments, value }) => {
+              formik.setFieldValue('segments', segments)
+              formik.setFieldValue('accountRef', value)
+            }}
             label={labels.accountRef}
             required
             error={formik.touched.accountRef && Boolean(formik.errors.accountRef)}

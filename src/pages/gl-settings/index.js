@@ -79,7 +79,6 @@ const GLSettings = () => {
         })
 
         setInitialValues(myObject)
-        console.log(myObject)
       })
       .catch(error => {
         setErrorMessage(error)
@@ -177,7 +176,6 @@ const GLSettings = () => {
         dataToPost.push({ key: nameKey, value: obj[nameKey] })
       }
     }
-    console.log(dataToPost)
     postRequest({
       extension: SystemRepository.Defaults.set,
       record: JSON.stringify({ sysDefaults: dataToPost })
@@ -197,8 +195,6 @@ const GLSettings = () => {
   const segNumb = ['GLACSeg0', 'GLACSeg1', 'GLACSeg2', 'GLACSeg3', 'GLACSeg4']
 
   const segName = ['GLACSegName0', 'GLACSegName1', 'GLACSegName2', 'GLACSegName3', 'GLACSegName4']
-
-  useEffect(() => console.log(formik.values), [formik])
 
   useEffect(() => {
     const segmentsNum = formik.values.GLACSegments

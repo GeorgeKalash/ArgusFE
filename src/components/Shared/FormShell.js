@@ -87,21 +87,21 @@ export default function FormShell({
       title: 'Resource Record Remarks'
     })
   }
-  console.log('formikk test ', form)
 
   return (
     <>
-      <DialogContent 
-      sx={{ 
-        display: 'flex !important', 
-        flex: 1, 
-        flexDirection: 'column', 
-        overflow: 'auto',
-        '.MuiBox-root':{
-          paddingTop:'5px !important',
-          px:'0px !important'
-        },
-       }}>
+      <DialogContent
+        sx={{
+          display: 'flex !important',
+          flex: 1,
+          flexDirection: 'column',
+          overflow: 'auto',
+          '.MuiBox-root': {
+            paddingTop: '5px !important',
+            px: '0px !important'
+          }
+        }}
+      >
         {children}
       </DialogContent>
       {windowToolbarVisible && (
