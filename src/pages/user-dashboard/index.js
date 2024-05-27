@@ -19,11 +19,11 @@ const GlobalStyle = createGlobalStyle`
     justify-content: center;
     align-items: center;
     font-family: 'Open Sans', Helvetica, sans-serif;
-    background: linear-gradient(to bottom left, #383838, #383838);
+    background: linear-gradient(to bottom left, #231F20, #383838);
     background-size: 125% 125%;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    color: white; /* Set global text color to white */
+    color: #f0f0f0;
   }
 `
 
@@ -37,20 +37,23 @@ const Frame = styled.div`
 
 const Card = styled.div`
   width: 100%;
-  padding: 20px;
+  padding: 30px;
   background: #383838;
-
+  border-radius: 15px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
   display: flex;
   justify-content: space-between;
-  align-items: stretch; /* Ensure children have the same height */
+  align-items: stretch;
 `
 
 const Profile = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  flex: 0;
-  padding: 5px;
+  flex: 0 0 400px;
+  padding: 20px;
+  background: #231f20;
+  border-radius: 15px;
 `
 
 const Avatar = styled.div`
@@ -59,8 +62,8 @@ const Avatar = styled.div`
   height: 300px;
   border-radius: 50%;
   cursor: pointer;
-  background: #383838;
-  margin-bottom: 40px;
+  background: #444;
+  margin-bottom: 30px;
   .circle {
     position: absolute;
     border-radius: 50%;
@@ -109,26 +112,27 @@ const Span = styled.span`
   display: block;
   text-transform: capitalize;
   text-align: center;
-  color: white; /* Set Span text color to white */
+  color: #f0f0f0;
   &.big {
-    font-size: 36px;
+    font-size: 28px;
     font-weight: 600;
+    margin-bottom: 5px;
   }
   &.small {
-    font-size: 24px;
+    font-size: 18px;
     font-weight: 300;
   }
 `
 
 const SideData = styled.div`
-  flex: 1; /* Allow it to grow and fill available space */
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  padding: 10px;
-  background: #383838;
-  border-radius: 10px;
+  padding: 20px;
+  background: #231f20;
+  border-radius: 15px;
   margin: 0 10px;
 `
 
@@ -138,13 +142,12 @@ const DataHalf = styled.div`
   align-items: center;
   justify-content: center;
   width: 100%;
-  padding: 5px;
-  background: #383838;
-  border-radius: 10px;
+  padding: 10px;
+  background: #444;
+  border-radius: 15px;
   border-top: 2px solid #93c6e0;
   flex: 1;
-  height: 50%; /* Set specific height */
-  margin: 10px 0; /* Add margin for spacing */
+  margin: 10px 0;
 `
 
 const CircleContainer = styled.div`
@@ -174,10 +177,12 @@ const CircleIcon = styled.div`
   font-weight: bold;
   color: #176fb5;
   margin-bottom: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 `
 
 const CompositeBarContainer = styled.div`
   width: 50%;
+  padding: 10px;
   canvas {
     width: 100% !important;
     height: 250px !important;
@@ -192,7 +197,7 @@ const ProgressBarsWrapper = styled.div`
 `
 
 const ProgressBarContainer = styled.div`
-  width: 40%;
+  width: 45%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -202,7 +207,7 @@ const ProgressBarLabel = styled.span`
   font-size: 18px;
   font-weight: 600;
   margin-bottom: 5px;
-  color: white; /* Set ProgressBarLabel text color to white */
+  color: #f0f0f0;
 `
 
 const ProgressBarBackground = styled.div`
@@ -210,7 +215,6 @@ const ProgressBarBackground = styled.div`
   height: 20px;
   background-color: #e0f2ff;
   border-radius: 10px;
-
   overflow: hidden;
   margin: 20px 0;
 `
@@ -220,6 +224,101 @@ const ProgressBar = styled.div`
   background-color: #176fb5;
   transition: width 1.5s ease-in-out;
 `
+
+const ErrorMessage = styled.div`
+  color: white;
+  margin: 20px 0;
+`
+
+const ProfileAvatar = ({ imageUrl }) => (
+  <Avatar>
+    <div className='circle'></div>
+    <div className='circle'></div>
+    <div className='pic' style={{ backgroundImage: `url(${imageUrl})` }}></div>
+  </Avatar>
+)
+
+const getChartOptions = label => ({
+  responsive: true,
+  maintainAspectRatio: false,
+  scales: {
+    y: {
+      beginAtZero: true,
+      ticks: {
+        color: '#f0f0f0'
+      },
+      grid: {
+        display: false // This line removes the grid lines on the y-axis
+      }
+    },
+    x: {
+      ticks: {
+        color: '#f0f0f0'
+      },
+      grid: {
+        display: false // This line removes the grid lines on the x-axis
+      }
+    }
+  },
+  plugins: {
+    title: {
+      display: true,
+      text: label,
+      font: {
+        size: 24,
+        weight: 'bold'
+      },
+      color: '#6673FD'
+    },
+    tooltip: {
+      enabled: true,
+      callbacks: {
+        label: function (context) {
+          return `${context.dataset.label}: ${context.raw}`
+        }
+      }
+    }
+  }
+})
+
+const CompositeBarChart = ({ id, labels, data, label }) => {
+  useEffect(() => {
+    const ctx = document.getElementById(id).getContext('2d')
+
+    const chart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          {
+            label,
+            data,
+            backgroundColor: '#6673FD',
+            borderColor: '#6673FD',
+            borderWidth: 1
+          }
+        ]
+      },
+      options: getChartOptions(label)
+    })
+
+    return () => {
+      chart.destroy()
+    }
+  }, [id, labels, data, label])
+
+  return <canvas id={id}></canvas>
+}
+
+const ProgressBarComponent = ({ label, percentage }) => (
+  <ProgressBarContainer>
+    <ProgressBarLabel>{label}:</ProgressBarLabel>
+    <ProgressBarLabel>{percentage.toFixed(0)}%</ProgressBarLabel>
+    <ProgressBarBackground>
+      <ProgressBar style={{ width: `${percentage}%` }} />
+    </ProgressBarBackground>
+  </ProgressBarContainer>
+)
 
 const UserDashboard = () => {
   const [errorMessage, setErrorMessage] = useState(null)
@@ -236,86 +335,18 @@ const UserDashboard = () => {
     newClientsAcquired: 0,
     name: ''
   })
+
   const [progress, setProgress] = useState({ pctToTarget: 0, teamPctToTarget: 0 })
+
   useEffect(() => {
     getDataResult()
   }, [])
+
   useEffect(() => {
     if (data.pctToTarget > 0 || data.teamPctToTarget > 0) {
       setProgress({ pctToTarget: data.pctToTarget, teamPctToTarget: data.teamPctToTarget })
     }
   }, [data.pctToTarget, data.teamPctToTarget])
-  useEffect(() => {
-    const ctx3a = document.getElementById('compositebara').getContext('2d')
-    const ctx3b = document.getElementById('compositebarb').getContext('2d')
-
-    const commonOptions = {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        y: {
-          beginAtZero: true
-        }
-      },
-      plugins: {
-        title: {
-          display: true,
-          font: {
-            size: 24,
-            weight: 'bold'
-          },
-          color: '#6673FD'
-        },
-        tooltip: {
-          enabled: true,
-          callbacks: {
-            label: function (context) {
-              return `${context.dataset.label}: ${context.raw}`
-            }
-          }
-        }
-      }
-    }
-
-    const compositeBarA = new Chart(ctx3a, {
-      type: 'bar',
-      data: {
-        labels: data.myYearlyGrowthInUnitsSoldList.map(item => item.year),
-        datasets: [
-          {
-            label: 'Units Sold',
-            data: data.myYearlyGrowthInUnitsSoldList.map(item => item.qty),
-            backgroundColor: '#6673FD',
-            borderColor: '#6673FD',
-            borderWidth: 1
-          }
-        ]
-      },
-      options: commonOptions
-    })
-
-    const compositeBarB = new Chart(ctx3b, {
-      type: 'bar',
-      data: {
-        labels: data.myYearlyGrowthInClientsAcquiredList.map(item => item.year),
-        datasets: [
-          {
-            label: 'Clients Acquired',
-            data: data.myYearlyGrowthInClientsAcquiredList.map(item => item.qty),
-            backgroundColor: '#93C6E0',
-            borderColor: '#93C6E0',
-            borderWidth: 1
-          }
-        ]
-      },
-      options: commonOptions
-    })
-
-    return () => {
-      compositeBarA.destroy()
-      compositeBarB.destroy()
-    }
-  }, [data.myYearlyGrowthInUnitsSoldList, data.myYearlyGrowthInClientsAcquiredList])
 
   const getDataResult = () => {
     getRequest({
@@ -342,12 +373,12 @@ const UserDashboard = () => {
   return (
     <>
       <GlobalStyle />
-      {errorMessage && <div style={{ color: 'white' }}>Error: {errorMessage}</div>}{' '}
+      {errorMessage && <ErrorMessage>Error: {errorMessage}</ErrorMessage>}
       <Frame>
         <Card>
-          <SideData className='left-data'>
+          <SideData>
             <DataHalf>
-              <Span>{data.name}</Span>
+              <Span className='big'>{data.name}</Span>
             </DataHalf>
             <DataHalf>
               <CircleContainer>
@@ -367,37 +398,31 @@ const UserDashboard = () => {
             </DataHalf>
           </SideData>
           <Profile>
-            <Avatar>
-              <div className='circle'></div>
-              <div className='circle'></div>
-              <div className='pic' style={{ backgroundImage: `url(${data.imageUrl})` }}></div>
-            </Avatar>
+            <ProfileAvatar imageUrl={data.imageUrl} />
           </Profile>
-          <SideData className='right-data'>
+          <SideData>
             <DataHalf>
               <CompositeBarContainer>
-                <canvas id='compositebara'></canvas>
+                <CompositeBarChart
+                  id='compositebara'
+                  labels={data.myYearlyGrowthInUnitsSoldList.map(item => item.year)}
+                  data={data.myYearlyGrowthInUnitsSoldList.map(item => item.qty)}
+                  label='Units Sold'
+                />
               </CompositeBarContainer>
               <CompositeBarContainer>
-                <canvas id='compositebarb'></canvas>
+                <CompositeBarChart
+                  id='compositebarb'
+                  labels={data.myYearlyGrowthInClientsAcquiredList.map(item => item.year)}
+                  data={data.myYearlyGrowthInClientsAcquiredList.map(item => item.qty)}
+                  label='Clients Acquired'
+                />
               </CompositeBarContainer>
             </DataHalf>
             <DataHalf>
               <ProgressBarsWrapper>
-                <ProgressBarContainer>
-                  <ProgressBarLabel>Percentage To Target:</ProgressBarLabel>
-                  <ProgressBarLabel>{progress.pctToTarget.toFixed(0)}%</ProgressBarLabel>
-                  <ProgressBarBackground>
-                    <ProgressBar style={{ width: `${progress.pctToTarget}%` }} />
-                  </ProgressBarBackground>
-                </ProgressBarContainer>
-                <ProgressBarContainer>
-                  <ProgressBarLabel>Team Percentage To Target</ProgressBarLabel>
-                  <ProgressBarLabel>{progress.teamPctToTarget.toFixed(0)}%</ProgressBarLabel>
-                  <ProgressBarBackground>
-                    <ProgressBar style={{ width: `${progress.teamPctToTarget}%` }} />
-                  </ProgressBarBackground>
-                </ProgressBarContainer>
+                <ProgressBarComponent label='Percentage To Target' percentage={progress.pctToTarget} />
+                <ProgressBarComponent label='Team Percentage To Target' percentage={progress.teamPctToTarget} />
               </ProgressBarsWrapper>
             </DataHalf>
           </SideData>
