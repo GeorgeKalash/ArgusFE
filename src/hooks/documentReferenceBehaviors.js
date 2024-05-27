@@ -37,7 +37,6 @@ export function useDocumentType({ functionId, access, hasDT, action }) {
   })
 
   return {
-    access,
     documentType: query.data,
     maxAccess: query?.data?.maxAccess,
     changeDT(value) {
