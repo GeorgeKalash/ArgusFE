@@ -3,6 +3,7 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { DashboardRepository } from 'src/repositories/DashboardRepository'
 import styled, { createGlobalStyle } from 'styled-components'
 import Chart from 'chart.js/auto'
+import { CircularData } from './circularData'
 
 const GlobalStyle = createGlobalStyle`
   @import url('https://fonts.googleapis.com/css?family=Open+Sans:700,600,300');
@@ -150,36 +151,6 @@ const DataHalf = styled.div`
   margin: 10px 0;
 `
 
-const CircleContainer = styled.div`
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-  margin-bottom: 20px;
-`
-
-const Circle = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 33%;
-`
-
-const CircleIcon = styled.div`
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  background: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  font-weight: bold;
-  color: #176fb5;
-  margin-bottom: 5px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-`
-
 const CompositeBarContainer = styled.div`
   width: 50%;
   padding: 10px;
@@ -248,7 +219,7 @@ const getChartOptions = label => ({
         color: '#f0f0f0'
       },
       grid: {
-        display: false // This line removes the grid lines on the y-axis
+        display: false
       }
     },
     x: {
@@ -256,7 +227,7 @@ const getChartOptions = label => ({
         color: '#f0f0f0'
       },
       grid: {
-        display: false // This line removes the grid lines on the x-axis
+        display: false
       }
     }
   },
@@ -381,20 +352,7 @@ const UserDashboard = () => {
               <Span className='big'>{data.name}</Span>
             </DataHalf>
             <DataHalf>
-              <CircleContainer>
-                <Circle>
-                  <CircleIcon>{data.unitsSold}</CircleIcon>
-                  <Span>Units Sold</Span>
-                </Circle>
-                <Circle>
-                  <CircleIcon>{data.newClientsAcquired}</CircleIcon>
-                  <Span>New Clients Acquired</Span>
-                </Circle>
-                <Circle>
-                  <CircleIcon>{data.pctToTarget.toFixed(0)}%</CircleIcon>
-                  <Span>Percentage To Target</Span>
-                </Circle>
-              </CircleContainer>
+              <CircularData data={data} />
             </DataHalf>
           </SideData>
           <Profile>
