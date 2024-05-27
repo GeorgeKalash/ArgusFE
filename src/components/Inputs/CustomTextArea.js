@@ -77,7 +77,7 @@ const CustomTextArea = ({
             value && ( // Only show the clear icon if readOnly is false
               <InputAdornment position='end'>
                 <IconButton tabIndex={-1} edge='end' onClick={onClear} aria-label='clear input'>
-                  <ClearIcon />
+                  <ClearIcon sx={{ border: '0px', fontSize: 20 }} />
                 </IconButton>
               </InputAdornment>
             )
