@@ -6,16 +6,14 @@ import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
-import { useWindowDimensions } from 'src/lib/useWindowDimensions'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
 import { DataSets } from 'src/resources/DataSets'
 
-const DetailsForm = ({ store, setStore, maxAccess, labels, expanded, editMode }) => {
+const DetailsForm = ({ store, setStore, maxAccess, labels, editMode }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { height } = useWindowDimensions()
 
   const { formik } = useForm({
     enableReinitialize: true,
@@ -83,7 +81,7 @@ const DetailsForm = ({ store, setStore, maxAccess, labels, expanded, editMode })
   useEffect(() => {
     const defaultParams = `_taxId=${recordId}`
     var parameters = defaultParams
-    recordId &&
+    if (recordId) {
       getRequest({
         extension: FinancialRepository.TaxDetailPack.qry,
         parameters: `_taxId=${recordId}`
@@ -103,12 +101,11 @@ const DetailsForm = ({ store, setStore, maxAccess, labels, expanded, editMode })
               ...prevStore,
               TaxDetail: items
             }))
-          } else {
-            formik.setValues({ TaxDetail: [{ id: 1, taxId: '', taxBase: '', taxCodeId: '', amount: '' }] })
           }
         })
         .catch(error => {})
-  }, [recordId])
+    }
+  }, [])
 
   return (
     <FormShell
