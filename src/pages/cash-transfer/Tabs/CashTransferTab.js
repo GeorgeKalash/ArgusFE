@@ -296,9 +296,9 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
   const actions = [
     {
       key: 'Bulk',
-      condition: !isClosed,
+      condition: true,
       onClick: getDataGrid,
-      disabled: editMode || formik.values.transfers.some(transfer => transfer.currencyId)
+      disabled: editMode || formik.values.transfers.some(transfer => transfer.currencyId) || isClosed
     },
     {
       key: 'Close',
