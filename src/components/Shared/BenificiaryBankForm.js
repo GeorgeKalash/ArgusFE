@@ -25,7 +25,7 @@ import { useError } from 'src/error'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-export default function BenificiaryBankForm({ client, dispersalType, beneficiary, corId, countryId }) {
+export default function BenificiaryBankForm({ viewBtns = true, client, dispersalType, beneficiary, corId, countryId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [maxAccess, setMaxAccess] = useState({ record: [] })
   const { stack: stackError } = useError()
@@ -206,6 +206,7 @@ export default function BenificiaryBankForm({ client, dispersalType, beneficiary
       setEditMode(true)
     }
   })
+  console.log('check formik ', formik.values)
 
   const { labels: _labels } = useResourceQuery({
     datasetId: ResourceIds.BeneficiaryBank
@@ -220,6 +221,9 @@ export default function BenificiaryBankForm({ client, dispersalType, beneficiary
       height={480}
       maxAccess={maxAccess}
       disabledSubmit={editMode}
+      isCleared={viewBtns}
+      isInfo={viewBtns}
+      isSaved={viewBtns}
     >
       <VertLayout>
         <Grow>

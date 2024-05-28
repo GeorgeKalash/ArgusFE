@@ -71,8 +71,8 @@ const OutwardsModification = () => {
         recordId: recordId ? recordId : null,
         maxAccess: access
       },
-      width: 1000,
-      height: 530,
+      width: 1400,
+      height: 700,
       title: _labels.outwardsModification
     })
   }

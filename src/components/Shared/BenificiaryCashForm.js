@@ -23,7 +23,7 @@ import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-const BenificiaryCashForm = ({ client, dispersalType, beneficiary, corId, countryId }) => {
+const BenificiaryCashForm = ({ viewBtns = true, client, dispersalType, beneficiary, corId, countryId }) => {
   const [maxAccess, setMaxAccess] = useState({ record: [] })
   const { stack: stackError } = useError()
   const [editMode, setEditMode] = useState(beneficiary?.beneficiaryId)
@@ -264,6 +264,9 @@ const BenificiaryCashForm = ({ client, dispersalType, beneficiary, corId, countr
       setEditMode={setEditMode}
       maxAccess={maxAccess}
       disabledSubmit={editMode}
+      isCleared={viewBtns}
+      isInfo={viewBtns}
+      isSaved={viewBtns}
     >
       <VertLayout>
         <Grow>

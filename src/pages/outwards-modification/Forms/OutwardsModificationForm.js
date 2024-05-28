@@ -1,6 +1,6 @@
 import { Grid } from '@mui/material'
 import * as yup from 'yup'
-import { useEffect, useContext } from 'react'
+import { useEffect, useContext, useState } from 'react'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FormShell from 'src/components/Shared/FormShell'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
@@ -16,14 +16,16 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import { formatDateFromApi } from 'src/lib/date-helper'
 import FieldSet from 'src/components/Shared/FieldSet'
-import { useWindow } from 'src/window'
-import BenificiaryBank from 'src/pages/outwards-transfer/Tabs/BenificiaryBank'
-import BenificiaryCash from 'src/pages/outwards-transfer/Tabs/BenificiaryCash'
+import { useWindow } from 'src/windows'
+import BenificiaryCashForm from 'src/components/Shared/BenificiaryCashForm'
+import BenificiaryBankForm from 'src/components/Shared/BenificiaryBankForm'
 
 export default function OutwardsModificationForm({ maxAccess, labels, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
-  const [editMode, setEditMode] = !!recordId
+  const [editMode, setEditMode] = useState(!!recordId)
+  const [displayCash, setDisplayCash] = useState(false)
+  const [displayBank, setDisplayBank] = useState(false)
 
   const { formik } = useForm({
     maxAccess: maxAccess,
@@ -38,7 +40,12 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
       productName: '',
       clientId: '',
       clientRef: '',
-      clientName: ''
+      clientName: '',
+      dispersalType: '',
+      countryId: '',
+      beneficiaryId: '',
+      beneficiarySeqNo: '',
+      corId: ''
     },
     enableReinitialize: true,
     validateOnChange: true,
@@ -57,43 +64,90 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
       }*/
     }
   })
-  function fillOutwardData(data) {
-    formik.setFieldValue('outwardRef', data ? data.reference : '')
-    formik.setFieldValue('outwardsDate', data ? formatDateFromApi(data.date) : '')
-    formik.setFieldValue('amount', data ? data.amount : '')
-    formik.setFieldValue('productName', data ? data.productId : '')
-    formik.setFieldValue('clientId', data ? data.clientId : '')
-    formik.setFieldValue('clientRef', data ? data.clientRef : '')
-    formik.setFieldValue('clientName', data ? data.clientName : '')
-    formik.setFieldValue('ttNo', data ? data.ttNo : '')
-    viewBeneficiary(data ? data.dispersalType : '')
+
+  const { OldBenFormik } = useForm({
+    maxAccess: maxAccess,
+    initialValues: {
+      clientId: '',
+      clientRef: '',
+      clientName: '',
+      countryId: '',
+      beneficiaryId: '',
+      beneficiarySeqNo: '',
+      corId: ''
+    },
+    enableReinitialize: true,
+    validateOnChange: true,
+    validationSchema: yup.object({
+      name: yup.string().required(' '),
+      bankId: yup.string().required(' ')
+    }),
+    onSubmit: async values => {}
+  })
+
+  async function fillOutwardData(recordId) {
+    const formFields = [
+      'outwardRef',
+      'outwardsDate',
+      'amount',
+      'productName',
+      'clientId',
+      'clientRef',
+      'clientName',
+      'ttNo',
+      'dispersalType',
+      'countryId',
+      'beneficiaryId',
+      'beneficiarySeqNo',
+      'corId'
+    ]
+
+    const setFieldValues = values => {
+      formFields.forEach(field => {
+        formik.setFieldValue(field, values[field] ?? '')
+      })
+    }
+
+    if (recordId) {
+      const res = await getRequest({
+        extension: RemittanceOutwardsRepository.OutwardsTransfer.get2,
+        parameters: `_recordId=${recordId}`
+      })
+
+      const { headerView, ttNo } = res.record
+
+      const fieldValues = {
+        outwardRef: headerView.reference,
+        outwardsDate: formatDateFromApi(headerView.date),
+        amount: headerView.amount,
+        productName: headerView.productName,
+        clientId: headerView.clientId,
+        clientRef: headerView.clientRef,
+        clientName: headerView.clientName,
+        ttNo: ttNo,
+        dispersalType: headerView.dispersalType,
+        countryId: headerView.countryId,
+        beneficiaryId: headerView.beneficiaryId,
+        beneficiarySeqNo: headerView.beneficiarySeqNo,
+        corId: headerView.corId
+      }
+
+      setFieldValues(fieldValues)
+      viewBeneficiary(headerView.dispersalType)
+    } else {
+      viewBeneficiary('')
+    }
   }
+
   function viewBeneficiary(dispersalType) {
-    if (formValues.dispersalType === 1) {
-      stack({
-        Component: BenificiaryCash,
-        props: {
-          clientId: formik.values.clientId,
-          countryId: formik.values.countryId,
-          beneficiaryId: formik.values.beneficiaryId
-        },
-        width: 700,
-        height: 500,
-        title: 'Cash'
-      })
-    } else if (formValues.dispersalType === 2) {
-      stack({
-        Component: BenificiaryBank,
-        props: {
-          clientId: formik.values.clientId,
-          dispersalType: formik.values.dispersalType,
-          countryId: formik.values.countryId,
-          beneficiaryId: formik.values.beneficiaryId
-        },
-        width: 900,
-        height: 600,
-        title: 'Bank'
-      })
+    if (dispersalType === 1) {
+      setDisplayCash(true)
+    } else if (dispersalType === 2) {
+      setDisplayBank(true)
+    }
+    if (!dispersalType) {
+      setDisplayBank(false)
+      setDisplayCash(false)
     }
   }
 
@@ -138,7 +192,7 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
                   label={labels.outward}
                   form={formik}
                   onChange={(event, newValue) => {
-                    fillOutwardData(newValue)
+                    fillOutwardData(newValue ? newValue.recordId : '')
                   }}
                   error={formik.touched.outwardRef && Boolean(formik.errors.outwardRef)}
                   maxAccess={maxAccess}
@@ -210,10 +264,80 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
           </Grid>
           <Grid container>
             <Grid container rowGap={2} xs={6} spacing={2} sx={{ pt: 5, pl: 2 }}>
-              <FieldSet title='Benificiary [Old]'></FieldSet>
+              <FieldSet title='Benificiary [Old]'>
+                {displayBank && (
+                  <BenificiaryBankForm
+                    client={{
+                      clientId: formik.values.clientId,
+                      clientName: formik.values.clientName,
+                      clientRef: formik.values.clientRef
+                    }}
+                    beneficiary={{
+                      beneficiaryId: formik.values.beneficiaryId,
+                      beneficiarySeqNo: formik.values.beneficiarySeqNo
+                    }}
+                    dispersaltype={formik.values.dispersalType}
+                    countryId={formik.values.countryId}
+                    corId={formik.values.corId}
+                    viewBtns={false}
+                  />
+                )}
+                {displayCash && (
+                  <BenificiaryCashForm
+                    client={{
+                      clientId: formik.values.clientId,
+                      clientName: formik.values.clientName,
+                      clientRef: formik.values.clientRef
+                    }}
+                    beneficiary={{
+                      beneficiaryId: formik.values.beneficiaryId,
+                      beneficiarySeqNo: formik.values.beneficiarySeqNo
+                    }}
+                    dispersaltype={formik.values.dispersalType}
+                    countryId={formik.values.countryId}
+                    corId={formik.values.corId}
+                    viewBtns={false}
+                  />
+                )}
+              </FieldSet>
             </Grid>
             <Grid container rowGap={2} xs={6} spacing={2} sx={{ pt: 5, pl: 4 }}>
-              <FieldSet title='Benificiary [New]'></FieldSet>
+              <FieldSet title='Benificiary [New]'>
+                {displayBank && (
+                  <BenificiaryBankForm
+                    client={{
+                      clientId: formik.values.clientId,
+                      clientName: formik.values.clientName,
+                      clientRef: formik.values.clientRef
+                    }}
+                    beneficiary={{
+                      beneficiaryId: formik.values.beneficiaryId,
+                      beneficiarySeqNo: formik.values.beneficiarySeqNo
+                    }}
+                    dispersaltype={formik.values.dispersalType}
+                    countryId={formik.values.countryId}
+                    corId={formik.values.corId}
+                    viewBtns={false}
+                  />
+                )}
+                {displayCash && (
+                  <BenificiaryCashForm
+                    client={{
+                      clientId: formik.values.clientId,
+                      clientName: formik.values.clientName,
+                      clientRef: formik.values.clientRef
+                    }}
+                    beneficiary={{
+                      beneficiaryId: formik.values.beneficiaryId,
+                      beneficiarySeqNo: formik.values.beneficiarySeqNo
+                    }}
+                    dispersaltype={formik.values.dispersalType}
+                    countryId={formik.values.countryId}
+                    corId={formik.values.corId}
+                    viewBtns={false}
+                  />
+                )}
+              </FieldSet>
             </Grid>
           </Grid>
         </Grow>
