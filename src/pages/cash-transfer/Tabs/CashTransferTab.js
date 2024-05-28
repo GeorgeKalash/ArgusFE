@@ -351,7 +351,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
-            <Grid container item xs={6} spacing={4}>
+            <Grid container rowGap={2} xs={6} sx={{ px: 2 }} spacing={4}>
               <Grid item xs={12}>
                 <CustomTextField
                   name='reference'
@@ -411,7 +411,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
                 />
               </Grid>
             </Grid>
-            <Grid container item xs={6} spacing={4}>
+            <Grid container rowGap={2} xs={6} sx={{ px: 2 }} spacing={4}>
               <Grid item xs={12}>
                 <CustomDatePicker
                   name='date'
