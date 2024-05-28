@@ -32,7 +32,7 @@ export function useDocumentType({ functionId, access, hasDT, action }) {
   const query = useQuery({
     retry: false,
     enabled: !!functionId,
-    queryKey: [functionId, nraId, JSON.stringify(access)],
+    queryKey: [functionId, nraId, !!access],
     queryFn: nraId || nraId === 'naraId' ? () => queryFn(nraId) : () => queryFn()
   })
 
