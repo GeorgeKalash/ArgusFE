@@ -74,15 +74,33 @@ export const Buttons = [
     main: false
   },
   {
+    key: 'Print',
+    color: '#231f20',
+    image: 'print.png',
+    main: false
+  },
+  {
     key: 'Invoice',
     color: '#231f20',
     image: 'invoice.png',
     main: false
   },
   {
+    key: 'Tree',
+    color: '#231f20',
+    image: 'tree.png',
+    main: false
+  },
+  {
     key: 'Integration Account',
     color: '#231f20',
     image: 'intAccount.png',
+    main: false
+  },
+  {
+    key: 'Account Balance',
+    color: '#275915',
+    image: 'popup-window.png',
     main: false
   },
   {

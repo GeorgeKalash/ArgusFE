@@ -121,7 +121,7 @@ const GlobalAuthorization = () => {
             labels={labels}
             inputSearch={true}
           >
-            <Box sx={{width: '350px', pt: 2, pl: 2 }}>
+            <Grid item sx={{width: '350px', pt: 2, pl: 2 }}>
               <ResourceComboBox
                 datasetId={DataSets.MODULE}
                 name='moduleId'
@@ -134,10 +134,12 @@ const GlobalAuthorization = () => {
                   onChange(newValue?.key)
                 }}
               />
-            </Box>
+            </Grid>
+            <Grid item>
               <Button variant='contained' onClick={() => openApplyModuleLevel()} disabled={!filters.moduleId}>
-                <Icon icon='mdi:arrow-expand-right' fontSize={18} />
+                <Icon icon='mdi:arrow-expand-right' fontSize={20} />
               </Button>
+              </Grid>
           </GridToolbar>
           </Fixed>
         <Table

@@ -48,5 +48,12 @@ export const CashBankRepository = {
     set: service + 'setBAC',
     del: service + 'delACC',
     snapshot: service + 'snapshotACC'
+  },
+  AccountBalance: {
+    qry: service + 'qryABA',
+    get: service + 'getABA'
+  },
+  CATransaction: {
+    page: service + 'pageTRX'
   }
 }

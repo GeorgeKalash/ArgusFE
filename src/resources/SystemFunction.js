@@ -96,7 +96,8 @@ export const SystemFunction = {
   CreditInvoicePurchase: Module.CurrencyTrading * 100 + 6,
   CreditInvoiceSales: Module.CurrencyTrading * 100 + 7,
   KYC: Module.Remittance * 100 + 0,
-  Outwards: Module.Remittance * 100 + 2
+  Outwards: Module.Remittance * 100 + 2,
+  CashCountTransaction: Module.CashCountTransaction * 100 + 1
 }
 
 export const getSystemFunctionModule = functionId => {

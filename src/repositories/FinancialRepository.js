@@ -69,5 +69,12 @@ export const FinancialRepository = {
     get: service + 'getTXC',
     set: service + 'setTXC',
     del: service + 'delTXC'
+  },
+  FiOpeningBalance: {
+    qry: service + 'qryOBA',
+    page: service + 'pageOBA',
+    get: service + 'getOBA',
+    set: service + 'setOBA',
+    del: service + 'delOBA'
   }
 }
