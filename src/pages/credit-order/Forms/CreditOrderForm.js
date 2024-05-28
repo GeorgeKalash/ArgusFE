@@ -937,20 +937,22 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
           </Grid>
         </Fixed>
         <Grow>
-              <DataGrid
-                onChange={value => detailsFormik.setFieldValue('rows', value)}
-                value={detailsFormik.values.rows}
-                error={detailsFormik.errors.rows}
-                columns={columns}
-                bg={
-                  formik.values.functionId &&
-                  (formik.values.functionId != SystemFunction.CurrencyCreditOrderPurchase
-                    ? '#C7F6C7'
-                    : 'rgb(245, 194, 193)')
-                }
-              />
-          </Grow>
-          <Fixed>
+          <DataGrid
+            onChange={value => detailsFormik.setFieldValue('rows', value)}
+            value={detailsFormik.values.rows}
+            error={detailsFormik.errors.rows}
+            columns={columns}
+            allowAddNewLine={!isClosed}
+            allowDelete={!isClosed}
+            bg={
+              formik.values.functionId &&
+              (formik.values.functionId != SystemFunction.CurrencyCreditOrderPurchase
+                ? '#C7F6C7'
+                : 'rgb(245, 194, 193)')
+            }
+          />
+        </Grow>
+        <Fixed>
           <Grid container rowGap={1} xs={12}>
             {/* First Column (moved to the left) */}
             <FormGrid container rowGap={1} xs={8} style={{ marginTop: '10px' }}>
@@ -992,7 +994,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
               </Grid>
             </Grid>
           </Grid>
-          </Fixed>
+        </Fixed>
       </FormShell>
     </VertLayout>
   )
