@@ -187,7 +187,11 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
     // const item = { ...rowPackage }
     // item.packageReferences = updatedRows[0]
     // const index = rowPackage.id - 1
-    formik.setFieldValue(`packages[${index}]`, newRows)
+    newRows[formik.values.packages[0]?.packageReferences?.length].seqNo =
+      formik.values.packages[0]?.packageReferences?.length + 1
+
+    // formik.values.packages[0]?.packageReferences?.length
+    formik.setFieldValue(`packages[0].packageReferences`, newRows)
 
     /*formik.setValues(prevValues => ({
       ...prevValues,
