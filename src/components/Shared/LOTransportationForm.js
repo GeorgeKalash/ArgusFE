@@ -101,13 +101,14 @@ export const LOTransportationForm = ({ recordId, functionId, editMode }) => {
               />
             </Grid>
             <Grid item xs={6}>
-              <CustomNumberField
+              <CustomTextField
                 name='tripNo'
                 label={labels.tripNo}
                 value={formik.values.tripNo}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('tripNo', '')}
                 maxAccess={maxAccess}
+                type='numeric'
                 maxLength='20'
                 required
                 readOnly={editMode}
@@ -132,7 +133,7 @@ export const LOTransportationForm = ({ recordId, functionId, editMode }) => {
               />
             </Grid>
             <Grid item xs={6}>
-              <CustomNumberField
+              <CustomTextField
                 name='doNo'
                 label={labels.doNo}
                 value={formik.values.doNo}
@@ -140,6 +141,7 @@ export const LOTransportationForm = ({ recordId, functionId, editMode }) => {
                 onClear={() => formik.setFieldValue('doNo', '')}
                 maxAccess={maxAccess}
                 maxLength='20'
+                type='numeric'
                 required
                 readOnly={editMode}
                 error={formik.touched.doNo && Boolean(formik.errors.doNo)}
@@ -163,7 +165,7 @@ export const LOTransportationForm = ({ recordId, functionId, editMode }) => {
               />
             </Grid>
             <Grid item xs={6}>
-              <CustomNumberField
+              <CustomTextField
                 name='customsNo'
                 label={labels.customsNo}
                 value={formik.values.customsNo}
@@ -171,6 +173,7 @@ export const LOTransportationForm = ({ recordId, functionId, editMode }) => {
                 onClear={() => formik.setFieldValue('customsNo', '')}
                 maxAccess={maxAccess}
                 maxLength='20'
+                type='numeric'
                 required
                 readOnly={editMode}
                 error={formik.touched.customsNo && Boolean(formik.errors.customsNo)}
@@ -199,6 +202,7 @@ export const LOTransportationForm = ({ recordId, functionId, editMode }) => {
                 label={labels.netGross}
                 value={formik.values.grossWgt}
                 onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('grossWgt', '')}
                 readOnly={editMode}
                 required
                 error={formik.touched.grossWgt && Boolean(formik.errors.grossWgt)}
@@ -227,13 +231,14 @@ export const LOTransportationForm = ({ recordId, functionId, editMode }) => {
                 label={labels.netWgt}
                 value={formik.values.netWgt}
                 onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('netWgt', '')}
                 readOnly={editMode}
                 required
                 error={formik.touched.netWgt && Boolean(formik.errors.netWgt)}
               />
             </Grid>
             <Grid item xs={6}>
-              <CustomNumberField
+              <CustomTextField
                 name='policyNo'
                 label={labels.policyNo}
                 value={formik.values.policyNo}
@@ -241,6 +246,7 @@ export const LOTransportationForm = ({ recordId, functionId, editMode }) => {
                 onClear={() => formik.setFieldValue('policyNo', '')}
                 maxAccess={maxAccess}
                 maxLength='20'
+                type='numeric'
                 required
                 readOnly={editMode}
                 error={formik.touched.policyNo && Boolean(formik.errors.policyNo)}
