@@ -1,10 +1,8 @@
 import { Grid } from '@mui/material'
 import * as yup from 'yup'
-import { useEffect, useContext, useState } from 'react'
+import { useEffect, useContext } from 'react'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FormShell from 'src/components/Shared/FormShell'
-import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -12,12 +10,12 @@ import toast from 'react-hot-toast'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
-import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
-import { CashBankRepository } from 'src/repositories/CashBankRepository'
+import { formatDateFromApi } from 'src/lib/date-helper'
+import date from 'src/components/Shared/DataGrid/components/date'
 
 export default function OutwardsModificationForm({ maxAccess, labels, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -25,7 +23,16 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
 
   const { formik } = useForm({
     maxAccess,
-    initialValues: {},
+    initialValues: {
+      recordId: null,
+      reference: '',
+      date: new Date(),
+      outwardsDate: null,
+      outwardId: '',
+      ttNo: '',
+      productName: '',
+      clientId: ''
+    },
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -33,17 +40,17 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
       bankId: yup.string().required(' ')
     }),
     onSubmit: async values => {
-      const res = await postRequest({
+      /*   const res = await postRequest({
         extension: RemittanceOutwardsRepository.BeneficiaryBank.set,
         record: JSON.stringify(values)
       })
 
       if (res.recordId) {
         toast.success('Record Updated Successfully')
-      }
+      }*/
     }
   })
-  useEffect(() => {}, [])
+  console.log('formik test ', formik.values)
 
   return (
     <FormShell resourceId={ResourceIds.OutwardsModification} form={formik} height={480} maxAccess={maxAccess}>
@@ -70,13 +77,12 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
                   value={formik.values.date}
                   editMode={editMode}
                   maxAccess={maxAccess}
-                  readOnly
                   error={formik.touched.date && Boolean(formik.errors.date)}
                 />
               </Grid>
             </Grid>
             <Grid container sx={{ display: 'flex', flexDirection: 'row' }}>
-              <Grid item xs={4} sx={{ mt: -2 }}>
+              <Grid item xs={4}>
                 <ResourceLookup
                   endpointId={RemittanceOutwardsRepository.OutwardsTransfer.snapshot}
                   valueField='reference'
@@ -87,7 +93,10 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
                   label={labels.outward}
                   form={formik}
                   onChange={(event, newValue) => {
-                    formik.setFieldValue('outwardId', newValue?.recordId)
+                    formik.setFieldValue('outwardId', newValue ? newValue.recordId : '')
+                    formik.setFieldValue('outwardsDate', newValue ? formatDateFromApi(newValue.date) : '')
+                    formik.setFieldValue('amount', newValue ? newValue.amount : '')
+                    formik.setFieldValue('productName', newValue ? newValue.productId : '')
                   }}
                   error={formik.touched.outwardId && Boolean(formik.errors.outwardId)}
                   maxAccess={maxAccess}
@@ -105,9 +114,8 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
               </Grid>
               <Grid item xs={4} sx={{ pl: 1, pt: 2 }}>
                 <CustomDatePicker
-                  name='date'
-                  required
-                  label={labels.date}
+                  name='outwardsDate'
+                  label={labels.outwardsDate}
                   value={formik.values.date}
                   editMode={editMode}
                   maxAccess={maxAccess}
@@ -127,7 +135,7 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
                   error={formik.touched.amount && Boolean(formik.errors.amount)}
                 />
               </Grid>
-              <Grid item xs={8} sx={{ pl: 1, pt: 2, mt: -4 }}>
+              <Grid item xs={8} sx={{ pl: 1, pt: 2 }}>
                 <ResourceLookup
                   endpointId={CTCLRepository.ClientCorporate.snapshot}
                   parameters={{
