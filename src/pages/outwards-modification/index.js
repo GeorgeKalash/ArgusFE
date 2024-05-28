@@ -75,7 +75,7 @@ const OutwardsModification = () => {
       },
       width: 1000,
       height: 530,
-      title: _labels.OutwardsModification
+      title: _labels.outwardsModification
     })
   }
 

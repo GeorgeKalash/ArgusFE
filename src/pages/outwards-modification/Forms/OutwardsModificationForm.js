@@ -74,62 +74,9 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
                   error={formik.touched.date && Boolean(formik.errors.date)}
                 />
               </Grid>
-              <Grid item xs={4} sx={{ pl: 1 }}>
-                <CustomTextField
-                  name='ttNo'
-                  label={labels.ttNo}
-                  value={formik.values.ttNo}
-                  readOnly
-                  error={formik.touched.ttNo && Boolean(formik.errors.ttNo)}
-                  maxAccess={maxAccess}
-                />
-              </Grid>
             </Grid>
             <Grid container sx={{ display: 'flex', flexDirection: 'row' }}>
-              <Grid item xs={4} sx={{ pt: 2 }}>
-                <CustomNumberField
-                  name='amount'
-                  label={labels.amount}
-                  value={formik.values.amount}
-                  maxAccess={maxAccess}
-                  required
-                  readOnly
-                  error={formik.touched.amount && Boolean(formik.errors.amount)}
-                />
-              </Grid>
-              <Grid item xs={8} sx={{ pl: 1, pt: 2, mt: -4 }}>
-                <ResourceLookup
-                  endpointId={CTCLRepository.ClientCorporate.snapshot}
-                  parameters={{
-                    _category: 0
-                  }}
-                  valueField='reference'
-                  displayField='name'
-                  name='clientId'
-                  label={labels.client}
-                  form={formik}
-                  required
-                  readOnly
-                  displayFieldWidth={2}
-                  valueShow='clientRef'
-                  secondValueShow='clientName'
-                  maxAccess={maxAccess}
-                  errorCheck={'clientId'}
-                />
-              </Grid>
-            </Grid>
-            <Grid container sx={{ display: 'flex', flexDirection: 'row' }}>
-              <Grid item xs={4} sx={{ pt: 2 }}>
-                <CustomTextField
-                  name='productName'
-                  label={labels.product}
-                  value={formik.values.productName}
-                  readOnly
-                  error={formik.touched.ttNo && Boolean(formik.errors.productName)}
-                  maxAccess={maxAccess}
-                />
-              </Grid>
-              <Grid item xs={4} sx={{ pl: 1, pt: 2, mt: -4 }}>
+              <Grid item xs={4} sx={{ mt: -2 }}>
                 <ResourceLookup
                   endpointId={RemittanceOutwardsRepository.OutwardsTransfer.snapshot}
                   valueField='reference'
@@ -146,6 +93,69 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
                   maxAccess={maxAccess}
                 />
               </Grid>
+              <Grid item xs={4} sx={{ pl: 1, pt: 2 }}>
+                <CustomTextField
+                  name='ttNo'
+                  label={labels.ttNo}
+                  value={formik.values.ttNo}
+                  readOnly
+                  error={formik.touched.ttNo && Boolean(formik.errors.ttNo)}
+                  maxAccess={maxAccess}
+                />
+              </Grid>
+              <Grid item xs={4} sx={{ pl: 1, pt: 2 }}>
+                <CustomDatePicker
+                  name='date'
+                  required
+                  label={labels.date}
+                  value={formik.values.date}
+                  editMode={editMode}
+                  maxAccess={maxAccess}
+                  readOnly
+                  error={formik.touched.date && Boolean(formik.errors.date)}
+                />
+              </Grid>
+            </Grid>
+            <Grid container sx={{ display: 'flex', flexDirection: 'row' }}>
+              <Grid item xs={4} sx={{ pt: 2 }}>
+                <CustomNumberField
+                  name='amount'
+                  label={labels.amount}
+                  value={formik.values.amount}
+                  maxAccess={maxAccess}
+                  readOnly
+                  error={formik.touched.amount && Boolean(formik.errors.amount)}
+                />
+              </Grid>
+              <Grid item xs={8} sx={{ pl: 1, pt: 2, mt: -4 }}>
+                <ResourceLookup
+                  endpointId={CTCLRepository.ClientCorporate.snapshot}
+                  parameters={{
+                    _category: 0
+                  }}
+                  valueField='reference'
+                  displayField='name'
+                  name='clientId'
+                  label={labels.client}
+                  form={formik}
+                  readOnly
+                  displayFieldWidth={2}
+                  valueShow='clientRef'
+                  secondValueShow='clientName'
+                  maxAccess={maxAccess}
+                  errorCheck={'clientId'}
+                />
+              </Grid>
+            </Grid>
+            <Grid item xs={4} sx={{ pt: 2 }}>
+              <CustomTextField
+                name='productName'
+                label={labels.product}
+                value={formik.values.productName}
+                readOnly
+                error={formik.touched.ttNo && Boolean(formik.errors.productName)}
+                maxAccess={maxAccess}
+              />
             </Grid>
           </Grid>
         </Grow>
