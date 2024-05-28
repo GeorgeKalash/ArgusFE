@@ -10,7 +10,6 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useResourceQuery } from 'src/hooks/resource'
 import * as yup from 'yup'
-import FormShell from 'src/components/Shared/FormShell'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
@@ -80,7 +79,6 @@ const GLSettings = () => {
         })
 
         setInitialValues(myObject)
-        console.log(myObject)
       })
       .catch(error => {
         setErrorMessage(error)
@@ -178,7 +176,6 @@ const GLSettings = () => {
         dataToPost.push({ key: nameKey, value: obj[nameKey] })
       }
     }
-    console.log(dataToPost)
     postRequest({
       extension: SystemRepository.Defaults.set,
       record: JSON.stringify({ sysDefaults: dataToPost })
@@ -198,8 +195,6 @@ const GLSettings = () => {
   const segNumb = ['GLACSeg0', 'GLACSeg1', 'GLACSeg2', 'GLACSeg3', 'GLACSeg4']
 
   const segName = ['GLACSegName0', 'GLACSegName1', 'GLACSegName2', 'GLACSegName3', 'GLACSegName4']
-
-  useEffect(() => console.log(formik.values), [formik])
 
   useEffect(() => {
     const segmentsNum = formik.values.GLACSegments
@@ -225,6 +220,7 @@ const GLSettings = () => {
               name='GLACSegments'
               label={_labels.segments}
               value={formik.values.GLACSegments}
+              onChange={formik.handleChange}
               type='number'
               numberField={true}
               onBlur={formik.handleChange}
@@ -271,6 +267,7 @@ const GLSettings = () => {
               <Grid key={name} item xs={12} sx={{ marginTop: '7px' }}>
                 <CustomTextField
                   name={name}
+                  label={_labels['segName' + idx]}
                   onBlur={handleBlur}
                   onFocus={e => setFocus(e.target.name)}
                   value={formik.values[name]}

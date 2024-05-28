@@ -53,5 +53,8 @@ export const CashBankRepository = {
     qry: service + 'qryABA',
     get: service + 'getABA',
     rebuild: service + 'rebuildABA'
+  },
+  CATransaction: {
+    page: service + 'pageTRX'
   }
 }
