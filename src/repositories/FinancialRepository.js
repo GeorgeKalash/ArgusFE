@@ -49,6 +49,27 @@ export const FinancialRepository = {
     set: service + 'setACB',
     del: service + 'delACB'
   },
+  TaxSchedules: {
+    qry: service + 'qryTAX',
+    page: service + 'pageTAX',
+    get: service + 'getTAX',
+    set: service + 'setTAX',
+    del: service + 'delTAX'
+  },
+  TaxDetailPack: {
+    qry: service + 'qryTXD',
+    page: service + 'pageTXD',
+    get: service + 'getTXD',
+    set2: service + 'set2TXD',
+    del: service + 'delTXD'
+  },
+  TaxCodes: {
+    qry: service + 'qryTXC',
+    page: service + 'pageTXC',
+    get: service + 'getTXC',
+    set: service + 'setTXC',
+    del: service + 'delTXC'
+  },
   FiOpeningBalance: {
     qry: service + 'qryOBA',
     page: service + 'pageOBA',
