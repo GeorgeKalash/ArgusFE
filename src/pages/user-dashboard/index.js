@@ -2,8 +2,9 @@ import { useEffect, useState, useContext } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { DashboardRepository } from 'src/repositories/DashboardRepository'
 import styled, { createGlobalStyle } from 'styled-components'
-import Chart from 'chart.js/auto'
-import { CircularData } from './circularData'
+import { CircularData } from '../../components/Shared/dashboardApplets/circularData'
+import { CompositeBarChart, LineChart } from '../../components/Shared/dashboardApplets/charts'
+import ProgressBarComponent from '../../components/Shared/dashboardApplets/ProgressBar'
 
 const GlobalStyle = createGlobalStyle`
   @import url('https://fonts.googleapis.com/css?family=Open+Sans:700,600,300');
@@ -175,41 +176,6 @@ const ProgressBarsWrapper = styled.div`
   align-items: center;
 `
 
-const ProgressBarContainer = styled.div`
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-`
-
-const ProgressBarLabel = styled.span`
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 5px;
-  color: #f0f0f0;
-`
-
-const ProgressBarBackground = styled.div`
-  width: 90%;
-  height: 20px;
-  background-color: #e0f2ff;
-  border-radius: 10px;
-  overflow: hidden;
-  margin: 20px 0;
-`
-
-const ProgressBar = styled.div`
-  height: 100%;
-  background-color: #176fb5;
-  transition: width 1.5s ease-in-out;
-`
-
-const ErrorMessage = styled.div`
-  color: white;
-  margin: 20px 0;
-`
-
 const ProfileAvatar = ({ imageUrl }) => (
   <Avatar>
     <div className='circle'></div>
@@ -218,126 +184,7 @@ const ProfileAvatar = ({ imageUrl }) => (
   </Avatar>
 )
 
-const getChartOptions = label => ({
-  responsive: true,
-  maintainAspectRatio: false,
-  scales: {
-    y: {
-      beginAtZero: true,
-      ticks: {
-        color: '#f0f0f0'
-      },
-      grid: {
-        display: false
-      }
-    },
-    x: {
-      ticks: {
-        color: '#f0f0f0'
-      },
-      grid: {
-        display: false
-      }
-    }
-  },
-  plugins: {
-    legend: {
-      labels: {
-        color: '#f0f0f0' // Set legend text color to white
-      }
-    },
-    title: {
-      display: true,
-      text: label,
-      font: {
-        size: 24,
-        weight: 'bold'
-      },
-      color: '#6673FD'
-    },
-    tooltip: {
-      enabled: true,
-      callbacks: {
-        label: function (context) {
-          return `${context.dataset.label}: ${context.raw}`
-        }
-      }
-    }
-  }
-})
-
-const CompositeBarChart = ({ id, labels, data, label }) => {
-  useEffect(() => {
-    const ctx = document.getElementById(id).getContext('2d')
-
-    const chart = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels,
-        datasets: [
-          {
-            label,
-            data,
-            backgroundColor: '#6673FD',
-            borderColor: '#6673FD',
-            borderWidth: 1
-          }
-        ]
-      },
-      options: getChartOptions(label)
-    })
-
-    return () => {
-      chart.destroy()
-    }
-  }, [id, labels, data, label])
-
-  return <canvas id={id}></canvas>
-}
-
-const LineChart = ({ id, labels, data, label }) => {
-  useEffect(() => {
-    const ctx = document.getElementById(id).getContext('2d')
-
-    const chart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels,
-        datasets: [
-          {
-            label,
-            data,
-            fill: false,
-            borderColor: '#6673FD',
-            backgroundColor: '#6673FD',
-            borderWidth: 1,
-            tension: 0.1
-          }
-        ]
-      },
-      options: getChartOptions(label)
-    })
-
-    return () => {
-      chart.destroy()
-    }
-  }, [id, labels, data, label])
-
-  return <canvas id={id}></canvas>
-}
-
-const ProgressBarComponent = ({ label, percentage }) => (
-  <ProgressBarContainer>
-    <ProgressBarLabel>{label}:</ProgressBarLabel>
-    <ProgressBarLabel>{percentage.toFixed(0)}%</ProgressBarLabel>
-    <ProgressBarBackground>
-      <ProgressBar style={{ width: `${percentage}%` }} />
-    </ProgressBarBackground>
-  </ProgressBarContainer>
-)
-
 const UserDashboard = () => {
-  const [errorMessage, setErrorMessage] = useState(null)
   const { getRequest } = useContext(RequestsContext)
 
   const [data, setData] = useState({
@@ -372,7 +219,6 @@ const UserDashboard = () => {
       extension: DashboardRepository.SalesPersonDashboard.spDB
     })
       .then(res => {
-        console.log(res.record) // Log the response data to check the structure
         setData({
           imageUrl: res.record.imageUrl || '',
           myYearlyGrowthInUnitsSoldList: res.record.myYearlyGrowthInUnitsSoldList || [],
@@ -407,7 +253,6 @@ const UserDashboard = () => {
   return (
     <>
       <GlobalStyle />
-      {errorMessage && <ErrorMessage>Error: {errorMessage}</ErrorMessage>}
       <Frame>
         <Card>
           <SideData>
