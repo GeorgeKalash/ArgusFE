@@ -6,6 +6,7 @@ const CircleContainer = styled.div`
   display: flex;
   justify-content: space-between;
   width: 100%;
+  flex: 0;
   margin-bottom: 20px;
 `
 

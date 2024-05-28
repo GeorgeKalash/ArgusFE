@@ -5,6 +5,7 @@ const Span = styled.span`
   text-transform: capitalize;
   text-align: center;
   color: #f0f0f0;
+  flex: 1;
   &.big {
     font-size: 28px;
     font-weight: 600;
@@ -17,10 +18,9 @@ const Span = styled.span`
 `
 
 const CircleIcon = styled.div`
-  width: 100px;
-  height: 100px;
   border-radius: 50%;
   background: #ffffff;
+  flex: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -29,6 +29,16 @@ const CircleIcon = styled.div`
   color: #176fb5;
   margin-bottom: 5px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+`
+
+const CircleIconContent = styled.div`
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `
 
 const CircleItemContainer = styled.div`
@@ -43,8 +53,10 @@ const CircleItemContainer = styled.div`
 export const CircularItem = ({ number, name, isPercentage = false }) => (
   <CircleItemContainer>
     <CircleIcon>
-      {number}
-      {isPercentage ? '%' : ''}
+      <CircleIconContent>
+        {number}
+        {isPercentage ? '%' : ''}
+      </CircleIconContent>
     </CircleIcon>
     <Span>{name}</Span>
   </CircleItemContainer>
