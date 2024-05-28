@@ -48,7 +48,7 @@ export default function OpeningBalanceForm({ labels, maxAccess, recordId, record
       const fiscalYear = formik.values.fiscalYear
       const accountId = formik.values.accountId
 
-      const response = await postRequest({
+      await postRequest({
         extension: CashBankRepository.OpeningBalance.set,
         record: JSON.stringify(obj)
       })
@@ -79,8 +79,6 @@ export default function OpeningBalanceForm({ labels, maxAccess, recordId, record
             parameters: `_fiscalYear=${formik.values.fiscalYear}&_accountId=${formik.values.accountId}&_currencyId=${formik.values.currencyId}`
           })
 
-          console.log(formik)
-
           formik.setValues({
             ...res.record,
             accountId: formik.values.accountId,
@@ -90,7 +88,6 @@ export default function OpeningBalanceForm({ labels, maxAccess, recordId, record
               String(res.record.accountId * 100) +
               String(res.record.currencyId * 10)
           })
-          console.log(formik, 'dsdsdsd')
         }
       } catch (exception) {}
     })()
@@ -113,7 +110,7 @@ export default function OpeningBalanceForm({ labels, maxAccess, recordId, record
                 required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik && formik.setFieldValue('fiscalYear', newValue?.fiscalYear)
+                  formik.setFieldValue('fiscalYear', newValue?.fiscalYear)
                 }}
                 error={formik.touched.fiscalYear && Boolean(formik.errors.fiscalYear)}
               />
@@ -124,6 +121,7 @@ export default function OpeningBalanceForm({ labels, maxAccess, recordId, record
                 parameters={{
                   _type: 0
                 }}
+                required
                 readOnly={editMode}
                 name='accountId'
                 label={labels.accountRef}
@@ -167,6 +165,7 @@ export default function OpeningBalanceForm({ labels, maxAccess, recordId, record
             <Grid item xs={12}>
               <CustomNumberField
                 name='amount'
+                required
                 label={labels.amount}
                 value={formik.values.amount}
                 maxAccess={maxAccess}
