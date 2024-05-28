@@ -1,7 +1,3 @@
-// ** React Imports
-
-// ** MUI Imports
-import { Box } from '@mui/material'
 import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'

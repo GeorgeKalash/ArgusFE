@@ -1,4 +1,3 @@
-// ** MUI Imports
 import { Grid } from '@mui/material'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -6,7 +5,7 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useForm } from 'src/hooks/form'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
-import { useState, useEffect, useContext } from 'react'
+import { useEffect, useContext } from 'react'
 import { useInvalidate } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import * as yup from 'yup'
@@ -18,45 +17,46 @@ export default function AgentBranchForm({ _labels, maxAccess, store, setStore, e
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId } = store
 
-  const [initialValues, setInitialData] = useState({
-    recordId: recordId || null,
-    agentId: '',
-    swiftCode: '',
-    addressId: '',
-    address: ''
-  })
-
   const invalidate = useInvalidate({
     endpointId: RemittanceSettingsRepository.CorrespondentAgentBranches.page
   })
 
   const { formik } = useForm({
     maxAccess,
-    initialValues,
-    enableReinitialize: true,
+    initialValues: {
+      recordId: recordId || null,
+      agentId: '',
+      swiftCode: '',
+      addressId: '',
+      address: ''
+    },
+    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       agentId: yup.string().required(' '),
       swiftCode: yup.string().required(' ')
     }),
     onSubmit: async obj => {
-      //const recordIdd = obj.recordId
-
       const response = await postRequest({
         extension: RemittanceSettingsRepository.CorrespondentAgentBranches.set,
         record: JSON.stringify(obj)
       })
 
       if (response.recordId) {
-        toast.success('Record Added Successfully')
+        if (!recordId) {
+          toast.success('Record Added Successfully')
+        } else toast.success('Record Edited Successfully')
+
         setStore(prevStore => ({
           ...prevStore,
           agentBranch: obj,
           recordId: response.recordId
         }))
+
         formik.setFieldValue('recordId', response.recordId)
+
         invalidate()
-      } else toast.success('Record Edited Successfully')
+      }
     }
   })
 
@@ -68,7 +68,6 @@ export default function AgentBranchForm({ _labels, maxAccess, store, setStore, e
           parameters: `_recordId=${recordId}`
         })
 
-        //setInitialData(res.record)
         formik.setValues(res.record)
         setStore(prevStore => ({
           ...prevStore,

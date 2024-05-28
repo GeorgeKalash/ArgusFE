@@ -8,7 +8,7 @@ import { useContext } from 'react'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import toast from 'react-hot-toast'
 
-const AgentBranchWindow = ({ labels, editMode, maxAccess, recordId, height }) => {
+const AgentBranchWindow = ({ labels, maxAccess, recordId, height }) => {
   const [store, setStore] = useState({
     recordId: recordId || null,
     agentBranch: null,
@@ -21,22 +21,17 @@ const AgentBranchWindow = ({ labels, editMode, maxAccess, recordId, height }) =>
   const { postRequest } = useContext(RequestsContext)
 
   async function onSubmit(address) {
-    const addressId = address.addressId
-    if (!store.agentBranch.addressId) {
-      const res = { ...store.agentBranch, addressId: addressId }
+     if (!store.agentBranch.addressId) {
+      store.agentBranch.addressId = address.addressId
+      const res = { ...store.agentBranch, addressId: address.addressId }
       if (res) {
         const data = { ...res, recordId: store?.recordId, agentId: store.agentBranch?.agentId }
         await postRequest({
           extension: RemittanceSettingsRepository.CorrespondentAgentBranches.set,
           record: JSON.stringify(data)
         })
-        if (!addressId) {
-          toast.success('Record Added Successfully')
-        }
       }
-    } else {
-      toast.success('Record Added Successfully')
-    }
+    } 
   }
 
   function setAddress(res) {
@@ -63,7 +58,7 @@ const AgentBranchWindow = ({ labels, editMode, maxAccess, recordId, height }) =>
         <AddressForm
           _labels={labels}
           maxAccess={maxAccess}
-          editMode={editMode}
+          editMode={store.recordId}
           recordId={store?.agentBranch?.addressId}
           address={store.address}
           setAddress={setAddress}

@@ -85,11 +85,10 @@ const Agent = () => {
       Component: AgentBranchWindow,
       props: {
         labels: _labels,
-        recordId: recordId ? recordId : null,
-        editMode: recordId && true
+        recordId: recordId ? recordId : null
       },
-      width: 1000,
-      height: 600,
+      width: 800,
+      height: 400,
       title: _labels.agentBranch
     })
   }
@@ -97,10 +96,10 @@ const Agent = () => {
   return (
     <VertLayout>
       <Fixed>
-      <GridToolbar onAdd={add} maxAccess={access} labels={_labels} />
+        <GridToolbar onAdd={add} maxAccess={access} labels={_labels} />
       </Fixed>
       <Grow>
-      <Table
+        <Table
           columns={columns}
           gridData={data}
           rowId={['recordId']}

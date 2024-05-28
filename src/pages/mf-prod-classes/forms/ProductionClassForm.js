@@ -9,15 +9,18 @@ import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import { ResourceLookup } from 'src/components/Shared//ResourceLookup'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
-import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-export default function ProductionClassForm({ labels, maxAccess, recordId, setErroreMssage, setSelectedRecordId, editMode, setEditMode }) {
-  const [isLoading, setIsLoading] = useState(false)
-
+export default function ProductionClassForm({
+  labels,
+  maxAccess,
+  recordId,
+  setSelectedRecordId,
+  editMode,
+  setEditMode
+}) {
   const [initialValues, setInitialData] = useState({
     recordId: null,
     reference: '',
@@ -66,8 +69,6 @@ export default function ProductionClassForm({ labels, maxAccess, recordId, setEr
     ;(async function () {
       try {
         if (recordId) {
-          setIsLoading(true)
-
           const res = await getRequest({
             extension: ManufacturingRepository.ProductionClass.get,
             parameters: `_recordId=${recordId}`
@@ -78,7 +79,6 @@ export default function ProductionClassForm({ labels, maxAccess, recordId, setEr
       } catch (exception) {
         setErrorMessage(error)
       }
-      setIsLoading(false)
     })()
   }, [])
 
