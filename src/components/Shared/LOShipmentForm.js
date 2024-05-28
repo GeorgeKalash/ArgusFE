@@ -173,19 +173,21 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
   }
 
   const handleSerialsGridChange = newRows => {
-    const updatedRows = newRows.map(row => {
-      if (!row.seqNo && row.seqNo !== 0) {
-        row.seqNo = seqCounter
-        setSeqCounter(seqCounter + 1)
-      }
+    console.log('newRows', newRows)
 
-      return row
-    })
+    // const updatedRows = newRows.map(row => {
+    //   if (!row.seqNo && row.seqNo !== 0) {
+    //     row.seqNo = seqCounter
+    //     setSeqCounter(seqCounter + 1)
+    //   }
 
-    const item = { ...rowPackage }
-    item.packageReferences = updatedRows[0]
-    const index = rowPackage.id - 1
-    formik.setFieldValue(`packages[${index}]`, item)
+    //   return row
+    // })
+
+    // const item = { ...rowPackage }
+    // item.packageReferences = updatedRows[0]
+    // const index = rowPackage.id - 1
+    formik.setFieldValue(`packages[${index}]`, newRows)
 
     /*formik.setValues(prevValues => ({
       ...prevValues,
@@ -383,7 +385,7 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
                     onChange={value => handleSerialsGridChange(value)}
                     value={
                       formik.values.packages.filter(item => item.id == selectedRowId)[0]?.packageReferences || [
-                        { seqNo: 1, id: 1, reference: '' }
+                        { seqNo: '1', id: 1, reference: '' }
                       ]
                     }
                     maxAccess={maxAccess}
