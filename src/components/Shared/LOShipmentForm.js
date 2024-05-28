@@ -21,6 +21,7 @@ import FieldSet from './FieldSet'
 export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const [seqCounter, setSeqCounter] = useState(1)
+  const [rowPackage, setPackage] = useState(null)
   const [selectedRowId, setSelectedRowId] = useState(null)
   const [enableSerials, setEnableSerials] = useState(true)
 
@@ -128,6 +129,7 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
   function loadSerialsGrid(row) {
     setSelectedRowId(row.id)
     setEnableSerials(false)
+    setPackage(row)
 
     if (row.seqNo) {
       let newList = []
@@ -179,13 +181,16 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
 
       return row
     })
-    formik.setValues(prevValues => ({
+
+    const item = { ...rowPackage }
+    item.packageReferences = updatedRows[0]
+    const index = rowPackage.id - 1
+    formik.setFieldValue(`packages[${index}]`, item)
+
+    /*formik.setValues(prevValues => ({
       ...prevValues,
       packages: prevValues.packages.map(packageItem => {
         if (packageItem.id === newRows[0].id) {
-          console.log('check package ', packageItem)
-          console.log('check package 2 ', newRows[0])
-
           return {
             ...packageItem,
             packageReferences: updatedRows
@@ -194,8 +199,12 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
           return packageItem
         }
       })
-    }))
+    }))*/
   }
+  console.log(
+    'check formik ',
+    formik.values.packages.filter(item => item.id == selectedRowId)
+  )
 
   const handlePackageGridChange = newRows => {
     newRows.map(row => {
@@ -373,8 +382,9 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
                   <DataGrid
                     onChange={value => handleSerialsGridChange(value)}
                     value={
-                      formik.values.packages.find(packageItem => packageItem.id === selectedRowId)
-                        ?.packageReferences || [{ seqNo: 1, id: 1 }]
+                      formik.values.packages.filter(item => item.id == selectedRowId)[0]?.packageReferences || [
+                        { seqNo: 1, id: 1, reference: '' }
+                      ]
                     }
                     maxAccess={maxAccess}
                     allowAddNewLine={!editMode}

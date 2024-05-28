@@ -28,6 +28,7 @@ export function DataGrid({
   rowSelectionModel,
   disabled = false
 }) {
+  console.log('check values ', value)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState([false, {}])
 
   async function processDependenciesForColumn(newRow, oldRow, editCell) {
@@ -268,7 +269,12 @@ export function DataGrid({
   const handleRowClick = params => {
     const selectedRow = value.find(row => row.id === params.row.id)
     if (onSelectionChange) {
-      onSelectionChange(selectedRow)
+      async function update({ newRow }) {
+        updateState({
+          newRow
+        })
+      }
+      onSelectionChange(selectedRow, update)
     }
   }
 
