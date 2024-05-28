@@ -34,7 +34,10 @@ export const CashBankRepository = {
     set: service + 'set2TFM',
     del: service + 'delTFM',
     page: service + 'pageTFM',
-    snapshot: service + 'snapshotTFM'
+    snapshot: service + 'snapshotTFM',
+    close: service + 'closeTFM',
+    reopen: service + 'reopenTFM',
+    post: service + 'postTFM'
   },
   CurrencyTransfer: {
     qry: service + 'qryTFC'
@@ -45,5 +48,12 @@ export const CashBankRepository = {
     set: service + 'setBAC',
     del: service + 'delACC',
     snapshot: service + 'snapshotACC'
+  },
+  AccountBalance: {
+    qry: service + 'qryABA',
+    get: service + 'getABA'
+  },
+  CATransaction: {
+    page: service + 'pageTRX'
   }
 }

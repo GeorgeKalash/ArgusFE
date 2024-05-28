@@ -14,6 +14,8 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { useForm } from 'src/hooks/form.js'
 import { useWindowDimensions } from 'src/lib/useWindowDimensions'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 export default function FieldGlobalForm({ labels, maxAccess, resourceId, resourceName, expanded }) {
   const { height } = useWindowDimensions()
@@ -145,58 +147,61 @@ export default function FieldGlobalForm({ labels, maxAccess, resourceId, resourc
     <FormShell
       resourceId={ResourceIds.GlobalAuthorization}
       form={detailsFormik}
-      height={300}
       editMode={true}
       maxAccess={maxAccess}
       isInfo={false}
       isCleared={false}
     >
-      <Grid container spacing={4}>
-        <Grid item xs={12}>
-          <CustomTextField
-            name='resourceId'
-            label={labels.resourceId}
-            value={resourceId}
-            required
-            onChange={detailsFormik.handleChange}
-            maxAccess={maxAccess}
-            readOnly={true}
-            onClear={() => detailsFormik.setFieldValue('resourceId', '')}
-            error={detailsFormik.touched.resourceId && Boolean(detailsFormik.errors.resourceId)}
-            helperText={detailsFormik.touched.resourceId && detailsFormik.errors.resourceId}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <CustomTextField
-            name='resourceName'
-            label={labels.resourceName}
-            value={resourceName}
-            required
-            readOnly={true}
-            maxAccess={maxAccess}
-            onChange={detailsFormik.handleChange}
-            onClear={() => detailsFormik.setFieldValue('resourceName', '')}
-            error={detailsFormik.touched.resourceName && Boolean(detailsFormik.errors.resourceName)}
-            helperText={detailsFormik.touched.resourceName && detailsFormik.errors.resourceName}
-          />
-        </Grid>
-      </Grid>
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={4}>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='resourceId'
+                label={labels.resourceId}
+                value={resourceId}
+                required
+                onChange={detailsFormik.handleChange}
+                maxAccess={maxAccess}
+                readOnly={true}
+                onClear={() => detailsFormik.setFieldValue('resourceId', '')}
+                error={detailsFormik.touched.resourceId && Boolean(detailsFormik.errors.resourceId)}
+                helperText={detailsFormik.touched.resourceId && detailsFormik.errors.resourceId}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='resourceName'
+                label={labels.resourceName}
+                value={resourceName}
+                required
+                readOnly={true}
+                maxAccess={maxAccess}
+                onChange={detailsFormik.handleChange}
+                onClear={() => detailsFormik.setFieldValue('resourceName', '')}
+                error={detailsFormik.touched.resourceName && Boolean(detailsFormik.errors.resourceName)}
+                helperText={detailsFormik.touched.resourceName && detailsFormik.errors.resourceName}
+              />
+            </Grid>
+          </Grid>
 
-      <Grid item xs={12} sx={{ pt: 2 }}>
-        <Box sx={{ width: '100%' }}>
-          <DataGrid
-            onChange={value => {
-              detailsFormik.setFieldValue('rows', value)
-            }}
-            value={detailsFormik.values.rows}
-            error={detailsFormik.errors.rows}
-            columns={columns}
-            allowDelete={false}
-            allowAddNewLine={false}
-            height={`${expanded ? height - 300 : 230}px`}
-          />
-        </Box>
-      </Grid>
+          <Grid item xs={12} sx={{ pt: 2 }}>
+            <Box sx={{ width: '100%' }}>
+              <DataGrid
+                onChange={value => {
+                  detailsFormik.setFieldValue('rows', value)
+                }}
+                value={detailsFormik.values.rows}
+                error={detailsFormik.errors.rows}
+                columns={columns}
+                allowDelete={false}
+                allowAddNewLine={false}
+                height={`${expanded ? height - 300 : 230}px`}
+              />
+            </Box>
+          </Grid>
+        </Grow>
+      </VertLayout>
     </FormShell>
   )
 }

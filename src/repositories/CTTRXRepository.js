@@ -40,5 +40,8 @@ export const CTTRXrepository = {
   },
   CreditInvoiceItem: {
     qry: service + 'qryIVI'
+  },
+  CashCount: {
+    qry: service + 'qryTRX'
   }
 }

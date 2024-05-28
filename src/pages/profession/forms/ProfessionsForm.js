@@ -1,6 +1,5 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
-import { useFormik } from 'formik'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -14,20 +13,10 @@ import { DataSets } from 'src/resources/DataSets'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { useForm } from 'src/hooks/form'
 
 export default function ProfessionsForm({ labels, maxAccess, recordId, setStore }) {
-  const [isLoading, setIsLoading] = useState(false)
   const [editMode, setEditMode] = useState(!!recordId)
-
-  const [initialValues, setInitialData] = useState({
-    recordId: null,
-    reference: '',
-    name: '',
-    flName: '',
-    monthlyIncome: '',
-    riskFactor: '',
-    diplomatStatus: ''
-  })
 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -35,8 +24,17 @@ export default function ProfessionsForm({ labels, maxAccess, recordId, setStore 
     endpointId: RemittanceSettingsRepository.Profession.page
   })
 
-  const formik = useFormik({
-    initialValues,
+  const { formik } = useForm({
+    initialValues: {
+      recordId: null,
+      reference: '',
+      name: '',
+      flName: '',
+      monthlyIncome: '',
+      riskFactor: '',
+      diplomatStatus: ''
+    },
+    maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object().shape({
@@ -70,35 +68,33 @@ export default function ProfessionsForm({ labels, maxAccess, recordId, setStore 
           name: obj.name
         })
         toast.success('Record Added Successfully')
-        setInitialData({
+
+        formik.setValues({
           ...obj,
           recordId: response.recordId
         })
-      } else {
-        toast.success('Record Edited Successfully')
-        setEditMode(true)
-      }
+      } else toast.success('Record Edited Successfully')
+
+      setEditMode(true)
       invalidate()
     }
   })
 
   useEffect(() => {
     ;(async function () {
-      if (recordId) {
-        setIsLoading(true)
-
-        const res = await getRequest({
-          extension: RemittanceSettingsRepository.Profession.get,
-          parameters: `_recordId=${recordId}`
-        })
-        setStore({
-          recordId: res.record.recordId,
-          name: res.record.name
-        })
-        setInitialData(res.record)
-      }
-
-      setIsLoading(false)
+      try {
+        if (recordId) {
+          const res = await getRequest({
+            extension: RemittanceSettingsRepository.Profession.get,
+            parameters: `_recordId=${recordId}`
+          })
+          setStore({
+            recordId: res.record.recordId,
+            name: res.record.name
+          })
+          formik.setValues(res.record)
+        }
+      } catch (exception) {}
     })()
   }, [])
 

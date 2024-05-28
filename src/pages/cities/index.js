@@ -11,7 +11,6 @@ import { useWindow } from 'src/windows'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { height } from '@mui/system'
 
 const City = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -33,7 +32,7 @@ const City = () => {
     access,
     search,
     clear,
-
+    refetch,
     paginationParameters
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -123,6 +122,7 @@ const City = () => {
           onSearchClear={clear}
           labels={_labels}
           inputSearch={true}
+          refetch={refetch}
         />
       </Fixed>
       <Grow>
