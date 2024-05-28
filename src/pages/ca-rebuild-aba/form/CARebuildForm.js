@@ -15,12 +15,8 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 
-export default function CARebuildAccountBalance() {
+export default function CARebuildAccountBalance({ _labels, access }) {
   const { postRequest } = useContext(RequestsContext)
-
-  const { labels: _labels, access } = useResourceQuery({
-    datasetId: ResourceIds.CARebuildAccountBalance
-  })
 
   const { formik } = useForm({
     initialValues: { fiscalYear: '', cashAccountId: '', recordId: 'N/A' },
