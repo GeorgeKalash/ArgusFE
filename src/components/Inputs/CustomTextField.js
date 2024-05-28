@@ -15,6 +15,7 @@ const CustomTextField = ({
   fullWidth = true,
   autoFocus = false,
   readOnly = false,
+  clearable = false,
   autoComplete = 'off',
   numberField = false,
   editMode = false,
@@ -125,7 +126,8 @@ const CustomTextField = ({
                 <SearchIcon sx={{ border: '0px', fontSize: 20 }} />
               </IconButton>
             )}
-            {!readOnly &&
+            {!clearable &&
+              !readOnly &&
               (value || value === 0) && ( // Only show the clear icon if readOnly is false
                 <IconButton tabIndex={-1} edge='end' onClick={onClear} aria-label='clear input'>
                   <ClearIcon sx={{ border: '0px', fontSize: 20 }} />

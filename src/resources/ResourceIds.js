@@ -109,6 +109,7 @@ export const ResourceIds = {
   ModuleDeactivation: 23107,
   Dispersal: 36109,
   OutwardsTransfer: 36301,
+  FI_dimensions: 31112,
   BeneficiaryBank: 36303,
   BeneficiaryCash: 36304,
   Beneficiary: 36305,
@@ -120,6 +121,7 @@ export const ResourceIds = {
   InstantCash: 36306,
   GlobalAuthorization: 23105,
   InterfaceMap: 36120,
+  FiOpeningBalances: 31301,
   SiteGroups: 41113,
   PriceLevels: 51101,
   CommissionSchedule: 51118,
@@ -130,5 +132,6 @@ export const ResourceIds = {
   CashNote: 37101,
   LOShipments: 40301,
   LOTransportation: 40302,
-  AccountBalance: 33107
+  AccountBalance: 33107,
+  CATransaction: 33312
 }
