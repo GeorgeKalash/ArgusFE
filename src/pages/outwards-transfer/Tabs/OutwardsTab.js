@@ -631,7 +631,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
       actions={actions}
       previewReport={editMode}
       functionId={SystemFunction.Outwards}
-      disabledSubmit={isPosted}
+      disabledSubmit={isClosed}
     >
       <VertLayout>
         <Grow>
@@ -1248,7 +1248,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                   errorCheck={'beneficiaryId'}
                 />
               </Grid>
-              <Grid item xs={2} sx={{ pl: 2 }}>
+              <Grid item xs={2} sx={{ pl: 2, mt: 3 }}>
                 <Button
                   sx={{
                     backgroundColor: '#908c8c',
@@ -1273,6 +1273,8 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                       value={formik.values.amountRows}
                       error={formik.errors.amountRows}
                       disabled={isClosed}
+                      allowAddNewLine={!isClosed}
+                      allowDelete={!isClosed}
                       maxAccess={maxAccess}
                       name='amountRows'
                       height={170}

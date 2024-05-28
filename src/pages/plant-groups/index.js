@@ -1,18 +1,26 @@
-import { useContext } from 'react'
+import { useState, useContext } from 'react'
+
+import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
+
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
+
+import Tree from 'src/components/Shared/Tree'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { ResourceIds } from 'src/resources/ResourceIds'
-import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
-import CityForm from 'src/pages/cities/Forms/CityForm'
 import { useWindow } from 'src/windows'
+
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+
+// ** Resources
+import { ResourceIds } from 'src/resources/ResourceIds'
+import PlantGroupsForm from './forms/PlantGroupsForm'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-const City = () => {
+const Plant = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const { stack } = useWindow()
@@ -21,40 +29,25 @@ const City = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     return await getRequest({
-      extension: SystemRepository.City.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_countryId=0&_stateId=0`
+      extension: SystemRepository.PlantGroup.qry,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
   }
 
   const {
     query: { data },
     labels: _labels,
-    access,
-    search,
-    clear,
+    paginationParameters,
     refetch,
-    paginationParameters
+    access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SystemRepository.City.page,
-    datasetId: ResourceIds.Cities,
-    search: {
-      endpointId: SystemRepository.City.snapshot,
-      searchFn: fetchWithSearch
-    }
+    endpointId: SystemRepository.PlantGroup.qry,
+    datasetId: ResourceIds.PlantGroups
   })
 
-  async function fetchWithSearch({ qry }) {
-    const response = await getRequest({
-      extension: SystemRepository.City.snapshot,
-      parameters: `_filter=${qry}&_stateId=0&_countryId=0`
-    })
-
-    return response
-  }
-
   const invalidate = useInvalidate({
-    endpointId: SystemRepository.City.page
+    endpointId: SystemRepository.PlantGroup.qry
   })
 
   const columns = [
@@ -68,62 +61,62 @@ const City = () => {
       headerName: _labels.name,
       flex: 1
     },
-    ,
+
     {
-      field: 'countryName',
-      headerName: _labels.country,
-      flex: 1
-    },
-    {
-      field: 'stateName',
-      headerName: _labels.state,
+      field: 'parentName',
+      headerName: _labels.parent,
       flex: 1
     }
   ]
 
+  const add = () => {
+    openForm()
+  }
+
   const del = async obj => {
     await postRequest({
-      extension: SystemRepository.City.del,
+      extension: SystemRepository.PlantGroup.del,
       record: JSON.stringify(obj)
     })
     invalidate()
     toast.success('Record Deleted Successfully')
   }
 
-  const edit = obj => {
-    openForm(obj?.recordId)
-  }
-
-  const add = () => {
-    openForm()
-  }
-
   function openForm(recordId) {
     stack({
-      Component: CityForm,
+      Component: PlantGroupsForm,
       props: {
         labels: _labels,
-        recordId: recordId,
+        recordId: recordId ? recordId : null,
         maxAccess: access
       },
-      width: 500,
-      height: 360,
-      title: _labels.cities
+      width: 600,
+      height: 350,
+      title: _labels.plantGroup
     })
+  }
+
+  function onTreeClick() {
+    stack({
+      Component: Tree,
+
+      props: {
+        data: data
+      },
+      width: 500,
+      height: 400,
+      title: 'Tree'
+    })
+  }
+
+  const edit = obj => {
+    openForm(obj?.recordId)
   }
 
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar
-          onAdd={add}
-          maxAccess={access}
-          onSearch={search}
-          onSearchClear={clear}
-          labels={_labels}
-          inputSearch={true}
-          refetch={refetch}
-        />
+        <GridToolbar onAdd={add} maxAccess={access} onTree={onTreeClick} />
       </Fixed>
       <Grow>
         <Table
@@ -132,14 +125,16 @@ const City = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          maxAccess={access}
+          isLoading={false}
           pageSize={50}
+          refetch={refetch}
           paginationParameters={paginationParameters}
           paginationType='api'
+          maxAccess={access}
         />
       </Grow>
     </VertLayout>
   )
 }
 
-export default City
+export default Plant
