@@ -16,10 +16,12 @@ const CashEnquiry = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    return await getRequest({
-      extension: CashBankRepository.CATransaction.qry,
+    const response = await getRequest({
+      extension: CashBankRepository.CATransaction.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_functionId=0`
     })
+
+    return { ...response, _startAt: _startAt }
   }
 
   const {
@@ -30,7 +32,7 @@ const CashEnquiry = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: CashBankRepository.CATransaction.qry,
+    endpointId: CashBankRepository.CATransaction.page,
     datasetId: ResourceIds.CATransaction
   })
 
