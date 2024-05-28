@@ -13,7 +13,7 @@ import { useForm } from 'src/hooks/form'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { MasterSource } from 'src/resources/MasterSource'
 
-export default function TaxSchedulesForm({ labels, maxAccess, setStore, store }) {
+export default function TaxSchedulesForm({ labels, maxAccess, setStore, store, editMode }) {
   const { recordId } = store
 
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -54,7 +54,6 @@ export default function TaxSchedulesForm({ labels, maxAccess, setStore, store })
       invalidate()
     }
   })
-  const editMode = !!formik.values.recordId || !!recordId
 
   useEffect(() => {
     ;(async function () {
