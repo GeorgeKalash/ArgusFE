@@ -114,6 +114,7 @@ export default function AgentBranchForm({ _labels, maxAccess, store, setStore, e
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('swiftCode', '')}
                 error={formik.touched.swiftCode && Boolean(formik.errors.swiftCode)}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>
