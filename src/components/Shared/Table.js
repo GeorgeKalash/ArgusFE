@@ -344,7 +344,6 @@ const Table = ({
       renderCell: params => {
         const { row } = params
         const isStatus3 = row.status === 3
-        const isStatus1 = row.status === -1
         const isWIP = row.wip === 2
 
         return (
@@ -359,7 +358,7 @@ const Table = ({
                 <Image src={editIcon} alt='Edit' width={18} height={18} />
               </IconButton>
             )}
-            {!isStatus3 && !isStatus1 && deleteBtnVisible && !isWIP && (
+            {!isStatus3 && deleteBtnVisible && !isWIP && (
               <IconButton
                 size='small'
                 onClick={() => {
