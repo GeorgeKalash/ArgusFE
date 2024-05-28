@@ -28,15 +28,12 @@ const OutwardsModification = () => {
     query: { data },
     labels: _labels,
     refetch,
-    access
+    access,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: RTOWMRepository.OutwardsModification.qry,
     datasetId: ResourceIds.OutwardsModification
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: RTOWMRepository.OutwardsModification.qry
   })
 
   const columns = [

@@ -15,23 +15,30 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import { formatDateFromApi } from 'src/lib/date-helper'
-import date from 'src/components/Shared/DataGrid/components/date'
+import FieldSet from 'src/components/Shared/FieldSet'
+import { useWindow } from 'src/window'
+import BenificiaryBank from 'src/pages/outwards-transfer/Tabs/BenificiaryBank'
+import BenificiaryCash from 'src/pages/outwards-transfer/Tabs/BenificiaryCash'
 
 export default function OutwardsModificationForm({ maxAccess, labels, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const editMode = !!recordId
+  const { stack } = useWindow()
+  const [editMode, setEditMode] = !!recordId
 
   const { formik } = useForm({
-    maxAccess,
+    maxAccess: maxAccess,
     initialValues: {
       recordId: null,
       reference: '',
-      date: new Date(),
+
+      //date: new Date(),
       outwardsDate: null,
-      outwardId: '',
+      outwardRef: '',
       ttNo: '',
       productName: '',
-      clientId: ''
+      clientId: '',
+      clientRef: '',
+      clientName: ''
     },
     enableReinitialize: true,
     validateOnChange: true,
@@ -50,7 +57,45 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
       }*/
     }
   })
-  console.log('formik test ', formik.values)
+  function fillOutwardData(data) {
+    formik.setFieldValue('outwardRef', data ? data.reference : '')
+    formik.setFieldValue('outwardsDate', data ? formatDateFromApi(data.date) : '')
+    formik.setFieldValue('amount', data ? data.amount : '')
+    formik.setFieldValue('productName', data ? data.productId : '')
+    formik.setFieldValue('clientId', data ? data.clientId : '')
+    formik.setFieldValue('clientRef', data ? data.clientRef : '')
+    formik.setFieldValue('clientName', data ? data.clientName : '')
+    formik.setFieldValue('ttNo', data ? data.ttNo : '')
+    viewBeneficiary(data ? data.dispersalType : '')
+  }
+  function viewBeneficiary(dispersalType) {
+    if (formValues.dispersalType === 1) {
+      stack({
+        Component: BenificiaryCash,
+        props: {
+          clientId: formik.values.clientId,
+          countryId: formik.values.countryId,
+          beneficiaryId: formik.values.beneficiaryId
+        },
+        width: 700,
+        height: 500,
+        title: 'Cash'
+      })
+    } else if (formValues.dispersalType === 2) {
+      stack({
+        Component: BenificiaryBank,
+        props: {
+          clientId: formik.values.clientId,
+          dispersalType: formik.values.dispersalType,
+          countryId: formik.values.countryId,
+          beneficiaryId: formik.values.beneficiaryId
+        },
+        width: 900,
+        height: 600,
+        title: 'Bank'
+      })
+    }
+  }
 
   return (
     <FormShell resourceId={ResourceIds.OutwardsModification} form={formik} height={480} maxAccess={maxAccess}>
@@ -87,18 +132,15 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
                   endpointId={RemittanceOutwardsRepository.OutwardsTransfer.snapshot}
                   valueField='reference'
                   displayField='reference'
-                  name='outwardId'
+                  name='outwardRef'
                   secondDisplayField={false}
                   required
                   label={labels.outward}
                   form={formik}
                   onChange={(event, newValue) => {
-                    formik.setFieldValue('outwardId', newValue ? newValue.recordId : '')
-                    formik.setFieldValue('outwardsDate', newValue ? formatDateFromApi(newValue.date) : '')
-                    formik.setFieldValue('amount', newValue ? newValue.amount : '')
-                    formik.setFieldValue('productName', newValue ? newValue.productId : '')
+                    fillOutwardData(newValue)
                   }}
-                  error={formik.touched.outwardId && Boolean(formik.errors.outwardId)}
+                  error={formik.touched.outwardRef && Boolean(formik.errors.outwardRef)}
                   maxAccess={maxAccess}
                 />
               </Grid>
@@ -116,7 +158,7 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
                 <CustomDatePicker
                   name='outwardsDate'
                   label={labels.outwardsDate}
-                  value={formik.values.date}
+                  value={formik.values.outwardsDate}
                   editMode={editMode}
                   maxAccess={maxAccess}
                   readOnly
@@ -164,6 +206,14 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
                 error={formik.touched.ttNo && Boolean(formik.errors.productName)}
                 maxAccess={maxAccess}
               />
+            </Grid>
+          </Grid>
+          <Grid container>
+            <Grid container rowGap={2} xs={6} spacing={2} sx={{ pt: 5, pl: 2 }}>
+              <FieldSet title='Benificiary [Old]'></FieldSet>
+            </Grid>
+            <Grid container rowGap={2} xs={6} spacing={2} sx={{ pt: 5, pl: 4 }}>
+              <FieldSet title='Benificiary [New]'></FieldSet>
             </Grid>
           </Grid>
         </Grow>

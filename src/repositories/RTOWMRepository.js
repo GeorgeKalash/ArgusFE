@@ -3,12 +3,12 @@ const service = 'RTOWM.asmx/'
 //Remittance Outwards Modification Repository
 export const RTOWMRepository = {
   OutwardsModification: {
-    qry: service + '',
-    get2: service + '',
-    set2: service + '',
-    del: service + '',
-    post: service + '',
-    reopen: service + '',
-    close: service + ''
+    qry: service + 'qryOWM',
+    get: service + 'getOWM',
+    set2: service + 'set2OWM',
+    del: service + 'delOWM',
+    post: service + 'postOWM',
+    reopen: service + 'reopenOWM',
+    close: service + 'closeOWM'
   }
 }
