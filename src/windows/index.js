@@ -21,28 +21,36 @@ export function WindowProvider({ children }) {
       }}
     >
       {children}
-      {stack.map(({ Component, title, width = 800, props, onClose, canExpand, height }, index) => (
-        <Window
-          key={index}
-          sx={{ display: 'flex !important', flex: '1' }}
-          Title={title}
-          controlled={true}
-          onClose={() => {
-            closeWindow()
-            if (onClose) onClose()
-          }}
-          width={width}
-          height={height}
-          canExpand={canExpand}
-        >
-          <Component
-            {...props}
-            window={{
-              close: closeWindow
+      {stack.map(
+        (
+          { Component, title, width = 800, props, onClose, closable, expandable, draggableWindow, height, styles },
+          index
+        ) => (
+          <Window
+            key={index}
+            sx={{ display: 'flex !important', flex: '1' }}
+            Title={title}
+            controlled={true}
+            onClose={() => {
+              closeWindow()
+              if (onClose) onClose()
             }}
-          />
-        </Window>
-      ))}
+            width={width}
+            height={height}
+            expandable={expandable}
+            draggableWindow={draggableWindow}
+            closable={closable}
+            styles={styles}
+          >
+            <Component
+              {...props}
+              window={{
+                close: closeWindow
+              }}
+            />
+          </Window>
+        )
+      )}
     </WindowContext.Provider>
   )
 }

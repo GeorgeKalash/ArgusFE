@@ -16,15 +16,18 @@ const Window = React.memo(
     height = 600,
     activeTab,
     setActiveTab,
+    draggableWindow = true,
     Title,
     onSave,
     onClear,
     onInfo,
     controlled,
     editMode = false,
+    styles,
     disabledSubmit,
     disabledInfo,
-    canExpand = true,
+    expandable = true,
+    closable = true,
     onApply,
     disabledApply,
     ...props
@@ -68,6 +71,7 @@ const Window = React.memo(
       <Box
         id='parent'
         sx={{
+          ...styles,
           bottom: 0,
           position: 'absolute',
           width: containerWidth,
@@ -78,13 +82,112 @@ const Window = React.memo(
           alignItems: 'center'
         }}
       >
-        <Draggable
-          handle='#draggable-dialog-title'
-          cancel={'[class*="MuiDialogContent-root"]'}
-          bounds='parent'
-          position={position}
-          onDrag={handleDrag}
-        >
+        {draggableWindow ? (
+          <Draggable
+            handle='#draggable-dialog-title'
+            cancel={'[class*="MuiDialogContent-root"]'}
+            bounds='parent'
+            position={position}
+            onDrag={handleDrag}
+          >
+            <Box sx={{ position: 'relative' }}>
+              <Paper
+                sx={{
+                  transition: 'width 0.3s, height 0.3s',
+                  height: controlled ? (expanded ? containerHeight : height) : expanded ? containerHeight : height,
+                  width: expanded ? containerWidth : width,
+                  display: controlled ? 'flex' : 'block',
+                  flexDirection: controlled ? 'column' : 'unset'
+                }}
+              >
+                <DialogTitle
+                  id='draggable-dialog-title'
+                  sx={{
+                    cursor: 'move',
+                    pl: '15px !important',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    py: '0px !important',
+                    margin: '0px !important',
+                    backgroundColor: '#231f20',
+                    borderTopLeftRadius: '5px',
+                    borderTopRightRadius: '5px',
+                    borderBottomLeftRadius: '0px',
+                    borderBottomRightRadius: '0px'
+                  }}
+                >
+                  <Box>
+                    <Typography
+                      sx={{
+                        fontSize: '1.2rem',
+                        fontWeight: 600,
+                        color: 'white !important'
+                      }}
+                    >
+                      {Title}
+                    </Typography>
+                  </Box>
+                  <Box>
+                    {expandable && (
+                      <IconButton
+                        tabIndex={-1}
+                        edge='end'
+                        onClick={handleExpandToggle}
+                        data-is-expanded={expanded}
+                        aria-label='expand'
+                        sx={{ color: 'white !important' }}
+                      >
+                        <OpenInFullIcon />
+                      </IconButton>
+                    )}
+                    {closable && (
+                      <IconButton
+                        tabIndex={-1}
+                        edge='end'
+                        sx={{ color: 'white !important' }}
+                        onClick={onClose}
+                        aria-label='clear input'
+                      >
+                        <ClearIcon />
+                      </IconButton>
+                    )}
+                  </Box>
+                </DialogTitle>
+                {tabs && (
+                  <Tabs value={activeTab} onChange={(event, newValue) => setActiveTab(newValue)}>
+                    {tabs.map((tab, i) => (
+                      <Tab key={i} label={tab.label} disabled={tab?.disabled} />
+                    ))}
+                  </Tabs>
+                )}
+                {!controlled ? (
+                  <>
+                    <DialogContent sx={{ p: 2 }}>{children}</DialogContent>
+                    {windowToolbarVisible && (
+                      <WindowToolbar
+                        onSave={onSave}
+                        onClear={onClear}
+                        onInfo={onInfo}
+                        onApply={onApply}
+                        disabledSubmit={disabledSubmit}
+                        disabledInfo={disabledInfo}
+                        disabledApply={disabledApply}
+                      />
+                    )}
+                  </>
+                ) : (
+                  React.Children.map(children, child => {
+                    return React.cloneElement(child, {
+                      expanded: expanded,
+                      height: expanded ? containerHeightPanel : heightPanel
+                    })
+                  })
+                )}
+              </Paper>
+            </Box>
+          </Draggable>
+        ) : (
           <Box sx={{ position: 'relative' }}>
             <Paper
               sx={{
@@ -98,7 +201,6 @@ const Window = React.memo(
               <DialogTitle
                 id='draggable-dialog-title'
                 sx={{
-                  cursor: 'move',
                   pl: '15px !important',
                   display: 'flex',
                   alignItems: 'center',
@@ -113,12 +215,20 @@ const Window = React.memo(
                 }}
               >
                 <Box>
-                  <Typography sx={{ fontSize: '1.2rem', fontWeight: 600, color: 'white !important' }}>
+                  <Typography
+                    sx={{
+                      fontSize: '1.2rem',
+                      fontWeight: 600,
+                      paddingBottom: '0.2rem !important',
+                      paddingTop: '0.2rem !important',
+                      color: 'white !important'
+                    }}
+                  >
                     {Title}
                   </Typography>
                 </Box>
                 <Box>
-                  {canExpand && (
+                  {expandable && (
                     <IconButton
                       tabIndex={-1}
                       edge='end'
@@ -130,15 +240,17 @@ const Window = React.memo(
                       <OpenInFullIcon />
                     </IconButton>
                   )}
-                  <IconButton
-                    tabIndex={-1}
-                    edge='end'
-                    sx={{ color: 'white !important' }}
-                    onClick={onClose}
-                    aria-label='clear input'
-                  >
-                    <ClearIcon />
-                  </IconButton>
+                  {closable && (
+                    <IconButton
+                      tabIndex={-1}
+                      edge='end'
+                      sx={{ color: 'white !important' }}
+                      onClick={onClose}
+                      aria-label='clear input'
+                    >
+                      <ClearIcon />
+                    </IconButton>
+                  )}
                 </Box>
               </DialogTitle>
               {tabs && (
@@ -173,7 +285,7 @@ const Window = React.memo(
               )}
             </Paper>
           </Box>
-        </Draggable>
+        )}
       </Box>
     )
   }
