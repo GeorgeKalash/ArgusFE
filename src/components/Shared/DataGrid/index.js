@@ -279,7 +279,7 @@ export function DataGrid({
   }
 
   return (
-    <Box sx={{ height: height ? height : 'auto', flex: '1 !important', width: '98%' }}>
+    <Box sx={{ height: height ? height : 'auto', flex: '1 !important' }}>
       {/* Container with scroll */}
       <MUIDataGrid
         hideFooter
