@@ -19,7 +19,6 @@ export const FinancialRepository = {
     del: service + 'delET',
     page: service + 'pageET',
     snapshot: service + 'snapshotET'
-
   },
   Account: {
     qry: service + 'qryACC',
@@ -34,20 +33,48 @@ export const FinancialRepository = {
     get: service + 'getGRP',
     set: service + 'setGRP',
     del: service + 'delGRP',
-    page: service + 'pageGRP',
+    page: service + 'pageGRP'
   },
-  AccountCreditLimit:{
+  AccountCreditLimit: {
     qry: service + 'qryACL',
     page: service + 'pageACL',
     get: service + 'getACL',
     set: service + 'setACL',
-    del: service + 'delACL',
+    del: service + 'delACL'
   },
-  AccountCreditBalance:{
+  AccountCreditBalance: {
     qry: service + 'qryACB',
     page: service + 'pageACB',
     get: service + 'getACB',
     set: service + 'setACB',
-    del: service + 'delACB',
+    del: service + 'delACB'
+  },
+  TaxSchedules: {
+    qry: service + 'qryTAX',
+    page: service + 'pageTAX',
+    get: service + 'getTAX',
+    set: service + 'setTAX',
+    del: service + 'delTAX'
+  },
+  TaxDetailPack: {
+    qry: service + 'qryTXD',
+    page: service + 'pageTXD',
+    get: service + 'getTXD',
+    set2: service + 'set2TXD',
+    del: service + 'delTXD'
+  },
+  TaxCodes: {
+    qry: service + 'qryTXC',
+    page: service + 'pageTXC',
+    get: service + 'getTXC',
+    set: service + 'setTXC',
+    del: service + 'delTXC'
+  },
+  FiOpeningBalance: {
+    qry: service + 'qryOBA',
+    page: service + 'pageOBA',
+    get: service + 'getOBA',
+    set: service + 'setOBA',
+    del: service + 'delOBA'
   }
 }

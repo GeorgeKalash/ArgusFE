@@ -22,12 +22,14 @@ import IconButton from '@mui/material/IconButton'
 import Icon from 'src/@core/components/icon'
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'
 
-function ArrowBackIcon (){
-return <KeyboardArrowRightIcon
-sx={{
-  transform: 'rotate(180Deg)'
-}}
- />
+function ArrowBackIcon() {
+  return (
+    <KeyboardArrowRightIcon
+      sx={{
+        transform: 'rotate(180Deg)'
+      }}
+    />
+  )
 }
 
 const StyledBoxForShadow = styled(Box)(({ theme }) => ({
@@ -40,11 +42,12 @@ const StyledBoxForShadow = styled(Box)(({ theme }) => ({
   width: 'calc(100% + 15px)',
   height: theme.mixins.toolbar.minHeight,
   transition: 'opacity .15s ease-in-out',
-  background: `linear-gradient(${theme.palette.background.default} ${theme.direction === 'rtl' ? '95%' : '5%'
-    },${hexToRGBA(theme.palette.background.default, 0.85)} 30%,${hexToRGBA(
-      theme.palette.background.default,
-      0.5
-    )} 65%,${hexToRGBA(theme.palette.background.default, 0.3)} 75%,transparent)`,
+  background: `linear-gradient(${theme.palette.background.default} ${
+    theme.direction === 'rtl' ? '95%' : '5%'
+  },${hexToRGBA(theme.palette.background.default, 0.85)} 30%,${hexToRGBA(
+    theme.palette.background.default,
+    0.5
+  )} 65%,${hexToRGBA(theme.palette.background.default, 0.3)} 75%,transparent)`,
   '&.scrolled': {
     opacity: 1
   }
@@ -55,17 +58,17 @@ const Navigation = props => {
     saveSettings,
     toggleNavVisibility,
     menuLockedIcon: userMenuLockedIcon,
-    menuUnlockedIcon: userMenuUnlockedIcon,
+    menuUnlockedIcon: userMenuUnlockedIcon
   } = props
 
-  const router = useRouter();
-  const { hidden, settings, afterNavMenuContent, beforeNavMenuContent, navMenuContent: userNavMenuContent } = props 
-  const {  setLastOpenedPage } = useContext(MenuContext)
-  const [isShrunk, setIsShrunk] = useState(false);
+  const router = useRouter()
+  const { hidden, settings, afterNavMenuContent, beforeNavMenuContent, navMenuContent: userNavMenuContent } = props
+  const { setLastOpenedPage } = useContext(MenuContext)
+  const [isShrunk, setIsShrunk] = useState(false)
   const [currentActiveGroup, setCurrentActiveGroup] = useState([])
-  const [filteredMenu, setFilteredMenu] = useState([]) 
-  const [openFolders, setOpenFolders] = useState([]);
-  const menu = props.verticalNavItems 
+  const [filteredMenu, setFilteredMenu] = useState([])
+  const [openFolders, setOpenFolders] = useState([])
+  const menu = props.verticalNavItems
   const gear = useContext(MenuContext)
   const [isArabic, setIsArabic] = useState(false)
   const auth = useAuth()
@@ -103,8 +106,8 @@ const Navigation = props => {
     }
   }
 
-  useEffect (()=>{
-    if(auth?.user?.languageId === 2) setIsArabic(true)
+  useEffect(() => {
+    if (auth?.user?.languageId === 2) setIsArabic(true)
     else setIsArabic(false)
   }, [])
 
@@ -126,18 +129,17 @@ const Navigation = props => {
   }
 
   // ** filterMenu
-  const handleSearch = (e) => {
-    const term = e.target.value;
-    
+  const handleSearch = e => {
+    const term = e.target.value
+
     if (term === '') {
       setFilteredMenu(menu)
       setOpenFolders([])
-    }
-    else {
-      const [filteredChildren, updatedActiveGroups] = filterMenu(menu, term);
+    } else {
+      const [filteredChildren, updatedActiveGroups] = filterMenu(menu, term)
       setFilteredMenu(filteredChildren)
     }
-  };
+  }
 
   // const filterMenu = (items, term, newActiveGroups = []) => {
 
@@ -178,8 +180,7 @@ const Navigation = props => {
   // };
 
   const filterMenu = (items, term) => {
-
-    const filteredItems = items.map((item) => {
+    const filteredItems = items.map(item => {
       if (item.children) {
         const [filteredChildren, hasMatchingChild] = filterMenu(item.children, term)
         if (filteredChildren.length > 0 || hasMatchingChild) {
@@ -190,40 +191,40 @@ const Navigation = props => {
           return {
             ...item,
             children: filteredChildren,
-            isOpen: true, // Open folders with matching children
-          };
+            isOpen: true // Open folders with matching children
+          }
         }
       }
       const isMatch = item.title.toLowerCase().includes(term.toLowerCase())
 
-      return isMatch ? { ...item, isOpen: true } : null;
+      return isMatch ? { ...item, isOpen: true } : null
     })
 
-    const filteredItemsWithoutNull = filteredItems.filter((item) => item !== null)
-    const hasMatchingItem = filteredItemsWithoutNull.some((item) => item.isOpen)
+    const filteredItemsWithoutNull = filteredItems.filter(item => item !== null)
+    const hasMatchingItem = filteredItemsWithoutNull.some(item => item.isOpen)
 
     return [filteredItemsWithoutNull, hasMatchingItem]
-  };
+  }
 
-  const filterFav = (menu) => {
-    const iconName = "FavIcon"; 
-    const favorites = [];
-  
-    const traverse = (items) => {
+  const filterFav = menu => {
+    const iconName = 'FavIcon'
+    const favorites = []
+
+    const traverse = items => {
       items?.forEach(item => {
         if (item?.children && item?.children?.length > 0) {
-          traverse(item?.children);
+          traverse(item?.children)
         } else {
-          if(item?.iconName === iconName){
-            favorites?.push(item);
+          if (item?.iconName === iconName) {
+            favorites?.push(item)
           }
         }
-      });
-    };
-    traverse(menu);
+      })
+    }
+    traverse(menu)
 
-    return favorites;
-  };
+    return favorites
+  }
 
   useEffect(() => {
     setFilteredMenu(props.verticalNavItems)
@@ -234,18 +235,15 @@ const Navigation = props => {
   return (
     <ThemeProvider theme={darkTheme}>
       <Drawer {...props}>
-        <VerticalNavHeader   
-          isArabic={isArabic}
-          {...props} 
-        />
+        <VerticalNavHeader isArabic={isArabic} {...props} />
         {beforeNavMenuContent && beforeVerticalNavMenuContentPosition === 'fixed'
           ? beforeNavMenuContent(navMenuContentProps)
           : null}
         {(beforeVerticalNavMenuContentPosition === 'static' || !beforeNavMenuContent) && (
           <StyledBoxForShadow ref={shadowRef} />
         )}
-        <Box sx={{ display: 'flex', alignItems: 'center', px: 2, pb:'10px', pt:2 }}>
-        <TextField
+        <Box sx={{ display: 'flex', alignItems: 'center', px: 2, pb: '10px', pt: 2 }}>
+          <TextField
             placeholder='Filter here...'
             variant='outlined'
             fullWidth
@@ -258,35 +256,35 @@ const Navigation = props => {
                 alignItems: navCollapsed ? 'center !important' : 'left',
                 justifyContent: navCollapsed ? 'center !important' : 'left',
                 border: 'transparent',
-                background:'#231f20',
+                background: '#231f20',
                 fieldset: {
                   borderColor: 'transparent !important'
                 },
-                height:'30px',
-                borderRadius:'5px',
-                pr:1
+                height: '30px',
+                borderRadius: '5px',
+                pr: 1
               },
-              endAdornment: <SearchIcon sx={{ border: '0px', fontSize:20 }} />
+              endAdornment: <SearchIcon sx={{ border: '0px', fontSize: 20 }} />
             }}
           />
-          <TextField sx={{display:'none'}}/>
-           <Dropdown
+          <TextField sx={{ display: 'none' }} />
+          <Dropdown
             Image={<SettingsIcon />}
-            TooltipTitle="Gear Items"
-            onClickAction={(GearItem) => {
-              router.push(GearItem?.path);
-              setLastOpenedPage(GearItem);
+            TooltipTitle='Gear Items'
+            onClickAction={GearItem => {
+              router.push(GearItem?.path)
+              setLastOpenedPage(GearItem)
             }}
             map={gear.gear}
             navCollapsed={navCollapsed}
           />
-          {filterFav(menu) && filterFav(menu).length > 0 &&(
+          {filterFav(menu) && filterFav(menu).length > 0 && (
             <Dropdown
-              Image={ <GradeIcon style={{ color: 'yellow' }}/>}
-              TooltipTitle="Favorite Items"
-              onClickAction={(favorite) => {
-                router.push(favorite?.path);
-                setLastOpenedPage(favorite);
+              Image={<GradeIcon style={{ color: 'yellow' }} />}
+              TooltipTitle='Favorite Items'
+              onClickAction={favorite => {
+                router.push(favorite?.path)
+                setLastOpenedPage(favorite)
               }}
               map={filterFav(menu)}
               navCollapsed={navCollapsed}
@@ -297,14 +295,14 @@ const Navigation = props => {
           <ScrollWrapper
             {...(hidden
               ? {
-                onScroll: container => scrollMenu(container),
-                sx: { height: '100%', overflowY: 'auto', overflowX: 'hidden' }
-              }
+                  onScroll: container => scrollMenu(container),
+                  sx: { height: '100%', overflowY: 'auto', overflowX: 'hidden' }
+                }
               : {
-                options: { wheelPropagation: false },
-                onScrollY: container => scrollMenu(container),
-                containerRef: ref => handleInfiniteScroll(ref)
-              })}
+                  options: { wheelPropagation: false },
+                  onScrollY: container => scrollMenu(container),
+                  containerRef: ref => handleInfiniteScroll(ref)
+                })}
           >
             {beforeNavMenuContent && beforeVerticalNavMenuContentPosition === 'static'
               ? beforeNavMenuContent(navMenuContentProps)
@@ -318,7 +316,6 @@ const Navigation = props => {
                   pt: 0,
                   transition: 'padding .25s ease',
                   '& > :first-child': { mt: '0' }
-
                 }}
               >
                 <VerticalNavItems
@@ -350,7 +347,7 @@ const Navigation = props => {
         >
           <Icon icon='mdi:close' fontSize={15} />
         </IconButton>
-            ) : userMenuLockedIcon === null && userMenuUnlockedIcon === null ? null : (
+      ) : userMenuLockedIcon === null && userMenuUnlockedIcon === null ? null : (
         <IconButton
           disableRipple
           disableFocusRipple
@@ -359,17 +356,21 @@ const Navigation = props => {
             p: 0,
             color: 'white',
             backgroundColor: '#231f20 !important',
-            borderRadius:'0 !important',
-            width:'10px !important',
+            borderRadius: '0 !important',
+            width: '10px !important',
             '& svg': {
               fontSize: '1.2rem',
               transition: 'opacity .25s ease-in-out'
             }
           }}
         >
-          {navCollapsed ? 
-          (isArabic ? MenuLockedIcon():MenuUnlockedIcon()) :
-          (isArabic ? MenuUnlockedIcon():MenuLockedIcon())}
+          {navCollapsed
+            ? isArabic
+              ? MenuLockedIcon()
+              : MenuUnlockedIcon()
+            : isArabic
+            ? MenuUnlockedIcon()
+            : MenuLockedIcon()}
         </IconButton>
       )}
     </ThemeProvider>
