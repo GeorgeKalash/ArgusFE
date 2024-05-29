@@ -67,9 +67,7 @@ export function DataGrid({
   const skip = allowDelete ? 1 : 0
 
   const handleButtonClick = (id, field) => {
-    console.log(id, field, 'row.id, field')
     apiRef.current.startCellEditMode({ id, field })
-
     apiRef.current.setCellFocus(id, field)
   }
   useEffect(() => {
