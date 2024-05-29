@@ -40,7 +40,6 @@ export default function BenificiaryBankForm({
   const [maxAccess, setMaxAccess] = useState({ record: [] })
   const { stack: stackError } = useError()
   const [editMode, setEditMode] = useState(beneficiary?.beneficiaryId && !editable)
-
   useEffect(() => {
     ;(async function () {
       if (countryId && corId && dispersalType) {
@@ -175,7 +174,7 @@ export default function BenificiaryBankForm({
         rtId: values.rtId,
         rtName: values.rtName,
         name: values.name,
-        dispersalType: values.dispersalType,
+        dispersalType: 1,
         isBlocked: values.isBlocked,
         stoppedDate: values.stoppedDate ? formatDateToApi(values.stoppedDate) : null,
         stoppedReason: values.stoppedReason,
@@ -207,7 +206,7 @@ export default function BenificiaryBankForm({
         seqNo: values.seqNo
       }
       const data = { header: header, beneficiaryBank: bankInfo }
-
+      console.log('check header ', header)
       if (store?.submitted) {
         setStore(prevStore => ({
           ...prevStore,

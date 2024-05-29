@@ -1,4 +1,4 @@
-const service = 'RTOWM.asmx/'
+const service = 'RTOW.asmx/'
 
 //Remittance Outwards Modification Repository
 export const RTOWMRepository = {
