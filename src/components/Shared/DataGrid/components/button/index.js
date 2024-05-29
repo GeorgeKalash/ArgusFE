@@ -1,6 +1,6 @@
 import { Button } from '@mui/material'
 
-function DataGridButton({ row, column, field, updateRow, update }) {
+function DataGridButton({ row, column, field, updateRow }) {
   return (
     <Button
       sx={{
@@ -11,7 +11,7 @@ function DataGridButton({ row, column, field, updateRow, update }) {
         objectFit: 'contain'
       }}
       autoFocus
-      onClick={e => column.onClick(e, row, update, updateRow)}
+      onClick={e => column.onClick(e, row, updateRow)}
       variant='contained'
       disabled={!row[field]}
     >

@@ -536,7 +536,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
                 }
               }
             ]}
-            allowDelete={!isClosed || !isPosted}
+            allowDelete={!isClosed || (!isPosted && !isClosed)}
           />
         </Grow>
       </VertLayout>
