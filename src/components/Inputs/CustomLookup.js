@@ -64,7 +64,10 @@ const CustomLookup = ({
         position: 'relative',
         width: '100%',
         mb: error && helperText ? 6 : 0,
-        display: 'block'
+        display: 'block',
+        '.MuiBox-root': {
+          padding: '0px !important'
+        }
       }}
     >
       <Box display={'flex'}>
@@ -246,7 +249,7 @@ const CustomLookup = ({
               error={error}
               helperText={helperText}
               sx={{
-                width: '100%' // Calculate the width dynamically
+                width: '100%'
               }}
             />
           </Box>
