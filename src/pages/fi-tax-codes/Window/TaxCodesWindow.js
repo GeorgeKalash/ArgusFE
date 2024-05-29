@@ -7,12 +7,13 @@ import HistoryForm from '../forms/HistoryForm'
 
 const TaxCodesWindow = ({ height, recordId, labels, maxAccess }) => {
   const [activeTab, setActiveTab] = useState(0)
-  const [editMode, setEditMode] = useState(recordId)
 
   const [store, setStore] = useState({
     recordId: recordId || null,
     TaxHistoryViewList: []
   })
+
+  const editMode = !!store.recordId
 
   const tabs = [{ label: labels.taxCodes }, { label: labels.history, disabled: !store.recordId }]
 
@@ -21,23 +22,10 @@ const TaxCodesWindow = ({ height, recordId, labels, maxAccess }) => {
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
 
       <CustomTabPanel height={height} index={0} value={activeTab}>
-        <TaxCodesForm
-          labels={labels}
-          setEditMode={setEditMode}
-          setStore={setStore}
-          store={store}
-          editMode={editMode}
-          maxAccess={maxAccess}
-        />
+        <TaxCodesForm labels={labels} setStore={setStore} store={store} editMode={editMode} maxAccess={maxAccess} />
       </CustomTabPanel>
       <CustomTabPanel height={height} index={1} value={activeTab}>
-        <HistoryForm
-          labels={labels}
-          setEditMode={setEditMode}
-          setStore={setStore}
-          maxAccess={maxAccess}
-          store={store}
-        />
+        <HistoryForm labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} editMode={editMode} />
       </CustomTabPanel>
     </>
   )

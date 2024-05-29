@@ -7,7 +7,6 @@ import { formatDateFromApi, formatDateToApiFunction } from 'src/lib/date-helper'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
-import { useWindowDimensions } from 'src/lib/useWindowDimensions'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
@@ -15,7 +14,6 @@ import { useForm } from 'src/hooks/form'
 const HistoryForm = ({ store, setStore, maxAccess, labels, editMode }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { height } = useWindowDimensions()
 
   const { formik } = useForm({
     enableReinitialize: true,
@@ -77,11 +75,10 @@ const HistoryForm = ({ store, setStore, maxAccess, labels, editMode }) => {
       })
       .catch(error => {})
   }
-
   useEffect(() => {
     const defaultParams = `_taxCodeId=${recordId}`
     var parameters = defaultParams
-    recordId &&
+    if (recordId) {
       getRequest({
         extension: FinancialRepository.TaxHistoryPack.qry,
         parameters: `_taxCodeId=${recordId}`
@@ -99,12 +96,11 @@ const HistoryForm = ({ store, setStore, maxAccess, labels, editMode }) => {
               ...prevStore,
               TaxHistoryView: items
             }))
-          } else {
-            formik.setValues({ TaxHistoryView: [{ id: 1, taxCodeId: '', date: '', amount: '' }] })
           }
         })
         .catch(error => {})
-  }, [recordId])
+    }
+  }, [])
 
   return (
     <>

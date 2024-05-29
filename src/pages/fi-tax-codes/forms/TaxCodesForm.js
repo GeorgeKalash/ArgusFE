@@ -13,9 +13,8 @@ import { useForm } from 'src/hooks/form'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { MasterSource } from 'src/resources/MasterSource'
 
-export default function TaxCodesForm({ labels, maxAccess, setStore, store }) {
+export default function TaxCodesForm({ labels, maxAccess, setStore, store, editMode }) {
   const { recordId } = store
-  const [editMode, setEditMode] = useState(!!recordId)
 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -51,7 +50,6 @@ export default function TaxCodesForm({ labels, maxAccess, setStore, store }) {
           recordId: response.recordId
         })
       } else toast.success('Record Edited Successfully')
-      setEditMode(true)
 
       invalidate()
     }
