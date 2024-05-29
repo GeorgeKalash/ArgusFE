@@ -357,12 +357,6 @@ export function DataGrid({
                 await commitRowUpdate()
               }
 
-              async function update({ newRow }) {
-                updateState({
-                  newRow
-                })
-              }
-
               return (
                 <Box
                   sx={{
@@ -380,7 +374,7 @@ export function DataGrid({
                     border: `1px solid ${error?.[cell.rowIndex]?.[params.field] ? '#ff0000' : 'transparent'}`
                   }}
                 >
-                  <Component {...params} update={update} updateRow={updateRow} column={column} />
+                  <Component {...params} updateRow={updateRow} column={column} />
                 </Box>
               )
             },
