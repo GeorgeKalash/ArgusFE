@@ -85,7 +85,7 @@ const CustomNumberField = ({
         endAdornment: !readOnly && (value || value === 0) && (
           <InputAdornment position='end'>
             <IconButton tabIndex={-1} edge='end' onClick={onClear} aria-label='clear input'>
-              <ClearIcon />
+              <ClearIcon sx={{ border: '0px', fontSize: 20 }} />
             </IconButton>
           </InputAdornment>
         )

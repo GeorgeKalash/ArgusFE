@@ -6,6 +6,12 @@ export const Buttons = [
     main: false
   },
   {
+    key: 'Bulk',
+    color: '#09235C',
+    image: 'Bulk.png',
+    main: false
+  },
+  {
     key: 'Cancel',
     color: '#0A4164',
     image: 'cancelWhite.png',
