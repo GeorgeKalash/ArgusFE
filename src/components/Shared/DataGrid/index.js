@@ -446,6 +446,7 @@ export function DataGrid({
                       ...column,
                       props
                     }}
+                    handleButtonClick={() => {}}
                     update={update}
                     updateRow={updateRow}
                     isLoading={isUpdatingField}
