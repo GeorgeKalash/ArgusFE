@@ -26,7 +26,7 @@ const Window = React.memo(
     styles,
     disabledSubmit,
     disabledInfo,
-    expandable = true,
+    canExpand = true,
     closable = true,
     onApply,
     disabledApply,
@@ -129,7 +129,7 @@ const Window = React.memo(
                     </Typography>
                   </Box>
                   <Box>
-                    {expandable && (
+                    {canExpand && (
                       <IconButton
                         tabIndex={-1}
                         edge='end'
@@ -228,7 +228,7 @@ const Window = React.memo(
                   </Typography>
                 </Box>
                 <Box>
-                  {expandable && (
+                  {canExpand && (
                     <IconButton
                       tabIndex={-1}
                       edge='end'

@@ -27,7 +27,7 @@ const CaRebuildAba = () => {
         _labels
       },
 
-      expandable: false,
+      canExpand: false,
 
       closable: false,
       draggableWindow: false,
