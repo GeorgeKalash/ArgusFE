@@ -60,14 +60,13 @@ export default function CashCountNotesForm({
       forceNotesCount
         ? updateRow({
             changes: {
-              ...row,
               counted,
               currencyNotes,
               variation: counted - row.system,
               flag: row.system === counted ? true : false
             }
           })
-        : updateRow({ changes: { ...row, currencyNotes } })
+        : updateRow({ changes: { currencyNotes } })
 
       window.close()
     }
