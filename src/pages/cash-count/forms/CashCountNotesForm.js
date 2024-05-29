@@ -52,23 +52,22 @@ export default function CashCountNotesForm({
           cashCountId: row?.cashCountId < 1 ? 0 : row?.cashCountId,
           ...rest
         }))
-      console.log('currencyNotes', currencyNotes)
-      console.log(update)
-      !forceNotesCount && update({ newRow: { ...row, currencyNotes } })
 
       const counted = obj.currencyNotes.reduce((acc, { subTotal }) => {
         return acc + (subTotal || 0)
       }, 0)
-      forceNotesCount &&
-        update({
-          newRow: {
-            ...row,
-            counted,
-            currencyNotes,
-            variation: counted - row.system,
-            flag: row.system === counted ? true : false
-          }
-        })
+
+      forceNotesCount
+        ? update({
+            newRow: {
+              ...row,
+              counted,
+              currencyNotes,
+              variation: counted - row.system,
+              flag: row.system === counted ? true : false
+            }
+          })
+        : forceNotesCount && update({ newRow: { ...row, currencyNotes } })
 
       window.close()
     }
