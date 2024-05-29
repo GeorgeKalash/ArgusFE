@@ -52,12 +52,23 @@ export default function CashCountNotesForm({
           cashCountId: row?.cashCountId < 1 ? 0 : row?.cashCountId,
           ...rest
         }))
-      update({ newRow: { ...row, currencyNotes } })
+      console.log('currencyNotes', currencyNotes)
+      console.log(update)
+      !forceNotesCount && update({ newRow: { ...row, currencyNotes } })
 
       const counted = obj.currencyNotes.reduce((acc, { subTotal }) => {
         return acc + (subTotal || 0)
       }, 0)
-      forceNotesCount && update({ newRow: { ...row, counted } })
+      forceNotesCount &&
+        update({
+          newRow: {
+            ...row,
+            counted,
+            currencyNotes,
+            variation: counted - row.system,
+            flag: row.system === counted ? true : false
+          }
+        })
 
       window.close()
     }
@@ -67,6 +78,7 @@ export default function CashCountNotesForm({
   }, [recordId])
 
   const getGridData = async () => {
+    console.log('row.currencyNotes', row.currencyNotes)
     const parameters = `_currencyId=` + row.currencyId
 
     const { list } = await getRequest({
