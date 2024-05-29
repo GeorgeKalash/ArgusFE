@@ -41,7 +41,6 @@ const WindowToolbar = ({
     actions,
     isSaved,
     isInfo,
-
     isCleared,
     disabledSubmit,
     disabledApply,
@@ -53,7 +52,6 @@ const WindowToolbar = ({
     onSave,
     onPost,
     onClear,
-
     onInfo,
     onApply,
     onApproval,
