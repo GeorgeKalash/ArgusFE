@@ -72,7 +72,7 @@ const OutwardsModification = () => {
         maxAccess: access
       },
       width: 1400,
-      height: 700,
+      height: 800,
       title: _labels.outwardsModification
     })
   }

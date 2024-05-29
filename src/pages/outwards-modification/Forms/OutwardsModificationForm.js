@@ -1,12 +1,11 @@
 import { Grid } from '@mui/material'
 import * as yup from 'yup'
-import { useEffect, useContext, useState } from 'react'
+import { useContext, useState } from 'react'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FormShell from 'src/components/Shared/FormShell'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import toast from 'react-hot-toast'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -16,16 +15,15 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import { formatDateFromApi } from 'src/lib/date-helper'
 import FieldSet from 'src/components/Shared/FieldSet'
-import { useWindow } from 'src/windows'
 import BenificiaryCashForm from 'src/components/Shared/BenificiaryCashForm'
 import BenificiaryBankForm from 'src/components/Shared/BenificiaryBankForm'
 
 export default function OutwardsModificationForm({ maxAccess, labels, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { stack } = useWindow()
   const [editMode, setEditMode] = useState(!!recordId)
   const [displayCash, setDisplayCash] = useState(false)
   const [displayBank, setDisplayBank] = useState(false)
+  const [store, setStore] = useState({ submitted: false }, { beneficiaryList: {} })
 
   const { formik } = useForm({
     maxAccess: maxAccess,
@@ -49,41 +47,15 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
     },
     enableReinitialize: true,
     validateOnChange: true,
-    validationSchema: yup.object({
-      name: yup.string().required(' '),
-      bankId: yup.string().required(' ')
-    }),
+    validationSchema: yup.object({}),
     onSubmit: async values => {
-      /*   const res = await postRequest({
-        extension: RemittanceOutwardsRepository.BeneficiaryBank.set,
-        record: JSON.stringify(values)
-      })
-
-      if (res.recordId) {
-        toast.success('Record Updated Successfully')
-      }*/
+      setStore(prevStore => ({
+        ...prevStore,
+        submitted: true
+      }))
     }
   })
-
-  const { OldBenFormik } = useForm({
-    maxAccess: maxAccess,
-    initialValues: {
-      clientId: '',
-      clientRef: '',
-      clientName: '',
-      countryId: '',
-      beneficiaryId: '',
-      beneficiarySeqNo: '',
-      corId: ''
-    },
-    enableReinitialize: true,
-    validateOnChange: true,
-    validationSchema: yup.object({
-      name: yup.string().required(' '),
-      bankId: yup.string().required(' ')
-    }),
-    onSubmit: async values => {}
-  })
+  console.log('store check', store)
 
   async function fillOutwardData(recordId) {
     const formFields = [
@@ -305,36 +277,42 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
               <FieldSet title='Benificiary [New]'>
                 {displayBank && (
                   <BenificiaryBankForm
-                    client={{
-                      clientId: formik.values.clientId,
-                      clientName: formik.values.clientName,
-                      clientRef: formik.values.clientRef
-                    }}
-                    beneficiary={{
-                      beneficiaryId: formik.values.beneficiaryId,
-                      beneficiarySeqNo: formik.values.beneficiarySeqNo
-                    }}
-                    dispersaltype={formik.values.dispersalType}
-                    countryId={formik.values.countryId}
-                    corId={formik.values.corId}
                     viewBtns={false}
+                    store={store}
+                    setStore={setStore}
+                    {...(editMode && {
+                      client: {
+                        clientId: formik.values.clientId,
+                        clientName: formik.values.clientName,
+                        clientRef: formik.values.clientRef
+                      },
+                      beneficiary: {
+                        beneficiaryId: formik.values.beneficiaryId,
+                        beneficiarySeqNo: formik.values.beneficiarySeqNo
+                      },
+                      dispersaltype: formik.values.dispersalType,
+                      countryId: formik.values.countryId,
+                      corId: formik.values.corId
+                    })}
                   />
                 )}
                 {displayCash && (
                   <BenificiaryCashForm
-                    client={{
-                      clientId: formik.values.clientId,
-                      clientName: formik.values.clientName,
-                      clientRef: formik.values.clientRef
-                    }}
-                    beneficiary={{
-                      beneficiaryId: formik.values.beneficiaryId,
-                      beneficiarySeqNo: formik.values.beneficiarySeqNo
-                    }}
-                    dispersaltype={formik.values.dispersalType}
-                    countryId={formik.values.countryId}
-                    corId={formik.values.corId}
                     viewBtns={false}
+                    {...(editMode && {
+                      client: {
+                        clientId: formik.values.clientId,
+                        clientName: formik.values.clientName,
+                        clientRef: formik.values.clientRef
+                      },
+                      beneficiary: {
+                        beneficiaryId: formik.values.beneficiaryId,
+                        beneficiarySeqNo: formik.values.beneficiarySeqNo
+                      },
+                      dispersaltype: formik.values.dispersalType,
+                      countryId: formik.values.countryId,
+                      corId: formik.values.corId
+                    })}
                   />
                 )}
               </FieldSet>

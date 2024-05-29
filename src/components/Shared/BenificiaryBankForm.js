@@ -25,7 +25,16 @@ import { useError } from 'src/error'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-export default function BenificiaryBankForm({ viewBtns = true, client, dispersalType, beneficiary, corId, countryId }) {
+export default function BenificiaryBankForm({
+  viewBtns = true,
+  store,
+  setStore,
+  client,
+  dispersalType,
+  beneficiary,
+  corId,
+  countryId
+}) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [maxAccess, setMaxAccess] = useState({ record: [] })
   const { stack: stackError } = useError()
@@ -97,8 +106,11 @@ export default function BenificiaryBankForm({ viewBtns = true, client, dispersal
 
         formik.setValues(obj)
       }
+      if (store?.submitted) {
+        formik.handleSubmit()
+      }
     })()
-  }, [])
+  }, [store?.submitted])
 
   const [initialValues, setInitialData] = useState({
     //RTBEN
@@ -195,18 +207,24 @@ export default function BenificiaryBankForm({ viewBtns = true, client, dispersal
       }
       const data = { header: header, beneficiaryBank: bankInfo }
 
-      const res = await postRequest({
-        extension: RemittanceOutwardsRepository.BeneficiaryBank.set,
-        record: JSON.stringify(data)
-      })
+      if (store?.submitted) {
+        setStore(prevStore => ({
+          ...prevStore,
+          beneficiaryList: data
+        }))
+      } else {
+        const res = await postRequest({
+          extension: RemittanceOutwardsRepository.BeneficiaryBank.set,
+          record: JSON.stringify(data)
+        })
 
-      if (res.recordId) {
-        toast.success('Record Updated Successfully')
+        if (res.recordId) {
+          toast.success('Record Updated Successfully')
+        }
       }
       setEditMode(true)
     }
   })
-  console.log('check formik ', formik.values)
 
   const { labels: _labels } = useResourceQuery({
     datasetId: ResourceIds.BeneficiaryBank
