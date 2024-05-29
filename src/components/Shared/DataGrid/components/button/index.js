@@ -1,6 +1,9 @@
 import { Button } from '@mui/material'
+import { useGridApiRef } from '@mui/x-data-grid'
 
-function DataGridButton({ row, column, field, update, updateRow }) {
+function DataGridButton({ row, column, field, update, updateRow, handleButtonClick }) {
+  const apiRef = useGridApiRef()
+
   return (
     <Button
       sx={{
@@ -11,7 +14,9 @@ function DataGridButton({ row, column, field, update, updateRow }) {
         objectFit: 'contain'
       }}
       autoFocus
-      onClick={e => column.onClick(e, row, update, updateRow)}
+      onClick={e => {
+        handleButtonClick(row.id, field), column.onClick(e, row, update, updateRow)
+      }}
       variant='contained'
       disabled={!row[field]}
     >

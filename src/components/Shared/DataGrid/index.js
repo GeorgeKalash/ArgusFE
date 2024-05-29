@@ -5,7 +5,7 @@ import {
   useGridApiRef
 } from '@mui/x-data-grid'
 import components from './components'
-import { Box, IconButton } from '@mui/material'
+import { Box, Button, IconButton } from '@mui/material'
 import { useEffect, useRef, useState } from 'react'
 import { useError } from 'src/error'
 import DeleteDialog from '../DeleteDialog'
@@ -66,6 +66,12 @@ export function DataGrid({
 
   const skip = allowDelete ? 1 : 0
 
+  const handleButtonClick = (id, field) => {
+    console.log(id, field, 'row.id, field')
+    apiRef.current.startCellEditMode({ id, field })
+
+    apiRef.current.setCellFocus(id, field)
+  }
   useEffect(() => {
     if (!isUpdatingField && nextEdit) {
       const { id, field } = nextEdit
@@ -380,7 +386,13 @@ export function DataGrid({
                     border: `1px solid ${error?.[cell.rowIndex]?.[params.field] ? '#ff0000' : 'transparent'}`
                   }}
                 >
-                  <Component {...params} update={update} updateRow={updateRow} column={column} />
+                  <Component
+                    {...params}
+                    update={update}
+                    updateRow={updateRow}
+                    handleButtonClick={handleButtonClick}
+                    column={column}
+                  />
                 </Box>
               )
             },
