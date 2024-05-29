@@ -1,6 +1,6 @@
 import { Grid } from '@mui/material'
 import * as yup from 'yup'
-import { useContext, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FormShell from 'src/components/Shared/FormShell'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
@@ -17,6 +17,8 @@ import { formatDateFromApi } from 'src/lib/date-helper'
 import FieldSet from 'src/components/Shared/FieldSet'
 import BenificiaryCashForm from 'src/components/Shared/BenificiaryCashForm'
 import BenificiaryBankForm from 'src/components/Shared/BenificiaryBankForm'
+import toast from 'react-hot-toast'
+import { RTOWMRepository } from 'src/repositories/RTOWMRepository'
 
 export default function OutwardsModificationForm({ maxAccess, labels, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -30,9 +32,9 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
     initialValues: {
       recordId: null,
       reference: '',
-
-      //date: new Date(),
+      date: new Date(),
       outwardsDate: null,
+      outwardId: '',
       outwardRef: '',
       ttNo: '',
       productName: '',
@@ -45,20 +47,20 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
       beneficiarySeqNo: '',
       corId: ''
     },
-    enableReinitialize: true,
+    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({}),
     onSubmit: async values => {
       setStore(prevStore => ({
         ...prevStore,
-        submitted: true
+        submitted: true,
+        beneficiaryList: prevStore.beneficiaryList
       }))
     }
   })
-  console.log('store check', store)
-
   async function fillOutwardData(recordId) {
     const formFields = [
+      'outwardId',
       'outwardRef',
       'outwardsDate',
       'amount',
@@ -89,6 +91,7 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
       const { headerView, ttNo } = res.record
 
       const fieldValues = {
+        outwardId: headerView.recordId,
         outwardRef: headerView.reference,
         outwardsDate: formatDateFromApi(headerView.date),
         amount: headerView.amount,
@@ -122,6 +125,34 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
       setDisplayCash(false)
     }
   }
+  useEffect(() => {
+    ;(async function () {
+      try {
+        if (store.beneficiaryList && store.submitted) {
+          let beneficiaryBankPack = null
+          let beneficiaryCashPack = null
+
+          if (displayCash) beneficiaryCashPack = store.beneficiaryList
+          if (displayBank) beneficiaryBankPack = store.beneficiaryList
+
+          const data = {
+            outwardId: formik.values.outwardId,
+            beneficiaryId: formik.values.beneficiaryId,
+            seqNo: '',
+            beneficiaryCashPack: beneficiaryCashPack,
+            beneficiaryBankPack: beneficiaryBankPack
+          }
+
+          const res = await postRequest({
+            extension: RTOWMRepository.OutwardsModification.set2,
+            record: JSON.stringify(data)
+          })
+
+          if (res.record) toast.success('Record Updated Successfully')
+        }
+      } catch (error) {}
+    })()
+  }, [store.beneficiaryList])
 
   return (
     <FormShell resourceId={ResourceIds.OutwardsModification} form={formik} height={480} maxAccess={maxAccess}>
@@ -148,6 +179,8 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
                   value={formik.values.date}
                   editMode={editMode}
                   maxAccess={maxAccess}
+                  onChange={formik.setFieldValue}
+                  onClear={() => formik.setFieldValue('date', '')}
                   error={formik.touched.date && Boolean(formik.errors.date)}
                 />
               </Grid>
@@ -280,39 +313,37 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
                     viewBtns={false}
                     store={store}
                     setStore={setStore}
-                    {...(editMode && {
-                      client: {
-                        clientId: formik.values.clientId,
-                        clientName: formik.values.clientName,
-                        clientRef: formik.values.clientRef
-                      },
-                      beneficiary: {
-                        beneficiaryId: formik.values.beneficiaryId,
-                        beneficiarySeqNo: formik.values.beneficiarySeqNo
-                      },
-                      dispersaltype: formik.values.dispersalType,
-                      countryId: formik.values.countryId,
-                      corId: formik.values.corId
-                    })}
+                    editable={true}
+                    client={{
+                      clientId: formik.values.clientId,
+                      clientName: formik.values.clientName,
+                      clientRef: formik.values.clientRef
+                    }}
+                    beneficiary={{
+                      beneficiaryId: formik.values.beneficiaryId,
+                      beneficiarySeqNo: formik.values.beneficiarySeqNo
+                    }}
+                    dispersaltype={formik.values.dispersalType}
+                    countryId={formik.values.countryId}
+                    corId={formik.values.corId}
                   />
                 )}
                 {displayCash && (
                   <BenificiaryCashForm
                     viewBtns={false}
-                    {...(editMode && {
-                      client: {
-                        clientId: formik.values.clientId,
-                        clientName: formik.values.clientName,
-                        clientRef: formik.values.clientRef
-                      },
-                      beneficiary: {
-                        beneficiaryId: formik.values.beneficiaryId,
-                        beneficiarySeqNo: formik.values.beneficiarySeqNo
-                      },
-                      dispersaltype: formik.values.dispersalType,
-                      countryId: formik.values.countryId,
-                      corId: formik.values.corId
-                    })}
+                    editable={true}
+                    client={{
+                      clientId: formik.values.clientId,
+                      clientName: formik.values.clientName,
+                      clientRef: formik.values.clientRef
+                    }}
+                    beneficiary={{
+                      beneficiaryId: formik.values.beneficiaryId,
+                      beneficiarySeqNo: formik.values.beneficiarySeqNo
+                    }}
+                    dispersaltype={formik.values.dispersalType}
+                    countryId={formik.values.countryId}
+                    corId={formik.values.corId}
                   />
                 )}
               </FieldSet>

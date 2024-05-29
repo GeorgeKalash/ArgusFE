@@ -33,12 +33,13 @@ export default function BenificiaryBankForm({
   dispersalType,
   beneficiary,
   corId,
-  countryId
+  countryId,
+  editable = false
 }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [maxAccess, setMaxAccess] = useState({ record: [] })
   const { stack: stackError } = useError()
-  const [editMode, setEditMode] = useState(beneficiary?.beneficiaryId)
+  const [editMode, setEditMode] = useState(beneficiary?.beneficiaryId && !editable)
 
   useEffect(() => {
     ;(async function () {
@@ -210,6 +211,7 @@ export default function BenificiaryBankForm({
       if (store?.submitted) {
         setStore(prevStore => ({
           ...prevStore,
+          submitted: true,
           beneficiaryList: data
         }))
       } else {

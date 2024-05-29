@@ -23,10 +23,20 @@ import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-const BenificiaryCashForm = ({ viewBtns = true, client, dispersalType, beneficiary, corId, countryId }) => {
+const BenificiaryCashForm = ({
+  viewBtns = true,
+  store,
+  setStore,
+  client,
+  dispersalType,
+  beneficiary,
+  corId,
+  countryId,
+  editable = false
+}) => {
   const [maxAccess, setMaxAccess] = useState({ record: [] })
   const { stack: stackError } = useError()
-  const [editMode, setEditMode] = useState(beneficiary?.beneficiaryId)
+  const [editMode, setEditMode] = useState(beneficiary?.beneficiaryId && !editable)
 
   useEffect(() => {
     ;(async function () {
@@ -90,8 +100,11 @@ const BenificiaryCashForm = ({ viewBtns = true, client, dispersalType, beneficia
         }
         formik.setValues(obj)
       }
+      if (store?.submitted) {
+        formik.handleSubmit()
+      }
     })()
-  }, [])
+  }, [store?.submitted])
 
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [notArabic, setNotArabic] = useState(true)
@@ -190,13 +203,20 @@ const BenificiaryCashForm = ({ viewBtns = true, client, dispersalType, beneficia
         seqNo: values.seqNo
       }
       const data = { header: header, beneficiaryCash: cashInfo }
-
-      const res = await postRequest({
-        extension: RemittanceOutwardsRepository.BeneficiaryCash.set,
-        record: JSON.stringify(data)
-      })
-      if (res.recordId) {
-        toast.success('Record Updated Successfully')
+      if (store?.submitted) {
+        setStore(prevStore => ({
+          ...prevStore,
+          submitted: true,
+          beneficiaryList: data
+        }))
+      } else {
+        const res = await postRequest({
+          extension: RemittanceOutwardsRepository.BeneficiaryCash.set,
+          record: JSON.stringify(data)
+        })
+        if (res.recordId) {
+          toast.success('Record Updated Successfully')
+        }
       }
       setEditMode(true)
     }
