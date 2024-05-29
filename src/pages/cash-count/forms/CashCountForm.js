@@ -275,7 +275,6 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
       })
       .catch(error => {})
   }
-  console.log(formik.values)
 
   const actions = [
     {
