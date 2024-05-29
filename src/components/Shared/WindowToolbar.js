@@ -40,6 +40,7 @@ const WindowToolbar = ({
     actions,
     isSaved,
     isInfo,
+
     isCleared,
     disabledSubmit,
     disabledApply,
