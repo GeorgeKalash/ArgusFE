@@ -3,7 +3,7 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import FormShell from './FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { Box, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 import CustomTextField from '../Inputs/CustomTextField'
 import ResourceComboBox from './ResourceComboBox'
 import { DataGrid } from './DataGrid'
@@ -125,9 +125,6 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
   }
 
   const handleSerialsGridChange = newRows => {
-    console.log('newRows', newRows)
-
-    // const index = formik.values.packages.findIndex(item => item.id === selectedRowId)
     if (formik.values.packages[index]?.packageReferences?.length < newRows.length) {
       newRows[formik.values.packages[index]?.packageReferences?.length].seqNo =
         formik.values.packages[index]?.packageReferences?.length + 1
@@ -160,7 +157,6 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
             id: index + 1
           }))
         }))
-        console.log('packages', packages)
         formik.setValues({
           ...res.record.header,
           packages: packages
@@ -222,8 +218,8 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
                       value={formik.values.packages}
                       error={formik.errors.packages}
                       maxAccess={maxAccess}
-                      // allowAddNewLine={!editMode}
-                      // allowDelete={!editMode}
+                      allowAddNewLine={!editMode}
+                      allowDelete={!editMode}
                       onSelectionChange={row => row && loadSerialsGrid(row)}
                       columns={[
                         {
@@ -297,9 +293,8 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
                         ]
                       }
                       maxAccess={maxAccess}
-                      // allowAddNewLine={!editMode}
+                      allowAddNewLine={!editMode}
                       allowDelete={false}
-                      // disabled={enableSerials}
                       columns={[
                         {
                           component: 'numberfield',
@@ -313,9 +308,8 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
                           label: labels.reference,
                           name: 'reference',
                           props: {
-                            maxLength: 20
-
-                            // readOnly: editMode
+                            maxLength: 20,
+                            readOnly: editMode
                           }
                         }
                       ]}
