@@ -173,7 +173,7 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
     <FormShell resourceId={ResourceIds.LOShipments} form={formik} editMode={true} isCleared={false} isInfo={false}>
       <VertLayout>
         <Fixed>
-          <Grid container direction='row' wrap='nowrap' spacing={2}>
+          <Grid container wrap='nowrap' spacing={2}>
             <Grid item xs={6}>
               <ResourceComboBox
                 endpointId={LogisticsRepository.LoCarrier.qry}
@@ -212,15 +212,10 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
           </Grid>
         </Fixed>
         <Grow>
-          <Grid container wrap='nowrap' xs={12} spacing={1} sx={{ flex: 1, flexDirection: 'row' }}>
+          <Grid container wrap='nowrap' xs={12} spacing={1}>
             <Grid item xs={8} sx={{ display: 'flex', flex: 1 }}>
-              <FieldSet sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                <Grid
-                  container
-                  direction='row'
-                  wrap='nowrap'
-                  sx={{ display: 'flex', flexDirection: 'column', flex: 1 }}
-                >
+              <FieldSet sx={{ flex: 1 }}>
+                <Grid container wrap='nowrap' sx={{ flexDirection: 'column', flex: 1 }}>
                   <Grow>
                     <DataGrid
                       onChange={value => handlePackageGridChange(value)}
