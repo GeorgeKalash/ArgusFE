@@ -61,10 +61,10 @@ export default function CARebuildAccountBalance({ _labels, access }) {
     <FormShell
       resourceId={ResourceIds.CARebuildAccountBalance}
       form={formik}
+      actions={actions}
       maxAccess={access}
       isSaved={false}
       disabledSubmit={true}
-      actions={actions}
       editMode={true}
     >
       <VertLayout>
@@ -100,7 +100,7 @@ export default function CARebuildAccountBalance({ _labels, access }) {
                 secondValueShow='cashAccountName'
                 form={formik}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('cashAccountId', newValue ? newValue.recordId : '')
+                  formik.setFieldValue('cashAccountId', newValue ? newValue.recordId : 0)
                   formik.setFieldValue('cashAccountRef', newValue ? newValue.reference : '')
                   formik.setFieldValue('cashAccountName', newValue ? newValue.name : '')
                 }}
