@@ -5,7 +5,7 @@ import { useState } from 'react'
 import TaxCodesForm from '../forms/TaxCodesForm'
 import HistoryForm from '../forms/HistoryForm'
 
-const TaxCodesWindow = ({ height, recordId, labels, maxAccess }) => {
+const TaxCodesWindow = ({ recordId, labels, maxAccess }) => {
   const [activeTab, setActiveTab] = useState(0)
 
   const [store, setStore] = useState({
@@ -21,10 +21,10 @@ const TaxCodesWindow = ({ height, recordId, labels, maxAccess }) => {
     <>
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
 
-      <CustomTabPanel height={height} index={0} value={activeTab}>
+      <CustomTabPanel index={0} value={activeTab}>
         <TaxCodesForm labels={labels} setStore={setStore} store={store} editMode={editMode} maxAccess={maxAccess} />
       </CustomTabPanel>
-      <CustomTabPanel height={height} index={1} value={activeTab}>
+      <CustomTabPanel index={1} value={activeTab}>
         <HistoryForm labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} editMode={editMode} />
       </CustomTabPanel>
     </>
