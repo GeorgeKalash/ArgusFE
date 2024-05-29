@@ -19,7 +19,7 @@ export default function CashCountNotesForm({
   recordId,
   forceNotesCount,
   row,
-  update,
+  updateRow,
   readOnly,
   window
 }) {
@@ -58,8 +58,8 @@ export default function CashCountNotesForm({
       }, 0)
 
       forceNotesCount
-        ? update({
-            newRow: {
+        ? updateRow({
+            changes: {
               ...row,
               counted,
               currencyNotes,
@@ -67,7 +67,7 @@ export default function CashCountNotesForm({
               flag: row.system === counted ? true : false
             }
           })
-        : update({ newRow: { ...row, currencyNotes } })
+        : updateRow({ changes: { ...row, currencyNotes } })
 
       window.close()
     }

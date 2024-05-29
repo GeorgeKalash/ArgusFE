@@ -349,6 +349,14 @@ export function DataGrid({
 
               const cell = findCell(params)
 
+              async function updateRow({ changes }) {
+                stageRowUpdate({
+                  changes
+                })
+
+                await commitRowUpdate()
+              }
+
               async function update({ newRow }) {
                 updateState({
                   newRow
@@ -372,7 +380,7 @@ export function DataGrid({
                     border: `1px solid ${error?.[cell.rowIndex]?.[params.field] ? '#ff0000' : 'transparent'}`
                   }}
                 >
-                  <Component {...params} update={update} column={column} />
+                  <Component {...params} update={update} updateRow={updateRow} column={column} />
                 </Box>
               )
             },
@@ -389,6 +397,7 @@ export function DataGrid({
               }
 
               async function update({ field, value }) {
+                console.log(field, value, 'test')
                 stageRowUpdate({
                   changes: {
                     [field]: value

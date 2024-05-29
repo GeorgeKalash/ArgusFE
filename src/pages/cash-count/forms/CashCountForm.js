@@ -519,7 +519,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
                 component: 'button',
                 name: 'enabled',
                 label: labels.currencyNotes,
-                onClick: (e, row, update) => {
+                onClick: (e, row, update, updateRow) => {
                   stack({
                     Component: CashCountNotes,
                     props: {
@@ -528,7 +528,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
                       maxAccess: maxAccess,
                       forceNotesCount: formik.values.forceNotesCount,
                       row,
-                      update
+                      updateRow
                     },
                     width: 700,
                     title: labels?.currencyNotes
