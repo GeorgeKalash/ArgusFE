@@ -13,7 +13,6 @@ const WindowToolbar = ({
   onClear,
   onInfo,
   onApply,
-
   isSaved,
   isInfo,
   isCleared,
