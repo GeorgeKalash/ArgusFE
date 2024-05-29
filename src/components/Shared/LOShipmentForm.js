@@ -20,14 +20,7 @@ import FieldSet from './FieldSet'
 
 export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
-  const [seqCounter, setSeqCounter] = useState(1)
-  const [rowPackage, setPackage] = useState(null)
   const [selectedRowId, setSelectedRowId] = useState(null)
-  const [enableSerials, setEnableSerials] = useState(true)
-
-  const [store, setStore] = useState([
-    { typeId: '', packageSeqNo: '', function: '', recordId: '', seqNo: 1, id: 1, reference: '' }
-  ])
 
   const { formik } = useForm({
     initialValues: {
@@ -109,6 +102,7 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
       toast.success('Record Updated Successfully')
     }
   })
+  const index = formik.values.packages.findIndex(item => item.id === selectedRowId)
 
   const { labels, maxAccess } = useResourceQuery({
     datasetId: ResourceIds.LOShipments
@@ -128,94 +122,23 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
 
   function loadSerialsGrid(row) {
     setSelectedRowId(row.id)
-    setEnableSerials(false)
-    setPackage(row)
-
-    if (row.seqNo) {
-      let newList = []
-      for (let i = 0; i < store.length; i++) {
-        if (store[i].typeId === row.packageType) {
-          newList.push({
-            ...store[i],
-            packageSeqNo: store[i].seqNo
-          })
-        }
-      }
-      setSeqCounter(newList[newList.length - 1].seqNo + 1)
-      formik.setValues(prevValues => ({
-        ...prevValues,
-        packages: prevValues.packages.map(packageItem => {
-          if (packageItem.packageType === newList[0].typeId) {
-            return {
-              ...packageItem,
-              packageReferences: newList
-            }
-          } else {
-            return packageItem
-          }
-        })
-      }))
-    } else {
-      formik.setValues(prevValues => ({
-        ...prevValues,
-        packages: prevValues.packages.map(packageItem => {
-          if (packageItem.id === row.id) {
-            return {
-              ...packageItem,
-              packageReferences: [{ id: 1, seqNo: 1, reference: '', packageSeqNo: packageItem.seqNo }]
-            }
-          } else {
-            return packageItem
-          }
-        })
-      }))
-    }
   }
 
   const handleSerialsGridChange = newRows => {
     console.log('newRows', newRows)
 
-    // const updatedRows = newRows.map(row => {
-    //   if (!row.seqNo && row.seqNo !== 0) {
-    //     row.seqNo = seqCounter
-    //     setSeqCounter(seqCounter + 1)
-    //   }
-
-    //   return row
-    // })
-
-    // const item = { ...rowPackage }
-    // item.packageReferences = updatedRows[0]
-    // const index = rowPackage.id - 1
-    newRows[formik.values.packages[0]?.packageReferences?.length].seqNo =
-      formik.values.packages[0]?.packageReferences?.length + 1
-
-    // formik.values.packages[0]?.packageReferences?.length
-    formik.setFieldValue(`packages[0].packageReferences`, newRows)
-
-    /*formik.setValues(prevValues => ({
-      ...prevValues,
-      packages: prevValues.packages.map(packageItem => {
-        if (packageItem.id === newRows[0].id) {
-          return {
-            ...packageItem,
-            packageReferences: updatedRows
-          }
-        } else {
-          return packageItem
-        }
-      })
-    }))*/
+    // const index = formik.values.packages.findIndex(item => item.id === selectedRowId)
+    if (formik.values.packages[index]?.packageReferences?.length < newRows.length) {
+      newRows[formik.values.packages[index]?.packageReferences?.length].seqNo =
+        formik.values.packages[index]?.packageReferences?.length + 1
+    }
+    formik.setFieldValue(`packages[${index}].packageReferences`, newRows)
   }
-  console.log(
-    'check formik ',
-    formik.values.packages.filter(item => item.id == selectedRowId)
-  )
 
   const handlePackageGridChange = newRows => {
     newRows.map(row => {
       if (!!row.seqNo) {
-        formik.setFieldValue('packages[1].packageReferences', [{ id: 1, seqNo: 1 }])
+        formik.setFieldValue('packages[0].packageReferences', [{ id: 1, seqNo: 1 }])
       }
     })
     formik.setFieldValue('packages', newRows)
@@ -231,42 +154,20 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
 
         const packages = res.record.packages.map((item, index) => ({
           ...item,
-          id: index + 1
+          id: index + 1,
+          packageReferences: item?.packageReferences?.map((item, index) => ({
+            ...item,
+            id: index + 1
+          }))
         }))
-
-        let packageReferencesList = []
-        for (let i = 0; i < res.record.packages.length; i++) {
-          const modifiedPackageReferences = res.record.packages[i]?.packageReferences.map((data, index) => {
-            return {
-              ...data,
-              typeId: res.record.packages[i].packageType,
-              packageSeqNo: res.record.packages[i].seqNo,
-              id: index + 1
-            }
-          })
-          if (modifiedPackageReferences) {
-            packageReferencesList.push(...modifiedPackageReferences)
-          }
-        }
-        setStore(packageReferencesList || [{ id: 1, seqNo: 1 }])
-
-        if (packageReferencesList?.length > 0) {
-          const lastSeqNo = packageReferencesList[packageReferencesList.length - 1].seqNo
-          setSeqCounter(lastSeqNo ? lastSeqNo + 1 : 1)
-        }
-
+        console.log('packages', packages)
         formik.setValues({
           ...res.record.header,
-          packages: packages.map(pkg => ({
-            ...pkg,
-            packageReferences: [{ id: 1, seqNo: 1 }]
-          }))
+          packages: packages
         })
       }
     })()
   }, [])
-
-  //console.log('formik check ', formik.values)
 
   return (
     <FormShell resourceId={ResourceIds.LOShipments} form={formik} editMode={true} isCleared={false} isInfo={false}>
@@ -311,110 +212,120 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
           </Grid>
         </Fixed>
         <Grow>
-          <Grid container direction='row' wrap='nowrap' sx={{ flex: 1, flexDirection: 'row' }}>
-            <FieldSet sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-              <Grid container direction='row' wrap='nowrap' sx={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-                <Grow>
-                  <DataGrid
-                    onChange={value => handlePackageGridChange(value)}
-                    value={formik.values.packages}
-                    error={formik.errors.packages}
-                    maxAccess={maxAccess}
-                    allowAddNewLine={!editMode}
-                    allowDelete={!editMode}
-                    onSelectionChange={row => row && loadSerialsGrid(row)}
-                    columns={[
-                      {
-                        component: 'resourcecombobox',
-                        label: labels.type,
-                        name: 'packageTypeName',
-                        props: {
-                          datasetId: DataSets.PACKAGE_TYPE,
-                          displayField: 'value',
-                          valueField: 'key',
-                          mapping: [
-                            { from: 'key', to: 'packageType' },
-                            { from: 'value', to: 'packageTypeName' }
-                          ],
-                          readOnly: editMode
+          <Grid container wrap='nowrap' xs={12} spacing={1} sx={{ flex: 1, flexDirection: 'row' }}>
+            <Grid item xs={8} sx={{ display: 'flex', flex: 1 }}>
+              <FieldSet sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                <Grid
+                  container
+                  direction='row'
+                  wrap='nowrap'
+                  sx={{ display: 'flex', flexDirection: 'column', flex: 1 }}
+                >
+                  <Grow>
+                    <DataGrid
+                      onChange={value => handlePackageGridChange(value)}
+                      value={formik.values.packages}
+                      error={formik.errors.packages}
+                      maxAccess={maxAccess}
+                      // allowAddNewLine={!editMode}
+                      // allowDelete={!editMode}
+                      onSelectionChange={row => row && loadSerialsGrid(row)}
+                      columns={[
+                        {
+                          component: 'resourcecombobox',
+                          label: labels.type,
+                          name: 'packageTypeName',
+                          props: {
+                            datasetId: DataSets.PACKAGE_TYPE,
+                            displayField: 'value',
+                            valueField: 'key',
+                            mapping: [
+                              { from: 'key', to: 'packageType' },
+                              { from: 'value', to: 'packageTypeName' }
+                            ],
+                            readOnly: editMode
+                          }
+                        },
+                        {
+                          component: 'numberfield',
+                          name: 'qty',
+                          label: labels.qty,
+                          defaultValue: '',
+                          props: {
+                            readOnly: editMode
+                          }
+                        },
+                        {
+                          component: 'numberfield',
+                          label: labels.amount,
+                          name: 'amount',
+                          defaultValue: '',
+                          props: { readOnly: editMode }
                         }
-                      },
-                      {
-                        component: 'numberfield',
-                        name: 'qty',
-                        label: labels.qty,
-                        defaultValue: '',
-                        props: {
-                          readOnly: editMode
-                        }
-                      },
-                      {
-                        component: 'numberfield',
-                        label: labels.amount,
-                        name: 'amount',
-                        defaultValue: '',
-                        props: { readOnly: editMode }
-                      }
-                    ]}
-                  />
-                </Grow>
-                <Fixed>
-                  <Grid container direction='row' wrap='nowrap' sx={{ pt: 5, justifyContent: 'flex-end' }}>
-                    <Grid item xs={3}>
-                      <CustomTextField
-                        name='totalQty'
-                        maxAccess={maxAccess}
-                        value={getFormattedNumber(totalQty)}
-                        label={labels.totalQty}
-                        readOnly={true}
-                      />
+                      ]}
+                    />
+                  </Grow>
+                  <Fixed>
+                    <Grid container direction='row' wrap='nowrap' sx={{ pt: 5, justifyContent: 'flex-end' }}>
+                      <Grid item xs={3}>
+                        <CustomTextField
+                          name='totalQty'
+                          maxAccess={maxAccess}
+                          value={getFormattedNumber(totalQty)}
+                          label={labels.totalQty}
+                          readOnly={true}
+                        />
+                      </Grid>
+                      <Grid item xs={3} sx={{ pl: 3 }}>
+                        <CustomTextField
+                          name='totalAmount'
+                          maxAccess={maxAccess}
+                          value={getFormattedNumber(totalAmount.toFixed(2))}
+                          label={labels.totalAmount}
+                          readOnly={true}
+                        />
+                      </Grid>
                     </Grid>
-                    <Grid item xs={3} sx={{ pl: 3 }}>
-                      <CustomTextField
-                        name='totalAmount'
-                        maxAccess={maxAccess}
-                        value={getFormattedNumber(totalAmount.toFixed(2))}
-                        label={labels.totalAmount}
-                        readOnly={true}
-                      />
-                    </Grid>
-                  </Grid>
-                </Fixed>
-              </Grid>
-            </FieldSet>
-            <Grid item xs={4} sx={{ display: 'flex', flex: 1, pl: 7 }}>
+                  </Fixed>
+                </Grid>
+              </FieldSet>
+            </Grid>
+            <Grid item xs={4} sx={{ display: 'flex', flex: 1 }}>
               <FieldSet xs={4} sx={{ flex: 1 }}>
                 <Grow>
-                  <DataGrid
-                    onChange={value => handleSerialsGridChange(value)}
-                    value={
-                      formik.values.packages.filter(item => item.id == selectedRowId)[0]?.packageReferences || [
-                        { seqNo: '1', id: 1, reference: '' }
-                      ]
-                    }
-                    maxAccess={maxAccess}
-                    allowAddNewLine={!editMode}
-                    allowDelete={false}
-                    disabled={enableSerials}
-                    columns={[
-                      {
-                        component: 'numberfield',
-                        name: 'seqNo',
-                        label: labels.seqNo,
-                        defaultValue: '',
-                        props: { readOnly: true }
-                      },
-                      {
-                        component: 'textfield',
-                        label: labels.reference,
-                        name: 'reference',
-                        props: {
-                          maxLength: 20,
-                          readOnly: editMode
-                        }
+                  {selectedRowId && formik.values.packages[index] && (
+                    <DataGrid
+                      onChange={value => handleSerialsGridChange(value)}
+                      value={
+                        formik.values.packages.find(item => item.id === selectedRowId).packageReferences || [
+                          { seqNo: '1', id: 1, reference: '' }
+                        ]
                       }
-                    ]}
-                  />
+                      maxAccess={maxAccess}
+                      // allowAddNewLine={!editMode}
+                      allowDelete={false}
+                      // disabled={enableSerials}
+                      columns={[
+                        {
+                          component: 'numberfield',
+                          name: 'seqNo',
+                          label: labels.seqNo,
+                          defaultValue: '',
+                          props: { readOnly: true }
+                        },
+                        {
+                          component: 'textfield',
+                          label: labels.reference,
+                          name: 'reference',
+                          props: {
+                            maxLength: 20
+
+                            // readOnly: editMode
+                          }
+                        }
+                      ]}
+                    />
+                  )}
                 </Grow>
               </FieldSet>
             </Grid>
