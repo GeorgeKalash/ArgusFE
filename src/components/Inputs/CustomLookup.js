@@ -183,20 +183,31 @@ const CustomLookup = ({
                         position: 'absolute',
                         top: '50%',
                         transform: 'translateY(-50%)',
-                        right: 15,
+                        right: 5,
                         display: 'flex'
                       }}
                     >
                       {!readOnly && (
-                        <InputAdornment position='end'>
-                          <IconButton tabIndex={-1} edge='end' onClick={e => onChange('')} aria-label='clear input'>
-                            <ClearIcon />
+                        <InputAdornment sx={{ margin: '0px !important' }} position='end'>
+                          <IconButton
+                            sx={{ margin: '0px !important', padding: '0px !important' }}
+                            tabIndex={-1}
+                            edge='end'
+                            onClick={e => onChange('')}
+                            aria-label='clear input'
+                          >
+                            <ClearIcon sx={{ border: '0px', fontSize: 20 }} />
                           </IconButton>
                         </InputAdornment>
                       )}
-                      <InputAdornment position='end'>
-                        <IconButton tabIndex={-1} edge='end' style={{ pointerEvents: 'none' }}>
-                          <SearchIcon style={{ cursor: 'pointer' }} />
+                      <InputAdornment sx={{ margin: '0px !important' }} position='end'>
+                        <IconButton
+                          sx={{ margin: '0px !important', padding: '0px !important' }}
+                          tabIndex={-1}
+                          edge='end'
+                          style={{ pointerEvents: 'none' }}
+                        >
+                          <SearchIcon style={{ cursor: 'pointer', border: '0px', fontSize: 20 }} />
                         </IconButton>
                       </InputAdornment>
                       {/* Adjust color as needed */}
