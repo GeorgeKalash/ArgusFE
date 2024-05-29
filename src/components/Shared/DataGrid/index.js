@@ -407,7 +407,6 @@ export function DataGrid({
               }
 
               async function update({ field, value }) {
-                console.log(field, value, 'test')
                 stageRowUpdate({
                   changes: {
                     [field]: value
