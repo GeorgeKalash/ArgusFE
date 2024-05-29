@@ -268,7 +268,7 @@ export const LOTransportationForm = ({ recordId, functionId, editMode }) => {
                 readOnly={editMode}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('arrivalCountryId', newValue?.recordId)
+                  formik.setFieldValue('arrivalCountryId', newValue ? newValue.recordId : '')
                 }}
                 error={formik.touched.arrivalCountryId && Boolean(formik.errors.arrivalCountryId)}
               />
