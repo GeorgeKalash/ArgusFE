@@ -28,49 +28,52 @@ const CashCount = () => {
   const { stack } = useWindow()
   const { getRequest, postRequest } = useContext(RequestsContext)
 
-  async function fetchGridData() {
-    return await getRequest({
-      extension: CashCountRepository.CashCountTransaction.qry,
-      parameters: `_filter=`
-    })
-  }
   async function fetchWithSearch({ options = {}, filters }) {
+    const { _startAt = 0, _pageSize = 50 } = options
+
     return (
       filters.qry &&
       (await getRequest({
         extension: CashCountRepository.CashCountTransaction.snapshot,
-        parameters: `_filter=${filters.qry}`
+        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=${filters.qry}`
       }))
     )
   }
 
-  // const {
-  //   query: { data },
-  //   filterBy,
-  //   clearFilter,
-  //   labels: _labels,
-  //   refetch,
-  //   access
-  // } = useResourceQuery({
-  //   endpointId: CashCountRepository.CashCountTransaction.snapshot,
-  //   datasetId: ResourceIds.ClientMaster,
-  //   filter: {
-  //     endpointId: CashCountRepository.CashCountTransaction.snapshot,
-  //     filterFn: fetchWithSearch
-  //   }
-  // })
+  async function fetchGridData(options = {}) {
+    return await getRequest({
+      extension: CashCountRepository.CashCountTransaction.qry,
+      parameters: ``
+    })
+  }
 
   const {
     query: { data },
+    filterBy,
+    clearFilter,
     labels: _labels,
-    refetch,
-    invalidate,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: CashCountRepository.CashCountTransaction.qry,
-    datasetId: ResourceIds.CashCountTransaction
+    datasetId: ResourceIds.CashCountTransaction,
+    filter: {
+      endpointId: CashCountRepository.CashCountTransaction.snapshot,
+      filterFn: fetchWithSearch
+    }
   })
+
+  // const {
+  //   query: { data },
+  //   labels: _labels,
+  //   refetch,
+  //   invalidate,
+  //   access
+  // } = useResourceQuery({
+  //   queryFn: fetchGridData,
+  //   endpointId: CashCountRepository.CashCountTransaction.qry,
+  //   datasetId: ResourceIds.CashCountTransaction
+  // })
 
   const columns = [
     {
@@ -176,9 +179,9 @@ const CashCount = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
+          deleteConfirmationType={'strict'}
           isLoading={false}
-          pageSize={50}
-          refetch={refetch}
+          pageSize={20}
           paginationType='client'
           maxAccess={access}
         />

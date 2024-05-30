@@ -17,7 +17,7 @@ export default function CashCountNotesForm({
   labels,
   maxAccess,
   recordId,
-  forceNotesCount,
+  forceNoteCount,
   row,
   updateRow,
   readOnly,
@@ -57,7 +57,7 @@ export default function CashCountNotesForm({
         return acc + (subTotal || 0)
       }, 0)
 
-      forceNotesCount
+      forceNoteCount
         ? updateRow({
             changes: {
               counted,

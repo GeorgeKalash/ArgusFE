@@ -5,7 +5,7 @@ import {
   useGridApiRef
 } from '@mui/x-data-grid'
 import components from './components'
-import { Box, Button, IconButton } from '@mui/material'
+import { Box, IconButton } from '@mui/material'
 import { useEffect, useRef, useState } from 'react'
 import { useError } from 'src/error'
 import DeleteDialog from '../DeleteDialog'
@@ -28,8 +28,6 @@ export function DataGrid({
   rowSelectionModel,
   disabled = false
 }) {
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState([false, {}])
-
   async function processDependenciesForColumn(newRow, oldRow, editCell) {
     const column = columns.find(({ name }) => name === editCell.field)
 
@@ -274,8 +272,9 @@ export function DataGrid({
 
   async function updateRowState({ id, changes }) {
     const row = apiRef.current.getRow(id)
-
-    apiRef.current.updateRows([{ ...row, ...changes }])
+    const newRow = { ...row, ...changes }
+    apiRef.current.updateRows([newRow])
+    handleRowChange(newRow)
   }
 
   return (
@@ -448,14 +447,6 @@ export function DataGrid({
           actionsColumn
         ]}
       />
-      {/* <DeleteDialog
-        open={deleteDialogOpen}
-        onClose={() => setDeleteDialogOpen([false, {}])}
-        onConfirm={obj => {
-          setDeleteDialogOpen([false, {}])
-          deleteRow(obj)
-        }}
-      /> */}
     </Box>
   )
 }

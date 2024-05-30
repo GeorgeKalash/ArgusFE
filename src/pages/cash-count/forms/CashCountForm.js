@@ -86,7 +86,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
       cashAccountId: '',
       cashAccountRef: '',
       cashAccountName: '',
-      forceNotesCount: false,
+      forceNoteCount: false,
       wip: 1,
       status: 1,
       releaseStatus: '',
@@ -135,6 +135,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
           shiftId: obj.shiftId,
           currencyId: obj.currencyId,
           cashAccountId: obj.cashAccountId,
+          forceNoteCount: obj.forceNoteCount,
           reference: obj.reference,
           date: formatDateToApi(new Date()),
           startTime: obj.startTime,
@@ -194,7 +195,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
           cashAccountId: header.cashAccountId,
           cashAccountRef: header.cashAccountRef,
           cashAccountName: header.cashAccountName,
-          forceNotesCount: false,
+          forceNoteCount: header.forceNoteCount,
           wip: header.wip,
           status: header.status,
           releaseStatus: header.releaseStatus,
@@ -331,6 +332,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
       }
     }
   }
+  console.log(formik.values)
 
   return (
     <FormShell
@@ -433,8 +435,8 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
               <FormControlLabel
                 control={
                   <Checkbox
-                    name='forceNotesCount'
-                    checked={formik.values?.forceNotesCount}
+                    name='forceNoteCount'
+                    checked={formik.values?.forceNoteCount}
                     onChange={formik.handleChange}
                     disabled={
                       formik.values.items &&
@@ -490,7 +492,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
                 name: 'counted',
                 label: labels.count,
                 props: {
-                  readOnly: formik.values.forceNotesCount || isPosted || isClosed
+                  readOnly: formik.values.forceNoteCount || isPosted || isClosed
                 },
                 async onChange({ row: { update, newRow } }) {
                   const counted = newRow.counted || 0
@@ -526,7 +528,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
                       readOnly: isPosted || isClosed,
                       labels: labels,
                       maxAccess: maxAccess,
-                      forceNotesCount: formik.values.forceNotesCount,
+                      forceNoteCount: formik.values.forceNoteCount,
                       row,
                       updateRow
                     },
