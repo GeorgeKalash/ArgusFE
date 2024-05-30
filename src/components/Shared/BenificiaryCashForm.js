@@ -32,7 +32,8 @@ const BenificiaryCashForm = ({
   beneficiary,
   corId,
   countryId,
-  editable = false
+  editable = false,
+  clearBenForm
 }) => {
   const [maxAccess, setMaxAccess] = useState({ record: [] })
   const { stack: stackError } = useError()
@@ -48,7 +49,6 @@ const BenificiaryCashForm = ({
 
         const controls = { controls: qryCCL.list }
         const maxAccess = { record: controls }
-        setMaxAccess(maxAccess)
       }
 
       if (beneficiary?.beneficiaryId) {
@@ -103,8 +103,11 @@ const BenificiaryCashForm = ({
       if (store?.submitted) {
         formik.handleSubmit()
       }
+      if (clearBenForm) {
+        formik.resetForm()
+      }
     })()
-  }, [store?.submitted])
+  }, [store?.submitted, clearBenForm])
 
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [notArabic, setNotArabic] = useState(true)
@@ -206,7 +209,6 @@ const BenificiaryCashForm = ({
       if (store?.submitted) {
         setStore(prevStore => ({
           ...prevStore,
-          submitted: true,
           beneficiaryList: data
         }))
       } else {

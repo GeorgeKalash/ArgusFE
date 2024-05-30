@@ -29,17 +29,19 @@ export default function BenificiaryBankForm({
   viewBtns = true,
   store,
   setStore,
+  editable = false,
   client,
-  dispersalType,
   beneficiary,
+  dispersalType,
   corId,
   countryId,
-  editable = false
+  clearBenForm
 }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [maxAccess, setMaxAccess] = useState({ record: [] })
   const { stack: stackError } = useError()
   const [editMode, setEditMode] = useState(beneficiary?.beneficiaryId && !editable)
+
   useEffect(() => {
     ;(async function () {
       if (countryId && corId && dispersalType) {
@@ -109,8 +111,11 @@ export default function BenificiaryBankForm({
       if (store?.submitted) {
         formik.handleSubmit()
       }
+      if (clearBenForm) {
+        formik.resetForm()
+      }
     })()
-  }, [store?.submitted])
+  }, [store?.submitted, clearBenForm])
 
   const [initialValues, setInitialData] = useState({
     //RTBEN
@@ -174,7 +179,7 @@ export default function BenificiaryBankForm({
         rtId: values.rtId,
         rtName: values.rtName,
         name: values.name,
-        dispersalType: 1,
+        dispersalType: values.dispersalType,
         isBlocked: values.isBlocked,
         stoppedDate: values.stoppedDate ? formatDateToApi(values.stoppedDate) : null,
         stoppedReason: values.stoppedReason,
@@ -206,7 +211,7 @@ export default function BenificiaryBankForm({
         seqNo: values.seqNo
       }
       const data = { header: header, beneficiaryBank: bankInfo }
-      console.log('check header ', header)
+
       if (store?.submitted) {
         setStore(prevStore => ({
           ...prevStore,

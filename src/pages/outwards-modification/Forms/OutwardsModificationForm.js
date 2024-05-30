@@ -1,4 +1,4 @@
-import { Grid } from '@mui/material'
+import { Button, Grid, alpha } from '@mui/material'
 import * as yup from 'yup'
 import { useContext, useEffect, useState } from 'react'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
@@ -25,6 +25,7 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
   const [editMode, setEditMode] = useState(!!recordId)
   const [displayCash, setDisplayCash] = useState(false)
   const [displayBank, setDisplayBank] = useState(false)
+  const [clearBenForm, setClearBen] = useState(false)
   const [store, setStore] = useState({ submitted: false }, { beneficiaryList: {} })
 
   const { formik } = useForm({
@@ -59,6 +60,9 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
     }
   })
   async function fillOutwardData(recordId) {
+    setDisplayBank(false)
+    setDisplayCash(false)
+
     const formFields = [
       'outwardId',
       'outwardRef',
@@ -120,11 +124,8 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
     } else if (dispersalType === 2) {
       setDisplayBank(true)
     }
-    if (!dispersalType) {
-      setDisplayBank(false)
-      setDisplayCash(false)
-    }
   }
+
   useEffect(() => {
     ;(async function () {
       try {
@@ -132,13 +133,13 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
           let beneficiaryBankPack = null
           let beneficiaryCashPack = null
 
+          console.log('display pack ', store.beneficiaryList)
           if (displayCash) beneficiaryCashPack = store.beneficiaryList
           if (displayBank) beneficiaryBankPack = store.beneficiaryList
 
           const data = {
             outwardId: formik.values.outwardId,
             beneficiaryId: formik.values.beneficiaryId,
-            seqNo: '',
             beneficiaryCashPack: beneficiaryCashPack,
             beneficiaryBankPack: beneficiaryBankPack
           }
@@ -153,6 +154,10 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
       } catch (error) {}
     })()
   }, [store.beneficiaryList])
+
+  function clearForm() {
+    setClearBen(true)
+  }
 
   return (
     <FormShell resourceId={ResourceIds.OutwardsModification} form={formik} height={480} maxAccess={maxAccess}>
@@ -184,9 +189,7 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
                   error={formik.touched.date && Boolean(formik.errors.date)}
                 />
               </Grid>
-            </Grid>
-            <Grid container sx={{ display: 'flex', flexDirection: 'row' }}>
-              <Grid item xs={4}>
+              <Grid item xs={4} sx={{ pl: 1 }}>
                 <ResourceLookup
                   endpointId={RemittanceOutwardsRepository.OutwardsTransfer.snapshot}
                   valueField='reference'
@@ -203,6 +206,8 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
                   maxAccess={maxAccess}
                 />
               </Grid>
+            </Grid>
+            <Grid container sx={{ display: 'flex', flexDirection: 'row' }}>
               <Grid item xs={4} sx={{ pl: 1, pt: 2 }}>
                 <CustomTextField
                   name='ttNo'
@@ -224,19 +229,19 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
                   error={formik.touched.date && Boolean(formik.errors.date)}
                 />
               </Grid>
+              <Grid item xs={4} sx={{ pl: 1, pt: 2 }}>
+                <CustomTextField
+                  name='productName'
+                  label={labels.product}
+                  value={formik.values.productName}
+                  readOnly
+                  error={formik.touched.ttNo && Boolean(formik.errors.productName)}
+                  maxAccess={maxAccess}
+                />
+              </Grid>
             </Grid>
             <Grid container sx={{ display: 'flex', flexDirection: 'row' }}>
               <Grid item xs={4} sx={{ pt: 2 }}>
-                <CustomNumberField
-                  name='amount'
-                  label={labels.amount}
-                  value={formik.values.amount}
-                  maxAccess={maxAccess}
-                  readOnly
-                  error={formik.touched.amount && Boolean(formik.errors.amount)}
-                />
-              </Grid>
-              <Grid item xs={8} sx={{ pl: 1, pt: 2 }}>
                 <ResourceLookup
                   endpointId={CTCLRepository.ClientCorporate.snapshot}
                   parameters={{
@@ -255,16 +260,16 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
                   errorCheck={'clientId'}
                 />
               </Grid>
-            </Grid>
-            <Grid item xs={4} sx={{ pt: 2 }}>
-              <CustomTextField
-                name='productName'
-                label={labels.product}
-                value={formik.values.productName}
-                readOnly
-                error={formik.touched.ttNo && Boolean(formik.errors.productName)}
-                maxAccess={maxAccess}
-              />
+              <Grid item xs={8} sx={{ pl: 1, pt: 2 }}>
+                <CustomNumberField
+                  name='amount'
+                  label={labels.amount}
+                  value={formik.values.amount}
+                  maxAccess={maxAccess}
+                  readOnly
+                  error={formik.touched.amount && Boolean(formik.errors.amount)}
+                />
+              </Grid>
             </Grid>
           </Grid>
           <Grid container>
@@ -281,7 +286,7 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
                       beneficiaryId: formik.values.beneficiaryId,
                       beneficiarySeqNo: formik.values.beneficiarySeqNo
                     }}
-                    dispersaltype={formik.values.dispersalType}
+                    dispersalType={formik.values.dispersalType}
                     countryId={formik.values.countryId}
                     corId={formik.values.corId}
                     viewBtns={false}
@@ -298,7 +303,7 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
                       beneficiaryId: formik.values.beneficiaryId,
                       beneficiarySeqNo: formik.values.beneficiarySeqNo
                     }}
-                    dispersaltype={formik.values.dispersalType}
+                    dispersalType={formik.values.dispersalType}
                     countryId={formik.values.countryId}
                     corId={formik.values.corId}
                     viewBtns={false}
@@ -308,44 +313,68 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
             </Grid>
             <Grid container rowGap={2} xs={6} spacing={2} sx={{ pt: 5, pl: 4 }}>
               <FieldSet title='Benificiary [New]'>
-                {displayBank && (
-                  <BenificiaryBankForm
-                    viewBtns={false}
-                    store={store}
-                    setStore={setStore}
-                    editable={true}
-                    client={{
-                      clientId: formik.values.clientId,
-                      clientName: formik.values.clientName,
-                      clientRef: formik.values.clientRef
+                <Grid item xs={2} sx={{ pl: 2, mt: 3 }}>
+                  <Button
+                    sx={{
+                      backgroundColor: '#f44336',
+                      color: '#FFFFFF',
+                      '&:hover': {
+                        backgroundColor: alpha('#f44336', 0.8)
+                      }
                     }}
-                    beneficiary={{
-                      beneficiaryId: formik.values.beneficiaryId,
-                      beneficiarySeqNo: formik.values.beneficiarySeqNo
+                    onClick={() => {
+                      clearForm()
                     }}
-                    dispersaltype={formik.values.dispersalType}
-                    countryId={formik.values.countryId}
-                    corId={formik.values.corId}
-                  />
-                )}
-                {displayCash && (
-                  <BenificiaryCashForm
-                    viewBtns={false}
-                    editable={true}
-                    client={{
-                      clientId: formik.values.clientId,
-                      clientName: formik.values.clientName,
-                      clientRef: formik.values.clientRef
-                    }}
-                    beneficiary={{
-                      beneficiaryId: formik.values.beneficiaryId,
-                      beneficiarySeqNo: formik.values.beneficiarySeqNo
-                    }}
-                    dispersaltype={formik.values.dispersalType}
-                    countryId={formik.values.countryId}
-                    corId={formik.values.corId}
-                  />
-                )}
+                  >
+                    Clear
+                  </Button>
+                </Grid>
+                <Grid>
+                  {displayBank && (
+                    <BenificiaryBankForm
+                      viewBtns={false}
+                      store={store}
+                      setStore={setStore}
+                      editable={true}
+                      client={{
+                        clientId: formik.values.clientId,
+                        clientName: formik.values.clientName,
+                        clientRef: formik.values.clientRef
+                      }}
+                      beneficiary={{
+                        beneficiaryId: formik.values.beneficiaryId,
+                        beneficiarySeqNo: formik.values.beneficiarySeqNo
+                      }}
+                      dispersalType={formik.values.dispersalType}
+                      countryId={formik.values.countryId}
+                      corId={formik.values.corId}
+                      clearBenForm={clearBenForm}
+                    />
+                  )}
+                </Grid>
+                <Grid>
+                  {displayCash && (
+                    <BenificiaryCashForm
+                      viewBtns={false}
+                      editable={true}
+                      store={store}
+                      setStore={setStore}
+                      client={{
+                        clientId: formik.values.clientId,
+                        clientName: formik.values.clientName,
+                        clientRef: formik.values.clientRef
+                      }}
+                      beneficiary={{
+                        beneficiaryId: formik.values.beneficiaryId,
+                        beneficiarySeqNo: formik.values.beneficiarySeqNo
+                      }}
+                      dispersalType={formik.values.dispersalType}
+                      countryId={formik.values.countryId}
+                      corId={formik.values.corId}
+                      clearBenForm={clearBenForm}
+                    />
+                  )}
+                </Grid>
               </FieldSet>
             </Grid>
           </Grid>
