@@ -22,7 +22,7 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import CashCountForm from './forms/CashCountForm'
 import { CashCountRepository } from 'src/repositories/CashCountRepository'
-import { formatDateDefault } from 'src/lib/date-helper'
+import { formatDateDefault, getTimeInTimeZone } from 'src/lib/date-helper'
 
 const CashCount = () => {
   const { stack } = useWindow()
@@ -70,9 +70,16 @@ const CashCount = () => {
       flex: 1
     },
     {
-      field: 'time',
-      headerName: _labels.time,
-      flex: 1
+      field: 'startTime',
+      headerName: _labels.startTime,
+      flex: 1,
+      valueGetter: ({ row }) => getTimeInTimeZone(row.startTime)
+    },
+    {
+      field: 'endTime',
+      headerName: _labels.endTime,
+      flex: 1,
+      valueGetter: ({ row }) => row.endTime && getTimeInTimeZone(row.endTime)
     },
     {
       field: 'statusName',
