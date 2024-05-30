@@ -16,13 +16,14 @@ import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useForm } from 'src/hooks/form'
-import useDocumentType from 'src/hooks/documentReferenceBehaviors'
+import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 
 export default function JournalVoucherForm({ labels, access, recordId, general = {} }) {
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.JournalVoucher,
     access: access
   })
+
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({

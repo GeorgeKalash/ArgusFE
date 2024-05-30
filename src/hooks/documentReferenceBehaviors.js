@@ -4,10 +4,9 @@ import { useError } from 'src/error'
 import documentType from 'src/lib/docRefBehaviors'
 import { RequestsContext } from 'src/providers/RequestsContext'
 
-export function useDocumentType({ functionId, access, hasDT, action }) {
+export function useDocumentTypeProxy({ functionId, action }) {
   const { getRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
-  const [nraId, setNraId] = useState()
 
   const proxyAction = async () => {
     const general = await documentType(getRequest, functionId)
@@ -17,6 +16,16 @@ export function useDocumentType({ functionId, access, hasDT, action }) {
       stackError({ message: general?.errorMessage })
     }
   }
+
+  return {
+    proxyAction
+  }
+}
+
+export function useDocumentType({ functionId, access, hasDT }) {
+  const { getRequest } = useContext(RequestsContext)
+  const { stack: stackError } = useError()
+  const [nraId, setNraId] = useState()
 
   const queryFn = async nraId => {
     const result = await documentType(getRequest, functionId, access, nraId, hasDT)
@@ -31,6 +40,7 @@ export function useDocumentType({ functionId, access, hasDT, action }) {
 
   const query = useQuery({
     retry: false,
+    staleTime: 0,
     enabled: !!functionId,
     queryKey: [functionId, nraId, !!access],
     queryFn: nraId || nraId === 'naraId' ? () => queryFn(nraId) : () => queryFn()
@@ -41,9 +51,6 @@ export function useDocumentType({ functionId, access, hasDT, action }) {
     maxAccess: query?.data?.maxAccess,
     changeDT(value) {
       setNraId(value?.nraId ?? 'nraId')
-    },
-    proxyAction
+    }
   }
 }
-
-export default useDocumentType

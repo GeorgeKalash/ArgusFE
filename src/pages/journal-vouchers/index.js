@@ -13,7 +13,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
-import useDocumentType from 'src/hooks/documentReferenceBehaviors'
+import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 
 const JournalVoucher = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -97,7 +97,7 @@ const JournalVoucher = () => {
     })
   }
 
-  const { proxyAction } = useDocumentType({
+  const { proxyAction } = useDocumentTypeProxy({
     functionId: SystemFunction.JournalVoucher,
     action: openForm
   })

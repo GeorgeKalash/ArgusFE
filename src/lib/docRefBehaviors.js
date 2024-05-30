@@ -17,6 +17,7 @@ const getData = async (getRequest, extension, parameters) => {
 }
 
 const mergeWithMaxAccess = (maxAccess, reference, dcTypeRequired) => {
+  maxAccess = JSON.parse(JSON.stringify(maxAccess))
   let controls = maxAccess.record.controls
 
   let obj = controls.find(obj => obj.controlId === 'reference')
