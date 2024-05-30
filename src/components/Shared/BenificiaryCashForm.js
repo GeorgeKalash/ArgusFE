@@ -17,11 +17,11 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import toast from 'react-hot-toast'
 import { useResourceQuery } from 'src/hooks/resource'
 import { useForm } from 'src/hooks/form'
-import FormGrid from 'src/components/form/layout/FormGrid'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import FormGrid from 'src/components/form/layout/FormGrid'
 
 const BenificiaryCashForm = ({
   viewBtns = true,
@@ -103,7 +103,7 @@ const BenificiaryCashForm = ({
       if (store?.submitted) {
         formik.handleSubmit()
       }
-      if (clearBenForm) {
+      if (clearBenForm && !store?.submitted) {
         formik.resetForm()
       }
     })()

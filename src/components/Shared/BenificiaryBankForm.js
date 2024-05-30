@@ -111,7 +111,7 @@ export default function BenificiaryBankForm({
       if (store?.submitted) {
         formik.handleSubmit()
       }
-      if (clearBenForm) {
+      if (clearBenForm && !store?.submitted) {
         formik.resetForm()
       }
     })()

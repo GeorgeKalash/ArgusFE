@@ -62,6 +62,11 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
   async function fillOutwardData(recordId) {
     setDisplayBank(false)
     setDisplayCash(false)
+    setClearBen(false)
+    setStore(prevStore => ({
+      ...prevStore,
+      submitted: false
+    }))
 
     const formFields = [
       'outwardId',
@@ -133,7 +138,6 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
           let beneficiaryBankPack = null
           let beneficiaryCashPack = null
 
-          console.log('display pack ', store.beneficiaryList)
           if (displayCash) beneficiaryCashPack = store.beneficiaryList
           if (displayBank) beneficiaryBankPack = store.beneficiaryList
 
@@ -144,12 +148,12 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
             beneficiaryBankPack: beneficiaryBankPack
           }
 
-          const res = await postRequest({
+          /* const res = await postRequest({
             extension: RTOWMRepository.OutwardsModification.set2,
             record: JSON.stringify(data)
           })
 
-          if (res.record) toast.success('Record Updated Successfully')
+          if (res.record) toast.success('Record Updated Successfully')*/
         }
       } catch (error) {}
     })()
@@ -313,15 +317,19 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
             </Grid>
             <Grid container rowGap={2} xs={6} spacing={2} sx={{ pt: 5, pl: 4 }}>
               <FieldSet title='Benificiary [New]'>
-                <Grid item xs={2} sx={{ pl: 2, mt: 3 }}>
+                <Grid item xs={2}>
                   <Button
                     sx={{
                       backgroundColor: '#f44336',
                       color: '#FFFFFF',
                       '&:hover': {
                         backgroundColor: alpha('#f44336', 0.8)
+                      },
+                      '&:disabled': {
+                        backgroundColor: alpha('#f44336', 0.8)
                       }
                     }}
+                    disabled={clearBenForm || store?.submitted || !displayCash == !displayBank || editMode}
                     onClick={() => {
                       clearForm()
                     }}
