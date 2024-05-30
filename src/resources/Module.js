@@ -7,7 +7,7 @@ export const Module = {
   RecurringExpenses: 34,
   CurrencyTrading: 35,
   Remittance: 36,
-  CashCountTransaction: 37,
+  CashCount: 37,
   Inventory: 41,
   Manufacturing: 42,
   FixedAssets: 43,
