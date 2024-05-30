@@ -210,7 +210,7 @@ export function DataGrid({
       },
       width: 450,
       height: 170,
-      canExpand: false,
+      expandable: false,
       title: 'Delete'
     })
   }

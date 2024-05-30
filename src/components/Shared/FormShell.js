@@ -130,8 +130,6 @@ export default function FormShell({
               width: 700,
               height: 600,
               height: 'auto',
-
-              styles: { zIndex: 12 },
               title: 'Transaction Log'
             })
           }

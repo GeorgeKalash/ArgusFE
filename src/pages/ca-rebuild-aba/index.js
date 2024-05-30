@@ -26,11 +26,9 @@ const CaRebuildAba = () => {
         access,
         _labels
       },
-
-      canExpand: false,
-
+      expandable: false,
       closable: false,
-      draggableWindow: false,
+      draggable: false,
       width: 600,
       height: 400,
       title: _labels.accountRebuild
