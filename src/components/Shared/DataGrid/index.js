@@ -28,9 +28,6 @@ export function DataGrid({
   rowSelectionModel,
   disabled = false
 }) {
-  console.log('check values ', value)
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState([false, {}])
-
   async function processDependenciesForColumn(newRow, oldRow, editCell) {
     const column = columns.find(({ name }) => name === editCell.field)
 
@@ -278,6 +275,13 @@ export function DataGrid({
     }
   }
 
+  async function updateRowState({ id, changes }) {
+    const row = apiRef.current.getRow(id)
+    const newRow = { ...row, ...changes }
+    apiRef.current.updateRows([newRow])
+    handleRowChange(newRow)
+  }
+
   return (
     <Box sx={{ height: height ? height : 'auto', flex: '1 !important' }}>
       {/* Container with scroll */}
@@ -355,6 +359,10 @@ export function DataGrid({
 
               const cell = findCell(params)
 
+              async function updateRow({ changes }) {
+                updateRowState({ id: params.row.id, changes })
+              }
+
               async function update({ newRow }) {
                 updateState({
                   newRow
@@ -378,7 +386,7 @@ export function DataGrid({
                     border: `1px solid ${error?.[cell.rowIndex]?.[params.field] ? '#ff0000' : 'transparent'}`
                   }}
                 >
-                  <Component {...params} update={update} column={column} />
+                  <Component {...params} update={update} updateRow={updateRow} column={column} />
                 </Box>
               )
             },
@@ -444,14 +452,6 @@ export function DataGrid({
           actionsColumn
         ]}
       />
-      {/* <DeleteDialog
-        open={deleteDialogOpen}
-        onClose={() => setDeleteDialogOpen([false, {}])}
-        onConfirm={obj => {
-          setDeleteDialogOpen([false, {}])
-          deleteRow(obj)
-        }}
-      /> */}
     </Box>
   )
 }
