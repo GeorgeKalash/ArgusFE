@@ -66,10 +66,6 @@ export function DataGrid({
 
   const skip = allowDelete ? 1 : 0
 
-  const handleButtonClick = (id, field) => {
-    apiRef.current.startCellEditMode({ id, field })
-    apiRef.current.setCellFocus(id, field)
-  }
   useEffect(() => {
     if (!isUpdatingField && nextEdit) {
       const { id, field } = nextEdit
@@ -276,6 +272,12 @@ export function DataGrid({
     }
   }
 
+  async function updateRowState({ id, changes }) {
+    const row = apiRef.current.getRow(id)
+
+    apiRef.current.updateRows([{ ...row, ...changes }])
+  }
+
   return (
     <Box sx={{ height: height ? height : 'auto', flex: '1 !important' }}>
       {/* Container with scroll */}
@@ -354,11 +356,7 @@ export function DataGrid({
               const cell = findCell(params)
 
               async function updateRow({ changes }) {
-                stageRowUpdate({
-                  changes
-                })
-
-                await commitRowUpdate()
+                updateRowState({ id: params.row.id, changes })
               }
 
               async function update({ newRow }) {
@@ -384,13 +382,7 @@ export function DataGrid({
                     border: `1px solid ${error?.[cell.rowIndex]?.[params.field] ? '#ff0000' : 'transparent'}`
                   }}
                 >
-                  <Component
-                    {...params}
-                    update={update}
-                    updateRow={updateRow}
-                    handleButtonClick={handleButtonClick}
-                    column={column}
-                  />
+                  <Component {...params} update={update} updateRow={updateRow} column={column} />
                 </Box>
               )
             },
@@ -445,7 +437,6 @@ export function DataGrid({
                       ...column,
                       props
                     }}
-                    handleButtonClick={() => {}}
                     update={update}
                     updateRow={updateRow}
                     isLoading={isUpdatingField}

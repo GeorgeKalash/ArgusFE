@@ -2,6 +2,7 @@ const service = 'CC.asmx/'
 
 export const CashCountRepository = {
   CashCountTransaction: {
+    snapshot: service + 'snapshotTRX',
     qry: service + 'qryTRX',
     get2: service + 'get2TRX',
     set2: service + 'set2TRX',

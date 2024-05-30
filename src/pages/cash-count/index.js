@@ -34,6 +34,31 @@ const CashCount = () => {
       parameters: `_filter=`
     })
   }
+  async function fetchWithSearch({ options = {}, filters }) {
+    return (
+      filters.qry &&
+      (await getRequest({
+        extension: CashCountRepository.CashCountTransaction.snapshot,
+        parameters: `_filter=${filters.qry}`
+      }))
+    )
+  }
+
+  // const {
+  //   query: { data },
+  //   filterBy,
+  //   clearFilter,
+  //   labels: _labels,
+  //   refetch,
+  //   access
+  // } = useResourceQuery({
+  //   endpointId: CashCountRepository.CashCountTransaction.snapshot,
+  //   datasetId: ResourceIds.ClientMaster,
+  //   filter: {
+  //     endpointId: CashCountRepository.CashCountTransaction.snapshot,
+  //     filterFn: fetchWithSearch
+  //   }
+  // })
 
   const {
     query: { data },
@@ -131,7 +156,18 @@ const CashCount = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />{' '}
+        <GridToolbar
+          onAdd={add}
+          maxAccess={access}
+          onSearch={value => {
+            filterBy('qry', value)
+          }}
+          onSearchClear={() => {
+            clearFilter('qry')
+          }}
+          labels={_labels}
+          inputSearch={true}
+        />{' '}
       </Fixed>
       <Grow>
         <Table
