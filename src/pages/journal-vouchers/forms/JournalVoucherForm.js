@@ -75,7 +75,6 @@ export default function JournalVoucherForm({ labels, access, recordId, general =
       } catch (error) {}
     }
   })
-
   const editMode = !!formik.values.recordId || !!recordId
   useEffect(() => {
     ;(async function () {

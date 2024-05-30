@@ -36,7 +36,7 @@ const mergeWithMaxAccess = (maxAccess, reference, dcTypeRequired) => {
         sgId: 18,
         resourceId: ResourceIds.JournalVoucher,
         controlId: 'reference',
-        accessLevel: reference?.mandatory && DISABLED
+        accessLevel: reference?.readOnly ? DISABLED : MANDATORY
       })
     } else {
       controls = maxAccess.record.controls.filter(obj => obj.controlId != 'reference')
