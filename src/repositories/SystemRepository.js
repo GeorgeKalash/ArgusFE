@@ -171,5 +171,12 @@ export const SystemRepository = {
   },
   TimeZone: {
     get: service + 'getTZN'
+  },
+  FiscalYears: {
+    page: service + 'pageFY',
+    qry: service + 'qryFY',
+    set: service + 'setFY',
+    get: service + 'getFY',
+    del: service + 'delFY'
   }
 }
