@@ -56,7 +56,6 @@ const TabsProvider = ({ children }) => {
 
   const handleClose = () => {
     setAnchorEl(null)
-
     setTabsIndex()
   }
 
@@ -85,26 +84,25 @@ const TabsProvider = ({ children }) => {
   }
 
   const handleCloseAllTabs = () => {
-    router.push('/default/')
-    setOpenTabs([])
-    setCurrentTabIndex()
+    const firstTab = openTabs[0]
+    router.push(firstTab.route)
+    setOpenTabs([firstTab])
+    setCurrentTabIndex(0)
   }
 
   const handleCloseOtherTab = Tab => {
     const tab = openTabs[Tab]
+    const firstTab = openTabs[0]
     router.push(tab.route)
-    setOpenTabs([])
-    setOpenTabs([tab])
-    setCurrentTabIndex(0)
+    setOpenTabs([firstTab, tab])
+    setCurrentTabIndex(Tab)
   }
 
   const closeTab = tabRoute => {
     const index = openTabs.findIndex(tab => tab.route === tabRoute)
     const activeTabsLength = openTabs.length
 
-    setOpenTabs(prevState => {
-      return prevState.filter(tab => tab.route !== tabRoute)
-    })
+    setOpenTabs(prevState => prevState.filter(tab => tab.route !== tabRoute))
 
     if (activeTabsLength === 1) {
       handleCloseAllTabs()
@@ -115,7 +113,6 @@ const TabsProvider = ({ children }) => {
     if (currentTabIndex === index) {
       const newValue = index === activeTabsLength - 1 ? index - 1 : index + 1
       setCurrentTabIndex(newValue)
-
       router.push(openTabs[newValue].route)
     } else if (index < currentTabIndex) {
       setCurrentTabIndex(currentValue => currentValue - 1)
@@ -123,46 +120,21 @@ const TabsProvider = ({ children }) => {
   }
 
   useEffect(() => {
-    if (router.asPath === '/default/') {
-      setOpenTabs([])
-    } else {
-      if (initialLoadDone && router.asPath != '/default/') {
-        const isTabOpen = openTabs.some((activeTab, index) => {
-          if (activeTab.page === children || activeTab.route === router.asPath) {
-            setCurrentTabIndex(index)
+    if (initialLoadDone && router.asPath !== '/default/') {
+      const isTabOpen = openTabs.some((activeTab, index) => {
+        if (activeTab.page === children || activeTab.route === router.asPath) {
+          setCurrentTabIndex(index)
 
-            return true
-          }
-
-          return false
-        })
-        if (isTabOpen) return
-        else {
-          const newValueState = openTabs.length
-          setOpenTabs(prevState => {
-            return [
-              ...prevState,
-              {
-                page: children,
-                route: router.asPath,
-                label: lastOpenedPage
-                  ? lastOpenedPage.name
-                  : findNode(menu, router.asPath.replace(/\/$/, '')) || findNode(gear, router.asPath.replace(/\/$/, ''))
-              }
-            ]
-          })
-          setCurrentTabIndex(newValueState)
+          return true
         }
-      }
-    }
-  }, [children, router.asPath])
 
-  useEffect(() => {
-    if (router.asPath === '/default/') {
-      return
-    } else {
-      if (!openTabs[0] && router.route != '/default/' && router.asPath && menu.length > 0) {
-        setOpenTabs([
+        return false
+      })
+      if (isTabOpen) return
+      else {
+        const newValueState = openTabs.length
+        setOpenTabs(prevState => [
+          ...prevState,
           {
             page: children,
             route: router.asPath,
@@ -171,8 +143,23 @@ const TabsProvider = ({ children }) => {
               : findNode(menu, router.asPath.replace(/\/$/, '')) || findNode(gear, router.asPath.replace(/\/$/, ''))
           }
         ])
-        setInitialLoadDone(true)
+        setCurrentTabIndex(newValueState)
       }
+    }
+  }, [children, router.asPath])
+
+  useEffect(() => {
+    if (!openTabs[0] && router.asPath && menu.length > 0) {
+      setOpenTabs([
+        {
+          page: children,
+          route: router.asPath,
+          label: lastOpenedPage
+            ? lastOpenedPage.name
+            : findNode(menu, router.asPath.replace(/\/$/, '')) || findNode(gear, router.asPath.replace(/\/$/, ''))
+        }
+      ])
+      setInitialLoadDone(true)
     }
   }, [openTabs, router, menu, gear])
 
@@ -211,7 +198,6 @@ const TabsProvider = ({ children }) => {
               '.MuiTabs-indicator': {
                 backgroundColor: 'white'
               },
-
               '.MuiSvgIcon-root': {
                 color: 'white!important'
               },
@@ -223,13 +209,13 @@ const TabsProvider = ({ children }) => {
             {openTabs.length > 0 &&
               openTabs.map((activeTab, i) => {
                 return (
-                  !activeTab.isDefault && (
-                    <Tab
-                      key={i}
-                      label={activeTab?.label}
-                      onClick={() => router?.push(activeTab.route)}
-                      onContextMenu={event => OpenItems(event, i)}
-                      icon={
+                  <Tab
+                    key={i}
+                    label={activeTab?.label}
+                    onClick={() => router?.push(activeTab.route)}
+                    onContextMenu={event => OpenItems(event, i)}
+                    icon={
+                      i === 0 ? null : (
                         <IconButton
                           size='small'
                           onClick={event => {
@@ -239,22 +225,22 @@ const TabsProvider = ({ children }) => {
                         >
                           <CloseIcon fontSize='small' />
                         </IconButton>
-                      }
-                      iconPosition='end'
-                      sx={{
-                        minHeight: '35px !important',
-                        borderTopLeftRadius: 5,
-                        borderTopRightRadius: 5,
-                        py: '0px !important',
-                        mb: '0px !important',
-                        borderBottom: '0px !important',
-                        mr: '2px !important',
-                        fontWeight: '1.5rem',
-                        pr: '0px !important',
-                        pl: '10px !important'
-                      }}
-                    />
-                  )
+                      )
+                    }
+                    iconPosition='end'
+                    sx={{
+                      minHeight: '35px !important',
+                      borderTopLeftRadius: 5,
+                      borderTopRightRadius: 5,
+                      py: '0px !important',
+                      mb: '0px !important',
+                      borderBottom: '0px !important',
+                      mr: '2px !important',
+                      fontWeight: '1.5rem',
+                      pr: '0px !important',
+                      pl: '10px !important'
+                    }}
+                  />
                 )
               })}
           </Tabs>
