@@ -6,7 +6,7 @@ import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/max
 import PopperComponent from '../Shared/Popper/PopperComponent'
 
 const CustomLookup = ({
-  type = 'text', //any valid HTML5 input type
+  type = 'text',
   name,
   label,
   firstValue,
@@ -24,8 +24,8 @@ const CustomLookup = ({
   firstFieldWidth = secondDisplayField ? '50%' : '100%',
   displayFieldWidth = 1,
   helperText,
-  variant = 'outlined', //outlined, standard, filled
-  size = 'small', //small, medium
+  variant = 'outlined',
+  size = 'small',
   required = false,
   autoFocus = false,
   disabled = false,
@@ -66,7 +66,7 @@ const CustomLookup = ({
           value={firstValue}
           size={size}
           options={store}
-          filterOptions={(options, { inputValue }) => {
+          filterOptions={options => {
             if (displayField) {
               return options.filter(option => option)
             }
@@ -180,7 +180,6 @@ const CustomLookup = ({
                         <SearchIcon style={{ cursor: 'pointer', border: '0px', fontSize: 20 }} />
                       </IconButton>
                     </InputAdornment>
-                    {/* Adjust color as needed */}
                   </div>
                 )
               }}
@@ -193,7 +192,7 @@ const CustomLookup = ({
                 }),
                 '& .MuiOutlinedInput-root': {
                   '& fieldset': {
-                    border: !hasBorder && 'none' // Hide border
+                    border: !hasBorder && 'none'
                   }
                 },
                 width: '100%'
