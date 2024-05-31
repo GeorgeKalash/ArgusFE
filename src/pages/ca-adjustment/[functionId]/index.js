@@ -10,21 +10,25 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
-import CAadjustmentForm from './form/CAadjustmentForms'
+import CAadjustmentForm from '../form/CAadjustmentForms'
 import { formatDateDefault } from 'src/lib/date-helper'
 import { getFormattedNumber } from 'src/lib/numberField-helper'
+import { useRouter } from 'next/router'
 
 const CAadjustment = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const { stack } = useWindow()
 
+  const router = useRouter()
+  const { functionId } = router.query
+
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
     return await getRequest({
       extension: CashBankRepository.CAadjustment.qry,
-      parameters: `_startAt=0&_params=&_pageSize=50&_sortBy=reference&_functionId=3301`
+      parameters: `_startAt=0&_params=&_pageSize=50&_sortBy=reference&_functionId=${functionId}`
     })
   }
 
@@ -100,7 +104,8 @@ const CAadjustment = () => {
       props: {
         labels: _labels,
         recordId: recordId,
-        maxAccess: access
+        maxAccess: access,
+        functionId: functionId
       },
       width: 800,
       height: 670,

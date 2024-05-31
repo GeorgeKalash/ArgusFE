@@ -18,8 +18,10 @@ import { formatDateFromApi } from 'src/lib/date-helper'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
+import { actionAsyncStorage } from 'next/dist/client/components/action-async-storage.external'
+import { SystemFunction } from 'src/resources/SystemFunction'
 
-export default function CAadjustmentForm({ labels, maxAccess, recordId }) {
+export default function CAadjustmentForm({ labels, maxAccess, recordId, functionId }) {
   const [editMode, setEditMode] = useState(!!recordId)
 
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -35,7 +37,7 @@ export default function CAadjustmentForm({ labels, maxAccess, recordId }) {
       name: '',
       dtId: '',
       plantId: '',
-      date: '',
+      date: new Date(),
       currencyId: '',
       status: '',
       cashAccountId: '',
@@ -43,16 +45,14 @@ export default function CAadjustmentForm({ labels, maxAccess, recordId }) {
       baseAmount: '',
       exRate: '',
       rateCalcMethod: '',
-      functionId: 3301,
-
+      functionId: functionId,
       notes: ''
     },
     maxAccess,
-    enableReinitialize: true,
+    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       reference: yup.string().required(' '),
-      date: yup.date().required(' '),
       amount: yup.string().required(' '),
       currencyId: yup.string().required(' '),
       cashAccountId: yup.string().required(' ')
@@ -78,12 +78,6 @@ export default function CAadjustmentForm({ labels, maxAccess, recordId }) {
 
           recordId: response.recordId
         })
-        console.log({
-          ...obj,
-          baseAmount: response.amount,
-
-          recordId: response.recordId
-        })
       } else {
         toast.success('Record Edited Successfully')
       }
@@ -93,8 +87,6 @@ export default function CAadjustmentForm({ labels, maxAccess, recordId }) {
       invalidate()
     }
   })
-
-  // console.log(formik.values, 'foooorrrrrrmik')
 
   useEffect(() => {
     ;(async function () {
@@ -115,10 +107,31 @@ export default function CAadjustmentForm({ labels, maxAccess, recordId }) {
     })()
   }, [])
 
-  //
+  const actions = [
+    {
+      key: 'RecordRemarks',
+      condition: true,
+      onClick: 'onRecordRemarks',
+      disabled: !editMode
+    },
+    {
+      key: 'GL',
+      condition: true,
+      onClick: 'onClickGL',
+      disabled: !editMode
+    }
+  ]
 
   return (
-    <FormShell resourceId={ResourceIds.IncreaseDecreaseAdj} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell
+      resourceId={ResourceIds.IncreaseDecreaseAdj}
+      form={formik}
+      maxAccess={maxAccess}
+      editMode={editMode}
+      actions={actions}
+      functionId={SystemFunction.CashIncrease}
+      previewReport={editMode}
+    >
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
