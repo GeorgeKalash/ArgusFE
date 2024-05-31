@@ -121,6 +121,7 @@ export const ResourceIds = {
   InstantCash: 36306,
   GlobalAuthorization: 23105,
   InterfaceMap: 36120,
+  FiOpeningBalances: 31301,
   SiteGroups: 41113,
   PriceLevels: 51101,
   CommissionSchedule: 51118,
@@ -129,8 +130,12 @@ export const ResourceIds = {
   ExchangeRates: 32103,
   CbBankAccounts: 33105,
   CashNote: 37101,
+  TaxCodes: 31109,
+  TaxSchedules: 31107,
   LOShipments: 40301,
   LOTransportation: 40302,
   OpeningBalance: 33311,
-  AccountBalance: 33107
+  AccountBalance: 33107,
+  CATransaction: 33312
+
 }

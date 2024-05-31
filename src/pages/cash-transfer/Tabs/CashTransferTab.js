@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Grid } from '@mui/material'
+import { Button, Grid } from '@mui/material'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
@@ -273,7 +273,33 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
     })()
   }, [])
 
+  const getDataGrid = async () => {
+    try {
+      const res = await getRequest({
+        extension: CashBankRepository.AccountBalance.qry,
+        parameters: `_cashAccountId=${formik.values.fromCashAccountId}`
+      })
+      formik.setFieldValue(
+        'transfers',
+        res.list
+          .filter(item => item.balance != 0)
+          .map(({ id, balance, ...rest }, index) => ({
+            id: index + 1,
+            balance,
+            amount: balance || '',
+            ...rest
+          }))
+      )
+    } catch (error) {}
+  }
+
   const actions = [
+    {
+      key: 'Bulk',
+      condition: true,
+      onClick: getDataGrid,
+      disabled: editMode || formik.values.transfers.some(transfer => transfer.currencyId) || isClosed
+    },
     {
       key: 'Close',
       condition: !isClosed,
@@ -324,8 +350,8 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
     >
       <VertLayout>
         <Fixed>
-          <Grid container>
-            <Grid container rowGap={2} xs={6}>
+          <Grid container spacing={2}>
+            <Grid container rowGap={2} xs={6} sx={{ px: 2 }} spacing={4}>
               <Grid item xs={12}>
                 <CustomTextField
                   name='reference'
@@ -385,7 +411,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
                 />
               </Grid>
             </Grid>
-            <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
+            <Grid container rowGap={2} xs={6} sx={{ px: 2 }} spacing={4}>
               <Grid item xs={12}>
                 <CustomDatePicker
                   name='date'
