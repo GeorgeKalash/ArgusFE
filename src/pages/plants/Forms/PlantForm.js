@@ -77,7 +77,7 @@ const PlantForm = ({ _labels, maxAccess, store, setStore, editMode }) => {
     var parameters = `_filter=` + '&_recordId=' + recordId
     if (recordId) {
       getRequest({
-        extension: SystemRepository.Plant.get,
+        extension: SystemRepository.Plant.getw,
         parameters: parameters
       })
         .then(res => {

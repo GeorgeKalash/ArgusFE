@@ -20,7 +20,7 @@ const PageError = ({ onClose, message, height = 100 }) => {
         sx={{
           display: 'flex',
           flexDirection: 'column',
-          height: height,
+          height: height - 50,
           pr: 5
         }}
       >
