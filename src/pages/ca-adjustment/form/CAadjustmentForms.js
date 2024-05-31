@@ -52,7 +52,7 @@ export default function CAadjustmentForm({ labels, maxAccess, recordId }) {
     validateOnChange: true,
     validationSchema: yup.object({
       reference: yup.string().required(' '),
-      date: yup.string().required(' '),
+      date: yup.date().required(' '),
       amount: yup.string().required(' '),
       currencyId: yup.string().required(' '),
       cashAccountId: yup.string().required(' ')
@@ -74,16 +74,27 @@ export default function CAadjustmentForm({ labels, maxAccess, recordId }) {
         toast.success('Record Added Successfully')
         formik.setValues({
           ...obj,
+          baseAmount: obj.amount,
+
+          recordId: response.recordId
+        })
+        console.log({
+          ...obj,
           baseAmount: response.amount,
 
           recordId: response.recordId
         })
-      } else toast.success('Record Edited Successfully')
+      } else {
+        toast.success('Record Edited Successfully')
+      }
+
       setEditMode(true)
 
       invalidate()
     }
   })
+
+  // console.log(formik.values, 'foooorrrrrrmik')
 
   useEffect(() => {
     ;(async function () {
@@ -116,7 +127,7 @@ export default function CAadjustmentForm({ labels, maxAccess, recordId }) {
                 endpointId={SystemRepository.DocumentType.qry}
                 parameters={`_startAt=0&_pageSize=1000&_dgId=${formik.values.functionId}`}
                 name='dtId'
-                label={'dtId'}
+                label={labels.doctype}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
@@ -135,7 +146,7 @@ export default function CAadjustmentForm({ labels, maxAccess, recordId }) {
             <Grid item xs={12}>
               <CustomTextField
                 name='reference'
-                label={'reference'}
+                label={labels.reference}
                 value={formik.values.reference}
                 required
                 rows={2}
@@ -149,7 +160,7 @@ export default function CAadjustmentForm({ labels, maxAccess, recordId }) {
               <ResourceComboBox
                 endpointId={SystemRepository.Plant.qry}
                 name='plantId'
-                label={'plantId'}
+                label={labels.plant}
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 columnsInDropDown={[
@@ -174,14 +185,15 @@ export default function CAadjustmentForm({ labels, maxAccess, recordId }) {
                 onChange={formik.setFieldValue}
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('date', '')}
-                error={formik.touched.date && Boolean(formik.errors.date)}
+
+                // error={formik.touched.date && Boolean(formik.errors.date)}
               />
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={SystemRepository.Currency.qry}
                 name='currencyId'
-                label={labels.currencyName}
+                label={labels.currency}
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 columnsInDropDown={[
@@ -207,7 +219,7 @@ export default function CAadjustmentForm({ labels, maxAccess, recordId }) {
                 displayField='name'
                 name='cashAccountId'
                 required
-                label={'cashAccount'}
+                label={labels.cashAccount}
                 form={formik}
                 valueShow='cashAccountRef'
                 secondValueShow='cashAccountName'

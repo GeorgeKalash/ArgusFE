@@ -59,7 +59,7 @@ const CAadjustment = () => {
 
     {
       field: 'cashAccountName',
-      headerName: _labels.account,
+      headerName: _labels.cashAccount,
       flex: 1
     },
     {
@@ -102,9 +102,9 @@ const CAadjustment = () => {
         recordId: recordId,
         maxAccess: access
       },
-      width: 900,
-      height: 730,
-      title: 'CAadjustmentForm'
+      width: 800,
+      height: 670,
+      title: _labels.increaseAdj
     })
   }
 
