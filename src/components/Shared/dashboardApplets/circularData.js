@@ -10,13 +10,17 @@ const CircleContainer = styled.div`
   margin-bottom: 20px;
 `
 
+const formatNumberWithCommas = number => {
+  return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+}
+
 export const CircularData = ({ data, list }) => (
   <CircleContainer>
     {list.map((item, index) => (
       <CircularItem
         key={index}
         name={item.name}
-        number={item.isPercentage ? data[item.key].toFixed(0) : data[item.key]}
+        number={formatNumberWithCommas(data[item.key].toFixed(0))}
         isPercentage={item.isPercentage}
       />
     ))}

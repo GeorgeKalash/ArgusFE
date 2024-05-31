@@ -32,8 +32,8 @@ const CircleIcon = styled.div`
 `
 
 const CircleIconContent = styled.div`
-  width: 100px;
-  height: 100px;
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
   background: #ffffff;
   display: flex;
@@ -47,7 +47,7 @@ const CircleItemContainer = styled.div`
   align-items: center;
   justify-content: center;
   text-align: center;
-  margin: 10px;
+  margin: 5px;
 `
 
 export const CircularItem = ({ number, name, isPercentage = false }) => (

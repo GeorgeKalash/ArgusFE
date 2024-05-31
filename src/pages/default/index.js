@@ -1,10 +1,11 @@
-import { useEffect, useState, useContext } from 'react'
+import React, { useEffect, useState, useContext } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { DashboardRepository } from 'src/repositories/DashboardRepository'
 import styled, { createGlobalStyle } from 'styled-components'
 import { CircularData } from '../../components/Shared/dashboardApplets/circularData'
-import { CompositeBarChart, LineChart } from '../../components/Shared/dashboardApplets/charts'
+import { CompositeBarChart } from '../../components/Shared/dashboardApplets/charts'
 import ProgressBarComponent from '../../components/Shared/dashboardApplets/ProgressBar'
+import HorizontalTimeline from '../../components/Shared/dashboardApplets/HorizontalTimeline'
 
 const GlobalStyle = createGlobalStyle`
   @import url('https://fonts.googleapis.com/css?family=Open+Sans:700,600,300');
@@ -32,7 +33,6 @@ const GlobalStyle = createGlobalStyle`
 const Frame = styled.div`
   width: 100%;
   height: 100%;
-  flex: 1;
   display: flex;
   justify-content: flex-start;
   align-items: flex-start;
@@ -40,13 +40,29 @@ const Frame = styled.div`
 
 const Card = styled.div`
   width: 100%;
+  height: 100%;
   padding: 30px;
   background: #383838;
-  height: 100% !important;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+`
+
+const HeaderCard = styled.div`
+  flex: 0 0 150px; /* Adjust the height as needed */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+`
+
+const BodyCard = styled.div`
+  flex: 1;
   display: flex;
   justify-content: space-between;
   align-items: stretch;
+  overflow: hidden;
 `
 
 const Profile = styled.div`
@@ -129,10 +145,10 @@ const Span = styled.span`
 
 const SideData = styled.div`
   flex: 1;
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  height: 100%;
   padding: 20px;
   background: #231f20;
   border-radius: 15px;
@@ -228,14 +244,14 @@ const Home = () => {
           performanceVsTeamAverage: res.record.performanceVsTeamAverage || 0.0,
           teamPctToTarget: res.record.teamPctToTarget || 0.0,
           newClientsAcquired: res.record.newClientsAcquired || 0,
-          distanceToNextCommissionLeg: res.distanceToNextCommissionLeg || 0,
-          commissionAcquired: res.commissionAcquired || 0,
+          distanceToNextCommissionLeg: res.record.distanceToNextCommissionLeg || 0,
+          commissionAcquired: res.record.commissionAcquired || 0,
           name: res.record.salesPerson.name || '',
           teamRace: res.record.teamRace || []
         })
       })
       .catch(error => {
-        setErrorMessage(error.message)
+        console.log(error.message)
       })
   }
 
@@ -255,56 +271,55 @@ const Home = () => {
       <GlobalStyle />
       <Frame>
         <Card>
-          <SideData>
-            <DataHalf>
-              <CircularData data={data} list={list1} />
-            </DataHalf>
-            <DataHalf>
-              <CircularData data={data} list={list2} />
-            </DataHalf>
-            <DataHalf>
-              <CompositeBarContainer>
-                <LineChart
-                  id='lineChart'
-                  labels={data.teamRace.map(item => item.spRef)}
-                  data={data.teamRace.map(item => item.commission)}
-                  label='Team Commissions'
-                />
-              </CompositeBarContainer>
-            </DataHalf>
-          </SideData>
-          <Profile>
-            <ProfileAvatar imageUrl={data.imageUrl} />
-            <Span className='big'>{data.name}</Span>
-          </Profile>
-          <SideData>
-            <DataHalf>
-              <CompositeBarContainer>
-                <CompositeBarChart
-                  id='compositebara'
-                  labels={data.myYearlyGrowthInUnitsSoldList.map(item => item.year)}
-                  data={data.myYearlyGrowthInUnitsSoldList.map(item => item.qty)}
-                  label='Units Sold'
-                />
-              </CompositeBarContainer>
-            </DataHalf>
-            <DataHalf>
-              <CompositeBarContainer>
-                <CompositeBarChart
-                  id='compositebarb'
-                  labels={data.myYearlyGrowthInClientsAcquiredList.map(item => item.year)}
-                  data={data.myYearlyGrowthInClientsAcquiredList.map(item => item.qty)}
-                  label='Clients Acquired'
-                />
-              </CompositeBarContainer>
-            </DataHalf>
-            <DataHalf>
-              <ProgressBarsWrapper>
-                <ProgressBarComponent label='Percentage To Target' percentage={progress.pctToTarget} />
-                <ProgressBarComponent label='Team Percentage To Target' percentage={progress.teamPctToTarget} />
-              </ProgressBarsWrapper>
-            </DataHalf>
-          </SideData>
+          <HeaderCard>
+            <SideData>
+              <DataHalf>
+                <HorizontalTimeline data={data.teamRace} />
+              </DataHalf>
+            </SideData>
+          </HeaderCard>
+          <BodyCard>
+            <SideData>
+              <DataHalf>
+                <CircularData data={data} list={list1} />
+              </DataHalf>
+              <DataHalf>
+                <CircularData data={data} list={list2} />
+              </DataHalf>
+            </SideData>
+            <Profile>
+              <ProfileAvatar imageUrl={data.imageUrl} />
+              <Span className='big'>{data.name}</Span>
+            </Profile>
+            <SideData>
+              <DataHalf>
+                <CompositeBarContainer>
+                  <CompositeBarChart
+                    id='compositebara'
+                    labels={data.myYearlyGrowthInUnitsSoldList.map(item => item.year)}
+                    data={data.myYearlyGrowthInUnitsSoldList.map(item => item.qty)}
+                    label='Units Sold'
+                  />
+                </CompositeBarContainer>
+              </DataHalf>
+              <DataHalf>
+                <CompositeBarContainer>
+                  <CompositeBarChart
+                    id='compositebarb'
+                    labels={data.myYearlyGrowthInClientsAcquiredList.map(item => item.year)}
+                    data={data.myYearlyGrowthInClientsAcquiredList.map(item => item.qty)}
+                    label='Clients Acquired'
+                  />
+                </CompositeBarContainer>
+              </DataHalf>
+              <DataHalf>
+                <ProgressBarsWrapper>
+                  <ProgressBarComponent label='Percentage To Target' percentage={progress.pctToTarget} />
+                  <ProgressBarComponent label='Team Percentage To Target' percentage={progress.teamPctToTarget} />
+                </ProgressBarsWrapper>
+              </DataHalf>
+            </SideData>
+          </BodyCard>
         </Card>
       </Frame>
     </>
