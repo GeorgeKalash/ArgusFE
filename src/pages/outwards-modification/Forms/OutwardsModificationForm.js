@@ -148,12 +148,12 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
             beneficiaryBankPack: beneficiaryBankPack
           }
 
-          /* const res = await postRequest({
+          const res = await postRequest({
             extension: RTOWMRepository.OutwardsModification.set2,
             record: JSON.stringify(data)
           })
 
-          if (res.record) toast.success('Record Updated Successfully')*/
+          if (res.record) toast.success('Record Updated Successfully')
         }
       } catch (error) {}
     })()

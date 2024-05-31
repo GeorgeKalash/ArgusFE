@@ -17,11 +17,10 @@ const OutwardsModification = () => {
   const { stack } = useWindow()
 
   async function fetchGridData() {
-    /* return await getRequest({
+    return await getRequest({
       extension: RTOWMRepository.OutwardsModification.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
-    })*/
-    return { list: [] }
+      parameters: `_filter=`
+    })
   }
 
   const {
