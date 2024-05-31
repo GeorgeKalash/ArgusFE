@@ -22,7 +22,7 @@ export function useDocumentTypeProxy({ functionId, action }) {
   }
 }
 
-export function useDocumentType({ functionId, access, hasDT }) {
+export function useDocumentType({ functionId, access, hasDT, enabled = true }) {
   const { getRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
   const [nraId, setNraId] = useState()
@@ -41,7 +41,7 @@ export function useDocumentType({ functionId, access, hasDT }) {
   const query = useQuery({
     retry: false,
     staleTime: 0,
-    enabled: !!functionId,
+    enabled: !!functionId && enabled,
     queryKey: [functionId, nraId, !!access],
     queryFn: nraId || nraId === 'naraId' ? () => queryFn(nraId) : () => queryFn()
   })

@@ -198,7 +198,8 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
   const { maxAccess } = useDocumentType({
     functionId: fId,
     access: access,
-    hasDT: false
+    hasDT: false,
+    enabled: !editMode
   })
 
   const { formik } = useForm({

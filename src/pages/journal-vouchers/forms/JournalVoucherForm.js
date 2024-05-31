@@ -21,7 +21,8 @@ import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 export default function JournalVoucherForm({ labels, access, recordId, general = {} }) {
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.JournalVoucher,
-    access: access
+    access: access,
+    enabled: !recordId
   })
 
   const { getRequest, postRequest } = useContext(RequestsContext)
