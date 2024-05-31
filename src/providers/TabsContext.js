@@ -187,7 +187,7 @@ const TabsProvider = ({ children }) => {
           overflow: 'auto'
         }}
       >
-        <Box sx={{ backgroundColor: '#231f20', pt: '5px' }}>
+        <Box sx={{ backgroundColor: '#231f20', pt: '5px', position: 'relative !important', zIndex: '3 !important' }}>
           <Tabs
             value={currentTabIndex}
             onChange={handleChange}
