@@ -19,6 +19,7 @@ import BenificiaryCashForm from 'src/components/Shared/BenificiaryCashForm'
 import BenificiaryBankForm from 'src/components/Shared/BenificiaryBankForm'
 import toast from 'react-hot-toast'
 import { RTOWMRepository } from 'src/repositories/RTOWMRepository'
+import { useInvalidate } from 'src/hooks/resource'
 
 export default function OutwardsModificationForm({ maxAccess, labels, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -26,7 +27,13 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
   const [displayCash, setDisplayCash] = useState(false)
   const [displayBank, setDisplayBank] = useState(false)
   const [clearBenForm, setClearBen] = useState(false)
+  const [isClosed, setIsClosed] = useState(false)
+  const [isPosted, setIsPosted] = useState(false)
   const [store, setStore] = useState({ submitted: false }, { beneficiaryList: {} })
+
+  const invalidate = useInvalidate({
+    endpointId: RTOWMRepository.OutwardsModification.page
+  })
 
   const { formik } = useForm({
     maxAccess: maxAccess,
@@ -46,7 +53,12 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
       countryId: '',
       beneficiaryId: '',
       beneficiarySeqNo: '',
-      corId: ''
+      corId: '',
+      oldBeneficiaryId: '',
+      oldBeneficiarySeqNo: '',
+      wip: '',
+      releaseStatus: '',
+      status: ''
     },
     enableReinitialize: false,
     validateOnChange: true,
@@ -59,7 +71,63 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
       }))
     }
   })
-  async function fillOutwardData(recordId) {
+
+  const onClose = async () => {
+    const res = await postRequest({
+      extension: RemittanceOutwardsRepository.OutwardsTransfer.close,
+      record: JSON.stringify({
+        outwardId: formik.values.outwardId
+      })
+    })
+
+    if (res.recordId) {
+      toast.success('Record Closed Successfully')
+      invalidate()
+      setIsClosed(true)
+    }
+  }
+
+  const onReopen = async () => {
+    const res = await postRequest({
+      extension: RemittanceOutwardsRepository.OutwardsTransfer.reopen,
+      record: JSON.stringify({
+        outwardId: formik.values.outwardId
+      })
+    })
+
+    if (res.recordId) {
+      toast.success('Record Closed Successfully')
+      invalidate()
+      setIsClosed(false)
+    }
+  }
+
+  const onPost = async () => {
+    let beneficiaryBankPack = null
+    let beneficiaryCashPack = null
+
+    if (displayCash) beneficiaryCashPack = store.beneficiaryList
+    if (displayBank) beneficiaryBankPack = store.beneficiaryList
+
+    const data = {
+      outwardId: formik.values.outwardId,
+      beneficiaryCashPack: beneficiaryCashPack,
+      beneficiaryBankPack: beneficiaryBankPack
+    }
+
+    const res = await postRequest({
+      extension: RemittanceOutwardsRepository.OutwardsTransfer.post,
+      record: JSON.stringify({ data })
+    })
+
+    if (res?.recordId) {
+      toast.success('Record Posted Successfully')
+      invalidate()
+      setIsPosted(true)
+    }
+  }
+
+  async function fillOutwardData(recordId, data) {
     setDisplayBank(false)
     setDisplayCash(false)
     setClearBen(false)
@@ -68,7 +136,7 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
       submitted: false
     }))
 
-    const formFields = [
+    const outwardFields = [
       'outwardId',
       'outwardRef',
       'outwardsDate',
@@ -85,11 +153,15 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
       'corId'
     ]
 
-    const setFieldValues = values => {
-      formFields.forEach(field => {
+    const modifiedOWFields = ['reference', 'recordId', 'date', 'oldBeneficiaryId', 'oldBeneficiarySeqNo']
+
+    const setFieldValues = (fields, values) => {
+      fields.forEach(field => {
         formik.setFieldValue(field, values[field] ?? '')
       })
     }
+
+    setFieldValues(modifiedOWFields, data)
 
     if (recordId) {
       const res = await getRequest({
@@ -116,7 +188,7 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
         corId: headerView.corId
       }
 
-      setFieldValues(fieldValues)
+      setFieldValues(outwardFields, fieldValues)
       viewBeneficiary(headerView.dispersalType)
     } else {
       viewBeneficiary('')
@@ -131,10 +203,41 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
     }
   }
 
+  function clearForm() {
+    setClearBen(true)
+  }
+
+  const actions = [
+    {
+      key: 'Close',
+      condition: !isClosed,
+      onClick: onClose,
+      disabled: isClosed || !editMode || isPosted
+    },
+    {
+      key: 'Reopen',
+      condition: isClosed,
+      onClick: onReopen,
+      disabled: !isClosed || !editMode || (formik.values.releaseStatus === 3 && formik.values.status === 3) || isPosted
+    },
+    {
+      key: 'Approval',
+      condition: true,
+      onClick: 'onApproval',
+      disabled: !isClosed
+    },
+    {
+      key: 'Post',
+      condition: true,
+      onClick: onPost,
+      disabled: !editMode || isPosted || !isClosed
+    }
+  ]
+
   useEffect(() => {
     ;(async function () {
       try {
-        if (store.beneficiaryList && store.submitted) {
+        if (store.beneficiaryList && store.submitted && !editMode) {
           let beneficiaryBankPack = null
           let beneficiaryCashPack = null
 
@@ -143,7 +246,6 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
 
           const data = {
             outwardId: formik.values.outwardId,
-            beneficiaryId: formik.values.beneficiaryId,
             beneficiaryCashPack: beneficiaryCashPack,
             beneficiaryBankPack: beneficiaryBankPack
           }
@@ -153,18 +255,36 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
             record: JSON.stringify(data)
           })
 
-          if (res.record) toast.success('Record Updated Successfully')
+          if (res.recordId) {
+            toast.success('Record Updated Successfully')
+            invalidate()
+          }
+        }
+
+        if (recordId && !store.beneficiaryList) {
+          const res = await getRequest({
+            extension: RTOWMRepository.OutwardsModification.get,
+            parameters: `_recordId=${recordId}`
+          })
+          res.record.date = formatDateFromApi(res.record.date)
+          fillOutwardData(res.record.outwardId, res.record)
         }
       } catch (error) {}
     })()
   }, [store.beneficiaryList])
 
-  function clearForm() {
-    setClearBen(true)
-  }
-
   return (
-    <FormShell resourceId={ResourceIds.OutwardsModification} form={formik} height={480} maxAccess={maxAccess}>
+    <FormShell
+      resourceId={ResourceIds.OutwardsModification}
+      form={formik}
+      height={480}
+      maxAccess={maxAccess}
+      editMode={editMode}
+      disabledSubmit={editMode}
+      onClose={onClose}
+      isClosed={isClosed}
+      actions={actions}
+    >
       <VertLayout>
         <Grow>
           <Grid container>
@@ -204,7 +324,13 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
                   label={labels.outward}
                   form={formik}
                   onChange={(event, newValue) => {
-                    fillOutwardData(newValue ? newValue.recordId : '')
+                    fillOutwardData(newValue ? newValue.recordId : '', {
+                      reference: newValue ? newValue.reference : '',
+                      recordId: newValue ? newValue.recordId : '',
+                      date: newValue ? formatDateFromApi(newValue.date) : '',
+                      oldBeneficiaryId: newValue ? newValue.beneficiaryId : '',
+                      oldBeneficiarySeqNo: newValue ? newValue.beneficiarySeqNo : ''
+                    })
                   }}
                   error={formik.touched.outwardRef && Boolean(formik.errors.outwardRef)}
                   maxAccess={maxAccess}
@@ -212,7 +338,7 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
               </Grid>
             </Grid>
             <Grid container sx={{ display: 'flex', flexDirection: 'row' }}>
-              <Grid item xs={4} sx={{ pl: 1, pt: 2 }}>
+              <Grid item xs={4} sx={{ pt: 2 }}>
                 <CustomTextField
                   name='ttNo'
                   label={labels.ttNo}
@@ -287,8 +413,8 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
                       clientRef: formik.values.clientRef
                     }}
                     beneficiary={{
-                      beneficiaryId: formik.values.beneficiaryId,
-                      beneficiarySeqNo: formik.values.beneficiarySeqNo
+                      beneficiaryId: formik.values.oldBeneficiaryId,
+                      beneficiarySeqNo: formik.values.oldBeneficiarySeqNo
                     }}
                     dispersalType={formik.values.dispersalType}
                     countryId={formik.values.countryId}
@@ -304,8 +430,8 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
                       clientRef: formik.values.clientRef
                     }}
                     beneficiary={{
-                      beneficiaryId: formik.values.beneficiaryId,
-                      beneficiarySeqNo: formik.values.beneficiarySeqNo
+                      beneficiaryId: formik.values.oldBeneficiaryId,
+                      beneficiarySeqNo: formik.values.oldBeneficiarySeqNo
                     }}
                     dispersalType={formik.values.dispersalType}
                     countryId={formik.values.countryId}
@@ -343,7 +469,7 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
                       viewBtns={false}
                       store={store}
                       setStore={setStore}
-                      editable={true}
+                      editable={!editMode}
                       client={{
                         clientId: formik.values.clientId,
                         clientName: formik.values.clientName,
@@ -364,7 +490,7 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
                   {displayCash && (
                     <BenificiaryCashForm
                       viewBtns={false}
-                      editable={true}
+                      editable={!editMode}
                       store={store}
                       setStore={setStore}
                       client={{

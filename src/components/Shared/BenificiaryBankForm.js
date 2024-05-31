@@ -54,7 +54,7 @@ export default function BenificiaryBankForm({
         const maxAccess = { record: controls }
         setMaxAccess(maxAccess)
       }
-      if (beneficiary?.beneficiaryId) {
+      if (beneficiary?.beneficiaryId && !store?.submitted) {
         const RTBEB = await getRequest({
           extension: RemittanceOutwardsRepository.BeneficiaryBank.get,
           parameters: `_clientId=${client?.clientId}&_beneficiaryId=${beneficiary?.beneficiaryId}&_seqNo=${beneficiary?.beneficiarySeqNo}`
@@ -106,11 +106,19 @@ export default function BenificiaryBankForm({
           seqNo: RTBEB?.record?.seqNo
         }
 
+        if (store) {
+          setStore(prevStore => ({
+            ...prevStore,
+            beneficiaryList: obj
+          }))
+        }
+
         formik.setValues(obj)
       }
       if (store?.submitted) {
         formik.handleSubmit()
       }
+
       if (clearBenForm && !store?.submitted) {
         formik.resetForm()
       }

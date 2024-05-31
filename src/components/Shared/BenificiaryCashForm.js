@@ -51,7 +51,7 @@ const BenificiaryCashForm = ({
         const maxAccess = { record: controls }
       }
 
-      if (beneficiary?.beneficiaryId) {
+      if (beneficiary?.beneficiaryId && !store?.submitted) {
         const RTBEC = await getRequest({
           extension: RemittanceOutwardsRepository.BeneficiaryCash.get,
           parameters: `_clientId=${client?.clientId}&_beneficiaryId=${beneficiary?.beneficiaryId}&_seqNo=${beneficiary?.beneficiarySeqNo}`
@@ -97,6 +97,12 @@ const BenificiaryCashForm = ({
           fl_familyName: RTBEC?.record?.fl_familyName,
           birthPlace: RTBEC?.record?.birthPlace,
           seqNo: RTBEC?.record?.seqNo
+        }
+        if (store) {
+          setStore(prevStore => ({
+            ...prevStore,
+            beneficiaryList: obj
+          }))
         }
         formik.setValues(obj)
       }

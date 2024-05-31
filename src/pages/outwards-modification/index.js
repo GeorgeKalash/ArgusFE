@@ -4,23 +4,39 @@ import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { RTOWMRepository } from 'src/repositories/RTOWMRepository'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useWindow } from 'src/windows'
 import OutwardsModificationForm from './Forms/OutwardsModificationForm'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { formatDateDefault } from 'src/lib/date-helper'
 
 const OutwardsModification = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
 
-  async function fetchGridData() {
-    return await getRequest({
-      extension: RTOWMRepository.OutwardsModification.qry,
-      parameters: `_filter=`
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50 } = options
+
+    const response = await getRequest({
+      extension: RTOWMRepository.OutwardsModification.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
+
+    return { ...response, _startAt: _startAt }
+  }
+  async function fetchWithSearch({ options = {}, filters }) {
+    const { _startAt = 0, _pageSize = 50 } = options
+    if (!filters.qry) {
+      return { list: [] }
+    } else {
+      return await getRequest({
+        extension: RTOWMRepository.OutwardsModification.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+    }
   }
 
   const {
@@ -28,11 +44,15 @@ const OutwardsModification = () => {
     labels: _labels,
     refetch,
     access,
-    invalidate
+    filterBy
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: RTOWMRepository.OutwardsModification.qry,
-    datasetId: ResourceIds.OutwardsModification
+    endpointId: RTOWMRepository.OutwardsModification.page,
+    datasetId: ResourceIds.OutwardsModification,
+    filter: {
+      endpointId: RTOWMRepository.OutwardsModification.snapshot,
+      filterFn: fetchWithSearch
+    }
   })
 
   const columns = [
@@ -44,7 +64,8 @@ const OutwardsModification = () => {
     {
       field: 'date',
       headerName: _labels.date,
-      flex: 1
+      flex: 1,
+      valueGetter: ({ row }) => formatDateDefault(row?.date)
     },
     {
       field: 'rsName',
@@ -62,6 +83,7 @@ const OutwardsModification = () => {
       flex: 1
     }
   ]
+
   function openForm(recordId) {
     stack({
       Component: OutwardsModificationForm,
@@ -84,19 +106,21 @@ const OutwardsModification = () => {
     openForm(obj.recordId)
   }
 
-  const del = async obj => {
-    await postRequest({
-      extension: RTOWMRepository.OutwardsModification.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success('Record Deleted Successfully')
-  }
-
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <GridToolbar
+          onAdd={add}
+          maxAccess={access}
+          onSearch={value => {
+            filterBy('qry', value)
+          }}
+          onSearchClear={() => {
+            clearFilter('qry')
+          }}
+          labels={_labels}
+          inputSearch={true}
+        />
       </Fixed>
       <Grow>
         <Table
@@ -104,7 +128,6 @@ const OutwardsModification = () => {
           gridData={data}
           rowId={['recordId']}
           onEdit={edit}
-          onDelete={del}
           isLoading={false}
           pageSize={50}
           refetch={refetch}
