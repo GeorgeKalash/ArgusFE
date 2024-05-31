@@ -14,21 +14,23 @@ const PageError = ({ onClose, message, height = 100 }) => {
       ? message.response.data.error
       : message?.response?.data
 
+  const windowHeight = height + 50
+
   return (
-    <Window Title='Error' width={450} height={height} onClose={onClose} canExpand={false}>
+    <Window Title='Error' width={450} height={windowHeight} onClose={onClose} canExpand={false}>
       <Box
         sx={{
           display: 'flex',
           flexDirection: 'column',
-          height: height - 50,
-          pr: 5
+          height: height
         }}
       >
         <Box
           sx={{
             flex: '1',
             overflow: 'auto',
-            px: 5
+            py: 2,
+            mx: 2
           }}
         >
           {errorMessage}
