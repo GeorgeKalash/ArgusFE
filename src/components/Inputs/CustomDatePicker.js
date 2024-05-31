@@ -113,7 +113,7 @@ const CustomDatePicker = ({
                 <InputAdornment position='end'>
                   {value && (
                     <IconButton tabIndex={-1} edge='start' onClick={() => onChange(name, null)} sx={{ mr: -2 }}>
-                      <ClearIcon />
+                      <ClearIcon sx={{ border: '0px', fontSize: 20 }} />
                     </IconButton>
                   )}
                   <IconButton tabIndex={-1} onClick={() => setOpenDatePicker(true)} sx={{ mr: -2 }}>
