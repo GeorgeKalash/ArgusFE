@@ -122,6 +122,9 @@ const documentType = async (getRequest, functionId, maxAccess, selectNraId = und
     if (((!dtId || dtId) && !nraId) || (nraId && !activeStatus)) {
       const glbSysNumberRange = await fetchData(getRequest, functionId, 'glbSysNumberRange') //fun
       nraId = glbSysNumberRange?.nraId
+      if (nraId && dcTypeRequired) {
+        dcTypeRequired = false
+      }
       activeStatus = true
     }
     if (!nraId && !dcTypeRequired) {
