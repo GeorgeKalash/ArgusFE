@@ -140,7 +140,7 @@ export default function JournalVoucherForm({ labels, access, recordId, general =
             label={labels.reference}
             value={formik.values.reference}
             readOnly={editMode}
-            maxAccess={maxAccess}
+            maxAccess={!editMode && maxAccess}
             maxLength='30'
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('reference', '')}
