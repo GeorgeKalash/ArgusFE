@@ -309,6 +309,7 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
                           name: 'reference',
                           props: {
                             maxLength: 20,
+                            mandatory: true,
                             readOnly: editMode
                           }
                         }
