@@ -72,7 +72,7 @@ const Window = React.memo(
     }, [])
 
     const handleClick = useCallback(e => {
-      e.stopPropagation()
+      // e.stopPropagation()
     }, [])
 
     return (

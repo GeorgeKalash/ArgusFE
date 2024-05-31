@@ -77,9 +77,10 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
           functionId: functionId,
           packageReferences:
             packageDetail.packageReferences?.map(packageRefDetail => ({
-              ...packageRefDetail,
+              seqNo: index + 1,
               recordId: recordId,
-              functionId: functionId
+              functionId: functionId,
+              reference: packageRefDetail.reference
             })) || []
         }
       })
@@ -152,11 +153,13 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
         const packages = res.record.packages.map((item, index) => ({
           ...item,
           id: index + 1,
-          packageReferences: item?.packageReferences?.map((item, index) => ({
+          packageReferences: item?.packageReferences?.map((item, i) => ({
             ...item,
-            id: index + 1
+            id: i + 1,
+            seqNo: i + 1
           }))
         }))
+        setSelectedRowId(res.record?.packages?.length > 0 && 1)
         formik.setValues({
           ...res.record.header,
           packages: packages
@@ -218,6 +221,7 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
                       value={formik.values.packages}
                       error={formik.errors.packages}
                       maxAccess={maxAccess}
+                      rowSelectionModel={selectedRowId}
                       allowAddNewLine={!editMode}
                       allowDelete={!editMode}
                       onSelectionChange={row => row && loadSerialsGrid(row)}
