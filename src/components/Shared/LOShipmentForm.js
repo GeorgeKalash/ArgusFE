@@ -68,12 +68,14 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
           recordId: recordId,
           functionId: functionId,
           packageReferences:
-            packageDetail.packageReferences?.map(packageRefDetail => ({
-              seqNo: index + 1,
-              recordId: recordId,
-              functionId: functionId,
-              reference: packageRefDetail.reference
-            })) || []
+            packageDetail.packageReferences
+              .map(packageRefDetail => ({
+                seqNo: index + 1,
+                recordId: recordId,
+                functionId: functionId,
+                reference: packageRefDetail.reference
+              }))
+              ?.filter(item => !!item?.reference) || []
         }
       })
 
@@ -216,7 +218,7 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
                       rowSelectionModel={selectedRowId}
                       allowAddNewLine={!editMode}
                       allowDelete={!editMode}
-                      onSelectionChange={row => row && loadSerialsGrid(row)}
+                      onSelectionChange={row => console.log(row, 'row2ssss')}
                       columns={[
                         {
                           component: 'resourcecombobox',
@@ -231,6 +233,9 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
                               { from: 'value', to: 'packageTypeName' }
                             ],
                             readOnly: editMode
+                          },
+                          async onChange({ row: { newRow } }) {
+                            newRow && loadSerialsGrid(newRow)
                           }
                         },
                         {
