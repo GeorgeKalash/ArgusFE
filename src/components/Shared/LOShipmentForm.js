@@ -45,6 +45,7 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
     },
     enableReinitialize: true,
     validateOnChange: true,
+
     validationSchema: yup.object({
       policyNo: yup.string().required(),
       carrierId: yup.string().required(),
@@ -54,16 +55,7 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
           yup.object().shape({
             packageTypeName: yup.string().required(),
             qty: yup.string().required(),
-            amount: yup.string().required(),
-            packageReferences: yup
-              .array()
-              .of(
-                yup.object().shape({
-                  seqNo: yup.string().required(),
-                  reference: yup.string().required()
-                })
-              )
-              .required()
+            amount: yup.string().required()
           })
         )
         .required()
@@ -222,7 +214,7 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
                       error={formik.errors.packages}
                       maxAccess={maxAccess}
                       rowSelectionModel={selectedRowId}
-                      allowAddNewLine={!editMode}
+                      // allowAddNewLine={!editMode}
                       allowDelete={!editMode}
                       onSelectionChange={row => row && loadSerialsGrid(row)}
                       columns={[
