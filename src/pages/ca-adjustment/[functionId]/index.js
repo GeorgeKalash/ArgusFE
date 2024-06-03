@@ -14,6 +14,8 @@ import CAadjustmentForm from '../form/CAadjustmentForms'
 import { formatDateDefault } from 'src/lib/date-helper'
 import { getFormattedNumber } from 'src/lib/numberField-helper'
 import { useRouter } from 'next/router'
+import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
+import { SystemFunction } from 'src/resources/SystemFunction'
 
 const CAadjustment = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -90,10 +92,6 @@ const CAadjustment = () => {
     }
   ]
 
-  const add = () => {
-    openForm()
-  }
-
   const edit = obj => {
     openForm(obj?.recordId)
   }
@@ -104,13 +102,22 @@ const CAadjustment = () => {
       props: {
         labels: _labels,
         recordId: recordId,
-        maxAccess: access,
-        functionId: functionId
+        access,
+        functionId
       },
       width: 800,
       height: 670,
       title: _labels.increaseAdj
     })
+  }
+
+  const { proxyAction } = useDocumentTypeProxy({
+    functionId: functionId,
+    action: openForm
+  })
+
+  const add = async () => {
+    await proxyAction()
   }
 
   const del = async obj => {

@@ -19,9 +19,16 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { SystemFunction } from 'src/resources/SystemFunction'
+import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 
-export default function CAadjustmentForm({ labels, maxAccess, recordId, functionId }) {
+export default function CAadjustmentForm({ labels, access, recordId, functionId }) {
   const [editMode, setEditMode] = useState(!!recordId)
+
+  const { documentType, maxAccess, changeDT } = useDocumentType({
+    functionId: functionId,
+    access: access,
+    enabled: !recordId
+  })
 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -34,7 +41,7 @@ export default function CAadjustmentForm({ labels, maxAccess, recordId, function
       recordId: null,
       reference: '',
       name: '',
-      dtId: '',
+      dtId: documentType?.dtId,
       plantId: '',
       date: new Date(),
       currencyId: '',
@@ -51,7 +58,6 @@ export default function CAadjustmentForm({ labels, maxAccess, recordId, function
     enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
-      reference: yup.string().required(' '),
       amount: yup.string().required(' '),
       currencyId: yup.string().required(' '),
       cashAccountId: yup.string().required(' '),
@@ -130,7 +136,7 @@ export default function CAadjustmentForm({ labels, maxAccess, recordId, function
       maxAccess={maxAccess}
       editMode={editMode}
       actions={actions}
-      functionId={SystemFunction.CashIncrease}
+      functionId={functionId}
       previewReport={editMode}
     >
       <VertLayout>
@@ -151,6 +157,7 @@ export default function CAadjustmentForm({ labels, maxAccess, recordId, function
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
+                  changeDT(newValue)
                   formik && formik.setFieldValue('dtId', newValue?.recordId)
                   formik && formik.setFieldValue('status', newValue?.activeStatus)
                 }}
@@ -162,7 +169,6 @@ export default function CAadjustmentForm({ labels, maxAccess, recordId, function
                 name='reference'
                 label={labels.reference}
                 value={formik.values.reference}
-                required
                 rows={2}
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
