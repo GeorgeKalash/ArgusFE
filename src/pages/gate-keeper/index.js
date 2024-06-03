@@ -16,6 +16,8 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+
 const GateKeeper = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
@@ -189,20 +191,21 @@ const GateKeeper = () => {
 
   return (
     <FormShell form={formik} infoVisible={false} isCleared={false}>
-      <Fixed>
-        <GridToolbar onRefresh={true} refreshGrid={() => invalidate()} />
-      </Fixed>
-      <Grow>
-        <DataGrid
-          onChange={value => formik.setFieldValue('rows', value)}
-          value={formik.values.rows}
-          error={formik.errors.rows}
-          columns={columns}
-          height={`calc(100vh - 210px)`}
-          allowAddNewLine={false}
-          allowDelete={false}
-        />
-      </Grow>
+      <VertLayout>
+        <Fixed>
+          <GridToolbar onRefresh={true} refreshGrid={() => invalidate()} />
+        </Fixed>
+        <Grow>
+          <DataGrid
+            onChange={value => formik.setFieldValue('rows', value)}
+            value={formik.values.rows}
+            error={formik.errors.rows}
+            columns={columns}
+            allowAddNewLine={false}
+            allowDelete={false}
+          />
+        </Grow>
+      </VertLayout>
     </FormShell>
   )
 }
