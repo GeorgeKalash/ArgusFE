@@ -16,8 +16,6 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 export default function OpeningBalanceForm({ labels, maxAccess, recordId, record }) {
-  const [editMode, setEditMode] = useState(!!recordId)
-
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
@@ -55,9 +53,7 @@ export default function OpeningBalanceForm({ labels, maxAccess, recordId, record
 
       if (!currencyId && !fiscalYear && !accountId) {
         toast.success('Record Added Successfully')
-        setEditMode(false)
       } else toast.success('Record Edited Successfully')
-      setEditMode(true)
       formik.setValues({
         ...obj,
 
@@ -68,12 +64,12 @@ export default function OpeningBalanceForm({ labels, maxAccess, recordId, record
     }
   })
 
+  const editMode = !!formik.values.recordId || !!recordId
+
   useEffect(() => {
     ;(async function () {
       try {
         if (record && record.currencyId && record.fiscalYear && record.accountId) {
-          setEditMode(true)
-
           const res = await getRequest({
             extension: CashBankRepository.OpeningBalance.get,
             parameters: `_fiscalYear=${formik.values.fiscalYear}&_accountId=${formik.values.accountId}&_currencyId=${formik.values.currencyId}`

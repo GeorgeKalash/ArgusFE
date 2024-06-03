@@ -95,7 +95,7 @@ const OpeningBalance = () => {
 
         recordId: record
           ? String(record.fiscalYear * 1000) + String(record.accountId * 100) + String(record.currencyId * 10)
-          : undefined
+          : null
       },
       width: 600,
       height: 430,
