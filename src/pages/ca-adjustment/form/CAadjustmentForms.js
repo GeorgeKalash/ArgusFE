@@ -18,7 +18,6 @@ import { formatDateFromApi } from 'src/lib/date-helper'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
-import { actionAsyncStorage } from 'next/dist/client/components/action-async-storage.external'
 import { SystemFunction } from 'src/resources/SystemFunction'
 
 export default function CAadjustmentForm({ labels, maxAccess, recordId, functionId }) {
@@ -55,12 +54,14 @@ export default function CAadjustmentForm({ labels, maxAccess, recordId, function
       reference: yup.string().required(' '),
       amount: yup.string().required(' '),
       currencyId: yup.string().required(' '),
-      cashAccountId: yup.string().required(' ')
+      cashAccountId: yup.string().required(' '),
+      date: yup.string().required(' ')
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
       if (!recordId) {
         obj.baseAmount = obj.amount
+        obj.status = 1
         obj.rateCalcMethod = 1
         obj.exRate = 1
       }
@@ -181,7 +182,6 @@ export default function CAadjustmentForm({ labels, maxAccess, recordId, function
                   { key: 'name', value: 'Name' }
                 ]}
                 values={formik.values}
-                required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   const plantId = newValue?.recordId || ''
@@ -196,10 +196,10 @@ export default function CAadjustmentForm({ labels, maxAccess, recordId, function
                 label={labels.date}
                 value={formik.values.date}
                 onChange={formik.setFieldValue}
+                required
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('date', '')}
-
-                // error={formik.touched.date && Boolean(formik.errors.date)}
+                error={formik.touched.date && Boolean(formik.errors.date)}
               />
             </Grid>
             <Grid item xs={12}>
