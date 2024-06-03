@@ -294,7 +294,19 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
 
           if (res.recordId) {
             toast.success('Record Updated Successfully')
+            formik.setFieldValue('recordId', res.recordId)
             invalidate()
+            setEditMode(true)
+
+            const res2 = await getRequest({
+              extension: RTOWMRepository.OutwardsModification.get,
+              parameters: `_recordId=${res.recordId}`
+            })
+            formik.setFieldValue('reference', res2.record.reference)
+            setStore(prevStore => ({
+              ...prevStore,
+              fullModifiedOutwardBody: res2.record
+            }))
           }
         }
 

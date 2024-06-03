@@ -14,7 +14,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { formatDateDefault } from 'src/lib/date-helper'
 
 const OutwardsModification = () => {
-  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {

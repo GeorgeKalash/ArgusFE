@@ -111,7 +111,6 @@ export default function BenificiaryBankForm({
             beneficiaryList: obj
           }))
         }
-
         formik.setValues(obj)
       }
       if (store?.submitted) {
@@ -228,7 +227,8 @@ export default function BenificiaryBankForm({
         setStore(prevStore => ({
           ...prevStore,
           submitted: true,
-          beneficiaryList: data
+          beneficiaryList: data,
+          loadBen: false
         }))
       } else {
         const res = await postRequest({
