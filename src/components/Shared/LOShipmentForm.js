@@ -214,7 +214,7 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
                       error={formik.errors.packages}
                       maxAccess={maxAccess}
                       rowSelectionModel={selectedRowId}
-                      // allowAddNewLine={!editMode}
+                      allowAddNewLine={!editMode}
                       allowDelete={!editMode}
                       onSelectionChange={row => row && loadSerialsGrid(row)}
                       columns={[
