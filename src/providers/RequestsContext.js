@@ -14,7 +14,6 @@ const RequestsContext = createContext()
 
 function LoadingOverlay() {
   const { settings } = useSettings()
-  const { navCollapsed } = settings
 
   return (
     <Box
@@ -39,11 +38,18 @@ function LoadingOverlay() {
 const RequestsProvider = ({ showLoading = false, children }) => {
   const { user, setUser, apiUrl } = useContext(AuthContext)
 
-  const { stack: stackError } = useError() || {}
+  const errorModel = useError()
   const [loading, setLoading] = useState(false)
 
   let isRefreshingToken = false
   let tokenRefreshQueue = []
+
+  function showError(props) {
+    if (errorModel) errorModel.stack(props)
+    else {
+      //show old error window
+    }
+  }
 
   const debouncedCloseLoading = debounce(() => {
     setLoading(false)
@@ -69,7 +75,7 @@ const RequestsProvider = ({ showLoading = false, children }) => {
       })
       .catch(error => {
         debouncedCloseLoading()
-        stackError({ message: error, height: error.response?.status === 404 ? 400 : '' })
+        showError({ message: error, height: error.response?.status === 404 ? 400 : '' })
         throw error
       })
   }
@@ -83,7 +89,7 @@ const RequestsProvider = ({ showLoading = false, children }) => {
     })
       .then(res => res.data)
       .catch(error => {
-        stackError({ message: error, height: error.response?.status === 404 ? 400 : '' })
+        showError({ message: error, height: error.response?.status === 404 ? 400 : '' })
         throw error
       })
   }
@@ -102,7 +108,7 @@ const RequestsProvider = ({ showLoading = false, children }) => {
     })
       .then(res => res.data)
       .catch(error => {
-        stackError({ message: error, height: error.response?.status === 404 ? 400 : '' })
+        showError({ message: error, height: error.response?.status === 404 ? 400 : '' })
         throw error
       })
   }
@@ -135,7 +141,7 @@ const RequestsProvider = ({ showLoading = false, children }) => {
         debouncedCloseLoading()
         console.log(error.response)
 
-        stackError({ message: error, height: error.response?.status === 404 ? 400 : '' })
+        showError({ message: error, height: error.response?.status === 404 ? 400 : '' })
         throw error
       })
   }
