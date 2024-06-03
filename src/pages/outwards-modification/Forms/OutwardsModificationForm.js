@@ -20,16 +20,23 @@ import BenificiaryBankForm from 'src/components/Shared/BenificiaryBankForm'
 import toast from 'react-hot-toast'
 import { RTOWMRepository } from 'src/repositories/RTOWMRepository'
 import { useInvalidate } from 'src/hooks/resource'
+import { SystemFunction } from 'src/resources/SystemFunction'
 
 export default function OutwardsModificationForm({ maxAccess, labels, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [editMode, setEditMode] = useState(!!recordId)
   const [displayCash, setDisplayCash] = useState(false)
   const [displayBank, setDisplayBank] = useState(false)
-  const [clearBenForm, setClearBen] = useState(false)
   const [isClosed, setIsClosed] = useState(false)
   const [isPosted, setIsPosted] = useState(false)
-  const [store, setStore] = useState({ submitted: false }, { beneficiaryList: {} })
+
+  const [store, setStore] = useState(
+    { submitted: false },
+    { clearBenForm: false },
+    { loadBen: true },
+    { beneficiaryList: {} },
+    { fullModifiedOutwardBody: {} }
+  )
 
   const invalidate = useInvalidate({
     endpointId: RTOWMRepository.OutwardsModification.page
@@ -51,18 +58,26 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
       clientName: '',
       dispersalType: '',
       countryId: '',
+      headerBenId: '',
+      headerBenName: '',
+      headerBenSeqNo: '',
       beneficiaryId: '',
       beneficiarySeqNo: '',
       corId: '',
       oldBeneficiaryId: '',
       oldBeneficiarySeqNo: '',
+      oldBeneficiarySeqName: '',
       wip: '',
       releaseStatus: '',
       status: ''
     },
     enableReinitialize: false,
     validateOnChange: true,
-    validationSchema: yup.object({}),
+    validationSchema: yup.object({
+      beneficiaryId: yup.string().required(),
+      outwardRef: yup.string().required(),
+      date: yup.string().required()
+    }),
     onSubmit: async values => {
       setStore(prevStore => ({
         ...prevStore,
@@ -74,9 +89,9 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
 
   const onClose = async () => {
     const res = await postRequest({
-      extension: RemittanceOutwardsRepository.OutwardsTransfer.close,
+      extension: RTOWMRepository.OutwardsModification.close,
       record: JSON.stringify({
-        outwardId: formik.values.outwardId
+        recordId: formik.values.recordId
       })
     })
 
@@ -89,10 +104,8 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
 
   const onReopen = async () => {
     const res = await postRequest({
-      extension: RemittanceOutwardsRepository.OutwardsTransfer.reopen,
-      record: JSON.stringify({
-        outwardId: formik.values.outwardId
-      })
+      extension: RTOWMRepository.OutwardsModification.reopen,
+      record: JSON.stringify(store.fullModifiedOutwardBody)
     })
 
     if (res.recordId) {
@@ -116,8 +129,8 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
     }
 
     const res = await postRequest({
-      extension: RemittanceOutwardsRepository.OutwardsTransfer.post,
-      record: JSON.stringify({ data })
+      extension: RTOWMRepository.OutwardsModification.post,
+      record: JSON.stringify(data)
     })
 
     if (res?.recordId) {
@@ -127,15 +140,13 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
     }
   }
 
-  async function fillOutwardData(recordId, data) {
-    setDisplayBank(false)
-    setDisplayCash(false)
-    setClearBen(false)
-    setStore(prevStore => ({
-      ...prevStore,
-      submitted: false
-    }))
+  function setFieldValues(fields, values) {
+    fields.forEach(field => {
+      formik.setFieldValue(field, values[field] ?? '')
+    })
+  }
 
+  async function fillOutwardData(data) {
     const outwardFields = [
       'outwardId',
       'outwardRef',
@@ -154,19 +165,14 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
     ]
 
     const modifiedOWFields = ['reference', 'recordId', 'date', 'oldBeneficiaryId', 'oldBeneficiarySeqNo']
-
-    const setFieldValues = (fields, values) => {
-      fields.forEach(field => {
-        formik.setFieldValue(field, values[field] ?? '')
-      })
-    }
-
     setFieldValues(modifiedOWFields, data)
+    setIsClosed(data.wip === 2 ? true : false)
+    setIsPosted(data.status === 3 ? true : false)
 
-    if (recordId) {
+    if (data.outwardId) {
       const res = await getRequest({
         extension: RemittanceOutwardsRepository.OutwardsTransfer.get2,
-        parameters: `_recordId=${recordId}`
+        parameters: `_recordId=${data.outwardId}`
       })
 
       const { headerView, ttNo } = res.record
@@ -189,22 +195,53 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
       }
 
       setFieldValues(outwardFields, fieldValues)
-      viewBeneficiary(headerView.dispersalType)
+      fillBeneficiaryData({
+        headerBenId: headerView.beneficiaryId ?? '',
+        headerBenName: headerView.beneficiaryName ?? '',
+        headerBenSeqNo: headerView.beneficiarySeqNo ?? '',
+        dispersalType: headerView.dispersalType ?? ''
+      })
+
+      setStore(prevStore => ({
+        ...prevStore,
+        loadBen: true,
+        fullModifiedOutwardBody: data
+      }))
     } else {
-      viewBeneficiary('')
+      formik.resetForm()
+      setDisplayBank(false)
+      setDisplayCash(false)
+      setStore(prevStore => ({
+        ...prevStore,
+        submitted: false,
+        clearBenForm: false,
+        loadBen: false,
+        fullModifiedOutwardBody: data
+      }))
     }
   }
+  async function fillBeneficiaryData(data) {
+    setDisplayBank(false)
+    setDisplayCash(false)
+    setStore(prevStore => ({
+      ...prevStore,
+      submitted: false,
+      clearBenForm: false,
+      loadBen: true
+    }))
 
+    const beneficiaryFields = ['headerBenId', 'headerBenSeqNo', 'headerBenName']
+    setFieldValues(beneficiaryFields, data)
+    viewBeneficiary(data.dispersalType ?? '')
+    formik.setFieldValue('beneficiaryId', data.headerBenId)
+    formik.setFieldValue('beneficiarySeqNo', data.headerBenSeqNo)
+  }
   function viewBeneficiary(dispersalType) {
     if (dispersalType === 1) {
       setDisplayCash(true)
     } else if (dispersalType === 2) {
       setDisplayBank(true)
     }
-  }
-
-  function clearForm() {
-    setClearBen(true)
   }
 
   const actions = [
@@ -230,7 +267,7 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
       key: 'Post',
       condition: true,
       onClick: onPost,
-      disabled: !editMode || isPosted || !isClosed
+      disabled: !editMode || !isPosted || !isClosed
     }
   ]
 
@@ -267,7 +304,7 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
             parameters: `_recordId=${recordId}`
           })
           res.record.date = formatDateFromApi(res.record.date)
-          fillOutwardData(res.record.outwardId, res.record)
+          fillOutwardData(res.record)
         }
       } catch (error) {}
     })()
@@ -284,6 +321,7 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
       onClose={onClose}
       isClosed={isClosed}
       actions={actions}
+      functionId={SystemFunction.OutwardsModification}
     >
       <VertLayout>
         <Grow>
@@ -295,15 +333,14 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
                   label={labels.reference}
                   value={formik.values.reference}
                   maxAccess={maxAccess}
-                  maxLength='15'
                   readOnly
-                  required
                 />
               </Grid>
               <Grid item xs={4} sx={{ pl: 1 }}>
                 <CustomDatePicker
                   name='date'
                   required
+                  readOnly={editMode}
                   label={labels.date}
                   value={formik.values.date}
                   editMode={editMode}
@@ -321,15 +358,18 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
                   name='outwardRef'
                   secondDisplayField={false}
                   required
+                  readOnly={editMode}
                   label={labels.outward}
                   form={formik}
                   onChange={(event, newValue) => {
-                    fillOutwardData(newValue ? newValue.recordId : '', {
+                    fillOutwardData({
+                      outwardId: newValue ? newValue.recordId : '',
                       reference: newValue ? newValue.reference : '',
-                      recordId: newValue ? newValue.recordId : '',
                       date: newValue ? formatDateFromApi(newValue.date) : '',
                       oldBeneficiaryId: newValue ? newValue.beneficiaryId : '',
-                      oldBeneficiarySeqNo: newValue ? newValue.beneficiarySeqNo : ''
+                      oldBeneficiarySeqNo: newValue ? newValue.beneficiarySeqNo : '',
+                      oldBeneficiaryName: newValue ? newValue.beneficiaryName : '',
+                      dispersalType: newValue ? newValue.dispersalType : ''
                     })
                   }}
                   error={formik.touched.outwardRef && Boolean(formik.errors.outwardRef)}
@@ -356,7 +396,7 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
                   editMode={editMode}
                   maxAccess={maxAccess}
                   readOnly
-                  error={formik.touched.date && Boolean(formik.errors.date)}
+                  error={formik.touched.outwardsDate && Boolean(formik.errors.outwardsDate)}
                 />
               </Grid>
               <Grid item xs={4} sx={{ pl: 1, pt: 2 }}>
@@ -390,7 +430,7 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
                   errorCheck={'clientId'}
                 />
               </Grid>
-              <Grid item xs={8} sx={{ pl: 1, pt: 2 }}>
+              <Grid item xs={4} sx={{ pl: 1, pt: 2 }}>
                 <CustomNumberField
                   name='amount'
                   label={labels.amount}
@@ -398,6 +438,34 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
                   maxAccess={maxAccess}
                   readOnly
                   error={formik.touched.amount && Boolean(formik.errors.amount)}
+                />
+              </Grid>
+              <Grid item xs={4} sx={{ pl: 1, pt: 2 }}>
+                <ResourceLookup
+                  endpointId={RemittanceOutwardsRepository.Beneficiary.snapshot}
+                  parameters={{
+                    _clientId: formik.values.clientId,
+                    _dispersalType: formik.values.dispersalType
+                  }}
+                  valueField='name'
+                  displayField='name'
+                  name='headerBenName'
+                  label={labels.beneficiary}
+                  form={formik}
+                  required
+                  readOnly={!formik.values.clientId || !formik.values.dispersalType || editMode || isPosted}
+                  maxAccess={maxAccess}
+                  editMode={editMode}
+                  secondDisplayField={false}
+                  onChange={async (event, newValue) => {
+                    fillBeneficiaryData({
+                      headerBenId: newValue ? newValue.beneficiaryId : '',
+                      headerBenName: newValue ? newValue.name : '',
+                      headerBenSeqNo: newValue ? newValue.seqNo : '',
+                      dispersalType: newValue ? newValue.dispersalType : ''
+                    })
+                  }}
+                  errorCheck={'headerBenId'}
                 />
               </Grid>
             </Grid>
@@ -455,9 +523,12 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
                         backgroundColor: alpha('#f44336', 0.8)
                       }
                     }}
-                    disabled={clearBenForm || store?.submitted || !displayCash == !displayBank || editMode}
+                    disabled={store?.submitted || !displayCash == !displayBank || editMode}
                     onClick={() => {
-                      clearForm()
+                      setStore(prevStore => ({
+                        ...prevStore,
+                        clearBenForm: true
+                      }))
                     }}
                   >
                     Clear
@@ -482,7 +553,6 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
                       dispersalType={formik.values.dispersalType}
                       countryId={formik.values.countryId}
                       corId={formik.values.corId}
-                      clearBenForm={clearBenForm}
                     />
                   )}
                 </Grid>
@@ -505,7 +575,6 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
                       dispersalType={formik.values.dispersalType}
                       countryId={formik.values.countryId}
                       corId={formik.values.corId}
-                      clearBenForm={clearBenForm}
                     />
                   )}
                 </Grid>

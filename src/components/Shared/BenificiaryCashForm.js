@@ -32,8 +32,7 @@ const BenificiaryCashForm = ({
   beneficiary,
   corId,
   countryId,
-  editable = false,
-  clearBenForm
+  editable = false
 }) => {
   const [maxAccess, setMaxAccess] = useState({ record: [] })
   const { stack: stackError } = useError()
@@ -51,7 +50,7 @@ const BenificiaryCashForm = ({
         const maxAccess = { record: controls }
       }
 
-      if (beneficiary?.beneficiaryId && !store?.submitted) {
+      if (beneficiary?.beneficiaryId && (!store || store.submitted != store.loadBen)) {
         const RTBEC = await getRequest({
           extension: RemittanceOutwardsRepository.BeneficiaryCash.get,
           parameters: `_clientId=${client?.clientId}&_beneficiaryId=${beneficiary?.beneficiaryId}&_seqNo=${beneficiary?.beneficiarySeqNo}`
@@ -109,11 +108,16 @@ const BenificiaryCashForm = ({
       if (store?.submitted) {
         formik.handleSubmit()
       }
-      if (clearBenForm && !store?.submitted) {
+      if (store?.clearBenForm && !store?.submitted) {
         formik.resetForm()
+        setStore(prevStore => ({
+          ...prevStore,
+          clearBenForm: false,
+          loadBen: false
+        }))
       }
     })()
-  }, [store?.submitted, clearBenForm])
+  }, [store?.submitted, store?.clearBenForm, beneficiary?.beneficiaryId, beneficiary?.beneficiarySeqNo])
 
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [notArabic, setNotArabic] = useState(true)

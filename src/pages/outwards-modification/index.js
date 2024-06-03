@@ -73,7 +73,7 @@ const OutwardsModification = () => {
       flex: 1
     },
     {
-      field: 'status',
+      field: 'statusName',
       headerName: _labels.status,
       flex: 1
     },

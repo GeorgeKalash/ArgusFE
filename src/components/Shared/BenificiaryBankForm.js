@@ -34,8 +34,7 @@ export default function BenificiaryBankForm({
   beneficiary,
   dispersalType,
   corId,
-  countryId,
-  clearBenForm
+  countryId
 }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [maxAccess, setMaxAccess] = useState({ record: [] })
@@ -54,7 +53,7 @@ export default function BenificiaryBankForm({
         const maxAccess = { record: controls }
         setMaxAccess(maxAccess)
       }
-      if (beneficiary?.beneficiaryId && !store?.submitted) {
+      if (beneficiary?.beneficiaryId && (!store || store.submitted != store.loadBen)) {
         const RTBEB = await getRequest({
           extension: RemittanceOutwardsRepository.BeneficiaryBank.get,
           parameters: `_clientId=${client?.clientId}&_beneficiaryId=${beneficiary?.beneficiaryId}&_seqNo=${beneficiary?.beneficiarySeqNo}`
@@ -119,11 +118,16 @@ export default function BenificiaryBankForm({
         formik.handleSubmit()
       }
 
-      if (clearBenForm && !store?.submitted) {
+      if (store?.clearBenForm && !store?.submitted) {
         formik.resetForm()
+        setStore(prevStore => ({
+          ...prevStore,
+          clearBenForm: false,
+          loadBen: false
+        }))
       }
     })()
-  }, [store?.submitted, clearBenForm])
+  }, [store?.submitted, store?.clearBenForm, beneficiary?.beneficiaryId, beneficiary?.beneficiarySeqNo])
 
   const [initialValues, setInitialData] = useState({
     //RTBEN
