@@ -26,19 +26,21 @@ export default function CARebuildAccountBalance({ _labels, access }) {
       fiscalYear: yup.string().required(' ')
     }),
     onSubmit: async obj => {
-      const { recordId, ...rest } = obj
+      try {
+        const { recordId, ...rest } = obj
 
-      const response = await postRequest({
-        extension: CashBankRepository.AccountBalance.rebuild,
-        record: JSON.stringify(rest)
-      })
+        const response = await postRequest({
+          extension: CashBankRepository.AccountBalance.rebuild,
+          record: JSON.stringify(rest)
+        })
 
-      toast.success('Record Success')
-      formik.setValues({
-        ...obj
-      })
+        toast.success('Record Success')
+        formik.setValues({
+          ...obj
+        })
 
-      invalidate()
+        invalidate()
+      } catch (error) {}
     }
   })
 
@@ -64,7 +66,6 @@ export default function CARebuildAccountBalance({ _labels, access }) {
       actions={actions}
       maxAccess={access}
       isSaved={false}
-      disabledSubmit={true}
       editMode={true}
     >
       <VertLayout>
@@ -104,7 +105,6 @@ export default function CARebuildAccountBalance({ _labels, access }) {
                   formik.setFieldValue('cashAccountRef', newValue ? newValue.reference : '')
                   formik.setFieldValue('cashAccountName', newValue ? newValue.name : '')
                 }}
-                errorCheck={'cashAccountId'}
                 maxAccess={access}
               />
             </Grid>
