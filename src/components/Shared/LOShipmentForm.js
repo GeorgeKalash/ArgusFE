@@ -205,7 +205,7 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
           </Grid>
         </Fixed>
         <Grow>
-          <Grid container wrap='nowrap' xs={12} spacing={1}>
+          <Grid container xs={12} spacing={3}>
             <Grid item xs={8} sx={{ display: 'flex', flex: 1 }}>
               <FieldSet sx={{ flex: 1 }}>
                 <Grid container wrap='nowrap' sx={{ flexDirection: 'column', flex: 1 }}>
