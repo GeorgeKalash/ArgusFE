@@ -18,7 +18,6 @@ import { formatDateFromApi } from 'src/lib/date-helper'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
-import { SystemFunction } from 'src/resources/SystemFunction'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 
 export default function CAadjustmentForm({ labels, access, recordId, functionId }) {
@@ -91,6 +90,13 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
 
       setEditMode(true)
 
+      const res = await getRequest({
+        extension: CashBankRepository.CAadjustment.get,
+        parameters: `_recordId=${response.recordId}`
+      })
+
+      formik.setFieldValue('reference', res.record.reference)
+
       invalidate()
     }
   })
@@ -147,6 +153,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                 endpointId={SystemRepository.DocumentType.qry}
                 parameters={`_startAt=0&_pageSize=1000&_dgId=${formik.values.functionId}`}
                 name='dtId'
+                readOnly={editMode}
                 label={labels.doctype}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
@@ -169,6 +176,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                 name='reference'
                 label={labels.reference}
                 value={formik.values.reference}
+                readOnly={editMode}
                 rows={2}
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}

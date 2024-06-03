@@ -15,7 +15,6 @@ import { formatDateDefault } from 'src/lib/date-helper'
 import { getFormattedNumber } from 'src/lib/numberField-helper'
 import { useRouter } from 'next/router'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
-import { SystemFunction } from 'src/resources/SystemFunction'
 
 const CAadjustment = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -28,10 +27,12 @@ const CAadjustment = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    return await getRequest({
+    const response = await getRequest({
       extension: CashBankRepository.CAadjustment.qry,
       parameters: `_startAt=0&_params=&_pageSize=50&_sortBy=reference&_functionId=${functionId}`
     })
+
+    return { ...response, _startAt: _startAt }
   }
 
   const {
@@ -59,7 +60,7 @@ const CAadjustment = () => {
 
     {
       field: 'dtName',
-      headerName: _labels.dtName,
+      headerName: _labels.doctype,
       flex: 1
     },
 
@@ -106,7 +107,7 @@ const CAadjustment = () => {
         functionId
       },
       width: 800,
-      height: 670,
+      height: 600,
       title: _labels.increaseAdj
     })
   }
