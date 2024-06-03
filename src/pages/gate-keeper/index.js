@@ -11,9 +11,10 @@ import { DataGrid } from 'src/components/Shared/DataGrid'
 import FormShell from 'src/components/Shared/FormShell'
 import { useForm } from 'src/hooks/form'
 import * as yup from 'yup'
-import { Box } from '@mui/material'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import GridToolbar from 'src/components/Shared/GridToolbar'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const GateKeeper = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -187,9 +188,11 @@ const GateKeeper = () => {
   ]
 
   return (
-    <Box>
-      <FormShell form={formik} infoVisible={false} isCleared={false}>
+    <FormShell form={formik} infoVisible={false} isCleared={false}>
+      <Fixed>
         <GridToolbar onRefresh={true} refreshGrid={() => invalidate()} />
+      </Fixed>
+      <Grow>
         <DataGrid
           onChange={value => formik.setFieldValue('rows', value)}
           value={formik.values.rows}
@@ -199,8 +202,8 @@ const GateKeeper = () => {
           allowAddNewLine={false}
           allowDelete={false}
         />
-      </FormShell>
-    </Box>
+      </Grow>
+    </FormShell>
   )
 }
 
