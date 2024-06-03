@@ -69,8 +69,7 @@ const RequestsProvider = ({ showLoading = false, children }) => {
       })
       .catch(error => {
         debouncedCloseLoading()
-
-        stackError({ message: error, height: 400 })
+        stackError({ message: error, height: error.response.status === 404 ? 400 : '' })
         throw error
       })
   }
@@ -84,7 +83,7 @@ const RequestsProvider = ({ showLoading = false, children }) => {
     })
       .then(res => res.data)
       .catch(error => {
-        stackError({ message: error, height: 400 })
+        stackError({ message: error, height: error.response.status === 404 ? 400 : '' })
         throw error
       })
   }
@@ -103,7 +102,7 @@ const RequestsProvider = ({ showLoading = false, children }) => {
     })
       .then(res => res.data)
       .catch(error => {
-        stackError({ message: error, height: 400 })
+        stackError({ message: error, height: error.response.status === 404 ? 400 : '' })
         throw error
       })
   }
@@ -134,8 +133,9 @@ const RequestsProvider = ({ showLoading = false, children }) => {
       })
       .catch(error => {
         debouncedCloseLoading()
+        console.log(error.response)
 
-        stackError({ message: error, height: 400 })
+        stackError({ message: error, height: error.response.status === 404 ? 400 : '' })
         throw error
       })
   }
