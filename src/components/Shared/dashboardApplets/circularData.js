@@ -7,7 +7,6 @@ const CircleContainer = styled.div`
   justify-content: space-between;
   width: 100%;
   flex: 0;
-  margin-bottom: 20px;
 `
 
 const formatNumberWithCommas = number => {

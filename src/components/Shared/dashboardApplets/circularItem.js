@@ -32,8 +32,8 @@ const CircleIcon = styled.div`
 `
 
 const CircleIconContent = styled.div`
-  width: 120px;
-  height: 120px;
+  width: 130px;
+  height: 130px;
   border-radius: 50%;
   background: #ffffff;
   display: flex;

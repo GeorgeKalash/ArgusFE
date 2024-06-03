@@ -10,8 +10,8 @@ const TimelineContainer = styled.div`
   width: 100%;
   padding: 20px;
   border-radius: 15px;
-  height: 150px;
   flex: 1;
+  margin: 5px;
   &::-webkit-scrollbar {
     display: none;
   }
@@ -78,20 +78,28 @@ const TimelineIcon = styled.div`
   font-size: 12px;
 `
 
-const HorizontalTimeline = ({ data }) => (
-  <TimelineContainer>
-    <TimelineArrow />
-    {data.map((item, index) => (
-      <TimelineItem key={index}>
-        {index % 2 === 0 ? (
-          <TimelineContent1>{item.spRef}</TimelineContent1>
-        ) : (
-          <TimelineContent2>{item.spRef}</TimelineContent2>
-        )}
-        <TimelineIcon />
-      </TimelineItem>
-    ))}
-  </TimelineContainer>
+const TimelineTitle = styled.h2`
+  text-align: center;
+  display: flex;
+`
+
+const HorizontalTimeline = ({ data, label }) => (
+  <div style={{ display: 'flex', height: '180px', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+    <TimelineTitle>{label}</TimelineTitle>
+    <TimelineContainer>
+      <TimelineArrow />
+      {data.map((item, index) => (
+        <TimelineItem key={index}>
+          {index % 2 === 0 ? (
+            <TimelineContent1>{item.spRef}</TimelineContent1>
+          ) : (
+            <TimelineContent2>{item.spRef}</TimelineContent2>
+          )}
+          <TimelineIcon />
+        </TimelineItem>
+      ))}
+    </TimelineContainer>
+  </div>
 )
 
 export default HorizontalTimeline
