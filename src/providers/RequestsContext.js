@@ -8,13 +8,10 @@ import { AuthContext } from 'src/providers/AuthContext'
 import { useError } from 'src/error'
 import { Box, CircularProgress } from '@mui/material'
 import { debounce } from 'lodash'
-import { useSettings } from 'src/@core/hooks/useSettings'
 
 const RequestsContext = createContext()
 
 function LoadingOverlay() {
-  const { settings } = useSettings()
-
   return (
     <Box
       style={{
@@ -44,11 +41,8 @@ const RequestsProvider = ({ showLoading = false, children }) => {
   let isRefreshingToken = false
   let tokenRefreshQueue = []
 
-  function showError(props) {
-    if (errorModel) errorModel.stack(props)
-    else {
-      //show old error window
-    }
+  async function showError(props) {
+    if (errorModel) await errorModel.stack(props)
   }
 
   const debouncedCloseLoading = debounce(() => {
@@ -81,8 +75,6 @@ const RequestsProvider = ({ showLoading = false, children }) => {
   }
 
   const getMicroRequest = async body => {
-    const accessToken = await getAccessToken()
-
     return axios({
       method: 'GET',
       url: process.env.NEXT_PUBLIC_YAKEEN_URL + body.extension + '?' + body.parameters
@@ -148,13 +140,11 @@ const RequestsProvider = ({ showLoading = false, children }) => {
 
   const getAccessToken = async () => {
     return new Promise(async resolve => {
-      // Add a resolve function to the queue
       const resolveWrapper = token => {
         resolve(token)
       }
       tokenRefreshQueue.push(resolveWrapper)
 
-      // If a token refresh is not in progress, initiate it
       try {
         if (user?.expiresAt !== null) {
           var dateNow = new Date()
