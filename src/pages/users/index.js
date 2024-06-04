@@ -9,7 +9,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
 
 const Users = () => {
@@ -32,15 +32,12 @@ const Users = () => {
     labels: _labels,
     refetch,
     paginationParameters,
-    access
+    access,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: SystemRepository.Users.qry,
     datasetId: ResourceIds.Users
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: SystemRepository.Users.qry
   })
 
   function openForm(recordId) {

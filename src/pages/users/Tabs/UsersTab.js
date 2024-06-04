@@ -41,23 +41,22 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
       confirmPassword: '',
       umcpnl: false
     },
-
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      fullName: yup.string().required('This field is required'),
-      username: yup.string().required('This field is required'),
-      email: yup.string().required('This field is required'),
-      activeStatus: yup.string().required('This field is required'),
-      userType: yup.string().required('This field is required'),
-      languageId: yup.string().required('This field is required'),
+      fullName: yup.string().required(),
+      username: yup.string().required(),
+      email: yup.string().required(),
+      activeStatus: yup.string().required(),
+      userType: yup.string().required(),
+      languageId: yup.string().required(),
       ...(passwordState
         ? {}
         : {
-            password: yup.string().required('This field is required'),
+            password: yup.string().required(),
             confirmPassword: yup
               .string()
-              .required('Confirm Password is required')
+              .required()
               .oneOf([yup.ref('password'), null], 'Password must match')
           })
     }),
@@ -67,10 +66,8 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
         record: JSON.stringify(obj)
       })
       if (!obj.recordId) {
-        setRecordId(res?.recordId)
         toast.success('Record Added Successfully')
         formik.setFieldValue('recordId', res?.recordId)
-        console.log('store rec 22 ', res?.recordId)
         setRecordId(res?.recordId)
       } else {
         toast.success('Record Updated Successfully')
@@ -83,27 +80,24 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
     endpointId: SystemRepository.Users.qry
   })
 
-  const checkFieldDirect = email => {
-    getIdentityRequest({
-      extension: AccountRepository.UserIdentity.check,
-      parameters: `_email=${email}`
-    })
-      .then(res => {
+  const checkFieldDirect = async email => {
+    try {
+      await getIdentityRequest({
+        extension: AccountRepository.UserIdentity.check,
+        parameters: `_email=${email}`
+      })
+      setEmailPresent(false)
+      setPasswordState(false)
+    } catch (error) {
+      if (error.response && error.response.status === 303) {
+        setEmailPresent(true)
+        setPasswordState(true)
+        formik.validateForm()
+      } else {
         setEmailPresent(false)
         setPasswordState(false)
-        formik.validateForm()
-      })
-      .catch(error => {
-        if (error.response.status == 300) {
-          setEmailPresent(true)
-          setPasswordState(true)
-          formik.validateForm()
-        } else {
-          setEmailPresent(false)
-          setPasswordState(false)
-          formik.validateForm()
-        }
-      })
+      }
+    }
   }
 
   useEffect(() => {
@@ -124,7 +118,6 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
       <VertLayout>
         <Grow>
           <Grid container>
-            {/* First Column */}
             <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
               <Grid item xs={12}>
                 <CustomTextField
@@ -211,8 +204,6 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
                   error={formik.touched.activeStatus && Boolean(formik.errors.activeStatus)}
                 />
               </Grid>
-            </Grid>
-            <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
               <Grid item xs={12}>
                 <ResourceComboBox
                   name='userType'
@@ -229,6 +220,8 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
                   error={formik.touched.userType && Boolean(formik.errors.userType)}
                 />
               </Grid>
+            </Grid>
+            <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
               <Grid item xs={12}>
                 <ResourceComboBox
                   name='languageId'
@@ -311,6 +304,7 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
                   readOnly={passwordState}
                   maxAccess={maxAccess}
                   onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
                   onClear={() => formik.setFieldValue('confirmPassword', '')}
                   error={formik.touched.confirmPassword && Boolean(formik.errors.confirmPassword)}
                 />

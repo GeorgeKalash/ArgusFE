@@ -4,7 +4,6 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
-import * as yup from 'yup'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useWindow } from 'src/windows'
@@ -31,7 +30,6 @@ const SecurityGrpTab = ({ labels, maxAccess, storeRecordId, window }) => {
   const { formik } = useForm({
     enableReinitialize: true,
     validateOnChange: true,
-    validationSchema: yup.object({}),
     initialValues: {
       sgId: '',
       sgName: '',
@@ -147,6 +145,7 @@ const SecurityGrpTab = ({ labels, maxAccess, storeRecordId, window }) => {
       record: JSON.stringify(obj)
     })
     toast.success('Record Deleted Successfully')
+    invalidate()
   }
 
   return (

@@ -2,7 +2,6 @@ import { Grid } from '@mui/material'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { useForm } from 'src/hooks/form'
-import * as yup from 'yup'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { SaleRepository } from 'src/repositories/SaleRepository'
@@ -21,7 +20,6 @@ const DefaultsTab = ({ labels, maxAccess, storeRecordId }) => {
   const { formik } = useForm({
     enableReinitialize: false,
     validateOnChange: true,
-    validationSchema: yup.object({}),
     initialValues: {
       siteId: '',
       plantId: '',
@@ -51,15 +49,12 @@ const DefaultsTab = ({ labels, maxAccess, storeRecordId }) => {
 
   const getACC = async (cashAccId, UserDocObject) => {
     if (cashAccId != null) {
-      const defaultParams = `_recordId=${cashAccId}`
-      const parameters = defaultParams
-
       const res = await getRequest({
         extension: CashBankRepository.CashAccount.get,
-        parameters: parameters
+        parameters: `_recordId=${cashAccId}`
       })
-      UserDocObject.cashAccountRef = res.record.accountNo
-      UserDocObject.cashAccountName = res.record.name
+      UserDocObject.cashAccountRef = res?.record?.accountNo
+      UserDocObject.cashAccountName = res?.record?.name
 
       return UserDocObject
     }
@@ -152,7 +147,7 @@ const DefaultsTab = ({ labels, maxAccess, storeRecordId }) => {
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
               />
             </Grid>
-            <Grid item xs={12} style={{ marginTop: '-15px' }}>
+            <Grid item xs={12}>
               <ResourceLookup
                 endpointId={CashBankRepository.CashAccount.snapshot}
                 parameters={{

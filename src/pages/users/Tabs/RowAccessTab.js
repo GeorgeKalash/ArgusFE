@@ -1,7 +1,6 @@
 import Table from 'src/components/Shared/Table'
-import { Grid, Box, Button } from '@mui/material'
+import { Grid } from '@mui/material'
 import { useForm } from 'src/hooks/form'
-import * as yup from 'yup'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -16,6 +15,7 @@ import { SaleRepository } from 'src/repositories/SaleRepository'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 import { POSRepository } from 'src/repositories/POSRepository'
 import toast from 'react-hot-toast'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 
 const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
   const [data, setData] = useState([])
@@ -33,7 +33,6 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
     maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
-    validationSchema: yup.object({}),
     initialValues: {
       recordId: '',
       name: '',
@@ -164,46 +163,37 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
   return (
     <FormShell resourceId={ResourceIds.Users} form={formik} maxAccess={maxAccess} editMode={!!storeRecordId}>
       <VertLayout>
-        <Grow>
-          <Grid container spacing={4}>
-            <Grid item xs={12}>
-              <Grid container spacing={2} alignItems='center'>
-                <Grid item xs={6}>
-                  <ResourceComboBox
-                    label={labels.rowAccess}
-                    valueField='key'
-                    displayField='value'
-                    name='classId'
-                    datasetId={DataSets.ROW_ACCESS}
-                    values={formik.values}
-                    maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('classId', newValue ? newValue.key : ResourceIds.Plants)
-                      fetchGridData(newValue ? newValue.key : ResourceIds.Plants)
-                    }}
-                    error={formik.touched.classId && Boolean(formik.errors.classId)}
-                  />
-                </Grid>
-              </Grid>
-            </Grid>
-            <Grid item xs={12} sx={{ pt: 2 }}>
-              <Box>
-                <Table
-                  columns={rowColumns}
-                  gridData={data ? data : { list: [] }}
-                  setData={setData}
-                  rowId={['recordId']}
-                  isLoading={false}
-                  maxAccess={maxAccess}
-                  pagination={false}
-                  height={300}
-                  checkTitle={labels.active}
-                  showCheckboxColumn={true}
-                  viewCheckButtons={true}
-                />
-              </Box>
-            </Grid>
+        <Fixed>
+          <Grid item xs={6}>
+            <ResourceComboBox
+              label={labels.rowAccess}
+              valueField='key'
+              displayField='value'
+              name='classId'
+              datasetId={DataSets.ROW_ACCESS}
+              values={formik.values}
+              maxAccess={maxAccess}
+              onChange={(event, newValue) => {
+                formik.setFieldValue('classId', newValue ? newValue.key : ResourceIds.Plants)
+                fetchGridData(newValue ? newValue.key : ResourceIds.Plants)
+              }}
+              error={formik.touched.classId && Boolean(formik.errors.classId)}
+            />
           </Grid>
+        </Fixed>
+        <Grow>
+          <Table
+            columns={rowColumns}
+            gridData={data ? data : { list: [] }}
+            setData={setData}
+            rowId={['recordId']}
+            isLoading={false}
+            maxAccess={maxAccess}
+            pagination={false}
+            checkTitle={labels.active}
+            showCheckboxColumn={true}
+            viewCheckButtons={true}
+          />
         </Grow>
       </VertLayout>
     </FormShell>

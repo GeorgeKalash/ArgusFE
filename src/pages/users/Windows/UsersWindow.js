@@ -5,12 +5,11 @@ import SecurityGrpTab from 'src/pages/users/Tabs/SecurityGrpTab'
 import RowAccessTab from 'src/pages/users/Tabs/RowAccessTab'
 import { CustomTabs } from 'src/components/Shared/CustomTabs'
 import { useState } from 'react'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 
 const UsersWindow = ({ labels, maxAccess, recordId }) => {
   const [activeTab, setActiveTab] = useState(0)
   const [storeRecordId, setRecordId] = useState(recordId)
-
-  console.log('store rec ', storeRecordId)
 
   const tabs = [
     { label: labels.users },
@@ -20,7 +19,7 @@ const UsersWindow = ({ labels, maxAccess, recordId }) => {
   ]
 
   return (
-    <>
+    <VertLayout>
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
       <CustomTabPanel index={0} value={activeTab}>
         <UsersTab labels={labels} maxAccess={maxAccess} storeRecordId={storeRecordId} setRecordId={setRecordId} />
@@ -34,7 +33,7 @@ const UsersWindow = ({ labels, maxAccess, recordId }) => {
       <CustomTabPanel index={3} value={activeTab}>
         <RowAccessTab labels={labels} maxAccess={maxAccess} storeRecordId={storeRecordId} />
       </CustomTabPanel>
-    </>
+    </VertLayout>
   )
 }
 
