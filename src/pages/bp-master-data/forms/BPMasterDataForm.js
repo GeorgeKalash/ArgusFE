@@ -18,10 +18,10 @@ import { formatDateFromApi, formatDateToApi, formatDateToApiFunction } from 'src
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-export default function BPMasterDataForm({ labels, maxAccess, defaultValue, setEditMode , store, setStore}) {
+export default function BPMasterDataForm({ labels, maxAccess, defaultValue, setEditMode, store, setStore }) {
   const [isLoading, setIsLoading] = useState(false)
 
-  const {category, recordId} = store
+  const { category, recordId } = store
 
   const [initialValues, setInitialData] = useState({
     recordId: recordId,
@@ -53,19 +53,19 @@ export default function BPMasterDataForm({ labels, maxAccess, defaultValue, setE
   const editMode = !!recordId
 
   const filterIdCategory = async categId => {
+    const res = await getRequest({
+      extension: BusinessPartnerRepository.CategoryID.qry,
+      parameters: `_startAt=0&_pageSize=1000`
+    })
 
-      const res = await getRequest({
-        extension: BusinessPartnerRepository.CategoryID.qry,
-        parameters: `_startAt=0&_pageSize=1000`
-      })
-
-
-return  categId  ? res.list.filter(
-            item => (parseInt(categId) === 1 && item.person) || (parseInt(categId) === 2 && item.org) || (parseInt(categId) === 3 && item.group)
-          )
-
-        : []
-
+    return categId
+      ? res.list.filter(
+          item =>
+            (parseInt(categId) === 1 && item.person) ||
+            (parseInt(categId) === 2 && item.org) ||
+            (parseInt(categId) === 3 && item.group)
+        )
+      : []
   }
 
   const invalidate = useInvalidate({
@@ -85,27 +85,28 @@ return  categId  ? res.list.filter(
     onSubmit: async obj => {
       // const recordId = obj.recordId
       console.log(obj)
-      obj.recordId=recordId
-       const date =  obj?.birthDate && formatDateToApi(obj?.birthDate)
-       const data = { ...obj, birthDate : date }
+      obj.recordId = recordId
+      const date = obj?.birthDate && formatDateToApi(obj?.birthDate)
+      const data = { ...obj, birthDate: date }
 
       const res = await postRequest({
         extension: BusinessPartnerRepository.MasterData.set,
         record: JSON.stringify(data)
       })
 
-      if (!recordId){
-          toast.success('Record Added Successfully')
-          setEditMode(true)
-          formik.setFieldValue('recordId' , res.recordId )
+      if (!recordId) {
+        toast.success('Record Added Successfully')
+        setEditMode(true)
+        formik.setFieldValue('recordId', res.recordId)
 
-          setStore(prevStore => ({
-            ...prevStore,
-            recordId: res.recordId
-          }));
+        setStore(prevStore => ({
+          ...prevStore,
+          recordId: res.recordId
+        }))
+      } else {
+        toast.success('Record Edited Successfully')
       }
-      else{ toast.success('Record Edited Successfully')}
-       setEditMode(true)
+      setEditMode(true)
 
       invalidate()
     }
@@ -144,28 +145,37 @@ return  categId  ? res.list.filter(
           res.record.birthDate = formatDateFromApi(res.record.birthDate)
           formik.setValues(res.record)
         }
-      } catch (exception) {
-      }
+      } catch (exception) {}
       setIsLoading(false)
     })()
   }, [])
 
   useEffect(() => {
     ;(async function () {
-      if (formik?.values?.category){
-       const _category = await filterIdCategory(formik?.values?.category)
+      if (formik?.values?.category) {
+        const _category = await filterIdCategory(formik?.values?.category)
 
         setStore(prevStore => ({
           ...prevStore,
           category: _category
-        }));
-}
+        }))
+      }
     })()
   }, [formik?.values?.category])
+
+  const actions = [
+    {
+      key: 'RecordRemarks',
+      condition: true,
+      onClick: 'onRecordRemarks',
+      disabled: !editMode
+    }
+  ]
 
   return (
     <FormShell
       resourceId={ResourceIds.BPMasterData}
+      actions={actions}
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}
@@ -295,22 +305,20 @@ return  categId  ? res.list.filter(
                 />
               </Grid>
               <Grid item xs={12}>
-
-                  <CustomComboBox
-                    name='defaultInc'
-                    label={labels.idCategory}
-                    valueField='recordId'
-                    displayField='name'
-                    store={store.category}
-                    value={store?.category?.filter(item => item.recordId === parseInt(formik.values.defaultInc))[0]}
-                    maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
-                      formik && formik.setFieldValue('defaultInc', newValue?.recordId)
-                    }}
-                    error={formik.touched.defaultInc && Boolean(formik.errors.defaultInc)}
-                    helperText={formik.touched.defaultInc && formik.errors.defaultInc}
-                  />
-
+                <CustomComboBox
+                  name='defaultInc'
+                  label={labels.idCategory}
+                  valueField='recordId'
+                  displayField='name'
+                  store={store.category}
+                  value={store?.category?.filter(item => item.recordId === parseInt(formik.values.defaultInc))[0]}
+                  maxAccess={maxAccess}
+                  onChange={(event, newValue) => {
+                    formik && formik.setFieldValue('defaultInc', newValue?.recordId)
+                  }}
+                  error={formik.touched.defaultInc && Boolean(formik.errors.defaultInc)}
+                  helperText={formik.touched.defaultInc && formik.errors.defaultInc}
+                />
               </Grid>
               <Grid item xs={12}>
                 <CustomTextField

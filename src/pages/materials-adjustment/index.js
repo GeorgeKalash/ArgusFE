@@ -22,8 +22,6 @@ const MaterialsAdjustment = () => {
     })
 
     return { ...response, _startAt: _startAt }
-
-    return { ...response, _startAt: _startAt }
   }
 
   const {
