@@ -1,12 +1,15 @@
 html,
 body {
   height: calc(100 * var(--vh)) !important;
-  zoom: var(--zoom);
+  /* zoom: var(--zoom); */
   --zoom: 1;
   --vh: calc(1vh / var(--zoom));
   --vw: calc(1vw / var(--zoom));
+  transform: scale(var(--zoom));
+  transform-origin: 0 0;
+  width: calc(100 * var(--vw)) !important;
+  height: calc(100 * var(--vh)) !important;
 }
-
 /* Largest screens */
 @media screen and (max-width: 2560px) and (max-height: 1440px) {
   body {
