@@ -208,7 +208,8 @@ const DocumentsOnHold = () => {
         labels = await getLabels(ResourceIds.OutwardsModification)
         relevantAccess = await getAccess(ResourceIds.OutwardsModification)
 
-        windowWidth = 1100
+        windowWidth = 1400
+        windowHeight = 800
         title = labels.outwardsModification
         break
 

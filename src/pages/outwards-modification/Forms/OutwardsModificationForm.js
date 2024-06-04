@@ -164,7 +164,7 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
       'corId'
     ]
 
-    const modifiedOWFields = ['reference', 'recordId', 'date', 'oldBeneficiaryId', 'oldBeneficiarySeqNo']
+    const modifiedOWFields = ['reference', 'recordId', 'date', 'oldBeneficiaryId', 'oldBeneficiarySeqNo', 'status']
     setFieldValues(modifiedOWFields, data)
     setIsClosed(data.wip === 2 ? true : false)
     setIsPosted(data.status === 3 ? true : false)
@@ -267,7 +267,7 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
       key: 'Post',
       condition: true,
       onClick: onPost,
-      disabled: !editMode || !isPosted || !isClosed
+      disabled: formik.values.status != 4
     }
   ]
 
@@ -423,25 +423,6 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
               </Grid>
             </Grid>
             <Grid container sx={{ display: 'flex', flexDirection: 'row' }}>
-              <Grid item xs={4} sx={{ pt: 2 }}>
-                <ResourceLookup
-                  endpointId={CTCLRepository.ClientCorporate.snapshot}
-                  parameters={{
-                    _category: 0
-                  }}
-                  valueField='reference'
-                  displayField='name'
-                  name='clientId'
-                  label={labels.client}
-                  form={formik}
-                  readOnly
-                  displayFieldWidth={2}
-                  valueShow='clientRef'
-                  secondValueShow='clientName'
-                  maxAccess={maxAccess}
-                  errorCheck={'clientId'}
-                />
-              </Grid>
               <Grid item xs={4} sx={{ pl: 1, pt: 2 }}>
                 <CustomNumberField
                   name='amount'
@@ -479,6 +460,29 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
                   }}
                   errorCheck={'headerBenId'}
                 />
+              </Grid>
+              <Grid item xs={4} sx={{ pl: 5, pt: 2 }}>
+                <Button
+                  sx={{
+                    backgroundColor: '#f44336',
+                    color: '#FFFFFF',
+                    '&:hover': {
+                      backgroundColor: alpha('#f44336', 0.8)
+                    },
+                    '&:disabled': {
+                      backgroundColor: alpha('#f44336', 0.8)
+                    }
+                  }}
+                  disabled={store?.submitted || !displayCash == !displayBank || editMode}
+                  onClick={() => {
+                    setStore(prevStore => ({
+                      ...prevStore,
+                      clearBenForm: true
+                    }))
+                  }}
+                >
+                  Clear
+                </Button>
               </Grid>
             </Grid>
           </Grid>
@@ -523,29 +527,6 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
             </Grid>
             <Grid container rowGap={2} xs={6} spacing={2} sx={{ pt: 5, pl: 4 }}>
               <FieldSet title='Benificiary [New]'>
-                <Grid item xs={2}>
-                  <Button
-                    sx={{
-                      backgroundColor: '#f44336',
-                      color: '#FFFFFF',
-                      '&:hover': {
-                        backgroundColor: alpha('#f44336', 0.8)
-                      },
-                      '&:disabled': {
-                        backgroundColor: alpha('#f44336', 0.8)
-                      }
-                    }}
-                    disabled={store?.submitted || !displayCash == !displayBank || editMode}
-                    onClick={() => {
-                      setStore(prevStore => ({
-                        ...prevStore,
-                        clearBenForm: true
-                      }))
-                    }}
-                  >
-                    Clear
-                  </Button>
-                </Grid>
                 <Grid>
                   {displayBank && (
                     <BenificiaryBankForm

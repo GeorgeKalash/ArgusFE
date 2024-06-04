@@ -62,6 +62,11 @@ const OutwardsModification = () => {
       flex: 1
     },
     {
+      field: 'outwardReference',
+      headerName: _labels.outwardReference,
+      flex: 1
+    },
+    {
       field: 'date',
       headerName: _labels.date,
       flex: 1,
