@@ -21,7 +21,7 @@ const ProgressBarBackground = styled.div`
   background-color: #e0f2ff;
   border-radius: 10px;
   overflow: hidden;
-  margin: 20px 0;
+  margin: 10px 0;
 `
 
 const ProgressBar = styled.div`
