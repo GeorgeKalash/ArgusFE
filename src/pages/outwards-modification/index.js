@@ -62,7 +62,7 @@ const OutwardsModification = () => {
       flex: 1
     },
     {
-      field: 'outwardReference',
+      field: 'owRef',
       headerName: _labels.outwardReference,
       flex: 1
     },
