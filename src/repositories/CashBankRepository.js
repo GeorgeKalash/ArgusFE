@@ -61,6 +61,7 @@ export const CashBankRepository = {
     page: service + 'pageADJ',
     get: service + 'getADJ',
     set: service + 'setADJ',
-    del: service + 'delADJ'
+    del: service + 'delADJ',
+    post: service + 'postADJ'
   }
 }

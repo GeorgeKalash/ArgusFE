@@ -120,6 +120,20 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
     })()
   }, [])
 
+  const onPost = () => {
+    postRequest({
+      extension: CashBankRepository.CAadjustment.post,
+      record: JSON.stringify(formik.values)
+    })
+      .then(res => {
+        if (res?.recordId) {
+          toast.success('Record Posted Successfully')
+          invalidate()
+        }
+      })
+      .catch(error => {})
+  }
+
   const actions = [
     {
       key: 'RecordRemarks',
@@ -132,6 +146,12 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       condition: true,
       onClick: 'onClickGL',
       disabled: !editMode
+    },
+    {
+      key: 'Post',
+      condition: true,
+      onClick: onPost,
+      disabled: !editMode || formik.values.status !== 3
     }
   ]
 

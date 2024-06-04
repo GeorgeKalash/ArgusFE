@@ -25,15 +25,19 @@ const CAadjustment = () => {
   const { functionId } = router.query
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const {
+      pagination: { _startAt = 0, _pageSize = 50 }
+    } = options
 
     const response = await getRequest({
       extension: CashBankRepository.CAadjustment.qry,
-      parameters: `_startAt=0&_params=&_pageSize=50&_sortBy=reference&_functionId=${functionId}`
+      parameters: `_startAt=${_startAt}&_params=&_pageSize=50&_sortBy=reference&_functionId=${functionId}`
     })
 
     return { ...response, _startAt: _startAt }
   }
+
+  console.log(functionId, 'func')
 
   const {
     query: { data },
@@ -42,9 +46,13 @@ const CAadjustment = () => {
     paginationParameters,
     refetch
   } = useResourceQuery({
-    queryFn: fetchGridData,
     endpointId: CashBankRepository.CAadjustment.qry,
-    datasetId: ResourceIds.IncreaseDecreaseAdj
+    datasetId: ResourceIds.IncreaseDecreaseAdj,
+
+    filter: {
+      filterFn: fetchGridData,
+      default: { functionId }
+    }
   })
 
   const invalidate = useInvalidate({
@@ -108,7 +116,7 @@ const CAadjustment = () => {
       },
       width: 800,
       height: 600,
-      title: _labels.increaseAdj
+      title: functionId == 3301 ? _labels.increaseAdj : _labels.decreaseAdj
     })
   }
 
@@ -142,6 +150,7 @@ const CAadjustment = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
+          deleteConfirmationType={'strict'}
           isLoading={false}
           pageSize={50}
           paginationParameters={paginationParameters}
