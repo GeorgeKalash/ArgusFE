@@ -172,13 +172,13 @@ const InlineEditGrid = ({
                             <IconButton
                               onClick={() => gridValidation.setFieldValue(`rows[${rowIndex}].${fieldName}`, '0')}
                             >
-                              <ClearIcon />
+                              <ClearIcon sx={{ border: '0px', fontSize: 20 }} />
                             </IconButton>
                           </InputAdornment>
                         )}
                         <InputAdornment>
                           <IconButton onClick={() => setOpenDatePicker(true)} sx={{ mr: -2 }}>
-                            <EventIcon />
+                            <EventIcon sx={{ border: '0px', fontSize: 20 }} />
                           </IconButton>
                         </InputAdornment>
                       </>
@@ -240,7 +240,7 @@ const InlineEditGrid = ({
                         onClick={() => gridValidation.setFieldValue(`rows[${rowIndex}].${fieldName}`, 0)}
                         aria-label='clear input'
                       >
-                        <ClearIcon />
+                        <ClearIcon sx={{ border: '0px', fontSize: 20 }} />
                       </IconButton>
                     </InputAdornment>
                   ))
@@ -413,7 +413,7 @@ const InlineEditGrid = ({
                   </Box>
                 )
             }}
-            
+
             // onFocus={() => setOpen(true)}
 
             // getOptionLabel={option => {
@@ -495,7 +495,7 @@ const InlineEditGrid = ({
                             }}
                             aria-label='clear input'
                           >
-                            <ClearIcon />
+                            <ClearIcon sx={{ border: '0px', fontSize: 20 }} />
                           </IconButton>
                         </InputAdornment>
                       )}
@@ -503,6 +503,7 @@ const InlineEditGrid = ({
                         <IconButton tabIndex={-1} edge='end' aria-label='clear input'>
                           <SearchIcon
                             style={{ cursor: 'pointer' }}
+                            sx={{ border: '0px', fontSize: 20 }}
                             onClick={() => {
                               // Handle search action if needed
                             }}
@@ -712,7 +713,7 @@ const InlineEditGrid = ({
               return (
                 <div ref={null}>
                   <IconButton tabIndex='-1' icon='pi pi-trash' onClick={() => openDeleteDialog(column.rowIndex)}>
-                    <DeleteIcon />
+                    <DeleteIcon sx={{ border: '0px', fontSize: 20 }} />
                   </IconButton>
                 </div>
               )

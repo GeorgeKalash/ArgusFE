@@ -1,47 +1,52 @@
-import { useState, useContext } from 'react'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
-import CostCenterWindow from './Window/CostCenterWindow'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { useWindow } from 'src/windows'
+import CostCenterForm from './forms/CostCenterForm'
 
 const CostCenter = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const [selectedRecordId, setSelectedRecordId] = useState(null)
-  const [windowOpen, setWindowOpen] = useState(false)
-  const [errorMessage, setErrorMessage] = useState(null)
-  const [gridData ,setGridData]=useState([]);
+  const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    return await getRequest({
+    const response = await getRequest({
       extension: GeneralLedgerRepository.CostCenter.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
+
+    return { ...response, _startAt: _startAt }
   }
 
-  async function fetchWithSearch({options = {} , qry}) {
+  async function fetchWithSearch({ options = {}, qry }) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-return await getRequest({
+    return await getRequest({
       extension: GeneralLedgerRepository.CostCenter.snapshot,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=${qry}`
     })
   }
+
+  const invalidate = useInvalidate({
+    endpointId: GeneralLedgerRepository.CostCenter.page
+  })
 
   const {
     query: { data },
     search,
     clear,
     labels: _labels,
+    paginationParameters,
+    refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -49,14 +54,9 @@ return await getRequest({
     datasetId: ResourceIds.CostCenter,
     search: {
       endpointId: GeneralLedgerRepository.CostCenter.snapshot,
-      searchFn: fetchWithSearch,
+      searchFn: fetchWithSearch
     }
   })
-
-  const invalidate = useInvalidate({
-    endpointId: GeneralLedgerRepository.CostCenter.page
-  })
-
 
   const columns = [
     {
@@ -68,20 +68,20 @@ return await getRequest({
       field: 'name',
       headerName: _labels.name,
       flex: 1
-    },  {
-        field: 'ccgName',
-        headerName: _labels.costCenterGroup,
-        flex: 1
-      }
+    },
+    {
+      field: 'ccgName',
+      headerName: _labels.costCenterGroup,
+      flex: 1
+    }
   ]
 
   const add = () => {
-    setWindowOpen(true)
+    openForm()
   }
 
   const edit = obj => {
-    setSelectedRecordId(obj.recordId)
-    setWindowOpen(true)
+    openForm(obj?.recordId)
   }
 
   const del = async obj => {
@@ -93,36 +93,48 @@ return await getRequest({
     toast.success('Record Deleted Successfully')
   }
 
+  function openForm(recordId) {
+    stack({
+      Component: CostCenterForm,
+      props: {
+        labels: _labels,
+        recordId: recordId ? recordId : null,
+        maxAccess: access,
+        invalidate: invalidate
+      },
+      width: 600,
+      height: 600,
+      title: _labels.costCenter
+    })
+  }
+
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} onSearch={search} onSearchClear={clear} labels={_labels}  inputSearch={true}/>
+        <GridToolbar
+          onAdd={add}
+          maxAccess={access}
+          onSearch={search}
+          onSearchClear={clear}
+          labels={_labels}
+          inputSearch={true}
+        />
       </Fixed>
       <Grow>
         <Table
           columns={columns}
-          gridData={  data ?? {list: []} }
+          gridData={data ?? { list: [] }}
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
           isLoading={false}
           pageSize={50}
-          paginationType='client'
+          paginationType='api'
           maxAccess={access}
+          refetch={refetch}
+          paginationParameters={paginationParameters}
         />
       </Grow>
-      {windowOpen && (
-        <CostCenterWindow
-          onClose={() => {
-            setWindowOpen(false)
-            setSelectedRecordId(null)
-          }}
-          labels={_labels}
-          maxAccess={access}
-          recordId={selectedRecordId}
-        />
-      )}
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </VertLayout>
   )
 }

@@ -1,4 +1,5 @@
-import { useContext, useEffect, useState } from 'react'
+import { useContext } from 'react'
+import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
@@ -17,7 +18,6 @@ const ProductionRequestLog = () => {
     query: { data },
     labels: _labels,
     refetch,
-    paginationParameters,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -33,18 +33,19 @@ const ProductionRequestLog = () => {
     endpointId: ManufacturingRepository.LeanProductionPlanning.preview
   })
 
-  async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
-
-    const response = await getRequest({
+  async function fetchGridData() {
+    return await getRequest({
       extension: ManufacturingRepository.LeanProductionPlanning.preview,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_status=1&_filter=`
+      parameters: `_status=1`
     })
-
-    return { ...response, _startAt: _startAt }
   }
 
   const columns = [
+    {
+      field: 'reference',
+      headerName: _labels.reference,
+      flex: 1
+    },
     {
       field: 'sku',
       headerName: _labels[3],
@@ -91,19 +92,29 @@ const ProductionRequestLog = () => {
     invalidate()
   }
 
+  const del = async obj => {
+    await postRequest({
+      extension: ManufacturingRepository.LeanProductionPlanning.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success('Record Deleted Successfully')
+  }
+
   return (
     <VertLayout>
       <Grow>
         <Table
           columns={columns}
           gridData={data ? data : { list: [] }}
-          rowId={['recordId', 'seqNo']}
+          rowId={['recordId', 'itemId', 'functionId']}
+          onDelete={del}
           isLoading={false}
           maxAccess={access}
           showCheckboxColumn={true}
+          handleCheckedRows={() => {}}
           pageSize={50}
-          paginationParameters={paginationParameters}
-          paginationType='api'
+          paginationType='client'
           refetch={refetch}
         />
       </Grow>

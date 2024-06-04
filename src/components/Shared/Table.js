@@ -7,7 +7,6 @@ import { DataGrid, gridClasses } from '@mui/x-data-grid'
 import { alpha, styled } from '@mui/material/styles'
 
 // ** Icons
-import Icon from 'src/@core/components/icon'
 import FirstPageIcon from '@mui/icons-material/FirstPage'
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore'
 import NavigateNextIcon from '@mui/icons-material/NavigateNext'
@@ -16,12 +15,16 @@ import RefreshIcon from '@mui/icons-material/Refresh'
 
 // ** Custom Imports
 import DeleteDialog from './DeleteDialog'
+import Image from 'next/image'
 
 // ** Resources
 import { ControlAccessLevel, TrxType } from 'src/resources/AccessLevels'
 import { HIDDEN, accessLevel } from 'src/services/api/maxAccess'
 import { useWindow } from 'src/windows'
 import StrictDeleteConfirmation from './StrictDeleteConfirmation'
+
+import deleteIcon from '../../../public/images/TableIcons/delete.png'
+import editIcon from '../../../public/images/TableIcons/edit.png'
 
 const ODD_OPACITY = 0.2
 
@@ -30,21 +33,22 @@ const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
   borderTop: `1px solid ${theme.palette.mode === 'light' ? '#cccccc' : '#303030'}`,
   borderBottom: `1px solid ${theme.palette.mode === 'light' ? '#cccccc' : '#303030'}`,
   '& .MuiDataGrid-main': {
-    // remove overflow hidden overwise sticky does not work
     overflow: 'unset'
   },
   '& .MuiDataGrid-columnHeaders': {
-    position: 'sticky'
+    position: 'sticky',
+    backgroundColor: '#F5F5F5'
+  },
+
+  '& .MuiDataGrid-columnHeaderTitle': {
+    fontWeight: '900'
   },
   '& .MuiDataGrid-row:last-child': {
     borderBottom: `1px solid ${theme.palette.mode === 'light' ? '#cccccc' : '#303030'}`
   },
-  '& .MuiDataGrid-overlayWrapperInner': {
-    marginTop: '-1px'
-  },
   '& .MuiDataGrid-virtualScroller': {
-    // remove the space left for the header
-    marginTop: '0!important'
+    marginTop: '0px !important',
+    overflowX: 'hidden !important'
   },
   '& .MuiDataGrid-columnsContainer': {
     backgroundColor: theme.palette.mode === 'light' ? '#fafafa' : '#1d1d1d'
@@ -166,11 +170,9 @@ const Table = ({
             <IconButton onClick={goToLastPage} disabled={page === pageCount}>
               <LastPageIcon />
             </IconButton>
-            {/* {api && ( */}
             <IconButton onClick={refetch}>
               <RefreshIcon />
             </IconButton>
-            {/* )} */}
             Displaying Records {startAt === 0 ? 1 : startAt} -{' '}
             {totalRecords < pageSize ? totalRecords : page === pageCount ? totalRecords : startAt + pageSize} of{' '}
             {totalRecords}
@@ -250,11 +252,9 @@ const Table = ({
               <IconButton onClick={goToLastPage} disabled={page === pageCount}>
                 <LastPageIcon />
               </IconButton>
-              {/* {api && ( */}
               <IconButton onClick={refetch}>
                 <RefreshIcon />
               </IconButton>
-              {/* )} */}
               Displaying Records {startAt === 0 ? 1 : startAt} -{' '}
               {totalRecords < pageSize ? totalRecords : page === pageCount ? totalRecords : startAt + pageSize} of{' '}
               {totalRecords}
@@ -302,6 +302,32 @@ const Table = ({
     })
   }
 
+  {
+    /* <DeleteDialog
+    open={deleteDialogOpen}
+    fullScreen={false}
+    onClose={() => setDeleteDialogOpen([false, {}])}
+    onConfirm={obj => {
+      setDeleteDialogOpen([false, {}])
+      props.onDelete(obj)
+    }}
+  /> */
+  }
+
+  function openDelete(obj) {
+    stack({
+      Component: DeleteDialog,
+      props: {
+        open: [true, {}],
+        fullScreen: false,
+        onConfirm: () => props.onDelete(obj)
+      },
+      width: 450,
+      height: 170,
+      title: 'Delete'
+    })
+  }
+
   const shouldRemoveColumn = column => {
     const match = columnsAccess && columnsAccess.find(item => item.controlId === column.id)
 
@@ -319,33 +345,34 @@ const Table = ({
       renderCell: params => {
         const { row } = params
         const isStatus3 = row.status === 3
+        const isStatusCanceled = row.status === -1
         const isWIP = row.wip === 2
 
         return (
           <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
             {props.onEdit && (
               <IconButton size='small' onClick={() => props.onEdit(params.row)}>
-                <Icon icon='mdi:application-edit-outline' fontSize={18} />
+                <Image src={editIcon} alt='Edit' width={18} height={18} />
               </IconButton>
             )}
             {props.popupComponent && (
               <IconButton size='small' onClick={() => props.popupComponent(params.row)}>
-                <Icon icon='mdi:application-edit-outline' fontSize={18} />
+                <Image src={editIcon} alt='Edit' width={18} height={18} />
               </IconButton>
             )}
-            {!isStatus3 && deleteBtnVisible && !isWIP && (
+            {!isStatus3 && !isStatusCanceled && deleteBtnVisible && !isWIP && (
               <IconButton
                 size='small'
                 onClick={() => {
                   if (props.deleteConfirmationType == 'strict') {
                     openDeleteConfirmation(params.row)
                   } else {
-                    setDeleteDialogOpen([true, params.row])
+                    openDelete(params.row)
                   }
                 }}
                 color='error'
               >
-                <Icon icon='mdi:delete-forever' fontSize={18} />
+                <Image src={deleteIcon} alt='Delete' width={18} height={18} />
               </IconButton>
             )}
           </Box>
@@ -423,6 +450,9 @@ const Table = ({
                 : []
             }
             sx={{
+              '& .MuiDataGrid-overlayWrapperInner': {
+                height: '300px !important'
+              },
               overflow: 'auto',
               position: 'relative',
               display: 'flex',
@@ -469,16 +499,6 @@ const Table = ({
                 : []),
               ...filteredColumns
             ]}
-          />
-
-          <DeleteDialog
-            fullScreen={false}
-            open={deleteDialogOpen}
-            onClose={() => setDeleteDialogOpen([false, {}])}
-            onConfirm={obj => {
-              setDeleteDialogOpen([false, {}])
-              props.onDelete(obj)
-            }}
           />
         </>
       ) : (

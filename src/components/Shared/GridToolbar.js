@@ -1,6 +1,5 @@
 // ** MUI Imports
 import { Box, Button, Grid, Tooltip, Typography, Autocomplete, DialogActions, TextField } from '@mui/material'
-
 import Icon from 'src/@core/components/icon'
 import CustomTextField from '../Inputs/CustomTextField'
 import { useState, useEffect, useContext } from 'react'
@@ -18,8 +17,11 @@ const GridToolbar = ({
   initialLoad,
   onAdd,
   openRPB,
+  onTree,
+  refreshGrid,
   disableRPB = false,
   onGo,
+  onRefresh = false,
   paramsArray,
   children,
   labels,
@@ -91,69 +93,101 @@ const GridToolbar = ({
   }
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        width: '100%'
-      }}
-    >
-      {children && children}
-      <Box sx={{ display: 'flex', pb: 2, pr: 2 }}>
-        {initialLoad && (
-          <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
-            <Button onClick={initialLoad} variant='contained'>
-              <Icon icon='mdi:reload' />
-            </Button>
-          </Box>
-        )}
-        {onAdd && addBtnVisible && (
-          <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
-            <Tooltip title='Add'>
-              <Button
-                onClick={onAdd}
-                variant='contained'
-                style={{ backgroundColor: 'transparent', border: '1px solid #4eb558' }}
-              >
-                <img src='/images/buttonsIcons/add.png' alt='Add' />
+    <Grid container spacing={4} sx={{ display: 'flex', padding: 2 }}>
+      <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', pl: 2, zIndex: 0 }}>
+        <Grid container spacing={4} sx={{ display: 'flex', padding: 1 }}>
+          {children && children}
+          {initialLoad && (
+            <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', py: '7px !important' }}>
+              <Button onClick={initialLoad} variant='contained'>
+                <Icon icon='mdi:reload' />
               </Button>
-            </Tooltip>
-          </Box>
-        )}
-
-        {inputSearch && (
-          <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2, zIndex: 0 }}>
-            <CustomTextField
-              name='search'
-              value={searchValue}
-              label={labels.search}
-              onClear={clear}
-              onChange={e => setSearchValue(e.target.value)}
-              onSearch={onSearch}
-              search={true}
-            />
-          </Box>
-        )}
-        {openRPB && (
-          <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
-            <Button onClick={openRPB} variant='contained' disabled={disableRPB}>
-              OPEN RPB
-            </Button>
-          </Box>
-        )}
-        {onGo && (
-          <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
-            <Button
-              disabled={paramsArray.length === 0}
-              onClick={() => onGo({ _startAt: 0, _pageSize: 30, params: formatDataForApi(paramsArray) })}
-              variant='contained'
-            >
-              GO
-            </Button>
-          </Box>
-        )}
-      </Box>
+            </Grid>
+          )}
+          {onAdd && addBtnVisible && (
+            <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', pt: '7px !important' }}>
+              <Tooltip title='Add'>
+                <Button
+                  onClick={onAdd}
+                  variant='contained'
+                  style={{ backgroundColor: 'transparent', border: '1px solid #4eb558' }}
+                  sx={{
+                    mr: 1,
+                    '&:hover': {
+                      opacity: 0.8
+                    },
+                    width: '20px',
+                    height: '35px',
+                    objectFit: 'contain'
+                  }}
+                >
+                  <img src='/images/buttonsIcons/add.png' alt='Add' />
+                </Button>
+              </Tooltip>
+            </Grid>
+          )}
+          {inputSearch && (
+            <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', pt: '7px !important' }}>
+              <CustomTextField
+                name='search'
+                value={searchValue}
+                label={labels.search}
+                onClear={clear}
+                onChange={e => setSearchValue(e.target.value)}
+                onSearch={onSearch}
+                search={true}
+                height={35}
+              />
+            </Grid>
+          )}
+          {onTree && (
+            <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: '7px !important' }}>
+              <Tooltip title='Add'>
+                <Button
+                  onClick={onTree}
+                  variant='contained'
+                  sx={{
+                    mr: 1,
+                    '&:hover': {
+                      opacity: 0.8
+                    },
+                    width: '20px',
+                    height: '35px',
+                    objectFit: 'contain'
+                  }}
+                >
+                  <img src='/images/buttonsIcons/tree.png' alt='Add' />
+                </Button>
+              </Tooltip>
+            </Box>
+          )}
+          {openRPB && (
+            <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', py: '7px !important' }}>
+              <Button onClick={openRPB} variant='contained' disabled={disableRPB}>
+                OPEN RPB
+              </Button>
+            </Grid>
+          )}
+          {onRefresh && (
+            <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
+              <Button variant='contained' onClick={refreshGrid}>
+                Refresh
+              </Button>
+            </Box>
+          )}
+          {onGo && (
+            <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', py: '7px !important' }}>
+              <Button
+                disabled={paramsArray.length === 0}
+                onClick={() => onGo({ _startAt: 0, _pageSize: 30, params: formatDataForApi(paramsArray) })}
+                variant='contained'
+              >
+                GO
+              </Button>
+            </Grid>
+          )}
+        </Grid>
+      </Grid>
       {paramsArray && paramsArray.length > 0 && (
         <Box sx={{ pl: 2 }}>
           <Grid container>
@@ -168,7 +202,7 @@ const GridToolbar = ({
         </Box>
       )}
       {previewReport ? (
-        <Box sx={{ display: 'flex', alignItems: 'center', paddingRight: '2rem' }}>
+        <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', py: '7px !important' }}>
           <CustomComboBox
             label={'Select a report template'}
             valueField='caption'
@@ -200,11 +234,11 @@ const GridToolbar = ({
               <img src='/images/buttonsIcons/preview.png' alt='Preview' />
             </Tooltip>
           </Button>
-        </Box>
+        </Grid>
       ) : (
         <Box></Box>
       )}
-    </Box>
+    </Grid>
   )
 }
 
