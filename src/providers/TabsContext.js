@@ -1,11 +1,8 @@
 import React, { createContext, useEffect, useState, useContext } from 'react'
 import { useRouter } from 'next/router'
-import { Tabs, Tab, Box } from '@mui/material'
-import { IconButton } from '@mui/material'
+import { Tabs, Tab, Box, IconButton, Menu, MenuItem } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import PropTypes from 'prop-types'
-import Menu from '@mui/material/Menu'
-import MenuItem from '@mui/material/MenuItem'
 import { MenuContext } from 'src/providers/MenuContext'
 
 const TabsContext = createContext()
@@ -45,7 +42,19 @@ const TabsProvider = ({ children }) => {
   const router = useRouter()
   const { menu, gear, lastOpenedPage } = useContext(MenuContext)
 
-  const [anchorEl, setAnchorEl] = React.useState(null)
+  const [anchorEl, setAnchorEl] = useState(null)
+
+  const [openTabs, setOpenTabs] = useState([
+    {
+      page: children,
+      route: '/default/',
+      label: 'Home'
+    }
+  ])
+  const [currentTabIndex, setCurrentTabIndex] = useState(0)
+  const [tabsIndex, setTabsIndex] = useState(null)
+  const [initialLoadDone, setInitialLoadDone] = useState(false)
+
   const open = Boolean(anchorEl)
 
   const OpenItems = (event, i) => {
@@ -56,7 +65,7 @@ const TabsProvider = ({ children }) => {
 
   const handleClose = () => {
     setAnchorEl(null)
-    setTabsIndex()
+    setTabsIndex(null)
   }
 
   const findNode = (nodes, targetRouter) => {
@@ -74,13 +83,9 @@ const TabsProvider = ({ children }) => {
     return null
   }
 
-  const [openTabs, setOpenTabs] = useState([])
-  const [initialLoadDone, setInitialLoadDone] = useState(false)
-  const [currentTabIndex, setCurrentTabIndex] = useState(0)
-  const [TabsIndex, setTabsIndex] = useState()
-
   const handleChange = (event, newValue) => {
     setCurrentTabIndex(newValue)
+    router.push(openTabs[newValue].route)
   }
 
   const handleCloseAllTabs = () => {
@@ -90,12 +95,12 @@ const TabsProvider = ({ children }) => {
     setCurrentTabIndex(0)
   }
 
-  const handleCloseOtherTab = Tab => {
-    const tab = openTabs[Tab]
+  const handleCloseOtherTab = tabIndex => {
+    const tab = openTabs[tabIndex]
     const firstTab = openTabs[0]
     router.push(tab.route)
     setOpenTabs([firstTab, tab])
-    setCurrentTabIndex(Tab)
+    setCurrentTabIndex(tabIndex)
   }
 
   const closeTab = tabRoute => {
@@ -120,9 +125,9 @@ const TabsProvider = ({ children }) => {
   }
 
   useEffect(() => {
-    if (initialLoadDone && router.asPath !== '/default/') {
+    if (initialLoadDone) {
       const isTabOpen = openTabs.some((activeTab, index) => {
-        if (activeTab.page === children || activeTab.route === router.asPath) {
+        if (activeTab.route === router.asPath) {
           setCurrentTabIndex(index)
 
           return true
@@ -130,8 +135,8 @@ const TabsProvider = ({ children }) => {
 
         return false
       })
-      if (isTabOpen) return
-      else {
+
+      if (!isTabOpen) {
         const newValueState = openTabs.length
         setOpenTabs(prevState => [
           ...prevState,
@@ -144,24 +149,45 @@ const TabsProvider = ({ children }) => {
           }
         ])
         setCurrentTabIndex(newValueState)
+      } else {
+        setOpenTabs(prevState =>
+          prevState.map(tab => {
+            if (tab.route === router.asPath) {
+              return { ...tab, page: children }
+            }
+
+            return tab
+          })
+        )
       }
     }
-  }, [children, router.asPath])
+  }, [children, router.asPath, initialLoadDone, lastOpenedPage, menu, gear])
 
   useEffect(() => {
-    if (!openTabs[0] && router.asPath && menu.length > 0) {
-      setOpenTabs([
+    if (!initialLoadDone && router.asPath && menu.length > 0) {
+      const newTabs = [
         {
+          page: router.asPath === '/default/' ? children : null,
+          route: '/default/',
+          label: 'Home'
+        }
+      ]
+
+      if (router.asPath !== '/default/') {
+        newTabs.push({
           page: children,
           route: router.asPath,
           label: lastOpenedPage
             ? lastOpenedPage.name
             : findNode(menu, router.asPath.replace(/\/$/, '')) || findNode(gear, router.asPath.replace(/\/$/, ''))
-        }
-      ])
+        })
+        setCurrentTabIndex(1)
+      }
+
+      setOpenTabs(newTabs)
       setInitialLoadDone(true)
     }
-  }, [openTabs, router, menu, gear])
+  }, [router.asPath, menu, gear, children, lastOpenedPage, initialLoadDone])
 
   return (
     <>
@@ -207,42 +233,43 @@ const TabsProvider = ({ children }) => {
             }}
           >
             {openTabs.length > 0 &&
-              openTabs.map((activeTab, i) => {
-                return (
-                  <Tab
-                    key={i}
-                    label={activeTab?.label}
-                    onClick={() => router?.push(activeTab.route)}
-                    onContextMenu={event => OpenItems(event, i)}
-                    icon={
-                      activeTab.route === '/default/' ? null : (
-                        <IconButton
-                          size='small'
-                          onClick={event => {
-                            event.stopPropagation()
-                            closeTab(activeTab.route)
-                          }}
-                        >
-                          <CloseIcon fontSize='small' />
-                        </IconButton>
-                      )
-                    }
-                    iconPosition='end'
-                    sx={{
-                      minHeight: '35px !important',
-                      borderTopLeftRadius: 5,
-                      borderTopRightRadius: 5,
-                      py: '0px !important',
-                      mb: '0px !important',
-                      borderBottom: '0px !important',
-                      mr: '2px !important',
-                      fontWeight: '1.5rem',
-                      pr: '0px !important',
-                      pl: '10px !important'
-                    }}
-                  />
-                )
-              })}
+              openTabs.map((activeTab, i) => (
+                <Tab
+                  key={i}
+                  label={activeTab?.label}
+                  onClick={() => {
+                    setCurrentTabIndex(i)
+                    router.push(activeTab.route)
+                  }}
+                  onContextMenu={event => OpenItems(event, i)}
+                  icon={
+                    activeTab.route === '/default/' ? null : (
+                      <IconButton
+                        size='small'
+                        onClick={event => {
+                          event.stopPropagation()
+                          closeTab(activeTab.route)
+                        }}
+                      >
+                        <CloseIcon fontSize='small' />
+                      </IconButton>
+                    )
+                  }
+                  iconPosition='end'
+                  sx={{
+                    minHeight: '35px !important',
+                    borderTopLeftRadius: 5,
+                    borderTopRightRadius: 5,
+                    py: '0px !important',
+                    mb: '0px !important',
+                    borderBottom: '0px !important',
+                    mr: '2px !important',
+                    fontWeight: '1.5rem',
+                    pr: '0px !important',
+                    pl: '10px !important'
+                  }}
+                />
+              ))}
           </Tabs>
         </Box>
         {openTabs.length > 0 &&
@@ -263,7 +290,7 @@ const TabsProvider = ({ children }) => {
       >
         <MenuItem
           onClick={event => {
-            closeTab(openTabs[TabsIndex]?.route)
+            closeTab(openTabs[tabsIndex]?.route)
             event.stopPropagation()
             handleClose()
           }}
@@ -273,7 +300,7 @@ const TabsProvider = ({ children }) => {
         <MenuItem
           onClick={event => {
             event.stopPropagation()
-            handleCloseOtherTab(TabsIndex)
+            handleCloseOtherTab(tabsIndex)
             handleClose()
           }}
         >
