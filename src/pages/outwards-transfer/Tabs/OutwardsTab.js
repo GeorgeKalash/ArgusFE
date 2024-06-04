@@ -55,6 +55,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
 
   const [initialValues, setInitialData] = useState({
     recordId: null,
+    dtId: null,
     plantId: plantId,
     cashAccountId: cashAccountId,
     userId: userId,
@@ -579,6 +580,24 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
 
     formik.setFieldValue('vatRate', parseInt(vatPct))
   }
+
+  const getDefaultDT = async () => {
+    const parameters = `_userId=${userData && userData.userId}&_functionId=${SystemFunction.OutwardsTransfer}`
+
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.UserFunction.get,
+        parameters: parameters
+      })
+      if (res.record) {
+        formik.setFieldValue('dtId', res.record.dtId)
+      } else {
+        formik.setFieldValue('dtId', '')
+      }
+    } catch (error) {
+      formik.setFieldValue('dtId', '')
+    }
+  }
   function onInstantCashSubmit(obj) {
     obj.remitter.primaryId.expiryDate = obj.remitter.primaryId.expiryDate
       ? formatDateToApi(obj.remitter.primaryId.expiryDate)
@@ -612,6 +631,8 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
           getClientInfo(res.record.headerView.clientId)
           fillFormData(res.record)
           productDataFill(res.record.headerView)
+        } else {
+          getDefaultDT()
         }
         getDefaultVAT()
       } catch (error) {}
@@ -631,7 +652,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
       actions={actions}
       previewReport={editMode}
       functionId={SystemFunction.Outwards}
-      disabledSubmit={isPosted}
+      disabledSubmit={isClosed}
     >
       <VertLayout>
         <Grow>
@@ -1248,7 +1269,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                   errorCheck={'beneficiaryId'}
                 />
               </Grid>
-              <Grid item xs={2} sx={{ pl: 2 }}>
+              <Grid item xs={2} sx={{ pl: 2, mt: 3 }}>
                 <Button
                   sx={{
                     backgroundColor: '#908c8c',
@@ -1273,6 +1294,8 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                       value={formik.values.amountRows}
                       error={formik.errors.amountRows}
                       disabled={isClosed}
+                      allowAddNewLine={!isClosed}
+                      allowDelete={!isClosed}
                       maxAccess={maxAccess}
                       name='amountRows'
                       height={170}

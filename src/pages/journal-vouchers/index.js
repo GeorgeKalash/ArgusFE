@@ -7,14 +7,17 @@ import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepositor
 import { formatDateDefault } from 'src/lib/date-helper'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { SystemFunction } from 'src/resources/SystemFunction'
+import JournalVoucherForm from './forms/JournalVoucherForm'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import JournalVoucherForm from './forms/JournalVoucherForm'
 import { useWindow } from 'src/windows'
+import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 
 const JournalVoucher = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
@@ -31,7 +34,6 @@ const JournalVoucher = () => {
     labels: _labels,
     search,
     clear,
-
     paginationParameters,
     access
   } = useResourceQuery({
@@ -43,6 +45,7 @@ const JournalVoucher = () => {
       searchFn: fetchWithSearch
     }
   })
+
   async function fetchWithSearch({ qry }) {
     const response = await getRequest({
       extension: GeneralLedgerRepository.JournalVoucher.snapshot,
@@ -80,12 +83,31 @@ const JournalVoucher = () => {
     }
   ]
 
-  const add = () => {
-    openForm()
+  const openForm = recordId => {
+    stack({
+      Component: JournalVoucherForm,
+      props: {
+        labels: _labels,
+        access: access,
+        recordId: recordId
+      },
+      width: 500,
+      height: 500,
+      title: _labels.generalJournal
+    })
+  }
+
+  const { proxyAction } = useDocumentTypeProxy({
+    functionId: SystemFunction.JournalVoucher,
+    action: openForm
+  })
+
+  const add = async () => {
+    await proxyAction()
   }
 
   const edit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj.recordId)
   }
 
   const del = async obj => {
@@ -95,21 +117,6 @@ const JournalVoucher = () => {
     })
     invalidate()
     toast.success('Record Deleted Successfully')
-  }
-
-  function openForm(recordId) {
-    stack({
-      Component: JournalVoucherForm,
-      props: {
-        labels: _labels,
-        recordId: recordId ? recordId : null,
-        maxAccess: access,
-        invalidate: invalidate
-      },
-      width: 600,
-      height: 600,
-      title: _labels.generalJournal
-    })
   }
 
   return (

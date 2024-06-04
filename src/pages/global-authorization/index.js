@@ -110,84 +110,84 @@ const GlobalAuthorization = () => {
   return (
     <VertLayout>
       <Fixed>
-          <GridToolbar
-            maxAccess={access}
-            onSearch={value => {
-              filters.moduleId && filterBy('qry', value)
-            }}
-            onSearchClear={() => {
-              clearFilter('qry')
-            }}
-            labels={labels}
-            inputSearch={true}
-          >
-            <Grid item sx={{width: '350px', pt: 2, pl: 2 }}>
-              <ResourceComboBox
-                datasetId={DataSets.MODULE}
-                name='moduleId'
-                values={{
-                  moduleId: filters.moduleId
-                }}
-                valueField='key'
-                displayField='value'
-                onChange={(event, newValue) => {
-                  onChange(newValue?.key)
-                }}
-              />
-            </Grid>
-            <Grid item>
-              <Button variant='contained' onClick={() => openApplyModuleLevel()} disabled={!filters.moduleId}>
-                <Icon icon='mdi:arrow-expand-right' fontSize={20} />
-              </Button>
-              </Grid>
-          </GridToolbar>
-          </Fixed>
-        <Table
-          columns={[
-            {
-              field: 'key',
-              headerName: labels.resourceId,
-              flex: 1
-            },
-            {
-              field: 'value',
-              headerName: labels.resourceName,
-              flex: 1
-            },
-            {
-              field: 'Resource Global',
-              headerName: labels.resourceGlobal,
-              width: 200,
-              renderCell: params => (
-                <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
-                  <IconButton size='small' onClick={() => openResourceGlobal(params.row)}>
-                    <Icon icon='mdi:application-edit-outline' fontSize={18} />
-                  </IconButton>
-                </Box>
-              )
-            },
-            {
-              field: 'field Global',
-              headerName: labels.fieldGlobal,
-              width: 200,
-              renderCell: params => (
-                <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
-                  <IconButton size='small' onClick={() => openFieldGlobal(params.row)}>
-                    <Icon icon='mdi:application-edit-outline' fontSize={18} />
-                  </IconButton>
-                </Box>
-              )
-            }
-          ]}
-          gridData={data ?? { list: [] }}
-          rowId={['key']}
-          isLoading={false}
-          pageSize={50}
+        <GridToolbar
           maxAccess={access}
-          refetch={refetch}
-          paginationType='client'
-        />
-      </VertLayout>
+          onSearch={value => {
+            filters.moduleId && filterBy('qry', value)
+          }}
+          onSearchClear={() => {
+            clearFilter('qry')
+          }}
+          labels={labels}
+          inputSearch={true}
+        >
+          <Grid item sx={{ width: '350px', pt: '7px !important' }}>
+            <ResourceComboBox
+              datasetId={DataSets.MODULE}
+              name='moduleId'
+              values={{
+                moduleId: filters.moduleId
+              }}
+              valueField='key'
+              displayField='value'
+              onChange={(event, newValue) => {
+                onChange(newValue?.key)
+              }}
+            />
+          </Grid>
+          <Grid item sx={{ pt: '7px !important' }}>
+            <Button variant='contained' onClick={() => openApplyModuleLevel()} disabled={!filters.moduleId}>
+              <Icon icon='mdi:arrow-expand-right' fontSize={20} />
+            </Button>
+          </Grid>
+        </GridToolbar>
+      </Fixed>
+      <Table
+        columns={[
+          {
+            field: 'key',
+            headerName: labels.resourceId,
+            flex: 1
+          },
+          {
+            field: 'value',
+            headerName: labels.resourceName,
+            flex: 1
+          },
+          {
+            field: 'Resource Global',
+            headerName: labels.resourceGlobal,
+            width: 200,
+            renderCell: params => (
+              <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
+                <IconButton size='small' onClick={() => openResourceGlobal(params.row)}>
+                  <Icon icon='mdi:application-edit-outline' fontSize={18} />
+                </IconButton>
+              </Box>
+            )
+          },
+          {
+            field: 'field Global',
+            headerName: labels.fieldGlobal,
+            width: 200,
+            renderCell: params => (
+              <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
+                <IconButton size='small' onClick={() => openFieldGlobal(params.row)}>
+                  <Icon icon='mdi:application-edit-outline' fontSize={18} />
+                </IconButton>
+              </Box>
+            )
+          }
+        ]}
+        gridData={data ?? { list: [] }}
+        rowId={['key']}
+        isLoading={false}
+        pageSize={50}
+        maxAccess={access}
+        refetch={refetch}
+        paginationType='client'
+      />
+    </VertLayout>
   )
 }
 
