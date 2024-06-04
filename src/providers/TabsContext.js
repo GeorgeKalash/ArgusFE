@@ -215,7 +215,7 @@ const TabsProvider = ({ children }) => {
                     onClick={() => router?.push(activeTab.route)}
                     onContextMenu={event => OpenItems(event, i)}
                     icon={
-                      i === 0 ? null : (
+                      activeTab.route === '/default/' ? null : (
                         <IconButton
                           size='small'
                           onClick={event => {
