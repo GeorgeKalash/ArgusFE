@@ -71,10 +71,6 @@ const Window = React.memo(
       setPosition(prev => ({ x: prev.x + ui.deltaX, y: prev.y + ui.deltaY }))
     }, [])
 
-    const handleClick = useCallback(e => {
-      e.stopPropagation()
-    }, [])
-
     return (
       <Box
         id='parent'
@@ -97,7 +93,7 @@ const Window = React.memo(
           position={position}
           onDrag={handleDrag}
         >
-          <Box sx={{ position: 'relative', pointerEvents: 'all' }} onClick={handleClick}>
+          <Box sx={{ position: 'relative', pointerEvents: 'all' }}>
             <Paper
               ref={paperRef}
               tabIndex={-1}
