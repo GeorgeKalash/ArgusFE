@@ -74,7 +74,7 @@ const PosUsers = () => {
       extension: PointofSaleRepository.PosUsers.del,
       record: JSON.stringify(obj)
     })
-    invalidate()
+    refetch()
     toast.success('Record Deleted Successfully')
   }
 

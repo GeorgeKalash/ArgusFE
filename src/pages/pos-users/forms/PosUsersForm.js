@@ -67,25 +67,23 @@ export default function PosUsersForm({ labels, maxAccess, userId, invalidate }) 
         <Grow>
           <Grid container spacing={4}>
             <Grid item xs={12}>
-              <Grid item xs={12}>
-                <ResourceComboBox
-                  endpointId={SystemRepository.PosUsers.qry}
-                  name='userId'
-                  label={labels.user}
-                  valueField='recordId'
-                  parameters={`_size=1000&_filter=&_startAt=0&_sortBy=fullName`}
-                  displayField={['email']}
-                  columnsInDropDown={[{ key: 'email', value: 'email' }]}
-                  values={formik.values}
-                  required
-                  maxAccess={maxAccess}
-                  readOnly={editMode}
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('userId', newValue ? newValue.recordId : '')
-                  }}
-                  error={formik.touched.userId && Boolean(formik.errors.userId)}
-                />
-              </Grid>
+              <ResourceComboBox
+                endpointId={SystemRepository.PosUsers.qry}
+                name='userId'
+                label={labels.user}
+                valueField='recordId'
+                parameters={`_size=1000&_filter=&_startAt=0&_sortBy=fullName`}
+                displayField={['email']}
+                columnsInDropDown={[{ key: 'email', value: 'email' }]}
+                values={formik.values}
+                required
+                maxAccess={maxAccess}
+                readOnly={editMode}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('userId', newValue?.recordId)
+                }}
+                error={formik.touched.userId && Boolean(formik.errors.userId)}
+              />
             </Grid>
 
             <Grid item xs={12}>
@@ -100,7 +98,7 @@ export default function PosUsersForm({ labels, maxAccess, userId, invalidate }) 
                 required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('posId', newValue ? newValue.recordId : '')
+                  formik.setFieldValue('posId', newValue?.recordId)
                 }}
                 error={formik.touched.posId && Boolean(formik.errors.posId)}
               />
