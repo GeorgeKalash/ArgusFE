@@ -350,24 +350,36 @@ const Table = ({
         return (
           <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
             {props.onEdit && (
-              <IconButton size='small' onClick={() => props.onEdit(params.row)}>
+              <IconButton
+                size='small'
+                onClick={e => {
+                  props.onEdit(params.row)
+                  e.stopPropagation()
+                }}
+              >
                 <Image src={editIcon} alt='Edit' width={18} height={18} />
               </IconButton>
             )}
             {props.popupComponent && (
-              <IconButton size='small' onClick={() => props.popupComponent(params.row)}>
+              <IconButton
+                size='small'
+                onClick={e => {
+                  props.popupComponent(params.row), e.stopPropagation()
+                }}
+              >
                 <Image src={editIcon} alt='Edit' width={18} height={18} />
               </IconButton>
             )}
             {!isStatus3 && !isStatusCanceled && deleteBtnVisible && !isWIP && (
               <IconButton
                 size='small'
-                onClick={() => {
+                onClick={e => {
                   if (props.deleteConfirmationType == 'strict') {
                     openDeleteConfirmation(params.row)
                   } else {
                     openDelete(params.row)
                   }
+                  e.stopPropagation()
                 }}
                 color='error'
               >
