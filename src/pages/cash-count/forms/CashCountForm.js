@@ -24,8 +24,8 @@ import { SystemFunction } from 'src/resources/SystemFunction'
 import { getStorageData } from 'src/storage/storage'
 import { useInvalidate } from 'src/hooks/resource'
 import { useError } from 'src/error'
-import { GenerateTransferForm } from './GenerateTransferForm'
 import WorkFlow from 'src/components/Shared/WorkFlow'
+import GenerateTransferForm from './GenerateTransferForm'
 
 export default function CashCountForm({ labels, maxAccess, recordId }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -280,7 +280,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
       })
       .catch(error => {})
   }
-  function openTransferForm(recordId) {
+  function openTransferForm() {
     stack({
       Component: GenerateTransferForm,
       props: {

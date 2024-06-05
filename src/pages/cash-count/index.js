@@ -31,16 +31,13 @@ const CashCount = () => {
   async function fetchWithSearch({ options = {}, filters }) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    return (
-      filters.qry &&
-      (await getRequest({
-        extension: CashCountRepository.CashCountTransaction.snapshot,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=${filters.qry}`
-      }))
-    )
+    return await getRequest({
+      extension: CashCountRepository.CashCountTransaction.snapshot,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=${filters.qry}`
+    })
   }
 
-  async function fetchGridData(options = {}) {
+  async function fetchGridData() {
     return await getRequest({
       extension: CashCountRepository.CashCountTransaction.qry,
       parameters: ``
