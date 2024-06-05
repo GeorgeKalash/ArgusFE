@@ -44,6 +44,7 @@ const CAadjustment = () => {
     labels: _labels,
     access,
     paginationParameters,
+    invalidate,
     refetch
   } = useResourceQuery({
     endpointId: CashBankRepository.CAadjustment.qry,
@@ -53,10 +54,6 @@ const CAadjustment = () => {
       filterFn: fetchGridData,
       default: { functionId }
     }
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: CashBankRepository.CAadjustment.qry
   })
 
   const columns = [

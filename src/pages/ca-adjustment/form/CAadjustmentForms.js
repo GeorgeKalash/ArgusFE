@@ -89,14 +89,14 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       }
 
       setEditMode(true)
+      try {
+        const res = await getRequest({
+          extension: CashBankRepository.CAadjustment.get,
+          parameters: `_recordId=${response.recordId}`
+        })
 
-      const res = await getRequest({
-        extension: CashBankRepository.CAadjustment.get,
-        parameters: `_recordId=${response.recordId}`
-      })
-
-      formik.setFieldValue('reference', res.record.reference)
-
+        formik.setFieldValue('reference', res.record.reference)
+      } catch (error) {}
       invalidate()
     }
   })
@@ -151,7 +151,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       key: 'Post',
       condition: true,
       onClick: onPost,
-      disabled: !editMode || formik.values.status !== 3
+      disabled: !editMode || formik.values.status !== 1
     }
   ]
 
