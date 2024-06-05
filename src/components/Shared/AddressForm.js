@@ -18,6 +18,7 @@ const AddressForm = ({ recordId, address, setAddress = () => {}, editMode, onSub
       toast.success('Record Updated Successfully')
     })
   }
+
   useEffect(() => {
     ;(async function () {
       if (recordId) {
@@ -29,7 +30,7 @@ const AddressForm = ({ recordId, address, setAddress = () => {}, editMode, onSub
           setAddress(res.record)
         } catch (error) {}
       }
-    })
+    })()
   }, [recordId])
 
   return (
