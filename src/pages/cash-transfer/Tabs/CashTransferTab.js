@@ -54,6 +54,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
     toCashAccountId: '',
     toCARef: '',
     toCAName: '',
+    baseAmount: '',
     notes: '',
     wip: '',
     status: '',
@@ -105,6 +106,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
       copy.date = formatDateToApi(copy.date)
       copy.status = copy.status === '' ? 1 : copy.status
       copy.wip = copy.wip === '' ? 1 : copy.wip
+      copy.baseAmount = totalLoc
 
       const updatedRows = formik.values.transfers.map((transferDetail, index) => {
         const seqNo = index + 1
@@ -149,6 +151,12 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
     }
   })
 
+  const totalLoc = formik.values.transfers.reduce((locSum, row) => {
+    const locValue = parseFloat(row.baseAmount?.toString().replace(/,/g, '')) || 0
+
+    return locSum + locValue
+  }, 0)
+
   const onClose = async () => {
     const { transfers, ...rest } = formik.values
     const copy = { ...rest }
@@ -156,6 +164,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
     copy.date = formatDateToApi(copy.date)
     copy.wip = copy.wip === '' ? 1 : copy.wip
     copy.status = copy.status === '' ? 1 : copy.status
+    copy.baseAmount = totalLoc
 
     const res = await postRequest({
       extension: CashBankRepository.CashTransfer.close,
@@ -183,6 +192,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
     copy.date = formatDateToApi(copy.date)
     copy.wip = copy.wip === '' ? 1 : copy.wip
     copy.status = copy.status === '' ? 1 : copy.status
+    copy.baseAmount = totalLoc
 
     const res = await postRequest({
       extension: CashBankRepository.CashTransfer.reopen,
@@ -202,6 +212,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
     copy.date = formatDateToApi(copy.date)
     copy.wip = copy.wip === '' ? 1 : copy.wip
     copy.status = copy.status === '' ? 1 : copy.status
+    copy.baseAmount = totalLoc
 
     const res = await postRequest({
       extension: CashBankRepository.CashTransfer.post,
