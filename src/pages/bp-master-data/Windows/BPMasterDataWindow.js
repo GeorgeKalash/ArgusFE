@@ -1,12 +1,11 @@
-// ** Custom Imports
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-
 import BPMasterDataForm from '../forms/BPMasterDataForm'
 import { useState } from 'react'
 import { CustomTabs } from 'src/components/Shared/CustomTabs'
 import IDNumberForm from '../forms/IDNumberForm'
 import AddressMasterDataForm from '../forms/AddressMasterDataForm'
 import RelationList from 'src/pages/bp-master-data/forms/RelationList'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 
 const BPMasterDataWindow = ({ labels, maxAccess, defaultValue, recordId, height }) => {
   const [activeTab, setActiveTab] = useState(0)
@@ -25,7 +24,7 @@ const BPMasterDataWindow = ({ labels, maxAccess, defaultValue, recordId, height 
   ]
 
   return (
-    <>
+    <VertLayout>
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
       <CustomTabPanel index={0} height={height} value={activeTab}>
         <BPMasterDataForm
@@ -41,17 +40,12 @@ const BPMasterDataWindow = ({ labels, maxAccess, defaultValue, recordId, height 
         <IDNumberForm store={store} maxAccess={maxAccess} labels={labels} />
       </CustomTabPanel>
       <CustomTabPanel index={2} height={height} value={activeTab}>
-        <RelationList store={store} labels={labels} maxAccess={maxAccess}/>
+        <RelationList store={store} labels={labels} maxAccess={maxAccess} />
       </CustomTabPanel>
       <CustomTabPanel index={3} height={height} value={activeTab}>
-        <AddressMasterDataForm
-          store={store}
-          setStore={setStore}
-          labels={labels}
-          maxAccess={maxAccess}
-        />
+        <AddressMasterDataForm store={store} setStore={setStore} labels={labels} maxAccess={maxAccess} />
       </CustomTabPanel>
-    </>
+    </VertLayout>
   )
 }
 

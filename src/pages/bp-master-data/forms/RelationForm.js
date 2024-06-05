@@ -1,86 +1,83 @@
-import { Grid, Box } from '@mui/material'
+import { Grid } from '@mui/material'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { useFormik } from 'formik'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { formatDateFromApi, formatDateToApiFunction } from 'src/lib/date-helper'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { useForm } from 'src/hooks/form'
 
 const RelationForm = ({ bpId, recordId, labels, maxAccess, getRelationGridData, window, editMode }) => {
-  const [businessPartnerStore, setBusinessPartnerStore] = useState([])
   const { getRequest, postRequest } = useContext(RequestsContext)
 
-  const [initialValues, setValues] = useState({
-    recordId: null,
-    toBPId: null,
-    relationId: null,
-    relationName: null,
-    startDate: null,
-    endDate: null,
-    toBPName: null,
-    toBPRef: null,
-    fromBPId: bpId
-  })
-
-  const formik = useFormik({
-    initialValues,
+  const { formik } = useForm({
+    maxAccess,
+    initialValues: {
+      recordId: null,
+      toBPId: null,
+      relationId: null,
+      relationName: null,
+      startDate: null,
+      endDate: null,
+      toBPName: null,
+      toBPRef: null,
+      fromBPId: bpId
+    },
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      toBPId: yup.string().required(' '),
-      relationId: yup.string().required(' ')
+      toBPId: yup.string().required(),
+      relationId: yup.string().required()
     }),
     onSubmit: values => {
       postRelation(values)
     }
   })
 
-  const postRelation = obj => {
+  const postRelation = async obj => {
     obj.startDate = obj.startDate ? formatDateToApiFunction(obj.startDate) : ''
     obj.endDate = obj.endDate ? formatDateToApiFunction(obj.endDate) : ''
 
-    postRequest({
-      extension: BusinessPartnerRepository.Relation.set,
-      record: JSON.stringify(obj)
-    })
-      .then(res => {
-        if (!recordId) {
-          toast.success('Record Added Successfully')
-        } else toast.success('Record Editted Successfully')
-
-        getRelationGridData(bpId)
-        window.close()
+    try {
+      await postRequest({
+        extension: BusinessPartnerRepository.Relation.set,
+        record: JSON.stringify(obj)
       })
 
-      .catch(error => {})
+      if (!recordId) {
+        toast.success('Record Added Successfully')
+      } else {
+        toast.success('Record Edited Successfully')
+      }
+
+      await getRelationGridData(bpId)
+      window.close()
+    } catch (error) {}
+  }
+
+  const getRelationById = async recordId => {
+    try {
+      const res = await getRequest({
+        extension: BusinessPartnerRepository.Relation.get,
+        parameters: `_recordId=${recordId}`
+      })
+
+      res.record.startDate = formatDateFromApi(res.record.startDate)
+      res.record.endDate = formatDateFromApi(res.record.endDate)
+      formik.setValues(res.record)
+    } catch (error) {}
   }
 
   useEffect(() => {
     recordId && getRelationById(recordId)
   }, [recordId])
-
-  const getRelationById = recordId => {
-    const defaultParams = `_recordId=${recordId}`
-    var parameters = defaultParams
-    getRequest({
-      extension: BusinessPartnerRepository.Relation.get,
-      parameters: parameters
-    })
-      .then(res => {
-        res.record.startDate = formatDateFromApi(res.record.startDate)
-        res.record.endDate = formatDateFromApi(res.record.endDate)
-        formik.setValues(res.record)
-      })
-      .catch(error => {})
-  }
 
   return (
     <FormShell
@@ -110,15 +107,9 @@ const RelationForm = ({ bpId, recordId, labels, maxAccess, getRelationGridData, 
                 firstValue={formik.values.toBPRef}
                 secondValue={formik.values.toBPName}
                 onChange={(event, newValue) => {
-                  if (newValue) {
-                    formik.setFieldValue('toBPId', newValue?.recordId)
-                    formik.setFieldValue('toBPRef', newValue?.reference)
-                    formik.setFieldValue('toBPName', newValue?.name)
-                  } else {
-                    formik.setFieldValue('toBPId', '')
-                    formik.setFieldValue('toBPRef', '')
-                    formik.setFieldValue('toBPName', '')
-                  }
+                  formik.setFieldValue('toBPId', newValue ? newValue.recordId : '')
+                  formik.setFieldValue('toBPRef', newValue ? newValue.reference : '')
+                  formik.setFieldValue('toBPName', newValue ? newValue.name : '')
                 }}
                 maxAccess={maxAccess}
                 error={formik.touched.toBPId && Boolean(formik.errors.toBPId)}
