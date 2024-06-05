@@ -154,10 +154,12 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
           }))
         }))
         setSelectedRowId(res.record?.packages?.length > 0 && 1)
-        formik.setValues({
-          ...res.record.header,
-          packages: packages
-        })
+
+        res?.record?.header &&
+          formik.setValues({
+            ...res.record.header,
+            packages: packages
+          })
       }
     })()
   }, [])
@@ -218,7 +220,7 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
                       rowSelectionModel={selectedRowId}
                       allowAddNewLine={!editMode}
                       allowDelete={!editMode}
-                      onSelectionChange={row => console.log(row, 'row2ssss')}
+                      onSelectionChange={row => row && loadSerialsGrid(row)}
                       columns={[
                         {
                           component: 'resourcecombobox',
