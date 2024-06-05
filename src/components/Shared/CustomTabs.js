@@ -30,7 +30,7 @@ export const CustomTabs = ({ tabs, activeTab, setActiveTab }) => {
               backgroundColor: 'white'
             },
             '.MuiTabs-indicator': {
-              backgroundColor: 'white'
+              display: 'none'
             }
           }}
         >

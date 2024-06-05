@@ -77,15 +77,14 @@ const PopperComponent = ({ children, anchorEl, open }) => {
   const thresholdPercentage = 0.35
 
   const canRenderBelow = window.innerHeight / zoom - (rect && rect.bottom) > window.innerHeight * thresholdPercentage
+  console.log(zoom)
 
   return ReactDOM.createPortal(
     <Box
       ref={popperRef}
       sx={{
         zIndex: '2 !important',
-        display: open && isVisible ? 'block' : 'none'
-      }}
-      style={{
+        display: open && isVisible ? 'block' : 'none',
         position: 'absolute',
         minWidth: anchorEl ? anchorEl.clientWidth : 'auto',
         top: rect?.bottom,
