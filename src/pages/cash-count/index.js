@@ -167,7 +167,7 @@ const CashCount = () => {
           onDelete={del}
           deleteConfirmationType={'strict'}
           isLoading={false}
-          pageSize={20}
+          pageSize={50}
           paginationType='client'
           maxAccess={access}
         />
