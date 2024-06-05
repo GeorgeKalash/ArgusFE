@@ -376,7 +376,6 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
                   onChange={(event, newValue) => {
                     fillOutwardData({
                       outwardId: newValue ? newValue.recordId : '',
-                      reference: newValue ? newValue.reference : '',
                       date: newValue ? formatDateFromApi(newValue.date) : '',
                       oldBeneficiaryId: newValue ? newValue.beneficiaryId : '',
                       oldBeneficiarySeqNo: newValue ? newValue.beneficiarySeqNo : '',
