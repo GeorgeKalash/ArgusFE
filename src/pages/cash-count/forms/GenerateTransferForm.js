@@ -12,7 +12,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 
-export const GenerateTransferForm = ({ cashCountId, fromPlantId, labels, maxAccess }) => {
+export default function GenerateTransferForm({ cashCountId, fromPlantId, labels, maxAccess }) {
   const { postRequest } = useContext(RequestsContext)
 
   const { formik } = useForm({
