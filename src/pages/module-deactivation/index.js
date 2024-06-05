@@ -109,7 +109,6 @@ const ModuleDeactivation = () => {
           isLoading={false}
           maxAccess={access}
           showCheckboxColumn={true}
-          handleCheckedRows={() => {}}
           pagination={false}
         />
       </Grow>

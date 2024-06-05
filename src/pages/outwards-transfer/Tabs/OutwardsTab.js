@@ -55,6 +55,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
 
   const [initialValues, setInitialData] = useState({
     recordId: null,
+    dtId: null,
     plantId: plantId,
     cashAccountId: cashAccountId,
     userId: userId,
@@ -579,6 +580,24 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
 
     formik.setFieldValue('vatRate', parseInt(vatPct))
   }
+
+  const getDefaultDT = async () => {
+    const parameters = `_userId=${userData && userData.userId}&_functionId=${SystemFunction.OutwardsTransfer}`
+
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.UserFunction.get,
+        parameters: parameters
+      })
+      if (res.record) {
+        formik.setFieldValue('dtId', res.record.dtId)
+      } else {
+        formik.setFieldValue('dtId', '')
+      }
+    } catch (error) {
+      formik.setFieldValue('dtId', '')
+    }
+  }
   function onInstantCashSubmit(obj) {
     obj.remitter.primaryId.expiryDate = obj.remitter.primaryId.expiryDate
       ? formatDateToApi(obj.remitter.primaryId.expiryDate)
@@ -612,6 +631,8 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
           getClientInfo(res.record.headerView.clientId)
           fillFormData(res.record)
           productDataFill(res.record.headerView)
+        } else {
+          getDefaultDT()
         }
         getDefaultVAT()
       } catch (error) {}
