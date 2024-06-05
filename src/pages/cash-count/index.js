@@ -52,7 +52,8 @@ const CashCount = () => {
     filterBy,
     clearFilter,
     labels: _labels,
-    access
+    access,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: CashCountRepository.CashCountTransaction.qry,
@@ -62,18 +63,6 @@ const CashCount = () => {
       filterFn: fetchWithSearch
     }
   })
-
-  // const {
-  //   query: { data },
-  //   labels: _labels,
-  //   refetch,
-  //   invalidate,
-  //   access
-  // } = useResourceQuery({
-  //   queryFn: fetchGridData,
-  //   endpointId: CashCountRepository.CashCountTransaction.qry,
-  //   datasetId: ResourceIds.CashCountTransaction
-  // })
 
   const columns = [
     {

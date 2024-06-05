@@ -332,7 +332,6 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
       }
     }
   }
-  console.log(formik.values)
 
   return (
     <FormShell
