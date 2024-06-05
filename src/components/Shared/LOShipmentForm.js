@@ -235,9 +235,6 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
                               { from: 'value', to: 'packageTypeName' }
                             ],
                             readOnly: editMode
-                          },
-                          async onChange({ row: { newRow } }) {
-                            newRow && loadSerialsGrid(newRow)
                           }
                         },
                         {

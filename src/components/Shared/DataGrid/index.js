@@ -152,6 +152,8 @@ export function DataGrid({
         id,
         field
       })
+      const row = apiRef.current.getRow(id)
+      onSelectionChange(row)
     })
   }
 
@@ -264,7 +266,7 @@ export function DataGrid({
   }
 
   const handleRowClick = params => {
-    const selectedRow = value.find(row => row.id === params.row.id)
+    const selectedRow = apiRef.current.getRow(params.id)
     if (onSelectionChange) {
       async function update({ newRow }) {
         updateState({
