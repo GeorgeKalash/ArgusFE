@@ -5,7 +5,7 @@ import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { CachCountSettingsRepository } from 'src/repositories/CachCountSettingsRepository'
+import { CashCountRepository } from 'src/repositories/CashCountRepository'
 import { useForm } from 'src/hooks/form'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -19,7 +19,7 @@ export default function CcCashNotesForm({ labels, maxAccess, currencyId, note, w
   const editMode = !!currencyId
 
   const invalidate = useInvalidate({
-    endpointId: CachCountSettingsRepository.CcCashNotes.page
+    endpointId: CashCountRepository.CcCashNotes.page
   })
 
   const { formik } = useForm({
@@ -36,7 +36,7 @@ export default function CcCashNotesForm({ labels, maxAccess, currencyId, note, w
     }),
     onSubmit: async obj => {
       const response = await postRequest({
-        extension: CachCountSettingsRepository.CcCashNotes.set,
+        extension: CashCountRepository.CcCashNotes.set,
         record: JSON.stringify(obj)
       })
 
@@ -50,7 +50,7 @@ export default function CcCashNotesForm({ labels, maxAccess, currencyId, note, w
       try {
         if (currencyId && note) {
           const res = await getRequest({
-            extension: CachCountSettingsRepository.CcCashNotes.get,
+            extension: CashCountRepository.CcCashNotes.get,
             parameters: `_currencyId=${currencyId}&_note=${note}`
           })
           formik.setValues(res.record)

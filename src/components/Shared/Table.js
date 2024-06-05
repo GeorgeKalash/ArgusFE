@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 
 // ** MUI Imports
-import { Box, Stack, IconButton, LinearProgress, Checkbox, TableCell } from '@mui/material'
+import { Box, Stack, IconButton, LinearProgress, Checkbox, TableCell, Button } from '@mui/material'
 import { DataGrid, gridClasses } from '@mui/x-data-grid'
 import { alpha, styled } from '@mui/material/styles'
 
@@ -100,12 +100,13 @@ const PaginationContainer = styled(Box)({
 const Table = ({
   pagination = true,
   paginationType = 'api',
-  handleCheckedRows,
   height,
   addedHeight = '0px',
   actionColumnHeader = null,
   showCheckboxColumn = false,
   checkTitle = '',
+  viewCheckButtons = false,
+  setData,
   ...props
 }) => {
   const { stack } = useWindow()
@@ -274,14 +275,14 @@ const Table = ({
       }) !== HIDDEN
   )
 
+  const shouldViewButtons = !viewCheckButtons ? 'none' : ''
+
   const handleCheckboxChange = row => {
     setCheckedRows(prevCheckedRows => {
       const newCheckedRows = { ...prevCheckedRows }
       const key = row.seqNo ? `${row.recordId}-${row.seqNo}` : row.recordId
       newCheckedRows[key] = row
       const filteredRows = !newCheckedRows[key]?.checked ? [newCheckedRows[key]] : []
-      handleCheckedRows(filteredRows)
-      console.log('checkedRows 4 ', newCheckedRows)
 
       return filteredRows
     })
@@ -344,29 +345,42 @@ const Table = ({
       renderCell: params => {
         const { row } = params
         const isStatus3 = row.status === 3
+        const isStatusCanceled = row.status === -1
         const isWIP = row.wip === 2
 
         return (
           <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
             {props.onEdit && (
-              <IconButton size='small' onClick={() => props.onEdit(params.row)}>
+              <IconButton
+                size='small'
+                onClick={e => {
+                  props.onEdit(params.row)
+                  e.stopPropagation()
+                }}
+              >
                 <Image src={editIcon} alt='Edit' width={18} height={18} />
               </IconButton>
             )}
             {props.popupComponent && (
-              <IconButton size='small' onClick={() => props.popupComponent(params.row)}>
+              <IconButton
+                size='small'
+                onClick={e => {
+                  props.popupComponent(params.row), e.stopPropagation()
+                }}
+              >
                 <Image src={editIcon} alt='Edit' width={18} height={18} />
               </IconButton>
             )}
-            {!isStatus3 && deleteBtnVisible && !isWIP && (
+            {!isStatus3 && !isStatusCanceled && deleteBtnVisible && !isWIP && (
               <IconButton
                 size='small'
-                onClick={() => {
+                onClick={e => {
                   if (props.deleteConfirmationType == 'strict') {
                     openDeleteConfirmation(params.row)
                   } else {
                     openDelete(params.row)
                   }
+                  e.stopPropagation()
                 }}
                 color='error'
               >
@@ -377,6 +391,30 @@ const Table = ({
         )
       }
     })
+  }
+
+  const handleCheckAll = () => {
+    const updatedRowGridData = gridData.list.map(row => ({
+      ...row,
+      checked: true
+    }))
+
+    setData(prevGridData => ({
+      ...prevGridData,
+      list: updatedRowGridData
+    }))
+  }
+
+  const handleUncheckAll = () => {
+    const updatedRowGridData = gridData.list.map(row => ({
+      ...row,
+      checked: false
+    }))
+
+    setData(prevGridData => ({
+      ...prevGridData,
+      list: updatedRowGridData
+    }))
   }
 
   useEffect(() => {
@@ -402,6 +440,19 @@ const Table = ({
     <>
       {maxAccess && maxAccess > TrxType.NOACCESS ? (
         <>
+          <Stack direction='row' spacing={2} marginBottom={2}>
+            <Button variant='contained' color='primary' onClick={handleCheckAll} style={{ display: shouldViewButtons }}>
+              Check All
+            </Button>
+            <Button
+              variant='contained'
+              color='secondary'
+              onClick={handleUncheckAll}
+              style={{ display: shouldViewButtons }}
+            >
+              Uncheck All
+            </Button>
+          </Stack>
           <StripedDataGrid
             rows={
               gridData?.list

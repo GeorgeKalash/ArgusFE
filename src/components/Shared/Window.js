@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo } from 'react'
+import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import { DialogTitle, DialogContent, Paper, Tabs, Tab, Box, Typography, IconButton } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
 import OpenInFullIcon from '@mui/icons-material/OpenInFull'
@@ -33,6 +33,7 @@ const Window = React.memo(
     const { navCollapsed } = settings
     const [expanded, setExpanded] = useState(false)
     const [position, setPosition] = useState({ x: 0, y: 0 })
+    const paperRef = useRef(null)
 
     const maxAccess = props.maxAccess?.record.maxAccess
 
@@ -52,6 +53,12 @@ const Window = React.memo(
         transactionLogInfo.style.height = expanded ? '30vh' : '18vh'
       }
     }, [expanded])
+
+    useEffect(() => {
+      if (paperRef.current) {
+        paperRef.current.focus()
+      }
+    }, [])
 
     const handleExpandToggle = useCallback(() => {
       if (!expanded) {
@@ -75,7 +82,8 @@ const Window = React.memo(
           backgroundColor: 'rgba(0, 0, 0, 0.1)',
           display: 'flex',
           justifyContent: 'center',
-          alignItems: 'center'
+          alignItems: 'center',
+          pointerEvents: 'none'
         }}
       >
         <Draggable
@@ -85,8 +93,10 @@ const Window = React.memo(
           position={position}
           onDrag={handleDrag}
         >
-          <Box sx={{ position: 'relative' }}>
+          <Box sx={{ position: 'relative', pointerEvents: 'all' }}>
             <Paper
+              ref={paperRef}
+              tabIndex={-1}
               sx={{
                 transition: 'width 0.3s, height 0.3s',
                 height: controlled ? (expanded ? containerHeight : height) : expanded ? containerHeight : height,

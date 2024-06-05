@@ -1,6 +1,5 @@
 import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
-import { useError } from 'src/error'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { Grid, Box } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
@@ -19,12 +18,13 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
 
-export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, setErrorMessage, expanded }) {
+export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, expanded, window }) {
   const { height } = useWindowDimensions()
   const [isLoading, setIsLoading] = useState(false)
   const [isPosted, setIsPosted] = useState(false)
   const [itemStore, setItemStore] = useState([])
   const [editMode, setEditMode] = useState(!!recordId)
+  const { getRequest, postRequest } = useContext(RequestsContext)
 
   const [initialValues, setInitialData] = useState({
     recordId: null,
@@ -33,11 +33,8 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
     plantId: '',
     siteId: '',
     description: '',
-    date: null,
-    isOnPostClicked: false
+    date: null
   })
-  const { stack: stackError } = useError()
-  const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
     endpointId: InventoryRepository.MaterialsAdjustment.qry
@@ -51,20 +48,47 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
       siteId: yup.string().required('This field is required')
     }),
     onSubmit: async obj => {
-      try {
-        const copy = { ...obj }
-        copy.date = formatDateToApi(copy.date)
-        if (formik.values.isOnPostClicked) {
-          handlePost(copy)
-          formik.setFieldValue('isOnPostClicked', false)
+      const copy = { ...obj }
+      copy.date = formatDateToApi(copy.date)
+
+      const updatedRows = detailsFormik.values.rows.map((adjDetail, index) => {
+        const seqNo = index + 1
+        if (adjDetail.muQty === null) {
+          return {
+            ...adjDetail,
+            qtyInBase: 0,
+            seqNo: seqNo
+          }
         } else {
-          await postADJ(copy)
-          setEditMode(true)
-          invalidate()
+          return {
+            ...adjDetail,
+            qtyInBase: adjDetail.muQty * adjDetail.qty,
+            seqNo: seqNo
+          }
         }
-      } catch (error) {
-        setErrorMessage(error)
+      })
+
+      if (updatedRows.length == 1 && updatedRows[0].itemId == '') {
+        throw new Error('Grid not filled. Please fill the grid before saving.')
       }
+
+      const resultObject = {
+        header: obj,
+        items: updatedRows,
+        serials: [],
+        lots: []
+      }
+
+      const res = await postRequest({
+        extension: InventoryRepository.MaterialsAdjustment.set2,
+        record: JSON.stringify(resultObject)
+      })
+      toast.success('Record Updated Successfully')
+      invalidate()
+      setEditMode(true)
+      formik.setFieldValue('recordId', res.recordId)
+      handlePost()
+      window.close()
     }
   })
 
@@ -99,81 +123,28 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
     return qtySum + qtyValue
   }, 0)
 
-  const handlePost = obj => {
-    postRequest({
+  const handlePost = async () => {
+    const values = { ...formik.values }
+    values.date = formatDateToApi(values.date)
+
+    await postRequest({
       extension: InventoryRepository.MaterialsAdjustment.post,
-      record: JSON.stringify(obj)
+      record: JSON.stringify(values)
     })
-      .then(res => {
-        invalidate()
-        setIsPosted(true)
-        toast.success('Record Deleted Successfully')
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+    invalidate()
+    setIsPosted(true)
   }
 
-  const postADJ = async obj => {
-    try {
-      const updatedRows = detailsFormik.values.rows.map((adjDetail, index) => {
-        const seqNo = index + 1 // Adding 1 to make it 1-based index
-        if (adjDetail.muQty === null) {
-          // If muQty is null, set qtyInBase to 0
-          return {
-            ...adjDetail,
-            qtyInBase: 0,
-            seqNo: seqNo
-          }
-        } else {
-          // If muQty is not null, calculate qtyInBase
-          return {
-            ...adjDetail,
-            qtyInBase: adjDetail.muQty * adjDetail.qty,
-            seqNo: seqNo
-          }
-        }
-      })
-
-      if (updatedRows.length == 1 && updatedRows[0].itemId == '') {
-        throw new Error('Grid not filled. Please fill the grid before saving.')
-      }
-
-      const resultObject = {
-        header: obj,
-        items: updatedRows,
-        serials: [],
-        lots: []
-      }
-
-      const res = await postRequest({
-        extension: InventoryRepository.MaterialsAdjustment.set2,
-        record: JSON.stringify(resultObject)
-      })
-      toast.success('Record Updated Successfully')
-      invalidate()
-      formik.setFieldValue('recordId', res.recordId)
-    } catch (error) {
-      setErrorMessage(error)
-    }
-  }
-
-  const lookupSKU = searchQry => {
+  const lookupSKU = async searchQry => {
     setItemStore([])
 
     if (searchQry) {
       var parameters = `_filter=${searchQry}&_categoryId=0&_msId=0&_startAt=0&_size=1000`
-      getRequest({
+      await getRequest({
         extension: InventoryRepository.Item.snapshot,
         parameters: parameters
       })
-        .then(res => {
-          setItemStore(res.list)
-          console.log('lookup ', res.list)
-        })
-        .catch(error => {
-          setErrorMessage(error)
-        })
+      setItemStore(res.list)
     }
   }
 
@@ -233,59 +204,53 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
     }
   ]
 
-  const fillDetailsGrid = adjId => {
+  const fillDetailsGrid = async adjId => {
     var parameters = `_filter=&_adjustmentId=${adjId}`
-    getRequest({
+
+    const res = await getRequest({
       extension: InventoryRepository.MaterialsAdjustmentDetail.qry,
       parameters: parameters
     })
-      .then(res => {
-        // Create a new list by modifying each object in res.list
-        const modifiedList = res.list.map(item => ({
-          ...item,
-          totalCost: item.unitCost * item.qty // Modify this based on your calculation
-        }))
 
-        console.log('response ', modifiedList)
-
-        detailsFormik.setValues({
-          ...detailsFormik.values,
-          rows: modifiedList
-        })
-        console.log('detailsFormik ', detailsFormik.values.rows)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+    // Create a new list by modifying each object in res.list
+    const modifiedList = res.list.map(item => ({
+      ...item,
+      totalCost: item.unitCost * item.qty // Modify this based on your calculation
+    }))
+    detailsFormik.setValues({
+      ...detailsFormik.values,
+      rows: modifiedList
+    })
   }
-  useEffect(() => {
-    console.log('heightttt ', height)
-  }, [height])
+
+  useEffect(() => {}, [height])
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          setIsLoading(true)
-          fillDetailsGrid(recordId)
+      if (recordId) {
+        setIsLoading(true)
+        fillDetailsGrid(recordId)
 
-          const res = await getRequest({
-            extension: InventoryRepository.MaterialsAdjustment.get,
-            parameters: `_recordId=${recordId}`
-          })
-          setIsPosted(res.record.status === 3 ? true : false)
-          res.record.date = formatDateFromApi(res.record.date)
-          console.log('debug date ', res.record.date)
-          setInitialData(res.record)
-        }
-      } catch (error) {
-        setErrorMessage(error)
-      } finally {
-        setIsLoading(false)
+        const res = await getRequest({
+          extension: InventoryRepository.MaterialsAdjustment.get,
+          parameters: `_recordId=${recordId}`
+        })
+        setIsPosted(res.record.status === 3 ? true : false)
+        res.record.date = formatDateFromApi(res.record.date)
+        setInitialData(res.record)
       }
     })()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  const actions = [
+    {
+      key: 'RecordRemarks',
+      condition: true,
+      onClick: 'onRecordRemarks',
+      disabled: !editMode
+    }
+  ]
 
   return (
     <FormShell
@@ -295,8 +260,8 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
       editMode={editMode}
       isPosted={isPosted}
       postVisible={true}
+      actions={actions}
       previewReport={editMode}
-
     >
       <Grid container>
         <Grid container xs={12} style={{ overflow: 'hidden' }}>

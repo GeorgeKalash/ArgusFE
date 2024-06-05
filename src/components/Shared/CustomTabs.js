@@ -15,14 +15,14 @@ export const CustomTabs = ({ tabs, activeTab, setActiveTab }) => {
             minHeight: '35px !important',
             '.MuiTab-root': {
               color: 'white',
-              backgroundColor: 'white',
+              backgroundColor: 'grey',
               '&:hover': {
                 color: 'white',
                 backgroundColor: '#ddd'
               }
             },
             '.Mui-disabled': {
-              color: '#5A5A5A',
+              color: '#6A6A6A !important',
               backgroundColor: '#333333'
             },
             '.Mui-selected': {

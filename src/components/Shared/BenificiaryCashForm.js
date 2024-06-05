@@ -17,16 +17,26 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import toast from 'react-hot-toast'
 import { useResourceQuery } from 'src/hooks/resource'
 import { useForm } from 'src/hooks/form'
-import FormGrid from 'src/components/form/layout/FormGrid'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import FormGrid from 'src/components/form/layout/FormGrid'
 
-const BenificiaryCashForm = ({ client, dispersalType, beneficiary, corId, countryId }) => {
+const BenificiaryCashForm = ({
+  viewBtns = true,
+  store,
+  setStore,
+  client,
+  dispersalType,
+  beneficiary,
+  corId,
+  countryId,
+  editable = false
+}) => {
   const [maxAccess, setMaxAccess] = useState({ record: [] })
   const { stack: stackError } = useError()
-  const [editMode, setEditMode] = useState(beneficiary?.beneficiaryId)
+  const [editMode, setEditMode] = useState(beneficiary?.beneficiaryId && !editable)
 
   useEffect(() => {
     ;(async function () {
@@ -38,10 +48,9 @@ const BenificiaryCashForm = ({ client, dispersalType, beneficiary, corId, countr
 
         const controls = { controls: qryCCL.list }
         const maxAccess = { record: controls }
-        setMaxAccess(maxAccess)
       }
 
-      if (beneficiary?.beneficiaryId) {
+      if (beneficiary?.beneficiaryId && (!store || store.submitted != store.loadBen)) {
         const RTBEC = await getRequest({
           extension: RemittanceOutwardsRepository.BeneficiaryCash.get,
           parameters: `_clientId=${client?.clientId}&_beneficiaryId=${beneficiary?.beneficiaryId}&_seqNo=${beneficiary?.beneficiarySeqNo}`
@@ -88,10 +97,27 @@ const BenificiaryCashForm = ({ client, dispersalType, beneficiary, corId, countr
           birthPlace: RTBEC?.record?.birthPlace,
           seqNo: RTBEC?.record?.seqNo
         }
+        if (store) {
+          setStore(prevStore => ({
+            ...prevStore,
+            beneficiaryList: obj
+          }))
+        }
         formik.setValues(obj)
       }
+      if (store?.submitted) {
+        formik.handleSubmit()
+      }
+      if (store?.clearBenForm && !store?.submitted) {
+        formik.resetForm()
+        setStore(prevStore => ({
+          ...prevStore,
+          clearBenForm: false,
+          loadBen: false
+        }))
+      }
     })()
-  }, [])
+  }, [store?.submitted, store?.clearBenForm, beneficiary?.beneficiaryId, beneficiary?.beneficiarySeqNo])
 
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [notArabic, setNotArabic] = useState(true)
@@ -190,13 +216,19 @@ const BenificiaryCashForm = ({ client, dispersalType, beneficiary, corId, countr
         seqNo: values.seqNo
       }
       const data = { header: header, beneficiaryCash: cashInfo }
-
-      const res = await postRequest({
-        extension: RemittanceOutwardsRepository.BeneficiaryCash.set,
-        record: JSON.stringify(data)
-      })
-      if (res.recordId) {
-        toast.success('Record Updated Successfully')
+      if (store?.submitted) {
+        setStore(prevStore => ({
+          ...prevStore,
+          beneficiaryList: data
+        }))
+      } else {
+        const res = await postRequest({
+          extension: RemittanceOutwardsRepository.BeneficiaryCash.set,
+          record: JSON.stringify(data)
+        })
+        if (res.recordId) {
+          toast.success('Record Updated Successfully')
+        }
       }
       setEditMode(true)
     }
@@ -264,6 +296,9 @@ const BenificiaryCashForm = ({ client, dispersalType, beneficiary, corId, countr
       setEditMode={setEditMode}
       maxAccess={maxAccess}
       disabledSubmit={editMode}
+      isCleared={viewBtns}
+      isInfo={viewBtns}
+      isSaved={viewBtns}
     >
       <VertLayout>
         <Grow>
