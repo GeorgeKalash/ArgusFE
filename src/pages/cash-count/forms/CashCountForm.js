@@ -373,7 +373,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
                 maxAccess={maxAccess}
               />
             </Grid>
-            <Grid item xs={6} sx={{ mt: 4 }}>
+            <Grid item xs={6}>
               <CustomDatePicker
                 name='date'
                 label={labels.date}

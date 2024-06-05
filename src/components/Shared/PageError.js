@@ -1,6 +1,6 @@
 import React from 'react'
 import Window from './Window'
-import { Box, Button } from '@mui/material'
+import { Box, Button, DialogActions, DialogContent } from '@mui/material'
 
 const PageError = ({ onClose, message, height = 100 }) => {
   const errorMessage =
@@ -16,37 +16,31 @@ const PageError = ({ onClose, message, height = 100 }) => {
 
   return (
     <Window Title='Error' width={450} height={height} onClose={onClose} canExpand={false}>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: height,
-          pr: 5
-        }}
-      >
+      <DialogContent>
         <Box
           sx={{
-            flex: '1',
-            overflow: 'auto',
-            px: 5
+            pt: 2
           }}
         >
           {errorMessage}
         </Box>
+      </DialogContent>
+      <DialogActions
+        sx={{
+          pb: 2
+        }}
+      >
         <Box
           sx={{
-            flexShrink: 0,
-            py: 1,
-            px: 5,
-            display: 'flex',
-            justifyContent: 'flex-end'
+            pt: 2,
+            pl: 2
           }}
         >
           <Button variant='contained' onClick={onClose} color='primary'>
-            ok
+            Ok
           </Button>
         </Box>
-      </Box>
+      </DialogActions>
     </Window>
   )
 }
