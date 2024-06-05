@@ -16,22 +16,22 @@ const AgentBranchWindow = ({ labels, maxAccess, recordId, height }) => {
     addressId: null
   })
 
+  const editMode = !!store.recordId
+
   const [activeTab, setActiveTab] = useState(0)
-  const tabs = [{ label: labels.agentBranch }, { label: labels.address, disabled: !store.recordId }]
+  const tabs = [{ label: labels.agentBranch }, { label: labels.address, disabled: !editMode }]
   const { postRequest } = useContext(RequestsContext)
 
   async function onSubmit(address) {
-     if (!store.agentBranch.addressId) {
+    if (!store.agentBranch.addressId) {
       store.agentBranch.addressId = address.addressId
       const res = { ...store.agentBranch, addressId: address.addressId }
-      if (res) {
-        const data = { ...res, recordId: store?.recordId, agentId: store.agentBranch?.agentId }
-        await postRequest({
-          extension: RemittanceSettingsRepository.CorrespondentAgentBranches.set,
-          record: JSON.stringify(data)
-        })
-      }
-    } 
+      const data = { ...res, recordId: store?.recordId, agentId: store.agentBranch?.agentId }
+      await postRequest({
+        extension: RemittanceSettingsRepository.CorrespondentAgentBranches.set,
+        record: JSON.stringify(data)
+      })
+    }
   }
 
   function setAddress(res) {
@@ -46,19 +46,13 @@ const AgentBranchWindow = ({ labels, maxAccess, recordId, height }) => {
     <>
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
       <CustomTabPanel height={height} index={0} value={activeTab}>
-        <AgentBranchForm
-          _labels={labels}
-          maxAccess={maxAccess}
-          store={store}
-          setStore={setStore}
-          editMode={store.recordId}
-        />
+        <AgentBranchForm _labels={labels} maxAccess={maxAccess} store={store} setStore={setStore} editMode={editMode} />
       </CustomTabPanel>
       <CustomTabPanel height={height} index={1} value={activeTab}>
         <AddressForm
           _labels={labels}
           maxAccess={maxAccess}
-          editMode={store.recordId}
+          editMode={editMode}
           recordId={store?.agentBranch?.addressId}
           address={store.address}
           setAddress={setAddress}

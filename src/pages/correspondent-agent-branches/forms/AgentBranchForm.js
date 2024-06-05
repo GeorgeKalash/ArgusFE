@@ -42,8 +42,7 @@ export default function AgentBranchForm({ _labels, maxAccess, store, setStore, e
         record: JSON.stringify(obj)
       })
 
-      if (response.recordId) {
-        if (!recordId) {
+        if (!editMode) {
           toast.success('Record Added Successfully')
         } else toast.success('Record Edited Successfully')
 
@@ -56,7 +55,6 @@ export default function AgentBranchForm({ _labels, maxAccess, store, setStore, e
         formik.setFieldValue('recordId', response.recordId)
 
         invalidate()
-      }
     }
   })
 

@@ -29,7 +29,6 @@ const PlantWindow = ({ labels, editMode, maxAccess, recordId, height }) => {
           extension: SystemRepository.Plant.set,
           record: JSON.stringify(data)
         })
-          .then(result => {})
           .catch(error => {})
       }
     }

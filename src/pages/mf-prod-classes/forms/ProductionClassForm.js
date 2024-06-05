@@ -54,8 +54,8 @@ export default function ProductionClassForm({
       if (!recordId) {
         toast.success('Record Added Successfully')
         setInitialData({
-          ...obj, // Spread the existing properties
-          recordId: response.recordId // Update only the recordId field
+          ...obj, 
+          recordId: response.recordId
         })
         setSelectedRecordId(response.recordId)
       } else toast.success('Record Edited Successfully')

@@ -18,16 +18,18 @@ const AddressForm = ({ recordId, address, setAddress = () => {}, editMode, onSub
       toast.success('Record Updated Successfully')
     })
   }
+
   useEffect(() => {
-    setAddress([])
-    if (recordId) {
-      getRequest({
-        extension: SystemRepository.Address.get,
-        parameters: `_filter=` + '&_recordId=' + recordId
-      }).then(res => {
+    ;(async function () {
+      if (recordId) {
+        const res = await getRequest({
+          extension: SystemRepository.Address.get,
+          parameters: `_filter=` + '&_recordId=' + recordId
+        })
+
         setAddress(res.record)
-      })
-    }
+      }
+    })()
   }, [recordId])
 
   return (
