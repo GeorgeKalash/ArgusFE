@@ -112,9 +112,9 @@ export default function CashCountNotesForm({
 
       if (currencyNote) {
         n.qty = currencyNote.qty
-        n.qty1 = currencyNote.qty1
-        n.qty100 = currencyNote.qty100
-        n.qty1000 = currencyNote.qty1000
+        n.qty1 = currencyNote.qty1 || ''
+        n.qty100 = currencyNote.qty100 || ''
+        n.qty1000 = currencyNote.qty1000 || ''
         n.seqNo = currencyNote.seqNo
         n.subTotal = currencyNote.subTotal
       }
