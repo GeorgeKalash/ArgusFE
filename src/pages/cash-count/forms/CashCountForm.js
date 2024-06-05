@@ -24,6 +24,8 @@ import { SystemFunction } from 'src/resources/SystemFunction'
 import { getStorageData } from 'src/storage/storage'
 import { useInvalidate } from 'src/hooks/resource'
 import { useError } from 'src/error'
+import { GenerateTransferForm } from './GenerateTransferForm'
+import WorkFlow from 'src/components/Shared/WorkFlow'
 
 export default function CashCountForm({ labels, maxAccess, recordId }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -127,43 +129,45 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
         .required(' ')
     }),
     onSubmit: async obj => {
-      const payload = {
-        header: {
-          recordId: obj.recordId,
-          dtId: obj.dtId,
-          plantId: obj.plantId,
-          shiftId: obj.shiftId,
-          currencyId: obj.currencyId,
-          cashAccountId: obj.cashAccountId,
-          forceNoteCount: obj.forceNoteCount,
-          reference: obj.reference,
-          date: formatDateToApi(new Date()),
-          startTime: obj.startTime,
-          endTime: obj.endTime,
-          status: obj.status,
-          wip: obj.wip,
-          releaseStatus: obj.releaseStatus
-        },
-        items: obj.items.map(({ id, flag, enabled, cashCountId, currencyNotes, ...rest }, index) => ({
-          seqNo: index + 1,
-          cashCountId: cashCountId || 0,
-          currencyNotes: currencyNotes || [],
-          ...rest
-        }))
-      }
+      try {
+        const payload = {
+          header: {
+            recordId: obj.recordId,
+            dtId: obj.dtId,
+            plantId: obj.plantId,
+            shiftId: obj.shiftId,
+            currencyId: obj.currencyId,
+            cashAccountId: obj.cashAccountId,
+            forceNoteCount: obj.forceNoteCount,
+            reference: obj.reference,
+            date: formatDateToApi(new Date()),
+            startTime: obj.startTime,
+            endTime: obj.endTime,
+            status: obj.status,
+            wip: obj.wip,
+            releaseStatus: obj.releaseStatus
+          },
+          items: obj.items.map(({ id, flag, enabled, cashCountId, currencyNotes, ...rest }, index) => ({
+            seqNo: index + 1,
+            cashCountId: cashCountId || 0,
+            currencyNotes: currencyNotes || [],
+            ...rest
+          }))
+        }
 
-      const response = await postRequest({
-        extension: CashCountRepository.CashCountTransaction.set2,
-        record: JSON.stringify(payload)
-      })
-      const _recordId = response.recordId
-      if (!obj.recordId) {
-        toast.success('Record Added Successfully')
-        getData(_recordId)
-      } else toast.success('Record Edited Successfully')
-      setEditMode(true)
+        const response = await postRequest({
+          extension: CashCountRepository.CashCountTransaction.set2,
+          record: JSON.stringify(payload)
+        })
+        const _recordId = response.recordId
+        if (!obj.recordId) {
+          toast.success('Record Added Successfully')
+          getData(_recordId)
+        } else toast.success('Record Edited Successfully')
+        setEditMode(true)
 
-      invalidate()
+        invalidate()
+      } catch (error) {}
     }
   })
 
@@ -276,8 +280,46 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
       })
       .catch(error => {})
   }
+  function openTransferForm(recordId) {
+    stack({
+      Component: GenerateTransferForm,
+      props: {
+        labels: labels,
+        cashCountId: formik.values.recordId,
+        fromPlantId: formik.values.plantId,
+        maxAccess
+      },
+      width: 600,
+      height: 200,
+      title: labels.cashCount
+    })
+  }
+
+  const onWorkFlowClick = async () => {
+    stack({
+      Component: WorkFlow,
+      props: {
+        functionId: SystemFunction.CashCountTransaction,
+        recordId: formik.values.recordId
+      },
+      width: 950,
+      title: 'Workflow'
+    })
+  }
 
   const actions = [
+    {
+      key: 'Bulk',
+      condition: true,
+      onClick: openTransferForm,
+      disabled: formik.values.status !== 1
+    },
+    {
+      key: 'WorkFlow',
+      condition: true,
+      onClick: onWorkFlowClick,
+      disabled: !editMode
+    },
     {
       key: 'Post',
       condition: true,

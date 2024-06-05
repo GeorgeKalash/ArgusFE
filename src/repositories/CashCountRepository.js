@@ -9,7 +9,8 @@ export const CashCountRepository = {
     post: service + 'postTRX',
     close: service + 'closeTRX',
     reopen: service + 'reopenTRX',
-    del: service + 'delTRX'
+    del: service + 'delTRX',
+    generate: service + 'generateTFR'
   },
   CcCashNotes: {
     qry: service + 'qryNOT',
