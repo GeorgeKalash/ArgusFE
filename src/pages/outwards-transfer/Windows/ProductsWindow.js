@@ -44,24 +44,19 @@ const ProductsWindow = ({ labels, width, height, gridData, maxAccess, form }) =>
   ]
 
   return (
-    <FormShell
-      resourceId={ResourceIds.OutwardsTransfer}
-      form={form}
-      maxAccess={maxAccess}
-      infoVisible={false}
-    >
+    <FormShell resourceId={ResourceIds.OutwardsTransfer} form={form} maxAccess={maxAccess} infoVisible={false}>
       <VertLayout>
         <Grow>
           <Table
-          columns={columns}
-          gridData={gridData}
-          rowId={['productId']}
-          isLoading={false}
-          pagination={false}
-          maxAccess={maxAccess}
-          showCheckboxColumn={true}
-          handleCheckedRows={() => {}}
-        />
+            columns={columns}
+            gridData={gridData}
+            rowId={['productId']}
+            isLoading={false}
+            pagination={false}
+            maxAccess={maxAccess}
+            showCheckboxColumn={true}
+            handleCheckedRows={() => {}}
+          />
         </Grow>
       </VertLayout>
     </FormShell>
