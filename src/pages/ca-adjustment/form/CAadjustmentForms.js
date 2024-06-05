@@ -32,12 +32,12 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
-    endpointId: CashBankRepository.CAadjustment.qry
+    endpointId: CashBankRepository.CAadjustment.page
   })
 
   const { formik } = useForm({
     initialValues: {
-      recordId: null,
+      recordId: recordId || null,
       reference: '',
       name: '',
       dtId: documentType?.dtId,
@@ -120,18 +120,18 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
     })()
   }, [])
 
-  const onPost = () => {
-    postRequest({
-      extension: CashBankRepository.CAadjustment.post,
-      record: JSON.stringify(formik.values)
-    })
-      .then(res => {
-        if (res?.recordId) {
-          toast.success('Record Posted Successfully')
-          invalidate()
-        }
+  const onPost = async () => {
+    try {
+      const res = await postRequest({
+        extension: CashBankRepository.CAadjustment.post,
+        record: JSON.stringify(formik.values)
       })
-      .catch(error => {})
+
+      if (res?.recordId) {
+        toast.success('Record Posted Successfully')
+        invalidate()
+      }
+    } catch (error) {}
   }
 
   const actions = [

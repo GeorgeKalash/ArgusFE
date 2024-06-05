@@ -1,9 +1,9 @@
-import { useState, useContext } from 'react'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
@@ -30,14 +30,12 @@ const CAadjustment = () => {
     } = options
 
     const response = await getRequest({
-      extension: CashBankRepository.CAadjustment.qry,
+      extension: CashBankRepository.CAadjustment.page,
       parameters: `_startAt=${_startAt}&_params=&_pageSize=50&_sortBy=reference&_functionId=${functionId}`
     })
 
     return { ...response, _startAt: _startAt }
   }
-
-  console.log(functionId, 'func')
 
   const {
     query: { data },
@@ -47,7 +45,7 @@ const CAadjustment = () => {
     invalidate,
     refetch
   } = useResourceQuery({
-    endpointId: CashBankRepository.CAadjustment.qry,
+    endpointId: CashBankRepository.CAadjustment.page,
     datasetId: ResourceIds.IncreaseDecreaseAdj,
 
     filter: {
