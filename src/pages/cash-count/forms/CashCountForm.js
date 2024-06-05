@@ -312,7 +312,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
       key: 'Bulk',
       condition: true,
       onClick: openTransferForm,
-      disabled: formik.values.status !== 1
+      disabled: formik.values.status !== 3
     },
     {
       key: 'WorkFlow',
