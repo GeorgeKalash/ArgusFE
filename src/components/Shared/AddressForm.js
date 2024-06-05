@@ -21,14 +21,13 @@ const AddressForm = ({ recordId, address, setAddress = () => {}, editMode, onSub
   useEffect(() => {
     ;(async function () {
       if (recordId) {
-        // try {
-        const res = await getRequest({
-          extension: SystemRepository.Address.get,
-          parameters: `_filter=` + '&_recordId=' + recordId
-        })
-        setAddress(res.record)
-
-        // } catch (error) {}
+        try {
+          const res = await getRequest({
+            extension: SystemRepository.Address.get,
+            parameters: `_filter=` + '&_recordId=' + recordId
+          })
+          setAddress(res.record)
+        } catch (error) {}
       }
     })
   }, [recordId])
