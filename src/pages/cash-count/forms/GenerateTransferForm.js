@@ -78,7 +78,12 @@ export default function GenerateTransferForm({ cashCountId, fromPlantId, labels,
                 required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik && formik.setFieldValue('toPlantId', newValue?.recordId)
+                  if (formik) {
+                    formik.setFieldValue('toPlantId', newValue?.recordId)
+                  }
+                  formik.setFieldValue('toAccountId', null)
+                  formik.setFieldValue('fromCARef', null)
+                  formik.setFieldValue('fromCAName', null)
                 }}
                 error={formik.touched.toPlantId && Boolean(formik.errors.toPlantId)}
               />
