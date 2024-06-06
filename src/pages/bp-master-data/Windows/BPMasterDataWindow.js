@@ -7,7 +7,7 @@ import AddressMasterDataForm from '../forms/AddressMasterDataForm'
 import RelationList from 'src/pages/bp-master-data/forms/RelationList'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 
-const BPMasterDataWindow = ({ labels, maxAccess, defaultValue, recordId, height }) => {
+const BPMasterDataWindow = ({ labels, maxAccess, recordId, height }) => {
   const [activeTab, setActiveTab] = useState(0)
 
   const [store, setStore] = useState({
@@ -30,7 +30,6 @@ const BPMasterDataWindow = ({ labels, maxAccess, defaultValue, recordId, height 
         <BPMasterDataForm
           labels={labels}
           maxAccess={maxAccess}
-          defaultValue={defaultValue}
           store={store}
           setStore={setStore}
           setEditMode={setEditMode}

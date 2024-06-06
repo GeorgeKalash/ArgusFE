@@ -17,8 +17,9 @@ import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
-export default function BPMasterDataForm({ labels, maxAccess, defaultValue, setEditMode, store, setStore }) {
+export default function BPMasterDataForm({ labels, maxAccess, setEditMode, store, setStore }) {
   const [isLoading, setIsLoading] = useState(false)
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -74,6 +75,19 @@ export default function BPMasterDataForm({ labels, maxAccess, defaultValue, setE
         toast.success('Record Added Successfully')
         setEditMode(true)
         formik.setFieldValue('recordId', res.recordId)
+        if (obj.defaultId) {
+          const data = {
+            bpId: res.recordId,
+            idNum: obj.defaultId,
+            incId: obj.defaultInc
+          }
+          try {
+            await postRequest({
+              extension: BusinessPartnerRepository.MasterIDNum.set,
+              record: JSON.stringify(data)
+            })
+          } catch (error) {}
+        }
 
         setStore(prevStore => ({
           ...prevStore,
@@ -83,7 +97,6 @@ export default function BPMasterDataForm({ labels, maxAccess, defaultValue, setE
         toast.success('Record Edited Successfully')
       }
       setEditMode(true)
-
       invalidate()
     }
   })
@@ -102,6 +115,18 @@ export default function BPMasterDataForm({ labels, maxAccess, defaultValue, setE
             (parseInt(categId) === 3 && item.group)
         )
       : []
+  }
+
+  const getDefaultId = async incId => {
+    if (incId && recordId) {
+      const res = await getRequest({
+        extension: BusinessPartnerRepository.MasterIDNum.get,
+        parameters: `_bpId=${recordId}&_incId=${incId}`
+      })
+      if (res.record) {
+        formik.setFieldValue('defaultId', res.record.idNum)
+      }
+    }
   }
 
   const invalidate = useInvalidate({
@@ -130,6 +155,7 @@ export default function BPMasterDataForm({ labels, maxAccess, defaultValue, setE
           res.record.birthDate = formatDateFromApi(res.record.birthDate)
           formik.setValues(res.record)
           setIsLoading(false)
+          await getDefaultId(res.record.defaultInc)
         }
       } catch (exception) {
         setIsLoading(false)
@@ -176,6 +202,8 @@ export default function BPMasterDataForm({ labels, maxAccess, defaultValue, setE
                   maxAccess={maxAccess}
                   onChange={(event, newValue) => {
                     formik.setFieldValue('category', newValue?.key)
+                    formik.setFieldValue('defaultInc', '')
+                    formik.setFieldValue('defaultId', '')
                   }}
                   error={formik.touched.category && Boolean(formik.errors.category)}
                 />
@@ -285,16 +313,20 @@ export default function BPMasterDataForm({ labels, maxAccess, defaultValue, setE
                   value={store?.category?.filter(item => item.recordId === parseInt(formik.values.defaultInc))[0]}
                   maxAccess={maxAccess}
                   onChange={(event, newValue) => {
-                    formik && formik.setFieldValue('defaultInc', newValue?.recordId)
+                    formik.setFieldValue('defaultId', '')
+                    formik.setFieldValue('defaultInc', newValue ? newValue.recordId : null)
+                    getDefaultId(newValue?.recordId)
                   }}
                 />
               </Grid>
               <Grid item xs={12}>
-                <CustomTextField
+                <CustomNumberField
+                  name='defaultId'
                   label={labels.defaultId}
-                  value={defaultValue}
+                  value={formik.values.defaultId}
                   maxAccess={maxAccess}
                   readOnly={!formik.values?.defaultInc}
+                  onChange={formik.handleChange}
                   onClear={() => formik.setFieldValue('defaultId', '')}
                 />
               </Grid>
