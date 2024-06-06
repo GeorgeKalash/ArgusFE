@@ -9,9 +9,10 @@ import { useForm } from 'src/hooks/form'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-const IDNumberForm = ({ store, maxAccess, labels, editMode }) => {
+const IDNumberForm = ({ store, maxAccess, labels }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const editMode = !!store.recordId
 
   const { formik } = useForm({
     maxAccess,

@@ -37,20 +37,24 @@ const RelationForm = ({ bpId, recordId, labels, maxAccess, getRelationGridData, 
       relationId: yup.string().required()
     }),
     onSubmit: values => {
+      console.log('enter here ')
       postRelation(values)
     }
   })
+  console.log('enter here formik ', formik)
 
   const postRelation = async obj => {
+    console.log('enter here 1')
     obj.startDate = obj.startDate ? formatDateToApiFunction(obj.startDate) : ''
     obj.endDate = obj.endDate ? formatDateToApiFunction(obj.endDate) : ''
 
     try {
+      console.log('enter here 2')
       await postRequest({
         extension: BusinessPartnerRepository.Relation.set,
         record: JSON.stringify(obj)
       })
-
+      console.log('enter here 3')
       if (!recordId) {
         toast.success('Record Added Successfully')
       } else {

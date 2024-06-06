@@ -11,11 +11,12 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-const RelationList = ({ store, labels, editMode, maxAccess }) => {
+const RelationList = ({ store, labels, maxAccess }) => {
   const { recordId } = store
   const [relationGridData, setRelationGridData] = useState([])
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const editMode = !!store.recordId
 
   const getRelationGridData = async bpId => {
     try {
