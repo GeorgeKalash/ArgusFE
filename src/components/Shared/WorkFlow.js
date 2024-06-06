@@ -1,6 +1,7 @@
 import React, { useContext, useEffect } from 'react'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import { RequestsContext } from 'src/providers/RequestsContext'
+import { Box } from '@mui/material'
 
 const WorkFlow = ({ functionId, recordId }) => {
   const { getRequest } = useContext(RequestsContext)
@@ -113,7 +114,16 @@ const WorkFlow = ({ functionId, recordId }) => {
     })()
   }, [])
 
-  return <div id={id} style={{ width: '100%', height: '500px', m: 3 }} />
+  return (
+    <Box
+      sx={{
+        pt: 5,
+        pl: 8
+      }}
+    >
+      <div id={id} style={{ width: '100%', height: '500px' }} />
+    </Box>
+  )
 }
 
 export default WorkFlow
