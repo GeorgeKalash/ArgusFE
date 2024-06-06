@@ -4,7 +4,9 @@ import { Box } from '@mui/material'
 
 const PopperComponent = ({ children, anchorEl, open }) => {
   const [isVisible, setIsVisible] = useState(true)
-  const [rect, setRect] = useState(anchorEl?.getBoundingClientRect())
+
+  const [unscaledRect, setUnscaledRect] = useState(anchorEl?.getBoundingClientRect())
+
   const popperRef = useRef(null)
 
   useEffect(() => {
@@ -29,13 +31,13 @@ const PopperComponent = ({ children, anchorEl, open }) => {
   useEffect(() => {
     const handleScroll = () => {
       if (anchorEl) {
-        setRect(anchorEl.getBoundingClientRect())
+        setUnscaledRect(anchorEl.getBoundingClientRect())
       }
     }
 
     const handleResize = () => {
       if (anchorEl) {
-        setRect(anchorEl.getBoundingClientRect())
+        setUnscaledRect(anchorEl.getBoundingClientRect())
       }
     }
 
@@ -73,11 +75,17 @@ const PopperComponent = ({ children, anchorEl, open }) => {
     }
   }, [open, anchorEl])
 
-  const zoom = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--zoom'))
+  const zoom = parseFloat(getComputedStyle(document.body).getPropertyValue('--zoom'))
   const thresholdPercentage = 0.35
 
-  const canRenderBelow = window.innerHeight / zoom - (rect && rect.bottom) > window.innerHeight * thresholdPercentage
-  console.log(zoom)
+  const rect = {
+    top: unscaledRect?.top / zoom,
+    bottom: unscaledRect?.bottom / zoom,
+    left: unscaledRect?.left / zoom,
+    right: unscaledRect?.right / zoom
+  }
+
+  const canRenderBelow = window.innerHeight / zoom - rect.bottom > window.innerHeight * thresholdPercentage
 
   return ReactDOM.createPortal(
     <Box
@@ -89,7 +97,7 @@ const PopperComponent = ({ children, anchorEl, open }) => {
         minWidth: anchorEl ? anchorEl.clientWidth : 'auto',
         top: rect?.bottom,
         left: rect?.left,
-        transform: !canRenderBelow ? `translateY(calc(-100% - 10px - ${rect?.height}px))` : 'none'
+        transform: !canRenderBelow ? `translateY(calc(-100% - 10px - ${unscaledRect?.height}px))` : 'none'
       }}
     >
       {children}
