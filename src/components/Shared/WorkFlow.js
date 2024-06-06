@@ -4,16 +4,19 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 
 const WorkFlow = ({ functionId, recordId }) => {
   const { getRequest } = useContext(RequestsContext)
+  const pageName = functionId
+  const id = recordId + '-' + functionId
 
   const getWorkFlowData = async () => {
     var parameters = `_functionId=${functionId}&_recordId=${recordId}`
+    try {
+      const result = await getRequest({
+        extension: SaleRepository.WorkFlow.graph,
+        parameters: parameters
+      })
 
-    const result = await getRequest({
-      extension: SaleRepository.WorkFlow.graph,
-      parameters: parameters
-    })
-
-    return result?.record
+      return result?.record
+    } catch (error) {}
   }
 
   const getDeptsJson = graph => {
@@ -72,7 +75,7 @@ const WorkFlow = ({ functionId, recordId }) => {
           loadScript('https://cdn.amcharts.com/lib/4/charts.js', () => {
             loadScript('https://cdn.amcharts.com/lib/4/themes/animated.js', () => {
               am4core.ready(() => {
-                const chart = am4core.create('chartdiv', am4charts.SankeyDiagram)
+                const chart = am4core.create(id, am4charts.SankeyDiagram)
                 const combinedData = getDeptsJson(data)
                 chart.data = combinedData
                 chart.dataFields.fromName = 'from'
@@ -110,7 +113,7 @@ const WorkFlow = ({ functionId, recordId }) => {
     })()
   }, [])
 
-  return <div id='chartdiv' style={{ width: '100%', height: '500px', m: 3 }} />
+  return <div id={id} style={{ width: '100%', height: '500px', m: 3 }} />
 }
 
 export default WorkFlow
