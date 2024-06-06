@@ -24,6 +24,7 @@ import { SystemFunction } from 'src/resources/SystemFunction'
 import { getStorageData } from 'src/storage/storage'
 import { useInvalidate } from 'src/hooks/resource'
 import { useError } from 'src/error'
+import WorkFlow from 'src/components/Shared/WorkFlow'
 import GenerateTransferForm from './GenerateTransferForm'
 
 export default function CashCountForm({ labels, maxAccess, recordId }) {
@@ -294,6 +295,18 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
     })
   }
 
+  const onWorkFlowClick = async () => {
+    stack({
+      Component: WorkFlow,
+      props: {
+        functionId: SystemFunction.CashCountTransaction,
+        recordId: formik.values.recordId
+      },
+      width: 950,
+      title: 'Workflow'
+    })
+  }
+
   const actions = [
     {
       key: 'Bulk',
@@ -301,7 +314,12 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
       onClick: openTransferForm,
       disabled: formik.values.status !== 3
     },
-
+    {
+      key: 'WorkFlow',
+      condition: true,
+      onClick: onWorkFlowClick,
+      disabled: !editMode
+    },
     {
       key: 'Post',
       condition: true,

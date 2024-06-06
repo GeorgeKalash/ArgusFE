@@ -28,6 +28,7 @@ import { useForm } from 'src/hooks/form'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import { RateDivision } from 'src/resources/RateDivision'
 import { DIRTYFIELD_AMOUNT, getRate } from 'src/utils/RateCalculator'
+import WorkFlow from 'src/components/Shared/WorkFlow'
 
 export default function CashTransferTab({ labels, recordId, maxAccess, plantId, cashAccountId, dtId }) {
   const [editMode, setEditMode] = useState(!!recordId)
@@ -289,32 +290,24 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
     })()
   }, [])
 
-  const getDataGrid = async () => {
-    try {
-      const res = await getRequest({
-        extension: CashBankRepository.AccountBalance.qry,
-        parameters: `_cashAccountId=${formik.values.fromCashAccountId}`
-      })
-      formik.setFieldValue(
-        'transfers',
-        res.list
-          .filter(item => item.balance != 0)
-          .map(({ id, balance, ...rest }, index) => ({
-            id: index + 1,
-            balance,
-            amount: balance || '',
-            ...rest
-          }))
-      )
-    } catch (error) {}
+  const onWorkFlowClick = async () => {
+    stack({
+      Component: WorkFlow,
+      props: {
+        functionId: SystemFunction.CashTransfer,
+        recordId: formik.values.recordId
+      },
+      width: 950,
+      title: 'Workflow'
+    })
   }
 
   const actions = [
     {
-      key: 'Bulk',
+      key: 'WorkFlow',
       condition: true,
-      onClick: getDataGrid,
-      disabled: editMode || formik.values.transfers.some(transfer => transfer.currencyId) || isClosed
+      onClick: onWorkFlowClick,
+      disabled: !editMode
     },
     {
       key: 'Close',
