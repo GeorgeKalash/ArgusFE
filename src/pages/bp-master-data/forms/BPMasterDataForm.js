@@ -52,7 +52,7 @@ export default function BPMasterDataForm({ labels, maxAccess, defaultValue, setE
       nationalityRef: null,
       legalStatus: null
     },
-    enableReinitialize: true,
+    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       category: yup.string().required(),
@@ -116,7 +116,6 @@ export default function BPMasterDataForm({ labels, maxAccess, defaultValue, setE
       disabled: !editMode
     }
   ]
-
   useEffect(() => {
     ;(async function () {
       try {
@@ -135,7 +134,11 @@ export default function BPMasterDataForm({ labels, maxAccess, defaultValue, setE
       } catch (exception) {
         setIsLoading(false)
       }
+    })()
+  }, [recordId])
 
+  useEffect(() => {
+    ;(async function () {
       if (formik?.values?.category) {
         const _category = await filterIdCategory(formik?.values?.category)
 
@@ -145,7 +148,7 @@ export default function BPMasterDataForm({ labels, maxAccess, defaultValue, setE
         }))
       }
     })()
-  }, [recordId, formik?.values?.category])
+  }, [formik?.values?.category])
 
   return (
     <FormShell
@@ -277,6 +280,7 @@ export default function BPMasterDataForm({ labels, maxAccess, defaultValue, setE
                   label={labels.idCategory}
                   valueField='recordId'
                   displayField='name'
+                  readOnly={!formik.values.category || !store?.category?.length > 0}
                   store={store.category}
                   value={store?.category?.filter(item => item.recordId === parseInt(formik.values.defaultInc))[0]}
                   maxAccess={maxAccess}
