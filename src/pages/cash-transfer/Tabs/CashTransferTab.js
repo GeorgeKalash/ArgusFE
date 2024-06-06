@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Button, Grid } from '@mui/material'
-import { useFormik } from 'formik'
+import { Grid } from '@mui/material'
 import * as yup from 'yup'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FormShell from 'src/components/Shared/FormShell'
@@ -20,12 +19,15 @@ import { LOShipmentForm } from 'src/components/Shared/LOShipmentForm'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import FormGrid from 'src/components/form/layout/FormGrid'
-import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
+import { formatDateFromApi, formatDateToApi, formatDateToApiFunction } from 'src/lib/date-helper'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import { useForm } from 'src/hooks/form'
+import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
+import { RateDivision } from 'src/resources/RateDivision'
+import { DIRTYFIELD_AMOUNT, getRate } from 'src/utils/RateCalculator'
 
 export default function CashTransferTab({ labels, recordId, maxAccess, plantId, cashAccountId, dtId }) {
   const [editMode, setEditMode] = useState(!!recordId)
@@ -52,6 +54,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
     toCashAccountId: '',
     toCARef: '',
     toCAName: '',
+    baseAmount: '',
     notes: '',
     wip: '',
     status: '',
@@ -68,6 +71,9 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
         currencyName: '',
         currencyRef: '',
         amount: '',
+        baseAmount: '',
+        exRate: '',
+        rateCalcMethod: '',
         balance: 0
       }
     ]
@@ -100,6 +106,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
       copy.date = formatDateToApi(copy.date)
       copy.status = copy.status === '' ? 1 : copy.status
       copy.wip = copy.wip === '' ? 1 : copy.wip
+      copy.baseAmount = totalLoc
 
       const updatedRows = formik.values.transfers.map((transferDetail, index) => {
         const seqNo = index + 1
@@ -144,6 +151,12 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
     }
   })
 
+  const totalLoc = formik.values.transfers.reduce((locSum, row) => {
+    const locValue = parseFloat(row.baseAmount?.toString().replace(/,/g, '')) || 0
+
+    return locSum + locValue
+  }, 0)
+
   const onClose = async () => {
     const { transfers, ...rest } = formik.values
     const copy = { ...rest }
@@ -151,6 +164,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
     copy.date = formatDateToApi(copy.date)
     copy.wip = copy.wip === '' ? 1 : copy.wip
     copy.status = copy.status === '' ? 1 : copy.status
+    copy.baseAmount = totalLoc
 
     const res = await postRequest({
       extension: CashBankRepository.CashTransfer.close,
@@ -178,6 +192,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
     copy.date = formatDateToApi(copy.date)
     copy.wip = copy.wip === '' ? 1 : copy.wip
     copy.status = copy.status === '' ? 1 : copy.status
+    copy.baseAmount = totalLoc
 
     const res = await postRequest({
       extension: CashBankRepository.CashTransfer.reopen,
@@ -197,6 +212,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
     copy.date = formatDateToApi(copy.date)
     copy.wip = copy.wip === '' ? 1 : copy.wip
     copy.status = copy.status === '' ? 1 : copy.status
+    copy.baseAmount = totalLoc
 
     const res = await postRequest({
       extension: CashBankRepository.CashTransfer.post,
@@ -337,6 +353,15 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
       disabled: false
     }
   ]
+
+  function getCurrencyApi(_currencyId) {
+    return getRequest({
+      extension: MultiCurrencyRepository.Currency.get,
+      parameters: `_currencyId=${_currencyId}&_date=${formatDateToApiFunction(formik.values.date)}&_rateDivision=${
+        RateDivision.FINANCIALS
+      }`
+    })
+  }
 
   return (
     <FormShell
@@ -513,14 +538,43 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
                   ]
                 },
                 widthDropDown: 200,
-                displayFieldWidth: 2
+                displayFieldWidth: 2,
+                async onChange({ row: { update, newRow } }) {
+                  if (!newRow?.currencyId) {
+                    return
+                  }
+                  if (newRow.currencyId) {
+                    const result = await getCurrencyApi(newRow?.currencyId)
+                    update({
+                      exRate: result.record.exRate,
+                      rateCalcMethod: result.record.rateCalcMethod
+                    })
+                  }
+                }
               },
               {
                 component: 'numberfield',
                 label: labels.amount,
                 name: 'amount',
                 defaultValue: '',
-                props: { disabled: isClosed }
+                props: { disabled: isClosed },
+                async onChange({ row: { update, newRow } }) {
+                  if (!newRow?.amount) {
+                    return
+                  }
+                  if (newRow?.amount) {
+                    const updatedRateRow = getRate({
+                      amount: newRow?.amount,
+                      exRate: newRow?.exRate,
+                      baseAmount: newRow?.baseAmount,
+                      rateCalcMethod: newRow?.rateCalcMethod,
+                      dirtyField: DIRTYFIELD_AMOUNT
+                    })
+                    update({
+                      baseAmount: updatedRateRow.baseAmount
+                    })
+                  }
+                }
               },
               {
                 component: 'numberfield',

@@ -6,7 +6,6 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 import FormShell from 'src/components/Shared/FormShell'
-import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -59,16 +58,17 @@ const PlantForm = ({ _labels, maxAccess, store, setStore, editMode }) => {
       record: JSON.stringify(obj)
     })
       .then(res => {
-        if (res.recordId) {
-          toast.success('Record Added Successfully')
+          if (!editMode) {
+            toast.success('Record Added Successfully')
+          } else toast.success('Record Edited Successfully')
 
           setStore(prevStore => ({
             ...prevStore,
             plant: obj,
             recordId: res.recordId
           }))
+
           invalidate()
-        } else toast.success('Record Edited Successfully')
       })
       .catch(error => {})
   }
