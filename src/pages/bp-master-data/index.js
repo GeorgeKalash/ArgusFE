@@ -189,7 +189,7 @@ const BPMasterData = () => {
           refetch={refetch}
         />
       </Grow>
-    </ VertLayout>
+    </VertLayout>
   )
 }
 
