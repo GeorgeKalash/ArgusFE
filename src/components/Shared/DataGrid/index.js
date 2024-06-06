@@ -153,7 +153,7 @@ export function DataGrid({
         field
       })
       const row = apiRef.current.getRow(id)
-      onSelectionChange(row)
+      if (onSelectionChange) onSelectionChange(row)
     })
   }
 
