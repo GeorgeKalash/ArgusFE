@@ -108,7 +108,6 @@ const WindowToolbar = ({
           .button-container {
             position: relative;
             display: inline-block;
-            
           }
           .toast {
             position: absolute;
