@@ -220,7 +220,9 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
                       rowSelectionModel={selectedRowId}
                       allowAddNewLine={!editMode}
                       allowDelete={!editMode}
-                      onSelectionChange={row => row && loadSerialsGrid(row)}
+                      onSelectionChange={row => {
+                        row && loadSerialsGrid(row)
+                      }}
                       columns={[
                         {
                           component: 'resourcecombobox',
@@ -286,6 +288,7 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
                 <Grow>
                   {selectedRowId && formik.values.packages[index] && (
                     <DataGrid
+                      key={selectedRowId}
                       onChange={value => handleSerialsGridChange(value)}
                       value={
                         formik.values.packages.find(item => item.id === selectedRowId).packageReferences || [
@@ -300,7 +303,6 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
                           component: 'numberfield',
                           name: 'seqNo',
                           label: labels.seqNo,
-                          defaultValue: '',
                           props: { readOnly: true }
                         },
                         {
