@@ -293,13 +293,15 @@ const Home = () => {
                 </CompositeBarContainer>
               </DataHalf>
             </SideData>
-            <Profile>
-              <ProfileAvatar imageUrl={data.imageUrl} />
-              <Span className='big'>{data.name}</Span>
+            <SideData>
+              <Profile>
+                <ProfileAvatar imageUrl={data.imageUrl} />
+                <Span className='big'>{data.name}</Span>
+              </Profile>
               <DataHalf>
                 <CircularData data={data} list={list2} />
               </DataHalf>
-            </Profile>
+            </SideData>
             <SideData>
               <DataHalf>
                 <CompositeBarContainer>
