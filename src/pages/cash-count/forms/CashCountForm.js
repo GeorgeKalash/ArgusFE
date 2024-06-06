@@ -291,7 +291,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
       },
       width: 600,
       height: 300,
-      title: labels.cashCount
+      title: labels.bulk
     })
   }
 
