@@ -157,7 +157,8 @@ export const SystemRepository = {
     qry: service + 'qryResourceControls'
   },
   UserFunction: {
-    get: service + 'getUFU'
+    get: service + 'getUFU',
+    qry: service + 'qryUFU'
   },
   RecordRemarks: {
     qry: service + 'qryRMK',
