@@ -354,13 +354,15 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
     }
   ]
 
-  function getCurrencyApi(_currencyId) {
-    return getRequest({
-      extension: MultiCurrencyRepository.Currency.get,
-      parameters: `_currencyId=${_currencyId}&_date=${formatDateToApiFunction(formik.values.date)}&_rateDivision=${
-        RateDivision.FINANCIALS
-      }`
-    })
+  async function getCurrencyApi(_currencyId) {
+    try {
+      return await getRequest({
+        extension: MultiCurrencyRepository.Currency.get,
+        parameters: `_currencyId=${_currencyId}&_date=${formatDateToApiFunction(formik.values.date)}&_rateDivision=${
+          RateDivision.FINANCIALS
+        }`
+      })
+    } catch (error) {}
   }
 
   return (
@@ -545,10 +547,12 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
                   }
                   if (newRow.currencyId) {
                     const result = await getCurrencyApi(newRow?.currencyId)
-                    update({
-                      exRate: result.record.exRate,
-                      rateCalcMethod: result.record.rateCalcMethod
-                    })
+                    if (result?.record) {
+                      update({
+                        exRate: result.record.exRate,
+                        rateCalcMethod: result.record.rateCalcMethod
+                      })
+                    }
                   }
                 }
               },
