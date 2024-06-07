@@ -31,9 +31,9 @@ export default function MultiCurrencyForm({ labels, maxAccess, currencyId, rateT
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      currencyId: yup.string().required('This field is required'),
-      rateTypeId: yup.string().required('This field is required'),
-      exId: yup.string().required('This field is required')
+      currencyId: yup.string().required(' '),
+      rateTypeId: yup.string().required(' '),
+      exId: yup.string().required(' ')
     }),
     onSubmit: async obj => {
       const response = await postRequest({
