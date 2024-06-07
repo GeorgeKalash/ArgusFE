@@ -368,8 +368,8 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
     >
       <VertLayout>
         <Fixed>
-          <Grid container spacing={2}>
-            <Grid container rowGap={2} xs={6} sx={{ px: 2 }} spacing={4}>
+          <Grid container>
+            <Grid container rowGap={2} xs={6} sx={{ px: 2 }} spacing={2}>
               <Grid item xs={12}>
                 <CustomTextField
                   name='reference'
@@ -378,7 +378,6 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
                   maxAccess={maxAccess}
                   maxLength='15'
                   readOnly
-                  required
                 />
               </Grid>
               <Grid item xs={12}>
@@ -429,7 +428,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
                 />
               </Grid>
             </Grid>
-            <Grid container rowGap={2} xs={6} sx={{ px: 2 }} spacing={4}>
+            <Grid container rowGap={2} xs={6} sx={{ px: 2 }} spacing={2}>
               <Grid item xs={12}>
                 <CustomDatePicker
                   name='date'

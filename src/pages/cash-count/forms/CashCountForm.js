@@ -33,7 +33,6 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
   const { stack } = useWindow()
   const [isClosed, setIsClosed] = useState(false)
   const [isPosted, setIsPosted] = useState(false)
-  const { stack: stackError } = useError()
 
   const getDefaultDT = async () => {
     const userData = getStorageData('userData')
@@ -115,7 +114,6 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
     enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
-      reference: yup.string().required(' '),
       cashAccountRef: yup.string().required(' '),
       plantId: yup.string().required(' '),
       items: yup
@@ -465,7 +463,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
                 }}
                 onClear={() => formik.setFieldValue('reference', '')}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
-                readOnly={editMode}
+                readOnly={true}
               />
             </Grid>
 
@@ -503,7 +501,6 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
                 name: 'currencyId',
                 props: {
                   readOnly: isPosted || isClosed,
-
                   endpointId: SystemRepository.Currency.qry,
                   valueField: 'recordId',
                   displayField: 'reference',
@@ -517,6 +514,9 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
                     { key: 'name', value: 'Name' }
                   ],
                   displayFieldWidth: 2
+                },
+                propsReducer({ row, props }) {
+                  return { ...props, readOnly: row.currencyNotes?.length > 0 }
                 },
                 async onChange({ row: { update, newRow } }) {
                   if (newRow?.currencyId) {
