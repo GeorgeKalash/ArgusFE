@@ -130,11 +130,15 @@ export const ResourceIds = {
   ExchangeRates: 32103,
   CbBankAccounts: 33105,
   CashNote: 37101,
+  OutwardsModification: 36308,
   TaxCodes: 31109,
   TaxSchedules: 31107,
   LOShipments: 40301,
   LOTransportation: 40302,
+  OpeningBalance: 33311,
   AccountBalance: 33107,
   CATransaction: 33312,
-  UserDashboard: 51400
+  UserDashboard: 51400,
+  ProductionRequestLog: 42321,
+  PointOfSale: 54101
 }

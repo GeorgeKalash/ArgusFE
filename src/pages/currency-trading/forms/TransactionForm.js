@@ -7,7 +7,6 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import Confirmation from 'src/components/Shared/Confirmation'
 import FieldSet from 'src/components/Shared/FieldSet'
 import { SystemFunction } from 'src/resources/SystemFunction'
-
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useError } from 'src/error'
 import { formatDateFromApi, formatDateToApiFunction } from 'src/lib/date-helper'
@@ -31,6 +30,8 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
+import { useForm } from 'src/hooks/form'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const FormContext = React.createContext(null)
@@ -96,7 +97,7 @@ function FormProvider({ formik, maxAccess, labels, children }) {
   return <FormContext.Provider value={{ formik, maxAccess, labels }}>{children}</FormContext.Provider>
 }
 
-export default function TransactionForm({ recordId, labels, maxAccess, plantId }) {
+export default function TransactionForm({ recordId, labels, access, plantId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [editMode, setEditMode] = useState(!!recordId)
   const [infoAutoFilled, setInfoAutoFilled] = useState(false)
@@ -109,6 +110,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId }
   const [idNumberOne, setIdNumber] = useState(null)
   const [search, setSearch] = useState(null)
   const [isClosed, setIsClosed] = useState(false)
+  const [fId, setFId] = useState(SystemFunction.CurrencyPurchase)
 
   async function checkTypes(value) {
     if (!value) {
@@ -193,12 +195,21 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId }
     search: null
   }
 
-  const formik = useFormik({
+  const { maxAccess } = useDocumentType({
+    functionId: fId,
+    access: access,
+    hasDT: false,
+    enabled: !editMode
+  })
+
+  const { formik } = useForm({
+    maxAccess,
     initialValues,
     enableReinitialize: false,
     validateOnChange: true,
     validateOnBlur: true,
     validationSchema: yup.object({
+      reference: yup.string().required(' '),
       date: yup.string().required(' '),
       id_type: yup.number().required(' '),
       id_number: yup.number().required(' '),
@@ -287,7 +298,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId }
     })
       .then(res => {
         const record = res.record
-        console.log(record.record)
         if (!recordId) {
           formik.setFieldValue('reference', record.headerView.reference)
         } else {
@@ -643,11 +653,11 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId }
       <VertLayout>
         <Grow>
           <FormProvider formik={formik} labels={labels} maxAccess={maxAccess}>
-            <Grid container >
+            <Grid container>
               <FieldSet title='Transaction'>
                 <Grid container spacing={4}>
                   <Grid item xs={4}>
-                    <FormField name='reference' Component={CustomTextField} readOnly />
+                    <FormField name='reference' maxAccess={maxAccess} Component={CustomTextField} readOnly={editMode} />
                   </Grid>
                   <FormGrid hideonempty item xs={4}>
                     <CustomDatePicker
@@ -677,7 +687,11 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId }
                     <RadioGroup
                       row
                       value={formik.values.functionId}
-                      onChange={e => setOperationType(parseInt(e.target.value))}
+                      onChange={e => {
+                        setOperationType(parseInt(e.target.value))
+                        setFId(e.target.value)
+                        formik.setFieldValue('reference', '')
+                      }}
                     >
                       <FormControlLabel
                         value={SystemFunction.CurrencyPurchase}

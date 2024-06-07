@@ -243,6 +243,15 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, e
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  const actions = [
+    {
+      key: 'RecordRemarks',
+      condition: true,
+      onClick: 'onRecordRemarks',
+      disabled: !editMode
+    }
+  ]
+
   return (
     <FormShell
       resourceId={ResourceIds.MaterialsAdjustment}
@@ -251,6 +260,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, e
       editMode={editMode}
       isPosted={isPosted}
       postVisible={true}
+      actions={actions}
       previewReport={editMode}
     >
       <Grid container>

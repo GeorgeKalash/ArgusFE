@@ -22,15 +22,19 @@ const ProductLegCommissionForm = ({ row, labels, maxAccess, store }) => {
       component: 'textfield',
       label: labels.commissionType,
       name: 'commissionName',
-      mandatory: true,
-      readOnly: true
+      props: {
+        mandatory: true,
+        readOnly: true
+      }
     },
     {
       component: 'textfield',
       label: labels.commission,
       name: 'commission',
-      mandatory: true,
-      readOnly: false
+      props: {
+        mandatory: true,
+        readOnly: false
+      }
     }
   ]
 
@@ -62,14 +66,12 @@ const ProductLegCommissionForm = ({ row, labels, maxAccess, store }) => {
   }, [row])
 
   const getCommissions = obj => {
-    //step 1: get all commission types
     var parameters = '_filter='
     getRequest({
       extension: CurrencyTradingSettingsRepository.CommissionType.qry,
       parameters: parameters
     })
       .then(commissionTypes => {
-        //step 2: get all ranges commissions
         const _productId = obj.productId
         const _seqNo = obj.seqNo
         const _rangeSeqNo = obj.rangeSeqNo
@@ -80,14 +82,12 @@ const ProductLegCommissionForm = ({ row, labels, maxAccess, store }) => {
           parameters: parameters
         })
           .then(commissionFees => {
-            // Create a mapping of commissionId to commissionFees entry for efficient lookup
             const commissionFeesMap = commissionFees.list.reduce((acc, fee) => {
               acc[fee.commissionId] = fee.commission
 
               return acc
             }, {})
 
-            // Combine commissionTypes and commissionFees
             const rows = commissionTypes.list.map((commissionType, index) => {
               const commissionValue = commissionFeesMap[commissionType.recordId] || 0
 
@@ -136,18 +136,14 @@ const ProductLegCommissionForm = ({ row, labels, maxAccess, store }) => {
     >
       <VertLayout>
         <Grow>
-          <Grid container gap={2}>
-            <Grid xs={12}>
-              <DataGrid
-                onChange={value => formik.setFieldValue('productLegCommission', value)}
-                value={formik.values.productLegCommission}
-                error={formik.errors.productLegCommission}
-                columns={columns}
-                allowDelete={false}
-                allowAddNewLine={false}
-              />
-            </Grid>
-          </Grid>
+          <DataGrid
+            onChange={value => formik.setFieldValue('productLegCommission', value)}
+            value={formik.values.productLegCommission}
+            error={formik.errors.productLegCommission}
+            columns={columns}
+            allowDelete={false}
+            allowAddNewLine={false}
+          />
         </Grow>
       </VertLayout>
     </FormShell>

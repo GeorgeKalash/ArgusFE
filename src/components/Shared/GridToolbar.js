@@ -168,6 +168,13 @@ const GridToolbar = ({
               </Button>
             </Grid>
           )}
+          {onRefresh && (
+            <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
+              <Button variant='contained' onClick={refreshGrid}>
+                Refresh
+              </Button>
+            </Box>
+          )}
           {onGo && (
             <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', py: '7px !important' }}>
               <Button

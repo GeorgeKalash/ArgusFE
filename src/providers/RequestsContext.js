@@ -8,14 +8,10 @@ import { AuthContext } from 'src/providers/AuthContext'
 import { useError } from 'src/error'
 import { Box, CircularProgress } from '@mui/material'
 import { debounce } from 'lodash'
-import { useSettings } from 'src/@core/hooks/useSettings'
 
 const RequestsContext = createContext()
 
 function LoadingOverlay() {
-  const { settings } = useSettings()
-  const { navCollapsed } = settings
-
   return (
     <Box
       style={{
@@ -39,11 +35,15 @@ function LoadingOverlay() {
 const RequestsProvider = ({ showLoading = false, children }) => {
   const { user, setUser, apiUrl } = useContext(AuthContext)
 
-  const { stack: stackError } = useError() || {}
+  const errorModel = useError()
   const [loading, setLoading] = useState(false)
 
   let isRefreshingToken = false
   let tokenRefreshQueue = []
+
+  async function showError(props) {
+    if (errorModel) await errorModel.stack(props)
+  }
 
   const debouncedCloseLoading = debounce(() => {
     setLoading(false)
@@ -69,22 +69,25 @@ const RequestsProvider = ({ showLoading = false, children }) => {
       })
       .catch(error => {
         debouncedCloseLoading()
-
-        stackError({ message: error, height: 400 })
+        showError({
+          message: error,
+          height: error.response?.status === 404 || error.response?.status === 500 ? 400 : ''
+        })
         throw error
       })
   }
 
   const getMicroRequest = async body => {
-    const accessToken = await getAccessToken()
-
     return axios({
       method: 'GET',
       url: process.env.NEXT_PUBLIC_YAKEEN_URL + body.extension + '?' + body.parameters
     })
       .then(res => res.data)
       .catch(error => {
-        stackError({ message: error, height: 400 })
+        showError({
+          message: error,
+          height: error.response?.status === 404 || error.response?.status === 500 ? 400 : ''
+        })
         throw error
       })
   }
@@ -103,7 +106,10 @@ const RequestsProvider = ({ showLoading = false, children }) => {
     })
       .then(res => res.data)
       .catch(error => {
-        stackError({ message: error, height: 400 })
+        showError({
+          message: error,
+          height: error.response?.status === 404 || error.response?.status === 500 ? 400 : ''
+        })
         throw error
       })
   }
@@ -134,21 +140,21 @@ const RequestsProvider = ({ showLoading = false, children }) => {
       })
       .catch(error => {
         debouncedCloseLoading()
-
-        stackError({ message: error, height: 400 })
+        showError({
+          message: error,
+          height: error.response?.status === 404 || error.response?.status === 500 ? 400 : ''
+        })
         throw error
       })
   }
 
   const getAccessToken = async () => {
     return new Promise(async resolve => {
-      // Add a resolve function to the queue
       const resolveWrapper = token => {
         resolve(token)
       }
       tokenRefreshQueue.push(resolveWrapper)
 
-      // If a token refresh is not in progress, initiate it
       try {
         if (user?.expiresAt !== null) {
           var dateNow = new Date()
