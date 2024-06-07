@@ -9,10 +9,9 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 
 // ** Helpers
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
 
 // ** Resources
@@ -49,6 +48,7 @@ const CashCount = () => {
     filterBy,
     clearFilter,
     labels: _labels,
+    refetch,
     access,
     invalidate
   } = useResourceQuery({
@@ -167,6 +167,7 @@ const CashCount = () => {
           onDelete={del}
           deleteConfirmationType={'strict'}
           isLoading={false}
+          refetch={refetch}
           pageSize={50}
           paginationType='client'
           maxAccess={access}
