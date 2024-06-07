@@ -1,28 +1,31 @@
 import Table from 'src/components/Shared/Table'
-import GridToolbar from 'src/components/Shared/GridToolbar'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useWindow } from 'src/windows'
-import { useContext } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import USDocTypeForm from './USDocTypeForm'
 import FormShell from 'src/components/Shared/FormShell'
 import { useForm } from 'src/hooks/form'
+import { Grid } from '@mui/material'
+import CustomTextField from 'src/components/Inputs/CustomTextField'
 
 const DocTypeTab = ({ labels, maxAccess, storeRecordId }) => {
   const { getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const [filteredData, setFilteredData] = useState(null)
 
   const { formik } = useForm({
     maxAccess,
     enableReinitialize: false,
     validateOnChange: true,
     initialValues: {
-      recordId: storeRecordId || null
+      recordId: storeRecordId || null,
+      search: ''
     }
   })
 
@@ -77,6 +80,22 @@ const DocTypeTab = ({ labels, maxAccess, storeRecordId }) => {
     })
   }
 
+  const handleSearchChange = event => {
+    const { value } = event.target
+    formik.setFieldValue('search', value)
+
+    if (value) {
+      const filtered = data.list.filter(
+        item =>
+          (item.sfName && item.sfName.toLowerCase().includes(value.toLowerCase())) ||
+          (item.dtName && item.dtName.toLowerCase().includes(value.toLowerCase()))
+      )
+      setFilteredData(filtered)
+    } else {
+      setFilteredData(data.list)
+    }
+  }
+
   return (
     <FormShell
       resourceId={ResourceIds.Users}
@@ -88,12 +107,25 @@ const DocTypeTab = ({ labels, maxAccess, storeRecordId }) => {
     >
       <VertLayout>
         <Fixed>
-          <GridToolbar maxAccess={maxAccess} />
+          <Grid container>
+            <Grid item xs={4}>
+              <CustomTextField
+                name='search'
+                value={formik.values.search}
+                label={labels.search}
+                onClear={() => {
+                  formik.setFieldValue('search', '')
+                  setFilteredData(data.list)
+                }}
+                onChange={handleSearchChange}
+              />
+            </Grid>
+          </Grid>
         </Fixed>
         <Grow>
           <Table
             columns={columns}
-            gridData={data ? data : { list: [] }}
+            gridData={filteredData ? { list: filteredData } : data}
             rowId={['userId', 'functionId']}
             onEdit={edit}
             isLoading={false}
