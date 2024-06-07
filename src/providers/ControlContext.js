@@ -1,15 +1,25 @@
 // ** React Imports
-import { createContext, useContext } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { KVSRepository } from 'src/repositories/KVSRepository'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
+import { ResourceIds } from 'src/resources/ResourceIds'
 
 const ControlContext = createContext()
 
 const ControlProvider = ({ children }) => {
   const { getRequest } = useContext(RequestsContext)
+  const [apiPlatformLabels, setApiPlatformLabels] = useState(null)
+
+  useEffect(() => {
+    getLabels(ResourceIds.Common, setApiPlatformLabels)
+  }, [])
+
+  const platformLabels = apiPlatformLabels
+    ? Object.fromEntries(apiPlatformLabels.map(({ key, value }) => [key, value]))
+    : {}
 
   const getLabels = (resourceId, callback) => {
     var parameters = '_dataset=' + resourceId
@@ -45,7 +55,8 @@ const ControlProvider = ({ children }) => {
 
   const values = {
     getLabels,
-    getAccess
+    getAccess,
+    platformLabels
   }
 
   return (

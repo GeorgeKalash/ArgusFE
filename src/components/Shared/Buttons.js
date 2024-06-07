@@ -1,42 +1,42 @@
-export const getButtons = mainLabels => [
+export const getButtons = platformLabels => [
   {
     key: 'Post',
-    label: mainLabels.Post,
+    label: platformLabels.Post,
     color: '#231f20',
     image: 'post.png',
     main: false
   },
   {
     key: 'Bulk',
-    label: mainLabels.Bulk,
+    label: platformLabels.Bulk,
     color: '#09235C',
     image: 'Bulk.png',
     main: false
   },
   {
     key: 'Cancel',
-    label: mainLabels.Cancel,
+    label: platformLabels.Cancel,
     color: '#0A4164',
     image: 'cancelWhite.png',
     main: false
   },
   {
     key: 'WorkFlow',
-    label: mainLabels.WorkFlow,
+    label: platformLabels.WorkFlow,
     color: '#231f20',
     image: 'workflow.png',
     main: false
   },
   {
     key: 'Delete',
-    label: mainLabels.Delete,
+    label: platformLabels.Delete,
     color: '#231f20',
     image: 'delete-icon.png',
     main: false
   },
   {
     key: 'Close',
-    label: mainLabels.Close,
+    label: platformLabels.Close,
     color: 'transparent',
     image: 'close.png',
     border: '1px solid #01a437',
@@ -44,7 +44,7 @@ export const getButtons = mainLabels => [
   },
   {
     key: 'Reopen',
-    label: mainLabels.Reopen,
+    label: platformLabels.Reopen,
     color: 'transparent',
     image: 'reopen.png',
     border: '1px solid #000000',
@@ -52,119 +52,119 @@ export const getButtons = mainLabels => [
   },
   {
     key: 'Approval',
-    label: mainLabels.Approval,
+    label: platformLabels.Approval,
     color: '#4EB558',
     image: 'approval.png',
     main: false
   },
   {
     key: 'Dismiss all',
-    label: mainLabels.DismissAll,
+    label: platformLabels.DismissAll,
     color: '#F44336',
     image: 'dismissal.png',
     main: false
   },
   {
     key: 'Reject',
-    label: mainLabels.Reject,
+    label: platformLabels.Reject,
     color: '#F44336',
     image: 'dismissal.png',
     main: false
   },
   {
     key: 'Approve',
-    label: mainLabels.Approve,
+    label: platformLabels.Approve,
     color: '#4EB558',
     image: 'approval.png',
     main: false
   },
   {
     key: 'Beneficiary',
-    label: mainLabels.Beneficiary,
+    label: platformLabels.Beneficiary,
     color: '#231f20',
     image: 'beneficiary.png',
     main: false
   },
   {
     key: 'Print',
-    label: mainLabels.Print,
+    label: platformLabels.Print,
     color: '#231f20',
     image: 'print.png',
     main: false
   },
   {
     key: 'Invoice',
-    label: mainLabels.Invoice,
+    label: platformLabels.Invoice,
     color: '#231f20',
     image: 'invoice.png',
     main: false
   },
   {
     key: 'Tree',
-    label: mainLabels.Tree,
+    label: platformLabels.Tree,
     color: '#231f20',
     image: 'tree.png',
     main: false
   },
   {
     key: 'Integration Account',
-    label: mainLabels.IntegrationAccount,
+    label: platformLabels.IntegrationAccount,
     color: '#231f20',
     image: 'intAccount.png',
     main: false
   },
   {
     key: 'Account Balance',
-    label: mainLabels.AccountBalance,
+    label: platformLabels.AccountBalance,
     color: '#275915',
     image: 'popup-window.png',
     main: false
   },
   {
     key: 'Client Relation',
-    label: mainLabels.ClientRelation,
+    label: platformLabels.ClientRelation,
     color: '#AC48AE',
     image: 'clientRelations.png',
     main: false
   },
   {
     key: 'GL',
-    label: mainLabels.GL,
+    label: platformLabels.GL,
     color: '#231f20',
     image: 'gl.png',
     main: false
   },
   {
     key: 'Shipment',
-    label: mainLabels.Shipment,
+    label: platformLabels.Shipment,
     color: '#843c54',
     image: 'shipment.png',
     main: false
   },
   {
     key: 'Transportation',
-    label: mainLabels.Transportation,
+    label: platformLabels.Transportation,
     color: '#064b38',
     image: 'transportation.png',
     main: false
   },
   {
     key: 'RecordRemarks',
-    label: mainLabels.RecordRemarks,
+    label: platformLabels.RecordRemarks,
     color: '#90278e',
     image: 'notes.png',
     main: false
   },
   {
     key: 'Apply',
-    label: mainLabels.Apply,
+    label: platformLabels.Apply,
     color: '#4eb558',
     image: 'apply.png',
     main: false
   },
   {
     key: 'Clear',
-    label: mainLabels.Clear,
+    label: platformLabels.Clear,
     condition: 'isCleared',
     onClick: 'onClear',
     color: '#f44336',
@@ -173,7 +173,7 @@ export const getButtons = mainLabels => [
   },
   {
     key: 'Info',
-    label: mainLabels.Info,
+    label: platformLabels.Info,
     condition: 'isInfo && infoVisible',
     onClick: 'onInfo',
     color: '#4355a5',
@@ -183,7 +183,7 @@ export const getButtons = mainLabels => [
   },
   {
     key: 'Submit',
-    label: mainLabels.Submit,
+    label: platformLabels.Submit,
     condition: 'isSaved',
     onClick: 'onSave',
     color: '#4eb558',

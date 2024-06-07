@@ -6,6 +6,7 @@ import { getButtons } from './Buttons'
 import CustomComboBox from '../Inputs/CustomComboBox'
 import useResourceParams from 'src/hooks/useResourceParams'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const WindowToolbar = ({
   onSave,
@@ -38,6 +39,7 @@ const WindowToolbar = ({
   actions = []
 }) => {
   const { getRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const [reportStore, setReportStore] = useState([])
   const [tooltip, setTooltip] = useState('')
 
@@ -64,10 +66,6 @@ const WindowToolbar = ({
         .catch(error => {})
     }
   }
-
-  const { labels: mainLabels } = useResourceParams({
-    datasetId: ResourceIds.Common
-  })
 
   useEffect(() => {
     getReportLayout()
@@ -105,7 +103,7 @@ const WindowToolbar = ({
     onClickGIA: () => onClickGIA(recordId)
   }
 
-  const buttons = getButtons(mainLabels)
+  const buttons = getButtons(platformLabels)
 
   return (
     <DialogActions sx={{ padding: '8px !important' }}>
@@ -156,7 +154,7 @@ const WindowToolbar = ({
             >
               <div
                 className='button-container'
-                onMouseEnter={() => handleButtonMouseEnter(mainLabels.Preview)}
+                onMouseEnter={() => handleButtonMouseEnter(platformLabels.Preview)}
                 onMouseLeave={handleButtonMouseLeave}
               >
                 <img src='/images/buttonsIcons/preview.png' alt='Preview' />
