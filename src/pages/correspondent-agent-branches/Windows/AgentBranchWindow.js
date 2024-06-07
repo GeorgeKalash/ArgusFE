@@ -22,15 +22,20 @@ const AgentBranchWindow = ({ labels, maxAccess, recordId, height }) => {
   const tabs = [{ label: labels.agentBranch }, { label: labels.address, disabled: !editMode }]
   const { postRequest } = useContext(RequestsContext)
 
-  async function onSubmit(address) {
+  function onSubmit(address) {
     if (!store.agentBranch.addressId) {
       store.agentBranch.addressId = address.addressId
       const res = { ...store.agentBranch, addressId: address.addressId }
       const data = { ...res, recordId: store?.recordId, agentId: store.agentBranch?.agentId }
-      await postRequest({
+
+      postRequest({
         extension: RemittanceSettingsRepository.CorrespondentAgentBranches.set,
         record: JSON.stringify(data)
       })
+        .then(() => {
+          toast.success('Record Edit Successfully')
+        })
+        .catch(error => {})
     }
   }
 

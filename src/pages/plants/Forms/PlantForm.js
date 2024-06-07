@@ -53,7 +53,6 @@ const PlantForm = ({ _labels, maxAccess, store, setStore, editMode }) => {
   })
 
   const postPlant = async obj => {
-    console.log(address)
     const addressId = address?.addressId || null
     if (addressId) {
       obj = { ...obj, addressId }
