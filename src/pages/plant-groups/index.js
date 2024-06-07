@@ -1,6 +1,4 @@
-import { useState, useContext } from 'react'
-
-import { Box } from '@mui/material'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
 
 import Table from 'src/components/Shared/Table'
@@ -27,11 +25,12 @@ const Plant = () => {
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
-
-    return await getRequest({
-      extension: SystemRepository.PlantGroup.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
-    })
+    try {
+      return await getRequest({
+        extension: SystemRepository.PlantGroup.qry,
+        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      })
+    } catch (error) {}
   }
 
   const {
@@ -61,7 +60,6 @@ const Plant = () => {
       headerName: _labels.name,
       flex: 1
     },
-
     {
       field: 'parentName',
       headerName: _labels.parent,
@@ -74,12 +72,14 @@ const Plant = () => {
   }
 
   const del = async obj => {
-    await postRequest({
-      extension: SystemRepository.PlantGroup.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success('Record Deleted Successfully')
+    try {
+      await postRequest({
+        extension: SystemRepository.PlantGroup.del,
+        record: JSON.stringify(obj)
+      })
+      invalidate()
+      toast.success('Record Deleted Successfully')
+    } catch (error) {}
   }
 
   function openForm(recordId) {
@@ -91,7 +91,7 @@ const Plant = () => {
         maxAccess: access
       },
       width: 600,
-      height: 350,
+      height: 300,
       title: _labels.plantGroup
     })
   }
@@ -99,7 +99,6 @@ const Plant = () => {
   function onTreeClick() {
     stack({
       Component: Tree,
-
       props: {
         data: data
       },

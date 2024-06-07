@@ -58,17 +58,17 @@ const PlantForm = ({ _labels, maxAccess, store, setStore, editMode }) => {
       record: JSON.stringify(obj)
     })
       .then(res => {
-          if (!editMode) {
-            toast.success('Record Added Successfully')
-          } else toast.success('Record Edited Successfully')
+        if (!editMode) {
+          toast.success('Record Added Successfully')
+        } else toast.success('Record Edited Successfully')
 
-          setStore(prevStore => ({
-            ...prevStore,
-            plant: obj,
-            recordId: res.recordId
-          }))
+        setStore(prevStore => ({
+          ...prevStore,
+          plant: obj,
+          recordId: res.recordId
+        }))
 
-          invalidate()
+        invalidate()
       })
       .catch(error => {})
   }

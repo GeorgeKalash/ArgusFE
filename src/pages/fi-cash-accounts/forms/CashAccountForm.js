@@ -19,7 +19,6 @@ import { useForm } from 'src/hooks/form'
 
 export default function CashAccountForm({ labels, recordId, maxAccess, invalidate }) {
   const [isLoading, setIsLoading] = useState(false)
-  const editMode = !!recordId
 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -46,7 +45,6 @@ export default function CashAccountForm({ labels, recordId, maxAccess, invalidat
       activeStatus: yup.string().required(' ')
     }),
     onSubmit: async obj => {
-      const recordId = obj.recordId
       obj.accountNo = obj.reference
 
       const response = await postRequest({
@@ -60,11 +58,13 @@ export default function CashAccountForm({ labels, recordId, maxAccess, invalidat
           ...obj,
           recordId: response.recordId
         })
+        setEditMode(true)
       } else toast.success('Record Edited Successfully')
       invalidate()
     }
   })
 
+  const editMode = !!recordId || !!formik.values.recordId
   useEffect(() => {
     ;(async function () {
       try {
@@ -220,15 +220,9 @@ export default function CashAccountForm({ labels, recordId, maxAccess, invalidat
                 errorCheck={'accountId'}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  if (newValue) {
-                    formik.setFieldValue('accountId', newValue?.recordId)
-                    formik.setFieldValue('accountRef', newValue?.reference)
-                    formik.setFieldValue('accountName', newValue?.name)
-                  } else {
-                    formik.setFieldValue('accountId', '')
-                    formik.setFieldValue('accountRef', null)
-                    formik.setFieldValue('accountName', null)
-                  }
+                  formik.setFieldValue('accountId', newValue?.recordId || '')
+                  formik.setFieldValue('accountRef', newValue?.reference || '')
+                  formik.setFieldValue('accountName', newValue?.name || '')
                 }}
               />
             </Grid>

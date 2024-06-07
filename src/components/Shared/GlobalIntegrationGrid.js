@@ -49,7 +49,11 @@ const GlobalIntegrationGrid = ({ masterSource, masterId }) => {
     const data = {
       masterSource: masterSource,
       masterId: masterId,
-      integrationAccounts: filteredIntegrations
+      integrationAccounts: filteredIntegrations.map(({ masterSource, masterId, ...rest }) => ({
+        masterId,
+        masterSource,
+        ...rest
+      }))
     }
 
     postRequest({
@@ -99,20 +103,22 @@ const GlobalIntegrationGrid = ({ masterSource, masterId }) => {
   useEffect(() => {
     fetchAndSetData()
   }, [])
-
+  console.log(masterId, masterSource)
   async function fetchAndSetData() {
     try {
       const postTypesResponse = await getRequest({
-        extension: GeneralLedgerRepository.IntegrationPostTypes.qry
+        extension: GeneralLedgerRepository.IntegrationPostTypes.qry,
+        parameters: ``
       })
 
       const integrationsResponse = await getRequest({
-        extension: GeneralLedgerRepository.IntegrationAccounts.qry
+        extension: GeneralLedgerRepository.IntegrationAccounts.qry,
+        parameters: ``
       })
 
       if (postTypesResponse.list.length > 0) {
         const integrations = integrationsResponse.list.filter(
-          rest => rest.masterSource === masterSource && rest.masterId === masterId
+          rest => rest.masterSource == masterSource && rest.masterId == masterId
         )
 
         const postTypes = postTypesResponse.list.map((record, index) => {
