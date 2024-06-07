@@ -158,7 +158,8 @@ export const SystemRepository = {
   },
   UserFunction: {
     get: service + 'getUFU',
-    qry: service + 'qryUFU'
+    qry: service + 'qryUFU',
+    set: service + 'setUFU'
   },
   RecordRemarks: {
     qry: service + 'qryRMK',

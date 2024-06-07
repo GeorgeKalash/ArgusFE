@@ -3,38 +3,46 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { useForm } from 'src/hooks/form'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useWindow } from 'src/windows'
-import ItemSelectorWindow from 'src/components/Shared/ItemSelectorWindow'
-import { useContext, useState } from 'react'
-import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
+import { useContext } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import toast from 'react-hot-toast'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import USDocTypeForm from './USDocTypeForm'
+import FormShell from 'src/components/Shared/FormShell'
+import { useForm } from 'src/hooks/form'
 
-const DocTypeTab = ({ labels, maxAccess, storeRecordId, window }) => {
-  const { getRequest, postRequest } = useContext(RequestsContext)
+const DocTypeTab = ({ labels, maxAccess, storeRecordId }) => {
+  const { getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+
+  const { formik } = useForm({
+    maxAccess,
+    enableReinitialize: false,
+    validateOnChange: true,
+    initialValues: {
+      recordId: storeRecordId || null
+    }
+  })
 
   const columns = [
     {
       field: 'sfName',
-      headerName: labels.functionName,
+      headerName: labels.systemFunction,
       flex: 1
     },
     {
       field: 'dtName',
-      headerName: labels.docTypeName,
+      headerName: labels.docType,
       flex: 1
     }
   ]
 
   const {
     query: { data },
-    labels: _labels
+    labels: _labels,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     enabled: Boolean(storeRecordId),
@@ -58,9 +66,10 @@ const DocTypeTab = ({ labels, maxAccess, storeRecordId, window }) => {
       Component: USDocTypeForm,
       props: {
         labels: _labels,
-        recordId: obj.recordId ? obj.recordId : null,
+        storeRecordId: storeRecordId || null,
         functionId: obj.functionId,
-        maxAccess: maxAccess
+        maxAccess: maxAccess,
+        invalidate: invalidate
       },
       width: 600,
       height: 500,
@@ -69,22 +78,31 @@ const DocTypeTab = ({ labels, maxAccess, storeRecordId, window }) => {
   }
 
   return (
-    <VertLayout>
-      <Fixed>
-        <GridToolbar maxAccess={maxAccess} />
-      </Fixed>
-      <Grow>
-        <Table
-          columns={columns}
-          gridData={data ? data : { list: [] }}
-          rowId={['userId', 'functionId']}
-          onEdit={edit}
-          isLoading={false}
-          maxAccess={maxAccess}
-          pagination={false}
-        />
-      </Grow>
-    </VertLayout>
+    <FormShell
+      resourceId={ResourceIds.Users}
+      maxAccess={maxAccess}
+      editMode={!!storeRecordId}
+      isSaved={false}
+      isCleared={false}
+      form={formik}
+    >
+      <VertLayout>
+        <Fixed>
+          <GridToolbar maxAccess={maxAccess} />
+        </Fixed>
+        <Grow>
+          <Table
+            columns={columns}
+            gridData={data ? data : { list: [] }}
+            rowId={['userId', 'functionId']}
+            onEdit={edit}
+            isLoading={false}
+            maxAccess={maxAccess}
+            pagination={false}
+          />
+        </Grow>
+      </VertLayout>
+    </FormShell>
   )
 }
 

@@ -28,7 +28,9 @@ export const AccessControlRepository = {
   },
   RowAccessUserView: {
     qry: service + 'qryROU',
-    set2: service + 'set2ROU'
+    set2: service + 'set2ROU',
+    set: service + 'setROU',
+    del: service + 'delROU'
   },
   ModuleDeactivation: {
     qry: service + 'qryMOD',
