@@ -15,7 +15,6 @@ const AddressForm = ({ recordId, address, setAddress = () => {}, editMode, onSub
     }).then(res => {
       data.addressId = res.recordId
       onSubmit(data)
-      toast.success('Record Updated Successfully')
     })
   }
 
