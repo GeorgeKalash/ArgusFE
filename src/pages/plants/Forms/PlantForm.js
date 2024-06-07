@@ -17,7 +17,7 @@ import { useInvalidate } from 'src/hooks/resource'
 
 const PlantForm = ({ _labels, maxAccess, store, setStore, editMode }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { recordId } = store
+  const { recordId, address } = store
 
   const invalidate = useInvalidate({
     endpointId: SystemRepository.Plant.page
@@ -53,22 +53,27 @@ const PlantForm = ({ _labels, maxAccess, store, setStore, editMode }) => {
   })
 
   const postPlant = async obj => {
+    console.log(address)
+    const addressId = address?.addressId || null
+    if (addressId) {
+      obj = { ...obj, addressId }
+    }
     await postRequest({
       extension: SystemRepository.Plant.set,
       record: JSON.stringify(obj)
     })
       .then(res => {
-          if (!editMode) {
-            toast.success('Record Added Successfully')
-          } else toast.success('Record Edited Successfully')
+        if (!editMode) {
+          toast.success('Record Added Successfully')
+        } else toast.success('Record Edited Successfully')
 
-          setStore(prevStore => ({
-            ...prevStore,
-            plant: obj,
-            recordId: res.recordId
-          }))
+        setStore(prevStore => ({
+          ...prevStore,
+          plant: obj,
+          recordId: res.recordId
+        }))
 
-          invalidate()
+        invalidate()
       })
       .catch(error => {})
   }
