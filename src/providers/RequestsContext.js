@@ -69,7 +69,10 @@ const RequestsProvider = ({ showLoading = false, children }) => {
       })
       .catch(error => {
         debouncedCloseLoading()
-        showError({ message: error, height: error.response?.status === 404 ? 400 : '' })
+        showError({
+          message: error,
+          height: error.response?.status === 404 || error.response?.status === 500 ? 400 : ''
+        })
         throw error
       })
   }
@@ -81,7 +84,10 @@ const RequestsProvider = ({ showLoading = false, children }) => {
     })
       .then(res => res.data)
       .catch(error => {
-        showError({ message: error, height: error.response?.status === 404 ? 400 : '' })
+        showError({
+          message: error,
+          height: error.response?.status === 404 || error.response?.status === 500 ? 400 : ''
+        })
         throw error
       })
   }
@@ -100,7 +106,10 @@ const RequestsProvider = ({ showLoading = false, children }) => {
     })
       .then(res => res.data)
       .catch(error => {
-        showError({ message: error, height: error.response?.status === 404 ? 400 : '' })
+        showError({
+          message: error,
+          height: error.response?.status === 404 || error.response?.status === 500 ? 400 : ''
+        })
         throw error
       })
   }
@@ -131,9 +140,10 @@ const RequestsProvider = ({ showLoading = false, children }) => {
       })
       .catch(error => {
         debouncedCloseLoading()
-        console.log(error.response)
-
-        showError({ message: error, height: error.response?.status === 404 ? 400 : '' })
+        showError({
+          message: error,
+          height: error.response?.status === 404 || error.response?.status === 500 ? 400 : ''
+        })
         throw error
       })
   }
