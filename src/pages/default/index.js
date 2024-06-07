@@ -23,7 +23,6 @@ const GlobalStyle = createGlobalStyle`
     display: flex;
     justify-content: center;
     align-items: center;
-    font-family: 'Open Sans', Helvetica, sans-serif;
     background: linear-gradient(to bottom left, #231F20, #383838);
     background-size: 125% 125%;
     -webkit-font-smoothing: antialiased;

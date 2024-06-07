@@ -15,7 +15,7 @@ const getChartOptions = (label, type) => {
         display: true,
         text: label,
         font: {
-          size: 24,
+          size: 20,
           weight: 'bold'
         },
         color: '#f0f0f0' // Set title text color to white

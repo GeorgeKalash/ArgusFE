@@ -9,7 +9,7 @@ const ProgressBarContainer = styled.div`
 `
 
 const ProgressBarLabel = styled.span`
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   margin-bottom: 5px;
   color: #f0f0f0;
