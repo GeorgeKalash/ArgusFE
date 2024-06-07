@@ -14,7 +14,6 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useInvalidate } from 'src/hooks/resource'
 
 export default function MultiCurrencyForm({ labels, maxAccess, currencyId, rateTypeId, window }) {
-  const [isLoading, setIsLoading] = useState(false)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const editMode = !!currencyId && !!rateTypeId
 
@@ -51,21 +50,19 @@ export default function MultiCurrencyForm({ labels, maxAccess, currencyId, rateT
       invalidate()
     }
   })
-
   useEffect(() => {
     ;(async function () {
       try {
         if (rateTypeId && currencyId) {
-          setIsLoading(true)
-
           const res = await getRequest({
             extension: MultiCurrencyRepository.McExchangeMap.get,
             parameters: `_currencyId=${currencyId}&_rateTypeId=${rateTypeId}`
           })
-          formik.setValues(res.record)
+          formik.setValues({
+            ...res.record
+          })
         }
       } catch (e) {}
-      setIsLoading(false)
     })()
   }, [])
 

@@ -37,7 +37,14 @@ export default function ExchangeTablesForm({ labels, maxAccess, recordId, invali
       currencyId: yup.string().required(' '),
       rateCalcMethod: yup.string().required(' '),
       rateAgainst: yup.string().required(' '),
-      rateAgainstCurrencyId: yup.string().required(' ')
+      rateAgainstCurrencyId: yup
+        .string()
+        .nullable()
+        .test('is-rateAgainstCurrencyId-required', ' ', function (value) {
+          const { rateAgainst } = this.parent
+
+          return rateAgainst === '2' ? !!value : true
+        })
     }),
     onSubmit: async obj => {
       const response = await postRequest({
@@ -69,6 +76,8 @@ export default function ExchangeTablesForm({ labels, maxAccess, recordId, invali
       } catch (e) {}
     })()
   }, [recordId])
+
+  // if rate againt = base currency, foreign currency is optional and readonly.
 
   return (
     <FormShell resourceId={ResourceIds.ExchangeTables} form={formik} maxAccess={maxAccess} editMode={editMode}>
@@ -173,6 +182,7 @@ export default function ExchangeTablesForm({ labels, maxAccess, recordId, invali
                   formik.setFieldValue('rateAgainstCurrencyId', newValue?.recordId || null)
                 }}
                 error={formik.touched.rateAgainstCurrencyId && Boolean(formik.errors.rateAgainstCurrencyId)}
+                readOnly={!(formik.values.rateAgainst === '2')}
               />
             </Grid>
           </Grid>
