@@ -4,6 +4,7 @@ export const SystemRepository = {
   mainMenu: service + 'mainMenu',
   getLabels: service + 'qryLBL',
   KeyValueStore: service + 'qryKVS',
+  KeyValueStore2: service + 'qryKVS2',
   ParameterDefinition: service + 'qryRP',
   ReportLayout: service + 'qryRL',
   ReportTemplate: service + 'qryRT',

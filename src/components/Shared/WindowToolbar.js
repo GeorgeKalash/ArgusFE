@@ -4,8 +4,6 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { getButtons } from './Buttons'
 import CustomComboBox from '../Inputs/CustomComboBox'
-import useResourceParams from 'src/hooks/useResourceParams'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { ControlContext } from 'src/providers/ControlContext'
 
 const WindowToolbar = ({

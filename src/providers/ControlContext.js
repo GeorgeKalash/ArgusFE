@@ -7,6 +7,7 @@ import { KVSRepository } from 'src/repositories/KVSRepository'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { AuthContext } from './AuthContext'
+import { SystemRepository } from 'src/repositories/SystemRepository'
 
 const ControlContext = createContext()
 
@@ -16,12 +17,28 @@ const ControlProvider = ({ children }) => {
   const { user } = useContext(AuthContext)
 
   useEffect(() => {
-    getLabels(ResourceIds.Common, setApiPlatformLabels)
+    getPlatformLabels(ResourceIds.Common, setApiPlatformLabels)
   }, [user?.languageId])
 
   const platformLabels = apiPlatformLabels
     ? Object.fromEntries(apiPlatformLabels.map(({ key, value }) => [key, value]))
     : {}
+
+  const getPlatformLabels = (resourceId, callback) => {
+    var parameters = '_dataset=' + resourceId + '&_language=1'
+
+    getRequest({
+      extension: SystemRepository.KeyValueStore2,
+      parameters: parameters
+    }).then(
+      res => {
+        callback(res.list)
+      },
+      error => {
+        console.error(error, 'Access')
+      }
+    )
+  }
 
   const getLabels = (resourceId, callback) => {
     var parameters = '_dataset=' + resourceId
