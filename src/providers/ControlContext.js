@@ -6,16 +6,18 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { KVSRepository } from 'src/repositories/KVSRepository'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { AuthContext } from './AuthContext'
 
 const ControlContext = createContext()
 
 const ControlProvider = ({ children }) => {
   const { getRequest } = useContext(RequestsContext)
   const [apiPlatformLabels, setApiPlatformLabels] = useState(null)
+  const { user } = useContext(AuthContext)
 
   useEffect(() => {
     getLabels(ResourceIds.Common, setApiPlatformLabels)
-  }, [])
+  }, [user?.languageId])
 
   const platformLabels = apiPlatformLabels
     ? Object.fromEntries(apiPlatformLabels.map(({ key, value }) => [key, value]))

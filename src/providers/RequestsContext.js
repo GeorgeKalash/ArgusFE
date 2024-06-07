@@ -50,9 +50,7 @@ const RequestsProvider = ({ showLoading = false, children }) => {
   }, 500)
 
   const getRequest = async body => {
-    const accessToken =
-      (await getAccessToken()) ||
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2MiOiIxMDAzIiwidXNyIjoiMTciLCJkYmUiOiIxIiwiZGJzIjoiMiIsIm5iZiI6MTcxNzc0NTQyOSwiZXhwIjoxNzE3Nzc0MjI5LCJpYXQiOjE3MTc3NDU0Mjl9.6N3PADjD0QbC0ba8_ejYEoiGaNAl8sGav8FIqp9SfC4'
+    const accessToken = await getAccessToken()
 
     !loading && setLoading(true)
 
