@@ -5,7 +5,6 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import RateTypesForm from './forms/RateTypesForm'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useWindow } from 'src/windows'
@@ -87,8 +86,8 @@ const RateTypes = () => {
         invalidate: invalidate
       },
       width: 600,
-      height: 600,
-      title: labels.RateType
+      height: 300,
+      title: labels.rateType
     })
   }
 
@@ -123,9 +122,6 @@ const RateTypes = () => {
           paginationParameters={paginationParameters}
         />
       </Grow>
-      {errorMessage && (
-        <ErrorWindow open={!!errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-      )}
     </VertLayout>
   )
 }

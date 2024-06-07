@@ -56,7 +56,7 @@ const ExchangeTables = () => {
     },
     {
       field: 'currencyRef',
-      headerName: _labels.currency,
+      headerName: _labels.currencyId,
       flex: 1
     }
   ]
@@ -88,7 +88,7 @@ const ExchangeTables = () => {
         invalidate: invalidate
       },
       width: 600,
-      height: 600,
+      height: 450,
       title: _labels.ExchangeTables
     })
   }
