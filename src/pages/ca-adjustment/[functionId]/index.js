@@ -85,6 +85,11 @@ const CAadjustment = () => {
       valueGetter: ({ row }) => getFormattedNumber(row?.amount)
     },
     {
+      field: 'currencyRef',
+      headerName: _labels.currency,
+      flex: 1
+    },
+    {
       field: 'statusName',
       headerName: _labels.status,
       flex: 1

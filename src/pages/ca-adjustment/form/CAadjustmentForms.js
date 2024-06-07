@@ -21,8 +21,6 @@ import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 
 export default function CAadjustmentForm({ labels, access, recordId, functionId }) {
-  const [editMode, setEditMode] = useState(!!recordId)
-
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: functionId,
     access: access,
@@ -88,7 +86,6 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
         toast.success('Record Edited Successfully')
       }
 
-      setEditMode(true)
       try {
         const res = await getRequest({
           extension: CashBankRepository.CAadjustment.get,
@@ -100,6 +97,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       invalidate()
     }
   })
+  const editMode = !!formik.values.recordId || !!recordId
 
   useEffect(() => {
     ;(async function () {
