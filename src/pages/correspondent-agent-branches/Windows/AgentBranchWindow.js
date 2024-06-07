@@ -23,6 +23,10 @@ const AgentBranchWindow = ({ labels, maxAccess, recordId, height }) => {
   const { postRequest } = useContext(RequestsContext)
 
   function onSubmit(address) {
+    setStore(prevStore => ({
+      ...prevStore,
+      address: { ...prevStore.address, recordId: address?.addressId }
+    }))
     if (!store.agentBranch.addressId) {
       store.agentBranch.addressId = address.addressId
       const res = { ...store.agentBranch, addressId: address.addressId }

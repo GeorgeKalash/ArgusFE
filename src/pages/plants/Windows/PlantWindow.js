@@ -23,7 +23,7 @@ const PlantWindow = ({ labels, editMode, maxAccess, recordId, height }) => {
     const addressId = address.addressId
     setStore(prevStore => ({
       ...prevStore,
-      address: { ...prevStore.address, addressId }
+      address: { ...prevStore.address, recordId: addressId }
     }))
     if (!store.plant.addressId) {
       const res = { ...store.plant, addressId: addressId }
