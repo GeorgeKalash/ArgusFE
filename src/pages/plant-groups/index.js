@@ -117,7 +117,7 @@ const Plant = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} actions={actions} maxAccess={access} onTree={onTreeClick} />
+        <GridToolbar onAdd={add} maxAccess={access} onTree={onTreeClick} />
       </Fixed>
       <Grow>
         <Table
