@@ -17,7 +17,6 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 const DocTypeTab = ({ labels, maxAccess, storeRecordId }) => {
   const { getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
-  const [filteredData, setFilteredData] = useState(null)
 
   const { formik } = useForm({
     maxAccess,
@@ -80,20 +79,20 @@ const DocTypeTab = ({ labels, maxAccess, storeRecordId }) => {
     })
   }
 
+  const value = formik.values.search
+
+  const filteredData = data && {
+    ...data,
+    list: data.list.filter(
+      item =>
+        (item.sfName && item.sfName.toLowerCase().includes(value.toLowerCase())) ||
+        (item.dtName && item.dtName.toLowerCase().includes(value.toLowerCase()))
+    )
+  }
+
   const handleSearchChange = event => {
     const { value } = event.target
     formik.setFieldValue('search', value)
-
-    if (value) {
-      const filtered = data.list.filter(
-        item =>
-          (item.sfName && item.sfName.toLowerCase().includes(value.toLowerCase())) ||
-          (item.dtName && item.dtName.toLowerCase().includes(value.toLowerCase()))
-      )
-      setFilteredData(filtered)
-    } else {
-      setFilteredData(data.list)
-    }
   }
 
   return (
@@ -115,7 +114,6 @@ const DocTypeTab = ({ labels, maxAccess, storeRecordId }) => {
                 label={labels.search}
                 onClear={() => {
                   formik.setFieldValue('search', '')
-                  setFilteredData(data.list)
                 }}
                 onChange={handleSearchChange}
               />
@@ -125,7 +123,7 @@ const DocTypeTab = ({ labels, maxAccess, storeRecordId }) => {
         <Grow>
           <Table
             columns={columns}
-            gridData={filteredData ? { list: filteredData } : data}
+            gridData={filteredData}
             rowId={['userId', 'functionId']}
             onEdit={edit}
             isLoading={false}
