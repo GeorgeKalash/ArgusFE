@@ -45,21 +45,13 @@ export default function GenerateTransferForm({ cashCountId, fromPlantId, labels,
           extension: CashCountRepository.CashCountTransaction.generate,
           record: JSON.stringify(data)
         })
-        if (!obj.recordId) {
-          toast.success('Record Added Successfully')
-        } else toast.success('Record Edited Successfully')
+        toast.success('Cash Transfer Generated Successfully')
       } catch (error) {}
     }
   })
 
   return (
-    <FormShell
-      resourceId={ResourceIds.CashCountTransaction}
-      form={formik}
-      maxAccess={maxAccess}
-      isCleared={false}
-      isInfo={false}
-    >
+    <FormShell form={formik} maxAccess={maxAccess} isCleared={false} isInfo={false}>
       <VertLayout>
         <Fixed>
           <Grid container spacing={4}>
