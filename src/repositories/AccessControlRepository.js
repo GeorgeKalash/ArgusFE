@@ -46,5 +46,11 @@ export const AccessControlRepository = {
   },
   GlobalControlAuthorizationView: {
     qry: service + 'qryCGL'
+  },
+  UserReleaseCode: {
+    qry: service + 'qryUCO',
+    get: service + 'getUCO',
+    set: service + 'setUCO',
+    del: service + 'delUCO'
   }
 }

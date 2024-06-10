@@ -1,0 +1,71 @@
+import { Grid } from '@mui/material'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import { useForm } from 'src/hooks/form'
+import { SystemRepository } from 'src/repositories/SystemRepository'
+import FormShell from 'src/components/Shared/FormShell'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ResourceIds } from 'src/resources/ResourceIds'
+import { useContext, useEffect, useState } from 'react'
+import { RequestsContext } from 'src/providers/RequestsContext'
+import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
+import toast from 'react-hot-toast'
+import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
+
+const ReleaseCodeForm = ({ labels, maxAccess, storeRecordId, invalidate, window }) => {
+  const { postRequest } = useContext(RequestsContext)
+
+  const { formik } = useForm({
+    enableReinitialize: false,
+    validateOnChange: true,
+    initialValues: {
+      userId: storeRecordId || null,
+      codeId: null
+    },
+    onSubmit: async obj => {
+      try {
+        await postRequest({
+          extension: AccessControlRepository.UserFunction.set,
+          record: JSON.stringify(obj)
+        })
+        toast.success('Record Updated Successfully')
+        window.close()
+        invalidate()
+      } catch (error) {}
+    }
+  })
+
+  return (
+    <FormShell
+      resourceId={ResourceIds.Users}
+      form={formik}
+      maxAccess={maxAccess}
+      editMode={!!storeRecordId}
+      isInfo={false}
+      isCleared={false}
+    >
+      <VertLayout>
+        <Grow>
+          <Grid item xs={6}>
+            <ResourceComboBox
+              endpointId={DocumentReleaseRepository.ReleaseCode.qry}
+              parameters={`_filter=&_startAt=${0}&_pageSize=${1000}`}
+              name='codeId'
+              label={labels.code}
+              valueField='recordId'
+              displayField='name'
+              values={formik.values}
+              onChange={async (event, newValue) => {
+                formik.setFieldValue('codeId', newValue?.recordId)
+              }}
+              error={formik.touched.codeId && Boolean(formik.errors.codeId)}
+              maxAccess={maxAccess}
+            />
+          </Grid>
+        </Grow>
+      </VertLayout>
+    </FormShell>
+  )
+}
+
+export default ReleaseCodeForm
