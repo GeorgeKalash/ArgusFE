@@ -1,17 +1,10 @@
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import Typography from '@mui/material/Typography'
 import { AuthContext } from 'src/providers/AuthContext'
-
-// ** React Imports
 import { useState, useEffect, useContext } from 'react'
-
-// ** Next Imports
 import Link from 'next/link'
-
-// ** Hooks
 import { useAuth } from 'src/hooks/useAuth'
 
-// ** MUI Imports
 import {
   Card,
   CardContent,
@@ -26,21 +19,13 @@ import {
 } from '@mui/material'
 import MuiFormControlLabel from '@mui/material/FormControlLabel'
 import { styled, useTheme } from '@mui/material/styles'
-
-// ** Icon Imports
 import Icon from 'src/@core/components/icon'
-
-// ** Third Party Imports
 import { useFormik } from 'formik'
 import * as yup from 'yup'
-
-// ** Layout Import
 import BlankLayout from 'src/@core/layouts/BlankLayout'
-
-// ** Custom Imports
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
+import { ControlContext } from 'src/providers/ControlContext'
 
-// ** Styled Components
 const LinkStyled = styled(Link)(({ theme }) => ({
   fontSize: '0.875rem',
   textDecoration: 'none',
@@ -57,11 +42,10 @@ const FormControlLabel = styled(MuiFormControlLabel)(({ theme }) => ({
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
-
-  // ** Hooks
   const theme = useTheme()
   const auth = useAuth()
   const { companyName } = useContext(AuthContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const validation = useFormik({
     enableReinitialize: true,
@@ -72,7 +56,7 @@ const LoginPage = () => {
     },
     validationSchema: yup.object({
       username: yup.string().required(),
-      password: yup.string().min(5, 'Must be at least 6 characters').required(),
+      password: yup.string().min(5, platformLabels.PassConf).required(),
       rememberMe: yup.boolean()
     }),
     onSubmit: values => {
@@ -113,7 +97,7 @@ const LoginPage = () => {
                   value={companyName}
                   size='small'
                   fullWidth
-                  label='Company Name'
+                  label={platformLabels.CompanyName}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -121,7 +105,7 @@ const LoginPage = () => {
                   name='username'
                   size='small'
                   fullWidth
-                  label='Username'
+                  label={platformLabels.Username}
                   value={validation.values.username}
                   type='text'
                   onChange={validation.handleChange}
@@ -134,7 +118,7 @@ const LoginPage = () => {
                   name='password'
                   size='small'
                   fullWidth
-                  label='Password'
+                  label={platformLabels.Password}
                   type={showPassword ? 'text' : 'password'}
                   value={validation.values.password}
                   onChange={validation.handleChange}
@@ -167,17 +151,7 @@ const LoginPage = () => {
                 justifyContent: 'space-between'
               }}
             >
-              <FormControlLabel
-                label='Remember Me'
-                control={
-                  <Checkbox
-                    name='rememberMe'
-                    checked={validation.values.rememberMe}
-                    onChange={validation.handleChange}
-                  />
-                }
-              />
-              <LinkStyled href='/pages/auth/forgot-password-v1'>Forgot Password?</LinkStyled>
+              <LinkStyled href='/pages/auth/forgot-password-v1'>{platformLabels.ForgotPass}</LinkStyled>
             </Box>
             <Button
               fullWidth
@@ -187,14 +161,14 @@ const LoginPage = () => {
               sx={{ mb: 7 }}
               onClick={validation.handleSubmit}
             >
-              Login
+              {platformLabels.Login}
             </Button>
           </CardContent>
         </Card>
 
         {/* Language Selection Section */}
         <Box sx={{ my: 5, display: 'flex', gap: 3, mt: 'auto' }}>
-          <Typography variant='body2'>Argus offered in:</Typography>
+          <Typography variant='body2'>{platformLabels.ArgusOfferedIn}</Typography>
           <Box sx={{ display: 'flex', flexDirection: 'row', gap: 5 }}>
             <LinkStyled href='/pages/auth/login-en' sx={{ color: 'red' }}>
               English

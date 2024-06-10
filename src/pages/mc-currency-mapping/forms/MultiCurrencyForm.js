@@ -12,9 +12,12 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useInvalidate } from 'src/hooks/resource'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function MultiCurrencyForm({ labels, maxAccess, currencyId, rateTypeId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
+
   const editMode = !!currencyId && !!rateTypeId
 
   const invalidate = useInvalidate({
@@ -42,9 +45,9 @@ export default function MultiCurrencyForm({ labels, maxAccess, currencyId, rateT
       })
 
       if (!currencyId && !rateTypeId) {
-        toast.success('Record Added Successfully')
+        toast.success(platformLabels.Added)
       } else {
-        toast.success('Record Edited Successfully')
+        toast.success(platformLabels.Edited)
       }
 
       invalidate()

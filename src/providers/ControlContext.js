@@ -7,7 +7,6 @@ import { KVSRepository } from 'src/repositories/KVSRepository'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { AuthContext } from './AuthContext'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 
 const ControlContext = createContext()
 
@@ -28,7 +27,7 @@ const ControlProvider = ({ children }) => {
     var parameters = '_dataset=' + resourceId + '&_language=1'
 
     getRequest({
-      extension: SystemRepository.KeyValueStore2,
+      extension: KVSRepository.getPlatformLabels,
       parameters: parameters
     }).then(
       res => {

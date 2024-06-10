@@ -1,31 +1,22 @@
-// ** React Imports
 import { useEffect, useState, useContext } from 'react'
-
-// ** MUI Imports
-import { Grid, Box } from '@mui/material'
-
-// ** Third Party Imports
+import { Grid } from '@mui/material'
 import { useFormik } from 'formik'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-
-// ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const MCDefault = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const [initialValues, setInitialValues] = useState({
     mc_defaultRTSA: null,
@@ -84,7 +75,7 @@ const MCDefault = () => {
       record: JSON.stringify({ sysDefaults: data })
     })
       .then(res => {
-        if (res) toast.success('Record Successfully')
+        if (res) toast.success(platformLabels.Edited)
       })
       .catch(error => {})
   }
@@ -96,63 +87,63 @@ const MCDefault = () => {
   return (
     <VertLayout>
       <Grow>
-      <Grid container spacing={5} sx={{ pl: '10px', pt:'10px' }} lg={4} md={7} sm={7} xs={12}>
-        <Grid item xs={12}>
-          <ResourceComboBox
-            endpointId={MultiCurrencyRepository.RateType.qry}
-            name='mc_defaultRTSA'
-            label={_labels.mc_defaultRTSA}
-            valueField='recordId'
-            displayField='name'
-            values={formik.values}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('mc_defaultRTSA', newValue?.recordId || '')
-            }}
-            error={formik.touched.mc_defaultRTSA && Boolean(formik.errors.mc_defaultRTSA)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <ResourceComboBox
-            endpointId={MultiCurrencyRepository.RateType.qry}
-            name='mc_defaultRTPU'
-            label={_labels.mc_defaultRTPU}
-            valueField='recordId'
-            displayField='name'
-            values={formik.values}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('mc_defaultRTPU', newValue?.recordId || '')
-            }}
-            error={formik.touched.mc_defaultRTPU && Boolean(formik.errors.mc_defaultRTPU)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <ResourceComboBox
-            endpointId={MultiCurrencyRepository.RateType.qry}
-            name='mc_defaultRTMF'
-            label={_labels.mc_defaultRTMF}
-            valueField='recordId'
-            displayField='name'
-            values={formik.values}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('mc_defaultRTMF', newValue?.recordId || '')
-            }}
-            error={formik.touched.mc_defaultRTMF && Boolean(formik.errors.mc_defaultRTMF)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <ResourceComboBox
-            endpointId={MultiCurrencyRepository.RateType.qry}
-            name='mc_defaultRTFI'
-            label={_labels.mc_defaultRTFI}
-            valueField='recordId'
-            displayField='name'
-            values={formik.values}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('mc_defaultRTFI', newValue?.recordId || '')
-            }}
-            error={formik.touched.mc_defaultRTFI && Boolean(formik.errors.mc_defaultRTFI)}
-          />
-        </Grid>
+        <Grid container spacing={5} sx={{ pl: '10px', pt: '10px' }} lg={4} md={7} sm={7} xs={12}>
+          <Grid item xs={12}>
+            <ResourceComboBox
+              endpointId={MultiCurrencyRepository.RateType.qry}
+              name='mc_defaultRTSA'
+              label={_labels.mc_defaultRTSA}
+              valueField='recordId'
+              displayField='name'
+              values={formik.values}
+              onChange={(event, newValue) => {
+                formik.setFieldValue('mc_defaultRTSA', newValue?.recordId || '')
+              }}
+              error={formik.touched.mc_defaultRTSA && Boolean(formik.errors.mc_defaultRTSA)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <ResourceComboBox
+              endpointId={MultiCurrencyRepository.RateType.qry}
+              name='mc_defaultRTPU'
+              label={_labels.mc_defaultRTPU}
+              valueField='recordId'
+              displayField='name'
+              values={formik.values}
+              onChange={(event, newValue) => {
+                formik.setFieldValue('mc_defaultRTPU', newValue?.recordId || '')
+              }}
+              error={formik.touched.mc_defaultRTPU && Boolean(formik.errors.mc_defaultRTPU)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <ResourceComboBox
+              endpointId={MultiCurrencyRepository.RateType.qry}
+              name='mc_defaultRTMF'
+              label={_labels.mc_defaultRTMF}
+              valueField='recordId'
+              displayField='name'
+              values={formik.values}
+              onChange={(event, newValue) => {
+                formik.setFieldValue('mc_defaultRTMF', newValue?.recordId || '')
+              }}
+              error={formik.touched.mc_defaultRTMF && Boolean(formik.errors.mc_defaultRTMF)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <ResourceComboBox
+              endpointId={MultiCurrencyRepository.RateType.qry}
+              name='mc_defaultRTFI'
+              label={_labels.mc_defaultRTFI}
+              valueField='recordId'
+              displayField='name'
+              values={formik.values}
+              onChange={(event, newValue) => {
+                formik.setFieldValue('mc_defaultRTFI', newValue?.recordId || '')
+              }}
+              error={formik.touched.mc_defaultRTFI && Boolean(formik.errors.mc_defaultRTFI)}
+            />
+          </Grid>
         </Grid>
       </Grow>
       <Fixed>

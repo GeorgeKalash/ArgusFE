@@ -1,24 +1,16 @@
-// ** React Imports
 import { createContext, useEffect, useState } from 'react'
-
-// ** Next Import
 import { useRouter } from 'next/router'
 
-// ** Config
-import authConfig from 'src/configs/auth'
-
-// ** Defaults
 const defaultProvider = {
   user: null,
   loading: true,
-  setUser: () => null,
-  setLoading: () => Boolean,
+  setUser: () => {},
+  setLoading: () => {},
   login: () => Promise.resolve(),
   logout: () => Promise.resolve()
 }
 const AuthContext = createContext(defaultProvider)
 
-// ** 3rd Party Imports
 import axios from 'axios'
 import SHA1 from 'crypto-js/sha1'
 import jwt from 'jwt-decode'
@@ -40,25 +32,28 @@ const encryptePWD = pwd => {
 }
 
 const AuthProvider = ({ children }) => {
-  // ** States
-  const [user, setUser] = useState(defaultProvider.user)
-  const [loading, setLoading] = useState(defaultProvider.loading)
+  const [user, setUser] = useState(null)
+  const [loading, setLoading] = useState(true)
   const [companyName, setCompanyName] = useState('')
   const [getAC, setGetAC] = useState({})
-
-  // ** Hooks
+  const [languageId, setLanguageId] = useState(1)
   const router = useRouter()
 
   useEffect(() => {
     const initAuth = async () => {
-      const userData = window.localStorage.getItem('userData')
-        ? window.localStorage.getItem('userData')
-        : window.sessionStorage.getItem('userData')
+      const userData = window.localStorage.getItem('userData') || window.sessionStorage.getItem('userData')
+      const savedLanguageId = window.localStorage.getItem('languageId')
 
       if (userData) {
         setUser(JSON.parse(userData))
+        if (savedLanguageId) {
+          setLanguageId(parseInt(savedLanguageId))
+        }
         setLoading(false)
       } else {
+        if (savedLanguageId) {
+          setLanguageId(parseInt(savedLanguageId))
+        }
         setLoading(false)
       }
     }
@@ -70,12 +65,8 @@ const AuthProvider = ({ children }) => {
       const accountName = matchHostname ? matchHostname[1] : 'byc-deploy'
 
       try {
-        const response = await axios({
-          method: 'GET',
-          url: `${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=${accountName}`
-        })
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=${accountName}`)
 
-        // Set companyName from the API response
         setCompanyName(response.data.record.companyName)
         setGetAC(response)
         window.localStorage.setItem('apiUrl', response.data.record.api)
@@ -89,9 +80,7 @@ const AuthProvider = ({ children }) => {
 
   const handleLogin = async (params, errorCallback) => {
     try {
-      const getUS2 = await axios({
-        method: 'GET',
-        url: `${getAC.data.record.api}/SY.asmx/getUS2?_email=${params.username}`,
+      const getUS2 = await axios.get(`${getAC.data.record.api}/SY.asmx/getUS2?_email=${params.username}`, {
         headers: {
           accountId: JSON.parse(getAC.data.record.accountId),
           dbe: JSON.parse(getAC.data.record.dbe),
@@ -107,9 +96,7 @@ const AuthProvider = ({ children }) => {
         getAC.data.record.accountId
       }&_userId=${getUS2.data.record.recordId}`
 
-      const signIn3 = await axios({
-        method: 'GET',
-        url: `${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/signIn3?${signIn3Params}`,
+      const signIn3 = await axios.get(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/signIn3?${signIn3Params}`, {
         headers: {
           accountId: JSON.parse(getAC.data.record.accountId),
           dbe: JSON.parse(getAC.data.record.dbe),
@@ -117,9 +104,7 @@ const AuthProvider = ({ children }) => {
         }
       })
 
-      const defaultSettings = await axios({
-        method: 'GET',
-        url: `${getAC.data.record.api}/SY.asmx/getDE?_key=dateFormat`,
+      const defaultSettings = await axios.get(`${getAC.data.record.api}/SY.asmx/getDE?_key=dateFormat`, {
         headers: {
           Authorization: 'Bearer ' + signIn3.data.record.accessToken,
           'Content-Type': 'multipart/form-data'
@@ -129,7 +114,6 @@ const AuthProvider = ({ children }) => {
       const defaultSet = {
         dateFormat: defaultSettings.data.record.value ? defaultSettings.data.record.value : 'dd/MM/yyyy'
       }
-
       window.localStorage.setItem('default', JSON.stringify(defaultSet))
 
       const loggedUser = {
@@ -141,17 +125,20 @@ const AuthProvider = ({ children }) => {
         employeeId: getUS2.data.record.employeeId,
         fullName: getUS2.data.record.fullName,
         role: 'admin',
-        username: getUS2.data.record.fullName,
-        id: 1,
         expiresAt: jwt(signIn3.data.record.accessToken).exp,
         ...signIn3.data.record
       }
 
-      setUser({ ...loggedUser })
+      setUser(loggedUser)
+      setLanguageId(loggedUser.languageId)
+      window.localStorage.setItem('languageId', loggedUser.languageId)
+      console.log(loggedUser)
 
-      params.rememberMe
-        ? window.localStorage.setItem('userData', JSON.stringify(loggedUser))
-        : window.sessionStorage.setItem('userData', JSON.stringify(loggedUser))
+      if (params.rememberMe) {
+        window.localStorage.setItem('userData', JSON.stringify(loggedUser))
+      } else {
+        window.sessionStorage.setItem('userData', JSON.stringify(loggedUser))
+      }
 
       const returnUrl = router.query.returnUrl
       const redirectURL = returnUrl && returnUrl !== '/' ? returnUrl : '/'
@@ -172,44 +159,43 @@ const AuthProvider = ({ children }) => {
 
   const getAccessToken = async () => {
     return new Promise(resolve => {
-      if (user.expiresAt !== null) {
-        var dateNow = new Date()
-
+      if (user && user.expiresAt !== null) {
+        const dateNow = new Date()
         if (user.expiresAt < Math.trunc(dateNow.getTime() / 1000)) {
-          var bodyFormData = new FormData()
+          const bodyFormData = new FormData()
           bodyFormData.append(
             'record',
-            JSON.stringify({ accessToken: user.accessToken, refreshToken: user.refreshToken })
+            JSON.stringify({
+              accessToken: user.accessToken,
+              refreshToken: user.refreshToken
+            })
           )
 
-          return axios({
-            method: 'POST',
-            url: process.env.NEXT_PUBLIC_AuthURL + 'MA.asmx/' + 'newAT',
-            headers: {
-              authorization: 'Bearer ' + user.accessToken,
-              'Content-Type': 'multipart/form-data'
-            },
-            data: bodyFormData
-          })
+          axios
+            .post(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/newAT`, bodyFormData, {
+              headers: {
+                authorization: 'Bearer ' + user.accessToken,
+                'Content-Type': 'multipart/form-data'
+              }
+            })
             .then(res => {
-              let newUser = {
+              const newUser = {
                 ...user,
                 accessToken: res.data.record.accessToken,
                 refreshToken: res.data.record.refreshToken,
                 expiresAt: jwt(res.data.record.accessToken).exp
               }
-
-              if (window.localStorage.getItem('userData'))
-                window.localStorage.setItem('userData', JSON.stringify(newUser))
-              else window.sessionStorage.setItem('userData', JSON.stringify(newUser))
-
+              const storage = window.localStorage.getItem('userData') ? window.localStorage : window.sessionStorage
+              storage.setItem('userData', JSON.stringify(newUser))
               resolve(res.data.record.accessToken)
             })
-            .catch(() => {
-              resolve('error getting new Access Token')
-            })
-        } else resolve(user.accessToken)
-      } else resolve(null)
+            .catch(() => resolve('error getting new Access Token'))
+        } else {
+          resolve(user.accessToken)
+        }
+      } else {
+        resolve(null)
+      }
     })
   }
 
@@ -217,6 +203,7 @@ const AuthProvider = ({ children }) => {
     user,
     loading,
     companyName,
+    languageId,
     setUser,
     setLoading,
     login: handleLogin,
