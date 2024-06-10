@@ -107,7 +107,7 @@ const OutwardsTransfer = () => {
       const cashAccountId = await getCashAccountId()
 
       if (plantId !== '' && cashAccountId !== '') {
-        // openOutWardsWindow(plantId, cashAccountId, recordId)
+        openOutWardsWindow(plantId, cashAccountId, recordId)
       } else {
         if (plantId === '') {
           setErrorMessage({ error: 'The user does not have a default plant' })
