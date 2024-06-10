@@ -41,7 +41,7 @@ export default function GenerateTransferForm({ cashCountId, fromPlantId, labels,
       }
       try {
         await postRequest({
-          extension: CashCountRepository.CashCountTransaction.generate,
+          extension: CashCountRepository.Generate.generate,
           record: JSON.stringify(data)
         })
         toast.success('Cash Transfer Generated Successfully')
