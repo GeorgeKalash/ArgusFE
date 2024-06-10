@@ -11,8 +11,8 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useForm } from 'src/hooks/form'
-import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 
 export default function PlantGroupsForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -118,7 +118,7 @@ export default function PlantGroupsForm({ labels, maxAccess, recordId }) {
                 onChange={(event, newValue) => {
                   formik.setFieldValue('parentId', newValue?.recordId)
                 }}
-                error={formik.touched.parentId && Boolean(formik.errors.parentId)}
+                error={formik.touched.parent && Boolean(formik.errors.parent)}
                 maxAccess={maxAccess}
               />
             </Grid>

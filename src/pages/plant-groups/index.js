@@ -1,4 +1,5 @@
 import { useContext } from 'react'
+
 import toast from 'react-hot-toast'
 
 import Table from 'src/components/Shared/Table'
@@ -9,7 +10,7 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useWindow } from 'src/windows'
 
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -23,30 +24,23 @@ const Plant = () => {
 
   const { stack } = useWindow()
 
-  async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
-    try {
-      return await getRequest({
-        extension: SystemRepository.PlantGroup.qry,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
-      })
-    } catch (error) {}
+  async function fetchGridData() {
+    return await getRequest({
+      extension: SystemRepository.PlantGroup.qry,
+      parameters: `_filter=`
+    })
   }
 
   const {
     query: { data },
     labels: _labels,
-    paginationParameters,
     refetch,
+    invalidate,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: SystemRepository.PlantGroup.qry,
     datasetId: ResourceIds.PlantGroups
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: SystemRepository.PlantGroup.qry
   })
 
   const columns = [
@@ -80,6 +74,14 @@ const Plant = () => {
       invalidate()
       toast.success('Record Deleted Successfully')
     } catch (error) {}
+    try {
+      await postRequest({
+        extension: SystemRepository.PlantGroup.del,
+        record: JSON.stringify(obj)
+      })
+      invalidate()
+      toast.success('Record Deleted Successfully')
+    } catch (error) {}
   }
 
   function openForm(recordId) {
@@ -91,7 +93,7 @@ const Plant = () => {
         maxAccess: access
       },
       width: 600,
-      height: 300,
+      height: 350,
       title: _labels.plantGroup
     })
   }
@@ -104,7 +106,7 @@ const Plant = () => {
       },
       width: 500,
       height: 400,
-      title: 'Tree'
+      title: _labels.tree
     })
   }
 
@@ -127,8 +129,7 @@ const Plant = () => {
           isLoading={false}
           pageSize={50}
           refetch={refetch}
-          paginationParameters={paginationParameters}
-          paginationType='api'
+          paginationType='client'
           maxAccess={access}
         />
       </Grow>

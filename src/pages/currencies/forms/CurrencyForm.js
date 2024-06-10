@@ -1,7 +1,6 @@
 // ** MUI Imports
 import { Grid, FormControlLabel, Checkbox } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
-import { useFormik } from 'formik'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -51,24 +50,26 @@ export default function CurrencyForm({ labels, maxAccess, recordId }) {
       profileId: yup.string().required(' ')
     }),
     onSubmit: async obj => {
-      const recordId = obj.recordId
+      try {
+        const recordId = obj.recordId
 
-      const response = await postRequest({
-        extension: SystemRepository.Currency.set,
-        record: JSON.stringify(obj)
-      })
-
-      if (!recordId) {
-        toast.success('Record Added Successfully')
-        formik.setValues({
-          ...obj,
-          recordId: response.recordId
+        const response = await postRequest({
+          extension: SystemRepository.Currency.set,
+          record: JSON.stringify(obj)
         })
-      } else {
-        toast.success('Record Edited Successfully')
-      }
-      setEditMode(true)
-      invalidate()
+
+        if (!recordId) {
+          toast.success('Record Added Successfully')
+          formik.setValues({
+            ...obj,
+            recordId: response.recordId
+          })
+        } else {
+          toast.success('Record Edited Successfully')
+        }
+        setEditMode(true)
+        invalidate()
+      } catch (error) {}
     }
   })
 

@@ -56,7 +56,7 @@ const MultiCurrencyMapping = () => {
     },
     {
       field: 'exName',
-      headerName: _labels.exchange,
+      headerName: _labels.exchangeTable,
       flex: 1
     }
   ]
@@ -66,7 +66,7 @@ const MultiCurrencyMapping = () => {
   }
 
   const popup = obj => {
-    openForm(obj?.currencyId, obj?.note)
+    openForm(obj?.currencyId, obj?.rateTypeId)
   }
 
   const del = async obj => {
@@ -89,7 +89,7 @@ const MultiCurrencyMapping = () => {
         invalidate: invalidate
       },
       width: 600,
-      height: 600,
+      height: 300,
       title: _labels.mc_mapping
     })
   }

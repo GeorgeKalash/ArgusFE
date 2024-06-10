@@ -4,7 +4,7 @@ import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
@@ -27,15 +27,12 @@ const CostCenterGroup = () => {
     return { ...response, _startAt: _startAt }
   }
 
-  const invalidate = useInvalidate({
-    endpointId: GeneralLedgerRepository.CostCenterGroup.page
-  })
-
   const {
     query: { data },
     labels: _labels,
     paginationParameters,
     refetch,
+    invalidate,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -65,12 +62,14 @@ const CostCenterGroup = () => {
   }
 
   const del = async obj => {
-    await postRequest({
-      extension: GeneralLedgerRepository.CostCenterGroup.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success('Record Deleted Successfully')
+    try {
+      await postRequest({
+        extension: GeneralLedgerRepository.CostCenterGroup.del,
+        record: JSON.stringify(obj)
+      })
+      toast.success('Record Deleted Successfully')
+      invalidate()
+    } catch (error) {}
   }
   function openForm(recordId) {
     stack({
@@ -78,11 +77,10 @@ const CostCenterGroup = () => {
       props: {
         labels: _labels,
         recordId: recordId ? recordId : null,
-        maxAccess: access,
-        invalidate: invalidate
+        maxAccess: access
       },
       width: 600,
-      height: 600,
+      height: 250,
       title: _labels.costCenter
     })
   }

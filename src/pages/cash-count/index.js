@@ -9,10 +9,9 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 
 // ** Helpers
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
 
 // ** Resources
@@ -31,16 +30,13 @@ const CashCount = () => {
   async function fetchWithSearch({ options = {}, filters }) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    return (
-      filters.qry &&
-      (await getRequest({
-        extension: CashCountRepository.CashCountTransaction.snapshot,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=${filters.qry}`
-      }))
-    )
+    return await getRequest({
+      extension: CashCountRepository.CashCountTransaction.snapshot,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=${filters.qry}`
+    })
   }
 
-  async function fetchGridData(options = {}) {
+  async function fetchGridData() {
     return await getRequest({
       extension: CashCountRepository.CashCountTransaction.qry,
       parameters: ``
@@ -52,6 +48,7 @@ const CashCount = () => {
     filterBy,
     clearFilter,
     labels: _labels,
+    refetch,
     access,
     invalidate
   } = useResourceQuery({
@@ -170,7 +167,8 @@ const CashCount = () => {
           onDelete={del}
           deleteConfirmationType={'strict'}
           isLoading={false}
-          pageSize={20}
+          refetch={refetch}
+          pageSize={50}
           paginationType='client'
           maxAccess={access}
         />
