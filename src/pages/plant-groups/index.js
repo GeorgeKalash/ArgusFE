@@ -98,6 +98,14 @@ const Plant = () => {
     })
   }
 
+  const actions = [
+    {
+      key: 'RecordRemarks',
+      condition: true,
+      onClick: 'onRecordRemarks',
+      disabled: !editMode
+    }
+  ]
   function onTreeClick() {
     stack({
       Component: Tree,
@@ -117,7 +125,7 @@ const Plant = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} onTree={onTreeClick} />
+        <GridToolbar onAdd={add} actions={actions} maxAccess={access} onTree={onTreeClick} />
       </Fixed>
       <Grow>
         <Table
