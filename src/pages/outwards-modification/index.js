@@ -12,6 +12,8 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { formatDateDefault } from 'src/lib/date-helper'
+import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
+import { SystemFunction } from 'src/resources/SystemFunction'
 
 const OutwardsModification = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -95,7 +97,7 @@ const OutwardsModification = () => {
       props: {
         labels: _labels,
         recordId: recordId ? recordId : null,
-        maxAccess: access
+        access
       },
       width: 1260,
       height: 720,
@@ -103,8 +105,13 @@ const OutwardsModification = () => {
     })
   }
 
-  const add = () => {
-    openForm()
+  const { proxyAction } = useDocumentTypeProxy({
+    functionId: SystemFunction.OutwardsModification,
+    action: openForm
+  })
+
+  const add = async () => {
+    await proxyAction()
   }
 
   const edit = obj => {

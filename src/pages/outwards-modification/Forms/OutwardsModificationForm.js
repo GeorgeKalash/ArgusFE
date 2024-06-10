@@ -12,7 +12,6 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
-import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import { formatDateFromApi } from 'src/lib/date-helper'
 import FieldSet from 'src/components/Shared/FieldSet'
 import BenificiaryCashForm from 'src/components/Shared/BenificiaryCashForm'
@@ -21,8 +20,9 @@ import toast from 'react-hot-toast'
 import { RTOWMRepository } from 'src/repositories/RTOWMRepository'
 import { useInvalidate } from 'src/hooks/resource'
 import { SystemFunction } from 'src/resources/SystemFunction'
+import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 
-export default function OutwardsModificationForm({ maxAccess, labels, recordId }) {
+export default function OutwardsModificationForm({ access, labels, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [editMode, setEditMode] = useState(!!recordId)
   const [displayCash, setDisplayCash] = useState(false)
@@ -37,6 +37,13 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
     { beneficiaryList: {} },
     { fullModifiedOutwardBody: {} }
   )
+
+  const { maxAccess } = useDocumentType({
+    functionId: SystemFunction.OutwardsModification,
+    access: access,
+    hasDT: false,
+    enabled: !editMode
+  })
 
   const invalidate = useInvalidate({
     endpointId: RTOWMRepository.OutwardsModification.page
