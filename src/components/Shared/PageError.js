@@ -2,7 +2,7 @@ import React from 'react'
 import Window from './Window'
 import { Box, Button, DialogActions, DialogContent } from '@mui/material'
 
-const PageError = ({ onClose, message, height = 100 }) => {
+const PageError = ({ onClose, message, height = '' }) => {
   const errorMessage =
     typeof message === 'string'
       ? message
@@ -15,7 +15,7 @@ const PageError = ({ onClose, message, height = 100 }) => {
       : message?.response?.data
 
   return (
-    <Window Title='Error' width={450} height={height} onClose={onClose} canExpand={false}>
+    <Window Title='Error' width={450} height={height} onClose={onClose} canExpand={false} controlled={true}>
       <DialogContent>
         <Box
           sx={{
