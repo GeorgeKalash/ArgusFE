@@ -133,7 +133,8 @@ const CashCount = () => {
 
   const { proxyAction } = useDocumentTypeProxy({
     functionId: SystemFunction.CashCountTransaction,
-    action: openForm
+    action: openForm,
+    hasDT: false
   })
 
   const edit = obj => {
