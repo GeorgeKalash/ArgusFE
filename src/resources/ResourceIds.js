@@ -135,6 +135,9 @@ export const ResourceIds = {
   TaxSchedules: 31107,
   LOShipments: 40301,
   LOTransportation: 40302,
+  OpeningBalance: 33311,
   AccountBalance: 33107,
-  CATransaction: 33312
+  CATransaction: 33312,
+  ProductionRequestLog: 42321,
+  PointOfSale: 54101
 }

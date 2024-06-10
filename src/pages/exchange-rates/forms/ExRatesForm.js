@@ -117,6 +117,7 @@ export default function ExRatesForm({ labels, recordId, maxAccess, record, windo
                 endpointId={MultiCurrencyRepository.ExchangeTable.qry}
                 name='exId'
                 label={labels.exTable}
+                readOnly={editMode}
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 columnsInDropDown={[
@@ -135,6 +136,7 @@ export default function ExRatesForm({ labels, recordId, maxAccess, record, windo
             <Grid item xs={12}>
               <CustomDatePicker
                 name='dayId'
+                readOnly={editMode}
                 label={labels.stDate}
                 onChange={formik.setFieldValue}
                 value={formik.values.dayId}

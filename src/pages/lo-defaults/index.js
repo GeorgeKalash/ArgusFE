@@ -13,13 +13,15 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 const LoDefault = () => {
   const [errorMessage, setErrorMessage] = useState(null)
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const [initialValues, setInitialValues] = useState({
-    transitSiteId: null
+    transitSiteId: null,
+    lo_min_car_amount: null
   })
 
   useEffect(() => {
@@ -37,7 +39,7 @@ const LoDefault = () => {
         console.log(res)
 
         const filteredList = res.list.filter(obj => {
-          return obj.key === 'transitSiteId'
+          return obj.key === 'transitSiteId' || obj.key === 'lo_min_car_amount'
         })
         filteredList.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
         setInitialValues(myObject)
@@ -85,7 +87,7 @@ const LoDefault = () => {
   return (
     <VertLayout>
       <Grow>
-        <Grid container spacing={5} sx={{ pl: '10px', pt: '1.4rem' }} lg={4} md={7} sm={7} xs={12}>
+        <Grid container spacing={2} sx={{ pl: '10px', pt: '1.4rem' }} lg={4} md={7} sm={7} xs={12}>
           <Grid item xs={12}>
             <ResourceComboBox
               endpointId={InventoryRepository.Site.qry}
@@ -107,8 +109,16 @@ const LoDefault = () => {
                 }
               }}
               error={formik.touched.transitSiteId && Boolean(formik.errors.transitSiteId)}
-
-              // helperText={formik.touched.transitSiteId && formik.errors.transitSiteId}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomNumberField
+              onClear={() => formik.setFieldValue('lo_min_car_amount', '')}
+              name='lo_min_car_amount'
+              onChange={formik.handleChange}
+              label={_labels.mca}
+              value={formik.values.lo_min_car_amount}
+              error={formik.touched.lo_min_car_amount && Boolean(formik.errors.lo_min_car_amount)}
             />
           </Grid>
         </Grid>
