@@ -13,8 +13,6 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 export default function CostCenterGroupForm({ labels, maxAccess, recordId }) {
-  const editMode = !!recordId
-
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
@@ -52,6 +50,7 @@ export default function CostCenterGroupForm({ labels, maxAccess, recordId }) {
       } catch (error) {}
     }
   })
+  const editMode = !!recordId || formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
