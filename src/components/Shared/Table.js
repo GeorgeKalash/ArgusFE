@@ -113,6 +113,7 @@ const Table = ({
   const { stack } = useWindow()
 
   const [gridData, setGridData] = useState(props.gridData)
+  const [isArabic, setIsArabic] = useState(false)
   const { platformLabels } = useContext(ControlContext)
   const [startAt, setStartAt] = useState(0)
   const [page, setPage] = useState(1)
@@ -124,6 +125,11 @@ const Table = ({
   const refetch = props?.refetch
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
   const columnsAccess = props.maxAccess && props.maxAccess.record.controls
+
+  useEffect(() => {
+    if (auth?.user?.languageId === 2) setIsArabic(true)
+    else setIsArabic(false)
+  }, [])
 
   const getRowId = row => {
     return props.rowId.map(field => row[field]).join('-')

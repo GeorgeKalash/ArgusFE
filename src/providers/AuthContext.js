@@ -132,7 +132,6 @@ const AuthProvider = ({ children }) => {
       setUser(loggedUser)
       setLanguageId(loggedUser.languageId)
       window.localStorage.setItem('languageId', loggedUser.languageId)
-      console.log(loggedUser)
 
       if (params.rememberMe) {
         window.localStorage.setItem('userData', JSON.stringify(loggedUser))

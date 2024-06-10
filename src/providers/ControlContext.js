@@ -7,13 +7,14 @@ import { KVSRepository } from 'src/repositories/KVSRepository'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { AuthContext } from './AuthContext'
+import axios from 'axios'
 
 const ControlContext = createContext()
 
 const ControlProvider = ({ children }) => {
   const { getRequest } = useContext(RequestsContext)
   const [apiPlatformLabels, setApiPlatformLabels] = useState(null)
-  const { user } = useContext(AuthContext)
+  const { user, apiUrl } = useContext(AuthContext)
 
   useEffect(() => {
     getPlatformLabels(ResourceIds.Common, setApiPlatformLabels)
@@ -25,18 +26,22 @@ const ControlProvider = ({ children }) => {
 
   const getPlatformLabels = (resourceId, callback) => {
     var parameters = '_dataset=' + resourceId + '&_language=1'
+    console.log(resourceId)
 
-    getRequest({
-      extension: KVSRepository.getPlatformLabels,
-      parameters: parameters
-    }).then(
-      res => {
-        callback(res.list)
-      },
-      error => {
-        console.error(error, 'Access')
+    axios({
+      method: 'GET',
+      url: apiUrl + KVSRepository.getPlatformLabels + '?' + parameters,
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        LanguageId: user?.languageId || 1
       }
-    )
+    })
+      .then(res => {
+        callback(res.data.list)
+      })
+      .catch(error => {
+        console.error(error, 'Access')
+      })
   }
 
   const getLabels = (resourceId, callback) => {
