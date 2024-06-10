@@ -29,7 +29,7 @@ import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepositor
 import { RateDivision } from 'src/resources/RateDivision'
 import { DIRTYFIELD_AMOUNT, getRate } from 'src/utils/RateCalculator'
 
-export default function CashTransferTab({ labels, recordId, maxAccess, plantId, cashAccountId, dtId }) {
+export default function CashTransferTab({ labels, recordId, access, plantId, cashAccountId, dtId }) {
   const [editMode, setEditMode] = useState(!!recordId)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
@@ -77,6 +77,12 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
         balance: 0
       }
     ]
+  })
+
+  const { maxAccess } = useDocumentType({
+    functionId: SystemFunction.CashTransfer,
+    access: access,
+    enabled: !recordId
   })
 
   const { formik } = useForm({
