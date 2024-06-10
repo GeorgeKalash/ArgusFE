@@ -98,14 +98,6 @@ const Plant = () => {
     })
   }
 
-  const actions = [
-    {
-      key: 'RecordRemarks',
-      condition: true,
-      onClick: 'onRecordRemarks',
-      disabled: !editMode
-    }
-  ]
   function onTreeClick() {
     stack({
       Component: Tree,
