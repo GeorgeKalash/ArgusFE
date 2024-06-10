@@ -463,13 +463,13 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
               <Grid item xs={4} sx={{ pl: 5, pt: 2 }}>
                 <Button
                   sx={{
-                    backgroundColor: '#f44336',
+                    backgroundColor: '#4eb558',
                     color: '#FFFFFF',
                     '&:hover': {
-                      backgroundColor: alpha('#f44336', 0.8)
+                      backgroundColor: alpha('#4eb558', 0.8)
                     },
                     '&:disabled': {
-                      backgroundColor: alpha('#f44336', 0.8)
+                      backgroundColor: alpha('#4eb558', 0.8)
                     }
                   }}
                   disabled={store?.submitted || !displayCash == !displayBank || editMode}
@@ -478,9 +478,10 @@ export default function OutwardsModificationForm({ maxAccess, labels, recordId }
                       ...prevStore,
                       clearBenForm: true
                     }))
+                    formik.setFieldValue('headerBenName', '')
                   }}
                 >
-                  Clear
+                  Add Beneficiary
                 </Button>
               </Grid>
             </Grid>
