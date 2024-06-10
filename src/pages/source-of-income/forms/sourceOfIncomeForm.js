@@ -1,4 +1,3 @@
-// ** MUI Imports
 import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import { useFormik } from 'formik'
@@ -9,48 +8,30 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { DataSets } from 'src/resources/DataSets'
-
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-
-// ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
+import { useForm } from 'src/hooks/form'
 
-
-export default function SourceOfIncomeForm({ labels, maxAccess, recordId }) {
-
-  const [isLoading, setIsLoading] = useState(false)
-
+export default function SourceOfIncomeForm({ labels, maxAccess, recordId, setStore }) {
   const [editMode, setEditMode] = useState(!!recordId)
 
-  const [initialValues, setInitialData] = useState({
-    recordId: null,
-    name: '',
-    reference:'',
-    incomeType:'',
-    flName:''
-
-
-  })
-
   const { getRequest, postRequest } = useContext(RequestsContext)
-
-  //const editMode = !!recordId
 
   const invalidate = useInvalidate({
     endpointId: RemittanceSettingsRepository.SourceOfIncome.page
   })
 
-  const formik = useFormik({
-    initialValues,
+  const { formik } = useForm({
+    initialValues: { recordId: null, name: '', reference: '', incomeType: '', flName: '' },
+    maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required('This field is required'),
-      reference: yup.string().required('This field is required'),
-      incomeType: yup.string().required('This field is required'),
-      flName: yup.string().required('This field is required'),
+      name: yup.string().required(' '),
+      reference: yup.string().required(' '),
+      incomeType: yup.string().required(' '),
+      flName: yup.string().required(' ')
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
@@ -61,10 +42,14 @@ export default function SourceOfIncomeForm({ labels, maxAccess, recordId }) {
       })
 
       if (!recordId) {
+        setStore({
+          recordId: response.recordId,
+          name: obj.name
+        })
         toast.success('Record Added Successfully')
-        setInitialData({
-          ...obj, // Spread the existing properties
-          recordId: response.recordId // Update only the recordId field
+        formik.setValues({
+          ...obj,
+          recordId: response.recordId
         })
       } else toast.success('Record Edited Successfully')
       setEditMode(true)
@@ -77,30 +62,22 @@ export default function SourceOfIncomeForm({ labels, maxAccess, recordId }) {
     ;(async function () {
       try {
         if (recordId) {
-          setIsLoading(true)
-
           const res = await getRequest({
             extension: RemittanceSettingsRepository.SourceOfIncome.get,
             parameters: `_recordId=${recordId}`
           })
-
-          setInitialData(res.record)
+          setStore({
+            recordId: res.record.recordId,
+            name: res.record.name
+          })
+          formik.setValues(res.record)
         }
-      } catch (exception) {
-        setErrorMessage(error)
-      }
-      setIsLoading(false)
+      } catch (exception) {}
     })()
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.SourceOfIncome}
-      form={formik}
-      height={300}
-      maxAccess={maxAccess}
-      editMode={editMode}
-    >
+    <FormShell resourceId={ResourceIds.SourceOfIncome} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <Grid container spacing={4}>
         <Grid item xs={12}>
           <CustomTextField
@@ -142,25 +119,22 @@ export default function SourceOfIncomeForm({ labels, maxAccess, recordId }) {
           />
         </Grid>
         <Grid item xs={12}>
-        <ResourceComboBox
-              datasetId={DataSets.CT_INCOME_TYPE }
-              name='incomeType'
-              label={labels.incomeType}
-              valueField='key'
-              displayField='value'
-              values={formik.values}
-              required
-              maxAccess={maxAccess}
-              onChange={(event, newValue) => {
-                formik.setFieldValue('incomeType', newValue?.key)
-              }}
-              error={formik.touched.incomeType && Boolean(formik.errors.incomeType)}
-            />
+          <ResourceComboBox
+            datasetId={DataSets.CT_INCOME_TYPE}
+            name='incomeType'
+            label={labels.incomeType}
+            valueField='key'
+            displayField='value'
+            values={formik.values}
+            required
+            maxAccess={maxAccess}
+            onChange={(event, newValue) => {
+              formik.setFieldValue('incomeType', newValue?.key)
+            }}
+            error={formik.touched.incomeType && Boolean(formik.errors.incomeType)}
+          />
         </Grid>
       </Grid>
     </FormShell>
   )
 }
-
-
-

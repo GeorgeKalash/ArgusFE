@@ -4,13 +4,16 @@ import { ControlContext } from 'src/providers/ControlContext'
 export default function useResourceParams({ datasetId }) {
   const [labels, setLabels] = useState(null)
   const [access, setAccess] = useState(null)
+
   const { getLabels, getAccess } = useContext(ControlContext)
 
   useEffect(() => {
-    if (!access) getAccess(datasetId, setAccess)
-    else {
-      if (access.record.maxAccess > 0) {
-        getLabels(datasetId, setLabels)
+    if (datasetId) {
+      if (!access) getAccess(datasetId, setAccess)
+      else {
+        if (access.record.maxAccess > 0) {
+          getLabels(datasetId, setLabels)
+        }
       }
     }
   }, [access])

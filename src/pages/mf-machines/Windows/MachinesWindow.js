@@ -1,52 +1,29 @@
-// ** Custom Imports
 import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import MachinesForm from '../forms/MachinesForm'
 import MachineSpecificationForm from '../forms/MachineSpecificationForm'
 import { useState } from 'react'
 
-
-const MachinesWindow = ({
-  onClose,
-  labels,
-  maxAccess,
-  recordId
-}) => {
-  
+const MachinesWindow = ({ onClose, labels, maxAccess, recordId }) => {
   const [activeTab, setActiveTab] = useState(0)
 
   const editMode = !!recordId
 
   return (
-
     <Window
       id='MachinesWindow'
       Title={labels.Machines}
       controlled={true}
       onClose={onClose}
-      width={600}
-      height={550}
-      tabs={[
-        { label: labels.Machines },
-        { label: labels.MachineSpecification, disabled: !editMode },
-      ]}
+      tabs={[{ label: labels.Machines }, { label: labels.MachineSpecification, disabled: !editMode }]}
       activeTab={activeTab}
       setActiveTab={setActiveTab}
-
     >
       <CustomTabPanel index={0} value={activeTab}>
-      <MachinesForm
-          labels={labels}
-          maxAccess={maxAccess}
-          recordId={recordId}
-        />
+        <MachinesForm labels={labels} maxAccess={maxAccess} recordId={recordId} />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
-      <MachineSpecificationForm
-          labels={labels}
-          maxAccess={maxAccess}
-          recordId={recordId}
-        />
+        <MachineSpecificationForm labels={labels} maxAccess={maxAccess} recordId={recordId} />
       </CustomTabPanel>
     </Window>
   )

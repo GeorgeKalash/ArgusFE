@@ -1,37 +1,20 @@
-// ** React Imports
 import { useState, useContext } from 'react'
-
-// ** MUI Imports
-import {Box } from '@mui/material'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-
 import { SystemRepository } from 'src/repositories/SystemRepository'
-
-// ** Windows
-import StatesWindow from './Windows/StatesWindow'
-
-// ** Helpers
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
-
-// ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import StatesForm from './forms/StatesForm'
+import { useWindow } from 'src/windows'
 
 const States = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
- 
-  const [selectedRecordId, setSelectedRecordId] = useState(null)
-
-  //states
-  const [windowOpen, setWindowOpen] = useState(false)
-  const [errorMessage, setErrorMessage] = useState(null)
+  const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, _countryId = 0 } = options
@@ -41,8 +24,7 @@ const States = () => {
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_countryId=${_countryId}&filter=`
     })
 
-    return {...response,  _startAt: _startAt}
-
+    return { ...response, _startAt: _startAt }
   }
 
   const {
@@ -75,12 +57,25 @@ const States = () => {
   ]
 
   const add = () => {
-    setWindowOpen(true)
+    openForm()
   }
 
   const edit = obj => {
-    setSelectedRecordId(obj.recordId)
-    setWindowOpen(true)
+    openForm(obj?.recordId)
+  }
+
+  function openForm(recordId) {
+    stack({
+      Component: StatesForm,
+      props: {
+        labels: _labels,
+        recordId: recordId,
+        maxAccess: access
+      },
+      width: 500,
+      height: 300,
+      title: _labels.State
+    })
   }
 
   const del = async obj => {
@@ -91,12 +86,13 @@ const States = () => {
     invalidate()
     toast.success('Record Deleted Successfully')
   }
-  
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar onAdd={add} maxAccess={access} />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
@@ -110,21 +106,8 @@ const States = () => {
           maxAccess={access}
           paginationType='api'
         />
-      </Box>
-      {windowOpen && (
-        <StatesWindow
-          onClose={() => {
-            setWindowOpen(false)
-            setSelectedRecordId(null)
-          }}
-          labels={_labels}
-          maxAccess={access}
-          recordId={selectedRecordId}
-          setSelectedRecordId={setSelectedRecordId}
-        />
-      )}
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+      </Grow>
+    </VertLayout>
   )
 }
 

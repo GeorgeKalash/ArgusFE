@@ -12,6 +12,7 @@ import axios from 'axios'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 
 const DocumentTypes = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -59,18 +60,10 @@ const DocumentTypes = () => {
   }, [])
 
   return (
-    <>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%'
-        }}
-      >
-        {reportTemplate}
-      </Box>
+    <VertLayout>
+      {reportTemplate}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+    </VertLayout>
   )
 }
 

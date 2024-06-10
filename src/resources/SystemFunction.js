@@ -89,8 +89,18 @@ export const SystemFunction = {
   Penalty: Module.EmployeeProfile * 100 + 3,
   JobInfo: Module.EmployeeProfile * 100 + 4,
   PaymentOrder: Module.Financials * 100 + 12,
+  CurrencyPurchase: Module.CurrencyTrading * 100 + 2,
+  CurrencySale: Module.CurrencyTrading * 100 + 3,
   CurrencyCreditOrderPurchase: Module.CurrencyTrading * 100 + 4,
   CurrencyCreditOrderSale: Module.CurrencyTrading * 100 + 5,
   CreditInvoicePurchase: Module.CurrencyTrading * 100 + 6,
-  CreditInvoiceSales: Module.CurrencyTrading * 100 + 7
+  CreditInvoiceSales: Module.CurrencyTrading * 100 + 7,
+  KYC: Module.Remittance * 100 + 0,
+  Outwards: Module.Remittance * 100 + 2,
+  OutwardsModification: Module.Remittance * 100 + 4,
+  CashCountTransaction: Module.CashCount * 100 + 1
+}
+
+export const getSystemFunctionModule = functionId => {
+  return Math.floor(functionId / 100)
 }

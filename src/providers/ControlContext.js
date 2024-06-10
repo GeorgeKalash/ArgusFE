@@ -1,8 +1,5 @@
 // ** React Imports
-import { createContext, useContext, useState } from 'react'
-
-// ** Custom Imports
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
+import { createContext, useContext } from 'react'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -12,9 +9,7 @@ import { AccessControlRepository } from 'src/repositories/AccessControlRepositor
 const ControlContext = createContext()
 
 const ControlProvider = ({ children }) => {
-
   const { getRequest } = useContext(RequestsContext)
-  const [errorMessage, setErrorMessage] = useState(null)
 
   const getLabels = (resourceId, callback) => {
     var parameters = '_dataset=' + resourceId
@@ -22,15 +17,14 @@ const ControlProvider = ({ children }) => {
     getRequest({
       extension: KVSRepository.getLabels,
       parameters: parameters
-    })
-      .then(res => {
-
+    }).then(
+      res => {
         callback(res.list)
-      })
-      .catch(error => {
-        console.log('error at getLabels')
-        setErrorMessage(error)
-      })
+      },
+      error => {
+        console.error(error, 'Access')
+      }
+    )
   }
 
   const getAccess = (resourceId, callback) => {
@@ -39,28 +33,26 @@ const ControlProvider = ({ children }) => {
     getRequest({
       extension: AccessControlRepository.maxAccess,
       parameters: parameters
-    })
-      .then(res => {
+    }).then(
+      res => {
         callback(res)
-      })
-      .catch(error => {
-        console.log('error at getAccess')
-        setErrorMessage(error)
-      })
+      },
+      error => {
+        console.error(error, 'Access')
+      }
+    )
   }
 
   const values = {
     getLabels,
-    getAccess,
+    getAccess
   }
 
   return (
     <>
       <ControlContext.Provider value={values}>{children}</ControlContext.Provider>
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )
-
 }
 
 export { ControlContext, ControlProvider }

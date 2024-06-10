@@ -1,28 +1,17 @@
-// ** React Imports
 import { useState, useContext } from 'react'
-
-// ** MUI Imports
 import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
-
-// ** Windows
-
-// ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
-
-// ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 import ProductionClassWindow from './Windows/ProductionClassWindow'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 
 const MfProductionClasses = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -89,7 +78,6 @@ const MfProductionClasses = () => {
   }
 
   const del = async obj => {
-
     await postRequest({
       extension: ManufacturingRepository.ProductionClass.del,
       record: JSON.stringify(obj)
@@ -100,9 +88,11 @@ const MfProductionClasses = () => {
   }
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar onAdd={add} maxAccess={access} />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
@@ -114,7 +104,7 @@ const MfProductionClasses = () => {
           paginationType='client'
           maxAccess={access}
         />
-      </Box>
+      </Grow>
 
       {windowOpen && (
         <ProductionClassWindow
@@ -135,7 +125,7 @@ const MfProductionClasses = () => {
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+    </VertLayout>
   )
 }
 

@@ -7,14 +7,7 @@ const MaterialsAdjustmentWindow = ({ onClose, labels, maxAccess, recordId, setEr
   console.log('pass window')
 
   return (
-    <Window
-      id='MaterialsAdjustmentWindow'
-      Title={labels[1]}
-      controlled={true}
-      onClose={onClose}
-      width={900}
-      height={600}
-    >
+    <Window id='MaterialsAdjustmentWindow' Title={labels[1]} controlled={true} onClose={onClose}>
       <MaterialsAdjustmentForm
         labels={labels}
         maxAccess={maxAccess}

@@ -32,11 +32,12 @@ function Dropdown({ Image, TooltipTitle, onClickAction, name, map, navCollapsed 
         backgroundColor: '#231f20',
         borderRadius: '4px',
         marginLeft: '10px',
-        padding: '5px',
+        padding: '0px',
       }}>
         <div
           style={{
-            paddingTop: '5px',
+            height:'30px',
+            paddingTop: '3px',
             paddingLeft: '5px',
             margin: '0px',
           }}
@@ -48,7 +49,7 @@ function Dropdown({ Image, TooltipTitle, onClickAction, name, map, navCollapsed 
             onClick={OpenItems}
             size="small"
           >
-            <ExpandMoreIcon style={{ fontSize: 22 }} />
+            <ExpandMoreIcon style={{ fontSize: 16 }} />
           </IconButton>
         </Tooltip>
       </Box>

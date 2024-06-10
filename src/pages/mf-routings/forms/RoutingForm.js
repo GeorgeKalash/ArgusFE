@@ -14,7 +14,15 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 
-export default function RoutingForm({ labels, maxAccess, recordId, setErrorMessage, setSelectedRecordId, editMode, setEditMode }) {
+export default function RoutingForm({
+  labels,
+  maxAccess,
+  recordId,
+  setErrorMessage,
+  setSelectedRecordId,
+  editMode,
+  setEditMode
+}) {
   const [isLoading, setIsLoading] = useState(false)
 
   const [initialValues, setInitialData] = useState({
@@ -81,13 +89,7 @@ export default function RoutingForm({ labels, maxAccess, recordId, setErrorMessa
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.Routings}
-      form={formik}
-      height={300}
-      maxAccess={maxAccess}
-      editMode={editMode}
-    >
+    <FormShell resourceId={ResourceIds.Routings} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <Grid container spacing={4}>
         <Grid item xs={12}>
           <CustomTextField

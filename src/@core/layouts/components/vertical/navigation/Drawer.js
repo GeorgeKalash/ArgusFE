@@ -21,7 +21,7 @@ const SwipeableDrawer = styled(MuiSwipeableDrawer)({
 })
 
 const Drawer = props => {
-  // ** Props
+  
   const {
     hidden,
     children,
@@ -34,14 +34,10 @@ const Drawer = props => {
     navigationBorderWidth
   } = props
 
-  // ** Hook
   const theme = useTheme()
-
-  // ** Vars
   const { navCollapsed } = settings
   let flag = true
 
-  // Drawer Props for Mobile & Tablet screens
   const MobileDrawerProps = {
     open: navVisible,
     onOpen: () => setNavVisible(true),
@@ -51,7 +47,6 @@ const Drawer = props => {
     }
   }
 
-  // Drawer Props for Laptop & Desktop screens
   const DesktopDrawerProps = {
     open: true,
     onOpen: () => null,

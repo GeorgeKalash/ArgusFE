@@ -1,7 +1,6 @@
 const service = 'LO.asmx/'
 
 export const LogisticsRepository = {
-
   LoCollector: {
     qry: service + 'qryCOL',
     get: service + 'getCOL',
@@ -16,4 +15,12 @@ export const LogisticsRepository = {
     page: service + 'pageCAR',
     del: service + 'delCAR'
   },
+  Shipment: {
+    get2: service + 'get2SHP',
+    set2: service + 'set2SHP'
+  },
+  Transportation: {
+    get: service + 'getTPT',
+    set: service + 'setTPT'
+  }
 }

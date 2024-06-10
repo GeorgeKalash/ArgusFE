@@ -2,8 +2,6 @@ import { useFormik } from 'formik'
 import * as yup from 'yup'
 import { useEffect, useState, useContext } from 'react'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import FormShell from 'src/components/Shared/FormShell'
@@ -18,6 +16,8 @@ import { CommonContext } from 'src/providers/CommonContext'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { AuthContext } from 'src/providers/AuthContext'
 import { getFormattedNumber } from 'src/lib/numberField-helper'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 export default function MonthlyTargetForm({ labels, maxAccess, recordId, setErrorMessage }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -186,83 +186,80 @@ export default function MonthlyTargetForm({ labels, maxAccess, recordId, setErro
   }, [recordId])
 
   return (
-    <FormShell resourceId={ResourceIds.SalesPerson} form={formik} height={300} editMode={true} maxAccess={maxAccess}>
-      <Grid container>
-        <Grid item xs={12}>
-          <Grid container spacing={2} alignItems='center'>
-            <Grid item xs={9}>
-              <ResourceComboBox
-                endpointId={SystemRepository.FiscalYears.qry}
-                name='fiscalYear'
-                label={labels[10]}
-                valueField='fiscalYear'
-                displayField='fiscalYear'
-                values={formik.values}
-                required
-                maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik && formik.setFieldValue('fiscalYear', newValue?.fiscalYear)
-                  changeFiscal(newValue?.fiscalYear)
-                }}
-                error={formik.touched.fiscalYear && Boolean(formik.errors.fiscalYear)}
-                helperText={formik.touched.fiscalYear && formik.errors.fiscalYear}
-              />
+    <FormShell resourceId={ResourceIds.SalesPerson} form={formik} editMode={true} maxAccess={maxAccess}>
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <Grid container spacing={2}>
+                <Grid item xs={9}>
+                  <ResourceComboBox
+                    endpointId={SystemRepository.FiscalYears.qry}
+                    name='fiscalYear'
+                    label={labels[10]}
+                    valueField='fiscalYear'
+                    displayField='fiscalYear'
+                    values={formik.values}
+                    required
+                    maxAccess={maxAccess}
+                    onChange={(event, newValue) => {
+                      formik && formik.setFieldValue('fiscalYear', newValue?.fiscalYear)
+                      changeFiscal(newValue?.fiscalYear)
+                    }}
+                    error={formik.touched.fiscalYear && Boolean(formik.errors.fiscalYear)}
+                    helperText={formik.touched.fiscalYear && formik.errors.fiscalYear}
+                  />
+                </Grid>
+                <Grid item xs={3}>
+                  <CustomTextField
+                    name='targetAmount'
+                    label={labels[9]}
+                    value={getFormattedNumber(formik.values.targetAmount)}
+                    maxAccess={maxAccess}
+                    readOnly={true}
+                    numberField={true}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('targetAmount', '')}
+                    error={formik.touched.targetAmount && Boolean(formik.errors.targetAmount)}
+                    helperText={formik.touched.targetAmount && formik.errors.targetAmount}
+                  />
+                </Grid>
+              </Grid>
             </Grid>
-            <Grid
-              item
-              container
-              alignItems='center'
-              justifyContent='flex-start'
-              sx={{ display: 'flex', justifyContent: 'flex-end', width: '170px' }}
-            >
-              <CustomTextField
-                name='targetAmount'
-                label={labels[9]}
-                value={getFormattedNumber(formik.values.targetAmount)}
-                maxAccess={maxAccess}
-                readOnly={true}
-                numberField={true}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('targetAmount', '')}
-                error={formik.touched.targetAmount && Boolean(formik.errors.targetAmount)}
-                helperText={formik.touched.targetAmount && formik.errors.targetAmount}
-              />
+            <Grid item xs={12}>
+              <Box>
+                <InlineEditGrid
+                  gridValidation={detailsFormik}
+                  maxAccess={maxAccess}
+                  columns={columns}
+                  defaultRow={{
+                    spId: recordId,
+                    month: '',
+                    targetAmount: ''
+                  }}
+                  allowAddNewLine={false}
+                  allowDelete={false}
+                />
+              </Box>
             </Grid>
-          </Grid>
-        </Grid>
-        <Grid item xs={12} sx={{ pt: 2 }}>
-          <Box sx={{ width: '100%' }}>
-            <InlineEditGrid
-              gridValidation={detailsFormik}
-              maxAccess={maxAccess}
-              columns={columns}
-              defaultRow={{
-                spId: recordId,
-                month: '',
-                targetAmount: ''
-              }}
-              scrollHeight={230}
-              allowAddNewLine={false}
-              allowDelete={false}
-            />
-          </Box>
-        </Grid>
-        <Grid item sx={{ pt: 3, display: 'flex', justifyContent: 'flex-end', marginLeft: '560px' }}>
-          <CustomTextField
-            name='balance'
-            label={labels[14]}
-            value={getFormattedNumber(totalAmount - formik.values.targetAmount)}
-            maxAccess={maxAccess}
-            readOnly={true}
-            onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('balance', '')}
-            error={formik.touched.balance && Boolean(formik.errors.balance)}
-            helperText={formik.touched.balance && formik.errors.balance}
-            sx={{ width: '160px' }}
-            numberField={true}
-          />
-        </Grid>
-      </Grid>
+              <Grid item xs={9}></Grid>
+              <Grid item xs={3}>
+                <CustomTextField
+                  name='balance'
+                  label={labels[14]}
+                  value={getFormattedNumber(totalAmount - formik.values.targetAmount)}
+                  maxAccess={maxAccess}
+                  readOnly={true}
+                  onChange={formik.handleChange}
+                  onClear={() => formik.setFieldValue('balance', '')}
+                  error={formik.touched.balance && Boolean(formik.errors.balance)}
+                  helperText={formik.touched.balance && formik.errors.balance}
+                  numberField={true}
+                />
+              </Grid>
+            </Grid>
+        </Grow>
+      </VertLayout>
     </FormShell>
   )
 }

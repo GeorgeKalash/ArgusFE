@@ -1,35 +1,20 @@
-// ** React Imports
 import { useState, useContext } from 'react'
-
-// ** MUI Imports
-import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
-
-// ** Windows
-
-// ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
-
-// ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 import RoutingWindow from './Windows/RoutingWindow'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const Routings = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-
   const [selectedRecordId, setSelectedRecordId] = useState(null)
-
-  //states
   const [windowOpen, setWindowOpen] = useState(false)
   const [editMode, setEditMode] = useState(false)
   const [activeTab, setActiveTab] = useState(0)
@@ -89,7 +74,6 @@ const Routings = () => {
   }
 
   const del = async obj => {
-
     await postRequest({
       extension: ManufacturingRepository.Routing.del,
       record: JSON.stringify(obj)
@@ -100,9 +84,11 @@ const Routings = () => {
   }
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar onAdd={add} maxAccess={access} />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
@@ -114,7 +100,7 @@ const Routings = () => {
           paginationType='client'
           maxAccess={access}
         />
-      </Box>
+      </Grow>
 
       {windowOpen && (
         <RoutingWindow
@@ -135,7 +121,7 @@ const Routings = () => {
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+    </VertLayout>
   )
 }
 

@@ -11,6 +11,7 @@ export const SystemRepository = {
     qry: service + 'qryDT',
     get: service + 'getDT',
     set: service + 'setDT',
+    snapshot: service + 'snapshotDT',
     del: service + 'delDT'
   },
   DocumentTypeMap: {
@@ -84,13 +85,17 @@ export const SystemRepository = {
     snapshot: service + 'snapshotCDI'
   },
   Address: {
-    qry: service + '',
+    qry: service + 'qryADD',
     get: service + 'getADD',
     set: service + 'setADD',
-    del: service + ''
+    del: service + '',
+    snapshot: service + 'snapshotADD'
   },
   PlantGroup: {
-    qry: service + 'qryPLG'
+    qry: service + 'qryPLG',
+    get: service + 'getPLG',
+    set: service + 'setPLG',
+    del: service + 'delPLG'
   },
   SMSTemplate: {
     qry: service + 'qrySMT',
@@ -144,5 +149,27 @@ export const SystemRepository = {
   },
   FiscalYears: {
     qry: service + 'qryFY'
+  },
+  ModuleClassRES: {
+    qry: service + 'qryRES'
+  },
+  ResourceControl: {
+    qry: service + 'qryResourceControls'
+  },
+  UserFunction: {
+    get: service + 'getUFU'
+  },
+  RecordRemarks: {
+    qry: service + 'qryRMK',
+    set: service + 'setRMK',
+    get: service + 'getRMK',
+    del: service + 'delRMK'
+  },
+  SystemChecks: {
+    qry: service + 'qryCHK',
+    set: service + 'set2CHK'
+  },
+  TimeZone: {
+    get: service + 'getTZN'
   }
 }

@@ -1,34 +1,20 @@
-// ** React Importsport
 import { useState, useContext } from 'react'
-
-// ** MUI Imports
-import { Box } from '@mui/material'
-
-// ** Third Party Imports
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SaleRepository } from 'src/repositories/SaleRepository'
-import { getNewSalesPerson, populateSalesPerson } from 'src/Models/Sales/SalesPerson'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { CommonContext } from 'src/providers/CommonContext'
-
-// ** Windows
 import SalesPersonWindow from './Windows/SalesPersonWindow'
-
-// ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const SalesPerson = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-
-  //states
   const [activeTab, setActiveTab] = useState(0)
   const [windowOpen, setWindowOpen] = useState(false)
   const [editMode, setEditMode] = useState(false)
@@ -116,9 +102,11 @@ const SalesPerson = () => {
   }
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar onAdd={add} maxAccess={access} />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
@@ -131,7 +119,8 @@ const SalesPerson = () => {
           paginationType='client'
           maxAccess={access}
         />
-      </Box>
+      </Grow>
+
       {windowOpen && (
         <SalesPersonWindow
           onClose={() => {
@@ -151,7 +140,7 @@ const SalesPerson = () => {
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+    </VertLayout>
   )
 }
 

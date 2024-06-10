@@ -3,16 +3,15 @@ import { useFormik } from 'formik'
 import * as yup from 'yup'
 import { useEffect, useState, useContext } from 'react'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
-
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const SFItemForm = ({ labels, maxAccess, recordId, setErrorMessage, setSelectedRecordIds }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -40,7 +39,7 @@ const SFItemForm = ({ labels, maxAccess, recordId, setErrorMessage, setSelectedR
           classId: recordId || '',
           sfItemId: null,
           itemName: '',
-          sku:''
+          sku: ''
         }
       ]
     },
@@ -99,9 +98,7 @@ const SFItemForm = ({ labels, maxAccess, recordId, setErrorMessage, setSelectedR
       valueField: 'recordId',
       displayField: 'sku',
       widthDropDown: 200,
-      fieldsToUpdate: [
-        { from: 'name', to: 'itemName' }
-      ],
+      fieldsToUpdate: [{ from: 'name', to: 'itemName' }],
       columnsInDropDown: [
         { key: 'sku', value: 'Reference' },
         { key: 'name', value: 'Name' }
@@ -137,7 +134,7 @@ const SFItemForm = ({ labels, maxAccess, recordId, setErrorMessage, setSelectedR
                   classId: recordId || '',
                   sfItemId: null,
                   itemName: '',
-                  sku:''
+                  sku: ''
                 }
               ]
             })
@@ -152,31 +149,26 @@ const SFItemForm = ({ labels, maxAccess, recordId, setErrorMessage, setSelectedR
   }, [])
 
   return (
-    <>
-      <FormShell
-        resourceId={ResourceIds.ProductionClass}
-        form={formik}
-        height={300}
-        editMode={true}
-        maxAccess={maxAccess}
-      >
-        <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', marginTop: -5 }}>
-          <InlineEditGrid
-            gridValidation={formik}
-            maxAccess={maxAccess}
-            columns={columns}
-            defaultRow={{
-              classId: recordId || '',
-              sfItemId: null,
-              itemName: '',
-              sku:''
-            }}
-            scrollHeight={250}
-            width={500}
-          />
-        </Box>
-      </FormShell>
-    </>
+    <FormShell resourceId={ResourceIds.ProductionClass} form={formik} editMode={true} maxAccess={maxAccess}>
+      <VertLayout>
+        <Grow>
+          <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', marginTop: -5 }}>
+            <InlineEditGrid
+              gridValidation={formik}
+              maxAccess={maxAccess}
+              columns={columns}
+              defaultRow={{
+                classId: recordId || '',
+                sfItemId: null,
+                itemName: '',
+                sku: ''
+              }}
+              width={500}
+            />
+          </Box>
+        </Grow>
+      </VertLayout>
+    </FormShell>
   )
 }
 

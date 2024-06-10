@@ -16,6 +16,8 @@ import { DevExpressRepository } from 'src/repositories/DevExpressRepository'
 
 // ** Statics
 import { ExportFormat } from 'src/statics/ExportFormat'
+import { VertLayout } from './Layouts/VertLayout'
+import { Fixed } from './Layouts/Fixed'
 
 const ReportViewer = ({ resourceId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -124,14 +126,8 @@ const ReportViewer = ({ resourceId }) => {
   }
 
   return (
-    <>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%'
-        }}
-      >
+    <VertLayout>
+      <Fixed>
         <GridToolbar
           openRPB={() => setReportParamWindowOpen(true)}
           disableRPB={!selectedReport?.parameters}
@@ -172,12 +168,12 @@ const ReportViewer = ({ resourceId }) => {
             </Button>
           </Box>
         </GridToolbar>
+      </Fixed>
         {pdf && (
           <Box id='reportContainer' sx={{ flex: 1, display: 'flex', p: 2 }}>
             <iframe title={selectedReport?.layoutName} src={pdf} width='100%' height='100%' allowFullScreen />
           </Box>
         )}
-      </Box>
       <ReportParameterBrowser
         disabled={!selectedReport?.parameters}
         reportName={selectedReport?.parameters}
@@ -187,7 +183,7 @@ const ReportViewer = ({ resourceId }) => {
         setParamsArray={setParamsArray}
       />
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+    </VertLayout>
   )
 }
 

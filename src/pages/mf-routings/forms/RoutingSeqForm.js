@@ -14,10 +14,9 @@ import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
 const RoutingSeqForm = ({ labels, maxAccess, recordId, setErrorMessage, setSelectedRecordId }) => {
-
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const [workCenterStore, setWorkCenterStore] =useState([])
-  const [operationStore, setOperationStore] =useState([])
+  const [workCenterStore, setWorkCenterStore] = useState([])
+  const [operationStore, setOperationStore] = useState([])
 
   const [isLoading, setIsLoading] = useState(false)
 
@@ -31,10 +30,10 @@ const RoutingSeqForm = ({ labels, maxAccess, recordId, setErrorMessage, setSelec
     validationSchema: yup.object({
       rows: yup.array().of(
         yup.object({
-            seqNo: yup.string().required('Semi finished item is required'),
-            name: yup.string().required('Semi finished item is required'),
-            workCenterName: yup.string().required('Semi finished item is required'),
-            operationName: yup.string().required('Semi finished item is required')
+          seqNo: yup.string().required('Semi finished item is required'),
+          name: yup.string().required('Semi finished item is required'),
+          workCenterName: yup.string().required('Semi finished item is required'),
+          operationName: yup.string().required('Semi finished item is required')
         })
       )
     }),
@@ -77,13 +76,13 @@ const RoutingSeqForm = ({ labels, maxAccess, recordId, setErrorMessage, setSelec
     }
   })
 
-  useEffect(()=>{
+  useEffect(() => {
     FillWorkCenter()
-  },[])
+  }, [])
 
-  useEffect(()=>{   
+  useEffect(() => {
     FillOperation()
-  },[])
+  }, [])
 
   const FillWorkCenter = () => {
     const defaultParams = `_filter=`
@@ -132,39 +131,37 @@ const RoutingSeqForm = ({ labels, maxAccess, recordId, setErrorMessage, setSelec
       name: 'name',
       mandatory: true,
       readOnly: false
-    }, 
-    {
-        field: 'combobox',
-        header: labels.workCenter,
-        nameId: 'workCenterId',
-        name: 'workCenterRef',
-        mandatory: true,
-        store: workCenterStore ,
-        valueField: 'recordId',
-        displayField: 'reference',
-        widthDropDown: 200,
-  
-        fieldsToUpdate: [{ from: 'name', to: 'workCenterName' }],
-        columnsInDropDown: [
-          { key: 'reference', value: 'Reference' },
-          { key: 'name', value: 'Name' }
-        ]
     },
     {
-        field: 'combobox',
-        header: labels.operation,
-        nameId: 'operationId',
-        name: 'operationName',
-        mandatory: true,
-        store: operationStore ,
-        valueField: 'recordId',
-        displayField: 'name',
-        widthDropDown: 200,
-  
-        fieldsToUpdate: [{ from: 'name', to: 'operationName' }],
-        columnsInDropDown: [
-            { key: 'name', value: 'Name' }
-          ]
+      field: 'combobox',
+      header: labels.workCenter,
+      nameId: 'workCenterId',
+      name: 'workCenterRef',
+      mandatory: true,
+      store: workCenterStore,
+      valueField: 'recordId',
+      displayField: 'reference',
+      widthDropDown: 200,
+
+      fieldsToUpdate: [{ from: 'name', to: 'workCenterName' }],
+      columnsInDropDown: [
+        { key: 'reference', value: 'Reference' },
+        { key: 'name', value: 'Name' }
+      ]
+    },
+    {
+      field: 'combobox',
+      header: labels.operation,
+      nameId: 'operationId',
+      name: 'operationName',
+      mandatory: true,
+      store: operationStore,
+      valueField: 'recordId',
+      displayField: 'name',
+      widthDropDown: 200,
+
+      fieldsToUpdate: [{ from: 'name', to: 'operationName' }],
+      columnsInDropDown: [{ key: 'name', value: 'Name' }]
     }
   ]
 
@@ -185,14 +182,14 @@ const RoutingSeqForm = ({ labels, maxAccess, recordId, setErrorMessage, setSelec
             formik.setValues({
               rows: [
                 {
-                    routingId: recordId || '',
-                    seqNo: '',
-                    name: '',
-                    workCenterId: '',
-                    operationId: '',
-                    workCenterName: '',
-                    workCenterRef: '',
-                    operationName: ''
+                  routingId: recordId || '',
+                  seqNo: '',
+                  name: '',
+                  workCenterId: '',
+                  operationId: '',
+                  workCenterName: '',
+                  workCenterRef: '',
+                  operationName: ''
                 }
               ]
             })
@@ -208,29 +205,22 @@ const RoutingSeqForm = ({ labels, maxAccess, recordId, setErrorMessage, setSelec
 
   return (
     <>
-      <FormShell
-        resourceId={ResourceIds.Routings}
-        form={formik}
-        height={300}
-        editMode={true}
-        maxAccess={maxAccess}
-      >
+      <FormShell resourceId={ResourceIds.Routings} form={formik} height={300} editMode={true} maxAccess={maxAccess}>
         <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', marginTop: -5 }}>
           <InlineEditGrid
             gridValidation={formik}
             maxAccess={maxAccess}
             columns={columns}
             defaultRow={{
-                routingId: recordId || '',
-                seqNo: '',
-                name: '',
-                workCenterId: '',
-                operationId: '',
-                workCenterName: '',
-                workCenterRef: '',
-                operationName: ''
+              routingId: recordId || '',
+              seqNo: '',
+              name: '',
+              workCenterId: '',
+              operationId: '',
+              workCenterName: '',
+              workCenterRef: '',
+              operationName: ''
             }}
-            scrollHeight={250}
             width={500}
           />
         </Box>

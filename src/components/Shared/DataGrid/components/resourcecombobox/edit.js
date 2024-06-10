@@ -1,38 +1,49 @@
-import { useGridApiContext } from '@mui/x-data-grid'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 
-export default function ResourceComboBoxEdit({ column: { props }, id, field, value }) {
-  const api = useGridApiContext()
+export default function ResourceComboBoxEdit({ column: { props }, id, field, value, updateRow, update, row }) {
+  let changes = props?.mapping
+    ? props.mapping
+        ?.map(({ from, to }) => ({
+          [from]: row[to] || ''
+        }))
+        .reduce((acc, obj) => ({ ...acc, ...obj }), {})
+    : value
 
-return (
+  return (
     <ResourceComboBox
-      {...props}
       name={field}
-      values={{
-        [field]: value
-      }}
+      value={changes}
       autoFocus
-      columnsInDropDown={props.columnsInDropDown}
-      displayField={props.displayField}
       label={''}
-      dataGrid={true}
-      readOnly={props?.readOnly}
+      hasBorder={false}
       onChange={(e, value) => {
-        if(value)
-        api.current.setEditCellValue({
-          id,
-          field,
-          value
-        })
+        if (props?.mapping) {
+          let changes = props.mapping
+            .map(({ from, to }) => ({
+              [to]: value ? value[from] : ''
+            }))
+            .reduce((acc, obj) => ({ ...acc, ...obj }), {})
+          updateRow({ id, changes })
+        } else {
+          update({
+            id,
+            field,
+            value: value || ''
+          })
 
-        else
+          const fieldsToUpdate = props?.fieldsToUpdate
+          if (fieldsToUpdate && fieldsToUpdate.length > 0) {
+            for (let updateObj of fieldsToUpdate) {
+              const { from, to } = updateObj
 
-        api.current.setEditCellValue({
-          id,
-          field,
-          value: ''
-        })
+              if (value && value[from]) {
+                update({ id, field: to, value: value[from] || '' })
+              }
+            }
+          }
+        }
       }}
+      {...props}
     />
   )
 }

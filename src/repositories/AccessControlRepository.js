@@ -27,6 +27,22 @@ export const AccessControlRepository = {
     snapshotGRP: service + 'snapshotGRP'
   },
   RowAccessUserView: {
-    qry: service + 'qryROU'
+    qry: service + 'qryROU',
+    set2: service + 'set2ROU'
+  },
+  ModuleDeactivation: {
+    qry: service + 'qryMOD',
+    set2: service + 'set2MOD'
+  },
+  AuthorizationResourceGlobal: {
+    qry: service + 'qryRGL',
+    get: service + 'getRGL',
+    set: service + 'setRGL'
+  },
+  GlobalControlAuthorizationPack: {
+    set2: service + 'set2CGL'
+  },
+  GlobalControlAuthorizationView: {
+    qry: service + 'qryCGL'
   }
 }

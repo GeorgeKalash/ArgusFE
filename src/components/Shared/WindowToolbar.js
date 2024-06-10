@@ -1,46 +1,69 @@
-import { DialogActions, Button, Box, Autocomplete, TextField, Tooltip } from '@mui/material'
+import { Autocomplete, Box, Button, DialogActions, TextField } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { DevExpressRepository } from 'src/repositories/DevExpressRepository'
+import { Buttons } from './Buttons'
+import ResourceComboBox from './ResourceComboBox'
+import CustomComboBox from '../Inputs/CustomComboBox'
 
 const WindowToolbar = ({
   onSave,
+  onCalculate,
   onPost,
-  onTFR,
   onClear,
   onInfo,
   onApply,
+  isSaved,
+  isInfo,
+  isCleared,
   recordId,
-  onClose,
-  newHandler,
+  onApproval,
+  onClickGIA,
+  onClickGL,
+  onClickAC,
   onGenerateReport,
   disabledSubmit,
   disabledApply,
   editMode = false,
-  smallBox = false,
   infoVisible = true,
-  NewComponentVisible,
-  postVisible = false,
-  visibleTFR = false,
+  onRecordRemarks,
   isClosed = false,
-  clientRelation,
   onClientRelation = false,
   isPosted = false,
-  isTFR = false,
   resourceId,
   setSelectedReport,
   selectedReport,
   previewReport,
-  visibleClear=true,
   actions = []
 }) => {
+  const functionMapping = {
+    actions,
+    isSaved,
+    isInfo,
+
+    isCleared,
+    disabledSubmit,
+    disabledApply,
+    infoVisible,
+    onRecordRemarks,
+    isPosted,
+    isClosed,
+    editMode,
+    onSave,
+    onPost,
+    onClear,
+    onInfo,
+    onApply,
+    onApproval,
+    onClientRelation,
+    onClickGL: () => onClickGL(recordId),
+    onClickAC: () => onClickAC(recordId),
+    onClickGIA: () => onClickGIA(recordId)
+  }
   const { getRequest } = useContext(RequestsContext)
 
-  const [showGLC, setShowGLC] = useState(false)
-
   const [reportStore, setReportStore] = useState([])
-  const [buttonIcons, setButtonIcons] = useState({})
+  const [tooltip, setTooltip] = useState('')
 
   const getReportLayout = () => {
     setReportStore([])
@@ -62,9 +85,7 @@ const WindowToolbar = ({
               }))
             )
         })
-        .catch(error => {
-          console.log(error)
-        })
+        .catch(error => {})
     }
   }
 
@@ -72,217 +93,164 @@ const WindowToolbar = ({
     getReportLayout()
   }, [])
 
+  const handleButtonMouseEnter = text => {
+    setTooltip(text)
+  }
+
+  const handleButtonMouseLeave = () => {
+    setTooltip(null)
+  }
+
   return (
-    <DialogActions>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+    <DialogActions sx={{ padding: '8px !important' }}>
+      <style>
+        {`
+          .button-container {
+            position: relative;
+            display: inline-block;
+            
+          }
+          .toast {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #333333ad;
+            color: white;
+            padding: 3px 7px;
+            border-radius: 7px;
+            opacity: 0;
+            transition: opacity 0.3s, top 0.3s;
+            z-index: 1;
+          }
+          .button-container:hover .toast {
+            opacity: 1;
+            top: -40px;
+          }
+        `}
+      </style>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          width: '100%'
+        }}
+      >
         {previewReport ? (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Autocomplete
-              size='small'
-              options={reportStore}
+            <CustomComboBox
+              label={'Select a report template'}
+              valueField='caption'
+              displayField='layoutName'
+              store={reportStore}
               value={selectedReport}
-              getOptionLabel={option => option.layoutName || option.caption || ''}
               onChange={(e, newValue) => setSelectedReport(newValue)}
-              renderInput={params => (
-                <TextField {...params} label='Select a report template' variant='outlined' fullWidth />
-              )}
               sx={{ width: 250 }}
               disableClearable
             />
             <Button
-              sx={{ ml: 2 }}
+              sx={{ width: '20px', height: '35px', ml: 1 }}
               variant='contained'
               disabled={!selectedReport}
               onClick={onGenerateReport}
               size='small'
             >
-              <Tooltip title='Preview'>
+              <div
+                className='button-container'
+                onMouseEnter={() => handleButtonMouseEnter('Preview')}
+                onMouseLeave={handleButtonMouseLeave}
+              >
                 <img src='/images/buttonsIcons/preview.png' alt='Preview' />
-              </Tooltip>
+                {tooltip && <div className='toast'>{tooltip}</div>}
+              </div>
             </Button>
           </Box>
         ) : (
           <Box></Box>
         )}
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          {actions.map((actionObj, index) => (
-            <Tooltip title={`${actionObj.title}`} key={`${actionObj.title}`}>
-              <Button
-                onClick={actionObj.action}
-                variant='contained'
-                sx={{
-                  mr: 1,
-                  backgroundColor: actionObj.color,
-                  '&:hover': { backgroundColor: actionObj.colorHover },
-                  width: 20,
-                  height: 35,
-                  objectFit: 'contain',
-                  border: actionObj.border
-                }}
-                style={{ display: actionObj.isHidden ? 'none' : 'block' }}
-                disabled={actionObj.isDisabled}
-              >
-                <img src={`/images/buttonsIcons/${actionObj.title}.png`} alt={`${actionObj.title}`} />
-              </Button>
-            </Tooltip>
-          ))}
-          {onTFR && visibleTFR && (
-            <Tooltip title='Invoice'>
-              <Button
-                onClick={onTFR}
-                variant='contained'
-                sx={{
-                  mr: 1,
-                  mt: smallBox && 0,
-                  backgroundColor: '#231f20',
-                  '&:hover': { backgroundColor: '#080707' },
-                  width: 20,
-                  height: 35,
-                  objectFit: 'contain'
-                }}
-                disabled={!isTFR}
-              >
-                <img src='/images/buttonsIcons/invoice.png' alt='Invoice' />
-              </Button>
-            </Tooltip>
-          )}
+          {Buttons.filter(button => actions.some(action => action.key === button.key)).map((button, index) => {
+            const correspondingAction = actions.find(action => action.key === button.key)
+            const isVisible = eval(correspondingAction.condition)
+            const isDisabled = eval(correspondingAction.disabled)
+            const handleClick = functionMapping[correspondingAction.onClick] || correspondingAction.onClick
 
-          {onClear && visibleClear && (
-            <Tooltip title='Clear'>
-              <Button
-                onClick={onClear}
-                sx={{
-                  mr: 1,
-                  backgroundColor: '#f44336',
-                  '&:hover': { backgroundColor: '#99271f' },
-                  width: 20,
-                  height: 35,
-                  objectFit: 'contain'
-                }}
-                variant='contained'
-              >
-                <img src='/images/buttonsIcons/clear.png' alt='Clear' />
-              </Button>
-            </Tooltip>
-          )}
-          {clientRelation && (
-            <Tooltip title='Client Relation'>
-              <Button
-                onClick={onClientRelation}
-                variant='contained'
-                sx={{
-                  mr: 1,
-                  mt: smallBox && 0,
-                  backgroundColor: '#AC48AE',
-                  '&:hover': { backgroundColor: '#5d205e' },
-                  width: 20,
-                  height: 35,
-                  objectFit: 'contain'
-                }}
-                disabled={!editMode}
-              >
-                <img src='/images/buttonsIcons/clientRelations.png' alt='Client Relation' />
-              </Button>
-            </Tooltip>
-          )}
-          {NewComponentVisible && (
-            <Tooltip title='GL'>
-              <Button
-                onClick={() => newHandler(recordId)}
-                variant='contained'
-                sx={{
-                  mr: 1,
-                  backgroundColor: '#231f20',
-                  '&:hover': { backgroundColor: '#1c1718' },
-                  width: 20,
-                  height: 35,
-                  objectFit: 'contain'
-                }}
-                disabled={!editMode}
-              >
-                <img src='/images/buttonsIcons/gl.png' alt='gl' />
-              </Button>
-            </Tooltip>
-          )}
-          {onInfo && infoVisible && (
-            <Tooltip title='Info'>
-              <Button
-                onClick={onInfo}
-                variant='contained'
-                sx={{
-                  mr: 1,
-                  backgroundColor: '#4355a5',
-                  '&:hover': { backgroundColor: '#24316b' },
-                  width: 20,
-                  height: 35,
-                  objectFit: 'contain'
-                }}
-                disabled={!editMode}
-              >
-                <img src='/images/buttonsIcons/info.png' alt='Info' />
-              </Button>
-            </Tooltip>
-          )}
-          {onPost && postVisible && (
-            <Tooltip title='Post'>
-              <Button
-                onClick={onPost}
-                variant='contained'
-                sx={{
-                  mr: 1,
-                  mt: smallBox && 0,
-                  backgroundColor: '#231f20',
-                  '&:hover': { backgroundColor: '#1c1718' },
-                  width: 20,
-                  height: 35,
-                  objectFit: 'contain'
-                }}
-                disabled={isPosted || !editMode}
-              >
-                <img src='/images/buttonsIcons/post.png' alt='Post' />
-              </Button>
-            </Tooltip>
-          )}
-          {onSave && (
-            <Tooltip title='Submit'>
-              <Button
-                onClick={onSave}
-                variant='contained'
-                sx={{
-                  mr: 1,
-                  mt: smallBox && 0,
-                  backgroundColor: '#4eb558',
-                  '&:hover': { backgroundColor: '#24782c' },
-                  width: 20,
-                  height: 35,
-                  objectFit: 'contain'
-                }}
-                disabled={disabledSubmit || isPosted || isClosed}
-              >
-                <img src='/images/buttonsIcons/save.png' alt='Submit' />
-              </Button>
-            </Tooltip>
-          )}
-          {onApply && (
-            <Tooltip title='Apply'>
-              <Button
-                onClick={onApply}
-                variant='contained'
-                sx={{
-                  mr: 1,
-                  mt: smallBox && 0,
-                  backgroundColor: '#4eb558',
-                  '&:hover': { backgroundColor: '#24782c' },
-                  width: 20,
-                  height: 35,
-                  objectFit: 'contain'
-                }}
-                disabled={disabledApply}
-              >
-                <img src='/images/buttonsIcons/apply.png' alt='Apply' />
-              </Button>
-            </Tooltip>
-          )}
+            return (
+              isVisible && (
+                <div
+                  className='button-container'
+                  onMouseEnter={() => (isDisabled ? null : handleButtonMouseEnter(button.key))}
+                  onMouseLeave={handleButtonMouseLeave}
+                  key={index}
+                >
+                  <Button
+                    onClick={handleClick}
+                    variant='contained'
+                    sx={{
+                      mr: 1,
+                      backgroundColor: button.color,
+                      '&:hover': {
+                        backgroundColor: button.color,
+                        opacity: 0.8
+                      },
+                      border: button.border,
+                      width: '50px !important',
+                      height: '35px',
+                      objectFit: 'contain',
+                      minWidth: '30px !important'
+                    }}
+                    disabled={isDisabled}
+                  >
+                    <img src={`/images/buttonsIcons/${button.image}`} alt={button.key} />
+                  </Button>
+                  {tooltip && <div className='toast'>{tooltip}</div>}
+                </div>
+              )
+            )
+          })}
+          {Buttons.map((button, index) => {
+            if (!button.main) {
+              return null // Skip this iteration if button.main is not true
+            }
+
+            const isVisible = eval(button.condition)
+            const isDisabled = eval(button.disabled)
+            const handleClick = functionMapping[button.onClick]
+
+            return (
+              isVisible && (
+                <div
+                  className='button-container'
+                  onMouseEnter={() => (isDisabled ? null : handleButtonMouseEnter(button.key))}
+                  onMouseLeave={handleButtonMouseLeave}
+                  key={index}
+                >
+                  <Button
+                    onClick={handleClick}
+                    variant='contained'
+                    sx={{
+                      mr: 1,
+                      backgroundColor: button.color,
+                      '&:hover': {
+                        backgroundColor: button.color,
+                        opacity: 0.8
+                      },
+                      border: button.border,
+                      width: '50px !important',
+                      height: '35px',
+                      objectFit: 'contain',
+                      minWidth: '30px !important'
+                    }}
+                    disabled={isDisabled}
+                  >
+                    <img src={`/images/buttonsIcons/${button.image}`} alt={button.key} />
+                  </Button>
+                  {tooltip && <div className='toast'>{tooltip}</div>}
+                </div>
+              )
+            )
+          })}
         </Box>{' '}
       </Box>
     </DialogActions>

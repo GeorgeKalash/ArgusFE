@@ -1,19 +1,11 @@
-// ** React Importsport
-import { useEffect, useState, useContext } from 'react'
-
-// ** MUI Imports
+import { useState, useContext } from 'react'
 import { Box } from '@mui/material'
-
-// ** Third Party Imports
 import { useFormik } from 'formik'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import { getNewCommissionSchedule, populateCommissionSchedule } from 'src/Models/Sales/CommissionSchedule'
@@ -22,12 +14,13 @@ import { DataSets } from 'src/resources/DataSets'
 import { ControlContext } from 'src/providers/ControlContext'
 import { CommonContext } from 'src/providers/CommonContext'
 
-// ** Windows
 import CommissionScheduleWindow from './Windows/CommissionScheduleWindow'
-
-// ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const CommissionSchedule = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -101,9 +94,11 @@ const CommissionSchedule = () => {
   }
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar onAdd={add} maxAccess={access} />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
@@ -115,7 +110,7 @@ const CommissionSchedule = () => {
           paginationType='client'
           maxAccess={access}
         />
-      </Box>
+      </Grow>
       {windowOpen && (
         <CommissionScheduleWindow
           onClose={() => {
@@ -135,7 +130,7 @@ const CommissionSchedule = () => {
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+    </VertLayout>
   )
 }
 
