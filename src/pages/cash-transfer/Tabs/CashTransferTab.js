@@ -28,6 +28,7 @@ import { useForm } from 'src/hooks/form'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import { RateDivision } from 'src/resources/RateDivision'
 import { DIRTYFIELD_AMOUNT, getRate } from 'src/utils/RateCalculator'
+import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 
 export default function CashTransferTab({ labels, recordId, access, plantId, cashAccountId, dtId }) {
   const [editMode, setEditMode] = useState(!!recordId)
