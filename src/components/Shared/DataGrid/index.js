@@ -414,6 +414,7 @@ export function DataGrid({
 
                 if (column.updateOn !== 'blur') await commitRowUpdate()
               }
+              const row = apiRef.current.getRow(params.id)
 
               return (
                 <Box
@@ -434,7 +435,7 @@ export function DataGrid({
                     {...params}
                     column={{
                       ...column,
-                      props
+                      props: column.propsReducer ? column?.propsReducer({ row, props }) : props
                     }}
                     update={update}
                     updateRow={updateRow}
