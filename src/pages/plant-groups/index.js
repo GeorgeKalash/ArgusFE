@@ -93,7 +93,7 @@ const Plant = () => {
         maxAccess: access
       },
       width: 600,
-      height: 350,
+      height: 300,
       title: _labels.plantGroup
     })
   }
