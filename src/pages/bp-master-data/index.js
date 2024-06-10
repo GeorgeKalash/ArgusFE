@@ -6,7 +6,7 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import BPMasterDataWindow from './Windows/BPMasterDataWindow'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
@@ -70,7 +70,8 @@ const BPMasterData = () => {
     clear,
     refetch,
     labels: _labels,
-    access
+    access,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: BusinessPartnerRepository.MasterData.qry,
@@ -88,10 +89,6 @@ const BPMasterData = () => {
 
     return response
   }
-
-  const invalidate = useInvalidate({
-    endpointId: BusinessPartnerRepository.MasterData.qry
-  })
 
   const columns = [
     {
@@ -133,7 +130,7 @@ const BPMasterData = () => {
   ]
 
   const add = () => {
-    openForm('')
+    openForm()
   }
 
   function openForm(recordId) {
