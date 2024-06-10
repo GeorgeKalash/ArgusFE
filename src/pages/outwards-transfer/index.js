@@ -107,7 +107,7 @@ const OutwardsTransfer = () => {
       const cashAccountId = await getCashAccountId()
 
       if (plantId !== '' && cashAccountId !== '') {
-        openOutWardsWindow(plantId, cashAccountId, recordId)
+        // openOutWardsWindow(plantId, cashAccountId, recordId)
       } else {
         if (plantId === '') {
           setErrorMessage({ error: 'The user does not have a default plant' })
@@ -171,7 +171,8 @@ const OutwardsTransfer = () => {
 
   const { proxyAction } = useDocumentTypeProxy({
     functionId: SystemFunction.Outwards,
-    action: openForm
+    action: openForm,
+    hasDT: false
   })
 
   const addOutwards = async () => {
@@ -183,6 +184,7 @@ const OutwardsTransfer = () => {
   }
 
   function openOutWardsWindow(plantId, cashAccountId, recordId) {
+    console.log('openOutWardsWindow')
     stack({
       Component: OutwardsTab,
       props: {
