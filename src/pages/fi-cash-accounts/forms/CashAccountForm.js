@@ -91,6 +91,18 @@ export default function CashAccountForm({ labels, recordId, maxAccess }) {
       condition: true,
       onClick: 'onClickGIA',
       disabled: !editMode
+    },
+    {
+      key: 'RecordRemarks',
+      condition: true,
+      onClick: 'onRecordRemarks',
+      disabled: !editMode
+    },
+    {
+      key: 'RecordRemarks',
+      condition: true,
+      onClick: 'onRecordRemarks',
+      disabled: !editMode
     }
   ]
 
