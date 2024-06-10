@@ -19,8 +19,6 @@ import { useForm } from 'src/hooks/form'
 import { useInvalidate } from 'src/hooks/resource'
 
 export default function CashAccountForm({ labels, recordId, maxAccess }) {
-  const editMode = !!recordId
-
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
@@ -70,8 +68,8 @@ export default function CashAccountForm({ labels, recordId, maxAccess }) {
       } catch (error) {}
     }
   })
-
   const editMode = !!recordId || !!formik.values.recordId
+
   useEffect(() => {
     ;(async function () {
       try {
