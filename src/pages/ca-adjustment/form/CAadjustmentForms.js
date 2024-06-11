@@ -162,6 +162,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       actions={actions}
       functionId={functionId}
       previewReport={editMode}
+      disabledSubmit={formik.values.status == '3'}
     >
       <VertLayout>
         <Grow>
@@ -207,6 +208,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                 endpointId={SystemRepository.Plant.qry}
                 name='plantId'
                 label={labels.plant}
+                readOnly={formik.values.status == '3'}
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 columnsInDropDown={[
@@ -226,6 +228,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
               <CustomDatePicker
                 name='date'
                 label={labels.date}
+                readOnly={formik.values.status == '3'}
                 value={formik.values.date}
                 onChange={formik.setFieldValue}
                 required
@@ -239,6 +242,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                 endpointId={SystemRepository.Currency.qry}
                 name='currencyId'
                 label={labels.currency}
+                readOnly={formik.values.status == '3'}
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 columnsInDropDown={[
@@ -260,6 +264,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                 parameters={{
                   _type: 2
                 }}
+                readOnly={formik.values.status == '3'}
                 valueField='reference'
                 displayField='name'
                 name='cashAccountId'
@@ -288,6 +293,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                 type='text'
                 label={labels.amount}
                 value={formik.values.amount}
+                readOnly={formik.values.status == '3'}
                 required
                 maxAccess={maxAccess}
                 onChange={e => formik.setFieldValue('amount', e.target.value)}
@@ -300,6 +306,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
               <CustomTextArea
                 name='notes'
                 label={labels.notes}
+                readOnly={formik.values.status == '3'}
                 value={formik.values.notes}
                 maxLength='100'
                 rows={2}
