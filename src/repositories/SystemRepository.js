@@ -169,6 +169,9 @@ export const SystemRepository = {
     qry: service + 'qryCHK',
     set: service + 'set2CHK'
   },
+  PosUsers: {
+    qry: service + 'qryUS'
+  },
   TimeZone: {
     get: service + 'getTZN'
   }
