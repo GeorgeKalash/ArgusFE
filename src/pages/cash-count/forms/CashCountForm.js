@@ -26,8 +26,9 @@ import { useInvalidate } from 'src/hooks/resource'
 import { useError } from 'src/error'
 import WorkFlow from 'src/components/Shared/WorkFlow'
 import GenerateTransferForm from './GenerateTransferForm'
+import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 
-export default function CashCountForm({ labels, maxAccess, recordId }) {
+export default function CashCountForm({ labels, maxAccess: access, recordId }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const [editMode, setEditMode] = useState(!!recordId)
   const { stack } = useWindow()
@@ -76,6 +77,13 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
 
   const invalidate = useInvalidate({
     endpointId: CashCountRepository.CashCountTransaction.qry
+  })
+
+  const { maxAccess } = useDocumentType({
+    functionId: SystemFunction.CashCountTransaction,
+    access: access,
+    hasDT: false,
+    enabled: !editMode
   })
 
   const { formik } = useForm({
@@ -457,16 +465,15 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
                 name='reference'
                 label={labels.reference}
                 value={formik.values.reference}
+                readOnly={editMode}
                 maxAccess={maxAccess}
                 onChange={e => {
                   formik.handleChange(e)
                 }}
                 onClear={() => formik.setFieldValue('reference', '')}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
-                readOnly={true}
               />
             </Grid>
-
             <Grid item xs={6}>
               <CustomTextField name='endTime' label={labels.endTime} value={formik.values.endTime} readOnly={true} />
             </Grid>

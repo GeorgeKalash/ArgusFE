@@ -22,6 +22,8 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import CashCountForm from './forms/CashCountForm'
 import { CashCountRepository } from 'src/repositories/CashCountRepository'
 import { formatDateDefault, getTimeInTimeZone } from 'src/lib/date-helper'
+import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
+import { SystemFunction } from 'src/resources/SystemFunction'
 
 const CashCount = () => {
   const { stack } = useWindow()
@@ -113,7 +115,7 @@ const CashCount = () => {
   ]
 
   const add = () => {
-    openForm()
+    proxyAction()
   }
   function openForm(recordId) {
     stack({
@@ -128,6 +130,12 @@ const CashCount = () => {
       title: _labels.cashCount
     })
   }
+
+  const { proxyAction } = useDocumentTypeProxy({
+    functionId: SystemFunction.CashCountTransaction,
+    action: openForm,
+    hasDT: false
+  })
 
   const edit = obj => {
     openForm(obj.recordId)

@@ -29,8 +29,13 @@ const PlantWindow = ({ labels, editMode, maxAccess, recordId, height }) => {
           extension: SystemRepository.Plant.set,
           record: JSON.stringify(data)
         })
+          .then(() => {
+            toast.success('Record Added Successfully')
+          })
           .catch(error => {})
       }
+    } else {
+      toast.success('Record Edited Successfully')
     }
   }
   function setAddress(res) {

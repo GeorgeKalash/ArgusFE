@@ -30,7 +30,7 @@ import { RateDivision } from 'src/resources/RateDivision'
 import { DIRTYFIELD_AMOUNT, getRate } from 'src/utils/RateCalculator'
 import WorkFlow from 'src/components/Shared/WorkFlow'
 
-export default function CashTransferTab({ labels, recordId, maxAccess, plantId, cashAccountId, dtId }) {
+export default function CashTransferTab({ labels, recordId, access, plantId, cashAccountId, dtId }) {
   const [editMode, setEditMode] = useState(!!recordId)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
@@ -78,6 +78,12 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
         balance: 0
       }
     ]
+  })
+
+  const { maxAccess } = useDocumentType({
+    functionId: SystemFunction.CashTransfer,
+    access: access,
+    enabled: !recordId
   })
 
   const { formik } = useForm({
@@ -267,7 +273,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
         functionId: SystemFunction.CashTransfer,
         editMode: isClosed
       },
-      width: 1500,
+      width: 1200,
       height: 670,
       title: 'Shipments'
     })
