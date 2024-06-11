@@ -102,7 +102,7 @@ const Table = ({
   paginationType = 'api',
   height,
   addedHeight = '0px',
-  actionColumnHeader = null,
+  actionColumnHeader = '',
   showCheckboxColumn = false,
   checkTitle = '',
   viewCheckButtons = false,
