@@ -3,7 +3,7 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import FormShell from './FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { Box, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 import CustomTextField from '../Inputs/CustomTextField'
 import ResourceComboBox from './ResourceComboBox'
 import { DataGrid } from './DataGrid'
@@ -20,7 +20,7 @@ import FieldSet from './FieldSet'
 
 export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
-  const [seqCounter, setSeqCounter] = useState(1)
+  const [selectedRowId, setSelectedRowId] = useState(null)
 
   const { formik } = useForm({
     initialValues: {
@@ -28,49 +28,54 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
       functionId: functionId,
       policyNo: '',
       carrierId: '',
-      typeGrid: [{ id: 1, recordId: '', functionId: '', seqNo: '', packageType: '', qty: '', amount: '' }],
-      serialGrid: [{ id: 1, recordId: '', functionId: '', seqNo: 1, reference: '' }]
+      packages: [
+        {
+          id: 1,
+          recordId: '',
+          functionId: '',
+          seqNo: '',
+          packageType: '',
+          qty: '',
+          amount: '',
+          packageReferences: [
+            { id: 1, typeId: '', packageSeqNo: '', recordId: '', functionId: '', seqNo: 1, reference: '' }
+          ]
+        }
+      ]
     },
     enableReinitialize: true,
     validateOnChange: true,
+
     validationSchema: yup.object({
       policyNo: yup.string().required(),
       carrierId: yup.string().required(),
-      typeGrid: yup
+      packages: yup
         .array()
         .of(
           yup.object().shape({
             packageTypeName: yup.string().required(),
-            qty: yup.string().nullable().required(),
-            amount: yup.string().nullable().required()
-          })
-        )
-        .required(),
-      serialGrid: yup
-        .array()
-        .of(
-          yup.object().shape({
-            seqNo: yup.string().required(),
-            reference: yup.string().nullable().required()
+            qty: yup.string().required(),
+            amount: yup.string().required()
           })
         )
         .required()
     }),
     onSubmit: async values => {
-      const packageRows = formik.values.typeGrid.map((packageDetail, index) => {
+      const packageRows = formik.values.packages.map((packageDetail, index) => {
         return {
           ...packageDetail,
           seqNo: index + 1,
           recordId: recordId,
-          functionId: functionId
-        }
-      })
-
-      const packageRefRows = formik.values.serialGrid.map(packageRefDetail => {
-        return {
-          ...packageRefDetail,
-          recordId: recordId,
-          functionId: functionId
+          functionId: functionId,
+          packageReferences:
+            packageDetail.packageReferences
+              .map(packageRefDetail => ({
+                seqNo: index + 1,
+                recordId: recordId,
+                functionId: functionId,
+                reference: packageRefDetail.reference
+              }))
+              ?.filter(item => !!item?.reference) || []
         }
       })
 
@@ -81,8 +86,7 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
           carrierId: values.carrierId,
           policyNo: values.policyNo
         },
-        packages: packageRows,
-        packageReferences: packageRefRows
+        packages: packageRows
       }
 
       await postRequest({
@@ -93,23 +97,45 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
       toast.success('Record Updated Successfully')
     }
   })
+  const index = formik.values.packages.findIndex(item => item.id === selectedRowId)
 
-  const { labels: labels, maxAccess } = useResourceQuery({
+  const { labels, maxAccess } = useResourceQuery({
     datasetId: ResourceIds.LOShipments
   })
 
-  const totalQty = formik.values?.typeGrid?.reduce((qty, row) => {
+  const totalQty = formik.values?.packages?.reduce((qty, row) => {
     const qtyValue = parseFloat(row.qty?.toString().replace(/,/g, '')) || 0
 
     return qty + qtyValue
   }, 0)
 
-  const totalAmount = formik.values?.typeGrid?.reduce((amount, row) => {
+  const totalAmount = formik.values?.packages?.reduce((amount, row) => {
     const amountValue = parseFloat(row.amount?.toString().replace(/,/g, '')) || 0
 
     return amount + amountValue
   }, 0)
-  function loadSerialsGrid() {}
+
+  function loadSerialsGrid(row) {
+    setSelectedRowId(row.id)
+  }
+
+  const handleSerialsGridChange = newRows => {
+    if (formik.values.packages[index]?.packageReferences?.length < newRows.length) {
+      newRows[formik.values.packages[index]?.packageReferences?.length].seqNo =
+        formik.values.packages[index]?.packageReferences?.length + 1
+    }
+    formik.setFieldValue(`packages[${index}].packageReferences`, newRows)
+  }
+
+  const handlePackageGridChange = newRows => {
+    newRows.map(row => {
+      if (!!row.seqNo) {
+        formik.setFieldValue('packages[0].packageReferences', [{ id: 1, seqNo: 1 }])
+      }
+    })
+    formik.setFieldValue('packages', newRows)
+  }
+
   useEffect(() => {
     ;(async function () {
       if (recordId && functionId) {
@@ -120,45 +146,29 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
 
         const packages = res.record.packages.map((item, index) => ({
           ...item,
-          id: index + 1
+          id: index + 1,
+          packageReferences: item?.packageReferences?.map((item, i) => ({
+            ...item,
+            id: i + 1,
+            seqNo: i + 1
+          }))
         }))
+        setSelectedRowId(res.record?.packages?.length > 0 && 1)
 
-        const packageReferences = res.record.packageReferences.map((item, index) => ({
-          ...item,
-          id: index + 1
-        }))
-        if (packageReferences.length > 0) {
-          const lastSeqNo = packageReferences[packageReferences.length - 1].seqNo
-          setSeqCounter(lastSeqNo ? lastSeqNo + 1 : 1)
-        }
-        formik.setValues({
-          ...res.record.header,
-          typeGrid: packages,
-          serialGrid: packageReferences
-        })
+        res?.record?.header &&
+          formik.setValues({
+            ...res.record.header,
+            packages: packages
+          })
       }
     })()
   }, [])
-
-  const handleDataGridChange = newRows => {
-    const updatedRows = newRows.map(row => {
-      console.log('check row ', row)
-      if (!row.seqNo && row.seqNo !== 0) {
-        row.seqNo = seqCounter
-        setSeqCounter(seqCounter + 1)
-      }
-
-      return row
-    })
-    console.log('check updatedRows ', updatedRows)
-    formik.setFieldValue('serialGrid', updatedRows)
-  }
 
   return (
     <FormShell resourceId={ResourceIds.LOShipments} form={formik} editMode={true} isCleared={false} isInfo={false}>
       <VertLayout>
         <Fixed>
-          <Grid container direction='row' wrap='nowrap' spacing={2}>
+          <Grid container wrap='nowrap' spacing={2}>
             <Grid item xs={6}>
               <ResourceComboBox
                 endpointId={LogisticsRepository.LoCarrier.qry}
@@ -197,106 +207,117 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
           </Grid>
         </Fixed>
         <Grow>
-          <Grid container xs={12} direction='row' wrap='nowrap' sx={{ flex: 1, flexDirection: 'row' }}>
-            <FieldSet sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-              <Grid container direction='row' wrap='nowrap' sx={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-                <Grow>
-                  <DataGrid
-                    onChange={value => formik.setFieldValue('typeGrid', value)}
-                    value={formik.values.typeGrid}
-                    error={formik.errors.typeGrid}
-                    maxAccess={maxAccess}
-                    allowAddNewLine={!editMode}
-                    allowDelete={!editMode}
-                    onSelectionChange={row => row && loadSerialsGrid()}
-                    columns={[
-                      {
-                        component: 'resourcecombobox',
-                        label: labels.type,
-                        name: 'packageTypeName',
-                        props: {
-                          datasetId: DataSets.PACKAGE_TYPE,
-                          displayField: 'value',
-                          valueField: 'key',
-                          mapping: [
-                            { from: 'key', to: 'packageType' },
-                            { from: 'value', to: 'packageTypeName' }
-                          ],
-                          readOnly: editMode
+          <Grid container xs={12} spacing={3}>
+            <Grid item xs={8} sx={{ display: 'flex', flex: 1 }}>
+              <FieldSet sx={{ flex: 1 }}>
+                <Grid container wrap='nowrap' sx={{ flexDirection: 'column', flex: 1 }}>
+                  <Grow>
+                    <DataGrid
+                      onChange={value => handlePackageGridChange(value)}
+                      value={formik.values.packages}
+                      error={formik.errors.packages}
+                      maxAccess={maxAccess}
+                      rowSelectionModel={selectedRowId}
+                      allowAddNewLine={!editMode}
+                      allowDelete={!editMode}
+                      onSelectionChange={row => {
+                        row && loadSerialsGrid(row)
+                      }}
+                      columns={[
+                        {
+                          component: 'resourcecombobox',
+                          label: labels.type,
+                          name: 'packageTypeName',
+                          props: {
+                            datasetId: DataSets.PACKAGE_TYPE,
+                            displayField: 'value',
+                            valueField: 'key',
+                            mapping: [
+                              { from: 'key', to: 'packageType' },
+                              { from: 'value', to: 'packageTypeName' }
+                            ],
+                            readOnly: editMode
+                          }
+                        },
+                        {
+                          component: 'numberfield',
+                          name: 'qty',
+                          label: labels.qty,
+                          defaultValue: '',
+                          props: {
+                            readOnly: editMode
+                          }
+                        },
+                        {
+                          component: 'numberfield',
+                          label: labels.amount,
+                          name: 'amount',
+                          defaultValue: '',
+                          props: { readOnly: editMode }
                         }
-                      },
-                      {
-                        component: 'numberfield',
-                        name: 'qty',
-                        label: labels.qty,
-                        defaultValue: '',
-                        props: {
-                          readOnly: editMode
-                        }
-                      },
-                      {
-                        component: 'numberfield',
-                        label: labels.amount,
-                        name: 'amount',
-                        defaultValue: '',
-                        props: { readOnly: editMode }
-                      }
-                    ]}
-                  />
-                </Grow>
-                <Fixed>
-                  <Grid container direction='row' wrap='nowrap' sx={{ pt: 5, justifyContent: 'flex-end' }}>
-                    <Grid item xs={3}>
-                      <CustomTextField
-                        name='totalQty'
-                        maxAccess={maxAccess}
-                        value={getFormattedNumber(totalQty)}
-                        label={labels.totalQty}
-                        readOnly={true}
-                      />
+                      ]}
+                    />
+                  </Grow>
+                  <Fixed>
+                    <Grid container direction='row' wrap='nowrap' sx={{ pt: 5, justifyContent: 'flex-end' }}>
+                      <Grid item xs={3}>
+                        <CustomTextField
+                          name='totalQty'
+                          maxAccess={maxAccess}
+                          value={getFormattedNumber(totalQty)}
+                          label={labels.totalQty}
+                          readOnly={true}
+                        />
+                      </Grid>
+                      <Grid item xs={3} sx={{ pl: 3 }}>
+                        <CustomTextField
+                          name='totalAmount'
+                          maxAccess={maxAccess}
+                          value={getFormattedNumber(totalAmount.toFixed(2))}
+                          label={labels.totalAmount}
+                          readOnly={true}
+                        />
+                      </Grid>
                     </Grid>
-                    <Grid item xs={3} sx={{ pl: 3 }}>
-                      <CustomTextField
-                        name='totalAmount'
-                        maxAccess={maxAccess}
-                        value={getFormattedNumber(totalAmount.toFixed(2))}
-                        label={labels.totalAmount}
-                        readOnly={true}
-                      />
-                    </Grid>
-                  </Grid>
-                </Fixed>
-              </Grid>
-            </FieldSet>
-            <Grid item xs={4} sx={{ display: 'flex', flex: 1, pl: 7 }}>
+                  </Fixed>
+                </Grid>
+              </FieldSet>
+            </Grid>
+            <Grid item xs={4} sx={{ display: 'flex', flex: 1 }}>
               <FieldSet xs={4} sx={{ flex: 1 }}>
                 <Grow>
-                  <DataGrid
-                    onChange={value => handleDataGridChange(value)}
-                    value={formik.values.serialGrid}
-                    error={formik.errors.serialGrid}
-                    maxAccess={maxAccess}
-                    allowAddNewLine={!editMode}
-                    allowDelete={false}
-                    columns={[
-                      {
-                        component: 'numberfield',
-                        name: 'seqNo',
-                        label: labels.seqNo,
-                        defaultValue: '',
-                        props: { readOnly: true }
-                      },
-                      {
-                        component: 'textfield',
-                        label: labels.reference,
-                        name: 'reference',
-                        props: {
-                          maxLength: 20,
-                          readOnly: editMode
-                        }
+                  {selectedRowId && formik.values.packages[index] && (
+                    <DataGrid
+                      key={selectedRowId}
+                      onChange={value => handleSerialsGridChange(value)}
+                      value={
+                        formik.values.packages.find(item => item.id === selectedRowId).packageReferences || [
+                          { seqNo: '1', id: 1, reference: '' }
+                        ]
                       }
-                    ]}
-                  />
+                      maxAccess={maxAccess}
+                      allowAddNewLine={!editMode}
+                      allowDelete={false}
+                      columns={[
+                        {
+                          component: 'numberfield',
+                          name: 'seqNo',
+                          label: labels.seqNo,
+                          props: { readOnly: true }
+                        },
+                        {
+                          component: 'textfield',
+                          label: labels.reference,
+                          name: 'reference',
+                          props: {
+                            maxLength: 20,
+                            mandatory: true,
+                            readOnly: editMode
+                          }
+                        }
+                      ]}
+                    />
+                  )}
                 </Grow>
               </FieldSet>
             </Grid>

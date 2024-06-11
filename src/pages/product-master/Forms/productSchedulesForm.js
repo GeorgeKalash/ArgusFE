@@ -278,17 +278,20 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
             value={formik.values.schedules}
             error={formik.errors.schedules}
             columns={columns}
-            onSelectionChange={row =>
-              row &&
-              setStore(prevStore => ({
-                ...prevStore,
-                plantId: row.plantId,
-                currencyId: row.currencyId,
-                countryId: row.countryId,
-                dispersalId: row.dispersalId,
-                _seqNo: row.seqNo
-              }))
-            }
+            rowSelectionModel={rowSelectionModel}
+            onSelectionChange={row => {
+              if (row) {
+                setStore(prevStore => ({
+                  ...prevStore,
+                  plantId: row.plantId,
+                  currencyId: row.currencyId,
+                  countryId: row.countryId,
+                  dispersalId: row.dispersalId,
+                  _seqNo: row.seqNo
+                }))
+                setRowSelectionModel(row.id)
+              }
+            }}
           />
         </Grow>
       </VertLayout>

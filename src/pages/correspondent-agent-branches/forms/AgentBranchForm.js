@@ -15,7 +15,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 export default function AgentBranchForm({ _labels, maxAccess, store, setStore, editMode }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { recordId } = store
+  const { recordId, address } = store
 
   const invalidate = useInvalidate({
     endpointId: RemittanceSettingsRepository.CorrespondentAgentBranches.page
@@ -37,24 +37,29 @@ export default function AgentBranchForm({ _labels, maxAccess, store, setStore, e
       swiftCode: yup.string().required(' ')
     }),
     onSubmit: async obj => {
+      const addressId = address?.recordId || null
+      if (addressId) {
+        obj = { ...obj, addressId }
+      }
+
       const response = await postRequest({
         extension: RemittanceSettingsRepository.CorrespondentAgentBranches.set,
         record: JSON.stringify(obj)
       })
 
-        if (!editMode) {
-          toast.success('Record Added Successfully')
-        } else toast.success('Record Edited Successfully')
+      if (!editMode) {
+        toast.success('Record Added Successfully')
+      } else toast.success('Record Edited Successfully')
 
-        setStore(prevStore => ({
-          ...prevStore,
-          agentBranch: obj,
-          recordId: response.recordId
-        }))
+      setStore(prevStore => ({
+        ...prevStore,
+        agentBranch: obj,
+        recordId: response.recordId
+      }))
 
-        formik.setFieldValue('recordId', response.recordId)
+      formik.setFieldValue('recordId', response.recordId)
 
-        invalidate()
+      invalidate()
     }
   })
 

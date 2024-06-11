@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -13,9 +13,6 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 export default function CostCenterGroupForm({ labels, maxAccess, recordId }) {
-  const [isLoading, setIsLoading] = useState(false)
-  const editMode = !!recordId
-
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
@@ -31,33 +28,34 @@ export default function CostCenterGroupForm({ labels, maxAccess, recordId }) {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      reference: yup.string().required('This field is required'),
-      name: yup.string().required('This field is required')
+      reference: yup.string().required(' '),
+      name: yup.string().required(' ')
     }),
     onSubmit: async obj => {
-      const response = await postRequest({
-        extension: GeneralLedgerRepository.CostCenterGroup.set,
-        record: JSON.stringify(obj)
-      })
-
-      if (!obj.recordId) {
-        toast.success('Record Added Successfully')
-        formik.setValues({
-          ...obj,
-          recordId: response.recordId
+      try {
+        const response = await postRequest({
+          extension: GeneralLedgerRepository.CostCenterGroup.set,
+          record: JSON.stringify(obj)
         })
-      } else toast.success('Record Edited Successfully')
 
-      invalidate()
+        if (!obj.recordId) {
+          toast.success('Record Added Successfully')
+          formik.setValues({
+            ...obj,
+            recordId: response.recordId
+          })
+        } else toast.success('Record Edited Successfully')
+
+        invalidate()
+      } catch (error) {}
     }
   })
+  const editMode = !!recordId || formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
       try {
         if (recordId) {
-          setIsLoading(true)
-
           const res = await getRequest({
             extension: GeneralLedgerRepository.CostCenterGroup.get,
             parameters: `_recordId=${recordId}`
@@ -66,12 +64,26 @@ export default function CostCenterGroupForm({ labels, maxAccess, recordId }) {
           formik.setValues(res.record)
         }
       } catch (e) {}
-      setIsLoading(false)
     })()
   }, [])
 
+  const actions = [
+    {
+      key: 'RecordRemarks',
+      condition: true,
+      onClick: 'onRecordRemarks',
+      disabled: !editMode
+    }
+  ]
+
   return (
-    <FormShell resourceId={ResourceIds.CostCenterGroup} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell
+      resourceId={ResourceIds.CostCenterGroup}
+      form={formik}
+      actions={actions}
+      maxAccess={maxAccess}
+      editMode={editMode}
+    >
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -86,7 +98,6 @@ export default function CostCenterGroupForm({ labels, maxAccess, recordId }) {
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('reference', '')}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
-                helperText={formik.touched.reference && formik.errors.reference}
               />
             </Grid>
             <Grid item xs={12}>
@@ -100,7 +111,6 @@ export default function CostCenterGroupForm({ labels, maxAccess, recordId }) {
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
                 error={formik.touched.name && Boolean(formik.errors.name)}
-                helperText={formik.touched.name && formik.errors.name}
               />
             </Grid>
           </Grid>

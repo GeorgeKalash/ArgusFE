@@ -15,6 +15,7 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { useError } from 'src/error'
+import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 
 const CashTransfer = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -163,6 +164,12 @@ const CashTransfer = () => {
     }
   ]
 
+  const { proxyAction } = useDocumentTypeProxy({
+    functionId: SystemFunction.CashTransfer,
+    action: openForm,
+    hasDT: false
+  })
+
   const delCashTFR = async obj => {
     await postRequest({
       extension: CashBankRepository.CashTransfer.del,
@@ -173,7 +180,7 @@ const CashTransfer = () => {
   }
 
   const addCashTFR = () => {
-    openForm()
+    proxyAction()
   }
 
   const editCashTFR = obj => {
@@ -187,7 +194,7 @@ const CashTransfer = () => {
         plantId: plantId,
         cashAccountId: cashAccountId,
         dtId: dtId,
-        maxAccess: access,
+        access,
         labels: _labels,
         recordId: recordId ? recordId : null
       },

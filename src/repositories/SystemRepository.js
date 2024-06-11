@@ -157,7 +157,9 @@ export const SystemRepository = {
     qry: service + 'qryResourceControls'
   },
   UserFunction: {
-    get: service + 'getUFU'
+    get: service + 'getUFU',
+    qry: service + 'qryUFU',
+    set: service + 'setUFU'
   },
   RecordRemarks: {
     qry: service + 'qryRMK',
@@ -168,6 +170,9 @@ export const SystemRepository = {
   SystemChecks: {
     qry: service + 'qryCHK',
     set: service + 'set2CHK'
+  },
+  PosUsers: {
+    qry: service + 'qryUS'
   },
   TimeZone: {
     get: service + 'getTZN'

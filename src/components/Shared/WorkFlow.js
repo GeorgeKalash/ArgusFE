@@ -1,18 +1,23 @@
 import React, { useContext, useEffect } from 'react'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import { RequestsContext } from 'src/providers/RequestsContext'
+import { Box } from '@mui/material'
 
 const WorkFlow = ({ functionId, recordId }) => {
   const { getRequest } = useContext(RequestsContext)
+  const pageName = functionId
+  const id = recordId + '-' + functionId
 
-  const getWorkFlowData = () => {
+  const getWorkFlowData = async () => {
     var parameters = `_functionId=${functionId}&_recordId=${recordId}`
-    getRequest({
-      extension: SaleRepository.WorkFlow.graph,
-      parameters: parameters
-    }).then(res => {
-      return res?.result
-    })
+    try {
+      const result = await getRequest({
+        extension: SaleRepository.WorkFlow.graph,
+        parameters: parameters
+      })
+
+      return result?.record
+    } catch (error) {}
   }
 
   const getDeptsJson = graph => {
@@ -55,59 +60,70 @@ const WorkFlow = ({ functionId, recordId }) => {
   }
 
   useEffect(() => {
-    var data = getWorkFlowData()
-    if (data) {
-      const loadScript = (url, callback) => {
-        const script = document.createElement('script')
-        script.type = 'text/javascript'
-        script.src = url
-        script.async = true
-        script.onload = callback
-        document.head.appendChild(script)
-      }
+    ;(async function () {
+      var data = await getWorkFlowData()
+      if (data) {
+        const loadScript = (url, callback) => {
+          const script = document.createElement('script')
+          script.type = 'text/javascript'
+          script.src = url
+          script.async = true
+          script.onload = callback
+          document.head.appendChild(script)
+        }
 
-      loadScript('https://cdn.amcharts.com/lib/4/core.js', () => {
-        loadScript('https://cdn.amcharts.com/lib/4/charts.js', () => {
-          loadScript('https://cdn.amcharts.com/lib/4/themes/animated.js', () => {
-            am4core.ready(() => {
-              const chart = am4core.create('chartdiv', am4charts.SankeyDiagram)
-              const combinedData = getDeptsJson(data)
-              chart.data = combinedData
-              chart.dataFields.fromName = 'from'
-              chart.dataFields.toName = 'to'
-              chart.dataFields.value = 'value'
-              chart.paddingRight = 40
+        loadScript('https://cdn.amcharts.com/lib/4/core.js', () => {
+          loadScript('https://cdn.amcharts.com/lib/4/charts.js', () => {
+            loadScript('https://cdn.amcharts.com/lib/4/themes/animated.js', () => {
+              am4core.ready(() => {
+                const chart = am4core.create(id, am4charts.SankeyDiagram)
+                const combinedData = getDeptsJson(data)
+                chart.data = combinedData
+                chart.dataFields.fromName = 'from'
+                chart.dataFields.toName = 'to'
+                chart.dataFields.value = 'value'
+                chart.paddingRight = 40
 
-              const nodeTemplate = chart.nodes.template
-              nodeTemplate.draggable = false
-              nodeTemplate.inert = true
-              nodeTemplate.clickable = false
-              nodeTemplate.width = 110
-              nodeTemplate.height = 30
+                const nodeTemplate = chart.nodes.template
+                nodeTemplate.draggable = false
+                nodeTemplate.inert = true
+                nodeTemplate.clickable = false
+                nodeTemplate.width = 110
+                nodeTemplate.height = 30
 
-              nodeTemplate.nameLabel.locationX = 0
-              nodeTemplate.nameLabel.height = undefined
-              nodeTemplate.nameLabel.label.fontWeight = 'bold'
-              const linkTemplate = chart.links.template
-              linkTemplate.middleLine.strokeOpacity = 0.3
-              linkTemplate.middleLine.stroke = am4core.color('#555')
-              linkTemplate.middleLine.strokeWidth = 5
-              linkTemplate.middleLine.hoverable = false
-              linkTemplate.fillOpacity = 0
-              linkTemplate.hoverable = true
-              linkTemplate.hoverOnFocus = true
-              linkTemplate.fill = am4core.color('#A8C686')
-              linkTemplate.isHover = true
+                nodeTemplate.nameLabel.locationX = 0
+                nodeTemplate.nameLabel.height = undefined
+                nodeTemplate.nameLabel.label.fontWeight = 'bold'
+                const linkTemplate = chart.links.template
+                linkTemplate.middleLine.strokeOpacity = 0.3
+                linkTemplate.middleLine.stroke = am4core.color('#555')
+                linkTemplate.middleLine.strokeWidth = 5
+                linkTemplate.middleLine.hoverable = false
+                linkTemplate.fillOpacity = 0
+                linkTemplate.hoverable = true
+                linkTemplate.hoverOnFocus = true
+                linkTemplate.fill = am4core.color('#A8C686')
+                linkTemplate.isHover = true
 
-              chart.appear(1000, 100)
+                chart.appear(1000, 100)
+              })
             })
           })
         })
-      })
-    }
+      }
+    })()
   }, [])
 
-  return <div id='chartdiv' style={{ width: '100%', height: '500px' }} />
+  return (
+    <Box
+      sx={{
+        pt: 5,
+        pl: 8
+      }}
+    >
+      <div id={id} style={{ width: '100%', height: '500px' }} />
+    </Box>
+  )
 }
 
 export default WorkFlow

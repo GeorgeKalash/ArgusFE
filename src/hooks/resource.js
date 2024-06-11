@@ -28,7 +28,8 @@ export function useResourceQuery({ endpointId, filter, datasetId, queryFn, searc
       : isFilterMode
       ? ({ queryKey: [_, __] }) =>
           filter.filterFn({
-            filters
+            filters,
+            pagination: apiOption
           })
       : apiOption
       ? () => queryFn(apiOption)

@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -16,12 +16,14 @@ import { MasterSource } from 'src/resources/MasterSource'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
+import { useInvalidate } from 'src/hooks/resource'
 
-export default function CashAccountForm({ labels, recordId, maxAccess, invalidate }) {
-  const [isLoading, setIsLoading] = useState(false)
-  const editMode = !!recordId
-
+export default function CashAccountForm({ labels, recordId, maxAccess }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
+
+  const invalidate = useInvalidate({
+    endpointId: CashBankRepository.CashAccount.qry
+  })
 
   const { formik } = useForm({
     initialValues: {
@@ -46,31 +48,32 @@ export default function CashAccountForm({ labels, recordId, maxAccess, invalidat
       activeStatus: yup.string().required(' ')
     }),
     onSubmit: async obj => {
-      const recordId = obj.recordId
-      obj.accountNo = obj.reference
+      try {
+        const recordId = obj.recordId
+        obj.accountNo = obj.reference
 
-      const response = await postRequest({
-        extension: CashBankRepository.CashBox.set,
-        record: JSON.stringify(obj)
-      })
-
-      if (!obj.recordId) {
-        toast.success('Record Added Successfully')
-        formik.setValues({
-          ...obj,
-          recordId: response.recordId
+        const response = await postRequest({
+          extension: CashBankRepository.CashBox.set,
+          record: JSON.stringify(obj)
         })
-      } else toast.success('Record Edited Successfully')
-      invalidate()
+
+        if (!recordId) {
+          toast.success('Record Added Successfully')
+          formik.setValues({
+            ...obj,
+            recordId: response.recordId
+          })
+        } else toast.success('Record Edited Successfully')
+        invalidate()
+      } catch (error) {}
     }
   })
+  const editMode = !!recordId || !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
       try {
         if (recordId) {
-          setIsLoading(true)
-
           const res = await getRequest({
             extension: CashBankRepository.CashAccount.get,
             parameters: `_recordId=${recordId}`
@@ -79,7 +82,6 @@ export default function CashAccountForm({ labels, recordId, maxAccess, invalidat
           formik.setValues(res.record)
         }
       } catch (exception) {}
-      setIsLoading(false)
     })()
   }, [])
 
@@ -88,6 +90,18 @@ export default function CashAccountForm({ labels, recordId, maxAccess, invalidat
       key: 'Integration Account',
       condition: true,
       onClick: 'onClickGIA',
+      disabled: !editMode
+    },
+    {
+      key: 'RecordRemarks',
+      condition: true,
+      onClick: 'onRecordRemarks',
+      disabled: !editMode
+    },
+    {
+      key: 'RecordRemarks',
+      condition: true,
+      onClick: 'onRecordRemarks',
       disabled: !editMode
     }
   ]
@@ -220,15 +234,9 @@ export default function CashAccountForm({ labels, recordId, maxAccess, invalidat
                 errorCheck={'accountId'}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  if (newValue) {
-                    formik.setFieldValue('accountId', newValue?.recordId)
-                    formik.setFieldValue('accountRef', newValue?.reference)
-                    formik.setFieldValue('accountName', newValue?.name)
-                  } else {
-                    formik.setFieldValue('accountId', '')
-                    formik.setFieldValue('accountRef', null)
-                    formik.setFieldValue('accountName', null)
-                  }
+                  formik.setFieldValue('accountId', newValue?.recordId || '')
+                  formik.setFieldValue('accountRef', newValue?.reference || '')
+                  formik.setFieldValue('accountName', newValue?.name || '')
                 }}
               />
             </Grid>

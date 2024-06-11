@@ -463,7 +463,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, plantI
         functionId: formik.values.functionId,
         editMode: formik.values.status != 1
       },
-      width: 950,
+      width: 1200,
       height: 670,
       title: 'Shipments'
     })
