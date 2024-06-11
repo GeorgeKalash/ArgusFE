@@ -7,6 +7,7 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import toast from 'react-hot-toast'
 import AddressForm from 'src/components/Shared/AddressForm'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const PlantWindow = ({ labels, editMode, maxAccess, recordId, height }) => {
   const [store, setStore] = useState({
@@ -16,6 +17,7 @@ const PlantWindow = ({ labels, editMode, maxAccess, recordId, height }) => {
   })
 
   const [activeTab, setActiveTab] = useState(0)
+  const { platformLabels } = useContext(ControlContext)
   const tabs = [{ label: labels.plant }, { label: labels.address, disabled: !store.recordId }]
   const { postRequest } = useContext(RequestsContext)
 
@@ -34,12 +36,12 @@ const PlantWindow = ({ labels, editMode, maxAccess, recordId, height }) => {
           record: JSON.stringify(data)
         })
           .then(() => {
-            toast.success('Record Added Successfully')
+            toast.success(platformLabels.Added)
           })
           .catch(error => {})
       }
     } else {
-      toast.success('Record Edit Successfully')
+      toast.success(platformLabels.Edited)
     }
   }
   function setAddress(res) {

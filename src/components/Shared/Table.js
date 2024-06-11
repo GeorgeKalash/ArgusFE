@@ -26,6 +26,7 @@ import StrictDeleteConfirmation from './StrictDeleteConfirmation'
 import deleteIcon from '../../../public/images/TableIcons/delete.png'
 import editIcon from '../../../public/images/TableIcons/edit.png'
 import { ControlContext } from 'src/providers/ControlContext'
+import { AuthContext } from 'src/providers/AuthContext'
 
 const ODD_OPACITY = 0.2
 
@@ -113,8 +114,8 @@ const Table = ({
   const { stack } = useWindow()
 
   const [gridData, setGridData] = useState(props.gridData)
-  const [isArabic, setIsArabic] = useState(false)
   const { platformLabels } = useContext(ControlContext)
+  const { languageId } = useContext(AuthContext)
   const [startAt, setStartAt] = useState(0)
   const [page, setPage] = useState(1)
   const [checkedRows, setCheckedRows] = useState({})
@@ -160,17 +161,33 @@ const Table = ({
 
         return (
           <PaginationContainer>
-            <IconButton onClick={goToFirstPage} disabled={page === 1}>
+            <IconButton
+              onClick={goToFirstPage}
+              disabled={page === 1}
+              sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+            >
               <FirstPageIcon />
             </IconButton>
-            <IconButton onClick={decrementPage} disabled={page === 1}>
+            <IconButton
+              onClick={decrementPage}
+              disabled={page === 1}
+              sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+            >
               <NavigateBeforeIcon />
             </IconButton>
             {platformLabels.Page} {page} {platformLabels.Of} {pageCount}
-            <IconButton onClick={incrementPage} disabled={page === pageCount}>
+            <IconButton
+              onClick={incrementPage}
+              disabled={page === pageCount}
+              sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+            >
               <NavigateNextIcon />
             </IconButton>
-            <IconButton onClick={goToLastPage} disabled={page === pageCount}>
+            <IconButton
+              onClick={goToLastPage}
+              disabled={page === pageCount}
+              sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+            >
               <LastPageIcon />
             </IconButton>
             <IconButton onClick={refetch}>
@@ -242,17 +259,33 @@ const Table = ({
 
           return (
             <PaginationContainer>
-              <IconButton onClick={goToFirstPage} disabled={page === 1}>
+              <IconButton
+                onClick={goToFirstPage}
+                disabled={page === 1}
+                sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+              >
                 <FirstPageIcon />
               </IconButton>
-              <IconButton onClick={decrementPage} disabled={page === 1}>
+              <IconButton
+                onClick={decrementPage}
+                disabled={page === 1}
+                sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+              >
                 <NavigateBeforeIcon />
               </IconButton>
               {platformLabels.Page} {page} {platformLabels.Of} {pageCount}
-              <IconButton onClick={incrementPage} disabled={page === pageCount}>
+              <IconButton
+                onClick={incrementPage}
+                disabled={page === pageCount}
+                sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+              >
                 <NavigateNextIcon />
               </IconButton>
-              <IconButton onClick={goToLastPage} disabled={page === pageCount}>
+              <IconButton
+                onClick={goToLastPage}
+                disabled={page === pageCount}
+                sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+              >
                 <LastPageIcon />
               </IconButton>
               <IconButton onClick={refetch}>

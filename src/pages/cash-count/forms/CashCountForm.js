@@ -23,13 +23,14 @@ import { formatDateFromApi, formatDateToApi, getTimeInTimeZone } from 'src/lib/d
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { getStorageData } from 'src/storage/storage'
 import { useInvalidate } from 'src/hooks/resource'
-import { useError } from 'src/error'
 import WorkFlow from 'src/components/Shared/WorkFlow'
 import GenerateTransferForm from './GenerateTransferForm'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function CashCountForm({ labels, maxAccess: access, recordId }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const [editMode, setEditMode] = useState(!!recordId)
   const { stack } = useWindow()
   const [isClosed, setIsClosed] = useState(false)
@@ -167,9 +168,9 @@ export default function CashCountForm({ labels, maxAccess: access, recordId }) {
         })
         const _recordId = response.recordId
         if (!obj.recordId) {
-          toast.success('Record Added Successfully')
+          toast.success(platformLabels.Added)
           getData(_recordId)
-        } else toast.success('Record Edited Successfully')
+        } else toast.success(platformLabels.Edited)
         setEditMode(true)
 
         invalidate()
@@ -249,7 +250,7 @@ export default function CashCountForm({ labels, maxAccess: access, recordId }) {
     })
       .then(() => {
         if (res.recordId) {
-          toast.success('Record Reopened Successfully')
+          toast.success(platformLabels.Reopened)
           invalidate()
           getData(obj?.recordId)
         }
@@ -264,7 +265,7 @@ export default function CashCountForm({ labels, maxAccess: access, recordId }) {
     })
       .then(res => {
         if (res?.recordId) {
-          toast.success('Record Posted Successfully')
+          toast.success(platformLabels.Posted)
           invalidate()
           getData(res?.recordId)
         }
@@ -279,7 +280,7 @@ export default function CashCountForm({ labels, maxAccess: access, recordId }) {
     })
       .then(res => {
         if (res?.recordId) {
-          toast.success('Record Posted Successfully')
+          toast.success(platformLabels.Posted)
           invalidate()
           setIsPosted(true)
         }

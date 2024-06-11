@@ -12,9 +12,11 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { useForm } from 'src/hooks/form'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function CostCenterForm({ labels, maxAccess, recordId, onSubmit }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const editMode = !!recordId
 
   const { formik } = useForm({
@@ -39,13 +41,13 @@ export default function CostCenterForm({ labels, maxAccess, recordId, onSubmit }
         })
 
         if (!obj.recordId) {
-          toast.success('Record Added Successfully')
+          toast.success(platformLabels.Added)
           formik.setValues({
             ...obj,
             recordId: response.recordId
           })
         } else {
-          toast.success('Record Edited Successfully')
+          toast.success(platformLabels.Edited)
         }
         invalidate()
       } catch (error) {}

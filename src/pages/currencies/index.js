@@ -11,9 +11,11 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import CurrencyForm from './forms/CurrencyForm'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const Currencies = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   async function fetchGridData() {
     return await getRequest({
@@ -67,7 +69,7 @@ const Currencies = () => {
         record: JSON.stringify(obj)
       })
       invalidate()
-      toast.success('Record Deleted Successfully')
+      toast.success(platformLabels.Deleted)
     } catch (error) {}
   }
 
