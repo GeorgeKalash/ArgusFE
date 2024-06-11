@@ -148,12 +148,13 @@ const AuthProvider = ({ children }) => {
     }
   }
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setUser(null)
     window.localStorage.removeItem('userData')
     window.sessionStorage.removeItem('userData')
 
-    router.push('/login')
+    await router.push('/login')
+    router.reload()
   }
 
   const getAccessToken = async () => {

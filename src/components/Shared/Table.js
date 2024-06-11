@@ -126,11 +126,6 @@ const Table = ({
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
   const columnsAccess = props.maxAccess && props.maxAccess.record.controls
 
-  useEffect(() => {
-    if (auth?.user?.languageId === 2) setIsArabic(true)
-    else setIsArabic(false)
-  }, [])
-
   const getRowId = row => {
     return props.rowId.map(field => row[field]).join('-')
   }
