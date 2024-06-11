@@ -51,7 +51,8 @@ export const CashBankRepository = {
   },
   AccountBalance: {
     qry: service + 'qryABA',
-    get: service + 'getABA'
+    get: service + 'getABA',
+    rebuild: service + 'rebuildABA'
   },
 
   OpeningBalance: {

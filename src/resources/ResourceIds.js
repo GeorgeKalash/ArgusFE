@@ -138,6 +138,8 @@ export const ResourceIds = {
   LOTransportation: 40302,
   OpeningBalance: 33311,
   AccountBalance: 33107,
+  CARebuildAccountBalance: 33501,
+  CATransaction: 33312,
   CATransaction: 33312,
   ProductionRequestLog: 42321,
   PointOfSale: 54101,
