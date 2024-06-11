@@ -21,6 +21,7 @@ import { useAuth } from 'src/hooks/useAuth'
 import IconButton from '@mui/material/IconButton'
 import Icon from 'src/@core/components/icon'
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'
+import { ControlContext } from 'src/providers/ControlContext'
 
 function ArrowBackIcon() {
   return (
@@ -64,7 +65,7 @@ const Navigation = props => {
   const router = useRouter()
   const { hidden, settings, afterNavMenuContent, beforeNavMenuContent, navMenuContent: userNavMenuContent } = props
   const { setLastOpenedPage } = useContext(MenuContext)
-  const [isShrunk, setIsShrunk] = useState(false)
+  const { platformLabels } = useContext(ControlContext)
   const [currentActiveGroup, setCurrentActiveGroup] = useState([])
   const [filteredMenu, setFilteredMenu] = useState([])
   const [openFolders, setOpenFolders] = useState([])
@@ -244,7 +245,7 @@ const Navigation = props => {
         )}
         <Box sx={{ display: 'flex', alignItems: 'center', px: 2, pb: '10px', pt: 2 }}>
           <TextField
-            placeholder='Filter here...'
+            placeholder={platformLabels.Filter}
             variant='outlined'
             fullWidth
             size='small'
@@ -270,7 +271,7 @@ const Navigation = props => {
           <TextField sx={{ display: 'none' }} />
           <Dropdown
             Image={<SettingsIcon />}
-            TooltipTitle='Gear Items'
+            TooltipTitle={platformLabels.Gear}
             onClickAction={GearItem => {
               router.push(GearItem?.path)
               setLastOpenedPage(GearItem)
@@ -281,7 +282,7 @@ const Navigation = props => {
           {filterFav(menu) && filterFav(menu).length > 0 && (
             <Dropdown
               Image={<GradeIcon style={{ color: 'yellow' }} />}
-              TooltipTitle='Favorite Items'
+              TooltipTitle={platformLabels.Favorite}
               onClickAction={favorite => {
                 router.push(favorite?.path)
                 setLastOpenedPage(favorite)

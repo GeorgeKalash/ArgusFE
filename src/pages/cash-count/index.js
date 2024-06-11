@@ -1,20 +1,10 @@
-// ** React Imports
 import { useContext } from 'react'
-
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-
-// ** Helpers
 import { useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
-
-// ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
@@ -24,10 +14,12 @@ import { CashCountRepository } from 'src/repositories/CashCountRepository'
 import { formatDateDefault, getTimeInTimeZone } from 'src/lib/date-helper'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const CashCount = () => {
   const { stack } = useWindow()
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   async function fetchWithSearch({ options = {}, filters }) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -147,7 +139,7 @@ const CashCount = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
   }
 
   return (

@@ -38,7 +38,7 @@ export default function CashCountNotesForm({
         .array()
         .of(
           yup.object().shape({
-            note: yup.string().required('currency  is required')
+            note: yup.string().required(' ')
           })
         )
         .required('Operations array is required')

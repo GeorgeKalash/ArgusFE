@@ -13,10 +13,11 @@ import { useForm } from 'src/hooks/form'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function ExchangeTablesForm({ labels, maxAccess, recordId, invalidate }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const editMode = !!recordId
+  const { platformLabels } = useContext(ControlContext)
 
   const { formik } = useForm({
     initialValues: {
@@ -53,15 +54,17 @@ export default function ExchangeTablesForm({ labels, maxAccess, recordId, invali
       })
 
       if (!obj.recordId) {
-        toast.success('Record Added Successfully')
+        toast.success(platformLabels.Added)
         formik.setValues({
           ...obj,
           recordId: response.recordId
         })
-      } else toast.success('Record Edited Successfully')
+      } else toast.success(platformLabels.Edited)
+
       invalidate()
     }
   })
+  const editMode = !!formik.values.recordId || !!recordId
 
   useEffect(() => {
     ;(async function () {
@@ -176,7 +179,7 @@ export default function ExchangeTablesForm({ labels, maxAccess, recordId, invali
                   { key: 'flName', value: 'Foreign Language' }
                 ]}
                 values={formik.values}
-                required
+                required={formik.values.rateAgainst === '2'}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('rateAgainstCurrencyId', newValue?.recordId || null)

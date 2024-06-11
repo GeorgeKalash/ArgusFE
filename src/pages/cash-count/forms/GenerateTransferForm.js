@@ -12,9 +12,11 @@ import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function GenerateTransferForm({ cashCountId, fromPlantId, labels, maxAccess }) {
   const { postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const { formik } = useForm({
     maxAccess,
@@ -44,7 +46,7 @@ export default function GenerateTransferForm({ cashCountId, fromPlantId, labels,
           extension: CashCountRepository.Generate.generate,
           record: JSON.stringify(data)
         })
-        toast.success('Cash Transfer Generated Successfully')
+        toast.success(platformLabels.Generated)
       } catch (error) {}
     }
   })

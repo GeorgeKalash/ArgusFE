@@ -11,9 +11,11 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import CostCenterGroupForm from './forms/CostCenterGroupForm'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const CostCenterGroup = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
@@ -67,7 +69,7 @@ const CostCenterGroup = () => {
         extension: GeneralLedgerRepository.CostCenterGroup.del,
         record: JSON.stringify(obj)
       })
-      toast.success('Record Deleted Successfully')
+      toast.success(platformLabels.Deleted)
       invalidate()
     } catch (error) {}
   }

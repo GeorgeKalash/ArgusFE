@@ -2,5 +2,6 @@ const service = 'KVS.asmx/'
 
 export const KVSRepository = {
   getLabels: service + 'qryLBL',
-  getSMSLanguage: service + 'qryST',
+  getPlatformLabels: service + 'qryLBL2',
+  getSMSLanguage: service + 'qryST'
 }

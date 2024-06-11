@@ -11,9 +11,11 @@ import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepositor
 import { useForm } from 'src/hooks/form'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function CostCenterGroupForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: GeneralLedgerRepository.CostCenterGroup.page
@@ -39,12 +41,12 @@ export default function CostCenterGroupForm({ labels, maxAccess, recordId }) {
         })
 
         if (!obj.recordId) {
-          toast.success('Record Added Successfully')
+          toast.success(platformLabels.Added)
           formik.setValues({
             ...obj,
             recordId: response.recordId
           })
-        } else toast.success('Record Edited Successfully')
+        } else toast.success(platformLabels.Edited)
 
         invalidate()
       } catch (error) {}

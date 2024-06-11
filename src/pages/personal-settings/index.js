@@ -12,6 +12,7 @@ import { DataSets } from 'src/resources/DataSets'
 import * as yup from 'yup'
 import { getStorageData } from 'src/storage/storage'
 import { useForm } from 'src/hooks/form'
+import i18n from 'src/configs/i18n'
 
 const PersonalSettings = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -61,11 +62,42 @@ const PersonalSettings = () => {
   })
 
   const postPersonalSettings = async obj => {
-    await postRequest({
-      extension: SelfServiceRepository.SSUserInfo.set,
-      record: JSON.stringify(obj)
-    })
-    toast.success('Record Added Successfully')
+    try {
+      await postRequest({
+        extension: SelfServiceRepository.SSUserInfo.set,
+        record: JSON.stringify(obj)
+      })
+      toast.success('Record Added Successfully')
+
+      window.localStorage.setItem('languageId', obj.languageId)
+
+      const currentSettings = JSON.parse(window.localStorage.getItem('settings')) || {}
+      changeLang(obj.languageId)
+
+      const newSettings = {
+        ...currentSettings,
+        direction: obj.languageId == 2 ? 'rtl' : 'ltr'
+      }
+
+      window.localStorage.setItem('settings', JSON.stringify(newSettings))
+    } catch (error) {}
+  }
+
+  const changeLang = id => {
+    switch (id) {
+      case 1:
+        i18n.changeLanguage('en')
+        break
+      case 2:
+        i18n.changeLanguage('ar')
+        break
+      case 3:
+        i18n.changeLanguage('fr')
+        break
+
+      default:
+        break
+    }
   }
 
   const handleSubmit = () => {
