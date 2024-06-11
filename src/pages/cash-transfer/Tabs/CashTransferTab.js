@@ -28,6 +28,7 @@ import { useForm } from 'src/hooks/form'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import { RateDivision } from 'src/resources/RateDivision'
 import { DIRTYFIELD_AMOUNT, getRate } from 'src/utils/RateCalculator'
+import WorkFlow from 'src/components/Shared/WorkFlow'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 
 export default function CashTransferTab({ labels, recordId, access, plantId, cashAccountId, dtId }) {
@@ -296,32 +297,24 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
     })()
   }, [])
 
-  const getDataGrid = async () => {
-    try {
-      const res = await getRequest({
-        extension: CashBankRepository.AccountBalance.qry,
-        parameters: `_cashAccountId=${formik.values.fromCashAccountId}`
-      })
-      formik.setFieldValue(
-        'transfers',
-        res.list
-          .filter(item => item.balance != 0)
-          .map(({ id, balance, ...rest }, index) => ({
-            id: index + 1,
-            balance,
-            amount: balance || '',
-            ...rest
-          }))
-      )
-    } catch (error) {}
+  const onWorkFlowClick = async () => {
+    stack({
+      Component: WorkFlow,
+      props: {
+        functionId: SystemFunction.CashTransfer,
+        recordId: formik.values.recordId
+      },
+      width: 950,
+      title: 'Workflow'
+    })
   }
 
   const actions = [
     {
-      key: 'Bulk',
+      key: 'WorkFlow',
       condition: true,
-      onClick: getDataGrid,
-      disabled: editMode || formik.values.transfers.some(transfer => transfer.currencyId) || isClosed
+      onClick: onWorkFlowClick,
+      disabled: !editMode
     },
     {
       key: 'Close',
@@ -382,8 +375,8 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
     >
       <VertLayout>
         <Fixed>
-          <Grid container spacing={2}>
-            <Grid container rowGap={2} xs={6} sx={{ px: 2 }} spacing={4}>
+          <Grid container>
+            <Grid container rowGap={2} xs={6} sx={{ px: 2 }} spacing={2}>
               <Grid item xs={12}>
                 <CustomTextField
                   name='reference'
@@ -392,7 +385,6 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
                   maxAccess={maxAccess}
                   maxLength='15'
                   readOnly
-                  required
                 />
               </Grid>
               <Grid item xs={12}>
@@ -443,7 +435,7 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
                 />
               </Grid>
             </Grid>
-            <Grid container rowGap={2} xs={6} sx={{ px: 2 }} spacing={4}>
+            <Grid container rowGap={2} xs={6} sx={{ px: 2 }} spacing={2}>
               <Grid item xs={12}>
                 <CustomDatePicker
                   name='date'

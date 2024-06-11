@@ -21,6 +21,10 @@ const PlantWindow = ({ labels, editMode, maxAccess, recordId, height }) => {
 
   async function onSubmit(address) {
     const addressId = address.addressId
+    setStore(prevStore => ({
+      ...prevStore,
+      address: { ...prevStore.address, recordId: addressId }
+    }))
     if (!store.plant.addressId) {
       const res = { ...store.plant, addressId: addressId }
       if (res) {
@@ -35,7 +39,7 @@ const PlantWindow = ({ labels, editMode, maxAccess, recordId, height }) => {
           .catch(error => {})
       }
     } else {
-      toast.success('Record Edited Successfully')
+      toast.success('Record Edit Successfully')
     }
   }
   function setAddress(res) {

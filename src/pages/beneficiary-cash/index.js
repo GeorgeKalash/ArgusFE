@@ -29,7 +29,7 @@ const BeneficiaryCash = () => {
     filter: {
       endpointId: RemittanceOutwardsRepository.Beneficiary.snapshot,
       filterFn: fetchWithSearch,
-      default: { dispersalType: 1, clientId: 0 }
+      default: { dispersalType: 1, clientId: 0, seqNo: 1 }
     }
   })
 
@@ -45,12 +45,12 @@ const BeneficiaryCash = () => {
     }
   }
 
-  async function openForm(beneficiaryId, clientId) {
+  async function openForm(obj) {
     stack({
       Component: BenificiaryCashForm,
       props: {
-        client: { clientId: clientId },
-        beneficiary: { beneficiaryId: beneficiaryId, beneficiarySeqNo: 1 },
+        client: { clientId: obj.clientId },
+        beneficiary: { beneficiaryId: obj.beneficiaryId, beneficiarySeqNo: obj.seqNo },
         dispersalType: 1
       },
       width: 700,
@@ -127,7 +127,7 @@ const BeneficiaryCash = () => {
   }
 
   const editBenCash = obj => {
-    openForm(obj.beneficiaryId, obj.clientId)
+    openForm(obj)
   }
 
   return (
@@ -150,7 +150,7 @@ const BeneficiaryCash = () => {
         <Table
           columns={columns}
           gridData={data ? data : { list: [] }}
-          rowId={['beneficiaryId', 'clientId']}
+          rowId={['beneficiaryId', 'clientId', 'seqNo']}
           onEdit={editBenCash}
           onDelete={delBenCash}
           isLoading={false}
