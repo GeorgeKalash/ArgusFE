@@ -30,6 +30,15 @@ const RateTypes = () => {
     return { ...response, _startAt: _startAt }
   }
 
+  async function fetchWithSearch({ options = {}, filters }) {
+    const { _startAt = 0, _pageSize = 50 } = options
+
+    return await getRequest({
+      extension: MultiCurrencyRepository.RateType.snapshot,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=${filters.qry}`
+    })
+  }
+
   const invalidate = useInvalidate({
     endpointId: MultiCurrencyRepository.RateType.page
   })
@@ -45,7 +54,10 @@ const RateTypes = () => {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: MultiCurrencyRepository.RateType.page,
-    datasetId: ResourceIds.RateType
+    datasetId: ResourceIds.RateType,
+    filter: {
+      filterFn: fetchWithSearch
+    }
   })
 
   const columns = [

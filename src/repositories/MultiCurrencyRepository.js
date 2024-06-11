@@ -14,7 +14,8 @@ export const MultiCurrencyRepository = {
     get: service + 'getRT',
     set: service + 'setRT',
     del: service + 'delRT',
-    page: service + 'pageRT'
+    page: service + 'pageRT',
+    snapshot: service + 'snapshotRT'
   },
   McExchangeMap: {
     page: service + 'pageCRT',
