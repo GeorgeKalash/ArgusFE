@@ -144,7 +144,7 @@ export default function CashCountNotesForm({
 
   return (
     <FormShell
-      resourceId={ResourceIds.CashAccounts}
+      resourceId={ResourceIds.CashCountTransaction}
       form={formik}
       maxAccess={maxAccess}
       isCleared={false}
