@@ -1,16 +1,13 @@
 import React, { useContext, useState, useEffect } from 'react'
-import Window from './Window'
-import CustomTabPanel from './CustomTabPanel'
 import { CommonContext } from 'src/providers/CommonContext'
 import { DataSets } from 'src/resources/DataSets'
 import Grid from '@mui/system/Unstable_Grid/Grid'
-import CustomComboBox from '../Inputs/CustomComboBox'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import Table from './Table'
 import { ControlContext } from 'src/providers/ControlContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { formatDateFromApi } from 'src/lib/date-helper'
+import { formatDateDefault, formatDateFromApi } from 'src/lib/date-helper'
 import ResourceComboBox from './ResourceComboBox'
 
 const TransactionLog = props => {
@@ -59,13 +56,16 @@ const TransactionLog = props => {
   }
 
   const showInfo = obj => {
+    console.log(obj, 'obj')
     var parameters = `_recordId=${obj.recordId}`
+    setInfo([])
     getRequest({
       extension: SystemRepository.TransactionLog.get,
       parameters: parameters
     })
       .then(res => {
-        setInfo(JSON.parse(res.record.data))
+        if (res.record?.ttName == 'Add') setInfo(JSON.parse(res.record.data)?.header)
+        if (res.record?.ttName == 'Edit') setInfo(JSON.parse(res.record.data))
       })
       .catch(error => {})
   }
@@ -158,7 +158,7 @@ const TransactionLog = props => {
         {Object.entries(info).map(([key, value]) => (
           <Grid key={key} style={{ display: 'flex', alignItems: 'center' }}>
             <Grid style={{ minWidth: '100px', fontWeight: 'bold' }}>{key}:</Grid>
-            <Grid>{value}</Grid>
+            <Grid>{key && key === 'date' ? formatDateDefault(value) : value}</Grid>
           </Grid>
         ))}
       </Grid>
