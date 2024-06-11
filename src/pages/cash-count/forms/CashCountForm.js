@@ -23,7 +23,6 @@ import { formatDateFromApi, formatDateToApi, getTimeInTimeZone } from 'src/lib/d
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { getStorageData } from 'src/storage/storage'
 import { useInvalidate } from 'src/hooks/resource'
-import { useError } from 'src/error'
 import WorkFlow from 'src/components/Shared/WorkFlow'
 import GenerateTransferForm from './GenerateTransferForm'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
