@@ -83,10 +83,8 @@ const PosUsers = () => {
       Component: PosUsersForm,
       props: {
         labels: labels,
-
         userId: userId ? userId : null,
-        maxAccess: access,
-        invalidate: invalidate
+        maxAccess: access
       },
       width: 600,
       height: 300,

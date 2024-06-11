@@ -3,6 +3,7 @@ import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
+import { useInvalidate } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { PointofSaleRepository } from 'src/repositories/PointofSaleRepository'
@@ -13,12 +14,18 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 
-export default function PosUsersForm({ labels, maxAccess, userId, invalidate }) {
+export default function PosUsersForm({ labels, maxAccess, userId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
+
+  const invalidate = useInvalidate({
+    endpointId: PointofSaleRepository.PosUsers.qry
+  })
+
   const editMode = !!userId
 
   const { formik } = useForm({
     initialValues: {
+      recordId: null,
       userId: null,
       posId: null,
       spId: null
@@ -37,13 +44,10 @@ export default function PosUsersForm({ labels, maxAccess, userId, invalidate }) 
         extension: PointofSaleRepository.PosUsers.set,
         record: JSON.stringify(obj)
       })
-      if (!obj.userId) {
-        toast.success('Record Added Successfully')
-        formik.setValues({
-          ...obj,
-          userId: response.userId
-        })
-      } else toast.success('Record Edited Successfully')
+      toast.success('Record Saved Successfully')
+
+      window.close()
+
       invalidate()
     }
   })
@@ -55,14 +59,14 @@ export default function PosUsersForm({ labels, maxAccess, userId, invalidate }) 
             extension: PointofSaleRepository.PosUsers.get,
             parameters: `_userId=${userId}`
           })
-          formik.setValues(res.record)
+          formik.setValues({ ...res.record, recordId: res?.record?.userId })
         }
       } catch (e) {}
     })()
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.PriceLevels} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell resourceId={ResourceIds.POSUsers} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -113,7 +117,6 @@ export default function PosUsersForm({ labels, maxAccess, userId, invalidate }) 
                 columnsInDropDown={[{ key: 'name', value: 'name' }]}
                 values={formik.values}
                 maxAccess={maxAccess}
-                readOnly={editMode}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('spId', newValue ? newValue.recordId : '')
                 }}
