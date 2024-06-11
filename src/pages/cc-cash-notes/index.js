@@ -3,7 +3,7 @@ import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { CachCountSettingsRepository } from 'src/repositories/CachCountSettingsRepository'
+import { CashCountRepository } from 'src/repositories/CashCountRepository'
 import CcCashNotesForm from './forms/CcCashNotesForm'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -21,7 +21,7 @@ const CcCashNotes = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: CachCountSettingsRepository.CcCashNotes.page,
+      extension: CashCountRepository.CcCashNotes.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=&_currencyId=0`
     })
 
@@ -37,7 +37,7 @@ const CcCashNotes = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: CachCountSettingsRepository.CcCashNotes.page,
+    endpointId: CashCountRepository.CcCashNotes.page,
     datasetId: ResourceIds.CashNote
   })
 
@@ -71,7 +71,7 @@ const CcCashNotes = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: CachCountSettingsRepository.CcCashNotes.del,
+      extension: CashCountRepository.CcCashNotes.del,
       record: JSON.stringify(obj)
     })
     invalidate()
