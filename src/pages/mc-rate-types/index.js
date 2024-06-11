@@ -70,12 +70,14 @@ const RateTypes = () => {
   }
 
   const del = async obj => {
-    await postRequest({
-      extension: MultiCurrencyRepository.RateType.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success(platformLabels.Deleted)
+    try {
+      await postRequest({
+        extension: MultiCurrencyRepository.RateType.del,
+        record: JSON.stringify(obj)
+      })
+      invalidate()
+      toast.success(platformLabels.Deleted)
+    } catch (error) {}
   }
 
   function openForm(recordId) {

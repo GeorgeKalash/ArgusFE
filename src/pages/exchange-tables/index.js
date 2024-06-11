@@ -72,12 +72,14 @@ const ExchangeTables = () => {
   }
 
   const del = async obj => {
-    await postRequest({
-      extension: MultiCurrencyRepository.ExchangeTable.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success(platformLabels.Deleted)
+    try {
+      await postRequest({
+        extension: MultiCurrencyRepository.ExchangeTable.del,
+        record: JSON.stringify(obj)
+      })
+      invalidate()
+      toast.success(platformLabels.Deleted)
+    } catch (error) {}
   }
 
   function openForm(recordId) {

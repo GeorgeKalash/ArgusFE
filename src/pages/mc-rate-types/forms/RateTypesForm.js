@@ -15,7 +15,6 @@ import { ControlContext } from 'src/providers/ControlContext'
 
 export default function RateTypesForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const editMode = !!recordId
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
@@ -52,6 +51,7 @@ export default function RateTypesForm({ labels, maxAccess, recordId }) {
       invalidate()
     }
   })
+  const editMode = !!formik.values.recordId || !!recordId
 
   useEffect(() => {
     ;(async function () {
@@ -83,7 +83,6 @@ export default function RateTypesForm({ labels, maxAccess, recordId }) {
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('reference', '')}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
-                helperText={formik.touched.reference && formik.errors.reference}
               />
             </Grid>
             <Grid item xs={12}>
@@ -97,7 +96,6 @@ export default function RateTypesForm({ labels, maxAccess, recordId }) {
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
                 error={formik.touched.name && Boolean(formik.errors.name)}
-                helperText={formik.touched.name && formik.errors.name}
               />
             </Grid>
           </Grid>
