@@ -1,5 +1,6 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import Window from 'src/components/Shared/Window'
+import useResourceParams from 'src/hooks/useResourceParams'
 
 const WindowContext = React.createContext(null)
 
@@ -50,6 +51,41 @@ export function WindowProvider({ children }) {
       )}
     </WindowContext.Provider>
   )
+}
+
+export function ImmediateWindow({ datasetId, Component, titleName }) {
+  const { stack } = useWindow()
+
+  const { labels: _labels, access } = useResourceParams({
+    datasetId: datasetId
+  })
+
+  const [rendered, setRendered] = useState(false)
+
+  useEffect(() => {
+    if (_labels[titleName] && !rendered) {
+      openForm()
+      setRendered(true)
+    }
+  }, [_labels, rendered])
+
+  function openForm() {
+    stack({
+      Component,
+      props: {
+        access,
+        _labels
+      },
+      expandable: false,
+      closable: false,
+      draggable: false,
+      width: 600,
+      height: 400,
+      title: _labels[titleName]
+    })
+  }
+
+  return null
 }
 
 export function useWindow() {

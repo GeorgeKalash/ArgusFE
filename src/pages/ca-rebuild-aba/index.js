@@ -1,41 +1,15 @@
-import { useEffect, useState } from 'react'
-import { useWindow } from 'src/windows'
+import { ImmediateWindow } from 'src/windows'
 import CARebuildAccountBalance from './form/CARebuildForm'
-import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
 const CaRebuildAba = () => {
-  const { stack } = useWindow()
-
-  const { labels: _labels, access } = useResourceQuery({
-    datasetId: ResourceIds.CARebuildAccountBalance
-  })
-  const [rendered, setRendered] = useState(false)
-
-  useEffect(() => {
-    if (_labels.accountRebuild && !rendered) {
-      openForm()
-      setRendered(true)
-    }
-  }, [_labels, rendered])
-
-  function openForm() {
-    stack({
-      Component: CARebuildAccountBalance,
-      props: {
-        access,
-        _labels
-      },
-      expandable: false,
-      closable: false,
-      draggable: false,
-      width: 600,
-      height: 400,
-      title: _labels.accountRebuild
-    })
-  }
-
-  return null
+  return (
+    <ImmediateWindow
+      datasetId={ResourceIds.CARebuildAccountBalance}
+      titleName={'accountRebuild'}
+      Component={CARebuildAccountBalance}
+    />
+  )
 }
 
 export default CaRebuildAba
