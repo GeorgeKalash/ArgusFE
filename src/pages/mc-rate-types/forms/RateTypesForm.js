@@ -15,7 +15,6 @@ import { ControlContext } from 'src/providers/ControlContext'
 
 export default function RateTypesForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const editMode = !!recordId
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
@@ -52,6 +51,7 @@ export default function RateTypesForm({ labels, maxAccess, recordId }) {
       invalidate()
     }
   })
+  const editMode = !!formik.values.recordId || !!recordId
 
   useEffect(() => {
     ;(async function () {
