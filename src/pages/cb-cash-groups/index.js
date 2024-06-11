@@ -11,9 +11,11 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import CbCashGroupsForms from './forms/CbCashGroupsForm'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const CbCashGroup = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
@@ -68,7 +70,7 @@ const CbCashGroup = () => {
         record: JSON.stringify(obj)
       })
       invalidate()
-      toast.success('Record Deleted Successfully')
+      toast.success(platformLabels.Deleted)
     } catch (error) {}
   }
   function openForm(recordId) {

@@ -1,17 +1,14 @@
-// ** MUI Imports
-import { Box, Button, Grid, Tooltip, Typography, Autocomplete, DialogActions, TextField } from '@mui/material'
+import { Box, Button, Grid, Tooltip, Typography } from '@mui/material'
 import Icon from 'src/@core/components/icon'
 import CustomTextField from '../Inputs/CustomTextField'
 import { useState, useEffect, useContext } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
-
 import PreviewReport from './PreviewReport'
 import { useWindow } from 'src/windows'
-
-// ** Resources
 import { TrxType } from 'src/resources/AccessLevels'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import CustomComboBox from '../Inputs/CustomComboBox'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const GridToolbar = ({
   initialLoad,
@@ -29,9 +26,7 @@ const GridToolbar = ({
   inputSearch,
   search,
   onSearch,
-
   previewReport,
-
   onSearchClear,
   ...props
 }) => {
@@ -39,6 +34,7 @@ const GridToolbar = ({
   const addBtnVisible = onAdd && maxAccess > TrxType.GET
   const [searchValue, setSearchValue] = useState('')
   const { getRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
   const [selectedReport, setSelectedReport] = useState(null)
   const [reportStore, setReportStore] = useState([])
@@ -106,7 +102,7 @@ const GridToolbar = ({
           )}
           {onAdd && addBtnVisible && (
             <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', pt: '7px !important' }}>
-              <Tooltip title='Add'>
+              <Tooltip title={platformLabels.add}>
                 <Button
                   onClick={onAdd}
                   variant='contained'
@@ -121,7 +117,7 @@ const GridToolbar = ({
                     objectFit: 'contain'
                   }}
                 >
-                  <img src='/images/buttonsIcons/add.png' alt='Add' />
+                  <img src='/images/buttonsIcons/add.png' alt={platformLabels.add} />
                 </Button>
               </Tooltip>
             </Grid>
@@ -131,7 +127,7 @@ const GridToolbar = ({
               <CustomTextField
                 name='search'
                 value={searchValue}
-                label={labels.search}
+                label={platformLabels.Filter}
                 onClear={clear}
                 onChange={e => setSearchValue(e.target.value)}
                 onSearch={onSearch}
@@ -142,7 +138,7 @@ const GridToolbar = ({
           )}
           {onTree && (
             <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: '7px !important' }}>
-              <Tooltip title='Add'>
+              <Tooltip title={platformLabels.add}>
                 <Button
                   onClick={onTree}
                   variant='contained'
@@ -156,7 +152,7 @@ const GridToolbar = ({
                     objectFit: 'contain'
                   }}
                 >
-                  <img src='/images/buttonsIcons/tree.png' alt='Add' />
+                  <img src='/images/buttonsIcons/tree.png' alt={platformLabelsv.add} />
                 </Button>
               </Tooltip>
             </Box>
@@ -164,14 +160,14 @@ const GridToolbar = ({
           {openRPB && (
             <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', py: '7px !important' }}>
               <Button onClick={openRPB} variant='contained' disabled={disableRPB}>
-                OPEN RPB
+                {platformLabels.OpenRPB}
               </Button>
             </Grid>
           )}
           {onRefresh && (
             <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
               <Button variant='contained' onClick={refreshGrid}>
-                Refresh
+                {platformLabels.Refresh}
               </Button>
             </Box>
           )}
@@ -182,7 +178,7 @@ const GridToolbar = ({
                 onClick={() => onGo({ _startAt: 0, _pageSize: 30, params: formatDataForApi(paramsArray) })}
                 variant='contained'
               >
-                GO
+                {platformLabels.GO}
               </Button>
             </Grid>
           )}
@@ -204,7 +200,7 @@ const GridToolbar = ({
       {previewReport ? (
         <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', py: '7px !important' }}>
           <CustomComboBox
-            label={'Select a report template'}
+            label={platformLabels.SelectReport}
             valueField='caption'
             displayField='layoutName'
             store={reportStore}
@@ -225,13 +221,13 @@ const GridToolbar = ({
                 },
                 width: 1000,
                 height: 500,
-                title: 'Preview Report'
+                title: platformLabels.PreviewReport
               })
             }
             size='small'
           >
-            <Tooltip title='Preview'>
-              <img src='/images/buttonsIcons/preview.png' alt='Preview' />
+            <Tooltip title={platformLabels.Preview}>
+              <img src='/images/buttonsIcons/preview.png' alt={platformLabels.Preview} />
             </Tooltip>
           </Button>
         </Grid>

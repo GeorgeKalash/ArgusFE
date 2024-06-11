@@ -11,9 +11,11 @@ import { useWindow } from 'src/windows'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const Plants = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
   async function fetchWithSearch({ qry }) {
@@ -83,7 +85,7 @@ const Plants = () => {
     })
       .then(res => {
         invalidate()
-        toast.success('Record Deleted Successfully')
+        toast.success(platformLabels.Deleted)
       })
       .catch(error => {})
   }
