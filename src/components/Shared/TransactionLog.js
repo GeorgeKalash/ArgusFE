@@ -64,8 +64,8 @@ const TransactionLog = props => {
       parameters: parameters
     })
       .then(res => {
-        if (res.record?.ttName == 'Add') setInfo(JSON.parse(res.record.data)?.header)
-        if (res.record?.ttName == 'Edit') setInfo(JSON.parse(res.record.data))
+        if (JSON.parse(res.record.data).header) setInfo(JSON.parse(res.record.data)?.header)
+        else setInfo(JSON.parse(res.record.data))
       })
       .catch(error => {})
   }
