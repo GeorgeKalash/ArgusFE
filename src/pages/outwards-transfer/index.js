@@ -13,6 +13,8 @@ import toast from 'react-hot-toast'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
+import { SystemFunction } from 'src/resources/SystemFunction'
 
 const OutwardsTransfer = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -113,7 +115,6 @@ const OutwardsTransfer = () => {
         if (cashAccountId === '') {
           setErrorMessage({ error: 'The user does not have a default cash account' })
         }
-        setWindowOpen(false)
       }
     } catch (error) {
       console.error(error)
@@ -168,8 +169,14 @@ const OutwardsTransfer = () => {
     toast.success('Record Deleted Successfully')
   }
 
-  const addOutwards = () => {
-    openForm('')
+  const { proxyAction } = useDocumentTypeProxy({
+    functionId: SystemFunction.Outwards,
+    action: openForm,
+    hasDT: false
+  })
+
+  const addOutwards = async () => {
+    await proxyAction()
   }
 
   const editOutwards = obj => {
@@ -177,13 +184,14 @@ const OutwardsTransfer = () => {
   }
 
   function openOutWardsWindow(plantId, cashAccountId, recordId) {
+    console.log('openOutWardsWindow')
     stack({
       Component: OutwardsTab,
       props: {
         plantId: plantId,
         cashAccountId: cashAccountId,
         userId: userData && userData.userId,
-        maxAccess: access,
+        access,
         labels: _labels,
         recordId: recordId ? recordId : null
       },

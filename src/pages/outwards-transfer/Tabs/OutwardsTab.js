@@ -37,8 +37,9 @@ import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 
-export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId, plantId, userId, window }) {
+export default function OutwardsTab({ labels, access, recordId, cashAccountId, plantId, userId, window }) {
   const [productsStore, setProductsStore] = useState([])
   const [cashData, setCashData] = useState({})
   const [editMode, setEditMode] = useState(!!recordId)
@@ -51,6 +52,13 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
 
   const invalidate = useInvalidate({
     endpointId: RemittanceOutwardsRepository.OutwardsTransfer.snapshot
+  })
+
+  const { maxAccess } = useDocumentType({
+    functionId: SystemFunction.Outwards,
+    access: access,
+    hasDT: false,
+    enabled: !editMode
   })
 
   const [initialValues, setInitialData] = useState({
@@ -582,7 +590,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
   }
 
   const getDefaultDT = async () => {
-    const parameters = `_userId=${userData && userData.userId}&_functionId=${SystemFunction.OutwardsTransfer}`
+    const parameters = `_userId=${userId}&_functionId=${SystemFunction.Outwards}`
 
     try {
       const res = await getRequest({

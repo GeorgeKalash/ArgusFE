@@ -4,12 +4,12 @@ import { useError } from 'src/error'
 import documentType from 'src/lib/docRefBehaviors'
 import { RequestsContext } from 'src/providers/RequestsContext'
 
-export function useDocumentTypeProxy({ functionId, action }) {
+export function useDocumentTypeProxy({ functionId, action, hasDT }) {
   const { getRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
 
   const proxyAction = async () => {
-    const general = await documentType(getRequest, functionId)
+    const general = await documentType(getRequest, functionId, '', undefined, hasDT)
     if (!general?.errorMessage) {
       await action()
     } else {

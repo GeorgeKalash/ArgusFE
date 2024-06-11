@@ -1,5 +1,6 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import Window from 'src/components/Shared/Window'
+import useResourceParams from 'src/hooks/useResourceParams'
 
 const WindowContext = React.createContext(null)
 
@@ -21,30 +22,70 @@ export function WindowProvider({ children }) {
       }}
     >
       {children}
-      {stack.map(({ Component, title, width = 800, props, onClose, canExpand, height }, index) => (
-        <Window
-          key={index}
-          sx={{ display: 'flex !important', flex: '1' }}
-          Title={title}
-          controlled={true}
-          onClose={() => {
-            closeWindow()
-            if (onClose) onClose()
-          }}
-          width={width}
-          height={height}
-          canExpand={canExpand}
-        >
-          <Component
-            {...props}
-            window={{
-              close: closeWindow
+      {stack.map(
+        ({ Component, title, width = 800, props, onClose, closable, expandable, draggable, height, styles }, index) => (
+          <Window
+            key={index}
+            sx={{ display: 'flex !important', flex: '1' }}
+            Title={title}
+            controlled={true}
+            onClose={() => {
+              closeWindow()
+              if (onClose) onClose()
             }}
-          />
-        </Window>
-      ))}
+            width={width}
+            height={height}
+            expandable={expandable}
+            draggable={draggable}
+            closable={closable}
+            styles={styles}
+          >
+            <Component
+              {...props}
+              window={{
+                close: closeWindow
+              }}
+            />
+          </Window>
+        )
+      )}
     </WindowContext.Provider>
   )
+}
+
+export function ImmediateWindow({ datasetId, Component, titleName }) {
+  const { stack } = useWindow()
+
+  const { labels: _labels, access } = useResourceParams({
+    datasetId: datasetId
+  })
+
+  const [rendered, setRendered] = useState(false)
+
+  useEffect(() => {
+    if (_labels[titleName] && !rendered) {
+      openForm()
+      setRendered(true)
+    }
+  }, [_labels, rendered])
+
+  function openForm() {
+    stack({
+      Component,
+      props: {
+        access,
+        _labels
+      },
+      expandable: false,
+      closable: false,
+      draggable: false,
+      width: 600,
+      height: 400,
+      title: _labels[titleName]
+    })
+  }
+
+  return null
 }
 
 export function useWindow() {

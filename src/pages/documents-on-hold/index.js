@@ -24,6 +24,7 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import CashCountForm from '../cash-count/forms/CashCountForm'
 import CashTransferTab from '../cash-transfer/Tabs/CashTransferTab'
+import OutwardsModificationForm from '../outwards-modification/Forms/OutwardsModificationForm'
 
 const DocumentsOnHold = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -200,6 +201,16 @@ const DocumentsOnHold = () => {
 
         windowWidth = 1100
         title = labels.CashTransfer
+        break
+
+      case SystemFunction.OutwardsModification:
+        relevantComponent = OutwardsModificationForm
+        labels = await getLabels(ResourceIds.OutwardsModification)
+        relevantAccess = await getAccess(ResourceIds.OutwardsModification)
+
+        windowWidth = 1260
+        windowHeight = 720
+        title = labels.outwardsModification
         break
 
       default:
