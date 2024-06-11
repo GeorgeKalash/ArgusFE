@@ -265,7 +265,7 @@ export default function CashCountForm({ labels, maxAccess: access, recordId }) {
     })
       .then(res => {
         if (res?.recordId) {
-          toast.success(platformLabels.Posted)
+          toast.success(platformLabels.Closed)
           invalidate()
           getData(res?.recordId)
         }
