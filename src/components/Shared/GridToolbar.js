@@ -127,7 +127,7 @@ const GridToolbar = ({
               <CustomTextField
                 name='search'
                 value={searchValue}
-                label={platformLabels.Filter}
+                label={platformLabels.Search}
                 onClear={clear}
                 onChange={e => setSearchValue(e.target.value)}
                 onSearch={onSearch}
