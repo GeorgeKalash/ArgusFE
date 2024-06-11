@@ -163,6 +163,12 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'Rebuild',
+    color: '#231F20',
+    image: 'rebuild.png',
+    main: false
+  },
+  {
     key: 'Clear',
     label: platformLabels.Clear,
     condition: 'isCleared',

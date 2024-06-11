@@ -154,6 +154,8 @@ export function DataGrid({
         id,
         field
       })
+      const row = apiRef.current.getRow(id)
+      if (onSelectionChange) onSelectionChange(row)
     })
   }
 
@@ -266,9 +268,14 @@ export function DataGrid({
   }
 
   const handleRowClick = params => {
-    const selectedRow = value.find(row => row.id === params.row.id)
+    const selectedRow = apiRef.current.getRow(params.id)
     if (onSelectionChange) {
-      onSelectionChange(selectedRow)
+      async function update({ newRow }) {
+        updateState({
+          newRow
+        })
+      }
+      onSelectionChange(selectedRow, update)
     }
   }
 
@@ -416,6 +423,7 @@ export function DataGrid({
 
                 if (column.updateOn !== 'blur') await commitRowUpdate()
               }
+              const row = apiRef.current.getRow(params.id)
 
               return (
                 <Box
@@ -436,7 +444,7 @@ export function DataGrid({
                     {...params}
                     column={{
                       ...column,
-                      props
+                      props: column.propsReducer ? column?.propsReducer({ row, props }) : props
                     }}
                     update={update}
                     updateRow={updateRow}
