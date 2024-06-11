@@ -12,9 +12,11 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { formatDateDefault } from 'src/lib/date-helper'
+import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
+import { SystemFunction } from 'src/resources/SystemFunction'
 
 const OutwardsModification = () => {
-  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
@@ -62,6 +64,11 @@ const OutwardsModification = () => {
       flex: 1
     },
     {
+      field: 'owRef',
+      headerName: _labels.outwardReference,
+      flex: 1
+    },
+    {
       field: 'date',
       headerName: _labels.date,
       flex: 1,
@@ -90,16 +97,21 @@ const OutwardsModification = () => {
       props: {
         labels: _labels,
         recordId: recordId ? recordId : null,
-        maxAccess: access
+        access
       },
-      width: 1400,
-      height: 800,
+      width: 1260,
+      height: 720,
       title: _labels.outwardsModification
     })
   }
 
-  const add = () => {
-    openForm()
+  const { proxyAction } = useDocumentTypeProxy({
+    functionId: SystemFunction.OutwardsModification,
+    action: openForm
+  })
+
+  const add = async () => {
+    await proxyAction()
   }
 
   const edit = obj => {
