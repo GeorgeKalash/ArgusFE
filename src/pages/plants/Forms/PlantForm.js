@@ -14,9 +14,11 @@ import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { useInvalidate } from 'src/hooks/resource'
 import { useForm } from 'src/hooks/form'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const PlantForm = ({ _labels, maxAccess, store, setStore, editMode }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const { recordId, address } = store
 
   const invalidate = useInvalidate({
@@ -63,8 +65,8 @@ const PlantForm = ({ _labels, maxAccess, store, setStore, editMode }) => {
       .then(res => {
         if (!editMode) {
           formik.setFieldValue('recordId', res.recordId)
-          toast.success('Record Added Successfully')
-        } else toast.success('Record Edited Successfully')
+          toast.success(platformLabels.Added)
+        } else toast.success(platformLabels.Edited)
 
         setStore(prevStore => ({
           ...prevStore,

@@ -6,11 +6,12 @@ import {
 } from '@mui/x-data-grid'
 import components from './components'
 import { Box, IconButton } from '@mui/material'
-import { useEffect, useRef, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import { useError } from 'src/error'
 import DeleteDialog from '../DeleteDialog'
 import { HIDDEN, accessLevel } from 'src/services/api/maxAccess'
 import { useWindow } from 'src/windows'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export function DataGrid({
   idName = 'id',
@@ -59,6 +60,7 @@ export function DataGrid({
   const apiRef = useGridApiRef()
 
   const [isUpdatingField, setIsUpdating] = useState(false)
+  const { platformLabels } = useContext(ControlContext)
 
   const [nextEdit, setNextEdit] = useState(null)
 
@@ -210,8 +212,8 @@ export function DataGrid({
       },
       width: 450,
       height: 170,
-      expandable: false,
-      title: 'Delete'
+      canExpand: false,
+      title: platformLabels.Delete
     })
   }
 
