@@ -49,7 +49,6 @@ export const AccessControlRepository = {
   },
   UserReleaseCode: {
     qry: service + 'qryUCO',
-    get: service + 'getUCO',
     set: service + 'setUCO',
     del: service + 'delUCO'
   }

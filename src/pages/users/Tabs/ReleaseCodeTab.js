@@ -3,7 +3,7 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useWindow } from 'src/windows'
 import { useContext } from 'react'
@@ -41,23 +41,26 @@ const ReleaseCodeTab = ({ labels, maxAccess, storeRecordId }) => {
   })
 
   async function fetchGridData() {
-    if (!storeRecordId) {
-      return { list: [] }
-    }
+    try {
+      if (!storeRecordId) {
+        return { list: [] }
+      }
 
-    return await getRequest({
-      extension: AccessControlRepository.UserReleaseCode.qry,
-      parameters: `_userId=${storeRecordId}&_filter=`
-    })
+      return await getRequest({
+        extension: AccessControlRepository.UserReleaseCode.qry,
+        parameters: `_userId=${storeRecordId}&_filter=`
+      })
+    } catch (error) {}
   }
 
-  function openForm(recordId) {
+  function openForm() {
     stack({
       Component: ReleaseCodeForm,
       props: {
         labels: _labels,
-        recordId: recordId ? recordId : null,
-        maxAccess
+        storeRecordId: storeRecordId ? storeRecordId : null,
+        maxAccess,
+        invalidate
       },
       width: 600,
       height: 400,
