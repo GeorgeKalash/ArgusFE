@@ -9,7 +9,7 @@ import FormShell from 'src/components/Shared/FormShell'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { useInvalidate } from 'src/hooks/resource'
@@ -62,6 +62,7 @@ const PlantForm = ({ _labels, maxAccess, store, setStore, editMode }) => {
     })
       .then(res => {
         if (!editMode) {
+          formik.setFieldValue('recordId', res.recordId)
           toast.success('Record Added Successfully')
         } else toast.success('Record Edited Successfully')
 
