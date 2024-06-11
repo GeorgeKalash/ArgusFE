@@ -3,25 +3,27 @@ import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
+import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
-import ExchangeTablesForm from './forms/ExchangeTablesForm'
+import OpeningBalanceForm from './form/OpeningBalanceForm'
+import { getFormattedNumber } from 'src/lib/numberField-helper'
 
-const ExchangeTables = () => {
+const OpeningBalance = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: MultiCurrencyRepository.ExchangeTable.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      extension: CashBankRepository.OpeningBalance.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -30,66 +32,74 @@ const ExchangeTables = () => {
   const {
     query: { data },
     labels: _labels,
-    refetch,
+    access,
     paginationParameters,
-    access
+    refetch
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: MultiCurrencyRepository.ExchangeTable.page,
-    datasetId: ResourceIds.ExchangeTables
+    endpointId: CashBankRepository.OpeningBalance.page,
+    datasetId: ResourceIds.OpeningBalance
   })
 
   const invalidate = useInvalidate({
-    endpointId: MultiCurrencyRepository.ExchangeTable.page
+    endpointId: CashBankRepository.OpeningBalance.page
   })
 
   const columns = [
     {
-      field: 'reference',
-      headerName: _labels.reference,
+      field: 'fiscalYear',
+      headerName: _labels.fiscalYear,
       flex: 1
     },
     {
-      field: 'name',
-      headerName: _labels.name,
+      field: 'cashAccountName',
+      headerName: _labels.accountName,
       flex: 1
     },
     {
       field: 'currencyRef',
-      headerName: _labels.currencyId,
+      headerName: _labels.currencyRef,
       flex: 1
+    },
+    {
+      field: 'amount',
+      headerName: _labels.amount,
+      flex: 1,
+      valueGetter: ({ row }) => getFormattedNumber(row?.amount)
     }
   ]
 
-  const add = () => {
-    openForm()
-  }
-
-  const edit = obj => {
-    openForm(obj?.recordId)
-  }
-
   const del = async obj => {
     await postRequest({
-      extension: MultiCurrencyRepository.ExchangeTable.del,
+      extension: CashBankRepository.OpeningBalance.del,
       record: JSON.stringify(obj)
     })
     invalidate()
     toast.success('Record Deleted Successfully')
   }
 
-  function openForm(recordId) {
+  const add = () => {
+    openForm()
+  }
+
+  const edit = obj => {
+    openForm(obj)
+  }
+
+  function openForm(record) {
     stack({
-      Component: ExchangeTablesForm,
+      Component: OpeningBalanceForm,
       props: {
         labels: _labels,
-        recordId: recordId ? recordId : null,
-        maxAccess: access,
-        invalidate: invalidate
+        record: record,
+
+        recordId: record
+          ? String(record.fiscalYear * 1000) + String(record.accountId * 100) + String(record.currencyId * 10)
+          : null
       },
       width: 600,
-      height: 450,
-      title: _labels.ExchangeTables
+      height: 430,
+      title: _labels.openingBalance
     })
   }
 
@@ -102,19 +112,19 @@ const ExchangeTables = () => {
         <Table
           columns={columns}
           gridData={data}
-          rowId={['recordId']}
+          rowId={['currencyId', 'fiscalYear', 'accountId']}
           onEdit={edit}
           onDelete={del}
           isLoading={false}
-          refetch={refetch}
           pageSize={50}
           paginationParameters={paginationParameters}
-          maxAccess={access}
+          refetch={refetch}
           paginationType='api'
+          maxAccess={access}
         />
       </Grow>
     </VertLayout>
   )
 }
 
-export default ExchangeTables
+export default OpeningBalance

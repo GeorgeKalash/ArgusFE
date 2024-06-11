@@ -9,9 +9,7 @@ import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import { ResourceLookup } from 'src/components/Shared//ResourceLookup'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
-import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
@@ -19,13 +17,10 @@ export default function ProductionClassForm({
   labels,
   maxAccess,
   recordId,
-  setErrorMessage,
   setSelectedRecordId,
   editMode,
   setEditMode
 }) {
-  const [isLoading, setIsLoading] = useState(false)
-
   const [initialValues, setInitialData] = useState({
     recordId: null,
     reference: '',
@@ -59,8 +54,8 @@ export default function ProductionClassForm({
       if (!recordId) {
         toast.success('Record Added Successfully')
         setInitialData({
-          ...obj, // Spread the existing properties
-          recordId: response.recordId // Update only the recordId field
+          ...obj, 
+          recordId: response.recordId
         })
         setSelectedRecordId(response.recordId)
       } else toast.success('Record Edited Successfully')
@@ -74,8 +69,6 @@ export default function ProductionClassForm({
     ;(async function () {
       try {
         if (recordId) {
-          setIsLoading(true)
-
           const res = await getRequest({
             extension: ManufacturingRepository.ProductionClass.get,
             parameters: `_recordId=${recordId}`
@@ -86,7 +79,6 @@ export default function ProductionClassForm({
       } catch (exception) {
         setErrorMessage(error)
       }
-      setIsLoading(false)
     })()
   }, [])
 
