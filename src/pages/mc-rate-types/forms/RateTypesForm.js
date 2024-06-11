@@ -14,7 +14,6 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 export default function RateTypesForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const editMode = !!recordId
 
   const invalidate = useInvalidate({
     endpointId: MultiCurrencyRepository.RateType.page
@@ -49,6 +48,7 @@ export default function RateTypesForm({ labels, maxAccess, recordId }) {
       invalidate()
     }
   })
+  const editMode = !!formik.values.recordId || !!recordId
 
   useEffect(() => {
     ;(async function () {

@@ -16,7 +16,6 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 export default function ExchangeTablesForm({ labels, maxAccess, recordId, invalidate }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const editMode = !!recordId
 
   const { formik } = useForm({
     initialValues: {
@@ -62,6 +61,7 @@ export default function ExchangeTablesForm({ labels, maxAccess, recordId, invali
       invalidate()
     }
   })
+  const editMode = !!formik.values.recordId || !!recordId
 
   useEffect(() => {
     ;(async function () {
@@ -176,7 +176,7 @@ export default function ExchangeTablesForm({ labels, maxAccess, recordId, invali
                   { key: 'flName', value: 'Foreign Language' }
                 ]}
                 values={formik.values}
-                required
+                required={formik.values.rateAgainst === '2'}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('rateAgainstCurrencyId', newValue?.recordId || null)
