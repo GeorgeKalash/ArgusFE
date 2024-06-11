@@ -77,7 +77,7 @@ export default function BenificiaryBankForm({
           stoppedReason: RTBEN?.record?.stoppedReason,
           gender: RTBEN?.record?.gender,
           rtId: RTBEN?.record?.rtId,
-          rtName: RTBEN?.record.rtName,
+          rtName: RTBEN?.record?.rtName,
           cellPhone: RTBEN?.record?.cellPhone,
           birthDate: RTBEN?.record?.birthDate && formatDateFromApi(RTBEN.record.birthDate),
           cobId: RTBEN?.record?.cobId,
