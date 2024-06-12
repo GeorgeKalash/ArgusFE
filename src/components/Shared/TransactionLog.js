@@ -1,28 +1,25 @@
 import React, { useContext, useState, useEffect } from 'react'
-import Window from './Window'
-import CustomTabPanel from './CustomTabPanel'
-import { CommonContext } from 'src/providers/CommonContext'
 import { DataSets } from 'src/resources/DataSets'
 import Grid from '@mui/system/Unstable_Grid/Grid'
-import CustomComboBox from '../Inputs/CustomComboBox'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import Table from './Table'
 import { ControlContext } from 'src/providers/ControlContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { formatDateFromApi } from 'src/lib/date-helper'
+import { formatDateDefault, formatDateFromApi } from 'src/lib/date-helper'
 import ResourceComboBox from './ResourceComboBox'
+import { useError } from 'src/error'
 
 const TransactionLog = props => {
   const { recordId, resourceId, onInfoClose } = props
   const { getRequest } = useContext(RequestsContext)
-  const { getAllKvsByDataset } = useContext(CommonContext)
+  const { stack: stackError } = useError()
+
   const { getLabels, getAccess } = useContext(ControlContext)
   const [transactionType, setTransactionType] = useState(0)
   const [gridData, setGridData] = useState({})
   const [labels, setLabels] = useState(null)
   const [access, setAccess] = useState(null)
-  const [errorMessage, setErrorMessage] = useState(null)
   const [info, setInfo] = useState({})
   useEffect(() => {
     if (!access) getAccess(ResourceIds.TransactionLog, setAccess)
@@ -31,7 +28,7 @@ const TransactionLog = props => {
         getGridData()
         getLabels(ResourceIds.TransactionLog, setLabels)
       } else {
-        setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
+        stackError({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
       }
     }
   }, [access, transactionType])
@@ -59,28 +56,28 @@ const TransactionLog = props => {
   }
 
   const showInfo = obj => {
+    console.log(obj, 'obj')
     var parameters = `_recordId=${obj.recordId}`
+    setInfo([])
     getRequest({
       extension: SystemRepository.TransactionLog.get,
       parameters: parameters
     })
       .then(res => {
-        setInfo(JSON.parse(res.record.data))
+        if (JSON.parse(res.record.data).header) setInfo(JSON.parse(res.record.data)?.header)
+        else setInfo(JSON.parse(res.record.data))
       })
       .catch(error => {})
   }
 
-  const formatDate = dateString => {
+  const formatTime = dateString => {
     const options = {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit'
     }
 
-    return new Date(dateString).toLocaleString('en-GB', options)
+    return new Date(formatDateFromApi(dateString)).toLocaleString('en-GB', options)
   }
 
   const columns = [
@@ -88,7 +85,7 @@ const TransactionLog = props => {
       field: 'eventDt',
       headerName: _labels.eventDate,
       flex: 1,
-      valueGetter: ({ row }) => formatDate(formatDateFromApi(row?.eventDt))
+      valueGetter: ({ row }) => formatDateDefault(row?.eventDt) + ' ' + formatTime(row?.eventDt)
     },
     {
       field: 'userName',
@@ -158,7 +155,7 @@ const TransactionLog = props => {
         {Object.entries(info).map(([key, value]) => (
           <Grid key={key} style={{ display: 'flex', alignItems: 'center' }}>
             <Grid style={{ minWidth: '100px', fontWeight: 'bold' }}>{key}:</Grid>
-            <Grid>{value}</Grid>
+            <Grid>{key && key === 'date' ? formatDateDefault(value) : value}</Grid>
           </Grid>
         ))}
       </Grid>
