@@ -2,9 +2,11 @@ import React, { useContext, useEffect } from 'react'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { Box } from '@mui/material'
+import { AuthContext } from 'src/providers/AuthContext'
 
 const WorkFlow = ({ functionId, recordId }) => {
   const { getRequest } = useContext(RequestsContext)
+  const { languageId } = useContext(AuthContext)
   const pageName = functionId
   const id = recordId + '-' + functionId
 
@@ -82,7 +84,8 @@ const WorkFlow = ({ functionId, recordId }) => {
                 chart.dataFields.fromName = 'from'
                 chart.dataFields.toName = 'to'
                 chart.dataFields.value = 'value'
-                chart.paddingRight = 40
+                chart.paddingRight = languageId === 2 ? 0 : 40
+                chart.paddingLeft = languageId === 2 ? 40 : 0
 
                 const nodeTemplate = chart.nodes.template
                 nodeTemplate.draggable = false
@@ -91,7 +94,7 @@ const WorkFlow = ({ functionId, recordId }) => {
                 nodeTemplate.width = 110
                 nodeTemplate.height = 30
 
-                nodeTemplate.nameLabel.locationX = 0
+                nodeTemplate.nameLabel.locationX = languageId === 2 ? 0.85 : 0
                 nodeTemplate.nameLabel.height = undefined
                 nodeTemplate.nameLabel.label.fontWeight = 'bold'
                 const linkTemplate = chart.links.template
