@@ -20,9 +20,18 @@ import { LogisticsRepository } from 'src/repositories/LogisticsRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
+import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
+import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
+import { DataSets } from 'src/resources/DataSets'
 
-export default function ReceiptVoucherForm({ labels, maxAccess, recordId }) {
+export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
+
+  const { documentType, maxAccess, changeDT } = useDocumentType({
+    functionId: SystemFunction.ReceiptVoucher,
+    access: access,
+    enabled: !recordId
+  })
   const editMode = !!recordId
 
   const invalidate = useInvalidate({
@@ -30,6 +39,9 @@ export default function ReceiptVoucherForm({ labels, maxAccess, recordId }) {
   })
 
   const { formik } = useForm({
+    maxAccess: maxAccess,
+    enableReinitialize: true,
+    validateOnChange: true,
     initialValues: {
       reference: '',
       accountId: null,
@@ -52,16 +64,14 @@ export default function ReceiptVoucherForm({ labels, maxAccess, recordId }) {
       collectorId: null,
       isVerified: true
     },
-    maxAccess: maxAccess,
-    enableReinitialize: true,
-    validateOnChange: true,
     validationSchema: yup.object({
-      accountId: yup.string().required(' '),
-      cashAccountId: yup.string().required(' '),
-      amount: yup.string().required(' ')
+      // accountId: yup.string().required(' '),
+      // cashAccountId: yup.string().required(' '),
+      // amount: yup.string().required(' ')
     }),
     onSubmit: async obj => {
-      const recordId = obj.recordId
+      // const recordId = obj.recordId
+      console.log('obj', obj)
 
       const response = await postRequest({
         extension: FinancialRepository.ReceiptVouchers.set,
@@ -99,7 +109,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess, recordId }) {
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
-                parameters={`_dgId=${SystemFunction.JournalVoucher}&_startAt=${0}&_pageSize=${50}`}
+                parameters={`_dgId=${SystemFunction.ReceiptVoucher}&_startAt=${0}&_pageSize=${50}`}
                 filter={!editMode ? item => item.activeStatus === 1 : undefined}
                 name='dtId'
                 label={labels.documentType}
@@ -164,23 +174,23 @@ export default function ReceiptVoucherForm({ labels, maxAccess, recordId }) {
             </Grid>
             <Grid item xs={12}>
               <ResourceLookup
-                endpointId={CashBankRepository.CashAccount.snapshot}
+                endpointId={GeneralLedgerRepository.Account.snapshot}
                 parameters={{
                   _type: 0
                 }}
                 required
-                readOnly={!editMode}
+                readOnly={editMode}
                 name='accountId'
                 label={labels.accountReference}
-                valueField='reference'
+                valueField='accountRef'
                 displayField='name'
-                valueShow='cashAccountRef'
-                secondValueShow='cashAccountName'
+                valueShow='accountRef'
+                secondValueShow='accountName'
                 form={formik}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('accountId', newValue?.recordId || '')
-                  formik.setFieldValue('cashAccountRef', newValue?.reference || '')
-                  formik.setFieldValue('cashAccountName', newValue?.name || '')
+                  formik.setFieldValue('accountRef', newValue?.accountRef || '')
+                  formik.setFieldValue('accountName', newValue?.name || '')
                 }}
                 error={formik.touched.accountId && Boolean(formik.errors.accountId)}
                 maxAccess={maxAccess}
@@ -189,17 +199,15 @@ export default function ReceiptVoucherForm({ labels, maxAccess, recordId }) {
 
             <Grid item xs={6}>
               <ResourceComboBox
-                endpointId={SystemRepository.DocumentType.qry}
-                filter={!editMode ? item => item.activeStatus === 1 : undefined}
+                datasetId={DataSets.PAYMENT_METHOD}
                 name='paymentMethod'
                 label={labels.paymentMethod}
                 readOnly={editMode}
-                valueField='recordId'
-                displayField='name'
+                valueField='key'
+                displayField='value'
                 values={formik.values}
                 onChange={async (event, newValue) => {
-                  formik.setFieldValue('paymentMethod', newValue?.recordId)
-                  changeDT(newValue)
+                  formik.setFieldValue('paymentMethod', newValue?.key)
                 }}
                 error={formik.touched.paymentMethod && Boolean(formik.errors.paymentMethod)}
                 maxAccess={maxAccess}
@@ -234,6 +242,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess, recordId }) {
                 required
                 onChange={(event, newValue) => {
                   formik.setValues({
+                    ...formik.values,
                     cashAccountId: newValue?.recordId || '',
                     cashAccountRef: newValue?.reference || '',
                     cashAccountName: newValue?.name || ''

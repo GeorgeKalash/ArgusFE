@@ -9,9 +9,10 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
-import { SystemFunction } from 'src/resources/SystemFunction'
 import ReceiptVoucherForm from './forms/ReceiptVoucherForm'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
+import { SystemFunction } from 'src/resources/SystemFunction'
 
 export default function CurrencyTrading() {
   const { getRequest } = useContext(RequestsContext)
@@ -23,11 +24,11 @@ export default function CurrencyTrading() {
       props: {
         labels,
         maxAccess: access,
-        recordId
+        recordId: recordId || null
       },
       width: 1200,
       height: 800,
-      title: 'Cash Invoice'
+      title: labels.ReceiptVoucher
     })
   }
 
@@ -52,12 +53,21 @@ export default function CurrencyTrading() {
     })
   }
 
+  const { proxyAction } = useDocumentTypeProxy({
+    functionId: SystemFunction.ReceiptVoucher,
+    action: openForm
+  })
+
+  const add = async () => {
+    await proxyAction()
+  }
+
   return (
     <VertLayout>
       <Fixed>
         <GridToolbar
           maxAccess={access}
-          onAdd={openForm}
+          onAdd={add}
           onSearch={value => {
             filterBy('qry', value)
           }}
