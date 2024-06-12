@@ -391,7 +391,6 @@ const Table = ({
                 size='small'
                 onClick={e => {
                   props.onEdit(params.row)
-                  e.stopPropagation()
                 }}
               >
                 <Image src={editIcon} alt='Edit' width={18} height={18} />
@@ -401,7 +400,7 @@ const Table = ({
               <IconButton
                 size='small'
                 onClick={e => {
-                  props.popupComponent(params.row), e.stopPropagation()
+                  props.popupComponent(params.row)
                 }}
               >
                 <Image src={editIcon} alt='Edit' width={18} height={18} />
@@ -416,7 +415,6 @@ const Table = ({
                   } else {
                     openDelete(params.row)
                   }
-                  e.stopPropagation()
                 }}
                 color='error'
               >
