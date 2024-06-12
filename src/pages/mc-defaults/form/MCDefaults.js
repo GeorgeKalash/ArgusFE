@@ -83,7 +83,7 @@ const MCDefault = ({ _labels, acces }) => {
   return (
     <VertLayout>
       <Grow>
-        <Grid container spacing={5} sx={{ pl: '10px', pt: '10px' }} lg={4} xs={12}>
+        <Grid container spacing={5} sx={{ pl: '10px', pt: '10px' }} xs={12}>
           <Grid item xs={12}>
             <ResourceComboBox
               endpointId={MultiCurrencyRepository.RateType.qry}

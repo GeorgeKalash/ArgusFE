@@ -53,7 +53,7 @@ export const getButtons = platformLabels => [
   {
     key: 'Approval',
     label: platformLabels.Approval,
-    color: '#4EB558',
+    color: '#231F20',
     image: 'approval.png',
     main: false
   },

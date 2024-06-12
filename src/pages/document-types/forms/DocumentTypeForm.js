@@ -143,7 +143,6 @@ export default function DocumentTypeForm({ labels, recordId, maxAccess }) {
                 valueField='recordId'
                 displayField='name'
                 values={formik.values}
-                required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('ilId', newValue?.recordId)
