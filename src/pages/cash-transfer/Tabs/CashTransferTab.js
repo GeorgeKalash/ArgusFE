@@ -558,7 +558,7 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
                 label: labels.amount,
                 name: 'amount',
                 defaultValue: '',
-                props: { disabled: isClosed },
+                props: { readOnly: isClosed },
                 async onChange({ row: { update, newRow } }) {
                   if (!newRow?.amount) {
                     return
@@ -582,7 +582,7 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
                 name: 'balance',
                 label: labels.balance,
                 defaultValue: '0',
-                props: { readOnly: isClosed }
+                props: { readOnly: true }
               }
             ]}
           />
