@@ -83,5 +83,22 @@ export const FinancialRepository = {
     get: service + 'getOBA',
     set: service + 'setOBA',
     del: service + 'delOBA'
+  },
+  FiMemo: {
+    qry: service + 'qryMEM',
+    get: service + 'getMEM',
+    del: service + 'delMEM'
+  },
+  CreditNote: {
+    set: service + 'setCN'
+  },
+  DebitNote: {
+    set: service + 'setDN'
+  },
+  ServiceBillReceived: {
+    set: service + 'setSB'
+  },
+  ServiceInvoice: {
+    set: service + 'setSI'
   }
 }

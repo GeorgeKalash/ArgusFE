@@ -1,15 +1,190 @@
+import { useContext } from 'react'
+import toast from 'react-hot-toast'
+import Table from 'src/components/Shared/Table'
+import GridToolbar from 'src/components/Shared/GridToolbar'
+import { RequestsContext } from 'src/providers/RequestsContext'
+import { useResourceQuery } from 'src/hooks/resource'
+import { ResourceIds } from 'src/resources/ResourceIds'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { useWindow } from 'src/windows'
+import { CashBankRepository } from 'src/repositories/CashBankRepository'
+import { formatDateDefault } from 'src/lib/date-helper'
+import { getFormattedNumber } from 'src/lib/numberField-helper'
 import { useRouter } from 'next/router'
+import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
+import { FinancialRepository } from 'src/repositories/FinancialRepository'
+import FinancialForm from './FinancialForm'
+import { SystemFunction } from 'src/resources/SystemFunction'
 
-const Memos = () => {
+const Financial = () => {
+  const { getRequest, postRequest } = useContext(RequestsContext)
+
+  const { stack } = useWindow()
+
   const router = useRouter()
-
   const { functionId } = router.query
 
+  async function fetchGridData(options = {}) {
+    const {
+      pagination: { _startAt = 0, _pageSize = 50 }
+    } = options
+
+    const response = await getRequest({
+      extension: FinancialRepository.FiMemo.qry,
+      parameters: `_startAt=${_startAt}&_params=&_pageSize=50&_sortBy=reference&_functionId=${functionId}`
+    })
+
+    return { ...response, _startAt: _startAt }
+  }
+  console.log(functionId, 'functionbbb')
+
+  const {
+    query: { data },
+    labels: _labels,
+    access,
+    paginationParameters,
+    invalidate,
+    refetch
+  } = useResourceQuery({
+    endpointId: FinancialRepository.FiMemo.qry,
+    datasetId: ResourceIds.CreditNote,
+
+    filter: {
+      filterFn: fetchGridData,
+      default: { functionId }
+    }
+  })
+
+  const columns = [
+    {
+      field: 'reference',
+      headerName: _labels.reference,
+      flex: 1
+    },
+    {
+      field: 'date',
+      headerName: _labels.date,
+      flex: 1,
+      valueGetter: ({ row }) => formatDateDefault(row?.date)
+    },
+    {
+      field: 'accountRef',
+      headerName: _labels.accountRef,
+      flex: 1
+    },
+    {
+      field: 'accountName',
+      headerName: _labels.accountName,
+      flex: 1
+    },
+    {
+      field: 'currencyName',
+      headerName: _labels.currency,
+      flex: 1
+    },
+    {
+      field: 'amount',
+      headerName: _labels.amount,
+      flex: 1,
+      valueGetter: ({ row }) => getFormattedNumber(row?.amount)
+    },
+    {
+      field: 'plantName',
+      headerName: _labels.plant,
+      flex: 1
+    },
+
+    {
+      field: 'statusName',
+      headerName: _labels.status,
+      flex: 1
+    },
+
+    {
+      field: 'notes',
+      headerName: _labels.notes,
+      flex: 1
+    }
+  ]
+
+  const edit = obj => {
+    openForm(obj?.recordId)
+  }
+
+  const getcorrectLabel = functionId => {
+    if (functionId === SystemFunction.CreditNote) {
+      return _labels.creditNote
+    } else if (functionId === SystemFunction.DebitNote) {
+      return _labels.debitNote
+    } else if (functionId === SystemFunction.ServiceBill) {
+      return _labels.serviceBill
+    } else if (functionId === SystemFunction.ServiceInvoice) {
+      return _labels.serviceInvoice
+    } else {
+      return null
+    }
+  }
+
+  function openForm(recordId) {
+    stack({
+      Component: FinancialForm,
+      props: {
+        labels: _labels,
+        recordId: recordId,
+        access,
+        functionId: functionId
+      },
+      width: 800,
+      height: 630,
+      title: getcorrectLabel(parseInt(functionId))
+    })
+  }
+
+  const { proxyAction } = useDocumentTypeProxy({
+    functionId: functionId,
+    action: openForm
+  })
+
+  const add = async () => {
+    await proxyAction()
+  }
+
+  const del = async obj => {
+    try {
+      await postRequest({
+        extension: FinancialRepository.FiMemo.del,
+        record: JSON.stringify(obj)
+      })
+      invalidate()
+      toast.success(platformLabels.Deleted)
+    } catch (error) {}
+  }
+
   return (
-    <div>
-      <p>Function ID: {functionId}</p>
-    </div>
+    <VertLayout>
+      <Fixed>
+        <GridToolbar onAdd={add} maxAccess={access} />
+      </Fixed>
+      <Grow>
+        <Table
+          columns={columns}
+          gridData={data}
+          rowId={['recordId']}
+          onEdit={edit}
+          onDelete={del}
+          deleteConfirmationType={'strict'}
+          isLoading={false}
+          pageSize={50}
+          paginationParameters={paginationParameters}
+          refetch={refetch}
+          paginationType='api'
+          maxAccess={access}
+        />
+      </Grow>
+    </VertLayout>
   )
 }
 
-export default Memos
+export default Financial
