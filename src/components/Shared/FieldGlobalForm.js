@@ -15,7 +15,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { CommonContext } from 'src/providers/CommonContext'
 
-export default function FieldGlobalForm({ labels, maxAccess, row, invalidate, window }) {
+export default function FieldGlobalForm({ labels, maxAccess, row, invalidate, window, resourceId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [isLoading, setIsLoading] = useState(false)
   const { getAllKvsByDataset } = useContext(CommonContext)
@@ -55,14 +55,19 @@ export default function FieldGlobalForm({ labels, maxAccess, row, invalidate, wi
           sgId: row.sgId,
           controls: updatedRows
         }
-
-        await postRequest({
-          extension: AccessControlRepository.SGControlAccess.set2,
-          record: JSON.stringify(resultObject)
-        })
-
+        if (resourceId == ResourceIds.SecurityGroup) {
+          await postRequest({
+            extension: AccessControlRepository.SGControlAccess.set2,
+            record: JSON.stringify(resultObject)
+          })
+        }
+        if (resourceId == ResourceIds.GlobalAuthorization) {
+          await postRequest({
+            extension: AccessControlRepository.GlobalControlAuthorizationPack.set2,
+            record: JSON.stringify(resultObject)
+          })
+        }
         toast.success('Record Edited Successfully')
-
         invalidate()
         window.close()
       } catch (error) {}
@@ -106,6 +111,7 @@ export default function FieldGlobalForm({ labels, maxAccess, row, invalidate, wi
     ;(async function () {
       try {
         if (row.resourceId) {
+          let accessLevelRes = []
           setIsLoading(true)
           getAccessLevel()
 
@@ -114,10 +120,18 @@ export default function FieldGlobalForm({ labels, maxAccess, row, invalidate, wi
             parameters: `_resourceId=${row.resourceId}`
           })
 
-          const accessLevelRes = await getRequest({
-            extension: AccessControlRepository.SGControlAccess.qry,
-            parameters: `_sgId=${row.sgId}&_resourceId=${row.resourceId}`
-          })
+          if (resourceId == ResourceIds.SecurityGroup) {
+            accessLevelRes = await getRequest({
+              extension: AccessControlRepository.SGControlAccess.qry,
+              parameters: `_sgId=${row.sgId}&_resourceId=${row.resourceId}`
+            })
+          }
+          if (resourceId == ResourceIds.GlobalAuthorization) {
+            accessLevelRes = await getRequest({
+              extension: AccessControlRepository.GlobalControlAuthorizationView.qry,
+              parameters: `_resourceId=${row.resourceId}`
+            })
+          }
 
           let finalList = []
 

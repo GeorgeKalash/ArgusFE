@@ -11,14 +11,14 @@ import { DataSets } from 'src/resources/DataSets'
 import { useEffect } from 'react'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
-import ResourceGlobalForm from './ResourceGlobalForm'
 import AccessLevelForm from './AccessLevelForm'
-import FieldGlobalForm from './FieldGlobalForm'
 import { CommonContext } from 'src/providers/CommonContext'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { useForm } from 'src/hooks/form'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import ResourceGlobalForm from 'src/components/Shared/ResourceGlobalForm'
+import FieldGlobalForm from 'src/components/Shared/FieldGlobalForm'
 
 const SGAccessLevelTab = ({ labels, maxAccess, storeRecordId }) => {
   const { getRequest } = useContext(RequestsContext)
@@ -113,7 +113,8 @@ const SGAccessLevelTab = ({ labels, maxAccess, storeRecordId }) => {
         labels: labels,
         maxAccess,
         row,
-        invalidate
+        invalidate,
+        resourceId: ResourceIds.SecurityGroup
       },
       width: 450,
       height: 300,
@@ -128,7 +129,8 @@ const SGAccessLevelTab = ({ labels, maxAccess, storeRecordId }) => {
         labels: labels,
         maxAccess,
         row,
-        invalidate
+        invalidate,
+        resourceId: ResourceIds.SecurityGroup
       },
       width: 500,
       height: 480,

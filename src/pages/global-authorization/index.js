@@ -10,13 +10,13 @@ import { useWindow } from 'src/windows'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataSets } from 'src/resources/DataSets'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-import ResourceGlobalForm from './forms/ResourceGlobalForm'
 import AccessLevelForm from './forms/AccessLevelForm'
-import FieldGlobalForm from './forms/FieldGlobalForm'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useEffect } from 'react'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import ResourceGlobalForm from 'src/components/Shared/ResourceGlobalForm'
+import FieldGlobalForm from 'src/components/Shared/FieldGlobalForm'
 
 const GlobalAuthorization = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -38,7 +38,8 @@ const GlobalAuthorization = () => {
     filterBy,
     clearFilter,
     access,
-    filters
+    filters,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchWithFilter,
     endpointId: SystemRepository.ModuleClassRES.qry,
@@ -78,9 +79,9 @@ const GlobalAuthorization = () => {
       props: {
         labels: labels,
         maxAccess: access,
-        resourceId: row.key,
-        resourceName: row.value,
-        moduleId: filters.moduleId
+        row: { resourceId: row.key, resourceName: row.value, moduleId: filters.moduleId },
+        invalidate,
+        resourceId: ResourceIds.GlobalAuthorization
       },
       width: 450,
       height: 300,
@@ -94,8 +95,9 @@ const GlobalAuthorization = () => {
       props: {
         labels: labels,
         maxAccess: access,
-        resourceId: row.key,
-        resourceName: row.value
+        row: { resourceId: row.key, resourceName: row.value },
+        invalidate,
+        resourceId: ResourceIds.GlobalAuthorization
       },
       width: 500,
       height: 480,
