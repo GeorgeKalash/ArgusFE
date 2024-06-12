@@ -123,6 +123,7 @@ const WindowToolbar = ({
             opacity: 0;
             transition: opacity 0.3s, top 0.3s;
             z-index: 1;
+            white-space: nowrap;
           }
           .button-container:hover .toast {
             opacity: 1;
@@ -242,7 +243,7 @@ const WindowToolbar = ({
                   >
                     <img src={`/images/buttonsIcons/${button.image}`} alt={button.key} />
                   </Button>
-                  {tooltip && <div className='toast'>{tooltip}</div>}
+                  {tooltip && <div className={`toast ${tooltip.length > 20 ? 'multiline' : ''}`}>{tooltip}</div>}
                 </div>
               )
             )
