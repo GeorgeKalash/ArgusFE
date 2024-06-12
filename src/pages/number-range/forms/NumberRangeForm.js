@@ -32,7 +32,7 @@ export default function NumberRangeForm({ labels, maxAccess, recordId }) {
       description: '',
       min: '',
       max: '',
-      current: '',
+      current: 0,
       external: false,
       dateRange: false,
       startDate: '',

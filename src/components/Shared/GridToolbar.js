@@ -138,7 +138,7 @@ const GridToolbar = ({
           )}
           {onTree && (
             <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: '7px !important' }}>
-              <Tooltip title={platformLabels.add}>
+              <Tooltip title={platformLabels.Tree}>
                 <Button
                   onClick={onTree}
                   variant='contained'
@@ -152,7 +152,7 @@ const GridToolbar = ({
                     objectFit: 'contain'
                   }}
                 >
-                  <img src='/images/buttonsIcons/tree.png' alt={platformLabelsv.add} />
+                  <img src='/images/buttonsIcons/tree.png' alt={platformLabels.Tree} />
                 </Button>
               </Tooltip>
             </Box>
