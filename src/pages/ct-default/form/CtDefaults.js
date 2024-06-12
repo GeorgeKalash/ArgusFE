@@ -174,7 +174,7 @@ const CtDefaults = ({ _labels, access }) => {
   return (
     <VertLayout>
       <Grow>
-        <Grid container spacing={3} sx={{ width: '50%', pt: '2.5rem' }}>
+        <Grid container spacing={3} sx={{ width: '95%', pt: '1rem', ml: '0.5rem' }}>
           {/* First Row */}
           <Grid item xs={12}>
             <ResourceLookup
