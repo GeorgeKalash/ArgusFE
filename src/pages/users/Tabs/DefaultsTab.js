@@ -155,6 +155,7 @@ const DefaultsTab = ({ labels, maxAccess, storeRecordId }) => {
                   _startAt: 0,
                   _type: 0
                 }}
+                filter={{ plantId: formik.values.plantId }}
                 name='cashAccountId'
                 label={labels.cashAccount}
                 valueField='accountNo'
