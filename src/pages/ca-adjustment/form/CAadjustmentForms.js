@@ -19,6 +19,8 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
+import { useWindow } from 'src/windows'
+import WorkFlow from 'src/components/Shared/WorkFlow'
 
 export default function CAadjustmentForm({ labels, access, recordId, functionId }) {
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -26,6 +28,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
     access: access,
     enabled: !recordId
   })
+  const { stack } = useWindow()
 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -132,6 +135,18 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
     } catch (error) {}
   }
 
+  const onWorkFlowClick = async () => {
+    stack({
+      Component: WorkFlow,
+      props: {
+        functionId: formik.values.functionId,
+        recordId: formik.values.recordId
+      },
+      width: 950,
+      title: 'Workflow'
+    })
+  }
+
   const actions = [
     {
       key: 'RecordRemarks',
@@ -150,6 +165,12 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       condition: true,
       onClick: onPost,
       disabled: !editMode || formik.values.status !== 1
+    },
+    {
+      key: 'WorkFlow',
+      condition: true,
+      onClick: onWorkFlowClick,
+      disabled: !editMode
     }
   ]
 
