@@ -19,6 +19,7 @@ import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { LogisticsRepository } from 'src/repositories/LogisticsRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 
 export default function ReceiptVoucherForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -32,7 +33,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess, recordId }) {
     initialValues: {
       reference: '',
       accountId: null,
-      date: '',
+      date: null,
       currencyId: null,
       dtId: null,
       dgId: '',
@@ -55,11 +56,9 @@ export default function ReceiptVoucherForm({ labels, maxAccess, recordId }) {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      fiscalYear: yup.string().required(' '),
       accountId: yup.string().required(' '),
-      currencyId: yup.string().required(' '),
-      amount: yup.string().required(' '),
-      baseAmount: yup.string().required(' ')
+      cashAccountId: yup.string().required(' '),
+      amount: yup.string().required(' ')
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
@@ -123,7 +122,6 @@ export default function ReceiptVoucherForm({ labels, maxAccess, recordId }) {
                 onChange={formik.setFieldValue}
                 value={formik.values.date}
                 maxAccess={maxAccess}
-                required
                 error={formik.touched.date && Boolean(formik.errors.date)}
               />
             </Grid>
@@ -161,7 +159,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess, recordId }) {
                     formik.setFieldValue('plantId', '')
                   }
                 }}
-                error={formik.touched.plantId && Boolean(formik.errors.recordId)}
+                error={formik.touched.plantId && Boolean(formik.errors.plantId)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -171,9 +169,9 @@ export default function ReceiptVoucherForm({ labels, maxAccess, recordId }) {
                   _type: 0
                 }}
                 required
-                readOnly={editMode}
+                readOnly={!editMode}
                 name='accountId'
-                label={labels.accountRef}
+                label={labels.accountReference}
                 valueField='reference'
                 displayField='name'
                 valueShow='cashAccountRef'
@@ -210,14 +208,14 @@ export default function ReceiptVoucherForm({ labels, maxAccess, recordId }) {
             <Grid item xs={6}>
               <CustomTextField
                 name='contact'
-                label={labels.reference}
-                value={formik.values.reference}
+                label={labels.contact}
+                value={formik.values.contact}
                 readOnly={editMode}
                 maxAccess={!editMode && maxAccess}
                 maxLength='30'
                 onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('reference', '')}
-                error={formik.touched.reference && Boolean(formik.errors.reference)}
+                onClear={() => formik.setFieldValue('contact', '')}
+                error={formik.touched.contact && Boolean(formik.errors.contact)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -233,6 +231,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess, recordId }) {
                 valueShow='cashAccountRef'
                 secondValueShow='cashAccountName'
                 form={formik}
+                required
                 onChange={(event, newValue) => {
                   formik.setValues({
                     cashAccountId: newValue?.recordId || '',
@@ -244,89 +243,85 @@ export default function ReceiptVoucherForm({ labels, maxAccess, recordId }) {
                 maxAccess={maxAccess}
               />
             </Grid>
-
-            <Grid item xs={12}>
-              <ResourceComboBox
-                endpointId={SystemRepository.Currency.qry}
-                name='currencyId'
-                label={labels.currencyName}
-                valueField='recordId'
-                displayField={['reference', 'name', 'flName']}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' },
-                  { key: 'flName', value: 'flName' }
-                ]}
-                values={formik.values}
-                required
-                readOnly={editMode}
-                maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('currencyId', newValue?.recordId || null)
-                }}
-                error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
-              />
+            <Grid container item xs={6} spacing={4}>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  endpointId={SystemRepository.Currency.qry}
+                  name='currencyId'
+                  label={labels.currency}
+                  valueField='recordId'
+                  displayField={['reference', 'name', 'flName']}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' },
+                    { key: 'flName', value: 'flName' }
+                  ]}
+                  values={formik.values}
+                  readOnly={editMode}
+                  maxAccess={maxAccess}
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('currencyId', newValue?.recordId || null)
+                  }}
+                  error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  endpointId={LogisticsRepository.LoCollector.qry}
+                  name='collectorId'
+                  label={labels.collector}
+                  readOnly={editMode}
+                  valueField='recordId'
+                  displayField='name'
+                  values={formik.values}
+                  onChange={async (event, newValue) => {
+                    formik.setFieldValue('collectorId', newValue?.recordId || '')
+                  }}
+                  error={formik.touched.collectorId && Boolean(formik.errors.collectorId)}
+                  maxAccess={maxAccess}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <CustomTextField
+                  name='amount'
+                  type='text'
+                  required
+                  label={labels.amount}
+                  value={formik.values.amount}
+                  maxAccess={maxAccess}
+                  onChange={e => formik.setFieldValue('amount', e.target.value)}
+                  onClear={() => formik.setFieldValue('amount', '')}
+                  error={formik.touched.amount && Boolean(formik.errors.amount)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  endpointId={FinancialRepository.DescriptionTemplate.qry}
+                  name='descriptionTemplateId'
+                  label={labels.descriptionTemplate}
+                  readOnly={editMode}
+                  valueField='recordId'
+                  displayField='name'
+                  values={formik.values}
+                  onChange={async (event, newValue) => {
+                    formik.setFieldValue('collectorId', newValue?.recordId || '')
+                  }}
+                  error={formik.touched.dtId && Boolean(formik.errors.dtId)}
+                  maxAccess={maxAccess}
+                />
+              </Grid>
             </Grid>
             <Grid item xs={12}>
-              <ResourceComboBox
-                endpointId={LogisticsRepository.LoCollector.qry}
-                name='collectorId'
-                label={labels.documentType}
-                readOnly={editMode}
-                valueField='recordId'
-                displayField='name'
-                values={formik.values}
-                onChange={async (event, newValue) => {
-                  formik.setFieldValue('collectorId', newValue?.recordId || '')
-                }}
-                error={formik.touched.dtId && Boolean(formik.errors.dtId)}
-                maxAccess={maxAccess}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <ResourceComboBox
-                endpointId={LogisticsRepository.LoCollector.qry}
-                name='collectorId'
-                label={labels.documentType}
-                readOnly={editMode}
-                valueField='recordId'
-                displayField='name'
-                values={formik.values}
-                onChange={async (event, newValue) => {
-                  formik.setFieldValue('collectorId', newValue?.recordId || '')
-                }}
-                error={formik.touched.dtId && Boolean(formik.errors.dtId)}
-                maxAccess={maxAccess}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <ResourceComboBox
-                endpointId={FinancialRepository.DescriptionTemplate.qry}
-                name='descriptionTemplateId'
-                label={labels.documentType}
-                readOnly={editMode}
-                valueField='recordId'
-                displayField='name'
-                values={formik.values}
-                onChange={async (event, newValue) => {
-                  formik.setFieldValue('collectorId', newValue?.recordId || '')
-                }}
-                error={formik.touched.dtId && Boolean(formik.errors.dtId)}
-                maxAccess={maxAccess}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomNumberField
-                name='baseAmount'
+              <CustomTextArea
+                name='notes'
                 type='text'
-                label={labels.baseAmount}
-                value={formik.values.baseAmount}
-                required
+                label={labels.notes}
+                value={formik.values.notes}
+                rows={4}
                 maxAccess={maxAccess}
-                onChange={e => formik.setFieldValue('baseAmount', e.target.value)}
-                onClear={() => formik.setFieldValue('baseAmount', '')}
-                error={formik.touched.baseAmount && Boolean(formik.errors.baseAmount)}
-                maxLength={10}
+                onChange={e => formik.setFieldValue('notes', e.target.value)}
+                onClear={() => formik.setFieldValue('notes', '')}
+                error={formik.touched.notes && Boolean(formik.errors.notes)}
               />
             </Grid>
           </Grid>

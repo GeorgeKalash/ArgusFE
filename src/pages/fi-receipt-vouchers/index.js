@@ -11,6 +11,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import ReceiptVoucherForm from './forms/ReceiptVoucherForm'
+import { ResourceIds } from 'src/resources/ResourceIds'
 
 export default function CurrencyTrading() {
   const { getRequest } = useContext(RequestsContext)
@@ -25,7 +26,7 @@ export default function CurrencyTrading() {
         recordId
       },
       width: 1200,
-      height: 600,
+      height: 800,
       title: 'Cash Invoice'
     })
   }
@@ -38,7 +39,7 @@ export default function CurrencyTrading() {
     access
   } = useResourceQuery({
     endpointId: FinancialRepository.ReceiptVouchers.snapshot,
-    datasetId: SystemFunction.ReceiptVoucher,
+    datasetId: ResourceIds.ReceiptVoucher,
     filter: {
       endpointId: FinancialRepository.ReceiptVouchers.snapshot,
       filterFn: fetchWithSearch
