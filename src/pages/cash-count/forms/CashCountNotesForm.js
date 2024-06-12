@@ -164,7 +164,7 @@ export default function CashCountNotesForm({
             columns={[
               {
                 component: 'numberfield',
-                label: labels.note,
+                label: labels.notes,
                 name: 'note',
                 props: {
                   readOnly: true
@@ -222,7 +222,7 @@ export default function CashCountNotesForm({
               {
                 component: 'numberfield',
                 label: labels.subTotal,
-                name: 'subTotal',
+                name: 'subtotal',
                 props: { readOnly: true }
               }
             ]}
