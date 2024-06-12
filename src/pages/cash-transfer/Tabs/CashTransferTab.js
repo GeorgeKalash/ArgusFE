@@ -582,7 +582,7 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
                 name: 'balance',
                 label: labels.balance,
                 defaultValue: '0',
-                props: { disabled: isClosed }
+                props: { readOnly: isClosed }
               }
             ]}
           />
