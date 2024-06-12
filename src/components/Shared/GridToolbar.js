@@ -152,7 +152,7 @@ const GridToolbar = ({
                     objectFit: 'contain'
                   }}
                 >
-                  <img src='/images/buttonsIcons/tree.png' alt={platformLabelsv.add} />
+                  <img src='/images/buttonsIcons/tree.png' alt={platformLabels.add} />
                 </Button>
               </Tooltip>
             </Box>
