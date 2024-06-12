@@ -35,6 +35,7 @@ export default function CashCountForm({ labels, maxAccess: access, recordId }) {
   const { stack } = useWindow()
   const [isClosed, setIsClosed] = useState(false)
   const [isPosted, setIsPosted] = useState(false)
+  const [bulkEnabled, setBulkEnabled] = useState(false)
 
   const getDefaultDT = async () => {
     const userData = getStorageData('userData')
@@ -198,7 +199,7 @@ export default function CashCountForm({ labels, maxAccess: access, recordId }) {
         })
         setIsClosed(header.wip === 2 ? true : false)
         setIsPosted(header.status === 3 ? true : false)
-
+        setBulkEnabled(header.status !== 3 ? false : true)
         formik.setValues({
           recordId: header.recordId,
           plantId: header.plantId,
@@ -283,6 +284,7 @@ export default function CashCountForm({ labels, maxAccess: access, recordId }) {
           toast.success(platformLabels.Posted)
           invalidate()
           setIsPosted(true)
+          setBulkEnabled(true)
         }
       })
       .catch(error => {})
@@ -319,7 +321,7 @@ export default function CashCountForm({ labels, maxAccess: access, recordId }) {
       key: 'Bulk',
       condition: true,
       onClick: openTransferForm,
-      disabled: formik.values.status !== 3
+      disabled: !bulkEnabled
     },
     {
       key: 'WorkFlow',
