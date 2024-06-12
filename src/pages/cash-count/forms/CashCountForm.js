@@ -321,7 +321,7 @@ export default function CashCountForm({ labels, maxAccess: access, recordId }) {
       key: 'Bulk',
       condition: true,
       onClick: openTransferForm,
-      disabled: !bulkEnabled
+      disabled: !isPosted
     },
     {
       key: 'WorkFlow',
