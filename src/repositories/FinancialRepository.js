@@ -83,5 +83,13 @@ export const FinancialRepository = {
     get: service + 'getOBA',
     set: service + 'setOBA',
     del: service + 'delOBA'
+  },
+  ReceiptVouchers: {
+    qry: service + 'qryRV',
+    get: service + 'getRV',
+    set: service + 'setRV',
+    del: service + 'delRV',
+    page: service + 'pageRV',
+    snapshot: service + 'snapshotRV'
   }
 }
