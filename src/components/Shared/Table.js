@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 
 // ** MUI Imports
-import { Box, Stack, IconButton, LinearProgress, Checkbox, TableCell } from '@mui/material'
+import { Box, Stack, IconButton, LinearProgress, Checkbox, TableCell, Button } from '@mui/material'
 import { DataGrid, gridClasses } from '@mui/x-data-grid'
 import { alpha, styled } from '@mui/material/styles'
 
@@ -25,6 +25,8 @@ import StrictDeleteConfirmation from './StrictDeleteConfirmation'
 
 import deleteIcon from '../../../public/images/TableIcons/delete.png'
 import editIcon from '../../../public/images/TableIcons/edit.png'
+import { ControlContext } from 'src/providers/ControlContext'
+import { AuthContext } from 'src/providers/AuthContext'
 
 const ODD_OPACITY = 0.2
 
@@ -100,17 +102,20 @@ const PaginationContainer = styled(Box)({
 const Table = ({
   pagination = true,
   paginationType = 'api',
-  handleCheckedRows,
   height,
   addedHeight = '0px',
-  actionColumnHeader = null,
+  actionColumnHeader = '',
   showCheckboxColumn = false,
   checkTitle = '',
+  viewCheckButtons = false,
+  setData,
   ...props
 }) => {
   const { stack } = useWindow()
 
   const [gridData, setGridData] = useState(props.gridData)
+  const { platformLabels } = useContext(ControlContext)
+  const { languageId } = useContext(AuthContext)
   const [startAt, setStartAt] = useState(0)
   const [page, setPage] = useState(1)
   const [checkedRows, setCheckedRows] = useState({})
@@ -156,25 +161,41 @@ const Table = ({
 
         return (
           <PaginationContainer>
-            <IconButton onClick={goToFirstPage} disabled={page === 1}>
+            <IconButton
+              onClick={goToFirstPage}
+              disabled={page === 1}
+              sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+            >
               <FirstPageIcon />
             </IconButton>
-            <IconButton onClick={decrementPage} disabled={page === 1}>
+            <IconButton
+              onClick={decrementPage}
+              disabled={page === 1}
+              sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+            >
               <NavigateBeforeIcon />
             </IconButton>
-            Page: {page} of {pageCount}
-            <IconButton onClick={incrementPage} disabled={page === pageCount}>
+            {platformLabels.Page} {page} {platformLabels.Of} {pageCount}
+            <IconButton
+              onClick={incrementPage}
+              disabled={page === pageCount}
+              sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+            >
               <NavigateNextIcon />
             </IconButton>
-            <IconButton onClick={goToLastPage} disabled={page === pageCount}>
+            <IconButton
+              onClick={goToLastPage}
+              disabled={page === pageCount}
+              sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+            >
               <LastPageIcon />
             </IconButton>
             <IconButton onClick={refetch}>
               <RefreshIcon />
             </IconButton>
-            Displaying Records {startAt === 0 ? 1 : startAt} -{' '}
-            {totalRecords < pageSize ? totalRecords : page === pageCount ? totalRecords : startAt + pageSize} of{' '}
-            {totalRecords}
+            {platformLabels.DisplayingRecords} {startAt === 0 ? 1 : startAt} -{' '}
+            {totalRecords < pageSize ? totalRecords : page === pageCount ? totalRecords : startAt + pageSize}{' '}
+            {platformLabels.Of} {totalRecords}
           </PaginationContainer>
         )
       } else {
@@ -238,25 +259,41 @@ const Table = ({
 
           return (
             <PaginationContainer>
-              <IconButton onClick={goToFirstPage} disabled={page === 1}>
+              <IconButton
+                onClick={goToFirstPage}
+                disabled={page === 1}
+                sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+              >
                 <FirstPageIcon />
               </IconButton>
-              <IconButton onClick={decrementPage} disabled={page === 1}>
+              <IconButton
+                onClick={decrementPage}
+                disabled={page === 1}
+                sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+              >
                 <NavigateBeforeIcon />
               </IconButton>
-              Page: {page} of {pageCount}
-              <IconButton onClick={incrementPage} disabled={page === pageCount}>
+              {platformLabels.Page} {page} {platformLabels.Of} {pageCount}
+              <IconButton
+                onClick={incrementPage}
+                disabled={page === pageCount}
+                sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+              >
                 <NavigateNextIcon />
               </IconButton>
-              <IconButton onClick={goToLastPage} disabled={page === pageCount}>
+              <IconButton
+                onClick={goToLastPage}
+                disabled={page === pageCount}
+                sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+              >
                 <LastPageIcon />
               </IconButton>
               <IconButton onClick={refetch}>
                 <RefreshIcon />
               </IconButton>
-              Displaying Records {startAt === 0 ? 1 : startAt} -{' '}
-              {totalRecords < pageSize ? totalRecords : page === pageCount ? totalRecords : startAt + pageSize} of{' '}
-              {totalRecords}
+              {platformLabels.DisplayingRecords} {startAt === 0 ? 1 : startAt} -{' '}
+              {totalRecords < pageSize ? totalRecords : page === pageCount ? totalRecords : startAt + pageSize}{' '}
+              {platformLabels.Of} {totalRecords}
             </PaginationContainer>
           )
         }
@@ -274,14 +311,14 @@ const Table = ({
       }) !== HIDDEN
   )
 
+  const shouldViewButtons = !viewCheckButtons ? 'none' : ''
+
   const handleCheckboxChange = row => {
     setCheckedRows(prevCheckedRows => {
       const newCheckedRows = { ...prevCheckedRows }
       const key = row.seqNo ? `${row.recordId}-${row.seqNo}` : row.recordId
       newCheckedRows[key] = row
       const filteredRows = !newCheckedRows[key]?.checked ? [newCheckedRows[key]] : []
-      handleCheckedRows(filteredRows)
-      console.log('checkedRows 4 ', newCheckedRows)
 
       return filteredRows
     })
@@ -297,7 +334,7 @@ const Table = ({
       },
       width: 500,
       height: 300,
-      title: 'Delete Confirmation'
+      title: platformLabels.DeleteConfirmation
     })
   }
 
@@ -323,7 +360,7 @@ const Table = ({
       },
       width: 450,
       height: 170,
-      title: 'Delete'
+      title: platformLabels.Delete
     })
   }
 
@@ -350,19 +387,29 @@ const Table = ({
         return (
           <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
             {props.onEdit && (
-              <IconButton size='small' onClick={() => props.onEdit(params.row)}>
+              <IconButton
+                size='small'
+                onClick={e => {
+                  props.onEdit(params.row)
+                }}
+              >
                 <Image src={editIcon} alt='Edit' width={18} height={18} />
               </IconButton>
             )}
             {props.popupComponent && (
-              <IconButton size='small' onClick={() => props.popupComponent(params.row)}>
+              <IconButton
+                size='small'
+                onClick={e => {
+                  props.popupComponent(params.row)
+                }}
+              >
                 <Image src={editIcon} alt='Edit' width={18} height={18} />
               </IconButton>
             )}
             {!isStatus3 && !isStatusCanceled && deleteBtnVisible && !isWIP && (
               <IconButton
                 size='small'
-                onClick={() => {
+                onClick={e => {
                   if (props.deleteConfirmationType == 'strict') {
                     openDeleteConfirmation(params.row)
                   } else {
@@ -371,13 +418,37 @@ const Table = ({
                 }}
                 color='error'
               >
-                <Image src={deleteIcon} alt='Delete' width={18} height={18} />
+                <Image src={deleteIcon} alt={platformLabels.Delete} width={18} height={18} />
               </IconButton>
             )}
           </Box>
         )
       }
     })
+  }
+
+  const handleCheckAll = () => {
+    const updatedRowGridData = gridData.list.map(row => ({
+      ...row,
+      checked: true
+    }))
+
+    setData(prevGridData => ({
+      ...prevGridData,
+      list: updatedRowGridData
+    }))
+  }
+
+  const handleUncheckAll = () => {
+    const updatedRowGridData = gridData.list.map(row => ({
+      ...row,
+      checked: false
+    }))
+
+    setData(prevGridData => ({
+      ...prevGridData,
+      list: updatedRowGridData
+    }))
   }
 
   useEffect(() => {
@@ -403,6 +474,19 @@ const Table = ({
     <>
       {maxAccess && maxAccess > TrxType.NOACCESS ? (
         <>
+          <Stack direction='row' spacing={2} marginBottom={2}>
+            <Button variant='contained' color='primary' onClick={handleCheckAll} style={{ display: shouldViewButtons }}>
+              {platformLabels.CheckAll}
+            </Button>
+            <Button
+              variant='contained'
+              color='secondary'
+              onClick={handleUncheckAll}
+              style={{ display: shouldViewButtons }}
+            >
+              {platformLabels.UncheckAll}
+            </Button>
+          </Stack>
           <StripedDataGrid
             rows={
               gridData?.list
@@ -429,7 +513,7 @@ const Table = ({
               Footer: CustomPagination,
               NoRowsOverlay: () => (
                 <Stack height='100%' alignItems='center' justifyContent='center'>
-                  This Screen Has No Data
+                  {platformLabels.NoDataScreen}
                 </Stack>
               )
             }}
@@ -464,7 +548,7 @@ const Table = ({
           />
         </>
       ) : (
-        'NO ACCESS'
+        platformLabels.NoAccess
       )}
     </>
   )

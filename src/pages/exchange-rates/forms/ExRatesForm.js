@@ -14,10 +14,12 @@ import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function ExRatesForm({ labels, recordId, maxAccess, record, window }) {
   const [editMode, setEditMode] = useState(!!recordId || !!record)
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: MultiCurrencyRepository.ExchangeRates.page
@@ -61,14 +63,14 @@ export default function ExRatesForm({ labels, recordId, maxAccess, record, windo
 
       const newRecordId = `${dataToSend.exId}${dayId}${dataToSend.seqNo}`
       if (!editMode) {
-        toast.success('Record Added Successfully')
+        toast.success(platformLabels.Added)
         formik.setValues({
           ...dataToSend,
           seqNo: response.seqNo,
           recordId: newRecordId
         })
       } else {
-        toast.success('Record Edited Successfully')
+        toast.success(platformLabels.Edited)
         formik.setValues({
           ...dataToSend,
           seqNo: response.seqNo,
@@ -117,6 +119,7 @@ export default function ExRatesForm({ labels, recordId, maxAccess, record, windo
                 endpointId={MultiCurrencyRepository.ExchangeTable.qry}
                 name='exId'
                 label={labels.exTable}
+                readOnly={editMode}
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 columnsInDropDown={[
@@ -135,6 +138,7 @@ export default function ExRatesForm({ labels, recordId, maxAccess, record, windo
             <Grid item xs={12}>
               <CustomDatePicker
                 name='dayId'
+                readOnly={editMode}
                 label={labels.stDate}
                 onChange={formik.setFieldValue}
                 value={formik.values.dayId}

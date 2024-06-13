@@ -10,6 +10,7 @@ import { useResourceQuery } from 'src/hooks/resource'
 import { Fixed } from './Layouts/Fixed'
 import { Grow } from './Layouts/Grow'
 import { VertLayout } from './Layouts/VertLayout'
+import { getFormattedNumber } from 'src/lib/numberField-helper'
 
 const AccountBalance = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -64,7 +65,8 @@ const AccountBalance = () => {
     {
       field: 'balance',
       headerName: _labels.balance,
-      flex: 1
+      flex: 1,
+      valueGetter: ({ row }) => getFormattedNumber(row?.balance)
     }
   ]
 

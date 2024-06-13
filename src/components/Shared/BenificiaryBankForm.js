@@ -25,11 +25,21 @@ import { useError } from 'src/error'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-export default function BenificiaryBankForm({ client, dispersalType, beneficiary, corId, countryId }) {
+export default function BenificiaryBankForm({
+  viewBtns = true,
+  store,
+  setStore,
+  editable = false,
+  client,
+  beneficiary,
+  dispersalType,
+  corId,
+  countryId
+}) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [maxAccess, setMaxAccess] = useState({ record: [] })
   const { stack: stackError } = useError()
-  const [editMode, setEditMode] = useState(beneficiary?.beneficiaryId)
+  const [editMode, setEditMode] = useState(beneficiary?.beneficiaryId && !editable)
 
   useEffect(() => {
     ;(async function () {
@@ -43,7 +53,7 @@ export default function BenificiaryBankForm({ client, dispersalType, beneficiary
         const maxAccess = { record: controls }
         setMaxAccess(maxAccess)
       }
-      if (beneficiary?.beneficiaryId) {
+      if (beneficiary?.beneficiaryId && (!store || store.submitted != store.loadBen)) {
         const RTBEB = await getRequest({
           extension: RemittanceOutwardsRepository.BeneficiaryBank.get,
           parameters: `_clientId=${client?.clientId}&_beneficiaryId=${beneficiary?.beneficiaryId}&_seqNo=${beneficiary?.beneficiarySeqNo}`
@@ -67,7 +77,7 @@ export default function BenificiaryBankForm({ client, dispersalType, beneficiary
           stoppedReason: RTBEN?.record?.stoppedReason,
           gender: RTBEN?.record?.gender,
           rtId: RTBEN?.record?.rtId,
-          rtName: RTBEN?.record.rtName,
+          rtName: RTBEN?.record?.rtName,
           cellPhone: RTBEN?.record?.cellPhone,
           birthDate: RTBEN?.record?.birthDate && formatDateFromApi(RTBEN.record.birthDate),
           cobId: RTBEN?.record?.cobId,
@@ -95,10 +105,28 @@ export default function BenificiaryBankForm({ client, dispersalType, beneficiary
           seqNo: RTBEB?.record?.seqNo
         }
 
+        if (store) {
+          setStore(prevStore => ({
+            ...prevStore,
+            beneficiaryList: obj
+          }))
+        }
         formik.setValues(obj)
       }
+      if (store?.submitted) {
+        formik.handleSubmit()
+      }
+
+      if (store?.clearBenForm && !store?.submitted) {
+        formik.resetForm()
+        setStore(prevStore => ({
+          ...prevStore,
+          clearBenForm: false,
+          loadBen: false
+        }))
+      }
     })()
-  }, [])
+  }, [store?.submitted, store?.clearBenForm, beneficiary?.beneficiaryId, beneficiary?.beneficiarySeqNo])
 
   const [initialValues, setInitialData] = useState({
     //RTBEN
@@ -195,13 +223,22 @@ export default function BenificiaryBankForm({ client, dispersalType, beneficiary
       }
       const data = { header: header, beneficiaryBank: bankInfo }
 
-      const res = await postRequest({
-        extension: RemittanceOutwardsRepository.BeneficiaryBank.set,
-        record: JSON.stringify(data)
-      })
+      if (store?.submitted) {
+        setStore(prevStore => ({
+          ...prevStore,
+          submitted: true,
+          beneficiaryList: data,
+          loadBen: false
+        }))
+      } else {
+        const res = await postRequest({
+          extension: RemittanceOutwardsRepository.BeneficiaryBank.set,
+          record: JSON.stringify(data)
+        })
 
-      if (res.recordId) {
-        toast.success('Record Updated Successfully')
+        if (res.recordId) {
+          toast.success('Record Updated Successfully')
+        }
       }
       setEditMode(true)
     }
@@ -220,6 +257,9 @@ export default function BenificiaryBankForm({ client, dispersalType, beneficiary
       height={480}
       maxAccess={maxAccess}
       disabledSubmit={editMode}
+      isCleared={viewBtns}
+      isInfo={viewBtns}
+      isSaved={viewBtns}
     >
       <VertLayout>
         <Grow>

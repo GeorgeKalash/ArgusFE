@@ -88,6 +88,7 @@ const CustomComboBox = ({
       readOnly={_readOnly}
       freeSolo={_readOnly}
       disabled={_disabled}
+      required={_required}
       sx={{ ...sx, display: _hidden ? 'none' : 'unset' }}
       renderOption={(props, option) => {
         if (columnsInDropDown && columnsInDropDown.length > 0) {

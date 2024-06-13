@@ -37,8 +37,9 @@ import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 
-export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId, plantId, userId, window }) {
+export default function OutwardsTab({ labels, access, recordId, cashAccountId, plantId, userId, window }) {
   const [productsStore, setProductsStore] = useState([])
   const [cashData, setCashData] = useState({})
   const [editMode, setEditMode] = useState(!!recordId)
@@ -53,8 +54,16 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     endpointId: RemittanceOutwardsRepository.OutwardsTransfer.snapshot
   })
 
+  const { maxAccess } = useDocumentType({
+    functionId: SystemFunction.Outwards,
+    access: access,
+    hasDT: false,
+    enabled: !editMode
+  })
+
   const [initialValues, setInitialData] = useState({
     recordId: null,
+    dtId: null,
     plantId: plantId,
     cashAccountId: cashAccountId,
     userId: userId,
@@ -579,6 +588,24 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
 
     formik.setFieldValue('vatRate', parseInt(vatPct))
   }
+
+  const getDefaultDT = async () => {
+    const parameters = `_userId=${userId}&_functionId=${SystemFunction.Outwards}`
+
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.UserFunction.get,
+        parameters: parameters
+      })
+      if (res.record) {
+        formik.setFieldValue('dtId', res.record.dtId)
+      } else {
+        formik.setFieldValue('dtId', '')
+      }
+    } catch (error) {
+      formik.setFieldValue('dtId', '')
+    }
+  }
   function onInstantCashSubmit(obj) {
     obj.remitter.primaryId.expiryDate = obj.remitter.primaryId.expiryDate
       ? formatDateToApi(obj.remitter.primaryId.expiryDate)
@@ -612,6 +639,8 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
           getClientInfo(res.record.headerView.clientId)
           fillFormData(res.record)
           productDataFill(res.record.headerView)
+        } else {
+          getDefaultDT()
         }
         getDefaultVAT()
       } catch (error) {}
