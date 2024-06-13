@@ -320,7 +320,6 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 datasetId={DataSets.PAYMENT_METHOD}
                 name='paymentMethod'
                 label={labels.paymentMethod}
-                readOnly={editMode}
                 valueField='key'
                 displayField='value'
                 required
@@ -345,7 +344,6 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                   { key: 'name', value: 'Name' }
                 ]}
                 values={formik.values}
-                readOnly={editMode}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('contactId', newValue?.recordId || null)
@@ -393,7 +391,6 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                     { key: 'flName', value: 'flName' }
                   ]}
                   values={formik.values}
-                  readOnly={editMode}
                   maxAccess={maxAccess}
                   onChange={(event, newValue) => {
                     formik.setFieldValue('currencyId', newValue?.recordId || null)
@@ -406,7 +403,6 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                   endpointId={LogisticsRepository.LoCollector.qry}
                   name='collectorId'
                   label={labels.collector}
-                  readOnly={editMode}
                   valueField='recordId'
                   displayField='name'
                   values={formik.values}
