@@ -19,6 +19,8 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
+import { useWindow } from 'src/windows'
+import WorkFlow from 'src/components/Shared/WorkFlow'
 
 export default function CAadjustmentForm({ labels, access, recordId, functionId }) {
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -26,6 +28,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
     access: access,
     enabled: !recordId
   })
+  const { stack } = useWindow()
 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -142,6 +145,18 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
     } catch (postError) {}
   }
 
+  const onWorkFlowClick = async () => {
+    stack({
+      Component: WorkFlow,
+      props: {
+        functionId: formik.values.functionId,
+        recordId: formik.values.recordId
+      },
+      width: 950,
+      title: 'Workflow'
+    })
+  }
+
   const actions = [
     {
       key: 'RecordRemarks',
@@ -161,6 +176,12 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       condition: true,
       onClick: onPost,
       disabled: !editMode || formik.values.status !== 1
+    },
+    {
+      key: 'WorkFlow',
+      condition: true,
+      onClick: onWorkFlowClick,
+      disabled: !editMode
     }
   ]
 
@@ -219,6 +240,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                 endpointId={SystemRepository.Plant.qry}
                 name='plantId'
                 label={labels.plant}
+                readOnly={formik.values.status == '3'}
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 columnsInDropDown={[
@@ -238,6 +260,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
               <CustomDatePicker
                 name='date'
                 label={labels.date}
+                readOnly={formik.values.status == '3'}
                 value={formik.values.date}
                 onChange={formik.setFieldValue}
                 required
@@ -251,6 +274,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                 endpointId={SystemRepository.Currency.qry}
                 name='currencyId'
                 label={labels.currency}
+                readOnly={formik.values.status == '3'}
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 columnsInDropDown={[
@@ -272,6 +296,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                 parameters={{
                   _type: 2
                 }}
+                readOnly={formik.values.status == '3'}
                 valueField='reference'
                 displayField='name'
                 name='cashAccountId'
@@ -300,6 +325,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                 type='text'
                 label={labels.amount}
                 value={formik.values.amount}
+                readOnly={formik.values.status == '3'}
                 required
                 maxAccess={maxAccess}
                 onChange={e => formik.setFieldValue('amount', e.target.value)}
@@ -312,6 +338,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
               <CustomTextArea
                 name='notes'
                 label={labels.notes}
+                readOnly={formik.values.status == '3'}
                 value={formik.values.notes}
                 maxLength='100'
                 rows={2}

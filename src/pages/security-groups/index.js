@@ -51,8 +51,8 @@ const SecurityGroup = () => {
         recordId: recordId ? recordId : null,
         maxAccess: access
       },
-      width: 600,
-      height: 600,
+      width: 900,
+      height: 700,
       title: _labels.securityGroups
     })
   }
@@ -79,12 +79,14 @@ const SecurityGroup = () => {
   }
 
   const del = async obj => {
-    await postRequest({
-      extension: AccessControlRepository.SecurityGroup.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success('Record Deleted Successfully')
+    try {
+      await postRequest({
+        extension: AccessControlRepository.SecurityGroup.del,
+        record: JSON.stringify(obj)
+      })
+      invalidate()
+      toast.success('Record Deleted Successfully')
+    } catch (error) {}
   }
 
   return (

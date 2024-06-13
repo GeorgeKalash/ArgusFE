@@ -53,7 +53,7 @@ export function WindowProvider({ children }) {
   )
 }
 
-export function ImmediateWindow({ datasetId, Component, titleName }) {
+export function ImmediateWindow({ datasetId, Component, titleName, height }) {
   const { stack } = useWindow()
 
   const { labels: _labels, access } = useResourceParams({
@@ -80,7 +80,7 @@ export function ImmediateWindow({ datasetId, Component, titleName }) {
       closable: false,
       draggable: false,
       width: 600,
-      height: 400,
+      height: height || 400,
       title: _labels[titleName]
     })
   }

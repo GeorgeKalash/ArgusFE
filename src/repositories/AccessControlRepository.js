@@ -51,5 +51,13 @@ export const AccessControlRepository = {
     qry: service + 'qryUCO',
     set: service + 'setUCO',
     del: service + 'delUCO'
+  },
+  ModuleClass: {
+    qry: service + 'qryRES',
+    set: service + 'setRES'
+  },
+  SGControlAccess: {
+    qry: service + 'qryCRL',
+    set2: service + 'set2CRL'
   }
 }
