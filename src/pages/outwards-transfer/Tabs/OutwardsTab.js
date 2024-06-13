@@ -38,6 +38,7 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
+import { useForm } from 'src/hooks/form'
 
 export default function OutwardsTab({ labels, access, recordId, cashAccountId, plantId, userId, window }) {
   const [productsStore, setProductsStore] = useState([])
@@ -142,7 +143,8 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
     ]
   })
 
-  const formik = useFormik({
+  const { formik } = useForm({
+    maxAccess,
     initialValues: initialValues,
     enableReinitialize: true,
     validateOnChange: true,
@@ -231,7 +233,6 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
       }
     }
   })
-
   const total = parseFloat(formik.values.amount || 0)
 
   const receivedTotal = formik.values.amountRows.reduce((sumAmount, row) => {
@@ -280,6 +281,7 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
       setIsClosed(false)
     }
   }
+  console.log('formik check ', formik.values)
 
   const onPost = async () => {
     const copy = { ...formik.values }
@@ -673,10 +675,9 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
                   value={formik?.values?.reference}
                   maxAccess={maxAccess}
                   maxLength='30'
-                  readOnly
-                  required
+                  readOnly={editMode}
+                  onChange={formik.handleChange}
                   error={formik.touched.reference && Boolean(formik.errors.reference)}
-                  helperText={formik.touched.reference && formik.errors.reference}
                 />
               </FormGrid>
               <FormGrid item hideonempty xs={2.4}>
