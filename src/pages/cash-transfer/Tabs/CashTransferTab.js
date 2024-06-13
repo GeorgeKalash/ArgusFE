@@ -30,6 +30,7 @@ import { RateDivision } from 'src/resources/RateDivision'
 import { DIRTYFIELD_AMOUNT, getRate } from 'src/utils/RateCalculator'
 import WorkFlow from 'src/components/Shared/WorkFlow'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
+import CashTransaction from 'src/components/Shared/CashTransaction'
 
 export default function CashTransferTab({ labels, recordId, access, plantId, cashAccountId, dtId }) {
   const [editMode, setEditMode] = useState(!!recordId)
@@ -280,6 +281,19 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
     })
   }
 
+  const transactionClicked = () => {
+    stack({
+      Component: CashTransaction,
+      props: {
+        recordId: formik.values.recordId,
+        functionId: SystemFunction.CashTransfer
+      },
+      width: 1200,
+      height: 670,
+      title: labels.cashTransaction
+    })
+  }
+
   useEffect(() => {
     ;(async function () {
       if (recordId) {
@@ -350,6 +364,12 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
       key: 'Account Balance',
       condition: true,
       onClick: 'onClickAC',
+      disabled: false
+    },
+    {
+      key: 'Cash Transaction',
+      condition: true,
+      onClick: transactionClicked,
       disabled: false
     }
   ]
