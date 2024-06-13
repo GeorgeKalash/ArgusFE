@@ -15,7 +15,7 @@ import { getFormattedNumber } from 'src/lib/numberField-helper'
 import { useRouter } from 'next/router'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
-import FinancialForm from './FinancialForm'
+import MemosForm from './MemosForm'
 import { SystemFunction } from 'src/resources/SystemFunction'
 
 const Financial = () => {
@@ -129,7 +129,7 @@ const Financial = () => {
 
   function openForm(recordId) {
     stack({
-      Component: FinancialForm,
+      Component: MemosForm,
       props: {
         labels: _labels,
         recordId: recordId,

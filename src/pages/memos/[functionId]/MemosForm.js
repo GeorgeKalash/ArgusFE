@@ -20,7 +20,7 @@ import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
 
-export default function FinancialForm({ labels, access, recordId, functionId }) {
+export default function MemosForm({ labels, access, recordId, functionId }) {
   //   const { documentType, maxAccess, changeDT } = useDocumentType({
   //     functionId: functionId,
   //     access: access,
