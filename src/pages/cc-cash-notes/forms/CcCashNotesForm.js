@@ -88,7 +88,7 @@ export default function CcCashNotesForm({ labels, maxAccess, currencyId, note, w
             <Grid item xs={12}>
               <CustomNumberField
                 name='note'
-                label={labels.note}
+                label={labels.currencyNote}
                 value={formik.values.note}
                 required
                 readOnly={editMode}

@@ -143,6 +143,7 @@ export const ResourceIds = {
   CATransaction: 33312,
   ProductionRequestLog: 42321,
   PointOfSale: 54101,
+  Common: 140,
   IncreaseDecreaseAdj: 33301,
   ReceiptVoucher: 31304
 }

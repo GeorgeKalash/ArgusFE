@@ -26,9 +26,11 @@ import { useInvalidate } from 'src/hooks/resource'
 import WorkFlow from 'src/components/Shared/WorkFlow'
 import GenerateTransferForm from './GenerateTransferForm'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function CashCountForm({ labels, maxAccess: access, recordId }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const [editMode, setEditMode] = useState(!!recordId)
   const { stack } = useWindow()
   const [isClosed, setIsClosed] = useState(false)
@@ -166,9 +168,9 @@ export default function CashCountForm({ labels, maxAccess: access, recordId }) {
         })
         const _recordId = response.recordId
         if (!obj.recordId) {
-          toast.success('Record Added Successfully')
+          toast.success(platformLabels.Added)
           getData(_recordId)
-        } else toast.success('Record Edited Successfully')
+        } else toast.success(platformLabels.Edited)
         setEditMode(true)
 
         invalidate()
@@ -196,7 +198,6 @@ export default function CashCountForm({ labels, maxAccess: access, recordId }) {
         })
         setIsClosed(header.wip === 2 ? true : false)
         setIsPosted(header.status === 3 ? true : false)
-
         formik.setValues({
           recordId: header.recordId,
           plantId: header.plantId,
@@ -248,7 +249,7 @@ export default function CashCountForm({ labels, maxAccess: access, recordId }) {
     })
       .then(() => {
         if (res.recordId) {
-          toast.success('Record Reopened Successfully')
+          toast.success(platformLabels.Reopened)
           invalidate()
           getData(obj?.recordId)
         }
@@ -263,7 +264,7 @@ export default function CashCountForm({ labels, maxAccess: access, recordId }) {
     })
       .then(res => {
         if (res?.recordId) {
-          toast.success('Record Posted Successfully')
+          toast.success(platformLabels.Closed)
           invalidate()
           getData(res?.recordId)
         }
@@ -278,7 +279,7 @@ export default function CashCountForm({ labels, maxAccess: access, recordId }) {
     })
       .then(res => {
         if (res?.recordId) {
-          toast.success('Record Posted Successfully')
+          toast.success(platformLabels.Posted)
           invalidate()
           setIsPosted(true)
         }
@@ -317,7 +318,7 @@ export default function CashCountForm({ labels, maxAccess: access, recordId }) {
       key: 'Bulk',
       condition: true,
       onClick: openTransferForm,
-      disabled: formik.values.status !== 3
+      disabled: !isPosted
     },
     {
       key: 'WorkFlow',

@@ -38,7 +38,7 @@ export default function CashCountNotesForm({
         .array()
         .of(
           yup.object().shape({
-            note: yup.string().required('currency  is required')
+            note: yup.string().required(' ')
           })
         )
         .required('Operations array is required')
@@ -165,7 +165,7 @@ export default function CashCountNotesForm({
             columns={[
               {
                 component: 'numberfield',
-                label: labels.note,
+                label: labels.currencyNote,
                 name: 'note',
                 props: {
                   readOnly: true
@@ -223,7 +223,7 @@ export default function CashCountNotesForm({
               {
                 component: 'numberfield',
                 label: labels.subTotal,
-                name: 'subTotal',
+                name: 'subtotal',
                 props: { readOnly: true }
               }
             ]}

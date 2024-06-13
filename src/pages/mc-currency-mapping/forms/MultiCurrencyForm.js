@@ -12,9 +12,12 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useInvalidate } from 'src/hooks/resource'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function MultiCurrencyForm({ labels, maxAccess, currencyId, rateTypeId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
+
   const editMode = !!currencyId && !!rateTypeId
 
   const invalidate = useInvalidate({
@@ -42,9 +45,9 @@ export default function MultiCurrencyForm({ labels, maxAccess, currencyId, rateT
       })
 
       if (!currencyId && !rateTypeId) {
-        toast.success('Record Added Successfully')
+        toast.success(platformLabels.Added)
       } else {
-        toast.success('Record Edited Successfully')
+        toast.success(platformLabels.Edited)
       }
 
       invalidate()
@@ -90,7 +93,6 @@ export default function MultiCurrencyForm({ labels, maxAccess, currencyId, rateT
                   formik && formik.setFieldValue('currencyId', newValue?.recordId)
                 }}
                 error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
-                helperText={formik.touched.currencyId && formik.errors.currencyId}
               />
             </Grid>
             <Grid item xs={12}>
@@ -112,7 +114,6 @@ export default function MultiCurrencyForm({ labels, maxAccess, currencyId, rateT
                   formik && formik.setFieldValue('rateTypeId', newValue?.recordId)
                 }}
                 error={formik.touched.rateTypeId && Boolean(formik.errors.rateTypeId)}
-                helperText={formik.touched.rateTypeId && formik.errors.rateTypeId}
               />
             </Grid>
             <Grid item xs={12}>
@@ -133,7 +134,6 @@ export default function MultiCurrencyForm({ labels, maxAccess, currencyId, rateT
                   formik.setFieldValue('exId', newValue?.recordId || null)
                 }}
                 error={formik.touched.exId && Boolean(formik.errors.exId)}
-                helperText={formik.touched.exId && formik.errors.exId}
               />
             </Grid>
           </Grid>
