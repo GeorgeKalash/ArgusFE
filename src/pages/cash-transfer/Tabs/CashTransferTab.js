@@ -351,6 +351,12 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
       condition: true,
       onClick: 'onClickAC',
       disabled: false
+    },
+    {
+      key: 'Cash Transaction',
+      condition: true,
+      onClick: 'transactionClicked',
+      disabled: !editMode
     }
   ]
 
