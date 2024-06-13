@@ -351,6 +351,7 @@ export default function BenificiaryBankForm({
                     { key: 'name', value: 'Name' }
                   ]}
                   maxAccess={maxAccess}
+                  required
                   values={formik.values}
                   onChange={(event, newValue) => {
                     formik.setFieldValue('bankId', newValue ? newValue.recordId : '')

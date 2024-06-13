@@ -548,7 +548,6 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
                         beneficiarySeqNo: formik.values.newBeneficiarySeqNo
                       }}
                       dispersalType={formik.values.dispersalType}
-                      countryId={formik.values.countryId}
                       corId={formik.values.corId}
                     />
                   )}
