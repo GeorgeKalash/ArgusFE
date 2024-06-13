@@ -1,73 +1,72 @@
-// ** MUI Imports
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { DataSets } from 'src/resources/DataSets'
 import { useForm } from 'src/hooks/form.js'
-
-// ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-
-import { SystemRepository } from 'src/repositories/SystemRepository'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-export default function ResourceGlobalForm({ labels, maxAccess, resourceName, resourceId, moduleId }) {
-  const [initialValues, setInitialData] = useState({
-    resourceId: resourceId,
-    resourceName: resourceName,
-    accessLevel: '',
-    moduleId: moduleId,
-    accessLevelName: ''
-  })
-
+export default function ResourceGlobalForm({ labels, maxAccess, row, invalidate, window, resourceId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-
-  const invalidate = useInvalidate({
-    endpointId: SystemRepository.ModuleClassRES.qry
-  })
 
   const { formik } = useForm({
     maxAccess,
-    initialValues,
+    initialValues: {
+      resourceId: row?.resourceId,
+      resourceName: row?.resourceName,
+      accessLevel: row?.accessLevel,
+      moduleId: row?.moduleId,
+      accessLevelName: row?.accessLevelName,
+      sgId: row?.sgId
+    },
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      accessLevel: yup.string().required(' ')
+      accessLevel: yup.string().required()
     }),
     onSubmit: async obj => {
-      const response = await postRequest({
-        extension: AccessControlRepository.AuthorizationResourceGlobal.set,
-        record: JSON.stringify(obj)
-      })
-
-      toast.success('Record Edited Successfully')
-      invalidate()
+      try {
+        if (resourceId == ResourceIds.SecurityGroup) {
+          await postRequest({
+            extension: AccessControlRepository.ModuleClass.set,
+            record: JSON.stringify(obj)
+          })
+        }
+        if (resourceId == ResourceIds.GlobalAuthorization) {
+          await postRequest({
+            extension: AccessControlRepository.AuthorizationResourceGlobal.set,
+            record: JSON.stringify(obj)
+          })
+        }
+        toast.success('Record Edited Successfully')
+        invalidate()
+        window.close()
+      } catch (error) {}
     }
   })
 
   useEffect(() => {
     ;(async function () {
-      if (resourceId) {
+      if (row.resourceId && resourceId == ResourceIds.GlobalAuthorization) {
         const res = await getRequest({
           extension: AccessControlRepository.AuthorizationResourceGlobal.get,
-          parameters: `_resourceId=${resourceId}`
+          parameters: `_resourceId=${row.resourceId}`
         })
-        if (res.record) setInitialData(res.record)
+        if (res.record) formik.setValues(res.record)
       }
     })()
   }, [])
 
   return (
     <FormShell
-      resourceId={ResourceIds.GlobalAuthorization}
+      resourceId={ResourceIds.SecurityGroup}
       form={formik}
       maxAccess={maxAccess}
       isInfo={false}
@@ -80,7 +79,7 @@ export default function ResourceGlobalForm({ labels, maxAccess, resourceName, re
               <CustomTextField
                 name='resourceId'
                 label={labels.resourceId}
-                value={resourceId}
+                value={row?.resourceId}
                 required
                 onChange={formik.handleChange}
                 maxAccess={maxAccess}
@@ -94,7 +93,7 @@ export default function ResourceGlobalForm({ labels, maxAccess, resourceName, re
               <CustomTextField
                 name='resourceName'
                 label={labels.resourceName}
-                value={resourceName}
+                value={row?.resourceName}
                 required
                 readOnly={true}
                 maxAccess={maxAccess}

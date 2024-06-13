@@ -198,7 +198,6 @@ export default function CashCountForm({ labels, maxAccess: access, recordId }) {
         })
         setIsClosed(header.wip === 2 ? true : false)
         setIsPosted(header.status === 3 ? true : false)
-
         formik.setValues({
           recordId: header.recordId,
           plantId: header.plantId,
@@ -319,7 +318,7 @@ export default function CashCountForm({ labels, maxAccess: access, recordId }) {
       key: 'Bulk',
       condition: true,
       onClick: openTransferForm,
-      disabled: formik.values.status !== 3
+      disabled: !isPosted
     },
     {
       key: 'WorkFlow',
