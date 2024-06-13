@@ -142,7 +142,16 @@ const ItemSelectorWindow = ({
           <Grid container xs={12}>
             <Grid item xs={5}>
               <FieldSet title={itemSelectorLabels.title1}>
-                <ul style={{ listStyleType: 'none', padding: 0, margin: 0 }}>
+                <ul
+                  style={{
+                    listStyleType: 'none',
+                    padding: 0,
+                    margin: 0,
+                    minHeight: '400px',
+                    maxHeight: '400px',
+                    overflowY: 'auto'
+                  }}
+                >
                   {allItems.map(item => (
                     <li key={`key1_${item.id}`} style={{ margin: '0', padding: '0' }}>
                       <label style={{ display: 'flex', alignItems: 'center', padding: '10px' }}>
@@ -171,7 +180,16 @@ const ItemSelectorWindow = ({
             </Grid>
             <Grid item xs={5}>
               <FieldSet title={itemSelectorLabels.title2}>
-                <ul style={{ listStyleType: 'none', padding: 0, margin: 0 }}>
+                <ul
+                  style={{
+                    listStyleType: 'none',
+                    padding: 0,
+                    margin: 0,
+                    maxHeight: '400px',
+                    minHeight: '400px',
+                    overflowY: 'auto'
+                  }}
+                >
                   {selected.map(item => (
                     <li key={`key2_${item.id}`} style={{ margin: '0', padding: '0' }}>
                       <label style={{ display: 'flex', alignItems: 'center', padding: '10px' }}>

@@ -149,7 +149,7 @@ const SGUsersTab = ({ labels, maxAccess, storeRecordId }) => {
           handleListsDataChange: handleListsDataChange,
           formik: formik
         },
-        width: 600,
+        width: 850,
         height: 600,
         title: _labels.securityGroups
       })

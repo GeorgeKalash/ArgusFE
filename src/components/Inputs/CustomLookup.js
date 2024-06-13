@@ -1,9 +1,10 @@
 import { Box, Grid, Autocomplete, TextField, IconButton, InputAdornment } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search'
 import ClearIcon from '@mui/icons-material/Clear'
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
 import PopperComponent from '../Shared/Popper/PopperComponent'
+import { AuthContext } from 'src/providers/AuthContext'
 
 const CustomLookup = ({
   type = 'text',
@@ -37,6 +38,7 @@ const CustomLookup = ({
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
   const [freeSolo, setFreeSolo] = useState(false)
+  const { languageId } = useContext(AuthContext)
 
   useEffect(() => {
     store.length < 1 && setFreeSolo(false)
@@ -153,7 +155,7 @@ const CustomLookup = ({
                       position: 'absolute',
                       top: '50%',
                       transform: 'translateY(-50%)',
-                      right: 5,
+                      right: languageId === 2 ? '85%' : 5,
                       display: 'flex'
                     }}
                   >
