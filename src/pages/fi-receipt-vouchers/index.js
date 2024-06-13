@@ -13,6 +13,7 @@ import ReceiptVoucherForm from './forms/ReceiptVoucherForm'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
+import { Checkbox } from '@mui/material'
 
 export default function CurrencyTrading() {
   const { getRequest } = useContext(RequestsContext)
@@ -130,7 +131,10 @@ export default function CurrencyTrading() {
     {
       field: 'isVerified',
       headerName: labels.isVerified,
-      flex: 1
+      flex: 1,
+      renderCell: ({ row }) => {
+        return <Checkbox checked={row.isVerified} />
+      }
     }
   ]
 
