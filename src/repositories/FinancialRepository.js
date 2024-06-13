@@ -87,7 +87,9 @@ export const FinancialRepository = {
   FiMemo: {
     qry: service + 'qryMEM',
     get: service + 'getMEM',
-    del: service + 'delMEM'
+    del: service + 'delMEM',
+    post: service + 'postMEM',
+    cancel: service + 'cancelMEM'
   },
   CreditNote: {
     set: service + 'setCN'
@@ -100,5 +102,8 @@ export const FinancialRepository = {
   },
   ServiceInvoice: {
     set: service + 'setSI'
+  },
+  FinancialTransaction: {
+    qry: service + 'qryTRX'
   }
 }

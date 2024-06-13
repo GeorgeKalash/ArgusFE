@@ -21,6 +21,7 @@ const WindowToolbar = ({
   onClickGIA,
   onClickGL,
   onClickAC,
+  onClickIT,
   onGenerateReport,
   disabledSubmit,
   disabledApply,
@@ -98,6 +99,7 @@ const WindowToolbar = ({
     onClientRelation,
     onClickGL: () => onClickGL(recordId),
     onClickAC: () => onClickAC(recordId),
+    onClickIT: () => onClickIT(recordId),
     onClickGIA: () => onClickGIA(recordId)
   }
 

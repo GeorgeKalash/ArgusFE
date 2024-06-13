@@ -128,8 +128,18 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       if (res?.recordId) {
         toast.success('Record Posted Successfully')
         invalidate()
+
+        try {
+          const getRes = await getRequest({
+            extension: CashBankRepository.CAadjustment.get,
+            parameters: `_recordId=${formik.values.recordId}`
+          })
+
+          getRes.record.date = formatDateFromApi(getRes.record.date)
+          formik.setValues(getRes.record)
+        } catch (getError) {}
       }
-    } catch (error) {}
+    } catch (postError) {}
   }
 
   const actions = [
@@ -145,6 +155,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       onClick: 'onClickGL',
       disabled: !editMode
     },
+
     {
       key: 'Post',
       condition: true,
@@ -162,6 +173,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       actions={actions}
       functionId={functionId}
       previewReport={editMode}
+      disabledSubmit={formik.values.status !== 1}
     >
       <VertLayout>
         <Grow>

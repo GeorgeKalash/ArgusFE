@@ -148,5 +148,6 @@ export const ResourceIds = {
   CreditNote: 31306,
   DebitNote: 31311,
   ServiceBillReceived: 31312,
-  ServiceInvoice: 31313
+  ServiceInvoice: 31313,
+  FinancialTransaction: 31302
 }

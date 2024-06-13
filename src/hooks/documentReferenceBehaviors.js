@@ -43,7 +43,7 @@ export function useDocumentType({ functionId, access, hasDT, enabled = true }) {
     staleTime: 0,
     enabled: !!functionId && enabled,
     queryKey: [functionId, nraId, !!access],
-    queryFn: nraId || nraId === 'naraId' ? () => queryFn(nraId) : () => queryFn()
+    queryFn: nraId || nraId === 'nraId' ? () => queryFn(nraId) : () => queryFn()
   })
 
   return {

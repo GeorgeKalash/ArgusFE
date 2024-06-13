@@ -11,6 +11,7 @@ import Approvals from './Approvals'
 import ResourceRecordRemarks from './ResourceRecordRemarks'
 import GlobalIntegrationGrid from './GlobalIntegrationGrid'
 import AccountBalance from './AccountBalance'
+import FinancialTransaction from './FinancialTransaction'
 
 export default function FormShell({
   form,
@@ -157,6 +158,15 @@ export default function FormShell({
               width: 700,
               height: 500,
               title: 'Integration Account'
+            })
+          }
+          onClickIT={() =>
+            stack({
+              Component: FinancialTransaction,
+              props: { formValues: form.values },
+              width: 1000,
+              height: 620,
+              title: 'Financial Transaction'
             })
           }
           onClickAC={() =>

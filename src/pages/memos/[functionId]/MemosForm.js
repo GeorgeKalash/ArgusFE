@@ -19,13 +19,14 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
+import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 
 export default function MemosForm({ labels, access, recordId, functionId }) {
-  //   const { documentType, maxAccess, changeDT } = useDocumentType({
-  //     functionId: functionId,
-  //     access: access,
-  //     enabled: !recordId
-  //   })
+  const { documentType, maxAccess, changeDT } = useDocumentType({
+    functionId: functionId,
+    access: access,
+    enabled: !recordId
+  })
 
   const [initialVatPct, setInitialVatPct] = useState('')
 
@@ -34,8 +35,6 @@ export default function MemosForm({ labels, access, recordId, functionId }) {
   const invalidate = useInvalidate({
     endpointId: FinancialRepository.FiMemo.qry
   })
-  console.log(functionId, 'func')
-  console.log(SystemFunction.CreditNote, 'systemfun')
 
   const getSetEndpoint = functionId => {
     switch (functionId) {
@@ -51,13 +50,14 @@ export default function MemosForm({ labels, access, recordId, functionId }) {
         return null
     }
   }
-  console.log(getSetEndpoint(3103), 'get set')
-  const endpointSet = getSetEndpoint(functionId)
+
+  console.log(SystemFunction.DebitNote, 'systemFunction')
+  console.log(functionId, 'funcId')
 
   const { formik } = useForm({
     initialValues: {
       recordId: recordId || null,
-      dtId: '',
+      dtId: documentType?.dtId || null,
       reference: '',
       date: new Date(),
       plantId: '',
@@ -76,13 +76,12 @@ export default function MemosForm({ labels, access, recordId, functionId }) {
       vatAmount: '',
       isSubjectToVAT: false
     },
-    access,
+    maxAccess,
     enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       amount: yup.number().required(' '),
       currencyId: yup.string().required(' '),
-      reference: yup.string().required(' '),
       accountId: yup.string().required(' '),
       subtotal: yup.number().required(' '),
       date: yup.string().required(' ')
@@ -97,7 +96,7 @@ export default function MemosForm({ labels, access, recordId, functionId }) {
       }
 
       const response = await postRequest({
-        extension: getSetEndpoint(formik.values.functionId),
+        extension: getSetEndpoint(parseInt(formik.values.functionId)),
         record: JSON.stringify(obj)
       })
 
@@ -176,6 +175,54 @@ export default function MemosForm({ labels, access, recordId, functionId }) {
     })()
   }, [])
 
+  const onPost = async () => {
+    try {
+      const res = await postRequest({
+        extension: FinancialRepository.FiMemo.post,
+        record: JSON.stringify(formik.values)
+      })
+
+      if (res?.recordId) {
+        toast.success('Record Posted Successfully')
+        invalidate()
+
+        try {
+          const getRes = await getRequest({
+            extension: FinancialRepository.FiMemo.get,
+            parameters: `_recordId=${formik.values.recordId}`
+          })
+
+          getRes.record.date = formatDateFromApi(getRes.record.date)
+          formik.setValues(getRes.record)
+        } catch (getError) {}
+      }
+    } catch (postError) {}
+  }
+
+  const onCancel = async () => {
+    try {
+      const res = await postRequest({
+        extension: FinancialRepository.FiMemo.cancel,
+        record: JSON.stringify(formik.values)
+      })
+
+      if (res?.recordId) {
+        toast.success('Record Canceled Successfully')
+        invalidate()
+
+        try {
+          const getRes = await getRequest({
+            extension: FinancialRepository.FiMemo.get,
+            parameters: `_recordId=${formik.values.recordId}`
+          })
+
+          getRes.record.date = formatDateFromApi(getRes.record.date)
+          formik.setValues(getRes.record)
+        } catch (getError) {}
+      }
+    } catch (cancelError) {}
+  }
+
   const actions = [
     {
       key: 'RecordRemarks',
@@ -188,6 +235,24 @@ export default function MemosForm({ labels, access, recordId, functionId }) {
       condition: true,
       onClick: 'onClickGL',
       disabled: !editMode
+    },
+    {
+      key: 'FI Trx',
+      condition: true,
+      onClick: 'onClickIT',
+      disabled: !editMode
+    },
+    {
+      key: 'Post',
+      condition: true,
+      onClick: onPost,
+      disabled: !editMode || formik.values.status === -1 || formik.values.status === 3
+    },
+    {
+      key: 'Cancel',
+      condition: true,
+      onClick: onCancel,
+      disabled: !editMode || formik.values.status === -1 || formik.values.status === 3
     }
   ]
 
@@ -205,17 +270,18 @@ export default function MemosForm({ labels, access, recordId, functionId }) {
         return null
     }
   }
-  console.log(getResourceId(3104), 'get res')
+  console.log(formik.values, 'formik')
 
   return (
     <FormShell
-      resourceId={getResourceId(formik.values.functionId)}
+      resourceId={getResourceId(parseInt(formik.values.functionId))}
       form={formik}
-      maxAccess={access}
+      maxAccess={maxAccess}
       editMode={editMode}
       actions={actions}
       functionId={formik.values.functionId}
       previewReport={editMode}
+      disabledSubmit={formik.values.status === -1 || formik.values.status === 3}
     >
       <VertLayout>
         <Grow>
@@ -236,9 +302,10 @@ export default function MemosForm({ labels, access, recordId, functionId }) {
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     values={formik.values}
-                    maxAccess={access}
+                    maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik && formik.setFieldValue('dtId', newValue?.recordId)
+                      changeDT(newValue)
+                      formik && formik.setFieldValue('dtId', newValue?.recordId || '')
                       formik && formik.setFieldValue('status', newValue?.activeStatus)
                     }}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}
@@ -248,11 +315,10 @@ export default function MemosForm({ labels, access, recordId, functionId }) {
                   <CustomTextField
                     name='reference'
                     label={labels.reference}
-                    required
                     value={formik.values.reference}
                     readOnly={editMode}
                     rows={2}
-                    maxAccess={access}
+                    maxAccess={maxAccess}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('reference', '')}
                     error={formik.touched.reference && Boolean(formik.errors.reference)}
@@ -270,7 +336,7 @@ export default function MemosForm({ labels, access, recordId, functionId }) {
                       { key: 'name', value: 'Name' }
                     ]}
                     values={formik.values}
-                    maxAccess={access}
+                    maxAccess={maxAccess}
                     onChange={(event, newValue) => {
                       const plantId = newValue?.recordId || ''
                       formik.setFieldValue('plantId', plantId)
@@ -285,7 +351,7 @@ export default function MemosForm({ labels, access, recordId, functionId }) {
                     value={formik.values.date}
                     onChange={formik.setFieldValue}
                     required
-                    maxAccess={access}
+                    maxAccess={maxAccess}
                     onClear={() => formik.setFieldValue('date', '')}
                     error={formik.touched.date && Boolean(formik.errors.date)}
                   />
@@ -303,7 +369,7 @@ export default function MemosForm({ labels, access, recordId, functionId }) {
                     ]}
                     values={formik.values}
                     required
-                    maxAccess={access}
+                    maxAccess={maxAccess}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('currencyId', newValue?.recordId || null)
                     }}
@@ -350,9 +416,8 @@ export default function MemosForm({ labels, access, recordId, functionId }) {
                     label={labels.descriptionTemplate}
                     displayField='name'
                     name='descriptionTemplate'
-                    value={''}
-                    values={formik.values}
-                    maxAccess={access}
+                    value={null}
+                    maxAccess={maxAccess}
                     onChange={(event, newValue) => {
                       if (newValue) {
                         const descriptionTemplateName = newValue?.name || ''
@@ -376,7 +441,7 @@ export default function MemosForm({ labels, access, recordId, functionId }) {
                     value={formik.values.notes}
                     maxLength='100'
                     rows={3}
-                    maxAccess={access}
+                    maxAccess={maxAccess}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('notes', '')}
                     error={formik.touched.notes && Boolean(formik.errors.notes)}
@@ -394,7 +459,7 @@ export default function MemosForm({ labels, access, recordId, functionId }) {
                     required
                     label={labels.subtotal}
                     value={formik.values.subtotal}
-                    maxAccess={access}
+                    maxAccess={maxAccess}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('subtotal', '')}
                     error={formik.touched.subtotal && Boolean(formik.errors.subtotal)}
@@ -406,7 +471,7 @@ export default function MemosForm({ labels, access, recordId, functionId }) {
                     readOnly
                     label={labels.vatPct}
                     value={formik.values.vatPct}
-                    maxAccess={access}
+                    maxAccess={maxAccess}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('vatPct', '')}
                     error={formik.touched.vatPct && Boolean(formik.errors.vatPct)}
@@ -418,7 +483,7 @@ export default function MemosForm({ labels, access, recordId, functionId }) {
                     readOnly
                     label={labels.vatAmount}
                     value={formik.values.vatAmount}
-                    maxAccess={access}
+                    maxAccess={maxAccess}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('vatAmount', '')}
                     error={formik.touched.vatAmount && Boolean(formik.errors.vatAmount)}
@@ -429,7 +494,7 @@ export default function MemosForm({ labels, access, recordId, functionId }) {
                     control={
                       <Checkbox
                         name='isSubjectToVAT'
-                        maxAccess={access}
+                        maxAccess={maxAccess}
                         checked={formik.values?.isSubjectToVAT}
                         onChange={formik.handleChange}
                       />
@@ -445,7 +510,7 @@ export default function MemosForm({ labels, access, recordId, functionId }) {
                     label={labels.amount}
                     value={formik.values.amount}
                     required
-                    maxAccess={access}
+                    maxAccess={maxAccess}
                     onChange={e => formik.setFieldValue('amount', e.target.value)}
                     onClear={() => formik.setFieldValue('amount', '')}
                     error={formik.touched.amount && Boolean(formik.errors.amount)}
