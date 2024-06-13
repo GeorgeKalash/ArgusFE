@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -23,16 +23,19 @@ import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { DataSets } from 'src/resources/DataSets'
+import { getStorageData } from 'src/storage/storage'
+import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 
 export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const [isCancelled, setIsCancelled] = useState()
+  const [isPosted, setIsPosted] = useState(false)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.ReceiptVoucher,
     access: access,
     enabled: !recordId
   })
-  const editMode = !!recordId
 
   const invalidate = useInvalidate({
     endpointId: FinancialRepository.ReceiptVouchers.page
@@ -40,14 +43,14 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
 
   const { formik } = useForm({
     maxAccess: maxAccess,
-    enableReinitialize: true,
+    enableReinitialize: false,
     validateOnChange: true,
     initialValues: {
       reference: '',
       accountId: null,
-      date: null,
+      date: new Date(),
       currencyId: null,
-      dtId: null,
+      dtId: documentType?.dtId,
       dgId: '',
       amount: '',
       baseAmount: '',
@@ -55,23 +58,24 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       oDocId: '',
       printStatus: '',
       status: 1,
-      paymentMethod: '',
+      paymentMethod: '1',
       cashAccountId: null,
       plantId: null,
       exRate: 1.0,
       rateCalcMethod: 1,
       contactId: null,
       collectorId: null,
-      isVerified: true
+      isVerified: true,
+      template: 1
     },
     validationSchema: yup.object({
-      // accountId: yup.string().required(' '),
-      // cashAccountId: yup.string().required(' '),
-      // amount: yup.string().required(' ')
+      accountId: yup.string().required(' '),
+      cashAccountId: yup.string().required(' '),
+      amount: yup.string().required(' '),
+      paymentMethod: yup.string().required(' ')
     }),
     onSubmit: async obj => {
-      // const recordId = obj.recordId
-      console.log('obj', obj)
+      const recordId = obj.recordId
 
       const response = await postRequest({
         extension: FinancialRepository.ReceiptVouchers.set,
@@ -79,30 +83,152 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       })
       if (!recordId) {
         toast.success('Record Added Successfully')
-        formik.setValues({
-          ...obj,
-          recordId: response.recordId
-        })
+        formik.setFieldValue('recordId', response.recordId)
+        getData(response.recordId)
       } else toast.success('Record Edited Successfully')
       invalidate()
     }
   })
+  const editMode = !!recordId || !!formik.values.recordId
+
+  const getDefaultDT = async () => {
+    const userData = getStorageData('userData')
+
+    const _userId = userData.userId
+    try {
+      const { record: cashAccountRecord } = await getRequest({
+        extension: SystemRepository.UserDefaults.get,
+        parameters: `_userId=${_userId}&_key=cashAccountId`
+      })
+
+      const { record: currency } = await getRequest({
+        extension: SystemRepository.Default.get,
+        parameters: `_key=currencyId`
+      })
+      const cashAccountId = cashAccountRecord?.value
+      if (cashAccountId) {
+        const { record: cashAccountResult } = await getRequest({
+          extension: CashBankRepository.CbBankAccounts.get,
+          parameters: `_recordId=${cashAccountId}`
+        })
+
+        formik.setFieldValue('cashAccountId', cashAccountId)
+        formik.setFieldValue('cashAccountRef', cashAccountResult.reference)
+        formik.setFieldValue('cashAccountName', cashAccountResult.name)
+        formik.setFieldValue('currencyId', parseInt(currency.value))
+      }
+
+      const { record: plantRecord } = await getRequest({
+        extension: SystemRepository.UserDefaults.get,
+        parameters: `_userId=${_userId}&_key=plantId`
+      })
+      if (plantRecord) {
+        formik.setFieldValue('plantId', parseInt(plantRecord.value))
+      }
+    } catch (error) {}
+  }
   useEffect(() => {
-    // ;(async function () {
-    //   try {
-    //     if (recordId) {
-    //       const res = await getRequest({
-    //         extension: FinancialRepository.ReceiptVouchers.get,
-    //         parameters: `_recordId=${recordId}`
-    //       })
-    //       formik.setValues(res.record)
-    //     }
-    //   } catch (e) {}
-    // })()
+    formik.setFieldValue('templateId', '')
+  }, [formik.values.notes])
+
+  useEffect(() => {
+    !recordId && getDefaultDT()
+    ;(async function () {
+      getData(recordId)
+    })()
   }, [])
 
+  async function getData(_recordId) {
+    try {
+      const recordId = _recordId || recordId
+      if (recordId) {
+        const res = await getRequest({
+          extension: FinancialRepository.ReceiptVouchers.get,
+          parameters: `_recordId=${recordId}`
+        })
+        setIsPosted(res.record.status === 3 ? true : false)
+        setIsCancelled(res.record.status === -1 ? true : false)
+        formik.setValues({ ...res.record, date: formatDateFromApi(res.record.date) })
+      }
+    } catch (e) {}
+  }
+
+  const onCancel = async () => {
+    try {
+      const obj = formik.values
+
+      const res = await postRequest({
+        extension: FinancialRepository.ReceiptVouchers.cancel,
+        record: JSON.stringify({ ...obj, date: formatDateToApi(obj.date) })
+      })
+
+      if (res?.recordId) {
+        setIsCancelled(true)
+        toast.success('Record Cancelled Successfully')
+        invalidate()
+      }
+    } catch (e) {}
+  }
+
+  const onPost = async () => {
+    try {
+      const res = await postRequest({
+        extension: FinancialRepository.ReceiptVouchers.post,
+        record: JSON.stringify(formik.values)
+      })
+
+      if (res) {
+        toast.success('Record Posted Successfully')
+        invalidate()
+        setIsPosted(true)
+      }
+    } catch (e) {}
+  }
+
+  const actions = [
+    {
+      key: 'GL',
+      condition: true,
+      onClick: 'onClickGL',
+      disabled: !editMode
+    },
+
+    {
+      key: 'Cancel',
+      condition: true,
+      onClick: onCancel,
+      disabled: !editMode || isPosted || isCancelled
+    },
+    {
+      key: 'RecordRemarks',
+      condition: true,
+      onClick: 'onRecordRemarks',
+      disabled: !editMode
+    },
+    {
+      key: 'Account Balance',
+      condition: true,
+      onClick: 'onClickAC',
+      disabled: false
+    },
+    {
+      key: 'Post',
+      condition: true,
+      onClick: onPost,
+      disabled: isPosted || !editMode
+    }
+  ]
+
   return (
-    <FormShell resourceId={ResourceIds.FiOpeningBalances} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell
+      resourceId={ResourceIds.FiOpeningBalances}
+      functionId={SystemFunction.ReceiptVoucher}
+      form={formik}
+      actions={actions}
+      maxAccess={maxAccess}
+      editMode={editMode}
+      previewReport={editMode}
+    >
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -163,33 +289,25 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  if (newValue) {
-                    formik.setFieldValue('plantId', newValue?.recordId)
-                  } else {
-                    formik.setFieldValue('plantId', '')
-                  }
+                  formik.setFieldValue('plantId', newValue?.recordId || null)
                 }}
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
               />
             </Grid>
             <Grid item xs={12}>
               <ResourceLookup
-                endpointId={GeneralLedgerRepository.Account.snapshot}
-                parameters={{
-                  _type: 0
-                }}
+                endpointId={FinancialRepository.Account.snapshot}
                 required
-                readOnly={editMode}
                 name='accountId'
                 label={labels.accountReference}
-                valueField='accountRef'
+                valueField='reference'
                 displayField='name'
                 valueShow='accountRef'
                 secondValueShow='accountName'
                 form={formik}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('accountId', newValue?.recordId || '')
-                  formik.setFieldValue('accountRef', newValue?.accountRef || '')
+                  formik.setFieldValue('accountRef', newValue?.reference || '')
                   formik.setFieldValue('accountName', newValue?.name || '')
                 }}
                 error={formik.touched.accountId && Boolean(formik.errors.accountId)}
@@ -205,6 +323,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 readOnly={editMode}
                 valueField='key'
                 displayField='value'
+                required
                 values={formik.values}
                 onChange={async (event, newValue) => {
                   formik.setFieldValue('paymentMethod', newValue?.key)
@@ -214,16 +333,24 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
               />
             </Grid>
             <Grid item xs={6}>
-              <CustomTextField
-                name='contact'
+              <ResourceComboBox
+                endpointId={formik.values?.accountId && FinancialRepository.Contact.qry}
+                parameters={formik.values?.accountId && `_accountId=${formik.values?.accountId}`}
+                name='contactId'
                 label={labels.contact}
-                value={formik.values.contact}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
                 readOnly={editMode}
-                maxAccess={!editMode && maxAccess}
-                maxLength='30'
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('contact', '')}
-                error={formik.touched.contact && Boolean(formik.errors.contact)}
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('contactId', newValue?.recordId || null)
+                }}
+                error={formik.touched.contactId && Boolean(formik.errors.contactId)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -291,31 +418,47 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 />
               </Grid>
               <Grid item xs={12}>
-                <CustomTextField
+                <CustomNumberField
                   name='amount'
                   type='text'
                   required
                   label={labels.amount}
                   value={formik.values.amount}
                   maxAccess={maxAccess}
-                  onChange={e => formik.setFieldValue('amount', e.target.value)}
-                  onClear={() => formik.setFieldValue('amount', '')}
+                  onChange={e =>
+                    formik.setValues({
+                      ...formik.values,
+                      amount: e.target.value,
+                      baseAmount: e.target.value
+                    })
+                  }
+                  onClear={() =>
+                    formik.setValues({
+                      ...formik.values,
+                      amount: '',
+                      basAmount: ''
+                    })
+                  }
                   error={formik.touched.amount && Boolean(formik.errors.amount)}
                 />
               </Grid>
               <Grid item xs={12}>
                 <ResourceComboBox
                   endpointId={FinancialRepository.DescriptionTemplate.qry}
-                  name='descriptionTemplateId'
+                  name='templateId'
                   label={labels.descriptionTemplate}
-                  readOnly={editMode}
                   valueField='recordId'
                   displayField='name'
                   values={formik.values}
-                  onChange={async (event, newValue) => {
-                    formik.setFieldValue('collectorId', newValue?.recordId || '')
+                  onChange={(event, newValue) => {
+                    let notes = formik.values.notes
+                    notes += newValue?.name && formik.values.notes && '\n'
+                    notes += newValue?.name
+
+                    notes && formik.setFieldValue('notes', notes)
+                    newValue?.name && formik.setFieldValue('templateId', newValue.recordId)
                   }}
-                  error={formik.touched.dtId && Boolean(formik.errors.dtId)}
+                  error={formik.touched.templateId && Boolean(formik.errors.templateId)}
                   maxAccess={maxAccess}
                 />
               </Grid>

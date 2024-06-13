@@ -28,7 +28,7 @@ export default function CurrencyTrading() {
       },
       width: 1200,
       height: 800,
-      title: labels.ReceiptVoucher
+      title: labels.receiptVoucher
     })
   }
 
@@ -37,20 +37,33 @@ export default function CurrencyTrading() {
     filterBy,
     clearFilter,
     labels: labels,
-    access
+    access,
+    paginationParameters,
+    refetch,
+    invalidate
   } = useResourceQuery({
-    endpointId: FinancialRepository.ReceiptVouchers.snapshot,
+    queryFn: fetchGridData,
+    endpointId: FinancialRepository.ReceiptVouchers.qry,
     datasetId: ResourceIds.ReceiptVoucher,
     filter: {
-      endpointId: FinancialRepository.ReceiptVouchers.snapshot,
       filterFn: fetchWithSearch
     }
   })
   async function fetchWithSearch({ options = {}, filters }) {
     return await getRequest({
       extension: FinancialRepository.ReceiptVouchers.snapshot,
-      parameters: `_filter=${filters.qry}&_category=1`
+      parameters: `_filter=${filters.qry}`
     })
+  }
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50 } = options
+
+    const response = await getRequest({
+      extension: FinancialRepository.ReceiptVouchers.qry,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=&_sortBy=asc`
+    })
+
+    return { ...response, _startAt: _startAt }
   }
 
   const { proxyAction } = useDocumentTypeProxy({
@@ -61,6 +74,65 @@ export default function CurrencyTrading() {
   const add = async () => {
     await proxyAction()
   }
+
+  const edit = async obj => {
+    await openForm(obj.recordId)
+  }
+
+  const del = async obj => {
+    try {
+      await postRequest({
+        extension: FinancialRepository.ReceiptVouchers.del,
+        record: JSON.stringify(obj)
+      })
+      invalidate()
+      toast.success('Record Deleted Successfully')
+    } catch (e) {}
+  }
+
+  const columns = [
+    {
+      field: 'Date',
+      headerName: labels.date,
+      flex: 1,
+      valueGetter: ({ row }) => formatDateDefault(row?.date)
+    },
+    {
+      field: 'reference',
+      headerName: labels.reference,
+      flex: 1
+    },
+    {
+      field: 'accountName',
+      headerName: labels.accountName,
+      flex: 1
+    },
+    {
+      field: 'CashAccount',
+      headerName: labels.CashAccount,
+      flex: 1
+    },
+    {
+      field: 'amount',
+      headerName: labels.amount,
+      flex: 1
+    },
+    {
+      field: 'currency',
+      headerName: labels.currency,
+      flex: 1
+    },
+    {
+      field: 'statusName',
+      headerName: labels.status,
+      flex: 1
+    },
+    {
+      field: 'isVerified',
+      headerName: labels.isVerified,
+      flex: 1
+    }
+  ]
 
   return (
     <VertLayout>
@@ -80,57 +152,16 @@ export default function CurrencyTrading() {
       </Fixed>
       <Grow>
         <Table
-          columns={[
-            {
-              field: 'Date',
-              headerName: labels.date,
-              flex: 1,
-              valueGetter: ({ row }) => formatDateDefault(row?.date)
-            },
-            {
-              field: 'reference',
-              headerName: labels.reference,
-              flex: 1
-            },
-            {
-              field: 'accountName',
-              headerName: labels.accountName,
-              flex: 1
-            },
-            {
-              field: 'CashAccount',
-              headerName: labels.CashAccount,
-              flex: 1
-            },
-            {
-              field: 'amount',
-              headerName: labels.amount,
-              flex: 1
-            },
-            {
-              field: 'currency',
-              headerName: labels.currency,
-              flex: 1
-            },
-            {
-              field: 'status',
-              headerName: labels.status,
-              flex: 1
-            },
-            {
-              field: 'isVerified',
-              headerName: labels.isVerified,
-              flex: 1
-            }
-          ]}
-          onEdit={obj => {
-            openForm(obj.recordId)
-          }}
+          columns={columns}
+          onEdit={edit}
+          onDelete={del}
           gridData={data ? data : { list: [] }}
           rowId={['recordId']}
           isLoading={false}
+          refetch={refetch}
+          paginationParameters={paginationParameters}
           pageSize={50}
-          paginationType='client'
+          paginationType='api'
           maxAccess={access}
         />
       </Grow>
