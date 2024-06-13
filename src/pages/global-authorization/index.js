@@ -1,22 +1,21 @@
-import { Box, Button, Grid, Tooltip, Typography, IconButton } from '@mui/material'
+import { Box, Button, Grid, IconButton } from '@mui/material'
 import Icon from 'src/@core/components/icon'
 import { useContext } from 'react'
 import { useResourceQuery } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import Table from 'src/components/Shared/Table'
-
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useWindow } from 'src/windows'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataSets } from 'src/resources/DataSets'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-import AccessLevelForm from './forms/AccessLevelForm'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useEffect } from 'react'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import ResourceGlobalForm from 'src/components/Shared/ResourceGlobalForm'
 import FieldGlobalForm from 'src/components/Shared/FieldGlobalForm'
+import AccessLevelForm from 'src/components/Shared/AccessLevelForm'
 
 const GlobalAuthorization = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -65,7 +64,9 @@ const GlobalAuthorization = () => {
         labels: labels,
         maxAccess: access,
         data,
-        moduleId: filters.moduleId
+        moduleId: filters.moduleId,
+        invalidate,
+        resourceId: ResourceIds.GlobalAuthorization
       },
       width: 450,
       height: 200,
