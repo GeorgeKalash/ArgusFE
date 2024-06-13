@@ -30,6 +30,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [isCancelled, setIsCancelled] = useState()
   const [isPosted, setIsPosted] = useState(false)
+  const [isVerified, setIsVerified] = useState(false)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.ReceiptVoucher,
@@ -148,6 +149,8 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
         })
         setIsPosted(res.record.status === 3 ? true : false)
         setIsCancelled(res.record.status === -1 ? true : false)
+        setIsVerified(res.record.isVerified)
+
         formik.setValues({ ...res.record, date: formatDateFromApi(res.record.date) })
       }
     } catch (e) {}
@@ -279,6 +282,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
               <ResourceComboBox
                 endpointId={SystemRepository.Plant.qry}
                 name='plantId'
+                readOnly={isVerified}
                 label={labels.plant}
                 valueField='recordId'
                 displayField='name'
@@ -299,6 +303,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 endpointId={FinancialRepository.Account.snapshot}
                 required
                 name='accountId'
+                readOnly={isVerified}
                 label={labels.accountReference}
                 valueField='reference'
                 displayField='name'
@@ -319,6 +324,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
               <ResourceComboBox
                 datasetId={DataSets.PAYMENT_METHOD}
                 name='paymentMethod'
+                readOnly={isVerified}
                 label={labels.paymentMethod}
                 valueField='key'
                 displayField='value'
@@ -336,6 +342,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 endpointId={formik.values?.accountId && FinancialRepository.Contact.qry}
                 parameters={formik.values?.accountId && `_accountId=${formik.values?.accountId}`}
                 name='contactId'
+                readOnly={isVerified}
                 label={labels.contact}
                 valueField='recordId'
                 displayField={['reference', 'name']}
@@ -358,6 +365,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                   _type: 0
                 }}
                 name='cashAccountRef'
+                readOnly={isVerified}
                 label={labels.cashAccount}
                 valueField='reference'
                 displayField='name'
@@ -382,6 +390,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 <ResourceComboBox
                   endpointId={SystemRepository.Currency.qry}
                   name='currencyId'
+                  readOnly={isVerified}
                   label={labels.currency}
                   valueField='recordId'
                   displayField={['reference', 'name', 'flName']}
@@ -402,6 +411,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 <ResourceComboBox
                   endpointId={LogisticsRepository.LoCollector.qry}
                   name='collectorId'
+                  readOnly={isVerified}
                   label={labels.collector}
                   valueField='recordId'
                   displayField='name'
@@ -419,6 +429,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                   type='text'
                   required
                   label={labels.amount}
+                  readOnly={isVerified}
                   value={formik.values.amount}
                   maxAccess={maxAccess}
                   onChange={e =>
@@ -443,6 +454,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                   endpointId={FinancialRepository.DescriptionTemplate.qry}
                   name='templateId'
                   label={labels.descriptionTemplate}
+                  readOnly={isVerified}
                   valueField='recordId'
                   displayField='name'
                   values={formik.values}
@@ -465,6 +477,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 type='text'
                 label={labels.notes}
                 value={formik.values.notes}
+                readOnly={isVerified}
                 rows={4}
                 maxAccess={maxAccess}
                 onChange={e => formik.setFieldValue('notes', e.target.value)}
