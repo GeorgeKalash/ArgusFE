@@ -209,12 +209,6 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       disabled: !editMode
     },
     {
-      key: 'Account Balance',
-      condition: true,
-      onClick: 'onClickAC',
-      disabled: false
-    },
-    {
       key: 'Post',
       condition: true,
       onClick: onPost,
@@ -230,6 +224,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       actions={actions}
       maxAccess={maxAccess}
       editMode={editMode}
+      disabledSubmit={isPosted}
       previewReport={editMode}
     >
       <VertLayout>
@@ -345,7 +340,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 readOnly={isVerified}
                 label={labels.contact}
                 valueField='recordId'
-                displayField={['reference', 'name']}
+                displayField={'name'}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
@@ -393,11 +388,10 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                   readOnly={isVerified}
                   label={labels.currency}
                   valueField='recordId'
-                  displayField={['reference', 'name', 'flName']}
+                  displayField={['name']}
                   columnsInDropDown={[
                     { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' },
-                    { key: 'flName', value: 'flName' }
+                    { key: 'name', value: 'Name' }
                   ]}
                   values={formik.values}
                   maxAccess={maxAccess}
@@ -414,7 +408,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                   readOnly={isVerified}
                   label={labels.collector}
                   valueField='recordId'
-                  displayField='name'
+                  displayField='reference'
                   values={formik.values}
                   onChange={async (event, newValue) => {
                     formik.setFieldValue('collectorId', newValue?.recordId || '')

@@ -27,7 +27,7 @@ export default function CurrencyTrading() {
         maxAccess: access,
         recordId: recordId || null
       },
-      width: 1200,
+      width: 1000,
       height: 800,
       title: labels.receiptVoucher
     })
