@@ -21,7 +21,6 @@ import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { useWindow } from 'src/windows'
 import WorkFlow from 'src/components/Shared/WorkFlow'
-import CashTransaction from 'src/components/Shared/CashTransaction'
 
 export default function CAadjustmentForm({ labels, access, recordId, functionId }) {
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -148,19 +147,6 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
     })
   }
 
-  const transactionClicked = () => {
-    stack({
-      Component: CashTransaction,
-      props: {
-        recordId: formik.values.recordId,
-        functionId: formik.values.functionId
-      },
-      width: 1200,
-      height: 670,
-      title: labels.cashTransaction
-    })
-  }
-
   const actions = [
     {
       key: 'RecordRemarks',
@@ -189,7 +175,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
     {
       key: 'Cash Transaction',
       condition: true,
-      onClick: transactionClicked,
+      onClick: 'transactionClicked',
       disabled: !editMode
     }
   ]
