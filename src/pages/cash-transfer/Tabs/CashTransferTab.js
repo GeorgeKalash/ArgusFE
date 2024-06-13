@@ -390,7 +390,8 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
                   value={formik?.values?.reference}
                   maxAccess={maxAccess}
                   maxLength='15'
-                  readOnly
+                  readOnly={editMode}
+                  error={formik.touched.reference && Boolean(formik.errors.reference)}
                 />
               </Grid>
               <Grid item xs={12}>
