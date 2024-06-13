@@ -190,7 +190,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       key: 'Cash Transaction',
       condition: true,
       onClick: transactionClicked,
-      disabled: false
+      disabled: !editMode
     }
   ]
 

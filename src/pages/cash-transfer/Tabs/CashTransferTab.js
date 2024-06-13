@@ -370,7 +370,7 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
       key: 'Cash Transaction',
       condition: true,
       onClick: transactionClicked,
-      disabled: false
+      disabled: !editMode
     }
   ]
 
