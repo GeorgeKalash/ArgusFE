@@ -30,7 +30,7 @@ const CashTransaction = props => {
     },
     {
       field: 'functionName',
-      headerName: _labels.functionName,
+      headerName: _labels.function,
       flex: 1
     },
     ,
@@ -47,13 +47,12 @@ const CashTransaction = props => {
     },
     {
       field: 'amount',
-
       headerName: _labels.amount,
       flex: 1
     },
     {
       field: 'baseAmount',
-      headerName: _labels.baseAmount,
+      headerName: _labels.BaseAmount,
       flex: 1
     }
   ]

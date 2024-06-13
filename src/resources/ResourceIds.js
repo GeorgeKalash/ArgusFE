@@ -145,5 +145,5 @@ export const ResourceIds = {
   PointOfSale: 54101,
   Common: 140,
   IncreaseDecreaseAdj: 33301,
-  CashTransactions: 140
+  CashTransactions: 33312
 }
