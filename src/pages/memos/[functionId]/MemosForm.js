@@ -141,6 +141,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
       formik.setFieldValue('vatPct', initialVatPct)
       const vatAmount = formik.values.subtotal / initialVatPct
       formik.setFieldValue('vatAmount', vatAmount)
+
       calculatedAmount += vatAmount
     } else {
       formik.setFieldValue('vatPct', '')
@@ -148,6 +149,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
     }
 
     formik.setFieldValue('amount', calculatedAmount)
+    formik.setFieldValue('baseAmount', calculatedAmount)
   }, [formik.values.isSubjectToVAT, initialVatPct, formik.values.subtotal])
 
   useEffect(() => {
@@ -168,6 +170,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
       } catch (exception) {}
     })()
   }, [])
+  console.log(formik.values, 'formike')
   useEffect(() => {
     formik.setFieldValue('templateId', '')
   }, [formik.values.notes])
@@ -291,7 +294,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_startAt=0&_pageSize=1000&_dgId=${formik.values.functionId}`}
                     name='dtId'
-                    readOnly={postedOrCanceled}
+                    readOnly={editMode}
                     label={labels.doctype}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
@@ -377,76 +380,6 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                     error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
                   />
                 </Grid>
-                <Grid item xs={12}>
-                  <ResourceLookup
-                    endpointId={FinancialRepository.Account.snapshot}
-                    parameters={{
-                      _type: 2
-                    }}
-                    readOnly={postedOrCanceled}
-                    valueField='reference'
-                    displayField='name'
-                    name='accountId'
-                    required
-                    label={labels.account}
-                    form={formik}
-                    valueShow='accountRef'
-                    secondValueShow='accountName'
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' },
-                      { key: 'keywords', value: 'Keywords' },
-                      { key: 'groupName', value: 'Account Group' }
-                    ]}
-                    onChange={(event, newValue) => {
-                      if (newValue) {
-                        formik.setFieldValue('accountId', newValue?.recordId || '')
-                        formik.setFieldValue('accountRef', newValue?.reference)
-                        formik.setFieldValue('accountName', newValue?.name)
-                      } else {
-                        formik.setFieldValue('accountId', null)
-                        formik.setFieldValue('accountRef', null)
-                        formik.setFieldValue('accountName', null)
-                      }
-                    }}
-                    error={formik.touched.accountId && Boolean(formik.errors.accountId) && !formik.values.accountId}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <ResourceComboBox
-                    endpointId={FinancialRepository.DescriptionTemplate.qry}
-                    name='templateId'
-                    label={labels.descriptionTemplate}
-                    valueField='recordId'
-                    readOnly={postedOrCanceled}
-                    displayField='name'
-                    values={formik.values}
-                    onChange={(event, newValue) => {
-                      let notes = formik.values.notes
-                      notes += newValue?.name && formik.values.notes && '\n'
-                      notes += newValue?.name
-
-                      notes && formik.setFieldValue('notes', notes)
-                      newValue?.name && formik.setFieldValue('templateId', newValue.recordId)
-                    }}
-                    error={formik.touched.templateId && Boolean(formik.errors.templateId)}
-                    maxAccess={maxAccess}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomTextArea
-                    name='notes'
-                    type='text'
-                    label={labels.notes}
-                    readOnly={postedOrCanceled}
-                    value={formik.values.notes}
-                    rows={4}
-                    maxAccess={maxAccess}
-                    onChange={e => formik.setFieldValue('notes', e.target.value)}
-                    onClear={() => formik.setFieldValue('notes', '')}
-                    error={formik.touched.notes && Boolean(formik.errors.notes)}
-                  />
-                </Grid>
               </Grid>
             </Grid>
 
@@ -519,6 +452,76 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                   />
                 </Grid>
               </Grid>
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceLookup
+                endpointId={FinancialRepository.Account.snapshot}
+                parameters={{
+                  _type: 2
+                }}
+                readOnly={postedOrCanceled}
+                valueField='reference'
+                displayField='name'
+                name='accountId'
+                required
+                label={labels.account}
+                form={formik}
+                valueShow='accountRef'
+                secondValueShow='accountName'
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' },
+                  { key: 'keywords', value: 'Keywords' },
+                  { key: 'groupName', value: 'Account Group' }
+                ]}
+                onChange={(event, newValue) => {
+                  if (newValue) {
+                    formik.setFieldValue('accountId', newValue?.recordId || '')
+                    formik.setFieldValue('accountRef', newValue?.reference)
+                    formik.setFieldValue('accountName', newValue?.name)
+                  } else {
+                    formik.setFieldValue('accountId', null)
+                    formik.setFieldValue('accountRef', null)
+                    formik.setFieldValue('accountName', null)
+                  }
+                }}
+                error={formik.touched.accountId && Boolean(formik.errors.accountId) && !formik.values.accountId}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <ResourceComboBox
+                endpointId={FinancialRepository.DescriptionTemplate.qry}
+                name='templateId'
+                label={labels.descriptionTemplate}
+                valueField='recordId'
+                readOnly={postedOrCanceled}
+                displayField='name'
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  let notes = formik.values.notes
+                  notes += newValue?.name && formik.values.notes && '\n'
+                  notes += newValue?.name
+
+                  notes && formik.setFieldValue('notes', notes)
+                  newValue?.name && formik.setFieldValue('templateId', newValue.recordId)
+                }}
+                error={formik.touched.templateId && Boolean(formik.errors.templateId)}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={6.01}>
+              <CustomTextArea
+                name='notes'
+                type='text'
+                label={labels.notes}
+                readOnly={postedOrCanceled}
+                value={formik.values.notes}
+                rows={4}
+                maxAccess={maxAccess}
+                onChange={e => formik.setFieldValue('notes', e.target.value)}
+                onClear={() => formik.setFieldValue('notes', '')}
+                error={formik.touched.notes && Boolean(formik.errors.notes)}
+              />
             </Grid>
           </Grid>
         </Grow>

@@ -104,6 +104,11 @@ const Financial = () => {
       field: 'notes',
       headerName: _labels.notes,
       flex: 1
+    },
+    {
+      field: 'isVerified',
+      headerName: _labels.isVerified,
+      flex: 1
     }
   ]
 

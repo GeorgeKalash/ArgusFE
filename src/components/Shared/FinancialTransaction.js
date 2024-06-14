@@ -50,7 +50,7 @@ const FinancialTransaction = ({ formValues }) => {
     },
     {
       field: 'baseAmount',
-      headerName: labels.amount,
+      headerName: labels.baseAmount,
       flex: 1,
       valueGetter: ({ row }) => getFormattedNumber(row?.baseAmount)
     },
