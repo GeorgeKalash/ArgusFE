@@ -71,6 +71,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     },
     validationSchema: yup.object({
       accountId: yup.string().required(' '),
+      currencyId: yup.string().required(' '),
       cashAccountId: yup.string().required(' '),
       amount: yup.string().required(' '),
       paymentMethod: yup.string().required(' ')
@@ -387,6 +388,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                   endpointId={SystemRepository.Currency.qry}
                   name='currencyId'
                   readOnly={readOnly}
+                  required
                   label={labels.currency}
                   valueField='recordId'
                   displayField={['name']}
