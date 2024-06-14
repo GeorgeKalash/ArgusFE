@@ -1,43 +1,23 @@
-// ** MUI Imports
 import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
-import { useFormik } from 'formik'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { DataSets } from 'src/resources/DataSets'
 import FormControlLabel from '@mui/material/FormControlLabel'
-import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import Checkbox from '@mui/material/Checkbox'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi, formatDateDefault } from 'src/lib/date-helper'
-
-// ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import { useForm } from 'src/hooks/form'
 
 export default function NumberRangeForm({ labels, maxAccess, recordId }) {
   const [dateRanges, setDateRange] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
 
   const [editMode, setEditMode] = useState(!!recordId)
-
-  const [initialValues, setInitialData] = useState({
-    recordId: null,
-    reference: '',
-    description: '',
-    min: '',
-    max: '',
-    current: '',
-    external: false,
-    dateRange: false,
-    startDate: '',
-    endDate: ''
-  })
 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -45,16 +25,28 @@ export default function NumberRangeForm({ labels, maxAccess, recordId }) {
     endpointId: SystemRepository.NumberRange.qry
   })
 
-  const formik = useFormik({
-    initialValues,
+  const { formik } = useForm({
+    initialValues: {
+      recordId: null,
+      reference: '',
+      description: '',
+      min: '',
+      max: '',
+      current: 0,
+      external: false,
+      dateRange: false,
+      startDate: '',
+      endDate: ''
+    },
+    maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      reference: yup.string().required('This field is required'),
-      description: yup.string().required('This field is required'),
-      min: yup.string().required('This field is required'),
-      max: yup.string().required('This field is required'),
-      current: yup.string().required('This field is required'),
+      reference: yup.string().required(' '),
+      description: yup.string().required(' '),
+      min: yup.string().required(' '),
+      max: yup.string().required(' '),
+      current: yup.string().required(' '),
 
       startDate: !!dateRanges ? yup.string().required() : yup.date().nullable(),
       endDate: !!dateRanges ? yup.string().required() : yup.date().nullable()
@@ -76,6 +68,10 @@ export default function NumberRangeForm({ labels, maxAccess, recordId }) {
 
       if (!recordId) {
         toast.success('Record Added Successfully')
+        formik.setValues({
+          ...obj,
+          recordId: response.recordId
+        })
       } else {
         toast.success('Record Edited Successfully')
       }
@@ -89,8 +85,6 @@ export default function NumberRangeForm({ labels, maxAccess, recordId }) {
     ;(async function () {
       try {
         if (recordId) {
-          setIsLoading(true)
-
           const res = await getRequest({
             extension: SystemRepository.NumberRange.get,
             parameters: `_recordId=${recordId}`
@@ -98,14 +92,11 @@ export default function NumberRangeForm({ labels, maxAccess, recordId }) {
           if (res.record) {
             ;(res.record.startDate = formatDateFromApi(res.record.startDate)),
               (res.record.endDate = formatDateFromApi(res.record.endDate)),
-              setInitialData(res.record)
+              formik.setValues(res.record)
             setDateRange(res.record.dateRange)
           }
         }
-      } catch (exception) {
-        setErrorMessage(error)
-      }
-      setIsLoading(false)
+      } catch (exception) {}
     })()
   }, [])
 

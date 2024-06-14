@@ -7,7 +7,7 @@ export const ManufacturingRepository = {
     qry: service + 'qryLBG',
     set: service + 'setLBG',
     get: service + 'getLBG',
-    del: service + 'delLGB'
+    del: service + 'delLBG'
   },
   ProductionLine: {
     page: service + 'pageLIN',
@@ -62,7 +62,8 @@ export const ManufacturingRepository = {
   },
   LeanProductionPlanning: {
     preview: service + 'previewLEAN',
-    update: service + 'updateLEAN'
+    update: service + 'updateLEAN',
+    del: service + 'delLEAN'
   },
   MaterialsAdjustment: {
     generate: service + 'generateADJ'

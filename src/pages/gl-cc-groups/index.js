@@ -1,44 +1,45 @@
-import { useState, useContext } from 'react'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
-import CostCenterGroupWindow from './Window/CostCenterGroupWindow'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { useWindow } from 'src/windows'
+import CostCenterGroupForm from './forms/CostCenterGroupForm'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const CostCenterGroup = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const [selectedRecordId, setSelectedRecordId] = useState(null)
-  const [windowOpen, setWindowOpen] = useState(false)
-  const [errorMessage, setErrorMessage] = useState(null)
+  const { platformLabels } = useContext(ControlContext)
+  const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    return await getRequest({
+    const response = await getRequest({
       extension: GeneralLedgerRepository.CostCenterGroup.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
+
+    return { ...response, _startAt: _startAt }
   }
 
   const {
     query: { data },
     labels: _labels,
+    paginationParameters,
+    refetch,
+    invalidate,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: GeneralLedgerRepository.CostCenterGroup.page,
     datasetId: ResourceIds.CostCenterGroup
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: GeneralLedgerRepository.CostCenterGroup.page
   })
 
   const columns = [
@@ -54,25 +55,37 @@ const CostCenterGroup = () => {
     }
   ]
 
-
   const add = () => {
-    setWindowOpen(true)
+    openForm()
   }
 
   const edit = obj => {
-    setSelectedRecordId(obj.recordId)
-    setWindowOpen(true)
+    openForm(obj?.recordId)
   }
 
   const del = async obj => {
-    await postRequest({
-      extension: GeneralLedgerRepository.CostCenterGroup.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success('Record Deleted Successfully')
+    try {
+      await postRequest({
+        extension: GeneralLedgerRepository.CostCenterGroup.del,
+        record: JSON.stringify(obj)
+      })
+      toast.success(platformLabels.Deleted)
+      invalidate()
+    } catch (error) {}
   }
-  
+  function openForm(recordId) {
+    stack({
+      Component: CostCenterGroupForm,
+      props: {
+        labels: _labels,
+        recordId: recordId ? recordId : null,
+        maxAccess: access
+      },
+      width: 600,
+      height: 250,
+      title: _labels.costCenter
+    })
+  }
 
   return (
     <VertLayout>
@@ -88,23 +101,12 @@ const CostCenterGroup = () => {
           onDelete={del}
           isLoading={false}
           pageSize={50}
-          paginationType='client'
+          paginationType='api'
           maxAccess={access}
+          refetch={refetch}
+          paginationParameters={paginationParameters}
         />
       </Grow>
-      {windowOpen && (
-        <CostCenterGroupWindow
-          onClose={() => {
-            setWindowOpen(false)
-            setSelectedRecordId(null)
-          }}
-          labels={_labels}
-          maxAccess={access}
-          recordId={selectedRecordId}
-          setSelectedRecordId={setSelectedRecordId}
-        />
-      )}
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </VertLayout>
   )
 }

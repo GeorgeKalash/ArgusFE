@@ -15,6 +15,7 @@ const CustomTextField = ({
   fullWidth = true,
   autoFocus = false,
   readOnly = false,
+  clearable = false,
   autoComplete = 'off',
   numberField = false,
   editMode = false,
@@ -122,13 +123,14 @@ const CustomTextField = ({
           <InputAdornment position='end'>
             {search && (
               <IconButton tabIndex={-1} edge='start' onClick={() => onSearch(value)} aria-label='search input'>
-                <SearchIcon />
+                <SearchIcon sx={{ border: '0px', fontSize: 20 }} />
               </IconButton>
             )}
-            {!readOnly &&
+            {!clearable &&
+              !readOnly &&
               (value || value === 0) && ( // Only show the clear icon if readOnly is false
                 <IconButton tabIndex={-1} edge='end' onClick={onClear} aria-label='clear input'>
-                  <ClearIcon />
+                  <ClearIcon sx={{ border: '0px', fontSize: 20 }} />
                 </IconButton>
               )}
           </InputAdornment>
@@ -138,7 +140,8 @@ const CustomTextField = ({
         '& .MuiOutlinedInput-root': {
           '& fieldset': {
             border: !hasBorder && 'none' // Hide border
-          }
+          },
+          height: `${props.height}px !important`
         }
       }}
       required={required}

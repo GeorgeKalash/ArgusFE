@@ -23,8 +23,8 @@ export default function CurrencyTrading() {
       : null
 
     const parameters = `_userId=${userData && userData.userId}&_key=plantId`
-    
-return getRequest({
+
+    return getRequest({
       extension: SystemRepository.UserDefaults.get,
       parameters: parameters
     })
@@ -46,9 +46,5 @@ return getRequest({
     openForm()
   }, [access])
 
-  return (
-    
-   plantId && accessADJ &&  <TransactionForm labels={_labelsADJ} maxAccess={accessADJ}  plantId={plantId} />
-    
-  )
+  return <>{plantId && access && <TransactionForm labels={_labelsADJ} access={access} plantId={plantId} />}</>
 }

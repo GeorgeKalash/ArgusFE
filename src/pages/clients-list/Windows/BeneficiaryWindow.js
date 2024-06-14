@@ -1,4 +1,3 @@
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import { useContext, useState } from 'react'
 import FormShell from 'src/components/Shared/FormShell'
@@ -8,8 +7,8 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { useResourceQuery } from 'src/hooks/resource'
 import { useFormik } from 'formik'
 import { useWindow } from 'src/windows'
-import BenificiaryCash from 'src/pages/outwards-transfer/Tabs/BenificiaryCash'
-import BenificiaryBank from 'src/pages/outwards-transfer/Tabs/BenificiaryBank'
+import BenificiaryCashForm from 'src/components/Shared/BenificiaryCashForm'
+import BenificiaryBankForm from 'src/components/Shared/BenificiaryBankForm'
 
 const BeneficiaryWindow = ({ clientId }) => {
   const { stack } = useWindow()
@@ -36,7 +35,7 @@ const BeneficiaryWindow = ({ clientId }) => {
     endpointId: RemittanceOutwardsRepository.Beneficiary.qry,
     datasetId: ResourceIds.Beneficiary
   })
-  async function fetchGridData(options = {}) {
+  async function fetchGridData() {
     return await getRequest({
       extension: RemittanceOutwardsRepository.Beneficiary.qry,
       parameters: `_clientId=${clientId}`
@@ -84,11 +83,11 @@ const BeneficiaryWindow = ({ clientId }) => {
 
     if (dispersalType === 1) {
       stack({
-        Component: BenificiaryCash,
+        Component: BenificiaryCashForm,
         props: {
-          clientId: clientId,
+          client: { clientId: clientId },
           dispersalType: dispersalType,
-          beneficiaryId: beneficiaryId,
+          beneficiary: { beneficiaryId: beneficiaryId, beneficiarySeqNo: obj.seqNo },
           corId: 0,
           countryId: nationalityId
         },
@@ -98,11 +97,11 @@ const BeneficiaryWindow = ({ clientId }) => {
       })
     } else if (dispersalType === 2) {
       stack({
-        Component: BenificiaryBank,
+        Component: BenificiaryBankForm,
         props: {
-          clientId: clientId,
+          client: { clientId: clientId },
           dispersalType: dispersalType,
-          beneficiaryId: beneficiaryId,
+          beneficiary: { beneficiaryId: beneficiaryId, beneficiarySeqNo: obj.seqNo },
           corId: 0,
           countryId: nationalityId
         },

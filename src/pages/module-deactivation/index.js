@@ -1,26 +1,10 @@
-// ** React Imports
-import { useState, useContext } from 'react'
-
-// ** MUI Imports
-import { Box } from '@mui/material'
-
-// ** Third Party Imports
-import { useFormik } from 'formik'
-
-// ** Custom Imports
+import { useState, useContext, useEffect } from 'react'
 import Table from 'src/components/Shared/Table'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-
-// ** Helpers
 import { useResourceQuery } from 'src/hooks/resource'
-
-// ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
-import { useWindowDimensions } from 'src/lib/useWindowDimensions'
 import { DataSets } from 'src/resources/DataSets'
 import toast from 'react-hot-toast'
 import { CommonContext } from 'src/providers/CommonContext'
@@ -30,50 +14,57 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const ModuleDeactivation = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { height } = useWindowDimensions()
   const { getAllKvsByDataset } = useContext(CommonContext)
+  const [data, setData] = useState([])
 
-  //states
-  const [moduleStore, setModuleStore] = useState([])
-
-  const resModule = getAllKvsByDataset({
-    _dataset: DataSets.MODULE,
-    callback: setModuleStore
-  })
-
-  async function getGridData(options = {}) {
-    const resCheckedModule = await getRequest({
-      extension: AccessControlRepository.ModuleDeactivation.qry,
-      parameters: `_filter=`
-    })
-
-    const finalList = moduleStore.map(x => {
-      const n = {
-        moduleId: x.key,
-        moduleName: x.value,
-        isInactive: false,
-        checked: false
-      }
-      const matchingTemplate = resCheckedModule.list.find(y => n.moduleId == y.moduleId)
-
-      // set n.isInactive=true if matchingTemplate is truthy.
-      matchingTemplate && (n.isInactive = true)
-      matchingTemplate && (n.checked = true)
-
-      return n
-    })
-
-    return { list: finalList }
-  }
-
-  const {
-    query: { data },
-    labels: _labels,
-    access
-  } = useResourceQuery({
-    queryFn: getGridData,
+  const { labels: _labels, access } = useResourceQuery({
     datasetId: ResourceIds.ModuleDeactivation
   })
+
+  const handleSubmit = () => {
+    postModule()
+  }
+
+  async function getAllModules() {
+    return new Promise((resolve, reject) => {
+      getAllKvsByDataset({
+        _dataset: DataSets.MODULE,
+        callback: result => {
+          if (result) resolve(result)
+          else reject()
+        }
+      })
+    })
+  }
+
+  useEffect(() => {
+    ;(async function () {
+      const moduleData = await getAllModules()
+
+      const resCheckedModule = getRequest({
+        extension: AccessControlRepository.ModuleDeactivation.qry,
+        parameters: `_filter=`
+      })
+
+      Promise.all([resCheckedModule]).then(([systemModules]) => {
+        const mergedModules = moduleData.map(moduleItem => {
+          const item = {
+            moduleId: moduleItem.key,
+            moduleName: moduleItem.value,
+            isInactive: false,
+            checked: false
+          }
+          const matchingTemplate = systemModules.list.find(y => item.moduleId == y.moduleId)
+
+          matchingTemplate && (item.isInactive = true)
+          matchingTemplate && (item.checked = true)
+
+          return item
+        })
+        setData({ list: mergedModules })
+      })
+    })()
+  }, [])
 
   const columns = [
     {
@@ -83,32 +74,7 @@ const ModuleDeactivation = () => {
     }
   ]
 
-  const ModuleDeactivationValidation = useFormik({
-    enableReinitialize: true,
-    validateOnChange: true,
-    validate: values => {},
-    initialValues: {
-      rows: [
-        {
-          moduleId: '',
-          moduleName: '',
-          isInactive: false,
-          checked: false
-        }
-      ]
-    },
-    onSubmit: values => {
-      postModule()
-    }
-  })
-
-  const handleSubmit = () => {
-    ModuleDeactivationValidation.handleSubmit()
-  }
-
-  const postModule = () => {
-    // Filter out objects where checked is truthy
-
+  const postModule = async () => {
     const checkedObjects = data.list
       .filter(obj => obj.checked)
       .map(obj => {
@@ -126,14 +92,11 @@ const ModuleDeactivation = () => {
       modules: checkedObjects
     }
 
-    postRequest({
+    await postRequest({
       extension: AccessControlRepository.ModuleDeactivation.set2,
       record: JSON.stringify(resultObject)
     })
-      .then(res => {
-        toast.success('Record Generated Successfully')
-      })
-      .catch(error => {})
+    toast.success('Record Updated Successfully')
   }
 
   return (
@@ -146,7 +109,6 @@ const ModuleDeactivation = () => {
           isLoading={false}
           maxAccess={access}
           showCheckboxColumn={true}
-          handleCheckedRows={() => {}}
           pagination={false}
         />
       </Grow>
