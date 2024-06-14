@@ -64,7 +64,6 @@ export default function MemosForm({ labels, access, recordId, functionId }) {
       currencyId: '',
       status: '',
       accountId: '',
-      descriptionTemplate: '',
       amount: '',
       baseAmount: '',
       functionId: functionId,
@@ -174,6 +173,9 @@ export default function MemosForm({ labels, access, recordId, functionId }) {
       } catch (exception) {}
     })()
   }, [])
+  useEffect(() => {
+    formik.setFieldValue('templateId', '')
+  }, [formik.values.notes])
 
   const onPost = async () => {
     try {
@@ -413,36 +415,32 @@ export default function MemosForm({ labels, access, recordId, functionId }) {
                 <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={FinancialRepository.DescriptionTemplate.qry}
+                    name='templateId'
                     label={labels.descriptionTemplate}
+                    valueField='recordId'
                     displayField='name'
-                    name='descriptionTemplate'
-                    value={null}
-                    maxAccess={maxAccess}
+                    values={formik.values}
                     onChange={(event, newValue) => {
-                      if (newValue) {
-                        const descriptionTemplateName = newValue?.name || ''
-                        const currentNotes = formik.values.notes
+                      let notes = formik.values.notes
+                      notes += newValue?.name && formik.values.notes && '\n'
+                      notes += newValue?.name
 
-                        const updatedNotes = currentNotes
-                          ? `${currentNotes}\n${descriptionTemplateName}`
-                          : descriptionTemplateName
-
-                        formik.setFieldValue('notes', updatedNotes)
-                      }
-
-                      formik.setFieldValue('descriptionTemplate', null)
+                      notes && formik.setFieldValue('notes', notes)
+                      newValue?.name && formik.setFieldValue('templateId', newValue.recordId)
                     }}
+                    error={formik.touched.templateId && Boolean(formik.errors.templateId)}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <CustomTextArea
                     name='notes'
+                    type='text'
                     label={labels.notes}
                     value={formik.values.notes}
-                    maxLength='100'
-                    rows={3}
+                    rows={4}
                     maxAccess={maxAccess}
-                    onChange={formik.handleChange}
+                    onChange={e => formik.setFieldValue('notes', e.target.value)}
                     onClear={() => formik.setFieldValue('notes', '')}
                     error={formik.touched.notes && Boolean(formik.errors.notes)}
                   />
