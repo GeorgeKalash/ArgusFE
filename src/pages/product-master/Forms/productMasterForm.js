@@ -67,15 +67,6 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
       isInactive: yup.string().required('This field is required'),
       corId: type === '1' ? yup.string().required('This field is required') : yup.string().notRequired()
     }),
-    onReset: () => {
-      setStore(prevStore => ({
-        ...prevStore,
-        recordId: null,
-        key: (prevStore?.key || 1) + 1
-      }))
-
-      setEditMode(false)
-    },
     onSubmit: values => {
       postProductMaster(values)
     }
@@ -128,7 +119,14 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
   }
 
   return (
-    <FormShell form={formik} resourceId={ResourceIds.ProductMaster} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell
+      form={formik}
+      resourceId={ResourceIds.ProductMaster}
+      maxAccess={maxAccess}
+      editMode={editMode}
+      setStore={setStore}
+      setEditMode={setEditMode}
+    >
       <VertLayout>
         <Grow>
           <Grid container>

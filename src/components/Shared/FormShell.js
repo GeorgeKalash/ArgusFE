@@ -61,6 +61,13 @@ export default function FormShell({
     if (typeof setEditMode === 'function') {
       setEditMode(false)
     }
+    if (typeof setStore === 'function') {
+      setStore(prevStore => ({
+        ...prevStore,
+        recordId: null,
+        key: (prevStore?.key || 1) + 1
+      }))
+    }
   }
 
   function onApproval() {
