@@ -14,9 +14,10 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { Checkbox } from '@mui/material'
+import toast from 'react-hot-toast'
 
 export default function CurrencyTrading() {
-  const { getRequest } = useContext(RequestsContext)
+  const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
 
   function openForm(recordId) {
