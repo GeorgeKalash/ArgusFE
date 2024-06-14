@@ -9,6 +9,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 const WindowToolbar = ({
   onSave,
   onCalculate,
+  transactionClicked,
   onPost,
   onClear,
   onInfo,
@@ -92,6 +93,7 @@ const WindowToolbar = ({
     editMode,
     onSave,
     onPost,
+    transactionClicked,
     onClear,
     onInfo,
     onApply,

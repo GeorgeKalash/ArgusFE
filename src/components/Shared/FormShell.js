@@ -12,6 +12,7 @@ import ResourceRecordRemarks from './ResourceRecordRemarks'
 import GlobalIntegrationGrid from './GlobalIntegrationGrid'
 import AccountBalance from './AccountBalance'
 import FinancialTransaction from './FinancialTransaction'
+import CashTransaction from './CashTransaction'
 
 export default function FormShell({
   form,
@@ -86,6 +87,19 @@ export default function FormShell({
       width: 800,
       height: 500,
       title: 'Resource Record Remarks'
+    })
+  }
+
+  const transactionClicked = () => {
+    stack({
+      Component: CashTransaction,
+      props: {
+        recordId: form.values?.recordId,
+        functionId: functionId
+      },
+      width: 1200,
+      height: 670,
+      title: 'Cash Transaction'
     })
   }
 
@@ -209,6 +223,7 @@ export default function FormShell({
           actions={actions}
           onApproval={onApproval}
           onRecordRemarks={onRecordRemarks}
+          transactionClicked={transactionClicked}
           editMode={editMode}
           disabledSubmit={disabledSubmit}
           infoVisible={infoVisible}

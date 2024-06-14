@@ -209,8 +209,6 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
       }))
     } else {
       formik.resetForm()
-      setDisplayBank(false)
-      setDisplayCash(false)
       setStore(prevStore => ({
         ...prevStore,
         submitted: false,
@@ -228,8 +226,8 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
       loadBen: true
     }))
 
-    const beneficiaryFields = ['headerBenId', 'headerBenSeqNo', 'headerBenName']
-    setFieldValues(beneficiaryFields, data)
+    //  const beneficiaryFields = ['headerBenId', 'headerBenSeqNo', 'headerBenName']
+    //setFieldValues(beneficiaryFields, data)
     viewBeneficiary(data.dispersalType ?? '')
     formik.setFieldValue('newBeneficiaryId', data.headerBenId)
     formik.setFieldValue('newBeneficiarySeqNo', data.headerBenSeqNo)
@@ -373,6 +371,8 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
                   label={labels.outward}
                   form={formik}
                   onChange={(event, newValue) => {
+                    setDisplayBank(false)
+                    setDisplayCash(false)
                     fillOutwardData({
                       outwardId: newValue ? newValue.recordId : '',
                       owRef: newValue ? newValue.reference : '',
@@ -480,6 +480,8 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
                       ...prevStore,
                       clearBenForm: true
                     }))
+                    formik.setFieldValue('newBeneficiaryId', '')
+                    formik.setFieldValue('newBeneficiarySeqNo', '')
                     formik.setFieldValue('headerBenName', '')
                   }}
                 >
@@ -546,7 +548,6 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
                         beneficiarySeqNo: formik.values.newBeneficiarySeqNo
                       }}
                       dispersalType={formik.values.dispersalType}
-                      countryId={formik.values.countryId}
                       corId={formik.values.corId}
                     />
                   )}
