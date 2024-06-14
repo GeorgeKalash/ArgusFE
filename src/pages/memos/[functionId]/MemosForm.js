@@ -225,6 +225,8 @@ export default function MemosForm({ labels, access, recordId, functionId }) {
     } catch (cancelError) {}
   }
 
+  const postedOrCanceled = formik.values.status === -1 || formik.values.status === 3
+
   const actions = [
     {
       key: 'RecordRemarks',
@@ -295,7 +297,7 @@ export default function MemosForm({ labels, access, recordId, functionId }) {
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_startAt=0&_pageSize=1000&_dgId=${formik.values.functionId}`}
                     name='dtId'
-                    readOnly={editMode}
+                    readOnly={postedOrCanceled}
                     label={labels.doctype}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
@@ -318,7 +320,7 @@ export default function MemosForm({ labels, access, recordId, functionId }) {
                     name='reference'
                     label={labels.reference}
                     value={formik.values.reference}
-                    readOnly={editMode}
+                    readOnly
                     rows={2}
                     maxAccess={maxAccess}
                     onChange={formik.handleChange}
@@ -330,6 +332,7 @@ export default function MemosForm({ labels, access, recordId, functionId }) {
                   <ResourceComboBox
                     endpointId={SystemRepository.Plant.qry}
                     name='plantId'
+                    readOnly={postedOrCanceled}
                     label={labels.plant}
                     valueField='recordId'
                     displayField={['reference', 'name']}
@@ -349,6 +352,7 @@ export default function MemosForm({ labels, access, recordId, functionId }) {
                 <Grid item xs={12}>
                   <CustomDatePicker
                     name='date'
+                    readOnly={postedOrCanceled}
                     label={labels.date}
                     value={formik.values.date}
                     onChange={formik.setFieldValue}
@@ -362,6 +366,7 @@ export default function MemosForm({ labels, access, recordId, functionId }) {
                   <ResourceComboBox
                     endpointId={SystemRepository.Currency.qry}
                     name='currencyId'
+                    readOnly={postedOrCanceled}
                     label={labels.currency}
                     valueField='recordId'
                     displayField={['reference', 'name']}
@@ -384,6 +389,7 @@ export default function MemosForm({ labels, access, recordId, functionId }) {
                     parameters={{
                       _type: 2
                     }}
+                    readOnly={postedOrCanceled}
                     valueField='reference'
                     displayField='name'
                     name='accountId'
@@ -418,6 +424,7 @@ export default function MemosForm({ labels, access, recordId, functionId }) {
                     name='templateId'
                     label={labels.descriptionTemplate}
                     valueField='recordId'
+                    readOnly={postedOrCanceled}
                     displayField='name'
                     values={formik.values}
                     onChange={(event, newValue) => {
@@ -437,6 +444,7 @@ export default function MemosForm({ labels, access, recordId, functionId }) {
                     name='notes'
                     type='text'
                     label={labels.notes}
+                    readOnly={postedOrCanceled}
                     value={formik.values.notes}
                     rows={4}
                     maxAccess={maxAccess}
@@ -448,12 +456,12 @@ export default function MemosForm({ labels, access, recordId, functionId }) {
               </Grid>
             </Grid>
 
-            {/* Right side - Last 5 Grid items */}
             <Grid item xs={6}>
               <Grid container spacing={4}>
                 <Grid item xs={12}>
                   <CustomNumberField
                     name='subtotal'
+                    readOnly={postedOrCanceled}
                     required
                     label={labels.subtotal}
                     value={formik.values.subtotal}
@@ -492,9 +500,10 @@ export default function MemosForm({ labels, access, recordId, functionId }) {
                     control={
                       <Checkbox
                         name='isSubjectToVAT'
+                        readOnly={postedOrCanceled}
                         maxAccess={maxAccess}
                         checked={formik.values?.isSubjectToVAT}
-                        onChange={formik.handleChange}
+                        onChange={!postedOrCanceled ? formik.handleChange : ''}
                       />
                     }
                     label={labels.vat}
