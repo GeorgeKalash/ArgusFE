@@ -92,16 +92,20 @@ export const FinancialRepository = {
     cancel: service + 'cancelMEM'
   },
   CreditNote: {
-    set: service + 'setCN'
+    set: service + 'setCN',
+    del: service + 'delCN'
   },
   DebitNote: {
-    set: service + 'setDN'
+    set: service + 'setDN',
+    del: service + 'delDN'
   },
   ServiceBillReceived: {
-    set: service + 'setSB'
+    set: service + 'setSB',
+    del: service + 'delSB'
   },
   ServiceInvoice: {
-    set: service + 'setSI'
+    set: service + 'setSI',
+    del: service + 'delSI'
   },
   FinancialTransaction: {
     qry: service + 'qryTRX'

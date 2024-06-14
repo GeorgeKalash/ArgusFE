@@ -125,6 +125,21 @@ const Financial = () => {
     }
   }
 
+  const getEndpoint = functionId => {
+    switch (functionId) {
+      case SystemFunction.CreditNote:
+        return FinancialRepository.CreditNote
+      case SystemFunction.DebitNote:
+        return FinancialRepository.DebitNote
+      case SystemFunction.ServiceBill:
+        return FinancialRepository.ServiceBillReceived
+      case SystemFunction.ServiceInvoice:
+        return FinancialRepository.ServiceInvoice
+      default:
+        return null
+    }
+  }
+
   function openForm(recordId) {
     stack({
       Component: MemosForm,
@@ -132,10 +147,11 @@ const Financial = () => {
         labels: _labels,
         recordId: recordId,
         access,
-        functionId: functionId
+        functionId: functionId,
+        getEndpoint
       },
       width: 800,
-      height: 630,
+      height: 670,
       title: getcorrectLabel(parseInt(functionId))
     })
   }
@@ -152,11 +168,11 @@ const Financial = () => {
   const del = async obj => {
     try {
       await postRequest({
-        extension: FinancialRepository.FiMemo.del,
+        extension: getEndpoint(parseInt(functionId)).del,
         record: JSON.stringify(obj)
       })
       invalidate()
-      toast.success(platformLabels.Deleted)
+      toast.success('Record Deleted Successfully')
     } catch (error) {}
   }
 

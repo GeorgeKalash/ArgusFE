@@ -21,7 +21,7 @@ import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 
-export default function MemosForm({ labels, access, recordId, functionId }) {
+export default function MemosForm({ labels, access, recordId, functionId, getEndpoint }) {
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: functionId,
     access: access,
@@ -36,20 +36,20 @@ export default function MemosForm({ labels, access, recordId, functionId }) {
     endpointId: FinancialRepository.FiMemo.qry
   })
 
-  const getSetEndpoint = functionId => {
-    switch (functionId) {
-      case SystemFunction.CreditNote:
-        return FinancialRepository.CreditNote.set
-      case SystemFunction.DebitNote:
-        return FinancialRepository.DebitNote.set
-      case SystemFunction.ServiceBill:
-        return FinancialRepository.ServiceBillReceived.set
-      case SystemFunction.ServiceInvoice:
-        return FinancialRepository.ServiceInvoice.set
-      default:
-        return null
-    }
-  }
+  // const getSetEndpoint = functionId => {
+  //   switch (functionId) {
+  //     case SystemFunction.CreditNote:
+  //       return FinancialRepository.CreditNote.set
+  //     case SystemFunction.DebitNote:
+  //       return FinancialRepository.DebitNote.set
+  //     case SystemFunction.ServiceBill:
+  //       return FinancialRepository.ServiceBillReceived.set
+  //     case SystemFunction.ServiceInvoice:
+  //       return FinancialRepository.ServiceInvoice.set
+  //     default:
+  //       return null
+  //   }
+  // }
 
   const { formik } = useForm({
     initialValues: {
@@ -92,7 +92,7 @@ export default function MemosForm({ labels, access, recordId, functionId }) {
       }
 
       const response = await postRequest({
-        extension: getSetEndpoint(parseInt(formik.values.functionId)),
+        extension: getEndpoint(parseInt(formik.values.functionId)).set,
         record: JSON.stringify(obj)
       })
 
