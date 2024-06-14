@@ -78,15 +78,15 @@ const Financial = () => {
       flex: 1
     },
     {
-      field: 'currencyName',
-      headerName: _labels.currency,
-      flex: 1
-    },
-    {
       field: 'amount',
       headerName: _labels.amount,
       flex: 1,
       valueGetter: ({ row }) => getFormattedNumber(row?.amount)
+    },
+    {
+      field: 'currencyName',
+      headerName: _labels.currency,
+      flex: 1
     },
     {
       field: 'plantName',
