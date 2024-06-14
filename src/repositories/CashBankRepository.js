@@ -13,6 +13,9 @@ export const CashBankRepository = {
   CreditCard: {
     qry: service + 'qryCC'
   },
+  CashTransaction: {
+    qry: service + 'qryTRX'
+  },
   CbCashGroup: {
     qry: service + 'qryGRP',
     page: service + 'pageGRP',
