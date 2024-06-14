@@ -18,11 +18,10 @@ import BenificiaryCashForm from 'src/components/Shared/BenificiaryCashForm'
 import BenificiaryBankForm from 'src/components/Shared/BenificiaryBankForm'
 import toast from 'react-hot-toast'
 import { RTOWMRepository } from 'src/repositories/RTOWMRepository'
-import { useInvalidate } from 'src/hooks/resource'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 
-export default function OutwardsModificationForm({ access, labels, recordId }) {
+export default function OutwardsModificationForm({ access, labels, recordId, invalidate }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [editMode, setEditMode] = useState(!!recordId)
   const [displayCash, setDisplayCash] = useState(false)
@@ -33,7 +32,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
   const [store, setStore] = useState(
     { submitted: false },
     { clearBenForm: false },
-    { loadBen: true },
+    { loadBen: false },
     { beneficiaryList: {} },
     { fullModifiedOutwardBody: {} }
   )
@@ -43,10 +42,6 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
     access: access,
     hasDT: false,
     enabled: !editMode
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: RTOWMRepository.OutwardsModification.page
   })
 
   const { formik } = useForm({
@@ -143,6 +138,11 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
   }
 
   async function fillOutwardData(data) {
+    setStore(prevStore => ({
+      ...prevStore,
+      fullModifiedOutwardBody: data
+    }))
+
     const outwardFields = [
       'outwardsDate',
       'amount',
@@ -201,23 +201,17 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
         headerBenSeqNo: data.newBeneficiarySeqNo ?? '',
         dispersalType: headerView.dispersalType ?? ''
       })
-
-      setStore(prevStore => ({
-        ...prevStore,
-        loadBen: true,
-        fullModifiedOutwardBody: data
-      }))
     } else {
       formik.resetForm()
       setStore(prevStore => ({
         ...prevStore,
         submitted: false,
         clearBenForm: false,
-        loadBen: false,
         fullModifiedOutwardBody: data
       }))
     }
   }
+
   async function fillBeneficiaryData(data) {
     setStore(prevStore => ({
       ...prevStore,
@@ -225,18 +219,11 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
       clearBenForm: false,
       loadBen: true
     }))
-
-    //  const beneficiaryFields = ['headerBenId', 'headerBenSeqNo', 'headerBenName']
-    //setFieldValues(beneficiaryFields, data)
-    viewBeneficiary(data.dispersalType ?? '')
     formik.setFieldValue('newBeneficiaryId', data.headerBenId)
     formik.setFieldValue('newBeneficiarySeqNo', data.headerBenSeqNo)
-  }
-
-  function viewBeneficiary(dispersalType) {
-    if (dispersalType === 1) {
+    if (data.dispersalType === 1) {
       setDisplayCash(true)
-    } else if (dispersalType === 2) {
+    } else if (data.dispersalType === 2) {
       setDisplayBank(true)
     }
   }

@@ -1,5 +1,4 @@
 import { useContext } from 'react'
-import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -46,7 +45,8 @@ const OutwardsModification = () => {
     labels: _labels,
     refetch,
     access,
-    filterBy
+    filterBy,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: RTOWMRepository.OutwardsModification.page,
@@ -97,7 +97,8 @@ const OutwardsModification = () => {
       props: {
         labels: _labels,
         recordId: recordId ? recordId : null,
-        access
+        access,
+        invalidate
       },
       width: 1260,
       height: 720,
