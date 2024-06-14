@@ -186,55 +186,58 @@ const GridToolbar = ({
           )}
         </Grid>
       </Grid>
-      {paramsArray && paramsArray.length > 0 && (
-        <Box sx={{ pl: 2 }}>
-          <Grid container spacing={0} sx={{ margin: 0, padding: 0 }}>
-            {paramsArray.map((param, i) => (
-              <Grid key={i} item sx={{ margin: 0, padding: 0 }}>
-                [<b>{param.caption}:</b>
-                {param.display}]
-              </Grid>
-            ))}
+
+      <Grid container spacing={4} sx={{ display: 'flex', pl: 7, pt: 5, flexDirection: 'column' }}>
+        {paramsArray && paramsArray.length > 0 && (
+          <Box sx={{ pl: 2 }}>
+            <Grid container spacing={0} sx={{ margin: 0, padding: 0 }}>
+              {paramsArray.map((param, i) => (
+                <Grid key={i} item sx={{ margin: 0, padding: 0 }}>
+                  [<b>{param.caption}:</b> {param.display}]
+                </Grid>
+              ))}
+            </Grid>
+          </Box>
+        )}
+
+        {previewReport ? (
+          <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', py: '7px !important' }}>
+            <CustomComboBox
+              label={platformLabels.SelectReport}
+              valueField='caption'
+              displayField='layoutName'
+              store={reportStore}
+              value={selectedReport}
+              onChange={(e, newValue) => setSelectedReport(newValue)}
+              sx={{ width: 250 }}
+              disableClearable
+            />
+            <Button
+              sx={{ ml: 2 }}
+              variant='contained'
+              disabled={!selectedReport}
+              onClick={() =>
+                stack({
+                  Component: PreviewReport,
+                  props: {
+                    selectedReport: selectedReport
+                  },
+                  width: 1000,
+                  height: 500,
+                  title: platformLabels.PreviewReport
+                })
+              }
+              size='small'
+            >
+              <Tooltip title={platformLabels.Preview}>
+                <img src='/images/buttonsIcons/preview.png' alt={platformLabels.Preview} />
+              </Tooltip>
+            </Button>
           </Grid>
-        </Box>
-      )}
-      {previewReport ? (
-        <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', py: '7px !important' }}>
-          <CustomComboBox
-            label={platformLabels.SelectReport}
-            valueField='caption'
-            displayField='layoutName'
-            store={reportStore}
-            value={selectedReport}
-            onChange={(e, newValue) => setSelectedReport(newValue)}
-            sx={{ width: 250 }}
-            disableClearable
-          />
-          <Button
-            sx={{ ml: 2 }}
-            variant='contained'
-            disabled={!selectedReport}
-            onClick={() =>
-              stack({
-                Component: PreviewReport,
-                props: {
-                  selectedReport: selectedReport
-                },
-                width: 1000,
-                height: 500,
-                title: platformLabels.PreviewReport
-              })
-            }
-            size='small'
-          >
-            <Tooltip title={platformLabels.Preview}>
-              <img src='/images/buttonsIcons/preview.png' alt={platformLabels.Preview} />
-            </Tooltip>
-          </Button>
-        </Grid>
-      ) : (
-        <Box></Box>
-      )}
+        ) : (
+          <Box></Box>
+        )}
+      </Grid>
     </Grid>
   )
 }

@@ -1,38 +1,20 @@
-// ** React Imports
 import { useEffect, useState, useContext } from 'react'
-
-// ** MUI Imports
 import { Checkbox, FormControlLabel, Grid } from '@mui/material'
-
-// ** Third Party Imports
 import * as yup from 'yup'
-
-// ** Custom Imports
-import Window from 'src/components/Shared/Window'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
-import { ResourceLookup } from './ResourceLookup'
-import WindowToolbar from './WindowToolbar'
 import { useForm } from 'src/hooks/form'
 import FormShell from './FormShell'
 
-const ReportParameterBrowser = ({ reportName, paramsArray, setParamsArray, disabled }) => {
+const ReportParameterBrowser = ({ reportName, paramsArray, disabled, window }) => {
   const { getRequest } = useContext(RequestsContext)
 
   const [parameters, setParameters] = useState(null)
   const [fields, setFields] = useState([])
-
-  //snaphot stores
-  const [itemSnapshotStore, setItemSnapshotStore] = useState([null])
-
-  const initialParams = paramsArray
 
   const getParameterDefinition = () => {
     var parameters = '_reportName=' + reportName
@@ -464,37 +446,9 @@ const ReportParameterBrowser = ({ reportName, paramsArray, setParamsArray, disab
     validateOnChange: true,
     validationSchema: yup.object({}),
     onSubmit: values => {
-      console.log('handle submit')
-      onClose()
+      window.close()
     }
   })
-
-  const clearValues = () => {
-    setParamsArray([])
-  }
-
-  // const clearValues = () => {
-  //   setParamsArray([])
-  //   // formik.resetForm()
-
-  //   console.log({ parameters })
-  //   console.log({ fields })
-  //   parameters.map(param => {
-  //     console.log({ param })
-  //     formik.setFieldValue(`${param.key}`, null)
-  //   })
-  //   // console.log({ fields })
-  //   setFields([])
-  //   // getFieldsByClassId()
-  // }
-
-  // useEffect(() => {
-  //   console.log({ formik: formik.values })
-  // }, [formik])
-
-  // useEffect(() => {
-  //   if (parameters && fields.length === 0) getFieldsByClassId()
-  // }, [fields])
 
   useEffect(() => {
     if (!parameters && fields.length === 0 && !disabled) getParameterDefinition()
@@ -506,7 +460,6 @@ const ReportParameterBrowser = ({ reportName, paramsArray, setParamsArray, disab
           paramsArray.forEach(item => {
             initialValues[item.fieldKey] = item.value
           })
-          console.log(initialValues)
           formik.setValues(initialValues)
         }
       })
