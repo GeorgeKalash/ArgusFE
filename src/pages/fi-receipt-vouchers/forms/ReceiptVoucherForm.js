@@ -39,7 +39,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
   })
 
   const invalidate = useInvalidate({
-    endpointId: FinancialRepository.ReceiptVouchers.page
+    endpointId: FinancialRepository.ReceiptVouchers.qry
   })
 
   const { formik } = useForm({
