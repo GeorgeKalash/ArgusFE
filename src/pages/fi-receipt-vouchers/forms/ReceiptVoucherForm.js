@@ -168,6 +168,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
 
       if (res?.recordId) {
         setIsCancelled(true)
+        setReadOnly(true)
         toast.success('Record Cancelled Successfully')
         invalidate()
       }
@@ -213,7 +214,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       key: 'Post',
       condition: true,
       onClick: onPost,
-      disabled: isPosted || !editMode
+      disabled: isPosted || !editMode || isCancelled
     }
   ]
 
@@ -225,7 +226,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       actions={actions}
       maxAccess={maxAccess}
       editMode={editMode}
-      disabledSubmit={isPosted}
+      disabledSubmit={isPosted || isCancelled}
       previewReport={editMode}
     >
       <VertLayout>
@@ -328,7 +329,13 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 required
                 values={formik.values}
                 onChange={async (event, newValue) => {
-                  formik.setFieldValue('paymentMethod', newValue?.key)
+                  formik.setValues({
+                    ...formik.values,
+                    paymentMethod: newValue?.key || '',
+                    cashAccountId: '',
+                    cashAccountRef: '',
+                    cashAccountName: ''
+                  })
                 }}
                 error={formik.touched.paymentMethod && Boolean(formik.errors.paymentMethod)}
                 maxAccess={maxAccess}
