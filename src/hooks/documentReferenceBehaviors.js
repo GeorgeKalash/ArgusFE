@@ -28,8 +28,6 @@ export function useDocumentType({ functionId, access, hasDT, enabled = true }) {
   const [nraId, setNraId] = useState()
 
   const queryFn = async nraId => {
-    console.log(nraId, 'nraId')
-
     const result = await documentType(getRequest, functionId, access, nraId, hasDT)
     if (result.errorMessage) {
       stackError({ message: result?.errorMessage })
@@ -52,7 +50,6 @@ export function useDocumentType({ functionId, access, hasDT, enabled = true }) {
     documentType: query.data,
     maxAccess: query?.data?.maxAccess,
     changeDT(value) {
-      console.log(value?.nraId)
       setNraId(value?.nraId || 'nraId')
     }
   }
