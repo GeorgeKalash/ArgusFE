@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import React, { useContext, useState } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
@@ -11,6 +11,7 @@ import { useWindow } from 'src/windows'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import ReportParameterBrowser from 'src/components/Shared/ReportParameterBrowser'
 
 // function SampleWindow() {
 //   const { stack } = useWindow()
@@ -54,6 +55,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 const BPMasterData = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const [paramsArray, setParamsArray] = useState([])
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -172,6 +174,22 @@ const BPMasterData = () => {
           onSearchClear={clear}
           labels={_labels}
           inputSearch={true}
+          openRPB={() =>
+            stack({
+              Component: ReportParameterBrowser,
+              props: {
+                disabled: false,
+                reportName: 'BPMAS',
+                paramsArray: paramsArray,
+                setParamsArray: setParamsArray
+              },
+              width: 700,
+              height: 500,
+              title: 'Report Parameters Browser'
+            })
+          }
+          disableRPB={false}
+          paramsArray={paramsArray}
         />
       </Fixed>
       <Grow>
@@ -188,7 +206,7 @@ const BPMasterData = () => {
           refetch={refetch}
         />
       </Grow>
-    </ VertLayout>
+    </VertLayout>
   )
 }
 

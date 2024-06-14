@@ -122,7 +122,7 @@ const ReportParameterBrowser = ({ reportName, paramsArray, setParamsArray, disab
   const getComboBoxByClassId = field => {
     switch (field.classId) {
       case 0:
-        var parameters = `_database=${field.data}`
+        var parameters = `_dataset=${field.data}&_language=1`
         getRequest({
           extension: SystemRepository.KeyValueStore,
           parameters: parameters
