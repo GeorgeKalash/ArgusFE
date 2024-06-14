@@ -254,6 +254,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 name='date'
                 label={labels.date}
                 onChange={formik.setFieldValue}
+                readOnly={readOnly}
                 value={formik.values.date}
                 maxAccess={maxAccess}
                 error={formik.touched.date && Boolean(formik.errors.date)}
@@ -280,7 +281,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 readOnly={readOnly}
                 label={labels.plant}
                 valueField='recordId'
-                displayField='name'
+                displayField={['reference', 'name']}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
@@ -472,7 +473,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 label={labels.notes}
                 value={formik.values.notes}
                 readOnly={readOnly}
-                rows={4}
+                rows={3}
                 maxAccess={maxAccess}
                 onChange={e => formik.setFieldValue('notes', e.target.value)}
                 onClear={() => formik.setFieldValue('notes', '')}

@@ -28,7 +28,7 @@ export default function CurrencyTrading() {
         recordId: recordId || null
       },
       width: 1000,
-      height: 800,
+      height: 780,
       title: labels.receiptVoucher
     })
   }
@@ -61,7 +61,7 @@ export default function CurrencyTrading() {
 
     const response = await getRequest({
       extension: FinancialRepository.ReceiptVouchers.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=&_sortBy=asc`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=&_sortBy=recordId desc`
     })
 
     return { ...response, _startAt: _startAt }
