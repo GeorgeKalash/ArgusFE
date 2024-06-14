@@ -51,9 +51,6 @@ export default function MemosForm({ labels, access, recordId, functionId }) {
     }
   }
 
-  console.log(SystemFunction.DebitNote, 'systemFunction')
-  console.log(functionId, 'funcId')
-
   const { formik } = useForm({
     initialValues: {
       recordId: recordId || null,
@@ -134,9 +131,7 @@ export default function MemosForm({ labels, access, recordId, functionId }) {
 
         const vatPctValue = res.list.find(item => item.key === 'vatPct')?.value || '0'
         setInitialVatPct(vatPctValue)
-      } catch (exception) {
-        console.error('Error fetching vatPct value:', exception)
-      }
+      } catch (exception) {}
     })()
   }, [])
   useEffect(() => {
@@ -274,7 +269,6 @@ export default function MemosForm({ labels, access, recordId, functionId }) {
         return null
     }
   }
-  console.log(formik.values, 'formik')
 
   return (
     <FormShell

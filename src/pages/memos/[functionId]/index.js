@@ -37,7 +37,6 @@ const Financial = () => {
 
     return { ...response, _startAt: _startAt }
   }
-  console.log(functionId, 'functionbbb')
 
   const {
     query: { data },
