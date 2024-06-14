@@ -1,6 +1,6 @@
 // ** Custom Imports
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { CustomTabs } from 'src/components/Shared/CustomTabs'
 import ProductAgentForm from '../Forms/productAgentForm'
 import ProductLegForm from '../Forms/productLegForm'
@@ -38,7 +38,7 @@ const ProductMasterWindow = ({ labels, recordId, maxAccess, height, expanded }) 
   return (
     <>
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-      <CustomTabPanel height={height} index={0} value={activeTab}>
+      <CustomTabPanel height={height} index={0} value={activeTab} key={`${store.key}-0`}>
         <ProductMasterForm
           store={store}
           setStore={setStore}
@@ -48,7 +48,7 @@ const ProductMasterWindow = ({ labels, recordId, maxAccess, height, expanded }) 
           editMode={editMode}
         />
       </CustomTabPanel>
-      <CustomTabPanel height={height} index={1} value={activeTab}>
+      <CustomTabPanel height={height} index={1} value={activeTab} key={`${store.key}-1`}>
         <ProductCountriesForm
           store={store}
           setStore={setStore}
@@ -59,7 +59,7 @@ const ProductMasterWindow = ({ labels, recordId, maxAccess, height, expanded }) 
           editMode={editMode}
         />
       </CustomTabPanel>
-      <CustomTabPanel height={height} index={2} value={activeTab}>
+      <CustomTabPanel height={height} index={2} value={activeTab} key={`${store.key}-2`}>
         <ProductCurrenciesForm
           store={store}
           setStore={setStore}
@@ -70,7 +70,7 @@ const ProductMasterWindow = ({ labels, recordId, maxAccess, height, expanded }) 
           editMode={editMode}
         />
       </CustomTabPanel>
-      <CustomTabPanel height={height} index={3} value={activeTab}>
+      <CustomTabPanel height={height} index={3} value={activeTab} key={`${store.key}-3`}>
         <ProductDispersalList
           store={store}
           setStore={setStore}
@@ -81,7 +81,7 @@ const ProductMasterWindow = ({ labels, recordId, maxAccess, height, expanded }) 
           editMode={editMode}
         />
       </CustomTabPanel>
-      <CustomTabPanel height={height} index={4} value={activeTab}>
+      <CustomTabPanel height={height} index={4} value={activeTab} key={`${store.key}-4`}>
         <ProductSchedulesForm
           store={store}
           setStore={setStore}
@@ -92,7 +92,7 @@ const ProductMasterWindow = ({ labels, recordId, maxAccess, height, expanded }) 
           editMode={editMode}
         />
       </CustomTabPanel>
-      <CustomTabPanel height={height} index={5} value={activeTab}>
+      <CustomTabPanel height={height} index={5} value={activeTab} key={`${store.key}-5`}>
         <ProductLegForm
           store={store}
           setStore={setStore}
@@ -104,7 +104,7 @@ const ProductMasterWindow = ({ labels, recordId, maxAccess, height, expanded }) 
         />
       </CustomTabPanel>
 
-      <CustomTabPanel height={height} index={6} value={activeTab}>
+      <CustomTabPanel height={height} index={6} value={activeTab} key={`${store.key}-6`}>
         <ProductAgentForm store={store} labels={labels} maxAccess={maxAccess} expanded={expanded} height={height} />
       </CustomTabPanel>
     </>

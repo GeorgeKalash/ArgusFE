@@ -43,6 +43,16 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
     endpointId: RemittanceSettingsRepository.Correspondent.qry
   })
 
+  const resetTabs = () => {
+    setStore(prevStore => ({
+      ...prevStore,
+      recordId: null,
+      key: (prevStore?.key || 1) + 1
+    }))
+
+    setEditMode(false)
+  }
+
   const formik = useFormik({
     initialValues,
     enableReinitialize: true,
@@ -57,6 +67,15 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
       isInactive: yup.string().required('This field is required'),
       corId: type === '1' ? yup.string().required('This field is required') : yup.string().notRequired()
     }),
+    onReset: () => {
+      setStore(prevStore => ({
+        ...prevStore,
+        recordId: null,
+        key: (prevStore?.key || 1) + 1
+      }))
+
+      setEditMode(false)
+    },
     onSubmit: values => {
       postProductMaster(values)
     }
@@ -100,7 +119,8 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
     })
       .then(res => {
         formik.setValues(res.record)
-        setEditMode(true)
+
+        // setEditMode(true)
       })
       .catch(error => {
         setErrorMessage(error)
