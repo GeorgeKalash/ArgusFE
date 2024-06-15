@@ -6,8 +6,10 @@ const WindowContext = React.createContext(null)
 
 export function WindowProvider({ children }) {
   const [stack, setStack] = useState([])
+  const [clear, setClear] = useState(0)
 
   function closeWindow() {
+    setClear(0)
     setStack(stack => {
       return stack.slice(0, stack.length - 1)
     })
@@ -25,7 +27,7 @@ export function WindowProvider({ children }) {
       {stack.map(
         ({ Component, title, width = 800, props, onClose, closable, expandable, draggable, height, styles }, index) => (
           <Window
-            key={index}
+            key={clear}
             sx={{ display: 'flex !important', flex: '1' }}
             Title={title}
             controlled={true}
@@ -41,7 +43,11 @@ export function WindowProvider({ children }) {
             styles={styles}
           >
             <Component
+              key={clear}
+              clear={clear}
+              setClear={setClear}
               {...props}
+              recordId={clear ? null : props.recordId}
               window={{
                 close: closeWindow
               }}

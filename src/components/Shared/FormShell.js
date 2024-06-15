@@ -24,6 +24,7 @@ export default function FormShell({
   disabledSubmit,
   infoVisible = true,
   postVisible = false,
+  setClear,
   resourceId,
   masterSource,
   functionId,
@@ -50,17 +51,17 @@ export default function FormShell({
     : true
 
   function handleReset() {
-    form.resetForm({
-      values: form.initialValues
-    })
+    setClear(true)
 
-    if (setIDInfoAutoFilled) {
-      setIDInfoAutoFilled(false)
-    }
-
-    if (typeof setEditMode === 'function') {
-      setEditMode(false)
-    }
+    // form.resetForm({
+    //   values: form.initialValues
+    // })
+    // if (setIDInfoAutoFilled) {
+    //   setIDInfoAutoFilled(false)
+    // }
+    // if (typeof setEditMode === 'function') {
+    //   setEditMode(false)
+    // }
   }
 
   function onApproval() {
