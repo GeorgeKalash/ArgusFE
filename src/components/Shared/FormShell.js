@@ -56,9 +56,9 @@ export default function FormShell({
     // form.resetForm({
     //   values: form.initialValues
     // })
-    // if (setIDInfoAutoFilled) {
-    //   setIDInfoAutoFilled(false)
-    // }
+    if (setIDInfoAutoFilled) {
+      setIDInfoAutoFilled(false)
+    }
     // if (typeof setEditMode === 'function') {
     //   setEditMode(false)
     // }
