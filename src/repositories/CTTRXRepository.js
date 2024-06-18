@@ -6,7 +6,8 @@ export const CTTRXrepository = {
     set2: service + 'set2CIV',
     snapshot: service + 'snapshotCIV',
     close: service + 'closeCIV',
-    reopen: service + 'reopenCIV'
+    reopen: service + 'reopenCIV',
+    post: service + 'postCIV'
   },
   CreditOrder: {
     page: service + 'pageORD',
