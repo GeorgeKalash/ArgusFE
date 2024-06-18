@@ -626,6 +626,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
   const onPost = async () => {
     try {
       const values = formik.values
+
       const data = {
         recordId: values?.recordId || null,
         date: formatDateToApiFunction(values.date),
@@ -641,6 +642,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
         amount: String(total || '').replaceAll(',', ''),
         notes: values.remarks
       }
+
       const res = await postRequest({
         extension: CTTRXrepository.CurrencyTrading.post,
         record: JSON.stringify(data)
@@ -653,6 +655,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       }
     } catch (e) {}
   }
+
   const actions = [
     {
       key: 'Post',
