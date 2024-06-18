@@ -78,6 +78,8 @@ const ReportViewer = ({ resourceId }) => {
   }
 
   const generateReport = ({ params = '' }) => {
+    console.log(params)
+
     const obj = {
       api_url: selectedReport.api_url + '?_params=' + params,
       assembly: selectedReport.assembly,
@@ -181,15 +183,6 @@ const ReportViewer = ({ resourceId }) => {
           <iframe title={selectedReport?.layoutName} src={pdf} width='100%' height='100%' allowFullScreen />
         </Box>
       )}
-
-      {/* <ReportParameterBrowser
-        disabled={!selectedReport?.parameters}
-        reportName={selectedReport?.parameters}
-        open={reportParamWindowOpen}
-        onClose={() => setReportParamWindowOpen(false)}
-        paramsArray={paramsArray}
-        setParamsArray={setParamsArray}
-      /> */}
     </VertLayout>
   )
 }

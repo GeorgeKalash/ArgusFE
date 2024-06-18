@@ -58,12 +58,22 @@ const BPMasterData = () => {
   const [paramsArray, setParamsArray] = useState([])
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 50, paramsArray = [] } = options
+    console.log(paramsArray)
+
+    var params = formatDataForApi(paramsArray)
+    console.log(params)
 
     return await getRequest({
       extension: BusinessPartnerRepository.MasterData.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=&_sortBy=reference desc`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}&_sortBy=reference desc`
     })
+  }
+
+  const formatDataForApi = paramsArray => {
+    const formattedData = paramsArray.map(({ fieldId, value }) => `${fieldId}|${value}`).join('^')
+
+    return formattedData
   }
 
   const {
@@ -186,6 +196,7 @@ const BPMasterData = () => {
             })
           }
           disableRPB={false}
+          onGo={refetch}
           paramsArray={paramsArray}
         />
       </Fixed>
