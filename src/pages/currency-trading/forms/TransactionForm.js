@@ -9,7 +9,7 @@ import FieldSet from 'src/components/Shared/FieldSet'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useError } from 'src/error'
-import { formatDateFromApi, formatDateToApiFunction } from 'src/lib/date-helper'
+import { formatDateFromApi, formatDateToApi, formatDateToApiFunction } from 'src/lib/date-helper'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
@@ -111,6 +111,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
   const [search, setSearch] = useState(null)
   const [isClosed, setIsClosed] = useState(false)
   const [fId, setFId] = useState(SystemFunction.CurrencyPurchase)
+  const [isPosted, setIsPosted] = useState(false)
 
   async function checkTypes(value) {
     if (!value) {
@@ -300,6 +301,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
         const record = res.record
         if (!recordId) {
           formik.setFieldValue('reference', record.headerView.reference)
+          formik.setFieldValue('recordId', record.headerView.recordId)
         } else {
           formik.setValues({
             recordId: _recordId,
@@ -340,12 +342,14 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
             purpose_of_exchange: record.headerView.poeId,
             nationality: record.clientMaster.nationalityId,
             cell_phone: record.clientMaster.cellPhone,
-            status: record.headerView.status
+            status: record.headerView.status,
+            cashAccountId: record.headerView.cashAccountId
           })
 
           setOperationType(record.headerView.functionId)
         }
         setIsClosed(record.headerView.wip === 2 ? true : false)
+        setIsPosted(record.headerView.status === 4 ? false : true)
       })
       .catch(error => {})
   }
@@ -371,71 +375,71 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
   }
 
   const onClose = async () => {
-    const values = formik.values
+    try {
+      const values = formik.values
 
-    const { record: cashAccountRecord } = await getRequest({
-      extension: SystemRepository.UserDefaults.get,
-      parameters: `_userId=${userId}&_key=cashAccountId`
-    })
+      const data = {
+        recordId: values?.recordId || null,
+        reference: values.reference,
+        status: values.status,
+        functionId: values.functionId,
+        plantId: plantId ? plantId : values.plantId,
+        clientId: values.clientId,
+        cashAccountId: values?.cashAccountId,
+        poeId: values.purpose_of_exchange,
+        wip: values.wip,
+        otpVerified: values.otp,
+        amount: String(total || '').replaceAll(',', ''),
+        notes: values.remarks
+      }
 
-    const data = {
-      recordId: values?.recordId || null,
-      status: values.status,
-      functionId: values.functionId,
-      plantId: plantId ? plantId : values.plantId,
-      clientId: values.clientId,
-      cashAccountId: cashAccountRecord.value,
-      poeId: values.purpose_of_exchange,
-      wip: values.wip,
-      otpVerified: values.otp,
-      amount: String(total || '').replaceAll(',', ''),
-      notes: values.remarks
-    }
-
-    const res = await postRequest({
-      extension: CTTRXrepository.CurrencyTrading.close,
-      record: JSON.stringify(data)
-    })
-    if (res.recordId) {
-      toast.success('Record Closed Successfully')
-      invalidate()
-      setIsClosed(true)
-    }
+      const res = await postRequest({
+        extension: CTTRXrepository.CurrencyTrading.close,
+        record: JSON.stringify(data)
+      })
+      if (res.recordId) {
+        toast.success('Record Closed Successfully')
+        invalidate()
+        setIsClosed(true)
+      }
+    } catch (e) {}
   }
 
   async function onReopen() {
-    const values = formik.values
+    try {
+      const values = formik.values
 
-    const { record: cashAccountRecord } = await getRequest({
-      extension: SystemRepository.UserDefaults.get,
-      parameters: `_userId=${userId}&_key=cashAccountId`
-    })
+      const { record: cashAccountRecord } = await getRequest({
+        extension: SystemRepository.UserDefaults.get,
+        parameters: `_userId=${userId}&_key=cashAccountId`
+      })
 
-    const data = {
-      recordId: values?.recordId || null,
-      date: formatDateToApiFunction(values.date),
-      reference: values.reference,
-      status: values.status,
-      functionId: values.functionId,
-      plantId: plantId ? plantId : values.plantId,
-      clientId: values.clientId,
-      cashAccountId: cashAccountRecord.value,
-      poeId: values.purpose_of_exchange,
-      wip: values.wip,
-      otpVerified: values.otp,
-      amount: String(total || '').replaceAll(',', ''),
-      notes: values.remarks
-    }
+      const data = {
+        recordId: values?.recordId || null,
+        date: formatDateToApiFunction(values.date),
+        reference: values.reference,
+        status: values.status,
+        functionId: values.functionId,
+        plantId: plantId ? plantId : values.plantId,
+        clientId: values.clientId,
+        cashAccountId: cashAccountRecord.value,
+        poeId: values.purpose_of_exchange,
+        wip: values.wip,
+        otpVerified: values.otp,
+        amount: String(total || '').replaceAll(',', ''),
+        notes: values.remarks
+      }
 
-    const res = await postRequest({
-      extension: CTTRXrepository.CurrencyTrading.reopen,
-      record: JSON.stringify(data)
-    })
-    if (res.recordId) {
-      toast.success('Record Reopened Successfully')
-      invalidate()
-      setIsClosed(false)
-    }
+      const res = await postRequest({
+        extension: CTTRXrepository.CurrencyTrading.reopen,
+        record: JSON.stringify(data)
+      })
+      if (res.recordId) {
+        toast.success('Record Reopened Successfully')
+        invalidate()
+        setIsClosed(false)
+      }
+    } catch (e) {}
   }
 
   const total = formik.values.operations.reduce((acc, { lcAmount }) => {
@@ -578,6 +582,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       setInfoAutoFilled(false)
       const clientInfo = response && response.record
       if (!!clientInfo) {
+        formik.setFieldValue('clientId', clientInfo.clientId)
         formik.setFieldValue('firstName', clientInfo.firstName)
         formik.setFieldValue('middleName', clientInfo.middleName)
         formik.setFieldValue('lastName', clientInfo.lastName)
@@ -616,13 +621,48 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     return response.record
   }
 
+  const onPost = async () => {
+    const values = formik.values
+    const data = {
+      recordId: values?.recordId || null,
+      date: formatDateToApiFunction(values.date),
+      reference: values.reference,
+      status: values.status,
+      functionId: values.functionId,
+      plantId: plantId ? plantId : values.plantId,
+      clientId: values.clientId,
+      cashAccountId: values.cashAccountId,
+      poeId: values.purpose_of_exchange,
+      wip: values.wip,
+      otpVerified: values.otp,
+      amount: String(total || '').replaceAll(',', ''),
+      notes: values.remarks
+    }
+    const res = await postRequest({
+      extension: CTTRXrepository.CurrencyTrading.post,
+      record: JSON.stringify(data)
+    })
+
+    if (res) {
+      toast.success('Record Posted Successfully')
+      setIsPosted(true)
+      invalidate()
+    }
+  }
   const actions = [
+    {
+      key: 'Post',
+      condition: true,
+      onClick: onPost,
+      disabled: !editMode || isPosted || !isClosed
+    },
     {
       key: 'Close',
       condition: !isClosed,
       onClick: onClose,
       disabled: isClosed || !editMode
     },
+
     {
       key: 'Reopen',
       condition: isClosed,
@@ -1228,6 +1268,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                     <Grid container xs={12} spacing={4}>
                       <Grid width={'100%'}>
                         <DataGrid
+                          height={200}
                           onChange={value => formik.setFieldValue('amount', value)}
                           value={formik.values.amount}
                           error={formik.errors.amount}
