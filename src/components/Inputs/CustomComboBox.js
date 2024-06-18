@@ -3,7 +3,6 @@ import { Autocomplete, TextField } from '@mui/material'
 import { ControlAccessLevel, TrxType } from 'src/resources/AccessLevels'
 import { Box } from '@mui/material'
 import React from 'react'
-import ReactDOM from 'react-dom'
 import PopperComponent from '../Shared/Popper/PopperComponent'
 
 const CustomComboBox = ({
