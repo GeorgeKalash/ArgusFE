@@ -55,7 +55,7 @@ const CustomComboBox = ({
             .map(header => (option[header] ? option[header]?.toString() : header === '->' && header))
             ?.filter(item => item)
             ?.join(' ')
-          if (text) return text
+          if (text !== undefined) return text
         }
         if (typeof option === 'object') {
           return `${option[displayField]}`

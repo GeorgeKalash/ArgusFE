@@ -453,125 +453,127 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
   const balance = total - receivedTotal
 
   async function onSubmit(values) {
-    if (
-      ((!values?.idNoConfirm && values?.clientId) ||
-        (!values?.confirmIdNo && !values?.clientId && !values.cellPhoneConfirm)) &&
-      !editMode
-    ) {
-      stack({
-        Component: ConfirmationOnSubmit,
-        props: {
-          formik: formik,
-          labels: labels
-        },
-        title: labels.fetch,
-        width: 400,
-        height: 400
-      })
-    } else {
-      const { record: recordFunctionId } = await getRequest({
-        extension: SystemRepository.UserFunction.get,
-        parameters: `_userId=${userId}&_functionId=${values.functionId}`
-      })
-
-      const { dtId } = recordFunctionId
-
-      const { record: cashAccountRecord } = await getRequest({
-        extension: SystemRepository.UserDefaults.get,
-        parameters: `_userId=${userId}&_key=cashAccountId`
-      })
-
-      const clientId = values.clientId || 0
-
-      const payload = {
-        header: {
-          recordId: values?.recordId || null,
-          dtId,
-          reference: values.reference,
-          status: values.status,
-          date: formatDateToApiFunction(values.date),
-          functionId: values.functionId,
-          plantId: plantId ? plantId : values.plantId,
-          clientId,
-          cashAccountId: cashAccountRecord.value,
-          poeId: values.purpose_of_exchange,
-          wip: values.wip,
-          amount: total,
-          notes: values.remarks
-        },
-        items: values.operations.map(({ id, ...rest }) => ({
-          seqNo: id,
-          ...rest
-        })),
-        clientMaster: {
-          category: values.clientType,
-          reference: null,
-          name: null,
-          flName: null,
-          keyword: null,
-          nationalityId: values.nationality,
-          status: 1,
-          addressId: null,
-          cellPhone: values.cell_phone,
-          oldReference: null,
-          otp: false,
-          createdDate: formatDateToApiFunction(values.date),
-          expiryDate: null
-        },
-        clientIndividual: {
-          clientId,
-          firstName: values.firstName,
-          lastName: values.lastName,
-          middleName: values.middleName,
-          familyName: values.familyName,
-          fl_firstName: values.fl_firstName,
-          fl_lastName: values.fl_lastName,
-          fl_middleName: values.fl_middleName,
-          fl_familyName: values.fl_familyName,
-          birthDate: formatDateToApiFunction(values.birth_date),
-          isResident: values.resident,
-          professionId: values.profession,
-          incomeSourceId: values.source_of_income,
-          sponsorName: values.sponsor
-        },
-        clientID: {
-          idNo: values.id_number,
-          clientId,
-          idCountryId: values.issue_country,
-          idtId: values.id_type,
-          idExpiryDate: formatDateToApiFunction(values.expiry_date),
-          idIssueDate: null,
-          idCityId: null,
-          isDiplomat: false
-        },
-
-        cash:
-          formik.values.amount.length > 0 &&
-          formik.values.amount.map(({ id, types, cashAccountId, ...rest }) => ({
-            seqNo: id,
-            cashAccountId: cashAccountRecord.value,
-            ...rest
-          }))
-      }
-
-      const response = await postRequest({
-        extension: CTTRXrepository.CurrencyTrading.set2,
-        record: JSON.stringify(payload)
-      })
-
-      if (!values.recordId) {
-        toast.success('Record Added Successfully')
-        formik.setFieldTouched(recordId, response.recordId)
-        getData(response.recordId)
-
-        setEditMode(true)
+    try {
+      if (
+        ((!values?.idNoConfirm && values?.clientId) ||
+          (!values?.confirmIdNo && !values?.clientId && !values.cellPhoneConfirm)) &&
+        !editMode
+      ) {
+        stack({
+          Component: ConfirmationOnSubmit,
+          props: {
+            formik: formik,
+            labels: labels
+          },
+          title: labels.fetch,
+          width: 400,
+          height: 400
+        })
       } else {
-        toast.success('Record Edited Successfully')
-      }
-      invalidate()
-    }
+        const { record: recordFunctionId } = await getRequest({
+          extension: SystemRepository.UserFunction.get,
+          parameters: `_userId=${userId}&_functionId=${values.functionId}`
+        })
 
-    return
+        const { dtId } = recordFunctionId
+
+        const { record: cashAccountRecord } = await getRequest({
+          extension: SystemRepository.UserDefaults.get,
+          parameters: `_userId=${userId}&_key=cashAccountId`
+        })
+
+        const clientId = values.clientId || 0
+
+        const payload = {
+          header: {
+            recordId: values?.recordId || null,
+            dtId,
+            reference: values.reference,
+            status: values.status,
+            date: formatDateToApiFunction(values.date),
+            functionId: values.functionId,
+            plantId: plantId ? plantId : values.plantId,
+            clientId,
+            cashAccountId: cashAccountRecord.value,
+            poeId: values.purpose_of_exchange,
+            wip: values.wip,
+            amount: total,
+            notes: values.remarks
+          },
+          items: values.operations.map(({ id, ...rest }) => ({
+            seqNo: id,
+            ...rest
+          })),
+          clientMaster: {
+            category: values.clientType,
+            reference: null,
+            name: null,
+            flName: null,
+            keyword: null,
+            nationalityId: values.nationality,
+            status: 1,
+            addressId: null,
+            cellPhone: values.cell_phone,
+            oldReference: null,
+            otp: false,
+            createdDate: formatDateToApiFunction(values.date),
+            expiryDate: null
+          },
+          clientIndividual: {
+            clientId,
+            firstName: values.firstName,
+            lastName: values.lastName,
+            middleName: values.middleName,
+            familyName: values.familyName,
+            fl_firstName: values.fl_firstName,
+            fl_lastName: values.fl_lastName,
+            fl_middleName: values.fl_middleName,
+            fl_familyName: values.fl_familyName,
+            birthDate: formatDateToApiFunction(values.birth_date),
+            isResident: values.resident,
+            professionId: values.profession,
+            incomeSourceId: values.source_of_income,
+            sponsorName: values.sponsor
+          },
+          clientID: {
+            idNo: values.id_number,
+            clientId,
+            idCountryId: values.issue_country,
+            idtId: values.id_type,
+            idExpiryDate: formatDateToApiFunction(values.expiry_date),
+            idIssueDate: null,
+            idCityId: null,
+            isDiplomat: false
+          },
+
+          cash:
+            formik.values.amount.length > 0 &&
+            formik.values.amount.map(({ id, types, cashAccountId, ...rest }) => ({
+              seqNo: id,
+              cashAccountId: cashAccountRecord.value,
+              ...rest
+            }))
+        }
+
+        const response = await postRequest({
+          extension: CTTRXrepository.CurrencyTrading.set2,
+          record: JSON.stringify(payload)
+        })
+
+        if (!values.recordId) {
+          toast.success('Record Added Successfully')
+          formik.setFieldTouched(recordId, response.recordId)
+          getData(response.recordId)
+
+          setEditMode(true)
+        } else {
+          toast.success('Record Edited Successfully')
+        }
+        invalidate()
+      }
+
+      return
+    } catch (e) {}
   }
   async function fetchClientInfo({ clientId }) {
     try {
@@ -622,32 +624,34 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
   }
 
   const onPost = async () => {
-    const values = formik.values
-    const data = {
-      recordId: values?.recordId || null,
-      date: formatDateToApiFunction(values.date),
-      reference: values.reference,
-      status: values.status,
-      functionId: values.functionId,
-      plantId: plantId ? plantId : values.plantId,
-      clientId: values.clientId,
-      cashAccountId: values.cashAccountId,
-      poeId: values.purpose_of_exchange,
-      wip: values.wip,
-      otpVerified: values.otp,
-      amount: String(total || '').replaceAll(',', ''),
-      notes: values.remarks
-    }
-    const res = await postRequest({
-      extension: CTTRXrepository.CurrencyTrading.post,
-      record: JSON.stringify(data)
-    })
+    try {
+      const values = formik.values
+      const data = {
+        recordId: values?.recordId || null,
+        date: formatDateToApiFunction(values.date),
+        reference: values.reference,
+        status: values.status,
+        functionId: values.functionId,
+        plantId: plantId ? plantId : values.plantId,
+        clientId: values.clientId,
+        cashAccountId: values.cashAccountId,
+        poeId: values.purpose_of_exchange,
+        wip: values.wip,
+        otpVerified: values.otp,
+        amount: String(total || '').replaceAll(',', ''),
+        notes: values.remarks
+      }
+      const res = await postRequest({
+        extension: CTTRXrepository.CurrencyTrading.post,
+        record: JSON.stringify(data)
+      })
 
-    if (res) {
-      toast.success('Record Posted Successfully')
-      setIsPosted(true)
-      invalidate()
-    }
+      if (res) {
+        toast.success('Record Posted Successfully')
+        setIsPosted(true)
+        invalidate()
+      }
+    } catch (e) {}
   }
   const actions = [
     {
