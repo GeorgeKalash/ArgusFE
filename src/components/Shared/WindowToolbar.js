@@ -163,9 +163,7 @@ const WindowToolbar = ({
               </div>
             </Button>
           </Box>
-        ) : (
-          <Box></Box>
-        )}
+        ) : null}
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           {buttons
             .filter(button => actions.some(action => action.key === button.key))
@@ -245,7 +243,7 @@ const WindowToolbar = ({
                   >
                     <img src={`/images/buttonsIcons/${button.image}`} alt={button.key} />
                   </Button>
-                  {tooltip && <div className={`toast ${tooltip.length > 20 ? 'multiline' : ''}`}>{tooltip}</div>}
+                  {tooltip && <div className='toast'>{tooltip}</div>}
                 </div>
               )
             )
