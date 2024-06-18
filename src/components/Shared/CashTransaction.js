@@ -54,6 +54,11 @@ const CashTransaction = props => {
       field: 'baseAmount',
       headerName: _labels.BaseAmount,
       flex: 1
+    },
+    {
+      field: 'notes',
+      headerName: _labels.notes,
+      flex: 1
     }
   ]
 
