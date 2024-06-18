@@ -30,6 +30,7 @@ export default function OpeningBalanceForm({ labels, maxAccess, recordId, record
       currencyId: '',
       currencyRef: '',
       amount: '',
+      baseAmount: '',
       ...record
     },
     maxAccess,
@@ -39,7 +40,8 @@ export default function OpeningBalanceForm({ labels, maxAccess, recordId, record
       fiscalYear: yup.string().required(' '),
       accountId: yup.string().required(' '),
       currencyId: yup.string().required(' '),
-      amount: yup.number().required(' ')
+      amount: yup.number().required(' '),
+      baseAmount: yup.number().required(' ')
     }),
     onSubmit: async obj => {
       const currencyId = formik.values.currencyId
@@ -168,6 +170,20 @@ export default function OpeningBalanceForm({ labels, maxAccess, recordId, record
                 onChange={e => formik.setFieldValue('amount', e.target.value)}
                 onClear={() => formik.setFieldValue('amount', '')}
                 error={formik.touched.amount && Boolean(formik.errors.amount)}
+                maxLength={10}
+                decimalScale={2}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomNumberField
+                name='baseAmount'
+                required
+                label={labels.baseAmount}
+                value={formik.values.baseAmount}
+                maxAccess={maxAccess}
+                onChange={e => formik.setFieldValue('baseAmount', e.target.value)}
+                onClear={() => formik.setFieldValue('baseAmount', '')}
+                error={formik.touched.baseAmount && Boolean(formik.errors.baseAmount)}
                 maxLength={10}
                 decimalScale={2}
               />

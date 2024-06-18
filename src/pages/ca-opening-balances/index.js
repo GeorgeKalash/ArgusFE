@@ -66,6 +66,12 @@ const OpeningBalance = () => {
       headerName: _labels.amount,
       flex: 1,
       valueGetter: ({ row }) => getFormattedNumber(row?.amount)
+    },
+    {
+      field: 'baseAmount',
+      headerName: _labels.baseAmount,
+      flex: 1,
+      valueGetter: ({ row }) => getFormattedNumber(row?.baseAmount)
     }
   ]
 
