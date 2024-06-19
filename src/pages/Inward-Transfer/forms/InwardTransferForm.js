@@ -24,7 +24,6 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { DataSets } from 'src/resources/DataSets'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { SystemFunction } from 'src/resources/SystemFunction'
-import { useWindow } from 'src/windows'
 import * as yup from 'yup'
 
 export default function InwardTransferForm({ labels, recordId, access, plantId, cashAccountId, dtId }) {
@@ -54,7 +53,47 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
     faxNo: '',
     sender_firstName: '',
     sender_lastName: '',
-    sender_middleName: ''
+    sender_middleName: '',
+    senter_nationalityId: null,
+    sender_phone: null,
+    sender_otherInfo: '',
+    sender_countryId: null,
+    sender_idtId: null,
+    sender_idNo: '',
+    sender_idIssuePlace: '',
+    sender_idIssueDate: new Date(),
+    sender_idExpiryDate: new Date(),
+    receiver_type: '',
+    receiver_riskCategory: '',
+    receiver_payoutType: '',
+    receiver_isResident: false,
+    receiver_firstName: '',
+    receiver_middleName: '',
+    receiver_lastName: '',
+    receiver_fl_firstName: '',
+    receiver_fl_middleName: '',
+    receiver_fl_lastName: '',
+    receiver_phone: null,
+    receiver_nationalityId: null,
+    receiver_idtId: null,
+    receiver_idNo: '',
+    receiver_idIssueDate: new Date(),
+    receiver_idExpiryDate: new Date(),
+    receiver_idIssuePlace: null,
+    receiver_accountNo: '',
+    receiver_address1: '',
+    receiver_address2: '',
+    receiver_bank: '',
+    receiver_bankBranch: '',
+    receiver_ttNo: '',
+    paymentMode: '',
+    paymentBank: '',
+    commissionType: '',
+    commissionAgent: '',
+    commissionReceiver: '',
+    expiryDate: new Date(),
+    sourceOfIncome: '',
+    purposeOfTransfer: ''
   })
 
   const { maxAccess } = useDocumentType({
@@ -378,7 +417,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                   <Grid item xs={12}>
                     <CustomTextArea
                       name='notes'
-                      label={labels.notes}
+                      label={labels.note}
                       value={formik.values.notes}
                       maxLength='200'
                       required
