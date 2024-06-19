@@ -126,6 +126,7 @@ const Table = ({
   const refetch = props?.refetch
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
   const columnsAccess = props.maxAccess && props.maxAccess.record.controls
+  const [selectedRow, setSelectedRow] = useState(null) // State to manage selected row
 
   const getRowId = row => {
     return props.rowId.map(field => row[field]).join('-')
@@ -470,6 +471,23 @@ const Table = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.gridData])
 
+  const handleRowSelection = params => {
+    setSelectedRow(params.id)
+  }
+  const getMaxId = () => {
+    const ids = gridData.list.map(row => getRowId(row))
+    console.log(ids)
+    setSelectedRow(Math.max(...ids))
+  }
+  useEffect(() => {
+    gridData && getMaxId()
+  }, [gridData])
+
+  // const rowSelection = newRowData => {
+  //   const newRowId = getRowId(newRowData)
+  //   setSelectedRow(newRowId.id)
+  // }
+
   return (
     <>
       {maxAccess && maxAccess > TrxType.NOACCESS ? (
@@ -488,6 +506,7 @@ const Table = ({
             </Button>
           </Stack>
           <StripedDataGrid
+            onRowClick={handleRowSelection} // Handle row selection
             rows={
               gridData?.list
                 ? page < 2 && paginationType === 'api'
@@ -495,7 +514,11 @@ const Table = ({
                   : gridData?.list
                 : []
             }
+            rowSelectionModel={[selectedRow]}
             sx={{
+              '& .MuiDataGrid-row.Mui-selected': {
+                backgroundColor: '#D8D8D8 !important'
+              },
               '& .MuiDataGrid-overlayWrapperInner': {
                 height: '300px !important'
               },
@@ -521,7 +544,11 @@ const Table = ({
             getRowId={getRowId}
             disableRowSelectionOnClick
             disableColumnMenu
-            getRowClassName={params => (params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd')}
+            getRowClassName={params =>
+              params.indexRelativeToCurrentPage % 2 === 0
+                ? params.id !== selectedRow && 'even'
+                : params.id !== selectedRow && 'odd'
+            }
             {...props}
             columns={[
               ...(showCheckboxColumn
