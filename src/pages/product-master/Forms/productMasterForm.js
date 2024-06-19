@@ -16,11 +16,10 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, maxAccess, setClear }) => {
+const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId: pId } = store
   const [type, setType] = useState('')
-
   const [initialValues, setData] = useState({
     recordId: null,
     name: null,
@@ -108,13 +107,7 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
   }
 
   return (
-    <FormShell
-      form={formik}
-      resourceId={ResourceIds.ProductMaster}
-      maxAccess={maxAccess}
-      editMode={editMode}
-      setClear={setClear}
-    >
+    <FormShell form={formik} resourceId={ResourceIds.ProductMaster} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container>

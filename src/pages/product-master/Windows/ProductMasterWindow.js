@@ -10,7 +10,7 @@ import ProductCountriesForm from '../Forms/productCountriesForm'
 import ProductMasterForm from '../Forms/productMasterForm'
 import ProductDispersalList from '../Forms/productDispersallist'
 
-const ProductMasterWindow = ({ labels, recordId, maxAccess, height, expanded, setClear }) => {
+const ProductMasterWindow = ({ labels, recordId, maxAccess, height, expanded }) => {
   const [editMode, setEditMode] = useState(recordId)
   const [activeTab, setActiveTab] = useState(0)
 
@@ -46,7 +46,6 @@ const ProductMasterWindow = ({ labels, recordId, maxAccess, height, expanded, se
           setEditMode={setEditMode}
           maxAccess={maxAccess}
           editMode={editMode}
-          setClear={setClear}
         />
       </CustomTabPanel>
       <CustomTabPanel height={height} index={1} value={activeTab}>

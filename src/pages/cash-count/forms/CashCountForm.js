@@ -28,11 +28,12 @@ import GenerateTransferForm from './GenerateTransferForm'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { ControlContext } from 'src/providers/ControlContext'
 
-export default function CashCountForm({ labels, maxAccess: access, recordId, setClear }) {
+export default function CashCountForm({ labels, maxAccess: access, recordId }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const [editMode, setEditMode] = useState(!!recordId)
   const { stack } = useWindow()
+
   const [isClosed, setIsClosed] = useState(false)
   const [isPosted, setIsPosted] = useState(false)
 
@@ -391,7 +392,6 @@ export default function CashCountForm({ labels, maxAccess: access, recordId, set
       functionId={SystemFunction.CashCountTransaction}
       disabledSubmit={isClosed}
       previewReport={editMode}
-      setClear={setClear}
     >
       <VertLayout>
         <Fixed>

@@ -4,7 +4,7 @@ import WindowToolbar from './WindowToolbar'
 import TransactionLog from './TransactionLog'
 import { TrxType } from 'src/resources/AccessLevels'
 import { ClientRelationForm } from './ClientRelationForm'
-import { useWindow } from 'src/windows'
+import { useGlobalRecord, useWindow } from 'src/windows'
 import PreviewReport from './PreviewReport'
 import GeneralLedger from 'src/components/Shared/GeneralLedger'
 import Approvals from './Approvals'
@@ -24,7 +24,6 @@ export default function FormShell({
   disabledSubmit,
   infoVisible = true,
   postVisible = false,
-  setClear,
   resourceId,
   masterSource,
   functionId,
@@ -41,6 +40,7 @@ export default function FormShell({
   const [windowInfo, setWindowInfo] = useState(null)
   const { stack } = useWindow()
   const [selectedReport, setSelectedReport] = useState(null)
+  const { clear } = useGlobalRecord()
 
   const windowToolbarVisible = editMode
     ? maxAccess < TrxType.EDIT
@@ -51,8 +51,8 @@ export default function FormShell({
     : true
 
   function handleReset() {
-    if (typeof setClear === 'function') {
-      setClear(true)
+    if (typeof clear === 'function') {
+      clear(true)
     } else {
       form.resetForm({
         values: form.initialValues

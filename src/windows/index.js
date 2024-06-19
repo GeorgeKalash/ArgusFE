@@ -3,6 +3,7 @@ import Window from 'src/components/Shared/Window'
 import useResourceParams from 'src/hooks/useResourceParams'
 
 const WindowContext = React.createContext(null)
+const ClearContext = React.createContext(null)
 
 export function WindowProvider({ children }) {
   const [stack, setStack] = useState([])
@@ -23,38 +24,46 @@ export function WindowProvider({ children }) {
         }
       }}
     >
-      {children}
-      {stack.map(
-        ({ Component, title, width = 800, props, onClose, closable, expandable, draggable, height, styles }, index) => (
-          <Window
-            key={clear}
-            sx={{ display: 'flex !important', flex: '1' }}
-            Title={title}
-            controlled={true}
-            onClose={() => {
-              closeWindow()
-              if (onClose) onClose()
-            }}
-            width={width}
-            height={height}
-            expandable={expandable}
-            draggable={draggable}
-            closable={closable}
-            styles={styles}
-          >
-            <Component
+      <ClearContext.Provider
+        value={{
+          clear(value) {
+            setClear(value)
+          }
+        }}
+      >
+        {children}
+
+        {stack.map(
+          ({ Component, title, width = 800, props, onClose, closable, expandable, draggable, height, styles }) => (
+            <Window
               key={clear}
-              clear={clear}
-              setClear={setClear}
-              {...props}
-              recordId={clear ? null : props.recordId}
-              window={{
-                close: closeWindow
+              sx={{ display: 'flex !important', flex: '1' }}
+              Title={title}
+              controlled={true}
+              onClose={() => {
+                closeWindow()
+                if (onClose) onClose()
               }}
-            />
-          </Window>
-        )
-      )}
+              width={width}
+              height={height}
+              expandable={expandable}
+              draggable={draggable}
+              closable={closable}
+              styles={styles}
+            >
+              <Component
+                key={clear}
+                clear={clear}
+                {...props}
+                recordId={clear ? null : props.recordId}
+                window={{
+                  close: closeWindow
+                }}
+              />
+            </Window>
+          )
+        )}
+      </ClearContext.Provider>
     </WindowContext.Provider>
   )
 }
@@ -96,4 +105,8 @@ export function ImmediateWindow({ datasetId, Component, titleName, height }) {
 
 export function useWindow() {
   return useContext(WindowContext)
+}
+
+export function useGlobalRecord() {
+  return useContext(ClearContext)
 }
