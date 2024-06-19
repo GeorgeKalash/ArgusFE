@@ -38,6 +38,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { useForm } from 'src/hooks/form'
+import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
 
 export default function OutwardsTab({ labels, access, recordId, cashAccountId, plantId, userId, window, invalidate }) {
   const [productsStore, setProductsStore] = useState([])
@@ -46,6 +47,7 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
   const [isClosed, setIsClosed] = useState(false)
   const [isPosted, setIsPosted] = useState(false)
   const [confirmationWindowOpen, setConfirmationWindowOpen] = useState(false)
+  const [otpShow, setOtpShow] = useState(false)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
@@ -216,6 +218,7 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
         if (amountRes.recordId) {
           toast.success('Record Updated Successfully')
           formik.setFieldValue('recordId', amountRes.recordId)
+          setOtpShow(true)
           setEditMode(true)
 
           const res2 = await getRequest({
@@ -635,10 +638,21 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
         } else {
           getDefaultDT()
         }
+        if (formik.values.recordId && otpShow && !editMode)
+          stack({
+            Component: OTPPhoneVerification,
+            props: {
+              formValidation: formik,
+              functionId: SystemFunction.Outwards
+            },
+            width: 400,
+            height: 400,
+            title: labels.OTPVerification
+          })
         getDefaultVAT()
       } catch (error) {}
     })()
-  }, [])
+  }, [formik.values.recordId])
 
   return (
     <FormShell

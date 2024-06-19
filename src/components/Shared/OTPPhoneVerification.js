@@ -71,7 +71,7 @@ const OTPPhoneVerification = ({ formValidation, functionId, onClose, getData, wi
       })
         .then(res => {
           toast.success('Verification Completed')
-          getData(formValidation?.values?.clientId)
+          getData && getData(formValidation?.values?.clientId)
           window.close()
         })
         .catch(error => {})
