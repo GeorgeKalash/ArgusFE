@@ -20,6 +20,7 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId: pId } = store
   const [type, setType] = useState('')
+
   const [initialValues, setData] = useState({
     recordId: null,
     name: null,
