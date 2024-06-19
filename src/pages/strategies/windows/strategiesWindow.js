@@ -7,7 +7,7 @@ import StrategiesForm from '../forms/strategiesForm.js'
 import PreReqsList from '../forms/PrereqList.js'
 import IndicatorForm from '../forms/indicatorForm.js'
 
-const StrategiesWindow = ({ height, recordId, labels, maxAccess, expanded, onApply }) => {
+const StrategiesWindow = ({ height, recordId, labels, maxAccess, expanded, onApply, setClear }) => {
   const [activeTab, setActiveTab] = useState(0)
 
   const editMode = !!recordId
@@ -25,7 +25,7 @@ const StrategiesWindow = ({ height, recordId, labels, maxAccess, expanded, onApp
 
   const tabs = [
     { label: labels.strategy },
-    { label: labels.code, disabled: !store.recordId },
+    { label: labels.code },
     { label: labels.prere, disabled: !store.recordId },
     { label: labels.indicator, disabled: !store.recordId }
   ]
@@ -41,6 +41,7 @@ const StrategiesWindow = ({ height, recordId, labels, maxAccess, expanded, onApp
           editMode={editMode}
           maxAccess={maxAccess}
           onChange={onStrategiesChange}
+          setClear={setClear}
         />
       </CustomTabPanel>
       <CustomTabPanel height={height} index={1} value={activeTab}>

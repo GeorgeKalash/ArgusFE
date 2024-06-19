@@ -17,7 +17,7 @@ import { useInvalidate } from 'src/hooks/resource'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useForm } from 'src/hooks/form'
 
-const StrategiesForm = ({ labels, editMode, maxAccess, setStore, store, onChange }) => {
+const StrategiesForm = ({ labels, editMode, maxAccess, setStore, store, onChange, setClear }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { recordId } = store
 
@@ -90,7 +90,13 @@ const StrategiesForm = ({ labels, editMode, maxAccess, setStore, store, onChange
   }
 
   return (
-    <FormShell form={formik} resourceId={ResourceIds.Strategies} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell
+      form={formik}
+      resourceId={ResourceIds.Strategies}
+      maxAccess={maxAccess}
+      editMode={editMode}
+      setClear={setClear}
+    >
       <Grid container spacing={4}>
         <Grid item xs={12}>
           <CustomTextField
