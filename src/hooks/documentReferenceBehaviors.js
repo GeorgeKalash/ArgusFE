@@ -50,7 +50,7 @@ export function useDocumentType({ functionId, access, hasDT, enabled = true }) {
     documentType: query.data,
     maxAccess: query?.data?.maxAccess,
     changeDT(value) {
-      setNraId(value?.nraId ?? 'nraId')
+      setNraId(value?.nraId || 'nraId')
     }
   }
 }

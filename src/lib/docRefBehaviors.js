@@ -104,7 +104,7 @@ const documentType = async (getRequest, functionId, maxAccess, selectNraId = und
   let dcTypeRequired
   let activeStatus = true
 
-  if (docType && selectNraId === undefined) {
+  if ((docType && selectNraId === undefined) || selectNraId === 'nraId') {
     if (dtId) {
       const dcTypNumberRange = await fetchData(getRequest, dtId, 'DcTypNumberRange') //DT
       nraId = dcTypNumberRange?.nraId
@@ -113,7 +113,6 @@ const documentType = async (getRequest, functionId, maxAccess, selectNraId = und
         errorMessage = 'Assign the document type to a number range'
       }
     }
-    console.log('hasDT', hasDT)
     if ((!dtId || !activeStatus) && hasDT) {
       const documentType = await fetchData(getRequest, functionId, 'DocumentType') //qryDT
       dcTypeRequired = documentType?.list?.filter(item => item?.activeStatus === 1).length > 0
@@ -123,6 +122,7 @@ const documentType = async (getRequest, functionId, maxAccess, selectNraId = und
     if (((!dtId || dtId) && !nraId) || (nraId && !activeStatus)) {
       const glbSysNumberRange = await fetchData(getRequest, functionId, 'glbSysNumberRange') //fun
       nraId = glbSysNumberRange?.nraId
+
       if (nraId && dcTypeRequired) {
         dcTypeRequired = false
       }

@@ -109,5 +109,18 @@ export const FinancialRepository = {
   },
   FinancialTransaction: {
     qry: service + 'qryTRX'
+  },
+  ReceiptVouchers: {
+    qry: service + 'qryRV',
+    get: service + 'getRV',
+    set: service + 'setRV',
+    del: service + 'delRV',
+    page: service + 'pageRV',
+    snapshot: service + 'snapshotRV',
+    cancel: service + 'cancelRV',
+    post: service + 'postRV'
+  },
+  Contact: {
+    qry: service + 'qryContact'
   }
 }

@@ -146,6 +146,7 @@ export const ResourceIds = {
   Common: 140,
   IncreaseDecreaseAdj: 33301,
   CashTransactions: 33312,
+  ReceiptVoucher: 31304,
   CreditNote: 31306,
   DebitNote: 31311,
   ServiceBillReceived: 31312,
