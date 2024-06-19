@@ -127,25 +127,25 @@ export default function InstantCash({ onInstantCashSubmit, cashData = {}, window
   })
   useEffect(() => {
     ;(async function () {
-      if (cashData.deliveryModeId) formik.setValues(cashData)
-      if (outwardsData.countryId) {
-        const res = await getRequest({
-          extension: SystemRepository.Country.get,
-          parameters: `_recordId=${outwardsData.countryId}`
-        })
-        if (!res.record?.isoCode1) {
-          stackError({
-            message: `Please assign iso code1 to ${res.record.name}`
+      try {
+        if (cashData.deliveryModeId) formik.setValues(cashData)
+        if (outwardsData.countryId) {
+          const res = await getRequest({
+            extension: SystemRepository.Country.get,
+            parameters: `_recordId=${outwardsData.countryId}`
           })
+          if (!res.record?.isoCode1) {
+            stackError({
+              message: `Please assign iso code1 to ${res.record.name}`
+            })
 
-          return
+            return
+          }
+          formik.setFieldValue('toCountryId', res?.record?.isoCode1.trim())
         }
-
-        formik.setFieldValue('toCountryId', res?.record?.isoCode1.trim())
-      }
+      } catch (error) {}
     })()
   }, [])
-  console.log('formik check ', formik)
 
   return (
     <FormShell
@@ -170,11 +170,7 @@ export default function InstantCash({ onInstantCashSubmit, cashData = {}, window
               values={formik.values}
               required
               onChange={(event, newValue) => {
-                if (newValue) {
-                  formik.setFieldValue('deliveryModeId', newValue?.recordId)
-                } else {
-                  formik.setFieldValue('deliveryModeId', '')
-                }
+                formik.setFieldValue('deliveryModeId', newValue ? newValue.recordId : '')
                 formik.setFieldValue('payingAgent', '')
               }}
               maxAccess={maxAccess}
@@ -214,13 +210,8 @@ export default function InstantCash({ onInstantCashSubmit, cashData = {}, window
               ]}
               values={formik.values}
               onChange={(event, newValue) => {
-                if (newValue) {
-                  formik.setFieldValue('payingAgent', newValue?.recordId)
-                  formik.setFieldValue('currency', newValue?.payingCurrency)
-                } else {
-                  formik.setFieldValue('payingAgent', '')
-                  formik.setFieldValue('currency', '')
-                }
+                formik.setFieldValue('payingAgent', newValue ? newValue.recordId : '')
+                formik.setFieldValue('currency', newValue ? newValue.payingCurrency : '')
               }}
               maxAccess={maxAccess}
               error={formik.touched.payingAgent && Boolean(formik.errors.payingAgent)}
@@ -300,11 +291,7 @@ export default function InstantCash({ onInstantCashSubmit, cashData = {}, window
                 displayField='name'
                 value={formik.values.remitter.employerStatus}
                 onChange={(event, newValue) => {
-                  if (newValue) {
-                    formik.setFieldValue('remitter.employerStatus', newValue?.recordId)
-                  } else {
-                    formik.setFieldValue('remitter.employerStatus', '')
-                  }
+                  formik.setFieldValue('remitter.employerStatus', newValue ? newValue.recordId : '')
                 }}
                 maxAccess={maxAccess}
                 error={formik.touched.remitter?.employerStatus && Boolean(formik.errors.remitter?.employerStatus)}

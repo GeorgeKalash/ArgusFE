@@ -4,7 +4,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-const ProductsWindow = ({ labels, width, height, gridData, maxAccess, form }) => {
+const ProductsWindow = ({ labels, gridData, maxAccess, form }) => {
   const columns = [
     {
       field: 'productRef',
