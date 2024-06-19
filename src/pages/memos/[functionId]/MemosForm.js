@@ -119,11 +119,11 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
     })()
   }, [])
   useEffect(() => {
-    let calculatedAmount = formik.values.subtotal
+    let calculatedAmount = parseFloat(formik.values.subtotal)
 
     if (formik.values.isSubjectToVAT) {
       formik.setFieldValue('vatPct', initialVatPct)
-      const vatAmount = formik.values.subtotal / initialVatPct
+      const vatAmount = (calculatedAmount * parseFloat(initialVatPct)) / 100
       formik.setFieldValue('vatAmount', vatAmount)
 
       calculatedAmount += vatAmount
