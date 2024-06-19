@@ -32,7 +32,7 @@ const Financial = () => {
 
     const response = await getRequest({
       extension: FinancialRepository.FiMemo.qry,
-      parameters: `_startAt=${_startAt}&_params=&_pageSize=50&_sortBy=reference&_functionId=${functionId}`
+      parameters: `_startAt=${_startAt}&_params=&_pageSize=${_pageSize}&_sortBy=reference&_functionId=${functionId}`
     })
 
     return { ...response, _startAt: _startAt }

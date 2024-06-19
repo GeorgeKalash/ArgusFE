@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -132,17 +132,15 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
         toast.success('Record Posted Successfully')
         invalidate()
 
-        try {
-          const getRes = await getRequest({
-            extension: CashBankRepository.CAadjustment.get,
-            parameters: `_recordId=${formik.values.recordId}`
-          })
+        const getRes = await getRequest({
+          extension: CashBankRepository.CAadjustment.get,
+          parameters: `_recordId=${formik.values.recordId}`
+        })
 
-          getRes.record.date = formatDateFromApi(getRes.record.date)
-          formik.setValues(getRes.record)
-        } catch (getError) {}
+        getRes.record.date = formatDateFromApi(getRes.record.date)
+        formik.setValues(getRes.record)
       }
-    } catch (postError) {}
+    } catch (error) {}
   }
 
   const onWorkFlowClick = async () => {

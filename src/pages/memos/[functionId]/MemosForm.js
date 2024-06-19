@@ -36,21 +36,6 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
     endpointId: FinancialRepository.FiMemo.qry
   })
 
-  // const getSetEndpoint = functionId => {
-  //   switch (functionId) {
-  //     case SystemFunction.CreditNote:
-  //       return FinancialRepository.CreditNote.set
-  //     case SystemFunction.DebitNote:
-  //       return FinancialRepository.DebitNote.set
-  //     case SystemFunction.ServiceBill:
-  //       return FinancialRepository.ServiceBillReceived.set
-  //     case SystemFunction.ServiceInvoice:
-  //       return FinancialRepository.ServiceInvoice.set
-  //     default:
-  //       return null
-  //   }
-  // }
-
   const { formik } = useForm({
     initialValues: {
       recordId: recordId || null,
@@ -83,8 +68,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
       date: yup.string().required(' ')
     }),
     onSubmit: async obj => {
-      const recordId = obj.recordId
-      if (!recordId) {
+      if (!obj.recordId) {
         obj.baseAmount = obj.amount
         obj.status = 1
         obj.rateCalcMethod = 1
@@ -96,7 +80,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
         record: JSON.stringify(obj)
       })
 
-      if (!recordId) {
+      if (!obj.recordId) {
         toast.success('Record Added Successfully')
         formik.setValues({
           ...obj,
@@ -135,7 +119,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
     })()
   }, [])
   useEffect(() => {
-    let calculatedAmount = parseInt(formik.values.subtotal)
+    let calculatedAmount = formik.values.subtotal
 
     if (formik.values.isSubjectToVAT) {
       formik.setFieldValue('vatPct', initialVatPct)
@@ -170,7 +154,6 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
       } catch (exception) {}
     })()
   }, [])
-  console.log(formik.values, 'formike')
   useEffect(() => {
     formik.setFieldValue('templateId', '')
   }, [formik.values.notes])
@@ -186,17 +169,15 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
         toast.success('Record Posted Successfully')
         invalidate()
 
-        try {
-          const getRes = await getRequest({
-            extension: FinancialRepository.FiMemo.get,
-            parameters: `_recordId=${formik.values.recordId}`
-          })
+        const getRes = await getRequest({
+          extension: FinancialRepository.FiMemo.get,
+          parameters: `_recordId=${formik.values.recordId}`
+        })
 
-          getRes.record.date = formatDateFromApi(getRes.record.date)
-          formik.setValues(getRes.record)
-        } catch (getError) {}
+        getRes.record.date = formatDateFromApi(getRes.record.date)
+        formik.setValues(getRes.record)
       }
-    } catch (postError) {}
+    } catch (error) {}
   }
 
   const onCancel = async () => {
@@ -210,19 +191,16 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
         toast.success('Record Canceled Successfully')
         invalidate()
 
-        try {
-          const getRes = await getRequest({
-            extension: FinancialRepository.FiMemo.get,
-            parameters: `_recordId=${formik.values.recordId}`
-          })
+        const getRes = await getRequest({
+          extension: FinancialRepository.FiMemo.get,
+          parameters: `_recordId=${formik.values.recordId}`
+        })
 
-          getRes.record.date = formatDateFromApi(getRes.record.date)
-          formik.setValues(getRes.record)
-        } catch (getError) {}
+        getRes.record.date = formatDateFromApi(getRes.record.date)
+        formik.setValues(getRes.record)
       }
-    } catch (cancelError) {}
+    } catch (error) {}
   }
-
   const postedOrCanceled = formik.values.status === -1 || formik.values.status === 3
 
   const actions = [
@@ -439,7 +417,6 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                 <Grid item xs={12}>
                   <CustomNumberField
                     name='amount'
-                    type='text'
                     readOnly
                     label={labels.amount}
                     value={formik.values.amount}
@@ -475,15 +452,9 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                   { key: 'groupName', value: 'Account Group' }
                 ]}
                 onChange={(event, newValue) => {
-                  if (newValue) {
-                    formik.setFieldValue('accountId', newValue?.recordId || '')
-                    formik.setFieldValue('accountRef', newValue?.reference)
-                    formik.setFieldValue('accountName', newValue?.name)
-                  } else {
-                    formik.setFieldValue('accountId', null)
-                    formik.setFieldValue('accountRef', null)
-                    formik.setFieldValue('accountName', null)
-                  }
+                  formik.setFieldValue('accountId', newValue ? newValue.recordId : '')
+                  formik.setFieldValue('accountRef', newValue ? newValue.reference : '')
+                  formik.setFieldValue('accountName', newValue ? newValue.name : '')
                 }}
                 error={formik.touched.accountId && Boolean(formik.errors.accountId) && !formik.values.accountId}
               />
