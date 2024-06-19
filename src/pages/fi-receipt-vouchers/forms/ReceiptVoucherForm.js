@@ -20,7 +20,6 @@ import { LogisticsRepository } from 'src/repositories/LogisticsRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
-import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { DataSets } from 'src/resources/DataSets'
 import { getStorageData } from 'src/storage/storage'
@@ -77,18 +76,18 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       paymentMethod: yup.string().required(' ')
     }),
     onSubmit: async obj => {
-      const recordId = obj.recordId
-
-      const response = await postRequest({
-        extension: FinancialRepository.ReceiptVouchers.set,
-        record: JSON.stringify(obj)
-      })
-      if (!recordId) {
-        toast.success('Record Added Successfully')
-        formik.setFieldValue('recordId', response.recordId)
-        getData(response.recordId)
-      } else toast.success('Record Edited Successfully')
-      invalidate()
+      try {
+        const response = await postRequest({
+          extension: FinancialRepository.ReceiptVouchers.set,
+          record: JSON.stringify(obj)
+        })
+        if (!obj.recordId) {
+          toast.success('Record Added Successfully')
+          formik.setFieldValue('recordId', response.recordId)
+          getData(response.recordId)
+        } else toast.success('Record Edited Successfully')
+        invalidate()
+      } catch (e) {}
     }
   })
   const editMode = !!recordId || !!formik.values.recordId
@@ -129,6 +128,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       }
     } catch (error) {}
   }
+
   useEffect(() => {
     formik.setFieldValue('templateId', '')
   }, [formik.values.notes])
