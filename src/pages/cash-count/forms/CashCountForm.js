@@ -33,7 +33,6 @@ export default function CashCountForm({ labels, maxAccess: access, recordId }) {
   const { platformLabels } = useContext(ControlContext)
   const [editMode, setEditMode] = useState(!!recordId)
   const { stack } = useWindow()
-
   const [isClosed, setIsClosed] = useState(false)
   const [isPosted, setIsPosted] = useState(false)
 
