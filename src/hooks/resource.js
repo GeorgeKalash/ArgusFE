@@ -40,7 +40,7 @@ export function useResourceQuery({ endpointId, filter, datasetId, queryFn, searc
       : { list: [] },
     enabled: access?.record?.maxAccess > 0
   })
-  console.log(query)
+
   return {
     access,
     labels,

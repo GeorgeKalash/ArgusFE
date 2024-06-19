@@ -61,10 +61,6 @@ export default function FormShell({
     if (setIDInfoAutoFilled) {
       setIDInfoAutoFilled(false)
     }
-
-    // if (typeof setEditMode === 'function') {
-    //   setEditMode(false)
-    // }
   }
 
   function onApproval() {
