@@ -373,6 +373,8 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
             } else {
               const updatedList = res.list.map(product => {
                 if (product.productId === formFields.productId) {
+                  productFormik.setValues(product)
+
                   return { ...product, checked: true }
                 }
 
@@ -430,7 +432,7 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
         },
         width: 700,
         height: 500,
-        title: 'Cash'
+        title: labels.cash
       })
     } else if (formValues.dispersalType === 2) {
       stack({
@@ -448,7 +450,7 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
         },
         width: 900,
         height: 600,
-        title: 'Bank'
+        title: labels.bank
       })
     }
   }
@@ -550,7 +552,7 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
         },
         width: 1000,
         height: 650,
-        title: 'Instant Cash'
+        title: labels.instantCash
       })
     } else if (productFormik.values.interfaceId == 2) {
       stack({
@@ -558,7 +560,7 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
         props: {},
         width: 700,
         height: 500,
-        title: 'Terra Pay'
+        title: labels.terraPay
       })
     }
   }
@@ -627,7 +629,6 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
           res.record.headerView.date = formatDateFromApi(res.record.headerView.date)
           res.record.headerView.defaultValueDate = formatDateFromApi(res.record.headerView.defaultValueDate)
           res.record.headerView.valueDate = formatDateFromApi(res.record.headerView.valueDate)
-          res.record.checked = true
           getClientInfo(res.record.headerView.clientId)
           fillFormData(res.record)
           productDataFill(res.record.headerView)
