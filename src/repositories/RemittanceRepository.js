@@ -8,6 +8,9 @@ export const RemittanceSettingsRepository = {
     set: service + 'setITF',
     del: service + 'delITF'
   },
+  sourceOfIncome: {
+    qry: service + 'qrySIT'
+  },
   ProductMaster: {
     qry: service + 'qryPRO',
     page: service + 'pagePRO',
