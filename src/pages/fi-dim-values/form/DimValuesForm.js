@@ -14,12 +14,12 @@ import { useForm } from 'src/hooks/form'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 
-export default function DimValuesForm({ labels, maxAccess, recordId, record, filteredRecordId, invalidate }) {
+export default function DimValuesForm({ labels, maxAccess, dimensionId, id, invalidate }) {
   0
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const { formik } = useForm({
-    initialValues: { recordId: recordId || null, id: '', name: '', dimension: filteredRecordId },
+    initialValues: { id: id, name: '', dimension: dimensionId },
     maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
@@ -40,27 +40,23 @@ export default function DimValuesForm({ labels, maxAccess, recordId, record, fil
       } else toast.success('Record Edited Successfully')
       formik.setValues({
         ...obj,
-        recordId: obj.id
+        id: obj.id
       })
 
       invalidate()
     }
   })
-  const editMode = !!formik.values.recordId || !!recordId
 
   useEffect(() => {
     ;(async function () {
       try {
-        if (record && record.id && record.dimension) {
+        if (dimensionId && id) {
           const res = await getRequest({
             extension: FinancialRepository.DimensionValue.get,
-            parameters: `_Id=${record.id}&_dimension=${record.dimension}`
+            parameters: `_Id=${formik.values.id}&_dimension=${dimensionId}`
           })
 
-          formik.setValues({
-            ...res.record,
-            recordId: res.record.id
-          })
+          formik.setValues(res.record)
         }
       } catch (exception) {}
     })()

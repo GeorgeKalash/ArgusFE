@@ -14,12 +14,15 @@ import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import DimValuesForm from './form/DimValuesForm'
+import { Grid } from '@mui/material'
 
 const DimensionsValues = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
-  const [filteredRecordId, setFilterRecordId] = useState(null)
+  const [tpaValues, setTpaValues] = useState([])
+  const [selectedTpaValue, setSelectedTpaValue] = useState({ key: null, value: '' })
+  const formatedRecordId = typeof selectedTpaValue?.key == 'string' ? selectedTpaValue.key.match(/\d+/)?.[0] : null
 
   const {
     query: { data },
@@ -39,18 +42,18 @@ const DimensionsValues = () => {
   })
 
   useEffect(() => {
-    if (filteredRecordId !== null) {
-      filterBy('qry', filteredRecordId)
+    if (formatedRecordId !== null) {
+      filterBy('qry', formatedRecordId)
     } else {
       clearFilter('qry')
     }
-  }, [filteredRecordId])
+  }, [formatedRecordId])
 
   async function fetchWithSearch({ filters }) {
-    if (filteredRecordId) {
+    if (formatedRecordId) {
       const data = await getRequest({
         extension: FinancialRepository.DimensionValue.qry,
-        parameters: `_filter=${filters.qry}&_dimension=${filteredRecordId}`
+        parameters: `_filter=${filters.qry}&_dimension=${formatedRecordId}`
       })
 
       return data
@@ -84,23 +87,28 @@ const DimensionsValues = () => {
   }
 
   const add = () => {
-    openForm()
+    if (formatedRecordId) {
+      openForm()
+    } else {
+      toast.error('Select A Dimension', {
+        position: 'top-right'
+      })
+    }
   }
 
   const edit = obj => {
-    openForm(obj)
+    openForm(obj?.id)
   }
 
-  function openForm(record) {
+  function openForm(id) {
     stack({
       Component: DimValuesForm,
       props: {
         labels: _labels,
-        record: record,
-        recordId: record ? record.Id : undefined,
+        id: id,
         maxAccess: access,
         invalidate,
-        filteredRecordId
+        dimensionId: formatedRecordId
       },
       width: 600,
       height: 500,
@@ -109,28 +117,46 @@ const DimensionsValues = () => {
   }
   const emptyValues = item => item.value !== null && item.value !== ''
 
+  useEffect(() => {
+    ;(async () => {
+      const data = await getRequest({
+        extension: SystemRepository.Defaults.qry,
+        parameters: `_filter=tpaDimension`
+      })
+
+      if (data) {
+        const result = data.list.filter(emptyValues)
+        setTpaValues(result)
+        setSelectedTpaValue(result[0])
+      }
+    })()
+  }, [])
+
   return (
     <VertLayout>
       <Fixed>
         <GridToolbar onAdd={add} maxAccess={access} labels={_labels} />
-        <ResourceComboBox
-          endpointId={SystemRepository.Defaults.qry}
-          parameters={`_filter=tpaDimension`}
-          label={_labels.group}
-          filter={emptyValues}
-          valueField='key'
-          displayField={['value']}
-          maxAccess={access}
-          onChange={(event, newValue) => {
-            const number = newValue?.key.match(/\d+/)?.[0]
-            setFilterRecordId(number)
-          }}
-        />
+        <Grid container>
+          <Grid item sx={{ marginLeft: '1rem' }} xs={6}>
+            <ResourceComboBox
+              label={_labels.group}
+              filter={emptyValues}
+              valueField='key'
+              displayField={['value']}
+              store={tpaValues}
+              value={selectedTpaValue}
+              maxAccess={access}
+              onChange={(event, newValue) => {
+                setSelectedTpaValue(newValue)
+              }}
+            />
+          </Grid>
+        </Grid>
       </Fixed>
       <Grow>
         <Table
           columns={columns}
-          gridData={filteredRecordId ? data : { list: [], count: 0 }}
+          gridData={formatedRecordId ? data : { list: [], count: 0 }}
           rowId={['id']}
           onEdit={edit}
           onDelete={del}
