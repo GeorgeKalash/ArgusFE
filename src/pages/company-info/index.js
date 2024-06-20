@@ -98,15 +98,15 @@ const CompanyInfo = () => {
     }
   })
 
-  const post = obj => {
-    postRequest({
+  const post = async obj => {
+    const result = await postRequest({
       extension: SystemRepository.CompanyInfo.set,
       record: JSON.stringify({ ...obj, attachment: null })
     })
-      .then(res => {})
-      .catch(error => {})
-    const res = PostImage(postRequest, obj, initialValues)
+    const res = await PostImage(postRequest, obj, initialValues)
     if (res) {
+      toast.success('Record Edited Successfully')
+    } else if (result) {
       toast.success('Record Edited Successfully')
     }
   }
