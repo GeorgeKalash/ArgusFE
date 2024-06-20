@@ -21,6 +21,7 @@ import { RTOWMRepository } from 'src/repositories/RTOWMRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
+import { useWindow } from 'src/windows'
 
 export default function OutwardsModificationForm({ access, labels, recordId, invalidate }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -29,7 +30,7 @@ export default function OutwardsModificationForm({ access, labels, recordId, inv
   const [displayBank, setDisplayBank] = useState(false)
   const [isClosed, setIsClosed] = useState(false)
   const [isPosted, setIsPosted] = useState(false)
-  const [otpShow, setOtpShow] = useState(false)
+  const { stack } = useWindow()
 
   const [store, setStore] = useState(
     { submitted: false },
@@ -286,17 +287,29 @@ export default function OutwardsModificationForm({ access, labels, recordId, inv
             formik.setFieldValue('recordId', res.recordId)
             invalidate()
             setEditMode(true)
-            setOtpShow(true)
 
             const res2 = await getRequest({
               extension: RTOWMRepository.OutwardsModification.get,
               parameters: `_recordId=${res.recordId}`
             })
+
             formik.setFieldValue('reference', res2.record.reference)
             setStore(prevStore => ({
               ...prevStore,
               fullModifiedOutwardBody: res2.record
             }))
+
+            stack({
+              Component: OTPPhoneVerification,
+              props: {
+                formValidation: formik,
+                recordId: res.recordId,
+                functionId: SystemFunction.OutwardsModification
+              },
+              width: 400,
+              height: 400,
+              title: labels.OTPVerification
+            })
           }
         }
 
@@ -308,17 +321,6 @@ export default function OutwardsModificationForm({ access, labels, recordId, inv
           res.record.date = formatDateFromApi(res.record.date)
           fillOutwardData(res.record)
         }
-        if (formik.values.recordId && otpShow)
-          stack({
-            Component: OTPPhoneVerification,
-            props: {
-              formValidation: formik,
-              functionId: SystemFunction.OutwardsModification
-            },
-            width: 400,
-            height: 400,
-            title: labels.OTPVerification
-          })
       } catch (error) {}
     })()
   }, [store.beneficiaryList, formik.values.recordId])

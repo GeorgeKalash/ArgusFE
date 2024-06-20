@@ -638,11 +638,12 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
         } else {
           getDefaultDT()
         }
-        if (formik.values.recordId && otpShow && !editMode)
+        if (formik.values.recordId && otpShow)
           stack({
             Component: OTPPhoneVerification,
             props: {
               formValidation: formik,
+              recordId: formik.values.recordId,
               functionId: SystemFunction.Outwards
             },
             width: 400,
