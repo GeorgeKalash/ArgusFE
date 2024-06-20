@@ -474,19 +474,6 @@ const Table = ({
   const handleRowSelection = params => {
     setSelectedRow(params.id)
   }
-  const getMaxId = () => {
-    const ids = gridData.list.map(row => getRowId(row))
-    console.log(ids)
-    setSelectedRow(Math.max(...ids))
-  }
-  useEffect(() => {
-    gridData && getMaxId()
-  }, [gridData])
-
-  // const rowSelection = newRowData => {
-  //   const newRowId = getRowId(newRowData)
-  //   setSelectedRow(newRowId.id)
-  // }
 
   return (
     <>
