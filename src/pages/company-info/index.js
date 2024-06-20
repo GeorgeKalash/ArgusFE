@@ -19,17 +19,21 @@ export function PostImage(postRequest, obj, initialValues) {
       extension: SystemRepository.Attachment.set,
       record: JSON.stringify(obj.attachment),
       file: obj?.attachment?.file
-    }).then(res => {
-      return res
     })
+      .then(res => {
+        return res
+      })
+      .catch(e => {})
   } else if (!obj?.attachment && initialValues?.attachment?.url) {
     return postRequest({
       extension: SystemRepository.Attachment.del,
       record: JSON.stringify(initialValues.attachment),
       file: obj?.attachment?.url
-    }).then(res => {
-      return res
     })
+      .then(res => {
+        return res
+      })
+      .catch(e => {})
   }
 }
 
@@ -105,26 +109,6 @@ const CompanyInfo = () => {
     if (res) {
       toast.success('Record Edited Successfully')
     }
-
-    // if (obj?.attachment?.file) {
-    //   postRequest({
-    //     extension: SystemRepository.Attachment.set,
-    //     record: JSON.stringify(obj.attachment),
-    //     file: obj?.attachment?.file
-    //   }).then(res => {
-    //     if (res) toast.success('Record Edited Successfully')
-    //   })
-    // } else if (!obj?.attachment && initialValues?.attachment?.url) {
-    //   postRequest({
-    //     extension: SystemRepository.Attachment.del,
-    //     record: JSON.stringify(initialValues.attachment),
-    //     file: obj?.attachment?.url
-    //   }).then(res => {
-    //     if (res) toast.success('Record Edited Successfully')
-    //   })
-    // } else {
-    //   toast.success('Record Edited Successfully')
-    // }
   }
 
   return (

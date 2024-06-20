@@ -1,4 +1,4 @@
-import { Box, Grid } from '@mui/material'
+import { Box } from '@mui/material'
 import React, { useContext, useEffect, useState } from 'react'
 import { useRef } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -15,14 +15,16 @@ const ImageUpload = ({ name, value, onChange, resourceId, error, seqNo, recordId
   }, [])
 
   async function getData() {
-    const result = await getRequest({
-      extension: SystemRepository.Attachment.get,
-      parameters: `_resourceId=${resourceId}&_seqNo=${seqNo}&_recordId=${recordId}`
-    })
-    setInitialData(prevData => ({
-      ...prevData,
-      [name]: result?.record
-    }))
+    try {
+      const result = await getRequest({
+        extension: SystemRepository.Attachment.get,
+        parameters: `_resourceId=${resourceId}&_seqNo=${seqNo}&_recordId=${recordId}`
+      })
+      setInitialData(prevData => ({
+        ...prevData,
+        [name]: result?.record
+      }))
+    } catch (e) {}
   }
 
   const handleClick = () => {
