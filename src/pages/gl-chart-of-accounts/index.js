@@ -4,16 +4,19 @@ import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+
 import { ResourceIds } from 'src/resources/ResourceIds'
+import ChartOfAccountsForm from './forms/ChartOfAccountsForm'
+import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+
+import { useWindow } from 'src/windows'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import ChartOfAccountsForm from './forms/ChartOfAccountsForm'
-import { useWindow } from 'src/windows'
 
 const ChartOfAccounts = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+
   const { stack } = useWindow()
 
   const invalidate = useInvalidate({
@@ -81,14 +84,6 @@ const ChartOfAccounts = () => {
     }
   ]
 
-  const add = () => {
-    openForm()
-  }
-
-  const edit = obj => {
-    openForm(obj?.recordId)
-  }
-
   const del = async obj => {
     try {
       await postRequest({
@@ -101,17 +96,24 @@ const ChartOfAccounts = () => {
     } catch (err) {}
   }
 
+  const edit = obj => {
+    openForm(obj.recordId)
+  }
+
+  const add = () => {
+    openForm()
+  }
+
   function openForm(recordId) {
     stack({
       Component: ChartOfAccountsForm,
       props: {
         labels: _labels,
-        recordId: recordId ? recordId : null,
         maxAccess: access,
-        invalidate: invalidate
+        recordId: recordId ? recordId : null
       },
-      width: 600,
-      height: 600,
+      width: 500,
+      height: 540,
       title: _labels.chartOfAccount
     })
   }
@@ -135,6 +137,7 @@ const ChartOfAccounts = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
+          refetch={refetch}
           deleteConfirmationType={'strict'}
           isLoading={false}
           pageSize={50}

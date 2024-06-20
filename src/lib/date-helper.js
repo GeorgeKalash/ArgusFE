@@ -68,6 +68,21 @@ function formatTimestampToDate(timestamp) {
 
   return formattedDate
 }
+function getTimeInTimeZone(dateString, timeZone = 0) {
+  const timestamp = parseInt(dateString.match(/\/Date\((\d+)\)\//)[1], 10)
+  const currentDate = new Date(timestamp)
+
+  currentDate.setHours(currentDate.getHours() + timeZone)
+  function padNumber(num) {
+    return num < 10 ? '0' + num : num
+  }
+
+  let newHours = padNumber(currentDate.getHours())
+  let newMinutes = padNumber(currentDate.getMinutes())
+  let newSeconds = padNumber(currentDate.getSeconds())
+
+  return `${newHours}:${newMinutes}:${newSeconds}`
+}
 
 export {
   formatDateFromApi,
@@ -75,5 +90,6 @@ export {
   formatDateToApiFunction,
   formatDateDefault,
   formatTimestampToDate,
-  formatDateFromApiInline
+  formatDateFromApiInline,
+  getTimeInTimeZone
 }

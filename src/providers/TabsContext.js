@@ -19,14 +19,14 @@ function CustomTabPanel(props) {
       id={`simple-tabpanel-${index}`}
       aria-labelledby={`simple-tab-${index}`}
       sx={{
-        display: value !== index ? 'none !important' : 'flex !important', 
-        flexDirection: 'column', 
+        display: value !== index ? 'none !important' : 'flex !important',
+        flexDirection: 'column',
         width: '100%',
-        flex :'1 !important', 
-        overflow:'auto',
-        paddingTop:'5px',
+        flex: '1 !important',
+        overflow: 'auto',
+        paddingTop: '5px',
         position: 'relative',
-        backgroundColor:'white'
+        backgroundColor: 'white'
       }}
       {...other}
     >
@@ -178,30 +178,45 @@ const TabsProvider = ({ children }) => {
 
   return (
     <>
-      <Box sx={{ display: 'flex !important', flexDirection: 'column', width: '100%',flex :'1 !important', overflow:'auto' }}>
-        <Box sx={{ backgroundColor:'#231f20',pt:'5px'}}>
+      <Box
+        sx={{
+          display: 'flex !important',
+          flexDirection: 'column',
+          width: '100%',
+          flex: '1 !important',
+          overflow: 'auto'
+        }}
+      >
+        <Box sx={{ backgroundColor: '#231f20', pt: '5px', position: 'relative !important', zIndex: '3 !important' }}>
           <Tabs
             value={currentTabIndex}
             onChange={handleChange}
-            variant="scrollable"
-            scrollButtons="auto"
-            aria-label="scrollable auto tabs example"
+            variant='scrollable'
+            scrollButtons='auto'
+            aria-label='scrollable auto tabs example'
             sx={{
               minHeight: '35px !important',
-              '.MuiTab-root': { 
-                color: 'white',  
-                backgroundColor:'grey',
+              '.MuiTab-root': {
+                color: 'white',
+                backgroundColor: 'grey',
                 '&:hover': {
-                  color:'grey',
+                  color: 'grey',
                   backgroundColor: '#ddd'
                 }
               },
-              '.Mui-selected': { 
-                color: '#231f20',  
+              '.Mui-selected': {
+                color: '#231f20',
                 backgroundColor: 'white'
               },
               '.MuiTabs-indicator': {
                 backgroundColor: 'white'
+              },
+
+              '.MuiSvgIcon-root': {
+                color: 'white!important'
+              },
+              '.MuiTab-root .MuiSvgIcon-root': {
+                color: '#5A585E !important'
               }
             }}
           >
@@ -226,7 +241,7 @@ const TabsProvider = ({ children }) => {
                         </IconButton>
                       }
                       iconPosition='end'
-                      sx={{ 
+                      sx={{
                         minHeight: '35px !important',
                         borderTopLeftRadius: 5,
                         borderTopRightRadius: 5,
@@ -235,8 +250,8 @@ const TabsProvider = ({ children }) => {
                         borderBottom: '0px !important',
                         mr: '2px !important',
                         fontWeight: '1.5rem',
-                        pr:'0px !important',
-                        pl:'10px !important'
+                        pr: '0px !important',
+                        pl: '10px !important'
                       }}
                     />
                   )

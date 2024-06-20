@@ -1,10 +1,9 @@
-import { useState, useContext } from 'react'
+import { useContext } from 'react'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
 import CashTransferTab from './Tabs/CashTransferTab'
@@ -15,13 +14,13 @@ import { formatDateDefault } from 'src/lib/date-helper'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { useError } from 'src/error'
+import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 
 const CashTransfer = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
-
-  //states
-  const [errorMessage, setErrorMessage] = useState(null)
   const { stack } = useWindow()
+  const { stack: stackError } = useError()
 
   const {
     query: { data },
@@ -38,15 +37,11 @@ const CashTransfer = () => {
       filterFn: fetchWithSearch
     }
   })
-  async function fetchWithSearch({ options = {}, filters }) {
-    const { _startAt = 0, _pageSize = 50 } = options
-
+  async function fetchWithSearch({ filters }) {
     return await getRequest({
       extension: CashBankRepository.CashTransfer.snapshot,
       parameters: `_filter=${filters.qry}`
     })
-
-    return
   }
 
   const invalidate = useInvalidate({
@@ -58,85 +53,64 @@ const CashTransfer = () => {
     : null
 
   const getPlantId = async () => {
-    const parameters = `_userId=${userData && userData.userId}&_key=plantId`
+    const res = await getRequest({
+      extension: SystemRepository.UserDefaults.get,
+      parameters: `_userId=${userData && userData.userId}&_key=plantId`
+    })
 
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.UserDefaults.get,
-        parameters: parameters
-      })
-
-      if (res.record.value) {
-        return res.record.value
-      }
-
-      return ''
-    } catch (error) {
-      setErrorMessage(error)
-
-      return ''
+    if (res.record?.value) {
+      return res.record.value
     }
+
+    return ''
   }
 
   const getCashAccountId = async () => {
-    const parameters = `_userId=${userData && userData.userId}&_key=cashAccountId`
+    const res = await getRequest({
+      extension: SystemRepository.UserDefaults.get,
+      parameters: `_userId=${userData && userData.userId}&_key=cashAccountId`
+    })
 
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.UserDefaults.get,
-        parameters: parameters
-      })
-
-      if (res.record.value) {
-        return res.record.value
-      }
-
-      return ''
-    } catch (error) {
-      setErrorMessage(error)
-
-      return ''
+    if (res.record?.value) {
+      return res.record.value
     }
+
+    return ''
   }
 
   const getDefaultDT = async () => {
-    const parameters = `_userId=${userData && userData.userId}&_functionId=${SystemFunction.CashTransfer}`
-
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.UserFunction.get,
-        parameters: parameters
-      })
-      if (res.record) {
-        return res.record.dtId
-      }
-
-      return ''
-    } catch (error) {
-      setErrorMessage(error)
-
-      return ''
+    const res = await getRequest({
+      extension: SystemRepository.UserFunction.get,
+      parameters: `_userId=${userData && userData.userId}&_functionId=${SystemFunction.CashTransfer}`
+    })
+    if (res.record) {
+      return res.record.dtId
     }
+
+    return ''
   }
   async function openForm(recordId) {
-    try {
-      const plantId = await getPlantId()
-      const cashAccountId = await getCashAccountId()
-      const dtId = await getDefaultDT()
+    const plantId = await getPlantId()
+    const cashAccountId = await getCashAccountId()
+    const dtId = await getDefaultDT()
 
-      if (plantId !== '' && cashAccountId !== '') {
-        openCashTransferWindow(plantId, cashAccountId, recordId, dtId)
-      } else {
-        if (plantId === '') {
-          setErrorMessage({ error: 'The user does not have a default plant' })
-        }
-        if (cashAccountId === '') {
-          setErrorMessage({ error: 'The user does not have a default cash account' })
-        }
-        setWindowOpen(false)
+    if (plantId !== '' && cashAccountId !== '') {
+      openCashTransferWindow(plantId, cashAccountId, recordId, dtId)
+    } else {
+      if (plantId === '') {
+        stackError({
+          message: `This user does not have a default plant.`
+        })
+
+        return
       }
-    } catch (error) {
-      console.error(error)
+      if (cashAccountId === '') {
+        stackError({
+          message: `This user does not have a default cash account.`
+        })
+
+        return
+      }
     }
   }
 
@@ -182,8 +156,19 @@ const CashTransfer = () => {
       field: 'statusName',
       headerName: _labels.status,
       flex: 1
+    },
+    {
+      field: 'wipName',
+      headerName: _labels.wip,
+      flex: 1
     }
   ]
+
+  const { proxyAction } = useDocumentTypeProxy({
+    functionId: SystemFunction.CashTransfer,
+    action: openForm,
+    hasDT: false
+  })
 
   const delCashTFR = async obj => {
     await postRequest({
@@ -195,7 +180,7 @@ const CashTransfer = () => {
   }
 
   const addCashTFR = () => {
-    openForm('')
+    proxyAction()
   }
 
   const editCashTFR = obj => {
@@ -209,7 +194,7 @@ const CashTransfer = () => {
         plantId: plantId,
         cashAccountId: cashAccountId,
         dtId: dtId,
-        maxAccess: access,
+        access,
         labels: _labels,
         recordId: recordId ? recordId : null
       },
@@ -248,7 +233,6 @@ const CashTransfer = () => {
           maxAccess={access}
         />
       </Grow>
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </VertLayout>
   )
 }

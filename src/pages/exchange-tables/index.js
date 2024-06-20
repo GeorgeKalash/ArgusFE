@@ -11,9 +11,11 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import ExchangeTablesForm from './forms/ExchangeTablesForm'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const ExchangeTables = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
@@ -56,7 +58,7 @@ const ExchangeTables = () => {
     },
     {
       field: 'currencyRef',
-      headerName: _labels.currency,
+      headerName: _labels.currencyId,
       flex: 1
     }
   ]
@@ -70,12 +72,14 @@ const ExchangeTables = () => {
   }
 
   const del = async obj => {
-    await postRequest({
-      extension: MultiCurrencyRepository.ExchangeTable.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success('Record Deleted Successfully')
+    try {
+      await postRequest({
+        extension: MultiCurrencyRepository.ExchangeTable.del,
+        record: JSON.stringify(obj)
+      })
+      invalidate()
+      toast.success(platformLabels.Deleted)
+    } catch (error) {}
   }
 
   function openForm(recordId) {
@@ -88,7 +92,7 @@ const ExchangeTables = () => {
         invalidate: invalidate
       },
       width: 600,
-      height: 600,
+      height: 450,
       title: _labels.ExchangeTables
     })
   }

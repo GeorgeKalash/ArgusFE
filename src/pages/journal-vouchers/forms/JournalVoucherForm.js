@@ -1,7 +1,6 @@
 // ** MUI Imports
 import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
-import { useFormik } from 'formik'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -16,22 +15,14 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import { useForm } from 'src/hooks/form'
+import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 
-export default function JournalVoucherForm({ labels, maxAccess, recordId }) {
-  const [isLoading, setIsLoading] = useState(false)
-  const [editMode, setEditMode] = useState(!!recordId)
-  const [responseValue, setResponseValue] = useState(null)
-
-  const [initialValues, setInitialData] = useState({
-    recordId: null,
-    reference: '',
-    date: new Date(),
-    notes: '',
-    currencyId: '',
-    dtId: '',
-    status: 1,
-    rateCalcMethod: 1,
-    exRate: 1
+export default function JournalVoucherForm({ labels, access, recordId, general = {} }) {
+  const { documentType, maxAccess, changeDT } = useDocumentType({
+    functionId: SystemFunction.JournalVoucher,
+    access: access,
+    enabled: !recordId
   })
 
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -40,21 +31,29 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId }) {
     endpointId: GeneralLedgerRepository.JournalVoucher.qry
   })
 
-  const formik = useFormik({
-    initialValues,
-    enableReinitialize: true,
+  const { formik } = useForm({
+    maxAccess,
+    initialValues: {
+      recordId: null,
+      reference: '',
+      date: new Date(),
+      notes: '',
+      currencyId: '',
+      dtId: documentType?.dtId,
+      status: 1,
+      rateCalcMethod: 1,
+      exRate: 1
+    },
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.string().required('This field is required'),
-      currencyId: yup.string().required('This field is required'),
-      dtId: yup.string().required('This field is required')
+      currencyId: yup.string().required('This field is required')
     }),
     onSubmit: async obj => {
       const data = {
         ...obj,
         date: formatDateToApi(obj.date),
-        recordId: initialValues.recordId,
-        response: responseValue
+        recordId: recordId
       }
       try {
         const response = await postRequest({
@@ -72,19 +71,16 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId }) {
 
           formik.setValues(res.record)
         } else toast.success('Record Edited Successfully')
-        setEditMode(true)
 
         invalidate()
       } catch (error) {}
     }
   })
-
+  const editMode = !!formik.values.recordId || !!recordId
   useEffect(() => {
     ;(async function () {
       try {
         if (recordId) {
-          setIsLoading(true)
-
           const res = await getRequest({
             extension: GeneralLedgerRepository.JournalVoucher.get,
             parameters: `_recordId=${recordId}`
@@ -122,19 +118,20 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId }) {
         <Grid item xs={12}>
           <ResourceComboBox
             endpointId={SystemRepository.DocumentType.qry}
+            parameters={`_dgId=${SystemFunction.JournalVoucher}&_startAt=${0}&_pageSize=${50}`}
+            filter={!editMode ? item => item.activeStatus === 1 : undefined}
             name='dtId'
             label={labels.documentType}
+            readOnly={editMode}
             valueField='recordId'
             displayField='name'
-            parameters={`_dgId=${SystemFunction.JournalVoucher}&_startAt=${0}&_pageSize=${50}`}
             values={formik.values}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('dtId', newValue?.recordId)
+            onChange={async (event, newValue) => {
+              formik.setFieldValue('dtId', newValue?.recordId || '')
+              changeDT(newValue)
             }}
             error={formik.touched.dtId && Boolean(formik.errors.dtId)}
-            helperText={formik.touched.dtId && formik.errors.dtId}
             maxAccess={maxAccess}
-            required
           />
         </Grid>
         <Grid item xs={12}>
@@ -142,13 +139,12 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId }) {
             name='reference'
             label={labels.reference}
             value={formik.values.reference}
-            readOnly
-            maxAccess={maxAccess}
+            readOnly={editMode}
+            maxAccess={!editMode && maxAccess}
             maxLength='30'
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('reference', '')}
             error={formik.touched.reference && Boolean(formik.errors.reference)}
-            helperText={formik.touched.reference && formik.errors.reference}
           />
         </Grid>
         <Grid item xs={12}>
@@ -160,8 +156,6 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId }) {
             maxAccess={maxAccess}
             required
             error={formik.touched.date && Boolean(formik.errors.date)}
-
-            //  disabledDate={Today}
           />
         </Grid>
         <Grid item xs={12}>
@@ -176,7 +170,6 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId }) {
               formik.setFieldValue('currencyId', newValue?.recordId)
             }}
             error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
-            helperText={formik.touched.currencyId && formik.errors.currencyId}
             maxAccess={maxAccess}
             required
           />
@@ -192,8 +185,6 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId }) {
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('notes', '')}
             error={formik.touched.notes && Boolean(formik.errors.notes)}
-
-            // helperText={formik.touched.notes && formik.errors.notes}
           />
         </Grid>
       </Grid>
