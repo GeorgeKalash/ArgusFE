@@ -9,18 +9,17 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { useForm } from 'src/hooks/form'
 import FormShell from './FormShell'
-import { getRpbList } from './RPBList'
 
-const ReportParameterBrowser = ({ reportName, paramsArray, setParamsArray, disabled, window }) => {
+// import { getRpbList } from './RPBList'
+
+const ReportParameterBrowser = ({ reportName, paramsArray, disabled, window }) => {
   const { getRequest } = useContext(RequestsContext)
 
   const [parameters, setParameters] = useState(null)
   const [fields, setFields] = useState([])
 
   const getParameterDefinition = () => {
-    var parameters = '_reportName=CA300'
-
-    //var parameters = '_reportName=' + reportName
+    var parameters = '_reportName=' + reportName
 
     getRequest({
       extension: SystemRepository.ParameterDefinition,
@@ -63,6 +62,10 @@ const ReportParameterBrowser = ({ reportName, paramsArray, setParamsArray, disab
       case 'currencyId':
         return {
           currencyId: formik?.values?.currencyId ? formik.values.currencyId : null
+        }
+      case 'cashAccountId':
+        return {
+          cashAccountId: formik?.values?.cashAccountId ? formik.values.cashAccountId : null
         }
 
       default:
@@ -112,7 +115,7 @@ const ReportParameterBrowser = ({ reportName, paramsArray, setParamsArray, disab
     })
   }
 
-  const rpbList = getRpbList()
+  //const rpbList = getRpbList()
 
   const getComboBoxByClassId = field => {
     switch (field.classId) {
@@ -161,7 +164,7 @@ const ReportParameterBrowser = ({ reportName, paramsArray, setParamsArray, disab
         })
         break
       case 20103:
-        var parameters = ''
+        var parameters = '_filter='
         getRequest({
           extension: 'SY.asmx/qryCU',
           parameters
@@ -174,7 +177,7 @@ const ReportParameterBrowser = ({ reportName, paramsArray, setParamsArray, disab
               ..._fieldValue
             }
           })
-          fields.push(getCombo({ field, valueField: 'recordId', displayField: 'fiscalYear', store: res.list }))
+          fields.push(getCombo({ field, valueField: 'recordId', displayField: 'reference', store: res.list }))
         })
         break
       case 20109:
@@ -191,7 +194,24 @@ const ReportParameterBrowser = ({ reportName, paramsArray, setParamsArray, disab
               ..._fieldValue
             }
           })
-          fields.push(getCombo({ field, valueField: 'recordId', displayField: 'fiscalYear', store: res.list }))
+          fields.push(getCombo({ field, valueField: 'fiscalYear', displayField: 'fiscalYear', store: res.list }))
+        })
+        break
+      case 31202:
+        var parameters = '_type=0'
+        getRequest({
+          extension: 'CA.asmx/qryACC',
+          parameters
+        }).then(res => {
+          var _fieldValue = getFieldValue(field.key)
+
+          formik.setValues(pre => {
+            return {
+              ...pre,
+              ..._fieldValue
+            }
+          })
+          fields.push(getCombo({ field, valueField: 'recordId', displayField: 'reference', store: res.list }))
         })
         break
       case 41101:
@@ -406,7 +426,18 @@ const ReportParameterBrowser = ({ reportName, paramsArray, setParamsArray, disab
                     value={formik.values[field.key]}
                     required={field.mandatory}
                     onChange={event => {
-                      const newValue = event.target.value
+                      console.log(event)
+                      formik.setFieldValue
+                    }}
+                    onClear={() => formik.setFieldValue(field.key, '')}
+                  />
+                  {/* <CustomDatePicker
+                    name={field.key}
+                    label={field.caption}
+                    value={formik.values[field.key]}
+                    required={field.mandatory}
+                    onChange={event => {
+                      const newValue = event?.target?.value
                       handleFieldChange({
                         fieldId: field.id,
                         fieldKey: field.key,
@@ -417,7 +448,7 @@ const ReportParameterBrowser = ({ reportName, paramsArray, setParamsArray, disab
                       formik.setFieldValue(field.key, newValue)
                     }}
                     onClear={() => formik.setFieldValue(field.key, '')}
-                  />
+                  /> */}
                 </Grid>
               )
               break
@@ -467,6 +498,8 @@ const ReportParameterBrowser = ({ reportName, paramsArray, setParamsArray, disab
   }
 
   const handleFieldChange = object => {
+    console.log('object')
+    console.log(object)
     const existingIndex = paramsArray.findIndex(item => item.fieldId === object.fieldId)
     if (existingIndex !== -1) {
       paramsArray[existingIndex] = {
@@ -485,8 +518,9 @@ const ReportParameterBrowser = ({ reportName, paramsArray, setParamsArray, disab
         display: object.display
       })
     }
-    setParamsArray(paramsArray)
-    console.log(paramsArray)
+
+    //setParamsArray(paramsArray)
+    //console.log(paramsArray)
     setFields(fields)
   }
 

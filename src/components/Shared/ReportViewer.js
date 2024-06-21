@@ -78,8 +78,6 @@ const ReportViewer = ({ resourceId }) => {
   }
 
   const generateReport = ({ params = '' }) => {
-    console.log(params)
-
     const obj = {
       api_url: selectedReport.api_url + '?_params=' + params,
       assembly: selectedReport.assembly,
@@ -116,6 +114,7 @@ const ReportViewer = ({ resourceId }) => {
   }, [reportStore])
 
   const formatDataForApi = paramsArray => {
+    console.log(paramsArray)
     const formattedData = paramsArray.map(({ fieldId, value }) => `${fieldId}|${value}`).join('^')
 
     return formattedData
