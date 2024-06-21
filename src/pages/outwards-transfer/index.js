@@ -15,6 +15,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { useError } from 'src/error'
+import { getStorageData } from 'src/storage/storage'
 
 const OutwardsTransfer = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -50,9 +51,7 @@ const OutwardsTransfer = () => {
     } catch (error) {}
   }
 
-  const userData = window.sessionStorage.getItem('userData')
-    ? JSON.parse(window.sessionStorage.getItem('userData'))
-    : null
+  const userData = getStorageData('userData')
 
   const getPlantId = async () => {
     try {
@@ -179,10 +178,10 @@ const OutwardsTransfer = () => {
       props: {
         plantId: plantId,
         cashAccountId: cashAccountId,
-        userId: userData && userData.userId,
+        userId: userData.userId,
         access,
         labels: _labels,
-        recordId: recordId ? recordId : null,
+        recordId: recordId,
         invalidate
       },
       width: 1100,
@@ -210,11 +209,10 @@ const OutwardsTransfer = () => {
       <Grow>
         <Table
           columns={columns}
-          gridData={data ? data : { list: [] }}
+          gridData={data}
           rowId={['recordId']}
           onEdit={editOutwards}
           onDelete={delOutwards}
-          isLoading={false}
           pageSize={50}
           paginationType='client'
           maxAccess={access}
