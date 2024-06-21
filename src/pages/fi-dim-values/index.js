@@ -21,6 +21,8 @@ const DimensionsValues = () => {
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
   const [tpaValues, setTpaValues] = useState([])
+  const [error, setError] = useState(false)
+
   const [selectedTpaValue, setSelectedTpaValue] = useState({ key: null, value: '' })
   const formatedRecordId = typeof selectedTpaValue?.key == 'string' ? selectedTpaValue.key.match(/\d+/)?.[0] : null
 
@@ -90,9 +92,7 @@ const DimensionsValues = () => {
     if (formatedRecordId) {
       openForm()
     } else {
-      toast.error('Select A Dimension', {
-        position: 'top-right'
-      })
+      setError(true)
     }
   }
 
@@ -148,7 +148,9 @@ const DimensionsValues = () => {
               maxAccess={access}
               onChange={(event, newValue) => {
                 setSelectedTpaValue(newValue)
+                setError(false)
               }}
+              error={error}
             />
           </Grid>
         </Grid>
