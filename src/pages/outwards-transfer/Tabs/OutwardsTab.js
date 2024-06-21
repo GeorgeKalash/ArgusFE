@@ -39,13 +39,11 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { useForm } from 'src/hooks/form'
 import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
+import { useInvalidate } from 'src/hooks/resource'
 
-export default function OutwardsTab({ labels, access, recordId, cashAccountId, plantId, userId, window, invalidate }) {
+export default function OutwardsTab({ labels, access, recordId, cashAccountId, plantId, userId, window }) {
   const [productsStore, setProductsStore] = useState([])
   const [cashData, setCashData] = useState({})
-  const [isClosed, setIsClosed] = useState(false)
-  const [isPosted, setIsPosted] = useState(false)
-  const [otpShow, setOtpShow] = useState(false)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
@@ -54,6 +52,10 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
     functionId: SystemFunction.Outwards,
     access,
     hasDT: false
+  })
+
+  const invalidate = useInvalidate({
+    endpointId: RemittanceOutwardsRepository.OutwardsTransfer.snapshot
   })
 
   const initialValues = {
@@ -162,6 +164,7 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
           })
         )
         .required('Cash array is required')
+
       // tdAmount: yup.number().test(`isCommission less than tdAmount`, `Error`, function (value) {
       //   const { commission } = this.parent
 
@@ -217,7 +220,7 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
         if (amountRes.recordId) {
           toast.success('Record Updated Successfully')
           formik.setFieldValue('recordId', amountRes.recordId)
-          setOtpShow(true)
+          viewOTP()
 
           const res2 = await getRequest({
             extension: RemittanceOutwardsRepository.OutwardsTransfer.get2,
@@ -231,7 +234,8 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
   })
 
   const editMode = !!formik.values.recordId
-
+  const isClosed = formik.values.wip === 2
+  const isPosted = formik.values.status === 4
   const total = parseFloat(formik.values.amount || 0)
 
   const receivedTotal = formik.values.amountRows.reduce((sumAmount, row) => {
@@ -241,6 +245,20 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
   }, 0)
 
   const Balance = total - receivedTotal
+
+  function viewOTP() {
+    stack({
+      Component: OTPPhoneVerification,
+      props: {
+        formValidation: formik,
+        recordId: formik.values.recordId,
+        functionId: SystemFunction.Outwards
+      },
+      width: 400,
+      height: 400,
+      title: labels.OTPVerification
+    })
+  }
 
   const onClose = async () => {
     try {
@@ -254,7 +272,13 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
       if (res.recordId) {
         toast.success('Record Closed Successfully')
         invalidate()
-        setIsClosed(true)
+
+        const res2 = await getRequest({
+          extension: RemittanceOutwardsRepository.OutwardsTransfer.get2,
+          parameters: `_recordId=${res.recordId}`
+        })
+        formik.setFieldValue('wip', res2.record.headerView.wip)
+        formik.setFieldValue('status', res2.record.headerView.status)
       }
     } catch (error) {}
   }
@@ -267,8 +291,6 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
       copy.valueDate = formatDateToApi(copy.valueDate)
       copy.defaultValueDate = formatDateToApi(copy.defaultValueDate)
       copy.expiryDate = formatDateToApi(copy.expiryDate)
-      copy.wip = copy.wip === '' ? 1 : copy.wip
-      copy.status = copy.status === '' ? 1 : copy.status
 
       const res = await postRequest({
         extension: RemittanceOutwardsRepository.OutwardsTransfer.reopen,
@@ -278,7 +300,13 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
       if (res.recordId) {
         toast.success('Record Closed Successfully')
         invalidate()
-        setIsClosed(false)
+
+        const res2 = await getRequest({
+          extension: RemittanceOutwardsRepository.OutwardsTransfer.get2,
+          parameters: `_recordId=${res.recordId}`
+        })
+        formik.setFieldValue('wip', res2.record.headerView.wip)
+        formik.setFieldValue('status', res2.record.headerView.status)
       }
     } catch (error) {}
   }
@@ -290,8 +318,6 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
       copy.valueDate = formatDateToApi(copy.valueDate)
       copy.defaultValueDate = formatDateToApi(copy.defaultValueDate)
       copy.expiryDate = formatDateToApi(copy.expiryDate)
-      copy.wip = copy.wip === '' ? 1 : copy.wip
-      copy.status = copy.status === '' ? 1 : copy.status
 
       const res = await postRequest({
         extension: RemittanceOutwardsRepository.OutwardsTransfer.post,
@@ -302,7 +328,7 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
         toast.success('Record Posted Successfully')
         formik.setFieldValue('ttNo', res.recordId)
         invalidate()
-        setIsPosted(true)
+        window.close()
       }
     } catch (error) {}
   }
@@ -365,6 +391,8 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
           parameters: parameters
         })
         if (res.list.length > 0) {
+          const newList = { list: res.list }
+          setProductsStore(newList)
           if (formFields.recordId) {
             if (!formFields.productId) {
               stackError({
@@ -487,13 +515,13 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
       key: 'Close',
       condition: !isClosed,
       onClick: onClose,
-      disabled: isClosed || !editMode || isPosted
+      disabled: isClosed || !editMode
     },
     {
       key: 'Reopen',
       condition: isClosed,
       onClick: onReopen,
-      disabled: !isClosed || !editMode || (formik.values.releaseStatus === 3 && formik.values.status === 3) || isPosted
+      disabled: !isClosed
     },
     {
       key: 'Approval',
@@ -511,7 +539,7 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
       key: 'Post',
       condition: true,
       onClick: onPost,
-      disabled: formik.values.status != 4 || isPosted
+      disabled: !isPosted
     },
     {
       key: 'GL',
@@ -626,8 +654,6 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
             extension: RemittanceOutwardsRepository.OutwardsTransfer.get2,
             parameters: `_recordId=${recordId}`
           })
-          setIsClosed(res.record.headerView.wip === 2 ? true : false)
-          setIsPosted(res.record.headerView.status === 3 ? true : false)
           res.record.headerView.date = formatDateFromApi(res.record.headerView.date)
           res.record.headerView.defaultValueDate = formatDateFromApi(res.record.headerView.defaultValueDate)
           res.record.headerView.valueDate = formatDateFromApi(res.record.headerView.valueDate)
@@ -637,18 +663,6 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
         } else {
           getDefaultDT()
         }
-        if (formik.values.recordId && otpShow)
-          stack({
-            Component: OTPPhoneVerification,
-            props: {
-              formValidation: formik,
-              recordId: formik.values.recordId,
-              functionId: SystemFunction.Outwards
-            },
-            width: 400,
-            height: 400,
-            title: labels.OTPVerification
-          })
         getDefaultVAT()
       } catch (error) {}
     })()

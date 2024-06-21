@@ -28,8 +28,6 @@ export default function OutwardsModificationForm({ access, labels, recordId, inv
   const [editMode, setEditMode] = useState(!!recordId)
   const [displayCash, setDisplayCash] = useState(false)
   const [displayBank, setDisplayBank] = useState(false)
-  const [isClosed, setIsClosed] = useState(false)
-  const [isPosted, setIsPosted] = useState(false)
   const { stack } = useWindow()
 
   const [store, setStore] = useState(
@@ -91,19 +89,25 @@ export default function OutwardsModificationForm({ access, labels, recordId, inv
       }))
     }
   })
+  const isClosed = formik.values.wip === 2
+  const isPosted = formik.values.status === 4
 
   const onClose = async () => {
     const res = await postRequest({
       extension: RTOWMRepository.OutwardsModification.close,
-      record: JSON.stringify({
-        recordId: formik.values.recordId
-      })
+      record: JSON.stringify(store.fullModifiedOutwardBody)
     })
 
     if (res.recordId) {
       toast.success('Record Closed Successfully')
       invalidate()
-      setIsClosed(true)
+
+      const res2 = await getRequest({
+        extension: RTOWMRepository.OutwardsModification.get,
+        parameters: `_recordId=${res.recordId}`
+      })
+      formik.setFieldValue('wip', res2.record.wip)
+      formik.setFieldValue('status', res2.record.status)
     }
   }
 
@@ -116,7 +120,13 @@ export default function OutwardsModificationForm({ access, labels, recordId, inv
     if (res.recordId) {
       toast.success('Record Closed Successfully')
       invalidate()
-      setIsClosed(false)
+
+      const res2 = await getRequest({
+        extension: RTOWMRepository.OutwardsModification.get,
+        parameters: `_recordId=${res.recordId}`
+      })
+      formik.setFieldValue('wip', res2.record.wip)
+      formik.setFieldValue('status', res2.record.status)
     }
   }
 
@@ -131,7 +141,12 @@ export default function OutwardsModificationForm({ access, labels, recordId, inv
     if (res?.recordId) {
       toast.success('Record Posted Successfully')
       invalidate()
-      setIsPosted(true)
+
+      const res2 = await getRequest({
+        extension: RTOWMRepository.OutwardsModification.get,
+        parameters: `_recordId=${res.recordId}`
+      })
+      formik.setFieldValue('status', res2.record.status)
     }
   }
 
@@ -171,12 +186,11 @@ export default function OutwardsModificationForm({ access, labels, recordId, inv
       'oldBeneficiarySeqNo',
       'newBeneficiaryId',
       'newBeneficiarySeqNo',
+      'wip',
       'status'
     ]
 
     setFieldValues(modifiedOWFields, data)
-    setIsClosed(data.wip === 2 ? true : false)
-    setIsPosted(data.status === 3 ? true : false)
 
     if (data.outwardId) {
       const res = await getRequest({
@@ -239,13 +253,13 @@ export default function OutwardsModificationForm({ access, labels, recordId, inv
       key: 'Close',
       condition: !isClosed,
       onClick: onClose,
-      disabled: isClosed || !editMode || isPosted
+      disabled: isClosed || !editMode
     },
     {
       key: 'Reopen',
       condition: isClosed,
       onClick: onReopen,
-      disabled: !isClosed || !editMode || (formik.values.releaseStatus === 3 && formik.values.status === 3) || isPosted
+      disabled: !isClosed
     },
     {
       key: 'Approval',
@@ -257,7 +271,7 @@ export default function OutwardsModificationForm({ access, labels, recordId, inv
       key: 'Post',
       condition: true,
       onClick: onPost,
-      disabled: formik.values.status != 4 || isPosted
+      disabled: !isPosted
     }
   ]
 
