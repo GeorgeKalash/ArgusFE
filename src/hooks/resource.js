@@ -60,6 +60,7 @@ export function useResourceQuery({ endpointId, filter, datasetId, queryFn, searc
     },
     filters,
     paginationParameters(res) {
+      console.log('paginationParameters', res)
       setApiOption(res)
     },
     clear() {

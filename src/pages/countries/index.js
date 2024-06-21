@@ -13,11 +13,13 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import CountryForm from './forms/CountryForm'
+import TableNew from 'src/components/Shared/TableNew'
 
 const Countries = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
-  async function fetchGridData(options = {}) {
+  async function fetchGridData(options) {
+    console.log('options', options)
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
@@ -117,9 +119,9 @@ const Countries = () => {
         <GridToolbar onAdd={add} maxAccess={access} />
       </Fixed>
       <Grow>
-        <Table
+        <TableNew
           columns={columns}
-          gridData={data}
+          gridData={data && data}
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
