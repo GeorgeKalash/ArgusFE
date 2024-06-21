@@ -139,7 +139,7 @@ const DimensionsValues = () => {
         <Grid container>
           <Grid item sx={{ marginLeft: '1rem' }} xs={6}>
             <ResourceComboBox
-              label={_labels.group}
+              label={_labels.dimensions}
               filter={emptyValues}
               valueField='key'
               displayField={['value']}
