@@ -8,7 +8,7 @@ import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
 import InwardTransferForm from './forms/InwardTransferForm'
 import toast from 'react-hot-toast'
-import { CashBankRepository } from 'src/repositories/CashBankRepository'
+import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { formatDateDefault } from 'src/lib/date-helper'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
@@ -21,6 +21,7 @@ const InwardTransfer = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
+  const userId = JSON.parse(window.sessionStorage.getItem('userData'))?.userId
 
   const {
     query: { data },
@@ -30,22 +31,22 @@ const InwardTransfer = () => {
     refetch,
     access
   } = useResourceQuery({
-    endpointId: CashBankRepository.CashTransfer.snapshot,
-    datasetId: ResourceIds.CashTransfer,
+    endpointId: RemittanceOutwardsRepository.InwardsTransfer.snapshot,
+    datasetId: ResourceIds.InwardTransfer,
     filter: {
-      endpointId: CashBankRepository.CashTransfer.snapshot,
+      endpointId: RemittanceOutwardsRepository.InwardsTransfer.snapshot,
       filterFn: fetchWithSearch
     }
   })
   async function fetchWithSearch({ filters }) {
     return await getRequest({
-      extension: CashBankRepository.CashTransfer.snapshot,
+      extension: RemittanceOutwardsRepository.InwardsTransfer.snapshot,
       parameters: `_filter=${filters.qry}`
     })
   }
 
   const invalidate = useInvalidate({
-    endpointId: CashBankRepository.CashTransfer.snapshot
+    endpointId: RemittanceOutwardsRepository.InwardsTransfer.snapshot
   })
 
   const userData = window.sessionStorage.getItem('userData')
@@ -81,7 +82,7 @@ const InwardTransfer = () => {
   const getDefaultDT = async () => {
     const res = await getRequest({
       extension: SystemRepository.UserFunction.get,
-      parameters: `_userId=${userData && userData.userId}&_functionId=${SystemFunction.CashTransfer}`
+      parameters: `_userId=${userData && userData.userId}&_functionId=${SystemFunction.InwardTransfer}`
     })
     if (res.record) {
       return res.record.dtId
@@ -95,7 +96,7 @@ const InwardTransfer = () => {
     const dtId = await getDefaultDT()
 
     if (plantId !== '' && cashAccountId !== '') {
-      openCashTransferWindow(plantId, cashAccountId, recordId, dtId)
+      openInwardTransferWindow(plantId, cashAccountId, recordId, dtId)
     } else {
       if (plantId === '') {
         stackError({
@@ -128,7 +129,7 @@ const InwardTransfer = () => {
     },
     {
       field: 'currencyName',
-      headerName: _labels.currencyName,
+      headerName: _labels.currency,
       flex: 1
     },
     {
@@ -161,7 +162,7 @@ const InwardTransfer = () => {
 
   const delCashTFR = async obj => {
     await postRequest({
-      extension: CashBankRepository.CashTransfer.del,
+      extension: RemittanceOutwardsRepository.InwardsTransfer.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -176,7 +177,7 @@ const InwardTransfer = () => {
     openForm(obj.recordId)
   }
 
-  function openCashTransferWindow(plantId, cashAccountId, recordId, dtId) {
+  function openInwardTransferWindow(plantId, cashAccountId, recordId, dtId) {
     stack({
       Component: InwardTransferForm,
       props: {
@@ -184,11 +185,12 @@ const InwardTransfer = () => {
         cashAccountId: cashAccountId,
         dtId: dtId,
         access,
+        userId,
         labels: _labels,
         recordId: recordId ? recordId : null
       },
       width: 1200,
-      title: 'Cash Transfer'
+      title: _labels.InwardTransfer
     })
   }
 
