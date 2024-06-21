@@ -128,6 +128,7 @@ const DimensionsValues = () => {
         const result = data.list.filter(emptyValues)
         setTpaValues(result)
         setSelectedTpaValue(result[0])
+        setError(false)
       }
     })()
   }, [])
@@ -135,9 +136,11 @@ const DimensionsValues = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} labels={_labels} />
-        <Grid container>
-          <Grid item sx={{ marginLeft: '1rem' }} xs={6}>
+        <Grid container alignItems='center' spacing={2}>
+          <Grid item>
+            <GridToolbar onAdd={add} maxAccess={access} labels={_labels} />
+          </Grid>
+          <Grid item xs={4}>
             <ResourceComboBox
               label={_labels.dimensions}
               filter={emptyValues}
