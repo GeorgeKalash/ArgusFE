@@ -195,5 +195,26 @@ code[class*='language-'] {
   transition: transform 0.3s ease-in-out;
 }
 .ag-theme-alpine .even-row {
-  background-color: rgb(212, 210, 210); /* Light gray background for even rows */
+  background-color: rgb(238, 238, 238); /* Light gray background for even rows */
+}
+
+.ag-theme-alpine .ag-row-hover {
+  background-color: rgb(242, 234, 234) !important; /* Hover color */
+}
+
+.ag-theme-alpine {
+  --ag-alpine-active-color: rgb(59, 57, 57) !important;
+  --ag-row-hover-color: rgb(249, 247, 247) !important;
+  --ag-selected-row-background-color: #d7d7d7 !important;
+}
+.ag-theme-alpine .ag-row-selected {
+  background-color: #b0b0b0 !important;
+}
+
+.ag-theme-alpine .ag-header {
+  z-index: 0;
+}
+
+.ag-row-position-absolute {
+  min-width: '300px' !important;
 }

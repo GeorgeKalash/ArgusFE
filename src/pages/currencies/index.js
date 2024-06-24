@@ -12,7 +12,6 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import CurrencyForm from './forms/CurrencyForm'
 import { ControlContext } from 'src/providers/ControlContext'
-import TableNew from 'src/components/Shared/TableNew'
 
 const Currencies = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)

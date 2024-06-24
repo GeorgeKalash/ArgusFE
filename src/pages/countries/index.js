@@ -18,7 +18,7 @@ import TableNew from 'src/components/Shared/TableNew'
 const Countries = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
-  async function fetchGridData(options) {
+  async function fetchGridData(options = {}) {
     console.log('options', options)
     const { _startAt = 0, _pageSize = 50 } = options
 
@@ -37,7 +37,6 @@ const Countries = () => {
     refetch,
     access
   } = useResourceQuery({
-    endpointId: SystemRepository.Country.page,
     queryFn: fetchGridData,
     endpointId: SystemRepository.Country.page,
     datasetId: ResourceIds.Countries
