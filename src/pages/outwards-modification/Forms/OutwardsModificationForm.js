@@ -25,9 +25,9 @@ import { useWindow } from 'src/windows'
 
 export default function OutwardsModificationForm({ access, labels, recordId, invalidate }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const [editMode, setEditMode] = useState(!!recordId)
   const [displayCash, setDisplayCash] = useState(false)
   const [displayBank, setDisplayBank] = useState(false)
+  const [isVerified, setIsVerified] = useState(false)
   const { stack } = useWindow()
 
   const [store, setStore] = useState(
@@ -41,8 +41,7 @@ export default function OutwardsModificationForm({ access, labels, recordId, inv
   const { maxAccess } = useDocumentType({
     functionId: SystemFunction.OutwardsModification,
     access: access,
-    hasDT: false,
-    enabled: !editMode
+    hasDT: false
   })
 
   const { formik } = useForm({
@@ -73,7 +72,8 @@ export default function OutwardsModificationForm({ access, labels, recordId, inv
       oldBeneficiarySeqName: '',
       wip: '',
       releaseStatus: '',
-      status: ''
+      status: '',
+      otpVerified: false
     },
     enableReinitialize: false,
     validateOnChange: true,
@@ -89,6 +89,7 @@ export default function OutwardsModificationForm({ access, labels, recordId, inv
       }))
     }
   })
+  const editMode = !!formik.values.recordId
   const isClosed = formik.values.wip === 2
   const isPosted = formik.values.status === 4
 
@@ -99,7 +100,7 @@ export default function OutwardsModificationForm({ access, labels, recordId, inv
     })
 
     if (res.recordId) {
-      toast.success('Record Closed Successfully')
+      !isVerified && toast.success('Record Closed Successfully')
       invalidate()
 
       const res2 = await getRequest({
@@ -187,7 +188,8 @@ export default function OutwardsModificationForm({ access, labels, recordId, inv
       'newBeneficiaryId',
       'newBeneficiarySeqNo',
       'wip',
-      'status'
+      'status',
+      'otpVerified'
     ]
 
     setFieldValues(modifiedOWFields, data)
@@ -300,13 +302,11 @@ export default function OutwardsModificationForm({ access, labels, recordId, inv
             toast.success('Record Updated Successfully')
             formik.setFieldValue('recordId', res.recordId)
             invalidate()
-            setEditMode(true)
 
             const res2 = await getRequest({
               extension: RTOWMRepository.OutwardsModification.get,
               parameters: `_recordId=${res.recordId}`
             })
-
             formik.setFieldValue('reference', res2.record.reference)
             setStore(prevStore => ({
               ...prevStore,
@@ -318,7 +318,8 @@ export default function OutwardsModificationForm({ access, labels, recordId, inv
               props: {
                 formValidation: formik,
                 recordId: res.recordId,
-                functionId: SystemFunction.OutwardsModification
+                functionId: SystemFunction.OutwardsModification,
+                setIsVerified
               },
               width: 400,
               height: 400,
@@ -335,9 +336,10 @@ export default function OutwardsModificationForm({ access, labels, recordId, inv
           res.record.date = formatDateFromApi(res.record.date)
           fillOutwardData(res.record)
         }
+        isVerified && onClose()
       } catch (error) {}
     })()
-  }, [store.beneficiaryList, formik.values.recordId])
+  }, [store.beneficiaryList, formik.values.recordId, isVerified])
 
   return (
     <FormShell

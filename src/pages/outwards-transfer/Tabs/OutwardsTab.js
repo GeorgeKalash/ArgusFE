@@ -47,6 +47,7 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
+  const [isVerified, setIsVerified] = useState(false)
 
   const { maxAccess } = useDocumentType({
     functionId: SystemFunction.Outwards,
@@ -122,6 +123,7 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
     hiddenTrxAmount: '',
     hiddenTrxCount: '',
     hiddenSponserName: '',
+    otpVerified: false,
     amountRows: [
       {
         id: 1,
@@ -209,7 +211,7 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
           header: copy,
           cash: updatedRows,
           bankType: productFormik.values.interfaceId,
-          ICRequest: cashData
+          ICRequest: cashData.length > 0 ? cashData : null
         }
 
         const amountRes = await postRequest({
@@ -220,7 +222,7 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
         if (amountRes.recordId) {
           toast.success('Record Updated Successfully')
           formik.setFieldValue('recordId', amountRes.recordId)
-          viewOTP()
+          viewOTP(amountRes.recordId)
 
           const res2 = await getRequest({
             extension: RemittanceOutwardsRepository.OutwardsTransfer.get2,
@@ -246,13 +248,14 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
 
   const Balance = total - receivedTotal
 
-  function viewOTP() {
+  function viewOTP(recordId) {
     stack({
       Component: OTPPhoneVerification,
       props: {
         formValidation: formik,
-        recordId: formik.values.recordId,
-        functionId: SystemFunction.Outwards
+        recordId: recordId,
+        functionId: SystemFunction.Outwards,
+        setIsVerified
       },
       width: 400,
       height: 400,
@@ -270,7 +273,7 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
       })
 
       if (res.recordId) {
-        toast.success('Record Closed Successfully')
+        !isVerified && toast.success('Record Closed Successfully')
         invalidate()
 
         const res2 = await getRequest({
@@ -664,9 +667,10 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
           getDefaultDT()
         }
         getDefaultVAT()
+        isVerified && onClose()
       } catch (error) {}
     })()
-  }, [formik.values.recordId])
+  }, [formik.values.recordId, isVerified])
 
   return (
     <FormShell
