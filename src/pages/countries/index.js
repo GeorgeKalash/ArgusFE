@@ -17,8 +17,8 @@ import CountryForm from './forms/CountryForm'
 const Countries = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+
   async function fetchGridData(options = {}) {
-    console.log('options', options)
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
@@ -76,7 +76,6 @@ const Countries = () => {
       headerName: _labels.ibanLength,
       flex: 1,
       align: 'right',
-
       valueGetter: ({ row }) => getFormattedNumberMax(row?.ibanLength, 5, 0)
     }
   ]
