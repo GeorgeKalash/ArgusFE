@@ -327,12 +327,10 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
         record: JSON.stringify(copy)
       })
 
-      if (res?.recordId) {
-        toast.success('Record Posted Successfully')
-        formik.setFieldValue('ttNo', res.recordId)
-        invalidate()
-        window.close()
-      }
+      toast.success('Record Posted Successfully')
+      formik.setFieldValue('ttNo', res.recordId)
+      invalidate()
+      window.close()
     } catch (error) {}
   }
 
