@@ -303,8 +303,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
       editMode={editMode}
       maxAccess={maxAccess}
       functionId={SystemFunction.InwardTransfer}
-
-      // disabledSubmit={editMode}
+      disabledSubmit={editMode}
     >
       <VertLayout>
         <Fixed>
