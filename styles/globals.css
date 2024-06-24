@@ -211,10 +211,6 @@ code[class*='language-'] {
   background-color: #b0b0b0 !important;
 }
 
-.ag-theme-alpine .ag-header {
+.ag-theme-alpine {
   z-index: 0;
-}
-
-.ag-row-position-absolute {
-  min-width: '300px' !important;
 }

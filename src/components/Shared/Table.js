@@ -31,7 +31,7 @@ const Table = ({
   const pageSize = props?.pageSize
   const api = props?.api ? props?.api : props?.paginationParameters
   const refetch = props?.refetch
-  const [gridData, setGridData] = useState(props.gridData)
+  const [gridData, setGridData] = useState([])
   const [startAt, setStartAt] = useState(0)
   const { languageId } = useContext(AuthContext)
   const { platformLabels } = useContext(ControlContext)
@@ -40,11 +40,12 @@ const Table = ({
   const { stack } = useWindow()
 
   useEffect(() => {
-    props.gridData && setGridData(props.gridData)
+    props.gridData && paginationType !== 'api' && setGridData(props?.gridData)
   }, [props.gridData])
 
   const CustomPagination = () => {
     if (paginationType === 'api') {
+      const gridData = props.gridData
       const startAt = gridData?._startAt ?? 0
       const totalRecords = gridData?.count ? gridData?.count : 0
       const page = Math.ceil(gridData?.count ? (startAt === 0 ? 1 : (startAt + 1) / pageSize) : 1)
@@ -267,63 +268,64 @@ const Table = ({
   if (props.onEdit || props.onDelete || props.popupComponent) {
     const deleteBtnVisible = maxAccess ? props.onDelete && maxAccess > TrxType.EDIT : props.onDelete ? true : false
 
-    columns?.push({
-      field: 'actions',
-      headerName: '',
-      width: 100,
-      cellRenderer: params => {
-        const { data } = params
-        const isStatus3 = data.status === 3
-        const isStatusCanceled = data.status === -1
-        const isWIP = data.wip === 2
+    if (!columns?.some(column => column.field === 'actions'))
+      columns?.push({
+        field: 'actions',
+        headerName: '',
+        width: 100,
+        cellRenderer: params => {
+          const { data } = params
+          const isStatus3 = data.status === 3
+          const isStatusCanceled = data.status === -1
+          const isWIP = data.wip === 2
 
-        return (
-          <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
-            {props.onEdit && (
-              <IconButton
-                size='small'
-                onClick={e => {
-                  props.onEdit(data)
-                }}
-              >
-                <Image src={editIcon} alt='Edit' width={18} height={18} />
-              </IconButton>
-            )}
-            {props.popupComponent && (
-              <IconButton
-                size='small'
-                onClick={e => {
-                  props.popupComponent(data)
-                }}
-              >
-                <Image src={editIcon} alt='Edit' width={18} height={18} />
-              </IconButton>
-            )}
-            {!isStatus3 && !isStatusCanceled && deleteBtnVisible && !isWIP && (
-              <IconButton
-                size='small'
-                onClick={e => {
-                  if (props.deleteConfirmationType == 'strict') {
-                    openDeleteConfirmation(data)
-                  } else {
-                    openDelete(data)
-                  }
-                }}
-                color='error'
-              >
-                <Image src={deleteIcon} alt={platformLabels.Delete} width={18} height={18} />
-              </IconButton>
-            )}
-          </Box>
-        )
-      }
-    })
+          return (
+            <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
+              {props.onEdit && (
+                <IconButton
+                  size='small'
+                  onClick={e => {
+                    props.onEdit(data)
+                  }}
+                >
+                  <Image src={editIcon} alt='Edit' width={18} height={18} />
+                </IconButton>
+              )}
+              {props.popupComponent && (
+                <IconButton
+                  size='small'
+                  onClick={e => {
+                    props.popupComponent(data)
+                  }}
+                >
+                  <Image src={editIcon} alt='Edit' width={18} height={18} />
+                </IconButton>
+              )}
+              {!isStatus3 && !isStatusCanceled && deleteBtnVisible && !isWIP && (
+                <IconButton
+                  size='small'
+                  onClick={e => {
+                    if (props.deleteConfirmationType == 'strict') {
+                      openDeleteConfirmation(data)
+                    } else {
+                      openDelete(data)
+                    }
+                  }}
+                  color='error'
+                >
+                  <Image src={deleteIcon} alt={platformLabels.Delete} width={18} height={18} />
+                </IconButton>
+              )}
+            </Box>
+          )
+        }
+      })
   }
 
   return (
     <Box className='ag-theme-alpine' style={{ flex: 1, width: '1000px !important' }}>
       <AgGridReact
-        rowData={gridData?.list}
+        rowData={paginationType === 'api' ? props?.gridData?.list : gridData.list}
         columnDefs={columns}
         pagination={false}
         paginationPageSize={pageSize}
