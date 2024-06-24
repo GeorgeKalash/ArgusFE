@@ -46,7 +46,13 @@ export default function GenerateOpening({ _labels, access }) {
   })
 
   return (
-    <FormShell resourceId={ResourceIds.GenerateOpeningBalances} form={formik} maxAccess={access} editMode={true}>
+    <FormShell
+      resourceId={ResourceIds.GenerateOpeningBalances}
+      form={formik}
+      maxAccess={access}
+      editMode={true}
+      isCleared={false}
+    >
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
