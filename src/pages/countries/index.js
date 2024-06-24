@@ -13,7 +13,6 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import CountryForm from './forms/CountryForm'
-import TableNew from 'src/components/Shared/TableNew'
 
 const Countries = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
