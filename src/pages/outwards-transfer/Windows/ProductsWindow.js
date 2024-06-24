@@ -6,7 +6,6 @@ import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import { useContext, useEffect, useState } from 'react'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useForm } from 'src/hooks/form'
 
 const ProductsWindow = ({ labels, maxAccess, onProductSubmit, outWardsData, window }) => {
   const [gridData, setGridData] = useState([])

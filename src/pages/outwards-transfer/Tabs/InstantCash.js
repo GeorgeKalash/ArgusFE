@@ -18,6 +18,7 @@ import { useError } from 'src/error'
 export default function InstantCash({ onInstantCashSubmit, cashData = {}, window, clientData, outwardsData }) {
   const { getRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
+  console.log('clientData ', clientData)
 
   const { labels: _labels, maxAccess } = useResourceQuery({
     datasetId: ResourceIds.InstantCash

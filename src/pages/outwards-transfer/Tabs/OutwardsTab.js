@@ -41,7 +41,6 @@ import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
 import { useInvalidate } from 'src/hooks/resource'
 
 export default function OutwardsTab({ labels, access, recordId, cashAccountId, plantId, userId, window }) {
-  const [cashData, setCashData] = useState({})
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
@@ -137,7 +136,31 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
         bankFees: '',
         receiptRef: ''
       }
-    ]
+    ],
+    instantCashDetails: {
+      deliveryModeId: '',
+      currency: '',
+      sourceAmount: '',
+      toCountryId: '',
+      totalTransactionAmountPerAnnum: '',
+      transactionsPerAnnum: '',
+      remitter: {
+        relation: '',
+        otherRelation: '',
+        employerName: '',
+        employerStatus: ''
+      },
+      beneficiary: {
+        address: {
+          postCode: ''
+        },
+        bankDetails: {
+          bankCode: '',
+          bankName: '',
+          bankAddress1: ''
+        }
+      }
+    }
   }
 
   const { formik } = useForm({
@@ -184,6 +207,7 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
       try {
         const copy = { ...values }
         delete copy.amountRows
+        delete copy.instantCashDetails
         copy.date = formatDateToApi(copy.date)
         copy.valueDate = formatDateToApi(copy.valueDate)
         copy.defaultValueDate = formatDateToApi(copy.defaultValueDate)
@@ -203,7 +227,7 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
           header: copy,
           cash: updatedRows,
           bankType: formik.values.bankType,
-          ICRequest: cashData.length > 0 ? cashData : null
+          ICRequest: formik.values.instantCashDetails?.deliveryModeId ?? null
         }
 
         const amountRes = await postRequest({
@@ -214,7 +238,6 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
         if (amountRes.recordId) {
           toast.success('Record Updated Successfully')
           formik.setFieldValue('recordId', amountRes.recordId)
-          viewOTP(amountRes.recordId)
 
           const res2 = await getRequest({
             extension: RemittanceOutwardsRepository.OutwardsTransfer.get2,
@@ -223,6 +246,8 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
           formik.setFieldValue('reference', res2.record.headerView.reference)
           invalidate()
         }
+
+        !recordId && viewOTP(amountRes.recordId)
       } catch (error) {}
     }
   })
@@ -282,6 +307,7 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
     try {
       const copy = { ...formik.values }
       delete copy.amountRows
+      delete copy.instantCashDetails
       copy.date = formatDateToApi(copy.date)
       copy.valueDate = formatDateToApi(copy.valueDate)
       copy.defaultValueDate = formatDateToApi(copy.defaultValueDate)
@@ -361,6 +387,7 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
       amountRows: modifiedList
     })
   }
+
   function openRelevantWindow(formValues) {
     if (formValues.dispersalType === 1) {
       stack({
@@ -489,12 +516,12 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
   }
 
   function openBankWindow() {
-    if (formik.values.bankType == 1) {
+    if (formik.values.bankType === 1) {
       stack({
         Component: InstantCash,
         props: {
           onInstantCashSubmit: onInstantCashSubmit,
-          cashData: cashData,
+          cashData: formik.values.instantCashDetails,
           outwardsData: {
             countryId: formik.values.countryId,
             amount: formik.values.amount
@@ -509,7 +536,7 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
         height: 650,
         title: labels.instantCash
       })
-    } else if (formik.values.bankType == 2) {
+    } else if (formik.values.bankType === 2) {
       stack({
         Component: TerraPay,
         props: {},
@@ -556,21 +583,15 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
     }
   }
   function onInstantCashSubmit(obj) {
-    obj.remitter.primaryId.expiryDate = obj.remitter.primaryId.expiryDate
-      ? formatDateToApi(obj.remitter.primaryId.expiryDate)
-      : null
-    obj.remitter.primaryId.issueDate = obj.remitter.primaryId.issueDate
-      ? formatDateToApi(obj.remitter.primaryId.issueDate)
-      : null
-    obj.remitter.dateOfBirth = obj.remitter.dateOfBirth ? formatDateToApi(obj.remitter.dateOfBirth) : null
-    obj.beneficiary.dateOfBirth = obj.beneficiary.dateOfBirth ? formatDateToApi(obj.beneficiary.dateOfBirth) : null
-    setCashData(obj)
+    formik.setFieldValue('instantCashDetails', obj)
   }
+
   function calculateValueDate(valueDays) {
     const newDate = new Date(formik.values.date)
     newDate.setDate(newDate.getDate() + valueDays)
     formik.setFieldValue('valueDate', newDate)
   }
+
   useEffect(() => {
     ;(async function () {
       try {
@@ -584,8 +605,6 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
           res.record.headerView.valueDate = formatDateFromApi(res.record.headerView.valueDate)
           chooseClient(res.record.headerView.clientId)
           fillFormData(res.record)
-
-          //productDataFill(res.record.headerView)
         } else {
           getDefaultDT()
         }
