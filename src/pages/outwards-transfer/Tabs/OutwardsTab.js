@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Grid, Button } from '@mui/material'
 import { getFormattedNumber } from 'src/lib/numberField-helper'
-import { useFormik } from 'formik'
 import * as yup from 'yup'
 import { useWindow } from 'src/windows'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
@@ -42,7 +41,6 @@ import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
 import { useInvalidate } from 'src/hooks/resource'
 
 export default function OutwardsTab({ labels, access, recordId, cashAccountId, plantId, userId, window }) {
-  const [productsStore, setProductsStore] = useState([])
   const [cashData, setCashData] = useState({})
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
@@ -60,7 +58,7 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
   })
 
   const initialValues = {
-    recordId: null,
+    recordId: recordId || null,
     dtId: null,
     plantId: plantId,
     cashAccountId: cashAccountId,
@@ -124,6 +122,7 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
     hiddenTrxCount: '',
     hiddenSponserName: '',
     otpVerified: false,
+    bankType: '',
     amountRows: [
       {
         id: 1,
@@ -199,18 +198,11 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
             outwardId: formik.values.recordId || 0
           }
         })
-        if (updatedRows.length == 1 && !updatedRows[0].type) {
-          stackError({
-            message: `Amount grid not filled. Please fill the grid before saving.`
-          })
-
-          return
-        }
 
         const amountGridData = {
           header: copy,
           cash: updatedRows,
-          bankType: productFormik.values.interfaceId,
+          bankType: formik.values.bankType,
           ICRequest: cashData.length > 0 ? cashData : null
         }
 
@@ -336,100 +328,22 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
     } catch (error) {}
   }
 
-  const productFormik = useFormik({
-    initialValues: {
-      countryId: '',
-      dispersalId: '',
-      dispersalName: '',
-      dipersalRef: '',
-      exRate: '',
-      productId: '',
-      productName: '',
-      productRef: '',
-      corId: '',
-      fees: '',
-      baseAmount: '',
-      rateCalcMethod: '',
-      checked: 'false',
-      exRate2: '',
-      interfaceId: '',
-      interfaceName: '',
-      valueDays: ''
-    },
-    enableReinitialize: true,
-    validateOnChange: true,
-    onSubmit: values => {
-      const selectedRowData = productsStore?.list?.find(row => row.checked)
-      productFormik.setValues(selectedRowData)
-      formik.setFieldValue('productId', selectedRowData?.productId)
-      formik.setFieldValue('commission', selectedRowData?.fees)
-      formik.setFieldValue('defaultCommission', selectedRowData?.fees)
-      formik.setFieldValue('lcAmount', selectedRowData?.baseAmount)
-      formik.setFieldValue('dispersalId', selectedRowData?.dispersalId)
-      formik.setFieldValue('exRate', selectedRowData?.exRate)
-      formik.setFieldValue('rateCalcMethod', selectedRowData?.rateCalcMethod)
-      formik.setFieldValue('corId', selectedRowData?.corId)
-      formik.setFieldValue('corRef', selectedRowData?.corRef)
-      formik.setFieldValue('corName', selectedRowData?.corName)
-      const vatAmount = calcVatAmount(formik, selectedRowData)
-      calcAmount(selectedRowData?.baseAmount, selectedRowData?.fees, vatAmount, formik.values.tdAmount)
-      calculateValueDate(selectedRowData.valueDays)
-      window.close()
-    }
-  })
-
-  const productDataFill = async formFields => {
-    var type = 2
-    var functionId = 1
-    var plant = formFields?.plantId
-    var countryId = formFields?.countryId
-    var currencyId = formFields?.currencyId
-    var dispersalType = formFields?.dispersalType
-    var amount = formFields?.fcAmount ?? 0
-    var parameters = `_type=${type}&_functionId=${functionId}&_plantId=${plant}&_countryId=${countryId}&_dispersalType=${dispersalType}&_currencyId=${currencyId}&_amount=${amount}&_agentId=8`
-    try {
-      if (plant && countryId && currencyId && dispersalType) {
-        const res = await getRequest({
-          extension: RemittanceOutwardsRepository.ProductDispersalEngine.qry,
-          parameters: parameters
-        })
-        if (res.list.length > 0) {
-          const newList = { list: res.list }
-          setProductsStore(newList)
-          if (formFields.recordId) {
-            if (!formFields.productId) {
-              stackError({
-                message: `There's no checked product`
-              })
-            } else {
-              const updatedList = res.list.map(product => {
-                if (product.productId === formFields.productId) {
-                  productFormik.setValues(product)
-
-                  return { ...product, checked: true }
-                }
-
-                return product
-              })
-              const newUpdatedList = { list: updatedList }
-              setProductsStore(newUpdatedList)
-            }
-          }
-        } else {
-          formik.setFieldValue('productId', '')
-          formik.setFieldValue('commission', null)
-          formik.setFieldValue('defaultCommission', null)
-          formik.setFieldValue('lcAmount', null)
-          formik.setFieldValue('productId', '')
-          formik.setFieldValue('dispersalId', '')
-          formik.setFieldValue('exRate', null)
-          formik.setFieldValue('rateCalcMethod', null)
-          formik.setFieldValue('amount', null)
-        }
-      } else {
-        setProductsStore([])
-      }
-    } catch (error) {}
+  const onProductSubmit = productData => {
+    const selectedRowData = productData?.list.find(row => row.checked)
+    formik.setFieldValue('bankType', selectedRowData?.interfaceId)
+    formik.setFieldValue('productId', selectedRowData?.productId)
+    formik.setFieldValue('commission', selectedRowData?.fees)
+    formik.setFieldValue('defaultCommission', selectedRowData?.fees)
+    formik.setFieldValue('lcAmount', selectedRowData?.baseAmount)
+    formik.setFieldValue('dispersalId', selectedRowData?.dispersalId)
+    formik.setFieldValue('exRate', selectedRowData?.exRate)
+    formik.setFieldValue('rateCalcMethod', selectedRowData?.rateCalcMethod)
+    formik.setFieldValue('corId', selectedRowData?.corId)
+    formik.setFieldValue('corRef', selectedRowData?.corRef)
+    formik.setFieldValue('corName', selectedRowData?.corName)
+    const vatAmount = calcVatAmount(formik, selectedRowData)
+    calcAmount(selectedRowData?.baseAmount, selectedRowData?.fees, vatAmount, formik.values.tdAmount)
+    calculateValueDate(selectedRowData?.valueDays)
   }
 
   const fillFormData = async data => {
@@ -443,6 +357,7 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
     formik.setValues({
       ...data.headerView,
       ttNo: data.ttNo,
+      bankType: data.bankType,
       amountRows: modifiedList
     })
   }
@@ -556,10 +471,17 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
     stack({
       Component: ProductsWindow,
       props: {
-        gridData: productsStore,
         maxAccess: maxAccess,
-        form: productFormik,
-        labels: labels
+        labels: labels,
+        outWardsData: {
+          plantId: formik.values.plantId,
+          countryId: formik.values.countryId,
+          currencyId: formik.values.currencyId,
+          dispersalType: formik.values.dispersalType,
+          fcAmount: formik.values.fcAmount,
+          productId: formik.values.productId
+        },
+        onProductSubmit
       },
       width: 900,
       height: 500
@@ -567,7 +489,7 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
   }
 
   function openBankWindow() {
-    if (productFormik.values.interfaceId == 1) {
+    if (formik.values.bankType == 1) {
       stack({
         Component: InstantCash,
         props: {
@@ -587,7 +509,7 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
         height: 650,
         title: labels.instantCash
       })
-    } else if (productFormik.values.interfaceId == 2) {
+    } else if (formik.values.bankType == 2) {
       stack({
         Component: TerraPay,
         props: {},
@@ -662,7 +584,8 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
           res.record.headerView.valueDate = formatDateFromApi(res.record.headerView.valueDate)
           chooseClient(res.record.headerView.clientId)
           fillFormData(res.record)
-          productDataFill(res.record.headerView)
+
+          //productDataFill(res.record.headerView)
         } else {
           getDefaultDT()
         }
@@ -841,9 +764,6 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
                     maxAccess={maxAccess}
                     onChange={e => formik.setFieldValue('fcAmount', e.target.value)}
                     onClear={() => formik.setFieldValue('fcAmount', '')}
-                    onBlur={() => {
-                      if (formik.values.fcAmount) productDataFill(formik.values)
-                    }}
                     error={formik.touched.fcAmount && Boolean(formik.errors.fcAmount)}
                     maxLength={10}
                   />
@@ -895,7 +815,7 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
                     <CustomNumberField
                       name='exRate2'
                       label={labels.exchangeRate}
-                      value={formik?.values?.exRate ? 1 / formik.values.exRate : null}
+                      value={formik.values?.exRate ? 1 / formik.values.exRate : ''}
                       required
                       readOnly
                       maxAccess={maxAccess}
