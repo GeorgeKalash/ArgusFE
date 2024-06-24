@@ -69,6 +69,7 @@ const Table = ({
       const goToLastPage = () => {
         api({ _startAt: (pageCount - 1) * pageSize, _pageSize: pageSize })
       }
+
       return (
         <Box
           sx={{
@@ -272,10 +273,10 @@ const Table = ({
       width: 100,
       cellRenderer: params => {
         const { data } = params
-
         const isStatus3 = data.status === 3
         const isStatusCanceled = data.status === -1
         const isWIP = data.wip === 2
+
         return (
           <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
             {props.onEdit && (
@@ -327,7 +328,6 @@ const Table = ({
         pagination={false}
         paginationPageSize={pageSize}
         rowSelection={'multiple'}
-        // paginationPageSizeSelector={[10, 25, 50, 1000]}
         suppressAggFuncInHeader={true}
         getRowClass={getRowClass}
         overlayLoadingTemplate={'<span class="ag-overlay-loading-center">Loading...</span>'}
