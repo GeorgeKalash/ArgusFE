@@ -14,23 +14,15 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-const ClassesForm = ({
-  labels,
-  editMode,
-  maxAccess,
-  setEditMode,
-  setStore,
-  store
-}) => {
-
-  const { postRequest, getRequest} = useContext(RequestsContext)
-  const {recordId} = store
+const ClassesForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store }) => {
+  const { postRequest, getRequest } = useContext(RequestsContext)
+  const { recordId } = store
 
   const invalidate = useInvalidate({
     endpointId: DocumentReleaseRepository.Class.qry
   })
 
-  const [initialValues , setInitialData] = useState({
+  const [initialValues, setInitialData] = useState({
     recordId: null,
     name: null,
     characteristicOperator: null
@@ -62,40 +54,34 @@ const ClassesForm = ({
             ...prevStore,
             recordId: res.recordId
           }))
-          formik.setFieldValue('recordId', res.recordId )
+          formik.setFieldValue('recordId', res.recordId)
           toast.success('Record Added Successfully')
-          invalidate()
         } else toast.success('Record Edited Successfully')
+        invalidate()
       })
       .catch(error => {
         setErrorMessage(error)
       })
   }
 
-  useEffect(()=>{
-    recordId  && getClassesById(recordId)
-  },[recordId])
+  useEffect(() => {
+    recordId && getClassesById(recordId)
+  }, [recordId])
 
-  const getClassesById =  recordId => {
+  const getClassesById = recordId => {
     const defaultParams = `_recordId=${recordId}`
     var parameters = defaultParams
-     getRequest({
+    getRequest({
       extension: DocumentReleaseRepository.Class.get,
       parameters: parameters
+    }).then(res => {
+      formik.setValues(res.record)
+      setEditMode(true)
     })
-      .then(res => {
-        formik.setValues(res.record)
-        setEditMode(true)
-      })
   }
 
-return (
-    <FormShell
-      form={formik}
-      resourceId={ResourceIds.Classes}
-      maxAccess={maxAccess}
-      editMode={editMode} 
-    > 
+  return (
+    <FormShell form={formik} resourceId={ResourceIds.Classes} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -128,7 +114,7 @@ return (
                 error={formik.touched.characteristicOperator && Boolean(formik.errors.characteristicOperator)}
               />
             </Grid>
-          </Grid> 
+          </Grid>
         </Grow>
       </VertLayout>
     </FormShell>
