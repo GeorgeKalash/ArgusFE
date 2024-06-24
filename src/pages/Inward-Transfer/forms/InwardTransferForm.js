@@ -27,13 +27,14 @@ import { SystemFunction } from 'src/resources/SystemFunction'
 import * as yup from 'yup'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 
-export default function InwardTransferForm({ labels, recordId, access, plantId, cashAccountId, userId }) {
+export default function InwardTransferForm({ labels, recordId, access, plantId, cashAccountId, userId, dtId }) {
   const [editMode, setEditMode] = useState(!!recordId)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
   const [toCurrency, setToCurrency] = useState(null)
   const [toCurrencyRef, setToCurrencyRef] = useState(null)
   const [baseCurrencyRef, setBaseCurrencyRef] = useState(null)
+  const [transferType, setTransferType] = useState(null)
   const [isClosed, setIsClosed] = useState(false)
   const [isPosted, setIsPosted] = useState(true)
 
@@ -45,6 +46,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
     recordId: recordId || null,
     plantId: parseInt(plantId),
     userId: parseInt(userId),
+    dtId: parseInt(dtId),
     wip: '',
     releaseStatus: '',
     exRate: '',
@@ -53,7 +55,9 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
     reference: '',
     date: new Date(),
     corId: null,
+    corName: '',
     currencyId: null,
+    currencyName: '',
     status: null,
     notes: '',
     amount: null,
@@ -69,7 +73,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
     sender_idtId: null,
     sender_idNo: '',
     sender_idIssuePlace: '',
-    sender_idIssueDate: new Date(null),
+    sender_idIssueDate: null,
     sender_idExpiryDate: null,
     receiver_type: '',
     receiver_riskCategory: '',
@@ -105,7 +109,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
   })
 
   const { maxAccess } = useDocumentType({
-    functionId: SystemFunction.InwardsTransfer,
+    functionId: SystemFunction.InwardTransfer,
     access: access,
     enabled: !recordId
   })
@@ -116,7 +120,6 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      reference: yup.string().required(),
       date: yup.date().required(),
       status: yup.number().required(),
       corId: yup.string().required(),
@@ -124,6 +127,8 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
       notes: yup.string().required(),
       amount: yup.number().required(),
       transferType: yup.string().required(),
+
+      // faxNo: transferType === '1' ? yup.string().required() : yup.string().notRequired(),
       sender_firstName: yup.string().required(),
       sender_lastName: yup.string().required(),
       sender_nationalityId: yup.string().required(),
@@ -136,10 +141,9 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
       commissionReceiver: yup.number().required()
     }),
     onSubmit: async values => {
+      console.log('copy')
       const copy = { ...formik.values }
       copy.date = formatDateToApi(copy?.date)
-
-      // copy.releaseStatus = copy?.releaseStatus === '' ? 1 : copy?.releaseStatus
       copy.wip = copy?.wip === '' ? 1 : copy?.wip
       copy.exRate = copy?.exRate === '' ? 1 : copy?.exRate
       copy.baseAmount = copy?.baseAmount === '' ? copy?.amount : copy?.baseAmount
@@ -260,22 +264,36 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
   }
 
   useEffect(() => {
-    ;(async function () {
+    const fetchRecord = async () => {
       if (recordId) {
-        const res = await getRequest({
-          extension: RemittanceOutwardsRepository.InwardsTransfer.get,
-          parameters: `_recordId=${recordId}`
-        })
-        res.record.date = formatDateFromApi(res.record.date)
-        setIsClosed(res.record.wip === 2 ? true : false)
-        setIsPosted(res.record.status === 4 ? false : true)
-        await fillCurrencyTransfer(recordId, res.record)
-        const baseCurrency = await getBaseCurrency()
-        getCorrespondentById(res.record.corId ?? '', baseCurrency, res.record.plantId)
-      } else {
-        getAccView()
+        try {
+          const res = await getRequest({
+            extension: RemittanceOutwardsRepository.InwardsTransfer.get,
+            parameters: `_recordId=${recordId}`
+          })
+          await fillCurrencyTransfer(recordId, res.record)
+
+          if (res.record) {
+            const record = {
+              ...res.record,
+              date: formatDateFromApi(res.record.date),
+              sender_idIssueDate: formatDateFromApi(res.record.sender_idIssueDate),
+              sender_idExpiryDate: formatDateFromApi(res.record.sender_idExpiryDate),
+              receiver_idIssueDate: formatDateFromApi(res.record.receiver_idIssueDate),
+              receiver_idExpiryDate: formatDateFromApi(res.record.receiver_idExpiryDate),
+              expiryDate: formatDateFromApi(res.record.expiryDate)
+            }
+
+            formik.setValues(record)
+            setEditMode(true)
+
+            const baseCurrency = await getBaseCurrency()
+            getCorrespondentById(res.record.corId, baseCurrency, res.record.plantId)
+          }
+        } catch (error) {}
       }
-    })()
+    }
+    fetchRecord()
   }, [])
 
   return (
@@ -285,6 +303,8 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
       editMode={editMode}
       maxAccess={maxAccess}
       functionId={SystemFunction.InwardTransfer}
+
+      // disabledSubmit={editMode}
     >
       <VertLayout>
         <Fixed>
@@ -297,9 +317,9 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       name='reference'
                       label={labels.reference}
                       value={formik?.values?.reference}
+                      readOnly={editMode}
                       maxAccess={maxAccess}
                       maxLength='15'
-                      required
                       error={formik.touched.reference && Boolean(formik.errors.reference)}
                       onChange={formik.handleChange}
                       onClear={() => formik.setFieldValue('reference', '')}
@@ -311,6 +331,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       required
                       label={labels.date}
                       value={formik?.values?.date}
+                      readOnly={editMode}
                       onChange={formik.setFieldValue}
                       editMode={editMode}
                       maxAccess={maxAccess}
@@ -324,6 +345,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       required
                       label={labels.status}
                       value={formik.values.status}
+                      readOnly={editMode}
                       maxAccess={maxAccess}
                       onChange={e => formik.setFieldValue('status', e.target.value)}
                       onClear={() => formik.setFieldValue('status', '')}
@@ -344,6 +366,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       label={labels.correspondent}
                       form={formik}
                       required
+                      readOnly={editMode}
                       firstFieldWidth='30%'
                       displayFieldWidth={1.5}
                       valueShow='corRef'
@@ -356,11 +379,9 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                           getCorrespondentById(newValue?.recordId, baseCurrency, formik.values.plantId)
                           formik.setFieldValue('corId', newValue?.recordId)
                           formik.setFieldValue('corName', newValue?.name || '')
-                          formik.setFieldValue('corRef', newValue?.reference || '')
                         } else {
                           formik.setFieldValue('corId', null)
                           formik.setFieldValue('corName', null)
-                          formik.setFieldValue('corRef', null)
                           setToCurrency(null)
                           setToCurrencyRef('')
                         }
@@ -370,6 +391,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                   </Grid>
                   <Grid item xs={4}>
                     <ResourceComboBox
+                      values={formik.values}
                       endpointId={SystemRepository.Currency.qry}
                       name='currencyId'
                       label={labels.currency}
@@ -381,10 +403,12 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       ]}
                       onChange={(event, newValue) => {
                         formik.setFieldValue('currencyId', newValue ? newValue.recordId : '')
+                        formik.setFieldValue('currencyName', newValue ? newValue.name : '')
                       }}
                       error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
                       maxAccess={maxAccess}
                       required
+                      readOnly={editMode}
                     />
                   </Grid>
                   <Grid item xs={4}>
@@ -393,6 +417,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       label={labels.notes}
                       value={formik.values.notes}
                       maxLength='200'
+                      readOnly={editMode}
                       required
                       maxAccess={maxAccess}
                       onChange={formik.handleChange}
@@ -411,6 +436,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       label={labels.amount}
                       value={formik.values.amount}
                       maxAccess={maxAccess}
+                      readOnly={editMode}
                       onChange={e => formik.setFieldValue('amount', e.target.value)}
                       onClear={() => formik.setFieldValue('amount', '')}
                       error={formik.touched.amount && Boolean(formik.errors.amount)}
@@ -420,15 +446,18 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                   </Grid>
                   <Grid item xs={4}>
                     <ResourceComboBox
+                      values={formik.values}
                       datasetId={DataSets.transferType}
                       name='transferType'
                       label={labels.transferType}
                       valueField='key'
                       displayField='value'
                       required
+                      readOnly={editMode}
                       maxAccess={maxAccess}
                       onChange={(event, newValue) => {
                         formik.setFieldValue('transferType', newValue?.key)
+                        setTransferType(newValue?.key)
                       }}
                       error={formik.touched.transferType && Boolean(formik.errors.transferType)}
                     />
@@ -441,7 +470,8 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       maxAccess={maxAccess}
                       maxLength='30'
                       error={formik.touched.faxNo && Boolean(formik.errors.faxNo)}
-                      readOnly={!formik.values.transferType}
+                      readOnly={!formik.values.transferType || formik.values.transferType != 1 || editMode}
+                      required={formik.values.transferType == 1}
                       onChange={formik.handleChange}
                       onClear={() => formik.setFieldValue('faxNo', '')}
                     />
@@ -461,6 +491,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       value={formik?.values?.sender_firstName}
                       maxAccess={maxAccess}
                       maxLength='50'
+                      readOnly={editMode}
                       required
                       error={formik.touched.sender_firstName && Boolean(formik.errors.sender_firstName)}
                       onChange={formik.handleChange}
@@ -473,6 +504,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       label={labels.sender_middleName}
                       value={formik?.values?.sender_middleName}
                       maxAccess={maxAccess}
+                      readOnly={editMode}
                       maxLength='50'
                       error={formik.touched.sender_middleName && Boolean(formik.errors.sender_middleName)}
                       onChange={formik.handleChange}
@@ -485,6 +517,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       label={labels.sender_lastName}
                       value={formik?.values?.sender_lastName}
                       maxAccess={maxAccess}
+                      readOnly={editMode}
                       maxLength='50'
                       required
                       error={formik.touched.sender_lastName && Boolean(formik.errors.sender_lastName)}
@@ -498,6 +531,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                 <Grid container spacing={2}>
                   <Grid item xs={4}>
                     <ResourceComboBox
+                      values={formik.values}
                       endpointId={SystemRepository.Country.qry}
                       name='sender_nationalityId'
                       label={labels.sender_nationalityId}
@@ -512,6 +546,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       }}
                       error={formik.touched.sender_nationalityId && Boolean(formik.errors.sender_nationalityId)}
                       maxAccess={maxAccess}
+                      readOnly={editMode}
                       required
                     />
                   </Grid>
@@ -521,6 +556,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       label={labels.sender_phone}
                       value={formik.values.sender_phone}
                       maxAccess={maxAccess}
+                      readOnly={editMode}
                       onChange={e => formik.setFieldValue('sender_phone', e.target.value)}
                       onClear={() => formik.setFieldValue('sender_phone', '')}
                       error={formik.touched.sender_phone && Boolean(formik.errors.sender_phone)}
@@ -534,6 +570,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       value={formik.values.sender_otherInfo}
                       maxLength='200'
                       maxAccess={maxAccess}
+                      readOnly={editMode}
                       onChange={formik.handleChange}
                       onClear={() => formik.setFieldValue('sender_otherInfo', '')}
                       error={formik.touched.sender_otherInfo && Boolean(formik.errors.sender_otherInfo)}
@@ -545,6 +582,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                 <Grid container spacing={2}>
                   <Grid item xs={4}>
                     <ResourceComboBox
+                      values={formik.values}
                       endpointId={SystemRepository.Country.qry}
                       name='sender_countryId'
                       label={labels.sender_countryId}
@@ -559,10 +597,12 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       }}
                       error={formik.touched.sender_countryId && Boolean(formik.errors.sender_countryId)}
                       maxAccess={maxAccess}
+                      readOnly={editMode}
                     />
                   </Grid>
                   <Grid item xs={4}>
                     <ResourceComboBox
+                      values={formik.values}
                       endpointId={CurrencyTradingSettingsRepository.IdTypes.qry}
                       name='sender_idtId'
                       label={labels.sender_idtId}
@@ -574,6 +614,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       }}
                       error={formik.touched.sender_idtId && Boolean(formik.errors.sender_idtId)}
                       maxAccess={maxAccess}
+                      readOnly={editMode}
                     />
                   </Grid>
                   <Grid item xs={4}>
@@ -582,6 +623,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       label={labels.sender_idNo}
                       value={formik?.values?.sender_idNo}
                       maxAccess={maxAccess}
+                      readOnly={editMode}
                       maxLength='30'
                       error={formik.touched.sender_idNo && Boolean(formik.errors.sender_idNo)}
                       onChange={formik.handleChange}
@@ -598,6 +640,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       label={labels.sender_idIssuePlace}
                       value={formik.values.sender_idIssuePlace}
                       maxAccess={maxAccess}
+                      readOnly={editMode}
                       onChange={e => formik.setFieldValue('sender_idIssuePlace', e.target.value)}
                       onClear={() => formik.setFieldValue('sender_idIssuePlace', '')}
                       error={formik.touched.sender_idIssuePlace && Boolean(formik.errors.sender_idIssuePlace)}
@@ -612,6 +655,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       onChange={formik.setFieldValue}
                       editMode={editMode}
                       maxAccess={maxAccess}
+                      readOnly={editMode}
                       onClear={() => formik.setFieldValue('sender_idIssueDate', '')}
                       error={formik.touched.sender_idIssueDate && Boolean(formik.errors.sender_idIssueDate)}
                     />
@@ -625,6 +669,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       onChange={formik.setFieldValue}
                       editMode={editMode}
                       maxAccess={maxAccess}
+                      readOnly={editMode}
                       onClear={() => formik.setFieldValue('sender_idExpiryDate', '')}
                       error={formik.touched.sender_idExpiryDate && Boolean(formik.errors.sender_idExpiryDate)}
                     />
@@ -639,6 +684,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                 <Grid container spacing={2}>
                   <Grid item xs={3}>
                     <ResourceComboBox
+                      values={formik.values}
                       datasetId={DataSets.transferType}
                       name='receiver_type'
                       label={labels.receiver_type}
@@ -646,6 +692,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       displayField='value'
                       required
                       maxAccess={maxAccess}
+                      readOnly={editMode}
                       onChange={(event, newValue) => {
                         formik.setFieldValue('receiver_type', newValue?.key)
                       }}
@@ -658,6 +705,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       label={labels.receiver_riskCategory}
                       value={formik.values.receiver_riskCategory}
                       maxAccess={maxAccess}
+                      readOnly={editMode}
                       onChange={e => formik.setFieldValue('receiver_riskCategory', e.target.value)}
                       onClear={() => formik.setFieldValue('receiver_riskCategory', '')}
                       error={formik.touched.receiver_riskCategory && Boolean(formik.errors.receiver_riskCategory)}
@@ -666,6 +714,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                   </Grid>
                   <Grid item xs={3}>
                     <ResourceComboBox
+                      values={formik.values}
                       datasetId={DataSets.receiverPayoutType}
                       name='receiver_payoutType'
                       label={labels.receiver_payoutType}
@@ -673,6 +722,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       required
                       displayField='value'
                       maxAccess={maxAccess}
+                      readOnly={editMode}
                       onChange={(event, newValue) => {
                         formik.setFieldValue('receiver_payoutType', newValue?.key)
                       }}
@@ -687,6 +737,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                           checked={formik.values.receiver_isResident}
                           onChange={formik.handleChange}
                           maxAccess={maxAccess}
+                          disabled={editMode}
                         />
                       }
                       label={labels.receiver_isResident}
@@ -702,6 +753,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       label={labels.receiver_firstName}
                       value={formik?.values?.receiver_firstName}
                       maxAccess={maxAccess}
+                      readOnly={editMode}
                       maxLength='20'
                       required
                       error={formik.touched.receiver_firstName && Boolean(formik.errors.receiver_firstName)}
@@ -715,6 +767,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       label={labels.receiver_middleName}
                       value={formik?.values?.receiver_middleName}
                       maxAccess={maxAccess}
+                      readOnly={editMode}
                       maxLength='20'
                       error={formik.touched.receiver_middleName && Boolean(formik.errors.receiver_middleName)}
                       onChange={formik.handleChange}
@@ -727,6 +780,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       label={labels.receiver_lastName}
                       value={formik?.values?.receiver_lastName}
                       maxAccess={maxAccess}
+                      readOnly={editMode}
                       maxLength='20'
                       required
                       error={formik.touched.receiver_lastName && Boolean(formik.errors.receiver_lastName)}
@@ -745,6 +799,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       label={labels.receiver_fl_firstName}
                       value={formik?.values?.receiver_fl_firstName}
                       maxAccess={maxAccess}
+                      readOnly={editMode}
                       maxLength='20'
                       error={formik.touched.receiver_fl_firstName && Boolean(formik.errors.receiver_fl_firstName)}
                       onChange={formik.handleChange}
@@ -757,6 +812,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       label={labels.receiver_fl_middleName}
                       value={formik?.values?.receiver_fl_middleName}
                       maxAccess={maxAccess}
+                      readOnly={editMode}
                       maxLength='20'
                       error={formik.touched.receiver_fl_middleName && Boolean(formik.errors.receiver_fl_middleName)}
                       onChange={formik.handleChange}
@@ -769,6 +825,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       label={labels.receiver_fl_lastName}
                       value={formik?.values?.receiver_fl_lastName}
                       maxAccess={maxAccess}
+                      readOnly={editMode}
                       maxLength='20'
                       error={formik.touched.receiver_fl_lastName && Boolean(formik.errors.receiver_fl_lastName)}
                       onChange={formik.handleChange}
@@ -786,6 +843,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       label={labels.receiver_phone}
                       value={formik.values.receiver_phone}
                       maxAccess={maxAccess}
+                      readOnly={editMode}
                       onChange={e => formik.setFieldValue('receiver_phone', e.target.value)}
                       onClear={() => formik.setFieldValue('receiver_phone', '')}
                       error={formik.touched.receiver_phone && Boolean(formik.errors.receiver_phone)}
@@ -798,6 +856,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       label={labels.receiver_nationalityId}
                       value={formik.values.receiver_nationalityId}
                       maxAccess={maxAccess}
+                      readOnly={editMode}
                       onChange={e => formik.setFieldValue('receiver_nationalityId', e.target.value)}
                       onClear={() => formik.setFieldValue('receiver_nationalityId', '')}
                       error={formik.touched.receiver_nationalityId && Boolean(formik.errors.receiver_nationalityId)}
@@ -806,6 +865,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                   </Grid>
                   <Grid item xs={3}>
                     <ResourceComboBox
+                      values={formik.values}
                       endpointId={CurrencyTradingSettingsRepository.IdTypes.qry}
                       name='receiver_idtId'
                       label={labels.receiver_idtId}
@@ -817,6 +877,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       }}
                       error={formik.touched.receiver_idtId && Boolean(formik.errors.receiver_idtId)}
                       maxAccess={maxAccess}
+                      readOnly={editMode}
                     />
                   </Grid>
                   <Grid item xs={3}>
@@ -825,6 +886,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       label={labels.receiver_idNo}
                       value={formik?.values?.receiver_idNo}
                       maxAccess={maxAccess}
+                      readOnly={editMode}
                       maxLength='30'
                       error={formik.touched.receiver_idNo && Boolean(formik.errors.receiver_idNo)}
                       onChange={formik.handleChange}
@@ -845,6 +907,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       onChange={formik.setFieldValue}
                       editMode={editMode}
                       maxAccess={maxAccess}
+                      readOnly={editMode}
                       onClear={() => formik.setFieldValue('receiver_idIssueDate', '')}
                       error={formik.touched.receiver_idIssueDate && Boolean(formik.errors.receiver_idIssueDate)}
                     />
@@ -857,6 +920,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       onChange={formik.setFieldValue}
                       editMode={editMode}
                       maxAccess={maxAccess}
+                      readOnly={editMode}
                       onClear={() => formik.setFieldValue('receiver_idExpiryDate', '')}
                       error={formik.touched.receiver_idExpiryDate && Boolean(formik.errors.receiver_idExpiryDate)}
                     />
@@ -867,6 +931,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       label={labels.receiver_idIssuePlace}
                       value={formik?.values?.receiver_idIssuePlace}
                       maxAccess={maxAccess}
+                      readOnly={editMode}
                       maxLength='30'
                       error={formik.touched.receiver_idIssuePlace && Boolean(formik.errors.receiver_idIssuePlace)}
                       onChange={formik.handleChange}
@@ -884,6 +949,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       label={labels.receiver_accountNo}
                       value={formik?.values?.receiver_accountNo}
                       maxAccess={maxAccess}
+                      readOnly={editMode}
                       maxLength='30'
                       error={formik.touched.receiver_accountNo && Boolean(formik.errors.receiver_accountNo)}
                       onChange={formik.handleChange}
@@ -897,6 +963,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       value={formik.values.receiver_address1}
                       maxLength='100'
                       maxAccess={maxAccess}
+                      readOnly={editMode}
                       onChange={formik.handleChange}
                       onClear={() => formik.setFieldValue('receiver_address1', '')}
                       error={formik.touched.receiver_address1 && Boolean(formik.errors.receiver_address1)}
@@ -909,6 +976,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       value={formik.values.receiver_address2}
                       maxLength='100'
                       maxAccess={maxAccess}
+                      readOnly={editMode}
                       onChange={formik.handleChange}
                       onClear={() => formik.setFieldValue('receiver_address2', '')}
                       error={formik.touched.receiver_address2 && Boolean(formik.errors.receiver_address2)}
@@ -926,6 +994,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       value={formik.values.receiver_bank}
                       maxLength='100'
                       maxAccess={maxAccess}
+                      readOnly={editMode}
                       onChange={formik.handleChange}
                       onClear={() => formik.setFieldValue('receiver_bank', '')}
                       error={formik.touched.receiver_bank && Boolean(formik.errors.receiver_bank)}
@@ -938,6 +1007,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       value={formik.values.receiver_bankBranch}
                       maxLength='100'
                       maxAccess={maxAccess}
+                      readOnly={editMode}
                       onChange={formik.handleChange}
                       onClear={() => formik.setFieldValue('receiver_bankBranch', '')}
                       error={formik.touched.receiver_bankBranch && Boolean(formik.errors.receiver_bankBranch)}
@@ -949,6 +1019,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       label={labels.receiver_ttNo}
                       value={formik?.values?.receiver_ttNo}
                       maxAccess={maxAccess}
+                      readOnly={editMode}
                       maxLength='20'
                       error={formik.touched.receiver_ttNo && Boolean(formik.errors.receiver_ttNo)}
                       onChange={formik.handleChange}
@@ -970,6 +1041,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       label={labels.paymentMode}
                       value={formik.values.paymentMode}
                       maxAccess={maxAccess}
+                      readOnly={editMode}
                       onChange={e => formik.setFieldValue('paymentMode', e.target.value)}
                       onClear={() => formik.setFieldValue('paymentMode', '')}
                       error={formik.touched.paymentMode && Boolean(formik.errors.paymentMode)}
@@ -982,6 +1054,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       label={labels.paymentBank}
                       value={formik?.values?.paymentBank}
                       maxAccess={maxAccess}
+                      readOnly={editMode}
                       maxLength='50'
                       error={formik.touched.paymentBank && Boolean(formik.errors.paymentBank)}
                       onChange={formik.handleChange}
@@ -994,6 +1067,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       label={labels.commissionType}
                       value={formik.values.commissionType}
                       maxAccess={maxAccess}
+                      readOnly={editMode}
                       onChange={e => formik.setFieldValue('commissionType', e.target.value)}
                       onClear={() => formik.setFieldValue('commissionType', '')}
                       error={formik.touched.commissionType && Boolean(formik.errors.commissionType)}
@@ -1007,6 +1081,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       label={labels.commissionAgent}
                       value={formik.values.commissionAgent}
                       maxAccess={maxAccess}
+                      readOnly={editMode}
                       onChange={e => formik.setFieldValue('commissionAgent', e.target.value)}
                       onClear={() => formik.setFieldValue('commissionAgent', '')}
                       error={formik.touched.commissionAgent && Boolean(formik.errors.commissionAgent)}
@@ -1025,6 +1100,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       label={labels.commissionReceiver}
                       value={formik.values.commissionReceiver}
                       maxAccess={maxAccess}
+                      readOnly={editMode}
                       onChange={e => formik.setFieldValue('commissionReceiver', e.target.value)}
                       onClear={() => formik.setFieldValue('commissionReceiver', '')}
                       error={formik.touched.commissionReceiver && Boolean(formik.errors.commissionReceiver)}
@@ -1040,12 +1116,14 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       onChange={formik.setFieldValue}
                       editMode={editMode}
                       maxAccess={maxAccess}
+                      readOnly={editMode}
                       onClear={() => formik.setFieldValue('expiryDate', '')}
                       error={formik.touched.expiryDate && Boolean(formik.errors.expiryDate)}
                     />
                   </Grid>
                   <Grid item xs={3}>
                     <ResourceComboBox
+                      values={formik.values}
                       endpointId={RemittanceSettingsRepository.SourceOfIncome.qry}
                       name='sourceOfIncome'
                       label={labels.sourceOfIncome}
@@ -1060,10 +1138,12 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       }}
                       error={formik.touched.sourceOfIncome && Boolean(formik.errors.sourceOfIncome)}
                       maxAccess={maxAccess}
+                      readOnly={editMode}
                     />
                   </Grid>
                   <Grid item xs={3}>
                     <ResourceComboBox
+                      values={formik.values}
                       endpointId={CurrencyTradingSettingsRepository.PurposeExchange.qry}
                       name='purposeOfTransfer'
                       label={labels.purposeOfTransfer}
@@ -1078,6 +1158,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       }}
                       error={formik.touched.purposeOfTransfer && Boolean(formik.errors.purposeOfTransfer)}
                       maxAccess={maxAccess}
+                      readOnly={editMode}
                     />
                   </Grid>
                 </Grid>

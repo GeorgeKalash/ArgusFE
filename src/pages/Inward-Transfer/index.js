@@ -156,11 +156,10 @@ const InwardTransfer = () => {
 
   const { proxyAction } = useDocumentTypeProxy({
     functionId: SystemFunction.InwardTransfer,
-    action: openForm,
-    hasDT: false
+    action: openForm
   })
 
-  const delCashTFR = async obj => {
+  const delTransfer = async obj => {
     await postRequest({
       extension: RemittanceOutwardsRepository.InwardsTransfer.del,
       record: JSON.stringify(obj)
@@ -169,11 +168,11 @@ const InwardTransfer = () => {
     toast.success('Record Deleted Successfully')
   }
 
-  const addCashTFR = () => {
+  const addTransfer = () => {
     proxyAction()
   }
 
-  const editCashTFR = obj => {
+  const editTransfer = obj => {
     openForm(obj.recordId)
   }
 
@@ -198,7 +197,7 @@ const InwardTransfer = () => {
     <VertLayout>
       <Fixed>
         <GridToolbar
-          onAdd={addCashTFR}
+          onAdd={addTransfer}
           maxAccess={access}
           onSearch={value => {
             filterBy('qry', value)
@@ -215,8 +214,8 @@ const InwardTransfer = () => {
           columns={columns}
           gridData={data ? data : { list: [] }}
           rowId={['recordId']}
-          onEdit={editCashTFR}
-          onDelete={delCashTFR}
+          onEdit={editTransfer}
+          onDelete={delTransfer}
           isLoading={false}
           pageSize={50}
           refetch={refetch}
