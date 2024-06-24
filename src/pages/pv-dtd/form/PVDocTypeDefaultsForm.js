@@ -74,7 +74,7 @@ export default function PVDocTypeDefaultsForm({ labels, maxAccess, dtId }) {
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.RVDocTypeDefaults} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell resourceId={ResourceIds.FIDocTypeDefaults} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
