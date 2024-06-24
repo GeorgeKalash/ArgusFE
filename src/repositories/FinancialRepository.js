@@ -96,5 +96,12 @@ export const FinancialRepository = {
   },
   Contact: {
     qry: service + 'qryContact'
+  },
+  RVDocTypeDefaults: {
+    qry: service + 'qryDTD',
+    page: service + 'pageDTD',
+    get: service + 'getDTD',
+    set: service + 'setDTD',
+    del: service + 'delDTD'
   }
 }
