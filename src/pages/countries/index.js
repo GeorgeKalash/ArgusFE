@@ -37,6 +37,7 @@ const Countries = () => {
     refetch,
     access
   } = useResourceQuery({
+    endpointId: SystemRepository.Country.page,
     queryFn: fetchGridData,
     endpointId: SystemRepository.Country.page,
     datasetId: ResourceIds.Countries
@@ -119,9 +120,10 @@ const Countries = () => {
         <GridToolbar onAdd={add} maxAccess={access} />
       </Fixed>
       <Grow>
-        <TableNew
+        <Table
           columns={columns}
-          gridData={data && data}
+          gridData={data}
+          fetchGridData={fetchGridData}
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}

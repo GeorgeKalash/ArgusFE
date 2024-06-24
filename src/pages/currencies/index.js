@@ -2693,7 +2693,7 @@ const Currencies = () => {
         <GridToolbar onAdd={add} maxAccess={access} />
       </Fixed>
       <Grow>
-        <TableNew
+        <Table
           columns={columns}
           gridData={data}
           rowId={['recordId']}
