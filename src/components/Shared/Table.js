@@ -74,11 +74,13 @@ const Table = ({ columns, gridData, fetchGridData, paginationType = 'api', ...pr
   const getRowClass = params => {
     return params?.rowIndex % 2 === 0 ? 'even-row' : ''
   }
+
   const onPaginationChanged = event => {
     console.log('event', event)
     const newPage = event.api.paginationGetCurrentPage()
     console.log('newPage', newPage)
   }
+
   return (
     <div className='ag-theme-alpine' style={{ flex: 1 }}>
       {api ? (
