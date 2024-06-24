@@ -97,7 +97,7 @@ export const FinancialRepository = {
   Contact: {
     qry: service + 'qryContact'
   },
-  RVDocTypeDefaults: {
+  FIDocTypeDefaults: {
     qry: service + 'qryDTD',
     page: service + 'pageDTD',
     get: service + 'getDTD',

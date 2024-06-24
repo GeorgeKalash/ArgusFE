@@ -22,7 +22,7 @@ const RVDocTypeDefaults = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: FinancialRepository.RVDocTypeDefaults.qry,
+      extension: FinancialRepository.FIDocTypeDefaults.qry,
 
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_functionId=${SystemFunction.ReceiptVoucher}`
     })
@@ -38,12 +38,12 @@ const RVDocTypeDefaults = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: FinancialRepository.RVDocTypeDefaults.qry,
+    endpointId: FinancialRepository.FIDocTypeDefaults.qry,
     datasetId: ResourceIds.RVDocTypeDefaults
   })
 
   const invalidate = useInvalidate({
-    endpointId: FinancialRepository.RVDocTypeDefaults.qry
+    endpointId: FinancialRepository.FIDocTypeDefaults.qry
   })
 
   const columns = [
@@ -74,7 +74,7 @@ const RVDocTypeDefaults = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: FinancialRepository.RVDocTypeDefaults.del,
+      extension: FinancialRepository.FIDocTypeDefaults.del,
       record: JSON.stringify(obj)
     })
     invalidate()

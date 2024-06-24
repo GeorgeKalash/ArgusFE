@@ -21,7 +21,7 @@ export default function RVDocTypeDefaultsForm({ labels, maxAccess, dtId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
-    endpointId: FinancialRepository.RVDocTypeDefaults.qry
+    endpointId: FinancialRepository.FIDocTypeDefaults.qry
   })
 
   const { formik } = useForm({
@@ -36,7 +36,7 @@ export default function RVDocTypeDefaultsForm({ labels, maxAccess, dtId }) {
     }),
     onSubmit: async obj => {
       const response = await postRequest({
-        extension: FinancialRepository.RVDocTypeDefaults.set,
+        extension: FinancialRepository.FIDocTypeDefaults.set,
         record: JSON.stringify(obj)
       })
 
@@ -57,7 +57,7 @@ export default function RVDocTypeDefaultsForm({ labels, maxAccess, dtId }) {
       try {
         if (dtId) {
           const res = await getRequest({
-            extension: FinancialRepository.RVDocTypeDefaults.get,
+            extension: FinancialRepository.FIDocTypeDefaults.get,
             parameters: `_dtId=${dtId}`
           })
 
