@@ -8,7 +8,6 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
-import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
@@ -18,19 +17,21 @@ export default function RebuildAccountBalances({ _labels, access }) {
   const { postRequest } = useContext(RequestsContext)
 
   const { formik } = useForm({
-    initialValues: { fiscalYear: '', groupId: 0, recordId: 'N/A', accountId: 0 },
+    initialValues: { fiscalYear: '', groupId: '', recordId: 'N/A', accountId: '' },
     enableReinitialize: true,
     maxAccess: access,
     validateOnChange: true,
 
     validationSchema: yup.object({
-      fiscalYear: yup.string().required(' ')
+      fiscalYear: yup.string().required(' '),
+      groupId: yup.string().required(' '),
+      accountId: yup.string().required(' ')
     }),
     onSubmit: async obj => {
       try {
         const { recordId, ...rest } = obj
 
-        const response = await postRequest({
+        await postRequest({
           extension: FinancialRepository.AccountCreditBalance.rebuild,
           record: JSON.stringify(rest)
         })
@@ -84,7 +85,7 @@ export default function RebuildAccountBalances({ _labels, access }) {
                 required
                 maxAccess={access}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('fiscalYear', newValue?.fiscalYear)
+                  formik.setFieldValue('fiscalYear', newValue?.fiscalYear || null)
                 }}
                 error={formik.touched.fiscalYear && Boolean(formik.errors.fiscalYear)}
               />
@@ -121,13 +122,7 @@ export default function RebuildAccountBalances({ _labels, access }) {
                 displayField='name'
                 values={formik.values}
                 onChange={(event, newValue) => {
-                  if (newValue) {
-                    formik.setFieldValue('groupId', newValue?.recordId)
-                    formik.setFieldValue('groupName', newValue?.name)
-                  } else {
-                    formik.setFieldValue('groupId', '')
-                    formik.setFieldValue('groupName', '')
-                  }
+                  formik.setFieldValue('groupId', newValue?.recordId || null)
                 }}
                 maxAccess={access}
                 error={formik.touched.groupId && Boolean(formik.errors.groupId)}
