@@ -1,5 +1,5 @@
-import { FormControlLabel, Grid, Checkbox } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { Grid } from '@mui/material'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -35,7 +35,7 @@ export default function MemosDtdForm({ labels, maxAccess, dtId, functionId }) {
       dtId: yup.string().required(' ')
     }),
     onSubmit: async obj => {
-      const response = await postRequest({
+      await postRequest({
         extension: FinancialRepository.FIDocTypeDefaults.set,
         record: JSON.stringify(obj)
       })

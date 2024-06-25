@@ -12,9 +12,11 @@ import { useWindow } from 'src/windows'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import RVDocTypeDefaultsForm from './form/RVDocTypeDefaultsForm'
 import { SystemFunction } from 'src/resources/SystemFunction'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const RVDocTypeDefaults = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const { stack } = useWindow()
 
@@ -78,7 +80,7 @@ const RVDocTypeDefaults = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
   }
 
   function openForm(dtId) {

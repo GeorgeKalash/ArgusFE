@@ -14,9 +14,11 @@ import { useRouter } from 'next/router'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 
 import MemosDtdForm from './form/MemosDtdForm'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const Financial = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const { stack } = useWindow()
 
@@ -81,7 +83,7 @@ const Financial = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
   }
 
   function openForm(dtId) {
@@ -89,8 +91,8 @@ const Financial = () => {
       Component: MemosDtdForm,
       props: {
         labels: _labels,
-        functionId: functionId,
-        dtId: dtId,
+        functionId,
+        dtId,
         maxAccess: access
       },
       width: 500,
@@ -98,8 +100,6 @@ const Financial = () => {
       title: _labels.doctypeDefault
     })
   }
-
-  console.log(functionId, 'func index')
 
   return (
     <VertLayout>
