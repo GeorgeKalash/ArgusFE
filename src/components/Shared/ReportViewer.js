@@ -7,7 +7,6 @@ import { Autocomplete, Box, Button, TextField } from '@mui/material'
 // ** Custom Imports
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import ReportParameterBrowser from 'src/components/Shared/ReportParameterBrowser'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -49,7 +48,7 @@ const ReportViewer = ({ resourceId }) => {
           }))
         ])
       })
-      .catch()
+      .catch(error => {})
   }
 
   const getReportTemplate = () => {
@@ -84,17 +83,19 @@ const ReportViewer = ({ resourceId }) => {
       url: process.env.NEXT_PUBLIC_REPORT_URL,
       extension: DevExpressRepository.generate,
       record: JSON.stringify(obj)
-    }).then(res => {
-      switch (selectedFormat.key) {
-        case 1:
-          setPDF(res.recordId)
-          break
-
-        default:
-          window.location.href = res.recordId
-          break
-      }
     })
+      .then(res => {
+        switch (selectedFormat.key) {
+          case 1:
+            setPDF(res.recordId)
+            break
+
+          default:
+            window.location.href = res.recordId
+            break
+        }
+      })
+      .catch(error => {})
   }
 
   useEffect(() => {
@@ -110,8 +111,11 @@ const ReportViewer = ({ resourceId }) => {
   }, [reportStore])
 
   const formatDataForApi = paramsArray => {
+    console.log('lastData', paramsArray)
     console.log(paramsArray)
-    const formattedData = paramsArray.map(({ fieldId, value }) => `${fieldId}|${value}`).join('^')
+    const formattedData = paramsArray
+      .map(({ fieldId, value }) => `${fieldId}|${value}`)
+      .reduce((acc, curr, index) => acc + (index === 1 ? ` ${curr}` : `^${curr}`), '')
 
     return formattedData
   }

@@ -39,7 +39,7 @@ export const apiMappings = {
     parameters: {
       _type: 0
     },
-    valueField: 'accountNo',
+    valueField: 'reference',
     valueOnSelection: 'recordId',
     displayField: 'name',
     displayFieldWidth: 2,

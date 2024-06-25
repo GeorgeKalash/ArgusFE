@@ -13,7 +13,24 @@ import { apiMappings, COMBOBOX, LOOKUP } from './apiMappings'
 import ResourceComboBox from './ResourceComboBox'
 import { ResourceLookup } from './ResourceLookup'
 
-const ReportParameterBrowser = ({ reportName, paramsArray, disabled, window }) => {
+const formatDateTo = value => {
+  const date = new Date(value)
+  const formattedDate = date.toISOString().slice(0, 10).replace(/-/g, '')
+  return formattedDate // Output: 20240621
+}
+
+const formatDateFrom = value => {
+  const year = value.slice(0, 4)
+  const month = value.slice(4, 6) - 1 // Months are 0-based in JavaScript Date
+  const day = value.slice(6, 8)
+
+  const parsedDate = new Date(year, month, day)
+  const timestamp = parsedDate.getTime()
+
+  return parsedDate
+}
+
+const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, disabled, window }) => {
   const { getRequest } = useContext(RequestsContext)
 
   const [parameters, setParameters] = useState([])
@@ -125,12 +142,22 @@ const ReportParameterBrowser = ({ reportName, paramsArray, disabled, window }) =
 
     return (
       <Grid item xs={12} key={field.id}>
+        {formik.values?.parameters?.[field.id]?.value}
         <CustomDatePicker
-          name={field.key}
+          name={`parameters[${field.id}]`}
           label={field.caption}
-          value={formik.values[field.key]}
+          value={formik.values?.parameters?.[field.id]?.value}
           required={field.mandatory}
-          onChange={formik.setFieldValue}
+          onChange={(name, newValue) => {
+            formik.setFieldValue(`parameters[${field.id}]`, {
+              fieldId: field.id,
+              fieldKey: field.key,
+              value: newValue,
+              caption: field.caption,
+              display: name,
+              display2: name
+            })
+          }}
           onClear={() => formik.setFieldValue(field.key, '')}
         />
       </Grid>
@@ -151,22 +178,30 @@ const ReportParameterBrowser = ({ reportName, paramsArray, disabled, window }) =
       <Grid item xs={12} key={field.id}>
         <ResourceComboBox
           endpointId={apiDetails.endpoint}
-          name={field.key}
+          name={`parameters[${field.id}]`}
           label={field.caption}
           valueField={apiDetails.valueField}
           displayField={apiDetails.displayField}
           columnsInDropDown={apiDetails.columnsInDropDown}
           required={field.mandatory}
-          value={formik.values[field.key]}
+          value={formik.values?.parameters?.[field.id]?.value}
           onChange={(event, newValue) => {
-            handleFieldChange({
+            // handleFieldChange({
+            //   fieldId: field.id,
+            //   fieldKey: field.key,
+            //   value: newValue?.[apiDetails.valueField],
+            //   caption: field.caption,
+            //   display: newValue?.[apiDetails.displayField]
+            // })
+            formik.setFieldValue(`parameters[${field.id}]`, {
               fieldId: field.id,
               fieldKey: field.key,
               value: newValue?.[apiDetails.valueField],
               caption: field.caption,
-              display: newValue?.[apiDetails.displayField]
+              display: newValue?.[apiDetails.displayField],
+              display2: newValue?.[apiDetails.displayField]
             })
-            formik.setFieldValue([field.key], newValue?.[apiDetails.valueField])
+            // formik.setFieldValue([field.key], newValue?.[apiDetails.valueField])
           }}
         />
       </Grid>
@@ -197,20 +232,29 @@ const ReportParameterBrowser = ({ reportName, paramsArray, disabled, window }) =
           firstFieldWidth={apiDetails.firstFieldWidth}
           valueField={apiDetails.valueField}
           displayField={apiDetails.displayField}
-          name={field.key}
+          name={`parameters[${field.id}]`}
           displayFieldWidth={apiDetails.displayFieldWidth}
           required={field.mandatory}
           label={field.caption}
           form={formik}
           firstValue={formik.values[field.key]}
           onChange={(event, newValue) => {
-            handleFieldChange({
+            // handleFieldChange({
+            //   fieldId: field.id,
+            //   fieldKey: field.key,
+            //   value: newValue?.[apiDetails.valueOnSelection],
+            //   caption: field.caption,
+            //   display: newValue?.[apiDetails.displayField]
+            // })
+            formik.setFieldValue(`parameters[${field.id}]`, {
               fieldId: field.id,
               fieldKey: field.key,
               value: newValue?.[apiDetails.valueOnSelection],
               caption: field.caption,
-              display: newValue?.[apiDetails.displayField]
+              display: newValue?.[apiDetails.displayField],
+              display2: newValue?.[apiDetails.displayField]
             })
+
             formik.setFieldValue([field.key], newValue?.[apiDetails.valueField])
           }}
         />
@@ -380,40 +424,68 @@ const ReportParameterBrowser = ({ reportName, paramsArray, disabled, window }) =
     })
   }
 
-  const handleFieldChange = object => {
-    const existingIndex = paramsArray.findIndex(item => item.fieldId === object.fieldId)
-    if (existingIndex !== -1) {
-      paramsArray[existingIndex] = {
-        fieldId: object.fieldId,
-        fieldKey: object.fieldKey,
-        value: object.value,
-        caption: object.caption,
-        display: object.display
-      }
-    } else {
-      paramsArray.push({
-        fieldId: object.fieldId,
-        fieldKey: object.fieldKey,
-        value: object.value,
-        caption: object.caption,
-        display: object.display
-      })
-    }
+  // const handleFieldChange = object => {
+  //   const existingIndex = paramsArray.findIndex(item => item.fieldId === object.fieldId)
+  //   if (existingIndex !== -1) {
+  //     paramsArray[existingIndex] = {
+  //       fieldId: object.fieldId,
+  //       fieldKey: object.fieldKey,
+  //       value: object.value,
+  //       caption: object.caption,
+  //       display: object.display
+  //     }
+  //   } else {
+  //     paramsArray.push({
+  //       fieldId: object.fieldId,
+  //       fieldKey: object.fieldKey,
+  //       value: object.value,
+  //       caption: object.caption,
+  //       display: object.display
+  //     })
+  //   }
 
-    //setParamsArray(paramsArray)
-    //console.log(paramsArray)
-    //setFields(fields)
-  }
+  //   //setParamsArray(paramsArray)
+  //   //console.log(paramsArray)
+  //   //setFields(fields)
+  // }
 
   const { formik } = useForm({
-    initialValues: {},
+    initialValues: {
+      parameters: []
+    },
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({}),
     onSubmit: values => {
+      console.log('values', values)
+      const processedArray = values?.parameters
+        ?.filter((item, index) => item?.fieldId)
+        .reduce((acc, item) => {
+          if (item?.fieldId) {
+            acc[item.fieldId] = {
+              ...item,
+              value: item.fieldKey === 'date' ? formatDateTo(item.value) : item.value
+            }
+          }
+          return acc
+        }, [])
+
+      setParamsArray(processedArray)
       window.close()
     }
   })
+
+  useEffect(() => {
+    const mappedData = paramsArray.reduce((acc, item) => {
+      acc[item?.fieldId] = {
+        ...item,
+        value: item.display === 'date' ? formatDateFrom(item.value) : item.value
+      }
+      return acc
+    }, [])
+    formik.setFieldValue('parameters', mappedData)
+  }, [])
+  console.log('formik'.formik?.values)
 
   useEffect(() => {
     getParameterDefinition(reportName, setParameters)
@@ -427,6 +499,8 @@ const ReportParameterBrowser = ({ reportName, paramsArray, disabled, window }) =
       })()
     }
   }, [parameters])
+
+  console.log('formiksss', formik?.values, paramsArray)
 
   return (
     <FormShell form={formik} infoVisible={false}>
