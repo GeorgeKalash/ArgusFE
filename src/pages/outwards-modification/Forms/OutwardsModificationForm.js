@@ -18,22 +18,24 @@ import BenificiaryCashForm from 'src/components/Shared/BenificiaryCashForm'
 import BenificiaryBankForm from 'src/components/Shared/BenificiaryBankForm'
 import toast from 'react-hot-toast'
 import { RTOWMRepository } from 'src/repositories/RTOWMRepository'
-import { useInvalidate } from 'src/hooks/resource'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
+import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
+import { useWindow } from 'src/windows'
+import { ControlContext } from 'src/providers/ControlContext'
 
-export default function OutwardsModificationForm({ access, labels, recordId }) {
+export default function OutwardsModificationForm({ access, labels, recordId, invalidate }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const [editMode, setEditMode] = useState(!!recordId)
   const [displayCash, setDisplayCash] = useState(false)
   const [displayBank, setDisplayBank] = useState(false)
-  const [isClosed, setIsClosed] = useState(false)
-  const [isPosted, setIsPosted] = useState(false)
+  const [isVerified, setIsVerified] = useState(false)
+  const { stack } = useWindow()
+  const { platformLabels } = useContext(ControlContext)
 
   const [store, setStore] = useState(
     { submitted: false },
     { clearBenForm: false },
-    { loadBen: true },
+    { loadBen: false },
     { beneficiaryList: {} },
     { fullModifiedOutwardBody: {} }
   )
@@ -41,12 +43,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
   const { maxAccess } = useDocumentType({
     functionId: SystemFunction.OutwardsModification,
     access: access,
-    hasDT: false,
-    enabled: !editMode
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: RTOWMRepository.OutwardsModification.page
+    hasDT: false
   })
 
   const { formik } = useForm({
@@ -63,6 +60,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
       clientId: '',
       clientRef: '',
       clientName: '',
+      cellPhone: '',
       dispersalType: '',
       countryId: '',
       headerBenId: '',
@@ -76,7 +74,8 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
       oldBeneficiarySeqName: '',
       wip: '',
       releaseStatus: '',
-      status: ''
+      status: '',
+      otpVerified: false
     },
     enableReinitialize: false,
     validateOnChange: true,
@@ -92,19 +91,26 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
       }))
     }
   })
+  const editMode = !!formik.values.recordId
+  const isClosed = formik.values.wip === 2
+  const isPosted = formik.values.status === 4
 
   const onClose = async () => {
     const res = await postRequest({
       extension: RTOWMRepository.OutwardsModification.close,
-      record: JSON.stringify({
-        recordId: formik.values.recordId
-      })
+      record: JSON.stringify(store.fullModifiedOutwardBody)
     })
 
     if (res.recordId) {
-      toast.success('Record Closed Successfully')
+      !isVerified && toast.success(platformLabels.Closed)
       invalidate()
-      setIsClosed(true)
+
+      const res2 = await getRequest({
+        extension: RTOWMRepository.OutwardsModification.get,
+        parameters: `_recordId=${res.recordId}`
+      })
+      formik.setFieldValue('wip', res2.record.wip)
+      formik.setFieldValue('status', res2.record.status)
     }
   }
 
@@ -115,9 +121,15 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
     })
 
     if (res.recordId) {
-      toast.success('Record Closed Successfully')
+      toast.success(platformLabels.Reopened)
       invalidate()
-      setIsClosed(false)
+
+      const res2 = await getRequest({
+        extension: RTOWMRepository.OutwardsModification.get,
+        parameters: `_recordId=${res.recordId}`
+      })
+      formik.setFieldValue('wip', res2.record.wip)
+      formik.setFieldValue('status', res2.record.status)
     }
   }
 
@@ -130,9 +142,14 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
     })
 
     if (res?.recordId) {
-      toast.success('Record Posted Successfully')
+      toast.success(platformLabels.Posted)
       invalidate()
-      setIsPosted(true)
+
+      const res2 = await getRequest({
+        extension: RTOWMRepository.OutwardsModification.get,
+        parameters: `_recordId=${res.recordId}`
+      })
+      formik.setFieldValue('status', res2.record.status)
     }
   }
 
@@ -143,6 +160,11 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
   }
 
   async function fillOutwardData(data) {
+    setStore(prevStore => ({
+      ...prevStore,
+      fullModifiedOutwardBody: data
+    }))
+
     const outwardFields = [
       'outwardsDate',
       'amount',
@@ -150,6 +172,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
       'clientId',
       'clientRef',
       'clientName',
+      'cellPhone',
       'ttNo',
       'dispersalType',
       'countryId',
@@ -166,12 +189,12 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
       'oldBeneficiarySeqNo',
       'newBeneficiaryId',
       'newBeneficiarySeqNo',
-      'status'
+      'wip',
+      'status',
+      'otpVerified'
     ]
 
     setFieldValues(modifiedOWFields, data)
-    setIsClosed(data.wip === 2 ? true : false)
-    setIsPosted(data.status === 3 ? true : false)
 
     if (data.outwardId) {
       const res = await getRequest({
@@ -188,6 +211,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
         clientId: headerView.clientId,
         clientRef: headerView.clientRef,
         clientName: headerView.clientName,
+        cellPhone: headerView.cellPhone,
         ttNo: ttNo,
         dispersalType: headerView.dispersalType,
         countryId: headerView.countryId,
@@ -201,23 +225,17 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
         headerBenSeqNo: data.newBeneficiarySeqNo ?? '',
         dispersalType: headerView.dispersalType ?? ''
       })
-
-      setStore(prevStore => ({
-        ...prevStore,
-        loadBen: true,
-        fullModifiedOutwardBody: data
-      }))
     } else {
       formik.resetForm()
       setStore(prevStore => ({
         ...prevStore,
         submitted: false,
         clearBenForm: false,
-        loadBen: false,
         fullModifiedOutwardBody: data
       }))
     }
   }
+
   async function fillBeneficiaryData(data) {
     setStore(prevStore => ({
       ...prevStore,
@@ -225,18 +243,11 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
       clearBenForm: false,
       loadBen: true
     }))
-
-    //  const beneficiaryFields = ['headerBenId', 'headerBenSeqNo', 'headerBenName']
-    //setFieldValues(beneficiaryFields, data)
-    viewBeneficiary(data.dispersalType ?? '')
     formik.setFieldValue('newBeneficiaryId', data.headerBenId)
     formik.setFieldValue('newBeneficiarySeqNo', data.headerBenSeqNo)
-  }
-
-  function viewBeneficiary(dispersalType) {
-    if (dispersalType === 1) {
+    if (data.dispersalType === 1) {
       setDisplayCash(true)
-    } else if (dispersalType === 2) {
+    } else if (data.dispersalType === 2) {
       setDisplayBank(true)
     }
   }
@@ -246,13 +257,13 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
       key: 'Close',
       condition: !isClosed,
       onClick: onClose,
-      disabled: isClosed || !editMode || isPosted
+      disabled: isClosed || !editMode
     },
     {
       key: 'Reopen',
       condition: isClosed,
       onClick: onReopen,
-      disabled: !isClosed || !editMode || (formik.values.releaseStatus === 3 && formik.values.status === 3) || isPosted
+      disabled: !isClosed
     },
     {
       key: 'Approval',
@@ -264,7 +275,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
       key: 'Post',
       condition: true,
       onClick: onPost,
-      disabled: formik.values.status != 4 || isPosted
+      disabled: !isPosted
     }
   ]
 
@@ -290,10 +301,10 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
           })
 
           if (res.recordId) {
-            toast.success('Record Updated Successfully')
+            const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
+            toast.success(actionMessage)
             formik.setFieldValue('recordId', res.recordId)
             invalidate()
-            setEditMode(true)
 
             const res2 = await getRequest({
               extension: RTOWMRepository.OutwardsModification.get,
@@ -304,6 +315,19 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
               ...prevStore,
               fullModifiedOutwardBody: res2.record
             }))
+
+            stack({
+              Component: OTPPhoneVerification,
+              props: {
+                formValidation: formik,
+                recordId: res.recordId,
+                functionId: SystemFunction.OutwardsModification,
+                setIsVerified
+              },
+              width: 400,
+              height: 400,
+              title: labels.OTPVerification
+            })
           }
         }
 
@@ -315,9 +339,10 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
           res.record.date = formatDateFromApi(res.record.date)
           fillOutwardData(res.record)
         }
+        isVerified && onClose()
       } catch (error) {}
     })()
-  }, [store.beneficiaryList])
+  }, [store.beneficiaryList, formik.values.recordId, isVerified])
 
   return (
     <FormShell
