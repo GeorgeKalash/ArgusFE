@@ -18,13 +18,15 @@ export default function GenerateOpening({ _labels, access }) {
   const { postRequest } = useContext(RequestsContext)
 
   const { formik } = useForm({
-    initialValues: { fiscalYear: '', tbFiscalYear: '', recordId: 'N/A', endDate: '' },
+    initialValues: { fiscalYear: null, tbFiscalYear: null, recordId: 'N/A', endDate: null },
     enableReinitialize: true,
     maxAccess: access,
     validateOnChange: true,
 
     validationSchema: yup.object({
-      fiscalYear: yup.string().required(' ')
+      fiscalYear: yup.string().required(' '),
+      tbendDate: yup.string().required(' '),
+      tbFiscalYear: yup.string().required(' ')
     }),
     onSubmit: async obj => {
       try {
@@ -36,9 +38,6 @@ export default function GenerateOpening({ _labels, access }) {
         })
 
         toast.success('Record Success')
-        formik.setValues({
-          ...obj
-        })
 
         invalidate()
       } catch (error) {}
@@ -67,7 +66,7 @@ export default function GenerateOpening({ _labels, access }) {
                 required
                 maxAccess={access}
                 onChange={(event, newValue) => {
-                  formik && formik.setFieldValue('tbFiscalYear', newValue?.tbFiscalYear)
+                  formik && formik.setFieldValue('tbFiscalYear', newValue?.fiscalYear || null)
                 }}
                 error={formik.touched.tbFiscalYear && Boolean(formik.errors.tbFiscalYear)}
               />
@@ -80,6 +79,7 @@ export default function GenerateOpening({ _labels, access }) {
                 onChange={formik.setFieldValue}
                 maxAccess={access}
                 onClear={() => formik.setFieldValue('tbendDate', '')}
+                required
                 error={formik.touched.tbendDate && Boolean(formik.errors.tbendDate)}
               />
             </Grid>
@@ -94,7 +94,7 @@ export default function GenerateOpening({ _labels, access }) {
                 required
                 maxAccess={access}
                 onChange={(event, newValue) => {
-                  formik && formik.setFieldValue('fiscalYear', newValue?.fiscalYear)
+                  formik && formik.setFieldValue('fiscalYear', newValue?.fiscalYear || null)
                 }}
                 error={formik.touched.fiscalYear && Boolean(formik.errors.fiscalYear)}
               />
