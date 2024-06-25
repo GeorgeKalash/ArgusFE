@@ -49,9 +49,7 @@ const ReportViewer = ({ resourceId }) => {
           }))
         ])
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch()
   }
 
   const getReportTemplate = () => {
@@ -72,9 +70,7 @@ const ReportViewer = ({ resourceId }) => {
           }))
         ])
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch()
   }
 
   const generateReport = ({ params = '' }) => {

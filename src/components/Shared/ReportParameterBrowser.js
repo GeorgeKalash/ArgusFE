@@ -9,17 +9,18 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { useForm } from 'src/hooks/form'
 import FormShell from './FormShell'
-
-// import { getRpbList } from './RPBList'
+import { apiMappings, COMBOBOX, LOOKUP } from './apiMappings'
+import ResourceComboBox from './ResourceComboBox'
+import { ResourceLookup } from './ResourceLookup'
 
 const ReportParameterBrowser = ({ reportName, paramsArray, disabled, window }) => {
   const { getRequest } = useContext(RequestsContext)
 
-  const [parameters, setParameters] = useState(null)
+  const [parameters, setParameters] = useState([])
   const [fields, setFields] = useState([])
 
-  const getParameterDefinition = () => {
-    var parameters = '_reportName=' + reportName
+  const getParameterDefinition = (reportName, setParameters) => {
+    const parameters = `_reportName=${reportName}`
 
     getRequest({
       extension: SystemRepository.ParameterDefinition,
@@ -29,19 +30,8 @@ const ReportParameterBrowser = ({ reportName, paramsArray, disabled, window }) =
     })
   }
 
-  // const getFieldKey = key => {
-  //   switch (key) {
-  //     case 'toFunctionId':
-  //       return formik.values?.toFunctionId
-  //     case 'fromFunctionId':
-  //       return formik.values?.fromFunctionId
-
-  //     default:
-  //       break
-  //   }
-  // }
-
   const getFieldValue = key => {
+    return { key: formik?.values?.key ? formik.values.key : null }
     switch (key) {
       case 'toFunctionId':
         return {
@@ -115,252 +105,145 @@ const ReportParameterBrowser = ({ reportName, paramsArray, disabled, window }) =
     })
   }
 
-  //const rpbList = getRpbList()
+  const fetchData = async field => {
+    const mapping = apiMappings[field.classId]
+    if (!mapping) {
+      console.warn(`No API mapping found for classId ${field.classId}`)
 
-  const getComboBoxByClassId = field => {
-    switch (field.classId) {
-      case 0:
-        var parameters = `_dataset=${field.data}&_language=1`
-        getRequest({
-          extension: SystemRepository.KeyValueStore,
-          parameters: parameters
-        }).then(res => {
-          var _fieldValue = getFieldValue(field.key)
-          formik.setValues(pre => {
-            return {
-              ...pre,
-              ..._fieldValue
-            }
-          })
-
-          fields.push(
-            <Grid item xs={12} key={field.classId}>
-              <CustomComboBox
-                name={field.key}
-                label={field.caption}
-                valueField='key'
-                displayField='value'
-                store={res.list}
-                value={
-                  formik?.values &&
-                  formik?.values[field.key] &&
-                  res.list.filter(item => item.key === formik?.values[field.key])[0]
-                }
-                required={field.mandatory}
-                onChange={(event, newValue) => {
-                  handleFieldChange({
-                    fieldId: field.id,
-                    fieldKey: field.key,
-                    value: newValue?.key,
-                    caption: field.caption,
-                    display: newValue?.value
-                  })
-                  formik.setFieldValue([field.key], newValue?.key)
-                }}
-                sx={{ pt: 2 }}
-              />
-            </Grid>
-          )
-        })
-        break
-      case 20103:
-        var parameters = '_filter='
-        getRequest({
-          extension: 'SY.asmx/qryCU',
-          parameters
-        }).then(res => {
-          var _fieldValue = getFieldValue(field.key)
-
-          formik.setValues(pre => {
-            return {
-              ...pre,
-              ..._fieldValue
-            }
-          })
-          fields.push(getCombo({ field, valueField: 'recordId', displayField: 'reference', store: res.list }))
-        })
-        break
-      case 20109:
-        var parameters = ''
-        getRequest({
-          extension: 'SY.asmx/qryFY',
-          parameters
-        }).then(res => {
-          var _fieldValue = getFieldValue(field.key)
-
-          formik.setValues(pre => {
-            return {
-              ...pre,
-              ..._fieldValue
-            }
-          })
-          fields.push(getCombo({ field, valueField: 'fiscalYear', displayField: 'fiscalYear', store: res.list }))
-        })
-        break
-      case 31202:
-        var parameters = '_type=0'
-        getRequest({
-          extension: 'CA.asmx/qryACC',
-          parameters
-        }).then(res => {
-          var _fieldValue = getFieldValue(field.key)
-
-          formik.setValues(pre => {
-            return {
-              ...pre,
-              ..._fieldValue
-            }
-          })
-          fields.push(getCombo({ field, valueField: 'recordId', displayField: 'reference', store: res.list }))
-        })
-        break
-      case 41101:
-        var parameters = '_filter='
-        getRequest({
-          extension: InventoryRepository.Site.qry,
-          parameters
-        }).then(res => {
-          var _fieldValue = getFieldValue(field.key)
-
-          formik.setValues(pre => {
-            return {
-              ...pre,
-              ..._fieldValue
-            }
-          })
-          fields.push(getCombo({ field, valueField: 'recordId', displayField: 'reference', store: res.list }))
-        })
-        break
-      case 41103:
-        var parameters = '_filter=&_name=&_pageSize=1000&_startAt=0'
-        getRequest({
-          extension: InventoryRepository.Category.qry,
-          parameters
-        }).then(res => {
-          var _fieldValue = getFieldValue(field.key)
-
-          formik.setValues(pre => {
-            return {
-              ...pre,
-              ..._fieldValue
-            }
-          })
-          fields.push(getCombo({ field, valueField: 'recordId', displayField: 'name', store: res.list }))
-        })
-        break
-
-      case 41201: //item filter
-        // getCombo({
-        //   field,
-        //   valueField: 'recordId',
-        //   displayField: 'reference',
-        //   itemSnapshotStore,
-        //   onChange: setItemSnapshotStore(itemSnapshot())
-        // })
-        fields
-          .push
-
-          // <ResourceLookup
-          //   endpointId='IV.asmx/snapshotIT'
-          //   valueField='sku'
-          //   displayField='sku'
-          //   name='sku'
-          //   label={field.caption}
-          //   form={formik}
-          //   secondDisplayField={true}
-          //   firstValue={formik?.values?.sku}
-          //   secondValue={formik?.values?.description}
-          //   onChange={(event, newValue) => {
-          //     if (newValue) {
-          //       formik.setFieldValue('itemId', newValue?.recordId)
-          //       formik.setFieldValue('sku', newValue?.sku)
-          //       formik.setFieldValue('description', newValue?.description)
-          //     } else {
-          //       formik.setFieldValue('itemId', '')
-          //       formik.setFieldValue('sku', null)
-          //       formik.setFieldValue('description', null)
-          //     }
-          //   }}
-          //   errorCheck={'itemId'}
-          // />
-          ()
-        break
-
-      // case 41103:
-      //   var parameters = '_filter='
-
-      //   getRequest({
-      //     extension: InventoryRepository.Category.qry,
-      //     parameters
-      //   })
-      //     .then(res => {
-      //       var _fieldValue = getFieldValue(field.key)
-
-      //       formik.setValues(pre => {
-      //         return {
-      //           ...pre,
-      //           ..._fieldValue
-      //         }
-      //       })
-
-      //       fields.push(getCombo({ field, valueField: 'recordId', displayField: 'reference', store: res.list }))
-      //     })
-      //     .catch(error => {
-      //       setErrorMessage(error)
-      //     })
-      //   break
-
-      // case 41102:
-      //   var parameters = '_filter='
-
-      //   getRequest({
-      //     extension: InventoryRepository.Measurement.qry,
-      //     parameters
-      //   })
-      //     .then(res => {
-      //       var _fieldValue = getFieldValue(field.key)
-
-      //       formik.setValues(pre => {
-      //         return {
-      //           ...pre,
-      //           ..._fieldValue
-      //         }
-      //       })
-
-      //       fields.push(getCombo({ field, valueField: 'recordId', displayField: 'reference', store: res.list }))
-      //     })
-      //     .catch(error => {
-      //       setErrorMessage(error)
-      //     })
-      //   break
-
-      // case 51101:
-      //   var parameters = '_filter='
-
-      //   getRequest({
-      //     extension: SaleRepository.PriceLevel.qry,
-      //     parameters
-      //   })
-      //     .then(res => {
-      //       var _fieldValue = getFieldValue(field.key)
-
-      //       formik.setValues(pre => {
-      //         return {
-      //           ...pre,
-      //           ..._fieldValue
-      //         }
-      //       })
-
-      //       fields.push(getCombo({ field, valueField: 'siteId', displayField: 'reference', store: res.list }))
-      //     })
-      //     .catch(error => {
-      //       setErrorMessage(error)
-      //     })
-      //   break
-
-      default:
-        break
+      return null
     }
+
+    return {
+      ...mapping
+    }
+  }
+
+  const getDateField = async (field, formik) => {
+    if (field.defaultValue && !formik.values[field.key]) {
+      formik.setFieldValue(field.key, field.defaultValue)
+    }
+
+    return (
+      <Grid item xs={12} key={field.id}>
+        <CustomDatePicker
+          name={field.key}
+          label={field.caption}
+          value={formik.values[field.key]}
+          required={field.mandatory}
+          onChange={formik.setFieldValue}
+          onClear={() => formik.setFieldValue(field.key, '')}
+        />
+      </Grid>
+    )
+  }
+
+  const getComboBoxByClassId = async (field, formik) => {
+    const apiDetails = await fetchData(field)
+    if (!apiDetails) return null
+
+    const _fieldValue = getFieldValue(field.key)
+    formik.setValues(pre => ({
+      ...pre,
+      ..._fieldValue
+    }))
+
+    return (
+      <Grid item xs={12} key={field.id}>
+        <ResourceComboBox
+          endpointId={apiDetails.endpoint}
+          name={field.key}
+          label={field.caption}
+          valueField={apiDetails.valueField}
+          displayField={apiDetails.displayField}
+          columnsInDropDown={apiDetails.columnsInDropDown}
+          required={field.mandatory}
+          value={formik.values[field.key]}
+          onChange={(event, newValue) => {
+            handleFieldChange({
+              fieldId: field.id,
+              fieldKey: field.key,
+              value: newValue?.[apiDetails.valueField],
+              caption: field.caption,
+              display: newValue?.[apiDetails.displayField]
+            })
+            formik.setFieldValue([field.key], newValue?.[apiDetails.valueField])
+          }}
+        />
+      </Grid>
+
+      // value={
+      //   formik?.values &&
+      //   formik?.values[field.key] &&
+      //   apiDetails.store.find(item => item[apiDetails.valueField] === formik?.values[field.key])
+      // }
+    )
+  }
+
+  const getLookupByClassId = async (field, formik) => {
+    const apiDetails = await fetchData(field)
+    if (!apiDetails) return null
+
+    const _fieldValue = getFieldValue(field.key)
+    formik.setValues(pre => ({
+      ...pre,
+      ..._fieldValue
+    }))
+
+    return (
+      <Grid item xs={12} key={field.id}>
+        <ResourceLookup
+          endpointId={apiDetails.endpoint}
+          parameters={apiDetails.parameters}
+          firstFieldWidth={apiDetails.firstFieldWidth}
+          valueField={apiDetails.valueField}
+          displayField={apiDetails.displayField}
+          name={field.key}
+          displayFieldWidth={apiDetails.displayFieldWidth}
+          required={field.mandatory}
+          label={field.caption}
+          form={formik}
+          firstValue={formik.values[field.key]}
+          onChange={(event, newValue) => {
+            handleFieldChange({
+              fieldId: field.id,
+              fieldKey: field.key,
+              value: newValue?.[apiDetails.valueOnSelection],
+              caption: field.caption,
+              display: newValue?.[apiDetails.displayField]
+            })
+            formik.setFieldValue([field.key], newValue?.[apiDetails.valueField])
+          }}
+        />
+      </Grid>
+    )
+  }
+
+  const generateFields = async (parameters, formik) => {
+    const fieldComponents = await Promise.all(
+      parameters.map(async field => {
+        if (field.controlType === 5) {
+          return await readDynamicFields(field, formik)
+        } else if (field.controlType === 4) {
+          return await getDateField(field, formik)
+        }
+      })
+    )
+
+    return fieldComponents.filter(field => field !== null)
+  }
+
+  const readDynamicFields = async (field, formik) => {
+    const apiDetails = await fetchData(field)
+    if (!apiDetails) return null
+
+    const _fieldValue = getFieldValue(field.key)
+    formik.setValues(pre => ({
+      ...pre,
+      ..._fieldValue
+    }))
+
+    if (apiDetails.type == COMBOBOX) return await getComboBoxByClassId(field, formik)
+    else return await getLookupByClassId(field, formik)
   }
 
   const getFieldsByClassId = async () => {
@@ -498,8 +381,6 @@ const ReportParameterBrowser = ({ reportName, paramsArray, disabled, window }) =
   }
 
   const handleFieldChange = object => {
-    console.log('object')
-    console.log(object)
     const existingIndex = paramsArray.findIndex(item => item.fieldId === object.fieldId)
     if (existingIndex !== -1) {
       paramsArray[existingIndex] = {
@@ -521,7 +402,7 @@ const ReportParameterBrowser = ({ reportName, paramsArray, disabled, window }) =
 
     //setParamsArray(paramsArray)
     //console.log(paramsArray)
-    setFields(fields)
+    //setFields(fields)
   }
 
   const { formik } = useForm({
@@ -535,25 +416,22 @@ const ReportParameterBrowser = ({ reportName, paramsArray, disabled, window }) =
   })
 
   useEffect(() => {
-    if (!parameters && fields.length === 0 && !disabled) getParameterDefinition()
-    if (parameters) {
-      // Assuming getFieldsByClassId is an asynchronous function that returns a promise
-      getFieldsByClassId().then(() => {
-        if (paramsArray.length > 0) {
-          const initialValues = {}
-          paramsArray.forEach(item => {
-            initialValues[item.fieldKey] = item.value
-          })
-          formik.setValues(initialValues)
-        }
-      })
+    getParameterDefinition(reportName, setParameters)
+  }, [reportName])
+
+  useEffect(() => {
+    if (parameters.length > 0) {
+      ;(async () => {
+        const generatedFields = await generateFields(parameters, formik)
+        setFields(generatedFields)
+      })()
     }
-  }, [parameters, disabled])
+  }, [parameters])
 
   return (
     <FormShell form={formik} infoVisible={false}>
       <Grid container spacing={2} sx={{ px: 4, pt: 2 }}>
-        {fields && fields}
+        {fields.length > 0 ? fields : <div>Loading...</div>}
       </Grid>
     </FormShell>
   )
