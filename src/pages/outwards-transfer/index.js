@@ -16,11 +16,13 @@ import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { useError } from 'src/error'
 import { getStorageData } from 'src/storage/storage'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const OutwardsTransfer = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
+  const { platformLabels } = useContext(ControlContext)
 
   const {
     query: { data },
@@ -154,7 +156,7 @@ const OutwardsTransfer = () => {
         record: JSON.stringify(obj)
       })
       invalidate()
-      toast.success('Record Deleted Successfully')
+      toast.success(platformLabels.Deleted)
     } catch (error) {}
   }
 

@@ -27,78 +27,26 @@ export default function InstantCash({ onInstantCashSubmit, cashData = {}, window
   const { formik } = useForm({
     maxAccess,
     initialValues: {
-      payingAgent: '',
       deliveryModeId: '',
       currency: '',
-      partnerReference: '',
-      sourceAmount: outwardsData?.amount ?? '',
-      fromCountryId: '',
+      sourceAmount: '',
       toCountryId: '',
-      sourceOfFundsId: 0,
-      remittancePurposeId: 0,
-      totalTransactionAmountPerAnnum: clientData?.hiddenTrxAmount ?? '',
-      transactionsPerAnnum: clientData?.hiddenTrxCount ?? '',
+      totalTransactionAmountPerAnnum: '',
+      transactionsPerAnnum: '',
       remitter: {
-        cardNo: '',
-        firstName: '',
-        middleName: '',
-        lastName: '',
-        mobileNumber: '',
-        phoneNumber: '',
-        email: '',
-        address: {
-          addressLine1: '',
-          addressLine2: '',
-          district: '',
-          city: '',
-          postCode: '',
-          state: '',
-          country: ''
-        },
-        primaryId: {
-          type: 0,
-          number: '',
-          issueDate: null,
-          expiryDate: null,
-          placeOfIssue: ''
-        },
-        dateOfBirth: '',
-        gender: '',
-        nationality: '',
-        countryOfBirth: '',
-        countryOfResidence: '',
         relation: '',
         otherRelation: '',
-        profession: 0,
-        employerName: clientData?.hiddenSponserName,
+        employerName: '',
         employerStatus: ''
       },
       beneficiary: {
-        cardNo: '',
-        firstName: '',
-        middleName: '',
-        lastName: '',
-        mobileNumber: '',
-        phoneNumber: '',
-        email: '',
         address: {
-          addressLine1: '',
-          addressLine2: '',
-          district: '',
-          city: '',
-          postCode: '',
-          state: '',
-          country: ''
+          postCode: ''
         },
-        dateOfBirth: null,
-        gender: '',
-        nationality: '',
-        countryOfBirth: '',
         bankDetails: {
           bankCode: '',
           bankName: '',
-          bankAddress1: '',
-          bankAccountNumber: ''
+          bankAddress1: ''
         }
       }
     },

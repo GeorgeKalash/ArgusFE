@@ -22,6 +22,7 @@ import { SystemFunction } from 'src/resources/SystemFunction'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
 import { useWindow } from 'src/windows'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function OutwardsModificationForm({ access, labels, recordId, invalidate }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -29,6 +30,7 @@ export default function OutwardsModificationForm({ access, labels, recordId, inv
   const [displayBank, setDisplayBank] = useState(false)
   const [isVerified, setIsVerified] = useState(false)
   const { stack } = useWindow()
+  const { platformLabels } = useContext(ControlContext)
 
   const [store, setStore] = useState(
     { submitted: false },
@@ -100,7 +102,7 @@ export default function OutwardsModificationForm({ access, labels, recordId, inv
     })
 
     if (res.recordId) {
-      !isVerified && toast.success('Record Closed Successfully')
+      !isVerified && toast.success(platformLabels.Closed)
       invalidate()
 
       const res2 = await getRequest({
@@ -119,7 +121,7 @@ export default function OutwardsModificationForm({ access, labels, recordId, inv
     })
 
     if (res.recordId) {
-      toast.success('Record Closed Successfully')
+      toast.success(platformLabels.Reopened)
       invalidate()
 
       const res2 = await getRequest({
@@ -140,7 +142,7 @@ export default function OutwardsModificationForm({ access, labels, recordId, inv
     })
 
     if (res?.recordId) {
-      toast.success('Record Posted Successfully')
+      toast.success(platformLabels.Posted)
       invalidate()
 
       const res2 = await getRequest({
@@ -299,7 +301,8 @@ export default function OutwardsModificationForm({ access, labels, recordId, inv
           })
 
           if (res.recordId) {
-            toast.success('Record Updated Successfully')
+            const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
+            toast.success(actionMessage)
             formik.setFieldValue('recordId', res.recordId)
             invalidate()
 

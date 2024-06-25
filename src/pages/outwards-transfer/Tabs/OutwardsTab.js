@@ -39,12 +39,14 @@ import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { useForm } from 'src/hooks/form'
 import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
 import { useInvalidate } from 'src/hooks/resource'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function OutwardsTab({ labels, access, recordId, cashAccountId, plantId, userId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
   const [isVerified, setIsVerified] = useState(false)
+  const { platformLabels } = useContext(ControlContext)
 
   const { maxAccess } = useDocumentType({
     functionId: SystemFunction.Outwards,
@@ -236,13 +238,15 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
         })
 
         if (amountRes.recordId) {
-          toast.success('Record Updated Successfully')
+          const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
+          toast.success(actionMessage)
           formik.setFieldValue('recordId', amountRes.recordId)
 
           const res2 = await getRequest({
             extension: RemittanceOutwardsRepository.OutwardsTransfer.get2,
             parameters: `_recordId=${amountRes.recordId}`
           })
+
           formik.setFieldValue('reference', res2.record.headerView.reference)
           invalidate()
         }
@@ -290,7 +294,7 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
       })
 
       if (res.recordId) {
-        !isVerified && toast.success('Record Closed Successfully')
+        !isVerified && toast.success(platformLabels.Closed)
         invalidate()
 
         const res2 = await getRequest({
@@ -319,7 +323,7 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
       })
 
       if (res.recordId) {
-        toast.success('Record Closed Successfully')
+        toast.success(platformLabels.Reopened)
         invalidate()
 
         const res2 = await getRequest({
@@ -346,7 +350,7 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
       })
 
       if (res?.recordId) {
-        toast.success('Record Posted Successfully')
+        toast.success(platformLabels.Posted)
         formik.setFieldValue('ttNo', res.recordId)
         invalidate()
         window.close()
