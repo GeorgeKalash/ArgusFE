@@ -1,5 +1,4 @@
 import { Button, Checkbox, FormControlLabel, Grid, Radio, RadioGroup } from '@mui/material'
-import { useFormik } from 'formik'
 import React, { useContext, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
@@ -100,7 +99,6 @@ function FormProvider({ formik, maxAccess, labels, children }) {
 
 export default function TransactionForm({ recordId, labels, access, plantId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const [editMode, setEditMode] = useState(!!recordId)
   const [infoAutoFilled, setInfoAutoFilled] = useState(false)
   const [idInfoAutoFilled, setIDInfoAutoFilled] = useState(false)
   const { stack: stackError } = useError()
@@ -110,9 +108,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
   const [rateType, setRateType] = useState(null)
   const [idNumberOne, setIdNumber] = useState(null)
   const [search, setSearch] = useState(null)
-  const [isClosed, setIsClosed] = useState(false)
   const [fId, setFId] = useState(SystemFunction.CurrencyPurchase)
-  const [isPosted, setIsPosted] = useState(false)
 
   async function checkTypes(value) {
     if (!value) {
@@ -201,7 +197,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     functionId: fId,
     access: access,
     hasDT: false,
-    enabled: !editMode
+    enabled: !!!recordId
   })
 
   const { formik } = useForm({
@@ -247,6 +243,10 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     onSubmit
   })
 
+  const editMode = !!formik.values.recordId
+  const isClosed = formik.values.wip === 2
+  const isPosted = formik.values.status === 4
+
   async function setOperationType(type) {
     if (type) {
       const res = await getRequest({
@@ -282,10 +282,8 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
   useEffect(() => {
     fillType()
     ;(async function () {
-      setEditMode(false)
       setOperationType(formik.values.functionId)
       if (recordId) {
-        setEditMode(true)
         getData(recordId)
       }
     })()
@@ -349,8 +347,6 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
 
           setOperationType(record.headerView.functionId)
         }
-        setIsClosed(record.headerView.wip === 2 ? true : false)
-        setIsPosted(record.headerView.status === 4 ? false : true)
       })
       .catch(error => {})
   }
@@ -401,7 +397,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       if (res.recordId) {
         toast.success('Record Closed Successfully')
         invalidate()
-        setIsClosed(true)
+        getData(res.recordId)
       }
     } catch (e) {}
   }
@@ -438,7 +434,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       if (res.recordId) {
         toast.success('Record Reopened Successfully')
         invalidate()
-        setIsClosed(false)
+        getData(res.recordId)
       }
     } catch (e) {}
   }
@@ -452,6 +448,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
   }, 0)
 
   const balance = total - receivedTotal
+
   async function onSubmit(values) {
     try {
       if (
@@ -564,10 +561,8 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
           parameters: `_clientId=${clientId}`
         })
         const totalBaseAmount = parseInt(get3CIV.record.baseAmount) + parseInt(total)
-        if (totalBaseAmount > baseAmount.value) {
-        }
 
-        /* const response = await postRequest({
+        const response = await postRequest({
           extension: CTTRXrepository.CurrencyTrading.set2,
           record: JSON.stringify(payload)
         })
@@ -576,18 +571,19 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
           toast.success('Record Added Successfully')
           formik.setFieldTouched(recordId, response.recordId)
           getData(response.recordId)
-
-          setEditMode(true)
         } else {
           toast.success('Record Edited Successfully')
-        }*/
-        !recordId && viewOTP(amountRes.recordId)
+        }
+        if (totalBaseAmount > baseAmount.value && !recordId) {
+          viewOTP(response.recordId)
+        }
         invalidate()
       }
 
       return
     } catch (e) {}
   }
+
   function viewOTP(recordId) {
     stack({
       Component: OTPPhoneVerification,
@@ -642,6 +638,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
 
     return response.record
   }
+
   async function fetchInfoByKey({ key }) {
     const response = await getRequest({
       extension: RTCLRepository.CtClientIndividual.get3,
@@ -678,7 +675,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
 
       if (res) {
         toast.success('Record Posted Successfully')
-        setIsPosted(true)
+        getData(res.recordId)
         invalidate()
       }
     } catch (e) {}
@@ -689,7 +686,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       key: 'Post',
       condition: true,
       onClick: onPost,
-      disabled: !editMode || isPosted || !isClosed
+      disabled: !isPosted
     },
     {
       key: 'Close',
@@ -702,7 +699,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       key: 'Reopen',
       condition: isClosed,
       onClick: onReopen,
-      disabled: !isClosed || !editMode || formik.values.releaseStatus === 3
+      disabled: !isClosed
     },
     {
       key: 'Approval',
@@ -717,7 +714,6 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       actions={actions}
       form={formik}
       initialValues={initialValues}
-      setEditMode={setEditMode}
       setIDInfoAutoFilled={setIDInfoAutoFilled}
       resourceId={ResourceIds.CashInvoice}
       editMode={editMode}
