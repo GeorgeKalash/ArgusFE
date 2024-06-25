@@ -67,6 +67,7 @@ export default function RebuildAccountBalances({ _labels, access }) {
       actions={actions}
       maxAccess={access}
       isSaved={false}
+      isCleared={false}
       editMode={true}
     >
       <VertLayout>
@@ -83,7 +84,7 @@ export default function RebuildAccountBalances({ _labels, access }) {
                 required
                 maxAccess={access}
                 onChange={(event, newValue) => {
-                  formik && formik.setFieldValue('fiscalYear', newValue?.fiscalYear)
+                  formik.setFieldValue('fiscalYear', newValue?.fiscalYear)
                 }}
                 error={formik.touched.fiscalYear && Boolean(formik.errors.fiscalYear)}
               />
