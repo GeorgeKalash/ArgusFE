@@ -387,7 +387,7 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
     formik.setValues({
       ...data.headerView,
       ttNo: data.ttNo,
-      bankType: data.bankType,
+      bankType: data.interfaceId,
       amountRows: modifiedList
     })
   }
