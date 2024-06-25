@@ -33,6 +33,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { useForm } from 'src/hooks/form'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
 
 const FormContext = React.createContext(null)
 
@@ -451,7 +452,6 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
   }, 0)
 
   const balance = total - receivedTotal
-
   async function onSubmit(values) {
     try {
       if (
@@ -482,6 +482,10 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
           parameters: `_userId=${userId}&_key=cashAccountId`
         })
 
+        const { record: baseAmount } = await getRequest({
+          extension: CurrencyTradingSettingsRepository.Defaults.get,
+          parameters: '_key=ct_minOtp_CIVAmount'
+        })
         const clientId = values.clientId || 0
 
         const payload = {
@@ -555,7 +559,15 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
             }))
         }
 
-        const response = await postRequest({
+        const get3CIV = await getRequest({
+          extension: CTTRXrepository.CurrencyTrading.get3,
+          parameters: `_clientId=${clientId}`
+        })
+        const totalBaseAmount = parseInt(get3CIV.record.baseAmount) + parseInt(total)
+        if (totalBaseAmount > baseAmount.value) {
+        }
+
+        /* const response = await postRequest({
           extension: CTTRXrepository.CurrencyTrading.set2,
           record: JSON.stringify(payload)
         })
@@ -568,13 +580,29 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
           setEditMode(true)
         } else {
           toast.success('Record Edited Successfully')
-        }
+        }*/
+        !recordId && viewOTP(amountRes.recordId)
         invalidate()
       }
 
       return
     } catch (e) {}
   }
+  function viewOTP(recordId) {
+    stack({
+      Component: OTPPhoneVerification,
+      props: {
+        formValidation: formik,
+        recordId: recordId,
+        functionId: formik.values.functionId,
+        onSuccess: onClose
+      },
+      width: 400,
+      height: 400,
+      title: labels.OTPVerification
+    })
+  }
+
   async function fetchClientInfo({ clientId }) {
     try {
       const response = await getRequest({
