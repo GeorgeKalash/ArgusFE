@@ -45,7 +45,6 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
-  const [isVerified, setIsVerified] = useState(false)
   const { platformLabels } = useContext(ControlContext)
 
   const { maxAccess } = useDocumentType({
@@ -276,7 +275,7 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
         formValidation: formik,
         recordId: recordId,
         functionId: SystemFunction.Outwards,
-        setIsVerified
+        onSuccess: onClose
       },
       width: 400,
       height: 400,
@@ -294,7 +293,7 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
       })
 
       if (res.recordId) {
-        !isVerified && toast.success(platformLabels.Closed)
+        toast.success(platformLabels.Closed)
         invalidate()
 
         const res2 = await getRequest({
@@ -351,7 +350,6 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
 
       if (res?.recordId) {
         toast.success(platformLabels.Posted)
-        formik.setFieldValue('ttNo', res.recordId)
         invalidate()
         window.close()
       }
@@ -613,10 +611,9 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
           getDefaultDT()
         }
         getDefaultVAT()
-        isVerified && onClose()
       } catch (error) {}
     })()
-  }, [formik.values.recordId, isVerified])
+  }, [formik.values.recordId])
 
   return (
     <FormShell
