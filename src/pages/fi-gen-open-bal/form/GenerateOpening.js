@@ -13,12 +13,13 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { RGFinancialRepository } from 'src/repositories/RGFinancialRepository'
+import { formatDateToApi } from 'src/lib/date-helper'
 
 export default function GenerateOpening({ _labels, access }) {
   const { postRequest } = useContext(RequestsContext)
 
   const { formik } = useForm({
-    initialValues: { fiscalYear: null, tbFiscalYear: null, recordId: 'N/A', endDate: null },
+    initialValues: { fiscalYear: null, tbFiscalYear: null, recordId: 'N/A', tbendDate: null },
     enableReinitialize: true,
     maxAccess: access,
     validateOnChange: true,
@@ -34,7 +35,7 @@ export default function GenerateOpening({ _labels, access }) {
 
         const response = await postRequest({
           extension: RGFinancialRepository.FiOpeningBalance.gen,
-          record: JSON.stringify(rest)
+          record: JSON.stringify({ ...obj, tbendDate: formatDateToApi(obj.tbendDate) })
         })
 
         toast.success('Record Success')
