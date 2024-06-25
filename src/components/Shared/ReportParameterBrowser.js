@@ -27,7 +27,7 @@ const formatDateFrom = value => {
   const parsedDate = new Date(year, month, day)
   const timestamp = parsedDate.getTime()
 
-  return parsedDate
+  return timestamp
 }
 
 const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, disabled, window }) => {
@@ -144,7 +144,7 @@ const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, disab
       <Grid item xs={12} key={field.id}>
         {formik.values?.parameters?.[field.id]?.value}
         <CustomDatePicker
-          name={`parameters[${field.id}]`}
+          name={field.key}
           label={field.caption}
           value={formik.values?.parameters?.[field.id]?.value}
           required={field.mandatory}
@@ -178,7 +178,7 @@ const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, disab
       <Grid item xs={12} key={field.id}>
         <ResourceComboBox
           endpointId={apiDetails.endpoint}
-          name={`parameters[${field.id}]`}
+          name={field.key}
           label={field.caption}
           valueField={apiDetails.valueField}
           displayField={apiDetails.displayField}
@@ -232,12 +232,13 @@ const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, disab
           firstFieldWidth={apiDetails.firstFieldWidth}
           valueField={apiDetails.valueField}
           displayField={apiDetails.displayField}
-          name={`parameters[${field.id}]`}
+          name={field.key}
           displayFieldWidth={apiDetails.displayFieldWidth}
           required={field.mandatory}
           label={field.caption}
           form={formik}
-          firstValue={formik.values[field.key]}
+          firstValue={formik.values.parameters?.[field.id]?.display}
+          secondValue={formik.values.test}
           onChange={(event, newValue) => {
             // handleFieldChange({
             //   fieldId: field.id,
@@ -252,10 +253,10 @@ const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, disab
               value: newValue?.[apiDetails.valueOnSelection],
               caption: field.caption,
               display: newValue?.[apiDetails.displayField],
-              display2: newValue?.[apiDetails.displayField]
+              display2: newValue?.[apiDetails.valueField]
             })
 
-            formik.setFieldValue([field.key], newValue?.[apiDetails.valueField])
+            formik.setFieldValue('test', '555')
           }}
         />
       </Grid>
@@ -451,7 +452,8 @@ const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, disab
 
   const { formik } = useForm({
     initialValues: {
-      parameters: []
+      parameters: [],
+      test: ''
     },
     enableReinitialize: true,
     validateOnChange: true,
@@ -479,7 +481,7 @@ const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, disab
     const mappedData = paramsArray.reduce((acc, item) => {
       acc[item?.fieldId] = {
         ...item,
-        value: item.display === 'date' ? formatDateFrom(item.value) : item.value
+        value: item.fieldKey === 'date' ? formatDateFrom(item.value) : item.value
       }
       return acc
     }, [])
