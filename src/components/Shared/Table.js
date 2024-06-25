@@ -25,13 +25,14 @@ const Table = ({
   paginationType = 'api',
   viewCheckButtons = false,
   showCheckboxColumn = false,
+  pagination = true,
   setData,
   ...props
 }) => {
-  const pageSize = props?.pageSize
-  const api = props?.api ? props?.api : props?.paginationParameters
+  const pageSize = props?.pageSize || 100
+  const api = props?.api ? props?.api : props?.paginationParameters || ''
   const refetch = props?.refetch
-  const [gridData, setGridData] = useState([])
+  const [gridData, setGridData] = useState({})
   const [startAt, setStartAt] = useState(0)
   const { languageId } = useContext(AuthContext)
   const { platformLabels } = useContext(ControlContext)
@@ -40,142 +41,36 @@ const Table = ({
   const { stack } = useWindow()
 
   useEffect(() => {
-    props.gridData && paginationType !== 'api' && setGridData(props?.gridData)
-  }, [props.gridData])
+    props?.gridData && paginationType !== 'api' && setGridData(props?.gridData)
+  }, [props?.gridData])
 
   const CustomPagination = () => {
-    if (paginationType === 'api') {
-      const gridData = props.gridData
-      const startAt = gridData?._startAt ?? 0
-      const totalRecords = gridData?.count ? gridData?.count : 0
-      const page = Math.ceil(gridData?.count ? (startAt === 0 ? 1 : (startAt + 1) / pageSize) : 1)
-      const pageCount = Math.ceil(gridData?.count ? gridData.count / pageSize : 1)
-
-      const incrementPage = () => {
-        if (page < pageCount) {
-          api({ _startAt: page * pageSize, _pageSize: pageSize })
-        }
-      }
-
-      const decrementPage = () => {
-        if (page > 1) {
-          api({ _startAt: (page - 2) * pageSize, _pageSize: pageSize })
-        }
-      }
-
-      const goToFirstPage = () => {
-        api({ _startAt: 0, _pageSize: pageSize })
-      }
-
-      const goToLastPage = () => {
-        api({ _startAt: (pageCount - 1) * pageSize, _pageSize: pageSize })
-      }
-
-      return (
-        <Box
-          sx={{
-            width: '100%',
-            backgroundColor: '#fff',
-            borderTop: '1px solid #ccc',
-            position: 'sticky',
-            bottom: 0
-          }}
-        >
-          <IconButton
-            onClick={goToFirstPage}
-            disabled={page === 1}
-            sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
-          >
-            <FirstPageIcon />
-          </IconButton>
-          <IconButton
-            onClick={decrementPage}
-            disabled={page === 1}
-            sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
-          >
-            <NavigateBeforeIcon />
-          </IconButton>
-          {platformLabels.Page} {page} {platformLabels.Of} {pageCount}
-          <IconButton
-            onClick={incrementPage}
-            disabled={page === pageCount}
-            sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
-          >
-            <NavigateNextIcon />
-          </IconButton>
-          <IconButton
-            onClick={goToLastPage}
-            disabled={page === pageCount}
-            sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
-          >
-            <LastPageIcon />
-          </IconButton>
-          <IconButton onClick={refetch}>
-            <RefreshIcon />
-          </IconButton>
-          {platformLabels.DisplayingRecords} {startAt === 0 ? 1 : startAt} -{' '}
-          {totalRecords < pageSize ? totalRecords : page === pageCount ? totalRecords : startAt + pageSize}{' '}
-          {platformLabels.Of} {totalRecords}
-        </Box>
-      )
-    } else {
-      const gridData = props.gridData
-
-      if (gridData && gridData?.list) {
-        const originalGridData = gridData && gridData.list
-        const page = Math.ceil(gridData.count ? (startAt === 0 ? 1 : (startAt + 1) / pageSize) : 1)
-
-        var _gridData = gridData?.list
-        const pageCount = Math.ceil(originalGridData?.length ? originalGridData?.length / pageSize : 1)
-        const totalRecords = originalGridData?.length
+    if (pagination) {
+      if (paginationType === 'api') {
+        const gridData = props.gridData
+        const startAt = gridData?._startAt ?? 0
+        const totalRecords = gridData?.count ? gridData?.count : 0
+        const page = Math.ceil(gridData?.count ? (startAt === 0 ? 1 : (startAt + 1) / pageSize) : 1)
+        const pageCount = Math.ceil(gridData?.count ? gridData.count / pageSize : 1)
 
         const incrementPage = () => {
           if (page < pageCount) {
-            var slicedGridData = _gridData.slice(page * pageSize, (page + 1) * pageSize)
-            setGridData({
-              ...gridData,
-              list: slicedGridData
-            })
-            setStartAt(startAt + pageSize)
+            api({ _startAt: page * pageSize, _pageSize: pageSize })
           }
         }
 
         const decrementPage = () => {
           if (page > 1) {
-            var slicedGridData = _gridData.slice((page - 2) * pageSize, (page - 1) * pageSize)
-            setGridData({
-              ...gridData,
-              list: slicedGridData
-            })
-            setStartAt(startAt - pageSize)
+            api({ _startAt: (page - 2) * pageSize, _pageSize: pageSize })
           }
         }
 
         const goToFirstPage = () => {
-          if (page > 1) {
-            var slicedGridData = _gridData.slice(
-              0,
-              originalGridData.length > pageSize ? pageSize : originalGridData.length
-            )
-            setGridData(prev => ({
-              ...prev,
-              list: slicedGridData
-            }))
-            setStartAt(0)
-          }
+          api({ _startAt: 0, _pageSize: pageSize })
         }
 
         const goToLastPage = () => {
-          if (page < pageCount) {
-            var slicedGridData = _gridData.slice((pageCount - 1) * pageSize, originalGridData.length)
-            setGridData({
-              ...gridData,
-              list: slicedGridData
-            })
-            const pageNumber = parseInt(originalGridData.length / pageSize)
-            const start = pageSize * pageNumber
-            setStartAt(start)
-          }
+          api({ _startAt: (pageCount - 1) * pageSize, _pageSize: pageSize })
         }
 
         return (
@@ -184,11 +79,10 @@ const Table = ({
               width: '100%',
               backgroundColor: '#fff',
               borderTop: '1px solid #ccc',
-              position: 'fixed',
+              position: 'sticky',
               bottom: 0
             }}
           >
-            {' '}
             <IconButton
               onClick={goToFirstPage}
               disabled={page === 1}
@@ -203,7 +97,8 @@ const Table = ({
             >
               <NavigateBeforeIcon />
             </IconButton>
-            {platformLabels.Page} {page} {platformLabels.Of} {pageCount}
+            {platformLabels.Page}
+            <input value={page} /> {platformLabels.Of} {pageCount}
             <IconButton
               onClick={incrementPage}
               disabled={page === pageCount}
@@ -226,10 +121,126 @@ const Table = ({
             {platformLabels.Of} {totalRecords}
           </Box>
         )
+      } else {
+        const gridData = props.gridData
+
+        if (gridData && gridData?.list) {
+          const originalGridData = gridData && gridData.list
+          const page = Math.ceil(gridData.count ? (startAt === 0 ? 1 : (startAt + 1) / pageSize) : 1)
+
+          var _gridData = gridData?.list
+          const pageCount = Math.ceil(originalGridData?.length ? originalGridData?.length / pageSize : 1)
+          const totalRecords = originalGridData?.length
+
+          const incrementPage = () => {
+            if (page < pageCount) {
+              var slicedGridData = _gridData.slice(page * pageSize, (page + 1) * pageSize)
+              setGridData({
+                ...gridData,
+                list: slicedGridData
+              })
+              setStartAt(startAt + pageSize)
+            }
+          }
+
+          const decrementPage = () => {
+            if (page > 1) {
+              var slicedGridData = _gridData.slice((page - 2) * pageSize, (page - 1) * pageSize)
+              setGridData({
+                ...gridData,
+                list: slicedGridData
+              })
+              setStartAt(startAt - pageSize)
+            }
+          }
+
+          const goToFirstPage = () => {
+            if (page > 1) {
+              var slicedGridData = _gridData.slice(
+                0,
+                originalGridData.length > pageSize ? pageSize : originalGridData.length
+              )
+              setGridData(prev => ({
+                ...prev,
+                list: slicedGridData
+              }))
+              setStartAt(0)
+            }
+          }
+
+          const goToLastPage = () => {
+            if (page < pageCount) {
+              var slicedGridData = _gridData.slice((pageCount - 1) * pageSize, originalGridData.length)
+              setGridData({
+                ...gridData,
+                list: slicedGridData
+              })
+              const pageNumber = parseInt(originalGridData.length / pageSize)
+              const start = pageSize * pageNumber
+              setStartAt(start)
+            }
+          }
+
+          return (
+            <Box
+              sx={{
+                width: '100%',
+                backgroundColor: '#fff',
+                borderTop: '1px solid #ccc',
+                position: 'fixed',
+                bottom: 0
+              }}
+            >
+              {' '}
+              <IconButton
+                onClick={goToFirstPage}
+                disabled={page === 1}
+                sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+              >
+                <FirstPageIcon />
+              </IconButton>
+              <IconButton
+                onClick={decrementPage}
+                disabled={page === 1}
+                sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+              >
+                <NavigateBeforeIcon />
+              </IconButton>
+              {platformLabels.Page} {page} {platformLabels.Of} {pageCount}
+              <IconButton
+                onClick={incrementPage}
+                disabled={page === pageCount}
+                sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+              >
+                <NavigateNextIcon />
+              </IconButton>
+              <IconButton
+                onClick={goToLastPage}
+                disabled={page === pageCount}
+                sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+              >
+                <LastPageIcon />
+              </IconButton>
+              <IconButton onClick={refetch}>
+                <RefreshIcon />
+              </IconButton>
+              {platformLabels.DisplayingRecords} {startAt === 0 ? 1 : startAt} -{' '}
+              {totalRecords < pageSize ? totalRecords : page === pageCount ? totalRecords : startAt + pageSize}{' '}
+              {platformLabels.Of} {totalRecords}
+            </Box>
+          )
+        }
       }
     }
   }
-
+  // const jumpToPage = e => {
+  //   const pages = e.target.value
+  //   console.log('page', pages)
+  //   if (paginationType === 'api') {
+  //     api({ _startAt: pages * pageSize, _pageSize: pageSize })
+  //   } else {
+  //   }
+  // }
   const getRowClass = params => {
     return params?.rowIndex % 2 === 0 ? 'even-row' : ''
   }
@@ -265,7 +276,7 @@ const Table = ({
     })
   }
 
-  if (props.onEdit || props.onDelete || props.popupComponent) {
+  if (props.onEdit || props.onDelete || props?.popupComponent) {
     const deleteBtnVisible = maxAccess ? props.onDelete && maxAccess > TrxType.EDIT : props.onDelete ? true : false
 
     if (!columns?.some(column => column.field === 'actions'))
@@ -323,19 +334,18 @@ const Table = ({
   }
 
   return (
-    <Box className='ag-theme-alpine' style={{ flex: 1, width: '1000px !important' }}>
+    <Box className='ag-theme-alpine' style={{ flex: 1, width: '1000px !important', height: props.height || 'auto' }}>
       <AgGridReact
-        rowData={paginationType === 'api' ? props?.gridData?.list : gridData.list}
+        rowData={paginationType === 'api' ? props?.gridData?.list : gridData?.list}
         columnDefs={columns}
         pagination={false}
         paginationPageSize={pageSize}
         rowSelection={'multiple'}
         suppressAggFuncInHeader={true}
         getRowClass={getRowClass}
-        overlayLoadingTemplate={'<span class="ag-overlay-loading-center">Loading...</span>'}
         onSelectionChanged={setData === 'function' && onSelectionChanged}
       />
-      <CustomPagination />
+      {pagination && <CustomPagination />}
     </Box>
   )
 }
