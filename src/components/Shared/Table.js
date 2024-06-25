@@ -233,6 +233,7 @@ const Table = ({
       }
     }
   }
+
   // const jumpToPage = e => {
   //   const pages = e.target.value
   //   console.log('page', pages)
@@ -241,6 +242,7 @@ const Table = ({
   //   } else {
   //   }
   // }
+
   const getRowClass = params => {
     return params?.rowIndex % 2 === 0 ? 'even-row' : ''
   }
