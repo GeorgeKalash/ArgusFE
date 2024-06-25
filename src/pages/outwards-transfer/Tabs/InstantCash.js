@@ -15,7 +15,7 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useError } from 'src/error'
 
-export default function InstantCash({ onInstantCashSubmit, cashData = {}, window, clientData, outwardsData }) {
+export default function InstantCash({ onSubmit, cashData = {}, window, clientData, outwardsData }) {
   const { getRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
   console.log('clientData ', clientData)
@@ -70,7 +70,7 @@ export default function InstantCash({ onInstantCashSubmit, cashData = {}, window
       values.sourceOfFundsId = 0
       values.remittancePurposeId = 0
       values.remitter.profession = 0
-      onInstantCashSubmit(values)
+      onSubmit(values)
       window.close()
     }
   })
