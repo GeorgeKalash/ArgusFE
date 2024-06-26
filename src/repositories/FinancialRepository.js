@@ -97,5 +97,12 @@ export const FinancialRepository = {
   },
   Contact: {
     qry: service + 'qryContact'
+  },
+  DimensionValue: {
+    qry: service + 'qryDI',
+    page: service + 'pageDI',
+    get: service + 'getDI',
+    set: service + 'setDI',
+    del: service + 'delDI'
   }
 }
