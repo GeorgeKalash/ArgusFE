@@ -65,7 +65,7 @@ export default function CashCountNotesForm({
             changes: {
               counted,
               currencyNotes,
-              variation: counted - row.system,
+              variation: counted - (row.system || 0),
               flag: row.system === counted ? true : false
             }
           })
