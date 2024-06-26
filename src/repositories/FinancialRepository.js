@@ -47,7 +47,8 @@ export const FinancialRepository = {
     page: service + 'pageACB',
     get: service + 'getACB',
     set: service + 'setACB',
-    del: service + 'delACB'
+    del: service + 'delACB',
+    rebuild: service + 'rebuildACB'
   },
   TaxSchedules: {
     qry: service + 'qryTAX',
