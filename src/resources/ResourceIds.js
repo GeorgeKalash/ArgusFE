@@ -107,6 +107,7 @@ export const ResourceIds = {
   SalesTarget: 51209,
   SystemFunction: 20105,
   ModuleDeactivation: 23107,
+  CompanyInfo: 20120,
   Dispersal: 36109,
   OutwardsTransfer: 36301,
   FI_dimensions: 31112,
