@@ -24,12 +24,14 @@ import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { DataSets } from 'src/resources/DataSets'
 import { getStorageData } from 'src/storage/storage'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [isCancelled, setIsCancelled] = useState()
   const [isPosted, setIsPosted] = useState(false)
   const [readOnly, setReadOnly] = useState(false)
+  const { platformLabels } = useContext(ControlContext)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.ReceiptVoucher,
@@ -82,10 +84,10 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
           record: JSON.stringify(obj)
         })
         if (!obj.recordId) {
-          toast.success('Record Added Successfully')
+          toast.success(platformLabels.Added)
           formik.setFieldValue('recordId', response.recordId)
           getData(response.recordId)
-        } else toast.success('Record Edited Successfully')
+        } else toast.success(platformLabels.Edited)
         invalidate()
       } catch (e) {}
     }
