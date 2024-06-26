@@ -12,27 +12,25 @@ import FormShell from './FormShell'
 import { apiMappings, COMBOBOX, LOOKUP } from './apiMappings'
 import ResourceComboBox from './ResourceComboBox'
 import { ResourceLookup } from './ResourceLookup'
+import { formatDateDefault } from 'src/lib/date-helper'
 
 const formatDateTo = value => {
   const date = new Date(value)
   const formattedDate = date.toISOString().slice(0, 10).replace(/-/g, '')
-  return formattedDate // Output: 20240621
+  return formattedDate
 }
 
 const formatDateFrom = value => {
   const year = value.slice(0, 4)
-  const month = value.slice(4, 6) - 1 // Months are 0-based in JavaScript Date
+  const month = value.slice(4, 6) - 1
   const day = value.slice(6, 8)
-
   const parsedDate = new Date(year, month, day)
   const timestamp = parsedDate.getTime()
-
   return timestamp
 }
 
 const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, disabled, window }) => {
   const { getRequest } = useContext(RequestsContext)
-
   const [parameters, setParameters] = useState([])
   const [fields, setFields] = useState([])
 
@@ -154,7 +152,7 @@ const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, disab
               fieldKey: field.key,
               value: newValue,
               caption: field.caption,
-              display: name,
+              display: formatDateDefault(newValue),
               display2: name
             })
           }}
@@ -186,13 +184,6 @@ const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, disab
           required={field.mandatory}
           value={formik.values?.parameters?.[field.id]?.value}
           onChange={(event, newValue) => {
-            // handleFieldChange({
-            //   fieldId: field.id,
-            //   fieldKey: field.key,
-            //   value: newValue?.[apiDetails.valueField],
-            //   caption: field.caption,
-            //   display: newValue?.[apiDetails.displayField]
-            // })
             formik.setFieldValue(`parameters[${field.id}]`, {
               fieldId: field.id,
               fieldKey: field.key,
@@ -201,16 +192,9 @@ const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, disab
               display: newValue?.[apiDetails.displayField],
               display2: newValue?.[apiDetails.displayField]
             })
-            // formik.setFieldValue([field.key], newValue?.[apiDetails.valueField])
           }}
         />
       </Grid>
-
-      // value={
-      //   formik?.values &&
-      //   formik?.values[field.key] &&
-      //   apiDetails.store.find(item => item[apiDetails.valueField] === formik?.values[field.key])
-      // }
     )
   }
 
@@ -240,13 +224,6 @@ const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, disab
           firstValue={formik.values.parameters?.[field.id]?.display}
           secondValue={formik.values.test}
           onChange={(event, newValue) => {
-            // handleFieldChange({
-            //   fieldId: field.id,
-            //   fieldKey: field.key,
-            //   value: newValue?.[apiDetails.valueOnSelection],
-            //   caption: field.caption,
-            //   display: newValue?.[apiDetails.displayField]
-            // })
             formik.setFieldValue(`parameters[${field.id}]`, {
               fieldId: field.id,
               fieldKey: field.key,
@@ -255,8 +232,6 @@ const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, disab
               display: newValue?.[apiDetails.displayField],
               display2: newValue?.[apiDetails.valueField]
             })
-
-            formik.setFieldValue('test', '555')
           }}
         />
       </Grid>
