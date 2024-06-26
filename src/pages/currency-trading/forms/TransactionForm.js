@@ -81,7 +81,7 @@ function FormField({ type, name, Component, valueField, onFocus, language, phone
         if (onFocus && (name == 'id_number' || name == 'search')) {
           onFocus(e.target.value)
         }
-        if (onFocus && name == 'cell_phone') {
+        if (onFocus && name == 'cellPhone') {
           onFocus(e.target.value)
         }
       }}
@@ -182,11 +182,11 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     remarks: null,
     purpose_of_exchange: null,
     nationality: null,
-    cell_phone: null,
+    cellPhone: null,
     status: '1',
     type: -1,
     wip: 1,
-    functionId: !editMode && SystemFunction.CurrencyPurchase,
+    functionId: SystemFunction.CurrencyPurchase,
     idNoConfirm: '',
     cellPhoneConfirm: '',
     otp: false,
@@ -217,7 +217,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       expiry_date: yup.string().required(' '),
       issue_country: yup.string().required(' '),
       nationality: yup.string().required(' '),
-      cell_phone: yup.string().required(' '),
+      cellPhone: yup.string().required(' '),
       profession: yup.string().required(' '),
       operations: yup
         .array()
@@ -284,73 +284,64 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     ;(async function () {
       setOperationType(formik.values.functionId)
       if (recordId) {
-        getData(recordId)
+        await getData(recordId)
       }
     })()
   }, [])
 
-  function getData(id) {
-    const _recordId = recordId ? recordId : id
-
-    getRequest({
-      extension: CTTRXrepository.CurrencyTrading.get2,
-      parameters: `_recordId=${_recordId}`
-    })
-      .then(res => {
-        const record = res.record
-        if (!recordId) {
-          formik.setFieldValue('reference', record.headerView.reference)
-          formik.setFieldValue('recordId', record.headerView.recordId)
-        } else {
-          formik.setValues({
-            recordId: _recordId,
-            reference: record.headerView.reference,
-            operations: record.items.map(({ seqNo, ...rest }) => ({
-              id: seqNo,
-              ...rest
-            })),
-            amount: record.cash.map(({ seqNo, ...rest }) => ({
-              id: seqNo,
-              ...rest
-            })),
-            clientType: record.clientMaster.category,
-            date: formatDateFromApi(record.headerView.date),
-            clientId: record?.clientIndividual?.clientId,
-            clientName: record.headerView.clientName,
-            functionId: record.headerView.functionId,
-            plantId: record.headerView.plantId,
-            wip: record.headerView.wip,
-            firstName: record?.clientIndividual?.firstName,
-            lastName: record?.clientIndividual?.lastName,
-            middleName: record?.clientIndividual?.middleName,
-            familyName: record?.clientIndividual?.familyName,
-            fl_firstName: record?.clientIndividual?.fl_firstName,
-            fl_lastName: record?.clientIndividual?.fl_lastName,
-            fl_middleName: record?.clientIndividual?.fl_middleName,
-            fl_familyName: record?.clientIndividual?.fl_familyName,
-            birth_date: formatDateFromApi(record?.clientIndividual?.birthDate),
-            resident: record?.clientIndividual?.isResident,
-            profession: record?.clientIndividual?.professionId,
-            source_of_income: record?.clientIndividual?.incomeSourceId,
-            sponsor: record?.clientIndividual?.sponsorName,
-            id_number: record.clientIDView.idNo,
-            issue_country: record.clientIDView.idCountryId,
-            id_type: record.clientIDView.idtId,
-            expiry_date: formatDateFromApi(record.clientIDView.idExpiryDate),
-            remarks: record.headerView.notes,
-            purpose_of_exchange: record.headerView.poeId,
-            nationality: record.clientMaster.nationalityId,
-            cell_phone: record.clientMaster.cellPhone,
-            status: record.headerView.status,
-            cashAccountId: record.headerView.cashAccountId
-          })
-
-          setOperationType(record.headerView.functionId)
-        }
+  async function getData(id) {
+    try {
+      const res = await getRequest({
+        extension: CTTRXrepository.CurrencyTrading.get2,
+        parameters: `_recordId=${id}`
       })
-      .catch(error => {})
+      const record = res.record
+      formik.setValues({
+        recordId: record.headerView.recordId,
+        reference: record.headerView.reference,
+        operations: record.items.map(({ seqNo, ...rest }) => ({
+          id: seqNo,
+          ...rest
+        })),
+        amount: record.cash.map(({ seqNo, ...rest }) => ({
+          id: seqNo,
+          ...rest
+        })),
+        clientType: record.clientMaster.category,
+        date: formatDateFromApi(record.headerView.date),
+        clientId: record?.clientIndividual?.clientId,
+        clientName: record.headerView.clientName,
+        functionId: record.headerView.functionId,
+        plantId: record.headerView.plantId,
+        wip: record.headerView.wip,
+        firstName: record?.clientIndividual?.firstName,
+        lastName: record?.clientIndividual?.lastName,
+        middleName: record?.clientIndividual?.middleName,
+        familyName: record?.clientIndividual?.familyName,
+        fl_firstName: record?.clientIndividual?.fl_firstName,
+        fl_lastName: record?.clientIndividual?.fl_lastName,
+        fl_middleName: record?.clientIndividual?.fl_middleName,
+        fl_familyName: record?.clientIndividual?.fl_familyName,
+        birth_date: formatDateFromApi(record?.clientIndividual?.birthDate),
+        resident: record?.clientIndividual?.isResident,
+        profession: record?.clientIndividual?.professionId,
+        source_of_income: record?.clientIndividual?.incomeSourceId,
+        sponsor: record?.clientIndividual?.sponsorName,
+        id_number: record.clientIDView.idNo,
+        issue_country: record.clientIDView.idCountryId,
+        id_type: record.clientIDView.idtId,
+        expiry_date: formatDateFromApi(record.clientIDView.idExpiryDate),
+        remarks: record.headerView.notes,
+        purpose_of_exchange: record.headerView.poeId,
+        nationality: record.clientMaster.nationalityId,
+        cellPhone: record.clientMaster.cellPhone,
+        status: record.headerView.status,
+        cashAccountId: record.headerView.cashAccountId,
+        otp: record.headerView.otpVerified
+      })
+      setOperationType(record.headerView.functionId)
+    } catch (error) {}
   }
-
   const { userId } = JSON.parse(window.sessionStorage.getItem('userData'))
 
   async function fetchRate({ currencyId }) {
@@ -397,7 +388,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       if (res.recordId) {
         toast.success('Record Closed Successfully')
         invalidate()
-        getData(res.recordId)
+        await getData(res.recordId)
       }
     } catch (e) {}
   }
@@ -434,7 +425,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       if (res.recordId) {
         toast.success('Record Reopened Successfully')
         invalidate()
-        getData(res.recordId)
+        await getData(res.recordId)
       }
     } catch (e) {}
   }
@@ -514,7 +505,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
             nationalityId: values.nationality,
             status: 1,
             addressId: null,
-            cellPhone: values.cell_phone,
+            cellPhone: values.cellPhone,
             oldReference: null,
             otp: false,
             createdDate: formatDateToApiFunction(values.date),
@@ -569,11 +560,11 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
 
         if (!values.recordId) {
           toast.success('Record Added Successfully')
-          formik.setFieldTouched(recordId, response.recordId)
-          getData(response.recordId)
+          await getData(response.recordId)
         } else {
           toast.success('Record Edited Successfully')
         }
+
         if (totalBaseAmount > baseAmount.value && !recordId) {
           viewOTP(response.recordId)
         }
@@ -675,7 +666,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
 
       if (res) {
         toast.success('Record Posted Successfully')
-        getData(res.recordId)
+        await getData(res.recordId)
         invalidate()
       }
     } catch (e) {}
@@ -815,7 +806,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                                 formik.setFieldValue('issue_country', info.clientIDView.idCountryId)
                                 formik.setFieldValue('id_type', info.clientIDView.idtId)
                                 formik.setFieldValue('nationality', info.clientMaster.nationalityId)
-                                formik.setFieldValue('cell_phone', info.clientMaster.cellPhone)
+                                formik.setFieldValue('cellPhone', info.clientMaster.cellPhone)
                                 formik.setFieldValue('expiry_date', formatDateFromApi(info.clientIDView.idExpiryDate))
 
                                 setIDInfoAutoFilled(true)
@@ -1127,8 +1118,8 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
 
                     <Grid item xs={12}>
                       <FormField
-                        type={showAsPasswordPhone && formik.values['cell_phone'] ? 'password' : 'text'}
-                        name='cell_phone'
+                        type={showAsPasswordPhone && formik.values['cellPhone'] ? 'password' : 'text'}
+                        name='cellPhone'
                         Component={CustomTextField}
                         phone={true}
                         required
