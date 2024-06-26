@@ -296,7 +296,8 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
         parameters: `_recordId=${id}`
       })
       const record = res.record
-      formik.setValues({
+      console.log('print response ', res)
+      await formik.setValues({
         recordId: record.headerView.recordId,
         reference: record.headerView.reference,
         operations: record.items.map(({ seqNo, ...rest }) => ({
@@ -560,6 +561,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
 
         if (!values.recordId) {
           toast.success('Record Added Successfully')
+
           await getData(response.recordId)
         } else {
           toast.success('Record Edited Successfully')
