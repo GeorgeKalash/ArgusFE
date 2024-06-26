@@ -15,12 +15,17 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { ControlContext } from 'src/providers/ControlContext'
 
-export default function DimValuesForm({ labels, maxAccess, dimensionId, id, invalidate }) {
+export default function DimValuesForm({ labels, maxAccess, id, dimValue }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const formatedRecordId = typeof dimValue == 'string' ? dimValue.match(/\d+/)?.[0] : null
+
+  const invalidate = useInvalidate({
+    endpointId: FinancialRepository.DimensionValue.qry
+  })
 
   const { formik } = useForm({
-    initialValues: { id: id, name: '', dimension: dimensionId },
+    initialValues: { id: id, name: '', dimension: formatedRecordId },
     maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
@@ -51,10 +56,10 @@ export default function DimValuesForm({ labels, maxAccess, dimensionId, id, inva
   useEffect(() => {
     ;(async function () {
       try {
-        if (dimensionId && id) {
+        if (formik.values.dimension && id) {
           const res = await getRequest({
             extension: FinancialRepository.DimensionValue.get,
-            parameters: `_Id=${formik.values.id}&_dimension=${dimensionId}`
+            parameters: `_Id=${formik.values.id}&_dimension=${formik.values.dimension}`
           })
 
           formik.setValues(res.record)

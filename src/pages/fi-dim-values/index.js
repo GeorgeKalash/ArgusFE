@@ -21,10 +21,6 @@ const DimensionsValues = () => {
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
   const [tpaValues, setTpaValues] = useState([])
-  const [error, setError] = useState(false)
-
-  const [selectedTpaValue, setSelectedTpaValue] = useState({ key: null, value: '' })
-  const formatedRecordId = typeof selectedTpaValue?.key == 'string' ? selectedTpaValue.key.match(/\d+/)?.[0] : null
 
   const {
     query: { data },
@@ -32,34 +28,25 @@ const DimensionsValues = () => {
     paginationParameters,
     refetch,
     invalidate,
+    filters,
     filterBy,
     clearFilter,
     access
   } = useResourceQuery({
     datasetId: ResourceIds.DimensionsValues,
+    endpointId: FinancialRepository.DimensionValue.qry,
     filter: {
-      endpointId: FinancialRepository.DimensionValue.qry,
       filterFn: fetchWithSearch
     }
   })
 
-  useEffect(() => {
-    if (formatedRecordId !== null) {
-      filterBy('qry', formatedRecordId)
-    } else {
-      clearFilter('qry')
-    }
-  }, [formatedRecordId])
-
   async function fetchWithSearch({ filters }) {
-    if (formatedRecordId) {
-      const data = await getRequest({
-        extension: FinancialRepository.DimensionValue.qry,
-        parameters: `_filter=${filters.qry}&_dimension=${formatedRecordId}`
-      })
+    const data = await getRequest({
+      extension: FinancialRepository.DimensionValue.qry,
+      parameters: `_filter=${filters.qry}&_dimension=${filters.qry.match(/\d+/)?.[0]}`
+    })
 
-      return data
-    }
+    return data
   }
 
   const columns = [
@@ -89,10 +76,8 @@ const DimensionsValues = () => {
   }
 
   const add = () => {
-    if (formatedRecordId) {
+    if (filters.qry) {
       openForm()
-    } else {
-      setError(!!formatedRecordId)
     }
   }
 
@@ -105,17 +90,16 @@ const DimensionsValues = () => {
       Component: DimValuesForm,
       props: {
         labels: _labels,
-        id: id,
+        id,
         maxAccess: access,
         invalidate,
-        dimensionId: formatedRecordId
+        dimValue: filters?.qry
       },
       width: 600,
       height: 500,
       title: _labels.dimValues
     })
   }
-  const emptyValues = item => item.value !== null && item.value !== ''
 
   useEffect(() => {
     ;(async () => {
@@ -125,10 +109,10 @@ const DimensionsValues = () => {
       })
 
       if (data) {
-        const result = data.list.filter(emptyValues)
+        const result = data.list.filter(item => item.value)
         setTpaValues(result)
-        setSelectedTpaValue(result[0])
-        setError(false)
+
+        filterBy('qry', result[0].key)
       }
     })()
   }, [])
@@ -143,17 +127,19 @@ const DimensionsValues = () => {
           <Grid item xs={4}>
             <ResourceComboBox
               label={_labels.dimensions}
-              filter={emptyValues}
               valueField='key'
               displayField={['value']}
               store={tpaValues}
-              value={selectedTpaValue}
+              value={filters?.qry}
               maxAccess={access}
               onChange={(event, newValue) => {
-                setSelectedTpaValue(newValue)
-                setError(false)
+                if (newValue?.key) {
+                  filterBy('qry', newValue?.key)
+                } else {
+                  clearFilter('qry')
+                }
               }}
-              error={error}
+              error={!filters.qry}
             />
           </Grid>
         </Grid>
@@ -161,7 +147,7 @@ const DimensionsValues = () => {
       <Grow>
         <Table
           columns={columns}
-          gridData={formatedRecordId ? data : { list: [], count: 0 }}
+          gridData={filters.qry ? data : { list: [], count: 0 }}
           rowId={['id']}
           onEdit={edit}
           onDelete={del}
