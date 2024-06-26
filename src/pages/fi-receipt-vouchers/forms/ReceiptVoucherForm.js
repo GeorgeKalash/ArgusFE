@@ -28,11 +28,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 
 export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const [isCancelled, setIsCancelled] = useState()
-  const [isPosted, setIsPosted] = useState(false)
-  const [readOnly, setReadOnly] = useState(false)
   const { platformLabels } = useContext(ControlContext)
-
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.ReceiptVoucher,
     access: access,
@@ -92,7 +88,11 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       } catch (e) {}
     }
   })
+
   const editMode = !!recordId || !!formik.values.recordId
+  const isCancelled = formik.values.status === -1 ? true : false
+  const isPosted = formik.values.status === 3 ? true : false
+  const readOnly = formik.values.status !== 1 ? true : false
 
   const getDefaultDT = async () => {
     const userData = getStorageData('userData')
@@ -150,9 +150,6 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
           extension: FinancialRepository.ReceiptVouchers.get,
           parameters: `_recordId=${recordId}`
         })
-        setIsPosted(res.record.status === 3 ? true : false)
-        setIsCancelled(res.record.status === -1 ? true : false)
-        setReadOnly(res.record.status !== 1 ? true : false)
 
         formik.setValues({ ...res.record, date: formatDateFromApi(res.record.date) })
       }
@@ -169,8 +166,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       })
 
       if (res?.recordId) {
-        setIsCancelled(true)
-        setReadOnly(true)
+        getData(formik.values.recordId)
         toast.success('Record Cancelled Successfully')
         invalidate()
       }
@@ -187,7 +183,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       if (res) {
         toast.success('Record Posted Successfully')
         invalidate()
-        setIsPosted(true)
+        getData(formik.values.recordId)
       }
     } catch (e) {}
   }

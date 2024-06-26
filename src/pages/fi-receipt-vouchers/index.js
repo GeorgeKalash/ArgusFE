@@ -113,7 +113,7 @@ export default function CurrencyTrading() {
       flex: 1
     },
     {
-      field: 'CashAccount',
+      field: 'cashAccountName',
       headerName: labels.CashAccount,
       flex: 1
     },
