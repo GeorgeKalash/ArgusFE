@@ -41,8 +41,6 @@ export default function GenerateOpening({ _labels, access }) {
         })
 
         toast.success(platformLabels.generated)
-
-        invalidate()
       } catch (error) {}
     }
   })
