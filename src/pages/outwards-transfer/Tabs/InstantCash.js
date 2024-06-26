@@ -18,7 +18,6 @@ import { useError } from 'src/error'
 export default function InstantCash({ onSubmit, cashData = {}, window, clientData, outwardsData }) {
   const { getRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
-  console.log('clientData ', clientData)
 
   const { labels: _labels, maxAccess } = useResourceQuery({
     datasetId: ResourceIds.InstantCash
@@ -29,14 +28,14 @@ export default function InstantCash({ onSubmit, cashData = {}, window, clientDat
     initialValues: {
       deliveryModeId: '',
       currency: '',
-      sourceAmount: '',
+      sourceAmount: outwardsData?.amount || 0,
       toCountryId: '',
-      totalTransactionAmountPerAnnum: '',
-      transactionsPerAnnum: '',
+      totalTransactionAmountPerAnnum: clientData.hiddenTrxAmount,
+      transactionsPerAnnum: clientData.hiddenTrxCount,
       remitter: {
         relation: '',
         otherRelation: '',
-        employerName: '',
+        employerName: clientData.hiddenSponserName,
         employerStatus: ''
       },
       beneficiary: {
@@ -67,9 +66,6 @@ export default function InstantCash({ onSubmit, cashData = {}, window, clientDat
       })
     }),
     onSubmit: values => {
-      values.sourceOfFundsId = 0
-      values.remittancePurposeId = 0
-      values.remitter.profession = 0
       onSubmit(values)
       window.close()
     }

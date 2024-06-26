@@ -157,6 +157,11 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       clientId: yup.string().required(' '),
       poeId: yup.string().required(' '),
       beneficiaryId: yup.string().required(' '),
+      tdAmount: yup.number().test(`isCommission less than tdAmount`, `Error`, function (value) {
+        const { commission } = this.parent
+
+        return value < commission
+      }),
       amountRows: yup
         .array()
         .of(
@@ -166,21 +171,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
           })
         )
         .required('Cash array is required')
-
-      // tdAmount: yup.number().test(`isCommission less than tdAmount`, `Error`, function (value) {
-      //   const { commission } = this.parent
-
-      //   return value < commission
-      // })
     }),
-    validate: values => {
-      const errors = {}
-      if (values.tdAmount > values.commission) {
-        errors.tdAmount = ' '
-      }
-
-      return errors
-    },
     onSubmit: async values => {
       try {
         const copy = { ...values }
@@ -205,8 +196,10 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
           header: copy,
           cash: updatedRows,
           bankType: formik.values.bankType,
-          ICRequest: formik.values.instantCashDetails?.deliveryModeId ?? null
+          ICRequest: formik.values.instantCashDetails ?? null
         }
+
+        console.log('ICRequest ', formik.values)
 
         const amountRes = await postRequest({
           extension: RemittanceOutwardsRepository.OutwardsTransfer.set2,
@@ -218,7 +211,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
           toast.success(actionMessage)
           formik.setFieldValue('recordId', amountRes.recordId)
 
-          const res2 = getOutwards(amountRes.recordId)
+          const res2 = await getOutwards(amountRes.recordId)
           formik.setFieldValue('reference', res2.record.headerView.reference)
           invalidate()
         }
@@ -277,7 +270,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
         if (recordId) toast.success(platformLabels.Closed)
         invalidate()
 
-        const res2 = getOutwards(res.recordId)
+        const res2 = await getOutwards(res.recordId)
         formik.setValues(res2.record.headerView)
       }
     } catch (error) {}
@@ -302,7 +295,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
         toast.success(platformLabels.Reopened)
         invalidate()
 
-        const res2 = getOutwards(res.recordId)
+        const res2 = await getOutwards(res.recordId)
         formik.setValues(res2.record.headerView)
       }
     } catch (error) {}
@@ -334,12 +327,17 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
 
   const onProductSubmit = productData => {
     const selectedRowData = productData?.list.find(row => row.checked)
-    formik.setValues(selectedRowData)
     formik.setFieldValue('bankType', selectedRowData?.interfaceId)
+    formik.setFieldValue('productId', selectedRowData?.productId)
     formik.setFieldValue('commission', selectedRowData?.fees)
     formik.setFieldValue('defaultCommission', selectedRowData?.fees)
     formik.setFieldValue('lcAmount', selectedRowData?.baseAmount)
-    formik.setFieldValue('vatAmount', vatAmount)
+    formik.setFieldValue('dispersalId', selectedRowData?.dispersalId)
+    formik.setFieldValue('exRate', selectedRowData?.exRate)
+    formik.setFieldValue('rateCalcMethod', selectedRowData?.rateCalcMethod)
+    formik.setFieldValue('corId', selectedRowData?.corId)
+    formik.setFieldValue('corRef', selectedRowData?.corRef)
+    formik.setFieldValue('corName', selectedRowData?.corName)
     calculateValueDate(selectedRowData?.valueDays)
   }
 
@@ -354,7 +352,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
     formik.setValues({
       ...data.headerView,
       ttNo: data.ttNo,
-      bankType: data.interfaceId,
+      bankType: data.headerView.interfaceId,
       amountRows: modifiedList
     })
   }
@@ -539,6 +537,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       formik.setFieldValue('dtId', '')
     }
   }
+
   function onInstantCashSubmit(obj) {
     formik.setFieldValue('instantCashDetails', obj)
   }
@@ -553,7 +552,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
     ;(async function () {
       try {
         if (recordId) {
-          const res = getOutwards(recordId)
+          const res = await getOutwards(recordId)
           res.record.headerView.date = formatDateFromApi(res.record.headerView.date)
           res.record.headerView.defaultValueDate = formatDateFromApi(res.record.headerView.defaultValueDate)
           res.record.headerView.valueDate = formatDateFromApi(res.record.headerView.valueDate)
