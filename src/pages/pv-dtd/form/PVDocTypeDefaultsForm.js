@@ -17,6 +17,7 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { DataSets } from 'src/resources/DataSets'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function PVDocTypeDefaultsForm({ labels, maxAccess, dtId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -24,6 +25,7 @@ export default function PVDocTypeDefaultsForm({ labels, maxAccess, dtId }) {
   const invalidate = useInvalidate({
     endpointId: FinancialRepository.FIDocTypeDefaults.qry
   })
+  const { platformLabels } = useContext(ControlContext)
 
   const { formik } = useForm({
     initialValues: {
@@ -51,7 +53,7 @@ export default function PVDocTypeDefaultsForm({ labels, maxAccess, dtId }) {
         recordId: obj.dtId
       })
 
-      toast.success('Record Success')
+      toast.success(platformLabels.Submit)
 
       invalidate()
     }

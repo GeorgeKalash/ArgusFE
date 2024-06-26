@@ -147,5 +147,7 @@ export const ResourceIds = {
   IncreaseDecreaseAdj: 33301,
   CashTransactions: 33312,
   ReceiptVoucher: 31304,
-  FIDocTypeDefaults: 31103
+  FIDocTypeDefaults: 31103,
+  DimensionsValues: 31111,
+  RebuildAccountBalances: 31501
 }

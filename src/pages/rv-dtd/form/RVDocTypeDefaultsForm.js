@@ -16,6 +16,7 @@ import { SystemFunction } from 'src/resources/SystemFunction'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function RVDocTypeDefaultsForm({ labels, maxAccess, dtId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -23,6 +24,7 @@ export default function RVDocTypeDefaultsForm({ labels, maxAccess, dtId }) {
   const invalidate = useInvalidate({
     endpointId: FinancialRepository.FIDocTypeDefaults.qry
   })
+  const { platformLabels } = useContext(ControlContext)
 
   const { formik } = useForm({
     initialValues: { dtId: dtId, accountId: '', plantId: '', recordId: dtId },
@@ -45,7 +47,7 @@ export default function RVDocTypeDefaultsForm({ labels, maxAccess, dtId }) {
         recordId: obj.dtId
       })
 
-      toast.success('Record Success')
+      toast.success(platformLabels.Submit)
 
       invalidate()
     }

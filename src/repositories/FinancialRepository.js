@@ -47,7 +47,8 @@ export const FinancialRepository = {
     page: service + 'pageACB',
     get: service + 'getACB',
     set: service + 'setACB',
-    del: service + 'delACB'
+    del: service + 'delACB',
+    rebuild: service + 'rebuildACB'
   },
   TaxSchedules: {
     qry: service + 'qryTAX',
@@ -103,5 +104,12 @@ export const FinancialRepository = {
     get: service + 'getDTD',
     set: service + 'setDTD',
     del: service + 'delDTD'
+  },
+  DimensionValue: {
+    qry: service + 'qryDI',
+    page: service + 'pageDI',
+    get: service + 'getDI',
+    set: service + 'setDI',
+    del: service + 'delDI'
   }
 }

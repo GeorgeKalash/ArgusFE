@@ -14,9 +14,11 @@ import { useForm } from 'src/hooks/form'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function MemosDtdForm({ labels, maxAccess, dtId, functionId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: FinancialRepository.FIDocTypeDefaults.qry
@@ -45,7 +47,7 @@ export default function MemosDtdForm({ labels, maxAccess, dtId, functionId }) {
         recordId: obj.dtId
       })
 
-      toast.success('Record Success')
+      toast.success(platformLabels.Submit)
 
       invalidate()
     }
