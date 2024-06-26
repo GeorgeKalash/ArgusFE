@@ -92,7 +92,6 @@ const TransactionLog = props => {
       headerName: _labels.username,
       flex: 1
     },
-    ,
     {
       field: 'ttName',
       headerName: _labels.trxName,

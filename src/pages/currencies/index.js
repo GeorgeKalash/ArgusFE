@@ -49,7 +49,6 @@ const Currencies = () => {
       headerName: _labels.name,
       flex: 1
     },
-    ,
     {
       field: 'flName',
       headerName: _labels.foreignLanguage,
