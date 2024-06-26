@@ -11,10 +11,10 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
-import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import DimValuesForm from './form/DimValuesForm'
 import { Grid } from '@mui/material'
+import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 
 const DimensionsValues = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -125,7 +125,7 @@ const DimensionsValues = () => {
             <GridToolbar onAdd={add} maxAccess={access} labels={_labels} />
           </Grid>
           <Grid item xs={4}>
-            <ResourceComboBox
+            <CustomComboBox
               label={_labels.dimensions}
               valueField='key'
               displayField={['value']}

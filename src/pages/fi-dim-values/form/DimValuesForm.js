@@ -44,10 +44,6 @@ export default function DimValuesForm({ labels, maxAccess, id, dimValue }) {
       if (!id) {
         toast.success(platformLabels.Added)
       } else toast.success(platformLabels.Edited)
-      formik.setValues({
-        ...obj,
-        id: obj.id
-      })
 
       invalidate()
     }
