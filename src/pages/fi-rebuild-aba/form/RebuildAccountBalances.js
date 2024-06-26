@@ -12,9 +12,11 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function RebuildAccountBalances({ _labels, access }) {
   const { postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const { formik } = useForm({
     initialValues: { fiscalYear: '', groupId: '', recordId: 'N/A', accountId: '' },
@@ -36,12 +38,7 @@ export default function RebuildAccountBalances({ _labels, access }) {
           record: JSON.stringify(rest)
         })
 
-        toast.success('Record Success')
-        formik.setValues({
-          ...obj
-        })
-
-        invalidate()
+        toast.success(platformLabels.rebuild)
       } catch (error) {}
     }
   })
@@ -92,6 +89,7 @@ export default function RebuildAccountBalances({ _labels, access }) {
             </Grid>
             <Grid item xs={12}>
               <ResourceLookup
+                required
                 endpointId={FinancialRepository.Account.snapshot}
                 name='accountId'
                 label={_labels.account}
@@ -121,6 +119,7 @@ export default function RebuildAccountBalances({ _labels, access }) {
                 valueField='recordId'
                 displayField='name'
                 values={formik.values}
+                required
                 onChange={(event, newValue) => {
                   formik.setFieldValue('groupId', newValue?.recordId || null)
                 }}
