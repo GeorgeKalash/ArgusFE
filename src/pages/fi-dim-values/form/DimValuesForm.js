@@ -13,9 +13,11 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function DimValuesForm({ labels, maxAccess, dimensionId, id, invalidate }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const { formik } = useForm({
     initialValues: { id: id, name: '', dimension: dimensionId },
@@ -35,8 +37,8 @@ export default function DimValuesForm({ labels, maxAccess, dimensionId, id, inva
       })
 
       if (!id) {
-        toast.success('Record Added Successfully')
-      } else toast.success('Record Edited Successfully')
+        toast.success(platformLabels.Added)
+      } else toast.success(platformLabels.Edited)
       formik.setValues({
         ...obj,
         id: obj.id

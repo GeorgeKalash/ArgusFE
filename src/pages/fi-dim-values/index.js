@@ -92,7 +92,7 @@ const DimensionsValues = () => {
     if (formatedRecordId) {
       openForm()
     } else {
-      setError(true)
+      setError(!!formatedRecordId)
     }
   }
 
