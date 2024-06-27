@@ -7,17 +7,7 @@ import toast from 'react-hot-toast'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import useResourceParams from 'src/hooks/useResourceParams'
 
-const OTPPhoneVerification = ({
-  formValidation,
-  details,
-  recordId,
-  functionId,
-  onClose,
-  getData,
-  onSuccess,
-  window
-}) => {
-  console.log('check data otp inside ', details)
+const OTPPhoneVerification = ({ formValidation, recordId, functionId, onClose, getData, onSuccess, window }) => {
   const { postRequest } = useContext(RequestsContext)
 
   const { labels: labels, access } = useResourceParams({
@@ -82,8 +72,7 @@ const OTPPhoneVerification = ({
       })
         .then(res => {
           toast.success('Verification Completed')
-          console.log('check data success ', details)
-          if (onSuccess) onSuccess(details)
+          if (onSuccess) onSuccess(recordId)
           getData && getData(formValidation?.values?.clientId)
           window.close()
         })
