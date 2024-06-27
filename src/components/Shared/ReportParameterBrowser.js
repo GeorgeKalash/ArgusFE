@@ -121,7 +121,6 @@ const GetDate = ({ field, formik }) => {
 }
 
 const GetTextField = ({ field, formik }) => {
-  console.log('formik', formik)
   return (
     <Grid item xs={12} key={field.id}>
       <CustomTextField
