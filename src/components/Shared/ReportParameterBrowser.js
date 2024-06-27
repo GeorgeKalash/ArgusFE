@@ -10,6 +10,7 @@ import { apiMappings, COMBOBOX, LOOKUP } from './apiMappings'
 import ResourceComboBox from './ResourceComboBox'
 import { ResourceLookup } from './ResourceLookup'
 import { formatDateDefault } from 'src/lib/date-helper'
+import CustomTextField from '../Inputs/CustomTextField'
 
 const formatDateTo = value => {
   const date = new Date(value)
@@ -42,15 +43,19 @@ const GetLookup = ({ field, formik, apiDetails }) => {
         firstValue={formik.values.parameters?.[field.id]?.display}
         secondValue={formik.values.parameters?.[field.id]?.display2}
         onChange={(event, newValue) => {
-          formik.setFieldValue(`parameters[${field.id}]`, {
-            fieldId: field.id,
-            fieldKey: field.key,
-            value: newValue?.[apiDetails.valueOnSelection] || '',
-            caption: field.caption,
-            display: newValue?.[apiDetails.displayField],
-            display2: newValue?.[apiDetails.valueField]
-          })
-          // setState(newValue?.[apiDetails.valueField] || '')
+          formik.setFieldValue(
+            `parameters[${field.id}]`,
+            newValue?.[apiDetails.valueOnSelection]
+              ? {
+                  fieldId: field.id,
+                  fieldKey: field.key,
+                  value: newValue?.[apiDetails.valueOnSelection] || '',
+                  caption: field.caption,
+                  display: newValue?.[apiDetails.displayField],
+                  display2: newValue?.[apiDetails.valueField]
+                }
+              : ''
+          )
         }}
       />
     </Grid>
@@ -61,6 +66,7 @@ const GetComboBox = ({ field, formik, apiDetails }) => {
     <Grid item xs={12} key={field.id}>
       <ResourceComboBox
         endpointId={apiDetails.endpoint}
+        parameters={apiDetails?.parameters}
         name={field.key}
         label={field.caption}
         valueField={apiDetails.valueField}
@@ -69,13 +75,18 @@ const GetComboBox = ({ field, formik, apiDetails }) => {
         required={field.mandatory}
         value={formik.values?.parameters?.[field.id]?.value}
         onChange={(event, newValue) => {
-          formik.setFieldValue(`parameters[${field.id}]`, {
-            fieldId: field.id,
-            fieldKey: field.key,
-            value: newValue?.[apiDetails.valueField] || '',
-            caption: field.caption,
-            display: newValue?.[apiDetails.displayField]
-          })
+          formik.setFieldValue(
+            `parameters[${field.id}]`,
+            newValue
+              ? {
+                  fieldId: field.id,
+                  fieldKey: field.key,
+                  value: newValue?.[apiDetails.valueField],
+                  caption: field.caption,
+                  display: newValue?.[apiDetails.displayField]
+                }
+              : ''
+          )
         }}
       />
     </Grid>
@@ -99,7 +110,35 @@ const GetDate = ({ field, formik }) => {
             display: formatDateDefault(newValue)
           })
         }}
-        onClear={() => formik.setFieldValue(field.key, '')}
+        onClear={() => formik.setFieldValue(`parameters[${field.id}]`, '')}
+      />
+    </Grid>
+  )
+}
+
+const GetTextField = ({ field, formik }) => {
+  return (
+    <Grid item xs={12}>
+      <CustomTextField
+        name={field.key}
+        label={field.caption}
+        value={formik.values?.parameters?.[field.id]?.value}
+        required={field.mandatory}
+        onChange={e => {
+          formik.setFieldValue(
+            `parameters[${field.id}]`,
+            e.target.value
+              ? {
+                  fieldId: field.id,
+                  fieldKey: field.key,
+                  value: e.target.value,
+                  caption: field.caption,
+                  display: e.target.value
+                }
+              : ''
+          )
+        }}
+        onClear={() => formik.setFieldValue(`parameters[${field.id}]`, '')}
       />
     </Grid>
   )
@@ -198,12 +237,14 @@ const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, disab
     <FormShell form={formik} infoVisible={false}>
       <Grid container spacing={2} sx={{ px: 4, pt: 2 }}>
         {items?.map(item => {
-          if (item.controlType === 5 && item.apiDetails.type !== COMBOBOX) {
+          if (item.controlType === 5 && item.apiDetails?.type === LOOKUP) {
             return <GetLookup key={item.fieldId} formik={formik} field={item} apiDetails={item.apiDetails} />
           } else if (item.controlType === 5 && item.apiDetails.type === COMBOBOX) {
             return <GetComboBox key={item.fieldId} formik={formik} field={item} apiDetails={item.apiDetails} />
           } else if (item.controlType === 4) {
-            return <GetDate key={item.fieldId} formik={formik} field={item} apiDetails={item.apiDetails} />
+            return <GetDate key={item.fieldId} formik={formik} field={item} />
+          } else if (item.controlType === 1) {
+            return <GetTextField key={item.fieldId} formik={formik} field={item} />
           }
           return null
         })}

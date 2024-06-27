@@ -44,5 +44,37 @@ export const apiMappings = {
     displayField: 'name',
     displayFieldWidth: 2,
     firstFieldWidth: '40%'
+  },
+  41103: {
+    //Item Category
+    type: COMBOBOX,
+    endpoint: 'IV.asmx/qryCA',
+    parameters: '_startAt=0&_pageSize=50&_name=',
+    valueField: 'caRef',
+    displayField: 'name'
+  },
+  41105: {
+    //Item Group
+    type: COMBOBOX,
+    endpoint: 'IV.asmx/qryGRP',
+    parameters: '_startAt=0&_pageSize=50',
+    valueField: 'reference',
+    displayField: 'name'
+  },
+  41102: {
+    //"Measurement Schedule"
+    type: COMBOBOX,
+    endpoint: 'IV.asmx/qryMS',
+    parameters: '_startAt=0&_pageSize=50&_name=',
+    valueField: 'reference',
+    displayField: 'name'
+  },
+  42107: {
+    //Production Line
+    type: COMBOBOX,
+    endpoint: 'MF.asmx/qryLIN',
+    parameters: '_filter=',
+    valueField: 'reference',
+    displayField: 'name'
   }
 }
