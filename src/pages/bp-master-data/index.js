@@ -171,23 +171,22 @@ const BPMasterData = () => {
           onSearchClear={clear}
           labels={_labels}
           inputSearch={true}
-          openRPB={() =>
-            stack({
-              Component: ReportParameterBrowser,
-              props: {
-                disabled: false,
-                reportName: 'BPMAS',
-                paramsArray: paramsArray,
-                setParamsArray: setParamsArray
-              },
-              width: 700,
-              height: 500,
-              title: 'Report Parameters Browser'
-            })
-          }
-          disableRPB={false}
-          onGo={refetch}
-          paramsArray={paramsArray}
+          // openRPB={() =>
+          //   stack({
+          //     Component: ReportParameterBrowser,
+          //     props: {
+          //       disabled: false,
+          //       reportName: 'BPMAS',
+          //       paramsArray: paramsArray,
+          //       setParamsArray: setParamsArray
+          //     },
+          //     width: 700,
+          //     height: 500,
+          //     title: 'Report Parameters Browser'
+          //   })
+          // }
+          refetch={refetch}
+          // paramsArray={paramsArray}
         />
       </Fixed>
       <Grow>

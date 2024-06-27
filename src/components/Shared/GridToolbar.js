@@ -11,17 +11,18 @@ import { TrxType } from 'src/resources/AccessLevels'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import CustomComboBox from '../Inputs/CustomComboBox'
 import { ControlContext } from 'src/providers/ControlContext'
+import ReportParameterBrowser from 'src/components/Shared/ReportParameterBrowser'
 
 const GridToolbar = ({
   initialLoad,
   onAdd,
-  openRPB,
+  // openRPB,
   onTree,
   refreshGrid,
   disableRPB = false,
   onGo,
   onRefresh = false,
-  paramsArray,
+  // paramsArray,
   children,
   labels,
   onClear,
@@ -40,6 +41,7 @@ const GridToolbar = ({
   const { stack } = useWindow()
   const [selectedReport, setSelectedReport] = useState(null)
   const [reportStore, setReportStore] = useState([])
+  const [paramsArray, setParamsArray] = useState([])
 
   useEffect(() => {
     getReportLayout()
@@ -53,6 +55,20 @@ const GridToolbar = ({
     }
   }, [reportStore])
 
+  const openRPB = () => {
+    stack({
+      Component: ReportParameterBrowser,
+      props: {
+        disabled: false,
+        reportName: 'BPMAS',
+        paramsArray: paramsArray,
+        setParamsArray: setParamsArray
+      },
+      width: 700,
+      height: 500,
+      title: 'Report Parameters Browser'
+    })
+  }
   const getReportLayout = () => {
     setReportStore([])
     if (previewReport) {
