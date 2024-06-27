@@ -33,6 +33,7 @@ import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { useForm } from 'src/hooks/form'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const FormContext = React.createContext(null)
 
@@ -109,6 +110,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
   const [idNumberOne, setIdNumber] = useState(null)
   const [search, setSearch] = useState(null)
   const [fId, setFId] = useState(SystemFunction.CurrencyPurchase)
+  const { platformLabels } = useContext(ControlContext)
 
   async function checkTypes(value) {
     if (!value) {
@@ -240,8 +242,172 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
         )
         .required(' ')
     }),
-    onSubmit
+    onSubmit: async values => {
+      try {
+        if (
+          ((!values?.idNoConfirm && values?.clientId) ||
+            (!values?.confirmIdNo && !values?.clientId && !values.cellPhoneConfirm)) &&
+          !editMode
+        ) {
+          stack({
+            Component: ConfirmationOnSubmit,
+            props: {
+              formik: formik,
+              labels: labels
+            },
+            title: labels.fetch,
+            width: 400,
+            height: 400
+          })
+        } else {
+          const { record: recordFunctionId } = await getRequest({
+            extension: SystemRepository.UserFunction.get,
+            parameters: `_userId=${userId}&_functionId=${values.functionId}`
+          })
+
+          const { dtId } = recordFunctionId
+
+          const { record: cashAccountRecord } = await getRequest({
+            extension: SystemRepository.UserDefaults.get,
+            parameters: `_userId=${userId}&_key=cashAccountId`
+          })
+
+          const { record: baseAmount } = await getRequest({
+            extension: CurrencyTradingSettingsRepository.Defaults.get,
+            parameters: '_key=ct_minOtp_CIVAmount'
+          })
+          const clientId = values.clientId || 0
+
+          const payload = {
+            header: {
+              recordId: values?.recordId || null,
+              dtId,
+              reference: values.reference,
+              status: values.status,
+              date: formatDateToApiFunction(values.date),
+              functionId: values.functionId,
+              plantId: plantId ? plantId : values.plantId,
+              clientId,
+              cashAccountId: cashAccountRecord.value,
+              poeId: values.purpose_of_exchange,
+              wip: values.wip,
+              amount: total,
+              notes: values.remarks
+            },
+            items: values.operations.map(({ id, ...rest }) => ({
+              seqNo: id,
+              ...rest
+            })),
+            clientMaster: {
+              category: values.clientType,
+              reference: null,
+              name: null,
+              flName: null,
+              keyword: null,
+              nationalityId: values.nationality,
+              status: 1,
+              addressId: null,
+              cellPhone: values.cellPhone,
+              oldReference: null,
+              otp: false,
+              createdDate: formatDateToApiFunction(values.date),
+              expiryDate: null
+            },
+            clientIndividual: {
+              clientId,
+              firstName: values.firstName,
+              lastName: values.lastName,
+              middleName: values.middleName,
+              familyName: values.familyName,
+              fl_firstName: values.fl_firstName,
+              fl_lastName: values.fl_lastName,
+              fl_middleName: values.fl_middleName,
+              fl_familyName: values.fl_familyName,
+              birthDate: formatDateToApiFunction(values.birth_date),
+              isResident: values.resident,
+              professionId: values.profession,
+              incomeSourceId: values.source_of_income,
+              sponsorName: values.sponsor
+            },
+            clientID: {
+              idNo: values.id_number,
+              clientId,
+              idCountryId: values.issue_country,
+              idtId: values.id_type,
+              idExpiryDate: formatDateToApiFunction(values.expiry_date),
+              idIssueDate: null,
+              idCityId: null,
+              isDiplomat: false
+            },
+
+            cash:
+              formik.values.amount.length > 0 &&
+              formik.values.amount.map(({ id, types, cashAccountId, ...rest }) => ({
+                seqNo: id,
+                cashAccountId: cashAccountRecord.value,
+                ...rest
+              }))
+          }
+
+          const get3CIV = await getRequest({
+            extension: CTTRXrepository.CurrencyTrading.get3,
+            parameters: `_clientId=${clientId}`
+          })
+          const totalBaseAmount = parseInt(get3CIV.record.baseAmount) + parseInt(total)
+
+          /* const response = await postRequest({
+            extension: CTTRXrepository.CurrencyTrading.set2,
+            record: JSON.stringify(payload)
+          })
+  */
+          const actionMessage = !recordId ? platformLabels.Edited : platformLabels.Added
+          toast.success(actionMessage)
+          formik.setFieldValue('recordId', 248)
+
+          // await getData(248)
+
+          // if (totalBaseAmount > baseAmount.value && !recordId)
+          viewOTP(248)
+
+          // invalidate()
+        }
+
+        return
+      } catch (error) {}
+    }
   })
+
+  const onClose = async () => {
+    try {
+      const values = formik.values
+
+      const data = {
+        recordId: values?.recordId || null,
+        reference: values.reference,
+        status: values.status,
+        functionId: values.functionId,
+        plantId: plantId ? plantId : values.plantId,
+        clientId: values.clientId,
+        cashAccountId: values?.cashAccountId,
+        poeId: values.purpose_of_exchange,
+        wip: values.wip,
+        otpVerified: values.otp,
+        amount: String(total || '').replaceAll(',', ''),
+        notes: values.remarks
+      }
+      console.log('data check', data)
+
+      /*  const res = await postRequest({
+        extension: CTTRXrepository.CurrencyTrading.close,
+        record: JSON.stringify(data)
+      })
+      if (res.recordId) {
+        toast.success('Record Closed Successfully')
+        invalidate()
+        await getData(res.recordId)
+      }*/
+    } catch (e) {}
+  }
 
   const editMode = !!formik.values.recordId
   const isClosed = formik.values.wip === 2
@@ -260,6 +426,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       })
 
       setRateType(res.record.value)
+
       formik.setFieldValue('functionId', type)
     }
   }
@@ -283,9 +450,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     fillType()
     ;(async function () {
       setOperationType(formik.values.functionId)
-      if (recordId) {
-        await getData(recordId)
-      }
+      if (recordId) await getData(recordId)
     })()
   }, [])
 
@@ -296,8 +461,8 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
         parameters: `_recordId=${id}`
       })
       const record = res.record
-      console.log('print response ', res)
-      await formik.setValues({
+      formik.setValues({
+        ...formik.values,
         recordId: record.headerView.recordId,
         reference: record.headerView.reference,
         operations: record.items.map(({ seqNo, ...rest }) => ({
@@ -363,37 +528,6 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     }
   }
 
-  const onClose = async () => {
-    try {
-      const values = formik.values
-
-      const data = {
-        recordId: values?.recordId || null,
-        reference: values.reference,
-        status: values.status,
-        functionId: values.functionId,
-        plantId: plantId ? plantId : values.plantId,
-        clientId: values.clientId,
-        cashAccountId: values?.cashAccountId,
-        poeId: values.purpose_of_exchange,
-        wip: values.wip,
-        otpVerified: values.otp,
-        amount: String(total || '').replaceAll(',', ''),
-        notes: values.remarks
-      }
-
-      const res = await postRequest({
-        extension: CTTRXrepository.CurrencyTrading.close,
-        record: JSON.stringify(data)
-      })
-      if (res.recordId) {
-        toast.success('Record Closed Successfully')
-        invalidate()
-        await getData(res.recordId)
-      }
-    } catch (e) {}
-  }
-
   async function onReopen() {
     try {
       const values = formik.values
@@ -440,142 +574,6 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
   }, 0)
 
   const balance = total - receivedTotal
-
-  async function onSubmit(values) {
-    try {
-      if (
-        ((!values?.idNoConfirm && values?.clientId) ||
-          (!values?.confirmIdNo && !values?.clientId && !values.cellPhoneConfirm)) &&
-        !editMode
-      ) {
-        stack({
-          Component: ConfirmationOnSubmit,
-          props: {
-            formik: formik,
-            labels: labels
-          },
-          title: labels.fetch,
-          width: 400,
-          height: 400
-        })
-      } else {
-        const { record: recordFunctionId } = await getRequest({
-          extension: SystemRepository.UserFunction.get,
-          parameters: `_userId=${userId}&_functionId=${values.functionId}`
-        })
-
-        const { dtId } = recordFunctionId
-
-        const { record: cashAccountRecord } = await getRequest({
-          extension: SystemRepository.UserDefaults.get,
-          parameters: `_userId=${userId}&_key=cashAccountId`
-        })
-
-        const { record: baseAmount } = await getRequest({
-          extension: CurrencyTradingSettingsRepository.Defaults.get,
-          parameters: '_key=ct_minOtp_CIVAmount'
-        })
-        const clientId = values.clientId || 0
-
-        const payload = {
-          header: {
-            recordId: values?.recordId || null,
-            dtId,
-            reference: values.reference,
-            status: values.status,
-            date: formatDateToApiFunction(values.date),
-            functionId: values.functionId,
-            plantId: plantId ? plantId : values.plantId,
-            clientId,
-            cashAccountId: cashAccountRecord.value,
-            poeId: values.purpose_of_exchange,
-            wip: values.wip,
-            amount: total,
-            notes: values.remarks
-          },
-          items: values.operations.map(({ id, ...rest }) => ({
-            seqNo: id,
-            ...rest
-          })),
-          clientMaster: {
-            category: values.clientType,
-            reference: null,
-            name: null,
-            flName: null,
-            keyword: null,
-            nationalityId: values.nationality,
-            status: 1,
-            addressId: null,
-            cellPhone: values.cellPhone,
-            oldReference: null,
-            otp: false,
-            createdDate: formatDateToApiFunction(values.date),
-            expiryDate: null
-          },
-          clientIndividual: {
-            clientId,
-            firstName: values.firstName,
-            lastName: values.lastName,
-            middleName: values.middleName,
-            familyName: values.familyName,
-            fl_firstName: values.fl_firstName,
-            fl_lastName: values.fl_lastName,
-            fl_middleName: values.fl_middleName,
-            fl_familyName: values.fl_familyName,
-            birthDate: formatDateToApiFunction(values.birth_date),
-            isResident: values.resident,
-            professionId: values.profession,
-            incomeSourceId: values.source_of_income,
-            sponsorName: values.sponsor
-          },
-          clientID: {
-            idNo: values.id_number,
-            clientId,
-            idCountryId: values.issue_country,
-            idtId: values.id_type,
-            idExpiryDate: formatDateToApiFunction(values.expiry_date),
-            idIssueDate: null,
-            idCityId: null,
-            isDiplomat: false
-          },
-
-          cash:
-            formik.values.amount.length > 0 &&
-            formik.values.amount.map(({ id, types, cashAccountId, ...rest }) => ({
-              seqNo: id,
-              cashAccountId: cashAccountRecord.value,
-              ...rest
-            }))
-        }
-
-        const get3CIV = await getRequest({
-          extension: CTTRXrepository.CurrencyTrading.get3,
-          parameters: `_clientId=${clientId}`
-        })
-        const totalBaseAmount = parseInt(get3CIV.record.baseAmount) + parseInt(total)
-
-        const response = await postRequest({
-          extension: CTTRXrepository.CurrencyTrading.set2,
-          record: JSON.stringify(payload)
-        })
-
-        if (!values.recordId) {
-          toast.success('Record Added Successfully')
-
-          await getData(response.recordId)
-        } else {
-          toast.success('Record Edited Successfully')
-        }
-
-        if (totalBaseAmount > baseAmount.value && !recordId) {
-          viewOTP(response.recordId)
-        }
-        invalidate()
-      }
-
-      return
-    } catch (e) {}
-  }
 
   function viewOTP(recordId) {
     stack({
