@@ -118,8 +118,6 @@ const Table = ({
   const { languageId } = useContext(AuthContext)
   const [startAt, setStartAt] = useState(0)
   const [page, setPage] = useState(1)
-  const [checkedRows, setCheckedRows] = useState({})
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState([false, {}])
   const pageSize = props.pageSize ? props.pageSize : 50
   const originalGridData = props.gridData && props.gridData.list && props.gridData.list
   const api = props?.api ? props?.api : props.paginationParameters
@@ -314,7 +312,7 @@ const Table = ({
   const shouldViewButtons = !viewCheckButtons ? 'none' : ''
 
   const handleCheckboxChange = row => {
-    setCheckedRows(prevCheckedRows => {
+    setData(prevCheckedRows => {
       const newCheckedRows = { ...prevCheckedRows }
       const key = row.seqNo ? `${row.recordId}-${row.seqNo}` : row.recordId
       newCheckedRows[key] = row
@@ -466,7 +464,6 @@ const Table = ({
       // console.log('enter if')
       // setPage(1)
     }
-    setCheckedRows([])
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.gridData])
 

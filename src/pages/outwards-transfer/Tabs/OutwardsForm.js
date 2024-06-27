@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Grid, Button } from '@mui/material'
 import { getFormattedNumber } from 'src/lib/numberField-helper'
 import * as yup from 'yup'
@@ -180,6 +180,8 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
         copy.date = formatDateToApi(copy.date)
         copy.valueDate = formatDateToApi(copy.valueDate)
         copy.defaultValueDate = formatDateToApi(copy.defaultValueDate)
+        copy.vatAmount = vatAmount
+        copy.amount = amount
 
         const updatedRows = formik.values.amountRows.map((amountDetails, index) => {
           const seqNo = index + 1
@@ -198,8 +200,6 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
           bankType: formik.values.bankType,
           ICRequest: formik.values.instantCashDetails ?? null
         }
-
-        console.log('ICRequest ', formik.values)
 
         const amountRes = await postRequest({
           extension: RemittanceOutwardsRepository.OutwardsTransfer.set2,
@@ -224,15 +224,6 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
   const editMode = !!formik.values.recordId
   const isClosed = formik.values.wip === 2
   const isPosted = formik.values.status === 4
-  const total = parseFloat(formik.values.amount || 0)
-
-  const receivedTotal = formik.values.amountRows.reduce((sumAmount, row) => {
-    const curValue = parseFloat(row.amount.toString().replace(/,/g, '')) || 0
-
-    return sumAmount + curValue
-  }, 0)
-
-  const Balance = total - receivedTotal
 
   function viewOTP(recordId) {
     stack({
@@ -269,9 +260,11 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       if (res.recordId) {
         if (recordId) toast.success(platformLabels.Closed)
         invalidate()
-
         const res2 = await getOutwards(res.recordId)
-        formik.setValues(res2.record.headerView)
+
+        //await fillFormData(res2)
+
+        formik.setFieldValue('wip', res2.record.headerView.wip)
       }
     } catch (error) {}
   }
@@ -296,7 +289,10 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
         invalidate()
 
         const res2 = await getOutwards(res.recordId)
-        formik.setValues(res2.record.headerView)
+
+        // await fillFormData(res2)
+        formik.setFieldValue('wip', res2.record.headerView.wip)
+        formik.setFieldValue('status', res2.record.headerView.status)
       }
     } catch (error) {}
   }
@@ -325,8 +321,18 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
   const vatAmount = (formik.values.commission * formik.values.vatRate) / 100
   const amount = formik.values.lcAmount + (formik.values.commission + formik.values.vatAmount - formik.values.tdAmount)
 
+  const total = parseFloat(amount || 0)
+
+  const receivedTotal = formik.values.amountRows.reduce((sumAmount, row) => {
+    const curValue = parseFloat(row.amount.toString().replace(/,/g, '')) || 0
+
+    return sumAmount + curValue
+  }, 0)
+
+  const Balance = total - receivedTotal
+
   const onProductSubmit = productData => {
-    const selectedRowData = productData?.list.find(row => row.checked)
+    const selectedRowData = productData?.find(row => row.checked)
     formik.setFieldValue('bankType', selectedRowData?.interfaceId)
     formik.setFieldValue('productId', selectedRowData?.productId)
     formik.setFieldValue('commission', selectedRowData?.fees)
@@ -835,8 +841,6 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                       value={vatAmount}
                       readOnly
                       maxAccess={maxAccess}
-                      onChange={e => formik.setFieldValue('vatAmount', e.target.value)}
-                      onClear={() => formik.setFieldValue('vatAmount', '')}
                       error={formik.touched.vatAmount && Boolean(formik.errors.vatAmount)}
                       maxLength={10}
                     />
@@ -864,7 +868,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                     required
                     readOnly
                     maxAccess={maxAccess}
-                    onChange={e => formik.setFieldValue('amount', e.target.value)}
+                    onChange={e => formik.setFieldValue('amount', amount)}
                     onClear={() => formik.setFieldValue('amount', '')}
                     error={formik.touched.amount && Boolean(formik.errors.amount)}
                     maxLength={10}
