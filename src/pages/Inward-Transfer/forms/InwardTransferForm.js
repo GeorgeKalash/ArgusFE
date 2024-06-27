@@ -12,6 +12,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { useError } from 'src/error'
+import { useWindow } from 'src/windows'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { useForm } from 'src/hooks/form'
 import { useInvalidate } from 'src/hooks/resource'
@@ -25,18 +26,15 @@ import { DataSets } from 'src/resources/DataSets'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import * as yup from 'yup'
-import { CashBankRepository } from 'src/repositories/CashBankRepository'
+import CloseForm from './CloseForm'
 
-export default function InwardTransferForm({ labels, recordId, access, plantId, cashAccountId, userId, dtId }) {
+export default function InwardTransferForm({ labels, recordId, access, plantId, window, userId, dtId }) {
   const [editMode, setEditMode] = useState(!!recordId)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
-  const [toCurrency, setToCurrency] = useState(null)
-  const [toCurrencyRef, setToCurrencyRef] = useState(null)
-  const [baseCurrencyRef, setBaseCurrencyRef] = useState(null)
   const [transferType, setTransferType] = useState(null)
+  const { stack } = useWindow()
   const [isClosed, setIsClosed] = useState(false)
-  const [isPosted, setIsPosted] = useState(true)
 
   const invalidate = useInvalidate({
     endpointId: RemittanceOutwardsRepository.InwardsTransfer.snapshot
@@ -55,9 +53,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
     reference: '',
     date: new Date(),
     corId: null,
-    corName: '',
     currencyId: null,
-    currencyName: '',
     status: null,
     notes: '',
     amount: null,
@@ -121,14 +117,12 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.date().required(),
-      status: yup.number().required(),
       corId: yup.string().required(),
       currencyId: yup.string().required(),
       notes: yup.string().required(),
       amount: yup.number().required(),
       transferType: yup.string().required(),
-
-      // faxNo: transferType === '1' ? yup.string().required() : yup.string().notRequired(),
+      faxNo: transferType == '1' ? yup.string().required() : yup.string().notRequired(),
       sender_firstName: yup.string().required(),
       sender_lastName: yup.string().required(),
       sender_nationalityId: yup.string().required(),
@@ -141,11 +135,11 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
       commissionReceiver: yup.number().required()
     }),
     onSubmit: async values => {
-      console.log('copy')
       const copy = { ...formik.values }
       copy.date = formatDateToApi(copy?.date)
       copy.wip = copy?.wip === '' ? 1 : copy?.wip
       copy.exRate = copy?.exRate === '' ? 1 : copy?.exRate
+      copy.status = copy?.status === null ? 1 : copy?.status
       copy.baseAmount = copy?.baseAmount === '' ? copy?.amount : copy?.baseAmount
       copy.rateCalcMethod = copy?.rateCalcMethod === '' ? 1 : copy?.rateCalcMethod
       copy.sender_idIssueDate = copy.sender_idIssueDate ? formatDateToApi(copy?.sender_idIssueDate) : null
@@ -153,114 +147,36 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
       copy.receiver_idIssueDate = copy.receiver_idIssueDate ? formatDateToApi(copy?.receiver_idIssueDate) : null
       copy.receiver_idExpiryDate = copy.receiver_idExpiryDate ? formatDateToApi(copy?.receiver_idExpiryDate) : null
       copy.expiryDate = copy.expiryDate ? formatDateToApi(copy?.expiryDate) : null
-      console.log(copy)
 
       const res = await postRequest({
         extension: RemittanceOutwardsRepository.InwardsTransfer.set,
         record: JSON.stringify(copy)
       })
-
       if (res.recordId) {
         toast.success('Record Updated Successfully')
         formik.setFieldValue('recordId', res.recordId)
         setEditMode(true)
-
         invalidate()
       }
     }
   })
 
-  const fillCurrencyTransfer = async (transferId, data) => {
-    const res = await getRequest({
-      extension: CashBankRepository.CurrencyTransfer.qry,
-      parameters: `_transferId=${transferId}`
+  function openCloseWindow() {
+    stack({
+      Component: CloseForm,
+      props: {
+        form: formik,
+        invalidate: invalidate(),
+        labels: labels,
+        isClosed: isClosed,
+        setIsClosed: setIsClosed,
+        maxAccess: maxAccess,
+        recordId: recordId,
+        window2: window
+      },
+      width: 600,
+      title: 'Approve Fields'
     })
-
-    const modifiedList = res.list.map(item => ({
-      ...item,
-      id: item.seqNo,
-      amount: parseFloat(item.amount).toFixed(2),
-      balance: parseFloat(item?.balance).toFixed(2) ?? 0
-    }))
-
-    formik.setValues({
-      ...data,
-      transfers: modifiedList
-    })
-  }
-
-  const getAccView = async () => {
-    if (cashAccountId) {
-      const res = await getRequest({
-        extension: CashBankRepository.CashAccount.get,
-        parameters: `_recordId=${cashAccountId}`
-      })
-      if (res.record) {
-        formik.setFieldValue('fromCARef', res.record.accountNo)
-        formik.setFieldValue('fromCAName', res.record.name)
-      }
-    }
-  }
-
-  async function getBaseCurrency() {
-    const res = await getRequest({
-      extension: SystemRepository.Defaults.get,
-      parameters: '_key=baseCurrencyId'
-    })
-    if (res.record.value) {
-      getBaseCurrencyRef(res.record.value)
-    }
-
-    return res.record.value ?? ''
-  }
-
-  const getBaseCurrencyRef = currencyId => {
-    try {
-      var parameters = `_recordId=${currencyId}`
-      getRequest({
-        extension: SystemRepository.Currency.get,
-        parameters: parameters
-      }).then(res => {
-        setBaseCurrencyRef(res.record.reference)
-      })
-    } catch (error) {}
-  }
-
-  const getCorrespondentById = async (recordId, baseCurrency, plant) => {
-    if (recordId) {
-      const _recordId = recordId
-      const defaultParams = `_recordId=${_recordId}`
-      var parameters = defaultParams
-
-      getRequest({
-        extension: RemittanceSettingsRepository.Correspondent.get,
-        parameters: parameters
-      }).then(async res => {
-        setToCurrency(res.record.currencyId)
-        setToCurrencyRef(res.record.currencyRef)
-
-        const evalRate = await getRequest({
-          extension: CurrencyTradingSettingsRepository.Defaults.get,
-          parameters: '_key=ct_credit_eval_ratetype_id'
-        })
-        if (evalRate.record) getEXMBase(plant, res.record.currencyId, baseCurrency, evalRate.record.value)
-      })
-    } else {
-      setToCurrency(null)
-      setToCurrencyRef(null)
-    }
-  }
-
-  function getEXMBase(plantId, currencyId, baseCurrency, rateType) {
-    if (!plantId || !currencyId || !rateType || !baseCurrency) {
-      if (!plantId) {
-        stackError({
-          message: `Plant Cannot Be Empty.`
-        })
-      }
-
-      return
-    }
   }
 
   useEffect(() => {
@@ -271,7 +187,6 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
             extension: RemittanceOutwardsRepository.InwardsTransfer.get,
             parameters: `_recordId=${recordId}`
           })
-          await fillCurrencyTransfer(recordId, res.record)
 
           if (res.record) {
             const record = {
@@ -283,18 +198,24 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
               receiver_idExpiryDate: formatDateFromApi(res.record.receiver_idExpiryDate),
               expiryDate: formatDateFromApi(res.record.expiryDate)
             }
-
+            setIsClosed(res.record.status === 4 ? true : false)
             formik.setValues(record)
             setEditMode(true)
-
-            const baseCurrency = await getBaseCurrency()
-            getCorrespondentById(res.record.corId, baseCurrency, res.record.plantId)
           }
         } catch (error) {}
       }
     }
     fetchRecord()
   }, [])
+
+  const actions = [
+    {
+      key: 'Close',
+      condition: !isClosed,
+      onClick: openCloseWindow,
+      disabled: isClosed || !editMode
+    }
+  ]
 
   return (
     <FormShell
@@ -303,7 +224,8 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
       editMode={editMode}
       maxAccess={maxAccess}
       functionId={SystemFunction.InwardTransfer}
-      disabledSubmit={editMode}
+      actions={actions}
+      disabledSubmit={isClosed}
     >
       <VertLayout>
         <Fixed>
@@ -341,10 +263,9 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                   <Grid item xs={4}>
                     <CustomNumberField
                       name='status'
-                      required
                       label={labels.status}
                       value={formik.values.status}
-                      readOnly={editMode}
+                      readOnly={true}
                       maxAccess={maxAccess}
                       onChange={e => formik.setFieldValue('status', e.target.value)}
                       onClear={() => formik.setFieldValue('status', '')}
@@ -369,20 +290,13 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       firstFieldWidth='30%'
                       displayFieldWidth={1.5}
                       valueShow='corRef'
-                      secondValueShow='corName'
                       maxAccess={maxAccess}
                       editMode={editMode}
                       onChange={async (event, newValue) => {
                         if (newValue) {
-                          const baseCurrency = await getBaseCurrency()
-                          getCorrespondentById(newValue?.recordId, baseCurrency, formik.values.plantId)
                           formik.setFieldValue('corId', newValue?.recordId)
-                          formik.setFieldValue('corName', newValue?.name || '')
                         } else {
                           formik.setFieldValue('corId', null)
-                          formik.setFieldValue('corName', null)
-                          setToCurrency(null)
-                          setToCurrencyRef('')
                         }
                       }}
                       errorCheck={'corId'}
@@ -402,7 +316,6 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       ]}
                       onChange={(event, newValue) => {
                         formik.setFieldValue('currencyId', newValue ? newValue.recordId : '')
-                        formik.setFieldValue('currencyName', newValue ? newValue.name : '')
                       }}
                       error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
                       maxAccess={maxAccess}

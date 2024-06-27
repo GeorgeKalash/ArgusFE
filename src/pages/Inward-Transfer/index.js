@@ -128,23 +128,13 @@ const InwardTransfer = () => {
       valueGetter: ({ row }) => formatDateDefault(row?.date)
     },
     {
-      field: 'currencyName',
+      field: 'currencyRef',
       headerName: _labels.currency,
       flex: 1
     },
     {
-      field: 'status',
+      field: 'statusName',
       headerName: _labels.status,
-      flex: 1
-    },
-    {
-      field: 'wip',
-      headerName: _labels.wip,
-      flex: 1
-    },
-    {
-      field: 'releaseStatus',
-      headerName: _labels.releaseStatus,
       flex: 1
     },
     {
