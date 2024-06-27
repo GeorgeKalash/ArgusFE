@@ -1,4 +1,6 @@
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
+import { InventoryRepository } from 'src/repositories/InventoryRepository'
+import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 
 export const COMBOBOX = 1
@@ -48,7 +50,7 @@ export const apiMappings = {
   41103: {
     //Item Category
     type: COMBOBOX,
-    endpoint: 'IV.asmx/qryCA',
+    endpoint: InventoryRepository.Category.qry,
     parameters: '_startAt=0&_pageSize=50&_name=',
     valueField: 'caRef',
     displayField: 'name'
@@ -56,7 +58,7 @@ export const apiMappings = {
   41105: {
     //Item Group
     type: COMBOBOX,
-    endpoint: 'IV.asmx/qryGRP',
+    endpoint: InventoryRepository.Group.qry,
     parameters: '_startAt=0&_pageSize=50',
     valueField: 'reference',
     displayField: 'name'
@@ -64,7 +66,7 @@ export const apiMappings = {
   41102: {
     //"Measurement Schedule"
     type: COMBOBOX,
-    endpoint: 'IV.asmx/qryMS',
+    endpoint: InventoryRepository.Measurement.qry,
     parameters: '_startAt=0&_pageSize=50&_name=',
     valueField: 'reference',
     displayField: 'name'
@@ -72,7 +74,7 @@ export const apiMappings = {
   42107: {
     //Production Line
     type: COMBOBOX,
-    endpoint: 'MF.asmx/qryLIN',
+    endpoint: ManufacturingRepository.ProductionLine.qry,
     parameters: '_filter=',
     valueField: 'reference',
     displayField: 'name'
