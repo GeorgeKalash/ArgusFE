@@ -6,7 +6,7 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
-import OutwardsTab from './Tabs/OutwardsTab'
+import OutwardsForm from './Tabs/OutwardsForm'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import toast from 'react-hot-toast'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -176,7 +176,7 @@ const OutwardsTransfer = () => {
 
   function openOutWardsWindow(plantId, cashAccountId, recordId) {
     stack({
-      Component: OutwardsTab,
+      Component: OutwardsForm,
       props: {
         plantId: plantId,
         cashAccountId: cashAccountId,
