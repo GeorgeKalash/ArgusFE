@@ -23,10 +23,12 @@ import { CommonContext } from 'src/providers/CommonContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const CTExchangeRates = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getAllKvsByDataset } = useContext(CommonContext)
+  const { platformLabels } = useContext(ControlContext)
 
   //state
   const [errorMessage, setErrorMessage] = useState()
@@ -187,7 +189,7 @@ const CTExchangeRates = () => {
       record: JSON.stringify(data)
     })
       .then(res => {
-        if (res) toast.success('Record Saved Successfully')
+        if (res) toast.success(platformLabels.Saved)
       })
       .catch(error => {
         setErrorMessage(error)

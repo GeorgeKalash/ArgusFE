@@ -33,6 +33,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { useForm } from 'src/hooks/form'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const FormContext = React.createContext(null)
 
@@ -98,6 +99,7 @@ function FormProvider({ formik, maxAccess, labels, children }) {
 }
 
 export default function TransactionForm({ recordId, labels, access, plantId }) {
+  const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [editMode, setEditMode] = useState(!!recordId)
   const [infoAutoFilled, setInfoAutoFilled] = useState(false)
@@ -398,7 +400,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
         record: JSON.stringify(data)
       })
       if (res.recordId) {
-        toast.success('Record Closed Successfully')
+        toast.success(platformLabels.Closed)
         invalidate()
         setIsClosed(true)
       }
@@ -435,7 +437,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
         record: JSON.stringify(data)
       })
       if (res.recordId) {
-        toast.success('Record Reopened Successfully')
+        toast.success(platformLabels.Reopened)
         invalidate()
         setIsClosed(false)
       }
@@ -561,13 +563,13 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
         })
 
         if (!values.recordId) {
-          toast.success('Record Added Successfully')
+          toast.success(platformLabels.Added)
           formik.setFieldTouched(recordId, response.recordId)
           getData(response.recordId)
 
           setEditMode(true)
         } else {
-          toast.success('Record Edited Successfully')
+          toast.success(platformLabels.Edited)
         }
         invalidate()
       }
@@ -649,7 +651,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       })
 
       if (res) {
-        toast.success('Record Posted Successfully')
+        toast.success(platformLabels.Posted)
         setIsPosted(true)
         invalidate()
       }

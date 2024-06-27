@@ -193,10 +193,10 @@ const ClientsCorporateList = () => {
           paginationType='client'
         />
       </Grow>
-        {errorMessage?.error && (
-          <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-        )}
-      </VertLayout>
+      {errorMessage?.error && (
+        <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
+      )}
+    </VertLayout>
   )
 }
 

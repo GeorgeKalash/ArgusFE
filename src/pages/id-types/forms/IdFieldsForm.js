@@ -9,10 +9,12 @@ import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTrad
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { DataSets } from 'src/resources/DataSets'
 import { useForm } from 'src/hooks/form'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const IdFieldsForm = ({ store, setStore, labels, editMode, height, expanded, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId: idtId } = store
+  const { platformLabels } = useContext(ControlContext)
 
   const { formik } = useForm({
     maxAccess: maxAccess,
@@ -50,7 +52,7 @@ const IdFieldsForm = ({ store, setStore, labels, editMode, height, expanded, max
       record: JSON.stringify(data)
     })
       .then(res => {
-        toast.success('Record Edited Successfully')
+        toast.success(platformLabels.Edited)
       })
       .catch(error => {})
   }

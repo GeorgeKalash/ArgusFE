@@ -21,6 +21,7 @@ import { RTOWMRepository } from 'src/repositories/RTOWMRepository'
 import { useInvalidate } from 'src/hooks/resource'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function OutwardsModificationForm({ access, labels, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -29,6 +30,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
   const [displayBank, setDisplayBank] = useState(false)
   const [isClosed, setIsClosed] = useState(false)
   const [isPosted, setIsPosted] = useState(false)
+  const { platformLabels } = useContext(ControlContext)
 
   const [store, setStore] = useState(
     { submitted: false },
@@ -102,7 +104,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
     })
 
     if (res.recordId) {
-      toast.success('Record Closed Successfully')
+      toast.success(platformLabels.Closed)
       invalidate()
       setIsClosed(true)
     }
@@ -115,7 +117,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
     })
 
     if (res.recordId) {
-      toast.success('Record Closed Successfully')
+      toast.success(platformLabels.Closed)
       invalidate()
       setIsClosed(false)
     }
@@ -130,7 +132,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
     })
 
     if (res?.recordId) {
-      toast.success('Record Posted Successfully')
+      toast.success(platformLabels.Posted)
       invalidate()
       setIsPosted(true)
     }
@@ -290,7 +292,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
           })
 
           if (res.recordId) {
-            toast.success('Record Updated Successfully')
+            toast.success(platformLabels.Updated)
             formik.setFieldValue('recordId', res.recordId)
             invalidate()
             setEditMode(true)
