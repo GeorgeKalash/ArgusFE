@@ -1,3 +1,4 @@
+import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
@@ -60,7 +61,7 @@ export const apiMappings = {
     type: COMBOBOX,
     endpoint: InventoryRepository.Group.qry,
     parameters: '_startAt=0&_pageSize=50',
-    valueField: 'reference',
+    valueField: 'recordId',
     displayField: 'name'
   },
   41102: {
@@ -68,7 +69,7 @@ export const apiMappings = {
     type: COMBOBOX,
     endpoint: InventoryRepository.Measurement.qry,
     parameters: '_startAt=0&_pageSize=50&_name=',
-    valueField: 'reference',
+    valueField: 'recordId',
     displayField: 'name'
   },
   42107: {
@@ -76,7 +77,21 @@ export const apiMappings = {
     type: COMBOBOX,
     endpoint: ManufacturingRepository.ProductionLine.qry,
     parameters: '_filter=',
-    valueField: 'reference',
+    valueField: 'recordId',
+    displayField: 'name'
+  },
+  21101: {
+    type: COMBOBOX,
+    endpoint: BusinessPartnerRepository.Group.qry,
+    parameters: '_filter=',
+    valueField: 'recordId',
+    displayField: 'name'
+  },
+  0: {
+    type: COMBOBOX,
+    endpoint: BusinessPartnerRepository.CategoryID.qry,
+    parameters: '_filter=',
+    valueField: 'recordId',
     displayField: 'name'
   }
 }

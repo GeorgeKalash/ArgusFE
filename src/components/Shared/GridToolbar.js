@@ -81,10 +81,24 @@ const GridToolbar = ({
   }
 
   const formatDataForApi = paramsArray => {
-    const formattedData = paramsArray.map(({ fieldId, value }) => `${fieldId}|${value}`).join('^')
+    let minFieldId = null
+    let minValue = Infinity
+
+    for (const [index, { fieldId, value }] of Object.entries(paramsArray)) {
+      const numericValue = Number(fieldId)
+      if (numericValue < minValue) {
+        minValue = numericValue
+        minFieldId = numericValue
+      }
+    }
+    console.log(paramsArray, minFieldId)
+    const formattedData = paramsArray
+      .map(({ fieldId, value }) => `${fieldId}|${value}`)
+      .reduce((acc, curr, index) => acc + (index === minFieldId ? `${curr}` : `^${curr}`), '')
 
     return formattedData
   }
+
   function clear() {
     setSearchValue('')
     onSearch('')

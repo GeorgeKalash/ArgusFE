@@ -68,31 +68,58 @@ const GetLookup = ({ field, formik, apiDetails }) => {
 const GetComboBox = ({ field, formik, apiDetails }) => {
   return (
     <Grid item xs={12} key={field.id}>
-      <ResourceComboBox
-        endpointId={apiDetails.endpoint}
-        parameters={apiDetails?.parameters}
-        name={field.key}
-        label={field.caption}
-        valueField={apiDetails.valueField}
-        displayField={apiDetails.displayField}
-        columnsInDropDown={apiDetails.columnsInDropDown}
-        required={field.mandatory}
-        value={formik.values?.parameters?.[field.id]?.value}
-        onChange={(event, newValue) => {
-          formik.setFieldValue(
-            `parameters[${field.id}]`,
-            newValue
-              ? {
-                  fieldId: field.id,
-                  fieldKey: field.key,
-                  value: newValue?.[apiDetails.valueField],
-                  caption: field.caption,
-                  display: newValue?.[apiDetails.displayField]
-                }
-              : ''
-          )
-        }}
-      />
+      {field.classId ? (
+        <ResourceComboBox
+          endpointId={apiDetails.endpoint}
+          parameters={apiDetails?.parameters}
+          name={field.key}
+          label={field.caption}
+          valueField={apiDetails.valueField}
+          displayField={apiDetails.displayField}
+          columnsInDropDown={apiDetails.columnsInDropDown}
+          required={field.mandatory}
+          value={formik.values?.parameters?.[field.id]?.value}
+          onChange={(event, newValue) => {
+            formik.setFieldValue(
+              `parameters[${field.id}]`,
+              newValue
+                ? {
+                    fieldId: field.id,
+                    fieldKey: field.key,
+                    value: newValue?.[apiDetails.valueField],
+                    caption: field.caption,
+                    display: newValue?.[apiDetails.displayField]
+                  }
+                : ''
+            )
+          }}
+        />
+      ) : (
+        <ResourceComboBox
+          datasetId={field?.data}
+          name={field.key}
+          label={field.caption}
+          valueField={'key'}
+          displayField={'value'}
+          columnsInDropDown={apiDetails.columnsInDropDown}
+          required={field.mandatory}
+          value={formik.values?.parameters?.[field.id]?.value}
+          onChange={(event, newValue) => {
+            formik.setFieldValue(
+              `parameters[${field.id}]`,
+              newValue
+                ? {
+                    fieldId: field.id,
+                    fieldKey: field.key,
+                    value: newValue?.key,
+                    caption: field.caption,
+                    display: newValue?.value
+                  }
+                : ''
+            )
+          }}
+        />
+      )}
     </Grid>
   )
 }
