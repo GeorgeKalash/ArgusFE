@@ -180,8 +180,6 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
         copy.date = formatDateToApi(copy.date)
         copy.valueDate = formatDateToApi(copy.valueDate)
         copy.defaultValueDate = formatDateToApi(copy.defaultValueDate)
-        copy.vatAmount = vatAmount
-        copy.amount = amount
 
         const updatedRows = formik.values.amountRows.map((amountDetails, index) => {
           const seqNo = index + 1
@@ -210,13 +208,11 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
           const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
           toast.success(actionMessage)
           formik.setFieldValue('recordId', amountRes.recordId)
-
           const res2 = await getOutwards(amountRes.recordId)
           formik.setFieldValue('reference', res2.record.headerView.reference)
           invalidate()
+          !recordId && viewOTP(amountRes.recordId, res2)
         }
-
-        !recordId && viewOTP(amountRes.recordId)
       } catch (error) {}
     }
   })
@@ -225,12 +221,13 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
   const isClosed = formik.values.wip === 2
   const isPosted = formik.values.status === 4
 
-  function viewOTP(recordId) {
+  function viewOTP(recordId, data) {
     stack({
       Component: OTPPhoneVerification,
       props: {
         formValidation: formik,
-        recordId: recordId,
+        details: data.record.headerView,
+        recordId,
         functionId: SystemFunction.Outwards,
         onSuccess: onClose
       },
@@ -248,12 +245,13 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
     } catch (error) {}
   }
 
-  const onClose = async () => {
+  const onClose = async data => {
+    console.log('data check ', data)
     try {
       const res = await postRequest({
         extension: RemittanceOutwardsRepository.OutwardsTransfer.close,
         record: JSON.stringify({
-          recordId: formik.values.recordId
+          recordId: data.recordId ?? formik.values.recordId
         })
       })
 
@@ -265,6 +263,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
         //await fillFormData(res2)
 
         formik.setFieldValue('wip', res2.record.headerView.wip)
+        formik.setFieldValue('status', res2.record.headerView.status)
       }
     } catch (error) {}
   }
@@ -319,9 +318,10 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
   }
 
   const vatAmount = (formik.values.commission * formik.values.vatRate) / 100
-  const amount = formik.values.lcAmount + (formik.values.commission + formik.values.vatAmount - formik.values.tdAmount)
 
-  const total = parseFloat(amount || 0)
+  const amount = parseFloat(
+    formik.values.lcAmount + (formik.values.commission + formik.values.vatAmount - formik.values.tdAmount)
+  )
 
   const receivedTotal = formik.values.amountRows.reduce((sumAmount, row) => {
     const curValue = parseFloat(row.amount.toString().replace(/,/g, '')) || 0
@@ -329,7 +329,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
     return sumAmount + curValue
   }, 0)
 
-  const Balance = total - receivedTotal
+  const Balance = amount - receivedTotal
 
   const onProductSubmit = productData => {
     const selectedRowData = productData?.find(row => row.checked)
@@ -571,6 +571,11 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       } catch (error) {}
     })()
   }, [])
+
+  useEffect(() => {
+    formik.setFieldValue('amount', amount)
+    formik.setFieldValue('vatAmount', vatAmount)
+  }, [amount, vatAmount])
 
   return (
     <FormShell
