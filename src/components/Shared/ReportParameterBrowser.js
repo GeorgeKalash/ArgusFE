@@ -15,6 +15,7 @@ import CustomTextField from '../Inputs/CustomTextField'
 const formatDateTo = value => {
   const date = new Date(value)
   const formattedDate = date.toISOString().slice(0, 10).replace(/-/g, '')
+
   return formattedDate
 }
 
@@ -24,8 +25,10 @@ const formatDateFrom = value => {
   const day = value.slice(6, 8)
   const parsedDate = new Date(year, month, day)
   const timestamp = parsedDate.getTime()
+
   return timestamp
 }
+
 const GetLookup = ({ field, formik, apiDetails }) => {
   return (
     <Grid item xs={12} key={field.id}>
@@ -61,6 +64,7 @@ const GetLookup = ({ field, formik, apiDetails }) => {
     </Grid>
   )
 }
+
 const GetComboBox = ({ field, formik, apiDetails }) => {
   return (
     <Grid item xs={12} key={field.id}>
@@ -182,16 +186,16 @@ const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, disab
     validateOnChange: true,
     validationSchema: yup.object({}),
     onSubmit: values => {
-      console.log('values', values)
       const processedArray = values?.parameters
         ?.filter((item, index) => item?.fieldId)
-        .reduce((acc, item) => {
+        ?.reduce((acc, item) => {
           if (item?.fieldId) {
             acc[item.fieldId] = {
               ...item,
               value: item.fieldKey === 'date' ? formatDateTo(item.value) : item.value
             }
           }
+
           return acc
         }, [])
 
@@ -224,6 +228,7 @@ const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, disab
         ...item,
         value: item.fieldKey === 'date' ? formatDateFrom(item.value) : item.value
       }
+
       return acc
     }, [])
     formik.setFieldValue('parameters', mappedData)
@@ -246,7 +251,6 @@ const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, disab
           } else if (item.controlType === 1) {
             return <GetTextField key={item.fieldId} formik={formik} field={item} />
           }
-          return null
         })}
       </Grid>
     </FormShell>

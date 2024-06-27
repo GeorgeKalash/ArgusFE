@@ -111,8 +111,6 @@ const ReportViewer = ({ resourceId }) => {
   }, [reportStore])
 
   const formatDataForApi = paramsArray => {
-    console.log('lastData', paramsArray)
-    console.log(paramsArray)
     const formattedData = paramsArray
       .map(({ fieldId, value }) => `${fieldId}|${value}`)
       .reduce((acc, curr, index) => acc + (index === 1 ? ` ${curr}` : `^${curr}`), '')
