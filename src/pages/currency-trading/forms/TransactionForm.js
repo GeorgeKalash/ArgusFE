@@ -355,21 +355,18 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
           })
           const totalBaseAmount = parseInt(get3CIV.record.baseAmount) + parseInt(total)
 
-          /* const response = await postRequest({
+          const response = await postRequest({
             extension: CTTRXrepository.CurrencyTrading.set2,
             record: JSON.stringify(payload)
           })
-  */
+
           const actionMessage = !recordId ? platformLabels.Edited : platformLabels.Added
           toast.success(actionMessage)
-          formik.setFieldValue('recordId', 248)
+          formik.setFieldValue('recordId', response.recordId)
+          await getData(response.recordId)
 
-          // await getData(248)
-
-          // if (totalBaseAmount > baseAmount.value && !recordId)
-          viewOTP(248)
-
-          // invalidate()
+          if (totalBaseAmount > baseAmount.value && !recordId) viewOTP(response.recordId)
+          invalidate()
         }
 
         return
