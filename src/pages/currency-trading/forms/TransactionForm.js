@@ -109,6 +109,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
   const [rateType, setRateType] = useState(null)
   const [idNumberOne, setIdNumber] = useState(null)
   const [search, setSearch] = useState(null)
+  const [currentRecId, setCurrenctRecId] = useState(recordId)
   const [fId, setFId] = useState(SystemFunction.CurrencyPurchase)
   const { platformLabels } = useContext(ControlContext)
 
@@ -362,6 +363,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
 
           const actionMessage = !recordId ? platformLabels.Edited : platformLabels.Added
           toast.success(actionMessage)
+          setCurrenctRecId(response.recordId)
           formik.setFieldValue('recordId', response.recordId)
           await getData(response.recordId)
 
@@ -376,26 +378,27 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
 
   const onClose = async recId => {
     try {
+      console.log('rec check ', recId)
       let data = {}
-      if (recId) {
+      if (!formik.values.recordId) {
         try {
           const res = await getRequest({
             extension: CTTRXrepository.CurrencyTrading.get2,
-            parameters: `_recordId=${id}`
+            parameters: `_recordId=${recId}`
           })
           data = {
-            recordId: res.headerView?.recordId,
-            reference: res.headerView?.reference,
-            status: res.headerView?.status,
-            functionId: res.headerView?.functionId,
-            plantId: res.headerView?.plantId,
-            clientId: res.headerView?.clientId,
-            cashAccountId: res.headerView.cashAccountId,
-            poeId: res.headerView?.poeId,
-            wip: res.headerView?.wip,
-            otpVerified: res.headerView?.otpVerified,
+            recordId: res.record.headerView?.recordId,
+            reference: res.record.headerView?.reference,
+            status: res.record.headerView?.status,
+            functionId: res.record.headerView?.functionId,
+            plantId: res.record.headerView?.plantId,
+            clientId: res.record.headerView?.clientId,
+            cashAccountId: res.record.headerView.cashAccountId,
+            poeId: res.record.headerView?.poeId,
+            wip: res.record.headerView?.wip,
+            otpVerified: res.record.headerView?.otpVerified,
             amount: String(total || '').replaceAll(',', ''),
-            notes: res.headerView?.notes
+            notes: res.record.headerView?.notes
           }
         } catch (error) {}
       } else {
@@ -421,13 +424,12 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
         record: JSON.stringify(data)
       })
       if (res.recordId) {
-        toast.success('Record Closed Successfully')
+        if (recordId) toast.success(platformLabels.Closed)
         invalidate()
         await getData(res.recordId)
       }
     } catch (e) {}
   }
-
   const editMode = !!formik.values.recordId
   const isClosed = formik.values.wip === 2
   const isPosted = formik.values.status === 4
@@ -477,7 +479,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     try {
       const res = await getRequest({
         extension: CTTRXrepository.CurrencyTrading.get2,
-        parameters: `_recordId=${id}`
+        parameters: `_recordId=${id ?? currentRecId}`
       })
       const record = res.record
       formik.setValues({
@@ -659,23 +661,45 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
   }
 
   const onPost = async () => {
+    console.log('rec post check ', !formik.values.recordId)
     try {
-      const values = formik.values
-
-      const data = {
-        recordId: values?.recordId || null,
-        date: formatDateToApiFunction(values.date),
-        reference: values.reference,
-        status: values.status,
-        functionId: values.functionId,
-        plantId: plantId ? plantId : values.plantId,
-        clientId: values.clientId,
-        cashAccountId: values.cashAccountId,
-        poeId: values.purpose_of_exchange,
-        wip: values.wip,
-        otpVerified: values.otp,
-        amount: String(total || '').replaceAll(',', ''),
-        notes: values.remarks
+      let data = {}
+      if (!formik.values.recordId) {
+        const res = await getRequest({
+          extension: CTTRXrepository.CurrencyTrading.get2,
+          parameters: `_recordId=${currentRecId}`
+        })
+        data = {
+          recordId: res.record.headerView?.recordId,
+          reference: res.record.headerView?.reference,
+          status: res.record.headerView?.status,
+          functionId: res.record.headerView?.functionId,
+          plantId: res.record.headerView?.plantId,
+          clientId: res.record.headerView?.clientId,
+          cashAccountId: res.record.headerView.cashAccountId,
+          poeId: res.record.headerView?.poeId,
+          wip: res.record.headerView?.wip,
+          otpVerified: res.record.headerView?.otpVerified,
+          amount: String(total || '').replaceAll(',', ''),
+          notes: res.record.headerView?.notes
+        }
+      } else {
+        const values = formik.values
+        data = {
+          recordId: values?.recordId || null,
+          date: formatDateToApiFunction(values.date),
+          reference: values.reference,
+          status: values.status,
+          functionId: values.functionId,
+          plantId: plantId ? plantId : values.plantId,
+          clientId: values.clientId,
+          cashAccountId: values.cashAccountId,
+          poeId: values.purpose_of_exchange,
+          wip: values.wip,
+          otpVerified: values.otp,
+          amount: String(total || '').replaceAll(',', ''),
+          notes: values.remarks
+        }
       }
 
       const res = await postRequest({
@@ -684,7 +708,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       })
 
       if (res) {
-        toast.success('Record Posted Successfully')
+        toast.success(platformLabels.Posted)
         await getData(res.recordId)
         invalidate()
       }
