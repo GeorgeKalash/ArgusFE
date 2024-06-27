@@ -211,7 +211,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
           const res2 = await getOutwards(amountRes.recordId)
           formik.setFieldValue('reference', res2.record.headerView.reference)
           invalidate()
-          !recordId && viewOTP(amountRes.recordId, res2)
+          !recordId && viewOTP(amountRes.recordId)
         }
       } catch (error) {}
     }
@@ -221,13 +221,12 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
   const isClosed = formik.values.wip === 2
   const isPosted = formik.values.status === 4
 
-  function viewOTP(recordId, data) {
+  function viewOTP(recId) {
     stack({
       Component: OTPPhoneVerification,
       props: {
         formValidation: formik,
-        details: data.record.headerView,
-        recordId,
+        recordId: recId,
         functionId: SystemFunction.Outwards,
         onSuccess: onClose
       },
@@ -245,13 +244,12 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
     } catch (error) {}
   }
 
-  const onClose = async data => {
-    console.log('data check ', data)
+  const onClose = async recId => {
     try {
       const res = await postRequest({
         extension: RemittanceOutwardsRepository.OutwardsTransfer.close,
         record: JSON.stringify({
-          recordId: data.recordId ?? formik.values.recordId
+          recordId: recId ?? formik.values.recordId
         })
       })
 
