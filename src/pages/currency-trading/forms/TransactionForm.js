@@ -374,27 +374,49 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     }
   })
 
-  const onClose = async () => {
+  const onClose = async recId => {
     try {
-      const values = formik.values
-
-      const data = {
-        recordId: values?.recordId || null,
-        reference: values.reference,
-        status: values.status,
-        functionId: values.functionId,
-        plantId: plantId ? plantId : values.plantId,
-        clientId: values.clientId,
-        cashAccountId: values?.cashAccountId,
-        poeId: values.purpose_of_exchange,
-        wip: values.wip,
-        otpVerified: values.otp,
-        amount: String(total || '').replaceAll(',', ''),
-        notes: values.remarks
+      let data = {}
+      if (recId) {
+        try {
+          const res = await getRequest({
+            extension: CTTRXrepository.CurrencyTrading.get2,
+            parameters: `_recordId=${id}`
+          })
+          data = {
+            recordId: res.headerView?.recordId,
+            reference: res.headerView?.reference,
+            status: res.headerView?.status,
+            functionId: res.headerView?.functionId,
+            plantId: res.headerView?.plantId,
+            clientId: res.headerView?.clientId,
+            cashAccountId: res.headerView.cashAccountId,
+            poeId: res.headerView?.poeId,
+            wip: res.headerView?.wip,
+            otpVerified: res.headerView?.otpVerified,
+            amount: String(total || '').replaceAll(',', ''),
+            notes: res.headerView?.notes
+          }
+        } catch (error) {}
+      } else {
+        const values = formik.values
+        data = {
+          recordId: values?.recordId || null,
+          reference: values.reference,
+          status: values.status,
+          functionId: values.functionId,
+          plantId: plantId ? plantId : values.plantId,
+          clientId: values.clientId,
+          cashAccountId: values?.cashAccountId,
+          poeId: values.purpose_of_exchange,
+          wip: values.wip,
+          otpVerified: values.otp,
+          amount: String(total || '').replaceAll(',', ''),
+          notes: values.remarks
+        }
       }
-      console.log('data check', data)
 
-      /*  const res = await postRequest({
+      const res = await postRequest({
         extension: CTTRXrepository.CurrencyTrading.close,
         record: JSON.stringify(data)
       })
@@ -402,7 +424,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
         toast.success('Record Closed Successfully')
         invalidate()
         await getData(res.recordId)
-      }*/
+      }
     } catch (e) {}
   }
 
@@ -572,12 +594,12 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
 
   const balance = total - receivedTotal
 
-  function viewOTP(recordId) {
+  function viewOTP(recId) {
     stack({
       Component: OTPPhoneVerification,
       props: {
         formValidation: formik,
-        recordId: recordId,
+        recordId: recId,
         functionId: formik.values.functionId,
         onSuccess: onClose
       },
