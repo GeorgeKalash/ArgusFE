@@ -114,33 +114,29 @@ const GetDate = ({ field, formik }) => {
             display: formatDateDefault(newValue)
           })
         }}
-        onClear={() => formik.setFieldValue(`parameters[${field.id}]`, '')}
+        onClear={() => formik.setFieldValue(`parameters[${field.id}]`, {})}
       />
     </Grid>
   )
 }
 
 const GetTextField = ({ field, formik }) => {
+  console.log('formik', formik)
   return (
-    <Grid item xs={12}>
+    <Grid item xs={12} key={field.id}>
       <CustomTextField
         name={field.key}
         label={field.caption}
-        value={formik.values?.parameters?.[field.id]?.value}
+        value={formik.values?.parameters?.[field.id]?.value || null}
         required={field.mandatory}
         onChange={e => {
-          formik.setFieldValue(
-            `parameters[${field.id}]`,
-            e.target.value
-              ? {
-                  fieldId: field.id,
-                  fieldKey: field.key,
-                  value: e.target.value,
-                  caption: field.caption,
-                  display: e.target.value
-                }
-              : ''
-          )
+          formik.setFieldValue(`parameters[${field.id}]`, {
+            fieldId: field.id,
+            fieldKey: field.key,
+            value: e.target.value,
+            caption: field.caption,
+            display: e.target.value
+          })
         }}
         onClear={() => formik.setFieldValue(`parameters[${field.id}]`, '')}
       />
@@ -159,9 +155,11 @@ const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, disab
     getRequest({
       extension: SystemRepository.ParameterDefinition,
       parameters: parameters
-    }).then(res => {
-      setParameters(res.list)
     })
+      .then(res => {
+        setParameters(res.list)
+      })
+      .catch(e => {})
   }
 
   const fetchData = async field => {
@@ -249,7 +247,7 @@ const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, disab
           } else if (item.controlType === 4) {
             return <GetDate key={item.fieldId} formik={formik} field={item} />
           } else if (item.controlType === 1) {
-            return <GetTextField key={item.fieldId} formik={formik} field={item} />
+            return <GetTextField key={item.fieldId} formik={formik} field={item} apiDetails={item.apiDetails} />
           }
         })}
       </Grid>
