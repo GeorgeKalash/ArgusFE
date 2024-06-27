@@ -147,5 +147,7 @@ export const ResourceIds = {
   IncreaseDecreaseAdj: 33301,
   CashTransactions: 33312,
   ReceiptVoucher: 31304,
-  InwardTransfer: 36309
+  InwardTransfer: 36309,
+  DimensionsValues: 31111,
+  RebuildAccountBalances: 31501
 }
