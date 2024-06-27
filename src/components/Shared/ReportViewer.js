@@ -69,7 +69,7 @@ const ReportViewer = ({ resourceId }) => {
           }))
         ])
       })
-      .catch()
+      .catch(error => {})
   }
 
   const generateReport = ({ params = '' }) => {
