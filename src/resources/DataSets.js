@@ -163,5 +163,6 @@ export const DataSets = {
   TARGET_TYPE: 160,
   BANK_ACCOUNT_TYPE: 161,
   transferType: 3610,
-  receiverPayoutType: 3611
+  receiverPayoutType: 3611,
+  Category: 3612
 }

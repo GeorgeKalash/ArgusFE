@@ -121,14 +121,13 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
       date: yup.date().required(),
       corId: yup.string().required(),
       currencyId: yup.string().required(),
-      notes: yup.string().required(),
       amount: yup.number().required(),
       transferType: yup.string().required(),
       faxNo: transferType == '1' ? yup.string().required() : yup.string().notRequired(),
       sender_firstName: yup.string().required(),
       sender_lastName: yup.string().required(),
       sender_nationalityId: yup.string().required(),
-      sender_idExpiryDate: yup.date().required(),
+      sender_countryId: yup.string().required(),
       receiver_type: yup.string().required(),
       receiver_firstName: yup.string().required(),
       receiver_lastName: yup.string().required(),
@@ -263,16 +262,20 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                     />
                   </Grid>
                   <Grid item xs={4}>
-                    <CustomNumberField
+                    <ResourceComboBox
+                      values={formik.values}
+                      datasetId={DataSets.DOCUMENT_STATUS}
                       name='status'
                       label={labels.status}
-                      value={formik.values.status}
+                      valueField='key'
+                      displayField='value'
                       readOnly={true}
+                      required
                       maxAccess={maxAccess}
-                      onChange={e => formik.setFieldValue('status', e.target.value)}
-                      onClear={() => formik.setFieldValue('status', '')}
+                      onChange={(event, newValue) => {
+                        formik.setFieldValue('status', newValue?.key)
+                      }}
                       error={formik.touched.status && Boolean(formik.errors.status)}
-                      maxLength={5}
                     />
                   </Grid>
                 </Grid>
@@ -332,7 +335,6 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       value={formik.values.notes}
                       maxLength='200'
                       readOnly={editMode}
-                      required
                       maxAccess={maxAccess}
                       onChange={formik.handleChange}
                       onClear={() => formik.setFieldValue('notes', '')}
@@ -512,6 +514,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       error={formik.touched.sender_countryId && Boolean(formik.errors.sender_countryId)}
                       maxAccess={maxAccess}
                       readOnly={editMode}
+                      required
                     />
                   </Grid>
                   <Grid item xs={4}>
@@ -577,7 +580,6 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                   <Grid item xs={4}>
                     <CustomDatePicker
                       name='sender_idExpiryDate'
-                      required
                       label={labels.sender_idExpiryDate}
                       value={formik?.values?.sender_idExpiryDate}
                       onChange={formik.setFieldValue}
@@ -599,7 +601,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                   <Grid item xs={3}>
                     <ResourceComboBox
                       values={formik.values}
-                      datasetId={DataSets.transferType}
+                      datasetId={DataSets.Category}
                       name='receiver_type'
                       label={labels.receiver_type}
                       valueField='key'
