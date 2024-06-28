@@ -84,10 +84,12 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
       parameters: '_filter='
     })
 
-    const posRequestPromise = getRequest({
-      extension: POSRepository.PointOfSale.qry,
-      parameters: '_filter='
-    })
+    const posRequestPromise =
+      classId == ResourceIds.PointOfSale &&
+      getRequest({
+        extension: POSRepository.PointOfSale.qry,
+        parameters: '_filter='
+      })
 
     const rowAccessUserPromise = getRequest({
       extension: AccessControlRepository.RowAccessUserView.qry,
