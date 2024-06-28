@@ -249,7 +249,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       const res = await postRequest({
         extension: RemittanceOutwardsRepository.OutwardsTransfer.close,
         record: JSON.stringify({
-          recordId: recId ?? formik.values.recordId
+          recordId: formik.values.recordId ?? recId
         })
       })
 
@@ -288,6 +288,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
         const res2 = await getOutwards(res.recordId)
 
         // await fillFormData(res2)
+
         formik.setFieldValue('wip', res2.record.headerView.wip)
         formik.setFieldValue('status', res2.record.headerView.status)
       }

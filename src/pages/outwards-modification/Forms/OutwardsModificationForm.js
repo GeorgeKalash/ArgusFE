@@ -28,7 +28,6 @@ export default function OutwardsModificationForm({ access, labels, recordId, inv
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [displayCash, setDisplayCash] = useState(false)
   const [displayBank, setDisplayBank] = useState(false)
-  const [isVerified, setIsVerified] = useState(false)
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
 
@@ -95,6 +94,15 @@ export default function OutwardsModificationForm({ access, labels, recordId, inv
   const isClosed = formik.values.wip === 2
   const isPosted = formik.values.status === 4
 
+  async function getOutwardsModification(recordId) {
+    try {
+      return await getRequest({
+        extension: RTOWMRepository.OutwardsModification.get,
+        parameters: `_recordId=${recordId}`
+      })
+    } catch (error) {}
+  }
+
   const onClose = async () => {
     const res = await postRequest({
       extension: RTOWMRepository.OutwardsModification.close,
@@ -102,15 +110,10 @@ export default function OutwardsModificationForm({ access, labels, recordId, inv
     })
 
     if (res.recordId) {
-      !isVerified && toast.success(platformLabels.Closed)
+      if (recordId) toast.success(platformLabels.Closed)
       invalidate()
-
-      const res2 = await getRequest({
-        extension: RTOWMRepository.OutwardsModification.get,
-        parameters: `_recordId=${res.recordId}`
-      })
-      formik.setFieldValue('wip', res2.record.wip)
-      formik.setFieldValue('status', res2.record.status)
+      const res2 = await getOutwardsModification(res.recordId)
+      await fillOutwardData(res2.record)
     }
   }
 
@@ -123,13 +126,8 @@ export default function OutwardsModificationForm({ access, labels, recordId, inv
     if (res.recordId) {
       toast.success(platformLabels.Reopened)
       invalidate()
-
-      const res2 = await getRequest({
-        extension: RTOWMRepository.OutwardsModification.get,
-        parameters: `_recordId=${res.recordId}`
-      })
-      formik.setFieldValue('wip', res2.record.wip)
-      formik.setFieldValue('status', res2.record.status)
+      const res2 = await getOutwardsModification(res.recordId)
+      await fillOutwardData(res2.record)
     }
   }
 
@@ -144,12 +142,8 @@ export default function OutwardsModificationForm({ access, labels, recordId, inv
     if (res?.recordId) {
       toast.success(platformLabels.Posted)
       invalidate()
-
-      const res2 = await getRequest({
-        extension: RTOWMRepository.OutwardsModification.get,
-        parameters: `_recordId=${res.recordId}`
-      })
-      formik.setFieldValue('status', res2.record.status)
+      const res2 = await getOutwardsModification(res.recordId)
+      await fillOutwardData(res2.record)
     }
   }
 
@@ -279,6 +273,20 @@ export default function OutwardsModificationForm({ access, labels, recordId, inv
     }
   ]
 
+  function viewOTP(recId) {
+    stack({
+      Component: OTPPhoneVerification,
+      props: {
+        formValidation: formik,
+        recordId: recId,
+        functionId: SystemFunction.OutwardsModification,
+        onSuccess: onClose
+      },
+      width: 400,
+      height: 400,
+      title: labels.OTPVerification
+    })
+  }
   useEffect(() => {
     ;(async function () {
       try {
@@ -306,43 +314,20 @@ export default function OutwardsModificationForm({ access, labels, recordId, inv
             formik.setFieldValue('recordId', res.recordId)
             invalidate()
 
-            const res2 = await getRequest({
-              extension: RTOWMRepository.OutwardsModification.get,
-              parameters: `_recordId=${res.recordId}`
-            })
-            formik.setFieldValue('reference', res2.record.reference)
-            setStore(prevStore => ({
-              ...prevStore,
-              fullModifiedOutwardBody: res2.record
-            }))
-
-            stack({
-              Component: OTPPhoneVerification,
-              props: {
-                formValidation: formik,
-                recordId: res.recordId,
-                functionId: SystemFunction.OutwardsModification,
-                setIsVerified
-              },
-              width: 400,
-              height: 400,
-              title: labels.OTPVerification
-            })
+            const res2 = await getOutwardsModification(res.recordId)
+            await fillOutwardData(res2.record)
+            !recordId && viewOTP(res2.recordId)
           }
         }
 
         if (recordId && !store.beneficiaryList) {
-          const res = await getRequest({
-            extension: RTOWMRepository.OutwardsModification.get,
-            parameters: `_recordId=${recordId}`
-          })
+          const res = await getOutwardsModification(res.recordId)
           res.record.date = formatDateFromApi(res.record.date)
-          fillOutwardData(res.record)
+          await fillOutwardData(res.record)
         }
-        isVerified && onClose()
       } catch (error) {}
     })()
-  }, [store.beneficiaryList, formik.values.recordId, isVerified])
+  }, [store.beneficiaryList, formik.values.recordId])
 
   return (
     <FormShell
