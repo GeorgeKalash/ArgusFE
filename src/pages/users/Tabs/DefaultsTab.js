@@ -12,10 +12,12 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useContext, useEffect } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const DefaultsTab = ({ labels, maxAccess, storeRecordId }) => {
   const editMode = !!storeRecordId
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const { formik } = useForm({
     enableReinitialize: false,
@@ -43,7 +45,7 @@ const DefaultsTab = ({ labels, maxAccess, storeRecordId }) => {
         })
       }
       fields.forEach(postField)
-      toast.success('Record Updated Successfully')
+      toast.success(platformLabels.Updated)
     }
   })
 

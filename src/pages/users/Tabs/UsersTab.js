@@ -17,12 +17,14 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { AccountRepository } from 'src/repositories/AccountRepository'
 import toast from 'react-hot-toast'
 import { useInvalidate } from 'src/hooks/resource'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
   const [emailPresent, setEmailPresent] = useState(false)
   const [passwordState, setPasswordState] = useState(false)
   const { getRequest, postRequest, getIdentityRequest } = useContext(RequestsContext)
   const editMode = !!storeRecordId
+  const { platformLabels } = useContext(ControlContext)
 
   const { formik } = useForm({
     maxAccess,
@@ -66,11 +68,11 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
         record: JSON.stringify(obj)
       })
       if (!obj.recordId) {
-        toast.success('Record Added Successfully')
+        toast.success(platformLabels.Added)
         formik.setFieldValue('recordId', res?.recordId)
         setRecordId(res?.recordId)
       } else {
-        toast.success('Record Updated Successfully')
+        toast.success(platformLabels.Updated)
       }
       invalidate()
     }

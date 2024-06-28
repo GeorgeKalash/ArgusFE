@@ -39,6 +39,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { useForm } from 'src/hooks/form'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function OutwardsTab({ labels, access, recordId, cashAccountId, plantId, userId, window }) {
   const [productsStore, setProductsStore] = useState([])
@@ -50,6 +51,7 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: RemittanceOutwardsRepository.OutwardsTransfer.snapshot
@@ -220,7 +222,7 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
       })
 
       if (amountRes.recordId) {
-        toast.success('Record Updated Successfully')
+        toast.success(platformLabels.Updated)
         formik.setFieldValue('recordId', amountRes.recordId)
         setEditMode(true)
 
@@ -252,7 +254,7 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
     })
 
     if (res.recordId) {
-      toast.success('Record Closed Successfully')
+      toast.success(platformLabels.Closed)
       invalidate()
       setIsClosed(true)
     }
@@ -276,7 +278,7 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
     })
 
     if (res.recordId) {
-      toast.success('Record Closed Successfully')
+      toast.success(platformLabels.Closed)
       invalidate()
       setIsClosed(false)
     }
@@ -300,7 +302,7 @@ export default function OutwardsTab({ labels, access, recordId, cashAccountId, p
     })
 
     if (res?.recordId) {
-      toast.success('Record Posted Successfully')
+      toast.success(platformLabels.Posted)
       setConfirmationWindowOpen(true)
       formik.setFieldValue('ttNo', res.recordId)
       invalidate()
