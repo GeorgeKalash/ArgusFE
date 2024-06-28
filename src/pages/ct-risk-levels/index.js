@@ -11,9 +11,11 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import CtRiskLevelsForm from './forms/CtRiskLevelsForm'
 import { useWindow } from 'src/windows'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const CtRiskLevel = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const { stack } = useWindow()
 
@@ -85,7 +87,7 @@ const CtRiskLevel = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
   }
 
   return (

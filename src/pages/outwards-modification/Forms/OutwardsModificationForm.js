@@ -28,7 +28,6 @@ export default function OutwardsModificationForm({ access, labels, recordId, inv
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [displayCash, setDisplayCash] = useState(false)
   const [displayBank, setDisplayBank] = useState(false)
-  const [isVerified, setIsVerified] = useState(false)
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
 
@@ -102,7 +101,7 @@ export default function OutwardsModificationForm({ access, labels, recordId, inv
     })
 
     if (res.recordId) {
-      !isVerified && toast.success(platformLabels.Closed)
+      toast.success(platformLabels.Closed)
       invalidate()
 
       const res2 = await getRequest({

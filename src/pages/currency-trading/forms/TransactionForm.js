@@ -560,7 +560,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
         record: JSON.stringify(data)
       })
       if (res.recordId) {
-        toast.success('Record Reopened Successfully')
+        toast.success(platformLabels.Reopened)
         invalidate()
         await getData(res.recordId)
       }
