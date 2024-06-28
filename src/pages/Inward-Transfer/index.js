@@ -6,7 +6,6 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
-import InwardTransferForm from './forms/InwardTransferForm'
 import toast from 'react-hot-toast'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
@@ -16,6 +15,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { useError } from 'src/error'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
+import InwardTransferForm from './forms/InwardTransferForm'
 
 const InwardTransfer = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)

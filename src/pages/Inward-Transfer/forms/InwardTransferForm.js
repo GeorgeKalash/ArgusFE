@@ -26,8 +26,8 @@ import { DataSets } from 'src/resources/DataSets'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import * as yup from 'yup'
-import CloseForm from './CloseForm'
 import { ControlContext } from 'src/providers/ControlContext'
+import CloseForm from './CloseForm'
 
 export default function InwardTransferForm({ labels, recordId, access, plantId, window, userId, dtId }) {
   const [editMode, setEditMode] = useState(!!recordId)
