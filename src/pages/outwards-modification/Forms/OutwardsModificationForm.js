@@ -103,16 +103,25 @@ export default function OutwardsModificationForm({ access, labels, recordId, inv
     } catch (error) {}
   }
 
-  const onClose = async () => {
+  const onClose = async recId => {
+    let data = {}
+    if (!formik.values.recordId) {
+      const resOWM = await getOutwardsModification(recId)
+      data = resOWM.record
+    } else {
+      data = store.fullModifiedOutwardBody
+    }
+
     const res = await postRequest({
       extension: RTOWMRepository.OutwardsModification.close,
-      record: JSON.stringify(store.fullModifiedOutwardBody)
+      record: JSON.stringify(data)
     })
 
     if (res.recordId) {
       if (recordId) toast.success(platformLabels.Closed)
       invalidate()
       const res2 = await getOutwardsModification(res.recordId)
+      res2.record.date = formatDateFromApi(res2.record.date)
       await fillOutwardData(res2.record)
     }
   }
@@ -127,6 +136,7 @@ export default function OutwardsModificationForm({ access, labels, recordId, inv
       toast.success(platformLabels.Reopened)
       invalidate()
       const res2 = await getOutwardsModification(res.recordId)
+      res2.record.date = formatDateFromApi(res2.record.date)
       await fillOutwardData(res2.record)
     }
   }
@@ -143,6 +153,7 @@ export default function OutwardsModificationForm({ access, labels, recordId, inv
       toast.success(platformLabels.Posted)
       invalidate()
       const res2 = await getOutwardsModification(res.recordId)
+      res2.record.date = formatDateFromApi(res2.record.date)
       await fillOutwardData(res2.record)
     }
   }
@@ -316,12 +327,12 @@ export default function OutwardsModificationForm({ access, labels, recordId, inv
 
             const res2 = await getOutwardsModification(res.recordId)
             await fillOutwardData(res2.record)
-            !recordId && viewOTP(res2.recordId)
+            !recordId && viewOTP(res.recordId)
           }
         }
 
         if (recordId && !store.beneficiaryList) {
-          const res = await getOutwardsModification(res.recordId)
+          const res = await getOutwardsModification(recordId)
           res.record.date = formatDateFromApi(res.record.date)
           await fillOutwardData(res.record)
         }

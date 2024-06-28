@@ -191,12 +191,13 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
             outwardId: formik.values.recordId || 0
           }
         })
+        console.log('formik check ', formik.values.instantCashDetails)
 
         const amountGridData = {
           header: copy,
           cash: updatedRows,
           bankType: formik.values.bankType,
-          ICRequest: formik.values.instantCashDetails ?? null
+          ICRequest: formik.values.instantCashDetails?.deliveryModeId ? formik.values.instantCashDetails : null
         }
 
         const amountRes = await postRequest({
@@ -216,7 +217,6 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       } catch (error) {}
     }
   })
-
   const editMode = !!formik.values.recordId
   const isClosed = formik.values.wip === 2
   const isPosted = formik.values.status === 4
@@ -258,10 +258,8 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
         invalidate()
         const res2 = await getOutwards(res.recordId)
 
-        //await fillFormData(res2)
-
-        formik.setFieldValue('wip', res2.record.headerView.wip)
-        formik.setFieldValue('status', res2.record.headerView.status)
+        await fillFormData(res2.record)
+        await getDefaultVAT()
       }
     } catch (error) {}
   }
@@ -287,10 +285,8 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
 
         const res2 = await getOutwards(res.recordId)
 
-        // await fillFormData(res2)
-
-        formik.setFieldValue('wip', res2.record.headerView.wip)
-        formik.setFieldValue('status', res2.record.headerView.status)
+        await fillFormData(res2.record)
+        await getDefaultVAT()
       }
     } catch (error) {}
   }
@@ -303,16 +299,14 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       copy.defaultValueDate = formatDateToApi(copy.defaultValueDate)
       copy.expiryDate = formatDateToApi(copy.expiryDate)
 
-      const res = await postRequest({
+      await postRequest({
         extension: RemittanceOutwardsRepository.OutwardsTransfer.post,
         record: JSON.stringify(copy)
       })
 
-      if (res?.recordId) {
-        toast.success(platformLabels.Posted)
-        invalidate()
-        window.close()
-      }
+      toast.success(platformLabels.Posted)
+      invalidate()
+      window.close()
     } catch (error) {}
   }
 
@@ -353,9 +347,11 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       bankFees: item.bankFees ? parseFloat(item.bankFees).toFixed(2) : null,
       amount: parseFloat(item.amount).toFixed(2)
     }))
-
     formik.setValues({
       ...data.headerView,
+      date: formatDateFromApi(data.headerView.date),
+      defaultValueDate: formatDateFromApi(data.headerView.defaultValueDate),
+      valueDate: formatDateFromApi(data.headerView.valueDate),
       ttNo: data.ttNo,
       bankType: data.headerView.interfaceId,
       amountRows: modifiedList
@@ -558,15 +554,12 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       try {
         if (recordId) {
           const res = await getOutwards(recordId)
-          res.record.headerView.date = formatDateFromApi(res.record.headerView.date)
-          res.record.headerView.defaultValueDate = formatDateFromApi(res.record.headerView.defaultValueDate)
-          res.record.headerView.valueDate = formatDateFromApi(res.record.headerView.valueDate)
           chooseClient(res.record.headerView.clientId)
           fillFormData(res.record)
         } else {
           getDefaultDT()
         }
-        getDefaultVAT()
+        await getDefaultVAT()
       } catch (error) {}
     })()
   }, [])
