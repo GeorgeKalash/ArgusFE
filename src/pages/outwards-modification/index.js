@@ -28,8 +28,7 @@ const OutwardsModification = () => {
 
     return { ...response, _startAt: _startAt }
   }
-  async function fetchWithSearch({ options = {}, filters }) {
-    const { _startAt = 0, _pageSize = 50 } = options
+  async function fetchWithSearch({ filters }) {
     if (!filters.qry) {
       return { list: [] }
     } else {
