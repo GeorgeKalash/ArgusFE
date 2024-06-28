@@ -7,6 +7,7 @@ import { useState } from 'react'
 import { useContext } from 'react'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import toast from 'react-hot-toast'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const AgentBranchWindow = ({ labels, maxAccess, recordId, height }) => {
   const [store, setStore] = useState({
@@ -17,20 +18,30 @@ const AgentBranchWindow = ({ labels, maxAccess, recordId, height }) => {
   })
 
   const editMode = !!store.recordId
+  const { platformLabels } = useContext(ControlContext)
 
   const [activeTab, setActiveTab] = useState(0)
   const tabs = [{ label: labels.agentBranch }, { label: labels.address, disabled: !editMode }]
   const { postRequest } = useContext(RequestsContext)
 
-  async function onSubmit(address) {
+  function onSubmit(address) {
+    setStore(prevStore => ({
+      ...prevStore,
+      address: { ...prevStore.address, recordId: address?.addressId }
+    }))
     if (!store.agentBranch.addressId) {
       store.agentBranch.addressId = address.addressId
       const res = { ...store.agentBranch, addressId: address.addressId }
       const data = { ...res, recordId: store?.recordId, agentId: store.agentBranch?.agentId }
-      await postRequest({
+
+      postRequest({
         extension: RemittanceSettingsRepository.CorrespondentAgentBranches.set,
         record: JSON.stringify(data)
       })
+        .then(() => {
+          toast.success(platformLabels.Edited)
+        })
+        .catch(error => {})
     }
   }
 

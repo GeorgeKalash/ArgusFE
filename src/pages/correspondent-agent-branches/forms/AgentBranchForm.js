@@ -12,10 +12,12 @@ import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function AgentBranchForm({ _labels, maxAccess, store, setStore, editMode }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { recordId } = store
+  const { recordId, address } = store
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: RemittanceSettingsRepository.CorrespondentAgentBranches.page
@@ -37,24 +39,29 @@ export default function AgentBranchForm({ _labels, maxAccess, store, setStore, e
       swiftCode: yup.string().required(' ')
     }),
     onSubmit: async obj => {
+      const addressId = address?.recordId || null
+      if (addressId) {
+        obj = { ...obj, addressId }
+      }
+
       const response = await postRequest({
         extension: RemittanceSettingsRepository.CorrespondentAgentBranches.set,
         record: JSON.stringify(obj)
       })
 
-        if (!editMode) {
-          toast.success('Record Added Successfully')
-        } else toast.success('Record Edited Successfully')
+      if (!editMode) {
+        toast.success(platformLabels.Added)
+      } else toast.success(platformLabels.Edited)
 
-        setStore(prevStore => ({
-          ...prevStore,
-          agentBranch: obj,
-          recordId: response.recordId
-        }))
+      setStore(prevStore => ({
+        ...prevStore,
+        agentBranch: obj,
+        recordId: response.recordId
+      }))
 
-        formik.setFieldValue('recordId', response.recordId)
+      formik.setFieldValue('recordId', response.recordId)
 
-        invalidate()
+      invalidate()
     }
   })
 

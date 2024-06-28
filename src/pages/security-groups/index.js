@@ -11,10 +11,12 @@ import { useWindow } from 'src/windows'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const SecurityGroup = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const { platformLabels } = useContext(ControlContext)
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -51,8 +53,8 @@ const SecurityGroup = () => {
         recordId: recordId ? recordId : null,
         maxAccess: access
       },
-      width: 600,
-      height: 600,
+      width: 900,
+      height: 700,
       title: _labels.securityGroups
     })
   }
@@ -79,12 +81,14 @@ const SecurityGroup = () => {
   }
 
   const del = async obj => {
-    await postRequest({
-      extension: AccessControlRepository.SecurityGroup.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success('Record Deleted Successfully')
+    try {
+      await postRequest({
+        extension: AccessControlRepository.SecurityGroup.del,
+        record: JSON.stringify(obj)
+      })
+      invalidate()
+      toast.success(platformLabels.Deleted)
+    } catch (error) {}
   }
 
   return (

@@ -38,7 +38,7 @@ export default function CashCountNotesForm({
         .array()
         .of(
           yup.object().shape({
-            note: yup.string().required('currency  is required')
+            note: yup.string().required(' ')
           })
         )
         .required('Operations array is required')
@@ -65,7 +65,7 @@ export default function CashCountNotesForm({
             changes: {
               counted,
               currencyNotes,
-              variation: counted - row.system,
+              variation: counted - (row.system || 0),
               flag: row.system === counted ? true : false
             }
           })
@@ -129,6 +129,7 @@ export default function CashCountNotesForm({
   const total = formik.values?.currencyNotes?.reduce((acc, { subTotal }) => {
     return acc + (subTotal || 0)
   }, 0)
+
   function sumQty({ update, newRow }) {
     const note = newRow?.note || 0
     const qty1 = newRow?.qty1 || 0
@@ -144,7 +145,7 @@ export default function CashCountNotesForm({
 
   return (
     <FormShell
-      resourceId={ResourceIds.CashAccounts}
+      resourceId={ResourceIds.CashCountTransaction}
       form={formik}
       maxAccess={maxAccess}
       isCleared={false}
@@ -164,7 +165,7 @@ export default function CashCountNotesForm({
             columns={[
               {
                 component: 'numberfield',
-                label: labels.note,
+                label: labels.currencyNote,
                 name: 'note',
                 props: {
                   readOnly: true
@@ -222,7 +223,7 @@ export default function CashCountNotesForm({
               {
                 component: 'numberfield',
                 label: labels.subTotal,
-                name: 'subTotal',
+                name: 'subtotal',
                 props: { readOnly: true }
               }
             ]}

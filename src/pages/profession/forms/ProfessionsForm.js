@@ -14,11 +14,13 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function ProfessionsForm({ labels, maxAccess, recordId, setStore }) {
   const [editMode, setEditMode] = useState(!!recordId)
 
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: RemittanceSettingsRepository.Profession.page
@@ -67,13 +69,13 @@ export default function ProfessionsForm({ labels, maxAccess, recordId, setStore 
           recordId: response.recordId,
           name: obj.name
         })
-        toast.success('Record Added Successfully')
+        toast.success(platformLabels.Added)
 
         formik.setValues({
           ...obj,
           recordId: response.recordId
         })
-      } else toast.success('Record Edited Successfully')
+      } else toast.success(platformLabels.Edited)
 
       setEditMode(true)
       invalidate()

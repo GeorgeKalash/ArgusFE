@@ -12,9 +12,11 @@ import { useContext, useEffect } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const ProductDispersalForm = ({ pId, labels, recordId, getGridData, maxAccess, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const formik = useFormik({
     initialValues: {
@@ -50,8 +52,8 @@ const ProductDispersalForm = ({ pId, labels, recordId, getGridData, maxAccess, w
     })
       .then(res => {
         if (!recordId) {
-          toast.success('Record Added Successfully')
-        } else toast.success('Record Editted Successfully')
+          toast.success(platformLabels.Added)
+        } else toast.success(platformLabels.Edited)
 
         getGridData(pId)
         window.close()

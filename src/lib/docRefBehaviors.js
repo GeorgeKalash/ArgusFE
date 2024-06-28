@@ -104,7 +104,7 @@ const documentType = async (getRequest, functionId, maxAccess, selectNraId = und
   let dcTypeRequired
   let activeStatus = true
 
-  if (docType && selectNraId === undefined) {
+  if ((docType && selectNraId === undefined) || selectNraId === 'nraId') {
     if (dtId) {
       const dcTypNumberRange = await fetchData(getRequest, dtId, 'DcTypNumberRange') //DT
       nraId = dcTypNumberRange?.nraId
@@ -118,10 +118,11 @@ const documentType = async (getRequest, functionId, maxAccess, selectNraId = und
       dcTypeRequired = documentType?.list?.filter(item => item?.activeStatus === 1).length > 0
     }
   }
-  if (selectNraId === 'naraId' || selectNraId === undefined) {
+  if (selectNraId === 'nraId' || selectNraId === undefined) {
     if (((!dtId || dtId) && !nraId) || (nraId && !activeStatus)) {
       const glbSysNumberRange = await fetchData(getRequest, functionId, 'glbSysNumberRange') //fun
       nraId = glbSysNumberRange?.nraId
+
       if (nraId && dcTypeRequired) {
         dcTypeRequired = false
       }

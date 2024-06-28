@@ -23,15 +23,18 @@ import { formatDateFromApi, formatDateToApi, getTimeInTimeZone } from 'src/lib/d
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { getStorageData } from 'src/storage/storage'
 import { useInvalidate } from 'src/hooks/resource'
-import { useError } from 'src/error'
+import WorkFlow from 'src/components/Shared/WorkFlow'
+import GenerateTransferForm from './GenerateTransferForm'
+import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
+import { ControlContext } from 'src/providers/ControlContext'
 
-export default function CashCountForm({ labels, maxAccess, recordId }) {
+export default function CashCountForm({ labels, maxAccess: access, recordId }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const [editMode, setEditMode] = useState(!!recordId)
   const { stack } = useWindow()
   const [isClosed, setIsClosed] = useState(false)
   const [isPosted, setIsPosted] = useState(false)
-  const { stack: stackError } = useError()
 
   const getDefaultDT = async () => {
     const userData = getStorageData('userData')
@@ -77,6 +80,13 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
     endpointId: CashCountRepository.CashCountTransaction.qry
   })
 
+  const { maxAccess } = useDocumentType({
+    functionId: SystemFunction.CashCountTransaction,
+    access: access,
+    hasDT: false,
+    enabled: !editMode
+  })
+
   const { formik } = useForm({
     maxAccess,
     initialValues: {
@@ -113,7 +123,6 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
     enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
-      reference: yup.string().required(' '),
       cashAccountRef: yup.string().required(' '),
       plantId: yup.string().required(' '),
       items: yup
@@ -127,43 +136,45 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
         .required(' ')
     }),
     onSubmit: async obj => {
-      const payload = {
-        header: {
-          recordId: obj.recordId,
-          dtId: obj.dtId,
-          plantId: obj.plantId,
-          shiftId: obj.shiftId,
-          currencyId: obj.currencyId,
-          cashAccountId: obj.cashAccountId,
-          forceNoteCount: obj.forceNoteCount,
-          reference: obj.reference,
-          date: formatDateToApi(new Date()),
-          startTime: obj.startTime,
-          endTime: obj.endTime,
-          status: obj.status,
-          wip: obj.wip,
-          releaseStatus: obj.releaseStatus
-        },
-        items: obj.items.map(({ id, flag, enabled, cashCountId, currencyNotes, ...rest }, index) => ({
-          seqNo: index + 1,
-          cashCountId: cashCountId || 0,
-          currencyNotes: currencyNotes || [],
-          ...rest
-        }))
-      }
+      try {
+        const payload = {
+          header: {
+            recordId: obj.recordId,
+            dtId: obj.dtId,
+            plantId: obj.plantId,
+            shiftId: obj.shiftId,
+            currencyId: obj.currencyId,
+            cashAccountId: obj.cashAccountId,
+            forceNoteCount: obj.forceNoteCount,
+            reference: obj.reference,
+            date: formatDateToApi(new Date()),
+            startTime: obj.startTime,
+            endTime: obj.endTime,
+            status: obj.status,
+            wip: obj.wip,
+            releaseStatus: obj.releaseStatus
+          },
+          items: obj.items.map(({ id, flag, enabled, cashCountId, currencyNotes, ...rest }, index) => ({
+            seqNo: index + 1,
+            cashCountId: cashCountId || 0,
+            currencyNotes: currencyNotes || [],
+            ...rest
+          }))
+        }
 
-      const response = await postRequest({
-        extension: CashCountRepository.CashCountTransaction.set2,
-        record: JSON.stringify(payload)
-      })
-      const _recordId = response.recordId
-      if (!obj.recordId) {
-        toast.success('Record Added Successfully')
-        getData(_recordId)
-      } else toast.success('Record Edited Successfully')
-      setEditMode(true)
+        const response = await postRequest({
+          extension: CashCountRepository.CashCountTransaction.set2,
+          record: JSON.stringify(payload)
+        })
+        const _recordId = response.recordId
+        if (!obj.recordId) {
+          toast.success(platformLabels.Added)
+          getData(_recordId)
+        } else toast.success(platformLabels.Edited)
+        setEditMode(true)
 
-      invalidate()
+        invalidate()
+      } catch (error) {}
     }
   })
 
@@ -187,7 +198,6 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
         })
         setIsClosed(header.wip === 2 ? true : false)
         setIsPosted(header.status === 3 ? true : false)
-
         formik.setValues({
           recordId: header.recordId,
           plantId: header.plantId,
@@ -239,7 +249,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
     })
       .then(() => {
         if (res.recordId) {
-          toast.success('Record Reopened Successfully')
+          toast.success(platformLabels.Reopened)
           invalidate()
           getData(obj?.recordId)
         }
@@ -254,7 +264,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
     })
       .then(res => {
         if (res?.recordId) {
-          toast.success('Record Posted Successfully')
+          toast.success(platformLabels.Closed)
           invalidate()
           getData(res?.recordId)
         }
@@ -269,15 +279,53 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
     })
       .then(res => {
         if (res?.recordId) {
-          toast.success('Record Posted Successfully')
+          toast.success(platformLabels.Posted)
           invalidate()
           setIsPosted(true)
         }
       })
       .catch(error => {})
   }
+  function openTransferForm() {
+    stack({
+      Component: GenerateTransferForm,
+      props: {
+        labels: labels,
+        cashCountId: formik.values.recordId,
+        fromPlantId: formik.values.plantId,
+        maxAccess
+      },
+      width: 600,
+      height: 300,
+      title: labels.bulk
+    })
+  }
+
+  const onWorkFlowClick = async () => {
+    stack({
+      Component: WorkFlow,
+      props: {
+        functionId: SystemFunction.CashCountTransaction,
+        recordId: formik.values.recordId
+      },
+      width: 950,
+      title: 'Workflow'
+    })
+  }
 
   const actions = [
+    {
+      key: 'Bulk',
+      condition: true,
+      onClick: openTransferForm,
+      disabled: !isPosted
+    },
+    {
+      key: 'WorkFlow',
+      condition: true,
+      onClick: onWorkFlowClick,
+      disabled: !editMode
+    },
     {
       key: 'Post',
       condition: true,
@@ -417,16 +465,15 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
                 name='reference'
                 label={labels.reference}
                 value={formik.values.reference}
+                readOnly={editMode}
                 maxAccess={maxAccess}
                 onChange={e => {
                   formik.handleChange(e)
                 }}
                 onClear={() => formik.setFieldValue('reference', '')}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
-                readOnly={editMode}
               />
             </Grid>
-
             <Grid item xs={6}>
               <CustomTextField name='endTime' label={labels.endTime} value={formik.values.endTime} readOnly={true} />
             </Grid>
@@ -461,7 +508,6 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
                 name: 'currencyId',
                 props: {
                   readOnly: isPosted || isClosed,
-
                   endpointId: SystemRepository.Currency.qry,
                   valueField: 'recordId',
                   displayField: 'reference',
@@ -475,6 +521,9 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
                     { key: 'name', value: 'Name' }
                   ],
                   displayFieldWidth: 2
+                },
+                propsReducer({ row, props }) {
+                  return { ...props, readOnly: row.currencyNotes?.length > 0 }
                 },
                 async onChange({ row: { update, newRow } }) {
                   if (newRow?.currencyId) {
