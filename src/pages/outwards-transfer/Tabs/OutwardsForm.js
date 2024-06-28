@@ -191,7 +191,6 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
             outwardId: formik.values.recordId || 0
           }
         })
-        console.log('formik check ', formik.values.instantCashDetails)
 
         const amountGridData = {
           header: copy,
@@ -259,6 +258,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
         const res2 = await getOutwards(res.recordId)
 
         await fillFormData(res2.record)
+        await chooseClient(res2.record.headerView.clientId)
         await getDefaultVAT()
       }
     } catch (error) {}
@@ -286,6 +286,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
         const res2 = await getOutwards(res.recordId)
 
         await fillFormData(res2.record)
+        await chooseClient(res2.record.headerView.clientId)
         await getDefaultVAT()
       }
     } catch (error) {}
@@ -554,8 +555,8 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       try {
         if (recordId) {
           const res = await getOutwards(recordId)
-          chooseClient(res.record.headerView.clientId)
-          fillFormData(res.record)
+          await fillFormData(res.record)
+          await chooseClient(res.record.headerView.clientId)
         } else {
           getDefaultDT()
         }
