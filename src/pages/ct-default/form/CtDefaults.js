@@ -18,10 +18,12 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 const CtDefaults = ({ _labels, access }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getLabels, getAccess } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
 
   //control
   const [labels, setLabels] = useState(null)
@@ -36,7 +38,8 @@ const CtDefaults = ({ _labels, access }) => {
     'ct_cash_purchase_ratetype_id',
     'ct_credit_sales_ratetype_id',
     'ct_credit_purchase_ratetype_id',
-    'ct_credit_eval_ratetype_id'
+    'ct_credit_eval_ratetype_id',
+    'ct_minOtp_CIVAmount'
   ]
 
   useEffect(() => {
@@ -58,7 +61,8 @@ const CtDefaults = ({ _labels, access }) => {
       ct_cash_purchase_ratetype_id: null,
       ct_credit_sales_ratetype_id: null,
       ct_credit_purchase_ratetype_id: null,
-      ct_credit_eval_ratetype_id: null
+      ct_credit_eval_ratetype_id: null,
+      ct_minOtp_CIVAmount: null
     },
     onSubmit: values => {
       postRtDefault(values)
@@ -130,7 +134,7 @@ const CtDefaults = ({ _labels, access }) => {
       record: JSON.stringify({ sysDefaults: data })
     })
       .then(res => {
-        if (res) toast.success('Record Successfully')
+        if (res) toast.success(platformLabels.Updated)
       })
       .catch(error => {
         setErrorMessage(error)
@@ -350,6 +354,17 @@ const CtDefaults = ({ _labels, access }) => {
               }}
               error={formik.touched.ct_credit_eval_ratetype_id && Boolean(formik.errors.ct_credit_eval_ratetype_id)}
               helperText={formik.touched.ct_credit_eval_ratetype_id && formik.errors.ct_credit_eval_ratetype_id}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomNumberField
+              name='ct_minOtp_CIVAmount'
+              label={_labels.minimumOtp}
+              value={formik.values.ct_minOtp_CIVAmount}
+              maxAccess={access}
+              onChange={e => formik.setFieldValue('ct_minOtp_CIVAmount', e.target.value)}
+              onClear={() => formik.setFieldValue('ct_minOtp_CIVAmount', '')}
+              error={formik.touched.ct_minOtp_CIVAmount && Boolean(formik.errors.ct_minOtp_CIVAmount)}
             />
           </Grid>
         </Grid>

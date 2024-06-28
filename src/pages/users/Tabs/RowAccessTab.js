@@ -16,10 +16,12 @@ import { AccessControlRepository } from 'src/repositories/AccessControlRepositor
 import { POSRepository } from 'src/repositories/POSRepository'
 import toast from 'react-hot-toast'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
   const [data, setData] = useState([])
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const rowColumns = [
     {
@@ -60,7 +62,7 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
         record: JSON.stringify(resultObject)
       })
 
-      toast.success('Record Updated Successfully')
+      toast.success(platformLabels.Updated)
     }
   })
 
