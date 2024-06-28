@@ -132,6 +132,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     trxCountPerYear: '',
     trxAmountPerYear: '',
     otpVerified: false,
+    govCellVerified: false,
     addressId: '',
     batchId: '',
     civilStatus: '',
@@ -299,6 +300,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
           recordId: recordId,
           recordIdRemittance: obj.clientRemittance?.recordId,
           otpVerified: obj.clientRemittance?.otpVerified,
+          govCellVerified: obj.clientRemittance?.govCellVerified,
           addressId: obj.clientRemittance?.addressId,
           batchId: obj.clientRemittance?.batchId,
           civilStatus: obj.clientRemittance?.civilStatus,
@@ -446,6 +448,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       issueDate: obj.issueDate && formatDateToApiFunction(obj.issueDate), // test
 
       otpVerified: obj.otpVerified,
+      govCellVerified: obj.govCellVerified,
       plantName: obj.plantName,
       nationalityName: obj.nationalityName,
       status: obj.status,
@@ -498,6 +501,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       isRelativeDiplomat: obj.isRelativeDiplomat,
       relativeDiplomatInfo: obj.relativeDiplomatInfo,
       otpVerified: obj.otpVerified,
+      govCellVerified: obj.govCellVerified,
       coveredFace: obj.coveredFace,
       isEmployee: obj.isEmployee,
       cobId: obj.cobId,
@@ -606,6 +610,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
         Component: OTPPhoneVerification,
         props: {
           idTypeStore: idTypeStore,
+          recordId: clientIndividualFormik.values.recordId,
           formValidation: clientIndividualFormik,
           functionId: clientIndividualFormik.values.functionId,
           setEditMode: setEditMode,
@@ -1609,6 +1614,20 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                     />
                   }
                   label={labels?.OTPVerified}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      name='govCellVerified'
+                      disabled={true}
+                      readOnly={editMode && true}
+                      checked={clientIndividualFormik.values?.govCellVerified}
+                      onChange={clientIndividualFormik.handleChange}
+                    />
+                  }
+                  label={labels?.govCellVerified}
                 />
               </Grid>
 
