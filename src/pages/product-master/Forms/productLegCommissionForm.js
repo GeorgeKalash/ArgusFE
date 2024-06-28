@@ -11,9 +11,11 @@ import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const ProductLegCommissionForm = ({ row, labels, maxAccess, store }) => {
   const { recordId: pId, seqNo } = store
+  const { platformLabels } = useContext(ControlContext)
 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -121,7 +123,7 @@ const ProductLegCommissionForm = ({ row, labels, maxAccess, store }) => {
       record: JSON.stringify(data)
     })
       .then(res => {
-        if (res) toast.success('Record Edited Successfully')
+        if (res) toast.success(platformLabels.Edited)
       })
       .catch(error => {})
   }

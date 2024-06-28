@@ -39,6 +39,7 @@ import { useInvalidate } from 'src/hooks/resource'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { useError } from 'src/error'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = false }) => {
   const { stack } = useWindow()
@@ -55,6 +56,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
   const [otpShow, setOtpShow] = useState(false)
   const [isClosed, setIsClosed] = useState(false)
   const { stack: stackError } = useError()
+  const { platformLabels } = useContext(ControlContext)
 
   const [initialValues, setInitialData] = useState({
     //clientIDView
@@ -567,7 +569,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       })
         .then(res => {
           if (res) {
-            toast.success('Record Edited Successfully')
+            toast.success(platformLabels.Edited)
           }
         })
         .catch(error => {})
@@ -588,7 +590,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       })
         .then(res => {
           if (res) {
-            toast.success('Record Successfully')
+            toast.success(platformLabels.Submit)
             setOtpShow(true)
             getClient(res.recordId)
             setEditMode(true)
@@ -641,7 +643,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
         record: JSON.stringify(data)
       })
       if (res.recordId) {
-        toast.success('Record Closed Successfully')
+        toast.success(platformLabels.Closed)
         invalidate()
         setIsClosed(true)
       }

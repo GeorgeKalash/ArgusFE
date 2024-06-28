@@ -42,10 +42,9 @@ export default function RVDocTypeDefaultsForm({ labels, maxAccess, dtId }) {
         record: JSON.stringify(obj)
       })
 
-      formik.setValues({
-        ...obj,
-        recordId: obj.dtId
-      })
+      if (!dtId) {
+        formik.setFieldValue('recordId', obj.dtId)
+      }
 
       toast.success(platformLabels.Submit)
 

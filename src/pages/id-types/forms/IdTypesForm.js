@@ -12,10 +12,12 @@ import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTrad
 import { DataSets } from 'src/resources/DataSets'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const IdTypesForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { recordId } = store
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: CurrencyTradingSettingsRepository.IdTypes.qry
@@ -74,9 +76,9 @@ const IdTypesForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store
           name: obj.name
         }))
 
-        toast.success('Record Added Successfully')
+        toast.success(platformLabels.Added)
       } else {
-        toast.success('Record Editted Successfully')
+        toast.success(platformLabels.Edited)
         setStore(prevStore => ({
           ...prevStore,
           name: obj.name

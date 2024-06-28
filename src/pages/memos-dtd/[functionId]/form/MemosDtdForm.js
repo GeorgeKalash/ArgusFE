@@ -41,11 +41,9 @@ export default function MemosDtdForm({ labels, maxAccess, dtId, functionId }) {
         extension: FinancialRepository.FIDocTypeDefaults.set,
         record: JSON.stringify(obj)
       })
-
-      formik.setValues({
-        ...obj,
-        recordId: obj.dtId
-      })
+      if (!dtId) {
+        formik.setFieldValue('recordId', obj.dtId)
+      }
 
       toast.success(platformLabels.Submit)
 
@@ -90,7 +88,7 @@ export default function MemosDtdForm({ labels, maxAccess, dtId, functionId }) {
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik && formik.setFieldValue('dtId', newValue?.recordId || '')
+                  formik.setFieldValue('dtId', newValue?.recordId || '')
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
               />
