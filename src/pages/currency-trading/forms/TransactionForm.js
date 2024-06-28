@@ -378,7 +378,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     try {
       const res = await getRequest({
         extension: CTTRXrepository.CurrencyTrading.get2,
-        parameters: `_recordId=${recId}`
+        parameters: `_recordId=${formik.values.recordId ?? recId}`
       })
 
       const data = {
