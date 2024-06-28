@@ -33,6 +33,8 @@ export default function CloseForm({ form, labels, setIsClosed, isClosed, maxAcce
     initialValues: {
       recordId: recordId || null,
       corId: null,
+      corRef: '',
+      corName: '',
       amount: null,
       receiver_firstName: '',
       receiver_lastName: '',
@@ -99,21 +101,20 @@ export default function CloseForm({ form, labels, setIsClosed, isClosed, maxAcce
                 <ResourceLookup
                   endpointId={RemittanceSettingsRepository.Correspondent.snapshot}
                   valueField='reference'
-                  displayField='id'
+                  displayField='name'
                   name='corId'
                   label={labels.correspondent}
                   form={formik}
                   required
-                  firstFieldWidth='30%'
-                  displayFieldWidth={1.5}
+                  readOnly={editMode}
+                  displayFieldWidth={2}
                   valueShow='corRef'
+                  secondValueShow='corName'
                   maxAccess={maxAccess}
-                  onChange={async (event, newValue) => {
-                    if (newValue) {
-                      formik.setFieldValue('corId', newValue?.recordId)
-                    } else {
-                      formik.setFieldValue('corId', null)
-                    }
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('corId', newValue ? newValue.recordId : '')
+                    formik.setFieldValue('corName', newValue ? newValue.name : '')
+                    formik.setFieldValue('corRef', newValue ? newValue.reference : '')
                   }}
                   errorCheck={'corId'}
                 />

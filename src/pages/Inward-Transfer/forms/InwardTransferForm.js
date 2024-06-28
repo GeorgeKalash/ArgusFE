@@ -55,6 +55,8 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
     reference: '',
     date: new Date(),
     corId: null,
+    corRef: '',
+    corName: '',
     currencyId: null,
     status: null,
     notes: '',
@@ -64,7 +66,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
     sender_firstName: '',
     sender_lastName: '',
     sender_middleName: '',
-    senter_nationalityId: null,
+    sender_nationalityId: null,
     sender_phone: null,
     sender_otherInfo: '',
     sender_countryId: null,
@@ -154,10 +156,17 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
         record: JSON.stringify(copy)
       })
       if (res.recordId) {
-        toast.success(platformLabels.Updated)
         formik.setFieldValue('recordId', res.recordId)
         setEditMode(true)
         invalidate()
+
+        const res2 = await getRequest({
+          extension: RemittanceOutwardsRepository.InwardsTransfer.get,
+          parameters: `_recordId=${res.recordId}`
+        })
+        formik.setFieldValue('reference', res2.record.reference)
+        formik.setFieldValue('status', res2.record.status)
+        toast.success(platformLabels.Updated)
       }
     }
   })
@@ -226,7 +235,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
       maxAccess={maxAccess}
       functionId={SystemFunction.InwardTransfer}
       actions={actions}
-      disabledSubmit={isClosed}
+      disabledSubmit={editMode}
     >
       <VertLayout>
         <Fixed>
@@ -270,7 +279,6 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       valueField='key'
                       displayField='value'
                       readOnly={true}
-                      required
                       maxAccess={maxAccess}
                       onChange={(event, newValue) => {
                         formik.setFieldValue('status', newValue?.key)
@@ -286,23 +294,20 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                     <ResourceLookup
                       endpointId={RemittanceSettingsRepository.Correspondent.snapshot}
                       valueField='reference'
-                      displayField='id'
+                      displayField='name'
                       name='corId'
                       label={labels.correspondent}
                       form={formik}
                       required
                       readOnly={editMode}
-                      firstFieldWidth='30%'
-                      displayFieldWidth={1.5}
+                      displayFieldWidth={2}
                       valueShow='corRef'
+                      secondValueShow='corName'
                       maxAccess={maxAccess}
-                      editMode={editMode}
-                      onChange={async (event, newValue) => {
-                        if (newValue) {
-                          formik.setFieldValue('corId', newValue?.recordId)
-                        } else {
-                          formik.setFieldValue('corId', null)
-                        }
+                      onChange={(event, newValue) => {
+                        formik.setFieldValue('corId', newValue ? newValue.recordId : '')
+                        formik.setFieldValue('corName', newValue ? newValue.name : '')
+                        formik.setFieldValue('corRef', newValue ? newValue.reference : '')
                       }}
                       errorCheck={'corId'}
                     />
