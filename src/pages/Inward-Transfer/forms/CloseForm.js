@@ -12,6 +12,7 @@ import { useError } from 'src/error'
 import { useForm } from 'src/hooks/form'
 import { useInvalidate } from 'src/hooks/resource'
 import { formatDateToApi } from 'src/lib/date-helper'
+import { ControlContext } from 'src/providers/ControlContext'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
@@ -21,6 +22,7 @@ import * as yup from 'yup'
 export default function CloseForm({ form, labels, setIsClosed, isClosed, maxAccess, window, recordId, window2 }) {
   const { stack: stackError } = useError()
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const [mismatchedFields, setMismatchedFields] = useState([])
 
   const invalidate = useInvalidate({
@@ -53,7 +55,7 @@ export default function CloseForm({ form, labels, setIsClosed, isClosed, maxAcce
         onClose()
       } else {
         setMismatchedFields(mismatches)
-        toast.error('Some fields do not match the original values.')
+        toast.error(platformLabels.fieldsDoNotMatch)
       }
     }
   })
@@ -77,7 +79,7 @@ export default function CloseForm({ form, labels, setIsClosed, isClosed, maxAcce
       record: JSON.stringify(copy)
     })
     if (res.recordId) {
-      toast.success('Record Closed Successfully')
+      toast.success(platformLabels.Closed)
       setIsClosed(true)
       invalidate()
       window.close()
@@ -97,7 +99,7 @@ export default function CloseForm({ form, labels, setIsClosed, isClosed, maxAcce
                 <ResourceLookup
                   endpointId={RemittanceSettingsRepository.Correspondent.snapshot}
                   valueField='reference'
-                  displayField='name'
+                  displayField='id'
                   name='corId'
                   label={labels.correspondent}
                   form={formik}

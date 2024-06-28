@@ -27,6 +27,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import * as yup from 'yup'
 import CloseForm from './CloseForm'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function InwardTransferForm({ labels, recordId, access, plantId, window, userId, dtId }) {
   const [editMode, setEditMode] = useState(!!recordId)
@@ -35,6 +36,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
   const [transferType, setTransferType] = useState(null)
   const { stack } = useWindow()
   const [isClosed, setIsClosed] = useState(false)
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: RemittanceOutwardsRepository.InwardsTransfer.snapshot
@@ -153,7 +155,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
         record: JSON.stringify(copy)
       })
       if (res.recordId) {
-        toast.success('Record Updated Successfully')
+        toast.success(platformLabels.Updated)
         formik.setFieldValue('recordId', res.recordId)
         setEditMode(true)
         invalidate()
@@ -175,7 +177,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
         window2: window
       },
       width: 600,
-      title: 'Approve Fields'
+      title: platformLabels.ApproveFields
     })
   }
 
@@ -281,7 +283,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                     <ResourceLookup
                       endpointId={RemittanceSettingsRepository.Correspondent.snapshot}
                       valueField='reference'
-                      displayField='name'
+                      displayField='id'
                       name='corId'
                       label={labels.correspondent}
                       form={formik}
