@@ -68,7 +68,6 @@ const GetLookup = ({ field, formik }) => {
 }
 
 const GetComboBox = ({ field, formik }) => {
-  console.log('apiDetails.displayField', field)
   const apiDetails = field?.apiDetails
 
   return (
@@ -88,6 +87,7 @@ const GetComboBox = ({ field, formik }) => {
             const textValue = Array.isArray(apiDetails?.displayField)
               ? apiDetails?.displayField?.map(header => newValue[header]?.toString())?.join(' - ')
               : newValue?.[apiDetails?.displayField]
+            field.mandatory && formik.setFieldTouched(`parameters[${field.id}]`, true) // Ensure touched is set
 
             formik.setFieldValue(
               `parameters[${field.id}]`,
@@ -102,13 +102,13 @@ const GetComboBox = ({ field, formik }) => {
                 : ''
             )
           }}
-          error={formik.touched.parameters?.[field?.id] && Boolean(formik.errors?.parameters?.[field?.id])}
+          error={Boolean(formik.errors?.parameters?.[field?.id])}
         />
       ) : (
         <>
           <ResourceComboBox
             datasetId={field?.data}
-            name={field.key}
+            name={`parameters[${field.id}`}
             label={field.caption}
             valueField={'key'}
             displayField={'value'}
@@ -129,7 +129,7 @@ const GetComboBox = ({ field, formik }) => {
                   : ''
               )
             }}
-            error={false}
+            error={Boolean(formik.errors?.parameters?.[field?.id])}
           />
         </>
       )}
@@ -141,7 +141,7 @@ const GetDate = ({ field, formik }) => {
   return (
     <Grid item xs={12} key={field.id}>
       <CustomDatePicker
-        name={field.key}
+        name={`parameters[${field.id}`}
         label={field.caption}
         value={formik.values?.parameters?.[field.id]?.value}
         required={field.mandatory}
@@ -154,7 +154,7 @@ const GetDate = ({ field, formik }) => {
             display: formatDateDefault(newValue)
           })
         }}
-        error={formik.touched.parameters?.[field.id] && Boolean(formik.errors?.parameters?.[field.id])}
+        error={Boolean(formik.errors?.parameters?.[field?.id])}
         onClear={() => formik.setFieldValue(`parameters[${field.id}]`, {})}
       />
     </Grid>
@@ -165,7 +165,7 @@ const GetTextField = ({ field, formik }) => {
   return (
     <Grid item xs={12} key={field.id}>
       <CustomTextField
-        name={field.id}
+        name={`parameters[${field.id}`}
         label={field.caption}
         value={formik.values?.parameters?.[field.id]?.value || null}
         required={field.mandatory}
@@ -253,8 +253,9 @@ const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, disab
 
       return errors.parameters.length > 0 ? errors : {}
     },
-    enableReinitialize: false,
+    enableReinitialize: true,
     validateOnChange: true,
+    validateOnBlur: true,
 
     // validationSchema: validationSchema,
     onSubmit: values => {
@@ -275,6 +276,8 @@ const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, disab
       window.close()
     }
   })
+
+  console.log('formik', formik)
 
   const mergeFieldWithApiDetails = async () => {
     const fieldComponentArray = []
