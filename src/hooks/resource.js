@@ -37,18 +37,25 @@ export function useResourceQuery({ endpointId, filter, datasetId, queryFn, searc
     enabled: access?.record?.maxAccess > 0 && enabled
   })
 
+  function unCache() {
+    queryClient.invalidateQueries([endpointId])
+    query.refetch()
+  }
+
   return {
     access,
     labels,
     query: query,
-    search(query) {
-      setSearchValue(query)
+    search(value) {
+      setSearchValue(value)
+      unCache()
     },
     filterBy(name, value) {
       setFilters({
         ...filters,
         [name]: value
       })
+      unCache()
     },
     clearFilter(name) {
       setFilters(filters => {
@@ -68,8 +75,15 @@ export function useResourceQuery({ endpointId, filter, datasetId, queryFn, searc
     },
     refetch(value) {
       setSearchValue('')
-      setFilters({})
-      !value.params ? query.refetch() : searchValue ? setSearchValue(searchValue) : setApiOption(value)
+      if (!value.params) {
+        query.refetch()
+      } else if (searchValue) {
+        setSearchValue(searchValue)
+        unCache()
+      } else {
+        unCache()
+        setApiOption(value)
+      }
     },
     invalidate: () => {
       queryClient.invalidateQueries([endpointId])

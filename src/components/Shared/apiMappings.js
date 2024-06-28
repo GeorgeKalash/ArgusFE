@@ -1,7 +1,11 @@
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
+import { FinancialRepository } from 'src/repositories/FinancialRepository'
+import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
+import { LogisticsRepository } from 'src/repositories/LogisticsRepository'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
+import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 
 export const COMBOBOX = 1
@@ -21,18 +25,12 @@ export const apiMappings = {
     endpoint: SystemRepository.Currency.qry,
     parameters: '_filter=',
     valueField: 'recordId',
-    displayField: 'reference',
-
-    //displayField: ['reference', 'name'],
-    columnsInDropDown: [
-      { key: 'reference', value: 'Reference' },
-      { key: 'name', value: 'Name' }
-    ]
+    displayField: 'name'
   },
   20109: {
     type: COMBOBOX,
     endpoint: SystemRepository.FiscalYears.qry,
-    parameters: '',
+    parameters: '_filter=',
     valueField: 'fiscalYear',
     displayField: 'fiscalYear'
   },
@@ -80,18 +78,156 @@ export const apiMappings = {
     valueField: 'recordId',
     displayField: 'name'
   },
+  31201: {
+    type: LOOKUP,
+    endpoint: FinancialRepository.Account.snapshot,
+    parameters: {
+      _type: 0
+    },
+    valueField: 'reference',
+    valueOnSelection: 'recordId',
+    displayField: 'name',
+    displayFieldWidth: 2,
+    firstFieldWidth: '40%'
+  },
+  20104: {
+    type: COMBOBOX,
+    endpoint: SystemRepository.DocumentType.qry,
+    parameters: '_filter=',
+    valueField: 'recordId',
+    displayField: 'name',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+  20110: {
+    type: COMBOBOX,
+    endpoint: SystemRepository.Plant.qry,
+    parameters: '_filter=',
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+  20107: {
+    type: COMBOBOX,
+    endpoint: SystemRepository.State.qry,
+    parameters: '_filter=',
+    valueField: 'recordId',
+    displayField: 'name'
+  },
+  20125: {
+    type: LOOKUP,
+    endpoint: SystemRepository.City.snapshot,
+    parameters: {
+      _type: 0
+    },
+    valueField: 'reference',
+    valueOnSelection: 'recordId',
+    displayField: 'name'
+  },
   21101: {
     type: COMBOBOX,
     endpoint: BusinessPartnerRepository.Group.qry,
     parameters: '_filter=',
     valueField: 'recordId',
-    displayField: 'name'
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
   },
-  0: {
+  23101: {
     type: COMBOBOX,
-    endpoint: BusinessPartnerRepository.CategoryID.qry,
+    endpoint: SystemRepository.Users.qry,
     parameters: '_filter=',
     valueField: 'recordId',
-    displayField: 'name'
+    displayField: ['fullName', 'email'],
+    columnsInDropDown: [
+      { key: 'fullName', value: 'Full Name' },
+      { key: 'email', value: 'Email' }
+    ]
+  },
+  30103: {
+    type: COMBOBOX,
+    endpoint: GeneralLedgerRepository.GLAccountGroups.qry,
+    parameters: '_filter=',
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+  30107: {
+    type: COMBOBOX,
+    endpoint: GeneralLedgerRepository.CostCenter.qry,
+    parameters: '_filter=',
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+  30201: {
+    type: LOOKUP,
+    endpoint: SystemRepository.City.snapshot,
+    parameters: {
+      _type: 0
+    },
+    valueField: 'accountRef',
+    valueOnSelection: 'recordId',
+    displayField: 'name',
+    displayFieldWidth: 2,
+    firstFieldWidth: '40%'
+  },
+  31101: {
+    type: COMBOBOX,
+    endpoint: FinancialRepository.Group.qry,
+    parameters: '_filter=',
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+  32101: {
+    type: COMBOBOX,
+    endpoint: MultiCurrencyRepository.ExchangeTable.qry,
+    parameters: '_filter=',
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+  20123: {
+    type: COMBOBOX,
+    endpoint: SystemRepository.PlantGroup.qry,
+    parameters: '_filter=',
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+  40201: {
+    type: COMBOBOX,
+    endpoint: LogisticsRepository.LoCarrier.qry,
+    parameters: '_filter=',
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
   }
 }

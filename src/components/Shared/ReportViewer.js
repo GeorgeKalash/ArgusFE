@@ -110,35 +110,13 @@ const ReportViewer = ({ resourceId }) => {
       })
   }, [reportStore])
 
-  const formatDataForApi = paramsArray => {
-    const formattedData = paramsArray
-      .map(({ fieldId, value }) => `${fieldId}|${value}`)
-      .reduce((acc, curr, index) => acc + (index === 1 ? ` ${curr}` : `^${curr}`), '')
-
-    return formattedData
-  }
-
   return (
     <VertLayout>
       <Fixed>
         <GridToolbar
-          openRPB={() =>
-            stack({
-              Component: ReportParameterBrowser,
-              props: {
-                disabled: !selectedReport?.parameters,
-                reportName: selectedReport?.parameters,
-                paramsArray: paramsArray,
-                setParamsArray: setParamsArray
-              },
-              width: 700,
-              height: 500,
-              title: 'Report Parameters Browser'
-            })
-          }
+          reportName={selectedReport?.parameters}
           disableRPB={!selectedReport?.parameters}
           onGo={generateReport}
-          paramsArray={paramsArray}
         >
           <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between' }}>
             <Autocomplete

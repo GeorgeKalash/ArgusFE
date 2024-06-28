@@ -141,22 +141,23 @@ const Table = ({
 
         const incrementPage = () => {
           if (page < pageCount) {
-            api({ _startAt: page * pageSize, _pageSize: pageSize })
+            api({ ...api, _startAt: page * pageSize, _pageSize: pageSize, params: gridData?._params })
+            console.log(api.params, '')
           }
         }
 
         const decrementPage = () => {
           if (page > 1) {
-            api({ _startAt: (page - 2) * pageSize, _pageSize: pageSize })
+            api({ _startAt: (page - 2) * pageSize, _pageSize: pageSize, params: gridData?._params })
           }
         }
 
         const goToFirstPage = () => {
-          api({ _startAt: 0, _pageSize: pageSize })
+          api({ _startAt: 0, _pageSize: pageSize, params: gridData?._params })
         }
 
         const goToLastPage = () => {
-          api({ _startAt: (pageCount - 1) * pageSize, _pageSize: pageSize })
+          api({ _startAt: (pageCount - 1) * pageSize, _pageSize: pageSize, params: gridData?._params })
         }
 
         return (

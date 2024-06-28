@@ -55,7 +55,6 @@ import ReportParameterBrowser from 'src/components/Shared/ReportParameterBrowser
 const BPMasterData = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
-  const [paramsArray, setParamsArray] = useState([])
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params = [] } = options
@@ -171,22 +170,8 @@ const BPMasterData = () => {
           onSearchClear={clear}
           labels={_labels}
           inputSearch={true}
-          // openRPB={() =>
-          //   stack({
-          //     Component: ReportParameterBrowser,
-          //     props: {
-          //       disabled: false,
-          //       reportName: 'BPMAS',
-          //       paramsArray: paramsArray,
-          //       setParamsArray: setParamsArray
-          //     },
-          //     width: 700,
-          //     height: 500,
-          //     title: 'Report Parameters Browser'
-          //   })
-          // }
-          refetch={refetch}
-          // paramsArray={paramsArray}
+          onGo={refetch}
+          reportName='BPMAS'
         />
       </Fixed>
       <Grow>

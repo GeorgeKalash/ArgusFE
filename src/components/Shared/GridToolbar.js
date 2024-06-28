@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Tooltip, Typography } from '@mui/material'
+import { Box, Button, Grid, Tooltip } from '@mui/material'
 import Icon from 'src/@core/components/icon'
 import CustomTextField from '../Inputs/CustomTextField'
 import { useState, useEffect, useContext } from 'react'
@@ -16,13 +16,12 @@ import ReportParameterBrowser from 'src/components/Shared/ReportParameterBrowser
 const GridToolbar = ({
   initialLoad,
   onAdd,
-  // openRPB,
   onTree,
   refreshGrid,
   disableRPB = false,
   onGo,
   onRefresh = false,
-  // paramsArray,
+  reportName,
   children,
   labels,
   onClear,
@@ -59,8 +58,7 @@ const GridToolbar = ({
     stack({
       Component: ReportParameterBrowser,
       props: {
-        disabled: false,
-        reportName: 'BPMAS',
+        reportName: reportName,
         paramsArray: paramsArray,
         setParamsArray: setParamsArray
       },
@@ -69,6 +67,7 @@ const GridToolbar = ({
       title: 'Report Parameters Browser'
     })
   }
+
   const getReportLayout = () => {
     setReportStore([])
     if (previewReport) {
@@ -97,20 +96,18 @@ const GridToolbar = ({
   }
 
   const formatDataForApi = paramsArray => {
-    let minFieldId = null
     let minValue = Infinity
 
     for (const [index, { fieldId, value }] of Object.entries(paramsArray)) {
       const numericValue = Number(fieldId)
       if (numericValue < minValue) {
         minValue = numericValue
-        minFieldId = numericValue
       }
     }
-    console.log(paramsArray, minFieldId)
+
     const formattedData = paramsArray
       .map(({ fieldId, value }) => `${fieldId}|${value}`)
-      .reduce((acc, curr, index) => acc + (index === minFieldId ? `${curr}` : `^${curr}`), '')
+      .reduce((acc, curr, index) => acc + (index === minValue ? `${curr}` : `^${curr}`), '')
 
     return formattedData
   }
@@ -189,7 +186,7 @@ const GridToolbar = ({
               </Tooltip>
             </Box>
           )}
-          {openRPB && (
+          {reportName && (
             <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', py: '7px !important' }}>
               <Button onClick={openRPB} variant='contained' disabled={disableRPB}>
                 {platformLabels.OpenRPB}
@@ -207,7 +204,11 @@ const GridToolbar = ({
             <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', py: '7px !important' }}>
               <Button
                 disabled={paramsArray.length === 0}
-                onClick={() => onGo({ _startAt: 0, _pageSize: 30, params: formatDataForApi(paramsArray) })}
+                onClick={() =>
+                  searchValue
+                    ? onSearch(searchValue)
+                    : onGo({ _startAt: 0, _pageSize: 50, params: formatDataForApi(paramsArray) })
+                }
                 variant='contained'
               >
                 {platformLabels.GO}
