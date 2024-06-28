@@ -52,7 +52,8 @@ export default function CurrencyTrading() {
   }
 
   return (
-    labels && access && (
+    labels &&
+    access && (
       <VertLayout>
         <Fixed>
           <GridToolbar
@@ -117,8 +118,8 @@ export default function CurrencyTrading() {
             paginationType='client'
             maxAccess={access}
           />
-          </Grow>
-        </VertLayout>
-      )
+        </Grow>
+      </VertLayout>
+    )
   )
 }

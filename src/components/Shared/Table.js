@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 
 // ** MUI Imports
@@ -25,6 +25,8 @@ import StrictDeleteConfirmation from './StrictDeleteConfirmation'
 
 import deleteIcon from '../../../public/images/TableIcons/delete.png'
 import editIcon from '../../../public/images/TableIcons/edit.png'
+import { ControlContext } from 'src/providers/ControlContext'
+import { AuthContext } from 'src/providers/AuthContext'
 
 const ODD_OPACITY = 0.2
 
@@ -102,7 +104,7 @@ const Table = ({
   paginationType = 'api',
   height,
   addedHeight = '0px',
-  actionColumnHeader = null,
+  actionColumnHeader = '',
   showCheckboxColumn = false,
   checkTitle = '',
   viewCheckButtons = false,
@@ -112,6 +114,8 @@ const Table = ({
   const { stack } = useWindow()
 
   const [gridData, setGridData] = useState(props.gridData)
+  const { platformLabels } = useContext(ControlContext)
+  const { languageId } = useContext(AuthContext)
   const [startAt, setStartAt] = useState(0)
   const [page, setPage] = useState(1)
   const [checkedRows, setCheckedRows] = useState({})
@@ -157,25 +161,41 @@ const Table = ({
 
         return (
           <PaginationContainer>
-            <IconButton onClick={goToFirstPage} disabled={page === 1}>
+            <IconButton
+              onClick={goToFirstPage}
+              disabled={page === 1}
+              sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+            >
               <FirstPageIcon />
             </IconButton>
-            <IconButton onClick={decrementPage} disabled={page === 1}>
+            <IconButton
+              onClick={decrementPage}
+              disabled={page === 1}
+              sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+            >
               <NavigateBeforeIcon />
             </IconButton>
-            Page: {page} of {pageCount}
-            <IconButton onClick={incrementPage} disabled={page === pageCount}>
+            {platformLabels.Page} {page} {platformLabels.Of} {pageCount}
+            <IconButton
+              onClick={incrementPage}
+              disabled={page === pageCount}
+              sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+            >
               <NavigateNextIcon />
             </IconButton>
-            <IconButton onClick={goToLastPage} disabled={page === pageCount}>
+            <IconButton
+              onClick={goToLastPage}
+              disabled={page === pageCount}
+              sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+            >
               <LastPageIcon />
             </IconButton>
             <IconButton onClick={refetch}>
               <RefreshIcon />
             </IconButton>
-            Displaying Records {startAt === 0 ? 1 : startAt} -{' '}
-            {totalRecords < pageSize ? totalRecords : page === pageCount ? totalRecords : startAt + pageSize} of{' '}
-            {totalRecords}
+            {platformLabels.DisplayingRecords} {startAt === 0 ? 1 : startAt} -{' '}
+            {totalRecords < pageSize ? totalRecords : page === pageCount ? totalRecords : startAt + pageSize}{' '}
+            {platformLabels.Of} {totalRecords}
           </PaginationContainer>
         )
       } else {
@@ -239,25 +259,41 @@ const Table = ({
 
           return (
             <PaginationContainer>
-              <IconButton onClick={goToFirstPage} disabled={page === 1}>
+              <IconButton
+                onClick={goToFirstPage}
+                disabled={page === 1}
+                sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+              >
                 <FirstPageIcon />
               </IconButton>
-              <IconButton onClick={decrementPage} disabled={page === 1}>
+              <IconButton
+                onClick={decrementPage}
+                disabled={page === 1}
+                sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+              >
                 <NavigateBeforeIcon />
               </IconButton>
-              Page: {page} of {pageCount}
-              <IconButton onClick={incrementPage} disabled={page === pageCount}>
+              {platformLabels.Page} {page} {platformLabels.Of} {pageCount}
+              <IconButton
+                onClick={incrementPage}
+                disabled={page === pageCount}
+                sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+              >
                 <NavigateNextIcon />
               </IconButton>
-              <IconButton onClick={goToLastPage} disabled={page === pageCount}>
+              <IconButton
+                onClick={goToLastPage}
+                disabled={page === pageCount}
+                sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+              >
                 <LastPageIcon />
               </IconButton>
               <IconButton onClick={refetch}>
                 <RefreshIcon />
               </IconButton>
-              Displaying Records {startAt === 0 ? 1 : startAt} -{' '}
-              {totalRecords < pageSize ? totalRecords : page === pageCount ? totalRecords : startAt + pageSize} of{' '}
-              {totalRecords}
+              {platformLabels.DisplayingRecords} {startAt === 0 ? 1 : startAt} -{' '}
+              {totalRecords < pageSize ? totalRecords : page === pageCount ? totalRecords : startAt + pageSize}{' '}
+              {platformLabels.Of} {totalRecords}
             </PaginationContainer>
           )
         }
@@ -298,7 +334,7 @@ const Table = ({
       },
       width: 500,
       height: 300,
-      title: 'Delete Confirmation'
+      title: platformLabels.DeleteConfirmation
     })
   }
 
@@ -324,7 +360,7 @@ const Table = ({
       },
       width: 450,
       height: 170,
-      title: 'Delete'
+      title: platformLabels.Delete
     })
   }
 
@@ -355,7 +391,6 @@ const Table = ({
                 size='small'
                 onClick={e => {
                   props.onEdit(params.row)
-                  e.stopPropagation()
                 }}
               >
                 <Image src={editIcon} alt='Edit' width={18} height={18} />
@@ -365,7 +400,7 @@ const Table = ({
               <IconButton
                 size='small'
                 onClick={e => {
-                  props.popupComponent(params.row), e.stopPropagation()
+                  props.popupComponent(params.row)
                 }}
               >
                 <Image src={editIcon} alt='Edit' width={18} height={18} />
@@ -380,11 +415,10 @@ const Table = ({
                   } else {
                     openDelete(params.row)
                   }
-                  e.stopPropagation()
                 }}
                 color='error'
               >
-                <Image src={deleteIcon} alt='Delete' width={18} height={18} />
+                <Image src={deleteIcon} alt={platformLabels.Delete} width={18} height={18} />
               </IconButton>
             )}
           </Box>
@@ -442,7 +476,7 @@ const Table = ({
         <>
           <Stack direction='row' spacing={2} marginBottom={2}>
             <Button variant='contained' color='primary' onClick={handleCheckAll} style={{ display: shouldViewButtons }}>
-              Check All
+              {platformLabels.CheckAll}
             </Button>
             <Button
               variant='contained'
@@ -450,7 +484,7 @@ const Table = ({
               onClick={handleUncheckAll}
               style={{ display: shouldViewButtons }}
             >
-              Uncheck All
+              {platformLabels.UncheckAll}
             </Button>
           </Stack>
           <StripedDataGrid
@@ -479,7 +513,7 @@ const Table = ({
               Footer: CustomPagination,
               NoRowsOverlay: () => (
                 <Stack height='100%' alignItems='center' justifyContent='center'>
-                  This Screen Has No Data
+                  {platformLabels.NoDataScreen}
                 </Stack>
               )
             }}
@@ -514,7 +548,7 @@ const Table = ({
           />
         </>
       ) : (
-        'NO ACCESS'
+        platformLabels.NoAccess
       )}
     </>
   )

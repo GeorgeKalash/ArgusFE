@@ -10,6 +10,7 @@ import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const ProductAgentForm = ({
   store,
@@ -21,6 +22,7 @@ const ProductAgentForm = ({
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId: pId, dispersals } = store
   const [_dispersalId, setDispersalId] = useState({})
+  const { platformLabels } = useContext(ControlContext)
 
   const columns = [
     {
@@ -76,7 +78,7 @@ const ProductAgentForm = ({
       extension: RemittanceSettingsRepository.ProductDispersalAgents.set2,
       record: JSON.stringify(data)
     }).then(res => {
-      if (res) toast.success('Record Edited Successfully')
+      if (res) toast.success(platformLabels.Edited)
     })
   }
 

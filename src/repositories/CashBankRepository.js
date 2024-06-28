@@ -13,6 +13,9 @@ export const CashBankRepository = {
   CreditCard: {
     qry: service + 'qryCC'
   },
+  CashTransaction: {
+    qry: service + 'qryTRX'
+  },
   CbCashGroup: {
     qry: service + 'qryGRP',
     page: service + 'pageGRP',
@@ -51,7 +54,8 @@ export const CashBankRepository = {
   },
   AccountBalance: {
     qry: service + 'qryABA',
-    get: service + 'getABA'
+    get: service + 'getABA',
+    rebuild: service + 'rebuildABA'
   },
 
   OpeningBalance: {
@@ -59,10 +63,18 @@ export const CashBankRepository = {
     get: service + 'getOBA',
     set: service + 'setOBA',
     del: service + 'delOBA',
-    page: service + 'pageOBA'},
+    page: service + 'pageOBA'
+  },
 
   CATransaction: {
     page: service + 'pageTRX'
-
+  },
+  CAadjustment: {
+    qry: service + 'qryADJ',
+    page: service + 'pageADJ',
+    get: service + 'getADJ',
+    set: service + 'setADJ',
+    del: service + 'delADJ',
+    post: service + 'postADJ'
   }
 }

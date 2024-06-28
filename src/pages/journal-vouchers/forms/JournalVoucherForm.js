@@ -127,7 +127,7 @@ export default function JournalVoucherForm({ labels, access, recordId, general =
             displayField='name'
             values={formik.values}
             onChange={async (event, newValue) => {
-              formik.setFieldValue('dtId', newValue?.recordId)
+              formik.setFieldValue('dtId', newValue?.recordId || '')
               changeDT(newValue)
             }}
             error={formik.touched.dtId && Boolean(formik.errors.dtId)}

@@ -4,39 +4,42 @@ import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import CbCashGroupsForms from './forms/CbCashGroupsForm'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const CbCashGroup = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    return await getRequest({
+    const response = await getRequest({
       extension: CashBankRepository.CbCashGroup.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
+
+    return { ...response, _startAt: _startAt }
   }
 
   const {
     query: { data },
     labels: _labels,
+    refetch,
+    invalidate,
+    paginationParameters,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: CashBankRepository.CbCashGroup.page,
     datasetId: ResourceIds.CbCashGroups
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: CashBankRepository.CbCashGroup.page
   })
 
   const columns = [
@@ -61,12 +64,14 @@ const CbCashGroup = () => {
   }
 
   const del = async obj => {
-    await postRequest({
-      extension: CashBankRepository.CbCashGroup.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success('Record Deleted Successfully')
+    try {
+      await postRequest({
+        extension: CashBankRepository.CbCashGroup.del,
+        record: JSON.stringify(obj)
+      })
+      invalidate()
+      toast.success(platformLabels.Deleted)
+    } catch (error) {}
   }
   function openForm(recordId) {
     stack({
@@ -74,11 +79,10 @@ const CbCashGroup = () => {
       props: {
         labels: _labels,
         recordId: recordId ? recordId : null,
-        maxAccess: access,
-        invalidate: invalidate
+        maxAccess: access
       },
       width: 600,
-      height: 600,
+      height: 250,
       title: _labels.accountGroup
     })
   }
@@ -99,6 +103,8 @@ const CbCashGroup = () => {
           pageSize={50}
           paginationType='api'
           maxAccess={access}
+          refetch={refetch}
+          paginationParameters={paginationParameters}
         />
       </Grow>
     </VertLayout>

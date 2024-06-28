@@ -11,10 +11,12 @@ import toast from 'react-hot-toast'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const BeneficiaryBank = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const { platformLabels } = useContext(ControlContext)
 
   const {
     query: { data },
@@ -29,7 +31,7 @@ const BeneficiaryBank = () => {
     filter: {
       endpointId: RemittanceOutwardsRepository.Beneficiary.snapshot,
       filterFn: fetchWithSearch,
-      default: { dispersalType: 2, clientId: 0 }
+      default: { dispersalType: 2, clientId: 0, seqNo: 1 }
     }
   })
 
@@ -45,12 +47,12 @@ const BeneficiaryBank = () => {
     }
   }
 
-  async function openForm(beneficiaryId, clientId) {
+  async function openForm(obj) {
     stack({
       Component: BenificiaryBankForm,
       props: {
-        client: { clientId: clientId },
-        beneficiary: { beneficiaryId: beneficiaryId, beneficiarySeqNo: 1 },
+        client: { clientId: obj.clientId },
+        beneficiary: { beneficiaryId: obj.beneficiaryId, beneficiarySeqNo: obj.seqNo },
         dispersalType: 2
       },
       width: 700,
@@ -119,7 +121,7 @@ const BeneficiaryBank = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
   }
 
   const addBenBank = () => {
@@ -127,7 +129,7 @@ const BeneficiaryBank = () => {
   }
 
   const editBenBank = obj => {
-    openForm(obj.beneficiaryId, obj.clientId)
+    openForm(obj)
   }
 
   return (
@@ -150,7 +152,7 @@ const BeneficiaryBank = () => {
         <Table
           columns={columns}
           gridData={data ? data : { list: [] }}
-          rowId={['beneficiaryId', 'clientId']}
+          rowId={['beneficiaryId', 'clientId', 'seqNo']}
           onEdit={editBenBank}
           onDelete={delBenBank}
           isLoading={false}

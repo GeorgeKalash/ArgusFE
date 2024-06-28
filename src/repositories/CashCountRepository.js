@@ -11,6 +11,9 @@ export const CashCountRepository = {
     reopen: service + 'reopenTRX',
     del: service + 'delTRX'
   },
+  Generate: {
+    generate: service + 'generateTFR'
+  },
   CcCashNotes: {
     qry: service + 'qryNOT',
     get: service + 'getNOT',

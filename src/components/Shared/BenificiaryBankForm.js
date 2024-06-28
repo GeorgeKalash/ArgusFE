@@ -77,7 +77,7 @@ export default function BenificiaryBankForm({
           stoppedReason: RTBEN?.record?.stoppedReason,
           gender: RTBEN?.record?.gender,
           rtId: RTBEN?.record?.rtId,
-          rtName: RTBEN?.record.rtName,
+          rtName: RTBEN?.record?.rtName,
           cellPhone: RTBEN?.record?.cellPhone,
           birthDate: RTBEN?.record?.birthDate && formatDateFromApi(RTBEN.record.birthDate),
           cobId: RTBEN?.record?.cobId,
@@ -92,6 +92,7 @@ export default function BenificiaryBankForm({
           //RTBEB
           bankId: RTBEB?.record?.bankId,
           accountRef: RTBEB?.record?.accountRef,
+          accountRefRepeat: RTBEB?.record?.accountRef,
           accountType: RTBEB?.record?.accountType,
           IBAN: RTBEB?.record?.IBAN,
           routingNo: RTBEB?.record?.routingNo,
@@ -111,7 +112,6 @@ export default function BenificiaryBankForm({
             beneficiaryList: obj
           }))
         }
-
         formik.setValues(obj)
       }
       if (store?.submitted) {
@@ -157,6 +157,7 @@ export default function BenificiaryBankForm({
     //RTBEB
     bankId: null,
     accountRef: '',
+    accountRefRepeat: '',
     accountType: '',
     IBAN: '',
     routingNo: '',
@@ -181,6 +182,18 @@ export default function BenificiaryBankForm({
       name: yup.string().required(' '),
       bankId: yup.string().required(' ')
     }),
+    validate: values => {
+      const errors = {}
+      if (values.accountRef && values.accountRefRepeat != values.accountRef) {
+        errors.accountRefRepeat = 'accountRef must match'
+        setStore(prevStore => ({
+          ...prevStore,
+          submitted: false
+        }))
+      }
+
+      return errors
+    },
     onSubmit: async values => {
       const header = {
         clientId: values.clientId,
@@ -228,7 +241,8 @@ export default function BenificiaryBankForm({
         setStore(prevStore => ({
           ...prevStore,
           submitted: true,
-          beneficiaryList: data
+          beneficiaryList: data,
+          loadBen: false
         }))
       } else {
         const res = await postRequest({
@@ -247,6 +261,10 @@ export default function BenificiaryBankForm({
   const { labels: _labels } = useResourceQuery({
     datasetId: ResourceIds.BeneficiaryBank
   })
+
+  const handleCopy = event => {
+    event.preventDefault()
+  }
 
   return (
     <FormShell
@@ -333,6 +351,7 @@ export default function BenificiaryBankForm({
                     { key: 'name', value: 'Name' }
                   ]}
                   maxAccess={maxAccess}
+                  required
                   values={formik.values}
                   onChange={(event, newValue) => {
                     formik.setFieldValue('bankId', newValue ? newValue.recordId : '')
@@ -352,6 +371,26 @@ export default function BenificiaryBankForm({
                   error={formik.touched.accountRef && Boolean(formik.errors.accountRef)}
                   maxAccess={maxAccess}
                   readOnly={editMode}
+                  onCopy={handleCopy}
+                  onPaste={handleCopy}
+                  onClear={() => formik.setFieldValue('accountRef', '')}
+                />
+              </FormGrid>
+              <FormGrid hideonempty xs={12}>
+                <CustomTextField
+                  name='accountRefRepeat'
+                  label={_labels.confirmAccountRef}
+                  value={formik.values.accountRefRepeat}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  maxLength='50'
+                  error={formik.touched.accountRefRepeat && Boolean(formik.errors.accountRefRepeat)}
+                  maxAccess={maxAccess}
+                  readOnly={editMode}
+                  required={formik.values.accountRef}
+                  onCopy={handleCopy}
+                  onPaste={handleCopy}
+                  onClear={() => formik.setFieldValue('accountRefRepeat', '')}
                 />
               </FormGrid>
 

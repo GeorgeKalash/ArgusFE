@@ -15,11 +15,13 @@ import { useInvalidate } from 'src/hooks/resource'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId: pId } = store
   const [type, setType] = useState('')
+  const { platformLabels } = useContext(ControlContext)
 
   const [initialValues, setData] = useState({
     recordId: null,
@@ -72,14 +74,14 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
         if (!recordId) {
           formik.setFieldValue('recordId', res.recordId)
 
-          toast.success('Record Added Successfully')
+          toast.success(platformLabels.Added)
           setEditMode(true)
           setStore(prevStore => ({
             ...prevStore,
             recordId: res.recordId
           }))
         } else {
-          toast.success('Record Editted Successfully')
+          toast.success(platformLabels.Edited)
         }
 
         invalidate()

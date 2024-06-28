@@ -11,9 +11,11 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import CostCenterForm from './forms/CostCenterForm'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const CostCenter = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
@@ -90,7 +92,7 @@ const CostCenter = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
   }
 
   function openForm(recordId) {
@@ -103,7 +105,7 @@ const CostCenter = () => {
         invalidate: invalidate
       },
       width: 600,
-      height: 600,
+      height: 300,
       title: _labels.costCenter
     })
   }

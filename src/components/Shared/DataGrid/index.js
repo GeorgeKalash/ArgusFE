@@ -6,11 +6,12 @@ import {
 } from '@mui/x-data-grid'
 import components from './components'
 import { Box, IconButton } from '@mui/material'
-import { useEffect, useRef, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import { useError } from 'src/error'
 import DeleteDialog from '../DeleteDialog'
 import { HIDDEN, accessLevel } from 'src/services/api/maxAccess'
 import { useWindow } from 'src/windows'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export function DataGrid({
   idName = 'id',
@@ -59,6 +60,7 @@ export function DataGrid({
   const apiRef = useGridApiRef()
 
   const [isUpdatingField, setIsUpdating] = useState(false)
+  const { platformLabels } = useContext(ControlContext)
 
   const [nextEdit, setNextEdit] = useState(null)
 
@@ -152,6 +154,8 @@ export function DataGrid({
         id,
         field
       })
+      const row = apiRef.current.getRow(id)
+      if (onSelectionChange) onSelectionChange(row)
     })
   }
 
@@ -209,7 +213,7 @@ export function DataGrid({
       width: 450,
       height: 170,
       canExpand: false,
-      title: 'Delete'
+      title: platformLabels.Delete
     })
   }
 
@@ -264,9 +268,14 @@ export function DataGrid({
   }
 
   const handleRowClick = params => {
-    const selectedRow = value.find(row => row.id === params.row.id)
+    const selectedRow = apiRef.current.getRow(params.id)
     if (onSelectionChange) {
-      onSelectionChange(selectedRow)
+      async function update({ newRow }) {
+        updateState({
+          newRow
+        })
+      }
+      onSelectionChange(selectedRow, update)
     }
   }
 
@@ -414,6 +423,7 @@ export function DataGrid({
 
                 if (column.updateOn !== 'blur') await commitRowUpdate()
               }
+              const row = apiRef.current.getRow(params.id)
 
               return (
                 <Box
@@ -434,7 +444,7 @@ export function DataGrid({
                     {...params}
                     column={{
                       ...column,
-                      props
+                      props: column.propsReducer ? column?.propsReducer({ row, props }) : props
                     }}
                     update={update}
                     updateRow={updateRow}

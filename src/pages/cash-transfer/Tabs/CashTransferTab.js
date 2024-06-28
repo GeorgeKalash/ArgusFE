@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Button, Grid } from '@mui/material'
-import { useFormik } from 'formik'
+import { Grid } from '@mui/material'
 import * as yup from 'yup'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FormShell from 'src/components/Shared/FormShell'
@@ -20,14 +19,19 @@ import { LOShipmentForm } from 'src/components/Shared/LOShipmentForm'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import FormGrid from 'src/components/form/layout/FormGrid'
-import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
+import { formatDateFromApi, formatDateToApi, formatDateToApiFunction } from 'src/lib/date-helper'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import { useForm } from 'src/hooks/form'
+import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
+import { RateDivision } from 'src/resources/RateDivision'
+import { DIRTYFIELD_AMOUNT, getRate } from 'src/utils/RateCalculator'
+import WorkFlow from 'src/components/Shared/WorkFlow'
+import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 
-export default function CashTransferTab({ labels, recordId, maxAccess, plantId, cashAccountId, dtId }) {
+export default function CashTransferTab({ labels, recordId, access, plantId, cashAccountId, dtId }) {
   const [editMode, setEditMode] = useState(!!recordId)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
@@ -52,6 +56,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
     toCashAccountId: '',
     toCARef: '',
     toCAName: '',
+    baseAmount: '',
     notes: '',
     wip: '',
     status: '',
@@ -68,9 +73,18 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
         currencyName: '',
         currencyRef: '',
         amount: '',
+        baseAmount: '',
+        exRate: '',
+        rateCalcMethod: '',
         balance: 0
       }
     ]
+  })
+
+  const { maxAccess } = useDocumentType({
+    functionId: SystemFunction.CashTransfer,
+    access: access,
+    enabled: !recordId
   })
 
   const { formik } = useForm({
@@ -100,6 +114,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
       copy.date = formatDateToApi(copy.date)
       copy.status = copy.status === '' ? 1 : copy.status
       copy.wip = copy.wip === '' ? 1 : copy.wip
+      copy.baseAmount = totalLoc
 
       const updatedRows = formik.values.transfers.map((transferDetail, index) => {
         const seqNo = index + 1
@@ -144,6 +159,12 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
     }
   })
 
+  const totalLoc = formik.values.transfers.reduce((locSum, row) => {
+    const locValue = parseFloat(row.baseAmount?.toString().replace(/,/g, '')) || 0
+
+    return locSum + locValue
+  }, 0)
+
   const onClose = async () => {
     const { transfers, ...rest } = formik.values
     const copy = { ...rest }
@@ -151,6 +172,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
     copy.date = formatDateToApi(copy.date)
     copy.wip = copy.wip === '' ? 1 : copy.wip
     copy.status = copy.status === '' ? 1 : copy.status
+    copy.baseAmount = totalLoc
 
     const res = await postRequest({
       extension: CashBankRepository.CashTransfer.close,
@@ -178,6 +200,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
     copy.date = formatDateToApi(copy.date)
     copy.wip = copy.wip === '' ? 1 : copy.wip
     copy.status = copy.status === '' ? 1 : copy.status
+    copy.baseAmount = totalLoc
 
     const res = await postRequest({
       extension: CashBankRepository.CashTransfer.reopen,
@@ -197,6 +220,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
     copy.date = formatDateToApi(copy.date)
     copy.wip = copy.wip === '' ? 1 : copy.wip
     copy.status = copy.status === '' ? 1 : copy.status
+    copy.baseAmount = totalLoc
 
     const res = await postRequest({
       extension: CashBankRepository.CashTransfer.post,
@@ -250,7 +274,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
         functionId: SystemFunction.CashTransfer,
         editMode: isClosed
       },
-      width: 1500,
+      width: 1200,
       height: 670,
       title: 'Shipments'
     })
@@ -273,32 +297,24 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
     })()
   }, [])
 
-  const getDataGrid = async () => {
-    try {
-      const res = await getRequest({
-        extension: CashBankRepository.AccountBalance.qry,
-        parameters: `_cashAccountId=${formik.values.fromCashAccountId}`
-      })
-      formik.setFieldValue(
-        'transfers',
-        res.list
-          .filter(item => item.balance != 0)
-          .map(({ id, balance, ...rest }, index) => ({
-            id: index + 1,
-            balance,
-            amount: balance || '',
-            ...rest
-          }))
-      )
-    } catch (error) {}
+  const onWorkFlowClick = async () => {
+    stack({
+      Component: WorkFlow,
+      props: {
+        functionId: SystemFunction.CashTransfer,
+        recordId: formik.values.recordId
+      },
+      width: 950,
+      title: 'Workflow'
+    })
   }
 
   const actions = [
     {
-      key: 'Bulk',
+      key: 'WorkFlow',
       condition: true,
-      onClick: getDataGrid,
-      disabled: editMode || formik.values.transfers.some(transfer => transfer.currencyId) || isClosed
+      onClick: onWorkFlowClick,
+      disabled: !editMode
     },
     {
       key: 'Close',
@@ -335,8 +351,23 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
       condition: true,
       onClick: 'onClickAC',
       disabled: false
+    },
+    {
+      key: 'Cash Transaction',
+      condition: true,
+      onClick: 'transactionClicked',
+      disabled: !editMode
     }
   ]
+
+  function getCurrencyApi(_currencyId) {
+    return getRequest({
+      extension: MultiCurrencyRepository.Currency.get,
+      parameters: `_currencyId=${_currencyId}&_date=${formatDateToApiFunction(formik.values.date)}&_rateDivision=${
+        RateDivision.FINANCIALS
+      }`
+    })
+  }
 
   return (
     <FormShell
@@ -350,8 +381,8 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
     >
       <VertLayout>
         <Fixed>
-          <Grid container spacing={2}>
-            <Grid container rowGap={2} xs={6} sx={{ px: 2 }} spacing={4}>
+          <Grid container>
+            <Grid container rowGap={2} xs={6} sx={{ px: 2 }} spacing={2}>
               <Grid item xs={12}>
                 <CustomTextField
                   name='reference'
@@ -359,8 +390,8 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
                   value={formik?.values?.reference}
                   maxAccess={maxAccess}
                   maxLength='15'
-                  readOnly
-                  required
+                  readOnly={editMode}
+                  error={formik.touched.reference && Boolean(formik.errors.reference)}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -411,7 +442,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
                 />
               </Grid>
             </Grid>
-            <Grid container rowGap={2} xs={6} sx={{ px: 2 }} spacing={4}>
+            <Grid container rowGap={2} xs={6} sx={{ px: 2 }} spacing={2}>
               <Grid item xs={12}>
                 <CustomDatePicker
                   name='date'
@@ -513,21 +544,52 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
                   ]
                 },
                 widthDropDown: 200,
-                displayFieldWidth: 2
+                displayFieldWidth: 2,
+                async onChange({ row: { update, newRow } }) {
+                  if (!newRow?.currencyId) {
+                    return
+                  }
+                  if (newRow.currencyId) {
+                    try {
+                      const result = await getCurrencyApi(newRow?.currencyId)
+                      update({
+                        exRate: result.record.exRate,
+                        rateCalcMethod: result.record.rateCalcMethod
+                      })
+                    } catch (error) {}
+                  }
+                }
               },
               {
                 component: 'numberfield',
                 label: labels.amount,
                 name: 'amount',
                 defaultValue: '',
-                props: { disabled: isClosed }
+                props: { readOnly: isClosed },
+                async onChange({ row: { update, newRow } }) {
+                  if (!newRow?.amount) {
+                    return
+                  }
+                  if (newRow?.amount) {
+                    const updatedRateRow = getRate({
+                      amount: newRow?.amount,
+                      exRate: newRow?.exRate,
+                      baseAmount: newRow?.baseAmount,
+                      rateCalcMethod: newRow?.rateCalcMethod,
+                      dirtyField: DIRTYFIELD_AMOUNT
+                    })
+                    update({
+                      baseAmount: updatedRateRow.baseAmount
+                    })
+                  }
+                }
               },
               {
                 component: 'numberfield',
                 name: 'balance',
                 label: labels.balance,
                 defaultValue: '0',
-                props: { disabled: isClosed }
+                props: { readOnly: true }
               }
             ]}
           />

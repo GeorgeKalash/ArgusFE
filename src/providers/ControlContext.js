@@ -1,15 +1,45 @@
 // ** React Imports
-import { createContext, useContext } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { KVSRepository } from 'src/repositories/KVSRepository'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
+import { ResourceIds } from 'src/resources/ResourceIds'
+import { AuthContext } from './AuthContext'
+import axios from 'axios'
 
 const ControlContext = createContext()
 
 const ControlProvider = ({ children }) => {
   const { getRequest } = useContext(RequestsContext)
+  const [apiPlatformLabels, setApiPlatformLabels] = useState(null)
+  const { user, apiUrl, languageId } = useContext(AuthContext)
+
+  useEffect(() => {
+    getPlatformLabels(ResourceIds.Common, setApiPlatformLabels)
+  }, [user?.languageId, languageId])
+
+  const platformLabels = apiPlatformLabels
+    ? Object.fromEntries(apiPlatformLabels.map(({ key, value }) => [key, value]))
+    : {}
+
+  const getPlatformLabels = (resourceId, callback) => {
+    var parameters = '_dataset=' + resourceId + '&_language=1'
+
+    axios({
+      method: 'GET',
+      url: apiUrl + KVSRepository.getPlatformLabels + '?' + parameters,
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        LanguageId: user?.languageId || languageId
+      }
+    })
+      .then(res => {
+        callback(res.data.list)
+      })
+      .catch(error => {})
+  }
 
   const getLabels = (resourceId, callback) => {
     var parameters = '_dataset=' + resourceId
@@ -45,7 +75,8 @@ const ControlProvider = ({ children }) => {
 
   const values = {
     getLabels,
-    getAccess
+    getAccess,
+    platformLabels
   }
 
   return (

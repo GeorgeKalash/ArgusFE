@@ -15,11 +15,13 @@ import ProductLegCommissionForm from './productLegCommissionForm'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const ProductLegForm = ({ store, labels, expanded, editMode, maxAccess }) => {
   const { recordId: pId, countries, _seqNo } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const { platformLabels } = useContext(ControlContext)
 
   const post = obj => {
     const data = {
@@ -37,7 +39,7 @@ const ProductLegForm = ({ store, labels, expanded, editMode, maxAccess }) => {
       record: JSON.stringify(data)
     })
       .then(res => {
-        if (res) toast.success('Record Edited Successfully')
+        if (res) toast.success(platformLabels.Edited)
         getScheduleRange()
       })
       .catch(error => {
@@ -137,69 +139,69 @@ const ProductLegForm = ({ store, labels, expanded, editMode, maxAccess }) => {
       <FormShell form={formik} resourceId={ResourceIds.ProductMaster} maxAccess={maxAccess} editMode={editMode}>
         <VertLayout>
           <Fixed>
-          <Grid container xs={12} spacing={3}>
-            <Grid item xs={3}>
-              <ResourceComboBox
-                endpointId={SystemRepository.Plant.qry}
-                name='plantId'
-                label={labels.plant}
-                valueField='recordId'
-                values={store}
-                readOnly={true}
-                displayField={['reference', 'name']}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
-              />
+            <Grid container xs={12} spacing={3}>
+              <Grid item xs={3}>
+                <ResourceComboBox
+                  endpointId={SystemRepository.Plant.qry}
+                  name='plantId'
+                  label={labels.plant}
+                  valueField='recordId'
+                  values={store}
+                  readOnly={true}
+                  displayField={['reference', 'name']}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' }
+                  ]}
+                />
+              </Grid>
+              <Grid item xs={3}>
+                <ResourceComboBox
+                  store={countries}
+                  name='countryId'
+                  label={labels.country}
+                  readOnly={true}
+                  valueField='countryId'
+                  displayField={['countryRef', 'countryName']}
+                  columnsInDropDown={[
+                    { key: 'countryRef', value: 'Reference' },
+                    { key: 'countryName', value: 'Name' }
+                  ]}
+                  values={store}
+                />
+              </Grid>
+              <Grid item xs={3}>
+                <ResourceComboBox
+                  name='currencyId'
+                  label={labels.currency}
+                  endpointId={SystemRepository.Currency.qry}
+                  valueField='recordId'
+                  values={store}
+                  displayField={['reference', 'name']}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' }
+                  ]}
+                  readOnly={true}
+                />
+              </Grid>
+              <Grid item xs={3}>
+                {}
+                <ResourceComboBox
+                  store={store?.dispersals}
+                  name='dispersalId'
+                  label={labels.dispersal}
+                  valueField='recordId'
+                  values={store}
+                  displayField={['reference', 'name']}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' }
+                  ]}
+                  readOnly={true}
+                />
+              </Grid>
             </Grid>
-            <Grid item xs={3}>
-              <ResourceComboBox
-                store={countries}
-                name='countryId'
-                label={labels.country}
-                readOnly={true}
-                valueField='countryId'
-                displayField={['countryRef', 'countryName']}
-                columnsInDropDown={[
-                  { key: 'countryRef', value: 'Reference' },
-                  { key: 'countryName', value: 'Name' }
-                ]}
-                values={store}
-              />
-            </Grid>
-            <Grid item xs={3}>
-              <ResourceComboBox
-                name='currencyId'
-                label={labels.currency}
-                endpointId={SystemRepository.Currency.qry}
-                valueField='recordId'
-                values={store}
-                displayField={['reference', 'name']}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
-                readOnly={true}
-              />
-            </Grid>
-            <Grid item xs={3}>
-              {}
-              <ResourceComboBox
-                store={store?.dispersals}
-                name='dispersalId'
-                label={labels.dispersal}
-                valueField='recordId'
-                values={store}
-                displayField={['reference', 'name']}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
-                readOnly={true}
-              />
-            </Grid>
-          </Grid>
           </Fixed>
           <Grow>
             <DataGrid
