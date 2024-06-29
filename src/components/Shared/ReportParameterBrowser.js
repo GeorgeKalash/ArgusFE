@@ -307,13 +307,13 @@ const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, disab
 
     parameters.map(async field => {
       if (field?.controlType && field.value) {
-        fieldComponentArray.push({
+        fieldComponentArray[field.id] = {
           fieldId: field.id,
           fieldKey: field.key,
-          value: field.key === 'date' ? new Date(field.value.toString()).getTime() : field.value,
+          value: field?.key === 'date' ? new Date(field.value.toString()).getTime() : field?.value,
           caption: field.caption,
-          display: field.value
-        })
+          display: field?.key === 'date' ? new Date(field.value.toString()).getTime() : field?.value
+        }
       }
     })
 
@@ -321,8 +321,7 @@ const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, disab
   }
   useEffect(() => {
     if (parameters.length > 0) {
-      // initialDefault()
-
+      initialDefault()
       mergeFieldWithApiDetails()
     }
   }, [parameters])
