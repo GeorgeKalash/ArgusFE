@@ -78,7 +78,7 @@ const GetLookup = ({ field, formik }) => {
 
 const GetComboBox = ({ field, formik }) => {
   const apiDetails = field?.apiDetails
-
+  console.log(formik.values?.parameters?.[field?.id]?.value?.toString())
   return (
     <Grid item xs={12} key={field.id}>
       {field.classId ? (
@@ -87,11 +87,11 @@ const GetComboBox = ({ field, formik }) => {
           parameters={apiDetails?.parameters}
           name={`parameters[${field.id}`}
           label={field.caption}
-          valueField={formik.values?.parameters?.[field?.id]?.value ? 'value' : apiDetails.valueField}
+          valueField={apiDetails.valueField}
           displayField={apiDetails.displayField}
           columnsInDropDown={apiDetails?.columnsInDropDown}
           required={field.mandatory}
-          values={formik.values?.parameters?.[field?.id]}
+          value={formik.values?.parameters?.[field?.id]?.value}
           onChange={(event, newValue) => {
             const textValue = Array.isArray(apiDetails?.displayField)
               ? apiDetails?.displayField?.map(header => newValue[header]?.toString())?.join(' - ')
