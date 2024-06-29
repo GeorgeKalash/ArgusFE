@@ -20,11 +20,20 @@ const formatDateTo = value => {
 }
 
 const formatDateFrom = value => {
-  const year = value.slice(0, 4)
-  const month = value.slice(4, 6) - 1
-  const day = value.slice(6, 8)
-  const parsedDate = new Date(year, month, day)
-  const timestamp = parsedDate.getTime()
+  let timestamp
+
+  if (value.indexOf('-') > -1) {
+    console.log('value', value)
+    timestamp = new Date(value.toString()).getTime()
+  } else {
+    const year = value.slice(0, 4)
+    const month = value.slice(4, 6)
+    const day = value.slice(6, 8)
+    const parsedDate = new Date(year, month - 1, day)
+    timestamp = parsedDate.getTime()
+  }
+
+  console.log('formattedDate', timestamp)
 
   return timestamp
 }
@@ -244,20 +253,19 @@ const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, disab
     validate: values => {
       const errors = { parameters: [] }
       items.forEach(item => {
-        if (item.mandatory && item?.id) {
-          if (values.parameters[item?.id] === undefined) {
+        if (item?.mandatory && item?.id) {
+          if (!values?.parameters?.[item?.id]) {
             errors.parameters[item?.id] = 'This field is required'
           }
         }
       })
-
       return errors.parameters.length > 0 ? errors : {}
     },
     enableReinitialize: true,
     validateOnChange: true,
     validateOnBlur: true,
 
-    // validationSchema: validationSchema,
+    // validationSchema: yup.object().shape({}),
     onSubmit: values => {
       const processedArray = values?.parameters
         ?.filter((item, index) => item?.fieldId)
@@ -292,8 +300,29 @@ const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, disab
     )
     setItems(fieldComponentArray.filter(field => field !== null))
   }
+
+  const initialDefault = async () => {
+    const fieldComponentArray = []
+
+    parameters.map(async field => {
+      if (field?.controlType && field.value) {
+        fieldComponentArray.push({
+          fieldId: field.id,
+          fieldKey: field.key,
+          value: field.key === 'date' ? new Date(field.value.toString()).getTime() : field.value,
+          caption: field.caption,
+          display: field.value
+        })
+      }
+    })
+
+    formik.setFieldValue('parameters', fieldComponentArray)
+  }
   useEffect(() => {
-    parameters.length > 0 && mergeFieldWithApiDetails()
+    if (parameters.length > 0) {
+      initialDefault()
+      mergeFieldWithApiDetails()
+    }
   }, [parameters])
 
   useEffect(() => {
