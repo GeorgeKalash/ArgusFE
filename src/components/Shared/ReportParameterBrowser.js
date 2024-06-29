@@ -320,7 +320,7 @@ const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, disab
   }
   useEffect(() => {
     if (parameters.length > 0) {
-      initialDefault()
+      // initialDefault()
       mergeFieldWithApiDetails()
     }
   }, [parameters])
