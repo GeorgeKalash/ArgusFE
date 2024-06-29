@@ -259,6 +259,7 @@ const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, disab
           }
         }
       })
+
       return errors.parameters.length > 0 ? errors : {}
     },
     enableReinitialize: true,
@@ -321,6 +322,7 @@ const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, disab
   useEffect(() => {
     if (parameters.length > 0) {
       // initialDefault()
+
       mergeFieldWithApiDetails()
     }
   }, [parameters])
