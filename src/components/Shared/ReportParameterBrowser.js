@@ -78,20 +78,21 @@ const GetLookup = ({ field, formik }) => {
 
 const GetComboBox = ({ field, formik }) => {
   const apiDetails = field?.apiDetails
-  console.log(formik.values?.parameters?.[field?.id]?.value?.toString())
+  console.log(formik.values?.parameters, 'parameters')
+
   return (
     <Grid item xs={12} key={field.id}>
       {field.classId ? (
         <ResourceComboBox
           endpointId={apiDetails.endpoint}
           parameters={apiDetails?.parameters}
-          name={`parameters[${field.id}`}
+          name={`parameters[${field?.id}`}
           label={field.caption}
           valueField={apiDetails.valueField}
           displayField={apiDetails.displayField}
           columnsInDropDown={apiDetails?.columnsInDropDown}
           required={field.mandatory}
-          value={formik.values?.parameters?.[field?.id]?.value}
+          values={formik.values}
           onChange={(event, newValue) => {
             const textValue = Array.isArray(apiDetails?.displayField)
               ? apiDetails?.displayField?.map(header => newValue[header]?.toString())?.join(' - ')
@@ -196,8 +197,8 @@ const GetTextField = ({ field, formik }) => {
 
 const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, disabled, window }) => {
   const { getRequest } = useContext(RequestsContext)
-  const [parameters, setParameters] = useState([])
   const [items, setItems] = useState([])
+  const [parameters, setParameters] = useState([])
 
   const getParameterDefinition = reportName => {
     const parameters = `_reportName=${reportName}`
@@ -321,7 +322,7 @@ const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, disab
   }
   useEffect(() => {
     if (parameters.length > 0) {
-      initialDefault()
+      // initialDefault()
       mergeFieldWithApiDetails()
     }
   }, [parameters])
@@ -336,6 +337,7 @@ const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, disab
       return acc
     }, [])
 
+    console.log(paramsArray, 'paramsArray')
     formik.setFieldValue('parameters', mappedData)
   }, [])
 

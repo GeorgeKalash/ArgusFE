@@ -26,7 +26,7 @@ const ReportViewer = ({ resourceId }) => {
   const [reportStore, setReportStore] = useState([])
   const [selectedReport, setSelectedReport] = useState(null)
   const [selectedFormat, setSelectedFormat] = useState(ExportFormat[0])
-  const [paramsArray, setParamsArray] = useState([])
+  // const [paramsArray, setParamsArray] = useState([])
   const [pdf, setPDF] = useState(null)
   const { stack } = useWindow()
 
@@ -109,6 +109,23 @@ const ReportViewer = ({ resourceId }) => {
         return reportStore[0]
       })
   }, [reportStore])
+
+  const formatDataForApi = paramsArray => {
+    let minValue = Infinity
+
+    for (const [index, { fieldId, value }] of Object.entries(paramsArray)) {
+      const numericValue = Number(fieldId)
+      if (numericValue < minValue) {
+        minValue = numericValue
+      }
+    }
+
+    const formattedData = paramsArray
+      .map(({ fieldId, value }) => `${fieldId}|${value}`)
+      .reduce((acc, curr, index) => acc + (index === minValue ? `${curr}` : `^${curr}`), '')
+
+    return formattedData
+  }
 
   return (
     <VertLayout>
