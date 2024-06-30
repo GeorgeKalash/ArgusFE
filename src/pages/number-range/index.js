@@ -11,6 +11,7 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import NumberRangeForm from './forms/NumberRangeForm'
 import { useWindow } from 'src/windows'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const NumberRange = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
