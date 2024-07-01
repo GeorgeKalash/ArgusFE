@@ -26,7 +26,6 @@ const ReportViewer = ({ resourceId }) => {
   const [reportStore, setReportStore] = useState([])
   const [selectedReport, setSelectedReport] = useState(null)
   const [selectedFormat, setSelectedFormat] = useState(ExportFormat[0])
-  // const [paramsArray, setParamsArray] = useState([])
   const [pdf, setPDF] = useState(null)
   const { stack } = useWindow()
 

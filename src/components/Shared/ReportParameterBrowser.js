@@ -84,6 +84,7 @@ const GetComboBox = ({ field, formik }) => {
       display: field.value
     })
   }
+
   return (
     <Grid item xs={12} key={field.id}>
       {/* {formik.values?.parameters?.[field.id]?.value} */}
