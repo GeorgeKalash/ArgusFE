@@ -1,28 +1,19 @@
 import { useContext, useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
-
-// ** MUI Imports
 import { Box, Stack, IconButton, LinearProgress, Checkbox, TableCell, Button } from '@mui/material'
 import { DataGrid, gridClasses } from '@mui/x-data-grid'
 import { alpha, styled } from '@mui/material/styles'
-
-// ** Icons
 import FirstPageIcon from '@mui/icons-material/FirstPage'
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore'
 import NavigateNextIcon from '@mui/icons-material/NavigateNext'
 import LastPageIcon from '@mui/icons-material/LastPage'
 import RefreshIcon from '@mui/icons-material/Refresh'
-
-// ** Custom Imports
 import DeleteDialog from './DeleteDialog'
 import Image from 'next/image'
-
-// ** Resources
 import { ControlAccessLevel, TrxType } from 'src/resources/AccessLevels'
 import { HIDDEN, accessLevel } from 'src/services/api/maxAccess'
 import { useWindow } from 'src/windows'
 import StrictDeleteConfirmation from './StrictDeleteConfirmation'
-
 import deleteIcon from '../../../public/images/TableIcons/delete.png'
 import editIcon from '../../../public/images/TableIcons/edit.png'
 import { ControlContext } from 'src/providers/ControlContext'
@@ -108,7 +99,7 @@ const Table = ({
   showCheckboxColumn = false,
   checkTitle = '',
   viewCheckButtons = false,
-  setData,
+  ChangeCheckedRow,
   ...props
 }) => {
   const { stack } = useWindow()
@@ -118,8 +109,6 @@ const Table = ({
   const { languageId } = useContext(AuthContext)
   const [startAt, setStartAt] = useState(0)
   const [page, setPage] = useState(1)
-  const [checkedRows, setCheckedRows] = useState({})
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState([false, {}])
   const pageSize = props.pageSize ? props.pageSize : 50
   const originalGridData = props.gridData && props.gridData.list && props.gridData.list
   const api = props?.api ? props?.api : props.paginationParameters
@@ -314,7 +303,7 @@ const Table = ({
   const shouldViewButtons = !viewCheckButtons ? 'none' : ''
 
   const handleCheckboxChange = row => {
-    setCheckedRows(prevCheckedRows => {
+    ChangeCheckedRow(prevCheckedRows => {
       const newCheckedRows = { ...prevCheckedRows }
       const key = row.seqNo ? `${row.recordId}-${row.seqNo}` : row.recordId
       newCheckedRows[key] = row
@@ -336,18 +325,6 @@ const Table = ({
       height: 300,
       title: platformLabels.DeleteConfirmation
     })
-  }
-
-  {
-    /* <DeleteDialog
-    open={deleteDialogOpen}
-    fullScreen={false}
-    onClose={() => setDeleteDialogOpen([false, {}])}
-    onConfirm={obj => {
-      setDeleteDialogOpen([false, {}])
-      props.onDelete(obj)
-    }}
-  /> */
   }
 
   function openDelete(obj) {
@@ -433,7 +410,7 @@ const Table = ({
       checked: true
     }))
 
-    setData(prevGridData => ({
+    ChangeCheckedRow(prevGridData => ({
       ...prevGridData,
       list: updatedRowGridData
     }))
@@ -445,7 +422,7 @@ const Table = ({
       checked: false
     }))
 
-    setData(prevGridData => ({
+    ChangeCheckedRow(prevGridData => ({
       ...prevGridData,
       list: updatedRowGridData
     }))
@@ -462,12 +439,6 @@ const Table = ({
     if (props.gridData && props.gridData.list && paginationType === 'api') {
       setGridData(props.gridData)
     }
-    if (pagination && paginationType != 'api' && props.gridData && props.gridData.list && page != 1) {
-      // console.log('enter if')
-      // setPage(1)
-    }
-    setCheckedRows([])
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.gridData])
 
   return (
