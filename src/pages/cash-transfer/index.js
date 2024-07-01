@@ -38,10 +38,13 @@ const CashTransfer = () => {
     }
   })
   async function fetchWithSearch({ filters }) {
-    return await getRequest({
-      extension: CashBankRepository.CashTransfer.snapshot,
-      parameters: `_filter=${filters.qry}`
-    })
+    return (
+      filters.qry &&
+      (await getRequest({
+        extension: CashBankRepository.CashTransfer.snapshot,
+        parameters: `_filter=${filters.qry}`
+      }))
+    )
   }
 
   const invalidate = useInvalidate({
