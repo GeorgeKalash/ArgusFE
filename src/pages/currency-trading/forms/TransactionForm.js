@@ -209,7 +209,6 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     validateOnChange: true,
     validateOnBlur: true,
     validationSchema: yup.object({
-      reference: yup.string().required(' '),
       date: yup.string().required(' '),
       id_type: yup.number().required(' '),
       id_number: yup.number().required(' '),
