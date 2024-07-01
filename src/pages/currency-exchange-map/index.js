@@ -22,6 +22,7 @@ const NumberRange = () => {
   const { getLabels, getAccess } = useContext(ControlContext)
   const [access, setAccess] = useState(0)
   const [labels, setLabels] = useState(null)
+  const { platformLabels } = useContext(ControlContext)
 
   useEffect(() => {
     if (!access) getAccess(ResourceIds.currencyExchangeMap, setAccess)
@@ -92,7 +93,7 @@ const NumberRange = () => {
       record: JSON.stringify(data)
     })
       .then(res => {
-        if (res.statusId) toast.success('Record Successfully')
+        if (res.statusId) toast.success(platformLabels.Updated)
       })
       .catch(error => {})
   }
