@@ -23,7 +23,6 @@ const formatDateFrom = value => {
   let timestamp
 
   if (value.indexOf('-') > -1) {
-    console.log('value', value)
     timestamp = new Date(value.toString()).getTime()
   } else {
     const year = value.slice(0, 4)
@@ -32,8 +31,6 @@ const formatDateFrom = value => {
     const parsedDate = new Date(year, month - 1, day)
     timestamp = parsedDate.getTime()
   }
-
-  console.log('formattedDate', timestamp)
 
   return timestamp
 }
@@ -78,34 +75,41 @@ const GetLookup = ({ field, formik }) => {
 
 const GetComboBox = ({ field, formik }) => {
   const apiDetails = field?.apiDetails
-  console.log(formik.values?.parameters, 'parameters')
-
+  if (!formik.values?.parameters?.[field.id]?.value && field.value) {
+    formik.setFieldValue(`parameters[${field.id}]`, {
+      fieldId: field.id,
+      fieldKey: field.key,
+      value: Number(field.value),
+      caption: field.caption,
+      display: field.value
+    })
+  }
   return (
     <Grid item xs={12} key={field.id}>
+      {/* {formik.values?.parameters?.[field.id]?.value} */}
       {field.classId ? (
         <ResourceComboBox
           endpointId={apiDetails.endpoint}
           parameters={apiDetails?.parameters}
-          name={`parameters[${field?.id}`}
+          name={`parameters[${field.id}]`}
           label={field.caption}
           valueField={apiDetails.valueField}
           displayField={apiDetails.displayField}
           columnsInDropDown={apiDetails?.columnsInDropDown}
           required={field.mandatory}
-          values={formik.values}
+          value={formik.values?.parameters?.[field.id]?.value || Number(field.value)}
           onChange={(event, newValue) => {
             const textValue = Array.isArray(apiDetails?.displayField)
-              ? apiDetails?.displayField?.map(header => newValue[header]?.toString())?.join(' - ')
+              ? apiDetails?.displayField?.map(header => newValue?.[header]?.toString())?.join(' - ')
               : newValue?.[apiDetails?.displayField]
-            field.mandatory && formik.setFieldTouched(`parameters[${field.id}]`, true) // Ensure touched is set
 
             formik.setFieldValue(
               `parameters[${field.id}]`,
-              newValue
+              newValue?.[apiDetails?.valueField]
                 ? {
                     fieldId: field.id,
                     fieldKey: field.key,
-                    value: newValue?.[apiDetails?.valueField],
+                    value: Number(newValue?.[apiDetails?.valueField]),
                     caption: field.caption,
                     display: textValue
                   }
@@ -116,9 +120,9 @@ const GetComboBox = ({ field, formik }) => {
         />
       ) : (
         <>
-          <ResourceComboBox
+          {/* <ResourceComboBox
             datasetId={field?.data}
-            name={`parameters[${field.id}`}
+            name={`parameters[${field.id}]`}
             label={field.caption}
             valueField={'key'}
             displayField={'value'}
@@ -140,7 +144,7 @@ const GetComboBox = ({ field, formik }) => {
               )
             }}
             error={Boolean(formik.errors?.parameters?.[field?.id])}
-          />
+          /> */}
         </>
       )}
     </Grid>
@@ -151,9 +155,9 @@ const GetDate = ({ field, formik }) => {
   return (
     <Grid item xs={12} key={field.id}>
       <CustomDatePicker
-        name={`parameters[${field.id}`}
+        name={`parameters[${field.id}]`}
         label={field.caption}
-        value={formik.values?.parameters?.[field.id]?.value}
+        value={formik.values?.parameters?.[field.id]?.value || new Date(field.value.toString()).getTime()}
         required={field.mandatory}
         onChange={(name, newValue) => {
           formik.setFieldValue(`parameters[${field.id}]`, {
@@ -287,8 +291,6 @@ const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, disab
     }
   })
 
-  console.log('formik', formik)
-
   const mergeFieldWithApiDetails = async () => {
     const fieldComponentArray = []
 
@@ -303,26 +305,25 @@ const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, disab
     setItems(fieldComponentArray.filter(field => field !== null))
   }
 
-  const initialDefault = async () => {
-    const fieldComponentArray = []
+  // const initialDefault = async () => {
+  //   const fieldComponentArray = []
 
-    parameters.map(async field => {
-      if (field?.controlType && field.value) {
-        fieldComponentArray[field.id] = {
-          fieldId: field.id,
-          fieldKey: field.key,
-          value: field?.key === 'date' ? new Date(field.value.toString()).getTime() : field?.value,
-          caption: field.caption,
-          display: field?.key === 'date' ? new Date(field.value.toString()).getTime() : field?.value
-        }
-      }
-    })
+  //   parameters.map(async field => {
+  //     if (field?.controlType && field.value) {
+  //       fieldComponentArray[field.id] = {
+  //         fieldId: field.id,
+  //         fieldKey: field.key,
+  //         value: field?.key === 'date' ? new Date(field.value.toString()).getTime() : field?.value,
+  //         caption: field.caption,
+  //         display: field?.key === 'date' ? new Date(field.value.toString()).getTime() : field?.value
+  //       }
+  //     }
+  //   })
 
-    formik.setFieldValue('parameters', fieldComponentArray)
-  }
+  //   formik.setFieldValue('parameters', fieldComponentArray)
+  // }
   useEffect(() => {
     if (parameters.length > 0) {
-      // initialDefault()
       mergeFieldWithApiDetails()
     }
   }, [parameters])
@@ -337,7 +338,6 @@ const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, disab
       return acc
     }, [])
 
-    console.log(paramsArray, 'paramsArray')
     formik.setFieldValue('parameters', mappedData)
   }, [])
 

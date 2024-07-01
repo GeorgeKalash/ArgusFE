@@ -30,6 +30,7 @@ const GridToolbar = ({
   onSearch,
   previewReport,
   onSearchClear,
+  onGenerateReport,
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
@@ -185,6 +186,19 @@ const GridToolbar = ({
                 </Button>
               </Tooltip>
             </Box>
+          )}
+          {onGenerateReport && (
+            <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', py: '7px !important' }}>
+              <Button
+                sx={{ ml: 2 }}
+                variant='contained'
+                disabled={!reportName}
+                onClick={() => onGenerateReport({ params: formatDataForApi(paramsArray) })}
+                size='small'
+              >
+                Generate Report
+              </Button>
+            </Grid>
           )}
           {reportName && (
             <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', py: '7px !important' }}>

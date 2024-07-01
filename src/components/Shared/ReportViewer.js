@@ -110,23 +110,6 @@ const ReportViewer = ({ resourceId }) => {
       })
   }, [reportStore])
 
-  const formatDataForApi = paramsArray => {
-    let minValue = Infinity
-
-    for (const [index, { fieldId, value }] of Object.entries(paramsArray)) {
-      const numericValue = Number(fieldId)
-      if (numericValue < minValue) {
-        minValue = numericValue
-      }
-    }
-
-    const formattedData = paramsArray
-      .map(({ fieldId, value }) => `${fieldId}|${value}`)
-      .reduce((acc, curr, index) => acc + (index === minValue ? `${curr}` : `^${curr}`), '')
-
-    return formattedData
-  }
-
   return (
     <VertLayout>
       <Fixed>
@@ -134,6 +117,7 @@ const ReportViewer = ({ resourceId }) => {
           reportName={selectedReport?.parameters}
           disableRPB={!selectedReport?.parameters}
           onGo={generateReport}
+          onGenerateReport={generateReport}
         >
           <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between' }}>
             <Autocomplete
@@ -158,7 +142,7 @@ const ReportViewer = ({ resourceId }) => {
               sx={{ width: 200, pl: 2 }}
               disableClearable
             />
-            <Button
+            {/* <Button
               sx={{ ml: 2 }}
               variant='contained'
               disabled={!selectedReport || !selectedFormat}
@@ -166,7 +150,7 @@ const ReportViewer = ({ resourceId }) => {
               size='small'
             >
               Generate Report
-            </Button>
+            </Button> */}
           </Box>
         </GridToolbar>
       </Fixed>
