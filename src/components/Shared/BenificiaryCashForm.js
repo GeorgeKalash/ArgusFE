@@ -320,6 +320,11 @@ const BenificiaryCashForm = ({
                 valueShow='clientRef'
                 secondValueShow='clientName'
                 maxAccess={maxAccess}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Ref.' },
+                  { key: 'name', value: 'Name' },
+                  { key: 'cellPhone', value: 'Cell Phone' }
+                ]}
                 onChange={async (event, newValue) => {
                   if (newValue?.status == -1) {
                     stackError({

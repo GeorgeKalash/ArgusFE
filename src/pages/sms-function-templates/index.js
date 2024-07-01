@@ -1,5 +1,4 @@
 import { useState, useContext } from 'react'
-import { Box, Grid } from '@mui/material'
 import { useFormik } from 'formik'
 import toast from 'react-hot-toast'
 import FormShell from 'src/components/Shared/FormShell'
@@ -8,8 +7,6 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { DataGrid } from 'src/components/Shared/DataGrid'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
-import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 
@@ -135,25 +132,20 @@ const SmsFunctionTemplate = () => {
   }
 
   return (
-    <VertLayout>
-      <Grow>
-        <DataGrid
-          onChange={value => {
-            formik.setFieldValue('rows', value)
-          }}
-          value={formik.values.rows}
-          error={formik.errors.rows}
-          columns={columns}
-          allowDelete={false}
-          allowAddNewLine={false}
-
-          // height={300}
-        />
-      </Grow>
-      <Fixed>
-        <WindowToolbar isSaved={true} form={formik} />
-      </Fixed>
-    </VertLayout>
+    <FormShell resourceId={ResourceIds.SmsFunctionTemplates} form={formik} isInfo={false} isCleared={false}>
+      <VertLayout>
+        <Grow>
+          <DataGrid
+            onChange={value => formik.setFieldValue('rows', value)}
+            value={formik.values.rows}
+            error={formik.errors.rows}
+            columns={columns}
+            allowDelete={false}
+            allowAddNewLine={false}
+          />
+        </Grow>
+      </VertLayout>
+    </FormShell>
   )
 }
 
