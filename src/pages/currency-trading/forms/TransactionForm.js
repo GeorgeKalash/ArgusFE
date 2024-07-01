@@ -583,7 +583,9 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
         formValidation: formik,
         recordId: recId,
         functionId: formik.values.functionId,
-        onSuccess: onClose
+        onSuccess: () => {
+          onClose(recId)
+        }
       },
       width: 400,
       height: 400,

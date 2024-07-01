@@ -92,7 +92,7 @@ const ProductsWindow = ({ labels, maxAccess, onProductSubmit, outWardsData, wind
           maxAccess={maxAccess}
           pagination={false}
           showCheckboxColumn={true}
-          setData={setGridData}
+          ChangeCheckedRow={setGridData}
         />
       </Grow>
       <Fixed>

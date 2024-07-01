@@ -291,7 +291,9 @@ export default function OutwardsModificationForm({ access, labels, recordId, inv
         formValidation: formik,
         recordId: recId,
         functionId: SystemFunction.OutwardsModification,
-        onSuccess: onClose
+        onSuccess: () => {
+          onClose(recId)
+        }
       },
       width: 400,
       height: 400,
