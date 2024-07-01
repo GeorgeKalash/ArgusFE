@@ -38,11 +38,15 @@ const InwardTransfer = () => {
       filterFn: fetchWithSearch
     }
   })
+
   async function fetchWithSearch({ filters }) {
-    return await getRequest({
-      extension: RemittanceOutwardsRepository.InwardsTransfer.snapshot,
-      parameters: `_filter=${filters.qry}`
-    })
+    return (
+      filters.qry &&
+      (await getRequest({
+        extension: RemittanceOutwardsRepository.InwardsTransfer.snapshot,
+        parameters: `_filter=${filters.qry}`
+      }))
+    )
   }
 
   const invalidate = useInvalidate({
