@@ -96,9 +96,7 @@ export const apiMappings = {
     parameters: '_filter=',
     valueField: 'recordId',
     displayField: 'name',
-
-    // displayField: ['reference', 'name'],
-    displayField: 'name',
+    displayField: ['reference', 'name'],
     columnsInDropDown: [
       { key: 'reference', value: 'Reference' },
       { key: 'name', value: 'Name' }
@@ -109,9 +107,7 @@ export const apiMappings = {
     endpoint: SystemRepository.Plant.qry,
     parameters: '_filter=',
     valueField: 'recordId',
-
-    // displayField: ['reference', 'name'],
-    displayField: 'name',
+    displayField: ['reference', 'name'],
     columnsInDropDown: [
       { key: 'reference', value: 'Reference' },
       { key: 'name', value: 'Name' }
@@ -139,9 +135,7 @@ export const apiMappings = {
     endpoint: BusinessPartnerRepository.Group.qry,
     parameters: '_filter=',
     valueField: 'recordId',
-
-    // displayField: ['reference', 'name'],
-    displayField: 'name',
+    displayField: ['reference', 'name'],
     columnsInDropDown: [
       { key: 'reference', value: 'Reference' },
       { key: 'name', value: 'Name' }
@@ -163,9 +157,7 @@ export const apiMappings = {
     endpoint: GeneralLedgerRepository.GLAccountGroups.qry,
     parameters: '_filter=',
     valueField: 'recordId',
-
-    // displayField: ['reference', 'name'],
-    displayField: 'name',
+    displayField: ['reference', 'name'],
     columnsInDropDown: [
       { key: 'reference', value: 'Reference' },
       { key: 'name', value: 'Name' }
@@ -176,9 +168,7 @@ export const apiMappings = {
     endpoint: GeneralLedgerRepository.CostCenter.qry,
     parameters: '_filter=',
     valueField: 'recordId',
-
-    // displayField: ['reference', 'name'],
-    displayField: 'name',
+    displayField: ['reference', 'name'],
     columnsInDropDown: [
       { key: 'reference', value: 'Reference' },
       { key: 'name', value: 'Name' }
@@ -201,9 +191,7 @@ export const apiMappings = {
     endpoint: FinancialRepository.Group.qry,
     parameters: '_filter=',
     valueField: 'recordId',
-
-    // displayField: ['reference', 'name'],
-    displayField: 'name',
+    displayField: ['reference', 'name'],
     columnsInDropDown: [
       { key: 'reference', value: 'Reference' },
       { key: 'name', value: 'Name' }
@@ -214,9 +202,7 @@ export const apiMappings = {
     endpoint: MultiCurrencyRepository.ExchangeTable.qry,
     parameters: '_filter=',
     valueField: 'recordId',
-
-    // displayField: ['reference', 'name'],
-    displayField: 'name',
+    displayField: ['reference', 'name'],
     columnsInDropDown: [
       { key: 'reference', value: 'Reference' },
       { key: 'name', value: 'Name' }
@@ -227,9 +213,7 @@ export const apiMappings = {
     endpoint: SystemRepository.PlantGroup.qry,
     parameters: '_filter=',
     valueField: 'recordId',
-
-    // displayField: ['reference', 'name'],
-    displayField: 'name',
+    displayField: ['reference', 'name'],
     columnsInDropDown: [
       { key: 'reference', value: 'Reference' },
       { key: 'name', value: 'Name' }
@@ -240,9 +224,7 @@ export const apiMappings = {
     endpoint: LogisticsRepository.LoCarrier.qry,
     parameters: '_filter=',
     valueField: 'recordId',
-
-    // displayField: ['reference', 'name'],
-    displayField: 'name',
+    displayField: ['reference', 'name'],
     columnsInDropDown: [
       { key: 'reference', value: 'Reference' },
       { key: 'name', value: 'Name' }

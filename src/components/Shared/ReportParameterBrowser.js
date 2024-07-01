@@ -98,7 +98,7 @@ const GetComboBox = ({ field, formik }) => {
           displayField={apiDetails.displayField}
           columnsInDropDown={apiDetails?.columnsInDropDown}
           required={field.mandatory}
-          value={formik.values?.parameters?.[field.id]?.value || Number(field.value)}
+          values={formik.values?.parameters?.[field.id]?.value || Number(field.value)}
           onChange={(event, newValue) => {
             const textValue = Array.isArray(apiDetails?.displayField)
               ? apiDetails?.displayField?.map(header => newValue?.[header]?.toString())?.join(' - ')
@@ -270,7 +270,6 @@ const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, disab
     },
     enableReinitialize: true,
     validateOnChange: true,
-    validateOnBlur: true,
 
     // validationSchema: yup.object().shape({}),
     onSubmit: values => {
