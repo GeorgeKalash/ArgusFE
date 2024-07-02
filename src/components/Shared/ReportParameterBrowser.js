@@ -299,7 +299,7 @@ const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, disab
 
           return acc
         }, [])
-      console.log('processedArray', processedArray)
+
       setParamsArray(processedArray)
       window.close()
     }
