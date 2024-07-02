@@ -42,7 +42,7 @@ const MfAccounts = () => {
   }
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 50, params } = options
 
     const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}`
     var parameters = defaultParams
@@ -52,7 +52,7 @@ const MfAccounts = () => {
       parameters: parameters
     })
 
-    return { ...response, _startAt: _startAt }
+    return { ...response, _startAt: _startAt, _params: params }
   }
 
   const columns = [
@@ -124,6 +124,8 @@ const MfAccounts = () => {
           }}
           labels={_labels}
           inputSearch={true}
+          reportName='FIACC'
+          onGo={refetch}
         />
       </Fixed>
       <Grow>

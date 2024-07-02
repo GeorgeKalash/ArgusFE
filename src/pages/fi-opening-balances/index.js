@@ -15,14 +15,14 @@ const FiOpeningBalance = () => {
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
       extension: FinancialRepository.FiOpeningBalance.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}`
     })
 
-    return { ...response, _startAt: _startAt }
+    return { ...response, _startAt: _startAt, _params: params }
   }
 
   const invalidate = useInvalidate({
@@ -117,7 +117,7 @@ const FiOpeningBalance = () => {
 
   return (
     <>
-      <GridToolbar onAdd={add} maxAccess={access} />
+      <GridToolbar onAdd={add} maxAccess={access} reportName='FIOBA' onGo={refetch} />
       <Table
         columns={columns}
         gridData={data}

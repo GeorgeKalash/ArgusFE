@@ -7,7 +7,6 @@ import { Autocomplete, Box, Button, TextField } from '@mui/material'
 // ** Custom Imports
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import ReportParameterBrowser from 'src/components/Shared/ReportParameterBrowser'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -18,6 +17,7 @@ import { DevExpressRepository } from 'src/repositories/DevExpressRepository'
 import { ExportFormat } from 'src/statics/ExportFormat'
 import { VertLayout } from './Layouts/VertLayout'
 import { Fixed } from './Layouts/Fixed'
+import { useWindow } from 'src/windows'
 
 const ReportViewer = ({ resourceId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -26,10 +26,8 @@ const ReportViewer = ({ resourceId }) => {
   const [reportStore, setReportStore] = useState([])
   const [selectedReport, setSelectedReport] = useState(null)
   const [selectedFormat, setSelectedFormat] = useState(ExportFormat[0])
-  const [paramsArray, setParamsArray] = useState([])
-  const [reportParamWindowOpen, setReportParamWindowOpen] = useState(false)
   const [pdf, setPDF] = useState(null)
-  const [errorMessage, setErrorMessage] = useState(null)
+  const { stack } = useWindow()
 
   const getReportLayout = () => {
     var parameters = `_resourceId=${resourceId}`
@@ -49,9 +47,7 @@ const ReportViewer = ({ resourceId }) => {
           }))
         ])
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch(error => {})
   }
 
   const getReportTemplate = () => {
@@ -72,14 +68,12 @@ const ReportViewer = ({ resourceId }) => {
           }))
         ])
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch(error => {})
   }
 
   const generateReport = ({ params = '' }) => {
     const obj = {
-      api_url: selectedReport.api_url + '?_params=',
+      api_url: selectedReport.api_url + '?_params=' + params,
       assembly: selectedReport.assembly,
       format: selectedFormat.key,
       reportClass: selectedReport.reportClass
@@ -90,7 +84,6 @@ const ReportViewer = ({ resourceId }) => {
       record: JSON.stringify(obj)
     })
       .then(res => {
-        console.log({ generateReportRES: res })
         switch (selectedFormat.key) {
           case 1:
             setPDF(res.recordId)
@@ -101,10 +94,7 @@ const ReportViewer = ({ resourceId }) => {
             break
         }
       })
-      .catch(error => {
-        console.log({ generateReportERROR: error })
-        setErrorMessage(error)
-      })
+      .catch(error => {})
   }
 
   useEffect(() => {
@@ -119,20 +109,14 @@ const ReportViewer = ({ resourceId }) => {
       })
   }, [reportStore])
 
-  const formatDataForApi = paramsArray => {
-    const formattedData = paramsArray.map(({ fieldId, value }) => `${fieldId}|${value}`).join('^')
-
-    return formattedData
-  }
-
   return (
     <VertLayout>
       <Fixed>
         <GridToolbar
-          openRPB={() => setReportParamWindowOpen(true)}
+          reportName={selectedReport?.parameters}
           disableRPB={!selectedReport?.parameters}
           onGo={generateReport}
-          paramsArray={paramsArray}
+          onGenerateReport={generateReport}
         >
           <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between' }}>
             <Autocomplete
@@ -157,7 +141,7 @@ const ReportViewer = ({ resourceId }) => {
               sx={{ width: 200, pl: 2 }}
               disableClearable
             />
-            <Button
+            {/* <Button
               sx={{ ml: 2 }}
               variant='contained'
               disabled={!selectedReport || !selectedFormat}
@@ -165,24 +149,15 @@ const ReportViewer = ({ resourceId }) => {
               size='small'
             >
               Generate Report
-            </Button>
+            </Button> */}
           </Box>
         </GridToolbar>
       </Fixed>
-        {pdf && (
-          <Box id='reportContainer' sx={{ flex: 1, display: 'flex', p: 2 }}>
-            <iframe title={selectedReport?.layoutName} src={pdf} width='100%' height='100%' allowFullScreen />
-          </Box>
-        )}
-      <ReportParameterBrowser
-        disabled={!selectedReport?.parameters}
-        reportName={selectedReport?.parameters}
-        open={reportParamWindowOpen}
-        onClose={() => setReportParamWindowOpen(false)}
-        paramsArray={paramsArray}
-        setParamsArray={setParamsArray}
-      />
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
+      {pdf && (
+        <Box id='reportContainer' sx={{ flex: 1, display: 'flex', p: 2 }}>
+          <iframe title={selectedReport?.layoutName} src={pdf} width='100%' height='100%' allowFullScreen />
+        </Box>
+      )}
     </VertLayout>
   )
 }

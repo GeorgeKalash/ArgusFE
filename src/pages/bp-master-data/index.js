@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import React, { useContext, useState } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
@@ -11,6 +11,7 @@ import { useWindow } from 'src/windows'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import ReportParameterBrowser from 'src/components/Shared/ReportParameterBrowser'
 
 // function SampleWindow() {
 //   const { stack } = useWindow()
@@ -56,11 +57,11 @@ const BPMasterData = () => {
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 50, params = [] } = options
 
     return await getRequest({
       extension: BusinessPartnerRepository.MasterData.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=&_sortBy=reference desc`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}&_sortBy=reference desc`
     })
   }
 
@@ -169,6 +170,8 @@ const BPMasterData = () => {
           onSearchClear={clear}
           labels={_labels}
           inputSearch={true}
+          onGo={refetch}
+          reportName='BPMAS'
         />
       </Fixed>
       <Grow>
