@@ -25,14 +25,18 @@ import FormGrid from 'src/components/form/layout/FormGrid'
 
 const BenificiaryCashForm = ({
   viewBtns = true,
-  store,
-  setStore,
   client,
   dispersalType,
   beneficiary,
   corId,
   countryId,
-  editable = false
+  editable = false,
+  submitted,
+  setSubmitted,
+  addBeneficiary,
+  setAddBeneficiary,
+  beneficiaryList,
+  onChangeBeneficiary
 }) => {
   const [maxAccess, setMaxAccess] = useState({ record: [] })
   const { stack: stackError } = useError()
@@ -48,9 +52,10 @@ const BenificiaryCashForm = ({
 
         const controls = { controls: qryCCL.list }
         const maxAccess = { record: controls }
+        setMaxAccess(maxAccess)
       }
 
-      if (beneficiary?.beneficiaryId && (!store || store.submitted != store.loadBen)) {
+      if (beneficiary?.beneficiaryId) {
         const RTBEC = await getRequest({
           extension: RemittanceOutwardsRepository.BeneficiaryCash.get,
           parameters: `_clientId=${client?.clientId}&_beneficiaryId=${beneficiary?.beneficiaryId}&_seqNo=${beneficiary?.beneficiarySeqNo}`
@@ -97,27 +102,29 @@ const BenificiaryCashForm = ({
           birthPlace: RTBEC?.record?.birthPlace,
           seqNo: RTBEC?.record?.seqNo
         }
-        if (store) {
-          setStore(prevStore => ({
-            ...prevStore,
-            beneficiaryList: obj
-          }))
+        if (beneficiaryList) {
+          onChangeBeneficiary(obj)
         }
         formik.setValues(obj)
       }
-      if (store?.submitted) {
-        formik.handleSubmit()
-      }
-      if (store?.clearBenForm && !store?.submitted) {
-        formik.resetForm()
-        setStore(prevStore => ({
-          ...prevStore,
-          clearBenForm: false,
-          loadBen: false
-        }))
-      }
     })()
-  }, [store?.submitted, store?.clearBenForm, beneficiary?.beneficiaryId, beneficiary?.beneficiarySeqNo])
+  }, [beneficiary?.beneficiaryId, beneficiary?.beneficiarySeqNo])
+
+  useEffect(() => {
+    if (addBeneficiary && !submitted) {
+      formik.resetForm()
+      setAddBeneficiary(false)
+    }
+  }, [addBeneficiary])
+
+  useEffect(() => {
+    if (formik.errors && submitted) {
+      setSubmitted(false)
+    }
+    if (submitted) {
+      formik.handleSubmit()
+    }
+  }, [submitted])
 
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [notArabic, setNotArabic] = useState(true)
@@ -126,7 +133,7 @@ const BenificiaryCashForm = ({
     datasetId: ResourceIds.BeneficiaryCash
   })
 
-  const [initialValues, setInitialData] = useState({
+  const initialValues = {
     //RTBEN
     clientId: client?.clientId || '',
     recordId: '',
@@ -159,7 +166,7 @@ const BenificiaryCashForm = ({
     fl_familyName: '',
     birthPlace: '',
     seqNo: 1
-  })
+  }
 
   const { formik } = useForm({
     maxAccess,
@@ -216,11 +223,9 @@ const BenificiaryCashForm = ({
         seqNo: values.seqNo
       }
       const data = { header: header, beneficiaryCash: cashInfo }
-      if (store?.submitted) {
-        setStore(prevStore => ({
-          ...prevStore,
-          beneficiaryList: data
-        }))
+      if (submitted) {
+        setSubmitted(true)
+        onChangeBeneficiary(data)
       } else {
         const res = await postRequest({
           extension: RemittanceOutwardsRepository.BeneficiaryCash.set,

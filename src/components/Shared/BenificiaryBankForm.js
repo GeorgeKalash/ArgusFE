@@ -27,14 +27,18 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 export default function BenificiaryBankForm({
   viewBtns = true,
-  store,
-  setStore,
   editable = false,
   client,
   beneficiary,
   dispersalType,
   corId,
-  countryId
+  countryId,
+  submitted,
+  setSubmitted,
+  addBeneficiary,
+  setAddBeneficiary,
+  beneficiaryList,
+  onChangeBeneficiary
 }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [maxAccess, setMaxAccess] = useState({ record: [] })
@@ -53,7 +57,7 @@ export default function BenificiaryBankForm({
         const maxAccess = { record: controls }
         setMaxAccess(maxAccess)
       }
-      if (beneficiary?.beneficiaryId && (!store || (!store?.submitted && store?.loadBen))) {
+      if (beneficiary?.beneficiaryId) {
         const RTBEB = await getRequest({
           extension: RemittanceOutwardsRepository.BeneficiaryBank.get,
           parameters: `_clientId=${client?.clientId}&_beneficiaryId=${beneficiary?.beneficiaryId}&_seqNo=${beneficiary?.beneficiarySeqNo}`
@@ -108,37 +112,29 @@ export default function BenificiaryBankForm({
           seqNo: RTBEB?.record?.seqNo
         }
 
-        if (store) {
-          setStore(prevStore => ({
-            ...prevStore,
-            loadBen: false,
-            beneficiaryList: obj
-          }))
-        }
+        if (beneficiaryList) onChangeBeneficiary(obj)
         formik.setValues(obj)
       }
-
-      if (formik.errors && store) {
-        setStore(prevStore => ({
-          ...prevStore,
-          submitted: false
-        }))
-      }
-      if (store?.submitted) {
-        formik.handleSubmit()
-      }
-
-      if (store?.clearBenForm && !store?.submitted) {
-        formik.resetForm()
-        setStore(prevStore => ({
-          ...prevStore,
-          clearBenForm: false
-        }))
-      }
     })()
-  }, [store?.submitted, store?.clearBenForm, beneficiary?.beneficiaryId, beneficiary?.beneficiarySeqNo])
+  }, [beneficiary?.beneficiaryId, beneficiary?.beneficiarySeqNo])
 
-  const [initialValues, setInitialData] = useState({
+  useEffect(() => {
+    if (addBeneficiary && !submitted) {
+      formik.resetForm()
+      setAddBeneficiary(false)
+    }
+  }, [addBeneficiary])
+
+  useEffect(() => {
+    if (formik.errors && submitted) {
+      setSubmitted(false)
+    }
+    if (submitted) {
+      formik.handleSubmit()
+    }
+  }, [submitted])
+
+  const initialValues = {
     //RTBEN
     clientId: client?.clientId || '',
     beneficiaryId: 0,
@@ -180,7 +176,7 @@ export default function BenificiaryBankForm({
     zipcode: '',
     remarks: '',
     seqNo: 1
-  })
+  }
 
   const { formik } = useForm({
     maxAccess,
@@ -250,12 +246,9 @@ export default function BenificiaryBankForm({
       }
       const data = { header: header, beneficiaryBank: bankInfo }
 
-      if (store?.submitted) {
-        setStore(prevStore => ({
-          ...prevStore,
-          submitted: true,
-          beneficiaryList: data
-        }))
+      if (submitted) {
+        setSubmitted(true)
+        onChangeBeneficiary(data)
       } else {
         const res = await postRequest({
           extension: RemittanceOutwardsRepository.BeneficiaryBank.set,
