@@ -120,9 +120,7 @@ export default function OutwardsModificationForm({ access, labels, recordId, inv
     if (res.recordId) {
       if (recordId) toast.success(platformLabels.Closed)
       invalidate()
-      const res2 = await getOutwardsModification(res.recordId)
-      res2.record.date = formatDateFromApi(res2.record.date)
-      await fillOutwardData(res2.record)
+      refetchForm(res.recordId)
     }
   }
 
@@ -135,9 +133,7 @@ export default function OutwardsModificationForm({ access, labels, recordId, inv
     if (res.recordId) {
       toast.success(platformLabels.Reopened)
       invalidate()
-      const res2 = await getOutwardsModification(res.recordId)
-      res2.record.date = formatDateFromApi(res2.record.date)
-      await fillOutwardData(res2.record)
+      refetchForm(res.recordId)
     }
   }
 
@@ -152,9 +148,7 @@ export default function OutwardsModificationForm({ access, labels, recordId, inv
     if (res?.recordId) {
       toast.success(platformLabels.Posted)
       invalidate()
-      const res2 = await getOutwardsModification(res.recordId)
-      res2.record.date = formatDateFromApi(res2.record.date)
-      await fillOutwardData(res2.record)
+      refetchForm(res.recordId)
     }
   }
 
@@ -300,6 +294,11 @@ export default function OutwardsModificationForm({ access, labels, recordId, inv
       title: labels.OTPVerification
     })
   }
+  async function refetchForm(recordId) {
+    const res2 = await getOutwardsModification(recordId)
+    res2.record.date = formatDateFromApi(res2.record.date)
+    await fillOutwardData(res2.record)
+  }
   useEffect(() => {
     ;(async function () {
       try {
@@ -327,16 +326,13 @@ export default function OutwardsModificationForm({ access, labels, recordId, inv
             formik.setFieldValue('recordId', res.recordId)
             invalidate()
 
-            const res2 = await getOutwardsModification(res.recordId)
-            await fillOutwardData(res2.record)
+            refetchForm(res.recordId)
             !recordId && viewOTP(res.recordId)
           }
         }
 
         if (recordId && !store.beneficiaryList) {
-          const res = await getOutwardsModification(recordId)
-          res.record.date = formatDateFromApi(res.record.date)
-          await fillOutwardData(res.record)
+          refetchForm(recordId)
         }
       } catch (error) {}
     })()
