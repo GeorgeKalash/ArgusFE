@@ -20,7 +20,6 @@ import { LogisticsRepository } from 'src/repositories/LogisticsRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
-import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { DataSets } from 'src/resources/DataSets'
 import { getStorageData } from 'src/storage/storage'
@@ -71,23 +70,24 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     },
     validationSchema: yup.object({
       accountId: yup.string().required(' '),
+      currencyId: yup.string().required(' '),
       cashAccountId: yup.string().required(' '),
       amount: yup.string().required(' '),
       paymentMethod: yup.string().required(' ')
     }),
     onSubmit: async obj => {
-      const recordId = obj.recordId
-
-      const response = await postRequest({
-        extension: FinancialRepository.ReceiptVouchers.set,
-        record: JSON.stringify(obj)
-      })
-      if (!recordId) {
-        toast.success('Record Added Successfully')
-        formik.setFieldValue('recordId', response.recordId)
-        getData(response.recordId)
-      } else toast.success('Record Edited Successfully')
-      invalidate()
+      try {
+        const response = await postRequest({
+          extension: FinancialRepository.ReceiptVouchers.set,
+          record: JSON.stringify(obj)
+        })
+        if (!obj.recordId) {
+          toast.success('Record Added Successfully')
+          formik.setFieldValue('recordId', response.recordId)
+          getData(response.recordId)
+        } else toast.success('Record Edited Successfully')
+        invalidate()
+      } catch (e) {}
     }
   })
   const editMode = !!recordId || !!formik.values.recordId
@@ -128,6 +128,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       }
     } catch (error) {}
   }
+
   useEffect(() => {
     formik.setFieldValue('templateId', '')
   }, [formik.values.notes])
@@ -167,6 +168,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
 
       if (res?.recordId) {
         setIsCancelled(true)
+        setReadOnly(true)
         toast.success('Record Cancelled Successfully')
         invalidate()
       }
@@ -212,7 +214,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       key: 'Post',
       condition: true,
       onClick: onPost,
-      disabled: isPosted || !editMode
+      disabled: isPosted || !editMode || isCancelled
     }
   ]
 
@@ -224,7 +226,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       actions={actions}
       maxAccess={maxAccess}
       editMode={editMode}
-      disabledSubmit={isPosted}
+      disabledSubmit={isPosted || isCancelled}
       previewReport={editMode}
     >
       <VertLayout>
@@ -327,7 +329,13 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 required
                 values={formik.values}
                 onChange={async (event, newValue) => {
-                  formik.setFieldValue('paymentMethod', newValue?.key)
+                  formik.setValues({
+                    ...formik.values,
+                    paymentMethod: newValue?.key || '',
+                    cashAccountId: '',
+                    cashAccountRef: '',
+                    cashAccountName: ''
+                  })
                 }}
                 error={formik.touched.paymentMethod && Boolean(formik.errors.paymentMethod)}
                 maxAccess={maxAccess}
@@ -387,6 +395,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                   endpointId={SystemRepository.Currency.qry}
                   name='currencyId'
                   readOnly={readOnly}
+                  required
                   label={labels.currency}
                   valueField='recordId'
                   displayField={['name']}
