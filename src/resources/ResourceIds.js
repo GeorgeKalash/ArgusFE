@@ -149,5 +149,6 @@ export const ResourceIds = {
   ReceiptVoucher: 31304,
   GenerateOpeningBalances: 31314,
   DimensionsValues: 31111,
-  RebuildAccountBalances: 31501
+  RebuildAccountBalances: 31501,
+  RoleCategories: 21102
 }
