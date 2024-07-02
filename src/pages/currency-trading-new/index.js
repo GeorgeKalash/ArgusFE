@@ -46,9 +46,5 @@ export default function CurrencyTrading() {
     openForm()
   }, [access])
 
-  return (
-    <Box sx={{ zIndex: 0 }}>
-      {plantId && access && <TransactionForm labels={_labelsADJ} access={access} plantId={plantId} />}
-    </Box>
-  )
+  return plantId && access && <TransactionForm labels={_labelsADJ} access={access} plantId={plantId} />
 }
