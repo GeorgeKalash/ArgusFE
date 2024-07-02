@@ -60,15 +60,7 @@ const DocumentsOnHold = () => {
     datasetId: ResourceIds.DocumentsOnHold
   })
 
-  const invalidate = useInvalidate({
-    endpointId: DocumentReleaseRepository.DocumentsOnHold.qry
-  })
   const [searchValue, setSearchValue] = useState('')
-
-  function onSearchClear() {
-    setSearchValue('')
-    setGridData({ count: 0, list: [], message: '', statusId: 1 })
-  }
 
   const columns = [
     {
@@ -259,13 +251,7 @@ const DocumentsOnHold = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar
-          maxAccess={access}
-          onSearch={search}
-          onSearchClear={onSearchClear}
-          labels={_labels}
-          inputSearch={true}
-        />
+        <GridToolbar maxAccess={access} onSearch={search} onSearchClear={refetch} labels={_labels} inputSearch={true} />
       </Fixed>
       <Grow>
         <Table
@@ -288,6 +274,9 @@ const DocumentsOnHold = () => {
             setWindowOpen(false)
             setSelectedRecordId(null)
           }}
+          setGridData={setGridData}
+          searchValue={searchValue}
+          search={search}
           labels={_labels}
           maxAccess={access}
           recordId={selectedRecordId}
