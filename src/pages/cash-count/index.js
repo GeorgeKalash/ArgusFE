@@ -21,22 +21,6 @@ const CashCount = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
-  async function fetchWithSearch({ options = {}, filters }) {
-    const { _startAt = 0, _pageSize = 50 } = options
-
-    return await getRequest({
-      extension: CashCountRepository.CashCountTransaction.snapshot,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=${filters.qry}`
-    })
-  }
-
-  async function fetchGridData() {
-    return await getRequest({
-      extension: CashCountRepository.CashCountTransaction.qry,
-      parameters: ``
-    })
-  }
-
   const {
     query: { data },
     filterBy,
@@ -46,14 +30,24 @@ const CashCount = () => {
     access,
     invalidate
   } = useResourceQuery({
-    queryFn: fetchGridData,
-    endpointId: CashCountRepository.CashCountTransaction.qry,
+    endpointId: CashCountRepository.CashCountTransaction.snapshot,
     datasetId: ResourceIds.CashCountTransaction,
     filter: {
       endpointId: CashCountRepository.CashCountTransaction.snapshot,
       filterFn: fetchWithSearch
     }
   })
+  async function fetchWithSearch({ options = {}, filters }) {
+    const { _startAt = 0, _pageSize = 50 } = options
+
+    return (
+      filters.qry &&
+      (await getRequest({
+        extension: CashCountRepository.CashCountTransaction.snapshot,
+        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=${filters.qry}`
+      }))
+    )
+  }
 
   const columns = [
     {

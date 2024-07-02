@@ -45,10 +45,13 @@ export default function CurrencyTrading() {
     }
   })
   async function fetchWithSearch({ options = {}, filters }) {
-    return await getRequest({
-      extension: CTTRXrepository.CurrencyTrading.snapshot,
-      parameters: `_filter=${filters.qry}&_category=1`
-    })
+    return (
+      filters.qry &&
+      (await getRequest({
+        extension: CTTRXrepository.CurrencyTrading.snapshot,
+        parameters: `_filter=${filters.qry}&_category=1`
+      }))
+    )
   }
 
   return (
