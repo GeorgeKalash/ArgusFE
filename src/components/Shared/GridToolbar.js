@@ -190,7 +190,7 @@ const GridToolbar = ({
           {onGenerateReport && (
             <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', py: '7px !important' }}>
               <Button
-                sx={{ height: '35px', ml: 2 }}
+                sx={{ height: 'auto', ml: 2 }}
                 variant='contained'
                 disabled={!reportName}
                 onClick={() => onGenerateReport({ params: formatDataForApi(paramsArray) })}
@@ -202,7 +202,13 @@ const GridToolbar = ({
           )}
           {reportName && (
             <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', pt: '7px !important' }}>
-              <Button onClick={openRPB} variant='contained' disabled={disableRPB} sx={{ height: '35px' }}>
+              <Button
+                onClick={openRPB}
+                variant='contained'
+                size='small'
+                disabled={disableRPB}
+                sx={{ height: !onGenerateReport ? '35px' : '42px' }}
+              >
                 {platformLabels.OpenRPB}
               </Button>
             </Grid>
@@ -217,7 +223,7 @@ const GridToolbar = ({
           {onGo && (
             <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', pt: '7px !important' }}>
               <Button
-                sx={{ height: '35px' }}
+                sx={{ height: !onGenerateReport ? '35px' : '42px' }}
                 disabled={paramsArray.length === 0}
                 onClick={() =>
                   searchValue
