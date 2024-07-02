@@ -45,7 +45,6 @@ const Confirmation = ({ labels, formik, editMode, idTypeStore, maxAccess }) => {
   })
 
   const postFetchDefault = obj => {
-    const hijriDate = moment(formatDateToApiFunction(obj.birthDate), 'YYYY-MM-DD').format('iYYYY-iMM-iDD')
     let type
     if (obj.idtId === 28) {
       type = 1
@@ -53,6 +52,11 @@ const Confirmation = ({ labels, formik, editMode, idTypeStore, maxAccess }) => {
     if (obj.idtId === 26) {
       type = 2
     }
+    const hijriDate =
+      type === 1
+        ? moment(formatDateToApiFunction(obj.birthDate), 'YYYY-MM-DD').format('iYYYY-iMM-iDD')
+        : formatDateToApiFunction(obj.birthDate)
+
     const defaultParams = `_number=${obj.idNo}&_dateTime=${hijriDate}&_type=${type}`
     var parameters = defaultParams
     getMicroRequest({
@@ -60,9 +64,9 @@ const Confirmation = ({ labels, formik, editMode, idTypeStore, maxAccess }) => {
       parameters: parameters
     })
       .then(res => {
-        console.log('obj.idtId', obj.idtId)
         const dateObj = new Date(res?.idExpirationDate)
-        const convertedTimestamp = dateObj.getTime()
+        const convertedTimestamp = dateObj.getTime() || ''
+
         console.log(convertedTimestamp)
         formik.setValues({
           ...formik.values,
