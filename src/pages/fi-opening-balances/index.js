@@ -19,7 +19,7 @@ const FiOpeningBalance = () => {
 
     const response = await getRequest({
       extension: FinancialRepository.FiOpeningBalance.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
     })
 
     return { ...response, _startAt: _startAt, _params: params }

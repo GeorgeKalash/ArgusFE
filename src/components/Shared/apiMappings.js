@@ -25,7 +25,11 @@ export const apiMappings = {
     endpoint: SystemRepository.Currency.qry,
     parameters: '_filter=',
     valueField: 'recordId',
-    displayField: 'name'
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
   },
   20109: {
     type: COMBOBOX,

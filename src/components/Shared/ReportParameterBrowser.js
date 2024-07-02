@@ -73,10 +73,10 @@ const GetLookup = ({ field, formik }) => {
   )
 }
 
-const GetComboBox = ({ field, formik }) => {
+const GetComboBox = ({ field, formik, paramsArray }) => {
   const apiDetails = field?.apiDetails
   useEffect(() => {
-    if (!formik.values?.parameters?.[field.id]?.value && field.value) {
+    if (!formik.values?.parameters?.[field.id]?.value && field.value && paramsArray?.length < 1) {
       formik.setFieldValue(`parameters[${field.id}]`, {
         fieldId: field.id,
         fieldKey: field.key,
@@ -103,7 +103,7 @@ const GetComboBox = ({ field, formik }) => {
           values={formik.values?.parameters?.[field.id]?.value}
           onChange={(event, newValue) => {
             const textValue = Array.isArray(apiDetails?.displayField)
-              ? apiDetails?.displayField?.map(header => newValue?.[header]?.toString())?.join(' - ')
+              ? apiDetails?.displayField?.map(header => newValue?.[header]?.toString())?.join(' ')
               : newValue?.[apiDetails?.displayField]
 
             formik.setFieldValue(
@@ -119,7 +119,7 @@ const GetComboBox = ({ field, formik }) => {
                 : ''
             )
           }}
-          error={Boolean(formik.errors?.parameters?.[field?.id])}
+          error={formik.touched?.parameters?.[field?.id] && Boolean(formik.errors?.parameters?.[field?.id])}
         />
       ) : (
         <>
@@ -146,7 +146,7 @@ const GetComboBox = ({ field, formik }) => {
                   : ''
               )
             }}
-            error={Boolean(formik.errors?.parameters?.[field?.id])}
+            error={formik.touched?.parameters?.[field?.id] && Boolean(formik.errors?.parameters?.[field?.id])}
           />
         </>
       )}
@@ -154,13 +154,13 @@ const GetComboBox = ({ field, formik }) => {
   )
 }
 
-const GetDate = ({ field, formik }) => {
+const GetDate = ({ field, formik, paramsArray }) => {
   useEffect(() => {
-    if (!formik.values?.parameters?.[field.id]?.value && field.value) {
+    if (!formik.values?.parameters?.[field.id]?.value && field.value && paramsArray?.length < 1) {
       formik.setFieldValue(`parameters[${field.id}]`, {
         fieldId: field.id,
         fieldKey: field.key,
-        value: new Date(field.value.toString()).getTime(),
+        value: new Date(field.value.toString())?.getTime(),
         caption: field.caption,
         display: field.value
       })
@@ -183,7 +183,7 @@ const GetDate = ({ field, formik }) => {
             display: formatDateDefault(newValue)
           })
         }}
-        error={Boolean(formik.errors?.parameters?.[field?.id])}
+        error={formik.touched?.parameters?.[field?.id] && Boolean(formik.errors?.parameters?.[field?.id])}
         onClear={() => formik.setFieldValue(`parameters[${field.id}]`, undefined)}
       />
     </Grid>
@@ -214,7 +214,7 @@ const GetTextField = ({ field, formik }) => {
   )
 }
 
-const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, disabled, window }) => {
+const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, window }) => {
   const { getRequest } = useContext(RequestsContext)
   const [items, setItems] = useState([])
   const [parameters, setParameters] = useState([])
@@ -245,27 +245,6 @@ const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, disab
     }
   }
 
-  const ssss = items.reduce((schema, item) => {
-    if (item?.mandatory) {
-      schema[item.id] = yup.string().required('Field is required')
-    }
-
-    return schema
-  }, {})
-
-  // Create dynamic Yup schema based on items
-  const validationSchema = yup.object().shape({
-    parameters: yup.array().of(
-      yup.object().shape(
-        items.reduce((schema, item) => {
-          if (item?.mandatory) schema[item.id] = yup.string().required('Field is required')
-
-          return schema
-        }, {})
-      )
-    )
-  })
-
   const { formik } = useForm({
     initialValues: {
       parameters: []
@@ -285,10 +264,10 @@ const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, disab
     enableReinitialize: true,
     validateOnChange: true,
 
-    // validationSchema: yup.object().shape({}),
+    validationSchema: yup.object().shape({}),
     onSubmit: values => {
       const processedArray = values?.parameters
-        ?.filter((item, index) => item?.fieldId)
+        ?.filter((item, index) => item?.fieldId && item?.value != null)
         ?.reduce((acc, item) => {
           if (item?.fieldId) {
             acc[item.fieldId] = {
@@ -319,23 +298,6 @@ const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, disab
     setItems(fieldComponentArray.filter(field => field !== null))
   }
 
-  // const initialDefault = async () => {
-  //   const fieldComponentArray = []
-
-  //   parameters.map(async field => {
-  //     if (field?.controlType && field.value) {
-  //       fieldComponentArray[field.id] = {
-  //         fieldId: field.id,
-  //         fieldKey: field.key,
-  //         value: field?.key === 'date' ? new Date(field.value.toString()).getTime() : field?.value,
-  //         caption: field.caption,
-  //         display: field?.key === 'date' ? new Date(field.value.toString()).getTime() : field?.value
-  //       }
-  //     }
-  //   })
-
-  //   formik.setFieldValue('parameters', fieldComponentArray)
-  // }
   useEffect(() => {
     if (parameters.length > 0) {
       mergeFieldWithApiDetails()
@@ -366,9 +328,9 @@ const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, disab
           if (item.controlType === 5 && item.apiDetails?.type === LOOKUP) {
             return <GetLookup key={item.fieldId} formik={formik} field={item} />
           } else if (item.controlType === 5 && item.apiDetails?.type === COMBOBOX) {
-            return <GetComboBox key={item.fieldId} formik={formik} field={item} />
+            return <GetComboBox key={item.fieldId} formik={formik} field={item} paramsArray={paramsArray} />
           } else if (item.controlType === 4) {
-            return <GetDate key={item.fieldId} formik={formik} field={item} />
+            return <GetDate key={item.fieldId} formik={formik} field={item} paramsArray={paramsArray} />
           } else if (item.controlType === 1) {
             return <GetTextField key={item.fieldId} formik={formik} field={item} apiDetails={item.apiDetails} />
           }
