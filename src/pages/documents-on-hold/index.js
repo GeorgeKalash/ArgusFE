@@ -15,7 +15,7 @@ import CreditInvoiceForm from '../credit-invoice/Forms/CreditInvoiceForm'
 import { KVSRepository } from 'src/repositories/KVSRepository'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 import TransactionForm from '../currency-trading/forms/TransactionForm'
-import OutwardsTab from '../outwards-transfer/Tabs/OutwardsTab'
+import OutwardsForm from '../outwards-transfer/Tabs/OutwardsForm'
 import ClientTemplateForm from '../clients-list/forms/ClientTemplateForm'
 import { RTCLRepository } from 'src/repositories/RTCLRepository'
 
@@ -186,7 +186,7 @@ const DocumentsOnHold = () => {
         break
 
       case SystemFunction.Outwards:
-        relevantComponent = OutwardsTab
+        relevantComponent = OutwardsForm
         labels = await getLabels(ResourceIds.OutwardsTransfer)
         relevantAccess = await getAccess(ResourceIds.OutwardsTransfer)
 

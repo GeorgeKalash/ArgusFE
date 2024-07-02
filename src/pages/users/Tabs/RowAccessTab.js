@@ -74,20 +74,26 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
       parameters: '_filter='
     })
 
-    const cashAccountRequestPromise = getRequest({
-      extension: CashBankRepository.CashAccount.qry,
-      parameters: '_filter=&_type=0'
-    })
+    const cashAccountRequestPromise =
+      classId == ResourceIds.CashAccounts &&
+      getRequest({
+        extension: CashBankRepository.CashAccount.qry,
+        parameters: '_filter=&_type=0'
+      })
 
-    const salesPersonRequestPromise = getRequest({
-      extension: SaleRepository.SalesPerson.qry,
-      parameters: '_filter='
-    })
+    const salesPersonRequestPromise =
+      classId == ResourceIds.SalesPerson &&
+      getRequest({
+        extension: SaleRepository.SalesPerson.qry,
+        parameters: '_filter='
+      })
 
-    const posRequestPromise = getRequest({
-      extension: POSRepository.PointOfSale.qry,
-      parameters: '_filter='
-    })
+    const posRequestPromise =
+      classId == ResourceIds.PointOfSale &&
+      getRequest({
+        extension: POSRepository.PointOfSale.qry,
+        parameters: '_filter='
+      })
 
     const rowAccessUserPromise = getRequest({
       extension: AccessControlRepository.RowAccessUserView.qry,

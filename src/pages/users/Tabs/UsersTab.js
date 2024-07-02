@@ -41,6 +41,7 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
       employeeId: '',
       password: '',
       confirmPassword: '',
+      dashboardId: null,
       umcpnl: false
     },
     enableReinitialize: true,
@@ -309,6 +310,21 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
                   onBlur={formik.handleBlur}
                   onClear={() => formik.setFieldValue('confirmPassword', '')}
                   error={formik.touched.confirmPassword && Boolean(formik.errors.confirmPassword)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  name='dashboardId'
+                  label={labels.dashboard}
+                  datasetId={DataSets.DASHBOARD}
+                  values={formik.values}
+                  valueField='key'
+                  displayField='value'
+                  maxAccess={maxAccess}
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('dashboardId', newValue ? newValue?.key : '')
+                  }}
+                  error={formik.touched.dashboardId && Boolean(formik.errors.dashboardId)}
                 />
               </Grid>
               <Grid item xs={12}>
