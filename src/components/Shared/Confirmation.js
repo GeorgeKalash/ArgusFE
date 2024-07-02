@@ -52,6 +52,7 @@ const Confirmation = ({ labels, formik, editMode, idTypeStore, maxAccess }) => {
     if (obj.idtId === 26) {
       type = 2
     }
+
     const hijriDate =
       type === 1
         ? moment(formatDateToApiFunction(obj.birthDate), 'YYYY-MM-DD').format('iYYYY-iMM-iDD')
