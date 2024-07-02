@@ -19,7 +19,7 @@ import { RemittanceSettingsRepository } from 'src/repositories/RemittanceReposit
 import { ResourceIds } from 'src/resources/ResourceIds'
 import * as yup from 'yup'
 
-export default function CloseForm({ form, labels, setIsClosed, isClosed, maxAccess, window, recordId, window2 }) {
+export default function CloseForm({ form, labels, maxAccess, window, recordId, window2 }) {
   const { stack: stackError } = useError()
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -82,7 +82,6 @@ export default function CloseForm({ form, labels, setIsClosed, isClosed, maxAcce
     })
     if (res.recordId) {
       toast.success(platformLabels.Closed)
-      setIsClosed(true)
       invalidate()
       window.close()
       window2.close()
@@ -106,7 +105,6 @@ export default function CloseForm({ form, labels, setIsClosed, isClosed, maxAcce
                   label={labels.correspondent}
                   form={formik}
                   required
-                  readOnly={editMode}
                   displayFieldWidth={2}
                   valueShow='corRef'
                   secondValueShow='corName'

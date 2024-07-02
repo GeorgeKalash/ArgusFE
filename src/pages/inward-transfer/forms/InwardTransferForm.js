@@ -30,27 +30,26 @@ import { ControlContext } from 'src/providers/ControlContext'
 import CloseForm from './CloseForm'
 
 export default function InwardTransferForm({ labels, recordId, access, plantId, window, userId, dtId }) {
-  const [editMode, setEditMode] = useState(!!recordId)
+  const editMode = !!recordId
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
   const [transferType, setTransferType] = useState(null)
   const { stack } = useWindow()
-  const [isClosed, setIsClosed] = useState(false)
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: RemittanceOutwardsRepository.InwardsTransfer.snapshot
   })
 
-  const [initialValues, setInitialData] = useState({
+  const initialValues = {
     recordId: recordId || null,
     plantId: parseInt(plantId),
     userId: parseInt(userId),
     dtId: parseInt(dtId),
-    wip: '',
+    wip: 1,
     releaseStatus: '',
-    exRate: '',
-    rateCalcMethod: '',
+    exRate: 1,
+    rateCalcMethod: 1,
     baseAmount: '',
     reference: '',
     date: new Date(),
@@ -58,7 +57,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
     corRef: '',
     corName: '',
     currencyId: null,
-    status: null,
+    status: 1,
     notes: '',
     amount: null,
     transferType: null,
@@ -106,11 +105,11 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
     expiryDate: null,
     sourceOfIncome: '',
     purposeOfTransfer: ''
-  })
+  }
 
   const { maxAccess } = useDocumentType({
     functionId: SystemFunction.InwardTransfer,
-    access: access,
+    access,
     enabled: !recordId
   })
 
@@ -138,49 +137,45 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
       commissionReceiver: yup.number().required()
     }),
     onSubmit: async values => {
-      const copy = { ...formik.values }
-      copy.date = formatDateToApi(copy?.date)
-      copy.wip = copy?.wip === '' ? 1 : copy?.wip
-      copy.exRate = copy?.exRate === '' ? 1 : copy?.exRate
-      copy.status = copy?.status === null ? 1 : copy?.status
-      copy.baseAmount = copy?.baseAmount === '' ? copy?.amount : copy?.baseAmount
-      copy.rateCalcMethod = copy?.rateCalcMethod === '' ? 1 : copy?.rateCalcMethod
-      copy.sender_idIssueDate = copy.sender_idIssueDate ? formatDateToApi(copy?.sender_idIssueDate) : null
-      copy.sender_idExpiryDate = copy.sender_idExpiryDate ? formatDateToApi(copy?.sender_idExpiryDate) : null
-      copy.receiver_idIssueDate = copy.receiver_idIssueDate ? formatDateToApi(copy?.receiver_idIssueDate) : null
-      copy.receiver_idExpiryDate = copy.receiver_idExpiryDate ? formatDateToApi(copy?.receiver_idExpiryDate) : null
-      copy.expiryDate = copy.expiryDate ? formatDateToApi(copy?.expiryDate) : null
+      try {
+        const copy = { ...formik.values }
+        copy.date = formatDateToApi(copy?.date)
+        copy.baseAmount = copy?.baseAmount === '' ? copy?.amount : copy?.baseAmount
+        copy.sender_idIssueDate = copy.sender_idIssueDate ? formatDateToApi(copy?.sender_idIssueDate) : null
+        copy.sender_idExpiryDate = copy.sender_idExpiryDate ? formatDateToApi(copy?.sender_idExpiryDate) : null
+        copy.receiver_idIssueDate = copy.receiver_idIssueDate ? formatDateToApi(copy?.receiver_idIssueDate) : null
+        copy.receiver_idExpiryDate = copy.receiver_idExpiryDate ? formatDateToApi(copy?.receiver_idExpiryDate) : null
+        copy.expiryDate = copy.expiryDate ? formatDateToApi(copy?.expiryDate) : null
 
-      const res = await postRequest({
-        extension: RemittanceOutwardsRepository.InwardsTransfer.set,
-        record: JSON.stringify(copy)
-      })
-      if (res.recordId) {
-        formik.setFieldValue('recordId', res.recordId)
-        setEditMode(true)
-        invalidate()
-
-        const res2 = await getRequest({
-          extension: RemittanceOutwardsRepository.InwardsTransfer.get,
-          parameters: `_recordId=${res.recordId}`
+        const res = await postRequest({
+          extension: RemittanceOutwardsRepository.InwardsTransfer.set,
+          record: JSON.stringify(copy)
         })
-        formik.setFieldValue('reference', res2.record.reference)
-        formik.setFieldValue('status', res2.record.status)
-        toast.success(platformLabels.Updated)
+        if (res.recordId) {
+          formik.setFieldValue('recordId', res.recordId)
+          invalidate()
+
+          const res2 = await getRequest({
+            extension: RemittanceOutwardsRepository.InwardsTransfer.get,
+            parameters: `_recordId=${res.recordId}`
+          })
+          formik.setValues(res2.record)
+          toast.success(platformLabels.Updated)
+        }
+      } catch (error) {
+        stackError(error)
       }
     }
   })
+  const isClosed = formik.values.status === 4 ? true : false
 
   function openCloseWindow() {
     stack({
       Component: CloseForm,
       props: {
         form: formik,
-        invalidate: invalidate(),
-        labels: labels,
-        isClosed: isClosed,
-        setIsClosed: setIsClosed,
-        maxAccess: maxAccess,
+        labels,
+        maxAccess,
         recordId: recordId,
         window2: window
       },
@@ -208,11 +203,12 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
               receiver_idExpiryDate: formatDateFromApi(res.record.receiver_idExpiryDate),
               expiryDate: formatDateFromApi(res.record.expiryDate)
             }
-            setIsClosed(res.record.status === 4 ? true : false)
+
             formik.setValues(record)
-            setEditMode(true)
           }
-        } catch (error) {}
+        } catch (error) {
+          stackError(error)
+        }
       }
     }
     fetchRecord()
@@ -248,12 +244,10 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       name='reference'
                       label={labels.reference}
                       value={formik?.values?.reference}
-                      readOnly={editMode}
                       maxAccess={maxAccess}
                       maxLength='15'
+                      readOnly={editMode}
                       error={formik.touched.reference && Boolean(formik.errors.reference)}
-                      onChange={formik.handleChange}
-                      onClear={() => formik.setFieldValue('reference', '')}
                     />
                   </Grid>
                   <Grid item xs={4}>
@@ -472,16 +466,17 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                     />
                   </Grid>
                   <Grid item xs={4}>
-                    <CustomNumberField
+                    <CustomTextField
                       name='sender_phone'
                       label={labels.sender_phone}
                       value={formik.values.sender_phone}
-                      maxAccess={maxAccess}
                       readOnly={editMode}
-                      onChange={e => formik.setFieldValue('sender_phone', e.target.value)}
+                      maxLength='15'
+                      phone={true}
+                      onChange={formik.handleChange}
                       onClear={() => formik.setFieldValue('sender_phone', '')}
                       error={formik.touched.sender_phone && Boolean(formik.errors.sender_phone)}
-                      maxLength={20}
+                      maxAccess={maxAccess}
                     />
                   </Grid>
                   <Grid item xs={4}>
@@ -759,29 +754,38 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
               <Grid item xs={12}>
                 <Grid container spacing={2}>
                   <Grid item xs={3}>
-                    <CustomNumberField
+                    <CustomTextField
                       name='receiver_phone'
                       label={labels.receiver_phone}
                       value={formik.values.receiver_phone}
-                      maxAccess={maxAccess}
                       readOnly={editMode}
-                      onChange={e => formik.setFieldValue('receiver_phone', e.target.value)}
+                      maxLength='15'
+                      phone={true}
+                      onChange={formik.handleChange}
                       onClear={() => formik.setFieldValue('receiver_phone', '')}
                       error={formik.touched.receiver_phone && Boolean(formik.errors.receiver_phone)}
-                      maxLength={20}
+                      maxAccess={maxAccess}
                     />
                   </Grid>
                   <Grid item xs={3}>
-                    <CustomNumberField
+                    <ResourceComboBox
+                      values={formik.values}
+                      endpointId={SystemRepository.Country.qry}
                       name='receiver_nationalityId'
                       label={labels.receiver_nationalityId}
-                      value={formik.values.receiver_nationalityId}
+                      valueField='recordId'
+                      displayField={['reference', 'name']}
+                      columnsInDropDown={[
+                        { key: 'reference', value: 'Reference' },
+                        { key: 'name', value: 'Name' }
+                      ]}
+                      onChange={(event, newValue) => {
+                        formik.setFieldValue('receiver_nationalityId', newValue ? newValue.recordId : '')
+                      }}
+                      error={formik.touched.receiver_nationalityId && Boolean(formik.errors.receiver_nationalityId)}
                       maxAccess={maxAccess}
                       readOnly={editMode}
-                      onChange={e => formik.setFieldValue('receiver_nationalityId', e.target.value)}
-                      onClear={() => formik.setFieldValue('receiver_nationalityId', '')}
-                      error={formik.touched.receiver_nationalityId && Boolean(formik.errors.receiver_nationalityId)}
-                      maxLength={15}
+                      required
                     />
                   </Grid>
                   <Grid item xs={3}>

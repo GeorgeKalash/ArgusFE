@@ -4,7 +4,7 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
 import toast from 'react-hot-toast'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
@@ -16,12 +16,13 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { useError } from 'src/error'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import InwardTransferForm from './forms/InwardTransferForm'
+import { getStorageData } from 'src/storage/storage'
 
 const InwardTransfer = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
-  const userId = JSON.parse(window.sessionStorage.getItem('userData'))?.userId
+  const userId = getStorageData('userData').userId
 
   const {
     query: { data },
@@ -29,7 +30,8 @@ const InwardTransfer = () => {
     clearFilter,
     labels: _labels,
     refetch,
-    access
+    access,
+    invalidate
   } = useResourceQuery({
     endpointId: RemittanceOutwardsRepository.InwardsTransfer.snapshot,
     datasetId: ResourceIds.InwardTransfer,
@@ -49,13 +51,7 @@ const InwardTransfer = () => {
     )
   }
 
-  const invalidate = useInvalidate({
-    endpointId: RemittanceOutwardsRepository.InwardsTransfer.snapshot
-  })
-
-  const userData = window.sessionStorage.getItem('userData')
-    ? JSON.parse(window.sessionStorage.getItem('userData'))
-    : null
+  const userData = getStorageData('userData')
 
   const getPlantId = async () => {
     const res = await getRequest({
@@ -150,7 +146,8 @@ const InwardTransfer = () => {
 
   const { proxyAction } = useDocumentTypeProxy({
     functionId: SystemFunction.InwardTransfer,
-    action: openForm
+    action: openForm,
+    hasDT: false
   })
 
   const delTransfer = async obj => {
@@ -174,9 +171,9 @@ const InwardTransfer = () => {
     stack({
       Component: InwardTransferForm,
       props: {
-        plantId: plantId,
-        cashAccountId: cashAccountId,
-        dtId: dtId,
+        plantId,
+        cashAccountId,
+        dtId,
         access,
         userId,
         labels: _labels,
@@ -206,7 +203,7 @@ const InwardTransfer = () => {
       <Grow>
         <Table
           columns={columns}
-          gridData={data ? data : { list: [] }}
+          gridData={data}
           rowId={['recordId']}
           onEdit={editTransfer}
           onDelete={delTransfer}
