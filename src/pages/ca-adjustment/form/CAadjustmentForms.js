@@ -171,6 +171,12 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       condition: true,
       onClick: onWorkFlowClick,
       disabled: !editMode
+    },
+    {
+      key: 'Cash Transaction',
+      condition: true,
+      onClick: 'transactionClicked',
+      disabled: !editMode
     }
   ]
 

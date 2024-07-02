@@ -12,11 +12,13 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 import toast from 'react-hot-toast'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const USDocTypeForm = ({ labels, maxAccess, storeRecordId, functionId, invalidate, window }) => {
   const editMode = !!storeRecordId
   const [data, setData] = useState([])
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const { formik } = useForm({
     enableReinitialize: false,
@@ -53,7 +55,7 @@ const USDocTypeForm = ({ labels, maxAccess, storeRecordId, functionId, invalidat
             })
           }
         })
-        toast.success('Record Updated Successfully')
+        toast.success(platformLabels.Updated)
         window.close()
         invalidate()
       } catch (error) {}

@@ -13,6 +13,7 @@ import ItemSelectorWindow from 'src/components/Shared/ItemSelectorWindow'
 import toast from 'react-hot-toast'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const SGUsersTab = ({ labels, maxAccess, storeRecordId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -20,6 +21,7 @@ const SGUsersTab = ({ labels, maxAccess, storeRecordId }) => {
   const [allUsers, setAllUsers] = useState([])
   const [selectedUsers, setSelectedUsers] = useState([])
   const { stack } = useWindow()
+  const { platformLabels } = useContext(ControlContext)
 
   const columns = [
     {
@@ -60,7 +62,7 @@ const SGUsersTab = ({ labels, maxAccess, storeRecordId }) => {
         record: JSON.stringify(data)
       })
       invalidate()
-      toast.success('Record Added Successfully')
+      toast.success(platformLabels.Added)
     }
   })
 
@@ -99,7 +101,7 @@ const SGUsersTab = ({ labels, maxAccess, storeRecordId }) => {
       extension: AccessControlRepository.SecurityGroupUser.del,
       record: JSON.stringify(obj)
     })
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
     invalidate()
   }
 

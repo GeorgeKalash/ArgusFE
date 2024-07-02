@@ -53,7 +53,7 @@ export default function BenificiaryBankForm({
         const maxAccess = { record: controls }
         setMaxAccess(maxAccess)
       }
-      if (beneficiary?.beneficiaryId && (!store || store.submitted != store.loadBen)) {
+      if (beneficiary?.beneficiaryId && (!store || (!store?.submitted && store?.loadBen))) {
         const RTBEB = await getRequest({
           extension: RemittanceOutwardsRepository.BeneficiaryBank.get,
           parameters: `_clientId=${client?.clientId}&_beneficiaryId=${beneficiary?.beneficiaryId}&_seqNo=${beneficiary?.beneficiarySeqNo}`
@@ -79,6 +79,7 @@ export default function BenificiaryBankForm({
           rtId: RTBEN?.record?.rtId,
           rtName: RTBEN?.record?.rtName,
           cellPhone: RTBEN?.record?.cellPhone,
+          cellPhoneRepeated: RTBEN?.record?.cellPhone,
           birthDate: RTBEN?.record?.birthDate && formatDateFromApi(RTBEN.record.birthDate),
           cobId: RTBEN?.record?.cobId,
           shortName: RTBEN?.record?.shortName,
@@ -92,8 +93,10 @@ export default function BenificiaryBankForm({
           //RTBEB
           bankId: RTBEB?.record?.bankId,
           accountRef: RTBEB?.record?.accountRef,
+          accountRefRepeat: RTBEB?.record?.accountRef,
           accountType: RTBEB?.record?.accountType,
           IBAN: RTBEB?.record?.IBAN,
+          IBANRepeated: RTBEB?.record?.IBAN,
           routingNo: RTBEB?.record?.routingNo,
           swiftCode: RTBEB?.record?.swiftCode,
           branchCode: RTBEB?.record?.branchCode,
@@ -108,10 +111,18 @@ export default function BenificiaryBankForm({
         if (store) {
           setStore(prevStore => ({
             ...prevStore,
+            loadBen: false,
             beneficiaryList: obj
           }))
         }
         formik.setValues(obj)
+      }
+
+      if (formik.errors && store) {
+        setStore(prevStore => ({
+          ...prevStore,
+          submitted: false
+        }))
       }
       if (store?.submitted) {
         formik.handleSubmit()
@@ -121,8 +132,7 @@ export default function BenificiaryBankForm({
         formik.resetForm()
         setStore(prevStore => ({
           ...prevStore,
-          clearBenForm: false,
-          loadBen: false
+          clearBenForm: false
         }))
       }
     })()
@@ -143,6 +153,7 @@ export default function BenificiaryBankForm({
     rtName: '',
     rtId: null,
     cellPhone: '',
+    cellPhoneRepeated: '',
     birthDate: null,
     cobId: '',
     shortName: '',
@@ -156,8 +167,10 @@ export default function BenificiaryBankForm({
     //RTBEB
     bankId: null,
     accountRef: '',
+    accountRefRepeat: '',
     accountType: '',
     IBAN: '',
+    IBANRepeated: '',
     routingNo: '',
     swiftCode: '',
     branchCode: '',
@@ -180,6 +193,20 @@ export default function BenificiaryBankForm({
       name: yup.string().required(' '),
       bankId: yup.string().required(' ')
     }),
+    validate: values => {
+      const errors = {}
+      if (values.accountRef && values.accountRefRepeat != values.accountRef) {
+        errors.accountRefRepeat = 'accountRef must match'
+      }
+      if (values.IBAN && values.IBANRepeated != values.IBAN) {
+        errors.IBANRepeated = 'IBAN must match'
+      }
+      if (values.cellPhone && values.cellPhoneRepeated != values.cellPhone) {
+        errors.cellPhoneRepeated = 'cellPhone must match'
+      }
+
+      return errors
+    },
     onSubmit: async values => {
       const header = {
         clientId: values.clientId,
@@ -227,8 +254,7 @@ export default function BenificiaryBankForm({
         setStore(prevStore => ({
           ...prevStore,
           submitted: true,
-          beneficiaryList: data,
-          loadBen: false
+          beneficiaryList: data
         }))
       } else {
         const res = await postRequest({
@@ -247,6 +273,10 @@ export default function BenificiaryBankForm({
   const { labels: _labels } = useResourceQuery({
     datasetId: ResourceIds.BeneficiaryBank
   })
+
+  const handleCopy = event => {
+    event.preventDefault()
+  }
 
   return (
     <FormShell
@@ -279,10 +309,14 @@ export default function BenificiaryBankForm({
                   form={formik}
                   required
                   readOnly={editMode}
-                  displayFieldWidth={2}
                   valueShow='clientRef'
                   secondValueShow='clientName'
                   maxAccess={maxAccess}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Ref.' },
+                    { key: 'name', value: 'Name' },
+                    { key: 'cellPhone', value: 'Cell Phone' }
+                  ]}
                   onChange={async (event, newValue) => {
                     if (newValue?.status == -1) {
                       stackError({
@@ -333,6 +367,7 @@ export default function BenificiaryBankForm({
                     { key: 'name', value: 'Name' }
                   ]}
                   maxAccess={maxAccess}
+                  required
                   values={formik.values}
                   onChange={(event, newValue) => {
                     formik.setFieldValue('bankId', newValue ? newValue.recordId : '')
@@ -352,6 +387,26 @@ export default function BenificiaryBankForm({
                   error={formik.touched.accountRef && Boolean(formik.errors.accountRef)}
                   maxAccess={maxAccess}
                   readOnly={editMode}
+                  onCopy={handleCopy}
+                  onPaste={handleCopy}
+                  onClear={() => formik.setFieldValue('accountRef', '')}
+                />
+              </FormGrid>
+              <FormGrid hideonempty xs={12}>
+                <CustomTextField
+                  name='accountRefRepeat'
+                  label={_labels.confirmAccountRef}
+                  value={formik.values.accountRefRepeat}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  maxLength='50'
+                  error={formik.touched.accountRefRepeat && Boolean(formik.errors.accountRefRepeat)}
+                  maxAccess={maxAccess}
+                  readOnly={editMode}
+                  required={formik.values.accountRef}
+                  onCopy={handleCopy}
+                  onPaste={handleCopy}
+                  onClear={() => formik.setFieldValue('accountRefRepeat', '')}
                 />
               </FormGrid>
 
@@ -547,6 +602,27 @@ export default function BenificiaryBankForm({
                   error={formik.touched.cellPhone && Boolean(formik.errors.cellPhone)}
                   maxAccess={maxAccess}
                   readOnly={editMode}
+                  onCopy={handleCopy}
+                  onPaste={handleCopy}
+                />
+              </FormGrid>
+              <FormGrid hideonempty xs={12}>
+                <CustomTextField
+                  name='cellPhoneRepeated'
+                  label={_labels.confirmCellPhone}
+                  value={formik.values?.cellPhoneRepeated}
+                  phone={true}
+                  onChange={formik.handleChange}
+                  maxLength='20'
+                  autoComplete='off'
+                  onClear={() => formik.setFieldValue('cellPhoneRepeated', '')}
+                  error={formik.touched.cellPhoneRepeated && Boolean(formik.errors.cellPhoneRepeated)}
+                  maxAccess={maxAccess}
+                  readOnly={editMode}
+                  onCopy={handleCopy}
+                  onPaste={handleCopy}
+                  onBlur={formik.handleBlur}
+                  required={formik.values.cellPhone}
                 />
               </FormGrid>
               <FormGrid hideonempty xs={12}>
@@ -633,6 +709,26 @@ export default function BenificiaryBankForm({
                   error={formik.touched.IBAN && Boolean(formik.errors.IBAN)}
                   maxAccess={maxAccess}
                   readOnly={editMode}
+                  onCopy={handleCopy}
+                  onPaste={handleCopy}
+                  onClear={() => formik.setFieldValue('IBAN', '')}
+                />
+              </FormGrid>
+              <FormGrid hideonempty xs={12}>
+                <CustomTextField
+                  name='IBANRepeated'
+                  label={_labels.confirmIBAN}
+                  maxLength='50'
+                  value={formik.values.IBANRepeated}
+                  onChange={formik.handleChange}
+                  onClear={() => formik.setFieldValue('IBANRepeated', '')}
+                  error={formik.touched.IBANRepeated && Boolean(formik.errors.IBANRepeated)}
+                  maxAccess={maxAccess}
+                  readOnly={editMode}
+                  onCopy={handleCopy}
+                  onPaste={handleCopy}
+                  onBlur={formik.handleBlur}
+                  required={formik.values.IBAN}
                 />
               </FormGrid>
               <FormGrid hideonempty xs={12}>

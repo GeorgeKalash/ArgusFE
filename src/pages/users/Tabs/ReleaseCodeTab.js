@@ -11,10 +11,12 @@ import { AccessControlRepository } from 'src/repositories/AccessControlRepositor
 import { RequestsContext } from 'src/providers/RequestsContext'
 import toast from 'react-hot-toast'
 import ReleaseCodeForm from './ReleaseCodeForm'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const ReleaseCodeTab = ({ labels, maxAccess, storeRecordId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const { platformLabels } = useContext(ControlContext)
 
   const columns = [
     {
@@ -78,7 +80,7 @@ const ReleaseCodeTab = ({ labels, maxAccess, storeRecordId }) => {
         extension: AccessControlRepository.UserReleaseCode.del,
         record: JSON.stringify(obj)
       })
-      toast.success('Record Deleted Successfully')
+      toast.success(platformLabels.Deleted)
       invalidate()
     } catch (error) {}
   }

@@ -169,6 +169,13 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'Cash Transaction',
+    label: platformLabels.CashTransaction,
+    color: '#231F20',
+    image: 'popup-window.png',
+    main: false
+  },
+  {
     key: 'Clear',
     label: platformLabels.Clear,
     condition: 'isCleared',
