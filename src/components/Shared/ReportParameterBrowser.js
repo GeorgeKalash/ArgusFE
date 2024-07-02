@@ -75,15 +75,17 @@ const GetLookup = ({ field, formik }) => {
 
 const GetComboBox = ({ field, formik }) => {
   const apiDetails = field?.apiDetails
-  if (!formik.values?.parameters?.[field.id]?.value && field.value) {
-    formik.setFieldValue(`parameters[${field.id}]`, {
-      fieldId: field.id,
-      fieldKey: field.key,
-      value: Number(field.value),
-      caption: field.caption,
-      display: field.value
-    })
-  }
+  useEffect(() => {
+    if (!formik.values?.parameters?.[field.id]?.value && field.value) {
+      formik.setFieldValue(`parameters[${field.id}]`, {
+        fieldId: field.id,
+        fieldKey: field.key,
+        value: Number(field.value),
+        caption: field.caption,
+        display: field.value
+      })
+    }
+  }, [])
 
   return (
     <Grid item xs={12} key={field.id}>
