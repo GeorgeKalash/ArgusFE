@@ -718,7 +718,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       <VertLayout>
         <Grow>
           <FormProvider formik={formik} labels={labels} maxAccess={maxAccess}>
-            <Grid container>
+            <Grid container sx={{ zIndex: 0 }}>
               <FieldSet title='Transaction'>
                 <Grid container spacing={4}>
                   <Grid item xs={4}>
