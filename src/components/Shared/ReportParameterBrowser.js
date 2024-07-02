@@ -98,7 +98,7 @@ const GetComboBox = ({ field, formik }) => {
           displayField={apiDetails.displayField}
           columnsInDropDown={apiDetails?.columnsInDropDown}
           required={field.mandatory}
-          values={formik.values?.parameters?.[field.id]?.value || Number(field.value)}
+          values={formik.values?.parameters?.[field.id]?.value}
           onChange={(event, newValue) => {
             const textValue = Array.isArray(apiDetails?.displayField)
               ? apiDetails?.displayField?.map(header => newValue?.[header]?.toString())?.join(' - ')
@@ -121,7 +121,7 @@ const GetComboBox = ({ field, formik }) => {
         />
       ) : (
         <>
-          {/* <ResourceComboBox
+          <ResourceComboBox
             datasetId={field?.data}
             name={`parameters[${field.id}]`}
             label={field.caption}
@@ -145,7 +145,7 @@ const GetComboBox = ({ field, formik }) => {
               )
             }}
             error={Boolean(formik.errors?.parameters?.[field?.id])}
-          /> */}
+          />
         </>
       )}
     </Grid>
@@ -153,12 +153,24 @@ const GetComboBox = ({ field, formik }) => {
 }
 
 const GetDate = ({ field, formik }) => {
+  useEffect(() => {
+    if (!formik.values?.parameters?.[field.id]?.value && field.value) {
+      formik.setFieldValue(`parameters[${field.id}]`, {
+        fieldId: field.id,
+        fieldKey: field.key,
+        value: new Date(field.value.toString()).getTime(),
+        caption: field.caption,
+        display: field.value
+      })
+    }
+  }, [])
+
   return (
     <Grid item xs={12} key={field.id}>
       <CustomDatePicker
         name={`parameters[${field.id}]`}
         label={field.caption}
-        value={formik.values?.parameters?.[field.id]?.value || new Date(field.value.toString()).getTime()}
+        value={formik.values?.parameters?.[field.id]?.value}
         required={field.mandatory}
         onChange={(name, newValue) => {
           formik.setFieldValue(`parameters[${field.id}]`, {
@@ -170,7 +182,7 @@ const GetDate = ({ field, formik }) => {
           })
         }}
         error={Boolean(formik.errors?.parameters?.[field?.id])}
-        onClear={() => formik.setFieldValue(`parameters[${field.id}]`, {})}
+        onClear={() => formik.setFieldValue(`parameters[${field.id}]`, undefined)}
       />
     </Grid>
   )
@@ -285,7 +297,7 @@ const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, disab
 
           return acc
         }, [])
-
+      console.log('processedArray', processedArray)
       setParamsArray(processedArray)
       window.close()
     }
