@@ -35,10 +35,10 @@ export default function BenificiaryBankForm({
   countryId,
   submitted,
   setSubmitted,
-  addBeneficiary,
-  setAddBeneficiary,
+  resetForm,
+  setResetForm,
   beneficiaryList,
-  onChangeBeneficiary
+  onChange
 }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [maxAccess, setMaxAccess] = useState({ record: [] })
@@ -57,7 +57,7 @@ export default function BenificiaryBankForm({
         const maxAccess = { record: controls }
         setMaxAccess(maxAccess)
       }
-      if (beneficiary?.beneficiaryId) {
+      if (beneficiary?.beneficiaryId && client?.clientId) {
         const RTBEB = await getRequest({
           extension: RemittanceOutwardsRepository.BeneficiaryBank.get,
           parameters: `_clientId=${client?.clientId}&_beneficiaryId=${beneficiary?.beneficiaryId}&_seqNo=${beneficiary?.beneficiarySeqNo}`
@@ -111,19 +111,17 @@ export default function BenificiaryBankForm({
           remarks: RTBEB?.record?.remarks,
           seqNo: RTBEB?.record?.seqNo
         }
-
-        if (beneficiaryList) onChangeBeneficiary(obj)
         formik.setValues(obj)
       }
     })()
-  }, [beneficiary?.beneficiaryId, beneficiary?.beneficiarySeqNo])
+  }, [beneficiary?.beneficiaryId, beneficiary?.beneficiarySeqNo, client?.clientId])
 
   useEffect(() => {
-    if (addBeneficiary && !submitted) {
+    if (resetForm && !submitted) {
       formik.resetForm()
-      setAddBeneficiary(false)
+      setResetForm(false)
     }
-  }, [addBeneficiary])
+  }, [resetForm])
 
   useEffect(() => {
     if (formik.errors && submitted) {
@@ -133,6 +131,53 @@ export default function BenificiaryBankForm({
       formik.handleSubmit()
     }
   }, [submitted])
+
+  useEffect(() => {
+    const values = formik.values
+
+    const header = {
+      clientId: values.clientId,
+      clientRef: values.clientRef,
+      clientName: values.clientName,
+      beneficiaryId: values.beneficiaryId,
+      gender: values.gender,
+      rtId: values.rtId,
+      rtName: values.rtName,
+      name: values.name,
+      dispersalType: values.dispersalType,
+      isBlocked: values.isBlocked,
+      stoppedDate: values.stoppedDate ? formatDateToApi(values.stoppedDate) : null,
+      stoppedReason: values.stoppedReason,
+      nationalityId: values.nationalityId,
+      cellPhone: values.cellPhone,
+      birthDate: values.birthDate ? formatDateToApi(values.birthDate) : null,
+      cobId: values.cobId,
+      shortName: values.shortName,
+      addressLine1: values.addressLine1,
+      addressLine2: values.addressLine2,
+      countryId: values.countryId,
+      seqNo: values.seqNo
+    }
+
+    const bankInfo = {
+      bankId: values.bankId,
+      clientId: values.clientId,
+      beneficiaryId: values.beneficiaryId,
+      accountRef: values.accountRef,
+      accountType: values.accountType,
+      IBAN: values.IBAN,
+      routingNo: values.routingNo,
+      swiftCode: values.swiftCode,
+      branchCode: values.branchCode,
+      branchName: values.branchName,
+      city: values.city,
+      state: values.state,
+      zipcode: values.zipcode,
+      seqNo: values.seqNo
+    }
+    const data = { header: header, beneficiaryBank: bankInfo }
+    onChange(data)
+  }, [formik.values])
 
   const initialValues = {
     //RTBEN
@@ -187,22 +232,23 @@ export default function BenificiaryBankForm({
       clientId: yup.string().required(' '),
       countryId: yup.string().required(' '),
       name: yup.string().required(' '),
-      bankId: yup.string().required(' ')
-    }),
-    validate: values => {
-      const errors = {}
-      if (values.accountRef && values.accountRefRepeat != values.accountRef) {
-        errors.accountRefRepeat = 'accountRef must match'
-      }
-      if (values.IBAN && values.IBANRepeated != values.IBAN) {
-        errors.IBANRepeated = 'IBAN must match'
-      }
-      if (values.cellPhone && values.cellPhoneRepeated != values.cellPhone) {
-        errors.cellPhoneRepeated = 'cellPhone must match'
-      }
+      bankId: yup.string().required(' '),
+      accountRefRepeat: yup.number().test('accountRef must match', 'Error', function (value) {
+        const { accountRef } = this.parent
 
-      return errors
-    },
+        return accountRef == value
+      }),
+      IBANRepeated: yup.number().test('IBAN must match', 'Error', function (value) {
+        const { IBAN } = this.parent
+
+        return IBAN == value
+      }),
+      cellPhoneRepeated: yup.number().test('cellPhone must match', 'Error', function (value) {
+        const { cellPhone } = this.parent
+
+        return cellPhone == value
+      })
+    }),
     onSubmit: async values => {
       const header = {
         clientId: values.clientId,
@@ -248,7 +294,6 @@ export default function BenificiaryBankForm({
 
       if (submitted) {
         setSubmitted(true)
-        onChangeBeneficiary(data)
       } else {
         const res = await postRequest({
           extension: RemittanceOutwardsRepository.BeneficiaryBank.set,

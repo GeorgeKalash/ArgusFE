@@ -33,10 +33,10 @@ const BenificiaryCashForm = ({
   editable = false,
   submitted,
   setSubmitted,
-  addBeneficiary,
-  setAddBeneficiary,
+  resetForm,
+  setResetForm,
   beneficiaryList,
-  onChangeBeneficiary
+  onChange
 }) => {
   const [maxAccess, setMaxAccess] = useState({ record: [] })
   const { stack: stackError } = useError()
@@ -55,7 +55,7 @@ const BenificiaryCashForm = ({
         setMaxAccess(maxAccess)
       }
 
-      if (beneficiary?.beneficiaryId) {
+      if (beneficiary?.beneficiaryId && client?.clientId) {
         const RTBEC = await getRequest({
           extension: RemittanceOutwardsRepository.BeneficiaryCash.get,
           parameters: `_clientId=${client?.clientId}&_beneficiaryId=${beneficiary?.beneficiaryId}&_seqNo=${beneficiary?.beneficiarySeqNo}`
@@ -102,20 +102,20 @@ const BenificiaryCashForm = ({
           birthPlace: RTBEC?.record?.birthPlace,
           seqNo: RTBEC?.record?.seqNo
         }
-        if (beneficiaryList) {
-          onChangeBeneficiary(obj)
-        }
+
+        if (beneficiaryList) onChange(obj)
+
         formik.setValues(obj)
       }
     })()
-  }, [beneficiary?.beneficiaryId, beneficiary?.beneficiarySeqNo])
+  }, [beneficiary?.beneficiaryId, beneficiary?.beneficiarySeqNo, client?.clientId])
 
   useEffect(() => {
-    if (addBeneficiary && !submitted) {
+    if (resetForm) {
       formik.resetForm()
-      setAddBeneficiary(false)
+      setResetForm(false)
     }
-  }, [addBeneficiary])
+  }, [resetForm])
 
   useEffect(() => {
     if (formik.errors && submitted) {
@@ -225,7 +225,7 @@ const BenificiaryCashForm = ({
       const data = { header: header, beneficiaryCash: cashInfo }
       if (submitted) {
         setSubmitted(true)
-        onChangeBeneficiary(data)
+        onChange(data)
       } else {
         const res = await postRequest({
           extension: RemittanceOutwardsRepository.BeneficiaryCash.set,
