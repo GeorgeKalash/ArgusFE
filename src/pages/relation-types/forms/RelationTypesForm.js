@@ -9,10 +9,12 @@ import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function RelationTypesForm({ labels, maxAccess, recordId, setStore }) {
   const [isLoading, setIsLoading] = useState(false)
   const [editMode, setEditMode] = useState(!!recordId)
+  const { platformLabels } = useContext(ControlContext)
 
   const [initialValues, setInitialData] = useState({
     recordId: null,
@@ -49,12 +51,12 @@ export default function RelationTypesForm({ labels, maxAccess, recordId, setStor
           recordId: response.recordId,
           name: obj.name
         })
-        toast.success('Record Added Successfully')
+        toast.success(platformLabels.Added)
         setInitialData({
           ...obj,
           recordId: response.recordId
         })
-      } else toast.success('Record Edited Successfully')
+      } else toast.success(platformLabels.Edited)
       setEditMode(true)
 
       invalidate()
@@ -85,12 +87,7 @@ export default function RelationTypesForm({ labels, maxAccess, recordId, setStor
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.RelationType}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={editMode}
-    >
+    <FormShell resourceId={ResourceIds.RelationType} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <Grid container spacing={4}>
         <Grid item xs={12}>
           <CustomTextField

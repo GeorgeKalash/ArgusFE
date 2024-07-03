@@ -13,9 +13,11 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function ActivityForm({ labels, maxAccess, recordId }) {
   const [editMode, setEditMode] = useState(!!recordId)
+  const { platformLabels } = useContext(ControlContext)
 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -42,12 +44,12 @@ export default function ActivityForm({ labels, maxAccess, recordId }) {
       })
 
       if (!recordId) {
-        toast.success('Record Added Successfully')
+        toast.success(platformLabels.Added)
         formik.setValues({
           ...obj,
           recordId: response.recordId
         })
-      } else toast.success('Record Edited Successfully')
+      } else toast.success(platformLabels.Edited)
       setEditMode(true)
 
       invalidate()
