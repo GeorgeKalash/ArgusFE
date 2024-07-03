@@ -150,5 +150,6 @@ export const ResourceIds = {
   FIDocTypeDefaults: 31103,
   GenerateOpeningBalances: 31314,
   DimensionsValues: 31111,
-  RebuildAccountBalances: 31501
+  RebuildAccountBalances: 31501,
+  ProfessionGroups: 36310
 }

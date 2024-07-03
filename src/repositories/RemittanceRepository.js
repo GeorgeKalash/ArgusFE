@@ -131,5 +131,12 @@ export const RemittanceSettingsRepository = {
     qry: service + 'qryIFM',
     get: service + 'getIFM',
     set2: service + 'set2IFM'
+  },
+  ProfessionGroups: {
+    qry: service + 'qryPFG',
+    page: service + 'pagePFG',
+    get: service + 'getPFG',
+    set: service + 'setPFG',
+    del: service + 'delPFG'
   }
 }
