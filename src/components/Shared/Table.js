@@ -303,14 +303,15 @@ const Table = ({
   const shouldViewButtons = !viewCheckButtons ? 'none' : ''
 
   const handleCheckboxChange = row => {
-    ChangeCheckedRow(prevCheckedRows => {
-      const newCheckedRows = { ...prevCheckedRows }
-      const key = row.seqNo ? `${row.recordId}-${row.seqNo}` : row.recordId
-      newCheckedRows[key] = row
-      const filteredRows = !newCheckedRows[key]?.checked ? [newCheckedRows[key]] : []
+    if (ChangeCheckedRow)
+      ChangeCheckedRow(prevCheckedRows => {
+        const newCheckedRows = { ...prevCheckedRows }
+        const key = row.seqNo ? `${row.recordId}-${row.seqNo}` : row.recordId
+        newCheckedRows[key] = row
+        const filteredRows = !newCheckedRows[key]?.checked ? [newCheckedRows[key]] : []
 
-      return filteredRows
-    })
+        return filteredRows
+      })
   }
 
   function openDeleteConfirmation(obj) {
