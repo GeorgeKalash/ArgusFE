@@ -20,7 +20,7 @@ export default function SourceOfIncomeTypeForm({ labels, recordId, maxAccess }) 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
-    endpointId: RemittanceSettingsRepository.SourceOfIncomeType.qry
+    endpointId: RemittanceSettingsRepository.SourceOfIncomeType.page
   })
 
   const { formik } = useForm({

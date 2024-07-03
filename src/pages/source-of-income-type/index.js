@@ -24,7 +24,7 @@ const SourceOfIncomeType = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     return await getRequest({
-      extension: RemittanceSettingsRepository.SourceOfIncomeType.qry,
+      extension: RemittanceSettingsRepository.SourceOfIncomeType.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
     })
   }
@@ -38,12 +38,12 @@ const SourceOfIncomeType = () => {
     paginationParameters
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: RemittanceSettingsRepository.SourceOfIncomeType.qry,
+    endpointId: RemittanceSettingsRepository.SourceOfIncomeType.page,
     datasetId: ResourceIds.SourceOfIncomeType
   })
 
   const invalidate = useInvalidate({
-    endpointId: RemittanceSettingsRepository.SourceOfIncomeType.qry
+    endpointId: RemittanceSettingsRepository.SourceOfIncomeType.page
   })
 
   const columns = [
@@ -93,7 +93,7 @@ const SourceOfIncomeType = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} labels={_labels} refetch={refetch} />
+        <GridToolbar onAdd={add} maxAccess={access} labels={_labels} />
       </Fixed>
       <Grow>
         <Table
@@ -104,6 +104,7 @@ const SourceOfIncomeType = () => {
           onDelete={del}
           maxAccess={access}
           pageSize={50}
+          refetch={refetch}
           paginationParameters={paginationParameters}
           paginationType='api'
         />
