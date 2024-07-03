@@ -33,28 +33,14 @@ const Users = () => {
     query: { data },
     labels: _labels,
     refetch,
-    search,
-    clear,
     paginationParameters,
     access,
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: SystemRepository.Users.qry,
-    datasetId: ResourceIds.Users,
-    search: {
-      endpointId: SystemRepository.Users.snapshot,
-      searchFn: fetchWithSearch
-    }
+    datasetId: ResourceIds.Users
   })
-  async function fetchWithSearch({ qry }) {
-    const response = await getRequest({
-      extension: SystemRepository.Users.snapshot,
-      parameters: `_filter=${qry}`
-    })
-
-    return response
-  }
 
   function openForm(recordId) {
     stack({
@@ -123,7 +109,7 @@ const Users = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} onSearch={search} onSearchClear={clear} inputSearch={true} />
+        <GridToolbar onAdd={add} maxAccess={access} />
       </Fixed>
       <Grow>
         <Table
