@@ -21,43 +21,8 @@ export default function CustomDatePickerHijri({
   fullWidth = true
 }) {
   const [openDatePicker, setOpenDatePicker] = React.useState(false)
-  // const formattedDate = value?.toISOString()?.split('T')[0] + 'T12:00:00'
-  // console.log('formattedDate', formattedDate)
-  return (
-    // <LocalizationProvider dateAdapter={AdapterMomentHijri}>
-    //   <DatePicker
-    //     variant={variant}
-    //     size={size}
-    //     label={label}
-    //     fullWidth={fullWidth}
-    //     defaultValue={value && moment(new Date(value))}
-    //     onChange={newValue => onChange(name, newValue)}
-    //     onClose={() => setOpenDatePicker(false)}
-    //     open={openDatePicker}
-    //     slotProps={{
-    //       // replacing clearable behaviour
-    //       textField: {
-    //         size: size,
-    //         fullWidth: fullWidth,
-    //         InputProps: {
-    //           endAdornment: !(readOnly || disabled) && (
-    //             <InputAdornment position='end'>
-    //               {value && (
-    //                 <IconButton tabIndex={-1} edge='start' onClick={() => onChange(name, null)} sx={{ mr: -2 }}>
-    //                   <ClearIcon sx={{ border: '0px', fontSize: 20 }} />
-    //                 </IconButton>
-    //               )}
-    //               <IconButton tabIndex={-1} onClick={() => setOpenDatePicker(true)} sx={{ mr: -2 }}>
-    //                 <EventIcon />
-    //               </IconButton>
-    //             </InputAdornment>
-    //           )
-    //         }
-    //       }
-    //     }}
-    //   />
-    // </LocalizationProvider>
 
+  return (
     <LocalizationProvider dateAdapter={AdapterMomentJalaali}>
       <DatePicker
         variant={variant}
