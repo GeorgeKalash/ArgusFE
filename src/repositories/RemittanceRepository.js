@@ -132,6 +132,13 @@ export const RemittanceSettingsRepository = {
     get: service + 'getIFM',
     set2: service + 'set2IFM'
   },
+  SourceOfIncomeType: {
+    qry: service + 'qrySIT',
+    page: service + 'pageSIT',
+    get: service + 'getSIT',
+    set: service + 'setSIT',
+    del: service + 'delSIT'
+  },
   ProfessionGroups: {
     qry: service + 'qryPFG',
     page: service + 'pagePFG',
