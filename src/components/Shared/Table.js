@@ -2,7 +2,7 @@ import React, { useContext, useRef } from 'react'
 import { AgGridReact } from 'ag-grid-react'
 import 'ag-grid-community/styles/ag-grid.css'
 import 'ag-grid-community/styles/ag-theme-alpine.css'
-import { Box, IconButton } from '@mui/material'
+import { Box, IconButton, TextField } from '@mui/material'
 import Image from 'next/image'
 import editIcon from '../../../public/images/TableIcons/edit.png'
 import { useState } from 'react'
@@ -18,6 +18,7 @@ import { AuthContext } from 'src/providers/AuthContext'
 import { ControlAccessLevel, TrxType } from 'src/resources/AccessLevels'
 import deleteIcon from '../../../public/images/TableIcons/delete.png'
 import { useWindow } from 'src/windows'
+import DeleteDialog from './DeleteDialog'
 
 const Table = ({
   columns,
@@ -46,6 +47,47 @@ const Table = ({
 
   const CustomPagination = () => {
     if (pagination) {
+      const TextInput = ({ value, pageCount }) => {
+        const jumpToPage = e => {
+          const pages = e.target.value
+          console.log('page', pages)
+          if (e.key === 'Enter' || e.keyCode === 13)
+            if (paginationType === 'api') {
+              api({ _startAt: (pages - 1) * pageSize, _pageSize: pageSize })
+            } else {
+              if (pages > 1 && e.target.value != value) {
+                var slicedGridData = props.gridData?.list.slice((pages - 1) * pageSize, pages * pageSize)
+                setGridData({
+                  ...props.gridData?.list,
+                  list: slicedGridData
+                })
+                console.log('pages', (pages - 1) * pageSize + pageSize)
+                setStartAt((pages - 1) * pageSize + pageSize)
+              }
+            }
+        }
+        const handleInput = e => {
+          if (e.target.value > pageCount || e.target.value < 0) e.target.value = 1
+          if (e.target.value === '0') e.target.value = ''
+        }
+        return (
+          <TextField
+            size={'small'}
+            sx={{
+              px: 2,
+              p: 1,
+              width: '80px',
+              '& .MuiInputBase-root': {
+                height: '30px'
+              }
+            }}
+            autoFocus={true}
+            onInput={handleInput}
+            defaultValue={value}
+            onKeyUp={jumpToPage}
+          />
+        )
+      }
       if (paginationType === 'api') {
         const gridData = props.gridData
         const startAt = gridData?._startAt ?? 0
@@ -98,7 +140,8 @@ const Table = ({
               <NavigateBeforeIcon />
             </IconButton>
             {platformLabels.Page}
-            <input value={page} /> {platformLabels.Of} {pageCount}
+            <TextInput value={page} pageCount={pageCount} />
+            {platformLabels.Of} {pageCount}
             <IconButton
               onClick={incrementPage}
               disabled={page === pageCount}
@@ -139,6 +182,7 @@ const Table = ({
                 ...gridData,
                 list: slicedGridData
               })
+
               setStartAt(startAt + pageSize)
             }
           }
@@ -206,7 +250,7 @@ const Table = ({
               >
                 <NavigateBeforeIcon />
               </IconButton>
-              {platformLabels.Page} {page} {platformLabels.Of} {pageCount}
+              {platformLabels.Page} <TextInput value={page} pageCount={pageCount} /> {platformLabels.Of} {pageCount}
               <IconButton
                 onClick={incrementPage}
                 disabled={page === pageCount}
@@ -237,9 +281,16 @@ const Table = ({
   // const jumpToPage = e => {
   //   const pages = e.target.value
   //   console.log('page', pages)
-  //   if (paginationType === 'api') {
-  //     api({ _startAt: pages * pageSize, _pageSize: pageSize })
+  //   if ((e.key === 'Enter' || e.keyCode === 13) && paginationType === 'api') {
+  //     api({ _startAt: (pages - 1) * pageSize, _pageSize: pageSize })
   //   } else {
+  //     if (pages > 1) {
+  //       var slicedGridData = gridData.slice(pages * pageSize, (pages + 1) * pageSize)
+  //       setGridData({
+  //         ...gridData,
+  //         list: slicedGridData
+  //       })
+  //     }
   //   }
   // }
 
