@@ -9,7 +9,7 @@ export function useResourceQuery({ endpointId, filter, datasetId, queryFn, searc
 
   const isSearchMode = !!searchValue
 
-  const isFilterMode = Object.keys(filters).length > 0
+  const isFilterMode = Object.keys(filters).length > 0 && Object.values(filters).every(value => value)
 
   const { access, labels } = useResourceParams({
     datasetId
