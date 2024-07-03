@@ -82,7 +82,7 @@ const ProfessionGroups = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: RemittanceSettingsRepository.Profession.del,
+      extension: RemittanceSettingsRepository.ProfessionGroups.del,
       record: JSON.stringify(obj)
     })
     invalidate()
