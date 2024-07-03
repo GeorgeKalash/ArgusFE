@@ -1,4 +1,4 @@
-import { Grid, Typography } from '@mui/material'
+import { Grid } from '@mui/material'
 import { useContext, useState } from 'react'
 import toast from 'react-hot-toast'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
@@ -21,7 +21,7 @@ import * as yup from 'yup'
 
 export default function CloseForm({ form, labels, maxAccess, window, recordId, window2 }) {
   const { stack: stackError } = useError()
-  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const [mismatchedFields, setMismatchedFields] = useState([])
 
@@ -63,28 +63,32 @@ export default function CloseForm({ form, labels, maxAccess, window, recordId, w
   })
 
   const onClose = async () => {
-    const copy = { ...form.values }
-    copy.date = formatDateToApi(copy?.date)
-    copy.wip = copy?.wip === '' ? 1 : copy?.wip
-    copy.status = copy?.status === null ? 1 : copy?.status
-    copy.exRate = copy?.exRate === '' ? 1 : copy?.exRate
-    copy.baseAmount = copy?.baseAmount === '' ? copy?.amount : copy?.baseAmount
-    copy.rateCalcMethod = copy?.rateCalcMethod === '' ? 1 : copy?.rateCalcMethod
-    copy.sender_idIssueDate = copy.sender_idIssueDate ? formatDateToApi(copy?.sender_idIssueDate) : null
-    copy.sender_idExpiryDate = copy.sender_idExpiryDate ? formatDateToApi(copy?.sender_idExpiryDate) : null
-    copy.receiver_idIssueDate = copy.receiver_idIssueDate ? formatDateToApi(copy?.receiver_idIssueDate) : null
-    copy.receiver_idExpiryDate = copy.receiver_idExpiryDate ? formatDateToApi(copy?.receiver_idExpiryDate) : null
-    copy.expiryDate = copy.expiryDate ? formatDateToApi(copy?.expiryDate) : null
+    try {
+      const copy = { ...form.values }
+      copy.date = formatDateToApi(copy?.date)
+      copy.wip = copy?.wip === '' ? 1 : copy?.wip
+      copy.status = copy?.status === null ? 1 : copy?.status
+      copy.exRate = copy?.exRate === '' ? 1 : copy?.exRate
+      copy.baseAmount = copy?.baseAmount === '' ? copy?.amount : copy?.baseAmount
+      copy.rateCalcMethod = copy?.rateCalcMethod === '' ? 1 : copy?.rateCalcMethod
+      copy.sender_idIssueDate = copy.sender_idIssueDate ? formatDateToApi(copy?.sender_idIssueDate) : null
+      copy.sender_idExpiryDate = copy.sender_idExpiryDate ? formatDateToApi(copy?.sender_idExpiryDate) : null
+      copy.receiver_idIssueDate = copy.receiver_idIssueDate ? formatDateToApi(copy?.receiver_idIssueDate) : null
+      copy.receiver_idExpiryDate = copy.receiver_idExpiryDate ? formatDateToApi(copy?.receiver_idExpiryDate) : null
+      copy.expiryDate = copy.expiryDate ? formatDateToApi(copy?.expiryDate) : null
 
-    const res = await postRequest({
-      extension: RemittanceOutwardsRepository.InwardsTransfer.close,
-      record: JSON.stringify(copy)
-    })
-    if (res.recordId) {
-      toast.success(platformLabels.Closed)
-      invalidate()
-      window.close()
-      window2.close()
+      const res = await postRequest({
+        extension: RemittanceOutwardsRepository.InwardsTransfer.close,
+        record: JSON.stringify(copy)
+      })
+      if (res.recordId) {
+        toast.success(platformLabels.Closed)
+        invalidate()
+        window.close()
+        window2.close()
+      }
+    } catch (error) {
+      stackError(error)
     }
   }
 

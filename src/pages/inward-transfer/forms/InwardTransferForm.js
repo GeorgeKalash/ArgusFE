@@ -33,7 +33,6 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
   const editMode = !!recordId
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
-  const [transferType, setTransferType] = useState(null)
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
 
@@ -116,7 +115,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
   const { formik } = useForm({
     maxAccess,
     initialValues,
-    enableReinitialize: true,
+    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.date().required(),
@@ -124,7 +123,12 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
       currencyId: yup.string().required(),
       amount: yup.number().required(),
       transferType: yup.string().required(),
-      faxNo: transferType == '1' ? yup.string().required() : yup.string().notRequired(),
+      faxNo: yup.number().test('isTransferTypeEqual1', 'Error', function (value) {
+        const { transferType } = this.parent
+
+        return transferType !== '1' || (transferType === '1' && value !== undefined && value !== null)
+      }),
+
       sender_firstName: yup.string().required(),
       sender_lastName: yup.string().required(),
       sender_nationalityId: yup.string().required(),
@@ -133,6 +137,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
       receiver_firstName: yup.string().required(),
       receiver_lastName: yup.string().required(),
       receiver_payoutType: yup.string().required(),
+      receiver_ttNo: yup.string().required(),
       commissionAgent: yup.number().required(),
       commissionReceiver: yup.number().required()
     }),
@@ -151,23 +156,21 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
           extension: RemittanceOutwardsRepository.InwardsTransfer.set,
           record: JSON.stringify(copy)
         })
-        if (res.recordId) {
-          formik.setFieldValue('recordId', res.recordId)
-          invalidate()
+        formik.setFieldValue('recordId', res.recordId)
+        invalidate()
 
-          const res2 = await getRequest({
-            extension: RemittanceOutwardsRepository.InwardsTransfer.get,
-            parameters: `_recordId=${res.recordId}`
-          })
-          formik.setValues(res2.record)
-          toast.success(platformLabels.Updated)
-        }
+        const res2 = await getRequest({
+          extension: RemittanceOutwardsRepository.InwardsTransfer.get,
+          parameters: `_recordId=${res.recordId}`
+        })
+        formik.setValues(res2.record)
+        toast.success(platformLabels.Added)
       } catch (error) {
         stackError(error)
       }
     }
   })
-  const isClosed = formik.values.status === 4 ? true : false
+  const isClosed = formik.values.status === 4
 
   function openCloseWindow() {
     stack({
@@ -176,7 +179,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
         form: formik,
         labels,
         maxAccess,
-        recordId: recordId,
+        recordId,
         window2: window
       },
       width: 600,
@@ -222,6 +225,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
       disabled: isClosed || !editMode
     }
   ]
+  console.log(formik)
 
   return (
     <FormShell
@@ -247,6 +251,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       maxAccess={maxAccess}
                       maxLength='15'
                       readOnly={editMode}
+                      onChange={e => formik.setFieldValue('reference', e.target.value)}
                       error={formik.touched.reference && Boolean(formik.errors.reference)}
                     />
                   </Grid>
@@ -372,7 +377,6 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       maxAccess={maxAccess}
                       onChange={(event, newValue) => {
                         formik.setFieldValue('transferType', newValue?.key)
-                        setTransferType(newValue?.key)
                       }}
                       error={formik.touched.transferType && Boolean(formik.errors.transferType)}
                     />
@@ -945,6 +949,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       value={formik?.values?.receiver_ttNo}
                       maxAccess={maxAccess}
                       readOnly={editMode}
+                      required
                       maxLength='20'
                       error={formik.touched.receiver_ttNo && Boolean(formik.errors.receiver_ttNo)}
                       onChange={formik.handleChange}

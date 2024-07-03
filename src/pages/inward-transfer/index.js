@@ -17,12 +17,14 @@ import { useError } from 'src/error'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import InwardTransferForm from './forms/InwardTransferForm'
 import { getStorageData } from 'src/storage/storage'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const InwardTransfer = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
   const userId = getStorageData('userData').userId
+  const { platformLabels } = useContext(ControlContext)
 
   const {
     query: { data },
@@ -42,76 +44,95 @@ const InwardTransfer = () => {
   })
 
   async function fetchWithSearch({ filters }) {
-    return (
-      filters.qry &&
-      (await getRequest({
-        extension: RemittanceOutwardsRepository.InwardsTransfer.snapshot,
-        parameters: `_filter=${filters.qry}`
-      }))
-    )
+    try {
+      return (
+        filters.qry &&
+        (await getRequest({
+          extension: RemittanceOutwardsRepository.InwardsTransfer.snapshot,
+          parameters: `_filter=${filters.qry}`
+        }))
+      )
+    } catch (error) {
+      stackError(error)
+    }
   }
 
-  const userData = getStorageData('userData')
-
   const getPlantId = async () => {
-    const res = await getRequest({
-      extension: SystemRepository.UserDefaults.get,
-      parameters: `_userId=${userData && userData.userId}&_key=plantId`
-    })
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.UserDefaults.get,
+        parameters: `_userId=${userId}&_key=plantId`
+      })
 
-    if (res.record?.value) {
-      return res.record.value
+      if (res.record?.value) {
+        return res.record.value
+      }
+
+      return ''
+    } catch (error) {
+      stackError(error)
     }
-
-    return ''
   }
 
   const getCashAccountId = async () => {
-    const res = await getRequest({
-      extension: SystemRepository.UserDefaults.get,
-      parameters: `_userId=${userData && userData.userId}&_key=cashAccountId`
-    })
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.UserDefaults.get,
+        parameters: `_userId=${userId}&_key=cashAccountId`
+      })
 
-    if (res.record?.value) {
-      return res.record.value
+      if (res.record?.value) {
+        return res.record.value
+      }
+
+      return ''
+    } catch (error) {
+      stackError(error)
     }
-
-    return ''
   }
 
   const getDefaultDT = async () => {
-    const res = await getRequest({
-      extension: SystemRepository.UserFunction.get,
-      parameters: `_userId=${userData && userData.userId}&_functionId=${SystemFunction.InwardTransfer}`
-    })
-    if (res.record) {
-      return res.record.dtId
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.UserFunction.get,
+        parameters: `_userId=${userId}&_functionId=${SystemFunction.InwardTransfer}`
+      })
+      if (res.record) {
+        return res.record.dtId
+      }
+
+      return ''
+    } catch (error) {
+      stackError(error)
     }
-
-    return ''
   }
+
   async function openForm(recordId) {
-    const plantId = await getPlantId()
-    const cashAccountId = await getCashAccountId()
-    const dtId = await getDefaultDT()
+    try {
+      const plantId = await getPlantId()
+      const cashAccountId = await getCashAccountId()
+      const dtId = await getDefaultDT()
 
-    if (plantId !== '' && cashAccountId !== '') {
-      openInwardTransferWindow(plantId, cashAccountId, recordId, dtId)
-    } else {
-      if (plantId === '') {
-        stackError({
-          message: `This user does not have a default plant.`
-        })
+      if (plantId !== '' && cashAccountId !== '') {
+        openInwardTransferWindow(plantId, cashAccountId, recordId, dtId)
+      } else {
+        if (plantId === '') {
+          stackError({
+            message: `This user does not have a default plant.`
+          })
 
-        return
+          return
+        }
+        if (cashAccountId === '') {
+          stackError({
+            message: `This user does not have a default cash account.`
+          })
+
+          return
+        }
       }
-      if (cashAccountId === '') {
-        stackError({
-          message: `This user does not have a default cash account.`
-        })
-
-        return
-      }
+    } catch (error) {
+      stackError(error)
     }
   }
 
@@ -151,12 +172,16 @@ const InwardTransfer = () => {
   })
 
   const delTransfer = async obj => {
-    await postRequest({
-      extension: RemittanceOutwardsRepository.InwardsTransfer.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success('Record Deleted Successfully')
+    try {
+      await postRequest({
+        extension: RemittanceOutwardsRepository.InwardsTransfer.del,
+        record: JSON.stringify(obj)
+      })
+      invalidate()
+      toast.success(platformLabels.Deleted)
+    } catch (error) {
+      stackError(error)
+    }
   }
 
   const addTransfer = () => {
@@ -177,7 +202,7 @@ const InwardTransfer = () => {
         access,
         userId,
         labels: _labels,
-        recordId: recordId ? recordId : null
+        recordId
       },
       width: 1200,
       title: _labels.InwardTransfer
