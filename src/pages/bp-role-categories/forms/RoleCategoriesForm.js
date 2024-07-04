@@ -10,11 +10,13 @@ import { FormControlLabel, Checkbox } from '@mui/material'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import { useForm } from 'src/hooks/form'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function RoleCategoriesForm({ labels, maxAccess, recordId }) {
   const [editMode, setEditMode] = useState(!!recordId)
 
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: BusinessPartnerRepository.RoleCategory.page
@@ -45,12 +47,12 @@ export default function RoleCategoriesForm({ labels, maxAccess, recordId }) {
       })
 
       if (!recordId) {
-        toast.success('Record Added Successfully')
+        toast.success(platformLabels.Added)
         formik.setValues({
           ...obj,
           recordId: response.recordId
         })
-      } else toast.success('Record Edited Successfully')
+      } else toast.success(platformLabels.Edited)
       setEditMode(true)
 
       invalidate()
@@ -80,7 +82,6 @@ export default function RoleCategoriesForm({ labels, maxAccess, recordId }) {
             name='reference'
             label={labels.reference}
             value={formik.values.reference}
-            rows={2}
             required
             maxAccess={maxAccess}
             onChange={formik.handleChange}
@@ -93,7 +94,6 @@ export default function RoleCategoriesForm({ labels, maxAccess, recordId }) {
             name='name'
             label={labels.name}
             value={formik.values.name}
-            rows={2}
             required
             maxAccess={maxAccess}
             onChange={formik.handleChange}
