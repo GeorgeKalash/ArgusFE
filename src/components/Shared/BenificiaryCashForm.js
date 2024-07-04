@@ -28,6 +28,8 @@ const BenificiaryCashForm = ({
   client,
   dispersalType,
   beneficiary,
+  submitted,
+  setSubmitted,
   corId,
   countryId,
   editable = false,
@@ -261,6 +263,14 @@ const BenificiaryCashForm = ({
     const data = { header: header, beneficiaryCash: cashInfo }
     if (onChange) onChange(data)
   }, [formik.values])
+
+  useEffect(() => {
+    const errors = Object.keys(formik.errors).length !== 0
+    if (errors) {
+      setSubmitted(false)
+      formik.handleSubmit()
+    }
+  }, [submitted])
 
   const constructNameField = formValues => {
     const arabicRegex = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/

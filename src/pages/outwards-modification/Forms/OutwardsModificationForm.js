@@ -30,7 +30,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
   const [resetForm, setResetForm] = useState(false)
-  const [beneficiaryList, onChange] = useState({})
+  const [submitted, setSubmitted] = useState(false)
 
   const { maxAccess } = useDocumentType({
     functionId: SystemFunction.OutwardsModification,
@@ -83,32 +83,16 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
       date: yup.string().required()
     }),
     onSubmit: async () => {
-      try {
-        const data = {
-          outwardId: formik.values.outwardId,
-          beneficiaryCashPack: displayCash ? formik.values.beneficiaryData : null,
-          beneficiaryBankPack: displayBank ? formik.values.beneficiaryData : null
-        }
-
-        const res = await postRequest({
-          extension: RTOWMRepository.OutwardsModification.set2,
-          record: JSON.stringify(data)
-        })
-
-        const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
-        toast.success(actionMessage)
-        await refetchForm(res.recordId)
-        invalidate()
-        !recordId && viewOTP(res.recordId)
-      } catch (error) {}
+      setSubmitted(true)
     }
   })
 
   const editMode = !!formik.values.recordId
   const isClosed = formik.values.wip === 2
   const isPosted = formik.values.status === 4
-  const displayCash = formik.values.dispersalType === 1
-  const displayBank = formik.values.dispersalType === 2
+  const dispersalMode = formik.values.dispersalType
+  const DISPERSAL_MODE_CASH = 1
+  const DISPERSAL_MODE_BANK = 2
 
   async function getOutwardsModification(recordId) {
     return await getRequest({
@@ -119,11 +103,9 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
 
   const onClose = async recId => {
     try {
-      const resOWM = await getOutwardsModification(recId)
-
       const res = await postRequest({
         extension: RTOWMRepository.OutwardsModification.close,
-        record: JSON.stringify(resOWM.record)
+        record: JSON.stringify({ recordId: recId })
       })
 
       if (recordId) toast.success(platformLabels.Closed)
@@ -137,7 +119,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
     try {
       const res = await postRequest({
         extension: RTOWMRepository.OutwardsModification.reopen,
-        record: JSON.stringify(formik.values)
+        record: JSON.stringify({ recordId: formik.values.recordId })
       })
 
       toast.success(platformLabels.Reopened)
@@ -159,6 +141,13 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
       invalidate()
       await refetchForm(res.recordId)
     } catch (error) {}
+  }
+
+  function changedBeneficiaryData(data) {
+    formik.setValues({
+      ...formik.values,
+      beneficiaryData: data
+    })
   }
 
   function setFieldValues(values) {
@@ -259,18 +248,37 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
     res2.record.date = formatDateFromApi(res2.record.date)
     await fillOutwardData(res2.record)
   }
+
   useEffect(() => {
-    formik.setValues({
-      ...formik.values,
-      beneficiaryData: beneficiaryList
-    })
-  }, [beneficiaryList])
+    ;(async function () {
+      try {
+        if (submitted && !editMode) {
+          const data = {
+            outwardId: formik.values.outwardId,
+            beneficiaryCashPack: dispersalMode === DISPERSAL_MODE_CASH ? formik.values.beneficiaryData : null,
+            beneficiaryBankPack: dispersalMode === DISPERSAL_MODE_BANK ? formik.values.beneficiaryData : null
+          }
+
+          const res = await postRequest({
+            extension: RTOWMRepository.OutwardsModification.set2,
+            record: JSON.stringify(data)
+          })
+
+          const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
+          toast.success(actionMessage)
+          await refetchForm(res.recordId)
+          invalidate()
+          !recordId && viewOTP(res.recordId)
+        }
+      } catch (error) {}
+    })()
+  }, [submitted])
 
   useEffect(() => {
     ;(async function () {
       if (recordId) await refetchForm(recordId)
     })()
-  }, [formik.values.recordId])
+  }, [])
 
   return (
     <FormShell
@@ -392,7 +400,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
                 }}
                 valueField='name'
                 displayField='name'
-                name='headerBenName'
+                name='headerBenId'
                 label={labels.beneficiary}
                 form={formik}
                 readOnly={!formik.values.clientId || !formik.values.dispersalType || editMode || isPosted}
@@ -400,12 +408,13 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
                 editMode={editMode}
                 secondDisplayField={false}
                 onChange={async (event, newValue) => {
-                  fillBeneficiaryData({
-                    headerBenId: newValue ? newValue.beneficiaryId : '',
-                    headerBenName: newValue ? newValue.name : '',
-                    headerBenSeqNo: newValue ? newValue.seqNo : '',
-                    dispersalType: newValue ? newValue.dispersalType : ''
-                  })
+                  if (newValue?.beneficiaryId)
+                    fillBeneficiaryData({
+                      headerBenId: newValue ? newValue.beneficiaryId : '',
+                      headerBenName: newValue ? newValue.name : '',
+                      headerBenSeqNo: newValue ? newValue.seqNo : '',
+                      dispersalType: newValue ? newValue.dispersalType : ''
+                    })
                 }}
                 errorCheck={'headerBenId'}
               />
@@ -437,7 +446,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
           <Grid container>
             <Grid container rowGap={2} xs={6} spacing={2} sx={{ pt: 5, pl: 2 }}>
               <FieldSet title={labels.benOld}>
-                {displayBank && (
+                {dispersalMode === DISPERSAL_MODE_BANK && (
                   <BenificiaryBankForm
                     client={{
                       clientId: formik.values.clientId,
@@ -454,7 +463,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
                     viewBtns={false}
                   />
                 )}
-                {displayCash && (
+                {dispersalMode === DISPERSAL_MODE_CASH && (
                   <BenificiaryCashForm
                     client={{
                       clientId: formik.values.clientId,
@@ -476,12 +485,14 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
             <Grid container rowGap={2} xs={6} spacing={2} sx={{ pt: 5, pl: 4 }}>
               <FieldSet title={labels.benNew}>
                 <Grid>
-                  {displayBank && (
+                  {dispersalMode === DISPERSAL_MODE_BANK && (
                     <BenificiaryBankForm
                       viewBtns={false}
                       resetForm={resetForm}
                       setResetForm={setResetForm}
-                      onChange={onChange}
+                      onChange={changedBeneficiaryData}
+                      submitted={submitted}
+                      setSubmitted={setSubmitted}
                       editable={!editMode}
                       client={{
                         clientId: formik.values.clientId,
@@ -498,13 +509,15 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
                   )}
                 </Grid>
                 <Grid>
-                  {displayCash && (
+                  {dispersalMode === DISPERSAL_MODE_CASH && (
                     <BenificiaryCashForm
                       viewBtns={false}
                       editable={!editMode}
                       resetForm={resetForm}
                       setResetForm={setResetForm}
-                      onChange={onChange}
+                      onChange={changedBeneficiaryData}
+                      submitted={submitted}
+                      setSubmitted={setSubmitted}
                       client={{
                         clientId: formik.values.clientId,
                         clientName: formik.values.clientName,

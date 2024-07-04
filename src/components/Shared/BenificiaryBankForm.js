@@ -32,6 +32,8 @@ export default function BenificiaryBankForm({
   beneficiary,
   dispersalType,
   corId,
+  submitted,
+  setSubmitted,
   countryId,
   resetForm,
   setResetForm,
@@ -96,12 +98,12 @@ export default function BenificiaryBankForm({
       countryId: yup.string().required(' '),
       name: yup.string().required(' '),
       bankId: yup.string().required(' '),
-      accountRefRepeat: yup.number().test('accountRef must match', 'Error', function (value) {
+      accountRefRepeat: yup.string().test('accountRef must match', 'Error', function (value) {
         const { accountRef } = this.parent
 
         return accountRef == value
       }),
-      IBANRepeated: yup.number().test('IBAN must match', 'Error', function (value) {
+      IBANRepeated: yup.string().test('IBAN must match', 'Error', function (value) {
         const { IBAN } = this.parent
 
         return IBAN == value
@@ -292,6 +294,14 @@ export default function BenificiaryBankForm({
     const data = { header: header, beneficiaryBank: bankInfo }
     if (onChange) onChange(data)
   }, [formik.values])
+
+  useEffect(() => {
+    const errors = Object.keys(formik.errors).length !== 0
+    if (errors) {
+      setSubmitted(false)
+      formik.handleSubmit()
+    }
+  }, [submitted])
 
   const { labels: _labels } = useResourceQuery({
     datasetId: ResourceIds.BeneficiaryBank
