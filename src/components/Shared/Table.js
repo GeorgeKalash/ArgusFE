@@ -2,7 +2,7 @@ import React, { useContext, useRef } from 'react'
 import { AgGridReact } from 'ag-grid-react'
 import 'ag-grid-community/styles/ag-grid.css'
 import 'ag-grid-community/styles/ag-theme-alpine.css'
-import { Box, IconButton, TextField } from '@mui/material'
+import { Box, Checkbox, IconButton, TextField } from '@mui/material'
 import Image from 'next/image'
 import editIcon from '../../../public/images/TableIcons/edit.png'
 import { useState } from 'react'
@@ -19,6 +19,7 @@ import { ControlAccessLevel, TrxType } from 'src/resources/AccessLevels'
 import deleteIcon from '../../../public/images/TableIcons/delete.png'
 import { useWindow } from 'src/windows'
 import DeleteDialog from './DeleteDialog'
+import StrictDeleteConfirmation from './StrictDeleteConfirmation'
 
 const Table = ({
   columns,
@@ -49,27 +50,26 @@ const Table = ({
     if (pagination) {
       const TextInput = ({ value, pageCount }) => {
         const jumpToPage = e => {
-          const pages = e.target.value
-          console.log('page', pages)
-          if (e.key === 'Enter' || e.keyCode === 13)
+          const newPage = e.target.value
+
+          if ((e.key === 'Enter' || e.keyCode === 13) && newPage > 0)
             if (paginationType === 'api') {
-              api({ _startAt: (pages - 1) * pageSize, _pageSize: pageSize })
+              api({ _startAt: (newPage - 1) * pageSize, _pageSize: pageSize })
             } else {
-              if (pages > 1 && e.target.value != value) {
-                var slicedGridData = props.gridData?.list.slice((pages - 1) * pageSize, pages * pageSize)
-                setGridData({
-                  ...props.gridData?.list,
-                  list: slicedGridData
-                })
-                console.log('pages', (pages - 1) * pageSize + pageSize)
-                setStartAt((pages - 1) * pageSize + pageSize)
-              }
+              var slicedGridData = props.gridData?.list.slice((newPage - 2) * pageSize, newPage * pageSize)
+              setGridData({
+                ...props.gridData?.list,
+                list: slicedGridData
+              })
+              setStartAt((newPage - 2) * pageSize + pageSize)
             }
         }
+
         const handleInput = e => {
-          if (e.target.value > pageCount || e.target.value < 0) e.target.value = 1
-          if (e.target.value === '0') e.target.value = ''
+          if (e.target.value > pageCount || e.target.value < 0) e.target.value = value
+          if (e.target.value === '0') e.target.value = value
         }
+
         return (
           <TextField
             size={'small'}
@@ -278,22 +278,6 @@ const Table = ({
     }
   }
 
-  // const jumpToPage = e => {
-  //   const pages = e.target.value
-  //   console.log('page', pages)
-  //   if ((e.key === 'Enter' || e.keyCode === 13) && paginationType === 'api') {
-  //     api({ _startAt: (pages - 1) * pageSize, _pageSize: pageSize })
-  //   } else {
-  //     if (pages > 1) {
-  //       var slicedGridData = gridData.slice(pages * pageSize, (pages + 1) * pageSize)
-  //       setGridData({
-  //         ...gridData,
-  //         list: slicedGridData
-  //       })
-  //     }
-  //   }
-  // }
-
   const getRowClass = params => {
     return params?.rowIndex % 2 === 0 ? 'even-row' : ''
   }
@@ -313,7 +297,8 @@ const Table = ({
     const gridApi = params.api
     const selectedNodes = gridApi.getSelectedNodes()
     const selectedData = selectedNodes.map(node => node.data)
-    setData(selectedData)
+    console.log(selectedData)
+    // setData(selectedData)
   }
   function openDelete(obj) {
     stack({
@@ -326,6 +311,19 @@ const Table = ({
       width: 450,
       height: 170,
       title: platformLabels.Delete
+    })
+  }
+  function openDeleteConfirmation(obj) {
+    stack({
+      Component: StrictDeleteConfirmation,
+      props: {
+        action() {
+          props.onDelete(obj)
+        }
+      },
+      width: 500,
+      height: 300,
+      title: platformLabels.DeleteConfirmation
     })
   }
 
@@ -390,13 +388,35 @@ const Table = ({
     <Box className='ag-theme-alpine' style={{ flex: 1, width: '1000px !important', height: props.height || 'auto' }}>
       <AgGridReact
         rowData={paginationType === 'api' ? props?.gridData?.list : gridData?.list}
+        // columnDefs={[
+        //   ...(showCheckboxColumn
+        //     ? [
+        //         {
+        //           field: 'checkbox',
+        //           headerName: 'checkTitle',
+        //           renderCell: params => (
+        //             <TableCell padding='checkbox'>
+        //               <Checkbox
+        //                 checked={params.row.checked || false}
+        //                 onChange={() => {
+        //                   handleCheckboxChange(params.row)
+        //                   params.row.checked = !params.row.checked
+        //                 }}
+        //               />
+        //             </TableCell>
+        //           )
+        //         }
+        //       ]
+        //     : []),
+        //   ...columns
+        // ]}
         columnDefs={columns}
         pagination={false}
         paginationPageSize={pageSize}
         rowSelection={'multiple'}
         suppressAggFuncInHeader={true}
         getRowClass={getRowClass}
-        onSelectionChanged={setData === 'function' && onSelectionChanged}
+        onSelectionChanged={onSelectionChanged}
       />
       {pagination && <CustomPagination />}
     </Box>
