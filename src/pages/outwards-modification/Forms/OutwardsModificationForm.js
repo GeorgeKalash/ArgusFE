@@ -29,8 +29,6 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
-
-  const [submitted, setSubmitted] = useState(false)
   const [resetForm, setResetForm] = useState(false)
   const [beneficiaryList, onChange] = useState({})
 
@@ -85,7 +83,24 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
       date: yup.string().required()
     }),
     onSubmit: async () => {
-      setSubmitted(true)
+      try {
+        const data = {
+          outwardId: formik.values.outwardId,
+          beneficiaryCashPack: displayCash ? formik.values.beneficiaryData : null,
+          beneficiaryBankPack: displayBank ? formik.values.beneficiaryData : null
+        }
+
+        const res = await postRequest({
+          extension: RTOWMRepository.OutwardsModification.set2,
+          record: JSON.stringify(data)
+        })
+
+        const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
+        toast.success(actionMessage)
+        await refetchForm(res.recordId)
+        invalidate()
+        !recordId && viewOTP(res.recordId)
+      } catch (error) {}
     }
   })
   const editMode = !!formik.values.recordId
@@ -104,41 +119,47 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
   }
 
   const onClose = async recId => {
-    const resOWM = await getOutwardsModification(recId)
+    try {
+      const resOWM = await getOutwardsModification(recId)
 
-    const res = await postRequest({
-      extension: RTOWMRepository.OutwardsModification.close,
-      record: JSON.stringify(resOWM.record)
-    })
+      const res = await postRequest({
+        extension: RTOWMRepository.OutwardsModification.close,
+        record: JSON.stringify(resOWM.record)
+      })
 
-    if (recordId) toast.success(platformLabels.Closed)
-    invalidate()
+      if (recordId) toast.success(platformLabels.Closed)
+      invalidate()
 
-    await refetchForm(res.recordId)
+      await refetchForm(res.recordId)
+    } catch (error) {}
   }
 
   const onReopen = async () => {
-    const res = await postRequest({
-      extension: RTOWMRepository.OutwardsModification.reopen,
-      record: JSON.stringify(formik.values)
-    })
+    try {
+      const res = await postRequest({
+        extension: RTOWMRepository.OutwardsModification.reopen,
+        record: JSON.stringify(formik.values)
+      })
 
-    toast.success(platformLabels.Reopened)
-    invalidate()
-    await refetchForm(res.recordId)
+      toast.success(platformLabels.Reopened)
+      invalidate()
+      await refetchForm(res.recordId)
+    } catch (error) {}
   }
 
   const onPost = async () => {
-    const res = await postRequest({
-      extension: RTOWMRepository.OutwardsModification.post,
-      record: JSON.stringify({
-        recordId: formik.values.recordId
+    try {
+      const res = await postRequest({
+        extension: RTOWMRepository.OutwardsModification.post,
+        record: JSON.stringify({
+          recordId: formik.values.recordId
+        })
       })
-    })
 
-    toast.success(platformLabels.Posted)
-    invalidate()
-    await res.recordId
+      toast.success(platformLabels.Posted)
+      invalidate()
+      await res.recordId
+    } catch (error) {}
   }
 
   function setFieldValues(fields, values) {
@@ -272,37 +293,11 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
     await fillOutwardData(res2.record)
   }
   useEffect(() => {
-    console.log('beneficiaryList ', beneficiaryList)
     formik.setValues({
       ...formik.values,
       beneficiaryData: beneficiaryList
     })
   }, [beneficiaryList])
-
-  useEffect(() => {
-    ;(async function () {
-      if (submitted) {
-        const data = {
-          outwardId: formik.values.outwardId,
-          beneficiaryCashPack: displayCash ? formik.values.beneficiaryData : null,
-          beneficiaryBankPack: displayBank ? formik.values.beneficiaryData : null
-        }
-
-        const res = await postRequest({
-          extension: RTOWMRepository.OutwardsModification.set2,
-          record: JSON.stringify(data)
-        })
-
-        const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
-        toast.success(actionMessage)
-        formik.setFieldValue('recordId', res.recordId)
-        invalidate()
-
-        !recordId && viewOTP(res.recordId)
-        setSubmitted(false)
-      }
-    })()
-  }, [submitted])
 
   useEffect(() => {
     ;(async function () {
@@ -458,7 +453,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
                     backgroundColor: alpha('#4eb558', 0.8)
                   }
                 }}
-                disabled={submitted || !displayCash == !displayBank || editMode}
+                disabled={editMode}
                 onClick={() => {
                   setResetForm(true)
                   formik.setFieldValue('newBeneficiaryId', '')
@@ -515,11 +510,8 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
                   {displayBank && (
                     <BenificiaryBankForm
                       viewBtns={false}
-                      submitted={submitted}
-                      setSubmitted={setSubmitted}
                       resetForm={resetForm}
                       setResetForm={setResetForm}
-                      beneficiaryList={beneficiaryList}
                       onChange={onChange}
                       editable={!editMode}
                       client={{
@@ -541,11 +533,8 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
                     <BenificiaryCashForm
                       viewBtns={false}
                       editable={!editMode}
-                      submitted={submitted}
-                      setSubmitted={setSubmitted}
                       resetForm={resetForm}
                       setResetForm={setResetForm}
-                      beneficiaryList={beneficiaryList}
                       onChange={onChange}
                       client={{
                         clientId: formik.values.clientId,

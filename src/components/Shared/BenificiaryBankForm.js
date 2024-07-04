@@ -33,151 +33,14 @@ export default function BenificiaryBankForm({
   dispersalType,
   corId,
   countryId,
-  submitted,
-  setSubmitted,
   resetForm,
   setResetForm,
-  beneficiaryList,
   onChange
 }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [maxAccess, setMaxAccess] = useState({ record: [] })
   const { stack: stackError } = useError()
   const [editMode, setEditMode] = useState(beneficiary?.beneficiaryId && !editable)
-
-  useEffect(() => {
-    ;(async function () {
-      if (countryId && corId && dispersalType) {
-        const qryCCL = await getRequest({
-          extension: RemittanceSettingsRepository.CorrespondentControl.qry,
-          parameters: `_countryId=${countryId}&_corId=${corId}&_resourceId=${ResourceIds.BeneficiaryBank}`
-        })
-
-        const controls = { controls: qryCCL.list }
-        const maxAccess = { record: controls }
-        setMaxAccess(maxAccess)
-      }
-      if (beneficiary?.beneficiaryId && client?.clientId) {
-        const RTBEB = await getRequest({
-          extension: RemittanceOutwardsRepository.BeneficiaryBank.get,
-          parameters: `_clientId=${client?.clientId}&_beneficiaryId=${beneficiary?.beneficiaryId}&_seqNo=${beneficiary?.beneficiarySeqNo}`
-        })
-
-        const RTBEN = await getRequest({
-          extension: RemittanceOutwardsRepository.Beneficiary.get,
-          parameters: `_clientId=${client?.clientId}&_beneficiaryId=${beneficiary?.beneficiaryId}&_seqNo=${beneficiary?.beneficiarySeqNo}`
-        })
-
-        const obj = {
-          //RTBEN
-          clientId: client?.clientId,
-          beneficiaryId: beneficiary?.beneficiaryId,
-          recordId: client?.clientId * 1000 + beneficiary?.beneficiaryId,
-          name: RTBEN?.record?.name,
-          dispersalType: dispersalType,
-          nationalityId: RTBEN?.record?.nationalityId,
-          isBlocked: RTBEN?.record?.isBlocked,
-          stoppedDate: RTBEN?.record?.stoppedDate && formatDateFromApi(RTBEN.record.stoppedDate),
-          stoppedReason: RTBEN?.record?.stoppedReason,
-          gender: RTBEN?.record?.gender,
-          rtId: RTBEN?.record?.rtId,
-          rtName: RTBEN?.record?.rtName,
-          cellPhone: RTBEN?.record?.cellPhone,
-          cellPhoneRepeated: RTBEN?.record?.cellPhone,
-          birthDate: RTBEN?.record?.birthDate && formatDateFromApi(RTBEN.record.birthDate),
-          cobId: RTBEN?.record?.cobId,
-          shortName: RTBEN?.record?.shortName,
-          addressLine1: RTBEN?.record?.addressLine1,
-          addressLine2: RTBEN?.record?.addressLine2,
-          clientRef: RTBEN?.record?.clientRef,
-          clientName: RTBEN?.record?.clientName,
-          countryId: RTBEN?.record?.countryId,
-          seqNo: RTBEN?.record?.seqNo,
-
-          //RTBEB
-          bankId: RTBEB?.record?.bankId,
-          accountRef: RTBEB?.record?.accountRef,
-          accountRefRepeat: RTBEB?.record?.accountRef,
-          accountType: RTBEB?.record?.accountType,
-          IBAN: RTBEB?.record?.IBAN,
-          IBANRepeated: RTBEB?.record?.IBAN,
-          routingNo: RTBEB?.record?.routingNo,
-          swiftCode: RTBEB?.record?.swiftCode,
-          branchCode: RTBEB?.record?.branchCode,
-          branchName: RTBEB?.record?.branchName,
-          state: RTBEB?.record?.state,
-          city: RTBEB?.record?.city,
-          zipcode: RTBEB?.record?.zipcode,
-          remarks: RTBEB?.record?.remarks,
-          seqNo: RTBEB?.record?.seqNo
-        }
-        formik.setValues(obj)
-      }
-    })()
-  }, [beneficiary?.beneficiaryId, beneficiary?.beneficiarySeqNo, client?.clientId])
-
-  useEffect(() => {
-    if (resetForm && !submitted) {
-      formik.resetForm()
-      setResetForm(false)
-    }
-  }, [resetForm])
-
-  useEffect(() => {
-    if (formik.errors && submitted) {
-      setSubmitted(false)
-    }
-    if (submitted) {
-      formik.handleSubmit()
-    }
-  }, [submitted])
-
-  useEffect(() => {
-    const values = formik.values
-
-    const header = {
-      clientId: values.clientId,
-      clientRef: values.clientRef,
-      clientName: values.clientName,
-      beneficiaryId: values.beneficiaryId,
-      gender: values.gender,
-      rtId: values.rtId,
-      rtName: values.rtName,
-      name: values.name,
-      dispersalType: values.dispersalType,
-      isBlocked: values.isBlocked,
-      stoppedDate: values.stoppedDate ? formatDateToApi(values.stoppedDate) : null,
-      stoppedReason: values.stoppedReason,
-      nationalityId: values.nationalityId,
-      cellPhone: values.cellPhone,
-      birthDate: values.birthDate ? formatDateToApi(values.birthDate) : null,
-      cobId: values.cobId,
-      shortName: values.shortName,
-      addressLine1: values.addressLine1,
-      addressLine2: values.addressLine2,
-      countryId: values.countryId,
-      seqNo: values.seqNo
-    }
-
-    const bankInfo = {
-      bankId: values.bankId,
-      clientId: values.clientId,
-      beneficiaryId: values.beneficiaryId,
-      accountRef: values.accountRef,
-      accountType: values.accountType,
-      IBAN: values.IBAN,
-      routingNo: values.routingNo,
-      swiftCode: values.swiftCode,
-      branchCode: values.branchCode,
-      branchName: values.branchName,
-      city: values.city,
-      state: values.state,
-      zipcode: values.zipcode,
-      seqNo: values.seqNo
-    }
-    const data = { header: header, beneficiaryBank: bankInfo }
-    onChange(data)
-  }, [formik.values])
 
   const initialValues = {
     //RTBEN
@@ -292,21 +155,143 @@ export default function BenificiaryBankForm({
       }
       const data = { header: header, beneficiaryBank: bankInfo }
 
-      if (submitted) {
-        setSubmitted(true)
-      } else {
-        const res = await postRequest({
-          extension: RemittanceOutwardsRepository.BeneficiaryBank.set,
-          record: JSON.stringify(data)
-        })
+      const res = await postRequest({
+        extension: RemittanceOutwardsRepository.BeneficiaryBank.set,
+        record: JSON.stringify(data)
+      })
 
-        if (res.recordId) {
-          toast.success('Record Updated Successfully')
-        }
+      if (res.recordId) {
+        toast.success('Record Updated Successfully')
       }
+
       setEditMode(true)
     }
   })
+
+  useEffect(() => {
+    ;(async function () {
+      if (countryId && corId && dispersalType) {
+        const qryCCL = await getRequest({
+          extension: RemittanceSettingsRepository.CorrespondentControl.qry,
+          parameters: `_countryId=${countryId}&_corId=${corId}&_resourceId=${ResourceIds.BeneficiaryBank}`
+        })
+
+        const controls = { controls: qryCCL.list }
+        const maxAccess = { record: controls }
+        setMaxAccess(maxAccess)
+      }
+      if (beneficiary?.beneficiaryId && client?.clientId) {
+        const RTBEB = await getRequest({
+          extension: RemittanceOutwardsRepository.BeneficiaryBank.get,
+          parameters: `_clientId=${client?.clientId}&_beneficiaryId=${beneficiary?.beneficiaryId}&_seqNo=${beneficiary?.beneficiarySeqNo}`
+        })
+
+        const RTBEN = await getRequest({
+          extension: RemittanceOutwardsRepository.Beneficiary.get,
+          parameters: `_clientId=${client?.clientId}&_beneficiaryId=${beneficiary?.beneficiaryId}&_seqNo=${beneficiary?.beneficiarySeqNo}`
+        })
+
+        const obj = {
+          //RTBEN
+          clientId: client?.clientId,
+          beneficiaryId: beneficiary?.beneficiaryId,
+          recordId: client?.clientId * 1000 + beneficiary?.beneficiaryId,
+          name: RTBEN?.record?.name,
+          dispersalType: dispersalType,
+          nationalityId: RTBEN?.record?.nationalityId,
+          isBlocked: RTBEN?.record?.isBlocked,
+          stoppedDate: RTBEN?.record?.stoppedDate && formatDateFromApi(RTBEN.record.stoppedDate),
+          stoppedReason: RTBEN?.record?.stoppedReason,
+          gender: RTBEN?.record?.gender,
+          rtId: RTBEN?.record?.rtId,
+          rtName: RTBEN?.record?.rtName,
+          cellPhone: RTBEN?.record?.cellPhone,
+          cellPhoneRepeated: RTBEN?.record?.cellPhone,
+          birthDate: RTBEN?.record?.birthDate && formatDateFromApi(RTBEN.record.birthDate),
+          cobId: RTBEN?.record?.cobId,
+          shortName: RTBEN?.record?.shortName,
+          addressLine1: RTBEN?.record?.addressLine1,
+          addressLine2: RTBEN?.record?.addressLine2,
+          clientRef: RTBEN?.record?.clientRef,
+          clientName: RTBEN?.record?.clientName,
+          countryId: RTBEN?.record?.countryId,
+          seqNo: RTBEN?.record?.seqNo,
+
+          //RTBEB
+          bankId: RTBEB?.record?.bankId,
+          accountRef: RTBEB?.record?.accountRef,
+          accountRefRepeat: RTBEB?.record?.accountRef,
+          accountType: RTBEB?.record?.accountType,
+          IBAN: RTBEB?.record?.IBAN,
+          IBANRepeated: RTBEB?.record?.IBAN,
+          routingNo: RTBEB?.record?.routingNo,
+          swiftCode: RTBEB?.record?.swiftCode,
+          branchCode: RTBEB?.record?.branchCode,
+          branchName: RTBEB?.record?.branchName,
+          state: RTBEB?.record?.state,
+          city: RTBEB?.record?.city,
+          zipcode: RTBEB?.record?.zipcode,
+          remarks: RTBEB?.record?.remarks,
+          seqNo: RTBEB?.record?.seqNo
+        }
+        formik.setValues(obj)
+      }
+    })()
+  }, [beneficiary?.beneficiaryId, beneficiary?.beneficiarySeqNo, client?.clientId])
+
+  useEffect(() => {
+    if (resetForm) {
+      formik.resetForm()
+      setResetForm(false)
+    }
+  }, [resetForm])
+
+  useEffect(() => {
+    const values = formik.values
+
+    const header = {
+      clientId: values.clientId,
+      clientRef: values.clientRef,
+      clientName: values.clientName,
+      beneficiaryId: values.beneficiaryId,
+      gender: values.gender,
+      rtId: values.rtId,
+      rtName: values.rtName,
+      name: values.name,
+      dispersalType: values.dispersalType,
+      isBlocked: values.isBlocked,
+      stoppedDate: values.stoppedDate ? formatDateToApi(values.stoppedDate) : null,
+      stoppedReason: values.stoppedReason,
+      nationalityId: values.nationalityId,
+      cellPhone: values.cellPhone,
+      birthDate: values.birthDate ? formatDateToApi(values.birthDate) : null,
+      cobId: values.cobId,
+      shortName: values.shortName,
+      addressLine1: values.addressLine1,
+      addressLine2: values.addressLine2,
+      countryId: values.countryId,
+      seqNo: values.seqNo
+    }
+
+    const bankInfo = {
+      bankId: values.bankId,
+      clientId: values.clientId,
+      beneficiaryId: values.beneficiaryId,
+      accountRef: values.accountRef,
+      accountType: values.accountType,
+      IBAN: values.IBAN,
+      routingNo: values.routingNo,
+      swiftCode: values.swiftCode,
+      branchCode: values.branchCode,
+      branchName: values.branchName,
+      city: values.city,
+      state: values.state,
+      zipcode: values.zipcode,
+      seqNo: values.seqNo
+    }
+    const data = { header: header, beneficiaryBank: bankInfo }
+    if (onChange) onChange(data)
+  }, [formik.values])
 
   const { labels: _labels } = useResourceQuery({
     datasetId: ResourceIds.BeneficiaryBank
