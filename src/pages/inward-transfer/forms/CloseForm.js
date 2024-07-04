@@ -66,9 +66,6 @@ export default function CloseForm({ form, labels, maxAccess, window, recordId, w
     try {
       const copy = { ...form.values }
       copy.date = formatDateToApi(copy?.date)
-      copy.wip = copy?.wip === '' ? 1 : copy?.wip
-      copy.status = copy?.status === null ? 1 : copy?.status
-      copy.exRate = copy?.exRate === '' ? 1 : copy?.exRate
       copy.baseAmount = copy?.baseAmount === '' ? copy?.amount : copy?.baseAmount
       copy.rateCalcMethod = copy?.rateCalcMethod === '' ? 1 : copy?.rateCalcMethod
       copy.sender_idIssueDate = copy.sender_idIssueDate ? formatDateToApi(copy?.sender_idIssueDate) : null
@@ -81,12 +78,10 @@ export default function CloseForm({ form, labels, maxAccess, window, recordId, w
         extension: RemittanceOutwardsRepository.InwardsTransfer.close,
         record: JSON.stringify(copy)
       })
-      if (res.recordId) {
-        toast.success(platformLabels.Closed)
-        invalidate()
-        window.close()
-        window2.close()
-      }
+      toast.success(platformLabels.Closed)
+      invalidate()
+      window.close()
+      window2.close()
     } catch (error) {
       stackError(error)
     }
@@ -118,7 +113,7 @@ export default function CloseForm({ form, labels, maxAccess, window, recordId, w
                     formik.setFieldValue('corName', newValue ? newValue.name : '')
                     formik.setFieldValue('corRef', newValue ? newValue.reference : '')
                   }}
-                  errorCheck={'corId'}
+                  error={(formik.touched.corId && Boolean(formik.errors.corId)) || getFieldError('corId')}
                 />
               </Grid>
               <Grid item xs={12}>

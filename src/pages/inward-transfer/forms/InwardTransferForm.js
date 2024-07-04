@@ -1,5 +1,5 @@
 import { Checkbox, FormControlLabel, Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import toast from 'react-hot-toast'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
@@ -30,7 +30,6 @@ import { ControlContext } from 'src/providers/ControlContext'
 import CloseForm from './CloseForm'
 
 export default function InwardTransferForm({ labels, recordId, access, plantId, window, userId, dtId }) {
-  const editMode = !!recordId
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
   const { stack } = useWindow()
@@ -170,6 +169,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
       }
     }
   })
+  const editMode = !!formik.values.recordId
   const isClosed = formik.values.status === 4
 
   function openCloseWindow() {
@@ -179,7 +179,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
         form: formik,
         labels,
         maxAccess,
-        recordId,
+        recordId: formik.values.recordId,
         window2: window
       },
       width: 600,
@@ -225,7 +225,6 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
       disabled: isClosed || !editMode
     }
   ]
-  console.log(formik)
 
   return (
     <FormShell
