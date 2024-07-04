@@ -154,6 +154,8 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       productId: yup.string().required(' '),
       commission: yup.string().required(' '),
       lcAmount: yup.string().required(' '),
+      corId: yup.string().required(' '),
+      exRate: yup.string().required(' '),
       clientId: yup.string().required(' '),
       poeId: yup.string().required(' '),
       beneficiaryId: yup.string().required(' '),
@@ -180,6 +182,8 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
         copy.date = formatDateToApi(copy.date)
         copy.valueDate = formatDateToApi(copy.valueDate)
         copy.defaultValueDate = formatDateToApi(copy.defaultValueDate)
+        copy.vatAmount = vatAmount
+        copy.amount = amount
 
         const updatedRows = formik.values.amountRows.map((amountDetails, index) => {
           const seqNo = index + 1
@@ -227,7 +231,9 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
         formValidation: formik,
         recordId: recId,
         functionId: SystemFunction.Outwards,
-        onSuccess: onClose
+        onSuccess: () => {
+          onClose(recId)
+        }
       },
       width: 400,
       height: 400,
@@ -255,10 +261,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       if (res.recordId) {
         if (recordId) toast.success(platformLabels.Closed)
         invalidate()
-        const res2 = await getOutwards(res.recordId)
-
-        await fillFormData(res2.record)
-        await chooseClient(res2.record.headerView.clientId)
+        refetchForm(res.recordId)
         await getDefaultVAT()
       }
     } catch (error) {}
@@ -283,10 +286,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
         toast.success(platformLabels.Reopened)
         invalidate()
 
-        const res2 = await getOutwards(res.recordId)
-
-        await fillFormData(res2.record)
-        await chooseClient(res2.record.headerView.clientId)
+        refetchForm(res.recordId)
         await getDefaultVAT()
       }
     } catch (error) {}
@@ -341,7 +341,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
     calculateValueDate(selectedRowData?.valueDays)
   }
 
-  const fillFormData = async data => {
+  const fillOutwardsData = async data => {
     const modifiedList = data.cash.map((item, index) => ({
       ...item,
       id: index + 1,
@@ -550,13 +550,17 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
     formik.setFieldValue('valueDate', newDate)
   }
 
+  async function refetchForm(recordId) {
+    const res = await getOutwards(recordId)
+    await fillOutwardsData(res.record)
+    await chooseClient(res.record.headerView.clientId)
+  }
+
   useEffect(() => {
     ;(async function () {
       try {
         if (recordId) {
-          const res = await getOutwards(recordId)
-          await fillFormData(res.record)
-          await chooseClient(res.record.headerView.clientId)
+          refetchForm(recordId)
         } else {
           getDefaultDT()
         }
@@ -564,11 +568,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       } catch (error) {}
     })()
   }, [])
-
-  useEffect(() => {
-    formik.setFieldValue('amount', amount)
-    formik.setFieldValue('vatAmount', vatAmount)
-  }, [amount, vatAmount])
+  console.log('formik check ', formik)
 
   return (
     <FormShell

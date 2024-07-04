@@ -58,7 +58,7 @@ const ProductsWindow = ({ labels, maxAccess, onProductSubmit, outWardsData, wind
       var currencyId = outWardsData?.currencyId
       var dispersalType = outWardsData?.dispersalType
       var amount = outWardsData?.fcAmount ?? 0
-      var parameters = `_type=${type}&_functionId=${functionId}&_plantId=${plant}&_countryId=${countryId}&_dispersalType=${dispersalType}&_currencyId=${currencyId}&_amount=${amount}&_agentId=8`
+      var parameters = `_type=${type}&_functionId=${functionId}&_plantId=${plant}&_countryId=${countryId}&_dispersalType=${dispersalType}&_currencyId=${currencyId}&_amount=${amount}`
 
       try {
         if (plant && countryId && currencyId && dispersalType) {
@@ -92,7 +92,7 @@ const ProductsWindow = ({ labels, maxAccess, onProductSubmit, outWardsData, wind
           maxAccess={maxAccess}
           pagination={false}
           showCheckboxColumn={true}
-          setData={setGridData}
+          ChangeCheckedRow={setGridData}
         />
       </Grow>
       <Fixed>

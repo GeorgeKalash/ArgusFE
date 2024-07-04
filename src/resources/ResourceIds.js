@@ -147,8 +147,11 @@ export const ResourceIds = {
   IncreaseDecreaseAdj: 33301,
   CashTransactions: 33312,
   ReceiptVoucher: 31304,
+  FIDocTypeDefaults: 31103,
   GenerateOpeningBalances: 31314,
   DimensionsValues: 31111,
   RebuildAccountBalances: 31501,
-  RoleCategories: 21102
+  RoleCategories: 21102,
+  SourceOfIncomeType: 36311,
+  ProfessionGroups: 36310
 }

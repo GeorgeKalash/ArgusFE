@@ -209,7 +209,6 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     validateOnChange: true,
     validateOnBlur: true,
     validationSchema: yup.object({
-      reference: yup.string().required(' '),
       date: yup.string().required(' '),
       id_type: yup.number().required(' '),
       id_number: yup.number().required(' '),
@@ -584,7 +583,9 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
         formValidation: formik,
         recordId: recId,
         functionId: formik.values.functionId,
-        onSuccess: onClose
+        onSuccess: () => {
+          onClose(recId)
+        }
       },
       width: 400,
       height: 400,
@@ -699,6 +700,12 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       condition: true,
       onClick: 'onApproval',
       disabled: !isClosed
+    },
+    {
+      key: 'Account Balance',
+      condition: true,
+      onClick: 'onClickAC',
+      disabled: false
     }
   ]
 
@@ -717,7 +724,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       <VertLayout>
         <Grow>
           <FormProvider formik={formik} labels={labels} maxAccess={maxAccess}>
-            <Grid container>
+            <Grid container sx={{ zIndex: 0 }}>
               <FieldSet title='Transaction'>
                 <Grid container spacing={4}>
                   <Grid item xs={4}>
