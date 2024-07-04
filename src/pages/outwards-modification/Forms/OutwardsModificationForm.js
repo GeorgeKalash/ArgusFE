@@ -324,7 +324,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
                 label={labels.outward}
                 form={formik}
                 onChange={(event, newValue) => {
-                  if (newValue?.recordId) clearForm()
+                  if (!newValue?.recordId) clearForm()
                   else
                     fillOutwardData({
                       outwardId: newValue ? newValue.recordId : '',
