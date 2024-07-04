@@ -74,7 +74,7 @@ export default function CloseForm({ form, labels, maxAccess, window, recordId, w
       copy.receiver_idExpiryDate = copy.receiver_idExpiryDate ? formatDateToApi(copy?.receiver_idExpiryDate) : null
       copy.expiryDate = copy.expiryDate ? formatDateToApi(copy?.expiryDate) : null
 
-      const res = await postRequest({
+      await postRequest({
         extension: RemittanceOutwardsRepository.InwardsTransfer.close,
         record: JSON.stringify(copy)
       })

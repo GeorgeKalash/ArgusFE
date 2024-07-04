@@ -140,7 +140,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
       commissionAgent: yup.number().required(),
       commissionReceiver: yup.number().required()
     }),
-    onSubmit: async values => {
+    onSubmit: async () => {
       try {
         const copy = { ...formik.values }
         copy.date = formatDateToApi(copy?.date)
