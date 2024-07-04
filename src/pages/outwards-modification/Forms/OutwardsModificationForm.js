@@ -206,7 +206,6 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
   }
 
   async function fillBeneficiaryData(data) {
-    setResetForm(true)
     formik.setFieldValue('newBeneficiaryId', data.headerBenId)
     formik.setFieldValue('newBeneficiarySeqNo', data.headerBenSeqNo)
     formik.setFieldValue('dispersalType', data.dispersalType)
