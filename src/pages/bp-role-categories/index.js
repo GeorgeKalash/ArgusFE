@@ -11,9 +11,11 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import RoleCategoriesForm from './forms/RoleCategoriesForm'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const RoleCategories = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
