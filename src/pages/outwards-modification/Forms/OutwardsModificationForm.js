@@ -103,6 +103,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
       } catch (error) {}
     }
   })
+
   const editMode = !!formik.values.recordId
   const isClosed = formik.values.wip === 2
   const isPosted = formik.values.status === 4
@@ -110,12 +111,10 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
   const displayBank = formik.values.dispersalType === 2
 
   async function getOutwardsModification(recordId) {
-    try {
-      return await getRequest({
-        extension: RTOWMRepository.OutwardsModification.get,
-        parameters: `_recordId=${recordId}`
-      })
-    } catch (error) {}
+    return await getRequest({
+      extension: RTOWMRepository.OutwardsModification.get,
+      parameters: `_recordId=${recordId}`
+    })
   }
 
   const onClose = async recId => {
@@ -158,83 +157,52 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
 
       toast.success(platformLabels.Posted)
       invalidate()
-      await res.recordId
+      await refetchForm(res.recordId)
     } catch (error) {}
   }
 
-  function setFieldValues(fields, values) {
-    fields.forEach(field => {
-      formik.setFieldValue(field, values[field] ?? '')
-    })
+  function setFieldValues(values) {
+    for (let [key, value] of Object.entries(values)) {
+      formik.setFieldValue(key, value ?? '')
+    }
   }
 
   async function fillOutwardData(data) {
-    formik.setValues(data)
+    setFieldValues(data)
 
-    const outwardFields = [
-      'outwardsDate',
-      'amount',
-      'productName',
-      'clientId',
-      'clientRef',
-      'clientName',
-      'cellPhone',
-      'ttNo',
-      'dispersalType',
-      'countryId',
-      'corId'
-    ]
+    const res = await getRequest({
+      extension: RemittanceOutwardsRepository.OutwardsTransfer.get2,
+      parameters: `_recordId=${data.outwardId}`
+    })
 
-    const modifiedOWFields = [
-      'outwardId',
-      'owRef',
-      'reference',
-      'recordId',
-      'date',
-      'oldBeneficiaryId',
-      'oldBeneficiarySeqNo',
-      'newBeneficiaryId',
-      'newBeneficiarySeqNo',
-      'wip',
-      'status',
-      'otpVerified'
-    ]
+    const { headerView, ttNo } = res.record
 
-    setFieldValues(modifiedOWFields, data)
-
-    if (data.outwardId) {
-      const res = await getRequest({
-        extension: RemittanceOutwardsRepository.OutwardsTransfer.get2,
-        parameters: `_recordId=${data.outwardId}`
-      })
-
-      const { headerView, ttNo } = res.record
-
-      const fieldValues = {
-        outwardsDate: formatDateFromApi(headerView.date),
-        amount: headerView.amount,
-        productName: headerView.productName,
-        clientId: headerView.clientId,
-        clientRef: headerView.clientRef,
-        clientName: headerView.clientName,
-        cellPhone: headerView.cellPhone,
-        ttNo: ttNo,
-        dispersalType: headerView.dispersalType,
-        countryId: headerView.countryId,
-        corId: headerView.corId
-      }
-
-      setFieldValues(outwardFields, fieldValues)
-      fillBeneficiaryData({
-        headerBenId: data.newBeneficiaryId ?? '',
-        headerBenName: data.newBeneficiaryName ?? '',
-        headerBenSeqNo: data.newBeneficiarySeqNo ?? '',
-        dispersalType: headerView.dispersalType ?? ''
-      })
-    } else {
-      formik.resetForm()
-      setResetForm(true)
+    const fieldValues = {
+      outwardsDate: formatDateFromApi(headerView.date),
+      amount: headerView.amount,
+      productName: headerView.productName,
+      clientId: headerView.clientId,
+      clientRef: headerView.clientRef,
+      clientName: headerView.clientName,
+      cellPhone: headerView.cellPhone,
+      ttNo: ttNo,
+      dispersalType: headerView.dispersalType,
+      countryId: headerView.countryId,
+      corId: headerView.corId
     }
+
+    setFieldValues(fieldValues)
+    fillBeneficiaryData({
+      headerBenId: data.newBeneficiaryId ?? '',
+      headerBenName: data.newBeneficiaryName ?? '',
+      headerBenSeqNo: data.newBeneficiarySeqNo ?? '',
+      dispersalType: headerView.dispersalType ?? ''
+    })
+  }
+
+  function clearForm() {
+    formik.resetForm()
+    setResetForm(true)
   }
 
   async function fillBeneficiaryData(data) {
@@ -356,18 +324,20 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
                 label={labels.outward}
                 form={formik}
                 onChange={(event, newValue) => {
-                  fillOutwardData({
-                    outwardId: newValue ? newValue.recordId : '',
-                    owRef: newValue ? newValue.reference : '',
-                    date: newValue ? formatDateFromApi(newValue.date) : '',
-                    oldBeneficiaryId: newValue ? newValue.beneficiaryId : '',
-                    oldBeneficiarySeqNo: newValue ? newValue.beneficiarySeqNo : '',
-                    oldBeneficiaryName: newValue ? newValue.beneficiaryName : '',
-                    newBeneficiaryId: newValue ? newValue.beneficiaryId : '',
-                    newBeneficiarySeqNo: newValue ? newValue.beneficiarySeqNo : '',
-                    newBeneficiaryName: newValue ? newValue.beneficiaryName : '',
-                    dispersalType: newValue ? newValue.dispersalType : ''
-                  })
+                  if (newValue?.recordId) clearForm()
+                  else
+                    fillOutwardData({
+                      outwardId: newValue ? newValue.recordId : '',
+                      owRef: newValue ? newValue.reference : '',
+                      date: newValue ? formatDateFromApi(newValue.date) : '',
+                      oldBeneficiaryId: newValue ? newValue.beneficiaryId : '',
+                      oldBeneficiarySeqNo: newValue ? newValue.beneficiarySeqNo : '',
+                      oldBeneficiaryName: newValue ? newValue.beneficiaryName : '',
+                      newBeneficiaryId: newValue ? newValue.beneficiaryId : '',
+                      newBeneficiarySeqNo: newValue ? newValue.beneficiarySeqNo : '',
+                      newBeneficiaryName: newValue ? newValue.beneficiaryName : '',
+                      dispersalType: newValue ? newValue.dispersalType : ''
+                    })
                 }}
                 error={formik.touched.owRef && Boolean(formik.errors.owRef)}
                 maxAccess={maxAccess}
