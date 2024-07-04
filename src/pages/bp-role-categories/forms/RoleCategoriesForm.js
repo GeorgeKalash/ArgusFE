@@ -13,8 +13,6 @@ import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 
 export default function RoleCategoriesForm({ labels, maxAccess, recordId }) {
-  const [editMode, setEditMode] = useState(!!recordId)
-
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -53,12 +51,13 @@ export default function RoleCategoriesForm({ labels, maxAccess, recordId }) {
           recordId: response.recordId
         })
       } else toast.success(platformLabels.Edited)
-      setEditMode(true)
 
       invalidate()
     }
   })
 
+  const editMode = !!formik.values.recordId || !!recordId;
+  
   useEffect(() => {
     ;(async function () {
       try {
