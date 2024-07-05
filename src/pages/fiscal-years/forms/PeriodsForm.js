@@ -1,0 +1,186 @@
+import { useForm } from 'src/hooks/form'
+import { useContext, useEffect } from 'react'
+import { DataGrid } from 'src/components/Shared/DataGrid'
+import FormShell from 'src/components/Shared/FormShell'
+import * as yup from 'yup'
+import toast from 'react-hot-toast'
+import { RequestsContext } from 'src/providers/RequestsContext'
+import { SystemRepository } from 'src/repositories/SystemRepository'
+import { ResourceIds } from 'src/resources/ResourceIds'
+import { useWindow } from 'src/windows'
+import PeriodsModuleForm from './PeriodsModuleForm'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { DataSets } from 'src/resources/DataSets'
+import { formatDateFromApi } from 'src/lib/date-helper'
+
+const PeriodsForm = ({ recordId, labels, maxAccess, editMode }) => {
+  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { stack } = useWindow()
+
+  const post = obj => {
+    const data = {
+      fiscalYear: recordId,
+      periods: obj.map(({ id, periodId, ...rest }) => ({
+        periodId: id,
+        ...rest
+      }))
+    }
+    postRequest({
+      extension: SystemRepository.FiscalPeriodPack.set2,
+      record: JSON.stringify(data)
+    })
+      .then(res => {
+        if (res) toast.success('Record Edited Successfully')
+        getPeriods()
+      })
+      .catch(error => {})
+  }
+
+  const { formik } = useForm({
+    initialValues: {
+      periods: []
+    },
+    maxAccess,
+    enableReinitialize: false,
+    validateOnChange: true,
+    validationSchema: yup.object({
+      periods: yup
+        .array()
+        .of(
+          yup.object().shape({
+            statusName: yup.string().required(' '),
+            startDate: yup.string().required(' '),
+            endDate: yup.string().required(' ')
+          })
+        )
+        .required(' ')
+    }),
+    onSubmit: values => {
+      post(values.periods)
+    }
+  })
+
+  const columns = [
+    {
+      component: 'numberfield',
+      label: labels?.period,
+      name: 'periodId',
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'date',
+      name: 'startDate',
+      label: labels?.startDate
+    },
+    {
+      component: 'date',
+      name: 'endDate',
+      label: labels?.endDate
+    },
+    {
+      component: 'resourcecombobox',
+      label: labels?.status,
+      name: 'statusName',
+      props: {
+        datasetId: DataSets.FY_PERIOD_STATUS,
+        valueField: 'key',
+        displayField: 'value',
+        widthDropDown: 200,
+        mapping: [
+          { from: 'key', to: 'status' },
+          { from: 'value', to: 'statusName' }
+        ],
+        columnsInDropDown: [{ key: 'value', value: 'Name' }],
+        displayFieldWidth: 2
+      }
+    },
+    {
+      component: 'button',
+      name: 'saved',
+      onClick: (e, row) => {
+        stack({
+          Component: PeriodsModuleForm,
+          props: {
+            labels: labels,
+            maxAccess: maxAccess,
+            row,
+            recordId,
+            editMode: editMode
+          },
+          width: 600,
+
+          title: labels?.period
+        })
+      }
+    }
+  ]
+
+  useEffect(() => {
+    console.log('in in')
+
+    recordId && getPeriods()
+  }, [recordId])
+
+  const getPeriods = () => {
+    console.log('in')
+    const defaultParams = `_fiscalYear=${recordId}`
+    var parameters = defaultParams
+    getRequest({
+      extension: SystemRepository.Period.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        console.log('list', res?.list)
+        console.log('listLength', res.list?.length)
+
+        if (res.list?.length > 0) {
+          console.log('inL')
+
+          const periods = res.list.map(({ id, periodId, startDate, endDate, ...rest }, index) => {
+            return {
+              id: index + 1,
+              periodId: index + 1,
+              startDate: formatDateFromApi(startDate),
+              endDate: formatDateFromApi(endDate),
+              saved: true,
+              ...rest
+            }
+          })
+          console.log('periods', periods)
+
+          formik.setValues({
+            periods: periods
+          })
+        }
+      })
+      .catch(error => {})
+  }
+
+  return (
+    <FormShell
+      form={formik}
+      resourceId={ResourceIds.FiscalYears}
+      maxAccess={maxAccess}
+      editMode={editMode}
+      isCleared={false}
+    >
+      <VertLayout>
+        <Grow>
+          <DataGrid
+            onChange={value => formik.setFieldValue('periods', value)}
+            value={formik.values?.periods}
+            error={formik.errors?.periods}
+            columns={columns}
+            allowDelete={false}
+            allowAddNewLine={false}
+          />
+        </Grow>
+      </VertLayout>
+    </FormShell>
+  )
+}
+
+export default PeriodsForm

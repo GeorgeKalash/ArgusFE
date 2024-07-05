@@ -5,23 +5,24 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import BPMasterDataWindow from './Windows/BPMasterDataWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { formatDateDefault } from 'src/lib/date-helper'
+import FiscalYearWindow from './Windows/FiscalYearWindow'
 
 const FiscalYear = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _filter = '' } = options
 
     return await getRequest({
-      extension: SystemRepository.FiscalYears.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}` //&_params=&_sortBy=reference desc`
+      extension: SystemRepository.FiscalYears.qry,
+      parameters: `_filter=${_filter}`
     })
   }
 
@@ -32,12 +33,12 @@ const FiscalYear = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SystemRepository.FiscalYears.page,
+    endpointId: SystemRepository.FiscalYears.qry,
     datasetId: ResourceIds.FiscalYears
   })
 
   const invalidate = useInvalidate({
-    endpointId: SystemRepository.FiscalYears.page
+    endpointId: SystemRepository.FiscalYears.qry
   })
 
   const columns = [
@@ -73,13 +74,14 @@ const FiscalYear = () => {
         maxAccess: access,
         recordId: recordId ? recordId : null
       },
-      width: 1200,
+      width: 800,
       title: _labels.fiscalYear
     })
   }
 
   const edit = obj => {
-    openForm(obj.recordId)
+    console.log('obj', obj)
+    openForm(obj.fiscalYear)
   }
 
   const del = async obj => {
@@ -100,10 +102,9 @@ const FiscalYear = () => {
         <Table
           columns={columns}
           gridData={data}
-          rowId={['recordId']}
+          rowId={['fiscalYear']}
           onEdit={edit}
           onDelete={del}
-          //deleteConfirmationType={'strict'}
           isLoading={false}
           pageSize={50}
           paginationType='client'
