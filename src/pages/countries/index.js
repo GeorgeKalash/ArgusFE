@@ -78,7 +78,7 @@ const Countries = () => {
       headerName: _labels.ibanLength,
       flex: 1,
       align: 'right',
-      valueGetter: ({ row }) => getFormattedNumberMax(row?.ibanLength, 5, 0)
+      valueGetter: ({ data }) => getFormattedNumberMax(data?.ibanLength, 5, 0)
     }
   ]
 

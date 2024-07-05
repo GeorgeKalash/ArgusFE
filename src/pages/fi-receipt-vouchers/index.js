@@ -96,7 +96,7 @@ export default function CurrencyTrading() {
       field: 'Date',
       headerName: labels.date,
       flex: 1,
-      valueGetter: ({ row }) => formatDateDefault(row?.date)
+      valueGetter: ({ data }) => formatDateDefault(data?.date)
     },
     {
       field: 'reference',

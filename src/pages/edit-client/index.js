@@ -99,14 +99,14 @@ const ClientsList = () => {
       headerName: labels.createdDate,
       flex: 1,
       editable: false,
-      valueGetter: ({ row }) => formatDateDefault(row?.createdDate)
+      valueGetter: ({ data }) => formatDateDefault(data?.createdDate)
     },
     {
       field: 'expiryDate',
       headerName: labels.expiryDate,
       flex: 1,
       editable: false,
-      valueGetter: ({ row }) => formatDateDefault(row?.expiryDate)
+      valueGetter: ({ data }) => formatDateDefault(data?.expiryDate)
     }
   ]
 

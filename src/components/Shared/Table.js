@@ -304,12 +304,12 @@ const Table = ({
       return filteredRows
     })
   }
+
   const onSelectionChanged = params => {
     const gridApi = params.api
     const selectedNodes = gridApi.getSelectedNodes()
     const selectedData = selectedNodes.map(node => node.data)
-    console.log(selectedData)
-    // setData(selectedData)
+    setData(selectedData)
   }
   function openDelete(obj) {
     stack({
@@ -403,7 +403,6 @@ const Table = ({
           const checked = e.target.checked
           const updatedRows = { ...checkedRows, [params.node.id]: checked }
           setCheckedRows(updatedRows)
-          // handleCheckedRows(updatedRows)
           console.log(params.colDef.field, checked, params.value)
           params.node.setDataValue(params.colDef.field, checked)
         }}
@@ -414,7 +413,7 @@ const Table = ({
   return (
     <Box className='ag-theme-alpine' style={{ flex: 1, width: '1000px !important', height: props.height || 'auto' }}>
       <AgGridReact
-        rowData={paginationType === 'api' ? props?.gridData?.list : gridData?.list}
+        rowData={(paginationType === 'api' ? props?.gridData?.list : gridData?.list) || { list: [] }}
         columnDefs={[
           ...(showCheckboxColumn
             ? [

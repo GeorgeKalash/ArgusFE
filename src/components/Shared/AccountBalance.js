@@ -66,7 +66,7 @@ const AccountBalance = () => {
       field: 'balance',
       headerName: _labels.balance,
       flex: 1,
-      valueGetter: ({ row }) => getFormattedNumber(row?.balance)
+      valueGetter: ({ data }) => getFormattedNumber(data?.balance)
     }
   ]
 

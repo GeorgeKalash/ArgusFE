@@ -57,7 +57,7 @@ const CashCount = () => {
       field: 'date',
       headerName: _labels.date,
       flex: 1,
-      valueGetter: ({ row }) => formatDateDefault(row?.date)
+      valueGetter: ({ data }) => formatDateDefault(data?.date)
     },
     {
       field: 'plantName',
@@ -73,13 +73,13 @@ const CashCount = () => {
       field: 'startTime',
       headerName: _labels.startTime,
       flex: 1,
-      valueGetter: ({ row }) => getTimeInTimeZone(row.startTime)
+      valueGetter: ({ data }) => getTimeInTimeZone(data.startTime)
     },
     {
       field: 'endTime',
       headerName: _labels.endTime,
       flex: 1,
-      valueGetter: ({ row }) => row.endTime && getTimeInTimeZone(row.endTime)
+      valueGetter: ({ data }) => data.endTime && getTimeInTimeZone(data.endTime)
     },
     {
       field: 'statusName',

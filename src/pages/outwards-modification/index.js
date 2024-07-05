@@ -71,7 +71,7 @@ const OutwardsModification = () => {
       field: 'date',
       headerName: _labels.date,
       flex: 1,
-      valueGetter: ({ row }) => formatDateDefault(row?.date)
+      valueGetter: ({ data }) => formatDateDefault(data?.date)
     },
     {
       field: 'rsName',

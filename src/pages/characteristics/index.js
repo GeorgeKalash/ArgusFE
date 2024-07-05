@@ -21,29 +21,29 @@ const Characteristics = () => {
 
   const {
     query: { data },
-    labels : _labels,
+    labels: _labels,
     paginationParameters,
     invalidate,
     refetch,
     access
   } = useResourceQuery({
-     queryFn: fetchGridData,
-     endpointId: DocumentReleaseRepository.CharacteristicsGeneral.qry,
-     datasetId: ResourceIds.Characteristics,
-   })
+    queryFn: fetchGridData,
+    endpointId: DocumentReleaseRepository.CharacteristicsGeneral.qry,
+    datasetId: ResourceIds.Characteristics
+  })
 
-  async function fetchGridData(options={}) {
+  async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}`
     var parameters = defaultParams
 
-     const response =  await getRequest({
+    const response = await getRequest({
       extension: DocumentReleaseRepository.CharacteristicsGeneral.qry,
       parameters: parameters
     })
 
-    return {...response,  _startAt: _startAt}
+    return { ...response, _startAt: _startAt }
   }
 
   const columns = [
@@ -60,7 +60,7 @@ const Characteristics = () => {
     {
       field: 'validFrom',
       headerName: _labels.validFrom,
-      valueGetter: ({ row }) => formatDateDefault(row?.validFrom),
+      valueGetter: ({ data }) => formatDateDefault(data?.validFrom),
       flex: 1
     }
   ]
@@ -69,24 +69,23 @@ const Characteristics = () => {
     postRequest({
       extension: DocumentReleaseRepository.CharacteristicsGeneral.del,
       record: JSON.stringify(obj)
+    }).then(res => {
+      toast.success('Record Deleted Successfully')
+      invalidate()
     })
-      .then(res => {
-        toast.success('Record Deleted Successfully')
-        invalidate()
-      })
   }
 
   const addCharacteristics = () => {
     openForm('')
   }
 
-  function openForm (recordId){
+  function openForm(recordId) {
     stack({
       Component: CharacteristicsWindow,
       props: {
         labels: _labels,
-        recordId: recordId? recordId : null,
-        maxAccess: access,
+        recordId: recordId ? recordId : null,
+        maxAccess: access
       },
       width: 600,
       title: _labels.characteristics
@@ -94,7 +93,7 @@ const Characteristics = () => {
   }
 
   const popup = obj => {
-    openForm(obj?.recordId )
+    openForm(obj?.recordId)
   }
 
   return (
