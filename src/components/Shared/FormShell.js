@@ -102,6 +102,15 @@ export default function FormShell({
       title: 'Cash Transaction'
     })
   }
+  function onClickIT() {
+    stack({
+      Component: FinancialTransaction,
+      props: { formValues: form.values },
+      width: 1000,
+      height: 620,
+      title: 'Financial Transaction'
+    })
+  }
 
   return (
     <>
@@ -174,15 +183,6 @@ export default function FormShell({
               title: 'Integration Account'
             })
           }
-          onClickIT={() =>
-            stack({
-              Component: FinancialTransaction,
-              props: { formValues: form.values },
-              width: 1000,
-              height: 620,
-              title: 'Financial Transaction'
-            })
-          }
           onClickAC={() =>
             stack({
               Component: AccountBalance,
@@ -223,6 +223,7 @@ export default function FormShell({
           actions={actions}
           onApproval={onApproval}
           onRecordRemarks={onRecordRemarks}
+          onClickIT={onClickIT}
           transactionClicked={transactionClicked}
           editMode={editMode}
           disabledSubmit={disabledSubmit}

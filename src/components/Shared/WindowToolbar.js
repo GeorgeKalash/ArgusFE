@@ -97,11 +97,12 @@ const WindowToolbar = ({
     onClear,
     onInfo,
     onApply,
+    onClickIT,
     onApproval,
     onClientRelation,
     onClickGL: () => onClickGL(recordId),
     onClickAC: () => onClickAC(recordId),
-    onClickIT: () => onClickIT(recordId),
+
     onClickGIA: () => onClickGIA(recordId)
   }
 
