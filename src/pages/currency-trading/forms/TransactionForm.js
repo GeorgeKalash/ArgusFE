@@ -373,6 +373,8 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     }
   })
 
+  const dir = JSON.parse(window.localStorage.getItem('settings'))?.direction
+
   const onClose = async recId => {
     try {
       const res = await getRequest({
@@ -1164,7 +1166,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                   </Grid>
 
                   <Grid container rowGap={3} xs={8} sx={{ px: 2, alignContent: 'start' }}>
-                    <Grid xs={12} container spacing={2}>
+                    <Grid xs={12} container spacing={2} sx={{ direction: dir }}>
                       <Grid item xs={3}>
                         <FormField
                           name='firstName'
@@ -1200,7 +1202,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                         />
                       </Grid>
                     </Grid>
-                    <Grid xs={12} container spacing={2} sx={{ flexDirection: 'row-reverse' }}>
+                    <Grid xs={12} container spacing={2} sx={{ flexDirection: 'row-reverse', direction: dir }}>
                       <Grid item xs={3}>
                         <FormField
                           name='fl_firstName'
