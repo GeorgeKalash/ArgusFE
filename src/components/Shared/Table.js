@@ -2,7 +2,9 @@ import React, { useContext, useRef } from 'react'
 import { AgGridReact } from 'ag-grid-react'
 import 'ag-grid-community/styles/ag-grid.css'
 import 'ag-grid-community/styles/ag-theme-alpine.css'
-import { Box, Checkbox, IconButton, TextField } from '@mui/material'
+import { Box, IconButton, TextField } from '@mui/material'
+import Checkbox from '@mui/material/Checkbox'
+
 import Image from 'next/image'
 import editIcon from '../../../public/images/TableIcons/edit.png'
 import { useState } from 'react'
@@ -15,19 +17,20 @@ import LastPageIcon from '@mui/icons-material/LastPage'
 import RefreshIcon from '@mui/icons-material/Refresh'
 import { ControlContext } from 'src/providers/ControlContext'
 import { AuthContext } from 'src/providers/AuthContext'
-import { ControlAccessLevel, TrxType } from 'src/resources/AccessLevels'
+import { TrxType } from 'src/resources/AccessLevels'
 import deleteIcon from '../../../public/images/TableIcons/delete.png'
 import { useWindow } from 'src/windows'
 import DeleteDialog from './DeleteDialog'
 import StrictDeleteConfirmation from './StrictDeleteConfirmation'
+import { HIDDEN, accessLevel } from 'src/services/api/maxAccess'
 
 const Table = ({
-  columns,
   fetchGridData,
   paginationType = 'api',
   viewCheckButtons = false,
   showCheckboxColumn = false,
   pagination = true,
+  handleCheckedRows,
   setData,
   ...props
 }) => {
@@ -41,6 +44,15 @@ const Table = ({
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
   const columnsAccess = props.maxAccess && props.maxAccess.record.controls
   const { stack } = useWindow()
+  const [checkedRows, setCheckedRows] = useState({})
+
+  const columns = props.columns.filter(
+    ({ field }) =>
+      accessLevel({
+        maxAccess: props.maxAccess,
+        name: field
+      }) !== HIDDEN
+  )
 
   useEffect(() => {
     props?.gridData && paginationType !== 'api' && setGridData(props?.gridData)
@@ -282,17 +294,16 @@ const Table = ({
     return params?.rowIndex % 2 === 0 ? 'even-row' : ''
   }
 
-  const checkboxColumn = {
-    headerCheckboxSelection: true,
-    checkboxSelection: true,
-    headerCheckboxSelectionFilteredOnly: false,
-    width: 100
-  }
+  const handleCheckboxChange = row => {
+    setCheckedRows(prevCheckedRows => {
+      const newCheckedRows = { ...prevCheckedRows }
+      const key = row.seqNo ? `${row.recordId}-${row.seqNo}` : row.recordId
+      newCheckedRows[key] = row
+      const filteredRows = !newCheckedRows[key]?.checked ? [newCheckedRows[key]] : []
 
-  if (!columns.some(col => col.field === 'checkbox') && showCheckboxColumn) {
-    columns.unshift({ ...checkboxColumn, field: '' })
+      return filteredRows
+    })
   }
-
   const onSelectionChanged = params => {
     const gridApi = params.api
     const selectedNodes = gridApi.getSelectedNodes()
@@ -384,39 +395,45 @@ const Table = ({
       })
   }
 
+  const checkboxCellRenderer = params => {
+    return (
+      <Checkbox
+        checked={params.value}
+        onChange={e => {
+          const checked = e.target.checked
+          const updatedRows = { ...checkedRows, [params.node.id]: checked }
+          setCheckedRows(updatedRows)
+          // handleCheckedRows(updatedRows)
+          console.log(params.colDef.field, checked, params.value)
+          params.node.setDataValue(params.colDef.field, checked)
+        }}
+      />
+    )
+  }
+
   return (
     <Box className='ag-theme-alpine' style={{ flex: 1, width: '1000px !important', height: props.height || 'auto' }}>
       <AgGridReact
         rowData={paginationType === 'api' ? props?.gridData?.list : gridData?.list}
-        // columnDefs={[
-        //   ...(showCheckboxColumn
-        //     ? [
-        //         {
-        //           field: 'checkbox',
-        //           headerName: 'checkTitle',
-        //           renderCell: params => (
-        //             <TableCell padding='checkbox'>
-        //               <Checkbox
-        //                 checked={params.row.checked || false}
-        //                 onChange={() => {
-        //                   handleCheckboxChange(params.row)
-        //                   params.row.checked = !params.row.checked
-        //                 }}
-        //               />
-        //             </TableCell>
-        //           )
-        //         }
-        //       ]
-        //     : []),
-        //   ...columns
-        // ]}
-        columnDefs={columns}
+        columnDefs={[
+          ...(showCheckboxColumn
+            ? [
+                {
+                  headerName: '',
+                  field: 'checked',
+                  cellRenderer: checkboxCellRenderer,
+                  headerCheckboxSelection: true
+                }
+              ]
+            : []),
+          ...columns
+        ]}
         pagination={false}
         paginationPageSize={pageSize}
         rowSelection={'multiple'}
         suppressAggFuncInHeader={true}
         getRowClass={getRowClass}
-        onSelectionChanged={onSelectionChanged}
+        onSelectionChanged={setData === 'function' && onSelectionChanged}
       />
       {pagination && <CustomPagination />}
     </Box>
