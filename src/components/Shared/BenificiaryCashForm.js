@@ -35,7 +35,9 @@ const BenificiaryCashForm = ({
   editable = false,
   resetForm,
   setResetForm,
-  onChange
+  onChange,
+  setValidSubmit,
+  submitMainForm = true
 }) => {
   const [maxAccess, setMaxAccess] = useState({ record: [] })
   const { stack: stackError } = useError()
@@ -97,52 +99,54 @@ const BenificiaryCashForm = ({
       lastName: yup.string().required(' ')
     }),
     onSubmit: async values => {
-      const header = {
-        clientId: values.clientId,
-        beneficiaryId: values.beneficiaryId,
-        gender: values.gender,
-        name: values.name,
-        dispersalType: values.dispersalType,
-        isBlocked: values.isBlocked,
-        stoppedDate: values.stoppedDate ? formatDateToApi(values.stoppedDate) : null,
-        stoppedReason: values.stoppedReason,
-        nationalityId: values.nationalityId,
-        cobId: values.cobId,
-        birthDate: values.birthDate ? formatDateToApi(values.birthDate) : null,
-        cellPhone: values.cellPhone,
-        addressLine1: values.addressLine1,
-        addressLine2: values.addressLine2,
-        clientRef: values.clientRef,
-        clientName: values.clientName,
-        countryId: values.countryId,
-        seqNo: values.seqNo
-      }
+      if (submitMainForm) {
+        const header = {
+          clientId: values.clientId,
+          beneficiaryId: values.beneficiaryId,
+          gender: values.gender,
+          name: values.name,
+          dispersalType: values.dispersalType,
+          isBlocked: values.isBlocked,
+          stoppedDate: values.stoppedDate ? formatDateToApi(values.stoppedDate) : null,
+          stoppedReason: values.stoppedReason,
+          nationalityId: values.nationalityId,
+          cobId: values.cobId,
+          birthDate: values.birthDate ? formatDateToApi(values.birthDate) : null,
+          cellPhone: values.cellPhone,
+          addressLine1: values.addressLine1,
+          addressLine2: values.addressLine2,
+          clientRef: values.clientRef,
+          clientName: values.clientName,
+          countryId: values.countryId,
+          seqNo: values.seqNo
+        }
 
-      const cashInfo = {
-        clientId: values.clientId,
-        beneficiaryId: values.beneficiaryId,
-        firstName: values.firstName,
-        lastName: values.lastName,
-        middleName: values.middleName,
-        familyName: values.familyName,
-        fl_firstName: values.fl_firstName,
-        fl_lastName: values.fl_lastName,
-        fl_middleName: values.fl_middleName,
-        fl_familyName: values.fl_familyName,
-        birthPlace: values.birthPlace,
-        seqNo: values.seqNo
-      }
-      const data = { header: header, beneficiaryCash: cashInfo }
+        const cashInfo = {
+          clientId: values.clientId,
+          beneficiaryId: values.beneficiaryId,
+          firstName: values.firstName,
+          lastName: values.lastName,
+          middleName: values.middleName,
+          familyName: values.familyName,
+          fl_firstName: values.fl_firstName,
+          fl_lastName: values.fl_lastName,
+          fl_middleName: values.fl_middleName,
+          fl_familyName: values.fl_familyName,
+          birthPlace: values.birthPlace,
+          seqNo: values.seqNo
+        }
+        const data = { header: header, beneficiaryCash: cashInfo }
 
-      const res = await postRequest({
-        extension: RemittanceOutwardsRepository.BeneficiaryCash.set,
-        record: JSON.stringify(data)
-      })
-      if (res.recordId) {
-        toast.success('Record Updated Successfully')
-      }
+        const res = await postRequest({
+          extension: RemittanceOutwardsRepository.BeneficiaryCash.set,
+          record: JSON.stringify(data)
+        })
+        if (res.recordId) {
+          toast.success('Record Updated Successfully')
+        }
 
-      setEditMode(true)
+        setEditMode(true)
+      }
     }
   })
 
@@ -265,10 +269,15 @@ const BenificiaryCashForm = ({
   }, [formik.values])
 
   useEffect(() => {
-    const errors = Object.keys(formik.errors).length !== 0
-    if (errors) {
-      setSubmitted(false)
-      formik.handleSubmit()
+    if (!submitMainForm) {
+      const errors = Object.keys(formik.errors).length !== 0
+      if (errors) {
+        setSubmitted(false)
+        formik.handleSubmit()
+
+        return
+      }
+      if (submitted && !errors) setValidSubmit(true)
     }
   }, [submitted])
 

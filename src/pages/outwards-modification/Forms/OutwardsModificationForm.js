@@ -31,6 +31,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
   const { platformLabels } = useContext(ControlContext)
   const [resetForm, setResetForm] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [validSubmit, setValidSubmit] = useState(false)
 
   const { maxAccess } = useDocumentType({
     functionId: SystemFunction.OutwardsModification,
@@ -252,14 +253,14 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
   useEffect(() => {
     ;(async function () {
       try {
-        if (submitted && !editMode) {
+        if (validSubmit) {
           const data = {
             outwardId: formik.values.outwardId,
             beneficiaryCashPack: dispersalMode === DISPERSAL_MODE_CASH ? formik.values.beneficiaryData : null,
             beneficiaryBankPack: dispersalMode === DISPERSAL_MODE_BANK ? formik.values.beneficiaryData : null
           }
 
-          /*const res = await postRequest({
+          const res = await postRequest({
             extension: RTOWMRepository.OutwardsModification.set2,
             record: JSON.stringify(data)
           })
@@ -267,12 +268,13 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
           const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
           toast.success(actionMessage)
           await refetchForm(res.recordId)
-          invalidate()*/
-          // !recordId && viewOTP(res.recordId)
+          invalidate()
+
+          !recordId && viewOTP(res.recordId)
         }
       } catch (error) {}
     })()
-  }, [submitted])
+  }, [validSubmit])
 
   useEffect(() => {
     ;(async function () {
@@ -407,7 +409,6 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
                 editMode={editMode}
                 secondDisplayField={false}
                 onChange={async (event, newValue) => {
-                  console.log('ben check ', newValue)
                   if (newValue?.beneficiaryId)
                     fillBeneficiaryData({
                       headerBenId: newValue ? newValue.beneficiaryId : '',
@@ -498,6 +499,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
                       onChange={changedBeneficiaryData}
                       submitted={submitted}
                       setSubmitted={setSubmitted}
+                      setValidSubmit={setValidSubmit}
                       editable={!editMode}
                       client={{
                         clientId: formik.values.clientId,
@@ -510,6 +512,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
                       }}
                       dispersalType={formik.values.dispersalType}
                       corId={formik.values.corId}
+                      submitMainForm={false}
                     />
                   )}
                 </Grid>
@@ -523,6 +526,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
                       onChange={changedBeneficiaryData}
                       submitted={submitted}
                       setSubmitted={setSubmitted}
+                      setValidSubmit={setValidSubmit}
                       client={{
                         clientId: formik.values.clientId,
                         clientName: formik.values.clientName,
@@ -535,6 +539,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
                       dispersalType={formik.values.dispersalType}
                       countryId={formik.values.countryId}
                       corId={formik.values.corId}
+                      submitMainForm={false}
                     />
                   )}
                 </Grid>

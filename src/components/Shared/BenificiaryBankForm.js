@@ -37,7 +37,9 @@ export default function BenificiaryBankForm({
   countryId,
   resetForm,
   setResetForm,
-  onChange
+  onChange,
+  setValidSubmit,
+  submitMainForm = true
 }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [maxAccess, setMaxAccess] = useState({ record: [] })
@@ -115,58 +117,60 @@ export default function BenificiaryBankForm({
       })
     }),
     onSubmit: async values => {
-      const header = {
-        clientId: values.clientId,
-        clientRef: values.clientRef,
-        clientName: values.clientName,
-        beneficiaryId: values.beneficiaryId,
-        gender: values.gender,
-        rtId: values.rtId,
-        rtName: values.rtName,
-        name: values.name,
-        dispersalType: values.dispersalType,
-        isBlocked: values.isBlocked,
-        stoppedDate: values.stoppedDate ? formatDateToApi(values.stoppedDate) : null,
-        stoppedReason: values.stoppedReason,
-        nationalityId: values.nationalityId,
-        cellPhone: values.cellPhone,
-        birthDate: values.birthDate ? formatDateToApi(values.birthDate) : null,
-        cobId: values.cobId,
-        shortName: values.shortName,
-        addressLine1: values.addressLine1,
-        addressLine2: values.addressLine2,
-        countryId: values.countryId,
-        seqNo: values.seqNo
+      if (submitMainForm) {
+        const header = {
+          clientId: values.clientId,
+          clientRef: values.clientRef,
+          clientName: values.clientName,
+          beneficiaryId: values.beneficiaryId,
+          gender: values.gender,
+          rtId: values.rtId,
+          rtName: values.rtName,
+          name: values.name,
+          dispersalType: values.dispersalType,
+          isBlocked: values.isBlocked,
+          stoppedDate: values.stoppedDate ? formatDateToApi(values.stoppedDate) : null,
+          stoppedReason: values.stoppedReason,
+          nationalityId: values.nationalityId,
+          cellPhone: values.cellPhone,
+          birthDate: values.birthDate ? formatDateToApi(values.birthDate) : null,
+          cobId: values.cobId,
+          shortName: values.shortName,
+          addressLine1: values.addressLine1,
+          addressLine2: values.addressLine2,
+          countryId: values.countryId,
+          seqNo: values.seqNo
+        }
+
+        const bankInfo = {
+          bankId: values.bankId,
+          clientId: values.clientId,
+          beneficiaryId: values.beneficiaryId,
+          accountRef: values.accountRef,
+          accountType: values.accountType,
+          IBAN: values.IBAN,
+          routingNo: values.routingNo,
+          swiftCode: values.swiftCode,
+          branchCode: values.branchCode,
+          branchName: values.branchName,
+          city: values.city,
+          state: values.state,
+          zipcode: values.zipcode,
+          seqNo: values.seqNo
+        }
+        const data = { header: header, beneficiaryBank: bankInfo }
+
+        const res = await postRequest({
+          extension: RemittanceOutwardsRepository.BeneficiaryBank.set,
+          record: JSON.stringify(data)
+        })
+
+        if (res.recordId) {
+          toast.success('Record Updated Successfully')
+        }
+
+        setEditMode(true)
       }
-
-      const bankInfo = {
-        bankId: values.bankId,
-        clientId: values.clientId,
-        beneficiaryId: values.beneficiaryId,
-        accountRef: values.accountRef,
-        accountType: values.accountType,
-        IBAN: values.IBAN,
-        routingNo: values.routingNo,
-        swiftCode: values.swiftCode,
-        branchCode: values.branchCode,
-        branchName: values.branchName,
-        city: values.city,
-        state: values.state,
-        zipcode: values.zipcode,
-        seqNo: values.seqNo
-      }
-      const data = { header: header, beneficiaryBank: bankInfo }
-
-      const res = await postRequest({
-        extension: RemittanceOutwardsRepository.BeneficiaryBank.set,
-        record: JSON.stringify(data)
-      })
-
-      if (res.recordId) {
-        toast.success('Record Updated Successfully')
-      }
-
-      setEditMode(true)
     }
   })
 
@@ -296,10 +300,15 @@ export default function BenificiaryBankForm({
   }, [formik.values])
 
   useEffect(() => {
-    const errors = Object.keys(formik.errors).length !== 0
-    if (errors) {
-      setSubmitted(false)
-      formik.handleSubmit()
+    if (!submitMainForm) {
+      const errors = Object.keys(formik.errors).length !== 0
+      if (errors) {
+        setSubmitted(false)
+        formik.handleSubmit()
+
+        return
+      }
+      if (submitted && !errors) setValidSubmit(true)
     }
   }, [submitted])
 

@@ -139,7 +139,7 @@ const OutwardsModification = () => {
           isLoading={false}
           pageSize={50}
           refetch={refetch}
-          paginationType='client'
+          paginationType='api'
           maxAccess={access}
         />
       </Grow>
