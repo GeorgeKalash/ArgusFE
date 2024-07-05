@@ -62,7 +62,7 @@ const SourceOfIncome = () => {
       flex: 1
     },
     {
-      field: 'incomeTypeName',
+      field: 'sitName',
       headerName: _labels.incomeType,
       flex: 1
     }

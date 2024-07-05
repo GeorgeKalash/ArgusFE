@@ -373,6 +373,8 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     }
   })
 
+  const dir = JSON.parse(window.localStorage.getItem('settings'))?.direction
+
   const onClose = async recId => {
     try {
       const res = await getRequest({
@@ -583,7 +585,9 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
         formValidation: formik,
         recordId: recId,
         functionId: formik.values.functionId,
-        onSuccess: onClose
+        onSuccess: () => {
+          onClose(recId)
+        }
       },
       width: 400,
       height: 400,
@@ -698,6 +702,12 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       condition: true,
       onClick: 'onApproval',
       disabled: !isClosed
+    },
+    {
+      key: 'Account Balance',
+      condition: true,
+      onClick: 'onClickAC',
+      disabled: false
     }
   ]
 
@@ -716,7 +726,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       <VertLayout>
         <Grow>
           <FormProvider formik={formik} labels={labels} maxAccess={maxAccess}>
-            <Grid container>
+            <Grid container sx={{ zIndex: 0 }}>
               <FieldSet title='Transaction'>
                 <Grid container spacing={4}>
                   <Grid item xs={4}>
@@ -1156,7 +1166,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                   </Grid>
 
                   <Grid container rowGap={3} xs={8} sx={{ px: 2, alignContent: 'start' }}>
-                    <Grid xs={12} container spacing={2}>
+                    <Grid xs={12} container spacing={2} sx={{ direction: dir }}>
                       <Grid item xs={3}>
                         <FormField
                           name='firstName'
@@ -1192,7 +1202,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                         />
                       </Grid>
                     </Grid>
-                    <Grid xs={12} container spacing={2} sx={{ flexDirection: 'row-reverse' }}>
+                    <Grid xs={12} container spacing={2} sx={{ flexDirection: 'row-reverse', direction: dir }}>
                       <Grid item xs={3}>
                         <FormField
                           name='fl_firstName'

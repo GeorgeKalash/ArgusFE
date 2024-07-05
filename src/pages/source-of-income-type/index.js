@@ -3,17 +3,18 @@ import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { useWindow } from 'src/windows'
+import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import CtRiskLevelsForm from './forms/CtRiskLevelsForm'
-import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
+import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
+import SourceOfIncomeTypeForm from './form/SourceOfIncomeTypeForm'
 
-const CtRiskLevel = () => {
+const SourceOfIncomeType = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -22,28 +23,27 @@ const CtRiskLevel = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    const response = await getRequest({
-      extension: CurrencyTradingSettingsRepository.RiskLevel.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+    return await getRequest({
+      extension: RemittanceSettingsRepository.SourceOfIncomeType.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
     })
-
-    return { ...response, _startAt: _startAt }
   }
 
   const {
     query: { data },
     labels: _labels,
-    paginationParameters,
+    access,
+
     refetch,
-    access
+    paginationParameters
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: CurrencyTradingSettingsRepository.RiskLevel.page,
-    datasetId: ResourceIds.RiskLevel
+    endpointId: RemittanceSettingsRepository.SourceOfIncomeType.page,
+    datasetId: ResourceIds.SourceOfIncomeType
   })
 
   const invalidate = useInvalidate({
-    endpointId: CurrencyTradingSettingsRepository.RiskLevel.page
+    endpointId: RemittanceSettingsRepository.SourceOfIncomeType.page
   })
 
   const columns = [
@@ -59,41 +59,41 @@ const CtRiskLevel = () => {
     }
   ]
 
-  const add = () => {
-    openForm()
-  }
-
-  const edit = obj => {
-    openForm(obj?.recordId)
-  }
-
-  function openForm(recordId) {
-    stack({
-      Component: CtRiskLevelsForm,
-      props: {
-        labels: _labels,
-        recordId: recordId,
-        maxAccess: access
-      },
-      width: 500,
-      height: 330,
-      title: _labels.riskLevel
-    })
-  }
-
   const del = async obj => {
     await postRequest({
-      extension: CurrencyTradingSettingsRepository.RiskLevel.del,
+      extension: RemittanceSettingsRepository.SourceOfIncomeType.del,
       record: JSON.stringify(obj)
     })
     invalidate()
     toast.success(platformLabels.Deleted)
   }
 
+  const edit = obj => {
+    openForm(obj?.recordId)
+  }
+
+  const add = () => {
+    openForm()
+  }
+
+  function openForm(recordId) {
+    stack({
+      Component: SourceOfIncomeTypeForm,
+      props: {
+        labels: _labels,
+        recordId: recordId,
+        maxAccess: access
+      },
+      width: 500,
+      height: 300,
+      title: _labels.sourceOfIncome
+    })
+  }
+
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <GridToolbar onAdd={add} maxAccess={access} labels={_labels} />
       </Fixed>
       <Grow>
         <Table
@@ -101,17 +101,16 @@ const CtRiskLevel = () => {
           gridData={data}
           rowId={['recordId']}
           onEdit={edit}
-          refetch={refetch}
           onDelete={del}
-          isLoading={false}
+          maxAccess={access}
           pageSize={50}
+          refetch={refetch}
           paginationParameters={paginationParameters}
           paginationType='api'
-          maxAccess={access}
         />
       </Grow>
     </VertLayout>
   )
 }
 
-export default CtRiskLevel
+export default SourceOfIncomeType

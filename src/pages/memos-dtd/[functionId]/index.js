@@ -3,28 +3,36 @@ import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import CtRiskLevelsForm from './forms/CtRiskLevelsForm'
 import { useWindow } from 'src/windows'
+
+import { useRouter } from 'next/router'
+import { FinancialRepository } from 'src/repositories/FinancialRepository'
+
+import MemosDtdForm from './form/MemosDtdForm'
 import { ControlContext } from 'src/providers/ControlContext'
 
-const CtRiskLevel = () => {
+const Financial = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
   const { stack } = useWindow()
 
+  const router = useRouter()
+  const { functionId } = router.query
+
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const {
+      pagination: { _startAt = 0, _pageSize = 50 }
+    } = options
 
     const response = await getRequest({
-      extension: CurrencyTradingSettingsRepository.RiskLevel.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      extension: FinancialRepository.FIDocTypeDefaults.qry,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_functionId=${functionId}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -33,28 +41,30 @@ const CtRiskLevel = () => {
   const {
     query: { data },
     labels: _labels,
+    access,
     paginationParameters,
-    refetch,
-    access
+    invalidate,
+    refetch
   } = useResourceQuery({
-    queryFn: fetchGridData,
-    endpointId: CurrencyTradingSettingsRepository.RiskLevel.page,
-    datasetId: ResourceIds.RiskLevel
-  })
+    endpointId: FinancialRepository.FIDocTypeDefaults.qry,
+    datasetId: ResourceIds.FIDocTypeDefaults,
 
-  const invalidate = useInvalidate({
-    endpointId: CurrencyTradingSettingsRepository.RiskLevel.page
+    filter: {
+      filterFn: fetchGridData,
+      default: { functionId }
+    }
   })
 
   const columns = [
     {
-      field: 'reference',
-      headerName: _labels.reference,
+      field: 'dtName',
+      headerName: _labels.doctype,
       flex: 1
     },
+
     {
-      field: 'name',
-      headerName: _labels.name,
+      field: 'plantName',
+      headerName: _labels.plant,
       flex: 1
     }
   ]
@@ -64,30 +74,31 @@ const CtRiskLevel = () => {
   }
 
   const edit = obj => {
-    openForm(obj?.recordId)
-  }
-
-  function openForm(recordId) {
-    stack({
-      Component: CtRiskLevelsForm,
-      props: {
-        labels: _labels,
-        recordId: recordId,
-        maxAccess: access
-      },
-      width: 500,
-      height: 330,
-      title: _labels.riskLevel
-    })
+    openForm(obj?.dtId)
   }
 
   const del = async obj => {
     await postRequest({
-      extension: CurrencyTradingSettingsRepository.RiskLevel.del,
+      extension: FinancialRepository.FIDocTypeDefaults.del,
       record: JSON.stringify(obj)
     })
     invalidate()
     toast.success(platformLabels.Deleted)
+  }
+
+  function openForm(dtId) {
+    stack({
+      Component: MemosDtdForm,
+      props: {
+        labels: _labels,
+        functionId,
+        dtId,
+        maxAccess: access
+      },
+      width: 500,
+      height: 360,
+      title: _labels.doctypeDefault
+    })
   }
 
   return (
@@ -99,13 +110,13 @@ const CtRiskLevel = () => {
         <Table
           columns={columns}
           gridData={data}
-          rowId={['recordId']}
+          rowId={['dtId']}
           onEdit={edit}
-          refetch={refetch}
           onDelete={del}
           isLoading={false}
           pageSize={50}
           paginationParameters={paginationParameters}
+          refetch={refetch}
           paginationType='api'
           maxAccess={access}
         />
@@ -114,4 +125,4 @@ const CtRiskLevel = () => {
   )
 }
 
-export default CtRiskLevel
+export default Financial
