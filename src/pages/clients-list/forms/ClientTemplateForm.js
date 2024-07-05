@@ -40,6 +40,7 @@ import { SystemFunction } from 'src/resources/SystemFunction'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { useError } from 'src/error'
 import { ControlContext } from 'src/providers/ControlContext'
+import CustomDatePickerHijri from 'src/components/Inputs/CustomDatePickerHijri'
 
 const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = false }) => {
   const { stack } = useWindow()
@@ -402,7 +403,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     validationSchema: yup.object({
       reference: referenceRequired && yup.string().required(' '),
       isResident: yup.string().required(' '),
-      birthDate: yup.date().required(' '),
+      birthDate: yup.string().required(' '),
       idtId: yup.string().required(' '),
       idNo: yup.string().required(' '),
       expiryDate: yup.date().required(' '),
@@ -757,21 +758,34 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                   }
                 />
               </Grid>
-              <Grid item xs={12}>
+              <Grid item xs={6}>
                 <CustomDatePicker
                   name='birthDate'
                   label={labels.birthDate}
                   value={clientIndividualFormik.values?.birthDate}
                   required={true}
-                  onChange={clientIndividualFormik.setFieldValue}
+                  onChange={(name, value) => {
+                    clientIndividualFormik.setFieldValue('birthDate', new Date(value)?.getTime() || '')
+                  }}
                   onClear={() => clientIndividualFormik.setFieldValue('birthDate', '')}
                   disabledDate={'>='}
                   readOnly={editMode && true}
-                  error={clientIndividualFormik.touched.birthDate && Boolean(clientIndividualFormik.errors.birthDate)}
+                  error={Boolean(clientIndividualFormik.errors.birthDate)}
                   maxAccess={maxAccess}
                 />
               </Grid>
-              <Grid container xs={12}></Grid>
+
+              <Grid item xs={6}>
+                <CustomDatePickerHijri
+                  name='birthDateHijri'
+                  label={labels.birthDateHijri}
+                  value={clientIndividualFormik.values?.birthDate}
+                  onChange={(name, value) => {
+                    clientIndividualFormik.setFieldValue('birthDate', value?.valueOf() || '')
+                  }}
+                  onClear={() => clientIndividualFormik.setFieldValue('birthDate', '')}
+                />
+              </Grid>
               <Grid item xs={12}>
                 <FieldSet title={labels.id}>
                   <Grid item xs={12}>
