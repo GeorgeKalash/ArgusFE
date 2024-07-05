@@ -75,7 +75,7 @@ const RoleCategories = () => {
         maxAccess: access
       },
       width: 600,
-      height: 330,
+      height: 400,
       title: _labels.roleCategories
     })
   }
