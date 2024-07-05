@@ -259,7 +259,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
             beneficiaryBankPack: dispersalMode === DISPERSAL_MODE_BANK ? formik.values.beneficiaryData : null
           }
 
-          const res = await postRequest({
+          /*const res = await postRequest({
             extension: RTOWMRepository.OutwardsModification.set2,
             record: JSON.stringify(data)
           })
@@ -267,8 +267,8 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
           const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
           toast.success(actionMessage)
           await refetchForm(res.recordId)
-          invalidate()
-          !recordId && viewOTP(res.recordId)
+          invalidate()*/
+          // !recordId && viewOTP(res.recordId)
         }
       } catch (error) {}
     })()
@@ -336,7 +336,6 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
                     fillOutwardData({
                       outwardId: newValue ? newValue.recordId : '',
                       owRef: newValue ? newValue.reference : '',
-                      date: newValue ? formatDateFromApi(newValue.date) : '',
                       oldBeneficiaryId: newValue ? newValue.beneficiaryId : '',
                       oldBeneficiarySeqNo: newValue ? newValue.beneficiarySeqNo : '',
                       oldBeneficiaryName: newValue ? newValue.beneficiaryName : '',
@@ -400,7 +399,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
                 }}
                 valueField='name'
                 displayField='name'
-                name='headerBenId'
+                name='headerBenName'
                 label={labels.beneficiary}
                 form={formik}
                 readOnly={!formik.values.clientId || !formik.values.dispersalType || editMode || isPosted}
@@ -408,6 +407,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
                 editMode={editMode}
                 secondDisplayField={false}
                 onChange={async (event, newValue) => {
+                  console.log('ben check ', newValue)
                   if (newValue?.beneficiaryId)
                     fillBeneficiaryData({
                       headerBenId: newValue ? newValue.beneficiaryId : '',
@@ -415,6 +415,11 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
                       headerBenSeqNo: newValue ? newValue.seqNo : '',
                       dispersalType: newValue ? newValue.dispersalType : ''
                     })
+                  else {
+                    formik.setFieldValue('headerBenId', '')
+                    formik.setFieldValue('headerBenName', '')
+                    formik.setFieldValue('headerBenSeqNo', '')
+                  }
                 }}
                 errorCheck={'headerBenId'}
               />
