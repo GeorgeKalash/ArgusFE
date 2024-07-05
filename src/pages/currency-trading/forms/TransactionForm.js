@@ -34,6 +34,7 @@ import { useForm } from 'src/hooks/form'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
 import { ControlContext } from 'src/providers/ControlContext'
+import CustomDatePickerHijri from 'src/components/Inputs/CustomDatePickerHijri'
 
 const FormContext = React.createContext(null)
 
@@ -1032,11 +1033,25 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                         label={labels.birth_date}
                         value={formik.values?.birth_date}
                         required={true}
-                        onChange={formik.setFieldValue}
+                        onChange={(name, value) => {
+                          formik.setFieldValue('birth_date', new Date(value)?.getTime() || '')
+                        }}
                         onClear={() => formik.setFieldValue('birth_date', '')}
                         error={formik.touched.birth_date && Boolean(formik.errors.birth_date)}
                         readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                         maxAccess={maxAccess}
+                      />
+                    </Grid>
+
+                    <Grid item xs={7}>
+                      <CustomDatePickerHijri
+                        name='birthdatehijri'
+                        label={labels.birthDateHijri}
+                        value={formik.values?.birth_date}
+                        onChange={(name, value) => {
+                          formik.setFieldValue('birth_date', value?.valueOf())
+                        }}
+                        onClear={() => formik.setFieldValue('birth_date', '')}
                       />
                     </Grid>
                     <Grid container xs={12}>
