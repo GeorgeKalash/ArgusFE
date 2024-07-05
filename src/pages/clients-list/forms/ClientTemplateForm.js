@@ -190,6 +190,8 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     }
   }
 
+  const dir = JSON.parse(window.localStorage.getItem('settings'))?.direction
+
   async function getCountry() {
     var parameters = `_filter=&_key=countryId`
 
@@ -1044,7 +1046,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                       maxAccess={maxAccess}
                     />
                   </Grid>
-                  <Grid container spacing={2} sx={{ paddingTop: '20px' }}>
+                  <Grid container spacing={2} sx={{ paddingTop: '20px', direction: dir }}>
                     <Grid item xs={3}>
                       <CustomTextField
                         name='firstName'
@@ -1113,7 +1115,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                     </Grid>
                   </Grid>
 
-                  <Grid container spacing={2} sx={{ flexDirection: 'row-reverse', paddingTop: '5px' }}>
+                  <Grid container spacing={2} sx={{ flexDirection: 'row-reverse', paddingTop: '5px', direction: dir }}>
                     <Grid item xs={3}>
                       <CustomTextField
                         name='fl_firstName'

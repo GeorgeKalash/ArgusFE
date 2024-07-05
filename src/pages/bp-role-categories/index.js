@@ -3,17 +3,17 @@ import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
+import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
-import ProfessionGroupsForm from './forms/ProfessionGroupsForm'
-import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
+import RoleCategoriesForm from './forms/RoleCategoriesForm'
 import { ControlContext } from 'src/providers/ControlContext'
 
-const ProfessionGroups = () => {
+const RoleCategories = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -22,7 +22,7 @@ const ProfessionGroups = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: RemittanceSettingsRepository.ProfessionGroups.page,
+      extension: BusinessPartnerRepository.RoleCategory.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
 
@@ -37,12 +37,12 @@ const ProfessionGroups = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: RemittanceSettingsRepository.ProfessionGroups.page,
-    datasetId: ResourceIds.ProfessionGroups
+    endpointId: BusinessPartnerRepository.RoleCategory.page,
+    datasetId: ResourceIds.RoleCategories
   })
 
   const invalidate = useInvalidate({
-    endpointId: RemittanceSettingsRepository.ProfessionGroups.page
+    endpointId: BusinessPartnerRepository.RoleCategory.page
   })
 
   const columns = [
@@ -68,21 +68,21 @@ const ProfessionGroups = () => {
 
   function openForm(recordId) {
     stack({
-      Component: ProfessionGroupsForm,
+      Component: RoleCategoriesForm,
       props: {
         labels: _labels,
         recordId: recordId,
         maxAccess: access
       },
       width: 600,
-      height: 330,
-      title: _labels.professionGroups
+      height: 400,
+      title: _labels.roleCategories
     })
   }
 
   const del = async obj => {
     await postRequest({
-      extension: RemittanceSettingsRepository.ProfessionGroups.del,
+      extension: BusinessPartnerRepository.RoleCategory.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -113,4 +113,4 @@ const ProfessionGroups = () => {
   )
 }
 
-export default ProfessionGroups
+export default RoleCategories
