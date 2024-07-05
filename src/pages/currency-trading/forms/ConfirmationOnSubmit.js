@@ -16,7 +16,6 @@ export default function ConfirmationOnSubmit({ formik, labels, window }) {
     },
     validate: values => {
       const errors = {}
-      console.log(values.cellPhoneRepeat, values.cellPhone)
       if (!formik.values.clientId && !values.cellPhoneRepeat) {
         errors.cellPhoneRepeat = 'Cell Phone Confirm is required'
       } else if (!formik.values.clientId && values.cellPhone !== values.cellPhoneRepeat) {
