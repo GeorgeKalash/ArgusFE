@@ -151,5 +151,12 @@ export const ResourceIds = {
   DebitNote: 31311,
   ServiceBillReceived: 31312,
   ServiceInvoice: 31313,
-  FinancialTransaction: 31302
+  FinancialTransaction: 31302,
+  FIDocTypeDefaults: 31103,
+  GenerateOpeningBalances: 31314,
+  DimensionsValues: 31111,
+  RebuildAccountBalances: 31501,
+  RoleCategories: 21102,
+  SourceOfIncomeType: 36311,
+  ProfessionGroups: 36310
 }
