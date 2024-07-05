@@ -30,13 +30,6 @@ const CashCount = () => {
     })
   }
 
-  async function fetchGridData() {
-    return await getRequest({
-      extension: CashCountRepository.CashCountTransaction.qry,
-      parameters: ``
-    })
-  }
-
   const {
     query: { data },
     filterBy,
@@ -46,8 +39,7 @@ const CashCount = () => {
     access,
     invalidate
   } = useResourceQuery({
-    queryFn: fetchGridData,
-    endpointId: CashCountRepository.CashCountTransaction.qry,
+    endpointId: CashCountRepository.CashCountTransaction.snapshot,
     datasetId: ResourceIds.CashCountTransaction,
     filter: {
       endpointId: CashCountRepository.CashCountTransaction.snapshot,

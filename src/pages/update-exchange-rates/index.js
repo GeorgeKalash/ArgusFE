@@ -23,6 +23,7 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 const UpdateExchangeRates = () => {
   const [access, setAccess] = useState()
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const { getLabels, getAccess } = useContext(ControlContext)
   const [labels, setLabels] = useState(null)
@@ -141,7 +142,7 @@ const UpdateExchangeRates = () => {
       record: JSON.stringify(data)
     })
       .then(res => {
-        if (res) toast.success('Record Successfully')
+        if (res) toast.success(platformLabels.Updated)
       })
       .catch(error => {})
   }

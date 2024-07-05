@@ -21,6 +21,7 @@ const GlobalExchangeBuyMap = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getLabels, getAccess } = useContext(ControlContext)
   const { height } = useWindowDimensions()
+  const { platformLabels } = useContext(ControlContext)
 
   const [errorMessage, setErrorMessage] = useState()
   const [access, setAccess] = useState(0)
@@ -92,7 +93,7 @@ const GlobalExchangeBuyMap = () => {
       record: JSON.stringify(data)
     })
       .then(res => {
-        if (res.statusId) toast.success('Record Successfully')
+        if (res.statusId) toast.success(platformLabels.Updated)
       })
       .catch(error => {})
   }
@@ -225,19 +226,19 @@ const GlobalExchangeBuyMap = () => {
           </Grid>
         </Grid>
       </Fixed>
-          <Grow>
-            {formik.values.currencyId && (
-              <DataGrid
-                onChange={value => formik.setFieldValue('rows', value)}
-                value={formik.values.rows}
-                error={formik.errors.rows}
-                columns={columns}
-              />
-            )}
-          </Grow>
-        <Fixed>
-          <WindowToolbar onSave={handleSubmit} isSaved={true} smallBox={true} />
-        </Fixed>
+      <Grow>
+        {formik.values.currencyId && (
+          <DataGrid
+            onChange={value => formik.setFieldValue('rows', value)}
+            value={formik.values.rows}
+            error={formik.errors.rows}
+            columns={columns}
+          />
+        )}
+      </Grow>
+      <Fixed>
+        <WindowToolbar onSave={handleSubmit} isSaved={true} smallBox={true} />
+      </Fixed>
     </VertLayout>
   )
 }
