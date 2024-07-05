@@ -1041,7 +1041,6 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                         label={labels.birthDateHijri}
                         value={formik.values?.birth_date}
                         onChange={(name, value) => {
-                          console.log(value)
                           formik.setFieldValue('birth_date', value?.valueOf())
                         }}
                         onClear={() => formik.setFieldValue('birth_date', '')}

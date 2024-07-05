@@ -698,7 +698,6 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       title: labels.beneficiaries
     })
   }
-  console.log(clientIndividualFormik)
 
   return (
     <FormShell
