@@ -98,7 +98,7 @@ const ProductsWindow = ({ labels, maxAccess, onProductSubmit, outWardsData, wind
       <Fixed>
         <WindowToolbar
           onSave={() => {
-            onProductSubmit(gridData)
+            onProductSubmit(gridData.list ? gridData.list : gridData)
             window.close()
           }}
           isSaved={true}

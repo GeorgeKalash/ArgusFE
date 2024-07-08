@@ -26,7 +26,7 @@ const BeneficiaryFields = () => {
   const [initialValues, setInitialData] = useState({
     countryId: '',
     dispersalType: '',
-    corId: '',
+    corId: 0,
     rows: [
       {
         id: 1,
