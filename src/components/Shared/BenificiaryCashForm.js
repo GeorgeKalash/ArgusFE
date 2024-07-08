@@ -155,10 +155,12 @@ const BenificiaryCashForm = ({
   })
   useEffect(() => {
     ;(async function () {
-      if (countryId && corId && dispersalType) {
+      if (formik.values.countryId && dispersalType) {
         const qryCCL = await getRequest({
           extension: RemittanceSettingsRepository.CorrespondentControl.qry,
-          parameters: `_countryId=${countryId}&_corId=${corId}&_resourceId=${ResourceIds.BeneficiaryCash}`
+          parameters: `_countryId=${formik.values.countryId}&_corId=${corId ?? 0}&_resourceId=${
+            ResourceIds.BeneficiaryCash
+          }`
         })
 
         const controls = { controls: qryCCL.list }
@@ -217,7 +219,7 @@ const BenificiaryCashForm = ({
         formik.setValues(obj)
       }
     })()
-  }, [beneficiary?.beneficiaryId, beneficiary?.beneficiarySeqNo, client?.clientId])
+  }, [beneficiary?.beneficiaryId, beneficiary?.beneficiarySeqNo, client?.clientId, formik.values.countryId])
 
   useEffect(() => {
     if (resetForm) {
@@ -349,62 +351,83 @@ const BenificiaryCashForm = ({
     >
       <VertLayout>
         <Grow>
-          <Grid container rowGap={2}>
+          <Grid container rowGap={2} sx={{ pt: 2 }}>
             <Grid container xs={12}>
-              <ResourceLookup
-                endpointId={CTCLRepository.ClientCorporate.snapshot}
-                parameters={{
-                  _category: 0
-                }}
-                valueField='reference'
-                displayField='name'
-                name='clientId'
-                label={_labels.client}
-                form={formik}
-                required
-                readOnly={editMode}
-                displayFieldWidth={2}
-                valueShow='clientRef'
-                secondValueShow='clientName'
-                maxAccess={maxAccess}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Ref.' },
-                  { key: 'name', value: 'Name' },
-                  { key: 'cellPhone', value: 'Cell Phone' }
-                ]}
-                onChange={async (event, newValue) => {
-                  if (newValue?.status == -1) {
-                    stackError({
-                      message: `Chosen Client Must Be Active.`
-                    })
-
-                    return
-                  }
-                  formik.setFieldValue('clientId', newValue ? newValue.recordId : '')
-                  formik.setFieldValue('clientName', newValue ? newValue.name : '')
-                  formik.setFieldValue('clientRef', newValue ? newValue.reference : '')
-                }}
-                errorCheck={'clientId'}
-              />
-            </Grid>
-            <Grid container xs={12}>
-              <FormGrid hideonempty xs={12}>
-                <CustomTextField
-                  name='name'
-                  label={_labels.name}
-                  value={formik.values?.name}
-                  maxLength='50'
-                  required
-                  onChange={formik.handleChange}
-                  onBlur={e => {
-                    constructNameField(formik.values)
+              <FormGrid hideonempty xs={6} sx={{ pr: 2 }}>
+                <ResourceLookup
+                  endpointId={CTCLRepository.ClientCorporate.snapshot}
+                  parameters={{
+                    _category: 0
                   }}
-                  error={formik.touched.name && Boolean(formik.errors.name)}
-                  maxAccess={maxAccess}
+                  valueField='reference'
+                  displayField='name'
+                  name='clientId'
+                  label={_labels.client}
+                  form={formik}
+                  required
                   readOnly={editMode}
+                  displayFieldWidth={2}
+                  valueShow='clientRef'
+                  secondValueShow='clientName'
+                  maxAccess={maxAccess}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Ref.' },
+                    { key: 'name', value: 'Name' },
+                    { key: 'cellPhone', value: 'Cell Phone' }
+                  ]}
+                  onChange={async (event, newValue) => {
+                    if (newValue?.status == -1) {
+                      stackError({
+                        message: `Chosen Client Must Be Active.`
+                      })
+
+                      return
+                    }
+                    formik.setFieldValue('clientId', newValue ? newValue.recordId : '')
+                    formik.setFieldValue('clientName', newValue ? newValue.name : '')
+                    formik.setFieldValue('clientRef', newValue ? newValue.reference : '')
+                  }}
+                  errorCheck={'clientId'}
+                />
+              </FormGrid>
+              <FormGrid hideonempty xs={6}>
+                <ResourceComboBox
+                  endpointId={SystemRepository.Country.qry}
+                  name='countryId'
+                  label={_labels.benCountry}
+                  valueField='recordId'
+                  displayField={['reference', 'name']}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' }
+                  ]}
+                  readOnly={(formik.values.countryId && editMode) || countryId || editMode}
+                  values={formik.values}
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('countryId', newValue ? newValue.recordId : '')
+                  }}
+                  error={formik.touched.countryId && Boolean(formik.errors.countryId)}
+                  maxAccess={maxAccess}
+                  required
                 />
               </FormGrid>
             </Grid>
+            <FormGrid hideonempty xs={12}>
+              <CustomTextField
+                name='name'
+                label={_labels.name}
+                value={formik.values?.name}
+                maxLength='50'
+                required
+                onChange={formik.handleChange}
+                onBlur={e => {
+                  constructNameField(formik.values)
+                }}
+                error={formik.touched.name && Boolean(formik.errors.name)}
+                maxAccess={maxAccess}
+                readOnly={editMode}
+              />
+            </FormGrid>
             <Grid container xs={12} spacing={2}>
               <FormGrid item hideonempty xs={3}>
                 <CustomTextField
@@ -521,7 +544,7 @@ const BenificiaryCashForm = ({
               </FormGrid>
             </Grid>
             <Grid container rowGap={2} xs={6} spacing={2} sx={{ px: 2, pt: 2 }}>
-              <FormGrid hideonempty xs={12} sx={{ position: 'relative', width: '100%' }}>
+              <FormGrid hideonempty xs={12}>
                 <CustomTextField
                   name='cellPhone'
                   phone={true}
@@ -623,7 +646,7 @@ const BenificiaryCashForm = ({
                 />
               </FormGrid>
             </Grid>
-            <Grid container rowGap={2} xs={6} spacing={2} sx={{ px: 2, pt: 2 }}>
+            <Grid container rowGap={2} xs={6} spacing={2} sx={{ px: 2, pt: 2, height: '50%' }}>
               <FormGrid hideonempty xs={12}>
                 <CustomDatePicker
                   name='birthDate'
@@ -679,31 +702,11 @@ const BenificiaryCashForm = ({
                   readOnly={editMode}
                 />
               </FormGrid>
-              <FormGrid xs={12}>
-                <ResourceComboBox
-                  endpointId={SystemRepository.Country.qry}
-                  name='countryId'
-                  label={_labels.benCountry}
-                  valueField='recordId'
-                  displayField={['reference', 'name']}
-                  columnsInDropDown={[
-                    { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
-                  ]}
-                  readOnly={formik.values.countryId != '' || countryId || editMode}
-                  values={formik.values}
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('countryId', newValue ? newValue.recordId : '')
-                  }}
-                  error={formik.touched.countryId && Boolean(formik.errors.countryId)}
-                  maxAccess={maxAccess}
-                  required
-                />
-              </FormGrid>
               <FormGrid hideonempty xs={12} sx={{ position: 'relative', width: '100%' }}>
                 <FormControlLabel
                   control={<Checkbox name='isBlocked' disabled={true} checked={formik.values?.isBlocked} />}
                   label={_labels.isBlocked}
+                  maxAccess={maxAccess}
                 />
               </FormGrid>
               <FormGrid hideonempty xs={12}>
@@ -724,6 +727,7 @@ const BenificiaryCashForm = ({
                   value={formik.values.stoppedReason}
                   rows={3}
                   error={formik.touched.stoppedReason && Boolean(formik.errors.stoppedReason)}
+                  maxAccess={maxAccess}
                 />
               </FormGrid>
             </Grid>
