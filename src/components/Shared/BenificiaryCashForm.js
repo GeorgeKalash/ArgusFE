@@ -25,19 +25,134 @@ import FormGrid from 'src/components/form/layout/FormGrid'
 
 const BenificiaryCashForm = ({
   viewBtns = true,
-  store,
-  setStore,
   client,
   dispersalType,
   beneficiary,
+  submitted,
+  setSubmitted,
   corId,
   countryId,
-  editable = false
+  editable = false,
+  resetForm,
+  setResetForm,
+  onChange,
+  setValidSubmit,
+  submitMainForm = true
 }) => {
   const [maxAccess, setMaxAccess] = useState({ record: [] })
   const { stack: stackError } = useError()
   const [editMode, setEditMode] = useState(beneficiary?.beneficiaryId && !editable)
+  const { getRequest, postRequest } = useContext(RequestsContext)
+  const [notArabic, setNotArabic] = useState(true)
 
+  const initialValues = {
+    //RTBEN
+    clientId: client?.clientId || '',
+    recordId: '',
+    beneficiaryId: 0,
+    name: '',
+    dispersalType: dispersalType || '',
+    nationalityId: null,
+    isBlocked: false,
+    stoppedDate: null,
+    stoppedReason: '',
+    gender: null,
+    cobId: '',
+    cellPhone: '',
+    birthDate: null,
+    addressLine1: '',
+    addressLine2: '',
+    clientRef: client?.clientRef || '',
+    clientName: client?.clientName || '',
+    countryId: countryId || '',
+    seqNo: 1,
+
+    //RTBEC
+    firstName: '',
+    lastName: '',
+    middleName: '',
+    familyName: '',
+    fl_firstName: '',
+    fl_lastName: '',
+    fl_middleName: '',
+    fl_familyName: '',
+    birthPlace: '',
+    seqNo: 1
+  }
+
+  const { formik } = useForm({
+    maxAccess,
+    initialValues,
+    enableReinitialize: true,
+    validateOnChange: true,
+    validateOnBlur: true,
+    validate: values => {
+      const errors = {}
+
+      return errors
+    },
+    validationSchema: yup.object({
+      clientId: yup.string().required(' '),
+      countryId: yup.string().required(' '),
+      name: yup.string().required(' '),
+      firstName: yup.string().required(' '),
+      lastName: yup.string().required(' ')
+    }),
+    onSubmit: async values => {
+      if (submitMainForm) {
+        const header = {
+          clientId: values.clientId,
+          beneficiaryId: values.beneficiaryId,
+          gender: values.gender,
+          name: values.name,
+          dispersalType: values.dispersalType,
+          isBlocked: values.isBlocked,
+          stoppedDate: values.stoppedDate ? formatDateToApi(values.stoppedDate) : null,
+          stoppedReason: values.stoppedReason,
+          nationalityId: values.nationalityId,
+          cobId: values.cobId,
+          birthDate: values.birthDate ? formatDateToApi(values.birthDate) : null,
+          cellPhone: values.cellPhone,
+          addressLine1: values.addressLine1,
+          addressLine2: values.addressLine2,
+          clientRef: values.clientRef,
+          clientName: values.clientName,
+          countryId: values.countryId,
+          seqNo: values.seqNo
+        }
+
+        const cashInfo = {
+          clientId: values.clientId,
+          beneficiaryId: values.beneficiaryId,
+          firstName: values.firstName,
+          lastName: values.lastName,
+          middleName: values.middleName,
+          familyName: values.familyName,
+          fl_firstName: values.fl_firstName,
+          fl_lastName: values.fl_lastName,
+          fl_middleName: values.fl_middleName,
+          fl_familyName: values.fl_familyName,
+          birthPlace: values.birthPlace,
+          seqNo: values.seqNo
+        }
+        const data = { header: header, beneficiaryCash: cashInfo }
+
+        const res = await postRequest({
+          extension: RemittanceOutwardsRepository.BeneficiaryCash.set,
+          record: JSON.stringify(data)
+        })
+        if (res.recordId) {
+          toast.success('Record Updated Successfully')
+        }
+
+        setEditMode(true)
+      }
+    }
+  })
+
+  const { labels: _labels } = useResourceQuery({
+    datasetId: ResourceIds.BeneficiaryCash
+  })
   useEffect(() => {
     ;(async function () {
       if (countryId && corId && dispersalType) {
@@ -48,9 +163,10 @@ const BenificiaryCashForm = ({
 
         const controls = { controls: qryCCL.list }
         const maxAccess = { record: controls }
+        setMaxAccess(maxAccess)
       }
 
-      if (beneficiary?.beneficiaryId && (!store || store.submitted != store.loadBen)) {
+      if (beneficiary?.beneficiaryId && client?.clientId) {
         const RTBEC = await getRequest({
           extension: RemittanceOutwardsRepository.BeneficiaryCash.get,
           parameters: `_clientId=${client?.clientId}&_beneficiaryId=${beneficiary?.beneficiaryId}&_seqNo=${beneficiary?.beneficiarySeqNo}`
@@ -97,142 +213,73 @@ const BenificiaryCashForm = ({
           birthPlace: RTBEC?.record?.birthPlace,
           seqNo: RTBEC?.record?.seqNo
         }
-        if (store) {
-          setStore(prevStore => ({
-            ...prevStore,
-            beneficiaryList: obj
-          }))
-        }
+
         formik.setValues(obj)
       }
-      if (store?.submitted) {
-        formik.handleSubmit()
-      }
-      if (store?.clearBenForm && !store?.submitted) {
-        formik.resetForm()
-        setStore(prevStore => ({
-          ...prevStore,
-          clearBenForm: false,
-          loadBen: false
-        }))
-      }
     })()
-  }, [store?.submitted, store?.clearBenForm, beneficiary?.beneficiaryId, beneficiary?.beneficiarySeqNo])
+  }, [beneficiary?.beneficiaryId, beneficiary?.beneficiarySeqNo, client?.clientId])
 
-  const { getRequest, postRequest } = useContext(RequestsContext)
-  const [notArabic, setNotArabic] = useState(true)
-
-  const { labels: _labels } = useResourceQuery({
-    datasetId: ResourceIds.BeneficiaryCash
-  })
-
-  const [initialValues, setInitialData] = useState({
-    //RTBEN
-    clientId: client?.clientId || '',
-    recordId: '',
-    beneficiaryId: 0,
-    name: '',
-    dispersalType: dispersalType || '',
-    nationalityId: null,
-    isBlocked: false,
-    stoppedDate: null,
-    stoppedReason: '',
-    gender: null,
-    cobId: '',
-    cellPhone: '',
-    birthDate: null,
-    addressLine1: '',
-    addressLine2: '',
-    clientRef: client?.clientRef || '',
-    clientName: client?.clientName || '',
-    countryId: countryId || '',
-    seqNo: 1,
-
-    //RTBEC
-    firstName: '',
-    lastName: '',
-    middleName: '',
-    familyName: '',
-    fl_firstName: '',
-    fl_lastName: '',
-    fl_middleName: '',
-    fl_familyName: '',
-    birthPlace: '',
-    seqNo: 1
-  })
-
-  const { formik } = useForm({
-    maxAccess,
-    initialValues,
-    enableReinitialize: true,
-    validateOnChange: true,
-    validateOnBlur: true,
-    validate: values => {
-      const errors = {}
-
-      return errors
-    },
-    validationSchema: yup.object({
-      clientId: yup.string().required(' '),
-      countryId: yup.string().required(' '),
-      name: yup.string().required(' '),
-      firstName: yup.string().required(' '),
-      lastName: yup.string().required(' ')
-    }),
-    onSubmit: async values => {
-      const header = {
-        clientId: values.clientId,
-        beneficiaryId: values.beneficiaryId,
-        gender: values.gender,
-        name: values.name,
-        dispersalType: values.dispersalType,
-        isBlocked: values.isBlocked,
-        stoppedDate: values.stoppedDate ? formatDateToApi(values.stoppedDate) : null,
-        stoppedReason: values.stoppedReason,
-        nationalityId: values.nationalityId,
-        cobId: values.cobId,
-        birthDate: values.birthDate ? formatDateToApi(values.birthDate) : null,
-        cellPhone: values.cellPhone,
-        addressLine1: values.addressLine1,
-        addressLine2: values.addressLine2,
-        clientRef: values.clientRef,
-        clientName: values.clientName,
-        countryId: values.countryId,
-        seqNo: values.seqNo
-      }
-
-      const cashInfo = {
-        clientId: values.clientId,
-        beneficiaryId: values.beneficiaryId,
-        firstName: values.firstName,
-        lastName: values.lastName,
-        middleName: values.middleName,
-        familyName: values.familyName,
-        fl_firstName: values.fl_firstName,
-        fl_lastName: values.fl_lastName,
-        fl_middleName: values.fl_middleName,
-        fl_familyName: values.fl_familyName,
-        birthPlace: values.birthPlace,
-        seqNo: values.seqNo
-      }
-      const data = { header: header, beneficiaryCash: cashInfo }
-      if (store?.submitted) {
-        setStore(prevStore => ({
-          ...prevStore,
-          beneficiaryList: data
-        }))
-      } else {
-        const res = await postRequest({
-          extension: RemittanceOutwardsRepository.BeneficiaryCash.set,
-          record: JSON.stringify(data)
-        })
-        if (res.recordId) {
-          toast.success('Record Updated Successfully')
-        }
-      }
-      setEditMode(true)
+  useEffect(() => {
+    if (resetForm) {
+      formik.resetForm()
+      setResetForm(false)
     }
-  })
+  }, [resetForm])
+
+  useEffect(() => {
+    const values = formik.values
+
+    const header = {
+      clientId: values.clientId,
+      beneficiaryId: values.beneficiaryId,
+      gender: values.gender,
+      name: values.name,
+      dispersalType: values.dispersalType,
+      isBlocked: values.isBlocked,
+      stoppedDate: values.stoppedDate ? formatDateToApi(values.stoppedDate) : null,
+      stoppedReason: values.stoppedReason,
+      nationalityId: values.nationalityId,
+      cobId: values.cobId,
+      birthDate: values.birthDate ? formatDateToApi(values.birthDate) : null,
+      cellPhone: values.cellPhone,
+      addressLine1: values.addressLine1,
+      addressLine2: values.addressLine2,
+      clientRef: values.clientRef,
+      clientName: values.clientName,
+      countryId: values.countryId,
+      seqNo: values.seqNo
+    }
+
+    const cashInfo = {
+      clientId: values.clientId,
+      beneficiaryId: values.beneficiaryId,
+      firstName: values.firstName,
+      lastName: values.lastName,
+      middleName: values.middleName,
+      familyName: values.familyName,
+      fl_firstName: values.fl_firstName,
+      fl_lastName: values.fl_lastName,
+      fl_middleName: values.fl_middleName,
+      fl_familyName: values.fl_familyName,
+      birthPlace: values.birthPlace,
+      seqNo: values.seqNo
+    }
+    const data = { header: header, beneficiaryCash: cashInfo }
+    if (onChange) onChange(data)
+  }, [formik.values])
+
+  useEffect(() => {
+    if (!submitMainForm) {
+      const errors = Object.keys(formik.errors).length !== 0
+      if (errors) {
+        setSubmitted(false)
+        formik.handleSubmit()
+
+        return
+      }
+      if (submitted && !errors) setValidSubmit(true)
+    }
+  }, [submitted])
 
   const constructNameField = formValues => {
     const arabicRegex = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/
