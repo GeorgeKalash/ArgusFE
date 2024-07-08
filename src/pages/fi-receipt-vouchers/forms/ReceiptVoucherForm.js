@@ -133,10 +133,6 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
   }
 
   useEffect(() => {
-    formik.setFieldValue('templateId', '')
-  }, [formik.values.notes])
-
-  useEffect(() => {
     !recordId && getDefaultDT()
     ;(async function () {
       getData(recordId)
@@ -454,20 +450,17 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
               </Grid>
               <Grid item xs={12}>
                 <ResourceComboBox
+                  neverPopulate
                   endpointId={FinancialRepository.DescriptionTemplate.qry}
                   name='templateId'
                   label={labels.descriptionTemplate}
                   readOnly={readOnly}
                   valueField='recordId'
                   displayField='name'
-                  values={formik.values}
                   onChange={(event, newValue) => {
                     let notes = formik.values.notes
-                    notes += newValue?.name && formik.values.notes && '\n'
-                    notes += newValue?.name
 
-                    notes && formik.setFieldValue('notes', notes)
-                    newValue?.name && formik.setFieldValue('templateId', newValue.recordId)
+                    if (newValue?.name) formik.setFieldValue('notes', notes + newValue?.name + '\n')
                   }}
                   error={formik.touched.templateId && Boolean(formik.errors.templateId)}
                   maxAccess={maxAccess}

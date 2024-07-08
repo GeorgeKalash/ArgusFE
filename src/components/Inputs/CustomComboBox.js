@@ -10,7 +10,7 @@ const CustomComboBox = ({
   type = 'text', //any valid HTML5 input type
   name,
   label,
-  value,
+  value: _value,
   valueField = 'key',
   displayField = 'value',
   store = [],
@@ -25,6 +25,7 @@ const CustomComboBox = ({
   autoFocus = false,
   disabled = false,
   readOnly = false,
+  neverPopulate = false,
   displayFieldWidth = 1,
   sx,
   columnsInDropDown,
@@ -40,6 +41,8 @@ const CustomComboBox = ({
   const _disabled = disabled || fieldAccess === ControlAccessLevel.Disabled
   const _required = required || fieldAccess === ControlAccessLevel.Mandatory
   const _hidden = fieldAccess === ControlAccessLevel.Hidden
+
+  const value = neverPopulate ? '' : _value
 
   return (
     <Autocomplete
@@ -130,6 +133,7 @@ const CustomComboBox = ({
       renderInput={params => (
         <TextField
           {...params}
+          inputProps={{ ...params.inputProps, ...(neverPopulate && { value: '' }) }}
           type={type}
           variant={variant}
           label={label}
