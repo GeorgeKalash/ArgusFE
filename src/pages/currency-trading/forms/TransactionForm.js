@@ -34,6 +34,7 @@ import { useForm } from 'src/hooks/form'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
 import { ControlContext } from 'src/providers/ControlContext'
+import CustomDatePickerHijri from 'src/components/Inputs/CustomDatePickerHijri'
 
 const FormContext = React.createContext(null)
 
@@ -373,6 +374,8 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     }
   })
 
+  const dir = JSON.parse(window.localStorage.getItem('settings'))?.direction
+
   const onClose = async recId => {
     try {
       const res = await getRequest({
@@ -583,7 +586,9 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
         formValidation: formik,
         recordId: recId,
         functionId: formik.values.functionId,
-        onSuccess: onClose
+        onSuccess: () => {
+          onClose(recId)
+        }
       },
       width: 400,
       height: 400,
@@ -698,6 +703,12 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       condition: true,
       onClick: 'onApproval',
       disabled: !isClosed
+    },
+    {
+      key: 'Account Balance',
+      condition: true,
+      onClick: 'onClickAC',
+      disabled: false
     }
   ]
 
@@ -716,7 +727,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       <VertLayout>
         <Grow>
           <FormProvider formik={formik} labels={labels} maxAccess={maxAccess}>
-            <Grid container>
+            <Grid container sx={{ zIndex: 0 }}>
               <FieldSet title='Transaction'>
                 <Grid container spacing={4}>
                   <Grid item xs={4}>
@@ -1022,11 +1033,25 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                         label={labels.birth_date}
                         value={formik.values?.birth_date}
                         required={true}
-                        onChange={formik.setFieldValue}
+                        onChange={(name, value) => {
+                          formik.setFieldValue('birth_date', new Date(value)?.getTime() || '')
+                        }}
                         onClear={() => formik.setFieldValue('birth_date', '')}
                         error={formik.touched.birth_date && Boolean(formik.errors.birth_date)}
                         readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                         maxAccess={maxAccess}
+                      />
+                    </Grid>
+
+                    <Grid item xs={7}>
+                      <CustomDatePickerHijri
+                        name='birthdatehijri'
+                        label={labels.birthDateHijri}
+                        value={formik.values?.birth_date}
+                        onChange={(name, value) => {
+                          formik.setFieldValue('birth_date', value?.valueOf())
+                        }}
+                        onClear={() => formik.setFieldValue('birth_date', '')}
                       />
                     </Grid>
                     <Grid container xs={12}>
@@ -1156,7 +1181,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                   </Grid>
 
                   <Grid container rowGap={3} xs={8} sx={{ px: 2, alignContent: 'start' }}>
-                    <Grid xs={12} container spacing={2}>
+                    <Grid xs={12} container spacing={2} sx={{ direction: dir }}>
                       <Grid item xs={3}>
                         <FormField
                           name='firstName'
@@ -1192,7 +1217,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                         />
                       </Grid>
                     </Grid>
-                    <Grid xs={12} container spacing={2} sx={{ flexDirection: 'row-reverse' }}>
+                    <Grid xs={12} container spacing={2} sx={{ flexDirection: 'row-reverse', direction: dir }}>
                       <Grid item xs={3}>
                         <FormField
                           name='fl_firstName'
