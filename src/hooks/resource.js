@@ -75,7 +75,7 @@ export function useResourceQuery({ endpointId, filter, datasetId, queryFn, searc
     },
     refetch(value) {
       setSearchValue('')
-      if (!value.params) {
+      if (!value.hasOwnProperty('params')) {
         query.refetch()
       } else if (searchValue) {
         setSearchValue(searchValue)

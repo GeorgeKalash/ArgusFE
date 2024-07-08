@@ -188,19 +188,6 @@ const GridToolbar = ({
               </Tooltip>
             </Box>
           )}
-          {onGenerateReport && (
-            <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', py: '7px !important' }}>
-              <Button
-                sx={{ height: 'auto', ml: 2 }}
-                variant='contained'
-                disabled={!reportName}
-                onClick={() => onGenerateReport({ params: formatDataForApi(paramsArray) })}
-                size='small'
-              >
-                Generate Report
-              </Button>
-            </Grid>
-          )}
           {reportName && (
             <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', pt: '7px !important' }}>
               <Button
@@ -225,7 +212,6 @@ const GridToolbar = ({
             <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', pt: '7px !important' }}>
               <Button
                 sx={{ height: !onGenerateReport ? '35px' : '42px' }}
-                disabled={paramsArray.length === 0}
                 onClick={() =>
                   searchValue
                     ? onSearch(searchValue)

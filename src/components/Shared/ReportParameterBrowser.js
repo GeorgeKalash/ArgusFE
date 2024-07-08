@@ -119,7 +119,7 @@ const GetComboBox = ({ field, formik, paramsArray }) => {
                 : ''
             )
           }}
-          error={formik.touched?.parameters?.[field?.id] && Boolean(formik.errors?.parameters?.[field?.id])}
+          error={Boolean(formik.errors?.parameters?.[field?.id])}
         />
       ) : (
         <>
@@ -146,7 +146,7 @@ const GetComboBox = ({ field, formik, paramsArray }) => {
                   : ''
               )
             }}
-            error={formik.touched?.parameters?.[field?.id] && Boolean(formik.errors?.parameters?.[field?.id])}
+            error={Boolean(formik.errors?.parameters?.[field?.id])}
           />
         </>
       )}
@@ -183,7 +183,7 @@ const GetDate = ({ field, formik, paramsArray }) => {
             display: formatDateDefault(newValue)
           })
         }}
-        error={formik.touched?.parameters?.[field?.id] && Boolean(formik.errors?.parameters?.[field?.id])}
+        error={Boolean(formik.errors?.parameters?.[field?.id])}
         onClear={() => formik.setFieldValue(`parameters[${field.id}]`, undefined)}
       />
     </Grid>
@@ -250,6 +250,7 @@ const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, windo
       parameters: []
     },
     validate: values => {
+      console.log('values', values)
       const errors = { parameters: [] }
       items.forEach(item => {
         if (item?.mandatory && item?.id) {
@@ -259,12 +260,10 @@ const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, windo
         }
       })
 
-      return errors.parameters.length > 0 ? errors : {}
+      return Object.keys(errors.parameters).length > 0 ? errors : {}
     },
     enableReinitialize: true,
     validateOnChange: true,
-
-    validationSchema: yup.object().shape({}),
     onSubmit: values => {
       const processedArray = values?.parameters
         ?.filter((item, index) => item?.fieldId && item?.value != null)

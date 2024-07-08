@@ -170,7 +170,7 @@ export const apiMappings = {
   30107: {
     type: COMBOBOX,
     endpoint: GeneralLedgerRepository.CostCenter.qry,
-    parameters: '_filter=',
+    parameters: `_params=&_startAt=0&_pageSize=200`,
     valueField: 'recordId',
     displayField: ['reference', 'name'],
     columnsInDropDown: [
