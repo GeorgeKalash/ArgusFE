@@ -23,6 +23,7 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 const CtDefaults = ({ _labels, access }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getLabels, getAccess } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
 
   //control
   const [labels, setLabels] = useState(null)
@@ -133,7 +134,7 @@ const CtDefaults = ({ _labels, access }) => {
       record: JSON.stringify({ sysDefaults: data })
     })
       .then(res => {
-        if (res) toast.success('Record Successfully')
+        if (res) toast.success(platformLabels.Updated)
       })
       .catch(error => {
         setErrorMessage(error)

@@ -11,10 +11,12 @@ import toast from 'react-hot-toast'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const BeneficiaryBank = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const { platformLabels } = useContext(ControlContext)
 
   const {
     query: { data },
@@ -119,7 +121,7 @@ const BeneficiaryBank = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
   }
 
   const addBenBank = () => {

@@ -17,14 +17,16 @@ import toast from 'react-hot-toast'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const BeneficiaryFields = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const [initialValues, setInitialData] = useState({
     countryId: '',
     dispersalType: '',
-    corId: '',
+    corId: 0,
     rows: [
       {
         id: 1,
@@ -75,7 +77,7 @@ const BeneficiaryFields = () => {
         record: JSON.stringify(resultObject)
       })
       if (res) {
-        toast.success('Record Updated Successfully')
+        toast.success(platformLabels.Updated)
       }
     }
   })

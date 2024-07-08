@@ -17,12 +17,14 @@ import toast from 'react-hot-toast'
 import { useWindowDimensions } from 'src/lib/useWindowDimensions'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const CorrespondentCurrenciesForm = ({ store, labels, maxAccess, expanded, editMode }) => {
   const { recordId, counties } = store
   const { stack } = useWindow()
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { height } = useWindowDimensions()
+  const { platformLabels } = useContext(ControlContext)
 
   const formik = useFormik({
     enableReinitialize: true,
@@ -78,7 +80,7 @@ const CorrespondentCurrenciesForm = ({ store, labels, maxAccess, expanded, editM
       record: JSON.stringify(data)
     })
       .then(res => {
-        toast.success('Record Edited Successfully')
+        toast.success(platformLabels.Edited)
         if (res) getData()
       })
       .catch(error => {})
