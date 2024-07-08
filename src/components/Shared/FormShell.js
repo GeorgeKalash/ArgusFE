@@ -223,7 +223,7 @@ export default function FormShell({
           clientRelation={clientRelation}
           resourceId={resourceId}
           masterSource={masterSource}
-          recordId={form?.values?.recordId}
+          recordId={form.values?.recordId}
           selectedReport={selectedReport}
           setSelectedReport={setSelectedReport}
           previewReport={previewReport}
@@ -235,7 +235,7 @@ export default function FormShell({
         <TransactionLog
           resourceId={resourceId}
           onInfoClose={() => setWindowInfo(false)}
-          recordId={form?.values?.recordId}
+          recordId={form.values?.recordId}
         />
       )}
     </>
