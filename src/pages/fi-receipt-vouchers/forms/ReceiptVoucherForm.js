@@ -91,9 +91,9 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
   })
 
   const editMode = !!recordId || !!formik.values.recordId
-  const isCancelled = formik.values.status === -1 ? true : false
-  const isPosted = formik.values.status === 3 ? true : false
-  const readOnly = formik.values.status !== 1 ? true : false
+  const isCancelled = formik.values.status === -1
+  const isPosted = formik.values.status === 3
+  const readOnly = formik.values.status !== 1
 
   const getDefaultDT = async () => {
     const userData = getStorageData('userData')
