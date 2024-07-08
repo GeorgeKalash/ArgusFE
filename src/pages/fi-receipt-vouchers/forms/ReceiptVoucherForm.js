@@ -141,7 +141,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
 
   async function getData(_recordId) {
     try {
-      const recordId = _recordId || recordId || formik.values.recordId
+      const recordId = _recordId || recordId
       if (recordId) {
         const res = await getRequest({
           extension: FinancialRepository.ReceiptVouchers.get,
@@ -163,7 +163,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       })
 
       if (res?.recordId) {
-        getData()
+        getData(formik.values.recordId)
         toast.success('Record Cancelled Successfully')
         invalidate()
       }
@@ -180,7 +180,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       if (res) {
         toast.success('Record Posted Successfully')
         invalidate()
-        getData()
+        getData(formik.values.recordId)
       }
     } catch (e) {}
   }
