@@ -102,8 +102,8 @@ const Checkbook = () => {
   const del = async obj => {
     try {
         await postRequest({
-            extension: CashBankRepository.CACheckbook.del,
-            record: JSON.stringify(obj)
+        extension: CashBankRepository.CACheckbook.del,
+        record: JSON.stringify(obj)
         })
         invalidate()
         toast.success(platformLabels.Deleted)
@@ -129,7 +129,7 @@ const Checkbook = () => {
           refetch={refetch}
           maxAccess={access}
         />
-      </Grow>{' '}
+      </Grow>
     </VertLayout>
   )
 }
