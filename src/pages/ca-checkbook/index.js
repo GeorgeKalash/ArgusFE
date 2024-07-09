@@ -101,12 +101,14 @@ const Checkbook = () => {
   }
 
   const del = async obj => {
-    await postRequest({
-    extension: CashBankRepository.CACheckbook.del,
-    record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success(platformLabels.Deleted)
+    try {
+        await postRequest({
+        extension: CashBankRepository.CACheckbook.del,
+        record: JSON.stringify(obj)
+        })
+        invalidate()
+        toast.success(platformLabels.Deleted)
+    } catch (exception) {}
   }
 
   return (
