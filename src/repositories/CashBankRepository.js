@@ -83,6 +83,5 @@ export const CashBankRepository = {
     get: service + 'getCBK',
     set: service + 'setCBK',
     del: service + 'delCBK',
-    post: service + 'postCBK'
   }
 }
