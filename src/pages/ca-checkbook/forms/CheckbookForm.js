@@ -55,18 +55,20 @@ export default function CheckbookForm({ labels, maxAccess, recordId }) {
         recordId: recordId
       }
 
-      const response = await postRequest({
-        extension: CashBankRepository.CACheckbook.set,
-        record: JSON.stringify(data)
-      })
-
-        !recordId ? toast.success(platformLabels.Added) : toast.success(platformLabels.Edited)
-        formik.setValues({
-            ...obj,
-            recordId: response.recordId
-        })
-
-      invalidate()
+      try {
+        const response = await postRequest({
+            extension: CashBankRepository.CACheckbook.set,
+            record: JSON.stringify(data)
+          })
+    
+            !recordId ? toast.success(platformLabels.Added) : toast.success(platformLabels.Edited)
+            formik.setValues({
+                ...obj,
+                recordId: response.recordId
+            })
+    
+        invalidate()
+      } catch (exception) {}
     }
   })
 
@@ -144,12 +146,12 @@ export default function CheckbookForm({ labels, maxAccess, recordId }) {
             </Grid>
             <Grid item xs={12}>
                 <CustomNumberField
-                  name='size'
+                    name='size'
                   type='text'
-                  required
-                  label={labels.size}
-                  value={formik.values.size}
-                  maxAccess={maxAccess}
+                    required
+                    label={labels.size}
+                    value={formik.values.size}
+                    maxAccess={maxAccess}
                   maxLength={100}
                   onChange={e =>
                     formik.setValues({
@@ -163,7 +165,7 @@ export default function CheckbookForm({ labels, maxAccess, recordId }) {
                       size: ''
                     })
                   }
-                  error={formik.touched.size && Boolean(formik.errors.size)}
+                    error={formik.touched.size && Boolean(formik.errors.size)}
                 />
               </Grid>
             <Grid item xs={12}>
