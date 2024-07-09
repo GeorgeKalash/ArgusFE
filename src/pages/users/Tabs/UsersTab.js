@@ -74,18 +74,11 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
           copy.password = copy.confirmPassword = encryptedPassword
 
           const user = getStorageData('userData')
-          const matchHostname = window.location.hostname.match(/^(.+)\.softmachine\.co$/)
-          const accountName = matchHostname ? matchHostname[1] : 'byc-deploy'
-
-          const response = await axios.get(
-            `${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=${accountName}`
-          )
-
           await axios.post(
             `${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/setID`,
             {
               record: JSON.stringify({
-                accountId: response.data.record.accountId,
+                accountId: user.accountId,
                 userName: copy.username,
                 password: copy.password,
                 userId: copy.recordId
