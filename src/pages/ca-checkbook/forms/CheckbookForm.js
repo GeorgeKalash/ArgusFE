@@ -177,7 +177,6 @@ export default function CheckbookForm({ labels, maxAccess, recordId }) {
                   onChange={formik.setFieldValue}
                   onClear={() => formik.setFieldValue('issueDate', '')}
                   error={formik.touched.issueDate && Boolean(formik.errors.issueDate)}
-                  helperText={formik.touched.issueDate && formik.errors.issueDate}
                   maxAccess={maxAccess}
                 />
             </Grid>
