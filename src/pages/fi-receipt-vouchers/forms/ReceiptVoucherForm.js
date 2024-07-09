@@ -135,17 +135,17 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
   useEffect(() => {
     !recordId && getDefaultDT()
     ;(async function () {
-      getData(recordId)
+      getData()
     })()
   }, [])
 
   async function getData(_recordId) {
     try {
-      const recordId = _recordId || recordId
-      if (recordId) {
+      const finalRecordId = _recordId || recordId || formik.values.recordId
+      if (finalRecordId) {
         const res = await getRequest({
           extension: FinancialRepository.ReceiptVouchers.get,
-          parameters: `_recordId=${recordId}`
+          parameters: `_recordId=${finalRecordId}`
         })
 
         formik.setValues({ ...res.record, date: formatDateFromApi(res.record.date) })
@@ -163,7 +163,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       })
 
       if (res?.recordId) {
-        getData(formik.values.recordId)
+        getData()
         toast.success('Record Cancelled Successfully')
         invalidate()
       }
@@ -180,7 +180,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       if (res) {
         toast.success('Record Posted Successfully')
         invalidate()
-        getData(formik.values.recordId)
+        getData()
       }
     } catch (e) {}
   }
