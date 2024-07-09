@@ -14,6 +14,8 @@ const AuthContext = createContext(defaultProvider)
 import axios from 'axios'
 import SHA1 from 'crypto-js/sha1'
 import jwt from 'jwt-decode'
+import ChangePassword from 'src/components/Shared/ChangePassword'
+import { useWindow } from 'src/windows'
 
 const encryptePWD = pwd => {
   var encryptedPWD = SHA1(pwd).toString()
@@ -38,6 +40,7 @@ const AuthProvider = ({ children }) => {
   const [getAC, setGetAC] = useState({})
   const [languageId, setLanguageId] = useState(1)
   const router = useRouter()
+  const { stack } = useWindow()
 
   useEffect(() => {
     const initAuth = async () => {
@@ -77,6 +80,24 @@ const AuthProvider = ({ children }) => {
 
     fetchData()
   }, [])
+  function openForm() {
+    stack({
+      Component: ChangePassword,
+      props: {
+        reopenLogin: true,
+        username: values.username
+
+        // _labels: platformLabels
+      },
+      expandable: false,
+      closable: false,
+      draggable: false,
+      width: 600,
+      height: 400,
+      spacing: false,
+      title: 'platformLabels[titleName]'
+    })
+  }
 
   const handleLogin = async (params, errorCallback) => {
     try {
@@ -92,56 +113,60 @@ const AuthProvider = ({ children }) => {
         throw new Error(`User ${params.username} not found`)
       }
 
-      const signIn3Params = `_email=${params.username}&_password=${encryptePWD(params.password)}&_accountId=${
-        getAC.data.record.accountId
-      }&_userId=${getUS2.data.record.recordId}`
-
-      const signIn3 = await axios.get(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/signIn3?${signIn3Params}`, {
-        headers: {
-          accountId: JSON.parse(getAC.data.record.accountId),
-          dbe: JSON.parse(getAC.data.record.dbe),
-          dbs: JSON.parse(getAC.data.record.dbs)
-        }
-      })
-
-      const defaultSettings = await axios.get(`${getAC.data.record.api}/SY.asmx/getDE?_key=dateFormat`, {
-        headers: {
-          Authorization: 'Bearer ' + signIn3.data.record.accessToken,
-          'Content-Type': 'multipart/form-data'
-        }
-      })
-
-      const defaultSet = {
-        dateFormat: defaultSettings.data.record.value ? defaultSettings.data.record.value : 'dd/MM/yyyy'
-      }
-      window.localStorage.setItem('default', JSON.stringify(defaultSet))
-
-      const loggedUser = {
-        accountId: getAC.data.record.accountId,
-        userId: getUS2.data.record.recordId,
-        username: getUS2.data.record.username,
-        languageId: getUS2.data.record.languageId,
-        userType: getUS2.data.record.userType,
-        employeeId: getUS2.data.record.employeeId,
-        fullName: getUS2.data.record.fullName,
-        role: 'admin',
-        expiresAt: jwt(signIn3.data.record.accessToken).exp,
-        ...signIn3.data.record
-      }
-
-      setUser(loggedUser)
-      setLanguageId(loggedUser.languageId)
-      window.localStorage.setItem('languageId', loggedUser.languageId)
-
-      if (params.rememberMe) {
-        window.localStorage.setItem('userData', JSON.stringify(loggedUser))
+      if (getUS2.data.record.umcpnl === true) {
+        openForm(values)
       } else {
-        window.sessionStorage.setItem('userData', JSON.stringify(loggedUser))
-      }
+        const signIn3Params = `_email=${params.username}&_password=${encryptePWD(params.password)}&_accountId=${
+          getAC.data.record.accountId
+        }&_userId=${getUS2.data.record.recordId}`
 
-      const returnUrl = router.query.returnUrl
-      const redirectURL = returnUrl && returnUrl !== '/' ? returnUrl : '/'
-      router.replace(redirectURL)
+        const signIn3 = await axios.get(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/signIn3?${signIn3Params}`, {
+          headers: {
+            accountId: JSON.parse(getAC.data.record.accountId),
+            dbe: JSON.parse(getAC.data.record.dbe),
+            dbs: JSON.parse(getAC.data.record.dbs)
+          }
+        })
+
+        const defaultSettings = await axios.get(`${getAC.data.record.api}/SY.asmx/getDE?_key=dateFormat`, {
+          headers: {
+            Authorization: 'Bearer ' + signIn3.data.record.accessToken,
+            'Content-Type': 'multipart/form-data'
+          }
+        })
+
+        const defaultSet = {
+          dateFormat: defaultSettings.data.record.value ? defaultSettings.data.record.value : 'dd/MM/yyyy'
+        }
+        window.localStorage.setItem('default', JSON.stringify(defaultSet))
+
+        const loggedUser = {
+          accountId: getAC.data.record.accountId,
+          userId: getUS2.data.record.recordId,
+          username: getUS2.data.record.username,
+          languageId: getUS2.data.record.languageId,
+          userType: getUS2.data.record.userType,
+          employeeId: getUS2.data.record.employeeId,
+          fullName: getUS2.data.record.fullName,
+          role: 'admin',
+          expiresAt: jwt(signIn3.data.record.accessToken).exp,
+          ...signIn3.data.record
+        }
+
+        setUser(loggedUser)
+        setLanguageId(loggedUser.languageId)
+        window.localStorage.setItem('languageId', loggedUser.languageId)
+
+        if (params.rememberMe) {
+          window.localStorage.setItem('userData', JSON.stringify(loggedUser))
+        } else {
+          window.sessionStorage.setItem('userData', JSON.stringify(loggedUser))
+        }
+
+        const returnUrl = router.query.returnUrl
+        const redirectURL = returnUrl && returnUrl !== '/' ? returnUrl : '/'
+        router.replace(redirectURL)
+      }
     } catch (error) {
       console.log({ logError: error })
       if (errorCallback) errorCallback(error)
@@ -209,6 +234,8 @@ const AuthProvider = ({ children }) => {
     login: handleLogin,
     logout: handleLogout,
     getAccessToken,
+    encryptePWD,
+    getAC,
     apiUrl: getAC?.data?.record.api || (typeof window !== 'undefined' ? window.localStorage.getItem('apiUrl') : '')
   }
 

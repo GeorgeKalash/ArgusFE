@@ -76,7 +76,7 @@ const LoginPage = () => {
     Boolean(Object.keys(platformLabels)?.length) && (
       <>
         <Box className='content-center' sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-          <Card sx={{ zIndex: 1, width: '28rem', marginBottom: 10, marginTop: 'auto' }}>
+          <Card sx={{ width: '28rem', marginBottom: 10, marginTop: 'auto' }}>
             <CardMedia
               component='img'
               image='/images/logos/ArgusLogo.png'
