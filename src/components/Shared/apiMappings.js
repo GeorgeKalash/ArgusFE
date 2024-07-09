@@ -7,6 +7,7 @@ import { LogisticsRepository } from 'src/repositories/LogisticsRepository'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import { ResourceIds } from 'src/resources/ResourceIds'
 
 export const COMBOBOX = 1
 
@@ -14,13 +15,9 @@ export const LOOKUP = 2
 
 export const apiMappings = {
   0: {
-    type: COMBOBOX,
-    endpoint: SystemRepository.KeyValueStore,
-    parameters: field => `_dataset=${field.data}&_language=1`,
-    valueField: 'key',
-    displayField: 'value'
+    type: COMBOBOX
   },
-  20103: {
+  [ResourceIds.NumberRange]: {
     type: COMBOBOX,
     endpoint: SystemRepository.Currency.qry,
     parameters: '_filter=',
@@ -31,14 +28,14 @@ export const apiMappings = {
       { key: 'name', value: 'Name' }
     ]
   },
-  20109: {
+  [ResourceIds.FiscalYears]: {
     type: COMBOBOX,
     endpoint: SystemRepository.FiscalYears.qry,
     parameters: '_filter=',
     valueField: 'fiscalYear',
     displayField: 'fiscalYear'
   },
-  31202: {
+  [ResourceIds.CashAccount]: {
     type: LOOKUP,
     endpoint: CashBankRepository.CashAccount.snapshot,
     parameters: {
@@ -50,7 +47,7 @@ export const apiMappings = {
     displayFieldWidth: 2,
     firstFieldWidth: '40%'
   },
-  41103: {
+  [ResourceIds.Category]: {
     //Item Category
     type: COMBOBOX,
     endpoint: InventoryRepository.Category.qry,
@@ -58,7 +55,7 @@ export const apiMappings = {
     valueField: 'caRef',
     displayField: 'name'
   },
-  41105: {
+  [ResourceIds.InventoryGroup]: {
     //Item Group
     type: COMBOBOX,
     endpoint: InventoryRepository.Group.qry,
@@ -66,7 +63,7 @@ export const apiMappings = {
     valueField: 'recordId',
     displayField: 'name'
   },
-  41102: {
+  [ResourceIds.Measurement]: {
     //"Measurement Schedule"
     type: COMBOBOX,
     endpoint: InventoryRepository.Measurement.qry,
@@ -74,7 +71,7 @@ export const apiMappings = {
     valueField: 'recordId',
     displayField: 'name'
   },
-  42107: {
+  [ResourceIds.ProductionLines]: {
     //Production Line
     type: COMBOBOX,
     endpoint: ManufacturingRepository.ProductionLine.qry,
@@ -82,7 +79,7 @@ export const apiMappings = {
     valueField: 'recordId',
     displayField: 'name'
   },
-  31201: {
+  [ResourceIds.Accounts]: {
     type: LOOKUP,
     endpoint: FinancialRepository.Account.snapshot,
     parameters: {
@@ -94,7 +91,7 @@ export const apiMappings = {
     displayFieldWidth: 2,
     firstFieldWidth: '40%'
   },
-  20104: {
+  [ResourceIds.DocumentTypes]: {
     type: COMBOBOX,
     endpoint: SystemRepository.DocumentType.qry,
     parameters: '_filter=',
@@ -106,7 +103,7 @@ export const apiMappings = {
       { key: 'name', value: 'Name' }
     ]
   },
-  20110: {
+  [ResourceIds.Plants]: {
     type: COMBOBOX,
     endpoint: SystemRepository.Plant.qry,
     parameters: '_filter=',
@@ -117,14 +114,14 @@ export const apiMappings = {
       { key: 'name', value: 'Name' }
     ]
   },
-  20107: {
+  [ResourceIds.States]: {
     type: COMBOBOX,
     endpoint: SystemRepository.State.qry,
     parameters: '_filter=',
     valueField: 'recordId',
     displayField: 'name'
   },
-  20125: {
+  [ResourceIds.Cities]: {
     type: LOOKUP,
     endpoint: SystemRepository.City.snapshot,
     parameters: {
@@ -134,7 +131,7 @@ export const apiMappings = {
     valueOnSelection: 'recordId',
     displayField: 'name'
   },
-  21101: {
+  [ResourceIds.Groups]: {
     type: COMBOBOX,
     endpoint: BusinessPartnerRepository.Group.qry,
     parameters: '_filter=',
@@ -145,7 +142,7 @@ export const apiMappings = {
       { key: 'name', value: 'Name' }
     ]
   },
-  23101: {
+  [ResourceIds.Users]: {
     type: COMBOBOX,
     endpoint: SystemRepository.Users.qry,
     parameters: '_filter=',
@@ -156,7 +153,7 @@ export const apiMappings = {
       { key: 'email', value: 'Email' }
     ]
   },
-  30103: {
+  [ResourceIds.GLAccountGroups]: {
     type: COMBOBOX,
     endpoint: GeneralLedgerRepository.GLAccountGroups.qry,
     parameters: '_filter=',
@@ -167,7 +164,7 @@ export const apiMappings = {
       { key: 'name', value: 'Name' }
     ]
   },
-  30107: {
+  [ResourceIds.CostCenter]: {
     type: COMBOBOX,
     endpoint: GeneralLedgerRepository.CostCenter.qry,
     parameters: `_params=&_startAt=0&_pageSize=200`,
@@ -178,7 +175,7 @@ export const apiMappings = {
       { key: 'name', value: 'Name' }
     ]
   },
-  30201: {
+  [ResourceIds.ChartOfAccounts]: {
     type: LOOKUP,
     endpoint: SystemRepository.City.snapshot,
     parameters: {
@@ -190,7 +187,7 @@ export const apiMappings = {
     displayFieldWidth: 2,
     firstFieldWidth: '40%'
   },
-  31101: {
+  [ResourceIds.FlAccountGroups]: {
     type: COMBOBOX,
     endpoint: FinancialRepository.Group.qry,
     parameters: '_filter=',
@@ -201,7 +198,7 @@ export const apiMappings = {
       { key: 'name', value: 'Name' }
     ]
   },
-  32101: {
+  [ResourceIds.ExchangeTables]: {
     type: COMBOBOX,
     endpoint: MultiCurrencyRepository.ExchangeTable.qry,
     parameters: '_filter=',
@@ -212,7 +209,7 @@ export const apiMappings = {
       { key: 'name', value: 'Name' }
     ]
   },
-  20123: {
+  [ResourceIds.PlantGroups]: {
     type: COMBOBOX,
     endpoint: SystemRepository.PlantGroup.qry,
     parameters: '_filter=',
@@ -223,7 +220,7 @@ export const apiMappings = {
       { key: 'name', value: 'Name' }
     ]
   },
-  40201: {
+  [ResourceIds.LoCarriers]: {
     type: COMBOBOX,
     endpoint: LogisticsRepository.LoCarrier.qry,
     parameters: '_filter=',
