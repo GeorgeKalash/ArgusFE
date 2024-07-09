@@ -567,7 +567,6 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       } catch (error) {}
     })()
   }, [])
-  console.log('formik check ', formik)
 
   return (
     <FormShell
