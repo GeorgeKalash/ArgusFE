@@ -3,7 +3,7 @@ import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
@@ -35,15 +35,12 @@ const Checkbook = () => {
     labels: _labels,
     paginationParameters,
     refetch,
-    access
+    access,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: CashBankRepository.CACheckbook.page,
     datasetId: ResourceIds.Checkbook
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: CashBankRepository.CACheckbook.page
   })
 
   const columns = [
@@ -105,8 +102,8 @@ const Checkbook = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: CashBankRepository.CACheckbook.del,
-      record: JSON.stringify(obj)
+    extension: CashBankRepository.CACheckbook.del,
+    record: JSON.stringify(obj)
     })
     invalidate()
     toast.success(platformLabels.Deleted)
