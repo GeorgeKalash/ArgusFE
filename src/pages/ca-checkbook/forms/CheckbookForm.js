@@ -52,7 +52,7 @@ export default function CheckbookForm({ labels, maxAccess, recordId }) {
       const data = {
         ...obj,
         issueDate: formatDateToApi(obj.issueDate),
-        recordId: recordId
+        recordId: obj.recordId
       }
 
       try {
@@ -147,24 +147,12 @@ export default function CheckbookForm({ labels, maxAccess, recordId }) {
             <Grid item xs={12}>
                 <CustomNumberField
                     name='size'
-                  type='text'
                     required
                     label={labels.size}
                     value={formik.values.size}
                     maxAccess={maxAccess}
-                  maxLength={100}
-                  onChange={e =>
-                    formik.setValues({
-                      ...formik.values,
-                      size: e.target.value
-                    })
-                  }
-                  onClear={() =>
-                    formik.setValues({
-                      ...formik.values,
-                      size: ''
-                    })
-                  }
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('size', '')}
                     error={formik.touched.size && Boolean(formik.errors.size)}
                 />
               </Grid>
