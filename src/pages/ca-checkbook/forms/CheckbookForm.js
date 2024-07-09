@@ -47,8 +47,6 @@ export default function CheckbookForm({ labels, maxAccess, recordId }) {
       issueDate: yup.string().required(' ')
     }),
     onSubmit: async obj => {
-      const recordId = obj.recordId
-
       const data = {
         ...obj,
         issueDate: formatDateToApi(obj.issueDate),
