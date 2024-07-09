@@ -411,33 +411,35 @@ const Table = ({
   }
 
   return (
-    <Box className='ag-theme-alpine' style={{ flex: 1, width: '1000px !important', height: props.height || 'auto' }}>
-      <AgGridReact
-        rowData={(paginationType === 'api' ? props?.gridData?.list : gridData?.list) || []}
-        enableClipboard={true}
-        enableRangeSelection={true}
-        columnDefs={[
-          ...(showCheckboxColumn
-            ? [
-                {
-                  headerName: '',
-                  field: 'checked',
-                  cellRenderer: checkboxCellRenderer,
-                  headerCheckboxSelection: true
-                }
-              ]
-            : []),
-          ...columns
-        ]}
-        pagination={false}
-        paginationPageSize={pageSize}
-        rowSelection={'multiple'}
-        suppressAggFuncInHeader={true}
-        getRowClass={getRowClass}
-        onSelectionChanged={setData === 'function' && onSelectionChanged}
-      />
+    <>
+      <Box className='ag-theme-alpine' style={{ flex: 1, width: '1000px !important', height: props.height || 'auto' }}>
+        <AgGridReact
+          rowData={(paginationType === 'api' ? props?.gridData?.list : gridData?.list) || []}
+          enableClipboard={true}
+          enableRangeSelection={true}
+          columnDefs={[
+            ...(showCheckboxColumn
+              ? [
+                  {
+                    headerName: '',
+                    field: 'checked',
+                    cellRenderer: checkboxCellRenderer,
+                    headerCheckboxSelection: true
+                  }
+                ]
+              : []),
+            ...columns
+          ]}
+          pagination={false}
+          paginationPageSize={pageSize}
+          rowSelection={'multiple'}
+          suppressAggFuncInHeader={true}
+          getRowClass={getRowClass}
+          onSelectionChanged={setData === 'function' && onSelectionChanged}
+        />
+      </Box>
       {pagination && <CustomPagination />}
-    </Box>
+    </>
   )
 }
 
