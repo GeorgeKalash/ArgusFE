@@ -49,8 +49,7 @@ export default function CheckbookForm({ labels, maxAccess, recordId }) {
     onSubmit: async obj => {
       const data = {
         ...obj,
-        issueDate: formatDateToApi(obj.issueDate),
-        recordId: obj.recordId
+        issueDate: formatDateToApi(obj.issueDate)
       }
 
       try {
