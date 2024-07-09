@@ -90,7 +90,7 @@ const GridToolbar = ({
   }
 
   return (
-    <Grid container spacing={4} sx={{ display: 'flex', padding: 2 }}>
+    <Grid container spacing={4} sx={{ display: 'flex', padding: 2, position: 'fixed' }}>
       <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', pl: 2, zIndex: 0 }}>
         <Grid container spacing={4} sx={{ display: 'flex', padding: 1 }}>
           {children && children}
