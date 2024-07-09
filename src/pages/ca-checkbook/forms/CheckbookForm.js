@@ -29,7 +29,7 @@ export default function CheckbookForm({ labels, maxAccess, recordId }) {
     initialValues: {
       recordId: null,
       bankAccountId: null,
-      size: null,
+      size: '',
       firstCheckNo: '',
       lastCheckNo: '',
       issueDate: null,
@@ -40,11 +40,11 @@ export default function CheckbookForm({ labels, maxAccess, recordId }) {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      bankAccountId: yup.string().required(' '),
-      size: yup.number().required(' '),
-      firstCheckNo: yup.string().required(' '),
-      lastCheckNo: yup.string().required(' '),
-      issueDate: yup.string().required(' ')
+      bankAccountId: yup.string().required(),
+      size: yup.number().min(0).max(99).required(),
+      firstCheckNo: yup.string().required(),
+      lastCheckNo: yup.string().required(),
+      issueDate: yup.string().required()
     }),
     onSubmit: async obj => {
       const data = {
