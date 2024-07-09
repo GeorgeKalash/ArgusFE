@@ -82,7 +82,6 @@ const Checkbook = () => {
   }
 
   const edit = obj => {
-    console.log(obj.record)
     openForm(obj?.recordId)
   }
 
@@ -91,7 +90,7 @@ const Checkbook = () => {
       Component: CheckbookForm,
       props: {
         labels: _labels,
-        recordId: recordId,
+        recordId,
         maxAccess: access
       },
       width: 500,
@@ -103,8 +102,8 @@ const Checkbook = () => {
   const del = async obj => {
     try {
         await postRequest({
-        extension: CashBankRepository.CACheckbook.del,
-        record: JSON.stringify(obj)
+            extension: CashBankRepository.CACheckbook.del,
+            record: JSON.stringify(obj)
         })
         invalidate()
         toast.success(platformLabels.Deleted)
