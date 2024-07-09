@@ -23,10 +23,10 @@ const BeneficiaryFields = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
-  const [initialValues, setInitialData] = useState({
+  const initialValues = {
     countryId: '',
     dispersalType: '',
-    corId: '',
+    corId: 0,
     rows: [
       {
         id: 1,
@@ -39,7 +39,7 @@ const BeneficiaryFields = () => {
         resourceId: ''
       }
     ]
-  })
+  }
 
   const formik = useFormik({
     initialValues,
@@ -153,90 +153,88 @@ const BeneficiaryFields = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar maxAccess={access}>
-          <Grid container xs={9} spacing={4} sx={{ pt: '1rem', pl: '0.5rem' }}>
-            <Grid item xs={3}>
-              <ResourceComboBox
-                endpointId={SystemRepository.Country.qry}
-                name='countryId'
-                label={labels.country}
-                valueField='recordId'
-                required
-                displayField={['name']}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' },
-                  { key: 'flName', value: 'Foreign Language Name' }
-                ]}
-                values={formik.values}
-                displayFieldWidth={1.75}
-                onChange={(event, newValue) => {
-                  if (newValue) {
-                    formik.setFieldValue('countryId', newValue?.recordId)
-                    onChange('countryId', newValue?.recordId)
-                  }
-                }}
-                error={formik.touched.countryId && Boolean(formik.errors.countryId)}
-                maxAccess={access}
-              />
-            </Grid>
-            <Grid item xs={3}>
-              <ResourceComboBox
-                datasetId={DataSets.BENEFICIARY_RESOURCEIDS}
-                label={labels.dispersalType}
-                required
-                name='dispersalType'
-                valueField='key'
-                displayField='value'
-                values={formik.values}
-                onChange={(event, newValue) => {
-                  if (newValue) {
-                    onChange('dispersalType', newValue?.key)
-                    if (formik.values.corId) onChange('corId', formik.values.corId)
-                    else onChange('corId', 0)
-                    formik.setFieldValue('dispersalType', newValue?.key)
-                  }
-                }}
-                error={formik.touched.dispersalType && Boolean(formik.errors.dispersalType)}
-              />
-            </Grid>
-            <Grid item xs={5}>
-              <ResourceLookup
-                endpointId={RemittanceSettingsRepository.Correspondent.snapshot}
-                valueField='reference'
-                displayField='name'
-                name='corId'
-                label={labels.correspondent}
-                form={formik}
-                displayFieldWidth={2}
-                firstFieldWidth='40%'
-                valueShow='corRef'
-                secondValueShow='corName'
-                maxAccess={access}
-                onChange={async (event, newValue) => {
-                  if (newValue) {
-                    onChange('corId', newValue?.recordId)
-                    formik.setFieldValue('corId', newValue?.recordId)
-                    formik.setFieldValue('corName', newValue?.name || '')
-                    formik.setFieldValue('corRef', newValue?.reference || '')
-                  } else {
-                    onChange('corId', 0)
-                    formik.setFieldValue('corId', 0)
-                    formik.setFieldValue('corName', '')
-                    formik.setFieldValue('corRef', '')
-                  }
-                }}
-                onClear={() => {
+        <Grid container spacing={2} sx={{ pt: 5, pl: 5 }}>
+          <Grid item xs={2}>
+            <ResourceComboBox
+              endpointId={SystemRepository.Country.qry}
+              name='countryId'
+              label={labels.country}
+              valueField='recordId'
+              required
+              displayField={['name']}
+              columnsInDropDown={[
+                { key: 'reference', value: 'Reference' },
+                { key: 'name', value: 'Name' },
+                { key: 'flName', value: 'Foreign Language Name' }
+              ]}
+              values={formik.values}
+              displayFieldWidth={1.75}
+              onChange={(event, newValue) => {
+                if (newValue) {
+                  formik.setFieldValue('countryId', newValue?.recordId)
+                  onChange('countryId', newValue?.recordId)
+                }
+              }}
+              error={formik.touched.countryId && Boolean(formik.errors.countryId)}
+              maxAccess={access}
+            />
+          </Grid>
+          <Grid item xs={2}>
+            <ResourceComboBox
+              datasetId={DataSets.BENEFICIARY_RESOURCEIDS}
+              label={labels.dispersalType}
+              required
+              name='dispersalType'
+              valueField='key'
+              displayField='value'
+              values={formik.values}
+              onChange={(event, newValue) => {
+                if (newValue) {
+                  onChange('dispersalType', newValue?.key)
+                  if (formik.values.corId) onChange('corId', formik.values.corId)
+                  else onChange('corId', 0)
+                  formik.setFieldValue('dispersalType', newValue?.key)
+                }
+              }}
+              error={formik.touched.dispersalType && Boolean(formik.errors.dispersalType)}
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <ResourceLookup
+              endpointId={RemittanceSettingsRepository.Correspondent.snapshot}
+              valueField='reference'
+              displayField='name'
+              name='corId'
+              label={labels.correspondent}
+              form={formik}
+              displayFieldWidth={2}
+              firstFieldWidth='40%'
+              valueShow='corRef'
+              secondValueShow='corName'
+              maxAccess={access}
+              onChange={async (event, newValue) => {
+                if (newValue) {
+                  onChange('corId', newValue?.recordId)
+                  formik.setFieldValue('corId', newValue?.recordId)
+                  formik.setFieldValue('corName', newValue?.name || '')
+                  formik.setFieldValue('corRef', newValue?.reference || '')
+                } else {
                   onChange('corId', 0)
                   formik.setFieldValue('corId', 0)
                   formik.setFieldValue('corName', '')
                   formik.setFieldValue('corRef', '')
-                }}
-                errorCheck={'corId'}
-              />
-            </Grid>
+                }
+              }}
+              onClear={() => {
+                onChange('corId', 0)
+                formik.setFieldValue('corId', 0)
+                formik.setFieldValue('corName', '')
+                formik.setFieldValue('corRef', '')
+              }}
+              errorCheck={'corId'}
+            />
           </Grid>
-        </GridToolbar>
+        </Grid>
       </Fixed>
       <FormShell
         form={formik}

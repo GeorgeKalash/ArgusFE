@@ -154,7 +154,6 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       productId: yup.string().required(' '),
       commission: yup.string().required(' '),
       lcAmount: yup.string().required(' '),
-      corId: yup.string().required(' '),
       exRate: yup.string().required(' '),
       clientId: yup.string().required(' '),
       poeId: yup.string().required(' '),
@@ -568,7 +567,6 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       } catch (error) {}
     })()
   }, [])
-  console.log('formik check ', formik)
 
   return (
     <FormShell
@@ -756,7 +754,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                     name='corId'
                     label={labels.Correspondant}
                     form={formik}
-                    required
+                    required={formik.values.corId}
                     displayFieldWidth={2}
                     valueShow='corRef'
                     secondValueShow='corName'
