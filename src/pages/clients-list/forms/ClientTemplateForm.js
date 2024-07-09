@@ -55,11 +55,11 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
   const [editMode, setEditMode] = useState(null)
   const [idTypeStore, setIdTypeStore] = useState([])
   const [otpShow, setOtpShow] = useState(false)
-  const [isClosed, setIsClosed] = useState(false)
+
   const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
 
-  const [initialValues, setInitialData] = useState({
+  const initialValues = {
     //clientIDView
     reference: '',
     clientId: '',
@@ -165,7 +165,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     isRelativeDiplomat: false,
     professionId: '',
     cltRemReference: ''
-  })
+  }
 
   const handleCopy = event => {
     event.preventDefault()
@@ -223,10 +223,9 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     })
       .then(res => {
         const obj = res?.record
-        setIsClosed(obj?.clientRemittance?.wip === 2 ? true : false)
 
         obj?.workAddressView && setAddress(obj?.workAddressView)
-        setInitialData({
+        clientIndividualFormik.setValues({
           //clientIDView
           functionId: SystemFunction.KYC,
           reference: obj.clientMaster?.reference,
@@ -298,6 +297,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
           plantId: obj.clientRemittance?.plantId,
           name: obj.clientMaster?.name,
           oldReference: obj.clientMaster?.oldReference,
+          status: obj.clientMaster?.status,
 
           // //clientRemittance
           recordId: recordId,
@@ -320,7 +320,6 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
           riskLevel: obj.clientRemittance?.riskLevel,
           salaryRangeId: obj.clientRemittance?.salaryRangeId,
           smsLanguage: obj.clientRemittance?.smsLanguage,
-          status: obj.clientRemittance?.status,
           whatsAppNo: obj.clientRemittance?.whatsAppNo,
           wip: obj.clientRemittance?.wip,
           workAddressId: obj.clientRemittance?.workAddressId,
@@ -432,6 +431,8 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     }
   })
 
+  const isClosed = clientIndividualFormik.values.status === 1
+
   const postRtDefault = obj => {
     const date = new Date()
 
@@ -456,7 +457,8 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       nationalityName: obj.nationalityName,
       status: obj.status,
       categoryName: obj.categoryName,
-      oldReference: obj.oldReference
+      oldReference: obj.oldReference,
+      status: obj.status
     }
 
     //CCTD
@@ -512,7 +514,6 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       wip: 1,
       releaseStatus: 1,
       educationLevelName: obj.educationLevelName,
-      status: obj.status,
       trxCountPerYear: obj.trxCountPerYear,
       trxAmountPerYear: obj.trxAmountPerYear
     }
@@ -653,7 +654,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       if (res.recordId) {
         toast.success(platformLabels.Closed)
         invalidate()
-        setIsClosed(true)
+        getClient(res.recordId)
       }
     } catch {}
   }
@@ -681,7 +682,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       key: 'Close',
       condition: !isClosed,
       onClick: onClose,
-      disabled: isClosed || !editMode
+      disabled: isClosed
     },
     {
       key: 'Reopen',
