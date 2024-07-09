@@ -41,7 +41,11 @@ export default function CheckbookForm({ labels, maxAccess, recordId }) {
     validateOnChange: true,
     validationSchema: yup.object({
       bankAccountId: yup.string().required(),
-      size: yup.number().min(0).max(99).required(),
+      size: yup
+      .number()
+      .required()
+      .min(0, 'Size must be at least 0')
+      .max(99, 'Size cannot be more than 99'),
       firstCheckNo: yup.string().required(),
       lastCheckNo: yup.string().required(),
       issueDate: yup.string().required()
@@ -151,6 +155,7 @@ export default function CheckbookForm({ labels, maxAccess, recordId }) {
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('size', '')}
                     error={formik.touched.size && Boolean(formik.errors.size)}
+                    helperText={formik.touched.size && formik.errors.size}
                 />
               </Grid>
             <Grid item xs={12}>
