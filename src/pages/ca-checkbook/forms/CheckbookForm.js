@@ -155,8 +155,7 @@ export default function CheckbookForm({ labels, maxAccess, recordId }) {
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('size', '')}
                     error={formik.touched.size && Boolean(formik.errors.size)}
-                    maxLength={2}
-                    decimalScale={0}
+                    maxLength={4}
                 />
               </Grid>
             <Grid item xs={12}>
