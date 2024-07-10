@@ -49,12 +49,10 @@ export default function RowAccessTab({ labels, maxAccess, recordId }) {
       checked: false
     },
     onSubmit: async () => {
-      console.log('enter save ', data)
       for (const item of data?.list) {
-        console.log('enter save1')
         item.hasAccess = item.checked
 
-        /*if (item.checked) {
+        if (item.checked) {
           await postRequest({
             extension: AccessControlRepository.DataAccessItem.set,
             record: JSON.stringify(item)
@@ -64,7 +62,7 @@ export default function RowAccessTab({ labels, maxAccess, recordId }) {
             extension: AccessControlRepository.DataAccessItem.del,
             record: JSON.stringify(item)
           })
-        }*/
+        }
       }
       toast.success(platformLabels.Updated)
     }
