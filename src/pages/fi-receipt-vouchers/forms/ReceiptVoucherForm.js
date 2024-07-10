@@ -20,17 +20,15 @@ import { LogisticsRepository } from 'src/repositories/LogisticsRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
-import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { DataSets } from 'src/resources/DataSets'
 import { getStorageData } from 'src/storage/storage'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const [isCancelled, setIsCancelled] = useState()
-  const [isPosted, setIsPosted] = useState(false)
-  const [readOnly, setReadOnly] = useState(false)
+  const { platformLabels } = useContext(ControlContext)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.ReceiptVoucher,
@@ -71,26 +69,31 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     },
     validationSchema: yup.object({
       accountId: yup.string().required(' '),
+      currencyId: yup.string().required(' '),
       cashAccountId: yup.string().required(' '),
       amount: yup.string().required(' '),
       paymentMethod: yup.string().required(' ')
     }),
     onSubmit: async obj => {
-      const recordId = obj.recordId
-
-      const response = await postRequest({
-        extension: FinancialRepository.ReceiptVouchers.set,
-        record: JSON.stringify(obj)
-      })
-      if (!recordId) {
-        toast.success('Record Added Successfully')
-        formik.setFieldValue('recordId', response.recordId)
-        getData(response.recordId)
-      } else toast.success('Record Edited Successfully')
-      invalidate()
+      try {
+        const response = await postRequest({
+          extension: FinancialRepository.ReceiptVouchers.set,
+          record: JSON.stringify(obj)
+        })
+        if (!obj.recordId) {
+          toast.success(platformLabels.Added)
+          formik.setFieldValue('recordId', response.recordId)
+          getData(response.recordId)
+        } else toast.success(platformLabels.Edited)
+        invalidate()
+      } catch (e) {}
     }
   })
+
   const editMode = !!recordId || !!formik.values.recordId
+  const isCancelled = formik.values.status === -1
+  const isPosted = formik.values.status === 3
+  const readOnly = formik.values.status !== 1
 
   const getDefaultDT = async () => {
     const userData = getStorageData('userData')
@@ -128,28 +131,22 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       }
     } catch (error) {}
   }
-  useEffect(() => {
-    formik.setFieldValue('templateId', '')
-  }, [formik.values.notes])
 
   useEffect(() => {
     !recordId && getDefaultDT()
     ;(async function () {
-      getData(recordId)
+      getData()
     })()
   }, [])
 
   async function getData(_recordId) {
     try {
-      const recordId = _recordId || recordId
-      if (recordId) {
+      const finalRecordId = _recordId || recordId || formik.values.recordId
+      if (finalRecordId) {
         const res = await getRequest({
           extension: FinancialRepository.ReceiptVouchers.get,
-          parameters: `_recordId=${recordId}`
+          parameters: `_recordId=${finalRecordId}`
         })
-        setIsPosted(res.record.status === 3 ? true : false)
-        setIsCancelled(res.record.status === -1 ? true : false)
-        setReadOnly(res.record.status !== 1 ? true : false)
 
         formik.setValues({ ...res.record, date: formatDateFromApi(res.record.date) })
       }
@@ -166,7 +163,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       })
 
       if (res?.recordId) {
-        setIsCancelled(true)
+        getData()
         toast.success('Record Cancelled Successfully')
         invalidate()
       }
@@ -183,7 +180,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       if (res) {
         toast.success('Record Posted Successfully')
         invalidate()
-        setIsPosted(true)
+        getData()
       }
     } catch (e) {}
   }
@@ -212,7 +209,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       key: 'Post',
       condition: true,
       onClick: onPost,
-      disabled: isPosted || !editMode
+      disabled: isPosted || !editMode || isCancelled
     }
   ]
 
@@ -224,7 +221,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       actions={actions}
       maxAccess={maxAccess}
       editMode={editMode}
-      disabledSubmit={isPosted}
+      disabledSubmit={isPosted || isCancelled}
       previewReport={editMode}
     >
       <VertLayout>
@@ -327,7 +324,13 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 required
                 values={formik.values}
                 onChange={async (event, newValue) => {
-                  formik.setFieldValue('paymentMethod', newValue?.key)
+                  formik.setValues({
+                    ...formik.values,
+                    paymentMethod: newValue?.key || '',
+                    cashAccountId: '',
+                    cashAccountRef: '',
+                    cashAccountName: ''
+                  })
                 }}
                 error={formik.touched.paymentMethod && Boolean(formik.errors.paymentMethod)}
                 maxAccess={maxAccess}
@@ -387,6 +390,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                   endpointId={SystemRepository.Currency.qry}
                   name='currencyId'
                   readOnly={readOnly}
+                  required
                   label={labels.currency}
                   valueField='recordId'
                   displayField={['name']}
@@ -446,20 +450,17 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
               </Grid>
               <Grid item xs={12}>
                 <ResourceComboBox
+                  neverPopulate
                   endpointId={FinancialRepository.DescriptionTemplate.qry}
                   name='templateId'
                   label={labels.descriptionTemplate}
                   readOnly={readOnly}
                   valueField='recordId'
                   displayField='name'
-                  values={formik.values}
                   onChange={(event, newValue) => {
                     let notes = formik.values.notes
-                    notes += newValue?.name && formik.values.notes && '\n'
-                    notes += newValue?.name
 
-                    notes && formik.setFieldValue('notes', notes)
-                    newValue?.name && formik.setFieldValue('templateId', newValue.recordId)
+                    if (newValue?.name) formik.setFieldValue('notes', notes + newValue?.name + '\n')
                   }}
                   error={formik.touched.templateId && Boolean(formik.errors.templateId)}
                   maxAccess={maxAccess}
