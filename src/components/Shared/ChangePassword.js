@@ -41,13 +41,13 @@ const ChangePassword = ({ _labels, reopenLogin = false, window, username = '' })
         .required()
     }),
     onSubmit: async () => {
-      console.log(formik.values.username)
       if (formik.values.newPassword === formik.values.confirmPassword) {
         const loginVal = {
           userName: formik.values.username,
           oldPW: encryptePWD(formik.values.password),
           newPW: encryptePWD(formik.values.newPassword)
         }
+        console.log(loginVal)
 
         try {
           const accessToken = await getAccessToken()

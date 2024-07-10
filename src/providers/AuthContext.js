@@ -80,14 +80,13 @@ const AuthProvider = ({ children }) => {
 
     fetchData()
   }, [])
-  function openForm() {
+
+  function openForm(username) {
     stack({
       Component: ChangePassword,
       props: {
         reopenLogin: true,
-        username: values.username
-
-        // _labels: platformLabels
+        username: username
       },
       expandable: false,
       closable: false,
@@ -114,7 +113,7 @@ const AuthProvider = ({ children }) => {
       }
 
       if (getUS2.data.record.umcpnl === true) {
-        openForm(values)
+        openForm(params.username)
       } else {
         const signIn3Params = `_email=${params.username}&_password=${encryptePWD(params.password)}&_accountId=${
           getAC.data.record.accountId
