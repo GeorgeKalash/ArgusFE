@@ -59,5 +59,10 @@ export const AccessControlRepository = {
   SGControlAccess: {
     qry: service + 'qryCRL',
     set2: service + 'set2CRL'
+  },
+  SGReleaseCode: {
+    qry: service + 'qryRCO',
+    set: service + 'setRCO',
+    del: service + 'delRCO'
   }
 }
