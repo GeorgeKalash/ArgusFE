@@ -214,3 +214,7 @@ code[class*='language-'] {
 .ag-theme-alpine {
   z-index: 0;
 }
+
+.ag-root-wrapper .ag-header {
+  display: none;
+}
