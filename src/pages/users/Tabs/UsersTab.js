@@ -18,6 +18,9 @@ import { AccountRepository } from 'src/repositories/AccountRepository'
 import toast from 'react-hot-toast'
 import { useInvalidate } from 'src/hooks/resource'
 import { ControlContext } from 'src/providers/ControlContext'
+import SHA1 from 'crypto-js/sha1'
+import axios from 'axios'
+import { getStorageData } from 'src/storage/storage'
 
 const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
   const [emailPresent, setEmailPresent] = useState(false)
@@ -64,6 +67,38 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
           })
     }),
     onSubmit: async obj => {
+      if (!storeRecordId) {
+        try {
+          const copy = { ...obj }
+          const encryptedPassword = encryptePWD(copy.password)
+          copy.password = copy.confirmPassword = encryptedPassword
+
+          const user = getStorageData('userData')
+          await axios.post(
+            `${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/setID`,
+            {
+              record: JSON.stringify({
+                accountId: user.accountId,
+                userName: copy.username,
+                password: copy.password,
+                userId: copy.recordId
+              })
+            },
+            {
+              headers: {
+                authorization: `Bearer ${user.accessToken}`,
+                'Content-Type': 'multipart/form-data'
+              }
+            }
+          )
+          postUS(copy)
+        } catch (error) {}
+      } else postUS(obj)
+    }
+  })
+
+  async function postUS(obj) {
+    try {
       const res = await postRequest({
         extension: SystemRepository.Users.set,
         record: JSON.stringify(obj)
@@ -76,8 +111,24 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
         toast.success(platformLabels.Updated)
       }
       invalidate()
+    } catch (error) {}
+  }
+
+  const encryptePWD = pwd => {
+    var encryptedPWD = SHA1(pwd).toString()
+    var shuffledString = ''
+
+    for (let i = 0; i < encryptedPWD.length; i = i + 8) {
+      var subString = encryptedPWD.slice(i, i + 8)
+
+      shuffledString += subString.charAt(6) + subString.charAt(7)
+      shuffledString += subString.charAt(4) + subString.charAt(5)
+      shuffledString += subString.charAt(2) + subString.charAt(3)
+      shuffledString += subString.charAt(0) + subString.charAt(1)
     }
-  })
+
+    return shuffledString.toUpperCase()
+  }
 
   const invalidate = useInvalidate({
     endpointId: SystemRepository.Users.qry
