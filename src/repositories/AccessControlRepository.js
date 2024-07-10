@@ -64,5 +64,10 @@ export const AccessControlRepository = {
     qry: service + 'qryRCO',
     set: service + 'setRCO',
     del: service + 'delRCO'
+  },
+  DataAccessItem: {
+    qry: service + 'qryROW',
+    set: service + 'setROW',
+    del: service + 'delROW'
   }
 }

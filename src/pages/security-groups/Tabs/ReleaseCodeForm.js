@@ -49,7 +49,7 @@ export default function ReleaseCodeForm({ labels, maxAccess, recordId, window })
       resourceId={ResourceIds.SecurityGroup}
       form={formik}
       maxAccess={maxAccess}
-      editMode={true}
+      editMode={!!recordId}
       isCleared={false}
       isInfo={false}
     >
