@@ -124,7 +124,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     flName: '',
     keyword: '',
     otp: '',
-    status: '-1',
+    status: -1,
     plantId: plantId || '',
     name: '',
     oldReference: '',
@@ -682,7 +682,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       key: 'Close',
       condition: !isClosed,
       onClick: onClose,
-      disabled: isClosed
+      disabled: isClosed || !editMode
     },
     {
       key: 'Reopen',
