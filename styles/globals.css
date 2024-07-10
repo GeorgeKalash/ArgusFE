@@ -215,6 +215,6 @@ code[class*='language-'] {
   z-index: 0;
 }
 
-.ag-root-wrapper .ag-header {
+.ag-watermark {
   display: none;
 }
