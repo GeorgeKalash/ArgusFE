@@ -12,9 +12,11 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { useForm } from 'src/hooks/form'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function SourceOfIncomeForm({ labels, maxAccess, recordId, setStore }) {
   const [editMode, setEditMode] = useState(!!recordId)
+  const { platformLabels } = useContext(ControlContext)
 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -23,14 +25,14 @@ export default function SourceOfIncomeForm({ labels, maxAccess, recordId, setSto
   })
 
   const { formik } = useForm({
-    initialValues: { recordId: null, name: '', reference: '', incomeType: '', flName: '' },
+    initialValues: { recordId: null, name: '', reference: '', flName: '', sitId: '' },
     maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(' '),
       reference: yup.string().required(' '),
-      incomeType: yup.string().required(' '),
+      sitId: yup.string().required(' '),
       flName: yup.string().required(' ')
     }),
     onSubmit: async obj => {
@@ -46,12 +48,12 @@ export default function SourceOfIncomeForm({ labels, maxAccess, recordId, setSto
           recordId: response.recordId,
           name: obj.name
         })
-        toast.success('Record Added Successfully')
+        toast.success(platformLabels.Added)
         formik.setValues({
           ...obj,
           recordId: response.recordId
         })
-      } else toast.success('Record Edited Successfully')
+      } else toast.success(platformLabels.Edited)
       setEditMode(true)
 
       invalidate()
@@ -120,16 +122,21 @@ export default function SourceOfIncomeForm({ labels, maxAccess, recordId, setSto
         </Grid>
         <Grid item xs={12}>
           <ResourceComboBox
-            datasetId={DataSets.CT_INCOME_TYPE}
-            name='incomeType'
+            endpointId={RemittanceSettingsRepository.SourceOfIncomeType.qry}
+            name='sitId'
             label={labels.incomeType}
-            valueField='key'
-            displayField='value'
-            values={formik.values}
+            valueField='recordId'
+            displayField={['reference', 'name']}
             required
-            maxAccess={maxAccess}
+            columnsInDropDown={[
+              { key: 'reference', value: 'Reference' },
+              { key: 'name', value: 'Name' }
+            ]}
+            values={formik.values}
             onChange={(event, newValue) => {
-              formik.setFieldValue('incomeType', newValue?.key)
+              formik.setFieldValue('sitId', newValue ? newValue.recordId : '')
+              formik.setFieldValue('sitRef', newValue ? newValue.reference : '')
+              formik.setFieldValue('sitName', newValue ? newValue.name : '')
             }}
             error={formik.touched.incomeType && Boolean(formik.errors.incomeType)}
           />

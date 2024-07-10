@@ -1,9 +1,8 @@
 // ** MUI Imports
-import { Autocomplete, TextField } from '@mui/material'
+import { Autocomplete, Paper, TextField } from '@mui/material'
 import { ControlAccessLevel, TrxType } from 'src/resources/AccessLevels'
 import { Box } from '@mui/material'
 import React from 'react'
-import ReactDOM from 'react-dom'
 import PopperComponent from '../Shared/Popper/PopperComponent'
 
 const CustomComboBox = ({
@@ -49,13 +48,14 @@ const CustomComboBox = ({
       options={store}
       key={value}
       PopperComponent={PopperComponent}
+      PaperComponent={({ children }) => <Paper style={{ width: `${displayFieldWidth * 100}%` }}>{children}</Paper>}
       getOptionLabel={(option, value) => {
         if (typeof displayField == 'object') {
           const text = displayField
             .map(header => (option[header] ? option[header]?.toString() : header === '->' && header))
             ?.filter(item => item)
             ?.join(' ')
-          if (text) return text
+          if (text !== undefined) return text
         }
         if (typeof option === 'object') {
           return `${option[displayField]}`
@@ -82,7 +82,7 @@ const CustomComboBox = ({
           )
         }
       }}
-      isOptionEqualToValue={(option, value) => option[valueField] == getOptionBy}
+      isOptionEqualToValue={(option, value) => option[valueField] === value[valueField]}
       onChange={onChange}
       fullWidth={fullWidth}
       readOnly={_readOnly}

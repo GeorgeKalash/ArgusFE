@@ -1,5 +1,4 @@
 import { useContext } from 'react'
-import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -29,16 +28,11 @@ const OutwardsModification = () => {
 
     return { ...response, _startAt: _startAt }
   }
-  async function fetchWithSearch({ options = {}, filters }) {
-    const { _startAt = 0, _pageSize = 50 } = options
-    if (!filters.qry) {
-      return { list: [] }
-    } else {
-      return await getRequest({
-        extension: RTOWMRepository.OutwardsModification.snapshot,
-        parameters: `_filter=${filters.qry}`
-      })
-    }
+  async function fetchWithSearch({ filters }) {
+    return await getRequest({
+      extension: RTOWMRepository.OutwardsModification.snapshot,
+      parameters: `_filter=${filters.qry}`
+    })
   }
 
   const {
@@ -46,7 +40,8 @@ const OutwardsModification = () => {
     labels: _labels,
     refetch,
     access,
-    filterBy
+    filterBy,
+    clearFilter
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: RTOWMRepository.OutwardsModification.page,
@@ -96,7 +91,7 @@ const OutwardsModification = () => {
       Component: OutwardsModificationForm,
       props: {
         labels: _labels,
-        recordId: recordId ? recordId : null,
+        recordId,
         access
       },
       width: 1260,
@@ -143,7 +138,7 @@ const OutwardsModification = () => {
           isLoading={false}
           pageSize={50}
           refetch={refetch}
-          paginationType='client'
+          paginationType='api'
           maxAccess={access}
         />
       </Grow>

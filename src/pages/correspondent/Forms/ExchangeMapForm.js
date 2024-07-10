@@ -12,11 +12,13 @@ import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const ExchangeMapForm = ({ maxAccess, editMode, currency, store, expanded, height, labels }) => {
   const { currencyId, currencyName } = currency
   const { recordId, countries } = store
   const { postRequest, getRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const formik = useFormik({
     enableReinitialize: true,
@@ -102,13 +104,13 @@ const ExchangeMapForm = ({ maxAccess, editMode, currency, store, expanded, heigh
             .then(values => {
               const valuesMap = values.list.reduce((acc, fee) => {
                 acc[fee.plantId] = fee
-                
-                  return acc
+
+                return acc
               }, {})
 
               const plants = result.list.map((plant, index) => {
                 const value = valuesMap[plant?.recordId] || 0
-                
+
                 return {
                   id: index,
                   corId: corId,
@@ -143,13 +145,13 @@ const ExchangeMapForm = ({ maxAccess, editMode, currency, store, expanded, heigh
       record: JSON.stringify(data)
     })
       .then(res => {
-        if (!res.recordId) toast.success('Record Added Successfully')
-        else toast.success('Record Edited Successfully')
+        if (!res.recordId) toast.success(platformLabels.Added)
+        else toast.success(platformLabels.Edited)
       })
       .catch(error => {})
   }
-  
-return (
+
+  return (
     <FormShell
       form={formik}
       resourceId={ResourceIds.Correspondent}
@@ -213,4 +215,3 @@ return (
 }
 
 export default ExchangeMapForm
-

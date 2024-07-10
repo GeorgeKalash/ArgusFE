@@ -8,12 +8,14 @@ import ProductDispersalForm from './productDispersalForm'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const ProductDispersalList = ({ store, setStore, labels, maxAccess }) => {
   const { recordId: pId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [gridData, setGridData] = useState()
   const { stack } = useWindow()
+  const { platformLabels } = useContext(ControlContext)
 
   const getGridData = pId => {
     setGridData([])
@@ -82,7 +84,7 @@ const ProductDispersalList = ({ store, setStore, labels, maxAccess }) => {
       record: JSON.stringify(obj)
     })
       .then(res => {
-        toast.success('Record Deleted Successfully')
+        toast.success(platformLabels.Deleted)
         getGridData(obj.productId)
       })
       .catch(error => {})
@@ -104,24 +106,24 @@ const ProductDispersalList = ({ store, setStore, labels, maxAccess }) => {
   }
 
   return (
-      <VertLayout>
-        <Fixed>
-          <GridToolbar onAdd={add} maxAccess={maxAccess} />
-        </Fixed>
-        <Grow>
-          <Table
-            columns={columns}
-            gridData={gridData}
-            rowId={['recordId']}
-            api={getGridData}
-            onEdit={edit}
-            onDelete={del}
-            isLoading={false}
-            maxAccess={maxAccess}
-            pagination={false}
-          />
-        </Grow>
-      </VertLayout>
+    <VertLayout>
+      <Fixed>
+        <GridToolbar onAdd={add} maxAccess={maxAccess} />
+      </Fixed>
+      <Grow>
+        <Table
+          columns={columns}
+          gridData={gridData}
+          rowId={['recordId']}
+          api={getGridData}
+          onEdit={edit}
+          onDelete={del}
+          isLoading={false}
+          maxAccess={maxAccess}
+          pagination={false}
+        />
+      </Grow>
+    </VertLayout>
   )
 }
 

@@ -11,6 +11,7 @@ import { useWindow } from 'src/windows'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const SourceOfIncome = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -25,6 +26,7 @@ const SourceOfIncome = () => {
 
     return { ...response, _startAt: _startAt }
   }
+  const { platformLabels } = useContext(ControlContext)
 
   const {
     query: { data },
@@ -60,7 +62,7 @@ const SourceOfIncome = () => {
       flex: 1
     },
     {
-      field: 'incomeTypeName',
+      field: 'sitName',
       headerName: _labels.incomeType,
       flex: 1
     }
@@ -93,7 +95,7 @@ const SourceOfIncome = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
   }
 
   return (
@@ -116,7 +118,7 @@ const SourceOfIncome = () => {
           maxAccess={access}
         />
       </Grow>
-      </VertLayout>
+    </VertLayout>
   )
 }
 

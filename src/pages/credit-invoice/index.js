@@ -17,9 +17,11 @@ import { getFormattedNumber } from 'src/lib/numberField-helper'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const CreditInvoice = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   //states
   const [errorMessage, setErrorMessage] = useState(null)
@@ -136,7 +138,7 @@ const CreditInvoice = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.labels)
   }
 
   return (

@@ -12,10 +12,12 @@ import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function AgentBranchForm({ _labels, maxAccess, store, setStore, editMode }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId, address } = store
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: RemittanceSettingsRepository.CorrespondentAgentBranches.page
@@ -48,8 +50,8 @@ export default function AgentBranchForm({ _labels, maxAccess, store, setStore, e
       })
 
       if (!editMode) {
-        toast.success('Record Added Successfully')
-      } else toast.success('Record Edited Successfully')
+        toast.success(platformLabels.Added)
+      } else toast.success(platformLabels.Edited)
 
       setStore(prevStore => ({
         ...prevStore,

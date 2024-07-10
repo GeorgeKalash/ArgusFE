@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
@@ -11,16 +11,18 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import CtRiskLevelsForm from './forms/CtRiskLevelsForm'
 import { useWindow } from 'src/windows'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const CtRiskLevel = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    response = await getRequest({
+    const response = await getRequest({
       extension: CurrencyTradingSettingsRepository.RiskLevel.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
@@ -31,9 +33,9 @@ const CtRiskLevel = () => {
   const {
     query: { data },
     labels: _labels,
-    access,
     paginationParameters,
-    refetch
+    refetch,
+    access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: CurrencyTradingSettingsRepository.RiskLevel.page,
@@ -85,7 +87,7 @@ const CtRiskLevel = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
   }
 
   return (
@@ -99,11 +101,11 @@ const CtRiskLevel = () => {
           gridData={data}
           rowId={['recordId']}
           onEdit={edit}
+          refetch={refetch}
           onDelete={del}
           isLoading={false}
           pageSize={50}
           paginationParameters={paginationParameters}
-          refetch={refetch}
           paginationType='api'
           maxAccess={access}
         />

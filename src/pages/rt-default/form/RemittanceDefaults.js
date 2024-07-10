@@ -18,6 +18,7 @@ const RemittanceDefaults = ({ _labels }) => {
   const { getLabels, getAccess } = useContext(ControlContext)
   const [labels, setLabels] = useState(null)
   const [access, setAccess] = useState(null)
+  const { platformLabels } = useContext(ControlContext)
 
   const [errorMessage, setErrorMessage] = useState(null)
 
@@ -108,7 +109,7 @@ const RemittanceDefaults = ({ _labels }) => {
       record: JSON.stringify({ sysDefaults: data })
     })
       .then(res => {
-        if (res) toast.success('Record Successfully')
+        if (res) toast.success(platformLabels.Updated)
       })
       .catch(error => {})
   }

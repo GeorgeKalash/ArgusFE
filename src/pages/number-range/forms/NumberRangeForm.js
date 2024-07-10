@@ -13,9 +13,11 @@ import { formatDateFromApi, formatDateToApi, formatDateDefault } from 'src/lib/d
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useForm } from 'src/hooks/form'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function NumberRangeForm({ labels, maxAccess, recordId }) {
   const [dateRanges, setDateRange] = useState(false)
+  const { platformLabels } = useContext(ControlContext)
 
   const [editMode, setEditMode] = useState(!!recordId)
 
@@ -67,13 +69,13 @@ export default function NumberRangeForm({ labels, maxAccess, recordId }) {
       })
 
       if (!recordId) {
-        toast.success('Record Added Successfully')
+        toast.success(platformLabels.Added)
         formik.setValues({
           ...obj,
           recordId: response.recordId
         })
       } else {
-        toast.success('Record Edited Successfully')
+        toast.success(platformLabels.Edited)
       }
 
       setEditMode(true)
