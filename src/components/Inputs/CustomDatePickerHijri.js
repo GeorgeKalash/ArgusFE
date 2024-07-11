@@ -4,8 +4,9 @@ import { DatePicker } from '@mui/x-date-pickers'
 import { InputAdornment, IconButton, Box } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
 import EventIcon from '@mui/icons-material/Event'
-import { AdapterMomentJalaali } from '@mui/x-date-pickers/AdapterMomentJalaali'
-import moment from 'moment-jalaali'
+import { AdapterMomentHijri } from '@mui/x-date-pickers/AdapterMomentHijri'
+import { useState } from 'react'
+import moment from 'moment-hijri'
 
 export default function CustomDatePickerHijri({
   variant = 'outlined',
@@ -18,20 +19,22 @@ export default function CustomDatePickerHijri({
   disabled,
   fullWidth = true
 }) {
-  const [openDatePicker, setOpenDatePicker] = React.useState(false)
-
+  const [openDatePicker, setOpenDatePicker] = useState(false)
+  console.log(value)
   return (
-    <LocalizationProvider dateAdapter={AdapterMomentJalaali}>
+    <LocalizationProvider dateAdapter={AdapterMomentHijri}>
       <DatePicker
         variant={variant}
         size={size}
         label={label}
-        key={moment(value)}
+        key={value}
         fullWidth={fullWidth}
-        defaultValue={value && moment(value)}
+        value={moment(new Date(value))}
         onChange={newValue => onChange(name, newValue)}
         onClose={() => setOpenDatePicker(false)}
         open={openDatePicker}
+        minDate={moment(new Date(1938, 0, 1))}
+        maxDate={moment(new Date(2075, 11, 31))}
         slotProps={{
           // replacing clearable behaviour
           textField: {
