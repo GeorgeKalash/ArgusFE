@@ -22,6 +22,7 @@ const CustomNumberField = ({
   thousandSeparator = ',',
   min = '',
   max = '',
+  allowNegative = true,
   ...props
 }) => {
   const name = props.name
@@ -68,6 +69,7 @@ const CustomNumberField = ({
     <NumericFormat
       label={label}
       allowLeadingZeros
+      allowNegative={allowNegative}
       thousandSeparator={thousandSeparator}
       decimalSeparator='.'
       decimalScale={decimalScale}

@@ -77,7 +77,11 @@ export const CashBankRepository = {
     del: service + 'delADJ',
     post: service + 'postADJ'
   },
-  CheckBook: {
+  CACheckbook: {
     qry: service + 'qryCBK',
+    page: service + 'pageCBK',
+    get: service + 'getCBK',
+    set: service + 'setCBK',
+    del: service + 'delCBK',
   }
 }
