@@ -481,7 +481,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
               </Grid>
               <Grid item xs={6}>
               <ResourceComboBox
-                    endpointId={CashBankRepository.CheckBook.qry}
+                    endpointId={CashBankRepository.CACheckbook.qry}
                     name='checkbookId'
                     label={labels.checkbook}
                     valueField='recordId'
