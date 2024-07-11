@@ -1,6 +1,5 @@
 import React, { useContext, useState } from 'react'
 import { Box, Button, Grid, IconButton, InputAdornment, LinearProgress } from '@mui/material'
-import WindowToolbar from './WindowToolbar'
 import Icon from 'src/@core/components/icon'
 import CustomTextField from '../Inputs/CustomTextField'
 import { Grow } from './Layouts/Grow'
@@ -13,7 +12,17 @@ import { useAuth } from 'src/hooks/useAuth'
 import axios from 'axios'
 import { useError } from 'src/error'
 
-const ChangePassword = ({ _labels, reopenLogin = false, window, username = '' }) => {
+const ChangePassword = ({
+  _labels,
+  reopenLogin = false,
+  window,
+  username = '',
+  encryptePWD,
+  loggedUser,
+  handleLogin,
+  params,
+  errorCallback
+}) => {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [score, setScore] = useState(0)
@@ -21,7 +30,8 @@ const ChangePassword = ({ _labels, reopenLogin = false, window, username = '' })
   const [showPassword, setShowPassword] = useState(false)
   const [showNewPassword, setShowNewPassword] = useState(false)
   const { stack: stackError } = useError()
-  const { encryptePWD, getAccessToken } = useContext(AuthContext)
+
+  // const { encryptePWD, getAccessToken } = useContext(AuthContext)
   const auth = useAuth()
 
   const { formik } = useForm({
@@ -50,7 +60,7 @@ const ChangePassword = ({ _labels, reopenLogin = false, window, username = '' })
         console.log(loginVal)
 
         try {
-          const accessToken = await getAccessToken()
+          const accessToken = loggedUser.accessToken
           if (!accessToken) {
             throw new Error('Failed to retrieve access token')
           }
@@ -71,7 +81,10 @@ const ChangePassword = ({ _labels, reopenLogin = false, window, username = '' })
             formik.setFieldValue('newPassword', '')
             formik.setFieldValue('confirmPassword', '')
           })
-          if (reopenLogin === true) window.close()
+          if (reopenLogin === true) {
+            window.close()
+            handleLogin(params, errorCallback)
+          }
         } catch (error) {
           stackError({ message: error.message })
         }

@@ -65,7 +65,7 @@ const AuthProvider = ({ children }) => {
     const fetchData = async () => {
       const matchHostname = window.location.hostname.match(/^(.+)\.softmachine\.co$/)
 
-      const accountName = matchHostname ? matchHostname[1] : 'burger'
+      const accountName = matchHostname ? matchHostname[1] : 'byc-deploy'
 
       try {
         const response = await axios.get(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=${accountName}`)
@@ -81,12 +81,18 @@ const AuthProvider = ({ children }) => {
     fetchData()
   }, [])
 
-  function openForm(username) {
+  function openForm(username, loggedUser, params, errorCallback) {
     stack({
       Component: ChangePassword,
       props: {
         reopenLogin: true,
-        username: username
+        handleLogin,
+        username,
+        encryptePWD,
+        getAccessToken,
+        loggedUser,
+        params,
+        errorCallback
       },
       expandable: false,
       closable: false,
@@ -112,56 +118,55 @@ const AuthProvider = ({ children }) => {
         throw new Error(`User ${params.username} not found`)
       }
 
-      if (getUS2.data.record.umcpnl === true) {
-        openForm(params.username)
+      const signIn3Params = `_email=${params.username}&_password=${encryptePWD(params.password)}&_accountId=${
+        getAC.data.record.accountId
+      }&_userId=${getUS2.data.record.recordId}`
+
+      const signIn3 = await axios.get(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/signIn3?${signIn3Params}`, {
+        headers: {
+          accountId: JSON.parse(getAC.data.record.accountId),
+          dbe: JSON.parse(getAC.data.record.dbe),
+          dbs: JSON.parse(getAC.data.record.dbs)
+        }
+      })
+
+      const defaultSettings = await axios.get(`${getAC.data.record.api}/SY.asmx/getDE?_key=dateFormat`, {
+        headers: {
+          Authorization: 'Bearer ' + signIn3.data.record.accessToken,
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+
+      const defaultSet = {
+        dateFormat: defaultSettings.data.record.value ? defaultSettings.data.record.value : 'dd/MM/yyyy'
+      }
+      window.localStorage.setItem('default', JSON.stringify(defaultSet))
+
+      const loggedUser = {
+        accountId: getAC.data.record.accountId,
+        userId: getUS2.data.record.recordId,
+        username: getUS2.data.record.username,
+        languageId: getUS2.data.record.languageId,
+        userType: getUS2.data.record.userType,
+        employeeId: getUS2.data.record.employeeId,
+        fullName: getUS2.data.record.fullName,
+        role: 'admin',
+        expiresAt: jwt(signIn3.data.record.accessToken).exp,
+        ...signIn3.data.record
+      }
+
+      setUser(loggedUser)
+      setLanguageId(loggedUser.languageId)
+      window.localStorage.setItem('languageId', loggedUser.languageId)
+
+      if (params.rememberMe) {
+        window.localStorage.setItem('userData', JSON.stringify(loggedUser))
       } else {
-        const signIn3Params = `_email=${params.username}&_password=${encryptePWD(params.password)}&_accountId=${
-          getAC.data.record.accountId
-        }&_userId=${getUS2.data.record.recordId}`
-
-        const signIn3 = await axios.get(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/signIn3?${signIn3Params}`, {
-          headers: {
-            accountId: JSON.parse(getAC.data.record.accountId),
-            dbe: JSON.parse(getAC.data.record.dbe),
-            dbs: JSON.parse(getAC.data.record.dbs)
-          }
-        })
-
-        const defaultSettings = await axios.get(`${getAC.data.record.api}/SY.asmx/getDE?_key=dateFormat`, {
-          headers: {
-            Authorization: 'Bearer ' + signIn3.data.record.accessToken,
-            'Content-Type': 'multipart/form-data'
-          }
-        })
-
-        const defaultSet = {
-          dateFormat: defaultSettings.data.record.value ? defaultSettings.data.record.value : 'dd/MM/yyyy'
-        }
-        window.localStorage.setItem('default', JSON.stringify(defaultSet))
-
-        const loggedUser = {
-          accountId: getAC.data.record.accountId,
-          userId: getUS2.data.record.recordId,
-          username: getUS2.data.record.username,
-          languageId: getUS2.data.record.languageId,
-          userType: getUS2.data.record.userType,
-          employeeId: getUS2.data.record.employeeId,
-          fullName: getUS2.data.record.fullName,
-          role: 'admin',
-          expiresAt: jwt(signIn3.data.record.accessToken).exp,
-          ...signIn3.data.record
-        }
-
-        setUser(loggedUser)
-        setLanguageId(loggedUser.languageId)
-        window.localStorage.setItem('languageId', loggedUser.languageId)
-
-        if (params.rememberMe) {
-          window.localStorage.setItem('userData', JSON.stringify(loggedUser))
-        } else {
-          window.sessionStorage.setItem('userData', JSON.stringify(loggedUser))
-        }
-
+        window.sessionStorage.setItem('userData', JSON.stringify(loggedUser))
+      }
+      if (getUS2.data.record.umcpnl === true) {
+        openForm(params.username, loggedUser, params, errorCallback)
+      } else {
         const returnUrl = router.query.returnUrl
         const redirectURL = returnUrl && returnUrl !== '/' ? returnUrl : '/'
         router.replace(redirectURL)
