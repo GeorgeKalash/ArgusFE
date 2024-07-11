@@ -41,11 +41,7 @@ export default function CheckbookForm({ labels, maxAccess, recordId }) {
     validateOnChange: true,
     validationSchema: yup.object({
       bankAccountId: yup.string().required(),
-      size: yup
-      .number()
-      .required()
-      .min(0)
-      .max(99),
+      size: yup.number().required(),
       firstCheckNo: yup.string().required(),
       lastCheckNo: yup.string().required(),
       issueDate: yup.string().required()
