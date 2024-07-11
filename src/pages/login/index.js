@@ -120,7 +120,7 @@ const LoginPage = () => {
                     value={validation.values.username}
                     type='text'
                     onChange={validation.handleChange}
-                    clearable={true}
+                    onClear={() => validation.setFieldValue('username', '')}
                     error={validation.touched.username && Boolean(validation.errors.username)}
                     helperText={validation.touched.username && validation.errors.username}
                   />
