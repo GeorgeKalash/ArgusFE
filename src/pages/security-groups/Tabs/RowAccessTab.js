@@ -13,13 +13,13 @@ import { AccessControlRepository } from 'src/repositories/AccessControlRepositor
 import toast from 'react-hot-toast'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { ControlContext } from 'src/providers/ControlContext'
-import { useResourceQuery } from 'src/hooks/resource'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 
 export default function RowAccessTab({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const [data, setData] = useState([])
+  const [modifiedRows, setModifiedRows] = useState([])
 
   const rowColumns = [
     {
@@ -49,7 +49,7 @@ export default function RowAccessTab({ labels, maxAccess, recordId }) {
       checked: false
     },
     onSubmit: async () => {
-      for (const item of data?.list) {
+      for (const item of latestData?.list) {
         item.hasAccess = item.checked
 
         if (item.checked) {
@@ -69,6 +69,8 @@ export default function RowAccessTab({ labels, maxAccess, recordId }) {
   })
 
   async function fetchGridData() {
+    setModifiedRows([])
+
     const moduleRes = await getRequest({
       extension: AccessControlRepository.DataAccessItem.qry,
       parameters: `_sgId=${recordId}&_filter=&_resourceId=${formik.values.classId}`
@@ -79,12 +81,30 @@ export default function RowAccessTab({ labels, maxAccess, recordId }) {
       checked: item.hasAccess
     }))
 
+    moduleRes?.list?.forEach(item => {
+      if (item.hasAccess) setModifiedRows(prevRows => [...prevRows, { recordId: item.recordId }])
+    })
+
     setData({ ...moduleRes, list: modifiedData })
   }
 
-  const filteredData = data && {
-    ...data,
-    list: data?.list?.filter(
+  const checkHandler = () => {
+    const newData = data.list ? [...data.list] : []
+
+    const rowIndex =
+      Object.keys(modifiedRows).length === 0
+        ? -1
+        : newData.findIndex(row => Object.keys(modifiedRows).every(key => row[key] === modifiedRows[key]))
+
+    if (rowIndex !== -1) newData[rowIndex] = { ...newData[rowIndex], checked: true }
+
+    return { list: newData }
+  }
+  const latestData = checkHandler()
+
+  const filteredData = latestData && {
+    ...latestData,
+    list: latestData?.list?.filter(
       item =>
         (item.rowRef && item.rowRef.toString().includes(formik.values.search)) ||
         (item.rowName && item.rowName.toLowerCase().includes(formik.values.search.toLowerCase()))
@@ -98,7 +118,7 @@ export default function RowAccessTab({ labels, maxAccess, recordId }) {
 
   useEffect(() => {
     if (recordId) fetchGridData()
-  }, [formik.values.classId])
+  }, [formik.values.classId, recordId])
 
   return (
     <FormShell
@@ -153,6 +173,7 @@ export default function RowAccessTab({ labels, maxAccess, recordId }) {
             showCheckboxColumn={true}
             viewCheckButtons={true}
             ChangeCheckedRow={setData}
+            setModifiedRows={setModifiedRows}
           />
         </Grow>
       </VertLayout>

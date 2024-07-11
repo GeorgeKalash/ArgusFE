@@ -100,6 +100,7 @@ const Table = ({
   checkTitle = '',
   viewCheckButtons = false,
   ChangeCheckedRow,
+  setModifiedRows,
   ...props
 }) => {
   const { stack } = useWindow()
@@ -303,15 +304,25 @@ const Table = ({
   const shouldViewButtons = !viewCheckButtons ? 'none' : ''
 
   const handleCheckboxChange = row => {
-    if (ChangeCheckedRow)
-      ChangeCheckedRow(prevCheckedRows => {
-        const newCheckedRows = { ...prevCheckedRows }
-        const key = row.seqNo ? `${row.recordId}-${row.seqNo}` : row.recordId
-        newCheckedRows[key] = row
-        const filteredRows = !newCheckedRows[key]?.checked ? [newCheckedRows[key]] : []
+    if (setModifiedRows) {
+      const result = props.rowId.reduce((array, key) => {
+        if (!row.checked) {
+          if (row[key]) array[key] = row[key]
+        }
 
-        return filteredRows
+        return array
+      }, {})
+
+      setModifiedRows(prevModifiedRows => {
+        if (!row.checked) {
+          return [...prevModifiedRows, result]
+        } else {
+          return prevModifiedRows.filter(item => {
+            return !props.rowId.every(key => item[key] === row[key])
+          })
+        }
       })
+    }
   }
 
   function openDeleteConfirmation(obj) {
