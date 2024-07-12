@@ -19,7 +19,7 @@ export default function RowAccessTab({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const [data, setData] = useState([])
-  const [modifiedRows, setModifiedRows] = useState([])
+  const [checkedRows, handleCheckedRows] = useState([])
 
   const rowColumns = [
     {
@@ -69,8 +69,6 @@ export default function RowAccessTab({ labels, maxAccess, recordId }) {
   })
 
   async function fetchGridData() {
-    setModifiedRows([])
-
     const moduleRes = await getRequest({
       extension: AccessControlRepository.DataAccessItem.qry,
       parameters: `_sgId=${recordId}&_filter=&_resourceId=${formik.values.classId}`
@@ -82,7 +80,7 @@ export default function RowAccessTab({ labels, maxAccess, recordId }) {
     }))
 
     moduleRes?.list?.forEach(item => {
-      if (item.hasAccess) setModifiedRows(prevRows => [...prevRows, { recordId: item.recordId }])
+      if (item.hasAccess) handleCheckedRows(prevRows => [...prevRows, { recordId: item.recordId }])
     })
 
     setData({ ...moduleRes, list: modifiedData })
@@ -92,14 +90,15 @@ export default function RowAccessTab({ labels, maxAccess, recordId }) {
     const newData = data.list ? [...data.list] : []
 
     const rowIndex =
-      Object.keys(modifiedRows).length === 0
+      Object.keys(checkedRows).length === 0
         ? -1
-        : newData.findIndex(row => Object.keys(modifiedRows).every(key => row[key] === modifiedRows[key]))
+        : newData.findIndex(row => Object.keys(checkedRows).every(key => row[key] === checkedRows[key]))
 
     if (rowIndex !== -1) newData[rowIndex] = { ...newData[rowIndex], checked: true }
 
     return { list: newData }
   }
+
   const latestData = checkHandler()
 
   const filteredData = latestData && {
@@ -117,6 +116,7 @@ export default function RowAccessTab({ labels, maxAccess, recordId }) {
   }
 
   useEffect(() => {
+    handleCheckedRows([])
     if (recordId) fetchGridData()
   }, [formik.values.classId, recordId])
 
@@ -173,7 +173,7 @@ export default function RowAccessTab({ labels, maxAccess, recordId }) {
             showCheckboxColumn={true}
             viewCheckButtons={true}
             ChangeCheckedRow={setData}
-            setModifiedRows={setModifiedRows}
+            handleCheckedRows={handleCheckedRows}
           />
         </Grow>
       </VertLayout>

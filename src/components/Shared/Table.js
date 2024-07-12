@@ -100,7 +100,7 @@ const Table = ({
   checkTitle = '',
   viewCheckButtons = false,
   ChangeCheckedRow,
-  setModifiedRows,
+  handleCheckedRows,
   ...props
 }) => {
   const { stack } = useWindow()
@@ -304,24 +304,11 @@ const Table = ({
   const shouldViewButtons = !viewCheckButtons ? 'none' : ''
 
   const handleCheckboxChange = row => {
-    if (setModifiedRows) {
-      const result = props.rowId.reduce((array, key) => {
-        if (!row.checked) {
-          if (row[key]) array[key] = row[key]
-        }
-
-        return array
-      }, {})
-
-      setModifiedRows(prevModifiedRows => {
-        if (!row.checked) {
-          return [...prevModifiedRows, result]
-        } else {
-          return prevModifiedRows.filter(item => {
-            return !props.rowId.every(key => item[key] === row[key])
-          })
-        }
-      })
+    if (handleCheckedRows) {
+      const result = Object.fromEntries(
+        props.rowId.map(key => (!row.checked && row[key] ? [key, row[key]] : null)).filter(entry => entry !== null)
+      )
+      if (Object.keys(result).length !== 0) handleCheckedRows(result)
     }
   }
 
