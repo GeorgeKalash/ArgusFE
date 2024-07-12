@@ -7,10 +7,11 @@ import { VertLayout } from './Layouts/VertLayout'
 import { useForm } from 'src/hooks/form'
 import toast from 'react-hot-toast'
 import * as yup from 'yup'
-import { AuthContext } from 'src/providers/AuthContext'
 import { useAuth } from 'src/hooks/useAuth'
 import axios from 'axios'
 import { useError } from 'src/error'
+import { RequestsContext } from 'src/providers/RequestsContext'
+import { SystemRepository } from 'src/repositories/SystemRepository'
 
 const ChangePassword = ({
   _labels,
@@ -30,8 +31,7 @@ const ChangePassword = ({
   const [showPassword, setShowPassword] = useState(false)
   const [showNewPassword, setShowNewPassword] = useState(false)
   const { stack: stackError } = useError()
-
-  // const { encryptePWD, getAccessToken } = useContext(AuthContext)
+  const { getRequest, postRequest } = useContext(RequestsContext)
   const auth = useAuth()
 
   const { formik } = useForm({
@@ -76,12 +76,13 @@ const ChangePassword = ({
             },
             data: bodyFormData
           }).then(res => {
-            toast.success('Password changed succesfully!')
+            toast.success('Password changed successfully!')
             formik.setFieldValue('password', '')
             formik.setFieldValue('newPassword', '')
             formik.setFieldValue('confirmPassword', '')
           })
           if (reopenLogin === true) {
+            updateUmcpnl()
             window.close()
             handleLogin(params, errorCallback)
           }
@@ -93,6 +94,24 @@ const ChangePassword = ({
       }
     }
   })
+
+  const updateUmcpnl = async () => {
+    try {
+      const user = loggedUser
+
+      const updateUser = {
+        ...user,
+        umcpnl: false
+      }
+      await postRequest({
+        extension: SystemRepository.Users.set,
+        record: JSON.stringify(updateUser)
+      })
+      toast.success('umcpnl field updated successfully!')
+    } catch (error) {
+      toast.error('Failed to update umcpnl field')
+    }
+  }
 
   const colors = ['#C11B17', '#FDD017', '#4AA02C', '#6AFB92', '#00FF00']
 
