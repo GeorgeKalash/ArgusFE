@@ -14,9 +14,10 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { Checkbox } from '@mui/material'
+import toast from 'react-hot-toast'
 
 export default function CurrencyTrading() {
-  const { getRequest } = useContext(RequestsContext)
+  const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
 
   function openForm(recordId) {
@@ -50,21 +51,24 @@ export default function CurrencyTrading() {
       filterFn: fetchWithSearch
     }
   })
-  async function fetchWithSearch({ options = {}, filters }) {
-    return await getRequest({
-      extension: FinancialRepository.ReceiptVouchers.snapshot,
-      parameters: `_filter=${filters.qry}`
-    })
+  async function fetchWithSearch({ filters }) {
+    try {
+      return await getRequest({
+        extension: FinancialRepository.ReceiptVouchers.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+    } catch (e) {}
   }
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
+    try {
+      const response = await getRequest({
+        extension: FinancialRepository.ReceiptVouchers.qry,
+        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=&_sortBy=recordId desc`
+      })
 
-    const response = await getRequest({
-      extension: FinancialRepository.ReceiptVouchers.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=&_sortBy=recordId desc`
-    })
-
-    return { ...response, _startAt: _startAt }
+      return { ...response, _startAt: _startAt }
+    } catch (e) {}
   }
 
   const { proxyAction } = useDocumentTypeProxy({
@@ -76,8 +80,8 @@ export default function CurrencyTrading() {
     await proxyAction()
   }
 
-  const edit = async obj => {
-    await openForm(obj.recordId)
+  const edit = obj => {
+    openForm(obj.recordId)
   }
 
   const del = async obj => {
@@ -109,7 +113,7 @@ export default function CurrencyTrading() {
       flex: 1
     },
     {
-      field: 'CashAccount',
+      field: 'cashAccountName',
       headerName: labels.CashAccount,
       flex: 1
     },
