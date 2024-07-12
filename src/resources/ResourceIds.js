@@ -156,5 +156,6 @@ export const ResourceIds = {
   ProfessionGroups: 36310,
   Roles: 21103,
   Checkbook: 33201,
-  PaymentVouchers: 31305
+  PaymentVouchers: 31305,
+  PaymentVoucherExpenses: 31343
 }
