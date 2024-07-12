@@ -1,17 +1,7 @@
 import Window from 'src/components/Shared/Window'
 import DocumentsForm from '../forms/DocumentsForm'
 
-const DocumentsWindow = ({
-  onClose,
-  labels,
-  maxAccess,
-  recordId,
-  functionId,
-  seqNo,
-  setWindowOpen,
-
-  search
-}) => {
+const DocumentsWindow = ({ onClose, labels, maxAccess, recordId, functionId, seqNo, setWindowOpen }) => {
   return (
     <Window
       id='DocumentsWindow'
