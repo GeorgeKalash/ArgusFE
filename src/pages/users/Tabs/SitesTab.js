@@ -13,14 +13,12 @@ import { DataSets } from 'src/resources/DataSets'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grid } from '@mui/material'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
+import { InventoryRepository } from 'src/repositories/InventoryRepository'
 
-const SitesTab = () => {
+const SitesTab = ({ labels, maxAccess, recordId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const { labels: _labels, access } = useResourceQuery({
-    queryFn: fetchGridData,
-
-    //endpointId: ManufacturingRepository.LeanProductionPlanning.preview,
     datasetId: ResourceIds.Users
   })
 
@@ -29,7 +27,7 @@ const SitesTab = () => {
     access: accessADJ,
     invalidate
   } = useResourceParams({
-    datasetId: ResourceIds.MaterialsAdjustment
+    datasetId: ResourceIds.Users
   })
 
   const { formik } = useForm({
@@ -73,12 +71,12 @@ const SitesTab = () => {
     }
   })
   async function fetchGridData() {
-    /* const response = await getRequest({
-      extension: ManufacturingRepository.LeanProductionPlanning.preview,
-      parameters: `_status=2`
+    const response = await getRequest({
+      extension: InventoryRepository.Site.qry,
+      parameters: `_filter=`
     })
 
-    const data = response.list.map((item, index) => ({
+    /*const data = response.list.map((item, index) => ({
       ...item,
       id: index + 1,
       balance: item.qty - (item.qtyProduced ?? 0),
@@ -140,6 +138,14 @@ const SitesTab = () => {
     const { value } = event.target
     formik.setFieldValue('search', value)
   }
+
+  useEffect(() => {
+    ;(async function () {
+      if (recordId) {
+        await fetchGridData()
+      }
+    })()
+  }, [recordId])
 
   return (
     <FormShell form={formik} infoVisible={false} isCleared={false}>

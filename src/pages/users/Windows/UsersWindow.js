@@ -40,7 +40,7 @@ const UsersWindow = ({ labels, maxAccess, recordId }) => {
         <DocTypeTab labels={labels} maxAccess={maxAccess} storeRecordId={storeRecordId} />
       </CustomTabPanel>
       <CustomTabPanel index={4} value={activeTab}>
-        <SitesTab labels={labels} maxAccess={maxAccess} storeRecordId={storeRecordId} />
+        <SitesTab labels={labels} maxAccess={maxAccess} recordId={storeRecordId} />
       </CustomTabPanel>
       <CustomTabPanel index={5} value={activeTab}>
         <RowAccessTab labels={labels} maxAccess={maxAccess} storeRecordId={storeRecordId} />
