@@ -8,6 +8,7 @@ import { useState } from 'react'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import DocTypeTab from '../Tabs/DocTypeTab'
 import ReleaseCodeTab from '../Tabs/ReleaseCodeTab'
+import SitesTab from '../Tabs/SitesTab'
 
 const UsersWindow = ({ labels, maxAccess, recordId }) => {
   const [activeTab, setActiveTab] = useState(0)
@@ -18,6 +19,7 @@ const UsersWindow = ({ labels, maxAccess, recordId }) => {
     { label: labels.defaults, disabled: !storeRecordId },
     { label: labels.securityGroups, disabled: !storeRecordId },
     { label: labels.docType, disabled: !storeRecordId },
+    { label: labels.site, disabled: !storeRecordId },
     { label: labels.rowAccess, disabled: !storeRecordId },
     { label: labels.releaseCode, disabled: !storeRecordId }
   ]
@@ -38,9 +40,12 @@ const UsersWindow = ({ labels, maxAccess, recordId }) => {
         <DocTypeTab labels={labels} maxAccess={maxAccess} storeRecordId={storeRecordId} />
       </CustomTabPanel>
       <CustomTabPanel index={4} value={activeTab}>
-        <RowAccessTab labels={labels} maxAccess={maxAccess} storeRecordId={storeRecordId} />
+        <SitesTab labels={labels} maxAccess={maxAccess} storeRecordId={storeRecordId} />
       </CustomTabPanel>
       <CustomTabPanel index={5} value={activeTab}>
+        <RowAccessTab labels={labels} maxAccess={maxAccess} storeRecordId={storeRecordId} />
+      </CustomTabPanel>
+      <CustomTabPanel index={6} value={activeTab}>
         <ReleaseCodeTab labels={labels} maxAccess={maxAccess} storeRecordId={storeRecordId} />
       </CustomTabPanel>
     </VertLayout>
