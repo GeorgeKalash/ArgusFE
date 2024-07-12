@@ -35,15 +35,12 @@ const BpRoles = () => {
     labels: _labels,
     paginationParameters,
     refetch,
-    access
+    access,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: BusinessPartnerRepository.Role.page,
     datasetId: ResourceIds.Roles
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: BusinessPartnerRepository.Role.page
   })
 
   const columns = [
