@@ -67,7 +67,6 @@ const DocumentsOnHold = () => {
   })
 
   async function fetchWithSearch({ options = {}, filters }) {
-    console.log(filters, 'filters')
     const { _startAt = 0, _pageSize = 50 } = options
 
     return (
