@@ -15,19 +15,13 @@ import { Grid } from '@mui/material'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const SitesTab = ({ labels, maxAccess, recordId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const { labels: _labels, access } = useResourceQuery({
-    datasetId: ResourceIds.Users
-  })
-
-  const {
-    labels: _labelsADJ,
-    access: accessADJ,
-    invalidate
-  } = useResourceParams({
     datasetId: ResourceIds.Users
   })
 
@@ -51,65 +45,89 @@ const SitesTab = ({ labels, maxAccess, recordId }) => {
       ]
     },
     onSubmit: async values => {
-      /*   const copy = { ...values }
-      let checkedObjects = copy.rows.filter(obj => obj.checked)
+      try {
+        const itemsListROU = values.rows
+          .filter(obj => obj.isChecked)
+          .map(row => ({
+            resourceId: ResourceIds.Sites,
+            userId: recordId,
+            recordId: row.siteId
+          }))
 
-      if (checkedObjects.length > 0) {
-        checkedObjects = checkedObjects.map(({ date, ...rest }) => ({
-          date: formatDateToApi(date),
-          ...rest
-        }))
-
-        const resultObject = {
-          leanProductions: checkedObjects
+        const dataROU = {
+          userId: recordId,
+          resourceId: ResourceIds.Sites,
+          items: itemsListROU
         }
 
-        const res = await postRequest({
-          extension: ManufacturingRepository.MaterialsAdjustment.generate,
-          record: JSON.stringify(resultObject)
+        await postRequest({
+          extension: AccessControlRepository.RowAccessUserView.set2,
+          record: JSON.stringify(dataROU)
         })
-      }*/
+
+        const itemsListUSI = values.rows
+          .filter(obj => obj.isChecked)
+          .map(row => ({
+            userId: recordId,
+            siteId: row.siteId,
+            accessLevel: row.accessLevel
+          }))
+
+        const dataUSI = {
+          userId: recordId,
+          items: itemsListUSI
+        }
+
+        await postRequest({
+          extension: AccessControlRepository.UserSiteView.set2,
+          record: JSON.stringify(dataUSI)
+        })
+        toast.success(platformLabels.Updated)
+      } catch (error) {}
     }
   })
-  async function fetchGridData() {
-    const siteResponse = await getRequest({
-      extension: InventoryRepository.Site.qry,
-      parameters: `_filter=`
-    })
 
-    const siteViews = siteResponse.list.map(site => {
-      const item = {
+  async function fetchGridData() {
+    try {
+      const siteResponse = await getRequest({
+        extension: InventoryRepository.Site.qry,
+        parameters: `_filter=`
+      })
+
+      const siteViews = siteResponse.list.map(site => ({
         siteId: site.recordId,
         siteReference: site.reference,
         siteName: site.name,
         isChecked: false
-      }
+      }))
 
-      return item
-    })
+      const rowAccessUserResponse = await getRequest({
+        extension: AccessControlRepository.RowAccessUserView.qry,
+        parameters: `_resourceId=${ResourceIds.Sites}&_userId=${recordId}`
+      })
+      rowAccessUserResponse.list.forEach(rau => {
+        const site = siteViews.find(site => site.siteId === rau.recordId)
+        if (site) site.isChecked = true
+      })
 
-    const rowAccessUserResponse = await getRequest({
-      extension: AccessControlRepository.RowAccessUserView.qry,
-      parameters: `_resourceId=${ResourceIds.Sites}&_userId=${recordId}`
-    })
-    rowAccessUserResponse.list.map(rau => {
-      siteViews.forEach(site => {
-        if (site.siteId === rau.recordId) {
-          site.isChecked = true
+      const userAccessResponse = await getRequest({
+        extension: AccessControlRepository.UserSiteView.qry,
+        parameters: `_userId=${recordId}`
+      })
+      userAccessResponse.list.forEach(userAccess => {
+        const site = siteViews.find(site => site.siteId === userAccess.siteId)
+        if (site) {
+          site.accessLevel = userAccess.accessLevel
+          site.accessLevelName = userAccess.accessLevelName
         }
       })
-    })
 
-    console.log('siteView ', siteViews)
-
-    /*const data = response.list.map((item, index) => ({
-      ...item,
-      id: index + 1,
-      balance: item.qty - (item.qtyProduced ?? 0),
-      date: formatDateFromApi(item?.date),
-      checked: false
-    }))
-    formik.setValues({ rows: data })*/
+      const data = siteViews.map((item, index) => ({
+        ...item,
+        id: index + 1
+      }))
+      formik.setValues({ rows: data })
+    } catch (error) {}
   }
 
   const columns = [
@@ -150,15 +168,20 @@ const SitesTab = ({ labels, maxAccess, recordId }) => {
           { from: 'key', to: 'accessLevel' },
           { from: 'value', to: 'accessLevelName' }
         ]
+      },
+      propsReducer({ row, props }) {
+        return { ...props, readOnly: !row.isChecked }
       }
     }
   ]
 
-  const filteredData = formik.values.rows.filter(
-    item =>
-      (item.siteReference && item.siteReference.toString().includes(formik.values.search)) ||
-      (item.siteName && item.siteName.toLowerCase().includes(formik.values.search.toLowerCase()))
-  )
+  const filteredData = formik.values.search
+    ? formik.values.rows.filter(
+        item =>
+          (item.siteReference && item.siteReference.toString().includes(formik.values.search.toLowerCase())) ||
+          (item.siteName && item.siteName.toLowerCase().includes(formik.values.search.toLowerCase()))
+      )
+    : formik.values.rows
 
   const handleSearchChange = event => {
     const { value } = event.target

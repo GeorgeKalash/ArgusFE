@@ -25,7 +25,7 @@ const UsersWindow = ({ labels, maxAccess, recordId }) => {
   ]
 
   return (
-    <VertLayout>
+    <>
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
       <CustomTabPanel index={0} value={activeTab}>
         <UsersTab labels={labels} maxAccess={maxAccess} storeRecordId={storeRecordId} setRecordId={setRecordId} />
@@ -48,7 +48,7 @@ const UsersWindow = ({ labels, maxAccess, recordId }) => {
       <CustomTabPanel index={6} value={activeTab}>
         <ReleaseCodeTab labels={labels} maxAccess={maxAccess} storeRecordId={storeRecordId} />
       </CustomTabPanel>
-    </VertLayout>
+    </>
   )
 }
 

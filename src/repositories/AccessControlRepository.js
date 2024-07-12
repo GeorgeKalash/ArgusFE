@@ -61,6 +61,7 @@ export const AccessControlRepository = {
     set2: service + 'set2CRL'
   },
   UserSiteView: {
-    qry: service + 'qryUSI'
+    qry: service + 'qryUSI',
+    set2: service + 'set2USI'
   }
 }
