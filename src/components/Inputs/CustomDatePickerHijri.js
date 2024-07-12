@@ -25,9 +25,7 @@ export default function CustomDatePickerHijri({
     const timestamp = newValue ? newValue.valueOf() : null
     onChange(name, timestamp)
   }
-  console.log('ne', moment(new Date(1938, 0, 1)).valueOf())
-  const val = moment(new Date(value)).valueOf()
-  console.log(value)
+
   return (
     <LocalizationProvider dateAdapter={AdapterMomentHijri}>
       <DatePicker
