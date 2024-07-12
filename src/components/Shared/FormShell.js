@@ -1,5 +1,5 @@
 import { DialogContent, Box } from '@mui/material'
-import { useState } from 'react'
+import { useContext, useState } from 'react'
 import WindowToolbar from './WindowToolbar'
 import TransactionLog from './TransactionLog'
 import { TrxType } from 'src/resources/AccessLevels'
@@ -13,6 +13,7 @@ import GlobalIntegrationGrid from './GlobalIntegrationGrid'
 import AccountBalance from './AccountBalance'
 import FinancialTransaction from './FinancialTransaction'
 import CashTransaction from './CashTransaction'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function FormShell({
   form,
@@ -41,6 +42,7 @@ export default function FormShell({
   const [windowInfo, setWindowInfo] = useState(null)
   const { stack } = useWindow()
   const [selectedReport, setSelectedReport] = useState(null)
+  const { platformLabels } = useContext(ControlContext)
 
   const windowToolbarVisible = editMode
     ? maxAccess < TrxType.EDIT
@@ -108,7 +110,7 @@ export default function FormShell({
       props: { formValues: form.values },
       width: 1000,
       height: 620,
-      title: 'Financial Transaction'
+      title: platformLabels.financialTransaction
     })
   }
 

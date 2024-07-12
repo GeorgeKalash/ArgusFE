@@ -20,6 +20,7 @@ import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function MemosForm({ labels, access, recordId, functionId, getEndpoint }) {
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -27,6 +28,8 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
     access: access,
     enabled: !recordId
   })
+
+  const { platformLabels } = useContext(ControlContext)
 
   const [initialVatPct, setInitialVatPct] = useState('')
 
@@ -81,7 +84,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
       })
 
       if (!obj.recordId) {
-        toast.success('Record Added Successfully')
+        toast.success(platformLabels.Added)
         formik.setValues({
           ...obj,
           baseAmount: obj.amount,
@@ -89,7 +92,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
           recordId: response.recordId
         })
       } else {
-        toast.success('Record Edited Successfully')
+        toast.success(platformLabels.Edited)
       }
 
       try {
