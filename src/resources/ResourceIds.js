@@ -154,5 +154,6 @@ export const ResourceIds = {
   RoleCategories: 21102,
   SourceOfIncomeType: 36311,
   ProfessionGroups: 36310,
+  Roles: 21103,
   Checkbook: 33201
 }
