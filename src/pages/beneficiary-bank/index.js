@@ -21,6 +21,7 @@ const BeneficiaryBank = () => {
   const {
     query: { data },
     filterBy,
+    refetch,
     clearFilter,
     labels: _labels,
     access,
@@ -151,13 +152,14 @@ const BeneficiaryBank = () => {
       <Grow>
         <Table
           columns={columns}
-          gridData={data ? data : { list: [] }}
+          gridData={data}
           rowId={['beneficiaryId', 'clientId', 'seqNo']}
           onEdit={editBenBank}
           onDelete={delBenBank}
           isLoading={false}
           pageSize={50}
           paginationType='client'
+          refetch={refetch}
           maxAccess={access}
         />
       </Grow>
