@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { DatePicker } from '@mui/x-date-pickers'
-import { InputAdornment, IconButton, Box } from '@mui/material'
+import { InputAdornment, IconButton } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
 import EventIcon from '@mui/icons-material/Event'
 import { AdapterMomentHijri } from '@mui/x-date-pickers/AdapterMomentHijri'
