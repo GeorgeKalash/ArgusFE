@@ -19,16 +19,7 @@ import { useWindow } from 'src/windows'
 import { getSystemFunctionModule } from 'src/resources/SystemFunction'
 import { Module } from 'src/resources/Module'
 
-export default function DocumentsForm({
-  labels,
-  maxAccess,
-  functionId,
-  seqNo,
-  recordId,
-  setWindowOpen,
-  searchValue,
-  setGridData
-}) {
+export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, recordId, setWindowOpen }) {
   const [isLoading, setIsLoading] = useState(false)
   const [responseValue, setResponseValue] = useState(null)
 
@@ -83,16 +74,7 @@ export default function DocumentsForm({
           toast.success('Record Edited Successfully')
         }
         setWindowOpen(false)
-        if (searchValue) {
-          await getRequest({
-            extension: DocumentReleaseRepository.DocumentsOnHold.qry,
-            parameters: `_startAt=0&_functionId=0&_reference=${searchValue}&_sortBy=reference desc&_response=0&_status=1&_pageSize=50`
-          })
-            .then(res => {
-              setGridData(res)
-            })
-            .catch(error)
-        } else invalidate()
+        invalidate()
       } catch (error) {}
     }
   })

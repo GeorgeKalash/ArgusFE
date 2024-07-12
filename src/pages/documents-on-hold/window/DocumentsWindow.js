@@ -9,8 +9,6 @@ const DocumentsWindow = ({
   functionId,
   seqNo,
   setWindowOpen,
-  searchValue,
-  setGridData,
 
   search
 }) => {
@@ -25,9 +23,6 @@ const DocumentsWindow = ({
     >
       <DocumentsForm
         onClose={onClose}
-        searchValue={searchValue}
-        search={search}
-        setGridData={setGridData}
         labels={labels}
         maxAccess={maxAccess}
         recordId={recordId}

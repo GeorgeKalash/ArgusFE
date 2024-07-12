@@ -34,7 +34,6 @@ const DocumentsOnHold = () => {
   const [selectedSeqNo, setSelectedSeqNo] = useState(null)
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
-  const [gridData, setGridData] = useState([])
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
@@ -51,16 +50,34 @@ const DocumentsOnHold = () => {
   const {
     query: { data },
     labels: _labels,
+    filterBy,
+    clearFilter,
     refetch,
+    clear,
     paginationParameters,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: DocumentReleaseRepository.DocumentsOnHold.qry,
-    datasetId: ResourceIds.DocumentsOnHold
+    datasetId: ResourceIds.DocumentsOnHold,
+    filter: {
+      endpointId: DocumentReleaseRepository.DocumentsOnHold.qry,
+      filterFn: fetchWithSearch
+    }
   })
 
-  const [searchValue, setSearchValue] = useState('')
+  async function fetchWithSearch({ options = {}, filters }) {
+    console.log(filters, 'filters')
+    const { _startAt = 0, _pageSize = 50 } = options
+
+    return (
+      filters.qry &&
+      (await getRequest({
+        extension: DocumentReleaseRepository.DocumentsOnHold.qry,
+        parameters: `_filter=${filters.qry}&_functionId=0&_reference=${filters.qry}&_sortBy=reference desc&_response=0&_status=1&_pageSize=${_pageSize}&_startAt=${_startAt}`
+      }))
+    )
+  }
 
   const columns = [
     {
@@ -225,38 +242,25 @@ const DocumentsOnHold = () => {
     }
   }
 
-  const search = inp => {
-    setSearchValue(inp)
-    setGridData({ count: 0, list: [], message: '', statusId: 1 })
-    const input = inp
-
-    if (input) {
-      var parameters = `_startAt=0&_functionId=0&_reference=${input}&_sortBy=reference desc&_response=0&_status=1&_pageSize=50`
-
-      getRequest({
-        extension: DocumentReleaseRepository.DocumentsOnHold.qry,
-        parameters: parameters
-      })
-        .then(res => {
-          setGridData(res)
-        })
-        .catch(error => {
-          setErrorMessage(error)
-        })
-    } else {
-      setGridData({ count: 0, list: [], message: '', statusId: 1 })
-    }
-  }
-
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar maxAccess={access} onSearch={search} onSearchClear={refetch} labels={_labels} inputSearch={true} />
+        <GridToolbar
+          maxAccess={access}
+          onSearch={value => {
+            filterBy('qry', value)
+          }}
+          onSearchClear={() => {
+            clearFilter('qry')
+          }}
+          labels={_labels}
+          inputSearch={true}
+        />
       </Fixed>
       <Grow>
         <Table
           columns={columns}
-          gridData={searchValue.length > 0 ? gridData : data}
+          gridData={data}
           rowId={['functionId', 'seqNo', 'recordId']}
           onEdit={edit}
           popupComponent={popupComponent}
@@ -274,9 +278,6 @@ const DocumentsOnHold = () => {
             setWindowOpen(false)
             setSelectedRecordId(null)
           }}
-          setGridData={setGridData}
-          searchValue={searchValue}
-          search={search}
           labels={_labels}
           maxAccess={access}
           recordId={selectedRecordId}

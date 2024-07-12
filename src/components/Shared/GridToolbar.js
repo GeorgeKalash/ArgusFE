@@ -86,9 +86,7 @@ const GridToolbar = ({
   function clear() {
     setSearchValue('')
     onSearch('')
-    if (typeof onSearchClear == 'function') {
-      onSearchClear()
-    }
+    if (onSearchClear) onSearchClear()
   }
 
   return (
