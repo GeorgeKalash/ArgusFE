@@ -21,12 +21,8 @@ const SitesTab = ({ labels, maxAccess, recordId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
-  const { labels: _labels, access } = useResourceQuery({
-    datasetId: ResourceIds.Users
-  })
-
   const { formik } = useForm({
-    access,
+    maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
@@ -44,9 +40,11 @@ const SitesTab = ({ labels, maxAccess, recordId }) => {
         }
       ]
     },
-    onSubmit: async values => {
+    onSubmit: async () => {
       try {
-        const itemsListROU = values.rows
+        console.log('formik check ', formik.values)
+
+        const itemsListROU = formik.values.rows
           .filter(obj => obj.isChecked)
           .map(row => ({
             resourceId: ResourceIds.Sites,
@@ -65,7 +63,7 @@ const SitesTab = ({ labels, maxAccess, recordId }) => {
           record: JSON.stringify(dataROU)
         })
 
-        const itemsListUSI = values.rows
+        const itemsListUSI = formik.values.rows
           .filter(obj => obj.isChecked)
           .map(row => ({
             userId: recordId,
@@ -140,7 +138,7 @@ const SitesTab = ({ labels, maxAccess, recordId }) => {
     {
       component: 'textfield',
       name: 'siteReference',
-      label: _labels.siteRef,
+      label: labels.siteRef,
       flex: 2,
       props: {
         readOnly: true
@@ -149,7 +147,7 @@ const SitesTab = ({ labels, maxAccess, recordId }) => {
     {
       component: 'textfield',
       name: 'siteName',
-      label: _labels.name,
+      label: labels.name,
       flex: 2,
       props: {
         readOnly: true
@@ -158,7 +156,7 @@ const SitesTab = ({ labels, maxAccess, recordId }) => {
     {
       component: 'resourcecombobox',
       name: 'accessLevelCombo',
-      label: _labels.accessLevel,
+      label: labels.accessLevel,
       flex: 3,
       props: {
         datasetId: DataSets.IV_SITE_ACCESS,
@@ -205,9 +203,10 @@ const SitesTab = ({ labels, maxAccess, recordId }) => {
               <CustomTextField
                 name='search'
                 value={formik.values.search}
-                label={_labels.search}
+                label={labels.search}
                 onClear={() => {
                   formik.setFieldValue('search', '')
+                  fetchGridData()
                 }}
                 onChange={handleSearchChange}
               />
