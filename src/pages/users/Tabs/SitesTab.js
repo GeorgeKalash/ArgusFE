@@ -1,4 +1,4 @@
-import { useContext } from 'react'
+import { useContext, useEffect } from 'react'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useResourceQuery } from 'src/hooks/resource'
@@ -14,6 +14,7 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grid } from '@mui/material'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
+import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 
 const SitesTab = ({ labels, maxAccess, recordId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -71,10 +72,35 @@ const SitesTab = ({ labels, maxAccess, recordId }) => {
     }
   })
   async function fetchGridData() {
-    const response = await getRequest({
+    const siteResponse = await getRequest({
       extension: InventoryRepository.Site.qry,
       parameters: `_filter=`
     })
+
+    const siteViews = siteResponse.list.map(site => {
+      const item = {
+        siteId: site.recordId,
+        siteReference: site.reference,
+        siteName: site.name,
+        isChecked: false
+      }
+
+      return item
+    })
+
+    const rowAccessUserResponse = await getRequest({
+      extension: AccessControlRepository.RowAccessUserView.qry,
+      parameters: `_resourceId=${ResourceIds.Sites}&_userId=${recordId}`
+    })
+    rowAccessUserResponse.list.map(rau => {
+      siteViews.forEach(site => {
+        if (site.siteId === rau.recordId) {
+          site.isChecked = true
+        }
+      })
+    })
+
+    console.log('siteView ', siteViews)
 
     /*const data = response.list.map((item, index) => ({
       ...item,

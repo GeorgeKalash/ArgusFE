@@ -59,5 +59,8 @@ export const AccessControlRepository = {
   SGControlAccess: {
     qry: service + 'qryCRL',
     set2: service + 'set2CRL'
+  },
+  UserSiteView: {
+    qry: service + 'qryUSI'
   }
 }
