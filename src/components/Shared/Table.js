@@ -305,10 +305,15 @@ const Table = ({
 
   const handleCheckboxChange = row => {
     if (handleCheckedRows) {
-      const result = Object.fromEntries(
-        props.rowId.map(key => (!row.checked && row[key] ? [key, row[key]] : null)).filter(entry => entry !== null)
+      handleCheckedRows(
+        gridData.list
+          .map(obj => ({
+            ...obj,
+            checked: props.rowId.every(key => obj[key] === row[key]) ? !obj.checked : obj.checked
+          }))
+          .filter(obj => obj.checked)
+          .map(obj => Object.fromEntries(Object.entries(obj).filter(([key]) => props.rowId.includes(key))))
       )
-      if (Object.keys(result).length !== 0) handleCheckedRows(result)
     }
   }
 

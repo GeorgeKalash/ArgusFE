@@ -18,8 +18,8 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 export default function RowAccessTab({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const [data, setData] = useState([])
-  const [checkedRows, handleCheckedRows] = useState([])
+  const [data, setData] = useState({ list: [] })
+  const [checkedRows, setCheckedRows] = useState([])
 
   const rowColumns = [
     {
@@ -79,24 +79,22 @@ export default function RowAccessTab({ labels, maxAccess, recordId }) {
       checked: item.hasAccess
     }))
 
-    moduleRes?.list?.forEach(item => {
-      if (item.hasAccess) handleCheckedRows(prevRows => [...prevRows, { recordId: item.recordId }])
-    })
+    setCheckedRows(
+      (moduleRes.list || [])
+        .filter(obj => obj.hasAccess)
+        .map(obj => Object.fromEntries(Object.entries(obj).filter(([key]) => ['recordId'].includes(key))))
+    )
 
     setData({ ...moduleRes, list: modifiedData })
   }
 
   const checkHandler = () => {
-    const newData = data.list ? [...data.list] : []
-
-    const rowIndex =
-      Object.keys(checkedRows).length === 0
-        ? -1
-        : newData.findIndex(row => Object.keys(checkedRows).every(key => row[key] === checkedRows[key]))
-
-    if (rowIndex !== -1) newData[rowIndex] = { ...newData[rowIndex], checked: true }
-
-    return { list: newData }
+    return {
+      list: data.list.map(obj => ({
+        ...obj,
+        checked: Object.keys(checkedRows).every(([key]) => obj[key] === checkedRows[key])
+      }))
+    }
   }
 
   const latestData = checkHandler()
@@ -116,7 +114,7 @@ export default function RowAccessTab({ labels, maxAccess, recordId }) {
   }
 
   useEffect(() => {
-    handleCheckedRows([])
+    setCheckedRows([])
     if (recordId) fetchGridData()
   }, [formik.values.classId, recordId])
 
@@ -173,7 +171,7 @@ export default function RowAccessTab({ labels, maxAccess, recordId }) {
             showCheckboxColumn={true}
             viewCheckButtons={true}
             ChangeCheckedRow={setData}
-            handleCheckedRows={handleCheckedRows}
+            handleCheckedRows={setCheckedRows}
           />
         </Grow>
       </VertLayout>
