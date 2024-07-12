@@ -34,7 +34,7 @@ import GuestGuard from 'src/@core/components/auth/GuestGuard'
 import Spinner from 'src/@core/components/spinner'
 
 // ** Contexts
-import { AuthProvider } from 'src/providers/AuthContext'
+import { AuthContext, AuthProvider } from 'src/providers/AuthContext'
 import { RequestsProvider } from 'src/providers/RequestsContext'
 import { ControlProvider } from 'src/providers/ControlContext'
 import { CommonProvider } from 'src/providers/CommonContext'
@@ -69,6 +69,7 @@ import 'styles/formgrid.css'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { WindowProvider } from 'src/windows'
 import { ErrorProvider } from 'src/error'
+import { useContext } from 'react'
 
 const clientSideEmotionCache = createEmotionCache()
 
@@ -86,7 +87,9 @@ if (themeConfig.routingLoader) {
 }
 
 const Guard = ({ children, authGuard, guestGuard }) => {
-  if (guestGuard) {
+  const { loading } = useContext(AuthContext)
+
+  if (loading || guestGuard) {
     return <GuestGuard fallback={<Spinner />}>{children}</GuestGuard>
   } else if (!guestGuard && !authGuard) {
     return <>{children}</>
@@ -130,17 +133,17 @@ const App = props => {
 
         <AuthProvider>
           <QueryClientProvider client={queryClient}>
-            <RequestsProvider>
-              <ControlProvider>
-                <CommonProvider>
-                  <SettingsProvider {...(setConfig ? { pageSettings: setConfig() } : {})}>
-                    <SettingsConsumer>
-                      {({ settings }) => {
-                        return (
-                          <ThemeComponent settings={settings}>
-                            <Guard authGuard={authGuard} guestGuard={guestGuard}>
-                              <AclGuard aclAbilities={aclAbilities} guestGuard={guestGuard} authGuard={authGuard}>
-                                <PrimeReactProvider>
+            <SettingsProvider {...(setConfig ? { pageSettings: setConfig() } : {})}>
+              <SettingsConsumer>
+                {({ settings }) => {
+                  return (
+                    <ThemeComponent settings={settings}>
+                      <PrimeReactProvider>
+                        <Guard authGuard={authGuard} guestGuard={guestGuard}>
+                          <AclGuard aclAbilities={aclAbilities} guestGuard={guestGuard} authGuard={authGuard}>
+                            <RequestsProvider>
+                              <ControlProvider>
+                                <CommonProvider>
                                   {getLayout(
                                     <ErrorProvider key={typeof window !== 'undefined' ? window.location.pathname : ''}>
                                       <RequestsProvider
@@ -159,23 +162,23 @@ const App = props => {
                                       </RequestsProvider>
                                     </ErrorProvider>
                                   )}
-                                </PrimeReactProvider>
-                              </AclGuard>
-                            </Guard>
-                            <ReactHotToast>
-                              <Toaster
-                                position={settings.toastPosition}
-                                toastOptions={{ className: 'react-hot-toast' }}
-                              />
-                            </ReactHotToast>
-                          </ThemeComponent>
-                        )
-                      }}
-                    </SettingsConsumer>
-                  </SettingsProvider>
-                </CommonProvider>
-              </ControlProvider>
-            </RequestsProvider>
+                                  <ReactHotToast>
+                                    <Toaster
+                                      position={settings.toastPosition}
+                                      toastOptions={{ className: 'react-hot-toast' }}
+                                    />
+                                  </ReactHotToast>
+                                </CommonProvider>
+                              </ControlProvider>
+                            </RequestsProvider>
+                          </AclGuard>
+                        </Guard>
+                      </PrimeReactProvider>
+                    </ThemeComponent>
+                  )
+                }}
+              </SettingsConsumer>
+            </SettingsProvider>
           </QueryClientProvider>
         </AuthProvider>
       </CacheProvider>

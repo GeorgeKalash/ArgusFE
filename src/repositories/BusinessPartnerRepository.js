@@ -75,5 +75,12 @@ export const BusinessPartnerRepository = {
     page: service + 'pageROC',
     set: service + 'setROC',
     del: service + 'delROC'
+  },
+  Role: {
+    qry: service + 'qryROL',
+    page: service + 'pageROL',
+    get: service + 'getROL',
+    set: service + 'setROL',
+    del: service + 'delROL'
   }
 }

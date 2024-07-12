@@ -14,6 +14,7 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
+import { responsiveFontSizes } from '@material-ui/core'
 
 const JournalVoucher = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -23,10 +24,12 @@ const JournalVoucher = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    return await getRequest({
+    const response = await getRequest({
       extension: GeneralLedgerRepository.JournalVoucher.qry,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_params=&_sortField=`
     })
+
+    return { ...response, _startAt: _startAt }
   }
 
   const {

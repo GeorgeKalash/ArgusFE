@@ -153,5 +153,7 @@ export const ResourceIds = {
   RebuildAccountBalances: 31501,
   RoleCategories: 21102,
   SourceOfIncomeType: 36311,
-  ProfessionGroups: 36310
+  ProfessionGroups: 36310,
+  Roles: 21103,
+  Checkbook: 33201
 }

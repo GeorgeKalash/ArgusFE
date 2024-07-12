@@ -223,7 +223,7 @@ export default function CashCountNotesForm({
               {
                 component: 'numberfield',
                 label: labels.subTotal,
-                name: 'subtotal',
+                name: 'subTotal',
                 props: { readOnly: true }
               }
             ]}

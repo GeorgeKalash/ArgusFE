@@ -58,10 +58,12 @@ const BPMasterData = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    return await getRequest({
+    const response = await getRequest({
       extension: BusinessPartnerRepository.MasterData.qry,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=&_sortBy=reference desc`
     })
+
+    return { ...response, _startAt: _startAt }
   }
 
   const {
@@ -69,6 +71,7 @@ const BPMasterData = () => {
     search,
     clear,
     refetch,
+    paginationParameters,
     labels: _labels,
     access,
     invalidate
@@ -181,7 +184,8 @@ const BPMasterData = () => {
           deleteConfirmationType={'strict'}
           isLoading={false}
           pageSize={50}
-          paginationType='client'
+          paginationType='api'
+          paginationParameters={paginationParameters}
           maxAccess={access}
           refetch={refetch}
         />
