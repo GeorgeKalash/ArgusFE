@@ -37,10 +37,10 @@ export default function RoleForm({ labels, maxAccess, recordId }) {
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
-      reference: yup.string().required(' '),
-      name: yup.string().required(' '),
-      rcId: yup.string().required(' '),
-      tpType: yup.string().required(' ')
+      reference: yup.string().required(),
+      name: yup.string().required(),
+      rcId: yup.string().required(),
+      tpType: yup.string().required()
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
