@@ -10,8 +10,8 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
-import { getFormattedNumber } from 'src/lib/numberField-helper'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
+import ItemsForm from './forms/ItemsForm'
 
 const IvItems = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -112,6 +112,20 @@ const IvItems = () => {
 
   const add = () => {
     openForm()
+  }
+
+  function openForm(recordId) {
+    stack({
+      Component: ItemsForm,
+      props: {
+        labels: _labels,
+        recordId: recordId,
+        maxAccess: access
+      },
+      width: 600,
+      height: 660,
+      title: _labels.items
+    })
   }
 
   const edit = obj => {

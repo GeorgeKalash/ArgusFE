@@ -52,6 +52,7 @@ export const InventoryRepository = {
     qry: service + 'qryADI'
   },
   Items: {
+    pack: service + 'packIT',
     page: service + 'pageIT',
     qry: service + 'qryIT',
     get: service + 'getIT',
