@@ -23,6 +23,7 @@ import { useWindow } from 'src/windows'
 import DeleteDialog from './DeleteDialog'
 import StrictDeleteConfirmation from './StrictDeleteConfirmation'
 import { HIDDEN, accessLevel } from 'src/services/api/maxAccess'
+import { all } from 'axios'
 
 const Table = ({
   fetchGridData,
@@ -45,6 +46,7 @@ const Table = ({
   const columnsAccess = props.maxAccess && props.maxAccess.record.controls
   const { stack } = useWindow()
   const [checkedRows, setCheckedRows] = useState({})
+  const [checked, setChecked] = useState({})
 
   const columns = props.columns.filter(
     ({ field }) =>
@@ -306,11 +308,21 @@ const Table = ({
   }
 
   const onSelectionChanged = params => {
+    console.log('checkedRows', checkedRows)
     const gridApi = params.api
+
     const selectedNodes = gridApi.getSelectedNodes()
     const selectedData = selectedNodes.map(node => node.data)
-    setData(selectedData)
+    const allChecked = (selectedData && selectedData?.every(row => row?.checked)) || false
+
+    setData === 'function' && setData(selectedData)
+    selectedNodes.forEach(node => {
+      const rowData = node.data
+      rowData.checked = allChecked ? false : true
+      handleCheckboxChange(rowData)
+    })
   }
+
   function openDelete(obj) {
     stack({
       Component: DeleteDialog,
@@ -395,10 +407,11 @@ const Table = ({
       })
   }
 
-  const checkboxCellRenderer = params => {
+  const checkboxCellRenderer = (params, checkedRows) => {
     return (
       <Checkbox
         checked={params.value}
+        key={checkedRows}
         onChange={e => {
           const checked = e.target.checked
           const updatedRows = { ...checkedRows, [params.node.id]: checked }
@@ -414,6 +427,7 @@ const Table = ({
     <>
       <Box className='ag-theme-alpine' style={{ flex: 1, width: '1000px !important', height: props.height || 'auto' }}>
         <AgGridReact
+          // key={checkedRows}
           rowData={(paginationType === 'api' ? props?.gridData?.list : gridData?.list) || []}
           enableClipboard={true}
           enableRangeSelection={true}
@@ -423,7 +437,7 @@ const Table = ({
                   {
                     headerName: '',
                     field: 'checked',
-                    cellRenderer: checkboxCellRenderer,
+                    cellRenderer: params => checkboxCellRenderer(params, checkedRows),
                     headerCheckboxSelection: true
                   }
                 ]
@@ -435,7 +449,7 @@ const Table = ({
           rowSelection={'multiple'}
           suppressAggFuncInHeader={true}
           getRowClass={getRowClass}
-          onSelectionChanged={setData === 'function' && onSelectionChanged}
+          onSelectionChanged={onSelectionChanged}
         />
       </Box>
       {pagination && <CustomPagination />}
