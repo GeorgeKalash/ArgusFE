@@ -50,5 +50,13 @@ export const InventoryRepository = {
   },
   MaterialsAdjustmentDetail: {
     qry: service + 'qryADI'
+  },
+  Items: {
+    page: service + 'pageIT',
+    qry: service + 'qryIT',
+    get: service + 'getIT',
+    set: service + 'setIT',
+    del: service + 'delIT',
+    snapshot: service + 'snapshotIT'
   }
 }
