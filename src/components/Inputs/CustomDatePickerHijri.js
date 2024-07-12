@@ -20,6 +20,13 @@ export default function CustomDatePickerHijri({
   fullWidth = true
 }) {
   const [openDatePicker, setOpenDatePicker] = useState(false)
+
+  const handleDateChange = newValue => {
+    const timestamp = newValue ? newValue.valueOf() : null
+    onChange(name, timestamp)
+  }
+  console.log('ne', moment(new Date(1938, 0, 1)).valueOf())
+  const val = moment(new Date(value)).valueOf()
   console.log(value)
   return (
     <LocalizationProvider dateAdapter={AdapterMomentHijri}>
@@ -27,16 +34,14 @@ export default function CustomDatePickerHijri({
         variant={variant}
         size={size}
         label={label}
-        key={value}
         fullWidth={fullWidth}
-        value={moment(new Date(value))}
-        onChange={newValue => onChange(name, newValue)}
+        value={value && moment(new Date(value))}
+        onChange={handleDateChange}
         onClose={() => setOpenDatePicker(false)}
         open={openDatePicker}
         minDate={moment(new Date(1938, 0, 1))}
         maxDate={moment(new Date(2075, 11, 31))}
         slotProps={{
-          // replacing clearable behaviour
           textField: {
             size: size,
             fullWidth: fullWidth,
