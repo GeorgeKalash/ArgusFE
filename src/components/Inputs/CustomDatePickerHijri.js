@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { DatePicker } from '@mui/x-date-pickers'
-import { InputAdornment, IconButton } from '@mui/material'
+import { InputAdornment, IconButton, TextField } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
 import EventIcon from '@mui/icons-material/Event'
 import { AdapterMomentHijri } from '@mui/x-date-pickers/AdapterMomentHijri'
@@ -33,7 +33,8 @@ export default function CustomDatePickerHijri({
         size={size}
         label={label}
         fullWidth={fullWidth}
-        value={value && moment(new Date(value))}
+        value={value ? moment(new Date(value)) : null}
+        defaultValue={value ? moment(new Date(value)) : null}
         onChange={handleDateChange}
         onClose={() => setOpenDatePicker(false)}
         open={openDatePicker}
@@ -46,7 +47,7 @@ export default function CustomDatePickerHijri({
             InputProps: {
               endAdornment: !(readOnly || disabled) && (
                 <InputAdornment position='end'>
-                  {value && (
+                  {Boolean(value) && (
                     <IconButton tabIndex={-1} edge='start' onClick={() => onChange(name, null)} sx={{ mr: -2 }}>
                       <ClearIcon sx={{ border: '0px', fontSize: 20 }} />
                     </IconButton>
