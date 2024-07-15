@@ -69,13 +69,13 @@ const Correspondent = () => {
       flex: 1
     },
     {
-      field: 'isInactive',
-      headerName: _labels.isInActive,
+      field: 'interfaceName',
+      headerName: _labels.interface,
       flex: 1
     },
     {
-      field: 'interfaceName',
-      headerName: _labels.interface,
+      field: 'isInactive',
+      headerName: _labels.isInActive,
       flex: 1
     }
   ]

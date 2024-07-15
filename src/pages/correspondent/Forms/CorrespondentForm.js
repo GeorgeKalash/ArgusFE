@@ -37,8 +37,7 @@ const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore,
       currencyId: null,
       currencyRef: null,
       isInactive: false,
-      interfaceId: null,
-      interfaceName: ''
+      interfaceId: null
     },
     validationSchema: yup.object({
       reference: yup.string().required(),
@@ -181,7 +180,6 @@ const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore,
                 values={formik.values}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('interfaceId', newValue?.recordId)
-                  formik.setFieldValue('interfaceName', newValue?.name)
                 }}
                 error={formik.touched.interfaceId && Boolean(formik.errors.interfaceId)}
               />
