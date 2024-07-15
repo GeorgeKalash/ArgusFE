@@ -68,31 +68,35 @@ export default function RowAccessTab({ labels, maxAccess, recordId }) {
     }
   })
 
-  async function fetchGridData() {
-    const moduleRes = await getRequest({
-      extension: AccessControlRepository.DataAccessItem.qry,
-      parameters: `_sgId=${recordId}&_filter=&_resourceId=${formik.values.classId}`
-    })
+  async function fetchGridData(resourceId) {
+    try {
+      const classId = resourceId ?? ResourceIds.DocumentTypes
 
-    const modifiedData = moduleRes?.list?.map(item => ({
-      ...item,
-      checked: item.hasAccess
-    }))
+      const moduleRes = await getRequest({
+        extension: AccessControlRepository.DataAccessItem.qry,
+        parameters: `_sgId=${recordId}&_filter=&_resourceId=${classId}`
+      })
 
-    setCheckedRows(
-      (moduleRes.list || [])
-        .filter(obj => obj.hasAccess)
-        .map(obj => Object.fromEntries(Object.entries(obj).filter(([key]) => ['recordId'].includes(key))))
-    )
+      const modifiedData = moduleRes?.list?.map(item => ({
+        ...item,
+        checked: item.hasAccess
+      }))
 
-    setData({ ...moduleRes, list: modifiedData })
+      setCheckedRows(
+        (moduleRes.list || [])
+          .filter(obj => obj.hasAccess)
+          .map(obj => Object.fromEntries(Object.entries(obj).filter(([key]) => ['recordId'].includes(key))))
+      )
+
+      setData({ ...moduleRes, list: modifiedData })
+    } catch (error) {}
   }
 
   const checkHandler = () => {
     return {
       list: data.list.map(obj => ({
         ...obj,
-        checked: Object.keys(checkedRows).every(([key]) => obj[key] === checkedRows[key])
+        checked: checkedRows.some(checkedRow => Object.keys(checkedRow).every(key => obj[key] === checkedRow[key]))
       }))
     }
   }
@@ -114,9 +118,13 @@ export default function RowAccessTab({ labels, maxAccess, recordId }) {
   }
 
   useEffect(() => {
-    setCheckedRows([])
-    if (recordId) fetchGridData()
-  }, [formik.values.classId, recordId])
+    ;(async function () {
+      try {
+        setCheckedRows([])
+        if (recordId) await fetchGridData()
+      } catch (error) {}
+    })()
+  }, [recordId])
 
   return (
     <FormShell
@@ -139,9 +147,9 @@ export default function RowAccessTab({ labels, maxAccess, recordId }) {
                 datasetId={DataSets.AU_RESOURCE_ROW_ACCESS}
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('classId', newValue ? newValue.key : ResourceIds.DocumentTypes)
-                  fetchGridData(newValue ? newValue.key : ResourceIds.DocumentTypes)
+                onChange={async (event, newValue) => {
+                  formik.setFieldValue('classId', newValue?.key ?? ResourceIds.DocumentTypes)
+                  await fetchGridData(newValue?.key)
                 }}
                 error={formik.touched.classId && Boolean(formik.errors.classId)}
               />
