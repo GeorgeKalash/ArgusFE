@@ -81,8 +81,6 @@ const SystemChecks = () => {
   }
 
   const postChecks = async () => {
-    console.log(data.list)
-
     const checkedObjects = data.list.filter(obj => obj.checked)
     checkedObjects.forEach(obj => {
       obj.scope = 1

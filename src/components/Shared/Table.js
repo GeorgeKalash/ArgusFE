@@ -1,8 +1,8 @@
-import React, { useCallback, useContext, useMemo, useRef } from 'react'
+import React, { useContext, useRef } from 'react'
 import { AgGridReact } from 'ag-grid-react'
 import 'ag-grid-community/styles/ag-grid.css'
 import 'ag-grid-community/styles/ag-theme-alpine.css'
-import { Box, Button, IconButton, TextField } from '@mui/material'
+import { Box, IconButton, TextField } from '@mui/material'
 import Checkbox from '@mui/material/Checkbox'
 
 import Image from 'next/image'
@@ -314,35 +314,6 @@ const Table = ({
     })
   }
 
-  const allChecked = gridData?.list?.every(row => row?.value)
-
-  const onSelectionChanged = params => {
-    const gridApi = params.api
-
-    const selectedNodes = gridApi?.getSelectedNodes()
-
-    const selectedData = selectedNodes?.map(node => node?.data)
-    if (selectedData.length === gridData.list.length || selectedData.length < 1)
-      if (selectedData.length > 0) {
-        selectedData.forEach(node => {
-          node.value = true
-          node.checked = true
-          handleCheckboxChange(node)
-        })
-      } else {
-        const allNodes = []
-        gridApi.forEachNode(node => allNodes.push(node))
-
-        allNodes.forEach(node => {
-          node.data.checked = false
-          node.data.value = false
-          handleCheckboxChange(node)
-        })
-
-        gridApi.redrawRows({ rowNodes: allNodes })
-      }
-  }
-
   const selectAll = e => {
     const api = gridRef.current.api
 
@@ -493,7 +464,6 @@ const Table = ({
           rowSelection={'multiple'}
           suppressAggFuncInHeader={true}
           getRowClass={getRowClass}
-          headerCheckboxSelectionFilteredOnly={true} // If you want to select only visible rows
         />
       </Box>
       {pagination && <CustomPagination />}
