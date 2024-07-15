@@ -41,7 +41,7 @@ const FiPaymentVouchers = () => {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: FinancialRepository.PaymentVouchers.page,
-    datasetId: ResourceIds.PaymentVouchers
+    datasetId: ResourceIds.PaymentVoucherExpenses
   })
 
   const invalidate = useInvalidate({
@@ -88,7 +88,7 @@ const FiPaymentVouchers = () => {
         plantId: plantId,
         maxAccess: access
       },
-      width: 1000,
+      width: 1300,
       height: 700,
       title: _labels.paymentVoucher
     })
