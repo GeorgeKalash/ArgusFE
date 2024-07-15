@@ -53,7 +53,6 @@ const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore,
   })
 
   const postCorrespondent = obj => {
-    console.log(obj)
     const recordId = obj?.recordId || ''
     postRequest({
       extension: RemittanceSettingsRepository.Correspondent.set,
