@@ -1,7 +1,6 @@
-import { Box, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
-import { useFormik } from 'formik'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { DataGrid } from 'src/components/Shared/DataGrid'
@@ -26,14 +25,11 @@ import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import WorkFlow from 'src/components/Shared/WorkFlow'
 import { useWindow } from 'src/windows'
-import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 
 export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access, recordId, plantId }) {
-  const [itemStore, setItemStore] = useState([])
   const [subtotalSum, setSubtotalSum] = useState(0);
   const [vatSum, setVatSum] = useState(0);
   const [amountSum, setAmountSum] = useState(0);
-  const [rowSelectionModel, setRowSelectionModel] = useState([])
 
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -45,88 +41,54 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
     enabled: !recordId
   })
 
+  const initialValues =  {
+    recordId: null,
+    reference: '',
+    accountId: '',
+    accountType: 3,
+    currencyId: null,
+    paymentMethod: '',
+    date: new Date(),
+    glId: null, 
+    amount: null,
+    checkNo: '',
+    checkbookId: null,
+    decimals: null,
+    notes: '',
+    exRate: 1,
+    rateCalcMethod: 1,
+    baseAmount: null, 
+    cashAccountId: null,
+    dtId: documentType?.dtId,
+    status: 1,
+    releaseStatus: null,
+    plantId: plantId,
+    contactId: null,
+    isVerified: false,
+    expenses: [
+      {
+        id: 1,
+        pvId: recordId || 0,
+        seqNo: 1,
+        etId: '',
+        subtotal: '',
+        vatAmount: '',
+        amount: '',
+        supplierName: '',
+        taxRef: '',
+        notes: '',
+        isVAT: false,
+      }
+    ]
+  }
 
   const invalidate = useInvalidate({
     endpointId: FinancialRepository.PaymentVouchers.page
   })
 
-  const detailsFormik = useFormik({
-    enableReinitialize: true,
-    validateOnChange: true,
-    initialValues: {
-      expenses: [
-        {
-          id: 1,
-          pvId: recordId || 0,
-          seqNo: 1,
-          etId: '',
-          subtotal: '',
-          vatAmount: '',
-          amount: '',
-          supplierName: '',
-          taxRef: '',
-          notes: '',
-          vatRate: null,
-        }
-      ]
-    },
-    validationSchema: yup.object({
-        expenses: yup
-          .array()
-          .of(
-            yup.object().shape({
-                pvId: yup.number().required(),
-                seqNo: yup.number().required(),
-                etId: yup.number().required(),
-                subtotal: yup.number().required(),
-                amount: yup.number().required(),
-                supplierName: yup.string().required(),
-                taxRef: yup.string().required(),
-                notes: yup.string().required(),
-            })
-          )
-          .required()
-      }),
-    onSubmit: async obj => {
-  
-        const updatedRows = detailsFormik.values.rows.map((obj, index) => {
-            const seqNo = index + 1
-
-            return {
-                ...obj,
-                seqNo: seqNo
-            }
-          
-        })
-      }
-  })
 
   const { formik } = useForm({
-    initialValues: {
-      recordId: null,
-      reference: '',
-      accountId: '',
-      accountType: 3,
-      currencyId: null,
-      paymentMethod: '',
-      date: new Date(),
-      glId: null, 
-      amount: null,
-      checkNo: '',
-      checkbookId: null,
-      decimals: null,
-      notes: '',
-      exRate: 1,
-      rateCalcMethod: 1,
-      baseAmount: null, 
-      cashAccountId: null,
-      dtId: documentType?.dtId,
-      status: 1,
-      releaseStatus: null,
-      plantId: plantId,
-      contactId: null,
-      isVerified: false,
-    },
+    initialValues,
     maxAccess,
     enableReinitialize: false,
     validateOnChange: true,
@@ -136,19 +98,40 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
       date: yup.string().required(),
       paymentMethod: yup.string().required(),
       cashAccountId: yup.string().required(),
-      amount: yup.string().required(),
+      expenses: yup
+          .array()
+          .of(
+            yup.object().shape({
+                etId: yup.number().required(),
+                amount: yup.number().required(),
+                supplierName: yup.string().required(),
+                taxRef: yup.string().required(),
+                notes: yup.string().required(),
+            })
+          )
+          .required()
     }),
     onSubmit: async obj => {
-      const recordId = obj.recordId
+      const copy = { ...obj }
+      delete copy.expenses
+      copy.date = formatDateToApi(copy.date)
+      copy.amount = totalAmount
+      copy.baseAmount = totalAmount
+
+      const updatedRows = formik.values.expenses.map((expensesDetails, index) => {
+        const seqNo = index + 1
+
+        return {
+          ...expensesDetails,
+          seqNo: seqNo,
+          pvId: formik.values.recordId || 0
+        }
+      })
 
       const data = {
-        header: {
-            ...obj,
-            date: formatDateToApi(obj.date),
-            recordId: recordId
-        },
-        items: [],
-        costCenters: []
+        header: copy,
+        items: updatedRows,
+        costCenters: [],
       }
       try {
         const response = await postRequest({
@@ -159,17 +142,23 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
         !recordId ? toast.success(platformLabels.Added) : toast.success(platformLabels.Edited)
         const res2 = await getPaymentVouchers(response.recordId)
         res2.record.date = formatDateFromApi(res2.record.date)
-        formik.setValues(res2.record)
+        getExpenses(res2.record)
 
         invalidate()
       } catch (error) {}
     }
   })
 
+  
+  const totalAmount = formik.values?.expenses?.reduce((amount, row) => {
+    const amountValue = parseFloat(row.amount?.toString().replace(/,/g, '')) || 0
+    
+    return amount + amountValue
+  }, 0)
+
   const isPosted = formik.values.status === 3
   const isCancelled = formik.values.status === -1
   const editMode = !!formik.values.recordId;
-
 
   async function getPaymentVouchers(recordId) {
     try {
@@ -205,15 +194,26 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
             extension: FinancialRepository.PaymentVouchers.get,
             parameters: `_recordId=${recordId}`
           })
+          res.record.date = formatDateFromApi(res.record.date)
+          await getExpenses(res.record)
 
-          formik.setValues({
-            ...res.record,
-            date: formatDateFromApi(res.record.date)
-          })
         }
+        await getDefaultVAT()
       } catch (exception) {}
     })()
   }, [])
+
+  async function getDefaultVAT() {
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.Defaults.get,
+        parameters: `_filter=&_key=vatPct`
+      });
+  
+      const vatPctValue = parseInt(res.record.value);
+      formik.setFieldValue('vatPct', vatPctValue);
+    } catch (error) {}
+  }
 
   const onWorkFlowClick = async () => {
     stack({
@@ -277,28 +277,20 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
     },
   ]
 
-  async function getDefaultVAT() {
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.Defaults.get,
-        parameters: `_filter=&_key=vatPct`
-      })
-      formik.setFieldValue('vatRate', parseInt(res.record.value))
-    } catch (error) {}
-  }
-
   const columns = [
     {
       component: 'resourcelookup',
       label: labels.expenseType,
-      name: 'etId',
+      name: 'reference',
       props: {
-        valueField: 'etId',
+        valueField: 'recordId',
         displayField: 'reference',
         displayFieldWidth: 4,
+        endpointId: FinancialRepository.ExpenseTypes.snapshot,
         mapping: [
-          { from: 'etId', to: 'etId' },
-          { from: 'name', to: 'expenseName' }
+          { from: 'recordId', to: 'etId' },
+          { from: 'name', to: 'etName' },
+          { from: 'reference', to: 'etRef' }
         ],
         columnsInDropDown: [
           { key: 'reference', value: 'Reference' },
@@ -309,7 +301,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
     {
       component: 'textfield',
       label: labels.expenseName,
-      name: 'expenseName',
+      name: 'etName',
       props: {
         readOnly: true
       }
@@ -325,14 +317,29 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
     {
         component: 'checkbox',
         label: labels.isVAT,
-        name: 'isVAT'
+        name: 'isVAT',
+        async onChange({ row: { update, newRow } }) {
+          
+          if (newRow.isVAT) {
+            let newSubtotal = newRow.amount * (100 / (100 + formik.values.vatPct));
+            update({
+              subtotal: newSubtotal.toFixed(2),
+              vatAmount: (newRow.amount - newSubtotal).toFixed(2)
+            })
+          } else {
+            update({
+              subtotal: newRow.amount,
+              vatAmount: 0
+            })
+          }
+        }
     },
     {
         component: 'textfield',
-        label: labels.vatAmount,
+        label: labels.vat,
         name: 'vatAmount',
         props: {
-          readOnly: true
+          readOnly: false
         }
     },
     {
@@ -340,7 +347,13 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
         label: labels.amount,
         name: 'amount',
         props: {
-          readOnly: true
+          readOnly: false
+        },
+        async onChange({ row: { update, newRow } }) {
+          update({
+            subtotal: newRow.amount,
+            vatAmount: 0
+          })
         }
     },
     {
@@ -348,43 +361,63 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
         label: labels.vendorName,
         name: 'supplierName',
         props: {
-          readOnly: isPosted
+          readOnly: false
         }
     },
     {
-        component: 'textfield',
-        label: labels.notes,
-        name: 'notes',
-        props: {
-          readOnly: isPosted
-        }
-    },
+      component: 'textfield',
+      label: labels.vatNo,
+      name: 'taxRef',
+      props: {
+        readOnly: false
+      }
+  },
+  {
+      component: 'textfield',
+      label: labels.notes,
+      name: 'notes',
+      props: {
+        readOnly: false
+      }
+  },
   ]
 
-  useEffect(() => {
-    recordId && getExpenses(recordId)
-  }, [recordId])
 
-  const getExpenses = pvId => {
-    const defaultParams = `_pvId=${recordId}`
-    var parameters = defaultParams
-    getRequest({
+  const getExpenses = async data => {
+
+    const res = await getRequest({
       extension: FinancialRepository.PaymentVoucherExpenses.qry,
-      parameters: parameters
+      parameters: `_pvId=${data.recordId}`
     })
-      .then(res => {
-        if (res.list.length > 0)
-          formik.setValues({
-            expenses: res.list.map(({ ...rest }, index) => ({
-              id: index + 1,
-              saved: true,
-              ...rest
-            }))
-          })
-      })
-      .catch(error => {})
-  }
 
+    const expensesList = res.list.map(item => ({
+      ...item,
+      id: item.seqNo,
+      subtotal: item.subtotal,
+      vatAmount: item.vatAmount,
+      isVAT: item.vatAmount != 0,
+    }))
+
+    formik.setValues({
+      ...data,
+      expenses: expensesList
+    })
+  }
+  
+  useEffect(() => {
+    const subtotals = formik?.values?.expenses?.map(item => parseFloat(item.subtotal) || 0);
+    const vatAmounts = formik?.values?.expenses?.map(item => parseFloat(item.vatAmount) || 0);
+    const amounts = formik?.values?.expenses?.map(item => parseFloat(item.amount) || 0);
+  
+    setSubtotalSum(subtotals?.reduce((acc, val) => acc + val, 0));
+    setVatSum(vatAmounts?.reduce((acc, val) => acc + val, 0));
+    setAmountSum(amounts?.reduce((acc, val) => acc + val, 0));
+    formik.setFieldValue('amount', amountSum);
+    formik.setFieldValue('vatAmount', vatSum);
+    formik.setFieldValue('subtotal', subtotalSum);
+    formik.setFieldValue('baseAmount', amountSum);
+  }, [formik?.values?.expenses]);
+  
   return (
     <FormShell 
       resourceId={ResourceIds.PaymentVoucherExpenses} 
@@ -627,34 +660,15 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
                     error={formik.touched.notes && Boolean(formik.errors.notes)}
                 />
             </Grid>
-            <Grid item xs={12}>
-                <DataGrid
-                    onChange={value => detailsFormik.setFieldValue('expenses', value)}
-                    value={detailsFormik.values.expenses}
-                    error={detailsFormik.errors.expenses}
-                    columns={columns}
-                    rowSelectionModel={rowSelectionModel}
-                    onSelectionChange={row => {
-                        if (row) {
-                            setStore(prevStore => ({
-                                ...prevStore,
-                                pvId: row.pvId,
-                                etId: row.etId,
-                                subtotal: row.subtotal,
-                                vatAmount: row.vatAmount,
-                                amount: row.amount,
-                                supplierName: row.supplierName,
-                                taxRef: row.taxRef,
-                                notes: row.notes,
-                                vatRate: row.vatRate,
-                                _seqNo: row.seqNo
-                            }))
-                            setRowSelectionModel(row.id)
-                        }
-                    }}
-                />
-            </Grid>
           </Grid>
+          <DataGrid
+            onChange={value => formik.setFieldValue('expenses', value)}
+            value={formik?.values?.expenses}
+            error={formik?.errors?.expenses}
+            columns={columns}
+            allowDelete={true}
+            allowAddNewLine={true}
+          />
         </Grow>
       </VertLayout>      
     </FormShell>
