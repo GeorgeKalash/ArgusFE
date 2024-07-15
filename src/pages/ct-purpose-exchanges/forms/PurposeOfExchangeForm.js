@@ -1,6 +1,5 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
-import { useFormik } from 'formik'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -11,15 +10,10 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
+import { useForm } from 'src/hooks/form'
 
 export default function PurposeOfExchangeForm({ labels, maxAccess, recordId, setStore }) {
   const [editMode, setEditMode] = useState(!!recordId)
-
-  const [initialValues, setInitialData] = useState({
-    recordId: null,
-    name: '',
-    reference: ''
-  })
 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -27,8 +21,13 @@ export default function PurposeOfExchangeForm({ labels, maxAccess, recordId, set
     endpointId: CurrencyTradingSettingsRepository.PurposeExchange.page
   })
 
-  const formik = useFormik({
-    initialValues,
+  const { formik } = useForm({
+    initialValues: {
+      recordId: null,
+      name: '',
+      reference: ''
+    },
+    maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -44,69 +43,70 @@ export default function PurposeOfExchangeForm({ labels, maxAccess, recordId, set
       })
 
       if (!recordId) {
-
         setStore({
           recordId: response.recordId,
           name: obj.name
         })
         toast.success('Record Added Successfully')
+        formik.setValues({
+          ...obj,
+          recordId: response.recordId
+        })
       } else {
         setStore(prev => ({ ...prev, name: obj.name }))
         toast.success('Record Edited Successfully')
-        setEditMode(true)
       }
+      setEditMode(true)
       invalidate()
     }
   })
-
-  function getData(recordId) {
-    getRequest({
-      extension: CurrencyTradingSettingsRepository.PurposeExchange.get,
-      parameters: `_recordId=${recordId}`
-    })
-      .then(res => {
-        formik.setValues(res.record)
-        setStore({
-          recordId: res.record.recordId,
-          name: res.record.name
-        })
-      })
-      .catch(error => {})
-  }
-  
-    useEffect(() => {
-    recordId && getData(recordId)
-  }, [recordId])
+  useEffect(() => {
+    ;(async function () {
+      try {
+        if (recordId) {
+          const res = await getRequest({
+            extension: CurrencyTradingSettingsRepository.PurposeExchange.get,
+            parameters: `_recordId=${recordId}`
+          })
+          setStore({
+            recordId: res.record.recordId,
+            name: res.record.name
+          })
+          formik.setValues(res.record)
+        }
+      } catch (exception) {}
+    })()
+  }, [])
 
   return (
     <FormShell resourceId={ResourceIds.PurposeOfExchange} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
-           <Grid container spacing={4}>
-        <Grid item xs={12}>
-          <CustomTextField
-            name='reference'
-            label={labels.reference}
-            value={formik.values.reference}
-            required
-            rows={2}
-            maxAccess={maxAccess}
-            onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('reference', '')}
-            error={formik.touched.reference && Boolean(formik.errors.reference)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <CustomTextField
-            name='name'
-            label={labels.name}
-            value={formik.values.name}
-            required
-            maxAccess={maxAccess}
-            maxLength='30'
-            onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('name', '')}
-            error={formik.touched.name && Boolean(formik.errors.name)}
+          <Grid container spacing={4}>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='reference'
+                label={labels.reference}
+                value={formik.values.reference}
+                required
+                rows={2}
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('reference', '')}
+                error={formik.touched.reference && Boolean(formik.errors.reference)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='name'
+                label={labels.name}
+                value={formik.values.name}
+                required
+                maxAccess={maxAccess}
+                maxLength='30'
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('name', '')}
+                error={formik.touched.name && Boolean(formik.errors.name)}
               />
             </Grid>
           </Grid>

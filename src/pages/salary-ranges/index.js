@@ -1,25 +1,23 @@
 import { useContext, useState } from 'react'
-import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import Table from 'src/components/Shared/Table'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import SalaryRangeWindow from './Windows/SalaryRangeWindow'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import SalaryRangeForm from './forms/SalaryRangeForm'
+import { useWindow } from 'src/windows'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const SalaryRange = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const [selectedRecordId, setSelectedRecordId] = useState(null)
+  const { platformLabels } = useContext(ControlContext)
 
-  //states
-  const [windowOpen, setWindowOpen] = useState(false)
-  const [errorMessage, setErrorMessage] = useState(null)
+  const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -64,12 +62,11 @@ const SalaryRange = () => {
   ]
 
   const add = () => {
-    setWindowOpen(true)
+    openForm()
   }
 
   const edit = obj => {
-    setSelectedRecordId(obj.recordId)
-    setWindowOpen(true)
+    openForm(obj?.recordId)
   }
 
   const del = async obj => {
@@ -78,7 +75,21 @@ const SalaryRange = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
+  }
+
+  function openForm(recordId) {
+    stack({
+      Component: SalaryRangeForm,
+      props: {
+        labels: _labels,
+        recordId: recordId,
+        maxAccess: access
+      },
+      width: 500,
+      height: 300,
+      title: _labels.salaryRange
+    })
   }
 
   return (
@@ -101,19 +112,6 @@ const SalaryRange = () => {
           maxAccess={access}
         />
       </Grow>
-      {windowOpen && (
-        <SalaryRangeWindow
-          onClose={() => {
-            setWindowOpen(false)
-            setSelectedRecordId(null)
-          }}
-          labels={_labels}
-          maxAccess={access}
-          recordId={selectedRecordId}
-          setSelectedRecordId={setSelectedRecordId}
-        />
-      )}
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </VertLayout>
   )
 }

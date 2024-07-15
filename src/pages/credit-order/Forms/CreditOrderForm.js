@@ -41,6 +41,7 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 export default function CreditOrderForm({ labels, maxAccess, recordId, expanded, plantId, userData, window }) {
+  const { platformLabels } = useContext(ControlContext)
   const { height } = useWindowDimensions()
   const [isLoading, setIsLoading] = useState(false)
   const [isClosed, setIsClosed] = useState(false)
@@ -138,7 +139,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
           })
 
           if (res.recordId) {
-            toast.success('Record Updated Successfully')
+            toast.success(platformLabels.Updated)
             formik.setFieldValue('recordId', res.recordId)
             setEditMode(true)
 
@@ -207,7 +208,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
         record: JSON.stringify(copy)
       })
       if (res.recordId) {
-        toast.success('Record Closed Successfully')
+        toast.success(platformLabels.Closed)
         invalidate()
         setIsClosed(true)
       }
@@ -231,7 +232,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
         record: JSON.stringify(copy)
       })
       if (res.recordId) {
-        toast.success('Record Closed Successfully')
+        toast.success(platformLabels.Closed)
         invalidate()
         setIsClosed(false)
       }
@@ -255,7 +256,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
         record: JSON.stringify(copy)
       })
       if (res.recordId) {
-        toast.success('Record Closed Successfully')
+        toast.success(platformLabels.Closed)
         setIsTFR(true)
         invalidate()
         setConfirmationWindowOpen(false)
@@ -937,20 +938,22 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
           </Grid>
         </Fixed>
         <Grow>
-              <DataGrid
-                onChange={value => detailsFormik.setFieldValue('rows', value)}
-                value={detailsFormik.values.rows}
-                error={detailsFormik.errors.rows}
-                columns={columns}
-                bg={
-                  formik.values.functionId &&
-                  (formik.values.functionId != SystemFunction.CurrencyCreditOrderPurchase
-                    ? '#C7F6C7'
-                    : 'rgb(245, 194, 193)')
-                }
-              />
-          </Grow>
-          <Fixed>
+          <DataGrid
+            onChange={value => detailsFormik.setFieldValue('rows', value)}
+            value={detailsFormik.values.rows}
+            error={detailsFormik.errors.rows}
+            columns={columns}
+            allowAddNewLine={!isClosed}
+            allowDelete={!isClosed}
+            bg={
+              formik.values.functionId &&
+              (formik.values.functionId != SystemFunction.CurrencyCreditOrderPurchase
+                ? '#C7F6C7'
+                : 'rgb(245, 194, 193)')
+            }
+          />
+        </Grow>
+        <Fixed>
           <Grid container rowGap={1} xs={12}>
             {/* First Column (moved to the left) */}
             <FormGrid container rowGap={1} xs={8} style={{ marginTop: '10px' }}>
@@ -992,7 +995,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
               </Grid>
             </Grid>
           </Grid>
-          </Fixed>
+        </Fixed>
       </FormShell>
     </VertLayout>
   )

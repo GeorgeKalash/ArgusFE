@@ -92,7 +92,10 @@ export const SystemRepository = {
     snapshot: service + 'snapshotADD'
   },
   PlantGroup: {
-    qry: service + 'qryPLG'
+    qry: service + 'qryPLG',
+    get: service + 'getPLG',
+    set: service + 'setPLG',
+    del: service + 'delPLG'
   },
   SMSTemplate: {
     qry: service + 'qrySMT',
@@ -154,7 +157,9 @@ export const SystemRepository = {
     qry: service + 'qryResourceControls'
   },
   UserFunction: {
-    get: service + 'getUFU'
+    get: service + 'getUFU',
+    qry: service + 'qryUFU',
+    set: service + 'setUFU'
   },
   RecordRemarks: {
     qry: service + 'qryRMK',
@@ -165,5 +170,11 @@ export const SystemRepository = {
   SystemChecks: {
     qry: service + 'qryCHK',
     set: service + 'set2CHK'
+  },
+  PosUsers: {
+    qry: service + 'qryUS'
+  },
+  TimeZone: {
+    get: service + 'getTZN'
   }
 }

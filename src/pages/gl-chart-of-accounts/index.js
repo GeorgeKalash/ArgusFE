@@ -1,30 +1,37 @@
-import { useState, useContext } from 'react'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
-import ChartOfAccountsWindow from './windows/ChartOfAccountsWindow'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+
 import { ResourceIds } from 'src/resources/ResourceIds'
+import ChartOfAccountsForm from './forms/ChartOfAccountsForm'
+import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+
+import { useWindow } from 'src/windows'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const ChartOfAccounts = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const [selectedRecordId, setSelectedRecordId] = useState(null)
-  const [windowOpen, setWindowOpen] = useState(false)
-  const [errorMessage, setErrorMessage] = useState(null)
+
+  const { stack } = useWindow()
+
+  const invalidate = useInvalidate({
+    endpointId: GeneralLedgerRepository.ChartOfAccounts.page
+  })
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    return await getRequest({
+    const response = await getRequest({
       extension: GeneralLedgerRepository.ChartOfAccounts.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_params=`
     })
+
+    return { ...response, _startAt: _startAt }
   }
 
   const {
@@ -43,10 +50,6 @@ const ChartOfAccounts = () => {
       endpointId: GeneralLedgerRepository.ChartOfAccounts.snapshot,
       searchFn: fetchWithSearch
     }
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: GeneralLedgerRepository.ChartOfAccounts.page
   })
 
   async function fetchWithSearch({ options = {}, qry }) {
@@ -81,15 +84,6 @@ const ChartOfAccounts = () => {
     }
   ]
 
-  const add = () => {
-    setWindowOpen(true)
-  }
-
-  const edit = obj => {
-    setSelectedRecordId(obj.recordId)
-    setWindowOpen(true)
-  }
-
   const del = async obj => {
     try {
       await postRequest({
@@ -100,6 +94,28 @@ const ChartOfAccounts = () => {
       invalidate()
       toast.success('Record Deleted Successfully')
     } catch (err) {}
+  }
+
+  const edit = obj => {
+    openForm(obj.recordId)
+  }
+
+  const add = () => {
+    openForm()
+  }
+
+  function openForm(recordId) {
+    stack({
+      Component: ChartOfAccountsForm,
+      props: {
+        labels: _labels,
+        maxAccess: access,
+        recordId: recordId ? recordId : null
+      },
+      width: 500,
+      height: 540,
+      title: _labels.chartOfAccount
+    })
   }
 
   return (
@@ -121,6 +137,7 @@ const ChartOfAccounts = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
+          refetch={refetch}
           deleteConfirmationType={'strict'}
           isLoading={false}
           pageSize={50}
@@ -129,19 +146,6 @@ const ChartOfAccounts = () => {
           maxAccess={access}
         />
       </Grow>
-
-      {windowOpen && (
-        <ChartOfAccountsWindow
-          onClose={() => {
-            setWindowOpen(false)
-            setSelectedRecordId(null)
-          }}
-          labels={_labels}
-          maxAccess={access}
-          recordId={selectedRecordId}
-        />
-      )}
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </VertLayout>
   )
 }

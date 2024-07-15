@@ -1,5 +1,4 @@
 import { useContext, useState } from 'react'
-import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import Table from 'src/components/Shared/Table'
@@ -12,10 +11,12 @@ import { useWindow } from 'src/windows'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const Professions = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const { platformLabels } = useContext(ControlContext)
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -61,13 +62,13 @@ const Professions = () => {
       flex: 1
     },
     {
-      field: 'monthlyIncome',
-      headerName: _labels.monthlyIncome,
+      field: 'salaryRange',
+      headerName: _labels.salaryRange,
       flex: 1
     },
     {
-      field: 'riskFactor',
-      headerName: _labels.riskFactor,
+      field: 'riskLevel',
+      headerName: _labels.riskLevel,
       flex: 1
     }
   ]
@@ -100,7 +101,7 @@ const Professions = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
   }
 
   return (

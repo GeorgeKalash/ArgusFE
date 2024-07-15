@@ -1,5 +1,4 @@
 import { Grid } from '@mui/material'
-import { useFormik } from 'formik'
 import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
@@ -13,25 +12,25 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { useForm } from 'src/hooks/form'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const AgentForm = ({ labels, maxAccess, recordId }) => {
-  const [isLoading, setIsLoading] = useState(false)
   const [editMode, setEditMode] = useState(!!recordId)
 
-  const [initialValues, setInitialData] = useState({
-    recordId: null,
-    name: '',
-    countryId: ''
-  })
-
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: RemittanceSettingsRepository.CorrespondentAgents.page
   })
 
-  const formik = useFormik({
-    initialValues,
+  const { formik } = useForm({
+    initialValues: {
+      recordId: null,
+      name: '',
+      countryId: ''
+    },
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -47,12 +46,12 @@ const AgentForm = ({ labels, maxAccess, recordId }) => {
       })
 
       if (!recordId) {
-        toast.success('Record Added Successfully')
-        setInitialData({
-          ...obj, // Spread the existing properties
-          recordId: response.recordId // Update only the recordId field
+        toast.success(platformLabels.Added)
+        formik.setValues({
+          ...obj,
+          recordId: response.recordId
         })
-      } else toast.success('Record Edited Successfully')
+      } else toast.success(platformLabels.Edited)
       setEditMode(true)
 
       invalidate()
@@ -63,30 +62,19 @@ const AgentForm = ({ labels, maxAccess, recordId }) => {
     ;(async function () {
       try {
         if (recordId) {
-          setIsLoading(true)
-
           const res = await getRequest({
             extension: RemittanceSettingsRepository.CorrespondentAgents.get,
             parameters: `_recordId=${recordId}`
           })
 
-          setInitialData(res.record)
+          formik.setValues(res.record)
         }
-      } catch (exception) {
-        setErrorMessage(error)
-      }
-      setIsLoading(false)
+      } catch (exception) {}
     })()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.CorrespondentAgents}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={editMode}
-    >
+    <FormShell resourceId={ResourceIds.CorrespondentAgents} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -101,8 +89,6 @@ const AgentForm = ({ labels, maxAccess, recordId }) => {
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
                 error={formik.touched.name && Boolean(formik.errors.name)}
-
-                // helperText={formik.touched.name && formik.errors.name}
               />
             </Grid>
             <Grid item xs={12}>
@@ -123,8 +109,6 @@ const AgentForm = ({ labels, maxAccess, recordId }) => {
                   formik.setFieldValue('countryId', newValue?.recordId)
                 }}
                 error={formik.touched.countryId && Boolean(formik.errors.countryId)}
-
-                // helperText={formik.touched.countryId && formik.errors.countryId}
               />
             </Grid>
           </Grid>

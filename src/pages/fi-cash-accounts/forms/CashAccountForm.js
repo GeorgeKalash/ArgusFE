@@ -1,11 +1,9 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
-import { useFormik } from 'formik'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
@@ -17,34 +15,33 @@ import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { MasterSource } from 'src/resources/MasterSource'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { useForm } from 'src/hooks/form'
+import { useInvalidate } from 'src/hooks/resource'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function CashAccountForm({ labels, recordId, maxAccess }) {
-  const [isLoading, setIsLoading] = useState(false)
-  const [editMode, setEditMode] = useState(!!recordId)
-
-  const [initialValues, setInitialData] = useState({
-    recordId: null,
-    name: '',
-    reference: '',
-    accountNo: '',
-    currencyId: null,
-    plantId: null,
-    activeStatus: null,
-    groupId: null,
-    accountName: '',
-    accountRef: '',
-    accountId: null,
-    type: 2
-  })
-
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: CashBankRepository.CashAccount.qry
   })
 
-  const formik = useFormik({
-    initialValues,
+  const { formik } = useForm({
+    initialValues: {
+      recordId: recordId || null,
+      name: '',
+      reference: '',
+      accountNo: '',
+      currencyId: null,
+      plantId: null,
+      activeStatus: null,
+      groupId: null,
+      accountName: '',
+      accountRef: '',
+      accountId: null,
+      type: 2
+    },
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -53,33 +50,32 @@ export default function CashAccountForm({ labels, recordId, maxAccess }) {
       activeStatus: yup.string().required(' ')
     }),
     onSubmit: async obj => {
-      const recordId = obj.recordId
-      obj.accountNo = obj.reference
+      try {
+        const recordId = obj.recordId
+        obj.accountNo = obj.reference
 
-      const response = await postRequest({
-        extension: CashBankRepository.CashBox.set,
-        record: JSON.stringify(obj)
-      })
-
-      if (!recordId) {
-        toast.success('Record Added Successfully')
-        setInitialData({
-          ...obj,
-          recordId: response.recordId
+        const response = await postRequest({
+          extension: CashBankRepository.CashBox.set,
+          record: JSON.stringify(obj)
         })
-      } else toast.success('Record Edited Successfully')
-      setEditMode(true)
 
-      invalidate()
+        if (!recordId) {
+          toast.success(platformLabels.Added)
+          formik.setValues({
+            ...obj,
+            recordId: response.recordId
+          })
+        } else toast.success(platformLabels.Edited)
+        invalidate()
+      } catch (error) {}
     }
   })
+  const editMode = !!recordId || !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
       try {
         if (recordId) {
-          setIsLoading(true)
-
           const res = await getRequest({
             extension: CashBankRepository.CashAccount.get,
             parameters: `_recordId=${recordId}`
@@ -87,10 +83,7 @@ export default function CashAccountForm({ labels, recordId, maxAccess }) {
 
           formik.setValues(res.record)
         }
-      } catch (exception) {
-        setErrorMessage(error)
-      }
-      setIsLoading(false)
+      } catch (exception) {}
     })()
   }, [])
 
@@ -99,6 +92,18 @@ export default function CashAccountForm({ labels, recordId, maxAccess }) {
       key: 'Integration Account',
       condition: true,
       onClick: 'onClickGIA',
+      disabled: !editMode
+    },
+    {
+      key: 'RecordRemarks',
+      condition: true,
+      onClick: 'onRecordRemarks',
+      disabled: !editMode
+    },
+    {
+      key: 'RecordRemarks',
+      condition: true,
+      onClick: 'onRecordRemarks',
       disabled: !editMode
     }
   ]
@@ -231,15 +236,9 @@ export default function CashAccountForm({ labels, recordId, maxAccess }) {
                 errorCheck={'accountId'}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  if (newValue) {
-                    formik.setFieldValue('accountId', newValue?.recordId)
-                    formik.setFieldValue('accountRef', newValue?.reference)
-                    formik.setFieldValue('accountName', newValue?.name)
-                  } else {
-                    formik.setFieldValue('accountId', '')
-                    formik.setFieldValue('accountRef', null)
-                    formik.setFieldValue('accountName', null)
-                  }
+                  formik.setFieldValue('accountId', newValue?.recordId || '')
+                  formik.setFieldValue('accountRef', newValue?.reference || '')
+                  formik.setFieldValue('accountName', newValue?.name || '')
                 }}
               />
             </Grid>
