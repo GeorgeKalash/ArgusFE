@@ -122,7 +122,7 @@ const IvItems = () => {
         recordId: recordId,
         maxAccess: access
       },
-      width: 600,
+      width: 1200,
       height: 660,
       title: _labels.items
     })
