@@ -1,8 +1,8 @@
-import React, { useContext, useRef } from 'react'
+import React, { useCallback, useContext, useMemo, useRef } from 'react'
 import { AgGridReact } from 'ag-grid-react'
 import 'ag-grid-community/styles/ag-grid.css'
 import 'ag-grid-community/styles/ag-theme-alpine.css'
-import { Box, IconButton, TextField } from '@mui/material'
+import { Box, Button, IconButton, TextField } from '@mui/material'
 import Checkbox from '@mui/material/Checkbox'
 
 import Image from 'next/image'
@@ -46,7 +46,8 @@ const Table = ({
   const columnsAccess = props.maxAccess && props.maxAccess.record.controls
   const { stack } = useWindow()
   const [checkedRows, setCheckedRows] = useState({})
-  const [checked, setChecked] = useState({})
+  const [checked, setChecked] = useState(false)
+  const gridRef = useRef(null)
 
   const columns = props.columns.filter(
     ({ field }) =>
@@ -57,6 +58,9 @@ const Table = ({
   )
 
   useEffect(() => {
+    const areAllValuesTrue = props?.gridData?.list.every(item => item.checked === true)
+    setChecked(areAllValuesTrue)
+
     props?.gridData &&
       paginationType !== 'api' &&
       pageSize &&
@@ -302,33 +306,53 @@ const Table = ({
   const handleCheckboxChange = row => {
     setCheckedRows(prevCheckedRows => {
       const newCheckedRows = { ...prevCheckedRows }
-      const key = row.seqNo ? `${row.recordId}-${row.seqNo}` : row.recordId
-      newCheckedRows[key] = row
+      const key = row.data.seqNo ? `${row.data.recordId}-${row.data.seqNo}` : row.data?.[props?.rowId]
+      newCheckedRows[key] = row.data
       const filteredRows = !newCheckedRows[key]?.checked ? [newCheckedRows[key]] : []
 
       return filteredRows
     })
   }
 
+  const allChecked = gridData?.list?.every(row => row?.value)
+
   const onSelectionChanged = params => {
-    console.log('checkedRows', checkedRows)
     const gridApi = params.api
 
-    const selectedNodes = gridApi.getSelectedNodes()
-    const selectedData = selectedNodes.map(node => node.data)
-    const allChecked = (selectedData && selectedData?.every(row => row?.checked)) || false
+    const selectedNodes = gridApi?.getSelectedNodes()
 
-    setData === 'function' && setData(selectedData)
+    const selectedData = selectedNodes?.map(node => node?.data)
+    if (selectedData.length === gridData.list.length || selectedData.length < 1)
+      if (selectedData.length > 0) {
+        selectedData.forEach(node => {
+          node.value = true
+          node.checked = true
+          handleCheckboxChange(node)
+        })
+      } else {
+        const allNodes = []
+        gridApi.forEachNode(node => allNodes.push(node))
 
-    const data = gridData.list?.map(({ checked, value, ...rest }) => ({
-      checked: true,
-      value: true,
-      ...rest
-    }))
+        allNodes.forEach(node => {
+          node.data.checked = false
+          node.data.value = false
+          handleCheckboxChange(node)
+        })
 
-    // setGridData({ list: data })
+        gridApi.redrawRows({ rowNodes: allNodes })
+      }
   }
 
+  const selectAll = e => {
+    const api = gridRef.current.api
+
+    api.forEachNode(node => {
+      const newData = { ...node.data, checked: !checked, value: !checked }
+      node.setData(newData)
+      handleCheckboxChange(node)
+    })
+    setChecked(!checked)
+  }
   function openDelete(obj) {
     stack({
       Component: DeleteDialog,
@@ -414,48 +438,62 @@ const Table = ({
   }
 
   const checkboxCellRenderer = params => {
-    console.log('params', params.node.data.checked)
     return (
       <Checkbox
-        checked={params?.node?.data?.checked}
+        checked={params.data.value}
         onChange={e => {
           const checked = e.target.checked
+
           const updatedRows = { ...checkedRows, [params.node.id]: checked }
           setCheckedRows(updatedRows)
-          console.log(params.colDef.field, checked, params.value)
-          params.node.setDataValue(params.colDef.field, checked)
+          const api = gridRef.current.api
+          api.forEachNode(node => {
+            if (params.node.id === node.id) {
+              const newData = {
+                ...node.data,
+                checked: node.data.value ? false : true,
+                value: node.data.value ? false : true
+              }
+              node.setData(newData)
+
+              // params.setValue(checked)
+            }
+          })
         }}
       />
     )
   }
 
+  const columnDefs = [
+    ...(showCheckboxColumn
+      ? [
+          {
+            headerName: '',
+            field: 'checked',
+            cellRenderer: checkboxCellRenderer,
+            headerComponent: () => <Checkbox checked={checked} onChange={selectAll} />,
+            suppressMenu: true // if i want to remove menu from header
+          }
+        ]
+      : []),
+    ...columns
+  ]
+
   return (
     <>
       <Box className='ag-theme-alpine' style={{ flex: 1, width: '1000px !important', height: props.height || 'auto' }}>
         <AgGridReact
+          ref={gridRef}
           rowData={(paginationType === 'api' ? props?.gridData?.list : gridData?.list) || []}
           enableClipboard={true}
           enableRangeSelection={true}
-          columnDefs={[
-            ...(showCheckboxColumn
-              ? [
-                  {
-                    headerName: '',
-                    field: 'checked',
-                    cellRenderer: checkboxCellRenderer,
-                    headerCheckboxSelection: true,
-                    suppressMenu: true // if i want to remove menu from header
-                  }
-                ]
-              : []),
-            ...columns
-          ]}
+          columnDefs={columnDefs}
           pagination={false}
           paginationPageSize={pageSize}
           rowSelection={'multiple'}
           suppressAggFuncInHeader={true}
           getRowClass={getRowClass}
-          onSelectionChanged={onSelectionChanged}
+          headerCheckboxSelectionFilteredOnly={true} // If you want to select only visible rows
         />
       </Box>
       {pagination && <CustomPagination />}
