@@ -27,7 +27,7 @@ import { all } from 'axios'
 
 const Table = ({
   fetchGridData,
-  paginationType = 'api',
+  paginationType = '',
   viewCheckButtons = false,
   showCheckboxColumn = false,
   pagination = true,
@@ -57,7 +57,10 @@ const Table = ({
   )
 
   useEffect(() => {
-    props?.gridData && paginationType !== 'api' && setGridData(props?.gridData)
+    props?.gridData &&
+      paginationType !== 'api' &&
+      pageSize &&
+      setGridData({ list: pageSize ? props?.gridData?.list?.slice(0, pageSize) : props?.gridData?.list })
   }, [props?.gridData])
 
   const CustomPagination = () => {
@@ -316,11 +319,14 @@ const Table = ({
     const allChecked = (selectedData && selectedData?.every(row => row?.checked)) || false
 
     setData === 'function' && setData(selectedData)
-    selectedNodes.forEach(node => {
-      const rowData = node.data
-      rowData.checked = allChecked ? false : true
-      handleCheckboxChange(rowData)
-    })
+
+    const data = gridData.list?.map(({ checked, value, ...rest }) => ({
+      checked: true,
+      value: true,
+      ...rest
+    }))
+
+    // setGridData({ list: data })
   }
 
   function openDelete(obj) {
@@ -407,11 +413,11 @@ const Table = ({
       })
   }
 
-  const checkboxCellRenderer = (params, checkedRows) => {
+  const checkboxCellRenderer = params => {
+    console.log('params', params.node.data.checked)
     return (
       <Checkbox
-        checked={params.value}
-        key={checkedRows}
+        checked={params?.node?.data?.checked}
         onChange={e => {
           const checked = e.target.checked
           const updatedRows = { ...checkedRows, [params.node.id]: checked }
@@ -427,7 +433,6 @@ const Table = ({
     <>
       <Box className='ag-theme-alpine' style={{ flex: 1, width: '1000px !important', height: props.height || 'auto' }}>
         <AgGridReact
-          // key={checkedRows}
           rowData={(paginationType === 'api' ? props?.gridData?.list : gridData?.list) || []}
           enableClipboard={true}
           enableRangeSelection={true}
@@ -437,8 +442,9 @@ const Table = ({
                   {
                     headerName: '',
                     field: 'checked',
-                    cellRenderer: params => checkboxCellRenderer(params, checkedRows),
-                    headerCheckboxSelection: true
+                    cellRenderer: checkboxCellRenderer,
+                    headerCheckboxSelection: true,
+                    suppressMenu: true // if i want to remove menu from header
                   }
                 ]
               : []),
