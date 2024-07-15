@@ -60,11 +60,29 @@ export default function ItemsForm({ labels, recordId, maxAccess }) {
     enableReinitialize: true,
     validateOnChange: true,
 
-    // validationSchema: yup.object({
-    //   name: yup.string().required(' '),
-    //   reference: yup.string().required(' '),
-    //   countryId: yup.string().required(' ')
-    // }),
+    validationSchema: yup.object({
+      categoryId: yup.string().required(' '),
+      sku: yup.string().required(' '),
+      name: yup.string().required(' '),
+      priceType: yup.string().required(' '),
+      msId: yup.string().required(' '),
+      lotCategoryId: yup
+        .string()
+        .nullable()
+        .test('is-lotcategory-required', 'Lot Category is required', function (value) {
+          const { trackBy } = this.parent
+
+          return trackBy === '2' || trackBy === 2 ? value != null && value.trim() !== '' : true
+        }),
+      spfId: yup
+        .string()
+        .nullable()
+        .test('is-spfId-required', 'spfId is required', function (value) {
+          const { trackBy } = this.parent
+
+          return trackBy === '1' || trackBy === 1 ? value != null && value.trim() !== '' : true
+        })
+    }),
     onSubmit: async obj => {
       const recordId = obj.recordId
 
@@ -274,7 +292,6 @@ export default function ItemsForm({ labels, recordId, maxAccess }) {
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
-                    required
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('groupId', newValue?.recordId || '')
@@ -325,7 +342,6 @@ export default function ItemsForm({ labels, recordId, maxAccess }) {
                     valueField='key'
                     displayField='value'
                     displayFieldWidth={1}
-                    required
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('valuationMethod', newValue?.key || '')
@@ -338,7 +354,6 @@ export default function ItemsForm({ labels, recordId, maxAccess }) {
                     name='description'
                     label={labels.description}
                     value={formik.values.description}
-                    required
                     maxAccess={maxAccess}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('description', '')}
@@ -349,40 +364,6 @@ export default function ItemsForm({ labels, recordId, maxAccess }) {
 
             <Grid item xs={6}>
               <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <ResourceComboBox
-                    endpointId={InventoryRepository.Items.pack}
-                    getList={response => {
-                      return response.record.taxSchedules
-                    }}
-                    values={formik.values}
-                    name='taxId'
-                    label={labels.vatSchedule}
-                    valueField='recordId'
-                    displayField='name'
-                    displayFieldWidth={1}
-                    required
-                    maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('taxId', newValue?.recordId || '')
-                    }}
-                    error={formik.touched.taxId && formik.errors.taxId}
-                  />
-                </Grid>
-
-                <Grid item xs={12}>
-                  <CustomTextField
-                    name='unitPrice'
-                    label={labels.unitPrice}
-                    value={formik.values.unitPrice}
-                    required
-                    maxAccess={maxAccess}
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('unitPrice', '')}
-                    error={formik.touched.unitPrice && formik.errors.unitPrice}
-                  />
-                </Grid>
-
                 <Grid item xs={4}>
                   <FormControlLabel
                     control={
@@ -438,6 +419,36 @@ export default function ItemsForm({ labels, recordId, maxAccess }) {
                     label={labels.purchase}
                   />
                 </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='unitPrice'
+                    label={labels.unitPrice}
+                    value={formik.values.unitPrice}
+                    maxAccess={maxAccess}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('unitPrice', '')}
+                    error={formik.touched.unitPrice && formik.errors.unitPrice}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={InventoryRepository.Items.pack}
+                    getList={response => {
+                      return response.record.taxSchedules
+                    }}
+                    values={formik.values}
+                    name='taxId'
+                    label={labels.vatSchedule}
+                    valueField='recordId'
+                    displayField='name'
+                    displayFieldWidth={1}
+                    maxAccess={maxAccess}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('taxId', newValue?.recordId || '')
+                    }}
+                    error={formik.touched.taxId && formik.errors.taxId}
+                  />
+                </Grid>
 
                 <Grid item xs={12}>
                   <ResourceComboBox
@@ -484,6 +495,11 @@ export default function ItemsForm({ labels, recordId, maxAccess }) {
                         formik.setFieldValue('lotCategoryId', newValue?.recordId || '')
                         formik.setFieldValue('lotCategoryName', newValue?.name || '')
                       }}
+                      error={
+                        formik.touched.lotCategoryId &&
+                        Boolean(formik.errors.lotCategoryId) &&
+                        !formik.values.lotCategoryName
+                      }
                     />
                   </Grid>
                 )}
@@ -495,6 +511,7 @@ export default function ItemsForm({ labels, recordId, maxAccess }) {
                       getList={response => {
                         return response.record.serialProfiles
                       }}
+                      required
                       values={formik.values}
                       name='spfId'
                       label={labels.sprofile}
@@ -506,6 +523,7 @@ export default function ItemsForm({ labels, recordId, maxAccess }) {
                         formik.setFieldValue('spfId', newValue?.recordId || '')
                         formik.setFieldValue('spfName', newValue?.name || '')
                       }}
+                      error={formik.touched.spfId && Boolean(formik.errors.spfId) && !formik.values.spfName}
                     />
                   </Grid>
                 )}
