@@ -4,6 +4,8 @@ import { Tabs, Tab, Box, IconButton, Menu, MenuItem } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import PropTypes from 'prop-types'
 import { MenuContext } from 'src/providers/MenuContext'
+import { RequestsContext } from './RequestsContext'
+import { SystemRepository } from 'src/repositories/SystemRepository'
 
 const TabsContext = createContext()
 
@@ -41,7 +43,8 @@ CustomTabPanel.propTypes = {
 const TabsProvider = ({ children }) => {
   const router = useRouter()
   const { menu, gear, lastOpenedPage } = useContext(MenuContext)
-
+  const { getRequest } = useContext(RequestsContext)
+  const { userId } = JSON.parse(window.sessionStorage.getItem('userData'))
   const [anchorEl, setAnchorEl] = useState(null)
 
   const [openTabs, setOpenTabs] = useState([
@@ -54,6 +57,7 @@ const TabsProvider = ({ children }) => {
   const [currentTabIndex, setCurrentTabIndex] = useState(0)
   const [tabsIndex, setTabsIndex] = useState(null)
   const [initialLoadDone, setInitialLoadDone] = useState(false)
+  const [dashboard, setDashboard] = useState(null)
 
   const open = Boolean(anchorEl)
 
@@ -189,6 +193,18 @@ const TabsProvider = ({ children }) => {
     }
   }, [router.asPath, menu, gear, children, lastOpenedPage, initialLoadDone])
 
+  useEffect(() => {
+    ;(async function () {
+      if (userId) {
+        const res = await getRequest({
+          extension: SystemRepository.Users.get,
+          parameters: `_recordId=${userId}`
+        })
+        setDashboard(res.record.dashboardId)
+      }
+    })()
+  }, [])
+
   return (
     <>
       <Box
@@ -266,7 +282,8 @@ const TabsProvider = ({ children }) => {
                     mr: '2px !important',
                     fontWeight: '1.5rem',
                     pr: '0px !important',
-                    pl: '10px !important'
+                    pl: '10px !important',
+                    display: activeTab.route === '/default/' && dashboard === null ? 'none' : 'flex'
                   }}
                 />
               ))}
