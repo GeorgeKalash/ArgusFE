@@ -155,6 +155,7 @@ export const ResourceIds = {
   SourceOfIncomeType: 36311,
   ProfessionGroups: 36310,
   PaymentVouchers: 31305,
-  Checkbook: 33201,
-  PaymentVoucherExpenses: 31343
+  PaymentVoucherExpenses: 31343,
+  Roles: 21103,
+  Checkbook: 33201
 }
