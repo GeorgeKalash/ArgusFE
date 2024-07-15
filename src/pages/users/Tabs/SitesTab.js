@@ -1,9 +1,7 @@
 import { useContext, useEffect } from 'react'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import useResourceParams from 'src/hooks/useResourceParams'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import FormShell from 'src/components/Shared/FormShell'
 import { useForm } from 'src/hooks/form'
@@ -42,8 +40,6 @@ const SitesTab = ({ labels, maxAccess, recordId }) => {
     },
     onSubmit: async () => {
       try {
-        console.log('formik check ', formik.values)
-
         const itemsListROU = formik.values.rows
           .filter(obj => obj.isChecked)
           .map(row => ({
@@ -80,6 +76,7 @@ const SitesTab = ({ labels, maxAccess, recordId }) => {
           extension: AccessControlRepository.UserSiteView.set2,
           record: JSON.stringify(dataUSI)
         })
+        await fetchGridData()
         toast.success(platformLabels.Updated)
       } catch (error) {}
     }
@@ -186,6 +183,15 @@ const SitesTab = ({ labels, maxAccess, recordId }) => {
     formik.setFieldValue('search', value)
   }
 
+  function handleRowsChange(newValues) {
+    const updatedRows = formik.values.rows.map(row => {
+      const newValue = newValues.find(newRow => newRow.id === row.id)
+
+      return newValue ? newValue : row
+    })
+
+    formik.setFieldValue('rows', updatedRows)
+  }
   useEffect(() => {
     ;(async function () {
       if (recordId) {
@@ -215,7 +221,7 @@ const SitesTab = ({ labels, maxAccess, recordId }) => {
         </Fixed>
         <Grow>
           <DataGrid
-            onChange={value => formik.setFieldValue('rows', value)}
+            onChange={value => handleRowsChange(value)}
             value={filteredData}
             error={formik.errors.rows}
             columns={columns}
