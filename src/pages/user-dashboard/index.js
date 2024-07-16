@@ -1,13 +1,10 @@
-import React, { useEffect, useState, useContext } from 'react'
+import { useEffect, useState, useContext } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { DashboardRepository } from 'src/repositories/DashboardRepository'
 import styled, { createGlobalStyle } from 'styled-components'
 import { CircularData } from '../../components/Shared/dashboardApplets/circularData'
-import { CompositeBarChart } from '../../components/Shared/dashboardApplets/charts'
+import { CompositeBarChart, LineChart } from '../../components/Shared/dashboardApplets/charts'
 import ProgressBarComponent from '../../components/Shared/dashboardApplets/ProgressBar'
-import HorizontalTimeline from '../../components/Shared/dashboardApplets/HorizontalTimeline'
-import { ResourceIds } from 'src/resources/ResourceIds'
-import useResourceParams from 'src/hooks/useResourceParams'
 
 const GlobalStyle = createGlobalStyle`
   @import url('https://fonts.googleapis.com/css?family=Open+Sans:700,600,300');
@@ -23,17 +20,19 @@ const GlobalStyle = createGlobalStyle`
     display: flex;
     justify-content: center;
     align-items: center;
+    font-family: 'Open Sans', Helvetica, sans-serif;
     background: linear-gradient(to bottom left, #231F20, #383838);
     background-size: 125% 125%;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    color: #F0F0F0;
+    color: #f0f0f0;
   }
 `
 
 const Frame = styled.div`
   width: 100%;
   height: 100%;
+  flex: 1;
   display: flex;
   justify-content: flex-start;
   align-items: flex-start;
@@ -41,29 +40,13 @@ const Frame = styled.div`
 
 const Card = styled.div`
   width: 100%;
-  height: 100%;
-  padding: 10px;
+  padding: 30px;
   background: #383838;
+  height: 100% !important;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-`
-
-const FooterCard = styled.div`
-  flex: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin: 10px;
-`
-
-const BodyCard = styled.div`
-  flex: 1;
   display: flex;
   justify-content: space-between;
   align-items: stretch;
-  overflow: hidden;
 `
 
 const Profile = styled.div`
@@ -146,11 +129,11 @@ const Span = styled.span`
 
 const SideData = styled.div`
   flex: 1;
-  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 5px 10px;
+  height: 100%;
+  padding: 20px;
   background: #231f20;
   border-radius: 15px;
   margin: 0 10px;
@@ -168,12 +151,12 @@ const DataHalf = styled.div`
   align-items: center;
   justify-content: center;
   width: 100%;
-  padding: 0px 5px;
+  padding: 10px;
   background: #444;
   border-radius: 15px;
   border-top: 2px solid #93c6e0;
   flex: 0;
-  margin: 5px;
+  margin: 10px 0;
 `
 
 const CompositeBarContainer = styled.div`
@@ -201,12 +184,8 @@ const ProfileAvatar = ({ imageUrl }) => (
   </Avatar>
 )
 
-const Home = () => {
-  const { labels: labels } = useResourceParams({
-    datasetId: ResourceIds.UserDashboard
-  })
+const UserDashboard = () => {
   const { getRequest } = useContext(RequestsContext)
-  const { dashboardId } = JSON.parse(window.sessionStorage.getItem('userData'))
 
   const [data, setData] = useState({
     imageUrl: '',
@@ -215,19 +194,20 @@ const Home = () => {
     pctToTarget: 0.0,
     unitsSold: 0.0,
     performanceVsTeamAverage: 0.0,
-    receivables: 0,
     teamPctToTarget: 0.0,
     newClientsAcquired: 0,
     distanceToNextCommissionLeg: 0,
     commissionAcquired: 0,
     name: '',
-    teamRace: [],
-    aging: []
+    teamRace: []
   })
+
   const [progress, setProgress] = useState({ pctToTarget: 0, teamPctToTarget: 0 })
+
   useEffect(() => {
     getDataResult()
   }, [])
+
   useEffect(() => {
     if (data.pctToTarget > 0 || data.teamPctToTarget > 0) {
       setProgress({ pctToTarget: data.pctToTarget, teamPctToTarget: data.teamPctToTarget })
@@ -248,102 +228,87 @@ const Home = () => {
           performanceVsTeamAverage: res.record.performanceVsTeamAverage || 0.0,
           teamPctToTarget: res.record.teamPctToTarget || 0.0,
           newClientsAcquired: res.record.newClientsAcquired || 0,
-          distanceToNextCommissionLeg: res.record.distanceToNextCommissionLeg || 0,
-          commissionAcquired: res.record.commissionAcquired || 0,
-          receivables: res.record.receivables || 0,
+          distanceToNextCommissionLeg: res.distanceToNextCommissionLeg || 0,
+          commissionAcquired: res.commissionAcquired || 0,
           name: res.record.salesPerson.name || '',
-          teamRace: res.record.teamRace || [],
-          aging: res.record.aging || []
+          teamRace: res.record.teamRace || []
         })
       })
       .catch(error => {
-        console.log(error.message)
+        setErrorMessage(error.message)
       })
   }
 
   const list1 = [
-    { name: labels.unitsSold, key: 'unitsSold' },
-    { name: labels.newClientsAcquired, key: 'newClientsAcquired' },
-    { name: labels.receivables, key: 'receivables' }
+    { name: 'Units Sold', key: 'unitsSold' },
+    { name: 'New Clients Acquired', key: 'newClientsAcquired' },
+    { name: 'Percentage To Target', key: 'pctToTarget', isPercentage: true }
   ]
 
   const list2 = [
-    { name: labels.distanceToNextCommissionLeg, key: 'distanceToNextCommissionLeg' },
-    { name: labels.commissionAcquired, key: 'commissionAcquired' }
+    { name: 'distance To Next Commission', key: 'distanceToNextCommissionLeg' },
+    { name: 'commission Acquired', key: 'commissionAcquired' }
   ]
 
   return (
-    dashboardId == 2 && (
-      <>
-        <GlobalStyle />
-        <Frame>
-          <Card>
-            <BodyCard>
-              <SideData>
-                <DataHalf>
-                  <CircularData data={data} list={list1} />
-                </DataHalf>
-                <DataHalf>
-                  <CompositeBarContainer>
-                    <CompositeBarChart
-                      id='compositebarc'
-                      labels={Object.keys(data.aging)}
-                      data={Object.values(data.aging)}
-                      label={labels.aging}
-                    />
-                  </CompositeBarContainer>
-                </DataHalf>
-              </SideData>
-              <SideData>
-                <Profile>
-                  <ProfileAvatar imageUrl={data.imageUrl} />
-                  <Span className='big'>{data.name}</Span>
-                </Profile>
-                <DataHalf>
-                  <CircularData data={data} list={list2} />
-                </DataHalf>
-              </SideData>
-              <SideData>
-                <DataHalf>
-                  <CompositeBarContainer>
-                    <CompositeBarChart
-                      id='compositebara'
-                      labels={data.myYearlyGrowthInUnitsSoldList.map(item => item.year)}
-                      data={data.myYearlyGrowthInUnitsSoldList.map(item => item.qty)}
-                      label={labels.unitsSold}
-                    />
-                  </CompositeBarContainer>
-                </DataHalf>
-                <DataHalf>
-                  <CompositeBarContainer>
-                    <CompositeBarChart
-                      id='compositebarb'
-                      labels={data.myYearlyGrowthInClientsAcquiredList.map(item => item.year)}
-                      data={data.myYearlyGrowthInClientsAcquiredList.map(item => item.qty)}
-                      label={labels.clientsAcquired}
-                    />
-                  </CompositeBarContainer>
-                </DataHalf>
-                <DataHalf>
-                  <ProgressBarsWrapper>
-                    <ProgressBarComponent label={labels.percentageToTarget} percentage={progress.pctToTarget} />
-                    <ProgressBarComponent label={labels.teamPercentageToTarget} percentage={progress.teamPctToTarget} />
-                  </ProgressBarsWrapper>
-                </DataHalf>
-              </SideData>
-            </BodyCard>
-            <FooterCard>
-              <SideData>
-                <DataHalf>
-                  <HorizontalTimeline data={data.teamRace} label={labels.teamRace} />
-                </DataHalf>
-              </SideData>
-            </FooterCard>
-          </Card>
-        </Frame>
-      </>
-    )
+    <>
+      <GlobalStyle />
+      <Frame>
+        <Card>
+          <SideData>
+            <DataHalf>
+              <CircularData data={data} list={list1} />
+            </DataHalf>
+            <DataHalf>
+              <CircularData data={data} list={list2} />
+            </DataHalf>
+            <DataHalf>
+              <CompositeBarContainer>
+                <LineChart
+                  id='lineChart'
+                  labels={data.teamRace.map(item => item.spRef)}
+                  data={data.teamRace.map(item => item.commission)}
+                  label='Team Commissions'
+                />
+              </CompositeBarContainer>
+            </DataHalf>
+          </SideData>
+          <Profile>
+            <ProfileAvatar imageUrl={data.imageUrl} />
+            <Span className='big'>{data.name}</Span>
+          </Profile>
+          <SideData>
+            <DataHalf>
+              <CompositeBarContainer>
+                <CompositeBarChart
+                  id='compositebara'
+                  labels={data.myYearlyGrowthInUnitsSoldList.map(item => item.year)}
+                  data={data.myYearlyGrowthInUnitsSoldList.map(item => item.qty)}
+                  label='Units Sold'
+                />
+              </CompositeBarContainer>
+            </DataHalf>
+            <DataHalf>
+              <CompositeBarContainer>
+                <CompositeBarChart
+                  id='compositebarb'
+                  labels={data.myYearlyGrowthInClientsAcquiredList.map(item => item.year)}
+                  data={data.myYearlyGrowthInClientsAcquiredList.map(item => item.qty)}
+                  label='Clients Acquired'
+                />
+              </CompositeBarContainer>
+            </DataHalf>
+            <DataHalf>
+              <ProgressBarsWrapper>
+                <ProgressBarComponent label='Percentage To Target' percentage={progress.pctToTarget} />
+                <ProgressBarComponent label='Team Percentage To Target' percentage={progress.teamPctToTarget} />
+              </ProgressBarsWrapper>
+            </DataHalf>
+          </SideData>
+        </Card>
+      </Frame>
+    </>
   )
 }
 
-export default Home
+export default UserDashboard
