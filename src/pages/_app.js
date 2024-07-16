@@ -34,7 +34,7 @@ import GuestGuard from 'src/@core/components/auth/GuestGuard'
 import Spinner from 'src/@core/components/spinner'
 
 // ** Contexts
-import { AuthProvider } from 'src/providers/AuthContext'
+import { AuthContext, AuthProvider } from 'src/providers/AuthContext'
 import { RequestsProvider } from 'src/providers/RequestsContext'
 import { ControlProvider } from 'src/providers/ControlContext'
 import { CommonProvider } from 'src/providers/CommonContext'
@@ -69,6 +69,7 @@ import 'styles/formgrid.css'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { WindowProvider } from 'src/windows'
 import { ErrorProvider } from 'src/error'
+import { useContext } from 'react'
 
 const clientSideEmotionCache = createEmotionCache()
 
@@ -86,7 +87,9 @@ if (themeConfig.routingLoader) {
 }
 
 const Guard = ({ children, authGuard, guestGuard }) => {
-  if (guestGuard) {
+  const { loading } = useContext(AuthContext)
+
+  if (loading || guestGuard) {
     return <GuestGuard fallback={<Spinner />}>{children}</GuestGuard>
   } else if (!guestGuard && !authGuard) {
     return <>{children}</>

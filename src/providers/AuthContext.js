@@ -52,12 +52,10 @@ const AuthProvider = ({ children }) => {
         if (savedLanguageId) {
           setLanguageId(parseInt(savedLanguageId))
         }
-        setLoading(false)
       } else {
         if (savedLanguageId) {
           setLanguageId(parseInt(savedLanguageId))
         }
-        setLoading(false)
       }
     }
     initAuth()
@@ -76,6 +74,8 @@ const AuthProvider = ({ children }) => {
       } catch (error) {
         console.error('Error fetching data:', error)
       }
+
+      setLoading(false)
     }
 
     fetchData()
