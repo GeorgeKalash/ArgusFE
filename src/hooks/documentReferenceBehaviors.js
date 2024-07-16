@@ -28,7 +28,6 @@ export function useDocumentType({ functionId, access, hasDT, enabled = true }) {
   const [nraId, setNraId] = useState()
 
   const queryFn = async nraId => {
-    console.log('nraId ' + nraId)
     const result = await documentType(getRequest, functionId, access, nraId, hasDT)
     if (result.errorMessage) {
       stackError({ message: result?.errorMessage })
@@ -42,7 +41,7 @@ export function useDocumentType({ functionId, access, hasDT, enabled = true }) {
   const query = useQuery({
     retry: false,
     staleTime: 0,
-    enabled: !!functionId && enabled,
+    enabled: [!!functionId, functionId == undefined] && enabled,
     queryKey: [functionId, nraId, !!access],
     queryFn: nraId || nraId === 'nraId' ? () => queryFn(nraId) : () => queryFn()
   })
@@ -50,7 +49,6 @@ export function useDocumentType({ functionId, access, hasDT, enabled = true }) {
   return {
     documentType: query.data,
     maxAccess: query?.data?.maxAccess,
-
     changeDT(value) {
       setNraId(value?.nraId || 'nraId')
     }

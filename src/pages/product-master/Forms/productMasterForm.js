@@ -26,7 +26,6 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
   const { platformLabels } = useContext(ControlContext)
 
   const { maxAccess, changeDT } = useDocumentType({
-    functionId: 1,
     access: access,
     enabled: !pId
   })

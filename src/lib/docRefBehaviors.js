@@ -94,8 +94,8 @@ const fetchData = async (getRequest, id, repository) => {
   return await getData(getRequest, extension, parameters)
 }
 
-const documentType = async (getRequest, functionId, maxAccess, selectNraId = undefined, hasDT = true) => {
-  const docType = selectNraId === undefined && (await fetchData(getRequest, functionId, 'dtId')) // ufu
+const documentType = async (getRequest, functionId = undefined, maxAccess, selectNraId = undefined, hasDT = true) => {
+  const docType = selectNraId === undefined && functionId && (await fetchData(getRequest, functionId, 'dtId')) // ufu
   const dtId = docType?.dtId
   let nraId
   let errorMessage = ''
@@ -103,8 +103,6 @@ const documentType = async (getRequest, functionId, maxAccess, selectNraId = und
   let isExternal
   let dcTypeRequired
   let activeStatus = true
-
-  console.log('select nraId = ' + selectNraId)
 
   if ((docType && selectNraId === undefined) || selectNraId === 'nraId') {
     if (dtId) {
@@ -120,7 +118,8 @@ const documentType = async (getRequest, functionId, maxAccess, selectNraId = und
       dcTypeRequired = documentType?.list?.filter(item => item?.activeStatus === 1).length > 0
     }
   }
-  if (selectNraId === 'nraId' || selectNraId === undefined) {
+
+  if ((selectNraId === 'nraId' || selectNraId === undefined) && functionId) {
     if (((!dtId || dtId) && !nraId) || (nraId && !activeStatus)) {
       const glbSysNumberRange = await fetchData(getRequest, functionId, 'glbSysNumberRange') //fun
       nraId = glbSysNumberRange?.nraId
