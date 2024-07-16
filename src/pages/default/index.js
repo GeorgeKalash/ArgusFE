@@ -8,7 +8,6 @@ import ProgressBarComponent from '../../components/Shared/dashboardApplets/Progr
 import HorizontalTimeline from '../../components/Shared/dashboardApplets/HorizontalTimeline'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import useResourceParams from 'src/hooks/useResourceParams'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 
 const GlobalStyle = createGlobalStyle`
   @import url('https://fonts.googleapis.com/css?family=Open+Sans:700,600,300');
@@ -207,8 +206,7 @@ const Home = () => {
     datasetId: ResourceIds.UserDashboard
   })
   const { getRequest } = useContext(RequestsContext)
-  const { userId } = JSON.parse(window.sessionStorage.getItem('userData'))
-  const [dashboard, setDashboard] = useState(null)
+  const { dashboardId } = JSON.parse(window.sessionStorage.getItem('userData'))
 
   const [data, setData] = useState({
     imageUrl: '',
@@ -263,18 +261,6 @@ const Home = () => {
       })
   }
 
-  useEffect(() => {
-    ;(async function () {
-      if (userId) {
-        const res = await getRequest({
-          extension: SystemRepository.Users.get,
-          parameters: `_recordId=${userId}`
-        })
-        setDashboard(res.record.dashboardId)
-      }
-    })()
-  }, [])
-
   const list1 = [
     { name: labels.unitsSold, key: 'unitsSold' },
     { name: labels.newClientsAcquired, key: 'newClientsAcquired' },
@@ -287,7 +273,7 @@ const Home = () => {
   ]
 
   return (
-    dashboard == 2 && (
+    dashboardId == 2 && (
       <>
         <GlobalStyle />
         <Frame>
