@@ -23,6 +23,8 @@ import { useWindow } from 'src/windows'
 import DeleteDialog from './DeleteDialog'
 import StrictDeleteConfirmation from './StrictDeleteConfirmation'
 import { HIDDEN, accessLevel } from 'src/services/api/maxAccess'
+import { formatDateDefault } from 'src/lib/date-helper'
+import { getFormattedNumber } from 'src/lib/numberField-helper'
 
 const Table = ({
   fetchGridData,
@@ -47,13 +49,29 @@ const Table = ({
   const [checkedRows, setCheckedRows] = useState({})
   const [checked, setChecked] = useState(false)
 
-  const columns = props.columns.filter(
-    ({ field }) =>
-      accessLevel({
-        maxAccess: props.maxAccess,
-        name: field
-      }) !== HIDDEN
-  )
+  const columns = props.columns
+    .filter(
+      ({ field }) =>
+        accessLevel({
+          maxAccess: props.maxAccess,
+          name: field
+        }) !== HIDDEN
+    )
+    .map(col => {
+      if (col.type === 'date') {
+        return {
+          ...col,
+          valueGetter: ({ data }) => formatDateDefault(data?.[col.field])
+        }
+      }
+      if (col.type === 'number') {
+        return {
+          ...col,
+          valueGetter: ({ data }) => getFormattedNumber(data?.[col.field])
+        }
+      }
+      return col
+    })
 
   useEffect(() => {
     const areAllValuesTrue = props?.gridData?.list.every(item => item.checked === true)
@@ -435,6 +453,7 @@ const Table = ({
       : []),
     ...columns
   ]
+  console.log('columns', columns)
 
   return (
     <>
