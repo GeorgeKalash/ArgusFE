@@ -12,6 +12,8 @@ import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import ItemsForm from './forms/ItemsForm'
+import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
+import { SystemFunction } from 'src/resources/SystemFunction'
 
 const IvItems = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -110,9 +112,7 @@ const IvItems = () => {
     }
   ]
 
-  const add = () => {
-    openForm()
-  }
+  //  Items: Module.Inventory * 100 + 6,
 
   function openForm(recordId) {
     stack({
@@ -126,6 +126,15 @@ const IvItems = () => {
       height: 660,
       title: _labels.items
     })
+  }
+
+  const { proxyAction } = useDocumentTypeProxy({
+    functionId: SystemFunction.Items,
+    action: openForm
+  })
+
+  const add = async () => {
+    await proxyAction()
   }
 
   const edit = obj => {
