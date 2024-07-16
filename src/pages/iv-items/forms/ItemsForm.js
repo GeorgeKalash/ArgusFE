@@ -467,7 +467,6 @@ export default function ItemsForm({ labels, recordId, maxAccess }) {
                     valueField='key'
                     displayField='value'
                     displayFieldWidth={1}
-                    required
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('trackBy', newValue?.key || '')
