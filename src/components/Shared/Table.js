@@ -70,6 +70,7 @@ const Table = ({
           valueGetter: ({ data }) => getFormattedNumber(data?.[col.field])
         }
       }
+
       return col
     })
 
