@@ -16,9 +16,11 @@ import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import MemosForm from './MemosForm'
 import { SystemFunction } from 'src/resources/SystemFunction'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const Financial = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const { stack } = useWindow()
 
@@ -177,7 +179,7 @@ const Financial = () => {
         record: JSON.stringify(obj)
       })
       invalidate()
-      toast.success('Record Deleted Successfully')
+      toast.success(platformLabels.Deleted)
     } catch (error) {}
   }
 
