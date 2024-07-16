@@ -65,7 +65,7 @@ export default function ExpensesCostCenters({ labels, maxAccess, row, window, up
         label: labels.costCenter,
         name: 'reference',
         props: {
-          valueField: 'recordId',
+          valueField: 'reference',
           displayField: 'reference',
           displayFieldWidth: 4,
           endpointId: GeneralLedgerRepository.CostCenter.snapshot,
