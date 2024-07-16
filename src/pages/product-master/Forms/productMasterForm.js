@@ -51,6 +51,8 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
   const invalidate = useInvalidate({
     endpointId: RemittanceSettingsRepository.Correspondent.qry
   })
+  console.log('maxAccess')
+  console.log(maxAccess)
 
   const { formik } = useForm({
     maxAccess,
@@ -109,7 +111,6 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
       parameters: parameters
     })
       .then(res => {
-        console.log('text = ' + res.record.value)
         res?.record?.value && changeDT({ nraId: res.record.value })
       })
       .catch(error => {})
@@ -141,11 +142,11 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
                   name='reference'
                   label={labels.reference}
                   value={formik.values.reference}
-                  readOnly={false}
+                  readOnly={editMode}
+                  maxAccess={!editMode && maxAccess}
                   onChange={formik.handleChange}
                   onClear={() => formik.setFieldValue('reference', '')}
                   error={formik.touched.reference && Boolean(formik.errors.reference)}
-                  maxAccess={!editMode && maxAccess}
                 />
               </Grid>
               <Grid item xs={12}>
