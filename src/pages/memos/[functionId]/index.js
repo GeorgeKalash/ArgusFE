@@ -28,9 +28,8 @@ const Financial = () => {
   const { functionId } = router.query
 
   async function fetchGridData(options = {}) {
-    const {
-      pagination: { _startAt = 0, _pageSize = 50 }
-    } = options
+    const { _startAt = 0, _pageSize = 50 } = options
+    console.log('fetching')
 
     const response = await getRequest({
       extension: FinancialRepository.FiMemo.qry,
@@ -42,20 +41,31 @@ const Financial = () => {
 
   const {
     query: { data },
+    refetch,
     labels: _labels,
-    access,
+    filterBy,
+    clearFilter,
     paginationParameters,
-    invalidate,
-    refetch
+    access
   } = useResourceQuery({
+    queryFn: fetchGridData,
     endpointId: FinancialRepository.FiMemo.qry,
     datasetId: ResourceIds.CreditNote,
-
     filter: {
-      filterFn: fetchGridData,
-      default: { functionId }
+      endpointId: FinancialRepository.FiMemo.snapshot,
+      filterFn: fetchWithSearch
     }
   })
+
+  async function fetchWithSearch({ options = {}, filters }) {
+    return (
+      filters.qry &&
+      (await getRequest({
+        extension: FinancialRepository.FiMemo.snapshot,
+        parameters: `_filter=${filters.qry}&_functionId=${functionId}`
+      }))
+    )
+  }
 
   const columns = [
     {
@@ -186,7 +196,17 @@ const Financial = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <GridToolbar
+          onAdd={add}
+          maxAccess={access}
+          onSearch={value => {
+            filterBy('qry', value)
+          }}
+          onSearchClear={() => {
+            clearFilter('qry')
+          }}
+          inputSearch={true}
+        />
       </Fixed>
       <Grow>
         <Table

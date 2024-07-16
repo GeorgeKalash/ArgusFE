@@ -307,6 +307,19 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                   />
                 </Grid>
                 <Grid item xs={12}>
+                  <CustomDatePicker
+                    name='date'
+                    readOnly={postedOrCanceled}
+                    label={labels.date}
+                    value={formik.values.date}
+                    onChange={formik.setFieldValue}
+                    required
+                    maxAccess={maxAccess}
+                    onClear={() => formik.setFieldValue('date', '')}
+                    error={formik.touched.date && Boolean(formik.errors.date)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={SystemRepository.Plant.qry}
                     name='plantId'
@@ -327,19 +340,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                     error={formik.touched.plantId && Boolean(formik.errors.plantId)}
                   />
                 </Grid>
-                <Grid item xs={12}>
-                  <CustomDatePicker
-                    name='date'
-                    readOnly={postedOrCanceled}
-                    label={labels.date}
-                    value={formik.values.date}
-                    onChange={formik.setFieldValue}
-                    required
-                    maxAccess={maxAccess}
-                    onClear={() => formik.setFieldValue('date', '')}
-                    error={formik.touched.date && Boolean(formik.errors.date)}
-                  />
-                </Grid>
+
                 <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={SystemRepository.Currency.qry}

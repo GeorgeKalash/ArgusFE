@@ -90,7 +90,8 @@ export const FinancialRepository = {
     get: service + 'getMEM',
     del: service + 'delMEM',
     post: service + 'postMEM',
-    cancel: service + 'cancelMEM'
+    cancel: service + 'cancelMEM',
+    snapshot: service + 'snapshotMEM'
   },
   CreditNote: {
     set: service + 'setCN',
