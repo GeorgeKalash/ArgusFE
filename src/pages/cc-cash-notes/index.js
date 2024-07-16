@@ -58,7 +58,6 @@ const CcCashNotes = () => {
       headerName: labels.currencyNote,
       flex: 1,
       type: 'number'
-      // valueGetter: ({ data }) => getFormattedNumber(data?.note)
     }
   ]
 

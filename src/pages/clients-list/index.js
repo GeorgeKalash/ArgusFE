@@ -90,7 +90,6 @@ const ClientsList = () => {
       flex: 1,
       editable: false,
       type: 'date'
-      // valueGetter: ({ data }) => formatDateDefault(data?.createdDate)
     },
     {
       field: 'expiryDate',
