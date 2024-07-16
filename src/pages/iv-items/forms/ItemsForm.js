@@ -16,14 +16,27 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import { SystemFunction } from 'src/resources/SystemFunction'
+import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 
-export default function ItemsForm({ labels, recordId, maxAccess }) {
+export default function ItemsForm({ labels, recordId, maxAccess: access }) {
   const [editMode, setEditMode] = useState(!!recordId)
   const { platformLabels } = useContext(ControlContext)
   const [showLotCategories, setShowLotCategories] = useState(false)
   const [showSerialProfiles, setShowSerialProfiles] = useState(false)
 
   const { getRequest, postRequest } = useContext(RequestsContext)
+
+  const { changeDT, maxAccess } = useDocumentType({
+    access: access,
+    enabled: !recordId
+  })
+
+  // const { documentType, maxAccess, changeDT } = useDocumentType({
+  //   functionId: functionId,
+  //   access: access,
+  //   enabled: !recordId
+  // })
 
   const invalidate = useInvalidate({
     endpointId: InventoryRepository.Items.qry
@@ -167,6 +180,7 @@ export default function ItemsForm({ labels, recordId, maxAccess }) {
                     required
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
+                      changeDT(newValue)
                       formik.setFieldValue('categoryId', newValue?.recordId || '')
                       formik.setFieldValue('categoryName', newValue?.name || '')
                       formik.setFieldValue('categoryRef', newValue?.caRef || '')
@@ -192,7 +206,7 @@ export default function ItemsForm({ labels, recordId, maxAccess }) {
                     displayField='value'
                     displayFieldWidth={1}
                     required
-                    maxAccess={maxAccess}
+                    maxAccess={!editMode && maxAccess}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('priceType', newValue?.key || '')
                       formik.setFieldValue('ptName', newValue?.value || '')

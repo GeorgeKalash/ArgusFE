@@ -128,13 +128,10 @@ const IvItems = () => {
     })
   }
 
-  const { proxyAction } = useDocumentTypeProxy({
-    functionId: SystemFunction.Items,
-    action: openForm
-  })
+  console.log(SystemFunction.Items)
 
-  const add = async () => {
-    await proxyAction()
+  const add = () => {
+    openForm()
   }
 
   const edit = obj => {
