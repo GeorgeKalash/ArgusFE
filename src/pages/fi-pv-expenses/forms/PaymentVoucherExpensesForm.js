@@ -292,7 +292,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
       label: labels.expenseType,
       name: 'reference',
       props: {
-        valueField: 'recordId',
+        valueField: 'reference',
         displayField: 'reference',
         displayFieldWidth: 4,
         endpointId: FinancialRepository.ExpenseTypes.snapshot,
