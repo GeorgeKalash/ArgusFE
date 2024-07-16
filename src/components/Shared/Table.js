@@ -23,7 +23,6 @@ import { useWindow } from 'src/windows'
 import DeleteDialog from './DeleteDialog'
 import StrictDeleteConfirmation from './StrictDeleteConfirmation'
 import { HIDDEN, accessLevel } from 'src/services/api/maxAccess'
-import { all } from 'axios'
 
 const Table = ({
   fetchGridData,
@@ -47,7 +46,6 @@ const Table = ({
   const { stack } = useWindow()
   const [checkedRows, setCheckedRows] = useState({})
   const [checked, setChecked] = useState(false)
-  const gridRef = useRef(null)
 
   const columns = props.columns.filter(
     ({ field }) =>
@@ -303,27 +301,28 @@ const Table = ({
     return params?.rowIndex % 2 === 0 ? 'even-row' : ''
   }
 
-  const handleCheckboxChange = row => {
-    setCheckedRows(prevCheckedRows => {
-      const newCheckedRows = { ...prevCheckedRows }
-      const key = row.data.seqNo ? `${row.data.recordId}-${row.data.seqNo}` : row.data?.[props?.rowId]
-      newCheckedRows[key] = row.data
-      const filteredRows = !newCheckedRows[key]?.checked ? [newCheckedRows[key]] : []
+  const selectAll = (params, e) => {
+    const gridApi = params.api
+    const allNodes = []
+    gridApi.forEachNode(node => allNodes.push(node))
 
-      return filteredRows
+    allNodes.forEach(node => {
+      node.data.checked = e.target.checked
+      node.setDataValue('checked', e.target.checked)
     })
+
+    setChecked(e.target.checked)
+    setCheckedRows(
+      allNodes.reduce((acc, node) => {
+        if (e.target.checked) acc[node.id] = node.data
+
+        return acc
+      }, {})
+    )
+
+    if (typeof setData === 'function') setData(allNodes.map(node => node.data))
   }
 
-  const selectAll = e => {
-    const api = gridRef.current.api
-
-    api.forEachNode(node => {
-      const newData = { ...node.data, checked: !checked, value: !checked }
-      node.setData(newData)
-      handleCheckboxChange(node)
-    })
-    setChecked(!checked)
-  }
   function openDelete(obj) {
     stack({
       Component: DeleteDialog,
@@ -411,25 +410,12 @@ const Table = ({
   const checkboxCellRenderer = params => {
     return (
       <Checkbox
-        checked={params.data.value}
+        checked={params.value}
         onChange={e => {
           const checked = e.target.checked
-
           const updatedRows = { ...checkedRows, [params.node.id]: checked }
           setCheckedRows(updatedRows)
-          const api = gridRef.current.api
-          api.forEachNode(node => {
-            if (params.node.id === node.id) {
-              const newData = {
-                ...node.data,
-                checked: node.data.value ? false : true,
-                value: node.data.value ? false : true
-              }
-              node.setData(newData)
-
-              // params.setValue(checked)
-            }
-          })
+          params.node.setDataValue(params.colDef.field, checked)
         }}
       />
     )
@@ -442,7 +428,7 @@ const Table = ({
             headerName: '',
             field: 'checked',
             cellRenderer: checkboxCellRenderer,
-            headerComponent: () => <Checkbox checked={checked} onChange={selectAll} />,
+            headerComponent: params => <Checkbox checked={checked} onChange={e => selectAll(params, e)} />,
             suppressMenu: true // if i want to remove menu from header
           }
         ]
@@ -454,7 +440,6 @@ const Table = ({
     <>
       <Box className='ag-theme-alpine' style={{ flex: 1, width: '1000px !important', height: props.height || 'auto' }}>
         <AgGridReact
-          ref={gridRef}
           rowData={(paginationType === 'api' ? props?.gridData?.list : gridData?.list) || []}
           enableClipboard={true}
           enableRangeSelection={true}
