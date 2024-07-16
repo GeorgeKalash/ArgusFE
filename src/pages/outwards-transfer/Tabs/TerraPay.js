@@ -11,7 +11,7 @@ import * as yup from 'yup'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
-export default function TerraPay({ setTerraPay, terraPay = {}, window, outwardsData }) {
+export default function TerraPay({ onSubmit, terraPay = {}, window, outwardsData }) {
   console.log('in terra')
   console.log(terraPay)
 
@@ -37,7 +37,7 @@ export default function TerraPay({ setTerraPay, terraPay = {}, window, outwardsD
       const copy = { ...values }
       copy.quotation.creditorReceivingCountry = ''
       copy.quotation.requestCurrency = ''
-      setTerraPay(copy)
+      onSubmit(copy)
       window.close()
     }
   })

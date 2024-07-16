@@ -138,7 +138,83 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
         receiptRef: ''
       }
     ],
-    instantCashDetails: {}
+    instantCashDetails: {},
+    terraPayDetails: {
+      quotation: {
+        requestDate: new Date(),
+        debitorMSIDSN: '', //HERE
+        creditorMSIDSN: '', //  ben phone number
+        creditorBankAccount: '', // ben.bankaccount is IBAN
+        creditorReceivingCountry: '',
+        requestAmount: '', //HERE
+        requestCurrency: '',
+        sendingCurrency: '',
+        receivingCurrency: ''
+      },
+      transaction: {
+        amount: '', //HERE
+        currency: '',
+        type: 'inttransfer', //FAWZI TO CHECK
+        descriptionText: '',
+        requestDate: new Date(),
+        requestingOrganisationTransactionReference: '',
+        debitorMSIDSN: '', //HERE
+        creditorBankAccount: '', // ben.bankaccount is IBAN
+        creditorSortCode: '0001', // Fawzi To check
+        creditorBankSubCode: '',
+        creditorAccounttype: 'Savings',
+        senderKyc: {
+          nationality: '',
+          dateOfBirth: new Date(),
+          gender: '',
+          idDocument: [],
+          postalAddress: {
+            addressLine1: '',
+            addressLine2: '',
+            addressLine3: '',
+            city: '',
+            stateProvince: '',
+            postalCode: '',
+            country: ''
+          },
+          subjectName: {
+            title: '',
+            firstName: '',
+            middleName: '',
+            lastName: '',
+            fullName: ''
+          }
+        },
+        recipientKyc: {
+          nationality: '',
+          dateOfBirth: new Date(),
+          idDocument: [],
+          postalAddress: {
+            addressLine1: '',
+            addressLine2: '',
+            addressLine3: '',
+            city: '',
+            stateProvince: '',
+            postalCode: '',
+            country: ''
+          },
+          subjectName: {
+            title: '',
+            firstName: '',
+            middleName: '',
+            lastName: '',
+            fullName: ''
+          }
+        },
+        internationalTransferInformation: {
+          quoteId: '',
+          receivingCountry: '',
+          remittancePurpose: '',
+          sourceOfFunds: '',
+          relationshipSender: ''
+        }
+      }
+    }
   }
 
   const { formik } = useForm({
@@ -178,6 +254,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
         const copy = { ...values }
         delete copy.amountRows
         delete copy.instantCashDetails
+        delete copy.terraPayDetails
         copy.date = formatDateToApi(copy.date)
         copy.valueDate = formatDateToApi(copy.valueDate)
         copy.defaultValueDate = formatDateToApi(copy.defaultValueDate)
@@ -195,11 +272,15 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
           }
         })
 
+        console.log('vals', copy)
+        terraPayFill(copy)
+
         const amountGridData = {
           header: copy,
           cash: updatedRows,
           bankType: formik.values.bankType,
-          ICRequest: formik.values.instantCashDetails?.deliveryModeId ? formik.values.instantCashDetails : null
+          ICRequest: formik.values.instantCashDetails?.deliveryModeId ? formik.values.instantCashDetails : null,
+          TPRequest: formik.values.terraPayDetails
         }
 
         const amountRes = await postRequest({
@@ -271,6 +352,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       const copy = { ...formik.values }
       delete copy.amountRows
       delete copy.instantCashDetails
+      delete copy.terraPayDetails
       copy.date = formatDateToApi(copy.date)
       copy.valueDate = formatDateToApi(copy.valueDate)
       copy.defaultValueDate = formatDateToApi(copy.defaultValueDate)
@@ -509,10 +591,18 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
     } else if (formik.values.bankType === 2) {
       stack({
         Component: TerraPay,
-        props: {},
+        props: {
+          onSubmit: onTerraPaySubmit,
+          terraPay: formik.values.terraPayDetails,
+          outwardsData: {
+            countryId: formik.values.countryId,
+            amount: formik.values.amount,
+            currencyId: formik.values.currencyId
+          }
+        },
         width: 700,
         height: 500,
-        title: labels.terraPay
+        title: 'Terra Pay'
       })
     }
   }
@@ -553,6 +643,71 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
     const res = await getOutwards(recordId)
     await fillOutwardsData(res.record)
     await chooseClient(res.record.headerView.clientId)
+  }
+
+  function onTerraPaySubmit(obj) {
+    formik.setFieldValue('terraPayDetails', obj)
+  }
+
+  function terraPayFill(formFields) {
+    console.log('inFunct')
+    console.log(formik.values.terraPayDetails)
+    formik.setFieldValue('terraPayDetails.quotation.debitorMSIDSN', formFields.cellPhone)
+    formik.setFieldValue('terraPayDetails.quotation.requestAmount', formFields.amount)
+    formik.setFieldValue('terraPayDetails.transaction.amount', formFields.amount)
+    formik.setFieldValue('terraPayDetails.transaction.debitorMSIDSN', formFields.cellPhone)
+
+    console.log('dateee', formik.values.terraPayDetails.quotation.requestDate)
+    console.log(!/^\/Date\(/.test(formik.values.terraPayDetails.quotation.requestDate))
+    if (
+      formik.values.terraPayDetails.quotation.requestDate &&
+      !/^\/Date\(/.test(formik.values.terraPayDetails.quotation.requestDate)
+    ) {
+      //CONDITION IS ENOUGH ON ONE DATE TO CHECK IF FORMATTED BEFORE
+      formik.values.terraPayDetails.quotation.requestDate &&
+        formik.setFieldValue(
+          'terraPayDetails.quotation.requestDate',
+          formatDateToApi(formik.values.terraPayDetails.quotation.requestDate)
+        )
+      formik.values.terraPayDetails.transaction.requestDate &&
+        formik.setFieldValue(
+          'terraPayDetails.transaction.requestDate',
+          formatDateToApi(formik.values.terraPayDetails.transaction.requestDate)
+        )
+      formik.values.terraPayDetails.transaction.senderKyc.dateOfBirth &&
+        formik.setFieldValue(
+          'terraPayDetails.transaction.senderKyc.dateOfBirth',
+          formatDateToApi(formik.values.terraPayDetails.transaction.senderKyc.dateOfBirth)
+        )
+      formik.values.terraPayDetails.transaction.senderKyc.idDocument.issueDate &&
+        formik.setFieldValue(
+          'terraPayDetails.transaction.senderKyc.idDocument.issueDate',
+          formatDateToApi(formik.values.terraPayDetails.transaction.senderKyc.idDocument.issueDate)
+        )
+      formik.values.terraPayDetails.transaction.senderKyc.idDocument.expiryDate &&
+        formik.setFieldValue(
+          'terraPayDetails.transaction.senderKyc.idDocument.expiryDate',
+          formatDateToApi(formik.values.terraPayDetails.transaction.senderKyc.idDocument.expiryDate)
+        )
+      formik.values.terraPayDetails.transaction.recipientKyc.dateOfBirth &&
+        formik.setFieldValue(
+          'terraPayDetails.transaction.recipientKyc.dateOfBirth',
+          formatDateToApi(formik.values.terraPayDetails.transaction.recipientKyc.dateOfBirth)
+        )
+      formik.values.terraPayDetails.transaction.recipientKyc.idDocument.issueDate &&
+        formik.setFieldValue(
+          'terraPayDetails.transaction.recipientKyc.idDocument.issueDate',
+          formatDateToApi(formik.values.terraPayDetails.transaction.recipientKyc.idDocument.issueDate)
+        )
+      formik.values.terraPayDetails.transaction.recipientKyc.idDocument.expiryDate &&
+        formik.setFieldValue(
+          'terraPayDetails.transaction.recipientKyc.idDocument.expiryDate',
+          formatDateToApi(formik.values.terraPayDetails.transaction.recipientKyc.idDocument.expiryDate)
+        )
+    }
+
+    console.log('last')
+    console.log(formik.values.terraPayDetails)
   }
 
   useEffect(() => {
