@@ -176,10 +176,12 @@ export default function BenificiaryBankForm({
 
   useEffect(() => {
     ;(async function () {
-      if (countryId && corId && dispersalType) {
+      if (formik.values.countryId && dispersalType) {
         const qryCCL = await getRequest({
           extension: RemittanceSettingsRepository.CorrespondentControl.qry,
-          parameters: `_countryId=${countryId}&_corId=${corId}&_resourceId=${ResourceIds.BeneficiaryBank}`
+          parameters: `_countryId=${formik.values.countryId}&_corId=${corId ?? 0}&_resourceId=${
+            ResourceIds.BeneficiaryBank
+          }`
         })
 
         const controls = { controls: qryCCL.list }
@@ -243,7 +245,7 @@ export default function BenificiaryBankForm({
         formik.setValues(obj)
       }
     })()
-  }, [beneficiary?.beneficiaryId, beneficiary?.beneficiarySeqNo, client?.clientId])
+  }, [beneficiary?.beneficiaryId, beneficiary?.beneficiarySeqNo, client?.clientId, formik.values.countryId])
 
   useEffect(() => {
     if (resetForm) {
@@ -338,7 +340,7 @@ export default function BenificiaryBankForm({
           <Grid container>
             {/* First Column */}
             <Grid container rowGap={2} xs={6}>
-              <Grid container xs={12}>
+              <FormGrid xs={12}>
                 <ResourceLookup
                   endpointId={CTCLRepository.ClientCorporate.snapshot}
                   parameters={{
@@ -354,6 +356,7 @@ export default function BenificiaryBankForm({
                   valueShow='clientRef'
                   secondValueShow='clientName'
                   maxAccess={maxAccess}
+                  displayFieldWidth={3}
                   columnsInDropDown={[
                     { key: 'reference', value: 'Ref.' },
                     { key: 'name', value: 'Name' },
@@ -373,7 +376,7 @@ export default function BenificiaryBankForm({
                   }}
                   errorCheck={'clientId'}
                 />
-              </Grid>
+              </FormGrid>
               <FormGrid xs={12}>
                 <ResourceComboBox
                   endpointId={SystemRepository.Country.qry}
@@ -689,21 +692,20 @@ export default function BenificiaryBankForm({
                 />
               </FormGrid>
               <FormGrid hideonempty xs={12}>
-                <Grid item xs={12}>
-                  <ResourceComboBox
-                    endpointId={CurrencyTradingSettingsRepository.RelationType.qry}
-                    name='rtId'
-                    label={_labels.relationType}
-                    displayField='name'
-                    valueField='recordId'
-                    values={formik.values}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('rtId', newValue ? newValue?.recordId : '')
-                    }}
-                    error={formik.touched.rtId && Boolean(formik.errors.rtId)}
-                    readOnly={editMode}
-                  />
-                </Grid>
+                <ResourceComboBox
+                  endpointId={CurrencyTradingSettingsRepository.RelationType.qry}
+                  name='rtId'
+                  label={_labels.relationType}
+                  displayField='name'
+                  valueField='recordId'
+                  values={formik.values}
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('rtId', newValue ? newValue?.recordId : '')
+                  }}
+                  maxAccess={maxAccess}
+                  error={formik.touched.rtId && Boolean(formik.errors.rtId)}
+                  readOnly={editMode}
+                />
               </FormGrid>
               <FormGrid hideonempty xs={12}>
                 <CustomTextField

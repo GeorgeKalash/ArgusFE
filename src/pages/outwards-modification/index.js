@@ -41,7 +41,6 @@ const OutwardsModification = () => {
     refetch,
     access,
     filterBy,
-    invalidate,
     clearFilter
   } = useResourceQuery({
     queryFn: fetchGridData,
