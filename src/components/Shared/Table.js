@@ -451,7 +451,18 @@ const Table = ({
           getRowClass={getRowClass}
         />
       </Box>
-      {pagination && <CustomPagination />}
+      {pagination && (
+        <Box
+          sx={{
+            flexShrink: 0,
+            position: 'sticky',
+            bottom: 0,
+            width: '100%'
+          }}
+        >
+          <CustomPagination />
+        </Box>
+      )}
     </>
   )
 }
