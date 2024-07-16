@@ -86,7 +86,6 @@ const ImageUpload = forwardRef(({ name, value, onChange, resourceId, error, seqN
         return
       }
       data = { ...data, file } //binary
-      console.log('data', data)
       formik.setValues(data)
 
       const reader = new FileReader()
