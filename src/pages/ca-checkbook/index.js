@@ -3,17 +3,18 @@ import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
-import ProfessionGroupsForm from './forms/ProfessionGroupsForm'
-import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { ControlContext } from 'src/providers/ControlContext'
+import { CashBankRepository } from 'src/repositories/CashBankRepository'
+import CheckbookForm from './forms/CheckbookForm'
+import { formatDateDefault } from 'src/lib/date-helper'
 
-const ProfessionGroups = () => {
+const Checkbook = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -22,7 +23,7 @@ const ProfessionGroups = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: RemittanceSettingsRepository.ProfessionGroups.page,
+      extension: CashBankRepository.CACheckbook.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
 
@@ -34,27 +35,45 @@ const ProfessionGroups = () => {
     labels: _labels,
     paginationParameters,
     refetch,
-    access
+    access,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: RemittanceSettingsRepository.ProfessionGroups.page,
-    datasetId: ResourceIds.ProfessionGroups
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: RemittanceSettingsRepository.ProfessionGroups.page
+    endpointId: CashBankRepository.CACheckbook.page,
+    datasetId: ResourceIds.Checkbook
   })
 
   const columns = [
     {
-        field: 'reference',
-        headerName: _labels.reference,
+        field: 'bankAccountName',
+        headerName: _labels.bankAccountName,
         flex: 1
     },
     {
-        field: 'name',
-        headerName: _labels.name,
+        field: 'bankAccountRef',
+        headerName: _labels.bankAccountRef,
         flex: 1
+    },
+    {
+        field: 'size',
+        headerName: _labels.size,
+        flex: 1
+    },
+    {
+        field: 'firstCheckNo',
+        headerName: _labels.firstCheckNo,
+        flex: 1
+    },
+    {
+        field: 'lastCheckNo',
+        headerName: _labels.lastCheckNo,
+        flex: 1
+    },
+    {
+        field: 'issueDate',
+        headerName: _labels.issueDate,
+        flex: 1,
+        valueGetter: ({ row }) => formatDateDefault(row?.issueDate)
     }
   ]
 
@@ -68,25 +87,27 @@ const ProfessionGroups = () => {
 
   function openForm(recordId) {
     stack({
-      Component: ProfessionGroupsForm,
+      Component: CheckbookForm,
       props: {
         labels: _labels,
-        recordId: recordId,
+        recordId,
         maxAccess: access
       },
-      width: 600,
-      height: 330,
-      title: _labels.professionGroups
+      width: 500,
+      height: 500,
+      title: _labels.checkbook
     })
   }
 
   const del = async obj => {
-    await postRequest({
-      extension: RemittanceSettingsRepository.ProfessionGroups.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success(platformLabels.Deleted)
+    try {
+        await postRequest({
+        extension: CashBankRepository.CACheckbook.del,
+        record: JSON.stringify(obj)
+        })
+        invalidate()
+        toast.success(platformLabels.Deleted)
+    } catch (exception) {}
   }
 
   return (
@@ -108,9 +129,9 @@ const ProfessionGroups = () => {
           refetch={refetch}
           maxAccess={access}
         />
-      </Grow>{' '}
+      </Grow>
     </VertLayout>
   )
 }
 
-export default ProfessionGroups
+export default Checkbook

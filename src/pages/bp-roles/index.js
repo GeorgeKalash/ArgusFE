@@ -3,58 +3,61 @@ import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
+import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
-import ProfessionGroupsForm from './forms/ProfessionGroupsForm'
-import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
+import RoleForm from './forms/RoleForm'
 import { ControlContext } from 'src/providers/ControlContext'
 
-const ProfessionGroups = () => {
+const BpRoles = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: RemittanceSettingsRepository.ProfessionGroups.page,
+      extension: BusinessPartnerRepository.Role.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
 
     return { ...response, _startAt: _startAt }
   }
 
+  const { stack } = useWindow()
+
   const {
     query: { data },
     labels: _labels,
     paginationParameters,
     refetch,
-    access
+    access,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: RemittanceSettingsRepository.ProfessionGroups.page,
-    datasetId: ResourceIds.ProfessionGroups
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: RemittanceSettingsRepository.ProfessionGroups.page
+    endpointId: BusinessPartnerRepository.Role.page,
+    datasetId: ResourceIds.Roles
   })
 
   const columns = [
     {
-        field: 'reference',
-        headerName: _labels.reference,
-        flex: 1
+      field: 'reference',
+      headerName: _labels.reference,
+      flex: 1
     },
     {
-        field: 'name',
-        headerName: _labels.name,
-        flex: 1
+      field: 'name',
+      headerName: _labels.name,
+      flex: 1
+    },
+    {
+      field: 'description',
+      headerName: _labels.description,
+      flex: 1
     }
   ]
 
@@ -66,27 +69,27 @@ const ProfessionGroups = () => {
     openForm(obj?.recordId)
   }
 
+  const del = async obj => {
+    await postRequest({
+      extension: BusinessPartnerRepository.Role.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
+  }
+
   function openForm(recordId) {
     stack({
-      Component: ProfessionGroupsForm,
+      Component: RoleForm,
       props: {
         labels: _labels,
         recordId: recordId,
         maxAccess: access
       },
-      width: 600,
-      height: 330,
-      title: _labels.professionGroups
+      width: 500,
+      height: 500,
+      title: _labels.businessPartnerRole
     })
-  }
-
-  const del = async obj => {
-    await postRequest({
-      extension: RemittanceSettingsRepository.ProfessionGroups.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success(platformLabels.Deleted)
   }
 
   return (
@@ -108,9 +111,9 @@ const ProfessionGroups = () => {
           refetch={refetch}
           maxAccess={access}
         />
-      </Grow>{' '}
+      </Grow>
     </VertLayout>
   )
 }
 
-export default ProfessionGroups
+export default BpRoles
