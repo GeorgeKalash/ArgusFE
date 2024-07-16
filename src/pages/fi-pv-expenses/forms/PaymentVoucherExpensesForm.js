@@ -715,7 +715,14 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
             </Grid>
           </Grid>
           <DataGrid
-            onChange={value => formik.setFieldValue('expenses', value)}
+            onChange={value => {
+              const updatedExpenses = value.map(expense => ({
+                ...expense,
+                hasCostCenters: true,
+              }))
+            
+              formik.setFieldValue('expenses', updatedExpenses);
+            }}
             value={formik?.values?.expenses}
             error={formik?.errors?.expenses}
             columns={columns}
