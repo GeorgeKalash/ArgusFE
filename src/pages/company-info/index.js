@@ -1,5 +1,5 @@
 import { Box, Grid } from '@mui/material'
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FormShell from 'src/components/Shared/FormShell'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
@@ -13,53 +13,9 @@ import ImageUpload from 'src/components/Inputs/ImageUpload'
 import { getStorageData } from 'src/storage/storage'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 
-export function PostImage(postRequest, obj, initialValues) {
-  if (obj?.attachment?.file) {
-    return postRequest({
-      extension: SystemRepository.Attachment.set,
-      record: JSON.stringify(obj.attachment),
-      file: obj?.attachment?.file
-    })
-      .then(res => {
-        return res
-      })
-      .catch(e => {})
-  } else if (!obj?.attachment && initialValues?.attachment?.url) {
-    return postRequest({
-      extension: SystemRepository.Attachment.del,
-      record: JSON.stringify(initialValues.attachment),
-      file: obj?.attachment?.url
-    })
-      .then(res => {
-        return res
-      })
-      .catch(e => {})
-  }
-}
-
 const CompanyInfo = () => {
-  const [initialValues, setInitialData] = useState({
-    plantId: '',
-    accountId: getStorageData('userData')?.accountId,
-    name: '',
-    webSite: '',
-    taxNo: '',
-    licenseNo: '',
-    crNo: '',
-    logoUrl: '',
-    flName: '',
-    attachment: {
-      resourceId: null,
-      recordId: 1,
-      seqNo: 0,
-      fileName: null,
-      folderId: null,
-      folderName: null,
-      date: null,
-      url: null,
-      file: null
-    }
-  })
+  const imageUploadRef = useRef()
+
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const { labels: labels, access: maxAccess } = useResourceParams({
@@ -76,8 +32,7 @@ const CompanyInfo = () => {
       parameters: `_filter=`
     })
     res.record.accountId = getStorageData('userData')?.accountId
-    setInitialData(prev => ({
-      ...prev,
+    formik.setValues({
       name: res.record.name,
       webSite: res.record.taxNo,
       taxNo: res.record.taxNo,
@@ -85,14 +40,24 @@ const CompanyInfo = () => {
       crNo: res.record.crNo,
       logoUrl: res.record.logoUrl,
       flName: res.record.flName
-    }))
+    })
   }
 
   const { formik } = useForm({
     maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
-    initialValues,
+    initialValues: {
+      plantId: '',
+      accountId: getStorageData('userData')?.accountId,
+      name: '',
+      webSite: '',
+      taxNo: '',
+      licenseNo: '',
+      crNo: '',
+      logoUrl: '',
+      flName: ''
+    },
     onSubmit: values => {
       post(values)
     }
@@ -103,10 +68,10 @@ const CompanyInfo = () => {
       extension: SystemRepository.CompanyInfo.set,
       record: JSON.stringify({ ...obj, attachment: null })
     })
-    const res = await PostImage(postRequest, obj, initialValues)
-    if (res) {
-      toast.success('Record Edited Successfully')
-    } else if (result) {
+    if (imageUploadRef.current) {
+      imageUploadRef.current.submit()
+    }
+    if (result) {
       toast.success('Record Edited Successfully')
     }
   }
@@ -212,16 +177,7 @@ const CompanyInfo = () => {
             />
           </Grid>
           <Grid item xs={12}>
-            <ImageUpload
-              name='attachment'
-              value={formik.values?.attachment}
-              onChange={formik.setFieldValue}
-              error={formik.errors?.url}
-              setInitialData={setInitialData}
-              resourceId={ResourceIds.CompanyInfo}
-              seqNo={0}
-              recordId={1}
-            />
+            <ImageUpload ref={imageUploadRef} resourceId={ResourceIds.CompanyInfo} seqNo={0} recordId={1} />
           </Grid>
         </Grid>
       </VertLayout>

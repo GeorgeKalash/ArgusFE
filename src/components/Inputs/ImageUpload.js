@@ -1,18 +1,49 @@
 import { Box } from '@mui/material'
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState, forwardRef, useImperativeHandle } from 'react'
 import { useRef } from 'react'
+import { useForm } from 'src/hooks/form'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 
-const ImageUpload = ({ name, value, onChange, resourceId, error, seqNo, recordId, setInitialData }) => {
+const ImageUpload = forwardRef(({ name, value, onChange, resourceId, error, seqNo, recordId }, ref) => {
   const hiddenInputRef = useRef()
-  const { getRequest } = useContext(RequestsContext)
-
+  const { getRequest, postRequest } = useContext(RequestsContext)
   const [image, setImage] = useState()
+  const [initialValues, setInitialData] = useState({})
+
+  const { formik } = useForm({
+    enableReinitialize: true,
+    validateOnChange: true,
+    initialValues
+  })
 
   useEffect(() => {
     getData()
   }, [])
+
+  const submit = () => {
+    if (formik.values?.file) {
+      return postRequest({
+        extension: SystemRepository.Attachment.set,
+        record: JSON.stringify(formik.values),
+        file: formik.values?.file
+      })
+        .then(res => {
+          return res
+        })
+        .catch(e => {})
+    } else if (!image && initialValues?.url) {
+      return postRequest({
+        extension: SystemRepository.Attachment.del,
+        record: JSON.stringify(initialValues),
+        file: initialValues?.url
+      })
+        .then(res => {
+          return res
+        })
+        .catch(e => {})
+    }
+  }
 
   async function getData() {
     try {
@@ -20,10 +51,7 @@ const ImageUpload = ({ name, value, onChange, resourceId, error, seqNo, recordId
         extension: SystemRepository.Attachment.get,
         parameters: `_resourceId=${resourceId}&_seqNo=${seqNo}&_recordId=${recordId}`
       })
-      setInitialData(prevData => ({
-        ...prevData,
-        [name]: result?.record
-      }))
+      setInitialData(result?.record)
     } catch (e) {}
   }
 
@@ -58,7 +86,9 @@ const ImageUpload = ({ name, value, onChange, resourceId, error, seqNo, recordId
         return
       }
       data = { ...data, file } //binary
-      onChange(name, data)
+      console.log('data', data)
+      formik.setValues(data)
+
       const reader = new FileReader()
       reader.onloadend = e => {
         setImage(e.target.result)
@@ -68,14 +98,20 @@ const ImageUpload = ({ name, value, onChange, resourceId, error, seqNo, recordId
   }
 
   const handleInputImageReset = () => {
-    onChange(name, '')
+    formik.setValues({})
     setImage('')
   }
+
+  useImperativeHandle(ref, () => ({
+    submit
+  }))
 
   return (
     <Box sx={{ display: 'flex', alignItems: 'flex-end' }}>
       <img
-        src={`${image || (value?.url && value?.url + `?${new Date().getTime()}`) || '/images/emptyPhoto.jpg'}`}
+        src={`${
+          image || (formik?.values?.url && formik?.values?.url + `?${new Date().getTime()}`) || '/images/emptyPhoto.jpg'
+        }`}
         alt=''
         style={{
           width: 140,
@@ -118,6 +154,6 @@ const ImageUpload = ({ name, value, onChange, resourceId, error, seqNo, recordId
       </Box>
     </Box>
   )
-}
+})
 
 export default ImageUpload
