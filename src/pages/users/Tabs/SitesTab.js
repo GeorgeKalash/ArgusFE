@@ -204,20 +204,17 @@ const SitesTab = ({ labels, maxAccess, recordId }) => {
     <FormShell form={formik} infoVisible={false} isCleared={false}>
       <VertLayout>
         <Fixed>
-          <Grid container>
-            <Grid xs={4} item>
-              <CustomTextField
-                name='search'
-                value={formik.values.search}
-                label={labels.search}
-                onClear={() => {
-                  formik.setFieldValue('search', '')
-                  fetchGridData()
-                }}
-                onChange={handleSearchChange}
-              />
-            </Grid>
-          </Grid>
+          <CustomTextField
+            name='search'
+            value={formik.values.search}
+            label={labels.search}
+            onClear={() => {
+              formik.setFieldValue('search', '')
+              fetchGridData()
+            }}
+            sx={{ width: '30%' }}
+            onChange={handleSearchChange}
+          />
         </Fixed>
         <Grow>
           <DataGrid
