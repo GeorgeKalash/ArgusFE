@@ -17,10 +17,14 @@ function DataGridButton({ row, column, field, update, updateRow }) {
       onClick={e => {
         column.onClick(e, row, update, updateRow)
       }}
-      variant='contained'
+      variant={!!column.img ? '' :'contained'}
       disabled={!row[field]}
     >
-      <img src='/images/buttonsIcons/popup.png' alt='popup' />
+      {
+       !!column.img ? 
+        <img src='/images/buttonsIcons/costCenter.png' alt='popup' /> 
+        : <img src='/images/buttonsIcons/popup.png' alt='popup' />
+      }
     </Button>
   )
 }

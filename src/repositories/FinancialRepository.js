@@ -124,5 +124,8 @@ export const FinancialRepository = {
   },
   PaymentVoucherExpenses: {
     qry: service + 'qryPVX',
+  },
+  PaymentVoucherCostCenters: {
+    qry: service + 'qryPVC',
   }
 }

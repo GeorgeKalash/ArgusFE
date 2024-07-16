@@ -25,6 +25,7 @@ import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import WorkFlow from 'src/components/Shared/WorkFlow'
 import { useWindow } from 'src/windows'
+import ExpensesCostCenters from 'src/components/Shared/ExpensesCostCenters'
 
 export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access, recordId, plantId }) {
   const [subtotalSum, setSubtotalSum] = useState(0);
@@ -78,8 +79,10 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
         taxRef: '',
         notes: '',
         isVAT: false,
-      }
-    ]
+        hasCostCenters: false,
+        costCenters: []
+      },  
+    ],
   }
 
   const invalidate = useInvalidate({
@@ -117,12 +120,18 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
       copy.date = formatDateToApi(copy.date)
       copy.amount = totalAmount
       copy.baseAmount = totalAmount
+      const costCenters = [];
 
       const updatedRows = formik.values.expenses.map((expensesDetails, index) => {
         const seqNo = index + 1
+        if (expensesDetails.costCenters) {
+          costCenters.push(...expensesDetails.costCenters);
+        }
+        const copy = { ...expensesDetails }
+        delete copy.costCenters
 
         return {
-          ...expensesDetails,
+          ...copy,
           seqNo: seqNo,
           pvId: formik.values.recordId || 0
         }
@@ -131,7 +140,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
       const data = {
         header: copy,
         items: updatedRows,
-        costCenters: [],
+        costCenters: costCenters,
       }
       try {
         const response = await postRequest({
@@ -380,30 +389,74 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
         readOnly: false
       }
   },
+  {
+      component: 'button',
+      name: 'hasCostCenters',
+      img: 'costCenters',
+      label: labels.costCenter,
+      onClick: (e, row, update, updateRow) => {
+        stack({
+          Component: ExpensesCostCenters,
+          props: {
+            labels: labels,
+            recordId: recordId,
+            row,
+            updateRow
+          },
+          width: 700,
+          height: 600,
+          title: labels.costCenter
+        })
+      }
+    }
   ]
 
-
-  const getExpenses = async data => {
-
+  const getCostCenters = async (pvId, seqNo) => {
+    const res = await getRequest({
+      extension: FinancialRepository.PaymentVoucherCostCenters.qry,
+      parameters: `_pvId=${pvId}&_seqNo=${seqNo}`
+    });
+  
+    return res.list.map(item => ({
+      ...item,
+      id: item.ccSeqNo,
+      seqNo: item.seqNo,
+      ccSeqNo: item.ccSeqNo,
+      ccName: item.ccName,
+      ccRef: item.ccRef,
+      pvId: item.pvId,
+      ccId: item.ccId,
+    }));
+  };
+  
+  const getExpenses = async (data) => {
     const res = await getRequest({
       extension: FinancialRepository.PaymentVoucherExpenses.qry,
       parameters: `_pvId=${data.recordId}`
-    })
-
-    const expensesList = res.list.map(item => ({
-      ...item,
-      id: item.seqNo,
-      subtotal: item.subtotal,
-      vatAmount: item.vatAmount,
-      isVAT: item.vatAmount != 0,
-    }))
-
+    });
+  
+    const expensesList = await Promise.all(
+      res.list.map(async item => {
+        const costCenters = await getCostCenters(data.recordId, item.seqNo);
+  
+        return {
+          ...item,
+          id: item.seqNo,
+          subtotal: item.subtotal,
+          vatAmount: item.vatAmount,
+          isVAT: item.vatAmount != 0,
+          hasCostCenters: true,
+          costCenters: costCenters 
+        };
+      })
+    )
+  
     formik.setValues({
       ...data,
       expenses: expensesList
     })
   }
-
+  
   useEffect(() => {
     const subtotals = formik?.values?.expenses?.map(item => parseFloat(item.subtotal) || 0);
     const vatAmounts = formik?.values?.expenses?.map(item => parseFloat(item.vatAmount) || 0);
