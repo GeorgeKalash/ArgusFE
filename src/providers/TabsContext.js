@@ -100,11 +100,15 @@ const TabsProvider = ({ children }) => {
   }
 
   const handleCloseOtherTab = tabIndex => {
-    const tab = openTabs[tabIndex]
-    const firstTab = openTabs[0]
-    router.push(tab.route)
-    setOpenTabs([firstTab, tab])
-    setCurrentTabIndex(tabIndex)
+    const homeTab = openTabs[0]
+    const selectedTab = openTabs[tabIndex]
+    const isHomeTabSelected = selectedTab.route === homeTab.route
+
+    const newOpenTabs = openTabs.filter((tab, index) => index === 0 || index === tabIndex)
+
+    router.push(selectedTab.route)
+    setOpenTabs(newOpenTabs)
+    setCurrentTabIndex(isHomeTabSelected ? 0 : newOpenTabs.length - 1)
   }
 
   const closeTab = tabRoute => {
@@ -221,7 +225,7 @@ const TabsProvider = ({ children }) => {
             value={currentTabIndex}
             onChange={handleChange}
             variant='scrollable'
-            scrollButtons='auto'
+            scrollButtons={openTabs.length > 3 ? 'auto' : 'off'}
             aria-label='scrollable auto tabs example'
             sx={{
               minHeight: '35px !important',
