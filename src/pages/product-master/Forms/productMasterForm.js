@@ -1,5 +1,4 @@
 import { Grid, FormControlLabel, Checkbox } from '@mui/material'
-import { useFormik } from 'formik'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
@@ -16,12 +15,21 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
+import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
+import { SystemRepository } from 'src/repositories/SystemRepository'
+import { useForm } from 'src/hooks/form'
 
-const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, maxAccess }) => {
+const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, maxAccess: access }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId: pId } = store
   const [type, setType] = useState('')
   const { platformLabels } = useContext(ControlContext)
+
+  const { maxAccess, changeDT } = useDocumentType({
+    functionId: 1,
+    access: access,
+    enabled: !pId
+  })
 
   const [initialValues, setData] = useState({
     recordId: null,
@@ -45,19 +53,19 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
     endpointId: RemittanceSettingsRepository.Correspondent.qry
   })
 
-  const formik = useFormik({
+  const { formik } = useForm({
+    maxAccess,
     initialValues,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      reference: yup.string().required('This field is required'),
-      name: yup.string().required('This field is required'),
-      type: yup.string().required('This field is required'),
-      functionId: yup.string().required('This field is required'),
-      interfaceId: yup.string().required('This field is required'),
-      commissionBase: yup.string().required('This field is required'),
-      isInactive: yup.string().required('This field is required'),
-      corId: type === '1' ? yup.string().required('This field is required') : yup.string().notRequired()
+      name: yup.string().required(' '),
+      type: yup.string().required(' '),
+      functionId: yup.string().required(' '),
+      interfaceId: yup.string().required(' '),
+      commissionBase: yup.string().required(' '),
+      isInactive: yup.string().required(' '),
+      corId: type === '1' ? yup.string().required(' ') : yup.string().notRequired()
     }),
     onSubmit: values => {
       postProductMaster(values)
@@ -91,7 +99,22 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
 
   useEffect(() => {
     pId && getProductMasterById(pId)
+    getDefaultNra()
   }, [pId])
+
+  const getDefaultNra = () => {
+    const defaultParams = `_key=rt-nra-product`
+    var parameters = defaultParams
+    getRequest({
+      extension: SystemRepository.Default.get,
+      parameters: parameters
+    })
+      .then(res => {
+        console.log('text = ' + res.record.value)
+        res?.record?.value && changeDT({ nraId: res.record.value })
+      })
+      .catch(error => {})
+  }
 
   const getProductMasterById = pId => {
     const defaultParams = `_recordId=${pId}`
@@ -104,9 +127,7 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
         formik.setValues(res.record)
         setEditMode(true)
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch(error => {})
   }
 
   return (
@@ -121,13 +142,11 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
                   name='reference'
                   label={labels.reference}
                   value={formik.values.reference}
-                  required
                   readOnly={false}
                   onChange={formik.handleChange}
                   onClear={() => formik.setFieldValue('reference', '')}
                   error={formik.touched.reference && Boolean(formik.errors.reference)}
-                  helperText={formik.touched.reference && formik.errors.reference}
-                  maxAccess={maxAccess}
+                  maxAccess={!editMode && maxAccess}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -139,7 +158,6 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
                   onChange={formik.handleChange}
                   onClear={() => formik.setFieldValue('name', '')}
                   error={formik.touched.name && Boolean(formik.errors.name)}
-                  helperText={formik.touched.name && formik.errors.name}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -156,7 +174,6 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
                     setType(newValue?.key)
                   }}
                   error={formik.touched.type && Boolean(formik.errors.type)}
-                  helperText={formik.touched.type && formik.errors.type}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -172,7 +189,6 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
                     formik.setFieldValue('functionId', newValue?.key)
                   }}
                   error={formik.touched.functionId && Boolean(formik.errors.functionId)}
-                  helperText={formik.touched.functionId && formik.errors.functionId}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -211,7 +227,6 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
                     }
                   }}
                   error={formik.touched.corId && Boolean(formik.errors.corId)}
-                  helperText={formik.touched.corId && formik.errors.corId}
                   maxAccess={maxAccess}
                 />
               </Grid>
@@ -230,7 +245,6 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
                     formik.setFieldValue('languages', newValue?.key)
                   }}
                   error={formik.touched.languages && Boolean(formik.errors.languages)}
-                  helperText={formik.touched.languages && formik.errors.languages}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -246,7 +260,6 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
                     formik.setFieldValue('interfaceId', newValue?.recordId)
                   }}
                   error={formik.touched.interfaceId && Boolean(formik.errors.interfaceId)}
-                  helperText={formik.touched.interfaceId && formik.errors.interfaceId}
                 />
               </Grid>
 
@@ -263,7 +276,6 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
                     formik.setFieldValue('commissionBase', newValue?.key)
                   }}
                   error={formik.touched.commissionBase && Boolean(formik.errors.commissionBase)}
-                  helperText={formik.touched.commissionBase && formik.errors.commissionBase}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -275,7 +287,6 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
                   onChange={formik.handleChange}
                   onClear={() => formik.setFieldValue('posMsg', '')}
                   error={formik.errors && Boolean(formik.errors.posMsg)}
-                  helperText={formik.errors && formik.errors.posMsg}
                 />
               </Grid>
               <Grid item xs={12}>

@@ -104,6 +104,8 @@ const documentType = async (getRequest, functionId, maxAccess, selectNraId = und
   let dcTypeRequired
   let activeStatus = true
 
+  console.log('select nraId = ' + selectNraId)
+
   if ((docType && selectNraId === undefined) || selectNraId === 'nraId') {
     if (dtId) {
       const dcTypNumberRange = await fetchData(getRequest, dtId, 'DcTypNumberRange') //DT
