@@ -5,7 +5,7 @@ import { useForm } from 'src/hooks/form'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 
-const ImageUpload = forwardRef(({ name, value, onChange, resourceId, error, seqNo, recordId }, ref) => {
+const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId }, ref) => {
   const hiddenInputRef = useRef()
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [image, setImage] = useState()
@@ -20,30 +20,6 @@ const ImageUpload = forwardRef(({ name, value, onChange, resourceId, error, seqN
   useEffect(() => {
     getData()
   }, [])
-
-  const submit = () => {
-    if (formik.values?.file) {
-      return postRequest({
-        extension: SystemRepository.Attachment.set,
-        record: JSON.stringify(formik.values),
-        file: formik.values?.file
-      })
-        .then(res => {
-          return res
-        })
-        .catch(e => {})
-    } else if (!image && initialValues?.url) {
-      return postRequest({
-        extension: SystemRepository.Attachment.del,
-        record: JSON.stringify(initialValues),
-        file: initialValues?.url
-      })
-        .then(res => {
-          return res
-        })
-        .catch(e => {})
-    }
-  }
 
   async function getData() {
     try {
@@ -99,6 +75,30 @@ const ImageUpload = forwardRef(({ name, value, onChange, resourceId, error, seqN
   const handleInputImageReset = () => {
     formik.setValues({})
     setImage('')
+  }
+
+  const submit = () => {
+    if (formik.values?.file) {
+      return postRequest({
+        extension: SystemRepository.Attachment.set,
+        record: JSON.stringify(formik.values),
+        file: formik.values?.file
+      })
+        .then(res => {
+          return res
+        })
+        .catch(e => {})
+    } else if (!image && initialValues?.url) {
+      return postRequest({
+        extension: SystemRepository.Attachment.del,
+        record: JSON.stringify(initialValues),
+        file: initialValues?.url
+      })
+        .then(res => {
+          return res
+        })
+        .catch(e => {})
+    }
   }
 
   useImperativeHandle(ref, () => ({
