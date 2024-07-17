@@ -62,11 +62,9 @@ const FiPaymentVouchers = () => {
   }
 
   const getPlantId = async () => {
-    const userData = window.sessionStorage.getItem('userData')
-      ? JSON.parse(window.sessionStorage.getItem('userData'))
-      : null
+    const userId = getStorageData('userData').userId
 
-    const parameters = `_userId=${userData && userData.userId}&_key=plantId`
+    const parameters = `_userId=${userId}&_key=plantId`
 
     return getRequest({
       extension: SystemRepository.UserDefaults.get,
