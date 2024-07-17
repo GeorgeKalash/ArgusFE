@@ -233,7 +233,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
         invalidate()
         const res2 = await getPaymentVouchers(res.recordId)
         res2.record.date = formatDateFromApi(res2.record.date)
-        getExpenses(res2.record)
+        await getExpenses(res2.record)
     } catch (e) {}
   }
 
