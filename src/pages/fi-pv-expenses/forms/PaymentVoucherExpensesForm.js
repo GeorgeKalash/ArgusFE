@@ -142,7 +142,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
         !recordId ? toast.success(platformLabels.Added) : toast.success(platformLabels.Edited)
         const res2 = await getPaymentVouchers(response.recordId)
         res2.record.date = formatDateFromApi(res2.record.date)
-        getExpenses(res2.record)
+        await getExpenses(res2.record)
         invalidate()
       } catch (error) {}
     }
