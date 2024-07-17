@@ -415,8 +415,6 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
         return {
           ...item,
           id: item.seqNo,
-          subtotal: item.subtotal,
-          vatAmount: item.vatAmount,
           isVAT: item.vatAmount != 0,
           hasCostCenters: true,
           costCenters: costCenters 
