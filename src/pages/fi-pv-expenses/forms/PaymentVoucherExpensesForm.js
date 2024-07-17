@@ -107,9 +107,6 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
             yup.object().shape({
                 etId: yup.number().required(),
                 amount: yup.number().required(),
-                supplierName: yup.string().required(),
-                taxRef: yup.string().required(),
-                notes: yup.string().required(),
             })
           )
           .required()
@@ -348,7 +345,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
         label: labels.vat,
         name: 'vatAmount',
         props: {
-          readOnly: false
+          readOnly: true
         }
     },
     {
