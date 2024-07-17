@@ -66,12 +66,13 @@ const FiPaymentVouchers = () => {
 
     const parameters = `_userId=${userId}&_key=plantId`
 
-    return getRequest({
-      extension: SystemRepository.UserDefaults.get,
-      parameters: parameters
-    })
-      .then(res => res.record.value)
-      .catch(error => {})
+    try {
+      return await getRequest({
+        extension: SystemRepository.UserDefaults.get,
+        parameters: parameters
+      })
+    } catch (e) {}
+    
   }
 
   function openOutWardsWindow(plantId, recordId) {
