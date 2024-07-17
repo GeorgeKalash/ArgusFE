@@ -105,8 +105,8 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
           .array()
           .of(
             yup.object().shape({
-                etId: yup.number().required(),
-                amount: yup.number().required(),
+              etId: yup.number().required(),
+              amount: yup.number().required(),
             })
           )
           .required()
@@ -149,7 +149,6 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
         const res2 = await getPaymentVouchers(response.recordId)
         res2.record.date = formatDateFromApi(res2.record.date)
         getExpenses(res2.record)
-
         invalidate()
       } catch (error) {}
     }
@@ -177,18 +176,18 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
 
   const onPost = async () => {
     try {
-        const res = await postRequest({
-            extension: FinancialRepository.PaymentVouchers.post,
-            record: JSON.stringify(formik.values)
-        })
+      const res = await postRequest({
+          extension: FinancialRepository.PaymentVouchers.post,
+          record: JSON.stringify(formik.values)
+      })
 
-        if (res?.recordId) {
-            toast.success(platformLabels.Posted)
-            invalidate()
-            const res2 = await getPaymentVouchers(res.recordId)
-            res2.record.date = formatDateFromApi(res2.record.date)
-            formik.setValues(res2.record)
-        }
+      if (res?.recordId) {
+          toast.success(platformLabels.Posted)
+          invalidate()
+          const res2 = await getPaymentVouchers(res.recordId)
+          res2.record.date = formatDateFromApi(res2.record.date)
+          getExpenses(res2.record)
+      }
     } catch (exception) {}
   }
 
@@ -245,7 +244,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
         invalidate()
         const res2 = await getPaymentVouchers(res.recordId)
         res2.record.date = formatDateFromApi(res2.record.date)
-        formik.setValues(res2.record)
+        getExpenses(res2.record)
       }
     } catch (e) {}
   }
@@ -438,7 +437,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
       extension: FinancialRepository.PaymentVoucherExpenses.qry,
       parameters: `_pvId=${data.recordId}`
     });
-  
+
     const expensesList = await Promise.all(
       res.list.map(async item => {
         const costCenters = await getCostCenters(data.recordId, item.seqNo);
