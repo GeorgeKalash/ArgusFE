@@ -474,7 +474,6 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
     formik.setFieldValue('baseAmount', amountSum);
   }, [formik?.values?.expenses]);
 
-  console.log(formik)
 
   return (
     <FormShell 
