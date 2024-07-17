@@ -357,25 +357,16 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
         component: 'textfield',
         label: labels.vendorName,
         name: 'supplierName',
-        props: {
-          readOnly: false
-        }
     },
     {
       component: 'textfield',
       label: labels.vatNo,
       name: 'taxRef',
-      props: {
-        readOnly: false
-      }
   },
   {
       component: 'textfield',
       label: labels.notes,
       name: 'notes',
-      props: {
-        readOnly: false
-      }
   },
   {
       component: 'button',
