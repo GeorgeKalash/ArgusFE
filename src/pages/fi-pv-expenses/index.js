@@ -90,7 +90,7 @@ const FiPaymentVouchers = () => {
       },
       width: 1300,
       height: 700,
-      title: _labels.paymentVoucher
+      title: _labels.paymentVoucherExpenses
     })
   }
 
