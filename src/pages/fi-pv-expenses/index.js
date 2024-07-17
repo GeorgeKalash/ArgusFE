@@ -107,12 +107,14 @@ const FiPaymentVouchers = () => {
   }
 
   const del = async obj => {
-    await postRequest({
-      extension: FinancialRepository.PaymentVouchers.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success(platformLabels.Deleted)
+    try {
+      await postRequest({
+        extension: FinancialRepository.PaymentVouchers.del,
+        record: JSON.stringify(obj)
+      })
+      invalidate()
+      toast.success(platformLabels.Deleted)
+    } catch (error) {}
   }
 
   return (
