@@ -67,10 +67,12 @@ const FiPaymentVouchers = () => {
     const parameters = `_userId=${userId}&_key=plantId`
 
     try {
-      return await getRequest({
+      const res = await getRequest({
         extension: SystemRepository.UserDefaults.get,
         parameters: parameters
       })
+
+      return res.record.value
     } catch (e) {}
     
   }
