@@ -117,27 +117,25 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
       copy.date = formatDateToApi(copy.date)
       copy.amount = totalAmount
       copy.baseAmount = totalAmount
-      const costCenters = [];
+      const costCentersValues = [];
 
       const updatedRows = formik.values.expenses.map((expensesDetails, index) => {
-        const seqNo = index + 1
-        if (expensesDetails.costCenters) {
-          costCenters.push(...expensesDetails.costCenters);
+        const { costCenters, ...restDetails } = expensesDetails;
+        if (costCenters) {
+          costCentersValues.push(...costCenters);
         }
-        const copy = { ...expensesDetails }
-        delete copy.costCenters
 
         return {
-          ...copy,
-          seqNo: seqNo,
-          pvId: formik.values.recordId || 0
-        }
-      })
+          ...restDetails,
+          seqNo: index + 1,
+          pvId: formik.values.recordId || 0,
+        };
+      });
 
       const data = {
         header: copy,
         items: updatedRows,
-        costCenters: costCenters,
+        costCenters: costCentersValues,
       }
       try {
         const response = await postRequest({
