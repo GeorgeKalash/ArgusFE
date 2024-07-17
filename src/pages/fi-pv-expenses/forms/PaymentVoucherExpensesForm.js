@@ -510,6 +510,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
                     name='currencyId'
                     label={labels.currency}
                     valueField='recordId'
+                    required
                     displayField={['reference', 'name']}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
