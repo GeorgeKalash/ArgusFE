@@ -52,8 +52,6 @@ export default function ExpensesCostCenters({ labels, maxAccess, row, window, up
                 );
 
                 updateRow({ changes: { costCenters } })
-                
-                toast.success(platformLabels.Added)
                 window.close()
             } catch (error) { }
         }
