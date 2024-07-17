@@ -37,15 +37,12 @@ const FiPaymentVouchers = () => {
     labels: _labels,
     paginationParameters,
     refetch,
-    access
+    access,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: FinancialRepository.PaymentVouchers.page,
     datasetId: ResourceIds.PaymentVoucherExpenses
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: FinancialRepository.PaymentVouchers.page
   })
 
   const columns = [
