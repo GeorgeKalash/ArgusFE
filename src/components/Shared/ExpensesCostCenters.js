@@ -86,9 +86,6 @@ export default function ExpensesCostCenters({ labels, maxAccess, row, window, up
         component: 'textfield',
         label: labels.amount,
         name: 'amount',
-        props: {
-          readOnly: false
-        }
       },
   ]
 
