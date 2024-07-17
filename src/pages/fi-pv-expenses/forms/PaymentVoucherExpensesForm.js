@@ -338,9 +338,6 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
         component: 'numberfield',
         label: labels.amount,
         name: 'amount',
-        props: {
-          readOnly: false
-        },
         async onChange({ row: { update, newRow } }) {
           if (newRow.isVAT) {
             let newSubtotal = newRow.amount * (100 / (100 + formik.values.vatPct));
