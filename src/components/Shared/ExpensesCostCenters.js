@@ -67,7 +67,7 @@ export default function ExpensesCostCenters({ labels, maxAccess, row, window, up
         props: {
           valueField: 'reference',
           displayField: 'reference',
-          displayFieldWidth: 4,
+          displayFieldWidth: 2,
           endpointId: GeneralLedgerRepository.CostCenter.snapshot,
           mapping: [
             { from: 'recordId', to: 'ccId' },
