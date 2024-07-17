@@ -1,5 +1,4 @@
-import { useEffect, useContext } from 'react'
-import toast from 'react-hot-toast'
+import { useEffect } from 'react'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { Grid } from '@mui/material'
@@ -10,11 +9,8 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import CustomTextField from '../Inputs/CustomTextField'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
-import { ControlContext } from 'src/providers/ControlContext'
 
 export default function ExpensesCostCenters({ labels, maxAccess, row, window, updateRow, recordId }) {
-    const { platformLabels } = useContext(ControlContext)
-
     const { formik } = useForm({
         maxAccess,
         enableReinitialize: true,
