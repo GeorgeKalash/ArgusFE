@@ -64,16 +64,16 @@ const FiPaymentVouchers = () => {
   const getPlantId = async () => {
     const userId = getStorageData('userData').userId
 
-    const parameters = `_userId=${userId}&_key=plantId`
-
     try {
       const res = await getRequest({
         extension: SystemRepository.UserDefaults.get,
-        parameters: parameters
+        parameters: `_userId=${userId}&_key=plantId`
       })
 
       return res.record.value
-    } catch (e) {}
+    } catch (e) {
+      return ''
+    }
     
   }
 
