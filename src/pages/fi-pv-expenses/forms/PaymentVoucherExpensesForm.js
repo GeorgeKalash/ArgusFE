@@ -399,12 +399,6 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
     return res.list.map(item => ({
       ...item,
       id: item.ccSeqNo,
-      seqNo: item.seqNo,
-      ccSeqNo: item.ccSeqNo,
-      ccName: item.ccName,
-      ccRef: item.ccRef,
-      pvId: item.pvId,
-      ccId: item.ccId,
     }));
   };
   
