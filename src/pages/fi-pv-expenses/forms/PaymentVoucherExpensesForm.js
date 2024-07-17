@@ -288,7 +288,8 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
         columnsInDropDown: [
           { key: 'reference', value: 'Reference' },
           { key: 'name', value: 'Name' }
-        ]
+        ],
+        readOnly: isPosted || isCancelled
       }
     },
     {
@@ -338,6 +339,9 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
         component: 'numberfield',
         label: labels.amount,
         name: 'amount',
+        props: {
+          readOnly: isPosted || isCancelled
+        },
         async onChange({ row: { update, newRow } }) {
           if (newRow.isVAT) {
             let newSubtotal = newRow.amount * (100 / (100 + formik.values.vatPct));
@@ -357,16 +361,25 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
         component: 'textfield',
         label: labels.vendorName,
         name: 'supplierName',
+        props: {
+          readOnly: isPosted || isCancelled
+        }
     },
     {
       component: 'textfield',
       label: labels.vatNo,
       name: 'taxRef',
+      props: {
+        readOnly: isPosted || isCancelled
+      }
   },
   {
       component: 'textfield',
       label: labels.notes,
       name: 'notes',
+      props: {
+        readOnly: isPosted || isCancelled
+      }
   },
   {
       component: 'button',
@@ -377,11 +390,13 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
         stack({
           Component: ExpensesCostCenters,
           props: {
-            labels: labels,
-            recordId: recordId,
             maxAccess,
+            labels,
+            recordId,
             row,
-            updateRow
+            updateRow,
+            isPosted,
+            isCancelled
           },
           width: 700,
           height: 600,
@@ -704,8 +719,8 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
             value={formik?.values?.expenses}
             error={formik?.errors?.expenses}
             columns={columns}
-            allowDelete={true}
-            allowAddNewLine={true}
+            allowDelete={!isPosted && !isCancelled}
+            allowAddNewLine={!isPosted && !isCancelled}
           />
         </Grow>
       </VertLayout>      
