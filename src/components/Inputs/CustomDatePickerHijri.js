@@ -42,6 +42,7 @@ export default function CustomDatePickerHijri({
         maxDate={moment(new Date(2075, 11, 31))}
         slotProps={{
           textField: {
+            readOnly: true,
             size: size,
             fullWidth: fullWidth,
             InputProps: {
