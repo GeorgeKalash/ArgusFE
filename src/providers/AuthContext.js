@@ -49,12 +49,10 @@ const AuthProvider = ({ children }) => {
         if (savedLanguageId) {
           setLanguageId(parseInt(savedLanguageId))
         }
-        setLoading(false)
       } else {
         if (savedLanguageId) {
           setLanguageId(parseInt(savedLanguageId))
         }
-        setLoading(false)
       }
     }
     initAuth()
@@ -73,6 +71,8 @@ const AuthProvider = ({ children }) => {
       } catch (error) {
         console.error('Error fetching data:', error)
       }
+
+      setLoading(false)
     }
 
     fetchData()
@@ -124,6 +124,7 @@ const AuthProvider = ({ children }) => {
         userType: getUS2.data.record.userType,
         employeeId: getUS2.data.record.employeeId,
         fullName: getUS2.data.record.fullName,
+        dashboardId: getUS2.data.record.dashboardId,
         role: 'admin',
         expiresAt: jwt(signIn3.data.record.accessToken).exp,
         ...signIn3.data.record
