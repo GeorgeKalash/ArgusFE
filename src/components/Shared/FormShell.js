@@ -9,6 +9,9 @@ import PreviewReport from './PreviewReport'
 import GeneralLedger from 'src/components/Shared/GeneralLedger'
 import Approvals from './Approvals'
 import ResourceRecordRemarks from './ResourceRecordRemarks'
+import GlobalIntegrationGrid from './GlobalIntegrationGrid'
+import AccountBalance from './AccountBalance'
+import CashTransaction from './CashTransaction'
 
 export default function FormShell({
   form,
@@ -22,6 +25,7 @@ export default function FormShell({
   infoVisible = true,
   postVisible = false,
   resourceId,
+  masterSource,
   functionId,
   maxAccess,
   isPosted = false,
@@ -85,10 +89,34 @@ export default function FormShell({
     })
   }
 
+  const transactionClicked = () => {
+    stack({
+      Component: CashTransaction,
+      props: {
+        recordId: form.values?.recordId,
+        functionId: functionId
+      },
+      width: 1200,
+      height: 670,
+      title: 'Cash Transaction'
+    })
+  }
+
   return (
     <>
-      <DialogContent sx={{ flex: 1, height: '100%', zIndex: 0 }}>
-        <Box sx={{ mt: 1 }}>{children}</Box>
+      <DialogContent
+        sx={{
+          display: 'flex !important',
+          flex: 1,
+          flexDirection: 'column',
+          overflow: 'auto',
+          '.MuiBox-root': {
+            paddingTop: '5px !important',
+            px: '0px !important'
+          }
+        }}
+      >
+        {children}
       </DialogContent>
       {windowToolbarVisible && (
         <WindowToolbar
@@ -114,6 +142,7 @@ export default function FormShell({
                 setErrorMessage: setErrorMessage
               },
               width: 700,
+              height: 600,
               height: 'auto',
               title: 'Transaction Log'
             })
@@ -129,6 +158,27 @@ export default function FormShell({
               width: 1000,
               height: 620,
               title: 'General Ledger'
+            })
+          }
+          onClickGIA={() =>
+            stack({
+              Component: GlobalIntegrationGrid,
+              props: {
+                masterId: form.values?.recordId,
+
+                masterSource: masterSource
+              },
+              width: 700,
+              height: 500,
+              title: 'Integration Account'
+            })
+          }
+          onClickAC={() =>
+            stack({
+              Component: AccountBalance,
+              width: 1000,
+              height: 620,
+              title: 'Account Balance'
             })
           }
           onClientRelation={() =>
@@ -152,8 +202,8 @@ export default function FormShell({
                 selectedReport: selectedReport,
                 recordId: form.values?.recordId
               },
-              width: 1000,
-              height: 500,
+              width: 1150,
+              height: 700,
               title: 'Preview Report'
             })
           }
@@ -163,6 +213,7 @@ export default function FormShell({
           actions={actions}
           onApproval={onApproval}
           onRecordRemarks={onRecordRemarks}
+          transactionClicked={transactionClicked}
           editMode={editMode}
           disabledSubmit={disabledSubmit}
           infoVisible={infoVisible}
@@ -171,6 +222,7 @@ export default function FormShell({
           isClosed={isClosed}
           clientRelation={clientRelation}
           resourceId={resourceId}
+          masterSource={masterSource}
           recordId={form.values?.recordId}
           selectedReport={selectedReport}
           setSelectedReport={setSelectedReport}

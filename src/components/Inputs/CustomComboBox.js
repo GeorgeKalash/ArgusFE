@@ -1,14 +1,15 @@
 // ** MUI Imports
-import { Autocomplete, TextField } from '@mui/material'
+import { Autocomplete, Paper, TextField } from '@mui/material'
 import { ControlAccessLevel, TrxType } from 'src/resources/AccessLevels'
 import { Box } from '@mui/material'
-import Paper from '@mui/material/Paper'
+import React from 'react'
+import PopperComponent from '../Shared/Popper/PopperComponent'
 
 const CustomComboBox = ({
   type = 'text', //any valid HTML5 input type
   name,
   label,
-  value,
+  value: _value,
   valueField = 'key',
   displayField = 'value',
   store = [],
@@ -23,6 +24,7 @@ const CustomComboBox = ({
   autoFocus = false,
   disabled = false,
   readOnly = false,
+  neverPopulate = false,
   displayFieldWidth = 1,
   sx,
   columnsInDropDown,
@@ -34,14 +36,12 @@ const CustomComboBox = ({
 
   const fieldAccess =
     props.maxAccess && props.maxAccess?.record?.controls?.find(item => item.controlId === name)?.accessLevel
-
   const _readOnly = editMode ? editMode && maxAccess < TrxType.EDIT : readOnly
-
   const _disabled = disabled || fieldAccess === ControlAccessLevel.Disabled
-
   const _required = required || fieldAccess === ControlAccessLevel.Mandatory
-
   const _hidden = fieldAccess === ControlAccessLevel.Hidden
+
+  const value = neverPopulate ? '' : _value
 
   return (
     <Autocomplete
@@ -50,17 +50,17 @@ const CustomComboBox = ({
       size={size}
       options={store}
       key={value}
+      PopperComponent={PopperComponent}
       PaperComponent={({ children }) => <Paper style={{ width: `${displayFieldWidth * 100}%` }}>{children}</Paper>}
       getOptionLabel={(option, value) => {
-        if (Array.isArray(displayField)) {
+        if (typeof displayField == 'object') {
           const text = displayField
             .map(header => (option[header] ? option[header]?.toString() : header === '->' && header))
             ?.filter(item => item)
             ?.join(' ')
-
-          if (text) return text
+          if (text !== undefined) return text
         }
-        if (typeof option === 'object' && !Array.isArray(displayField)) {
+        if (typeof option === 'object') {
           return `${option[displayField]}`
         } else {
           const selectedOption = store.find(item => {
@@ -85,12 +85,13 @@ const CustomComboBox = ({
           )
         }
       }}
-      isOptionEqualToValue={(option, value) => option[valueField] == getOptionBy}
+      isOptionEqualToValue={(option, value) => option[valueField] === value[valueField]}
       onChange={onChange}
       fullWidth={fullWidth}
       readOnly={_readOnly}
       freeSolo={_readOnly}
       disabled={_disabled}
+      required={_required}
       sx={{ ...sx, display: _hidden ? 'none' : 'unset' }}
       renderOption={(props, option) => {
         if (columnsInDropDown && columnsInDropDown.length > 0) {
@@ -132,6 +133,7 @@ const CustomComboBox = ({
       renderInput={params => (
         <TextField
           {...params}
+          inputProps={{ ...params.inputProps, ...(neverPopulate && { value: '' }) }}
           type={type}
           variant={variant}
           label={label}

@@ -1,17 +1,15 @@
-// ** MUI Imports
 import { Grid } from '@mui/material'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
-import toast from 'react-hot-toast'
 import FormShell from './FormShell'
-
-// ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { useState, useContext } from 'react'
 import CustomComboBox from '../Inputs/CustomComboBox'
-import { formatDateToApiFunction } from 'src/lib/date-helper'
+import { formatDateFromApi, formatDateToApiFunction } from 'src/lib/date-helper'
 import { RequestsContext } from 'src/providers/RequestsContext'
+import moment from 'moment-hijri'
+import { idID } from '@mui/material/locale'
 
 const Confirmation = ({ labels, formik, editMode, idTypeStore, maxAccess }) => {
   const [showAsPassword, setShowAsPassword] = useState(true)
@@ -47,18 +45,50 @@ const Confirmation = ({ labels, formik, editMode, idTypeStore, maxAccess }) => {
   })
 
   const postFetchDefault = obj => {
-    const defaultParams = `_number=${obj.idNo}&_dateTime=${formatDateToApiFunction(obj.birthDate)}&_type=${obj.idtId}`
+    let type
+    if (obj.idtId === 28) {
+      type = 1
+    }
+    if (obj.idtId === 26) {
+      type = 2
+    }
+
+    const hijriDate =
+      type === 1
+        ? moment(formatDateToApiFunction(obj.birthDate), 'YYYY-MM-DD').format('iYYYY-iMM-iDD')
+        : formatDateToApiFunction(obj.birthDate)
+
+    const defaultParams = `_number=${obj.idNo}&_dateTime=${hijriDate}&_type=${type}`
     var parameters = defaultParams
     getMicroRequest({
-      extension: 'getInformation',
+      extension: 'getInformations',
       parameters: parameters
     })
-      .then(res => {})
+      .then(res => {
+        const dateObj = new Date(res?.idExpirationDate)
+        const convertedTimestamp = dateObj.getTime() || ''
+
+        console.log(convertedTimestamp)
+        formik.setValues({
+          ...formik.values,
+          expiryDate: convertedTimestamp,
+          firstName: res.fl_firstName,
+          middleName: res.fl_middleName,
+          familyName: res.fl_familyName,
+          lastName: res.fl_lastName,
+          flName: res.flName,
+          fl_firstName: res.firstName,
+          fl_middleName: res.middleName,
+          fl_lastName: res.lastName,
+          fl_familyName: res.familyName,
+          gender: res.gender === 'ذكر' ? '1' : '2'
+        })
+      })
       .catch(error => {})
   }
 
   return (
-    <FormShell form={fetchFormik} height={320} maxAccess={maxAccess} editMode={editMode} infoVisible={false}>
+    <FormShell form={fetchFormik} maxAccess={maxAccess} editMode={editMode} infoVisible={false}>
       <Grid container spacing={4}>
         <Grid item xs={12}>
           {}

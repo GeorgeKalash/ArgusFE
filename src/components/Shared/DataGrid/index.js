@@ -6,10 +6,12 @@ import {
 } from '@mui/x-data-grid'
 import components from './components'
 import { Box, IconButton } from '@mui/material'
-import { useEffect, useRef, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import { useError } from 'src/error'
 import DeleteDialog from '../DeleteDialog'
 import { HIDDEN, accessLevel } from 'src/services/api/maxAccess'
+import { useWindow } from 'src/windows'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export function DataGrid({
   idName = 'id',
@@ -27,8 +29,6 @@ export function DataGrid({
   rowSelectionModel,
   disabled = false
 }) {
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState([false, {}])
-
   async function processDependenciesForColumn(newRow, oldRow, editCell) {
     const column = columns.find(({ name }) => name === editCell.field)
 
@@ -60,6 +60,7 @@ export function DataGrid({
   const apiRef = useGridApiRef()
 
   const [isUpdatingField, setIsUpdating] = useState(false)
+  const { platformLabels } = useContext(ControlContext)
 
   const [nextEdit, setNextEdit] = useState(null)
 
@@ -153,6 +154,8 @@ export function DataGrid({
         id,
         field
       })
+      const row = apiRef.current.getRow(id)
+      if (onSelectionChange) onSelectionChange(row)
     })
   }
 
@@ -192,22 +195,32 @@ export function DataGrid({
     width: '20',
     renderCell({ id: idName }) {
       return (
-        <IconButton
-          disabled={disabled}
-          tabIndex='-1'
-          icon='pi pi-trash'
-          onClick={() => setDeleteDialogOpen([true, idName])}
-        >
+        <IconButton disabled={disabled} tabIndex='-1' icon='pi pi-trash' onClick={() => openDelete(idName)}>
           <GridDeleteIcon />
         </IconButton>
       )
     }
   }
 
+  function openDelete(id) {
+    stack({
+      Component: DeleteDialog,
+      props: {
+        open: [true, {}],
+        fullScreen: false,
+        onConfirm: () => deleteRow(id)
+      },
+      width: 450,
+      height: 170,
+      canExpand: false,
+      title: platformLabels.Delete
+    })
+  }
+
   const currentEditCell = useRef(null)
 
-  const { stack } = useError()
-
+  const { stack: stackError } = useError()
+  const { stack } = useWindow()
   const stagedChanges = useRef(null)
 
   function stageRowUpdate({ changes }) {
@@ -248,19 +261,37 @@ export function DataGrid({
     return updatedRow
   }
 
+  async function updateState({ newRow }) {
+    apiRef.current.updateRows([newRow])
+
+    handleRowChange(newRow)
+  }
+
   const handleRowClick = params => {
-    const selectedRow = value.find(row => row.id === params.row.id)
+    const selectedRow = apiRef.current.getRow(params.id)
     if (onSelectionChange) {
-      onSelectionChange(selectedRow)
+      async function update({ newRow }) {
+        updateState({
+          newRow
+        })
+      }
+      onSelectionChange(selectedRow, update)
     }
   }
 
+  async function updateRowState({ id, changes }) {
+    const row = apiRef.current.getRow(id)
+    const newRow = { ...row, ...changes }
+    apiRef.current.updateRows([newRow])
+    handleRowChange(newRow)
+  }
+
   return (
-    <Box sx={{ height: height ? height : 'auto', width: '100%', overflow: 'auto' }}>
+    <Box sx={{ height: height ? height : 'auto', flex: '1 !important' }}>
       {/* Container with scroll */}
       <MUIDataGrid
         hideFooter
-        autoHeight={height ? false : true}
+        autoHeight={false}
         columnResizable={false}
         disableColumnFilter
         disableColumnMenu
@@ -291,7 +322,7 @@ export function DataGrid({
           console.error('[Datagrid - ERROR]: Please handle all errors inside onChange of your respective field.')
           console.error('[Datagrid - ERROR]:', e)
 
-          stack({ message: 'Error occured while updating row.' })
+          stackError({ message: 'Error occured while updating row.' })
         }}
         onCellKeyDown={handleCellKeyDown}
         columnVisibilityModel={{
@@ -306,8 +337,16 @@ export function DataGrid({
         apiRef={apiRef}
         editMode='cell'
         sx={{
+          display: 'flex !important',
+          flex: '1 !important',
           '& .MuiDataGrid-cell': {
             padding: '0 !important'
+          },
+          '& .MuiDataGrid-columnHeaders': {
+            backgroundColor: bg
+          },
+          '& .MuiDataGrid-columnHeaderTitle': {
+            fontWeight: '900'
           }
         }}
         onRowClick={handleRowClick} // Handle row click event
@@ -324,6 +363,16 @@ export function DataGrid({
 
               const cell = findCell(params)
 
+              async function updateRow({ changes }) {
+                updateRowState({ id: params.row.id, changes })
+              }
+
+              async function update({ newRow }) {
+                updateState({
+                  newRow
+                })
+              }
+
               return (
                 <Box
                   sx={{
@@ -333,11 +382,15 @@ export function DataGrid({
                     backgroundColor: bg,
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: (column.component === 'checkbox' || column.component === 'button') && 'center',
+                    justifyContent:
+                      (column.component === 'checkbox' ||
+                        column.component === 'button' ||
+                        column.component === 'icon') &&
+                      'center',
                     border: `1px solid ${error?.[cell.rowIndex]?.[params.field] ? '#ff0000' : 'transparent'}`
                   }}
                 >
-                  <Component {...params} column={column} />
+                  <Component {...params} update={update} updateRow={updateRow} column={column} />
                 </Box>
               )
             },
@@ -370,6 +423,7 @@ export function DataGrid({
 
                 if (column.updateOn !== 'blur') await commitRowUpdate()
               }
+              const row = apiRef.current.getRow(params.id)
 
               return (
                 <Box
@@ -379,14 +433,18 @@ export function DataGrid({
                     padding: '0 0px',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: (column.component === 'checkbox' || column.component === 'button') && 'center'
+                    justifyContent:
+                      (column.component === 'checkbox' ||
+                        column.component === 'button' ||
+                        column.component === 'icon') &&
+                      'center'
                   }}
                 >
                   <Component
                     {...params}
                     column={{
                       ...column,
-                      props
+                      props: column.propsReducer ? column?.propsReducer({ row, props }) : props
                     }}
                     update={update}
                     updateRow={updateRow}
@@ -398,14 +456,6 @@ export function DataGrid({
           })),
           actionsColumn
         ]}
-      />
-      <DeleteDialog
-        open={deleteDialogOpen}
-        onClose={() => setDeleteDialogOpen([false, {}])}
-        onConfirm={obj => {
-          setDeleteDialogOpen([false, {}])
-          deleteRow(obj)
-        }}
       />
     </Box>
   )

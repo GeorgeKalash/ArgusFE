@@ -1,33 +1,21 @@
-// ** React Imports
-import { useEffect, useState, useContext } from 'react'
-
-// ** MUI Imports
-import { Box } from '@mui/material'
-
-// ** Third Party Imports
-import { useFormik } from 'formik'
-import * as yup from 'yup'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-
-// ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
-
-// ** Windows
 import PlantWindow from './Windows/PlantWindow'
 import { useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const Plants = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
   async function fetchWithSearch({ qry }) {
@@ -97,7 +85,7 @@ const Plants = () => {
     })
       .then(res => {
         invalidate()
-        toast.success('Record Deleted Successfully')
+        toast.success(platformLabels.Deleted)
       })
       .catch(error => {})
   }
@@ -118,21 +106,15 @@ const Plants = () => {
         recordId: recordId ? recordId : null,
         editMode: recordId && true
       },
-      width: 1000,
-      height: 600,
+      width: 800,
+      height: 550,
       title: _labels.plant
     })
   }
 
   return (
-    <>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%'
-        }}
-      >
+    <VertLayout>
+      <Fixed>
         <GridToolbar
           onAdd={addPlant}
           maxAccess={access}
@@ -141,6 +123,8 @@ const Plants = () => {
           labels={_labels}
           inputSearch={true}
         />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
@@ -154,8 +138,8 @@ const Plants = () => {
           pageSize={50}
           maxAccess={access}
         />
-      </Box>
-    </>
+      </Grow>
+    </VertLayout>
   )
 }
 

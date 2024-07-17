@@ -1,5 +1,4 @@
 import { useContext } from 'react'
-import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
@@ -9,6 +8,10 @@ import SourceOfIncomeWindow from './Windows/SourceOfIncomeWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useWindow } from 'src/windows'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const SourceOfIncome = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -23,6 +26,7 @@ const SourceOfIncome = () => {
 
     return { ...response, _startAt: _startAt }
   }
+  const { platformLabels } = useContext(ControlContext)
 
   const {
     query: { data },
@@ -58,7 +62,7 @@ const SourceOfIncome = () => {
       flex: 1
     },
     {
-      field: 'incomeTypeName',
+      field: 'sitName',
       headerName: _labels.incomeType,
       flex: 1
     }
@@ -91,13 +95,15 @@ const SourceOfIncome = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
   }
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar onAdd={add} maxAccess={access} />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
@@ -111,8 +117,8 @@ const SourceOfIncome = () => {
           paginationType='api'
           maxAccess={access}
         />
-      </Box>
-    </>
+      </Grow>
+    </VertLayout>
   )
 }
 

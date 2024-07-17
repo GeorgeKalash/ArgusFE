@@ -1,26 +1,25 @@
-import { Box } from '@mui/material'
 import FormShell from 'src/components/Shared/FormShell'
-import { useFormik } from 'formik'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useContext, useEffect } from 'react'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
+import { useForm } from 'src/hooks/form'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-const IDNumberForm = ({ store, maxAccess, labels , editMode }) => {
-  const {recordId} = store
+const IDNumberForm = ({ store, maxAccess, labels }) => {
+  const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const editMode = !!store.recordId
 
-  const formik = useFormik({
+  const { formik } = useForm({
+    maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
-      rows: [
-
-      ]
+      rows: []
     },
     onSubmit: values => {
       postIdNumber(values.rows)
@@ -30,95 +29,82 @@ const IDNumberForm = ({ store, maxAccess, labels , editMode }) => {
   const columns = [
     {
       component: 'textfield',
-      label: labels?.idCategory,
+      label: labels.idCategory,
       name: 'incName',
-      readOnly: true
+      props: {
+        readOnly: true
+      }
     },
     {
-      id: 1,
       component: 'textfield',
-      label: labels?.idNumber,
+      label: labels.idNumber,
       name: 'idNum'
     }
   ]
 
-  const postIdNumber = obj => {
+  const postIdNumber = async obj => {
+    try {
+      const postBody = Object.entries(obj).map(async ([key, value]) => {
+        return await postRequest({
+          extension: BusinessPartnerRepository.MasterIDNum.set,
+          record: JSON.stringify(value)
+        })
+      })
 
-    const postBody = Object.entries(obj).map(([key, value]) => {
-      return postRequest({
-        extension: BusinessPartnerRepository.MasterIDNum.set,
-        record: JSON.stringify(value)
-      })
-    })
-    Promise.all(postBody)
-      .then(() => {
-        if (!recordId) {
-          toast.success('Record Added Successfully')
-        } else {
-          toast.success('Record Edited Successfully')
-        }
-      })
-      .catch(error => {
-      })
+      await Promise.all(postBody)
+
+      if (!recordId) {
+        toast.success('Record Added Successfully')
+      } else {
+        toast.success('Record Edited Successfully')
+      }
+    } catch (error) {}
   }
 
-  useEffect(()=>{
-    store.category?.length > 0 && getIdNumber(recordId)
-   },[store.category, recordId])
-
-async function  getIdNumber(recordId) {
-
-    if(recordId){
-    const defaultParams = `_bpId=${recordId}`
-    var parameters = defaultParams
-
-    const res =  await getRequest({
-      extension: BusinessPartnerRepository.MasterIDNum.qry,
-      parameters: parameters
-    })
-    const list =  store.category
-
-    var listMIN =  res.list?.filter(y => {
-      return list?.some(x => x.name === y.incName)
-    })
-
-    if (listMIN?.length > 0) {
-
-      const result =    listMIN.map(
-        ({  ...rest } , index) => ({
-           id: index,
-           ...rest
-        }))
-      formik.setValues({ rows: result })
-
-    } else {
-      formik.setValues({
-        rows: [
-
-        ]
+  async function getIdNumber(recordId) {
+    if (recordId) {
+      const res = await getRequest({
+        extension: BusinessPartnerRepository.MasterIDNum.qry,
+        parameters: `_bpId=${recordId}`
       })
+      const list = store.category
+
+      var listMIN = res.list?.filter(y => {
+        return list?.some(x => x.name === y.incName)
+      })
+
+      if (listMIN?.length > 0) {
+        const result = listMIN.map(({ ...rest }, index) => ({
+          id: index,
+          ...rest
+        }))
+        formik.setValues({ rows: result })
+      } else {
+        formik.setValues({
+          rows: []
+        })
+      }
     }
   }
-  }
 
-return (
-    <FormShell
-    resourceId={ResourceIds.BPMasterData}
-    form={formik}
-    maxAccess={maxAccess}
-    editMode={editMode}>
-      <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-        <DataGrid
-           onChange={value => formik.setFieldValue('rows', value)}
-           value={formik.values.rows}
-           error={formik.errors.rows}
-           columns={columns}
-           scrollHeight={350}
-           width={750}
-           allowDelete={false}
-           allowAddNewLine={false}
-        />
-      </Box>
+  useEffect(() => {
+    store.category?.length > 0 && getIdNumber(recordId)
+  }, [store.category, recordId])
+
+  return (
+    <FormShell resourceId={ResourceIds.BPMasterData} form={formik} maxAccess={maxAccess} editMode={editMode}>
+      <VertLayout>
+        <Grow>
+          <DataGrid
+            onChange={value => formik.setFieldValue('rows', value)}
+            value={formik.values.rows}
+            error={formik.errors.rows}
+            columns={columns}
+            allowDelete={false}
+            allowAddNewLine={false}
+          />
+        </Grow>
+      </VertLayout>
     </FormShell>
   )
 }

@@ -7,15 +7,18 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-// ** Custom Imports
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { DataSets } from 'src/resources/DataSets'
+import { ControlContext } from 'src/providers/ControlContext'
 
-const ProductCurrenciesForm = ({ store, setStore, labels, editMode, height, expanded, maxAccess }) => {
+const ProductCurrenciesForm = ({ store, setStore, labels, editMode, maxAccess }) => {
   const { recordId: pId, countries } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const formik = useFormik({
     validationSchema: yup.object({
@@ -67,7 +70,7 @@ const ProductCurrenciesForm = ({ store, setStore, labels, editMode, height, expa
       record: JSON.stringify(data)
     })
       .then(res => {
-        if (res) toast.success('Record Edited Successfully')
+        if (res) toast.success(platformLabels.Edited)
         getMonetaries(pId)
       })
       .catch(error => {
@@ -194,15 +197,16 @@ const ProductCurrenciesForm = ({ store, setStore, labels, editMode, height, expa
       infoVisible={false}
       editMode={editMode}
     >
-      <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-        <DataGrid
-          onChange={value => formik.setFieldValue('currencies', value)}
-          value={formik.values.currencies}
-          error={formik.errors.currencies}
-          columns={columns}
-          height={`${expanded ? `calc(100vh - 280px)` : `${height - 100}px`}`}
-        />
-      </Box>
+      <VertLayout>
+        <Grow>
+          <DataGrid
+            onChange={value => formik.setFieldValue('currencies', value)}
+            value={formik.values.currencies}
+            error={formik.errors.currencies}
+            columns={columns}
+          />
+        </Grow>
+      </VertLayout>
     </FormShell>
   )
 }

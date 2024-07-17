@@ -1,10 +1,6 @@
-// ** MUI Imports
 import { Grid, FormControlLabel, Checkbox } from '@mui/material'
-
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
@@ -17,10 +13,14 @@ import { useContext, useEffect, useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { useInvalidate } from 'src/hooks/resource'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { recordId } = store
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: RemittanceSettingsRepository.Correspondent.qry
@@ -36,14 +36,15 @@ const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore,
       bpId: null,
       currencyId: null,
       currencyRef: null,
-      isInactive: false
+      isInactive: false,
+      interfaceId: null
     },
     validationSchema: yup.object({
-      reference: yup.string().required('This field is required'),
-      name: yup.string().required('This field is required'),
-      bpId: yup.string().required('This field is required'),
-      bpRef: yup.string().required('This field is required'),
-      bpName: yup.string().required('This field is required')
+      reference: yup.string().required(),
+      name: yup.string().required(),
+      bpId: yup.string().required(),
+      bpRef: yup.string().required(),
+      bpName: yup.string().required()
     }),
     onSubmit: values => {
       postCorrespondent(values)
@@ -63,13 +64,13 @@ const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore,
             ...prevStore,
             recordId: res.recordId
           }))
-          toast.success('Record Added Successfully')
+          toast.success(platformLabels.Added)
 
           formik.setFieldValue('recordId', res.recordId)
-          invalidate()
         } else {
-          toast.success('Record Editted Successfully')
+          toast.success(platformLabels.Edited)
         }
+        invalidate()
       })
       .catch(error => {})
   }
@@ -94,89 +95,111 @@ const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore,
 
   return (
     <FormShell form={formik} resourceId={ResourceIds.Correspondent} maxAccess={maxAccess} editMode={editMode}>
-      <Grid container spacing={4}>
-        <Grid item xs={12}>
-          <CustomTextField
-            name='reference'
-            label={labels.reference}
-            value={formik.values.reference}
-            required
-            onChange={formik.handleChange}
-            maxLength='10'
-            maxAccess={maxAccess}
-            onClear={() => formik.setFieldValue('reference', '')}
-            error={formik.touched.reference && Boolean(formik.errors.reference)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <CustomTextField
-            name='name'
-            label={labels.name}
-            value={formik.values.name}
-            required
-            maxLength='50'
-            maxAccess={maxAccess}
-            onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('name', '')}
-            error={formik.touched.name && Boolean(formik.errors.name)}
-          />
-        </Grid>
-
-        <Grid item xs={12}>
-          <ResourceLookup
-            endpointId={BusinessPartnerRepository.MasterData.snapshot}
-            name='bpRef'
-            required
-            label={labels.businessPartner}
-            valueField='reference'
-            displayField='name'
-            valueShow='bpRef'
-            secondValueShow='bpName'
-            form={formik}
-            onChange={(event, newValue) => {
-              formik.setValues({
-                ...formik.values,
-                bpId: newValue?.recordId || '',
-                bpRef: newValue?.reference || '',
-                bpName: newValue?.name || ''
-              })
-            }}
-            errorCheck={'bpId'}
-            maxAccess={maxAccess}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <ResourceComboBox
-            endpointId={SystemRepository.Currency.qry}
-            name='currencyId'
-            label={labels.currency}
-            valueField='recordId'
-            displayField={['reference', 'name']}
-            columnsInDropDown={[
-              { key: 'reference', value: 'Reference' },
-              { key: 'name', value: 'Name' }
-            ]}
-            values={formik.values}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('currencyId', newValue?.recordId)
-            }}
-            error={formik.touched.countryId && Boolean(formik.errors.countryId)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <FormControlLabel
-            control={
-              <Checkbox
-                name='isInactive'
-                checked={formik.values?.isInactive}
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={4}>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='reference'
+                label={labels.reference}
+                value={formik.values.reference}
+                required
                 onChange={formik.handleChange}
+                maxLength='10'
+                maxAccess={maxAccess}
+                onClear={() => formik.setFieldValue('reference', '')}
+                error={formik.touched.reference && Boolean(formik.errors.reference)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='name'
+                label={labels.name}
+                value={formik.values.name}
+                required
+                maxLength='50'
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('name', '')}
+                error={formik.touched.name && Boolean(formik.errors.name)}
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <ResourceLookup
+                endpointId={BusinessPartnerRepository.MasterData.snapshot}
+                name='bpRef'
+                required
+                label={labels.businessPartner}
+                valueField='reference'
+                displayField='name'
+                valueShow='bpRef'
+                secondValueShow='bpName'
+                form={formik}
+                onChange={(event, newValue) => {
+                  formik.setValues({
+                    ...formik.values,
+                    bpId: newValue?.recordId || '',
+                    bpRef: newValue?.reference || '',
+                    bpName: newValue?.name || ''
+                  })
+                }}
+                errorCheck={'bpId'}
                 maxAccess={maxAccess}
               />
-            }
-            label={labels.isInActive}
-          />
-        </Grid>
-      </Grid>
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={SystemRepository.Currency.qry}
+                name='currencyId'
+                label={labels.currency}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('currencyId', newValue?.recordId)
+                }}
+                error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={RemittanceSettingsRepository.Interface.qry}
+                name='interfaceId'
+                label={labels.interface}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('interfaceId', newValue?.recordId)
+                }}
+                error={formik.touched.interfaceId && Boolean(formik.errors.interfaceId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name='isInactive'
+                    checked={formik.values?.isInactive}
+                    onChange={formik.handleChange}
+                    maxAccess={maxAccess}
+                  />
+                }
+                label={labels.isInActive}
+              />
+            </Grid>
+          </Grid>
+        </Grow>
+      </VertLayout>
     </FormShell>
   )
 }

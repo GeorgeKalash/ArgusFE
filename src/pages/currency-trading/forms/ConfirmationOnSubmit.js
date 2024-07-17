@@ -10,13 +10,12 @@ export default function ConfirmationOnSubmit({ formik, labels, window }) {
     validateOnChange: true,
     initialValues: {
       idNo: formik.values.id_number,
-      cellPhone: formik.values.cell_phone,
+      cellPhone: formik.values.cellPhone,
       idNoRepeat: '',
       cellPhoneRepeat: ''
     },
     validate: values => {
       const errors = {}
-
       if (!formik.values.clientId && !values.cellPhoneRepeat) {
         errors.cellPhoneRepeat = 'Cell Phone Confirm is required'
       } else if (!formik.values.clientId && values.cellPhone !== values.cellPhoneRepeat) {
@@ -42,7 +41,7 @@ export default function ConfirmationOnSubmit({ formik, labels, window }) {
 
   return (
     <>
-      <FormShell form={fetchFormik} height={320} infoVisible={false}>
+      <FormShell form={fetchFormik} infoVisible={false}>
         <Grid container spacing={4}>
           <Grid item xs={12} sx={{ position: 'relative', width: '100%' }}>
             <CustomTextField
@@ -70,7 +69,7 @@ export default function ConfirmationOnSubmit({ formik, labels, window }) {
                 onChange={fetchFormik.handleChange}
                 maxLength='15'
                 onClear={() => {
-                  fetchFormik.setFieldValue('cellphoneRepeat', '')
+                  fetchFormik.setFieldValue('cellPhoneRepeat', '')
                 }}
                 error={fetchFormik.touched.cellPhoneRepeat && Boolean(fetchFormik.errors.cellPhoneRepeat)}
                 helperText={fetchFormik.touched.cellPhoneRepeat && fetchFormik.errors.cellPhoneRepeat}

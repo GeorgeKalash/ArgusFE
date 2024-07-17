@@ -1,27 +1,21 @@
-import { useState, useContext } from 'react'
-
-// ** MUI Imports
-import { Box } from '@mui/material'
-
-// ** Third Party Imports
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
-
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import CityForm from 'src/pages/cities/Forms/CityForm'
 import { useWindow } from 'src/windows'
-
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const City = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const { stack } = useWindow()
 
@@ -40,7 +34,7 @@ const City = () => {
     access,
     search,
     clear,
-
+    refetch,
     paginationParameters
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -90,12 +84,14 @@ const City = () => {
   ]
 
   const del = async obj => {
-    await postRequest({
-      extension: SystemRepository.City.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success('Record Deleted Successfully')
+    try {
+      await postRequest({
+        extension: SystemRepository.City.del,
+        record: JSON.stringify(obj)
+      })
+      invalidate()
+      toast.success(platformLabels.Deleted)
+    } catch (error) {}
   }
 
   const edit = obj => {
@@ -115,14 +111,14 @@ const City = () => {
         maxAccess: access
       },
       width: 500,
-      height: 400,
+      height: 360,
       title: _labels.cities
     })
   }
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar
           onAdd={add}
           maxAccess={access}
@@ -130,7 +126,10 @@ const City = () => {
           onSearchClear={clear}
           labels={_labels}
           inputSearch={true}
+          refetch={refetch}
         />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
@@ -142,8 +141,8 @@ const City = () => {
           paginationParameters={paginationParameters}
           paginationType='api'
         />
-      </Box>
-    </>
+      </Grow>
+    </VertLayout>
   )
 }
 

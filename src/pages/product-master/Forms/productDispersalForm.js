@@ -1,6 +1,4 @@
-// ** MUI Imports
-import { Grid, Box, FormControlLabel, Checkbox } from '@mui/material'
-
+import { Grid, FormControlLabel, Checkbox } from '@mui/material'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
@@ -12,22 +10,16 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { useContext, useEffect } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
-const ProductDispersalForm = ({
-  pId,
-  labels,
-  recordId,
-  getGridData,
-  maxAccess,
-  window,
-  height,
-  expanded,
-}) => {
-
+const ProductDispersalForm = ({ pId, labels, recordId, getGridData, maxAccess, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const formik = useFormik({
-    initialValues : {
+    initialValues: {
       recordId: null,
       productId: pId,
       reference: null,
@@ -51,26 +43,22 @@ const ProductDispersalForm = ({
     }
   })
 
-
-
   const post = obj => {
     const recordId = obj.recordId
-    const productId = obj.productId  ? obj.productId : pId
+    const productId = obj.productId ? obj.productId : pId
     postRequest({
       extension: RemittanceSettingsRepository.ProductDispersal.set,
       record: JSON.stringify(obj)
     })
       .then(res => {
         if (!recordId) {
-          toast.success('Record Added Successfully')
-        }
-        else toast.success('Record Editted Successfully')
+          toast.success(platformLabels.Added)
+        } else toast.success(platformLabels.Edited)
 
         getGridData(pId)
         window.close()
       })
-      .catch(error => {
-      })
+      .catch(error => {})
   }
 
   const getDispersalById = id => {
@@ -83,24 +71,20 @@ const ProductDispersalForm = ({
     })
       .then(res => {
         formik.setValues(res.record)
-
-
       })
       .catch(error => {
         setErrorMessage(error)
       })
   }
-  useEffect(()=>{
+  useEffect(() => {
     recordId && getDispersalById(recordId)
-  },[recordId])
+  }, [recordId])
 
-return (
-  <FormShell form={formik}
-   resourceId={ResourceIds.Dispersal}
-   editMode={recordId}
-   maxAccess={maxAccess}
-  >
-     <Grid container gap={2}>
+  return (
+    <FormShell form={formik} resourceId={ResourceIds.Dispersal} editMode={recordId} maxAccess={maxAccess}>
+      <VertLayout>
+        <Grow>
+          <Grid container gap={2}>
             <Grid container xs={12} spacing={2}>
               <Grid item xs={12}>
                 <CustomTextField
@@ -174,9 +158,9 @@ return (
               </Grid>
             </Grid>
           </Grid>
-
-        </FormShell>
-
+        </Grow>
+      </VertLayout>
+    </FormShell>
   )
 }
 

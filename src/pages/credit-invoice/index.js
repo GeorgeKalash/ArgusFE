@@ -10,14 +10,18 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { CTTRXrepository } from 'src/repositories/CTTRXRepository'
 import { useWindow } from 'src/windows'
-
-// ** Windows
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CreditInvoiceForm from './Forms/CreditInvoiceForm'
 import { getFormattedNumber } from 'src/lib/numberField-helper'
 
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
+
 const CreditInvoice = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   //states
   const [errorMessage, setErrorMessage] = useState(null)
@@ -123,8 +127,7 @@ const CreditInvoice = () => {
         userData: userData,
         recordId
       },
-      width: 900,
-      height: 650,
+      width: 1000,
       title: _labels.creditInvoice
     })
   }
@@ -135,12 +138,12 @@ const CreditInvoice = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.labels)
   }
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar
           maxAccess={access}
           onAdd={add}
@@ -149,6 +152,8 @@ const CreditInvoice = () => {
           labels={_labels}
           inputSearch={true}
         />
+      </Fixed>
+      <Grow>
         <Table
           columns={[
             {
@@ -205,9 +210,9 @@ const CreditInvoice = () => {
           refetch={refetch}
           paginationType='client'
         />
-      </Box>
+      </Grow>
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+    </VertLayout>
   )
 }
 

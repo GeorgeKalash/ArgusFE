@@ -1,12 +1,10 @@
-// ** Custom Imports
-import Window from 'src/components/Shared/Window'
 import PurposeOfExchangeForm from '../forms/PurposeOfExchangeForm'
-import InterfaceForm from 'src/pages/interface/forms/InterfaceForm'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import { useState } from 'react'
 import { CustomTabs } from 'src/components/Shared/CustomTabs'
 import { InterfacesForm } from 'src/components/Shared/InterfacesForm'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 
 const PurposeOfExchangeWindow = ({ labels, maxAccess, recordId, height }) => {
   const [activeTab, setActiveTab] = useState(0)
@@ -19,14 +17,13 @@ const PurposeOfExchangeWindow = ({ labels, maxAccess, recordId, height }) => {
   const tabs = [{ label: labels?.main }, { label: labels?.interface, disabled: !store.recordId }]
 
   return (
-    <>
+    <VertLayout>
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-      <CustomTabPanel height={height} index={0} value={activeTab}>
+      <CustomTabPanel index={0} value={activeTab}>
         <PurposeOfExchangeForm labels={labels} maxAccess={maxAccess} recordId={recordId} setStore={setStore} />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
         <InterfacesForm
-          height={height}
           labels={labels}
           resourceId={ResourceIds.PurposeOfExchange}
           recordId={store.recordId}
@@ -34,7 +31,7 @@ const PurposeOfExchangeWindow = ({ labels, maxAccess, recordId, height }) => {
           name={store.name}
         />
       </CustomTabPanel>
-    </>
+    </VertLayout>
   )
 }
 

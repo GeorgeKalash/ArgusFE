@@ -1,20 +1,21 @@
-import { Box, Button, Grid, Tooltip, Typography, IconButton } from '@mui/material'
+import { Box, Button, Grid, IconButton } from '@mui/material'
 import Icon from 'src/@core/components/icon'
 import { useContext } from 'react'
 import { useResourceQuery } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import Table from 'src/components/Shared/Table'
-
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useWindow } from 'src/windows'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataSets } from 'src/resources/DataSets'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-import ResourceGlobalForm from './forms/ResourceGlobalForm'
-import AccessLevelForm from './forms/AccessLevelForm'
-import FieldGlobalForm from './forms/FieldGlobalForm'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useEffect } from 'react'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import ResourceGlobalForm from 'src/components/Shared/ResourceGlobalForm'
+import FieldGlobalForm from 'src/components/Shared/FieldGlobalForm'
+import AccessLevelForm from 'src/components/Shared/AccessLevelForm'
 
 const GlobalAuthorization = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -36,7 +37,8 @@ const GlobalAuthorization = () => {
     filterBy,
     clearFilter,
     access,
-    filters
+    filters,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchWithFilter,
     endpointId: SystemRepository.ModuleClassRES.qry,
@@ -62,7 +64,9 @@ const GlobalAuthorization = () => {
         labels: labels,
         maxAccess: access,
         data,
-        moduleId: filters.moduleId
+        moduleId: filters.moduleId,
+        invalidate,
+        resourceId: ResourceIds.GlobalAuthorization
       },
       width: 450,
       height: 200,
@@ -76,9 +80,9 @@ const GlobalAuthorization = () => {
       props: {
         labels: labels,
         maxAccess: access,
-        resourceId: row.key,
-        resourceName: row.value,
-        moduleId: filters.moduleId
+        row: { resourceId: row.key, resourceName: row.value, moduleId: filters.moduleId },
+        invalidate,
+        resourceId: ResourceIds.GlobalAuthorization
       },
       width: 450,
       height: 300,
@@ -92,8 +96,9 @@ const GlobalAuthorization = () => {
       props: {
         labels: labels,
         maxAccess: access,
-        resourceId: row.key,
-        resourceName: row.value
+        row: { resourceId: row.key, resourceName: row.value },
+        invalidate,
+        resourceId: ResourceIds.GlobalAuthorization
       },
       width: 500,
       height: 480,
@@ -106,88 +111,86 @@ const GlobalAuthorization = () => {
   }, [])
 
   return (
-    <>
-      <Box>
-        <div style={{ display: 'flex' }}>
-          <GridToolbar
-            maxAccess={access}
-            onSearch={value => {
-              filters.moduleId && filterBy('qry', value)
-            }}
-            onSearchClear={() => {
-              clearFilter('qry')
-            }}
-            labels={labels}
-            inputSearch={true}
-          >
-            <Box sx={{ display: 'flex', width: '350px', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
-              <ResourceComboBox
-                datasetId={DataSets.MODULE}
-                name='moduleId'
-                values={{
-                  moduleId: filters.moduleId
-                }}
-                valueField='key'
-                displayField='value'
-                onChange={(event, newValue) => {
-                  onChange(newValue?.key)
-                }}
-              />
-            </Box>
-            <Box sx={{ display: 'flex', height: '48px', justifyContent: 'flex-start', pt: 2, pl: 3 }}>
-              <Button variant='contained' onClick={() => openApplyModuleLevel()} disabled={!filters.moduleId}>
-                <Icon icon='mdi:arrow-expand-right' fontSize={18} />
-              </Button>
-            </Box>
-          </GridToolbar>
-        </div>
-        <Table
-          columns={[
-            {
-              field: 'key',
-              headerName: labels.resourceId,
-              flex: 1
-            },
-            {
-              field: 'value',
-              headerName: labels.resourceName,
-              flex: 1
-            },
-            {
-              field: 'Resource Global',
-              headerName: labels.resourceGlobal,
-              width: 200,
-              renderCell: params => (
-                <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
-                  <IconButton size='small' onClick={() => openResourceGlobal(params.row)}>
-                    <Icon icon='mdi:application-edit-outline' fontSize={18} />
-                  </IconButton>
-                </Box>
-              )
-            },
-            {
-              field: 'field Global',
-              headerName: labels.fieldGlobal,
-              width: 200,
-              renderCell: params => (
-                <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
-                  <IconButton size='small' onClick={() => openFieldGlobal(params.row)}>
-                    <Icon icon='mdi:application-edit-outline' fontSize={18} />
-                  </IconButton>
-                </Box>
-              )
-            }
-          ]}
-          gridData={data ?? { list: [] }}
-          rowId={['key']}
-          isLoading={false}
-          pageSize={50}
+    <VertLayout>
+      <Fixed>
+        <GridToolbar
           maxAccess={access}
-          refetch={refetch}
-          paginationType='client'
-        />
-      </Box>
-    </>
+          onSearch={value => {
+            filters.moduleId && filterBy('qry', value)
+          }}
+          onSearchClear={() => {
+            clearFilter('qry')
+          }}
+          labels={labels}
+          inputSearch={true}
+        >
+          <Grid item sx={{ width: '350px', pt: '7px !important' }}>
+            <ResourceComboBox
+              datasetId={DataSets.MODULE}
+              name='moduleId'
+              values={{
+                moduleId: filters.moduleId
+              }}
+              valueField='key'
+              displayField='value'
+              onChange={(event, newValue) => {
+                onChange(newValue?.key)
+              }}
+            />
+          </Grid>
+          <Grid item sx={{ pt: '7px !important' }}>
+            <Button variant='contained' onClick={() => openApplyModuleLevel()} disabled={!filters.moduleId}>
+              <Icon icon='mdi:arrow-expand-right' fontSize={20} />
+            </Button>
+          </Grid>
+        </GridToolbar>
+      </Fixed>
+      <Table
+        columns={[
+          {
+            field: 'key',
+            headerName: labels.resourceId,
+            flex: 1
+          },
+          {
+            field: 'value',
+            headerName: labels.resourceName,
+            flex: 1
+          },
+          {
+            field: 'Resource Global',
+            headerName: labels.resourceGlobal,
+            width: 200,
+            renderCell: params => (
+              <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
+                <IconButton size='small' onClick={() => openResourceGlobal(params.row)}>
+                  <Icon icon='mdi:application-edit-outline' fontSize={18} />
+                </IconButton>
+              </Box>
+            )
+          },
+          {
+            field: 'field Global',
+            headerName: labels.fieldGlobal,
+            width: 200,
+            renderCell: params => (
+              <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
+                <IconButton size='small' onClick={() => openFieldGlobal(params.row)}>
+                  <Icon icon='mdi:application-edit-outline' fontSize={18} />
+                </IconButton>
+              </Box>
+            )
+          }
+        ]}
+        gridData={data ?? { list: [] }}
+        rowId={['key']}
+        isLoading={false}
+        pageSize={50}
+        maxAccess={access}
+        refetch={refetch}
+        paginationType='client'
+      />
+    </VertLayout>
   )
 }
 

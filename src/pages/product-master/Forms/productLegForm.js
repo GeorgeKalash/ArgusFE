@@ -1,16 +1,10 @@
-// ** MUI Imports
 import { Grid, Box, Checkbox } from '@mui/material'
 import { useFormik } from 'formik'
 import { useContext, useEffect } from 'react'
-
-// ** Custom Imports
-
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import FormShell from 'src/components/Shared/FormShell'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
-
-// ** Helpers
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
@@ -18,11 +12,16 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useWindow } from 'src/windows'
 import ProductLegCommissionForm from './productLegCommissionForm'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { ControlContext } from 'src/providers/ControlContext'
 
-const ProductLegForm = ({ store, labels, height, expanded, editMode, maxAccess }) => {
+const ProductLegForm = ({ store, labels, expanded, editMode, maxAccess }) => {
   const { recordId: pId, countries, _seqNo } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const { platformLabels } = useContext(ControlContext)
 
   const post = obj => {
     const data = {
@@ -40,7 +39,7 @@ const ProductLegForm = ({ store, labels, height, expanded, editMode, maxAccess }
       record: JSON.stringify(data)
     })
       .then(res => {
-        if (res) toast.success('Record Edited Successfully')
+        if (res) toast.success(platformLabels.Edited)
         getScheduleRange()
       })
       .catch(error => {
@@ -100,11 +99,10 @@ const ProductLegForm = ({ store, labels, height, expanded, editMode, maxAccess }
             labels: labels,
             maxAccess: maxAccess,
             row,
-            store,
-            height
+            store
           },
           width: 600,
-          height: 400,
+
           title: labels?.commission
         })
       }
@@ -139,14 +137,8 @@ const ProductLegForm = ({ store, labels, height, expanded, editMode, maxAccess }
     store.plantId &&
     store.currencyId && (
       <FormShell form={formik} resourceId={ResourceIds.ProductMaster} maxAccess={maxAccess} editMode={editMode}>
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            height: '100%'
-          }}
-        >
-          <Grid container gap={2}>
+        <VertLayout>
+          <Fixed>
             <Grid container xs={12} spacing={3}>
               <Grid item xs={3}>
                 <ResourceComboBox
@@ -193,7 +185,6 @@ const ProductLegForm = ({ store, labels, height, expanded, editMode, maxAccess }
                   readOnly={true}
                 />
               </Grid>
-
               <Grid item xs={3}>
                 {}
                 <ResourceComboBox
@@ -211,17 +202,16 @@ const ProductLegForm = ({ store, labels, height, expanded, editMode, maxAccess }
                 />
               </Grid>
             </Grid>
-            <Grid xs={12}>
-              <DataGrid
-                onChange={value => formik.setFieldValue('productLegs', value)}
-                value={formik.values.productLegs}
-                error={formik.errors.productLegs}
-                columns={columns}
-                height={`${expanded ? `calc(100vh - 330px)` : `${height - 150}px`}`}
-              />
-            </Grid>
-          </Grid>
-        </Box>
+          </Fixed>
+          <Grow>
+            <DataGrid
+              onChange={value => formik.setFieldValue('productLegs', value)}
+              value={formik.values.productLegs}
+              error={formik.errors.productLegs}
+              columns={columns}
+            />
+          </Grow>
+        </VertLayout>
       </FormShell>
     )
   )

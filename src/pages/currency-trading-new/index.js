@@ -13,7 +13,7 @@ export default function CurrencyTrading() {
   const { stack: stackError } = useError()
   const [plantId, setPlantId] = useState(null)
 
-  const { labels: _labelsADJ, access } = useResourceParams({
+  const { labels: _labels, access } = useResourceParams({
     datasetId: ResourceIds.CashInvoice
   })
 
@@ -34,21 +34,17 @@ export default function CurrencyTrading() {
   async function openForm() {
     try {
       const plantId = await getPlantId()
-      if (plantId !== '') {
-        setPlantId(plantId)
-      } else {
+      if (!plantId) {
         stackError({ message: 'The user does not have a default plant' })
+      } else {
+        setPlantId(plantId)
       }
     } catch (error) {}
   }
 
   useEffect(() => {
-    openForm()
+    access && openForm()
   }, [access])
 
-  return (
-    <Box sx={{ height: `calc(100vh - 48px)`, display: 'flex', flexDirection: 'column', zIndex: 1 }}>
-      {plantId && access && <TransactionForm labels={_labelsADJ} maxAccess={access} plantId={plantId} />}
-    </Box>
-  )
+  return plantId && access && <TransactionForm labels={_labels} access={access} plantId={plantId} />
 }

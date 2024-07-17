@@ -7,37 +7,36 @@ import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-
-// ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import {ResourceLookup} from 'src/components/Shared/ResourceLookup'
+import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { useForm } from 'src/hooks/form'
+import { ControlContext } from 'src/providers/ControlContext'
 
-export default function CityDistrictForm ({ _labels, recordId, maxAccess }) {
-  const [isLoading, setIsLoading] = useState(false)
+export default function CityDistrictForm({ labels, recordId, maxAccess }) {
   const [editMode, setEditMode] = useState(!!recordId)
-
-  const [initialValues, setInitialData] = useState({
-    recordId: null,
-    name: '',
-    reference: '',
-    countryId: null,
-    cityId: null,
-    countryName: '',
-    cityName: '',
-    cityRef: ''
-  })
-
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: SystemRepository.CityDistrict.page
   })
 
-  const formik = useFormik({
-    initialValues,
+  const { formik } = useForm({
+    initialValues: {
+      recordId: null,
+      name: '',
+      reference: '',
+      countryId: null,
+      cityId: null,
+      countryName: '',
+      cityName: '',
+      cityRef: ''
+    },
+    maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -55,12 +54,12 @@ export default function CityDistrictForm ({ _labels, recordId, maxAccess }) {
       })
 
       if (!recordId) {
-        toast.success('Record Added Successfully')
-        setInitialData({
-          ...obj, // Spread the existing properties
-          recordId: response.recordId // Update only the recordId field
+        toast.success(platformLabels.Added)
+        formik.setValues({
+          ...obj,
+          recordId: response.recordId
         })
-      } else toast.success('Record Edited Successfully')
+      } else toast.success(platformLabels.Edited)
       setEditMode(true)
 
       invalidate()
@@ -71,126 +70,110 @@ export default function CityDistrictForm ({ _labels, recordId, maxAccess }) {
     ;(async function () {
       try {
         if (recordId) {
-          setIsLoading(true)
-
           const res = await getRequest({
             extension: SystemRepository.CityDistrict.get,
             parameters: `_recordId=${recordId}`
           })
 
-          setInitialData(res.record)
+          formik.setValues(res.record)
         }
-      } catch (exception) {
-        setErrorMessage(error)
-      }
-      setIsLoading(false)
+      } catch (exception) {}
     })()
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.CityDistrict}
-      form={formik}
-      height={400}
-      maxAccess={maxAccess}
-      editMode={editMode}
-    >
-      <Grid container spacing={4}>
-        <Grid item xs={12}>
-          <CustomTextField
-            name='reference'
-            label={_labels.reference}
-            value={formik.values.reference}
-            readOnly={editMode}
-            required
-            onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('reference', '')}
-            error={formik.touched.reference && Boolean(formik.errors.reference)}
-
-            //helperText={formik.touched.reference && formik.errors.reference}
-            maxLength='10'
-            maxAccess={maxAccess}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <CustomTextField
-            name='name'
-            label={_labels.name}
-            value={formik.values.name}
-            required
-            onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('name', '')}
-            error={formik.touched.name && Boolean(formik.errors.name)}
-
-            //helperText={formik.touched.name && formik.errors.name}
-            maxLength='40'
-            maxAccess={maxAccess}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <ResourceComboBox
-            endpointId={SystemRepository.Country.qry}
-            name='countryId'
-            label={_labels.country}
-            valueField='recordId'
-            displayField={['reference', 'name', 'flName']}
-            displayFieldWidth={1}
-            columnsInDropDown={[
-              { key: 'reference', value: 'Reference' },
-              { key: 'name', value: 'Name' },
-              { key: 'flName', value: 'Foreign Language' }
-            ]}
-            values={formik.values}
-            required
-            maxAccess={maxAccess}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('cityId', null) //city lookup depends on countryId
-              formik.setFieldValue('cityRef', null)
-              formik.setFieldValue('cityName', null)
-              if (newValue) {
-                formik.setFieldValue('countryId', newValue?.recordId)
-              } else {
-                formik.setFieldValue('countryId', '')
-              }
-            }}
-            error={formik.touched.countryId && Boolean(formik.errors.countryId)}
-            
-            //helperText={formik.touched.countryId && formik.errors.countryId}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <ResourceLookup
-            endpointId={SystemRepository.City.snapshot}
-            parameters={{
-              _countryId: formik.values.countryId,
-              _stateId: 0
-            }}
-            valueField='reference'
-            displayField='name'
-            name='cityRef'
-            label={_labels.city}
-            required
-            form={formik}
-            secondDisplayField={true}
-            firstValue={formik.values.cityRef}
-            secondValue={formik.values.cityName}
-            onChange={(event, newValue) => {
-              if (newValue) {
-                formik.setFieldValue('cityId', newValue?.recordId)
-                formik.setFieldValue('cityRef', newValue?.reference)
-                formik.setFieldValue('cityName', newValue?.name)
-              } else {
-                formik.setFieldValue('cityId', '')
-                formik.setFieldValue('cityRef', null)
-                formik.setFieldValue('cityName', null)
-              }
-            }}
-            errorCheck={'cityId'}
-            maxAccess={maxAccess}
-            readOnly = {(!formik.values.countryId) && true}
-          />
-        </Grid>
-      </Grid>
+    <FormShell resourceId={ResourceIds.CityDistrict} form={formik} maxAccess={maxAccess} editMode={editMode}>
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={4}>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='reference'
+                label={labels.reference}
+                value={formik.values.reference}
+                readOnly={editMode}
+                required
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('reference', '')}
+                error={formik.touched.reference && Boolean(formik.errors.reference)}
+                maxLength='10'
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='name'
+                label={labels.name}
+                value={formik.values.name}
+                required
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('name', '')}
+                error={formik.touched.name && Boolean(formik.errors.name)}
+                maxLength='40'
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={SystemRepository.Country.qry}
+                name='countryId'
+                label={labels.country}
+                valueField='recordId'
+                displayField={['reference', 'name', 'flName']}
+                displayFieldWidth={1}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' },
+                  { key: 'flName', value: 'Foreign Language' }
+                ]}
+                values={formik.values}
+                required
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('cityId', null)
+                  formik.setFieldValue('cityRef', null)
+                  formik.setFieldValue('cityName', null)
+                  if (newValue) {
+                    formik.setFieldValue('countryId', newValue?.recordId)
+                  } else {
+                    formik.setFieldValue('countryId', '')
+                  }
+                }}
+                error={formik.touched.countryId && Boolean(formik.errors.countryId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceLookup
+                endpointId={SystemRepository.City.snapshot}
+                parameters={{
+                  _countryId: formik.values.countryId,
+                  _stateId: 0
+                }}
+                valueField='reference'
+                displayField='name'
+                name='cityRef'
+                label={labels.city}
+                required
+                form={formik}
+                secondDisplayField={true}
+                firstValue={formik.values.cityRef}
+                secondValue={formik.values.cityName}
+                onChange={(event, newValue) => {
+                  formik.setValues({
+                    ...formik.values,
+                    cityId: newValue?.recordId || '',
+                    cityRef: newValue?.reference || '',
+                    cityName: newValue?.name || ''
+                  })
+                }}
+                errorCheck={'cityId'}
+                maxAccess={maxAccess}
+                readOnly={!formik.values.countryId && true}
+              />
+            </Grid>
+          </Grid>
+        </Grow>
+      </VertLayout>
     </FormShell>
   )
 }

@@ -1,14 +1,19 @@
+import { ControlContext } from 'src/providers/ControlContext'
 import ConfirmationDialog from '../ConfirmationDialog'
+import { useContext } from 'react'
 
-const DeleteDialog = props => {
+const DeleteDialog = ({ window, onConfirm, fullScreen, open }) => {
+  const { platformLabels } = useContext(ControlContext)
+
   return (
     <ConfirmationDialog
-      openCondition={props.open[0] ? props.open[0] : false}
-      closeCondition={props.onClose}
-      DialogText={'Are you sure you want to delete the selected record?'}
-      okButtonAction={() => props.onConfirm(props.open[1])}
-      cancelButtonAction={props.onClose}
-      {...props}
+      open={open[0] ? open[0] : false}
+      DialogText={platformLabels.DeleteConf}
+      okButtonAction={() => {
+        onConfirm(open[1]), window.close()
+      }}
+      fullScreen={fullScreen}
+      cancelButtonAction={() => window.close()}
     />
   )
 }

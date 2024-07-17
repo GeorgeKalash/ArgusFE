@@ -1,62 +1,44 @@
-
-// ** MUI Imports
-import {Box} from '@mui/material'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { useContext, useEffect, useState } from 'react'
-import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import { useWindow } from 'src/windows'
 import RelationForm from './RelationForm'
-import { useResourceQuery } from 'src/hooks/resource'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { formatDateDefault } from 'src/lib/date-helper'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-const RelationList = ({ store , height, labels, editMode, maxAccess }) => {
+const RelationList = ({ store, labels, maxAccess }) => {
+  const { recordId } = store
+  const [relationGridData, setRelationGridData] = useState([])
+  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { stack } = useWindow()
+  const editMode = !!store.recordId
 
-const { recordId } = store
-const [relationGridData, setRelationGridData] = useState([])
-const { getRequest, postRequest } = useContext(RequestsContext)
-const { stack } = useWindow()
-
-
-useEffect(()=>{
-  recordId && getRelationGridData(recordId)
-},[recordId])
-
-  const getRelationGridData = bpId => {
-    setRelationGridData([])
-    const defaultParams = `_bpId=${bpId}`
-    var parameters = defaultParams
-
-    getRequest({
-      extension: BusinessPartnerRepository.Relation.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setRelationGridData(res)
+  const getRelationGridData = async bpId => {
+    try {
+      const res = await getRequest({
+        extension: BusinessPartnerRepository.Relation.qry,
+        parameters: `_bpId=${bpId}`
       })
-      .catch(error => {
-      })
+
+      setRelationGridData(res)
+    } catch (error) {}
   }
 
-  const delRelation = obj => {
-    const bpId = recordId
-    postRequest({
-      extension: BusinessPartnerRepository.Relation.del,
-      record: JSON.stringify(obj)
-    })
-      .then(res => {
-        toast.success('Record Deleted Successfully')
-        getRelationGridData(bpId)
+  const delRelation = async obj => {
+    try {
+      await postRequest({
+        extension: BusinessPartnerRepository.Relation.del,
+        record: JSON.stringify(obj)
       })
-      .catch(error => {
 
-      })
+      toast.success('Record Deleted Successfully')
+      await getRelationGridData(recordId)
+    } catch (error) {}
   }
 
   const columns = [
@@ -75,52 +57,48 @@ useEffect(()=>{
       headerName: labels.from,
       flex: 1,
       valueGetter: ({ row }) => formatDateDefault(row?.startDate)
-
     },
     {
       field: 'endDate',
       headerName: labels.to,
       flex: 1,
-      valueGetter: ({ row }) =>  formatDateDefault(row?.endDate)
-
+      valueGetter: ({ row }) => formatDateDefault(row?.endDate)
     }
   ]
 
   const addRelation = () => {
-    openForm('')
+    openForm()
   }
 
-  const editRelation = (obj) => {
+  const editRelation = obj => {
     openForm(obj?.recordId)
   }
 
-  const openForm = (id) => {
+  const openForm = id => {
     stack({
-      Component:  RelationForm,
+      Component: RelationForm,
       props: {
-            labels: labels,
-            maxAccess: maxAccess,
-            editMode : editMode,
-            recordId :  id,
-            bpId : recordId,
-            getRelationGridData : getRelationGridData
+        labels: labels,
+        maxAccess: maxAccess,
+        editMode: editMode,
+        recordId: id,
+        bpId: recordId,
+        getRelationGridData: getRelationGridData
       },
       width: 500,
-      height: 400,
       title: labels.relation
     })
   }
+  useEffect(() => {
+    recordId && getRelationGridData(recordId)
+  }, [recordId])
 
   return (
-    <>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%'
-        }}
-      >
+    <VertLayout>
+      <Fixed>
         <GridToolbar onAdd={addRelation} maxAccess={maxAccess} />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={relationGridData}
@@ -129,13 +107,11 @@ useEffect(()=>{
           onEdit={editRelation}
           onDelete={delRelation}
           isLoading={false}
-          height={height}
           maxAccess={maxAccess}
           pagination={false}
         />
-
-      </Box>
-    </>
+      </Grow>
+    </VertLayout>
   )
 }
 

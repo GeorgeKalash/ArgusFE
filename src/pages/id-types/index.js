@@ -9,36 +9,41 @@ import IdTypesWindow from './Windows/IdTypesWindow'
 import { useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const IdTypes = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const { platformLabels } = useContext(ControlContext)
 
   const {
     query: { data },
-    labels : _labels,
+    labels: _labels,
     paginationParameters,
     invalidate,
     refetch,
     access
   } = useResourceQuery({
-     queryFn: fetchGridData,
-     endpointId: CurrencyTradingSettingsRepository.IdTypes.qry,
-     datasetId: ResourceIds.IdTypes,
-   })
+    queryFn: fetchGridData,
+    endpointId: CurrencyTradingSettingsRepository.IdTypes.qry,
+    datasetId: ResourceIds.IdTypes
+  })
 
-  async function fetchGridData(options={}) {
+  async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}`
     var parameters = defaultParams
 
-     const response =  await getRequest({
+    const response = await getRequest({
       extension: CurrencyTradingSettingsRepository.IdTypes.page,
       parameters: parameters
     })
 
-    return {...response}
+    return { ...response }
   }
 
   const columns = [
@@ -63,39 +68,40 @@ const IdTypes = () => {
     postRequest({
       extension: CurrencyTradingSettingsRepository.IdTypes.del,
       record: JSON.stringify(obj)
+    }).then(res => {
+      toast.success(platformLabels.Deleted)
+      invalidate()
     })
-      .then(res => {
-        toast.success('Record Deleted Successfully')
-        invalidate()
-      })
   }
 
   const addCharacteristics = () => {
     openForm()
   }
 
-  function openForm (recordId){
+  function openForm(recordId) {
     stack({
       Component: IdTypesWindow,
       props: {
         labels: _labels,
-        recordId: recordId? recordId : null,
-        maxAccess: access,
+        recordId: recordId ? recordId : null,
+        maxAccess: access
       },
       width: 600,
-      height: 600,
+      height: 650,
       title: _labels.idTypes
     })
   }
 
   const popup = obj => {
-    openForm(obj?.recordId )
+    openForm(obj?.recordId)
   }
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar onAdd={addCharacteristics} maxAccess={access} />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
@@ -109,8 +115,8 @@ const IdTypes = () => {
           pageSize={50}
           maxAccess={access}
         />
-      </Box>
-    </>
+      </Grow>
+    </VertLayout>
   )
 }
 

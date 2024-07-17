@@ -1,30 +1,25 @@
 import React, { useContext } from 'react'
-import { Box } from '@mui/material'
 import Table from 'src/components/Shared/Table'
 import { useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
-
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { formatDateDefault } from 'src/lib/date-helper'
-
-// ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useWindow } from 'src/windows'
 import ClientTemplateForm from './forms/ClientTemplateForm'
 import { useResourceQuery } from 'src/hooks/resource'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { useError } from 'src/error'
 
 const ClientsCorporateList = () => {
   const { stack } = useWindow()
   const { getRequest } = useContext(RequestsContext)
-
-  //control
+  const { stack: stackError } = useError()
   const [editMode, setEditMode] = useState(null)
-
-  //stores
-  const [errorMessage, setErrorMessage] = useState(null)
 
   const {
     query: { data },
@@ -58,49 +53,39 @@ const ClientsCorporateList = () => {
       flex: 1,
       editable: false
     },
-
     {
       field: 'name',
       headerName: _labels?.name,
       flex: 1,
       editable: false
     },
-
     {
       field: 'cellPhone',
       headerName: _labels.cellPhone,
       flex: 1,
       editable: false
     },
-
     {
       field: 'nationalityName',
-
       headerName: _labels.nationality,
       flex: 1,
       editable: false
     },
-
     {
       field: 'statusName',
-
       headerName: _labels.status,
       flex: 1,
       editable: false
     },
-
     {
       field: 'createdDate',
-
       headerName: _labels.createdDate,
       flex: 1,
       editable: false,
       valueGetter: ({ row }) => formatDateDefault(row?.createdDate)
     },
-
     {
       field: 'expiryDate',
-
       headerName: _labels.expiryDate,
       flex: 1,
       editable: false,
@@ -111,13 +96,11 @@ const ClientsCorporateList = () => {
   const addClient = async obj => {
     try {
       const plantId = await getPlantId()
-
       if (plantId !== '') {
         setEditMode(false)
-
         openForm('')
       } else {
-        setErrorMessage({ error: 'The user does not have a default plant' })
+        stackError({ message: 'The user does not have a default plant' })
       }
     } catch (error) {
       console.error(error)
@@ -143,7 +126,7 @@ const ClientsCorporateList = () => {
       return ''
     } catch (error) {
       // Handle errors if needed
-      setErrorMessage(error)
+      stackError(error)
 
       return ''
     }
@@ -154,32 +137,24 @@ const ClientsCorporateList = () => {
     const _recordId = obj.recordId
     openForm(_recordId)
   }
+
   function openForm(recordId) {
     stack({
       Component: ClientTemplateForm,
       props: {
-        setErrorMessage: setErrorMessage,
         _labels: _labels,
         maxAccess: access,
         editMode: editMode,
-        recordId: recordId ? recordId : null,
-        maxAccess: access
+        recordId: recordId ? recordId : null
       },
       width: 1100,
-      height: 650,
       title: _labels.clientCorporate
     })
   }
 
   return (
-    <>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%'
-        }}
-      >
+    <VertLayout>
+      <Fixed>
         <GridToolbar
           onAdd={addClient}
           maxAccess={access}
@@ -192,7 +167,8 @@ const ClientsCorporateList = () => {
           labels={_labels}
           inputSearch={true}
         />
-
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data ? data : { list: [] }}
@@ -203,11 +179,8 @@ const ClientsCorporateList = () => {
           pageSize={50}
           paginationType='client'
         />
-        {errorMessage?.error && (
-          <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-        )}
-      </Box>
-    </>
+      </Grow>
+    </VertLayout>
   )
 }
 

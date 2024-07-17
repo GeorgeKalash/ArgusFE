@@ -1,8 +1,4 @@
-// ** MUI Imports
 import { Grid, Box } from '@mui/material'
-
-// ** Custom Imports
-
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { useFormik } from 'formik'
 import { useContext, useEffect } from 'react'
@@ -13,75 +9,71 @@ import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
-const ProductLegCommissionForm = ({
-row, labels, maxAccess, store, height,
-expanded
-}) => {
-  const {recordId : pId,  seqNo } = store
+const ProductLegCommissionForm = ({ row, labels, maxAccess, store }) => {
+  const { recordId: pId, seqNo } = store
+  const { platformLabels } = useContext(ControlContext)
 
   const { getRequest, postRequest } = useContext(RequestsContext)
-
 
   const columns = [
     {
       component: 'textfield',
       label: labels.commissionType,
       name: 'commissionName',
-      mandatory: true,
-      readOnly: true
+      props: {
+        mandatory: true,
+        readOnly: true
+      }
     },
     {
       component: 'textfield',
       label: labels.commission,
       name: 'commission',
-      mandatory: true,
-      readOnly: false
+      props: {
+        mandatory: true,
+        readOnly: false
+      }
     }
   ]
 
   const formik = useFormik({
     enableReinitialize: false,
     validateOnChange: true,
-    validationSchema: yup.object({ productLegCommission: yup
-      .array()
-      .of(
-        yup.object().shape({
-          commission: yup.string().required('commission is required')
-        })
-      ).required('productLegCommission array is required') }),
+    validationSchema: yup.object({
+      productLegCommission: yup
+        .array()
+        .of(
+          yup.object().shape({
+            commission: yup.string().required('commission is required')
+          })
+        )
+        .required('productLegCommission array is required')
+    }),
     initialValues: {
       productLegCommission: [
-        { id: 1,
-          productId: '',
-          seqNo: 1,
-          rangeSeqNo: '',
-          commissionId: '',
-          commissionName: '',
-          commission: '',
-        }
+        { id: 1, productId: '', seqNo: 1, rangeSeqNo: '', commissionId: '', commissionName: '', commission: '' }
       ]
-
     },
     onSubmit: values => {
       post(values.productLegCommission)
     }
   })
 
-  useEffect(()=>{
+  useEffect(() => {
     row && getCommissions(row)
-  },[row])
+  }, [row])
 
   const getCommissions = obj => {
-    //step 1: get all commission types
     var parameters = '_filter='
     getRequest({
       extension: CurrencyTradingSettingsRepository.CommissionType.qry,
       parameters: parameters
     })
       .then(commissionTypes => {
-
-        //step 2: get all ranges commissions
         const _productId = obj.productId
         const _seqNo = obj.seqNo
         const _rangeSeqNo = obj.rangeSeqNo
@@ -92,42 +84,34 @@ expanded
           parameters: parameters
         })
           .then(commissionFees => {
+            const commissionFeesMap = commissionFees.list.reduce((acc, fee) => {
+              acc[fee.commissionId] = fee.commission
 
-            // Create a mapping of commissionId to commissionFees entry for efficient lookup
-              const commissionFeesMap = commissionFees.list.reduce((acc, fee) => {
-                acc[fee.commissionId] = fee.commission;
+              return acc
+            }, {})
 
-                return acc;
-              }, {});
+            const rows = commissionTypes.list.map((commissionType, index) => {
+              const commissionValue = commissionFeesMap[commissionType.recordId] || 0
 
-              // Combine commissionTypes and commissionFees
-              const rows = commissionTypes.list.map((commissionType, index) => {
-                const commissionValue = commissionFeesMap[commissionType.recordId] || 0;
+              return {
+                id: index + 1,
+                productId: obj.productId,
+                seqNo: obj.seqNo,
+                rangeSeqNo: obj.rangeSeqNo,
+                commissionId: commissionType.recordId,
+                commissionName: commissionType.name,
+                commission: commissionValue
+              }
+            })
 
-                return {
-                  id: index + 1,
-                  productId: obj.productId,
-                  seqNo: obj.seqNo,
-                  rangeSeqNo: obj.rangeSeqNo,
-                  commissionId: commissionType.recordId,
-                  commissionName: commissionType.name,
-                  commission: commissionValue
-                };
-              });
-
-              formik.setValues({ productLegCommission :rows })
+            formik.setValues({ productLegCommission: rows })
           })
-          .catch(error => {
-          })
-
+          .catch(error => {})
       })
-      .catch(error => {
-      })
-
+      .catch(error => {})
   }
 
   const post = obj => {
-
     const data = {
       productId: pId,
       seqNo: seqNo,
@@ -139,43 +123,32 @@ expanded
       record: JSON.stringify(data)
     })
       .then(res => {
-        if (res) toast.success('Record Edited Successfully')
+        if (res) toast.success(platformLabels.Edited)
       })
-      .catch(error => {
-
-      })
+      .catch(error => {})
   }
 
-return (
-
-  <FormShell
-   form={formik}
-   isCleared={false}
-   infoVisible={false}
-   resourceId={ResourceIds.ProductMaster}
-   maxAccess={maxAccess}>
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            height: '100%'
-          }}
-        >
-          <Grid container gap={2}>
-            <Grid xs={12}>
-            <DataGrid
-             onChange={value => formik.setFieldValue('productLegCommission', value)}
-             value={formik.values.productLegCommission}
-             error={formik.errors.productLegCommission}
-             columns={columns}
-             allowDelete={false}
-             height={`${expanded ? `calc(100vh - 330px)` : `${height-50}px`}`}
-             allowAddNewLine={false}/>
-            </Grid>
-          </Grid>
-        </Box>
-      </FormShell>
-
+  return (
+    <FormShell
+      form={formik}
+      isCleared={false}
+      infoVisible={false}
+      resourceId={ResourceIds.ProductMaster}
+      maxAccess={maxAccess}
+    >
+      <VertLayout>
+        <Grow>
+          <DataGrid
+            onChange={value => formik.setFieldValue('productLegCommission', value)}
+            value={formik.values.productLegCommission}
+            error={formik.errors.productLegCommission}
+            columns={columns}
+            allowDelete={false}
+            allowAddNewLine={false}
+          />
+        </Grow>
+      </VertLayout>
+    </FormShell>
   )
 }
 

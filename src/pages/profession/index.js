@@ -1,5 +1,4 @@
 import { useContext, useState } from 'react'
-import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import Table from 'src/components/Shared/Table'
@@ -9,10 +8,15 @@ import ProfessionsWindow from './Windows/ProfessionsWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useWindow } from 'src/windows'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const Professions = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const { platformLabels } = useContext(ControlContext)
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -58,13 +62,8 @@ const Professions = () => {
       flex: 1
     },
     {
-      field: 'monthlyIncome',
-      headerName: _labels.monthlyIncome,
-      flex: 1
-    },
-    {
-      field: 'riskFactor',
-      headerName: _labels.riskFactor,
+      field: 'riskLevelName',
+      headerName: _labels.riskLevel,
       flex: 1
     }
   ]
@@ -97,14 +96,15 @@ const Professions = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
   }
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar onAdd={add} maxAccess={access} />
-
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
@@ -118,8 +118,8 @@ const Professions = () => {
           paginationType='api'
           maxAccess={access}
         />
-      </Box>
-    </>
+      </Grow>
+    </VertLayout>
   )
 }
 

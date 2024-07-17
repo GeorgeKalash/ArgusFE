@@ -9,7 +9,11 @@ export function useResourceQuery({ endpointId, filter, datasetId, queryFn, searc
 
   const isSearchMode = !!searchValue
 
-  const isFilterMode = Object.keys(filters).length > 0
+  const isFilterMode =
+    Object.keys(filters).length > 0 &&
+    Object.values(filters).every(
+      value => value !== null && value !== undefined && (typeof value !== 'string' || value.trim() !== '')
+    )
 
   const { access, labels } = useResourceParams({
     datasetId
@@ -28,7 +32,8 @@ export function useResourceQuery({ endpointId, filter, datasetId, queryFn, searc
       : isFilterMode
       ? ({ queryKey: [_, __] }) =>
           filter.filterFn({
-            filters
+            filters,
+            pagination: apiOption
           })
       : apiOption
       ? () => queryFn(apiOption)

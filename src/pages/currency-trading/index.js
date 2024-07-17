@@ -8,6 +8,9 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 import Table from 'src/components/Shared/Table'
 import { formatDateDefault } from 'src/lib/date-helper'
 import { CTTRXrepository } from 'src/repositories/CTTRXRepository'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 export default function CurrencyTrading() {
   const { getRequest } = useContext(RequestsContext)
@@ -49,9 +52,10 @@ export default function CurrencyTrading() {
   }
 
   return (
-    <Box>
-      {labels && access && (
-        <>
+    labels &&
+    access && (
+      <VertLayout>
+        <Fixed>
           <GridToolbar
             maxAccess={access}
             onSearch={value => {
@@ -63,7 +67,8 @@ export default function CurrencyTrading() {
             labels={labels}
             inputSearch={true}
           />
-
+        </Fixed>
+        <Grow>
           <Table
             columns={[
               {
@@ -113,8 +118,8 @@ export default function CurrencyTrading() {
             paginationType='client'
             maxAccess={access}
           />
-        </>
-      )}
-    </Box>
+        </Grow>
+      </VertLayout>
+    )
   )
 }

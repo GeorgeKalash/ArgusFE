@@ -1,60 +1,42 @@
-// ** React Importsport
-import { useState, useContext } from 'react'
-
-// ** MUI Imports
-import { Box } from '@mui/material'
-
-// ** Third Party Imports
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
-
-// ** Windows
-import CurrencyWindow from './Windows/CurrencyWindow'
-
-// ** Helpers
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
-
+import { useResourceQuery } from 'src/hooks/resource'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { useWindow } from 'src/windows'
+import CurrencyForm from './forms/CurrencyForm'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const Currencies = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const [selectedRecordId, setSelectedRecordId] = useState(null)
-
-  //states
-  const [windowOpen, setWindowOpen] = useState(false)
-  const [errorMessage, setErrorMessage] = useState(null)
+  const { platformLabels } = useContext(ControlContext)
 
   async function fetchGridData() {
-
     return await getRequest({
       extension: SystemRepository.Currency.qry,
       parameters: `_filter=`
     })
-
   }
+
+  const { stack } = useWindow()
 
   const {
     query: { data },
     labels: _labels,
     refetch,
+    invalidate,
     access
   } = useResourceQuery({
-    queryFn:  fetchGridData,
+    queryFn: fetchGridData,
     endpointId: SystemRepository.Currency.qry,
     datasetId: ResourceIds.Currencies
   })
-
-  // const invalidate = useInvalidate({
-  //   endpointId: SystemRepository.Currency.qry
-  // })
 
   const columns = [
     {
@@ -81,27 +63,44 @@ const Currencies = () => {
   ]
 
   const del = async obj => {
-    await postRequest({
-      extension: SystemRepository.Currency.del,
-      record: JSON.stringify(obj)
-    })
-    refresh()
-    toast.success('Record Deleted Successfully')
+    try {
+      await postRequest({
+        extension: SystemRepository.Currency.del,
+        record: JSON.stringify(obj)
+      })
+      invalidate()
+      toast.success(platformLabels.Deleted)
+    } catch (error) {}
   }
 
   const add = () => {
-    setWindowOpen(true)
+    openForm()
   }
 
   const edit = obj => {
-    setSelectedRecordId(obj.recordId)
-    setWindowOpen(true)
+    openForm(obj?.recordId)
+  }
+
+  function openForm(recordId) {
+    stack({
+      Component: CurrencyForm,
+      props: {
+        labels: _labels,
+        recordId: recordId,
+        maxAccess: access
+      },
+      width: 700,
+      height: 700,
+      title: _labels.currency
+    })
   }
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar onAdd={add} maxAccess={access} />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
@@ -114,21 +113,8 @@ const Currencies = () => {
           paginationType='client'
           maxAccess={access}
         />
-      </Box>
-      {windowOpen && (
-        <CurrencyWindow
-          onClose={() => {
-            setWindowOpen(false)
-            setSelectedRecordId(null)
-          }}
-          labels={_labels}
-          maxAccess={access}
-          recordId={selectedRecordId}
-          setSelectedRecordId={setSelectedRecordId}
-        />
-      )}
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+      </Grow>
+    </VertLayout>
   )
 }
 

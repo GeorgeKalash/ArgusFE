@@ -1,11 +1,6 @@
 import { useEffect, useState } from 'react'
-
-// ** MUI Imports
 import { Grid } from '@mui/material'
-import { useFormik } from 'formik'
 import * as yup from 'yup'
-
-// ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -20,22 +15,36 @@ import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import toast from 'react-hot-toast'
 import { useError } from 'src/error'
 import { SystemFunction } from 'src/resources/SystemFunction'
+import { LOShipmentForm } from 'src/components/Shared/LOShipmentForm'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import FormGrid from 'src/components/form/layout/FormGrid'
-import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
+import { formatDateFromApi, formatDateToApi, formatDateToApiFunction } from 'src/lib/date-helper'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { useWindow } from 'src/windows'
+import { useForm } from 'src/hooks/form'
+import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
+import { RateDivision } from 'src/resources/RateDivision'
+import { DIRTYFIELD_AMOUNT, getRate } from 'src/utils/RateCalculator'
+import WorkFlow from 'src/components/Shared/WorkFlow'
+import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 
-export default function CashTransferTab({ labels, recordId, maxAccess, plantId, cashAccountId, dtId }) {
+export default function CashTransferTab({ labels, recordId, access, plantId, cashAccountId, dtId }) {
   const [editMode, setEditMode] = useState(!!recordId)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
+  const { stack } = useWindow()
+  const [isClosed, setIsClosed] = useState(false)
+  const [isPosted, setIsPosted] = useState(true)
 
   const invalidate = useInvalidate({
     endpointId: CashBankRepository.CashTransfer.snapshot
   })
 
   const [initialValues, setInitialData] = useState({
-    recordId: null,
+    recordId: recordId || null,
     dtId: parseInt(dtId),
     reference: '',
     date: new Date(),
@@ -47,6 +56,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
     toCashAccountId: '',
     toCARef: '',
     toCAName: '',
+    baseAmount: '',
     notes: '',
     wip: '',
     status: '',
@@ -63,12 +73,22 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
         currencyName: '',
         currencyRef: '',
         amount: '',
-        balance: ''
+        baseAmount: '',
+        exRate: '',
+        rateCalcMethod: '',
+        balance: 0
       }
     ]
   })
 
-  const formik = useFormik({
+  const { maxAccess } = useDocumentType({
+    functionId: SystemFunction.CashTransfer,
+    access: access,
+    enabled: !recordId
+  })
+
+  const { formik } = useForm({
+    maxAccess,
     initialValues,
     enableReinitialize: true,
     validateOnChange: true,
@@ -77,19 +97,27 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
       fromPlantId: yup.string().required(),
       date: yup.string().required(),
       toPlantId: yup.string().required(),
-      toCashAccountId: yup.string().required()
+      toCashAccountId: yup.string().required(),
+      transfers: yup
+        .array()
+        .of(
+          yup.object().shape({
+            currencyName: yup.string().required(),
+            amount: yup.string().nullable().required()
+          })
+        )
+        .required()
     }),
     onSubmit: async values => {
       const copy = { ...values }
       delete copy.transfers
       copy.date = formatDateToApi(copy.date)
-
-      // Default values for properties if they are empty
       copy.status = copy.status === '' ? 1 : copy.status
       copy.wip = copy.wip === '' ? 1 : copy.wip
+      copy.baseAmount = totalLoc
 
       const updatedRows = formik.values.transfers.map((transferDetail, index) => {
-        const seqNo = index + 1 // Adding 1 to make it 1-based index
+        const seqNo = index + 1
 
         return {
           ...transferDetail,
@@ -124,42 +152,112 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
           extension: CashBankRepository.CashTransfer.get,
           parameters: `_recordId=${res.recordId}`
         })
+
         formik.setFieldValue('reference', res2.record.reference)
         invalidate()
       }
     }
   })
 
-  const fillCurrencyTransfer = async (transferId, data) => {
-    try {
-      var parameters = `_transferId=${transferId}`
-      getRequest({
-        extension: CashBankRepository.CurrencyTransfer.qry,
-        parameters: parameters
-      }).then(res => {
-        // Create a new list by modifying each object in res.list
-        const modifiedList = res.list.map((item, index) => ({
-          ...item,
-          id: item.seqNo,
-          amount: parseFloat(item.amount).toFixed(2)
-        }))
+  const totalLoc = formik.values.transfers.reduce((locSum, row) => {
+    const locValue = parseFloat(row.baseAmount?.toString().replace(/,/g, '')) || 0
 
-        formik.setValues({
-          ...data,
-          transfers: modifiedList // Update the transfers array directly
-        })
+    return locSum + locValue
+  }, 0)
+
+  const onClose = async () => {
+    const { transfers, ...rest } = formik.values
+    const copy = { ...rest }
+
+    copy.date = formatDateToApi(copy.date)
+    copy.wip = copy.wip === '' ? 1 : copy.wip
+    copy.status = copy.status === '' ? 1 : copy.status
+    copy.baseAmount = totalLoc
+
+    const res = await postRequest({
+      extension: CashBankRepository.CashTransfer.close,
+      record: JSON.stringify(copy)
+    })
+    if (res.recordId) {
+      toast.success('Record Closed Successfully')
+      invalidate()
+      setIsClosed(true)
+
+      const res2 = await getRequest({
+        extension: CashBankRepository.CashTransfer.get,
+        parameters: `_recordId=${formik.values.recordId}`
       })
-    } catch (error) {}
+      if (res2?.record?.status == 4) {
+        setIsPosted(false)
+      }
+    }
+  }
+
+  const onReopen = async () => {
+    const { transfers, ...rest } = formik.values
+    const copy = { ...rest }
+
+    copy.date = formatDateToApi(copy.date)
+    copy.wip = copy.wip === '' ? 1 : copy.wip
+    copy.status = copy.status === '' ? 1 : copy.status
+    copy.baseAmount = totalLoc
+
+    const res = await postRequest({
+      extension: CashBankRepository.CashTransfer.reopen,
+      record: JSON.stringify(copy)
+    })
+    if (res.recordId) {
+      toast.success('Record Closed Successfully')
+      invalidate()
+      setIsClosed(false)
+      setIsPosted(true)
+    }
+  }
+
+  const onPost = async () => {
+    const { transfers, ...rest } = formik.values
+    const copy = { ...rest }
+    copy.date = formatDateToApi(copy.date)
+    copy.wip = copy.wip === '' ? 1 : copy.wip
+    copy.status = copy.status === '' ? 1 : copy.status
+    copy.baseAmount = totalLoc
+
+    const res = await postRequest({
+      extension: CashBankRepository.CashTransfer.post,
+      record: JSON.stringify(copy)
+    })
+
+    if (res?.recordId) {
+      toast.success('Record Posted Successfully')
+      invalidate()
+      setIsPosted(true)
+    }
+  }
+
+  const fillCurrencyTransfer = async (transferId, data) => {
+    const res = await getRequest({
+      extension: CashBankRepository.CurrencyTransfer.qry,
+      parameters: `_transferId=${transferId}`
+    })
+
+    const modifiedList = res.list.map(item => ({
+      ...item,
+      id: item.seqNo,
+      amount: parseFloat(item.amount).toFixed(2),
+      balance: parseFloat(item?.balance).toFixed(2) ?? 0
+    }))
+
+    formik.setValues({
+      ...data,
+      transfers: modifiedList
+    })
   }
 
   const getAccView = async () => {
-    console.log('cashAccountId ', cashAccountId)
     if (cashAccountId) {
-      const defaultParams = `_recordId=${cashAccountId}`
-
       const res = await getRequest({
         extension: CashBankRepository.CashAccount.get,
-        parameters: defaultParams
+        parameters: `_recordId=${cashAccountId}`
       })
       if (res.record) {
         formik.setFieldValue('fromCARef', res.record.accountNo)
@@ -167,259 +265,352 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
       }
     }
   }
+
+  const shipmentClicked = () => {
+    stack({
+      Component: LOShipmentForm,
+      props: {
+        recordId: formik.values.recordId,
+        functionId: SystemFunction.CashTransfer,
+        editMode: isClosed
+      },
+      width: 1200,
+      height: 670,
+      title: 'Shipments'
+    })
+  }
+
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: CashBankRepository.CashTransfer.get,
-            parameters: `_recordId=${recordId}`
-          })
-
-          res.record.date = formatDateFromApi(res.record.date)
-
-          // Add an empty transfer object to res.record , it's returning error in length object without it when setting values to formik
-          res.record.transfers = [
-            {
-              id: 1,
-              transferId: recordId,
-              seqNo: '',
-              currencyId: '',
-              currencyName: '',
-              currencyRef: '',
-              amount: '',
-              balance: ''
-            }
-          ]
-          await fillCurrencyTransfer(recordId, res.record)
-        }
-
+      if (recordId) {
+        const res = await getRequest({
+          extension: CashBankRepository.CashTransfer.get,
+          parameters: `_recordId=${recordId}`
+        })
+        res.record.date = formatDateFromApi(res.record.date)
+        setIsClosed(res.record.wip === 2 ? true : false)
+        setIsPosted(res.record.status === 4 ? false : true)
+        await fillCurrencyTransfer(recordId, res.record)
+      } else {
         getAccView()
-      } catch (error) {}
+      }
     })()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  const onWorkFlowClick = async () => {
+    stack({
+      Component: WorkFlow,
+      props: {
+        functionId: SystemFunction.CashTransfer,
+        recordId: formik.values.recordId
+      },
+      width: 950,
+      title: 'Workflow'
+    })
+  }
+
+  const actions = [
+    {
+      key: 'WorkFlow',
+      condition: true,
+      onClick: onWorkFlowClick,
+      disabled: !editMode
+    },
+    {
+      key: 'Close',
+      condition: !isClosed,
+      onClick: onClose,
+      disabled: isClosed || !editMode
+    },
+    {
+      key: 'Reopen',
+      condition: isClosed,
+      onClick: onReopen,
+      disabled: !isClosed || !editMode || (formik.values.releaseStatus === 3 && formik.values.status === 3)
+    },
+    {
+      key: 'Approval',
+      condition: true,
+      onClick: 'onApproval',
+      disabled: !isClosed
+    },
+    {
+      key: 'Post',
+      condition: true,
+      onClick: onPost,
+      disabled: isPosted
+    },
+    {
+      key: 'Shipment',
+      condition: true,
+      onClick: shipmentClicked,
+      disabled: (editMode && formik.values.fromPlantId == formik.values.toPlantId) || !editMode
+    },
+    {
+      key: 'Account Balance',
+      condition: true,
+      onClick: 'onClickAC',
+      disabled: false
+    },
+    {
+      key: 'Cash Transaction',
+      condition: true,
+      onClick: 'transactionClicked',
+      disabled: !editMode
+    }
+  ]
+
+  function getCurrencyApi(_currencyId) {
+    return getRequest({
+      extension: MultiCurrencyRepository.Currency.get,
+      parameters: `_currencyId=${_currencyId}&_date=${formatDateToApiFunction(formik.values.date)}&_rateDivision=${
+        RateDivision.FINANCIALS
+      }`
+    })
+  }
+
   return (
-    <>
-      <FormShell
-        resourceId={ResourceIds.CashTransfer}
-        form={formik}
-        editMode={editMode}
-        height={480}
-        maxAccess={maxAccess}
-        functionId={SystemFunction.CashTransfer}
-      >
-        <Grid container sx={{ pt: 2 }}>
-          {/* First Column */}
-          <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
-            <Grid item xs={12}>
-              <CustomTextField
-                name='reference'
-                label={labels.reference}
-                value={formik?.values?.reference}
-                maxAccess={maxAccess}
-                maxLength='15'
-                readOnly
-                required
-              />
+    <FormShell
+      resourceId={ResourceIds.CashTransfer}
+      form={formik}
+      editMode={editMode}
+      maxAccess={maxAccess}
+      functionId={SystemFunction.CashTransfer}
+      actions={actions}
+      disabledSubmit={isClosed}
+    >
+      <VertLayout>
+        <Fixed>
+          <Grid container>
+            <Grid container rowGap={2} xs={6} sx={{ px: 2 }} spacing={2}>
+              <Grid item xs={12}>
+                <CustomTextField
+                  name='reference'
+                  label={labels.reference}
+                  value={formik?.values?.reference}
+                  maxAccess={maxAccess}
+                  maxLength='15'
+                  readOnly={editMode}
+                  error={formik.touched.reference && Boolean(formik.errors.reference)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  endpointId={SystemRepository.Plant.qry}
+                  name='fromPlantId'
+                  label={labels.fromPlant}
+                  values={formik.values}
+                  valueField='recordId'
+                  displayField={['reference', 'name']}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' }
+                  ]}
+                  readOnly
+                  required
+                  maxAccess={maxAccess}
+                  onChange={(event, newValue) => {
+                    formik && formik.setFieldValue('fromPlantId', newValue?.recordId)
+                  }}
+                  error={formik.touched.fromPlantId && Boolean(formik.errors.fromPlantId)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceLookup
+                  endpointId={CashBankRepository.CashAccount.snapshot}
+                  parameters={{
+                    _type: 0
+                  }}
+                  firstFieldWidth='40%'
+                  valueField='accountNo'
+                  displayField='name'
+                  name='fromCashAccountId'
+                  displayFieldWidth={2}
+                  required
+                  label={labels.fromCashAcc}
+                  form={formik}
+                  readOnly
+                  valueShow='fromCARef'
+                  secondValueShow='fromCAName'
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('fromCashAccountId', newValue ? newValue.recordId : null)
+                    formik.setFieldValue('fromCARef', newValue ? newValue.accountNo : null)
+                    formik.setFieldValue('fromCAName', newValue ? newValue.name : null)
+                  }}
+                  error={formik.touched.fromCashAccountId && Boolean(formik.errors.fromCashAccountId)}
+                  maxAccess={maxAccess}
+                />
+              </Grid>
             </Grid>
-            <Grid item xs={12}>
-              <ResourceComboBox
-                endpointId={SystemRepository.Plant.qry}
-                name='fromPlantId'
-                label={labels.fromPlant}
-                values={formik.values}
-                valueField='recordId'
-                displayField={['reference', 'name']}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
-                readOnly
-                required
-                maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik && formik.setFieldValue('fromPlantId', newValue?.recordId)
-                }}
-                error={formik.touched.fromPlantId && Boolean(formik.errors.fromPlantId)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <ResourceLookup
-                endpointId={CashBankRepository.CashAccount.snapshot}
-                parameters={{
-                  _type: 0
-                }}
-                firstFieldWidth='40%'
-                valueField='accountNo'
-                displayField='name'
-                name='fromCashAccountId'
-                displayFieldWidth={2}
-                required
-                label={labels.fromCashAcc}
-                form={formik}
-                readOnly
-                valueShow='fromCARef'
-                secondValueShow='fromCAName'
-                onChange={(event, newValue) => {
-                  if (newValue) {
-                    formik.setFieldValue('fromCashAccountId', newValue?.recordId)
-                    formik.setFieldValue('fromCARef', newValue?.accountNo)
-                    formik.setFieldValue('fromCAName', newValue?.name)
-                  } else {
-                    formik.setFieldValue('fromCashAccountId', null)
-                    formik.setFieldValue('fromCARef', null)
-                    formik.setFieldValue('fromCAName', null)
-                  }
-                }}
-                error={formik.touched.fromCashAccountId && Boolean(formik.errors.fromCashAccountId)}
-                maxAccess={maxAccess}
-              />
-            </Grid>
-          </Grid>
-          {/* Second Column */}
-          <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
-            <Grid item xs={12}>
-              <CustomDatePicker
-                name='date'
-                required
-                label={labels.date}
-                value={formik?.values?.date}
-                onChange={formik.setFieldValue}
-                editMode={editMode}
-                maxAccess={maxAccess}
-                onClear={() => formik.setFieldValue('date', '')}
-                error={formik.touched.date && Boolean(formik.errors.date)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <ResourceComboBox
-                endpointId={SystemRepository.Plant.qry}
-                name='toPlantId'
-                label={labels.toPlant}
-                values={formik.values}
-                valueField='recordId'
-                displayField={['reference', 'name']}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
-                required
-                maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  if (newValue) formik.setFieldValue('toPlantId', newValue?.recordId)
-                  else formik.setFieldValue('toPlantId', null)
-                  formik.setFieldValue('toCashAccountId', null)
-                  formik.setFieldValue('toCARef', null)
-                  formik.setFieldValue('toCAName', null)
-                }}
-                error={formik.touched.toPlantId && Boolean(formik.errors.toPlantId)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <ResourceLookup
-                endpointId={CashBankRepository.CashAccount.snapshot}
-                parameters={{
-                  _type: 0
-                }}
-                firstFieldWidth='40%'
-                valueField='accountNo'
-                displayField='name'
-                name='toCashAccountId'
-                displayFieldWidth={2}
-                required
-                readOnly={!formik.values.toPlantId}
-                label={labels.toCashAcc}
-                form={formik}
-                filter={{ plantId: formik.values.toPlantId }}
-                valueShow='toCARef'
-                secondValueShow='toCAName'
-                viewHelperText={false}
-                onChange={(event, newValue) => {
-                  if (newValue) {
-                    formik.setFieldValue('toCashAccountId', newValue?.recordId)
-                    formik.setFieldValue('toCARef', newValue?.accountNo)
-                    formik.setFieldValue('toCAName', newValue?.name)
-                  } else {
-                    formik.setFieldValue('toCashAccountId', null)
-                    formik.setFieldValue('toCARef', null)
-                    formik.setFieldValue('toCAName', null)
-                  }
-                }}
-                maxAccess={maxAccess}
-                error={formik.touched.toCashAccountId && Boolean(formik.errors.toCashAccountId)}
-              />
+            <Grid container rowGap={2} xs={6} sx={{ px: 2 }} spacing={2}>
+              <Grid item xs={12}>
+                <CustomDatePicker
+                  name='date'
+                  required
+                  readOnly={isClosed}
+                  label={labels.date}
+                  value={formik?.values?.date}
+                  onChange={formik.setFieldValue}
+                  editMode={editMode}
+                  maxAccess={maxAccess}
+                  onClear={() => formik.setFieldValue('date', '')}
+                  error={formik.touched.date && Boolean(formik.errors.date)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  endpointId={SystemRepository.Plant.qry}
+                  name='toPlantId'
+                  label={labels.toPlant}
+                  values={formik.values}
+                  valueField='recordId'
+                  displayField={['reference', 'name']}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' }
+                  ]}
+                  required
+                  readOnly={isClosed}
+                  maxAccess={maxAccess}
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('toPlantId', newValue ? newValue.recordId : null)
+                    if (!newValue) {
+                      formik.setFieldValue('toCashAccountId', null)
+                      formik.setFieldValue('toCARef', null)
+                      formik.setFieldValue('toCAName', null)
+                    }
+                  }}
+                  error={formik.touched.toPlantId && Boolean(formik.errors.toPlantId)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceLookup
+                  endpointId={CashBankRepository.CashAccount.snapshot}
+                  parameters={{
+                    _type: 0
+                  }}
+                  firstFieldWidth='40%'
+                  valueField='accountNo'
+                  displayField='name'
+                  name='toCashAccountId'
+                  displayFieldWidth={2}
+                  required
+                  readOnly={!formik.values.toPlantId || isClosed}
+                  label={labels.toCashAcc}
+                  form={formik}
+                  filter={{ plantId: formik.values.toPlantId }}
+                  valueShow='toCARef'
+                  secondValueShow='toCAName'
+                  viewHelperText={false}
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('toCashAccountId', newValue ? newValue.recordId : null)
+                    formik.setFieldValue('toCARef', newValue ? newValue.accountNo : null)
+                    formik.setFieldValue('toCAName', newValue ? newValue.name : null)
+                  }}
+                  maxAccess={maxAccess}
+                  error={formik.touched.toCashAccountId && Boolean(formik.errors.toCashAccountId)}
+                />
+              </Grid>
             </Grid>
           </Grid>
-          <Grid width={'100%'} sx={{ pt: 5 }}>
-            <DataGrid
-              onChange={value => formik.setFieldValue('transfers', value)}
-              value={formik.values.transfers}
-              error={formik.errors.transfers}
-              height={220}
-              maxAccess={maxAccess}
-              columns={[
-                {
-                  component: 'resourcecombobox',
-                  label: labels.currency,
-                  name: 'currencyName',
-                  props: {
-                    endpointId: SystemRepository.Currency.qry,
-                    displayField: 'reference',
-                    valueField: 'recordId',
-                    mapping: [
-                      { from: 'recordId', to: 'currencyId' },
-                      { from: 'name', to: 'currencyName' },
-                      { from: 'reference', to: 'currencyRef' }
-                    ],
-                    columnsInDropDown: [
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]
-                  },
-                  widthDropDown: 200,
-                  displayFieldWidth: 2
+        </Fixed>
+        <Grow>
+          <DataGrid
+            onChange={value => formik.setFieldValue('transfers', value)}
+            value={formik.values.transfers}
+            error={formik.errors.transfers}
+            allowDelete={!isClosed}
+            allowAddNewLine={!isClosed}
+            maxAccess={maxAccess}
+            name='currencies'
+            columns={[
+              {
+                component: 'resourcecombobox',
+                label: labels.currency,
+                name: 'currencyName',
+                props: {
+                  disabled: isClosed,
+                  endpointId: SystemRepository.Currency.qry,
+                  displayField: 'reference',
+                  valueField: 'recordId',
+                  mapping: [
+                    { from: 'recordId', to: 'currencyId' },
+                    { from: 'name', to: 'currencyName' },
+                    { from: 'reference', to: 'currencyRef' }
+                  ],
+                  columnsInDropDown: [
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' }
+                  ]
                 },
-                {
-                  component: 'numberfield',
-                  label: labels.amount,
-                  name: 'amount',
-                  defaultValue: ''
-                },
-                {
-                  component: 'numberfield',
-                  name: 'balance',
-                  label: labels.balance,
-                  defaultValue: ''
+                widthDropDown: 200,
+                displayFieldWidth: 2,
+                async onChange({ row: { update, newRow } }) {
+                  if (!newRow?.currencyId) {
+                    return
+                  }
+                  if (newRow.currencyId) {
+                    try {
+                      const result = await getCurrencyApi(newRow?.currencyId)
+                      update({
+                        exRate: result.record.exRate,
+                        rateCalcMethod: result.record.rateCalcMethod
+                      })
+                    } catch (error) {}
+                  }
                 }
-              ]}
+              },
+              {
+                component: 'numberfield',
+                label: labels.amount,
+                name: 'amount',
+                defaultValue: '',
+                props: { readOnly: isClosed },
+                async onChange({ row: { update, newRow } }) {
+                  if (!newRow?.amount) {
+                    return
+                  }
+                  if (newRow?.amount) {
+                    const updatedRateRow = getRate({
+                      amount: newRow?.amount,
+                      exRate: newRow?.exRate,
+                      baseAmount: newRow?.baseAmount,
+                      rateCalcMethod: newRow?.rateCalcMethod,
+                      dirtyField: DIRTYFIELD_AMOUNT
+                    })
+                    update({
+                      baseAmount: updatedRateRow.baseAmount
+                    })
+                  }
+                }
+              },
+              {
+                component: 'numberfield',
+                name: 'balance',
+                label: labels.balance,
+                defaultValue: '0',
+                props: { readOnly: true }
+              }
+            ]}
+          />
+        </Grow>
+        <Fixed>
+          <FormGrid container rowGap={1} xs={7} style={{ marginTop: '10px' }}>
+            <CustomTextArea
+              name='notes'
+              label={labels.note}
+              value={formik.values.notes}
+              rows={3}
+              readOnly={isClosed}
+              maxLength='100'
+              editMode={editMode}
+              maxAccess={maxAccess}
+              onChange={e => formik.setFieldValue('notes', e.target.value)}
+              onClear={() => formik.setFieldValue('notes', '')}
             />
-          </Grid>
-          <Grid
-            container
-            rowGap={1}
-            xs={12}
-            style={{ marginTop: '5px' }}
-            sx={{ flexDirection: 'row', flexWrap: 'nowrap' }}
-          >
-            {/* First Column (moved to the left) */}
-            <FormGrid container rowGap={1} xs={7} style={{ marginTop: '10px' }}>
-              <CustomTextArea
-                name='notes'
-                label={labels.note}
-                value={formik.values.notes}
-                rows={3}
-                maxLength='100'
-                editMode={editMode}
-                maxAccess={maxAccess}
-                onChange={e => formik.setFieldValue('notes', e.target.value)}
-                onClear={() => formik.setFieldValue('notes', '')}
-              />
-            </FormGrid>
-          </Grid>
-        </Grid>
-      </FormShell>
-    </>
+          </FormGrid>
+        </Fixed>
+      </VertLayout>
+    </FormShell>
   )
 }

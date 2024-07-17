@@ -1,63 +1,50 @@
-// ** React Importsport
 import { useState, useContext } from 'react'
-
-// ** MUI Imports
-import { Box } from '@mui/material'
-
-// ** Third Party Imports
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
-
-// ** Windows
 import CorrespondentWindow from './Windows/CorrespondentWindow'
-
-// ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const Correspondent = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
-
   const [errorMessage, setErrorMessage] = useState(null)
-
-  //control
+  const { platformLabels } = useContext(ControlContext)
 
   const {
     query: { data },
-    labels : _labels,
+    labels: _labels,
     paginationParameters,
     invalidate,
     refetch,
     access
   } = useResourceQuery({
-     queryFn: fetchGridData,
-     endpointId: RemittanceSettingsRepository.Correspondent.qry,
-     datasetId: ResourceIds.Correspondent,
+    queryFn: fetchGridData,
+    endpointId: RemittanceSettingsRepository.Correspondent.qry,
+    datasetId: ResourceIds.Correspondent
+  })
 
-   })
-
-  async function fetchGridData(options={}) {
+  async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}`
     var parameters = defaultParams
 
-     const response =  await getRequest({
+    const response = await getRequest({
       extension: RemittanceSettingsRepository.Correspondent.qry,
       parameters: parameters
     })
 
-    return {...response,  _startAt: _startAt}
+    return { ...response, _startAt: _startAt }
   }
 
   const columns = [
@@ -82,12 +69,16 @@ const Correspondent = () => {
       flex: 1
     },
     {
+      field: 'interfaceName',
+      headerName: _labels.interface,
+      flex: 1
+    },
+    {
       field: 'isInactive',
       headerName: _labels.isInActive,
       flex: 1
     }
   ]
-
 
   const delCorrespondent = obj => {
     postRequest({
@@ -95,7 +86,7 @@ const Correspondent = () => {
       record: JSON.stringify(obj)
     })
       .then(res => {
-        toast.success('Record Deleted Successfully')
+        toast.success(platformLabels.Deleted)
         invalidate()
       })
       .catch(error => {
@@ -107,12 +98,12 @@ const Correspondent = () => {
     openForm('')
   }
 
-  function openForm (recordId){
+  function openForm(recordId) {
     stack({
       Component: CorrespondentWindow,
       props: {
         labels: _labels,
-        recordId: recordId? recordId : null,
+        recordId: recordId ? recordId : null
       },
       width: 900,
       height: 600,
@@ -121,16 +112,15 @@ const Correspondent = () => {
   }
 
   const popup = obj => {
-   openForm(obj?.recordId)
+    openForm(obj?.recordId)
   }
 
-
-
-
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar onAdd={addCorrespondent} maxAccess={access} />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
@@ -144,10 +134,9 @@ const Correspondent = () => {
           pageSize={50}
           maxAccess={access}
         />
-      </Box>
-
+      </Grow>
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+    </VertLayout>
   )
 }
 

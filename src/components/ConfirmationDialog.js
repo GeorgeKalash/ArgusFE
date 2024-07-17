@@ -1,6 +1,7 @@
 // ** MUI Imports
 import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button, Box } from '@mui/material'
-import Window from './Shared/Window'
+import { ControlContext } from 'src/providers/ControlContext'
+import { useContext } from 'react'
 
 const ConfirmationDialog = ({
   openCondition,
@@ -10,56 +11,54 @@ const ConfirmationDialog = ({
   cancelButtonAction,
   fullScreen = true
 }) => {
-  return !fullScreen ? ( //dialog full screen or page
-    openCondition && (
-      <Window Title='Confirmation' width={450} height={120} canExpand={false} onClose={closeCondition}>
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            height: '120px'
-          }}
-        >
-          <Box
-            sx={{
-              flex: '1',
-              overflow: 'auto',
-              p: 5
-            }}
-          >
-            {DialogText}
-          </Box>
-          <Box
-            sx={{
-              flexShrink: 0,
-              py: 1,
-              px: 5,
-              display: 'flex',
-              justifyContent: 'flex-end'
-            }}
-          >
-            <Button onClick={okButtonAction} color='primary'>
-              OK
-            </Button>
-            <Button onClick={cancelButtonAction} color='primary'>
-              Cancel
-            </Button>
-          </Box>
-        </Box>
-      </Window>
-    )
+  const { platformLabels } = useContext(ControlContext)
+
+  return !fullScreen ? (
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '120px'
+      }}
+    >
+      <Box
+        sx={{
+          flex: '1',
+          overflow: 'auto',
+          p: 5
+        }}
+      >
+        {DialogText}
+      </Box>
+      <Box
+        sx={{
+          flexShrink: 0,
+          py: 1,
+          px: 5,
+          display: 'flex',
+          justifyContent: 'flex-end'
+        }}
+      >
+        <Button onClick={okButtonAction} color='primary'>
+          {platformLabels.OK}
+        </Button>
+        <Button onClick={cancelButtonAction} color='primary'>
+          {platformLabels.Cancel}
+        </Button>
+      </Box>
+    </Box>
   ) : (
     <Dialog open={openCondition} onClose={closeCondition} fullWidth={true} maxWidth='xs'>
-      <DialogTitle>Confirmation</DialogTitle>
+      <DialogTitle>{platformLabels.Confirmation}</DialogTitle>
       <DialogContent>
         <DialogContentText>{DialogText}</DialogContentText>
       </DialogContent>
       <DialogActions>
         <Button onClick={okButtonAction} color='primary'>
-          OK
+          {platformLabels.OK}
         </Button>
         <Button onClick={cancelButtonAction} color='primary'>
-          Cancel
+          {platformLabels.Cancel}
         </Button>
       </DialogActions>
     </Dialog>

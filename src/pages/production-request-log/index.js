@@ -7,6 +7,9 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const ProductionRequestLog = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -99,23 +102,26 @@ const ProductionRequestLog = () => {
   }
 
   return (
-    <Box>
-      <Table
-        columns={columns}
-        gridData={data ? data : { list: [] }}
-        rowId={['recordId', 'itemId', 'functionId']}
-        onDelete={del}
-        isLoading={false}
-        maxAccess={access}
-        showCheckboxColumn={true}
-        handleCheckedRows={() => {}}
-        pageSize={50}
-        paginationType='client'
-        refetch={refetch}
-        addedHeight={'20px'}
-      />
-      <WindowToolbar onSave={handleSubmit} isSaved={true} smallBox={true} />
-    </Box>
+    <VertLayout>
+      <Grow>
+        <Table
+          columns={columns}
+          gridData={data ? data : { list: [] }}
+          rowId={['recordId', 'itemId', 'functionId']}
+          onDelete={del}
+          isLoading={false}
+          maxAccess={access}
+          showCheckboxColumn={true}
+          handleCheckedRows={() => {}}
+          pageSize={50}
+          paginationType='client'
+          refetch={refetch}
+        />
+      </Grow>
+      <Fixed>
+        <WindowToolbar onSave={handleSubmit} isSaved={true} smallBox={true} />
+      </Fixed>
+    </VertLayout>
   )
 }
 

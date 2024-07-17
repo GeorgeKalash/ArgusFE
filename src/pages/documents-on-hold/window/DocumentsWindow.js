@@ -8,8 +8,8 @@ const DocumentsWindow = ({ onClose, labels, maxAccess, recordId, functionId, seq
       Title={labels.documentOnHold}
       controlled={true}
       onClose={onClose}
-      width={500}
       height={400}
+      width={500}
     >
       <DocumentsForm
         onClose={onClose}

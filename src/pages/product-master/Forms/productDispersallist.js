@@ -1,25 +1,24 @@
-// ** React Imports
 import { useEffect, useState, useContext } from 'react'
-
-// ** MUI Imports
-import { Box } from '@mui/material'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { useWindow } from 'src/windows'
 import ProductDispersalForm from './productDispersalForm'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { ControlContext } from 'src/providers/ControlContext'
 
-const ProductDispersalList = ({ store, setStore, labels, maxAccess, expanded,height }) => {
-  const {recordId : pId} = store
+const ProductDispersalList = ({ store, setStore, labels, maxAccess }) => {
+  const { recordId: pId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const [gridData , setGridData] = useState()
+  const [gridData, setGridData] = useState()
   const { stack } = useWindow()
+  const { platformLabels } = useContext(ControlContext)
 
   const getGridData = pId => {
-    setGridData([]);
+    setGridData([])
     const defaultParams = `_productId=${pId}`
     var parameters = defaultParams
     getRequest({
@@ -27,13 +26,12 @@ const ProductDispersalList = ({ store, setStore, labels, maxAccess, expanded,hei
       parameters: parameters
     })
       .then(res => {
-          setGridData(res);
+        setGridData(res)
 
-          setStore(prevStore => ({
-            ...prevStore,
-              dispersals: res.list
-
-          }));
+        setStore(prevStore => ({
+          ...prevStore,
+          dispersals: res.list
+        }))
       })
       .catch(error => {
         setErrorMessage(error)
@@ -63,20 +61,20 @@ const ProductDispersalList = ({ store, setStore, labels, maxAccess, expanded,hei
     },
     {
       field: 'isDefault',
-      headerName:labels.isDefault,
+      headerName: labels.isDefault,
       flex: 1
     }
   ]
 
-  useEffect(()=>{
+  useEffect(() => {
     pId && getGridData(pId)
-  },[pId])
+  }, [pId])
 
   const add = () => {
     openForm('')
   }
 
-  const edit = (object) => {
+  const edit = object => {
     openForm(object.recordId)
   }
 
@@ -86,40 +84,33 @@ const ProductDispersalList = ({ store, setStore, labels, maxAccess, expanded,hei
       record: JSON.stringify(obj)
     })
       .then(res => {
-        toast.success('Record Deleted Successfully')
+        toast.success(platformLabels.Deleted)
         getGridData(obj.productId)
       })
-      .catch(error => {
-      })
+      .catch(error => {})
   }
 
-
-  function openForm(recordId){
+  function openForm(recordId) {
     stack({
       Component: ProductDispersalForm,
       props: {
         labels,
-        recordId: recordId? recordId : null,
+        recordId: recordId ? recordId : null,
         pId,
         maxAccess,
-        getGridData,
+        getGridData
       },
       width: 500,
-      height: 400,
       title: labels?.dispersal
     })
   }
 
   return (
-    <>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%'
-        }}
-      >
+    <VertLayout>
+      <Fixed>
         <GridToolbar onAdd={add} maxAccess={maxAccess} />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={gridData}
@@ -130,10 +121,9 @@ const ProductDispersalList = ({ store, setStore, labels, maxAccess, expanded,hei
           isLoading={false}
           maxAccess={maxAccess}
           pagination={false}
-          height={`${expanded ? `calc(100vh - 280px)` : `${height-100}`}`}
-          />
-      </Box>
-    </>
+        />
+      </Grow>
+    </VertLayout>
   )
 }
 

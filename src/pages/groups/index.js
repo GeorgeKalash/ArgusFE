@@ -1,52 +1,37 @@
-// ** React Imports
-import { useState, useContext } from 'react'
-
-// ** MUI Imports
-import {Box } from '@mui/material'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
-
-// ** Windows
-import GroupsWindow from './Windows/GroupsWindow'
-
-// ** Helpers
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
-
-// ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import GroupsForm from './forms/GroupsForm'
+import { useWindow } from 'src/windows'
 
 const Groups = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
- 
-  const [selectedRecordId, setSelectedRecordId] = useState(null)
-
-  //states
-  const [windowOpen, setWindowOpen] = useState(false)
-  const [errorMessage, setErrorMessage] = useState(null)
-
-  
+  const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    return await getRequest({
+    const response = await getRequest({
       extension: BusinessPartnerRepository.Groups.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
+
+    return { ...response, _startAt: _startAt }
   }
 
   const {
     query: { data },
     labels: _labels,
+    paginationParameters,
+    refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -57,7 +42,6 @@ const Groups = () => {
   const invalidate = useInvalidate({
     endpointId: BusinessPartnerRepository.Groups.page
   })
-
 
   const columns = [
     {
@@ -79,24 +63,35 @@ const Groups = () => {
       editable: false
     },
     {
-      field:'nraDescription',
-      headerName:_labels.numberRange,
+      field: 'nraDescription',
+      headerName: _labels.numberRange,
       flex: 1,
       editable: false
     }
-
   ]
-  
-  const add = () => {
 
-    setWindowOpen(true)
+  const add = () => {
+    openForm()
   }
 
   const edit = obj => {
-    setSelectedRecordId(obj.recordId)
-    setWindowOpen(true)
+    openForm(obj?.recordId)
   }
-  
+
+  function openForm(recordId) {
+    stack({
+      Component: GroupsForm,
+      props: {
+        labels: _labels,
+        recordId: recordId,
+        maxAccess: access
+      },
+      width: 600,
+      height: 330,
+      title: _labels.bpGroups
+    })
+  }
+
   const del = async obj => {
     await postRequest({
       extension: BusinessPartnerRepository.Groups.del,
@@ -107,9 +102,11 @@ const Groups = () => {
   }
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar onAdd={add} maxAccess={access} />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
@@ -118,30 +115,14 @@ const Groups = () => {
           onDelete={del}
           isLoading={false}
           pageSize={50}
-          paginationType='client'
+          paginationType='api'
+          paginationParameters={paginationParameters}
+          refetch={refetch}
           maxAccess={access}
         />
-      </Box>
-
-      {windowOpen && (
-        <GroupsWindow
-        onClose={() => {
-          setWindowOpen(false)
-          setSelectedRecordId(null)
-        }}
-        labels={_labels}
-        maxAccess={access}
-        recordId={selectedRecordId}
-        setSelectedRecordId={setSelectedRecordId}
-        
-   
-      />
-    )}
-    <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-  </>
-)
+      </Grow>
+    </VertLayout>
+  )
 }
 
 export default Groups
-
-

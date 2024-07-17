@@ -22,6 +22,7 @@ const CustomNumberField = ({
   thousandSeparator = ',',
   min = '',
   max = '',
+  allowNegative = true,
   ...props
 }) => {
   const name = props.name
@@ -68,6 +69,7 @@ const CustomNumberField = ({
     <NumericFormat
       label={label}
       allowLeadingZeros
+      allowNegative={allowNegative}
       thousandSeparator={thousandSeparator}
       decimalSeparator='.'
       decimalScale={decimalScale}
@@ -82,10 +84,10 @@ const CustomNumberField = ({
       InputProps={{
         autoComplete: 'off',
         readOnly: _readOnly,
-        endAdornment: ((!readOnly && value) || value === 0) && (
+        endAdornment: !readOnly && !props.disabled && (value || value === 0) && (
           <InputAdornment position='end'>
             <IconButton tabIndex={-1} edge='end' onClick={onClear} aria-label='clear input'>
-              <ClearIcon />
+              <ClearIcon sx={{ border: '0px', fontSize: 20 }} />
             </IconButton>
           </InputAdornment>
         )
