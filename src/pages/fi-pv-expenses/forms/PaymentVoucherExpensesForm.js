@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -28,10 +28,6 @@ import { useWindow } from 'src/windows'
 import ExpensesCostCenters from 'src/components/Shared/ExpensesCostCenters'
 
 export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access, recordId, plantId }) {
-  const [subtotalSum, setSubtotalSum] = useState(0);
-  const [vatSum, setVatSum] = useState(0);
-  const [amountSum, setAmountSum] = useState(0);
-
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -457,20 +453,24 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
       expenses: expensesList
     })
   }
-  
-  useEffect(() => {
-    const subtotals = formik?.values?.expenses?.map(item => parseFloat(item.subtotal) || 0);
-    const vatAmounts = formik?.values?.expenses?.map(item => parseFloat(item.vatAmount) || 0);
-    const amounts = formik?.values?.expenses?.map(item => parseFloat(item.amount) || 0);
 
-    setSubtotalSum(subtotals?.reduce((acc, val) => acc + val, 0));
-    setVatSum(vatAmounts?.reduce((acc, val) => acc + val, 0));
-    setAmountSum(amounts?.reduce((acc, val) => acc + val, 0));
-    formik.setFieldValue('amount', amountSum);
-    formik.setFieldValue('vatAmount', vatSum);
-    formik.setFieldValue('subtotal', subtotalSum);
-    formik.setFieldValue('baseAmount', amountSum);
-  }, [formik?.values?.expenses]);
+    const subtotalSum = formik.values?.expenses?.reduce((subtotal, row) => {
+      const subtotalValue = parseFloat(row.subtotal?.toString().replace(/,/g, '')) || 0
+  
+      return subtotal + subtotalValue
+    }, 0)
+
+    const vatSum = formik.values?.expenses?.reduce((vatAmount, row) => {
+      const vatAmountValue = parseFloat(row.vatAmount?.toString().replace(/,/g, '')) || 0
+  
+      return vatAmount + vatAmountValue
+    }, 0)
+
+    const amountSum = formik.values?.expenses?.reduce((amount, row) => {
+      const amountValue = parseFloat(row.amount?.toString().replace(/,/g, '')) || 0
+  
+      return amount + amountValue
+    }, 0)
 
 
   return (
