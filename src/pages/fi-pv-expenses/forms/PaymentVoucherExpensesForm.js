@@ -72,9 +72,9 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
         pvId: recordId || 0,
         seqNo: 1,
         etId: '',
-        subtotal: '',
-        vatAmount: '',
-        amount: '',
+        subtotal: null,
+        vatAmount: null,
+        amount: null,
         supplierName: '',
         taxRef: '',
         notes: '',
@@ -325,8 +325,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
         label: labels.isVAT,
         name: 'isVAT',
         async onChange({ row: { update, newRow } }) {
-
-          if (newRow.isVAT) {
+          if (newRow.isVAT && newRow.amount) {
             let newSubtotal = newRow.amount * (100 / (100 + formik.values.vatPct));
             update({
               subtotal: newSubtotal.toFixed(2),
@@ -356,10 +355,18 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
           readOnly: false
         },
         async onChange({ row: { update, newRow } }) {
-          update({
-            subtotal: newRow.amount,
-            vatAmount: 0
-          })
+          if (newRow.isVAT) {
+            let newSubtotal = newRow.amount * (100 / (100 + formik.values.vatPct));
+            update({
+              subtotal: newSubtotal.toFixed(2),
+              vatAmount: (newRow.amount - newSubtotal).toFixed(2)
+            })
+          } else {
+            update({
+              subtotal: newRow.amount,
+              vatAmount: 0
+            })
+          }
         }
     },
     {
@@ -467,6 +474,8 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
     formik.setFieldValue('subtotal', subtotalSum);
     formik.setFieldValue('baseAmount', amountSum);
   }, [formik?.values?.expenses]);
+
+  console.log(formik)
 
   return (
     <FormShell 
@@ -716,7 +725,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
             onChange={value => {
               const updatedExpenses = value.map(expense => ({
                 ...expense,
-                hasCostCenters: true,
+                hasCostCenters: true
               }))
             
               formik.setFieldValue('expenses', updatedExpenses);
