@@ -175,13 +175,12 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
           record: JSON.stringify(formik.values)
       })
 
-      if (res?.recordId) {
-          toast.success(platformLabels.Posted)
-          invalidate()
-          const res2 = await getPaymentVouchers(res.recordId)
-          res2.record.date = formatDateFromApi(res2.record.date)
-          getExpenses(res2.record)
-      }
+      toast.success(platformLabels.Posted)
+      invalidate()
+      const res2 = await getPaymentVouchers(res.recordId)
+      res2.record.date = formatDateFromApi(res2.record.date)
+      await getExpenses(res2.record)
+      
     } catch (exception) {}
   }
 
@@ -189,10 +188,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
     ;(async function () {
       try {
         if (recordId) {
-          const res = await getRequest({
-            extension: FinancialRepository.PaymentVouchers.get,
-            parameters: `_recordId=${recordId}`
-          })
+          const res = await getPaymentVouchers(recordId)
           res.record.date = formatDateFromApi(res.record.date)
           await getExpenses(res.record)
 
