@@ -379,6 +379,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
           props: {
             labels: labels,
             recordId: recordId,
+            maxAccess,
             row,
             updateRow
           },
