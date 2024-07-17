@@ -14,6 +14,7 @@ import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { useError } from 'src/error'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import FiPaymentVoucherExpensesForm from './forms/PaymentVoucherExpensesForm'
+import { getStorageData } from 'src/storage/storage'
 
 const FiPaymentVouchers = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -82,8 +83,8 @@ const FiPaymentVouchers = () => {
       Component: FiPaymentVoucherExpensesForm,
       props: {
         labels: _labels,
-        recordId: recordId,
-        plantId: plantId,
+        recordId,
+        plantId,
         maxAccess: access
       },
       width: 1300,
