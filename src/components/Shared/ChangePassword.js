@@ -14,11 +14,10 @@ import { useError } from 'src/error'
 const ChangePassword = ({
   _labels,
   reopenLogin = false,
+  loggedUser: propLoggedUser,
   window,
   username = '',
   handleLogout,
-  encryptePWD,
-  loggedUser,
   onClose
 }) => {
   const [password, setPassword] = useState('')
@@ -29,6 +28,10 @@ const ChangePassword = ({
   const [showNewPassword, setShowNewPassword] = useState(false)
   const { stack: stackError } = useError()
   const auth = useAuth()
+
+  const { encryptePWD, loggedUser: authLoggedUser } = useAuth()
+
+  const loggedUser = propLoggedUser ? propLoggedUser : authLoggedUser
 
   const { formik } = useForm({
     enableReinitialize: true,
@@ -80,7 +83,6 @@ const ChangePassword = ({
           if (reopenLogin === true) {
             window.close()
             onClose()
-            handleLogout()
           }
         } catch (error) {
           stackError({ message: error.message })

@@ -13,6 +13,9 @@ import * as yup from 'yup'
 import BlankLayout from 'src/@core/layouts/BlankLayout'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { ControlContext } from 'src/providers/ControlContext'
+import { useWindow } from 'src/windows'
+import ChangePassword from 'src/components/Shared/ChangePassword'
+import axios from 'axios'
 
 const LinkStyled = styled(Link)(({ theme }) => ({
   fontSize: '0.875rem',
@@ -27,6 +30,7 @@ const LoginPage = () => {
   const auth = useAuth()
   const { companyName } = useContext(AuthContext)
   const { platformLabels } = useContext(ControlContext)
+  const { stack } = useWindow()
 
   const validation = useFormik({
     enableReinitialize: true,
@@ -42,7 +46,13 @@ const LoginPage = () => {
     }),
     onSubmit: values => {
       auth.login({ ...values }, error => {
-        setErrorMessage(error)
+        if (error?.getUS2?.umcpnl) {
+          const { loggedUser } = error
+          const onClose = async () => {
+            await updateUmcpnl(loggedUser, error?.getUS2)
+          }
+          openForm(error.username, loggedUser, onClose)
+        } else setErrorMessage(error)
       })
     }
   })
@@ -53,11 +63,64 @@ const LoginPage = () => {
     }
   }
 
+  function openForm(username, loggedUser, onClose) {
+    stack({
+      Component: ChangePassword,
+      props: {
+        reopenLogin: true,
+        username,
+        loggedUser,
+        onClose: () => onClose()
+      },
+      expandable: false,
+      closable: false,
+      draggable: false,
+      width: 600,
+      height: 400,
+      spacing: false,
+      title: 'platformLabels[titleName]'
+    })
+  }
+
+  const { apiUrl, languageId } = useAuth()
+
+  const updateUmcpnl = async (loggedUser, getUS2) => {
+    try {
+      const user = getUS2
+      const accessToken = loggedUser.accessToken
+      if (!accessToken) {
+        throw new Error('Failed to retrieve access token')
+      }
+
+      const updateUser = {
+        ...user,
+        umcpnl: false
+      }
+
+      var bodyFormData = new FormData()
+      bodyFormData.append('record', JSON.stringify(updateUser))
+
+      const res = await axios({
+        method: 'POST',
+        url: `${apiUrl}SY.asmx/setUS`,
+        headers: {
+          Authorization: 'Bearer ' + accessToken,
+          'Content-Type': 'multipart/form-data',
+          LanguageId: languageId
+        },
+        data: bodyFormData
+      }).then(res => {})
+    } catch (error) {
+      console.error(error)
+      stackError({ message: error.message })
+    }
+  }
+
   return (
     Boolean(Object.keys(platformLabels)?.length) && (
       <>
         <Box className='content-center' sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-          <Card sx={{ zIndex: 1, width: '28rem', marginBottom: 10, marginTop: 'auto' }}>
+          <Card sx={{ zIndex: 0, width: '28rem', marginBottom: 10, marginTop: 'auto' }}>
             <Box
               sx={{
                 height: 60,

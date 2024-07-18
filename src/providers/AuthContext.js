@@ -83,28 +83,6 @@ const AuthProvider = ({ children }) => {
     fetchData()
   }, [])
 
-  function openForm(username, loggedUser, onClose) {
-    stack({
-      Component: ChangePassword,
-      props: {
-        reopenLogin: true,
-        handleLogout,
-        username,
-        encryptePWD,
-        loggedUser,
-
-        onClose: () => onClose()
-      },
-      expandable: false,
-      closable: false,
-      draggable: false,
-      width: 600,
-      height: 400,
-      spacing: false,
-      title: 'platformLabels[titleName]'
-    })
-  }
-
   const handleLogin = async (params, errorCallback) => {
     try {
       const getUS2 = await axios.get(`${getAC.data.record.api}/SY.asmx/getUS2?_email=${params.username}`, {
@@ -156,15 +134,17 @@ const AuthProvider = ({ children }) => {
         ...signIn3.data.record
       }
 
-      setUser(loggedUser)
       setLanguageId(loggedUser.languageId)
       window.localStorage.setItem('languageId', loggedUser.languageId)
       if (getUS2.data.record.umcpnl === true) {
-        const onClose = async () => {
-          await updateUmcpnl(loggedUser, getUS2.data.record)
-        }
-        openForm(params.username, loggedUser, onClose)
+        errorCallback({
+          username: params.username,
+          loggedUser,
+          getUS2: getUS2.data.record
+        })
       } else {
+        setUser(loggedUser)
+
         if (params.rememberMe) {
           window.localStorage.setItem('userData', JSON.stringify(loggedUser))
         } else {
@@ -227,37 +207,6 @@ const AuthProvider = ({ children }) => {
         resolve(null)
       }
     })
-  }
-
-  const updateUmcpnl = async (loggedUser, getUS2) => {
-    try {
-      const user = getUS2
-      const accessToken = loggedUser.accessToken
-      if (!accessToken) {
-        throw new Error('Failed to retrieve access token')
-      }
-
-      const updateUser = {
-        ...user,
-        umcpnl: false
-      }
-
-      var bodyFormData = new FormData()
-      bodyFormData.append('record', JSON.stringify(updateUser))
-
-      const res = await axios({
-        method: 'POST',
-        url: `${getAC?.data?.record.api}SY.asmx/setUS`,
-        headers: {
-          Authorization: 'Bearer ' + accessToken,
-          'Content-Type': 'multipart/form-data',
-          LanguageId: languageId
-        },
-        data: bodyFormData
-      }).then(res => {})
-    } catch (error) {
-      stackError({ message: error.message })
-    }
   }
 
   const values = {
