@@ -47,7 +47,15 @@ const ProductCountriesForm = ({ store, setStore, labels, editMode, height, expan
       ]
     },
     onSubmit: values => {
-      postProductCountries(values.countries)
+      const transformedValues = {
+        ...values,
+        countries: values.countries.map(country => ({
+          ...country,
+          purcRateTypeId: country.purcRateTypeId === '' ? null : country.purcRateTypeId,
+          saleRateTypeId: country.saleRateTypeId === '' ? null : country.saleRateTypeId
+        }))
+      }
+      postProductCountries(transformedValues.countries)
     }
   })
 
