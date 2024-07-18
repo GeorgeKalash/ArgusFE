@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 
 const defaultProvider = {
@@ -16,6 +16,7 @@ import SHA1 from 'crypto-js/sha1'
 import jwt from 'jwt-decode'
 import ChangePassword from 'src/components/Shared/ChangePassword'
 import { useWindow } from 'src/windows'
+import { useError } from 'src/error'
 
 const encryptePWD = pwd => {
   var encryptedPWD = SHA1(pwd).toString()
@@ -41,6 +42,7 @@ const AuthProvider = ({ children }) => {
   const [languageId, setLanguageId] = useState(1)
   const router = useRouter()
   const { stack } = useWindow()
+  const { stack: stackError } = useError()
 
   useEffect(() => {
     const initAuth = async () => {
@@ -81,18 +83,17 @@ const AuthProvider = ({ children }) => {
     fetchData()
   }, [])
 
-  function openForm(username, loggedUser, params, errorCallback) {
+  function openForm(username, loggedUser, onClose) {
     stack({
       Component: ChangePassword,
       props: {
         reopenLogin: true,
-        handleLogin,
+        handleLogout,
         username,
         encryptePWD,
-        getAccessToken,
         loggedUser,
-        params,
-        errorCallback
+
+        onClose: () => onClose()
       },
       expandable: false,
       closable: false,
@@ -158,21 +159,22 @@ const AuthProvider = ({ children }) => {
       setUser(loggedUser)
       setLanguageId(loggedUser.languageId)
       window.localStorage.setItem('languageId', loggedUser.languageId)
-
-      if (params.rememberMe) {
-        window.localStorage.setItem('userData', JSON.stringify(loggedUser))
-      } else {
-        window.sessionStorage.setItem('userData', JSON.stringify(loggedUser))
-      }
       if (getUS2.data.record.umcpnl === true) {
-        openForm(params.username, loggedUser, params, errorCallback)
+        const onClose = async () => {
+          await updateUmcpnl(loggedUser, getUS2.data.record)
+        }
+        openForm(params.username, loggedUser, onClose)
       } else {
+        if (params.rememberMe) {
+          window.localStorage.setItem('userData', JSON.stringify(loggedUser))
+        } else {
+          window.sessionStorage.setItem('userData', JSON.stringify(loggedUser))
+        }
         const returnUrl = router.query.returnUrl
         const redirectURL = returnUrl && returnUrl !== '/' ? returnUrl : '/'
         router.replace(redirectURL)
       }
     } catch (error) {
-      console.log({ logError: error })
       if (errorCallback) errorCallback(error)
     }
   }
@@ -181,7 +183,6 @@ const AuthProvider = ({ children }) => {
     setUser(null)
     window.localStorage.removeItem('userData')
     window.sessionStorage.removeItem('userData')
-
     await router.push('/login')
     router.reload()
   }
@@ -226,6 +227,37 @@ const AuthProvider = ({ children }) => {
         resolve(null)
       }
     })
+  }
+
+  const updateUmcpnl = async (loggedUser, getUS2) => {
+    try {
+      const user = getUS2
+      const accessToken = loggedUser.accessToken
+      if (!accessToken) {
+        throw new Error('Failed to retrieve access token')
+      }
+
+      const updateUser = {
+        ...user,
+        umcpnl: false
+      }
+
+      var bodyFormData = new FormData()
+      bodyFormData.append('record', JSON.stringify(updateUser))
+
+      const res = await axios({
+        method: 'POST',
+        url: `${getAC?.data?.record.api}SY.asmx/setUS`,
+        headers: {
+          Authorization: 'Bearer ' + accessToken,
+          'Content-Type': 'multipart/form-data',
+          LanguageId: languageId
+        },
+        data: bodyFormData
+      }).then(res => {})
+    } catch (error) {
+      stackError({ message: error.message })
+    }
   }
 
   const values = {

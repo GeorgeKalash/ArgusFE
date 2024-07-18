@@ -69,7 +69,7 @@ export function WindowProvider({ children }) {
   )
 }
 
-export function ImmediateWindow({ datasetId, Component, titleName, height }) {
+export function ImmediateWindow({ datasetId, Component, titleName, height, props = {} }) {
   const { stack } = useWindow()
 
   const { labels: _labels, access } = useResourceParams({
@@ -90,7 +90,8 @@ export function ImmediateWindow({ datasetId, Component, titleName, height }) {
       Component,
       props: {
         access,
-        _labels
+        _labels,
+        ...props
       },
       expandable: false,
       closable: false,

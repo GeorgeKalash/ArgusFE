@@ -1,23 +1,11 @@
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import Typography from '@mui/material/Typography'
 import { AuthContext } from 'src/providers/AuthContext'
-import { useState, useEffect, useContext } from 'react'
+import { useState, useContext } from 'react'
 import Link from 'next/link'
 import { useAuth } from 'src/hooks/useAuth'
 
-import {
-  Card,
-  CardContent,
-  Button,
-  Checkbox,
-  TextField,
-  Grid,
-  IconButton,
-  Box,
-  InputAdornment,
-  CardMedia
-} from '@mui/material'
-import MuiFormControlLabel from '@mui/material/FormControlLabel'
+import { Card, CardContent, Button, Grid, IconButton, Box, InputAdornment, CardMedia } from '@mui/material'
 import { styled, useTheme } from '@mui/material/styles'
 import Icon from 'src/@core/components/icon'
 import { useFormik } from 'formik'
@@ -30,13 +18,6 @@ const LinkStyled = styled(Link)(({ theme }) => ({
   fontSize: '0.875rem',
   textDecoration: 'none',
   color: theme.palette.primary.main
-}))
-
-const FormControlLabel = styled(MuiFormControlLabel)(({ theme }) => ({
-  '& .MuiFormControlLabel-label': {
-    fontSize: '0.875rem',
-    color: theme.palette.text.secondary
-  }
 }))
 
 const LoginPage = () => {

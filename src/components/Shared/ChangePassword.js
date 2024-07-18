@@ -10,19 +10,16 @@ import * as yup from 'yup'
 import { useAuth } from 'src/hooks/useAuth'
 import axios from 'axios'
 import { useError } from 'src/error'
-import { RequestsContext } from 'src/providers/RequestsContext'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 
 const ChangePassword = ({
   _labels,
   reopenLogin = false,
   window,
   username = '',
+  handleLogout,
   encryptePWD,
   loggedUser,
-  handleLogin,
-  params,
-  errorCallback
+  onClose
 }) => {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -31,7 +28,6 @@ const ChangePassword = ({
   const [showPassword, setShowPassword] = useState(false)
   const [showNewPassword, setShowNewPassword] = useState(false)
   const { stack: stackError } = useError()
-  const { getRequest, postRequest } = useContext(RequestsContext)
   const auth = useAuth()
 
   const { formik } = useForm({
@@ -82,9 +78,9 @@ const ChangePassword = ({
             formik.setFieldValue('confirmPassword', '')
           })
           if (reopenLogin === true) {
-            updateUmcpnl()
             window.close()
-            handleLogin(params, errorCallback)
+            onClose()
+            handleLogout()
           }
         } catch (error) {
           stackError({ message: error.message })
@@ -94,24 +90,6 @@ const ChangePassword = ({
       }
     }
   })
-
-  const updateUmcpnl = async () => {
-    try {
-      const user = loggedUser
-
-      const updateUser = {
-        ...user,
-        umcpnl: false
-      }
-      await postRequest({
-        extension: SystemRepository.Users.set,
-        record: JSON.stringify(updateUser)
-      })
-      toast.success('umcpnl field updated successfully!')
-    } catch (error) {
-      toast.error('Failed to update umcpnl field')
-    }
-  }
 
   const colors = ['#C11B17', '#FDD017', '#4AA02C', '#6AFB92', '#00FF00']
 
@@ -262,7 +240,6 @@ const ChangePassword = ({
                 value={(score / 50) * 100}
                 sx={{
                   flexGrow: 1,
-                  mr: 2,
                   height: 10,
                   backgroundColor: 'lightgrey',
                   '& .MuiLinearProgress-bar': { backgroundColor: color }
