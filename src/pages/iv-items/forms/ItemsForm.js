@@ -15,9 +15,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
-import CustomNumberField from 'src/components/Inputs/CustomNumberField'
-import { SystemFunction } from 'src/resources/SystemFunction'
-import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
+import { useRefBehavior } from 'src/hooks/useReferenceProxy'
 
 export default function ItemsForm({ labels, recordId, maxAccess: access }) {
   const [editMode, setEditMode] = useState(!!recordId)
@@ -27,16 +25,14 @@ export default function ItemsForm({ labels, recordId, maxAccess: access }) {
 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
-  const { changeDT, maxAccess } = useDocumentType({
+  console.log(access, 'accesss')
+
+  const { changeDT, maxAccess } = useRefBehavior({
     access: access,
-    enabled: !recordId
+    readOnlyOnEditMode: editMode
   })
 
-  // const { documentType, maxAccess, changeDT } = useDocumentType({
-  //   functionId: functionId,
-  //   access: access,
-  //   enabled: !recordId
-  // })
+  console.log(maxAccess, 'maxacces1')
 
   const invalidate = useInvalidate({
     endpointId: InventoryRepository.Items.qry
@@ -61,21 +57,22 @@ export default function ItemsForm({ labels, recordId, maxAccess: access }) {
       weght: '',
       trackBy: null,
       unitPrice: '',
-      ivtItem: false,
+      ivtItem: true,
+
+      salesItem: true,
+      purchaseItem: true,
       kitItem: false,
-      salesItem: false,
-      purchaseItem: false,
       taxId: null,
       lotCategoryId: null,
-      spfId: ''
+      spfId: '',
+      categoryName: ''
     },
-    maxAccess,
+    access,
     enableReinitialize: true,
     validateOnChange: true,
 
     validationSchema: yup.object({
       categoryId: yup.string().required(' '),
-      sku: yup.string().required(' '),
       name: yup.string().required(' '),
       priceType: yup.string().required(' '),
       msId: yup.string().required(' '),
@@ -112,6 +109,14 @@ export default function ItemsForm({ labels, recordId, maxAccess: access }) {
         })
       } else toast.success(platformLabels.Edited)
       setEditMode(true)
+      try {
+        const res = await getRequest({
+          extension: InventoryRepository.Items.get,
+          parameters: `_recordId=${response.recordId}`
+        })
+
+        formik.setFieldValue('sku', res.record.sku)
+      } catch (error) {}
 
       invalidate()
     }
@@ -126,33 +131,13 @@ export default function ItemsForm({ labels, recordId, maxAccess: access }) {
             parameters: `_recordId=${recordId}`
           })
 
-          formik.setValues(res.record)
+          formik.setValues({ ...res.record, kitItem: !!res.record.kitItem })
+          setShowLotCategories(res.record.trackBy === '2' || res.record.trackBy === 2)
+          setShowSerialProfiles(res.record.trackBy === '1' || res.record.trackBy === 1)
         }
       } catch {}
     })()
   }, [])
-
-  useEffect(() => {
-    setShowLotCategories(formik.values.trackBy === '2' || formik.values.trackBy === 2)
-    setShowSerialProfiles(formik.values.trackBy === '1' || formik.values.trackBy === 1)
-  }, [formik.values.trackBy])
-
-  console.log(formik.values, 'formikkkk')
-
-  //   useEffect(() => {
-  //     ;(async function () {
-  //       try {
-  //         const response = await getRequest({
-  //           extension: InventoryRepository.Items.pack
-  //         })
-
-  //         setValues(formattedCategories)
-  //         console.log(formattedCategories, 'formattedC')
-  //       } catch (error) {}
-  //     })()
-  //   }, [])
-
-  console.log(formik.values, 'formikkkk')
 
   return (
     <FormShell resourceId={ResourceIds.Items} form={formik} maxAccess={maxAccess} editMode={editMode}>
@@ -172,6 +157,7 @@ export default function ItemsForm({ labels, recordId, maxAccess: access }) {
                     label={labels.category}
                     valueField='recordId'
                     displayField='name'
+                    readOnly={editMode}
                     displayFieldWidth={1}
                     columnsInDropDown={[
                       { key: 'caRef', value: 'Reference' },
@@ -182,8 +168,6 @@ export default function ItemsForm({ labels, recordId, maxAccess: access }) {
                     onChange={(event, newValue) => {
                       changeDT(newValue)
                       formik.setFieldValue('categoryId', newValue?.recordId || '')
-                      formik.setFieldValue('categoryName', newValue?.name || '')
-                      formik.setFieldValue('categoryRef', newValue?.caRef || '')
                     }}
                     error={formik.touched.categoryId && formik.errors.categoryId}
                   />
@@ -209,7 +193,6 @@ export default function ItemsForm({ labels, recordId, maxAccess: access }) {
                     maxAccess={!editMode && maxAccess}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('priceType', newValue?.key || '')
-                      formik.setFieldValue('ptName', newValue?.value || '')
                     }}
                     error={formik.touched.priceType && formik.errors.priceType}
                   />
@@ -219,7 +202,6 @@ export default function ItemsForm({ labels, recordId, maxAccess: access }) {
                     name='sku'
                     label={labels.reference}
                     value={formik.values.sku}
-                    required
                     maxAccess={maxAccess}
                     readOnly={editMode}
                     onChange={formik.handleChange}
@@ -259,7 +241,6 @@ export default function ItemsForm({ labels, recordId, maxAccess: access }) {
                     value={formik.values.name}
                     required
                     maxAccess={maxAccess}
-                    readOnly={editMode}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('name', '')}
                     error={formik.touched.name && formik.errors.name}
@@ -272,7 +253,6 @@ export default function ItemsForm({ labels, recordId, maxAccess: access }) {
                     label={labels.flName}
                     value={formik.values.flName}
                     maxAccess={maxAccess}
-                    readOnly={editMode}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('flName', '')}
                   />
@@ -284,7 +264,6 @@ export default function ItemsForm({ labels, recordId, maxAccess: access }) {
                     label={labels.shortName}
                     value={formik.values.shortName}
                     maxAccess={maxAccess}
-                    readOnly={editMode}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('shortName', '')}
                   />
@@ -330,11 +309,11 @@ export default function ItemsForm({ labels, recordId, maxAccess: access }) {
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
+                    readOnly={editMode}
                     required
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('msId', newValue?.recordId || '')
-                      formik.setFieldValue('msName', newValue?.name || '')
                     }}
                     error={formik.touched.msId && formik.errors.msId}
                   />
@@ -391,21 +370,6 @@ export default function ItemsForm({ labels, recordId, maxAccess: access }) {
                     label={labels.inventory}
                   />
                 </Grid>
-
-                <Grid item xs={4}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        name='kitItem'
-                        checked={formik.values.kitItem}
-                        onChange={formik.handleChange}
-                        maxAccess={maxAccess}
-                      />
-                    }
-                    label={labels.kitItem}
-                  />
-                </Grid>
-
                 <Grid item xs={4}>
                   <FormControlLabel
                     control={
@@ -420,7 +384,7 @@ export default function ItemsForm({ labels, recordId, maxAccess: access }) {
                   />
                 </Grid>
 
-                <Grid item xs={12}>
+                <Grid item xs={4}>
                   <FormControlLabel
                     control={
                       <Checkbox
@@ -433,6 +397,21 @@ export default function ItemsForm({ labels, recordId, maxAccess: access }) {
                     label={labels.purchase}
                   />
                 </Grid>
+
+                <Grid item xs={12}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        name='kitItem'
+                        checked={formik.values.kitItem}
+                        onChange={formik.handleChange}
+                        maxAccess={maxAccess}
+                      />
+                    }
+                    label={labels.kitItem}
+                  />
+                </Grid>
+
                 <Grid item xs={12}>
                   <CustomTextField
                     name='unitPrice'
@@ -481,9 +460,13 @@ export default function ItemsForm({ labels, recordId, maxAccess: access }) {
                     valueField='key'
                     displayField='value'
                     displayFieldWidth={1}
+                    readOnly={editMode}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('trackBy', newValue?.key || '')
+                      const trackByValue = newValue?.key || ''
+                      formik.setFieldValue('trackBy', trackByValue)
+                      setShowLotCategories(trackByValue === '2' || trackByValue === 2)
+                      setShowSerialProfiles(trackByValue === '1' || trackByValue === 1)
                     }}
                     error={formik.touched.trackBy && formik.errors.trackBy}
                   />
@@ -501,6 +484,7 @@ export default function ItemsForm({ labels, recordId, maxAccess: access }) {
                       label={labels.lotCategory}
                       valueField='recordId'
                       displayField='name'
+                      readOnly={editMode}
                       displayFieldWidth={1}
                       required
                       maxAccess={maxAccess}
@@ -526,6 +510,7 @@ export default function ItemsForm({ labels, recordId, maxAccess: access }) {
                       }}
                       required
                       values={formik.values}
+                      readOnly={editMode}
                       name='spfId'
                       label={labels.sprofile}
                       valueField='recordId'

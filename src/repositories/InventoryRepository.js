@@ -58,6 +58,6 @@ export const InventoryRepository = {
     get: service + 'getIT',
     set: service + 'setIT',
     del: service + 'delIT',
-    snapshot: service + 'snapshotIT'
+    snapshot: service + 'snapshotIT2'
   }
 }

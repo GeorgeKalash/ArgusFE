@@ -53,7 +53,7 @@ const IvItems = () => {
   async function fetchWithSearch({ qry }) {
     const response = await getRequest({
       extension: InventoryRepository.Items.snapshot,
-      parameters: `_filter=${qry}`
+      parameters: `_filter=${qry}&_startAt=0&_size=50`
     })
 
     return response
@@ -112,8 +112,6 @@ const IvItems = () => {
     }
   ]
 
-  //  Items: Module.Inventory * 100 + 6,
-
   function openForm(recordId) {
     stack({
       Component: ItemsForm,
@@ -169,6 +167,7 @@ const IvItems = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
+          deleteConfirmationType={'strict'}
           isLoading={false}
           pageSize={50}
           paginationType='api'
