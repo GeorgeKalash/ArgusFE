@@ -19,7 +19,6 @@ import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 
 export default function DocumentTypeForm({ labels, recordId, maxAccess }) {
-  const [isLoading, setIsLoading] = useState(false)
   const [editMode, setEditMode] = useState(!!recordId)
   const { platformLabels } = useContext(ControlContext)
 
