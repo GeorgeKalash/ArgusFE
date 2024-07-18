@@ -186,15 +186,13 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getPaymentVouchers(recordId)
-          res.record.date = formatDateFromApi(res.record.date)
-          await getExpenses(res.record)
+      if (recordId) {
+        const res = await getPaymentVouchers(recordId)
+        res.record.date = formatDateFromApi(res.record.date)
+        await getExpenses(res.record)
 
-        }
-        await getDefaultVAT()
-      } catch (exception) {}
+      }
+      await getDefaultVAT()
     })()
   }, [])
 
