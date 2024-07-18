@@ -408,15 +408,17 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
   ]
 
   const getCostCenters = async (pvId, seqNo) => {
-    const res = await getRequest({
-      extension: FinancialRepository.PaymentVoucherCostCenters.qry,
-      parameters: `_pvId=${pvId}&_seqNo=${seqNo}`
-    });
-  
-    return res.list.map(item => ({
-      ...item,
-      id: item.ccSeqNo,
-    }));
+    try {
+      const res = await getRequest({
+        extension: FinancialRepository.PaymentVoucherCostCenters.qry,
+        parameters: `_pvId=${pvId}&_seqNo=${seqNo}`
+      });
+    
+      return res.list.map(item => ({
+        ...item,
+        id: item.ccSeqNo,
+      }));
+    } catch (exception) {}
   };
   
   const getExpenses = async (data) => {
