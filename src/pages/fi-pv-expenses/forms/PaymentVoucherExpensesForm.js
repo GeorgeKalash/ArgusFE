@@ -684,12 +684,9 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
                     form={formik}
                     required
                     onChange={(event, newValue) => {
-                      formik.setValues({
-                          ...formik.values,
-                          cashAccountId: newValue?.recordId || '',
-                          cashAccountRef: newValue?.reference || '',
-                          cashAccountName: newValue?.name || ''
-                      })
+                      formik.setFieldValue('cashAccountId', newValue ? newValue.recordId : null);
+                      formik.setFieldValue('cashAccountRef', newValue ? newValue.reference : null);
+                      formik.setFieldValue('cashAccounName', newValue ? newValue.name : null);
                     }}
                     errorCheck={'cashAccountId'}
                     maxAccess={maxAccess}
