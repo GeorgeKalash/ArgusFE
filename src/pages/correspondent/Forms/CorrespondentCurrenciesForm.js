@@ -50,6 +50,7 @@ const CorrespondentCurrenciesForm = ({ store, labels, maxAccess, expanded, editM
           inward: false,
           bankDeposit: false,
           deal: false,
+          goc: false,
           isInactive: false,
           saved: false
         }
@@ -125,6 +126,11 @@ const CorrespondentCurrenciesForm = ({ store, labels, maxAccess, expanded, editM
     },
     {
       component: 'checkbox',
+      label: labels.consignation,
+      name: 'goc'
+    },
+    {
+      component: 'checkbox',
       label: labels.isInActive,
       name: 'isInactive'
     }
@@ -181,6 +187,7 @@ const CorrespondentCurrenciesForm = ({ store, labels, maxAccess, expanded, editM
                   inward: false,
                   bankDeposit: false,
                   deal: false,
+                  goc: false,
                   isInactive: false,
                   saved: false
                 }
