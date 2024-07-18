@@ -313,7 +313,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
         label: labels.isVAT,
         name: 'isVAT',
         props: {
-          readOnly: isPosted || isCancelled
+          disabled: isPosted || isCancelled
         },
         async onChange({ row: { update, newRow } }) {
           if (newRow.isVAT && newRow.amount) {
