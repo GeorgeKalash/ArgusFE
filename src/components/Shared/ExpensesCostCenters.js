@@ -10,7 +10,7 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import CustomTextField from '../Inputs/CustomTextField'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 
-export default function ExpensesCostCenters({ labels, maxAccess, row, window, updateRow, recordId, isPosted, isCancelled }) {
+export default function ExpensesCostCenters({ labels, maxAccess, row, window, updateRow, recordId, readOnly }) {
     const { formik } = useForm({
         maxAccess,
         enableReinitialize: true,
@@ -72,7 +72,7 @@ export default function ExpensesCostCenters({ labels, maxAccess, row, window, up
             { key: 'reference', value: 'Reference' },
             { key: 'name', value: 'Name' }
           ],
-          readOnly: isCancelled || isPosted
+          readOnly
         }
       },
       {
@@ -88,7 +88,7 @@ export default function ExpensesCostCenters({ labels, maxAccess, row, window, up
         label: labels.amount,
         name: 'amount',
         props: {
-          readOnly: isCancelled || isPosted
+          readOnly
         }
       },
   ]
@@ -162,8 +162,8 @@ export default function ExpensesCostCenters({ labels, maxAccess, row, window, up
             value={formik.values.costCenters}
             error={formik.errors.costCenters}
             columns={columns}
-            allowDelete={!isPosted && !isCancelled}
-            allowAddNewLine={!isPosted && !isCancelled}
+            allowDelete={!readOnly}
+            allowAddNewLine={!readOnly}
           />
         </Grow>
       </VertLayout>

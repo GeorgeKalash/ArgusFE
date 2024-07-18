@@ -396,8 +396,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
             recordId,
             row,
             updateRow,
-            isPosted,
-            isCancelled
+            readOnly: isPosted || isCancelled
           },
           width: 700,
           height: 600,
