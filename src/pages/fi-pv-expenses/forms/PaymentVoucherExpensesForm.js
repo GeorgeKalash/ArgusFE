@@ -422,29 +422,31 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
   };
   
   const getExpenses = async (data) => {
-    const res = await getRequest({
-      extension: FinancialRepository.PaymentVoucherExpenses.qry,
-      parameters: `_pvId=${data.recordId}`
-    });
+    try {
+      const res = await getRequest({
+        extension: FinancialRepository.PaymentVoucherExpenses.qry,
+        parameters: `_pvId=${data.recordId}`
+      });
 
-    const expensesList = await Promise.all(
-      res.list.map(async item => {
-        const costCenters = await getCostCenters(data.recordId, item.seqNo);
-  
-        return {
-          ...item,
-          id: item.seqNo,
-          isVAT: item.vatAmount != 0,
-          hasCostCenters: true,
-          costCenters: costCenters 
-        };
+      const expensesList = await Promise.all(
+        res.list.map(async item => {
+          const costCenters = await getCostCenters(data.recordId, item.seqNo);
+    
+          return {
+            ...item,
+            id: item.seqNo,
+            isVAT: item.vatAmount != 0,
+            hasCostCenters: true,
+            costCenters: costCenters 
+          };
+        })
+      )
+
+      formik.setValues({
+        ...data,
+        expenses: expensesList
       })
-    )
-  
-    formik.setValues({
-      ...data,
-      expenses: expensesList
-    })
+    } catch (exception) {}
   }
 
     const subtotalSum = formik.values?.expenses?.reduce((subtotal, row) => {
