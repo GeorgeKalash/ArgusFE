@@ -617,7 +617,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
                     readOnly={isPosted || isCancelled}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                        formik.setFieldValue('paymentMethod', newValue?.key);
+                        formik.setFieldValue('paymentMethod', newValue ? newValue.key : null);
                         formik.setFieldValue('checkNo', '');
                         formik.setFieldValue('checkbookId', null);
                     }}
