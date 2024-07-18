@@ -227,7 +227,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
         record: JSON.stringify(formik.values)
       })
 
-        toast.success('Record Cancelled Successfully')
+        toast.success(platformLabels.Cancelled)
         invalidate()
         const res2 = await getPaymentVouchers(res.recordId)
         res2.record.date = formatDateFromApi(res2.record.date)
