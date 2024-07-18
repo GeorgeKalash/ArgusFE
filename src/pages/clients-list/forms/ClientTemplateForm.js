@@ -765,9 +765,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                   label={labels.birthDate}
                   value={clientIndividualFormik.values?.birthDate}
                   required={true}
-                  onChange={(name, value) => {
-                    clientIndividualFormik.setFieldValue('birthDate', new Date(value)?.getTime() || '')
-                  }}
+                  onChange={clientIndividualFormik.setFieldValue}
                   onClear={() => clientIndividualFormik.setFieldValue('birthDate', '')}
                   disabledDate={'>='}
                   readOnly={editMode && true}
@@ -782,7 +780,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                   label={labels.birthDateHijri}
                   value={clientIndividualFormik.values?.birthDate}
                   onChange={(name, value) => {
-                    clientIndividualFormik.setFieldValue('birthDate', value?.valueOf() || '')
+                    clientIndividualFormik.setFieldValue('birthDate', value)
                   }}
                   onClear={() => clientIndividualFormik.setFieldValue('birthDate', '')}
                 />
