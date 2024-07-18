@@ -9,13 +9,14 @@ import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepos
 import FormShell from 'src/components/Shared/FormShell'
 import { useFormik } from 'formik'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { useInvalidate } from 'src/hooks/resource'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
+import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 
 const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -36,6 +37,8 @@ const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore,
       bpId: null,
       currencyId: null,
       currencyRef: null,
+      owRateTypeId: null,
+      iwRateTypeId: null,
       isInactive: false,
       interfaceId: null
     },
@@ -182,6 +185,42 @@ const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore,
                   formik.setFieldValue('interfaceId', newValue?.recordId)
                 }}
                 error={formik.touched.interfaceId && Boolean(formik.errors.interfaceId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={MultiCurrencyRepository.RateType.qry}
+                name='owRateTypeId'
+                label={labels.owRateType}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('owRateTypeId', newValue?.recordId)
+                }}
+                error={formik.touched.owRateTypeId && Boolean(formik.errors.owRateTypeId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={MultiCurrencyRepository.RateType.qry}
+                name='iwRateTypeId'
+                label={labels.iwRateType}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('iwRateTypeId', newValue?.recordId)
+                }}
+                error={formik.touched.iwRateTypeId && Boolean(formik.errors.iwRateTypeId)}
               />
             </Grid>
             <Grid item xs={12}>

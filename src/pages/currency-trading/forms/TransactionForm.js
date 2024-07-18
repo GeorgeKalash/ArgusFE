@@ -416,19 +416,21 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
 
   async function setOperationType(type) {
     if (type) {
-      const res = await getRequest({
-        extension: SystemRepository.Defaults.get,
-        parameters:
-          type === SystemFunction.CurrencyPurchase
-            ? '_key=ct_cash_purchase_ratetype_id'
-            : type === SystemFunction.CurrencySale
-            ? '_key=ct_cash_sales_ratetype_id'
-            : ''
-      })
+      try {
+        const res = await getRequest({
+          extension: SystemRepository.Defaults.get,
+          parameters:
+            type === SystemFunction.CurrencyPurchase
+              ? '_key=ct_cash_purchase_ratetype_id'
+              : type === SystemFunction.CurrencySale
+              ? '_key=ct_cash_sales_ratetype_id'
+              : ''
+        })
 
-      setRateType(res.record.value)
+        setRateType(res.record.value)
 
-      formik.setFieldValue('functionId', type)
+        formik.setFieldValue('functionId', type)
+      } catch (e) {}
     }
   }
 
@@ -1033,9 +1035,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                         label={labels.birth_date}
                         value={formik.values?.birth_date}
                         required={true}
-                        onChange={(name, value) => {
-                          formik.setFieldValue('birth_date', new Date(value)?.getTime() || '')
-                        }}
+                        onChange={formik.setFieldValue}
                         onClear={() => formik.setFieldValue('birth_date', '')}
                         error={formik.touched.birth_date && Boolean(formik.errors.birth_date)}
                         readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
@@ -1049,7 +1049,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                         label={labels.birthDateHijri}
                         value={formik.values?.birth_date}
                         onChange={(name, value) => {
-                          formik.setFieldValue('birth_date', value?.valueOf())
+                          formik.setFieldValue('birth_date', value)
                         }}
                         onClear={() => formik.setFieldValue('birth_date', '')}
                       />
