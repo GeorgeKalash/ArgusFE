@@ -77,17 +77,28 @@ const LoginPage = () => {
       <>
         <Box className='content-center' sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
           <Card sx={{ zIndex: 1, width: '28rem', marginBottom: 10, marginTop: 'auto' }}>
-            <CardMedia
-              component='img'
-              image='/images/logos/ArgusLogo.png'
-              alt='ArgusERP'
+            <Box
               sx={{
                 height: 60,
                 backgroundColor: theme.palette.primary.main,
-                objectFit: 'contain',
-                p: 4
+                p: 4,
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center'
               }}
-            />
+            >
+              <CardMedia
+                component='img'
+                image='/images/logos/ArgusLogo.png'
+                alt='ArgusERP'
+                sx={{
+                  height: '100%',
+                  maxWidth: '100%',
+                  objectFit: 'contain'
+                }}
+              />
+            </Box>
+
             <CardContent sx={{ p: theme => `${theme.spacing(8, 9, 0)} !important` }} onKeyDown={handleKeyDown}>
               <Grid container spacing={5}>
                 <Grid item xs={12}>
@@ -109,6 +120,7 @@ const LoginPage = () => {
                     value={validation.values.username}
                     type='text'
                     onChange={validation.handleChange}
+                    onClear={() => validation.setFieldValue('username', '')}
                     error={validation.touched.username && Boolean(validation.errors.username)}
                     helperText={validation.touched.username && validation.errors.username}
                   />

@@ -559,15 +559,14 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
     ;(async function () {
       try {
         if (recordId) {
-          refetchForm(recordId)
+          await refetchForm(recordId)
         } else {
-          getDefaultDT()
+          await getDefaultDT()
         }
         await getDefaultVAT()
       } catch (error) {}
     })()
   }, [])
-  console.log('formik check ', formik)
 
   return (
     <FormShell
