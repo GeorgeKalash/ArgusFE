@@ -6,7 +6,6 @@ import { DataGrid } from 'src/components/Shared/DataGrid'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useWindow } from 'src/windows'
-import ExchangeMapForm from '../Forms/ExchangeMapForm'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useContext, useEffect } from 'react'
@@ -34,8 +33,7 @@ const CorrespondentCurrenciesForm = ({ store, labels, maxAccess, expanded, editM
         .array()
         .of(
           yup.object().shape({
-            currencyId: yup.string().required('currency  is required'),
-            exchangeId: yup.string().required('Country  is required')
+            currencyId: yup.string().required('currency  is required')
           })
         )
         .required('currencies array is required')
@@ -48,13 +46,11 @@ const CorrespondentCurrenciesForm = ({ store, labels, maxAccess, expanded, editM
           currencyId: '',
           currencyRef: '',
           currencyName: '',
-          exchangeId: '',
-          exchangeRef: '',
-          exchangeName: '',
           outward: false,
           inward: false,
           bankDeposit: false,
           deal: false,
+          goc: false,
           isInactive: false,
           saved: false
         }
@@ -107,28 +103,6 @@ const CorrespondentCurrenciesForm = ({ store, labels, maxAccess, expanded, editM
         displayFieldWidth: 3
       }
     },
-
-    {
-      component: 'resourcecombobox',
-      name: 'exchangeId',
-      label: labels.exchange,
-      props: {
-        endpointId: MultiCurrencyRepository.ExchangeTable.qry,
-        valueField: 'recordId',
-        displayField: 'reference',
-        mapping: [
-          { from: 'recordId', to: 'exchangeId' },
-          { from: 'reference', to: 'exchangeRef' }
-        ],
-
-        columnsInDropDown: [
-          { key: 'reference', value: 'Reference' },
-          { key: 'name', value: 'Name' }
-        ],
-        displayFieldWidth: 3
-      }
-    },
-
     {
       component: 'checkbox',
       name: 'outward',
@@ -152,29 +126,35 @@ const CorrespondentCurrenciesForm = ({ store, labels, maxAccess, expanded, editM
     },
     {
       component: 'checkbox',
-      label: labels.isInActive,
-      name: 'isInactive'
+      label: labels.consignation,
+      name: 'goc'
     },
     {
-      component: 'button',
-      name: 'saved',
-      label: labels.exchange,
-      onClick: async (e, row) => {
-        stack({
-          Component: ExchangeMapForm,
-          props: {
-            labels: labels,
-            recordId: recordId ? recordId : null,
-            store: store,
-            currency: { currencyId: row?.currencyId, currencyName: row?.currencyName },
-            exchange: { exchangeId: row?.exchangeId, exchangeName: row?.exchangeName }
-          },
-          width: 700,
-          height: 600,
-          title: labels.sellingPriceExchangeMap
-        })
-      }
+      component: 'checkbox',
+      label: labels.isInActive,
+      name: 'isInactive'
     }
+
+    // {
+    //   component: 'button',
+    //   name: 'saved',
+    //   label: labels.exchange,
+    //   onClick: async (e, row) => {
+    //     stack({
+    //       Component: ExchangeMapForm,
+    //       props: {
+    //         labels: labels,
+    //         recordId: recordId ? recordId : null,
+    //         store: store,
+    //         currency: { currencyId: row?.currencyId, currencyName: row?.currencyName },
+    //         exchange: { exchangeId: row?.exchangeId, exchangeName: row?.exchangeName }
+    //       },
+    //       width: 700,
+    //       height: 600,
+    //       title: labels.sellingPriceExchangeMap
+    //     })
+    //   }
+    // }
   ]
 
   function getData() {
@@ -203,13 +183,11 @@ const CorrespondentCurrenciesForm = ({ store, labels, maxAccess, expanded, editM
                   currencyId: '',
                   currencyRef: '',
                   currencyName: '',
-                  exchangeId: '',
-                  exchangeRef: '',
-                  exchangeName: '',
                   outward: false,
                   inward: false,
                   bankDeposit: false,
                   deal: false,
+                  goc: false,
                   isInactive: false,
                   saved: false
                 }
