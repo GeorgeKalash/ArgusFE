@@ -34,7 +34,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.PaymentVoucher,
-    access: access,
+    access,
     enabled: !recordId
   })
 
