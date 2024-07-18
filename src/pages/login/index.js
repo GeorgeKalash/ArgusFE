@@ -48,6 +48,7 @@ const LoginPage = () => {
       auth.login({ ...values }, error => {
         if (error?.getUS2?.umcpnl) {
           const { loggedUser } = error
+
           const onClose = async () => {
             await updateUmcpnl(loggedUser, error?.getUS2)
           }
@@ -70,6 +71,7 @@ const LoginPage = () => {
         reopenLogin: true,
         username,
         loggedUser,
+        _labels: platformLabels,
         onClose: () => onClose()
       },
       expandable: false,
@@ -78,7 +80,7 @@ const LoginPage = () => {
       width: 600,
       height: 400,
       spacing: false,
-      title: 'platformLabels[titleName]'
+      title: platformLabels.ChangePassword
     })
   }
 

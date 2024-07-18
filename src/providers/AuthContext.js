@@ -14,9 +14,6 @@ const AuthContext = createContext(defaultProvider)
 import axios from 'axios'
 import SHA1 from 'crypto-js/sha1'
 import jwt from 'jwt-decode'
-import ChangePassword from 'src/components/Shared/ChangePassword'
-import { useWindow } from 'src/windows'
-import { useError } from 'src/error'
 
 const encryptePWD = pwd => {
   var encryptedPWD = SHA1(pwd).toString()
@@ -41,8 +38,6 @@ const AuthProvider = ({ children }) => {
   const [getAC, setGetAC] = useState({})
   const [languageId, setLanguageId] = useState(1)
   const router = useRouter()
-  const { stack } = useWindow()
-  const { stack: stackError } = useError()
 
   useEffect(() => {
     const initAuth = async () => {
