@@ -8,11 +8,13 @@ import { useFormik } from 'formik'
 import * as yup from 'yup'
 import BlankLayout from 'src/@core/layouts/BlankLayout'
 import { ControlContext } from 'src/providers/ControlContext'
+import ResetChPassForm from '../forms/ResetChPassForm'
 
 const Reset = () => {
   const theme = useTheme()
   const { platformLabels } = useContext(ControlContext)
   const [accountId, setAccountId] = useState({})
+  const { stack } = useWindow()
 
   useEffect(() => {
     const fetchData = async () => {
@@ -68,10 +70,24 @@ const Reset = () => {
         .catch(error => {})
 
       //router.push('/login') //navigate to another route kebab case
-
+      openForm(obj?.recordId)
       //router.reload()
     }
   })
+
+  function openForm(recordId) {
+    stack({
+      Component: ResetChPassForm,
+      props: {
+        labels: _labels,
+        recordId: recordId,
+        maxAccess: access
+      },
+      width: 500,
+      height: 360,
+      title: _labels.Activity
+    })
+  }
 
   const handleKeyDown = event => {
     if (event.key === 'Enter') {

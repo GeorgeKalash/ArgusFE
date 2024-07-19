@@ -14,15 +14,11 @@ import axios from 'axios'
 import { useError } from 'src/error'
 
 const ResetChangePass = ({ _labels, reopenLogin = false, window, username = '' }) => {
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
   const [score, setScore] = useState(0)
-  const [color, setColor] = useState('white')
   const [showPassword, setShowPassword] = useState(false)
-  const [showNewPassword, setShowNewPassword] = useState(false)
   const { stack: stackError } = useError()
-  const { encryptePWD, getAccessToken } = useContext(AuthContext)
   const auth = useAuth()
+  const { encryptePWD, getAccessToken } = useContext(AuthContext)
 
   const { formik } = useForm({
     enableReinitialize: true,
@@ -30,16 +26,12 @@ const ResetChangePass = ({ _labels, reopenLogin = false, window, username = '' }
     initialValues: {
       username: username ? username : auth?.user?.username,
       password: '',
-      code: '',
+      newPassword: '',
       confirmPassword: ''
     },
     validationSchema: yup.object({
-      code: yup.string().required(),
       newPassword: yup.string().required(),
-      confirmPassword: yup
-        .string()
-        .oneOf([yup.ref('newPassword'), null], '')
-        .required()
+      confirmPassword: yup.string().required()
     }),
     onSubmit: async () => {
       if (formik.values.newPassword === formik.values.confirmPassword) {
@@ -48,10 +40,10 @@ const ResetChangePass = ({ _labels, reopenLogin = false, window, username = '' }
           oldPW: encryptePWD(formik.values.password),
           newPW: encryptePWD(formik.values.newPassword)
         }
-        console.log(loginVal)
 
         try {
-          const accessToken = await getAccessToken()
+          const accessToken = propLoggedUser ? propLoggedUser.accessToken : await getAccessToken()
+
           if (!accessToken) {
             throw new Error('Failed to retrieve access token')
           }
@@ -67,12 +59,16 @@ const ResetChangePass = ({ _labels, reopenLogin = false, window, username = '' }
             },
             data: bodyFormData
           }).then(res => {
-            toast.success('Password changed succesfully!')
+            toast.success('Password changed successfully!')
             formik.setFieldValue('password', '')
             formik.setFieldValue('newPassword', '')
             formik.setFieldValue('confirmPassword', '')
+            setScore(0)
           })
-          if (reopenLogin === true) window.close()
+          if (reopenLogin === true) {
+            window.close()
+            onClose()
+          }
         } catch (error) {
           stackError({ message: error.message })
         }
