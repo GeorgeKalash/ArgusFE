@@ -72,9 +72,7 @@ const FiPaymentVouchers = () => {
       })
 
       return res.record.value
-    } catch (e) {
-      return ''
-    }
+    } catch (e) {}
     
   }
 
