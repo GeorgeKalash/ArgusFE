@@ -141,6 +141,7 @@ export const ResourceIds = {
   CARebuildAccountBalance: 33501,
   CATransaction: 33312,
   CATransaction: 33312,
+  UserDashboard: 51400,
   ProductionRequestLog: 42321,
   PointOfSale: 54101,
   Common: 140,
@@ -155,6 +156,7 @@ export const ResourceIds = {
   SourceOfIncomeType: 36311,
   ProfessionGroups: 36310,
   ChangePassword: 20118,
+  PaymentVouchers: 31305,
   Roles: 21103,
   Checkbook: 33201
 }
