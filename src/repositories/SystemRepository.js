@@ -176,5 +176,8 @@ export const SystemRepository = {
   },
   TimeZone: {
     get: service + 'getTZN'
+  },
+  ETL: {
+    get: service + 'getETL'
   }
 }
