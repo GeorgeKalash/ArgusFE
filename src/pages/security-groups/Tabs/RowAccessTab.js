@@ -19,7 +19,6 @@ export default function RowAccessTab({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const [data, setData] = useState({ list: [] })
-  const [checkedRows, setCheckedRows] = useState([])
 
   const rowColumns = [
     {
@@ -39,14 +38,9 @@ export default function RowAccessTab({ labels, maxAccess, recordId }) {
     enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
-      resourceId: '',
-      rowRef: '',
-      rowName: '',
-      sgId: recordId,
       search: '',
       classId: ResourceIds.DocumentTypes,
-      hasAccess: false,
-      checked: false
+      checkedRows: null
     },
     onSubmit: async () => {
       for (const item of latestData?.list) {
@@ -68,6 +62,12 @@ export default function RowAccessTab({ labels, maxAccess, recordId }) {
     }
   })
 
+  const checkedRows = formik.values.checkedRows
+
+  function setCheckedRows(rows) {
+    // formik.setFieldValue('checkedRows', rows)
+  }
+
   async function fetchGridData(resourceId) {
     try {
       const classId = resourceId ?? ResourceIds.DocumentTypes
@@ -82,11 +82,11 @@ export default function RowAccessTab({ labels, maxAccess, recordId }) {
         checked: item.hasAccess
       }))
 
-      setCheckedRows(
-        (moduleRes.list || [])
-          .filter(obj => obj.hasAccess)
-          .map(obj => Object.fromEntries(Object.entries(obj).filter(([key]) => ['recordId'].includes(key))))
-      )
+      // setCheckedRows(
+      //   (moduleRes.list || [])
+      //     .filter(obj => obj.hasAccess)
+      //     .map(obj => Object.fromEntries(Object.entries(obj).filter(([key]) => ['recordId'].includes(key))))
+      // )
 
       setData({ ...moduleRes, list: modifiedData })
     } catch (error) {}
@@ -169,6 +169,8 @@ export default function RowAccessTab({ labels, maxAccess, recordId }) {
         </Fixed>
         <Grow>
           <Table
+            checkedRows={checkedRows}
+            handleCheckedRows={setCheckedRows}
             columns={rowColumns}
             gridData={filteredData}
             rowId={['recordId']}
@@ -178,8 +180,6 @@ export default function RowAccessTab({ labels, maxAccess, recordId }) {
             checkTitle={labels.active}
             showCheckboxColumn={true}
             viewCheckButtons={true}
-            ChangeCheckedRow={setData}
-            handleCheckedRows={setCheckedRows}
           />
         </Grow>
       </VertLayout>

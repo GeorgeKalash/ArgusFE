@@ -101,6 +101,7 @@ const Table = ({
   viewCheckButtons = false,
   ChangeCheckedRow,
   handleCheckedRows,
+  checkedRows,
   ...props
 }) => {
   const { stack } = useWindow()
@@ -120,6 +121,18 @@ const Table = ({
   const getRowId = row => {
     return props.rowId.map(field => row[field]).join('-')
   }
+
+  useEffect(() => {
+    if (!checkedRows && handleCheckboxChange) {
+      const newIds = (props.gridData?.list || [])
+        .filter(obj => obj.hasAccess)
+        .map(obj => Object.fromEntries(Object.entries(obj).filter(([key]) => props.rowId.includes(key))))
+
+      console.log(newIds)
+
+      handleCheckboxChange(newIds)
+    }
+  }, [gridData])
 
   const CustomPagination = () => {
     if (pagination) {
