@@ -97,7 +97,7 @@ const FiPaymentVouchers = () => {
     plantId !== '' 
     ? openOutWardsWindow(plantId, recordId)
     : stackError({
-      message: `The user does not have a default plant.`
+      message: platformLabels.noDefaultPlant
     })
   }
 
