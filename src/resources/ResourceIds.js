@@ -38,7 +38,6 @@ export const ResourceIds = {
   GlobalExchangeBuyMap: 36114,
   currencyExchangeMap: 36112,
   SourceOfIncome: 36117,
-  updateExchangerRates: 35106,
   ExchangeTables: 32101,
   NumberRange: 20103,
   BpRelationType: 21107,
