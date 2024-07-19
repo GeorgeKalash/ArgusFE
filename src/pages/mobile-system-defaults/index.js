@@ -15,6 +15,7 @@ import { useEffect } from 'react'
 export default function MobileSystem() {
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
+
   const { labels, access } = useResourceQuery({
     datasetId: ResourceIds.MobileSystemDefaults
   })
@@ -62,6 +63,7 @@ export default function MobileSystem() {
       })
       .catch(error => {})
   }
+
   return (
     <FormShell form={formik} resourceId={ResourceIds.MobileSystemDefaults} maxAccess={access}>
       <Grow>
