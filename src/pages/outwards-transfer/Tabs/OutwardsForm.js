@@ -147,13 +147,13 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
         creditorBankAccount: '', // ben.bankaccount is IBAN
         creditorReceivingCountry: '',
         requestAmount: '', //HERE
-        requestCurrency: '',
-        sendingCurrency: '',
-        receivingCurrency: ''
+        requestCurrency: '', // SEND CURRENCY REF is the receiving (rreceiver)
+        sendingCurrency: '', // SEND CURRENCY REF is the receiving (rreceiver)
+        receivingCurrency: '' // SEND CURRENCY REF is the receiving (rreceiver)
       },
       transaction: {
         amount: '', //HERE
-        currency: '',
+        currency: '', //SAME AS SENDING CURRRENCY
         type: 'inttransfer', //FAWZI TO CHECK
         descriptionText: '',
         requestDate: new Date(),
