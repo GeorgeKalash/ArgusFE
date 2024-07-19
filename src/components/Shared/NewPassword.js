@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react'
+import React, { useState } from 'react'
 import { Box, Button, DialogActions, Grid, IconButton, InputAdornment, LinearProgress } from '@mui/material'
 import Icon from 'src/@core/components/icon'
 import CustomTextField from '../Inputs/CustomTextField'
@@ -104,6 +104,15 @@ const NewPassword = ({ formik, labels, score, setScore }) => {
           onChange={onPasswordChange}
           error={formik.touched.newPassword && formik.errors.newPassword}
           InputProps={{
+            startAdornment: (
+              <InputAdornment position='start'>
+                <IconButton edge='start'>
+                  <div style={{ width: '20px', height: '20px' }}>
+                    <img src='/images/password/forgotPWD3.png' style={{ width: '100%', height: '100%' }} />
+                  </div>
+                </IconButton>
+              </InputAdornment>
+            ),
             endAdornment: (
               <InputAdornment position='end'>
                 <IconButton
@@ -139,6 +148,15 @@ const NewPassword = ({ formik, labels, score, setScore }) => {
           onChange={onConfirmPasswordChange}
           error={formik.touched.confirmPassword && formik.errors.confirmPassword}
           InputProps={{
+            startAdornment: (
+              <InputAdornment position='start'>
+                <IconButton edge='start'>
+                  <div style={{ width: '20px', height: '20px' }}>
+                    <img src='/images/password/forgotPWD3.png' style={{ width: '100%', height: '100%' }} />
+                  </div>
+                </IconButton>
+              </InputAdornment>
+            ),
             endAdornment: (
               <InputAdornment position='end'>
                 <IconButton

@@ -100,6 +100,13 @@ const ChangePassword = ({
               onChange={formik.handleChange}
               error={formik.touched.password && formik.errors.password}
               InputProps={{
+                startAdornment: (
+                  <InputAdornment position='start'>
+                    <IconButton edge='start'>
+                      <img src='/images/password/forgotPWD1.png' />
+                    </IconButton>
+                  </InputAdornment>
+                ),
                 endAdornment: (
                   <InputAdornment position='end'>
                     <IconButton

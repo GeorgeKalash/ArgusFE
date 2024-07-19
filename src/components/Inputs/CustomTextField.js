@@ -27,7 +27,6 @@ const CustomTextField = ({
   search = false,
   language = '',
   hasBorder = true,
-  icon,
   ...props
 }) => {
   const name = props.name
@@ -136,12 +135,6 @@ const CustomTextField = ({
               )}
           </InputAdornment>
         )
-
-        // startAdornment: icon ? (
-        //   <InputAdornment position='start'>
-        //     <Icon>{icon}</Icon>
-        //   </InputAdornment>
-        // ) : null
       }}
       sx={{
         '& .MuiOutlinedInput-root': {
