@@ -1,6 +1,5 @@
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { DISABLED, MANDATORY } from 'src/services/api/maxAccess'
-import { getStorageData } from 'src/storage/storage'
 
 const getData = async (getRequest, extension, parameters) => {
   try {
@@ -56,30 +55,12 @@ const fetchData = async (getRequest, id, repository) => {
   let extension, parameters
 
   switch (repository) {
-    case 'dtId': //default user
-      const userData = getStorageData('userData')
-      const userId = userData?.userId
-      parameters = `_userId=${userId}&_functionId=${id}`
-      extension = SystemRepository.UserFunction.get
-      break
-    case 'glbSysNumberRange': //get numberRange  if no dtId
-      parameters = `_recordId=${id}`
-      extension = SystemRepository.SystemFunction.get
-      break
-    case 'DocumentType': //get numberRange  if no dtId
-      parameters = `_dgId=${id}&_startAt=${0}&_pageSize=${50}`
-      extension = SystemRepository.DocumentType.qry
-      break
-    case 'DcTypNumberRange': //get numberRange if user has dtId
-      parameters = `_recordId=${id}`
-      extension = SystemRepository.DocumentType.get
-      break
     case 'isExternal':
       parameters = `_recordId=${id}`
       extension = SystemRepository.NumberRange.get
       break
     default:
-      return null // Invalid repository
+      return null
   }
 
   return await getData(getRequest, extension, parameters)

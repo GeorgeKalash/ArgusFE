@@ -58,7 +58,6 @@ export default function ItemsForm({ labels, recordId, maxAccess: access }) {
       trackBy: null,
       unitPrice: '',
       ivtItem: true,
-
       salesItem: true,
       purchaseItem: true,
       kitItem: false,
