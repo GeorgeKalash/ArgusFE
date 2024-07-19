@@ -176,7 +176,7 @@ const LoginPage = () => {
                     name='password'
                     size='small'
                     fullWidth
-                    label={platformLabels.Password}
+                    label={platformLabels.password}
                     type={showPassword ? 'text' : 'password'}
                     value={validation.values.password}
                     onChange={validation.handleChange}

@@ -172,7 +172,15 @@ const NewPassword = ({ formik, labels, score, setScore }) => {
         />
       </Grid>
       <DialogActions>
-        <Grid bottom={0} left={0} width='100%' position='fixed' sx={{ padding: '8px !important' }}>
+        <Grid
+          container
+          justifyContent='flex-end'
+          bottom={0}
+          left={0}
+          width='100%'
+          position='fixed'
+          sx={{ padding: '8px !important' }}
+        >
           <Button
             onClick={formik.handleSubmit}
             variant='contained'
