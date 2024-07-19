@@ -1,7 +1,5 @@
 import React, { useContext, useState } from 'react'
 import { Box, Button, Grid, IconButton, InputAdornment, LinearProgress } from '@mui/material'
-import WindowToolbar from './WindowToolbar'
-import Icon from 'src/@core/components/icon'
 import CustomTextField from '../Inputs/CustomTextField'
 import { Grow } from './Layouts/Grow'
 import { VertLayout } from './Layouts/VertLayout'
@@ -10,65 +8,45 @@ import toast from 'react-hot-toast'
 import * as yup from 'yup'
 import { AuthContext } from 'src/providers/AuthContext'
 import { useAuth } from 'src/hooks/useAuth'
-import axios from 'axios'
 import { useError } from 'src/error'
+import { SystemRepository } from 'src/repositories/SystemRepository'
 
-const ResetChangePass = ({ _labels, reopenLogin = false, window, username = '' }) => {
+const ResetChangePass = ({ _labels, username = '' }) => {
   const [score, setScore] = useState(0)
-  const [showPassword, setShowPassword] = useState(false)
   const { stack: stackError } = useError()
   const auth = useAuth()
-  const { encryptePWD, getAccessToken } = useContext(AuthContext)
+  const { encryptePWD } = useContext(AuthContext)
 
   const { formik } = useForm({
     enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
       username: username ? username : auth?.user?.username,
+      code: '',
       password: '',
-      newPassword: '',
       confirmPassword: ''
     },
     validationSchema: yup.object({
-      newPassword: yup.string().required(),
+      password: yup.string().required(),
       confirmPassword: yup.string().required()
     }),
     onSubmit: async () => {
-      if (formik.values.newPassword === formik.values.confirmPassword) {
-        const loginVal = {
+      if (formik.values.password === formik.values.confirmPassword) {
+        const resetPWVal = {
           userName: formik.values.username,
-          oldPW: encryptePWD(formik.values.password),
-          newPW: encryptePWD(formik.values.newPassword)
+          password: encryptePWD(formik.values.password)
         }
 
         try {
-          const accessToken = propLoggedUser ? propLoggedUser.accessToken : await getAccessToken()
-
-          if (!accessToken) {
-            throw new Error('Failed to retrieve access token')
-          }
-          var bodyFormData = new FormData()
-          bodyFormData.append('record', JSON.stringify(loginVal))
-
-          const res = await axios({
-            method: 'POST',
-            url: `${process.env.NEXT_PUBLIC_AuthURL}MA.asmx/changePW`,
-            headers: {
-              Authorization: 'Bearer ' + accessToken,
-              'Content-Type': 'multipart/form-data'
-            },
-            data: bodyFormData
-          }).then(res => {
-            toast.success('Password changed successfully!')
-            formik.setFieldValue('password', '')
-            formik.setFieldValue('newPassword', '')
-            formik.setFieldValue('confirmPassword', '')
-            setScore(0)
+          const response = await postRequest({
+            extension: SystemRepository.ResetPW.set,
+            record: resetPWVal,
+            url: `${process.env.NEXT_PUBLIC_AuthURL}MA.asmx/`
           })
-          if (reopenLogin === true) {
-            window.close()
-            onClose()
-          }
+
+          toast.success('Password changed successfully!')
+          router.push('/login')
+          router.reload()
         } catch (error) {
           stackError({ message: error.message })
         }
@@ -78,111 +56,27 @@ const ResetChangePass = ({ _labels, reopenLogin = false, window, username = '' }
     }
   })
 
-  const colors = ['#C11B17', '#FDD017', '#4AA02C', '#6AFB92', '#00FF00']
-
-  const scorePassword = passwd => {
-    let score = 0
-
-    if (passwd.length < 5) {
-      score += 3
-    } else if (passwd.length > 4 && passwd.length < 8) {
-      score += 6
-    } else if (passwd.length > 7 && passwd.length < 16) {
-      score += 12
-    } else if (passwd.length > 15) {
-      score += 18
-    }
-
-    if (passwd.match(/[a-z]/)) {
-      score += 1
-    }
-
-    if (passwd.match(/[A-Z]/)) {
-      score += 5
-    }
-
-    if (passwd.match(/\d+/)) {
-      score += 5
-    }
-
-    if (passwd.match(/(.*[0-9].*[0-9].*[0-9])/)) {
-      score += 5
-    }
-
-    if (passwd.match(/.[!,@,#,$,%,^,&,*,?,_,~]/)) {
-      score += 5
-    }
-
-    if (passwd.match(/(.*[!,@,#,$,%,^,&,*,?,_,~].*[!,@,#,$,%,^,&,*,?,_,~])/)) {
-      score += 5
-    }
-
-    if (passwd.match(/([a-z].*[A-Z])|([A-Z].*[a-z])/)) {
-      score += 2
-    }
-
-    if (passwd.match(/([a-zA-Z])/) && passwd.match(/([0-9])/)) {
-      score += 2
-    }
-
-    if (passwd.match(/([a-zA-Z0-9].*[!,@,#,$,%,^,&,*,?,_,~])|([!,@,#,$,%,^,&,*,?,_,~].*[a-zA-Z0-9])/)) {
-      score += 2
-    }
-
-    return score
-  }
-
-  const onPasswordChange = e => {
-    const newPassword = e.target.value
-    setPassword(newPassword)
-
-    if (newPassword === '') {
-      setScore(0)
-      setColor('white')
-
-      return
-    }
-
-    const newScore = scorePassword(newPassword)
-    setScore(newScore)
-
-    let i
-    if (newScore < 16) {
-      i = 0
-    } else if (newScore > 15 && newScore < 25) {
-      i = 1
-    } else if (newScore > 24 && newScore < 35) {
-      i = 2
-    } else if (newScore > 34 && newScore < 45) {
-      i = 3
-    } else {
-      i = 4
-    }
-
-    setColor(colors[i])
-    formik.setFieldValue('newPassword', newPassword)
-  }
-
-  const onConfirmPasswordChange = e => {
-    setConfirmPassword(e.target.value)
-    formik.setFieldValue('confirmPassword', e.target.value)
-  }
-
   return (
     <VertLayout>
       <Grow>
         <Grid container spacing={3} sx={{ pl: '10px', pt: '10px', pr: '10px' }}>
           <Grid item xs={12}>
             <CustomTextField
-              name='password'
+              name='code'
               size='small'
               fullWidth
-              label={'_labels.password'}
-              type={showPassword ? 'text' : 'password'}
-              value={formik.values.password}
+              label={_labels.code}
+              value={formik.values.code}
               onChange={formik.handleChange}
-              error={formik.touched.password && formik.errors.password}
-              InputProps={{
+              error={formik.touched.code && formik.errors.code}
+              /*  InputProps={{
+                startAdornment: (
+                  <InputAdornment position='start'>
+                    <IconButton edge='start'>
+                      <img src='/images/password/forgotPWD1.png' />
+                    </IconButton>
+                  </InputAdornment>
+                ),
                 endAdornment: (
                   <InputAdornment position='end'>
                     <IconButton
@@ -194,78 +88,11 @@ const ResetChangePass = ({ _labels, reopenLogin = false, window, username = '' }
                     </IconButton>
                   </InputAdornment>
                 )
-              }}
+              }} */
             />
-          </Grid>
-          <Grid item xs={12}>
-            <CustomTextField
-              name='newPassword'
-              size='small'
-              fullWidth
-              label={'_labels.newPassword'}
-              type={showNewPassword ? 'text' : 'password'}
-              value={formik.values.newPassword}
-              onChange={onPasswordChange}
-              error={formik.touched.newPassword && formik.errors.newPassword}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position='end'>
-                    <IconButton
-                      edge='end'
-                      onClick={() => setShowNewPassword(!showNewPassword)}
-                      onMouseDown={e => e.preventDefault()}
-                    >
-                      <Icon icon={showNewPassword ? 'mdi:eye-outline' : 'mdi:eye-off-outline'} />
-                    </IconButton>
-                  </InputAdornment>
-                )
-              }}
-            />
-            <Box sx={{ display: 'flex', alignItems: 'center', my: 2 }}>
-              <LinearProgress
-                variant='determinate'
-                value={(score / 50) * 100}
-                sx={{
-                  flexGrow: 1,
-                  mr: 2,
-                  height: 10,
-                  backgroundColor: 'lightgrey',
-                  '& .MuiLinearProgress-bar': { backgroundColor: color }
-                }}
-              />
-            </Box>
-            <CustomTextField
-              name='confirmPassword'
-              type={'password'}
-              label={'_labels.confirmPassword'}
-              required
-              onChange={onConfirmPasswordChange}
-              autoComplete='off'
-              onClear={() => formik.setFieldValue('confirmPassword', '')}
-              error={formik.touched.confirmPassword && Boolean(formik.errors.confirmPassword)}
-            />
-          </Grid>
-          <Grid bottom={0} left={0} width='100%' position='fixed'>
-            <Button
-              onClick={formik.handleSubmit}
-              variant='contained'
-              sx={{
-                mr: 1,
-                backgroundColor: '#4eb558',
-                '&:hover': {
-                  backgroundColor: '#4eb558',
-                  opacity: 0.8
-                },
-                width: '50px !important',
-                height: '35px',
-                objectFit: 'contain',
-                minWidth: '30px !important'
-              }}
-            >
-              <img src={'/images/buttonsIcons/save.png'} alt={'platformLabels.Submit'} />
-            </Button>
           </Grid>
         </Grid>
+        <NewPassword formik={formik} labels={_labels} score={score} setScore={setScore} />
       </Grow>
     </VertLayout>
   )

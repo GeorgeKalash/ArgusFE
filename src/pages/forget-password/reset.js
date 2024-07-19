@@ -69,9 +69,7 @@ const Reset = () => {
         })
         .catch(error => {})
 
-      //router.push('/login') //navigate to another route kebab case
-      openForm(obj?.recordId)
-      //router.reload()
+      openForm(obj?.username)
     }
   })
 
@@ -80,8 +78,7 @@ const Reset = () => {
       Component: ResetChPassForm,
       props: {
         labels: _labels,
-        recordId: recordId,
-        maxAccess: access
+        username: formik.values.username
       },
       width: 500,
       height: 360,
