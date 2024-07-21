@@ -21,6 +21,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import SHA1 from 'crypto-js/sha1'
 import axios from 'axios'
 import { getStorageData } from 'src/storage/storage'
+import { SaleRepository } from 'src/repositories/SaleRepository'
 
 const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
   const [emailPresent, setEmailPresent] = useState(false)
@@ -42,6 +43,7 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
       languageId: '',
       notificationGroupId: '',
       employeeId: '',
+      spId: '',
       password: '',
       confirmPassword: '',
       dashboardId: null,
@@ -332,6 +334,25 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
                     formik.setFieldValue('employeeName', newValue ? newValue.name : '')
                   }}
                   error={formik.touched.employeeId && Boolean(formik.errors.employeeId)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceLookup
+                  endpointId={SaleRepository.SalesPerson.snapshot}
+                  parameters={{
+                    _size: 50,
+                    _startAt: 0,
+                    _branchId: 0
+                  }}
+                  name='spId '
+                  label={labels.salesPerson}
+                  valueField='reference'
+                  displayField='name'
+                  maxAccess={maxAccess}
+                  form={formik}
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('spId', newValue ? newValue.recordId : '')
+                  }}
                 />
               </Grid>
               <Grid item xs={12}>
