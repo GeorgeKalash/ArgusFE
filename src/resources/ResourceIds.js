@@ -38,7 +38,6 @@ export const ResourceIds = {
   GlobalExchangeBuyMap: 36114,
   currencyExchangeMap: 36112,
   SourceOfIncome: 36117,
-  updateExchangerRates: 35106,
   ExchangeTables: 32101,
   NumberRange: 20103,
   BpRelationType: 21107,
@@ -155,6 +154,7 @@ export const ResourceIds = {
   RoleCategories: 21102,
   SourceOfIncomeType: 36311,
   ProfessionGroups: 36310,
+  ChangePassword: 20118,
   PaymentVouchers: 31305,
   Roles: 21103,
   Checkbook: 33201
