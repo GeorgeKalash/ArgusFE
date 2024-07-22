@@ -1,4 +1,4 @@
-import { useContext } from 'react'
+import { useContext, useEffect } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
@@ -56,6 +56,13 @@ const Financial = () => {
       filterFn: fetchWithSearch
     }
   })
+
+  // useEffect(() => {
+  //   if (functionId) {
+  //     refetch()
+  //     console.log('object refetched')
+  //   }
+  // }, [functionId])
 
   async function fetchWithSearch({ options = {}, filters }) {
     return (
