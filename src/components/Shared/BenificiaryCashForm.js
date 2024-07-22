@@ -31,6 +31,7 @@ const BenificiaryCashForm = ({
   submitted,
   setSubmitted,
   corId,
+  currencyId,
   countryId,
   editable = false,
   resetForm,
@@ -60,6 +61,7 @@ const BenificiaryCashForm = ({
     cobId: '',
     cellPhone: '',
     birthDate: null,
+    currencyId: currencyId || null,
     addressLine1: '',
     addressLine2: '',
     clientRef: client?.clientRef || '',
@@ -92,11 +94,12 @@ const BenificiaryCashForm = ({
       return errors
     },
     validationSchema: yup.object({
-      clientId: yup.string().required(' '),
-      countryId: yup.string().required(' '),
-      name: yup.string().required(' '),
-      firstName: yup.string().required(' '),
-      lastName: yup.string().required(' ')
+      clientId: yup.string().required(),
+      countryId: yup.string().required(),
+      name: yup.string().required(),
+      firstName: yup.string().required(),
+      lastName: yup.string().required(),
+      currencyId: yup.string().required()
     }),
     onSubmit: async values => {
       if (submitMainForm) {
@@ -112,6 +115,7 @@ const BenificiaryCashForm = ({
           nationalityId: values.nationalityId,
           cobId: values.cobId,
           birthDate: values.birthDate ? formatDateToApi(values.birthDate) : null,
+          currencyId: values.currencyId,
           cellPhone: values.cellPhone,
           addressLine1: values.addressLine1,
           addressLine2: values.addressLine2,
@@ -196,6 +200,7 @@ const BenificiaryCashForm = ({
           cobId: RTBEN?.record?.cobId,
           cellPhone: RTBEN?.record?.cellPhone,
           birthDate: RTBEN?.record?.birthDate && formatDateFromApi(RTBEN.record.birthDate),
+          currencyId: RTBEN?.record.currencyId,
           addressLine1: RTBEN?.record?.addressLine1,
           addressLine2: RTBEN?.record?.addressLine2,
           clientRef: RTBEN?.record?.clientRef,
@@ -243,6 +248,7 @@ const BenificiaryCashForm = ({
       nationalityId: values.nationalityId,
       cobId: values.cobId,
       birthDate: values.birthDate ? formatDateToApi(values.birthDate) : null,
+      currencyId: values.currencyId,
       cellPhone: values.cellPhone,
       addressLine1: values.addressLine1,
       addressLine2: values.addressLine2,
@@ -646,7 +652,28 @@ const BenificiaryCashForm = ({
                 />
               </FormGrid>
             </Grid>
-            <Grid container rowGap={2} xs={6} spacing={2} sx={{ px: 2, pt: 2, height: '50%' }}>
+            <Grid container rowGap={2} xs={6} spacing={2} sx={{ px: 2, pt: 2 }}>
+              <FormGrid hideonempty xs={12}>
+                <ResourceComboBox
+                  endpointId={SystemRepository.Currency.qry}
+                  name='currencyId'
+                  label={_labels.currency}
+                  valueField='recordId'
+                  displayField={['reference', 'name']}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' }
+                  ]}
+                  values={formik.values}
+                  required
+                  readOnly={(formik.values.currencyId && editMode) || currencyId || editMode}
+                  maxAccess={maxAccess}
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('currencyId', newValue?.recordId || null)
+                  }}
+                  error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
+                />
+              </FormGrid>
               <FormGrid hideonempty xs={12}>
                 <CustomDatePicker
                   name='birthDate'

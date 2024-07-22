@@ -371,6 +371,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
           },
           corId: formik.values.corId ? formik.values.corId : 0,
           countryId: formik.values.countryId,
+          currencyId: formik.values.currencyId,
           beneficiary: { beneficiaryId: formik.values.beneficiaryId, beneficiarySeqNo: formik.values.beneficiarySeqNo },
           dispersalType: formik.values.dispersalType
         },
@@ -387,6 +388,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
             clientRef: formik.values.clientRef,
             clientName: formik.values.clientName
           },
+          currencyId: formik.values.currencyId,
           dispersalType: formik.values.dispersalType,
           corId: formik.values.corId ? formik.values.corId : 0,
           countryId: formik.values.countryId,
@@ -1186,7 +1188,8 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                   endpointId={RemittanceOutwardsRepository.Beneficiary.snapshot}
                   parameters={{
                     _clientId: formik.values.clientId,
-                    _dispersalType: formik.values.dispersalType
+                    _dispersalType: formik.values.dispersalType,
+                    _currencyId: formik.values.currencyId
                   }}
                   valueField='name'
                   displayField='name'
