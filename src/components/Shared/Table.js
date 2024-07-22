@@ -76,7 +76,7 @@ const Table = ({
       if (col.type === 'timeZone') {
         return {
           ...col,
-          valueGetter: ({ data }) => getTimeInTimeZone(data?.[col.field])
+          valueGetter: ({ data }) => data?.[col.field] && getTimeInTimeZone(data?.[col.field])
         }
       }
 
