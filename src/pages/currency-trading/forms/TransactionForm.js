@@ -34,6 +34,7 @@ import { useForm } from 'src/hooks/form'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
 import { ControlContext } from 'src/providers/ControlContext'
+import CustomDatePickerHijri from 'src/components/Inputs/CustomDatePickerHijri'
 
 const FormContext = React.createContext(null)
 
@@ -373,6 +374,8 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     }
   })
 
+  const dir = JSON.parse(window.localStorage.getItem('settings'))?.direction
+
   const onClose = async recId => {
     try {
       const res = await getRequest({
@@ -413,19 +416,21 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
 
   async function setOperationType(type) {
     if (type) {
-      const res = await getRequest({
-        extension: SystemRepository.Defaults.get,
-        parameters:
-          type === SystemFunction.CurrencyPurchase
-            ? '_key=ct_cash_purchase_ratetype_id'
-            : type === SystemFunction.CurrencySale
-            ? '_key=ct_cash_sales_ratetype_id'
-            : ''
-      })
+      try {
+        const res = await getRequest({
+          extension: SystemRepository.Defaults.get,
+          parameters:
+            type === SystemFunction.CurrencyPurchase
+              ? '_key=ct_cash_purchase_ratetype_id'
+              : type === SystemFunction.CurrencySale
+              ? '_key=ct_cash_sales_ratetype_id'
+              : ''
+        })
 
-      setRateType(res.record.value)
+        setRateType(res.record.value)
 
-      formik.setFieldValue('functionId', type)
+        formik.setFieldValue('functionId', type)
+      } catch (e) {}
     }
   }
 
@@ -1037,6 +1042,18 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                         maxAccess={maxAccess}
                       />
                     </Grid>
+
+                    <Grid item xs={7}>
+                      <CustomDatePickerHijri
+                        name='birthdatehijri'
+                        label={labels.birthDateHijri}
+                        value={formik.values?.birth_date}
+                        onChange={(name, value) => {
+                          formik.setFieldValue('birth_date', value)
+                        }}
+                        onClear={() => formik.setFieldValue('birth_date', '')}
+                      />
+                    </Grid>
                     <Grid container xs={12}>
                       <Grid item xs={7}>
                         <FormField
@@ -1164,7 +1181,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                   </Grid>
 
                   <Grid container rowGap={3} xs={8} sx={{ px: 2, alignContent: 'start' }}>
-                    <Grid xs={12} container spacing={2}>
+                    <Grid xs={12} container spacing={2} sx={{ direction: dir }}>
                       <Grid item xs={3}>
                         <FormField
                           name='firstName'
@@ -1200,7 +1217,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                         />
                       </Grid>
                     </Grid>
-                    <Grid xs={12} container spacing={2} sx={{ flexDirection: 'row-reverse' }}>
+                    <Grid xs={12} container spacing={2} sx={{ flexDirection: 'row-reverse', direction: dir }}>
                       <Grid item xs={3}>
                         <FormField
                           name='fl_firstName'

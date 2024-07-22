@@ -21,6 +21,7 @@ const BeneficiaryCash = () => {
   const {
     query: { data },
     filterBy,
+    refetch,
     clearFilter,
     labels: _labels,
     access,
@@ -37,14 +38,11 @@ const BeneficiaryCash = () => {
 
   async function fetchWithSearch({ options = {}, filters }) {
     const { _clientId = 0, _dispersalType = 1 } = options
-    if (!filters.qry) {
-      return { list: [] }
-    } else {
-      return await getRequest({
-        extension: RemittanceOutwardsRepository.Beneficiary.snapshot,
-        parameters: `_clientId=${_clientId}&_dispersalType=${_dispersalType}&_filter=${filters.qry}`
-      })
-    }
+
+    return await getRequest({
+      extension: RemittanceOutwardsRepository.Beneficiary.snapshot,
+      parameters: `_clientId=${_clientId}&_dispersalType=${_dispersalType}&_filter=${filters.qry}`
+    })
   }
 
   async function openForm(obj) {
@@ -151,7 +149,8 @@ const BeneficiaryCash = () => {
       <Grow>
         <Table
           columns={columns}
-          gridData={data ? data : { list: [] }}
+          gridData={data}
+          refetch={refetch}
           rowId={['beneficiaryId', 'clientId', 'seqNo']}
           onEdit={editBenCash}
           onDelete={delBenCash}

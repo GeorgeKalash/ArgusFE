@@ -77,11 +77,7 @@ const CustomLookup = ({
           isOptionEqualToValue={(option, value) => (value ? option[valueField] === value[valueField] : '')}
           onChange={(event, newValue) => onChange(name, newValue)}
           PopperComponent={PopperComponent}
-          PaperComponent={({ children }) => (
-            <Paper sx={{ position: 'absolute', width: `${displayFieldWidth * 100}%`, zIndex: 999, mt: 1 }}>
-              {children}
-            </Paper>
-          )}
+          PaperComponent={({ children }) => <Paper style={{ width: `${displayFieldWidth * 100}%` }}>{children}</Paper>}
           renderOption={(props, option) => {
             if (columnsInDropDown && columnsInDropDown.length > 0) {
               return (
