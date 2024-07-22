@@ -49,6 +49,7 @@ export default function MobileSystem() {
   useEffect(() => {
     getDataResult()
   }, [])
+
   const handleSubmit = () => {
     formik.handleSubmit()
   }
