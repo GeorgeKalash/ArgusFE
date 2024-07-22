@@ -22,6 +22,7 @@ import SHA1 from 'crypto-js/sha1'
 import axios from 'axios'
 import { getStorageData } from 'src/storage/storage'
 import { SaleRepository } from 'src/repositories/SaleRepository'
+import { newDate } from 'date-fns-jalali'
 
 const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
   const [emailPresent, setEmailPresent] = useState(false)
@@ -37,13 +38,16 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
       fullName: '',
       username: '',
       email: '',
+      spRef: '',
+      spName: '',
       cellPhone: '',
       activeStatus: '',
       userType: '',
       languageId: '',
       notificationGroupId: '',
       employeeId: '',
-      spId: '',
+
+      spId: 0,
       password: '',
       confirmPassword: '',
       dashboardId: null,
@@ -81,6 +85,7 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
             {
               record: JSON.stringify({
                 accountId: user.accountId,
+                spId: user.spId,
                 userName: copy.username,
                 password: copy.password,
                 userId: copy.recordId
@@ -158,16 +163,22 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
 
   useEffect(() => {
     ;(async function () {
-      if (storeRecordId) {
+      if (storeRecordId || formik.values.recordId) {
         const res = await getRequest({
           extension: SystemRepository.Users.get,
           parameters: `_recordId=${storeRecordId}`
         })
-        formik.setValues(res.record)
-        setPasswordState(true)
+
+        console.log('Response from server:', res.record)
+
+        if (res?.record) {
+          formik.setValues(res.record)
+          console.log('formikValues after setValues:', formik.values)
+          setPasswordState(true)
+        }
       }
     })()
-  }, [storeRecordId])
+  }, [storeRecordId, formik.values.recordId])
 
   return (
     <FormShell resourceId={ResourceIds.Users} form={formik} maxAccess={maxAccess} editMode={editMode}>
@@ -339,22 +350,27 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
               <Grid item xs={12}>
                 <ResourceLookup
                   endpointId={SaleRepository.SalesPerson.snapshot}
-                  parameters={{
-                    _size: 50,
-                    _startAt: 0,
-                    _branchId: 0
-                  }}
-                  name='spId '
+                  name='spId'
                   label={labels.salesPerson}
-                  valueField='reference'
-                  displayField='name'
-                  maxAccess={maxAccess}
                   form={formik}
+                  displayFieldWidth={2}
+                  valueField='spRef'
+                  displayField='name'
+                  columnsInDropDown={[
+                    { key: 'spRef', value: 'Reference' },
+                    { key: 'name', value: 'Name' }
+                  ]}
+                  valueShow='spRef'
+                  secondValueShow='spName'
                   onChange={(event, newValue) => {
                     formik.setFieldValue('spId', newValue ? newValue.recordId : '')
+                    formik.setFieldValue('spRef', newValue ? newValue.spRef : '')
+                    formik.setFieldValue('spName', newValue ? newValue.name : '')
                   }}
+                  maxAccess={maxAccess}
                 />
               </Grid>
+
               <Grid item xs={12}>
                 <CustomTextField
                   name='password'
