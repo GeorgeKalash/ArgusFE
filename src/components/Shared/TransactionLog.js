@@ -85,7 +85,7 @@ const TransactionLog = props => {
       field: 'eventDt',
       headerName: _labels.eventDate,
       flex: 1,
-      valueGetter: ({ data }) => formatDateDefault(data?.eventDt) + ' ' + formatTime(data?.eventDt)
+      type: 'date'
     },
     {
       field: 'userName',

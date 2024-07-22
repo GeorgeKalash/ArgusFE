@@ -80,7 +80,7 @@ export default function CurrencyTrading() {
                 field: 'createdDate',
                 headerName: labels.date,
                 flex: 1,
-                valueGetter: ({ data }) => formatDateDefault(data?.date)
+                type: 'date'
               },
               {
                 field: 'clientName',

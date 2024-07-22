@@ -56,13 +56,13 @@ const RelationList = ({ store, labels, maxAccess }) => {
       field: 'startDate',
       headerName: labels.from,
       flex: 1,
-      valueGetter: ({ data }) => formatDateDefault(data?.startDate)
+      type: 'date'
     },
     {
       field: 'endDate',
       headerName: labels.to,
       flex: 1,
-      valueGetter: ({ data }) => formatDateDefault(data?.endDate)
+      type: 'date'
     }
   ]
 

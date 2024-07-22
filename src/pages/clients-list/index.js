@@ -96,7 +96,7 @@ const ClientsList = () => {
       headerName: labels.expiryDate,
       flex: 1,
       editable: false,
-      valueGetter: ({ data }) => formatDateDefault(data?.expiryDate)
+      type: 'date'
     }
   ]
 

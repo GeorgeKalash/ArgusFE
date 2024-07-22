@@ -165,7 +165,7 @@ const CreditInvoice = () => {
               field: 'date',
               headerName: _labels.date,
               flex: 1,
-              valueGetter: ({ data }) => formatDateDefault(data?.date)
+              type: 'date'
             },
             {
               field: 'plantRef',
@@ -190,7 +190,7 @@ const CreditInvoice = () => {
               field: 'amount',
               headerName: _labels.amount,
               flex: 1,
-              valueGetter: ({ data }) => getFormattedNumber(data?.amount)
+              type: 'number'
             },
             {
               field: 'statusName',

@@ -60,7 +60,7 @@ const Characteristics = () => {
     {
       field: 'validFrom',
       headerName: _labels.validFrom,
-      valueGetter: ({ data }) => formatDateDefault(data?.validFrom),
+      type: 'date',
       flex: 1
     }
   ]
