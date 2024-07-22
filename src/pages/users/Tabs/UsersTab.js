@@ -22,7 +22,6 @@ import SHA1 from 'crypto-js/sha1'
 import axios from 'axios'
 import { getStorageData } from 'src/storage/storage'
 import { SaleRepository } from 'src/repositories/SaleRepository'
-import { newDate } from 'date-fns-jalali'
 
 const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
   const [emailPresent, setEmailPresent] = useState(false)
@@ -163,19 +162,16 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
 
   useEffect(() => {
     ;(async function () {
-      if (storeRecordId || formik.values.recordId) {
+      if (storeRecordId) {
         const res = await getRequest({
           extension: SystemRepository.Users.get,
           parameters: `_recordId=${storeRecordId}`
         })
-
-        if (res?.record) {
-          formik.setValues(res.record)
-          setPasswordState(true)
-        }
+        formik.setValues(res.record)
+        setPasswordState(true)
       }
     })()
-  }, [storeRecordId, formik.values.recordId])
+  }, [storeRecordId])
 
   return (
     <FormShell resourceId={ResourceIds.Users} form={formik} maxAccess={maxAccess} editMode={editMode}>
