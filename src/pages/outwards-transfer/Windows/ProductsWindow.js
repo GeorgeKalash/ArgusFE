@@ -13,28 +13,13 @@ const ProductsWindow = ({ labels, maxAccess, onProductSubmit, outWardsData, wind
 
   const columns = [
     {
-      field: 'productRef',
-      headerName: labels.ProductRef,
-      flex: 1
-    },
-    {
       field: 'productName',
       headerName: labels.ProductName,
       flex: 1
     },
     {
       field: 'corName',
-      headerName: labels.corName,
-      flex: 1
-    },
-    {
-      field: 'interfaceName',
-      headerName: labels.interface,
-      flex: 1
-    },
-    {
-      field: 'dispersalRef',
-      headerName: labels.DispersalRef,
+      headerName: labels.Correspondant,
       flex: 1
     },
     {
