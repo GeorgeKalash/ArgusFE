@@ -81,7 +81,11 @@ export default function MobileSystem() {
               name='rt_mob_plantId'
               label={labels.plant}
               valueField='recordId'
-              displayField='name'
+              displayField={['reference', 'name']}
+              columnsInDropDown={[
+                { key: 'reference', value: 'Reference' },
+                { key: 'name', value: 'Name' }
+              ]}
               values={formik.values}
               onChange={async (event, newValue) => {
                 formik.setFieldValue('rt_mob_plantId', newValue?.recordId)
