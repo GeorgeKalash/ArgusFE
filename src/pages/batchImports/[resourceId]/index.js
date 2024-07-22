@@ -74,7 +74,6 @@ const BatchImports = () => {
           const reader = new FileReader()
           reader.onload = (e) => {
             const text = e.target.result
-            console.log('Data from reader: ', text);
             parseCSV(text)
           }
           reader.readAsText(file)
@@ -112,7 +111,6 @@ const BatchImports = () => {
 
       const dataFromCSV = transform(rows)
       setGridData(dataFromCSV)
-      console.log('Data from CSV: ', dataFromCSV);
       refetch();
     }
 
