@@ -25,22 +25,22 @@ const SalesPerson = () => {
     query: { data },
     labels: _labels,
     refetch,
-    search,
-    clear,
+    filterBy,
+    clearFilter,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: SaleRepository.SalesPerson.qry,
     datasetId: ResourceIds.SalesPerson,
-    search: {
-      endpointId: SaleRepository.SalesPerson.snapshot,
-      searchFn: fetchWithSearch
+    filter: {
+      filterFn: fetchWithSearch
     }
   })
-  async function fetchWithSearch({ qry }) {
+
+  async function fetchWithSearch({ filters }) {
     return await getRequest({
       extension: SaleRepository.SalesPerson.snapshot,
-      parameters: `_filter=${qry}`
+      parameters: `_filter=${filters.qry}`
     })
   }
 
@@ -119,8 +119,12 @@ const SalesPerson = () => {
         <GridToolbar
           onAdd={add}
           maxAccess={access}
-          onSearch={search}
-          onSearchClear={clear}
+          onSearch={value => {
+            filterBy('qry', value)
+          }}
+          onSearchClear={() => {
+            clearFilter('qry')
+          }}
           labels={_labels}
           inputSearch={true}
         />
