@@ -25,6 +25,9 @@ import StrictDeleteConfirmation from './StrictDeleteConfirmation'
 import { HIDDEN, accessLevel } from 'src/services/api/maxAccess'
 import { formatDateDefault } from 'src/lib/date-helper'
 import { getFormattedNumber } from 'src/lib/numberField-helper'
+import { VertLayout } from './Layouts/VertLayout'
+import { Grow } from './Layouts/Grow'
+import { Fixed } from './Layouts/Fixed'
 
 const Table = ({
   fetchGridData,
@@ -75,7 +78,7 @@ const Table = ({
     })
 
   useEffect(() => {
-    const areAllValuesTrue = props?.gridData?.list.every(item => item.checked === true)
+    const areAllValuesTrue = props?.gridData?.list?.every(item => item.checked === true)
     setChecked(areAllValuesTrue)
 
     props?.gridData &&
@@ -159,7 +162,7 @@ const Table = ({
               width: '100%',
               backgroundColor: '#fff',
               borderTop: '1px solid #ccc',
-              position: 'sticky',
+              fontSize: '0.9rem',
               bottom: 0
             }}
           >
@@ -269,7 +272,7 @@ const Table = ({
                 width: '100%',
                 backgroundColor: '#fff',
                 borderTop: '1px solid #ccc',
-                position: 'fixed',
+                fontSize: '0.9rem',
                 bottom: 0
               }}
             >
@@ -457,33 +460,45 @@ const Table = ({
   console.log('columns', columns)
 
   return (
-    <>
-      <Box className='ag-theme-alpine' style={{ flex: 1, width: '1000px !important', height: props.height || 'auto' }}>
-        <AgGridReact
-          rowData={(paginationType === 'api' ? props?.gridData?.list : gridData?.list) || []}
-          enableClipboard={true}
-          enableRangeSelection={true}
-          columnDefs={columnDefs}
-          pagination={false}
-          paginationPageSize={pageSize}
-          rowSelection={'multiple'}
-          suppressAggFuncInHeader={true}
-          getRowClass={getRowClass}
-        />
-      </Box>
-      {pagination && (
+    <VertLayout>
+      <Grow>
         <Box
+          className='ag-theme-alpine'
+          style={{ flex: 1, width: '1000px !important', height: props.height || 'auto' }}
           sx={{
-            flexShrink: 0,
-            position: 'sticky',
-            bottom: 0,
-            width: '100%'
+            '.ag-header': {
+              height: '40px !important',
+              minHeight: '40px !important'
+            },
+            '.ag-header-cell': {
+              height: '40px !important',
+              minHeight: '40px !important'
+            },
+            '.ag-cell': {
+              borderRight: '1px solid #d0d0d0 !important'
+            }
           }}
         >
-          <CustomPagination />
+          <AgGridReact
+            rowData={(paginationType === 'api' ? props?.gridData?.list : gridData?.list) || []}
+            enableClipboard={true}
+            enableRangeSelection={true}
+            columnDefs={columnDefs}
+            pagination={false}
+            paginationPageSize={pageSize}
+            rowSelection={'multiple'}
+            suppressAggFuncInHeader={true}
+            getRowClass={getRowClass}
+            rowHeight={35}
+          />
         </Box>
+      </Grow>
+      {pagination && (
+        <Fixed>
+          <CustomPagination />
+        </Fixed>
       )}
-    </>
+    </VertLayout>
   )
 }
 
