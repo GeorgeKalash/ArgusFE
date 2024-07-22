@@ -51,14 +51,12 @@ const ProductsWindow = ({ labels, maxAccess, onProductSubmit, outWardsData, wind
 
   useEffect(() => {
     ;(async function () {
-      var type = 2
-      var functionId = 1
       var plant = outWardsData?.plantId
       var countryId = outWardsData?.countryId
       var currencyId = outWardsData?.currencyId
       var dispersalType = outWardsData?.dispersalType
       var amount = outWardsData?.fcAmount ?? 0
-      var parameters = `_type=${type}&_functionId=${functionId}&_plantId=${plant}&_countryId=${countryId}&_dispersalType=${dispersalType}&_currencyId=${currencyId}&_amount=${amount}`
+      var parameters = `_plantId=${plant}&_countryId=${countryId}&_dispersalType=${dispersalType}&_currencyId=${currencyId}&_amount=${amount}`
 
       try {
         if (plant && countryId && currencyId && dispersalType) {
