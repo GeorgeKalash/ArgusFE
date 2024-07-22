@@ -140,12 +140,7 @@ const AuthProvider = ({ children }) => {
         })
       } else {
         setUser(loggedUser)
-
-        if (params.rememberMe) {
-          window.localStorage.setItem('userData', JSON.stringify(loggedUser))
-        } else {
-          window.sessionStorage.setItem('userData', JSON.stringify(loggedUser))
-        }
+        window.sessionStorage.setItem('userData', JSON.stringify(loggedUser))
         const returnUrl = router.query.returnUrl
         const redirectURL = returnUrl && returnUrl !== '/' ? returnUrl : '/'
         router.replace(redirectURL)
