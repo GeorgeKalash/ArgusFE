@@ -322,22 +322,27 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
                 <ResourceLookup
                   endpointId={EmployeeRepository.Employee.snapshot}
                   parameters={{
-                    _size: 50,
                     _startAt: 0,
                     _branchId: 0
                   }}
                   name='employeeId'
                   label={labels.employee}
-                  valueField='reference'
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'firstName', value: 'Name' }
+                  ]}
+                  valueField='employeeRef'
                   displayField='name'
                   maxAccess={maxAccess}
+                  displayFieldWidth={2}
                   form={formik}
+                  valueShow='employeeRef'
+                  secondValueShow='employeeName'
                   onChange={(event, newValue) => {
                     formik.setFieldValue('employeeId', newValue ? newValue.recordId : '')
                     formik.setFieldValue('employeeRef', newValue ? newValue.reference : '')
-                    formik.setFieldValue('employeeName', newValue ? newValue.name : '')
+                    formik.setFieldValue('employeeName', newValue ? newValue.fullName : '')
                   }}
-                  error={formik.touched.employeeId && Boolean(formik.errors.employeeId)}
                 />
               </Grid>
               <Grid item xs={12}>
