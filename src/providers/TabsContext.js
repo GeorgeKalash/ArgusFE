@@ -229,7 +229,7 @@ const TabsProvider = ({ children }) => {
                 backgroundColor: 'white'
               },
               '.MuiTabs-indicator': {
-                backgroundColor: 'white'
+                display: 'none'
               },
               '.MuiSvgIcon-root': {
                 color: 'white!important'
