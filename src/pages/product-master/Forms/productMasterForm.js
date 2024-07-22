@@ -58,10 +58,8 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(' '),
-      interfaceId: yup.string().required(' '),
       commissionBase: yup.string().required(' '),
-      isInactive: yup.string().required(' '),
-      corId: yup.string().required(' ')
+      isInactive: yup.string().required(' ')
     }),
     onSubmit: values => {
       postProductMaster(values)
@@ -173,7 +171,6 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
                   endpointId={RemittanceSettingsRepository.Correspondent.snapshot}
                   label={labels.correspondent}
                   form={formik}
-                  required
                   valueField='reference'
                   displayField='name'
                   firstValue={formik.values.corRef}
@@ -219,7 +216,6 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
                   valueField='recordId'
                   displayField='name'
                   values={formik.values}
-                  required
                   onChange={(event, newValue) => {
                     formik.setFieldValue('interfaceId', newValue?.recordId)
                   }}
