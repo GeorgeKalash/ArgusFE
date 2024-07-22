@@ -127,7 +127,12 @@ const BatchImports = () => {
   }
     
     const parseCSV = (text) => {
-      const lines = text.split('\n');
+      const lines = text.split('\n').filter(line => line.trim() !== '');
+
+      if (lines.length === 0) {
+        return;
+      }
+      
       const headers = lines[0].split(',').map(header => header.trim());
   
       const columnMap = columns.reduce((map, col) => {
