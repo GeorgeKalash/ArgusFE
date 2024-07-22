@@ -161,7 +161,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       tdAmount: yup.number().test(`isCommission less than tdAmount`, `Error`, function (value) {
         const { commission } = this.parent
 
-        return value < commission
+        return value <= commission
       }),
       amountRows: yup
         .array()
@@ -557,17 +557,19 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
   }
 
   async function checkProduct() {
-    if (plantId && formik.values.countryId && formik.values.currencyId && formik.values.dispersalType) {
-      var parameters = `_plantId=${plantId}&_countryId=${formik.values.countryId}&_dispersalType=${
-        formik.values.dispersalType
-      }&_currencyId=${formik.values.currencyId}&_amount=${formik.values.fcAmount || 0}`
+    try {
+      if (plantId && formik.values.countryId && formik.values.currencyId && formik.values.dispersalType) {
+        var parameters = `_plantId=${plantId}&_countryId=${formik.values.countryId}&_dispersalType=${
+          formik.values.dispersalType
+        }&_currencyId=${formik.values.currencyId}&_amount=${formik.values.fcAmount || 0}`
 
-      const res = await getRequest({
-        extension: RemittanceOutwardsRepository.ProductDispersalEngine.qry,
-        parameters: parameters
-      })
-      if (res.list.length == 1) handleSelectedProduct(res.list[0])
-    }
+        const res = await getRequest({
+          extension: RemittanceOutwardsRepository.ProductDispersalEngine.qry,
+          parameters: parameters
+        })
+        if (res.list.length == 1) handleSelectedProduct(res.list[0])
+      }
+    } catch (error) {}
   }
 
   useEffect(() => {
@@ -874,7 +876,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                     onChange={e => {
                       formik.setFieldValue('tdAmount', e.target.value)
                     }}
-                    onClear={() => formik.setFieldValue('tdAmount', '')}
+                    onClear={() => formik.setFieldValue('tdAmount', 0)}
                     error={formik.touched.tdAmount && Boolean(formik.errors.tdAmount)}
                     maxLength={10}
                   />
