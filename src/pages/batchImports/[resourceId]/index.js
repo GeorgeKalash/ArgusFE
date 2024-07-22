@@ -13,6 +13,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { getButtons } from 'src/components/Shared/Buttons'
 import { useResourceQuery } from 'src/hooks/resource'
 import toast from 'react-hot-toast'
+import { formatDateDefault } from 'src/lib/date-helper'
 
 const BatchImports = () => {
     const router = useRouter()
@@ -26,6 +27,21 @@ const BatchImports = () => {
     const { platformLabels } = useContext(ControlContext)
     const buttons = getButtons(platformLabels)
     const onClearButton = buttons.find(button => button.key === 'Clear')
+
+    const formatDate = (dateString) => {
+      const date = new Date(dateString);
+      const timestamp = date.getTime();
+
+      return `/Date(${timestamp})/`;
+    };
+
+    const formatDateWhenisAPI = (dateString) => {
+      const [day, month, year] = dateString.split('/').map(part => parseInt(part, 10));
+      const fullYear = year < 100 ? 2000 + year : year;
+      const date = new Date(Date.UTC(fullYear, month - 1, day, 0, 0, 0));
+
+      return date.toISOString().split('.')[0] + 'Z';
+    }
 
     const {
       access,
@@ -60,9 +76,7 @@ const BatchImports = () => {
                 ...modifiedFields
               ])
             }
-          } catch (exception) {
-            console.error(exception)
-          }
+          } catch (exception) {}
         })()
       }, [resourceId])
       
@@ -94,26 +108,55 @@ const BatchImports = () => {
             _startAt: 0
         };
     }
+
+    const convertValue = (value, dataType, isAPI = false) => {
+      switch (dataType) {
+          case 1: 
+            return value;
+          case 2: 
+            return parseInt(value, 10);
+          case 3:
+            return parseFloat(value);
+          case 5:
+            return isAPI 
+              ? formatDateWhenisAPI(value) 
+              : formatDateDefault(formatDate(value)); 
+          default:
+              return value;
+      }
+  }
     
     const parseCSV = (text) => {
-      const lines = text.split('\n')
-      const headers = lines[0].split(',').map(header => header.trim())
+      const lines = text.split('\n');
+      const headers = lines[0].split(',').map(header => header.trim());
+  
+      const columnMap = columns.reduce((map, col) => {
+        map[col.headerName] = col;
 
+        return map;
+      }, {})
+  
+      const orderedColumns = headers.map(header => columnMap[header]);
+  
       const rows = lines.slice(1).map(line => {
-        const values = line.split(',').map(value => value.trim())
+        const values = line.split(',').map(value => value.trim());
 
-        return headers.reduce((obj, header, index) => {
-          obj[header] = values[index]
+        return orderedColumns.reduce((obj, col, index) => {
+          if (col) {
+              obj[col.field] = convertValue(values[index], col.dataType);
+          } else {
+              obj[headers[index]] = values[index]; 
+          }
 
           return obj
         }, {})
       })
-
-      const dataFromCSV = transform(rows)
-      setGridData(dataFromCSV)
+  
+      const dataFromCSV = transform(rows);
+      setGridData(dataFromCSV);
       refetch();
-    }
-
+  }
+  
     const clearFile = () => {
       setName('');
       setGridData([]);
@@ -130,25 +173,33 @@ const BatchImports = () => {
     };
 
     const getImportData = async () => {
-      const data = {
-        [objectName]: gridData.list.map(({ recordId, ...rest }) => ({
-          ...rest
-        }))
-      }
-      console.log(endPoint)
+      const convertedData = gridData.list.map(row => {
+        return Object.keys(row).reduce((acc, key) => {
+          const col = columns.find(c => c.field === key);
+          if (col) {
+              acc[key] = convertValue(row[key], col.dataType, true);
+          } else {
+              acc[key] = row[key];
+          }
 
+          return acc;
+        }, {});
+      })
+  
+      const data = {
+        [objectName]: convertedData
+      }
+  
       try {
         await postRequest({
-          extension: endPoint,
-          record: JSON.stringify(data)
+            extension: endPoint,
+            record: JSON.stringify(data)
         })
-              
+
         invalidate()
-        
         toast.success(platformLabels.Imported)
       } catch (exception) {}
-
-    }
+  }
 
     return (
         <VertLayout>
