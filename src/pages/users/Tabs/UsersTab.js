@@ -46,7 +46,7 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
       notificationGroupId: '',
       employeeId: '',
 
-      spId: 0,
+      spId: '',
       password: '',
       confirmPassword: '',
       dashboardId: null,
