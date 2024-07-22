@@ -60,6 +60,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
     amount: null,
     transferType: null,
     faxNo: '',
+    trackingNo: '',
     sender_firstName: '',
     sender_lastName: '',
     sender_middleName: '',
@@ -127,7 +128,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
 
         return transferType !== '1' || (transferType === '1' && value !== undefined && value !== null)
       }),
-
+      trackingNo: yup.string().required(),
       sender_firstName: yup.string().required(),
       sender_lastName: yup.string().required(),
       sender_nationalityId: yup.string().required(),
@@ -393,6 +394,23 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       onChange={formik.handleChange}
                       onClear={() => formik.setFieldValue('faxNo', '')}
                     />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Grid container spacing={2}>
+                      <Grid item xs={4}>
+                        <CustomTextField
+                          name='trackingNo'
+                          required
+                          label={labels.trackingNo}
+                          value={formik?.values?.trackingNo}
+                          maxAccess={maxAccess}
+                          maxLength='30'
+                          readOnly={editMode}
+                          onChange={e => formik.setFieldValue('trackingNo', e.target.value)}
+                          error={formik.touched.trackingNo && Boolean(formik.errors.trackingNo)}
+                        />
+                      </Grid>
+                    </Grid>
                   </Grid>
                 </Grid>
               </Grid>
