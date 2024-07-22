@@ -69,6 +69,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
     dispersalType: '',
     dispersalTypeName: '',
     currencyId: '',
+    currencyRef: '',
     idNo: '',
     beneficiaryId: '',
     beneficiarySeqNo: '',
@@ -273,14 +274,24 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
         })
 
         console.log('vals', copy)
-        terraPayFill(copy)
+        //terraPayFill(copy)
 
         const amountGridData = {
           header: copy,
           cash: updatedRows,
           bankType: formik.values.bankType,
           ICRequest: formik.values.instantCashDetails?.deliveryModeId ? formik.values.instantCashDetails : null,
-          TPRequest: formik.values.terraPayDetails
+          TPRequest: mapTerraPayDetails(copy) /* {
+            ...formik.values.terraPayDetails,
+            quotation: {
+              ...formik.values.terraPayDetails.quotation,
+              sendingCurrency: formik.values.currencyRef,
+            },
+            transaction: {
+              ...formik.values.terraPayDetails.transaction,
+              currency: formik.values.currencyRef,
+            }
+          } */
         }
 
         const amountRes = await postRequest({
@@ -303,6 +314,47 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
   const editMode = !!formik.values.recordId
   const isClosed = formik.values.wip === 2
   const isPosted = formik.values.status === 4
+
+  const mapTerraPayDetails = values => {
+    console.log('IN', values)
+    const updateDate = date => (date && !/^\/Date\(/.test(date) ? formatDateToApi(date) : date)
+
+    return {
+      ...formik.values.terraPayDetails,
+      quotation: {
+        ...formik.values.terraPayDetails.quotation,
+        sendingCurrency: values.currencyRef,
+        debitorMSIDSN: values.cellPhone,
+        requestAmount: values.amount,
+        requestDate: updateDate(formik.values.terraPayDetails.quotation.requestDate)
+      },
+      transaction: {
+        ...formik.values.terraPayDetails.transaction,
+        currency: values.currencyRef,
+        debitorMSIDSN: values.cellPhone,
+        amount: values.amount,
+        requestDate: updateDate(formik.values.terraPayDetails.transaction.requestDate),
+        senderKyc: {
+          ...formik.values.terraPayDetails.transaction.senderKyc,
+          dateOfBirth: updateDate(formik.values.terraPayDetails.transaction.senderKyc.dateOfBirth)
+          /* idDocument: values.terraPayDetails.transaction.senderKyc.idDocument.map((doc) => ({
+            ...doc,
+            issueDate: updateDate(doc.issueDate),
+            expiryDate: updateDate(doc.expiryDate),
+          })), */
+        },
+        recipientKyc: {
+          ...formik.values.terraPayDetails.transaction.recipientKyc,
+          dateOfBirth: updateDate(formik.values.terraPayDetails.transaction.recipientKyc.dateOfBirth)
+          /* idDocument: values.terraPayDetails.transaction.recipientKyc.idDocument.map((doc) => ({
+            ...doc,
+            issueDate: updateDate(doc.issueDate),
+            expiryDate: updateDate(doc.expiryDate),
+          })),*/
+        }
+      }
+    }
+  }
 
   function viewOTP(recId) {
     stack({
@@ -596,8 +648,9 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
           terraPay: formik.values.terraPayDetails,
           outwardsData: {
             countryId: formik.values.countryId,
-            amount: formik.values.amount,
-            currencyId: formik.values.currencyId
+            amount: amount,
+            currencyId: formik.values.currencyId,
+            currencyRef: formik.values.currencyRef
           }
         },
         width: 700,
@@ -832,6 +885,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                       if (!newValue) {
                         formik.setFieldValue('dispersalType', '')
                         formik.setFieldValue('currencyId', '')
+                        formik.setFieldValue('currencyRef', '')
                       }
                     }}
                     error={formik.touched.countryId && Boolean(formik.errors.countryId)}
@@ -853,7 +907,10 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                       formik.setFieldValue('dispersalTypeName', newValue ? newValue?.dispersalTypeName : '')
                       formik.setFieldValue('beneficiaryId', '')
                       formik.setFieldValue('beneficiaryName', '')
-                      if (!newValue) formik.setFieldValue('currencyId', '')
+                      if (!newValue) {
+                        formik.setFieldValue('currencyId', '')
+                        formik.setFieldValue('currencyRef', '')
+                      }
                     }}
                     error={formik.touched.dispersalType && Boolean(formik.errors.dispersalType)}
                   />
@@ -879,6 +936,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                     readOnly={!formik.values.dispersalType || isClosed || isPosted}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('currencyId', newValue?.currencyId)
+                      formik.setFieldValue('currencyRef', newValue?.currencyRef)
                     }}
                     error={formik.touched.dispersalType && Boolean(formik.errors.dispersalType)}
                   />

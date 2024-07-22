@@ -35,6 +35,7 @@ export default function TerraPay({ onSubmit, terraPay = {}, window, outwardsData
     }),
     onSubmit: values => {
       const copy = { ...values }
+      console.log('copyTerra', copy)
       copy.quotation.creditorReceivingCountry = ''
       copy.quotation.requestCurrency = ''
       onSubmit(copy)
