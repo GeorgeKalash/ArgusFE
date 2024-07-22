@@ -1,90 +1,15 @@
-import { Grid } from '@mui/material'
-import React, { useContext } from 'react'
-import FormShell from 'src/components/Shared/FormShell'
-import { Grow } from 'src/components/Shared/Layouts/Grow'
-import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import { useForm } from 'src/hooks/form'
-import { SystemRepository } from 'src/repositories/SystemRepository'
-import { ControlContext } from 'src/providers/ControlContext'
-import { RequestsContext } from 'src/providers/RequestsContext'
-import toast from 'react-hot-toast'
+import { ImmediateWindow } from 'src/windows'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { useResourceQuery } from 'src/hooks/resource'
-import { useEffect } from 'react'
+import MobileSystem from './form/mobileSystemDefaultForm'
 
-export default function MobileSystem() {
-  const { platformLabels } = useContext(ControlContext)
-  const { getRequest, postRequest } = useContext(RequestsContext)
-
-  const { labels, access } = useResourceQuery({
-    datasetId: ResourceIds.MobileSystemDefaults
-  })
-
-  const { formik } = useForm({
-    enableReinitialize: false,
-    initialValues: {
-      rt_mob_plantId: ''
-    },
-    onSubmit: async obj => {
-      try {
-        var data = []
-        Object.entries(obj).forEach(([key, value]) => {
-          const newObj = { key: key, value: value }
-          data.push(newObj)
-        })
-        await postRequest({
-          extension: SystemRepository.Defaults.set,
-          record: JSON.stringify({ sysDefaults: data })
-        })
-        if (!obj.recordId) {
-          toast.success(platformLabels.Added)
-        } else toast.success(platformLabels.Edited)
-      } catch (e) {}
-    }
-  })
-
-  useEffect(() => {
-    getDataResult()
-  }, [])
-
-  const getDataResult = () => {
-    const myObject = {}
-    var parameters = `_filter=`
-    getRequest({
-      extension: SystemRepository.Defaults.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        const filteredList = res.list.filter(obj => {
-          return obj.key === 'rt_mob_plantId'
-        })
-        filteredList.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
-        formik.setValues(myObject)
-      })
-      .catch(error => {})
-  }
-
+const RtIndex = () => {
   return (
-    <FormShell form={formik} resourceId={ResourceIds.MobileSystemDefaults} maxAccess={access}>
-      <Grow>
-        <Grid container>
-          <Grid item xs={6}>
-            <ResourceComboBox
-              endpointId={SystemRepository.Plant.qry}
-              name='rt_mob_plantId'
-              label={labels.plant}
-              valueField='recordId'
-              displayField='name'
-              values={formik.values}
-              onChange={async (event, newValue) => {
-                formik.setFieldValue('rt_mob_plantId', newValue?.recordId)
-              }}
-              error={formik.touched.rt_mob_plantId && Boolean(formik.errors.rt_mob_plantId)}
-              maxAccess={access}
-            />
-          </Grid>
-        </Grid>
-      </Grow>
-    </FormShell>
+    <ImmediateWindow
+      datasetId={ResourceIds.MobileSystemDefaults}
+      titleName={'mobileSystemDefaults'}
+      Component={MobileSystem}
+    />
   )
 }
+
+export default RtIndex
