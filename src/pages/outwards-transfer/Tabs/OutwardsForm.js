@@ -312,9 +312,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
 
   const vatAmount = (formik.values.commission * formik.values.vatRate) / 100
 
-  const amount = parseFloat(
-    formik.values.lcAmount + (formik.values.commission + formik.values.vatAmount - formik.values.tdAmount)
-  )
+  const amount = parseFloat(formik.values.lcAmount + (formik.values.commission + vatAmount - formik.values.tdAmount))
 
   const receivedTotal = formik.values.amountRows.reduce((sumAmount, row) => {
     const curValue = parseFloat(row.amount.toString().replace(/,/g, '')) || 0
@@ -863,7 +861,6 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                       value={vatAmount}
                       readOnly
                       maxAccess={maxAccess}
-                      error={formik.touched.vatAmount && Boolean(formik.errors.vatAmount)}
                       maxLength={10}
                     />
                   </Grid>
