@@ -56,16 +56,6 @@ const ProductMaster = () => {
       flex: 1
     },
     {
-      field: 'typeName',
-      headerName: _labels.type,
-      flex: 1
-    },
-    {
-      field: 'functionName',
-      headerName: _labels.function,
-      flex: 1
-    },
-    {
       field: 'commissionBaseName',
       headerName: _labels.commissionBase,
       flex: 1
