@@ -8,16 +8,23 @@ import { useFormik } from 'formik'
 import * as yup from 'yup'
 import BlankLayout from 'src/@core/layouts/BlankLayout'
 import { ControlContext } from 'src/providers/ControlContext'
-import ResetChPassForm from '../forms/ResetChPassForm'
+import ResetChPassForm from './forms/ResetChPassForm'
+import { useWindow } from 'src/windows'
+import { useAuth } from 'src/hooks/useAuth'
+import { unstable_gridTabIndexColumnGroupHeaderSelector } from '@mui/x-data-grid'
 
 const Reset = () => {
   const theme = useTheme()
   const { platformLabels } = useContext(ControlContext)
   const [accountId, setAccountId] = useState({})
   const { stack } = useWindow()
+  const auth = useAuth()
 
   useEffect(() => {
-    const fetchData = async () => {
+    console.log(auth)
+    console.log(auth?.user)
+    setAccountId(auth?.user?.accountId)
+    /* const fetchData = async () => {
       const matchHostname = window.location.hostname.match(/^(.+)\.softmachine\.co$/)
 
       const accountName = matchHostname ? matchHostname[1] : 'byc-deploy'
@@ -31,7 +38,7 @@ const Reset = () => {
       }
     }
 
-    fetchData()
+    fetchData() */
   }, [])
 
   const validation = useFormik({
@@ -69,20 +76,21 @@ const Reset = () => {
         })
         .catch(error => {})
 
-      openForm(obj?.username)
+      openForm(values?.username)
     }
   })
 
-  function openForm(recordId) {
+  function openForm(username) {
+    console.log('username', username)
     stack({
       Component: ResetChPassForm,
       props: {
-        labels: _labels,
-        username: formik.values.username
+        labels: platformLabels,
+        username: username
       },
       width: 500,
       height: 360,
-      title: _labels.Activity
+      title: platformLabels.Activity
     })
   }
 

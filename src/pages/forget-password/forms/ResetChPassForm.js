@@ -1,8 +1,8 @@
 import React, { useContext, useState } from 'react'
 import { Box, Button, Grid, IconButton, InputAdornment, LinearProgress } from '@mui/material'
-import CustomTextField from '../Inputs/CustomTextField'
-import { Grow } from './Layouts/Grow'
-import { VertLayout } from './Layouts/VertLayout'
+import CustomTextField from 'src/components/Inputs/CustomTextField'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { VertLayout } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
 import toast from 'react-hot-toast'
 import * as yup from 'yup'
@@ -11,7 +11,7 @@ import { useAuth } from 'src/hooks/useAuth'
 import { useError } from 'src/error'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 
-const ResetChangePass = ({ _labels, username = '' }) => {
+const ResetChPassForm = ({ _labels, username = '' }) => {
   const [score, setScore] = useState(0)
   const { stack: stackError } = useError()
   const auth = useAuth()
@@ -65,7 +65,7 @@ const ResetChangePass = ({ _labels, username = '' }) => {
               name='code'
               size='small'
               fullWidth
-              label={_labels.code}
+              label='code'
               value={formik.values.code}
               onChange={formik.handleChange}
               error={formik.touched.code && formik.errors.code}
@@ -98,4 +98,4 @@ const ResetChangePass = ({ _labels, username = '' }) => {
   )
 }
 
-export default ResetChangePass
+export default ResetChPassForm
