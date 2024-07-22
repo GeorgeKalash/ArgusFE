@@ -169,11 +169,8 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
           parameters: `_recordId=${storeRecordId}`
         })
 
-        console.log('Response from server:', res.record)
-
         if (res?.record) {
           formik.setValues(res.record)
-          console.log('formikValues after setValues:', formik.values)
           setPasswordState(true)
         }
       }
