@@ -25,12 +25,24 @@ const SalesPerson = () => {
     query: { data },
     labels: _labels,
     refetch,
+    filterBy,
+    clearFilter,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: SaleRepository.SalesPerson.qry,
-    datasetId: ResourceIds.SalesPerson
+    datasetId: ResourceIds.SalesPerson,
+    filter: {
+      filterFn: fetchWithSearch
+    }
   })
+
+  async function fetchWithSearch({ filters }) {
+    return await getRequest({
+      extension: SaleRepository.SalesPerson.snapshot,
+      parameters: `_filter=${filters.qry}`
+    })
+  }
 
   const columns = [
     {
@@ -48,11 +60,7 @@ const SalesPerson = () => {
       headerName: _labels[3],
       flex: 1
     },
-    {
-      field: 'username',
-      headerName: _labels[5],
-      flex: 1
-    },
+
     {
       field: 'commissionPct',
       headerName: _labels[4],
@@ -104,7 +112,18 @@ const SalesPerson = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <GridToolbar
+          onAdd={add}
+          maxAccess={access}
+          onSearch={value => {
+            filterBy('qry', value)
+          }}
+          onSearchClear={() => {
+            clearFilter('qry')
+          }}
+          labels={_labels}
+          inputSearch={true}
+        />
       </Fixed>
       <Grow>
         <Table
