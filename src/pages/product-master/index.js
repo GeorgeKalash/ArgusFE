@@ -27,7 +27,7 @@ const ProductMaster = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: RemittanceSettingsRepository.Correspondent.qry,
+    endpointId: RemittanceSettingsRepository.ProductMaster.qry,
     datasetId: ResourceIds.ProductMaster
   })
 
@@ -53,16 +53,6 @@ const ProductMaster = () => {
     {
       field: 'name',
       headerName: _labels.name,
-      flex: 1
-    },
-    {
-      field: 'typeName',
-      headerName: _labels.type,
-      flex: 1
-    },
-    {
-      field: 'functionName',
-      headerName: _labels.function,
       flex: 1
     },
     {

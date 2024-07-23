@@ -35,6 +35,7 @@ export default function BenificiaryBankForm({
   submitted,
   setSubmitted,
   countryId,
+  currencyId,
   resetForm,
   setResetForm,
   onChange,
@@ -70,6 +71,7 @@ export default function BenificiaryBankForm({
     clientRef: client?.clientRef || '',
     clientName: client?.clientName || '',
     countryId: countryId || '',
+    currencyId: currencyId || null,
     seqNo: 1,
 
     //RTBEB
@@ -100,6 +102,7 @@ export default function BenificiaryBankForm({
       countryId: yup.string().required(' '),
       name: yup.string().required(' '),
       bankId: yup.string().required(' '),
+      currencyId: yup.string().required(),
       accountRefRepeat: yup.string().test('accountRef must match', 'Error', function (value) {
         const { accountRef } = this.parent
 
@@ -139,6 +142,7 @@ export default function BenificiaryBankForm({
           addressLine1: values.addressLine1,
           addressLine2: values.addressLine2,
           countryId: values.countryId,
+          currencyId: values.currencyId,
           seqNo: values.seqNo
         }
 
@@ -179,7 +183,7 @@ export default function BenificiaryBankForm({
       if (formik.values.countryId && dispersalType) {
         const qryCCL = await getRequest({
           extension: RemittanceSettingsRepository.CorrespondentControl.qry,
-          parameters: `_countryId=${formik.values.countryId}&_corId=${corId ?? 0}&_resourceId=${
+          parameters: `_countryId=${formik.values.countryId}&_corId=${corId || 0}&_resourceId=${
             ResourceIds.BeneficiaryBank
           }`
         })
@@ -223,6 +227,7 @@ export default function BenificiaryBankForm({
           clientRef: RTBEN?.record?.clientRef,
           clientName: RTBEN?.record?.clientName,
           countryId: RTBEN?.record?.countryId,
+          currencyId: RTBEN?.record?.currencyId,
           seqNo: RTBEN?.record?.seqNo,
 
           //RTBEB
@@ -278,6 +283,7 @@ export default function BenificiaryBankForm({
       addressLine1: values.addressLine1,
       addressLine2: values.addressLine2,
       countryId: values.countryId,
+      currencyId: values.currencyId,
       seqNo: values.seqNo
     }
 
@@ -421,7 +427,27 @@ export default function BenificiaryBankForm({
                   readOnly={(formik.values.countryId && editMode) || editMode || !formik.values.countryId}
                 />
               </FormGrid>
-
+              <FormGrid hideonempty xs={12}>
+                <ResourceComboBox
+                  endpointId={SystemRepository.Currency.qry}
+                  name='currencyId'
+                  label={_labels.currency}
+                  valueField='recordId'
+                  displayField={['reference', 'name']}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' }
+                  ]}
+                  values={formik.values}
+                  required
+                  readOnly={(formik.values.currencyId && editMode) || currencyId || editMode}
+                  maxAccess={maxAccess}
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('currencyId', newValue?.recordId || null)
+                  }}
+                  error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
+                />
+              </FormGrid>
               <FormGrid hideonempty xs={12}>
                 <CustomTextField
                   name='accountRef'

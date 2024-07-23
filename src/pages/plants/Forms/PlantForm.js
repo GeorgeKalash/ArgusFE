@@ -40,7 +40,8 @@ const PlantForm = ({ _labels, maxAccess, store, setStore, editMode }) => {
       costCenterName: null,
       groupId: null,
       groupName: null,
-      segmentName: null
+      segmentName: null,
+      flName: ''
     },
     enableReinitialize: false,
     validateOnChange: false,
@@ -195,6 +196,18 @@ const PlantForm = ({ _labels, maxAccess, store, setStore, editMode }) => {
             }}
             error={formik.touched.groupId && Boolean(formik.errors.groupId)}
             maxAccess={maxAccess}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <CustomTextField
+            name='flName'
+            label={_labels.flName}
+            value={formik.values.flName}
+            maxLength='30'
+            maxAccess={maxAccess}
+            onChange={formik.handleChange}
+            onClear={() => formik.setFieldValue('flName', '')}
+            error={formik.touched.flName && Boolean(formik.errors.flName)}
           />
         </Grid>
       </Grid>

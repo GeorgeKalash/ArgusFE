@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 
 const defaultProvider = {
@@ -60,7 +60,7 @@ const AuthProvider = ({ children }) => {
     const fetchData = async () => {
       const matchHostname = window.location.hostname.match(/^(.+)\.softmachine\.co$/)
 
-      const accountName = matchHostname ? matchHostname[1] : 'byc-deploy'
+      const accountName = matchHostname ? matchHostname[1] : 'burger'
 
       try {
         const response = await axios.get(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=${accountName}`)
@@ -130,21 +130,22 @@ const AuthProvider = ({ children }) => {
         ...signIn3.data.record
       }
 
-      setUser(loggedUser)
       setLanguageId(loggedUser.languageId)
       window.localStorage.setItem('languageId', loggedUser.languageId)
-
-      if (params.rememberMe) {
-        window.localStorage.setItem('userData', JSON.stringify(loggedUser))
+      if (getUS2.data.record.umcpnl === true) {
+        errorCallback({
+          username: params.username,
+          loggedUser,
+          getUS2: getUS2.data.record
+        })
       } else {
+        setUser(loggedUser)
         window.sessionStorage.setItem('userData', JSON.stringify(loggedUser))
+        const returnUrl = router.query.returnUrl
+        const redirectURL = returnUrl && returnUrl !== '/' ? returnUrl : '/'
+        router.replace(redirectURL)
       }
-
-      const returnUrl = router.query.returnUrl
-      const redirectURL = returnUrl && returnUrl !== '/' ? returnUrl : '/'
-      router.replace(redirectURL)
     } catch (error) {
-      console.log({ logError: error })
       if (errorCallback) errorCallback(error)
     }
   }
@@ -153,7 +154,6 @@ const AuthProvider = ({ children }) => {
     setUser(null)
     window.localStorage.removeItem('userData')
     window.sessionStorage.removeItem('userData')
-
     await router.push('/login')
     router.reload()
   }
@@ -210,6 +210,8 @@ const AuthProvider = ({ children }) => {
     login: handleLogin,
     logout: handleLogout,
     getAccessToken,
+    encryptePWD,
+    getAC,
     apiUrl: getAC?.data?.record.api || (typeof window !== 'undefined' ? window.localStorage.getItem('apiUrl') : '')
   }
 

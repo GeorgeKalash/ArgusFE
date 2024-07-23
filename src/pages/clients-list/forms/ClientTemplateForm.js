@@ -432,6 +432,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
   })
 
   const isClosed = clientIndividualFormik.values.status === 1
+  const wip = clientIndividualFormik.values.wip === 2
 
   const postRtDefault = obj => {
     const date = new Date()
@@ -676,13 +677,13 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       key: 'Approval',
       condition: true,
       onClick: 'onApproval',
-      disabled: !isClosed
+      disabled: !(isClosed || wip)
     },
     {
       key: 'Close',
       condition: !isClosed,
       onClick: onClose,
-      disabled: isClosed || !editMode
+      disabled: isClosed || (wip && !isClosed) || !editMode || (isClosed && !wip)
     },
     {
       key: 'Reopen',
