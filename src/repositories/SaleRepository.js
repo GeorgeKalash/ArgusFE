@@ -8,7 +8,6 @@ export const SaleRepository = {
     del: service + 'delPL',
     page: service + 'pagePL'
   },
-
   CommissionSchedule: {
     qry: service + 'qryCSC',
     get: service + 'getCSC',
