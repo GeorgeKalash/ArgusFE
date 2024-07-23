@@ -1,4 +1,4 @@
-import { Box, Grid, Autocomplete, TextField, IconButton, InputAdornment } from '@mui/material'
+import { Box, Grid, Autocomplete, TextField, IconButton, InputAdornment, Paper } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search'
 import ClearIcon from '@mui/icons-material/Clear'
 import { useEffect, useState } from 'react'
@@ -77,6 +77,7 @@ const CustomLookup = ({
           isOptionEqualToValue={(option, value) => (value ? option[valueField] === value[valueField] : '')}
           onChange={(event, newValue) => onChange(name, newValue)}
           PopperComponent={PopperComponent}
+          PaperComponent={({ children }) => <Paper style={{ width: `${displayFieldWidth * 100}%` }}>{children}</Paper>}
           renderOption={(props, option) => {
             if (columnsInDropDown && columnsInDropDown.length > 0) {
               return (

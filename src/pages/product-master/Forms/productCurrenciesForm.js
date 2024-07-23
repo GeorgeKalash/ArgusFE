@@ -13,10 +13,12 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { DataSets } from 'src/resources/DataSets'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const ProductCurrenciesForm = ({ store, setStore, labels, editMode, maxAccess }) => {
   const { recordId: pId, countries } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const formik = useFormik({
     validationSchema: yup.object({
@@ -68,7 +70,7 @@ const ProductCurrenciesForm = ({ store, setStore, labels, editMode, maxAccess })
       record: JSON.stringify(data)
     })
       .then(res => {
-        if (res) toast.success('Record Edited Successfully')
+        if (res) toast.success(platformLabels.Edited)
         getMonetaries(pId)
       })
       .catch(error => {

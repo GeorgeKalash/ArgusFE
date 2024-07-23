@@ -12,11 +12,13 @@ import { useWindow } from 'src/windows'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const Correspondent = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const [errorMessage, setErrorMessage] = useState(null)
+  const { platformLabels } = useContext(ControlContext)
 
   const {
     query: { data },
@@ -67,6 +69,11 @@ const Correspondent = () => {
       flex: 1
     },
     {
+      field: 'interfaceName',
+      headerName: _labels.interface,
+      flex: 1
+    },
+    {
       field: 'isInactive',
       headerName: _labels.isInActive,
       flex: 1
@@ -79,7 +86,7 @@ const Correspondent = () => {
       record: JSON.stringify(obj)
     })
       .then(res => {
-        toast.success('Record Deleted Successfully')
+        toast.success(platformLabels.Deleted)
         invalidate()
       })
       .catch(error => {

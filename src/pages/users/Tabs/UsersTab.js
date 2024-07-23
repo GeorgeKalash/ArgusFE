@@ -17,12 +17,18 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { AccountRepository } from 'src/repositories/AccountRepository'
 import toast from 'react-hot-toast'
 import { useInvalidate } from 'src/hooks/resource'
+import { ControlContext } from 'src/providers/ControlContext'
+import SHA1 from 'crypto-js/sha1'
+import axios from 'axios'
+import { getStorageData } from 'src/storage/storage'
+import { SaleRepository } from 'src/repositories/SaleRepository'
 
 const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
   const [emailPresent, setEmailPresent] = useState(false)
   const [passwordState, setPasswordState] = useState(false)
   const { getRequest, postRequest, getIdentityRequest } = useContext(RequestsContext)
   const editMode = !!storeRecordId
+  const { platformLabels } = useContext(ControlContext)
 
   const { formik } = useForm({
     maxAccess,
@@ -31,14 +37,19 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
       fullName: '',
       username: '',
       email: '',
+      spRef: '',
+      spName: '',
       cellPhone: '',
       activeStatus: '',
       userType: '',
       languageId: '',
       notificationGroupId: '',
       employeeId: '',
+
+      spId: '',
       password: '',
       confirmPassword: '',
+      dashboardId: null,
       umcpnl: false
     },
     enableReinitialize: true,
@@ -61,20 +72,69 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
           })
     }),
     onSubmit: async obj => {
+      if (!storeRecordId) {
+        try {
+          const copy = { ...obj }
+          const encryptedPassword = encryptePWD(copy.password)
+          copy.password = copy.confirmPassword = encryptedPassword
+
+          const user = getStorageData('userData')
+          await axios.post(
+            `${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/setID`,
+            {
+              record: JSON.stringify({
+                accountId: user.accountId,
+                spId: user.spId,
+                userName: copy.username,
+                password: copy.password,
+                userId: copy.recordId
+              })
+            },
+            {
+              headers: {
+                authorization: `Bearer ${user.accessToken}`,
+                'Content-Type': 'multipart/form-data'
+              }
+            }
+          )
+          postUS(copy)
+        } catch (error) {}
+      } else postUS(obj)
+    }
+  })
+
+  async function postUS(obj) {
+    try {
       const res = await postRequest({
         extension: SystemRepository.Users.set,
         record: JSON.stringify(obj)
       })
       if (!obj.recordId) {
-        toast.success('Record Added Successfully')
+        toast.success(platformLabels.Added)
         formik.setFieldValue('recordId', res?.recordId)
         setRecordId(res?.recordId)
       } else {
-        toast.success('Record Updated Successfully')
+        toast.success(platformLabels.Updated)
       }
       invalidate()
+    } catch (error) {}
+  }
+
+  const encryptePWD = pwd => {
+    var encryptedPWD = SHA1(pwd).toString()
+    var shuffledString = ''
+
+    for (let i = 0; i < encryptedPWD.length; i = i + 8) {
+      var subString = encryptedPWD.slice(i, i + 8)
+
+      shuffledString += subString.charAt(6) + subString.charAt(7)
+      shuffledString += subString.charAt(4) + subString.charAt(5)
+      shuffledString += subString.charAt(2) + subString.charAt(3)
+      shuffledString += subString.charAt(0) + subString.charAt(1)
     }
-  })
+
+    return shuffledString.toUpperCase()
+  }
 
   const invalidate = useInvalidate({
     endpointId: SystemRepository.Users.qry
@@ -262,24 +322,53 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
                 <ResourceLookup
                   endpointId={EmployeeRepository.Employee.snapshot}
                   parameters={{
-                    _size: 50,
                     _startAt: 0,
                     _branchId: 0
                   }}
                   name='employeeId'
                   label={labels.employee}
-                  valueField='reference'
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'firstName', value: 'Name' }
+                  ]}
+                  valueField='employeeRef'
                   displayField='name'
                   maxAccess={maxAccess}
+                  displayFieldWidth={2}
                   form={formik}
+                  valueShow='employeeRef'
+                  secondValueShow='employeeName'
                   onChange={(event, newValue) => {
                     formik.setFieldValue('employeeId', newValue ? newValue.recordId : '')
                     formik.setFieldValue('employeeRef', newValue ? newValue.reference : '')
-                    formik.setFieldValue('employeeName', newValue ? newValue.name : '')
+                    formik.setFieldValue('employeeName', newValue ? newValue.fullName : '')
                   }}
-                  error={formik.touched.employeeId && Boolean(formik.errors.employeeId)}
                 />
               </Grid>
+              <Grid item xs={12}>
+                <ResourceLookup
+                  endpointId={SaleRepository.SalesPerson.snapshot}
+                  name='spId'
+                  label={labels.salesPerson}
+                  form={formik}
+                  displayFieldWidth={2}
+                  valueField='spRef'
+                  displayField='name'
+                  columnsInDropDown={[
+                    { key: 'spRef', value: 'Reference' },
+                    { key: 'name', value: 'Name' }
+                  ]}
+                  valueShow='spRef'
+                  secondValueShow='spName'
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('spId', newValue ? newValue.recordId : '')
+                    formik.setFieldValue('spRef', newValue ? newValue.spRef : '')
+                    formik.setFieldValue('spName', newValue ? newValue.name : '')
+                  }}
+                  maxAccess={maxAccess}
+                />
+              </Grid>
+
               <Grid item xs={12}>
                 <CustomTextField
                   name='password'
@@ -307,6 +396,21 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
                   onBlur={formik.handleBlur}
                   onClear={() => formik.setFieldValue('confirmPassword', '')}
                   error={formik.touched.confirmPassword && Boolean(formik.errors.confirmPassword)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  name='dashboardId'
+                  label={labels.dashboard}
+                  datasetId={DataSets.DASHBOARD}
+                  values={formik.values}
+                  valueField='key'
+                  displayField='value'
+                  maxAccess={maxAccess}
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('dashboardId', newValue ? newValue?.key : '')
+                  }}
+                  error={formik.touched.dashboardId && Boolean(formik.errors.dashboardId)}
                 />
               </Grid>
               <Grid item xs={12}>

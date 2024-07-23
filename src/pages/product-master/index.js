@@ -11,10 +11,12 @@ import ProductMasterWindow from './Windows/ProductMasterWindow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const ProductMaster = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const { platformLabels } = useContext(ControlContext)
 
   const {
     query: { data },
@@ -25,7 +27,7 @@ const ProductMaster = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: RemittanceSettingsRepository.Correspondent.qry,
+    endpointId: RemittanceSettingsRepository.ProductMaster.qry,
     datasetId: ResourceIds.ProductMaster
   })
 
@@ -54,16 +56,6 @@ const ProductMaster = () => {
       flex: 1
     },
     {
-      field: 'typeName',
-      headerName: _labels.type,
-      flex: 1
-    },
-    {
-      field: 'functionName',
-      headerName: _labels.function,
-      flex: 1
-    },
-    {
       field: 'commissionBaseName',
       headerName: _labels.commissionBase,
       flex: 1
@@ -76,7 +68,7 @@ const ProductMaster = () => {
       record: JSON.stringify(obj)
     })
       .then(res => {
-        toast.success('Record Deleted Successfully')
+        toast.success(platformLabels.Deleted)
         invalidate()
       })
       .catch(error => {})

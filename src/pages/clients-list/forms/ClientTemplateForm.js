@@ -39,6 +39,8 @@ import { useInvalidate } from 'src/hooks/resource'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { useError } from 'src/error'
+import { ControlContext } from 'src/providers/ControlContext'
+import CustomDatePickerHijri from 'src/components/Inputs/CustomDatePickerHijri'
 
 const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = false }) => {
   const { stack } = useWindow()
@@ -53,10 +55,11 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
   const [editMode, setEditMode] = useState(null)
   const [idTypeStore, setIdTypeStore] = useState([])
   const [otpShow, setOtpShow] = useState(false)
-  const [isClosed, setIsClosed] = useState(false)
-  const { stack: stackError } = useError()
 
-  const [initialValues, setInitialData] = useState({
+  const { stack: stackError } = useError()
+  const { platformLabels } = useContext(ControlContext)
+
+  const initialValues = {
     //clientIDView
     reference: '',
     clientId: '',
@@ -121,7 +124,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     flName: '',
     keyword: '',
     otp: '',
-    status: '-1',
+    status: -1,
     plantId: plantId || '',
     name: '',
     oldReference: '',
@@ -130,6 +133,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     trxCountPerYear: '',
     trxAmountPerYear: '',
     otpVerified: false,
+    govCellVerified: false,
     addressId: '',
     batchId: '',
     civilStatus: '',
@@ -161,7 +165,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     isRelativeDiplomat: false,
     professionId: '',
     cltRemReference: ''
-  })
+  }
 
   const handleCopy = event => {
     event.preventDefault()
@@ -186,6 +190,8 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       }
     }
   }
+
+  const dir = JSON.parse(window.localStorage.getItem('settings'))?.direction
 
   async function getCountry() {
     var parameters = `_filter=&_key=countryId`
@@ -217,10 +223,9 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     })
       .then(res => {
         const obj = res?.record
-        setIsClosed(obj?.clientRemittance?.wip === 2 ? true : false)
 
         obj?.workAddressView && setAddress(obj?.workAddressView)
-        setInitialData({
+        clientIndividualFormik.setValues({
           //clientIDView
           functionId: SystemFunction.KYC,
           reference: obj.clientMaster?.reference,
@@ -292,11 +297,13 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
           plantId: obj.clientRemittance?.plantId,
           name: obj.clientMaster?.name,
           oldReference: obj.clientMaster?.oldReference,
+          status: obj.clientMaster?.status,
 
           // //clientRemittance
           recordId: recordId,
           recordIdRemittance: obj.clientRemittance?.recordId,
           otpVerified: obj.clientRemittance?.otpVerified,
+          govCellVerified: obj.clientRemittance?.govCellVerified,
           addressId: obj.clientRemittance?.addressId,
           batchId: obj.clientRemittance?.batchId,
           civilStatus: obj.clientRemittance?.civilStatus,
@@ -313,7 +320,6 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
           riskLevel: obj.clientRemittance?.riskLevel,
           salaryRangeId: obj.clientRemittance?.salaryRangeId,
           smsLanguage: obj.clientRemittance?.smsLanguage,
-          status: obj.clientRemittance?.status,
           whatsAppNo: obj.clientRemittance?.whatsAppNo,
           wip: obj.clientRemittance?.wip,
           workAddressId: obj.clientRemittance?.workAddressId,
@@ -396,7 +402,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     validationSchema: yup.object({
       reference: referenceRequired && yup.string().required(' '),
       isResident: yup.string().required(' '),
-      birthDate: yup.date().required(' '),
+      birthDate: yup.string().required(' '),
       idtId: yup.string().required(' '),
       idNo: yup.string().required(' '),
       expiryDate: yup.date().required(' '),
@@ -425,6 +431,9 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     }
   })
 
+  const isClosed = clientIndividualFormik.values.status === 1
+  const wip = clientIndividualFormik.values.wip === 2
+
   const postRtDefault = obj => {
     const date = new Date()
 
@@ -444,11 +453,13 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       issueDate: obj.issueDate && formatDateToApiFunction(obj.issueDate), // test
 
       otpVerified: obj.otpVerified,
+      govCellVerified: obj.govCellVerified,
       plantName: obj.plantName,
       nationalityName: obj.nationalityName,
       status: obj.status,
       categoryName: obj.categoryName,
-      oldReference: obj.oldReference
+      oldReference: obj.oldReference,
+      status: obj.status
     }
 
     //CCTD
@@ -496,6 +507,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       isRelativeDiplomat: obj.isRelativeDiplomat,
       relativeDiplomatInfo: obj.relativeDiplomatInfo,
       otpVerified: obj.otpVerified,
+      govCellVerified: obj.govCellVerified,
       coveredFace: obj.coveredFace,
       isEmployee: obj.isEmployee,
       cobId: obj.cobId,
@@ -503,7 +515,6 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       wip: 1,
       releaseStatus: 1,
       educationLevelName: obj.educationLevelName,
-      status: obj.status,
       trxCountPerYear: obj.trxCountPerYear,
       trxAmountPerYear: obj.trxAmountPerYear
     }
@@ -567,7 +578,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       })
         .then(res => {
           if (res) {
-            toast.success('Record Edited Successfully')
+            toast.success(platformLabels.Edited)
           }
         })
         .catch(error => {})
@@ -588,7 +599,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       })
         .then(res => {
           if (res) {
-            toast.success('Record Successfully')
+            toast.success(platformLabels.Submit)
             setOtpShow(true)
             getClient(res.recordId)
             setEditMode(true)
@@ -604,6 +615,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
         Component: OTPPhoneVerification,
         props: {
           idTypeStore: idTypeStore,
+          recordId: clientIndividualFormik.values.recordId,
           formValidation: clientIndividualFormik,
           functionId: clientIndividualFormik.values.functionId,
           setEditMode: setEditMode,
@@ -641,9 +653,9 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
         record: JSON.stringify(data)
       })
       if (res.recordId) {
-        toast.success('Record Closed Successfully')
+        toast.success(platformLabels.Closed)
         invalidate()
-        setIsClosed(true)
+        getClient(res.recordId)
       }
     } catch {}
   }
@@ -665,13 +677,13 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       key: 'Approval',
       condition: true,
       onClick: 'onApproval',
-      disabled: !isClosed
+      disabled: !(isClosed || wip)
     },
     {
       key: 'Close',
       condition: !isClosed,
       onClick: onClose,
-      disabled: isClosed || !editMode
+      disabled: isClosed || (wip && !isClosed) || !editMode || (isClosed && !wip)
     },
     {
       key: 'Reopen',
@@ -748,7 +760,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                   }
                 />
               </Grid>
-              <Grid item xs={12}>
+              <Grid item xs={6}>
                 <CustomDatePicker
                   name='birthDate'
                   label={labels.birthDate}
@@ -758,11 +770,22 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                   onClear={() => clientIndividualFormik.setFieldValue('birthDate', '')}
                   disabledDate={'>='}
                   readOnly={editMode && true}
-                  error={clientIndividualFormik.touched.birthDate && Boolean(clientIndividualFormik.errors.birthDate)}
+                  error={Boolean(clientIndividualFormik.errors.birthDate)}
                   maxAccess={maxAccess}
                 />
               </Grid>
-              <Grid container xs={12}></Grid>
+
+              <Grid item xs={6}>
+                <CustomDatePickerHijri
+                  name='birthDateHijri'
+                  label={labels.birthDateHijri}
+                  value={clientIndividualFormik.values?.birthDate}
+                  onChange={(name, value) => {
+                    clientIndividualFormik.setFieldValue('birthDate', value)
+                  }}
+                  onClear={() => clientIndividualFormik.setFieldValue('birthDate', '')}
+                />
+              </Grid>
               <Grid item xs={12}>
                 <FieldSet title={labels.id}>
                   <Grid item xs={12}>
@@ -1037,7 +1060,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                       maxAccess={maxAccess}
                     />
                   </Grid>
-                  <Grid container spacing={2} sx={{ paddingTop: '20px' }}>
+                  <Grid container spacing={2} sx={{ paddingTop: '20px', direction: dir }}>
                     <Grid item xs={3}>
                       <CustomTextField
                         name='firstName'
@@ -1106,7 +1129,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                     </Grid>
                   </Grid>
 
-                  <Grid container spacing={2} sx={{ flexDirection: 'row-reverse', paddingTop: '5px' }}>
+                  <Grid container spacing={2} sx={{ flexDirection: 'row-reverse', paddingTop: '5px', direction: dir }}>
                     <Grid item xs={3}>
                       <CustomTextField
                         name='fl_firstName'
@@ -1607,6 +1630,20 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                     />
                   }
                   label={labels?.OTPVerified}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      name='govCellVerified'
+                      disabled={true}
+                      readOnly={editMode && true}
+                      checked={clientIndividualFormik.values?.govCellVerified}
+                      onChange={clientIndividualFormik.handleChange}
+                    />
+                  }
+                  label={labels?.govCellVerified}
                 />
               </Grid>
 

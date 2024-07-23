@@ -29,6 +29,7 @@ const Window = React.memo(
     disabledInfo,
     onApply,
     disabledApply,
+    spacing,
     ...props
   }) => {
     const { settings } = useSettings()
@@ -75,8 +76,8 @@ const Window = React.memo(
         sx={{
           bottom: 0,
           position: 'absolute',
-          width: containerWidth,
-          height: containerHeight,
+          width: spacing ? containerWidth : '100%',
+          height: spacing ? containerHeight : '100%',
           backgroundColor: 'rgba(0, 0, 0, 0.1)',
           display: 'flex',
           justifyContent: 'center',

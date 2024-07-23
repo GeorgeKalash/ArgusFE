@@ -11,10 +11,12 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const ProductCountriesForm = ({ store, setStore, labels, editMode, height, expanded, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId: pId } = store
+  const { platformLabels } = useContext(ControlContext)
 
   const formik = useFormik({
     enableReinitialize: false,
@@ -25,17 +27,35 @@ const ProductCountriesForm = ({ store, setStore, labels, editMode, height, expan
         .array()
         .of(
           yup.object().shape({
-            countryId: yup.string().required(' '),
-            rateTypeId: yup.string().required(' ')
+            countryId: yup.string().required(' ')
           })
         )
         .required('Operations array is required')
     }),
     initialValues: {
-      countries: [{ id: 1, productId: pId, countryId: '', countryRef: '', countryName: '', isInactive: false }]
+      countries: [
+        {
+          id: 1,
+          productId: pId,
+          countryId: '',
+          countryRef: '',
+          countryName: '',
+          purcRateTypeId: null,
+          saleRateTypeId: null,
+          isInactive: false
+        }
+      ]
     },
     onSubmit: values => {
-      postProductCountries(values.countries)
+      const transformedValues = {
+        ...values,
+        countries: values.countries.map(country => ({
+          ...country,
+          purcRateTypeId: country.purcRateTypeId === '' ? null : country.purcRateTypeId,
+          saleRateTypeId: country.saleRateTypeId === '' ? null : country.saleRateTypeId
+        }))
+      }
+      postProductCountries(transformedValues.countries)
     }
   })
 
@@ -52,7 +72,7 @@ const ProductCountriesForm = ({ store, setStore, labels, editMode, height, expan
       record: JSON.stringify(data)
     })
       .then(res => {
-        if (res) toast.success('Record Edited Successfully')
+        if (res) toast.success(platformLabels.Edited)
         getCountries(pId)
       })
       .catch(error => {})
@@ -88,17 +108,37 @@ const ProductCountriesForm = ({ store, setStore, labels, editMode, height, expan
     },
     {
       component: 'resourcecombobox',
-      label: labels.rateType,
-      name: 'rateTypeId',
+      label: labels.saleRateType,
+      name: 'saleRateTypeId',
       props: {
         endpointId: MultiCurrencyRepository.RateType.qry,
         valueField: 'recordId',
         displayField: 'name',
         displayFieldWidth: 1.5,
         mapping: [
-          { from: 'name', to: 'rateTypeName' },
-          { from: 'reference', to: 'rateTypeRef' },
-          { from: 'recordId', to: 'rateTypeId' }
+          { from: 'name', to: 'saleRateTypeName' },
+          { from: 'reference', to: 'saleRateTypeRef' },
+          { from: 'recordId', to: 'saleRateTypeId' }
+        ],
+        columnsInDropDown: [
+          { key: 'reference', value: 'Reference' },
+          { key: 'name', value: 'Name' }
+        ]
+      }
+    },
+    {
+      component: 'resourcecombobox',
+      label: labels.purcRateType,
+      name: 'purcRateTypeId',
+      props: {
+        endpointId: MultiCurrencyRepository.RateType.qry,
+        valueField: 'recordId',
+        displayField: 'name',
+        displayFieldWidth: 1.5,
+        mapping: [
+          { from: 'name', to: 'purcRateTypeName' },
+          { from: 'reference', to: 'purcRateTypeRef' },
+          { from: 'recordId', to: 'purcRateTypeId' }
         ],
         columnsInDropDown: [
           { key: 'reference', value: 'Reference' },

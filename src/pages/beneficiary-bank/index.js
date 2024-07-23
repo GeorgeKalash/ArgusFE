@@ -11,14 +11,17 @@ import toast from 'react-hot-toast'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const BeneficiaryBank = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const { platformLabels } = useContext(ControlContext)
 
   const {
     query: { data },
     filterBy,
+    refetch,
     clearFilter,
     labels: _labels,
     access,
@@ -40,7 +43,7 @@ const BeneficiaryBank = () => {
     } else {
       return await getRequest({
         extension: RemittanceOutwardsRepository.Beneficiary.snapshot,
-        parameters: `_clientId=${_clientId}&_dispersalType=${_dispersalType}&_filter=${filters.qry}`
+        parameters: `_clientId=${_clientId}&_dispersalType=${_dispersalType}&_filter=${filters.qry}&_currencyId=0`
       })
     }
   }
@@ -119,7 +122,7 @@ const BeneficiaryBank = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
   }
 
   const addBenBank = () => {
@@ -149,13 +152,14 @@ const BeneficiaryBank = () => {
       <Grow>
         <Table
           columns={columns}
-          gridData={data ? data : { list: [] }}
+          gridData={data}
           rowId={['beneficiaryId', 'clientId', 'seqNo']}
           onEdit={editBenBank}
           onDelete={delBenBank}
           isLoading={false}
           pageSize={50}
           paginationType='client'
+          refetch={refetch}
           maxAccess={access}
         />
       </Grow>

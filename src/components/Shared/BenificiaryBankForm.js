@@ -27,33 +27,172 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 export default function BenificiaryBankForm({
   viewBtns = true,
-  store,
-  setStore,
   editable = false,
   client,
   beneficiary,
   dispersalType,
   corId,
-  countryId
+  submitted,
+  setSubmitted,
+  countryId,
+  currencyId,
+  resetForm,
+  setResetForm,
+  onChange,
+  setValidSubmit,
+  submitMainForm = true
 }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [maxAccess, setMaxAccess] = useState({ record: [] })
   const { stack: stackError } = useError()
   const [editMode, setEditMode] = useState(beneficiary?.beneficiaryId && !editable)
 
+  const initialValues = {
+    //RTBEN
+    clientId: client?.clientId || '',
+    beneficiaryId: 0,
+    recordId: '',
+    name: '',
+    dispersalType: dispersalType || '',
+    nationalityId: null,
+    isBlocked: false,
+    stoppedDate: null,
+    stoppedReason: '',
+    gender: null,
+    rtName: '',
+    rtId: null,
+    cellPhone: '',
+    cellPhoneRepeated: '',
+    birthDate: null,
+    cobId: '',
+    shortName: '',
+    addressLine1: '',
+    addressLine2: '',
+    clientRef: client?.clientRef || '',
+    clientName: client?.clientName || '',
+    countryId: countryId || '',
+    currencyId: currencyId || null,
+    seqNo: 1,
+
+    //RTBEB
+    bankId: null,
+    accountRef: '',
+    accountRefRepeat: '',
+    accountType: '',
+    IBAN: '',
+    IBANRepeated: '',
+    routingNo: '',
+    swiftCode: '',
+    branchCode: '',
+    branchName: '',
+    state: '',
+    city: '',
+    zipcode: '',
+    remarks: '',
+    seqNo: 1
+  }
+
+  const { formik } = useForm({
+    maxAccess,
+    initialValues,
+    enableReinitialize: true,
+    validateOnChange: true,
+    validationSchema: yup.object({
+      clientId: yup.string().required(' '),
+      countryId: yup.string().required(' '),
+      name: yup.string().required(' '),
+      bankId: yup.string().required(' '),
+      currencyId: yup.string().required(),
+      accountRefRepeat: yup.string().test('accountRef must match', 'Error', function (value) {
+        const { accountRef } = this.parent
+
+        return accountRef == value
+      }),
+      IBANRepeated: yup.string().test('IBAN must match', 'Error', function (value) {
+        const { IBAN } = this.parent
+
+        return IBAN == value
+      }),
+      cellPhoneRepeated: yup.number().test('cellPhone must match', 'Error', function (value) {
+        const { cellPhone } = this.parent
+
+        return cellPhone == value
+      })
+    }),
+    onSubmit: async values => {
+      if (submitMainForm) {
+        const header = {
+          clientId: values.clientId,
+          clientRef: values.clientRef,
+          clientName: values.clientName,
+          beneficiaryId: values.beneficiaryId,
+          gender: values.gender,
+          rtId: values.rtId,
+          rtName: values.rtName,
+          name: values.name,
+          dispersalType: values.dispersalType,
+          isBlocked: values.isBlocked,
+          stoppedDate: values.stoppedDate ? formatDateToApi(values.stoppedDate) : null,
+          stoppedReason: values.stoppedReason,
+          nationalityId: values.nationalityId,
+          cellPhone: values.cellPhone,
+          birthDate: values.birthDate ? formatDateToApi(values.birthDate) : null,
+          cobId: values.cobId,
+          shortName: values.shortName,
+          addressLine1: values.addressLine1,
+          addressLine2: values.addressLine2,
+          countryId: values.countryId,
+          currencyId: values.currencyId,
+          seqNo: values.seqNo
+        }
+
+        const bankInfo = {
+          bankId: values.bankId,
+          clientId: values.clientId,
+          beneficiaryId: values.beneficiaryId,
+          accountRef: values.accountRef,
+          accountType: values.accountType,
+          IBAN: values.IBAN,
+          routingNo: values.routingNo,
+          swiftCode: values.swiftCode,
+          branchCode: values.branchCode,
+          branchName: values.branchName,
+          city: values.city,
+          state: values.state,
+          zipcode: values.zipcode,
+          seqNo: values.seqNo
+        }
+        const data = { header: header, beneficiaryBank: bankInfo }
+
+        const res = await postRequest({
+          extension: RemittanceOutwardsRepository.BeneficiaryBank.set,
+          record: JSON.stringify(data)
+        })
+
+        if (res.recordId) {
+          toast.success('Record Updated Successfully')
+        }
+
+        setEditMode(true)
+      }
+    }
+  })
+
   useEffect(() => {
     ;(async function () {
-      if (countryId && corId && dispersalType) {
+      if (formik.values.countryId && dispersalType) {
         const qryCCL = await getRequest({
           extension: RemittanceSettingsRepository.CorrespondentControl.qry,
-          parameters: `_countryId=${countryId}&_corId=${corId}&_resourceId=${ResourceIds.BeneficiaryBank}`
+          parameters: `_countryId=${formik.values.countryId}&_corId=${corId || 0}&_resourceId=${
+            ResourceIds.BeneficiaryBank
+          }`
         })
 
         const controls = { controls: qryCCL.list }
         const maxAccess = { record: controls }
         setMaxAccess(maxAccess)
       }
-      if (beneficiary?.beneficiaryId && (!store || store.submitted != store.loadBen)) {
+      if (beneficiary?.beneficiaryId && client?.clientId) {
         const RTBEB = await getRequest({
           extension: RemittanceOutwardsRepository.BeneficiaryBank.get,
           parameters: `_clientId=${client?.clientId}&_beneficiaryId=${beneficiary?.beneficiaryId}&_seqNo=${beneficiary?.beneficiarySeqNo}`
@@ -79,6 +218,7 @@ export default function BenificiaryBankForm({
           rtId: RTBEN?.record?.rtId,
           rtName: RTBEN?.record?.rtName,
           cellPhone: RTBEN?.record?.cellPhone,
+          cellPhoneRepeated: RTBEN?.record?.cellPhone,
           birthDate: RTBEN?.record?.birthDate && formatDateFromApi(RTBEN.record.birthDate),
           cobId: RTBEN?.record?.cobId,
           shortName: RTBEN?.record?.shortName,
@@ -87,6 +227,7 @@ export default function BenificiaryBankForm({
           clientRef: RTBEN?.record?.clientRef,
           clientName: RTBEN?.record?.clientName,
           countryId: RTBEN?.record?.countryId,
+          currencyId: RTBEN?.record?.currencyId,
           seqNo: RTBEN?.record?.seqNo,
 
           //RTBEB
@@ -95,6 +236,7 @@ export default function BenificiaryBankForm({
           accountRefRepeat: RTBEB?.record?.accountRef,
           accountType: RTBEB?.record?.accountType,
           IBAN: RTBEB?.record?.IBAN,
+          IBANRepeated: RTBEB?.record?.IBAN,
           routingNo: RTBEB?.record?.routingNo,
           swiftCode: RTBEB?.record?.swiftCode,
           branchCode: RTBEB?.record?.branchCode,
@@ -105,158 +247,78 @@ export default function BenificiaryBankForm({
           remarks: RTBEB?.record?.remarks,
           seqNo: RTBEB?.record?.seqNo
         }
-
-        if (store) {
-          setStore(prevStore => ({
-            ...prevStore,
-            beneficiaryList: obj
-          }))
-        }
         formik.setValues(obj)
       }
-      if (store?.submitted) {
-        formik.handleSubmit()
-      }
-
-      if (store?.clearBenForm && !store?.submitted) {
-        formik.resetForm()
-        setStore(prevStore => ({
-          ...prevStore,
-          clearBenForm: false,
-          loadBen: false
-        }))
-      }
     })()
-  }, [store?.submitted, store?.clearBenForm, beneficiary?.beneficiaryId, beneficiary?.beneficiarySeqNo])
+  }, [beneficiary?.beneficiaryId, beneficiary?.beneficiarySeqNo, client?.clientId, formik.values.countryId])
 
-  const [initialValues, setInitialData] = useState({
-    //RTBEN
-    clientId: client?.clientId || '',
-    beneficiaryId: 0,
-    recordId: '',
-    name: '',
-    dispersalType: dispersalType || '',
-    nationalityId: null,
-    isBlocked: false,
-    stoppedDate: null,
-    stoppedReason: '',
-    gender: null,
-    rtName: '',
-    rtId: null,
-    cellPhone: '',
-    birthDate: null,
-    cobId: '',
-    shortName: '',
-    addressLine1: '',
-    addressLine2: '',
-    clientRef: client?.clientRef || '',
-    clientName: client?.clientName || '',
-    countryId: countryId || '',
-    seqNo: 1,
-
-    //RTBEB
-    bankId: null,
-    accountRef: '',
-    accountRefRepeat: '',
-    accountType: '',
-    IBAN: '',
-    routingNo: '',
-    swiftCode: '',
-    branchCode: '',
-    branchName: '',
-    state: '',
-    city: '',
-    zipcode: '',
-    remarks: '',
-    seqNo: 1
-  })
-
-  const { formik } = useForm({
-    maxAccess,
-    initialValues,
-    enableReinitialize: true,
-    validateOnChange: true,
-    validationSchema: yup.object({
-      clientId: yup.string().required(' '),
-      countryId: yup.string().required(' '),
-      name: yup.string().required(' '),
-      bankId: yup.string().required(' ')
-    }),
-    validate: values => {
-      const errors = {}
-      if (values.accountRef && values.accountRefRepeat != values.accountRef) {
-        errors.accountRefRepeat = 'accountRef must match'
-        setStore(prevStore => ({
-          ...prevStore,
-          submitted: false
-        }))
-      }
-
-      return errors
-    },
-    onSubmit: async values => {
-      const header = {
-        clientId: values.clientId,
-        clientRef: values.clientRef,
-        clientName: values.clientName,
-        beneficiaryId: values.beneficiaryId,
-        gender: values.gender,
-        rtId: values.rtId,
-        rtName: values.rtName,
-        name: values.name,
-        dispersalType: values.dispersalType,
-        isBlocked: values.isBlocked,
-        stoppedDate: values.stoppedDate ? formatDateToApi(values.stoppedDate) : null,
-        stoppedReason: values.stoppedReason,
-        nationalityId: values.nationalityId,
-        cellPhone: values.cellPhone,
-        birthDate: values.birthDate ? formatDateToApi(values.birthDate) : null,
-        cobId: values.cobId,
-        shortName: values.shortName,
-        addressLine1: values.addressLine1,
-        addressLine2: values.addressLine2,
-        countryId: values.countryId,
-        seqNo: values.seqNo
-      }
-
-      const bankInfo = {
-        bankId: values.bankId,
-        clientId: values.clientId,
-        beneficiaryId: values.beneficiaryId,
-        accountRef: values.accountRef,
-        accountType: values.accountType,
-        IBAN: values.IBAN,
-        routingNo: values.routingNo,
-        swiftCode: values.swiftCode,
-        branchCode: values.branchCode,
-        branchName: values.branchName,
-        city: values.city,
-        state: values.state,
-        zipcode: values.zipcode,
-        seqNo: values.seqNo
-      }
-      const data = { header: header, beneficiaryBank: bankInfo }
-
-      if (store?.submitted) {
-        setStore(prevStore => ({
-          ...prevStore,
-          submitted: true,
-          beneficiaryList: data,
-          loadBen: false
-        }))
-      } else {
-        const res = await postRequest({
-          extension: RemittanceOutwardsRepository.BeneficiaryBank.set,
-          record: JSON.stringify(data)
-        })
-
-        if (res.recordId) {
-          toast.success('Record Updated Successfully')
-        }
-      }
-      setEditMode(true)
+  useEffect(() => {
+    if (resetForm) {
+      formik.resetForm()
+      setResetForm(false)
     }
-  })
+  }, [resetForm])
+
+  useEffect(() => {
+    const values = formik.values
+
+    const header = {
+      clientId: values.clientId,
+      clientRef: values.clientRef,
+      clientName: values.clientName,
+      beneficiaryId: values.beneficiaryId,
+      gender: values.gender,
+      rtId: values.rtId,
+      rtName: values.rtName,
+      name: values.name,
+      dispersalType: values.dispersalType,
+      isBlocked: values.isBlocked,
+      stoppedDate: values.stoppedDate ? formatDateToApi(values.stoppedDate) : null,
+      stoppedReason: values.stoppedReason,
+      nationalityId: values.nationalityId,
+      cellPhone: values.cellPhone,
+      birthDate: values.birthDate ? formatDateToApi(values.birthDate) : null,
+      cobId: values.cobId,
+      shortName: values.shortName,
+      addressLine1: values.addressLine1,
+      addressLine2: values.addressLine2,
+      countryId: values.countryId,
+      currencyId: values.currencyId,
+      seqNo: values.seqNo
+    }
+
+    const bankInfo = {
+      bankId: values.bankId,
+      clientId: values.clientId,
+      beneficiaryId: values.beneficiaryId,
+      accountRef: values.accountRef,
+      accountType: values.accountType,
+      IBAN: values.IBAN,
+      routingNo: values.routingNo,
+      swiftCode: values.swiftCode,
+      branchCode: values.branchCode,
+      branchName: values.branchName,
+      city: values.city,
+      state: values.state,
+      zipcode: values.zipcode,
+      seqNo: values.seqNo
+    }
+    const data = { header: header, beneficiaryBank: bankInfo }
+    if (onChange) onChange(data)
+  }, [formik.values])
+
+  useEffect(() => {
+    if (!submitMainForm) {
+      const errors = Object.keys(formik.errors).length !== 0
+      if (errors) {
+        setSubmitted(false)
+        formik.handleSubmit()
+
+        return
+      }
+      if (submitted && !errors) setValidSubmit(true)
+    }
+  }, [submitted])
 
   const { labels: _labels } = useResourceQuery({
     datasetId: ResourceIds.BeneficiaryBank
@@ -284,7 +346,7 @@ export default function BenificiaryBankForm({
           <Grid container>
             {/* First Column */}
             <Grid container rowGap={2} xs={6}>
-              <Grid container xs={12}>
+              <FormGrid xs={12}>
                 <ResourceLookup
                   endpointId={CTCLRepository.ClientCorporate.snapshot}
                   parameters={{
@@ -297,10 +359,15 @@ export default function BenificiaryBankForm({
                   form={formik}
                   required
                   readOnly={editMode}
-                  displayFieldWidth={2}
                   valueShow='clientRef'
                   secondValueShow='clientName'
                   maxAccess={maxAccess}
+                  displayFieldWidth={3}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Ref.' },
+                    { key: 'name', value: 'Name' },
+                    { key: 'cellPhone', value: 'Cell Phone' }
+                  ]}
                   onChange={async (event, newValue) => {
                     if (newValue?.status == -1) {
                       stackError({
@@ -315,7 +382,7 @@ export default function BenificiaryBankForm({
                   }}
                   errorCheck={'clientId'}
                 />
-              </Grid>
+              </FormGrid>
               <FormGrid xs={12}>
                 <ResourceComboBox
                   endpointId={SystemRepository.Country.qry}
@@ -360,7 +427,27 @@ export default function BenificiaryBankForm({
                   readOnly={(formik.values.countryId && editMode) || editMode || !formik.values.countryId}
                 />
               </FormGrid>
-
+              <FormGrid hideonempty xs={12}>
+                <ResourceComboBox
+                  endpointId={SystemRepository.Currency.qry}
+                  name='currencyId'
+                  label={_labels.currency}
+                  valueField='recordId'
+                  displayField={['reference', 'name']}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' }
+                  ]}
+                  values={formik.values}
+                  required
+                  readOnly={(formik.values.currencyId && editMode) || currencyId || editMode}
+                  maxAccess={maxAccess}
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('currencyId', newValue?.recordId || null)
+                  }}
+                  error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
+                />
+              </FormGrid>
               <FormGrid hideonempty xs={12}>
                 <CustomTextField
                   name='accountRef'
@@ -586,6 +673,27 @@ export default function BenificiaryBankForm({
                   error={formik.touched.cellPhone && Boolean(formik.errors.cellPhone)}
                   maxAccess={maxAccess}
                   readOnly={editMode}
+                  onCopy={handleCopy}
+                  onPaste={handleCopy}
+                />
+              </FormGrid>
+              <FormGrid hideonempty xs={12}>
+                <CustomTextField
+                  name='cellPhoneRepeated'
+                  label={_labels.confirmCellPhone}
+                  value={formik.values?.cellPhoneRepeated}
+                  phone={true}
+                  onChange={formik.handleChange}
+                  maxLength='20'
+                  autoComplete='off'
+                  onClear={() => formik.setFieldValue('cellPhoneRepeated', '')}
+                  error={formik.touched.cellPhoneRepeated && Boolean(formik.errors.cellPhoneRepeated)}
+                  maxAccess={maxAccess}
+                  readOnly={editMode}
+                  onCopy={handleCopy}
+                  onPaste={handleCopy}
+                  onBlur={formik.handleBlur}
+                  required={formik.values.cellPhone}
                 />
               </FormGrid>
               <FormGrid hideonempty xs={12}>
@@ -610,21 +718,20 @@ export default function BenificiaryBankForm({
                 />
               </FormGrid>
               <FormGrid hideonempty xs={12}>
-                <Grid item xs={12}>
-                  <ResourceComboBox
-                    endpointId={CurrencyTradingSettingsRepository.RelationType.qry}
-                    name='rtId'
-                    label={_labels.relationType}
-                    displayField='name'
-                    valueField='recordId'
-                    values={formik.values}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('rtId', newValue ? newValue?.recordId : '')
-                    }}
-                    error={formik.touched.rtId && Boolean(formik.errors.rtId)}
-                    readOnly={editMode}
-                  />
-                </Grid>
+                <ResourceComboBox
+                  endpointId={CurrencyTradingSettingsRepository.RelationType.qry}
+                  name='rtId'
+                  label={_labels.relationType}
+                  displayField='name'
+                  valueField='recordId'
+                  values={formik.values}
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('rtId', newValue ? newValue?.recordId : '')
+                  }}
+                  maxAccess={maxAccess}
+                  error={formik.touched.rtId && Boolean(formik.errors.rtId)}
+                  readOnly={editMode}
+                />
               </FormGrid>
               <FormGrid hideonempty xs={12}>
                 <CustomTextField
@@ -672,6 +779,26 @@ export default function BenificiaryBankForm({
                   error={formik.touched.IBAN && Boolean(formik.errors.IBAN)}
                   maxAccess={maxAccess}
                   readOnly={editMode}
+                  onCopy={handleCopy}
+                  onPaste={handleCopy}
+                  onClear={() => formik.setFieldValue('IBAN', '')}
+                />
+              </FormGrid>
+              <FormGrid hideonempty xs={12}>
+                <CustomTextField
+                  name='IBANRepeated'
+                  label={_labels.confirmIBAN}
+                  maxLength='50'
+                  value={formik.values.IBANRepeated}
+                  onChange={formik.handleChange}
+                  onClear={() => formik.setFieldValue('IBANRepeated', '')}
+                  error={formik.touched.IBANRepeated && Boolean(formik.errors.IBANRepeated)}
+                  maxAccess={maxAccess}
+                  readOnly={editMode}
+                  onCopy={handleCopy}
+                  onPaste={handleCopy}
+                  onBlur={formik.handleBlur}
+                  required={formik.values.IBAN}
                 />
               </FormGrid>
               <FormGrid hideonempty xs={12}>

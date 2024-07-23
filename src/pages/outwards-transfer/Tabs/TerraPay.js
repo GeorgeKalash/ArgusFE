@@ -1,1 +1,1 @@
-export default function InstantCash({}) {}
+export default function TerraPay({}) {}

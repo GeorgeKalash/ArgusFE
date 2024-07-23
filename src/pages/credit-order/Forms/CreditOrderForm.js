@@ -39,8 +39,10 @@ import { DataGrid } from 'src/components/Shared/DataGrid'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function CreditOrderForm({ labels, maxAccess, recordId, expanded, plantId, userData, window }) {
+  const { platformLabels } = useContext(ControlContext)
   const { height } = useWindowDimensions()
   const [isLoading, setIsLoading] = useState(false)
   const [isClosed, setIsClosed] = useState(false)
@@ -138,7 +140,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
           })
 
           if (res.recordId) {
-            toast.success('Record Updated Successfully')
+            toast.success(platformLabels.Updated)
             formik.setFieldValue('recordId', res.recordId)
             setEditMode(true)
 
@@ -207,7 +209,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
         record: JSON.stringify(copy)
       })
       if (res.recordId) {
-        toast.success('Record Closed Successfully')
+        toast.success(platformLabels.Closed)
         invalidate()
         setIsClosed(true)
       }
@@ -231,7 +233,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
         record: JSON.stringify(copy)
       })
       if (res.recordId) {
-        toast.success('Record Closed Successfully')
+        toast.success(platformLabels.Closed)
         invalidate()
         setIsClosed(false)
       }
@@ -255,7 +257,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
         record: JSON.stringify(copy)
       })
       if (res.recordId) {
-        toast.success('Record Closed Successfully')
+        toast.success(platformLabels.Closed)
         setIsTFR(true)
         invalidate()
         setConfirmationWindowOpen(false)
