@@ -55,6 +55,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
       ttNo: '',
       productName: '',
       clientId: '',
+      currencyId: '',
       clientRef: '',
       clientName: '',
       cellPhone: '',
@@ -172,6 +173,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
       amount: headerView.amount,
       productName: headerView.productName,
       clientId: headerView.clientId,
+      currencyId: headerView.currencyId,
       clientRef: headerView.clientRef,
       clientName: headerView.clientName,
       cellPhone: headerView.cellPhone,
@@ -397,7 +399,8 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
                 endpointId={RemittanceOutwardsRepository.Beneficiary.snapshot}
                 parameters={{
                   _clientId: formik.values.clientId,
-                  _dispersalType: formik.values.dispersalType
+                  _dispersalType: formik.values.dispersalType,
+                  _currencyId: formik.values.currencyId
                 }}
                 valueField='name'
                 displayField='name'

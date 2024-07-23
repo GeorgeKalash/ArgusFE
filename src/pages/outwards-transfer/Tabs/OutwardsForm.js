@@ -161,7 +161,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       tdAmount: yup.number().test(`isCommission less than tdAmount`, `Error`, function (value) {
         const { commission } = this.parent
 
-        return value < commission
+        return value <= commission
       }),
       amountRows: yup
         .array()
@@ -312,9 +312,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
 
   const vatAmount = (formik.values.commission * formik.values.vatRate) / 100
 
-  const amount = parseFloat(
-    formik.values.lcAmount + (formik.values.commission + formik.values.vatAmount - formik.values.tdAmount)
-  )
+  const amount = parseFloat(formik.values.lcAmount + (formik.values.commission + vatAmount - formik.values.tdAmount))
 
   const receivedTotal = formik.values.amountRows.reduce((sumAmount, row) => {
     const curValue = parseFloat(row.amount.toString().replace(/,/g, '')) || 0
@@ -326,6 +324,9 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
 
   const onProductSubmit = productData => {
     const selectedRowData = productData?.find(row => row.checked)
+    handleSelectedProduct(selectedRowData)
+  }
+  function handleSelectedProduct(selectedRowData) {
     formik.setFieldValue('bankType', selectedRowData?.interfaceId)
     formik.setFieldValue('productId', selectedRowData?.productId)
     formik.setFieldValue('commission', selectedRowData?.fees)
@@ -370,6 +371,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
           },
           corId: formik.values.corId ? formik.values.corId : 0,
           countryId: formik.values.countryId,
+          currencyId: formik.values.currencyId,
           beneficiary: { beneficiaryId: formik.values.beneficiaryId, beneficiarySeqNo: formik.values.beneficiarySeqNo },
           dispersalType: formik.values.dispersalType
         },
@@ -386,6 +388,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
             clientRef: formik.values.clientRef,
             clientName: formik.values.clientName
           },
+          currencyId: formik.values.currencyId,
           dispersalType: formik.values.dispersalType,
           corId: formik.values.corId ? formik.values.corId : 0,
           countryId: formik.values.countryId,
@@ -553,6 +556,22 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
     const res = await getOutwards(recordId)
     await fillOutwardsData(res.record)
     await chooseClient(res.record.headerView.clientId)
+  }
+
+  async function checkProduct() {
+    try {
+      if (plantId && formik.values.countryId && formik.values.currencyId && formik.values.dispersalType) {
+        var parameters = `_plantId=${plantId}&_countryId=${formik.values.countryId}&_dispersalType=${
+          formik.values.dispersalType
+        }&_currencyId=${formik.values.currencyId}&_amount=${formik.values.fcAmount || 0}`
+
+        const res = await getRequest({
+          extension: RemittanceOutwardsRepository.ProductDispersalEngine.qry,
+          parameters: parameters
+        })
+        if (res.list.length == 1) handleSelectedProduct(res.list[0])
+      }
+    } catch (error) {}
   }
 
   useEffect(() => {
@@ -736,13 +755,22 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                     required
                     maxAccess={maxAccess}
                     onChange={e => formik.setFieldValue('fcAmount', e.target.value)}
+                    onBlur={async () => {
+                      await checkProduct()
+                    }}
                     onClear={() => formik.setFieldValue('fcAmount', '')}
                     error={formik.touched.fcAmount && Boolean(formik.errors.fcAmount)}
                     maxLength={10}
                   />
                 </Grid>
                 <Grid item xs={2}>
-                  <Button sx={{ backgroundColor: '#908c8c', color: '#000000' }} onClick={() => openProductWindow()}>
+                  <Button
+                    sx={{ backgroundColor: '#908c8c', color: '#000000' }}
+                    disabled={
+                      !(plantId && formik.values.countryId && formik.values.currencyId && formik.values.dispersalType)
+                    }
+                    onClick={() => openProductWindow()}
+                  >
                     Product
                   </Button>
                 </Grid>
@@ -837,7 +865,6 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                       value={vatAmount}
                       readOnly
                       maxAccess={maxAccess}
-                      error={formik.touched.vatAmount && Boolean(formik.errors.vatAmount)}
                       maxLength={10}
                     />
                   </Grid>
@@ -851,7 +878,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                     onChange={e => {
                       formik.setFieldValue('tdAmount', e.target.value)
                     }}
-                    onClear={() => formik.setFieldValue('tdAmount', '')}
+                    onClear={() => formik.setFieldValue('tdAmount', 0)}
                     error={formik.touched.tdAmount && Boolean(formik.errors.tdAmount)}
                     maxLength={10}
                   />
@@ -1161,7 +1188,8 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                   endpointId={RemittanceOutwardsRepository.Beneficiary.snapshot}
                   parameters={{
                     _clientId: formik.values.clientId,
-                    _dispersalType: formik.values.dispersalType
+                    _dispersalType: formik.values.dispersalType,
+                    _currencyId: formik.values.currencyId
                   }}
                   valueField='name'
                   displayField='name'
