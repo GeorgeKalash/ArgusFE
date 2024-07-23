@@ -157,5 +157,6 @@ export const ResourceIds = {
   ChangePassword: 20118,
   PaymentVouchers: 31305,
   Roles: 21103,
-  Checkbook: 33201
+  Checkbook: 33201,
+  MobileSystemDefaults: 36123
 }
