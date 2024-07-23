@@ -106,6 +106,13 @@ const Table = ({
 }) => {
   const { stack } = useWindow()
 
+  props.gridData.list = props.gridData.list.map(obj => ({
+    ...obj,
+    checked:
+      Array.isArray(checkedRows) &&
+      checkedRows.some(checkedRow => Object.keys(checkedRow).every(key => obj[key] === checkedRow[key]))
+  }))
+
   const [gridData, setGridData] = useState(props.gridData)
   const { platformLabels } = useContext(ControlContext)
   const { languageId } = useContext(AuthContext)
@@ -123,16 +130,14 @@ const Table = ({
   }
 
   useEffect(() => {
-    if (!checkedRows && handleCheckboxChange) {
+    if (handleCheckedRows) {
       const newIds = (props.gridData?.list || [])
         .filter(obj => obj.hasAccess)
         .map(obj => Object.fromEntries(Object.entries(obj).filter(([key]) => props.rowId.includes(key))))
 
-      console.log(newIds)
-
-      handleCheckboxChange(newIds)
+      handleCheckedRows(newIds)
     }
-  }, [gridData])
+  }, [props.gridData])
 
   const CustomPagination = () => {
     if (pagination) {

@@ -6,7 +6,7 @@ import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useMemo, useState } from 'react'
 import { DataSets } from 'src/resources/DataSets'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
@@ -65,7 +65,7 @@ export default function RowAccessTab({ labels, maxAccess, recordId }) {
   const checkedRows = formik.values.checkedRows
 
   function setCheckedRows(rows) {
-    // formik.setFieldValue('checkedRows', rows)
+    formik.setFieldValue('checkedRows', rows)
   }
 
   async function fetchGridData(resourceId) {
@@ -77,40 +77,21 @@ export default function RowAccessTab({ labels, maxAccess, recordId }) {
         parameters: `_sgId=${recordId}&_filter=&_resourceId=${classId}`
       })
 
-      const modifiedData = moduleRes?.list?.map(item => ({
-        ...item,
-        checked: item.hasAccess
-      }))
-
-      // setCheckedRows(
-      //   (moduleRes.list || [])
-      //     .filter(obj => obj.hasAccess)
-      //     .map(obj => Object.fromEntries(Object.entries(obj).filter(([key]) => ['recordId'].includes(key))))
-      // )
-
-      setData({ ...moduleRes, list: modifiedData })
+      setData(moduleRes)
     } catch (error) {}
   }
 
-  const checkHandler = () => {
-    return {
-      list: data.list.map(obj => ({
-        ...obj,
-        checked: checkedRows.some(checkedRow => Object.keys(checkedRow).every(key => obj[key] === checkedRow[key]))
-      }))
-    }
-  }
-
-  const latestData = checkHandler()
-
-  const filteredData = latestData && {
-    ...latestData,
-    list: latestData?.list?.filter(
-      item =>
-        (item.rowRef && item.rowRef.toString().includes(formik.values.search)) ||
-        (item.rowName && item.rowName.toLowerCase().includes(formik.values.search.toLowerCase()))
-    )
-  }
+  const filtered = useMemo(
+    () => ({
+      ...data,
+      list: data?.list?.filter(
+        item =>
+          (item.rowRef && item.rowRef.toString().includes(formik.values.search)) ||
+          (item.rowName && item.rowName.toLowerCase().includes(formik.values.search.toLowerCase()))
+      )
+    }),
+    [formik.values.search, data]
+  )
 
   const handleSearchChange = event => {
     const { value } = event.target
@@ -120,7 +101,6 @@ export default function RowAccessTab({ labels, maxAccess, recordId }) {
   useEffect(() => {
     ;(async function () {
       try {
-        setCheckedRows([])
         if (recordId) await fetchGridData()
       } catch (error) {}
     })()
@@ -172,7 +152,8 @@ export default function RowAccessTab({ labels, maxAccess, recordId }) {
             checkedRows={checkedRows}
             handleCheckedRows={setCheckedRows}
             columns={rowColumns}
-            gridData={filteredData}
+            gridData={filtered}
+            key={formik.values.classId}
             rowId={['recordId']}
             isLoading={false}
             maxAccess={maxAccess}
