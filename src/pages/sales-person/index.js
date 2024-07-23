@@ -60,11 +60,7 @@ const SalesPerson = () => {
       headerName: _labels[3],
       flex: 1
     },
-    {
-      field: 'username',
-      headerName: _labels[5],
-      flex: 1
-    },
+
     {
       field: 'commissionPct',
       headerName: _labels[4],
