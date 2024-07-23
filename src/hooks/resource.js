@@ -2,7 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import useResourceParams from './useResourceParams'
 import { useState } from 'react'
 
-export function useResourceQuery({ endpointId, filter, datasetId, queryFn, search, enabled = true }) {
+export function useResourceQuery({ endpointId, filter, datasetId, queryFn, search, enabled = true, functionId }) {
   const [searchValue, setSearchValue] = useState('')
   const [filters, setFilters] = useState(filter?.default || {})
   const [apiOption, setApiOption] = useState('')
@@ -23,7 +23,7 @@ export function useResourceQuery({ endpointId, filter, datasetId, queryFn, searc
   const query = useQuery({
     retry: false,
     refetchOnWindowFocus: false,
-    queryKey: [endpointId, searchValue, JSON.stringify(filters), apiOption],
+    queryKey: [endpointId, searchValue, JSON.stringify(filters), apiOption, functionId],
     queryFn: isSearchMode
       ? ({ queryKey: [_, qry] }) =>
           search.searchFn({
