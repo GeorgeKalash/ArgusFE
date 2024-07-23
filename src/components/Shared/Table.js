@@ -30,16 +30,14 @@ import { Grow } from './Layouts/Grow'
 import { Fixed } from './Layouts/Fixed'
 
 const Table = ({
-  fetchGridData,
   paginationType = '',
   viewCheckButtons = false,
   showCheckboxColumn = false,
   pagination = true,
-  handleCheckedRows,
   setData,
   ...props
 }) => {
-  const pageSize = props?.pageSize || 100
+  const pageSize = props?.pageSize || 10000
   const api = props?.api ? props?.api : props?.paginationParameters || ''
   const refetch = props?.refetch
   const [gridData, setGridData] = useState({})
@@ -83,9 +81,17 @@ const Table = ({
       return col
     })
 
+  const shouldRemoveColumn = column => {
+    const match = columnsAccess && columnsAccess.find(item => item.controlId === column.id)
+
+    return match && match.accessLevel === ControlAccessLevel.Hidden
+  }
+  const filteredColumns = columns.filter(column => !shouldRemoveColumn(column))
+
   useEffect(() => {
-    const areAllValuesTrue = props?.gridData?.list?.every(item => item.checked === true)
+    const areAllValuesTrue = props?.gridData?.list?.every(item => item?.checked === true)
     setChecked(areAllValuesTrue)
+    if (typeof setData === 'function') onSelectionChanged
 
     props?.gridData &&
       paginationType !== 'api' &&
@@ -348,7 +354,14 @@ const Table = ({
       }, {})
     )
 
-    if (typeof setData === 'function') setData(allNodes.map(node => node.data))
+    if (typeof setData === 'function') onSelectionChanged
+  }
+
+  const onSelectionChanged = params => {
+    const gridApi = params.api
+    const selectedNodes = gridApi.getSelectedNodes()
+    const selectedData = selectedNodes.map(node => node.data)
+    setData(selectedData)
   }
 
   function openDelete(obj) {
@@ -381,8 +394,8 @@ const Table = ({
   if (props.onEdit || props.onDelete || props?.popupComponent) {
     const deleteBtnVisible = maxAccess ? props.onDelete && maxAccess > TrxType.EDIT : props.onDelete ? true : false
 
-    if (!columns?.some(column => column.field === 'actions'))
-      columns?.push({
+    if (!filteredColumns?.some(column => column.field === 'actions'))
+      filteredColumns?.push({
         field: 'actions',
         headerName: '',
         width: 100,
@@ -461,9 +474,8 @@ const Table = ({
           }
         ]
       : []),
-    ...columns
+    ...filteredColumns
   ]
-  console.log('columns', columns)
 
   return (
     <VertLayout>
