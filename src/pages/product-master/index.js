@@ -27,7 +27,7 @@ const ProductMaster = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: RemittanceSettingsRepository.Correspondent.qry,
+    endpointId: RemittanceSettingsRepository.ProductMaster.qry,
     datasetId: ResourceIds.ProductMaster
   })
 
