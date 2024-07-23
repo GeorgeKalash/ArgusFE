@@ -78,7 +78,6 @@ export function useResourceQuery({ endpointId, filter, datasetId, queryFn, searc
       setFilters({})
     },
     refetch(value) {
-      setSearchValue('')
       if (!value.hasOwnProperty('params')) {
         query.refetch()
       } else if (searchValue) {
