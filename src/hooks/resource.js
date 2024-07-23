@@ -6,7 +6,6 @@ export function useResourceQuery({ endpointId, filter, datasetId, queryFn, searc
   const [searchValue, setSearchValue] = useState('')
   const [filters, setFilters] = useState(filter?.default || {})
   const [apiOption, setApiOption] = useState('')
-
   const isSearchMode = !!searchValue
 
   const isFilterMode =
@@ -23,7 +22,7 @@ export function useResourceQuery({ endpointId, filter, datasetId, queryFn, searc
   const query = useQuery({
     retry: false,
     refetchOnWindowFocus: false,
-    queryKey: [endpointId, searchValue, JSON.stringify(filters), apiOption, enabled],
+    queryKey: [endpointId, searchValue, JSON.stringify(filters), apiOption],
     queryFn: isSearchMode
       ? ({ queryKey: [_, qry] }) =>
           search.searchFn({
@@ -36,19 +35,15 @@ export function useResourceQuery({ endpointId, filter, datasetId, queryFn, searc
             pagination: apiOption
           })
       : apiOption
-      ? enabled
-        ? () => queryFn(apiOption)
-        : { list: [] }
-      : enabled
-      ? () => queryFn()
-      : { list: [] },
-    enabled: access?.record?.maxAccess > 0
+      ? () => queryFn(apiOption)
+      : () => queryFn(),
+    enabled: access?.record?.maxAccess > 0 && enabled
   })
 
   return {
     access,
     labels,
-    query: enabled ? query : { data: { list: [] } },
+    query: query,
     search(query) {
       setSearchValue(query)
     },
