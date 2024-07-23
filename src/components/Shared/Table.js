@@ -131,7 +131,6 @@ const Table = ({
         const incrementPage = () => {
           if (page < pageCount) {
             api({ ...api, _startAt: page * pageSize, _pageSize: pageSize, params: gridData?._params })
-            console.log(api.params, '')
           }
         }
 
