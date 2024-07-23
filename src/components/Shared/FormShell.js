@@ -1,4 +1,4 @@
-import { DialogContent, Box } from '@mui/material'
+import { DialogContent } from '@mui/material'
 import { useState } from 'react'
 import WindowToolbar from './WindowToolbar'
 import TransactionLog from './TransactionLog'
@@ -52,7 +52,7 @@ export default function FormShell({
 
   function handleReset() {
     if (typeof clear === 'function') {
-      clear(true)
+      clear()
     } else {
       form.resetForm({
         values: form.initialValues

@@ -16,18 +16,19 @@ export function WindowProvider({ children }) {
     })
   }
 
+  function addToStack(options) {
+    setStack(stack => [...stack, options])
+  }
+
   return (
-    <WindowContext.Provider
-      value={{
-        stack(options) {
-          setStack(stack => [...stack, options])
-        }
-      }}
-    >
+    <WindowContext.Provider value={{ stack: addToStack }}>
       <ClearContext.Provider
         value={{
-          clear(value) {
-            setClear(value)
+          clear() {
+            const currentValue = stack[stack.length - 1]
+            closeWindow()
+            currentValue.props.recordId = null
+            addToStack(currentValue)
           }
         }}
       >
@@ -52,8 +53,7 @@ export function WindowProvider({ children }) {
               styles={styles}
             >
               <Component
-                key={clear}
-                clear={clear}
+                key={clear ? null : props.recordId}
                 {...props}
                 recordId={clear ? null : props.recordId}
                 window={{
