@@ -2,11 +2,10 @@
 import { useEffect, useState, useContext } from 'react'
 
 // ** MUI Imports
-import { Autocomplete, Box, Button, TextField } from '@mui/material'
+import { Autocomplete, Box, TextField } from '@mui/material'
 
 // ** Custom Imports
 import GridToolbar from 'src/components/Shared/GridToolbar'
-import ReportParameterBrowser from 'src/components/Shared/ReportParameterBrowser'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -17,7 +16,6 @@ import { DevExpressRepository } from 'src/repositories/DevExpressRepository'
 import { ExportFormat } from 'src/statics/ExportFormat'
 import { VertLayout } from './Layouts/VertLayout'
 import { Fixed } from './Layouts/Fixed'
-import { useWindow } from 'src/windows'
 
 const ReportViewer = ({ resourceId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -27,7 +25,6 @@ const ReportViewer = ({ resourceId }) => {
   const [selectedReport, setSelectedReport] = useState(null)
   const [selectedFormat, setSelectedFormat] = useState(ExportFormat[0])
   const [pdf, setPDF] = useState(null)
-  const { stack } = useWindow()
 
   const getReportLayout = () => {
     var parameters = `_resourceId=${resourceId}`
@@ -141,15 +138,6 @@ const ReportViewer = ({ resourceId }) => {
               sx={{ width: 200, pl: 2 }}
               disableClearable
             />
-            {/* <Button
-              sx={{ ml: 2 }}
-              variant='contained'
-              disabled={!selectedReport || !selectedFormat}
-              onClick={() => generateReport({ params: formatDataForApi(paramsArray) })}
-              size='small'
-            >
-              Generate Report
-            </Button> */}
           </Box>
         </GridToolbar>
       </Fixed>
