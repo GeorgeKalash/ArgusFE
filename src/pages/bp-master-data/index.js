@@ -11,46 +11,6 @@ import { useWindow } from 'src/windows'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import ReportParameterBrowser from 'src/components/Shared/ReportParameterBrowser'
-
-// function SampleWindow() {
-//   const { stack } = useWindow()
-
-//   return (
-//     <div>
-//       <Button
-//         onClick={() => {
-//           stack({
-//             Component: SampleWindow,
-//             title: 'New Window'
-//           })
-//         }}
-//       >
-//         Open New Window
-//       </Button>
-//       Hello World.
-//     </div>
-//   )
-// }
-
-// function WindowConsumer() {
-//   const { stack } = useWindow()
-
-//   return (
-//     <div>
-//       <Button
-//         onClick={() => {
-//           stack({
-//             Component: SampleWindow,
-//             title: 'Sample Window'
-//           })
-//         }}
-//       >
-//         Open Window
-//       </Button>
-//     </div>
-//   )
-// }
 
 const BPMasterData = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -69,26 +29,26 @@ const BPMasterData = () => {
 
   const {
     query: { data },
-    search,
-    clear,
+    filterBy,
     refetch,
-    paginationParameters,
+    clearFilter,
     labels: _labels,
     access,
+    paginationParameters,
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: BusinessPartnerRepository.MasterData.qry,
+    endpointId: BusinessPartnerRepository.MasterData.snapshot,
     datasetId: ResourceIds.BPMasterData,
-    search: {
+    filter: {
       endpointId: BusinessPartnerRepository.MasterData.snapshot,
-      searchFn: fetchWithSearch
+      filterFn: fetchWithSearch
     }
   })
-  async function fetchWithSearch({ qry }) {
+  async function fetchWithSearch({ filters }) {
     const response = await getRequest({
       extension: BusinessPartnerRepository.MasterData.snapshot,
-      parameters: `_filter=${qry}`
+      parameters: `_filter=${filters.qry}`
     })
 
     return response
@@ -169,8 +129,12 @@ const BPMasterData = () => {
         <GridToolbar
           onAdd={add}
           maxAccess={access}
-          onSearch={search}
-          onSearchClear={clear}
+          onSearch={value => {
+            filterBy('qry', value)
+          }}
+          onSearchClear={() => {
+            clearFilter('qry')
+          }}
           labels={_labels}
           inputSearch={true}
           onGo={refetch}
