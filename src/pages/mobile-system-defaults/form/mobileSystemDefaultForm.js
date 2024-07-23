@@ -88,7 +88,7 @@ export default function MobileSystem() {
               ]}
               values={formik.values}
               onChange={async (event, newValue) => {
-                formik.setFieldValue('rt_mob_plantId', newValue?.recordId)
+                formik.setFieldValue('rt_mob_plantId', newValue?.recordId || '')
               }}
               error={formik.touched.rt_mob_plantId && Boolean(formik.errors.rt_mob_plantId)}
               maxAccess={access}
