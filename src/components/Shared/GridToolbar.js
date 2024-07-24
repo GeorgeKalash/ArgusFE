@@ -22,7 +22,7 @@ const GridToolbar = ({
   paramsArray,
   children,
   labels,
-  onClear,
+  onClear = false,
   inputSearch,
   search,
   onSearch,
@@ -180,6 +180,23 @@ const GridToolbar = ({
                 variant='contained'
               >
                 {platformLabels.GO}
+              </Button>
+            </Grid>
+          )}
+          {onClear && (
+            <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', py: '7px !important' }}>
+              <Button
+                onClick={refreshGrid}
+                sx={{
+                  backgroundColor:'#f44336',
+                  '&:hover': {
+                    backgroundColor: '#f44336',
+                    opacity: 0.8
+                  },
+                }}
+                variant='contained'
+              >
+                <img src='/images/buttonsIcons/clear.png' alt={platformLabels.Clear} />
               </Button>
             </Grid>
           )}

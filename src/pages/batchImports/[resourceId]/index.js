@@ -10,21 +10,22 @@ import { Box, Button } from '@mui/material'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { ControlContext } from 'src/providers/ControlContext'
-import { getButtons } from 'src/components/Shared/Buttons'
 import { useResourceQuery } from 'src/hooks/resource'
 import toast from 'react-hot-toast'
 import { formatDateDefault } from 'src/lib/date-helper'
 import { ProgressForm } from 'src/components/Shared/Progress'
 import { useWindow } from 'src/windows'
 import { useError } from 'src/error'
+import WindowToolbar from 'src/components/Shared/WindowToolbar'
 
 const BatchImports = () => {
     const { stack } = useWindow()
     const { stack: stackError } = useError()
     const router = useRouter()
 
+    const [columns, setColumns] = useState([])
+
     const [state, setState] = useState({
-      columns: [],
       gridData: [],
       name: '',
       objectName: '',
@@ -34,8 +35,6 @@ const BatchImports = () => {
     const { getRequest, postRequest } = useContext(RequestsContext)
     const { resourceId } = router.query
     const { platformLabels } = useContext(ControlContext)
-    const buttons = getButtons(platformLabels)
-    const onClearButton = buttons.find(button => button.key === 'Clear')
 
     const formatDate = (dateString) => {
       const date = new Date(dateString);
@@ -73,17 +72,17 @@ const BatchImports = () => {
                 headerName: name,
                 flex: 1,
                 ...rest,
-                columnIndex: index
               }))
+
+              setColumns([
+                { field: 'recordId', headerName: '', flex: .4 },
+                ...modifiedFields
+              ])
                     
               setState(prevState => ({
                 ...prevState,
                 objectName: res.record.objectName,
-                endPoint: res.record.endPoint,
-                columns: [
-                    { field: 'recordId', headerName: '', flex: .4 },
-                    ...modifiedFields
-                ]
+                endPoint: res.record.endPoint
               }));
             }
           } catch (exception) {}
@@ -150,7 +149,7 @@ const BatchImports = () => {
       
       const headers = lines[0].split(',').map(header => header.trim());
   
-      const columnMap = state.columns.reduce((map, col) => {
+      const columnMap = columns.reduce((map, col) => {
         map[col.headerName] = col;
 
         return map;
@@ -202,17 +201,14 @@ const BatchImports = () => {
     };
 
     const getImportData = async () => {
-      const mandatoryColumns = state.columns.filter(col => col.mandatory);
-      const missingFields = [];
+      const mandatoryColumns = columns.filter(col => col.mandatory);
 
-      for (const row of state.gridData.list) {
-        for (const col of mandatoryColumns) {
-          if (row[col.field] === null || row[col.field] === undefined || row[col.field] === '') {
-            missingFields.push(col.headerName);
-          }
-        }
-      }
-    
+      const missingFields = state.gridData.list.flatMap(row =>
+        mandatoryColumns
+          .filter(col => row[col.field] === null || row[col.field] === undefined || row[col.field] === '')
+          .map(col => col.headerName)
+      );
+      
       if (missingFields.length > 0) {
         const uniqueMissingFields = [...new Set(missingFields)];
         stackError({
@@ -224,7 +220,7 @@ const BatchImports = () => {
     
       const convertedData = state.gridData.list.map(row => {
         return Object.keys(row).reduce((acc, key) => {
-          const col = state.columns.find(c => c.field === key);
+          const col = columns.find(c => c.field === key);
           let value = row[key];
     
           if (value === '') {
@@ -265,12 +261,19 @@ const BatchImports = () => {
         toast.success(platformLabels.Imported);
       } catch (exception) {}
     }
-    
+
+    const actions = [
+      {
+        key: 'Import',
+        condition: true,
+        onClick: getImportData
+      }
+    ]
 
     return (
         <VertLayout>
             <Fixed>
-                <GridToolbar>
+                <GridToolbar onClear={true} refreshGrid={() => clearFile()}>
                   <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between' }}>
                     <CustomTextField
                       name='name'
@@ -280,34 +283,13 @@ const BatchImports = () => {
                       disabled={!!state.name}
                     />
                     <Button
-                      sx={{ ml: 2 }}
+                      sx={{ ml: 6, minWidth: '90px !important' }}
                       variant='contained'
                       size='small'
                       disabled={!!state.name}
                       onClick={() => document.getElementById('csvInput').click()}
                     >
                       {platformLabels.Browse}...
-                    </Button>
-                    <Button
-                      onClick={clearFile}
-                      variant='contained'
-                      sx={{
-                        mr: 1,
-                        ml: 1,
-                        backgroundColor: onClearButton.color,
-                        '&:hover': {
-                          backgroundColor: onClearButton.color,
-                          opacity: 0.8
-                        },
-                        border: onClearButton.border,
-                        width: '50px !important',
-                        height: '35px',
-                        objectFit: 'contain',
-                        minWidth: '30px !important'
-                      }}
-                      disabled={!state.name}
-                    >
-                      <img src={`/images/buttonsIcons/${onClearButton.image}`} alt={onClearButton.key} />
                     </Button>
                     <input
                         id="csvInput"
@@ -321,7 +303,7 @@ const BatchImports = () => {
             </Fixed>
             <Grow>
               <Table
-                  columns={state.columns}
+                  columns={columns}
                   gridData={state.gridData}
                   refetch={refetch}
                   rowId={['recordId']}
@@ -333,25 +315,9 @@ const BatchImports = () => {
                   textTransform={true}
               />
             </Grow>
-            <Box sx={{ display: 'flex', justifyContent: 'flex-start', mt: 2, mb: 7 }}>
-              <Button
-                variant='contained'
-                sx={{
-                  mr: 1,
-                  ml: 3,
-                  '&:hover': {
-                    opacity: 0.8
-                  },
-                  height: '35px',
-                  objectFit: 'contain',
-                  minWidth: '30px !important'
-                }}
-                size='small'
-                onClick={getImportData}
-              >
-                <img src={`/images/buttonsIcons/import.png`} alt={'Import'} />
-              </Button>
-            </Box>
+            <Fixed>
+              <WindowToolbar smallBox={true} actions={actions} />
+            </Fixed>
         </VertLayout>
     )
 }
