@@ -288,7 +288,7 @@ const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, windo
       parameters.map(async field => {
         const detailedApiDetails = (await fetchData(field)) || ''
         if (!detailedApiDetails) {
-          console.log('not every item with apiMappings')
+          console.log(` key ${field?.id} has not details in apiMappings`)
         }
         if (field.controlType) {
           fieldComponentArray.push({ ...field, apiDetails: detailedApiDetails })
