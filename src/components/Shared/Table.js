@@ -100,6 +100,7 @@ const Table = ({
   checkTitle = '',
   viewCheckButtons = false,
   ChangeCheckedRow,
+  textTransform = false,
   ...props
 }) => {
   const { stack } = useWindow()
@@ -470,6 +471,9 @@ const Table = ({
             sx={{
               '& .MuiDataGrid-overlayWrapperInner': {
                 height: '300px !important'
+              },
+              '& .MuiDataGrid-columnHeaderTitle': {
+                textTransform: textTransform ? 'none' : '' 
               },
               overflow: 'auto',
               position: 'relative',

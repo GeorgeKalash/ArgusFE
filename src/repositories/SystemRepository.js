@@ -179,5 +179,8 @@ export const SystemRepository = {
   },
   ETL: {
     get: service + 'getETL'
+  },
+  THD: {
+    get: service + 'getTHD'
   }
 }

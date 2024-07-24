@@ -14,14 +14,23 @@ import { getButtons } from 'src/components/Shared/Buttons'
 import { useResourceQuery } from 'src/hooks/resource'
 import toast from 'react-hot-toast'
 import { formatDateDefault } from 'src/lib/date-helper'
+import { ProgressForm } from 'src/components/Shared/Progress'
+import { useWindow } from 'src/windows'
+import { useError } from 'src/error'
 
 const BatchImports = () => {
+    const { stack } = useWindow()
+    const { stack: stackError } = useError()
     const router = useRouter()
-    const [columns, setColumns] = useState([]);
-    const [gridData, setGridData] = useState([]);
-    const [name, setName] = useState('');
-    const [objectName, setObjectName] = useState('');
-    const [endPoint, setEndPoint] = useState('');
+
+    const [state, setState] = useState({
+      columns: [],
+      gridData: [],
+      name: '',
+      objectName: '',
+      endPoint: ''
+    })
+
     const { getRequest, postRequest } = useContext(RequestsContext)
     const { resourceId } = router.query
     const { platformLabels } = useContext(ControlContext)
@@ -35,7 +44,7 @@ const BatchImports = () => {
       return `/Date(${timestamp})/`;
     };
 
-    const formatDateWhenisAPI = (dateString) => {
+    const formatDateForImport = (dateString) => {
       const [day, month, year] = dateString.split('/').map(part => parseInt(part, 10));
       const fullYear = year < 100 ? 2000 + year : year;
       const date = new Date(Date.UTC(fullYear, month - 1, day, 0, 0, 0));
@@ -50,7 +59,6 @@ const BatchImports = () => {
       datasetId: resourceId
     })
 
-
     useEffect(() => {
         ;(async function () {
           try {
@@ -60,21 +68,23 @@ const BatchImports = () => {
                 parameters: `_resourceId=${resourceId}`
               })
 
-              setObjectName(res.record.objectName)
-              setEndPoint(res.record.endPoint)
-
-              const modifiedFields = res.record.fields.map(({ name, ...rest }, index) =>  ({
-                  field: name,
-                  headerName: name,
-                  flex: 1,
-                  ...rest,
-                  columnIndex: index
-                }))
-              
-              setColumns([
-                { field: 'recordId', headerName: '', flex: 1 },
-                ...modifiedFields
-              ])
+              const modifiedFields = res.record.fields.map(({ name, ...rest }, index) => ({
+                field: name,
+                headerName: name,
+                flex: 1,
+                ...rest,
+                columnIndex: index
+              }))
+                    
+              setState(prevState => ({
+                ...prevState,
+                objectName: res.record.objectName,
+                endPoint: res.record.endPoint,
+                columns: [
+                    { field: 'recordId', headerName: '', flex: .4 },
+                    ...modifiedFields
+                ]
+              }));
             }
           } catch (exception) {}
         })()
@@ -83,7 +93,11 @@ const BatchImports = () => {
       const handleFileChange = (event) => {
         const file = event.target.files[0]
 
-        setName(file.name)
+        setState(prevState => ({
+          ...prevState,
+          name: file.name
+        }));
+
         if (file) {
           const reader = new FileReader()
           reader.onload = (e) => {
@@ -110,21 +124,22 @@ const BatchImports = () => {
     }
 
     const convertValue = (value, dataType, isAPI = false) => {
+      if (value === '') {
+        return value;
+      }
       switch (dataType) {
-          case 1: 
-            return value;
           case 2: 
             return parseInt(value, 10);
           case 3:
             return parseFloat(value);
           case 5:
             return isAPI 
-              ? formatDateWhenisAPI(value) 
+              ? formatDateForImport(value) 
               : formatDateDefault(formatDate(value)); 
           default:
               return value;
       }
-  }
+    }
     
     const parseCSV = (text) => {
       const lines = text.split('\n').filter(line => line.trim() !== '');
@@ -135,97 +150,143 @@ const BatchImports = () => {
       
       const headers = lines[0].split(',').map(header => header.trim());
   
-      const columnMap = columns.reduce((map, col) => {
+      const columnMap = state.columns.reduce((map, col) => {
         map[col.headerName] = col;
 
         return map;
       }, {})
   
       const orderedColumns = headers.map(header => columnMap[header]);
-  
+
       const rows = lines.slice(1).map(line => {
         const values = line.split(',').map(value => value.trim());
 
         return orderedColumns.reduce((obj, col, index) => {
           if (col) {
-              obj[col.field] = convertValue(values[index], col.dataType);
+            obj[col.field] = convertValue(values[index], col.dataType);
           } else {
-              obj[headers[index]] = values[index]; 
+            obj[headers[index]] = values[index];
           }
 
           return obj
         }, {})
       })
-  
+
       const dataFromCSV = transform(rows);
-      setGridData(dataFromCSV);
+      setState(prevState => ({
+        ...prevState,
+        gridData: dataFromCSV
+      }));
       refetch();
-  }
-  
+    }
+
     const clearFile = () => {
-      setName('');
-      setGridData([]);
+      setState(prevState => ({
+        ...prevState,
+        name: '',
+        gridData: []
+      }));
       document.getElementById('csvInput').value = null;
       refetch();
     };
 
     const refetch = () => {
-      setGridData((prevData) => {
-        const transformedData = transform(prevData.list);
+        setState(prevState => {
+            const transformedData = transform(prevState.gridData.list);
 
-        return transformedData;
-      });
+            return {
+                ...prevState,
+                gridData: transformedData
+            };
+        });
     };
 
     const getImportData = async () => {
-      const convertedData = gridData.list.map(row => {
-        return Object.keys(row).reduce((acc, key) => {
-          const col = columns.find(c => c.field === key);
-          if (col) {
-              acc[key] = convertValue(row[key], col.dataType, true);
-          } else {
-              acc[key] = row[key];
-          }
+      const mandatoryColumns = state.columns.filter(col => col.mandatory);
+      const missingFields = [];
 
+      for (const row of state.gridData.list) {
+        for (const col of mandatoryColumns) {
+          if (row[col.field] === null || row[col.field] === undefined || row[col.field] === '') {
+            missingFields.push(col.headerName);
+          }
+        }
+      }
+    
+      if (missingFields.length > 0) {
+        const uniqueMissingFields = [...new Set(missingFields)];
+        stackError({
+          message: `${uniqueMissingFields.join(', ')} ${uniqueMissingFields.length > 1 ? 'are' : 'is'} mandatory field${uniqueMissingFields.length > 1 ? 's' : ''}.`
+        });
+
+        return;
+      }
+    
+      const convertedData = state.gridData.list.map(row => {
+        return Object.keys(row).reduce((acc, key) => {
+          const col = state.columns.find(c => c.field === key);
+          let value = row[key];
+    
+          if (value === '') {
+            value = null;
+          }
+    
+          if (col) {
+            acc[key] = convertValue(value, col.dataType, true);
+          } else {
+            acc[key] = value;
+          }
+    
           return acc;
         }, {});
-      })
-  
+      });
+    
       const data = {
-        [objectName]: convertedData
+        [state.objectName]: convertedData
       }
-  
+    
       try {
-        await postRequest({
-            extension: endPoint,
-            record: JSON.stringify(data)
-        })
-
-        invalidate()
-        toast.success(platformLabels.Imported)
+        const res = await postRequest({
+          extension: state.endPoint,
+          record: JSON.stringify(data)
+        });
+    
+        stack({
+          Component: ProgressForm,
+          props: {
+            recordId: res.recordId,
+            access
+          },
+          width: 500,
+          height: 450,
+          title: platformLabels.Progress
+        });
+        invalidate();
+        toast.success(platformLabels.Imported);
       } catch (exception) {}
-  }
+    }
+    
 
     return (
         <VertLayout>
             <Fixed>
                 <GridToolbar>
-                <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between' }}>
+                  <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between' }}>
                     <CustomTextField
                       name='name'
                       label={platformLabels.SelectCSV}
-                      value={name}
+                      value={state.name}
                       readOnly={true}
-                      disabled={!!name}
+                      disabled={!!state.name}
                     />
                     <Button
                       sx={{ ml: 2 }}
                       variant='contained'
                       size='small'
-                      disabled={!!name}
+                      disabled={!!state.name}
                       onClick={() => document.getElementById('csvInput').click()}
                     >
-                      Browse...
+                      {platformLabels.Browse}...
                     </Button>
                     <Button
                       onClick={clearFile}
@@ -244,7 +305,7 @@ const BatchImports = () => {
                         objectFit: 'contain',
                         minWidth: '30px !important'
                       }}
-                      disabled={!name}
+                      disabled={!state.name}
                     >
                       <img src={`/images/buttonsIcons/${onClearButton.image}`} alt={onClearButton.key} />
                     </Button>
@@ -255,21 +316,22 @@ const BatchImports = () => {
                         style={{ display: 'none' }}
                         onChange={(e) => handleFileChange(e)}
                     />
-                </Box>
+                  </Box>
                 </GridToolbar>
             </Fixed>
             <Grow>
-                <Table
-                    columns={columns}
-                    gridData={gridData}
-                    refetch={refetch}
-                    rowId={['recordId']}
-                    isLoading={false}
-                    pageSize={50}
-                    paginationType='api'
-                    pagination={false}
-                    maxAccess={access}
-                />
+              <Table
+                  columns={state.columns}
+                  gridData={state.gridData}
+                  refetch={refetch}
+                  rowId={['recordId']}
+                  isLoading={false}
+                  pageSize={50}
+                  paginationType='api'
+                  pagination={false}
+                  maxAccess={access}
+                  textTransform={true}
+              />
             </Grow>
             <Box sx={{ display: 'flex', justifyContent: 'flex-start', mt: 2, mb: 7 }}>
               <Button
@@ -280,8 +342,6 @@ const BatchImports = () => {
                   '&:hover': {
                     opacity: 0.8
                   },
-                  border: onClearButton.border,
-                  width: '50px !important',
                   height: '35px',
                   objectFit: 'contain',
                   minWidth: '30px !important'
