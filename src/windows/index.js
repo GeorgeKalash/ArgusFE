@@ -1,23 +1,22 @@
 import React, { useContext, useEffect, useState } from 'react'
 import Window from 'src/components/Shared/Window'
 import useResourceParams from 'src/hooks/useResourceParams'
+import { v4 as uuidv4 } from 'uuid'
 
 const WindowContext = React.createContext(null)
 const ClearContext = React.createContext(null)
 
 export function WindowProvider({ children }) {
   const [stack, setStack] = useState([])
-  const [clear, setClear] = useState(0)
 
   function closeWindow() {
-    setClear(0)
     setStack(stack => {
       return stack.slice(0, stack.length - 1)
     })
   }
 
   function addToStack(options) {
-    setStack(stack => [...stack, options])
+    setStack(stack => [...stack, { ...options, id: uuidv4() }])
   }
 
   return (
@@ -25,7 +24,7 @@ export function WindowProvider({ children }) {
       <ClearContext.Provider
         value={{
           clear() {
-            const currentValue = stack[stack.length - 1]
+            const currentValue = { ...stack[stack.length - 1] }
             closeWindow()
             currentValue.props.recordId = null
             addToStack(currentValue)
@@ -35,9 +34,9 @@ export function WindowProvider({ children }) {
         {children}
 
         {stack.map(
-          ({ Component, title, width = 800, props, onClose, closable, expandable, draggable, height, styles }) => (
+          ({ id, Component, title, width = 800, props, onClose, closable, expandable, draggable, height, styles }) => (
             <Window
-              key={clear}
+              key={id}
               sx={{ display: 'flex !important', flex: '1' }}
               Title={title}
               controlled={true}
@@ -53,9 +52,7 @@ export function WindowProvider({ children }) {
               styles={styles}
             >
               <Component
-                key={clear ? null : props.recordId}
                 {...props}
-                recordId={clear ? null : props.recordId}
                 window={{
                   close: closeWindow
                 }}
