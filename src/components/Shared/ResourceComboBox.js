@@ -47,7 +47,10 @@ export default function ResourceComboBox({
             .catch(error => {})
   }, [parameters])
 
-  const filteredStore = data ? data : store.filter(filter)
+  let filteredStore = []
+  try {
+    filteredStore = data ? data : store.filter(filter)
+  } catch (error) {}
 
   const _value =
     (typeof values[name] === 'object'
