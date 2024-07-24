@@ -38,6 +38,7 @@ const BenificiaryCashForm = ({
   setResetForm,
   onChange,
   setValidSubmit,
+  onSuccess,
   submitMainForm = true
 }) => {
   const [maxAccess, setMaxAccess] = useState({ record: [] })
@@ -145,10 +146,9 @@ const BenificiaryCashForm = ({
           extension: RemittanceOutwardsRepository.BeneficiaryCash.set,
           record: JSON.stringify(data)
         })
-        if (res.recordId) {
-          toast.success('Record Updated Successfully')
-        }
 
+        toast.success('Record Updated Successfully')
+        if (onSuccess) onSuccess(res.recordId, values.name)
         setEditMode(true)
       }
     }

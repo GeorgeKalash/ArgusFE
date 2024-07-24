@@ -373,7 +373,8 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
           countryId: formik.values.countryId,
           currencyId: formik.values.currencyId,
           beneficiary: { beneficiaryId: formik.values.beneficiaryId, beneficiarySeqNo: formik.values.beneficiarySeqNo },
-          dispersalType: formik.values.dispersalType
+          dispersalType: formik.values.dispersalType,
+          onSuccess: (response, name) => HandleAddedBenificiary(response, name)
         },
         width: 700,
         height: 500,
@@ -392,13 +393,20 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
           dispersalType: formik.values.dispersalType,
           corId: formik.values.corId ? formik.values.corId : 0,
           countryId: formik.values.countryId,
-          beneficiary: { beneficiaryId: formik.values.beneficiaryId, beneficiarySeqNo: formik.values.beneficiarySeqNo }
+          beneficiary: { beneficiaryId: formik.values.beneficiaryId, beneficiarySeqNo: formik.values.beneficiarySeqNo },
+          onSuccess: (response, name) => HandleAddedBenificiary(response, name)
         },
         width: 900,
         height: 600,
         title: labels.bank
       })
     }
+  }
+  function HandleAddedBenificiary(response, name) {
+    const [, beneficiaryId, seqNo] = response.split(',')
+    formik.setFieldValue('beneficiaryId', beneficiaryId)
+    formik.setFieldValue('beneficiaryName', name)
+    formik.setFieldValue('beneficiarySeqNo', seqNo)
   }
 
   const chooseClient = async clientId => {
