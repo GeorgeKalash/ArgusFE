@@ -42,16 +42,16 @@ const BPMasterData = () => {
     datasetId: ResourceIds.BPMasterData,
     filter: {
       endpointId: BusinessPartnerRepository.MasterData.snapshot,
-      filterFn: fetchWithSearch
+      filterFn: fetchWithFilter
     }
   })
-  async function fetchWithSearch({ filters }) {
-    const response = await getRequest({
-      extension: BusinessPartnerRepository.MasterData.snapshot,
-      parameters: `_filter=${filters.qry}`
-    })
-
-    return response
+  async function fetchWithFilter({ filters, pagination }) {
+    if (filters.qry)
+      return await getRequest({
+        extension: BusinessPartnerRepository.MasterData.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+    else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
   const columns = [
@@ -137,7 +137,9 @@ const BPMasterData = () => {
           }}
           labels={_labels}
           inputSearch={true}
-          onGo={refetch}
+          onGo={value => {
+            filterBy('params', value)
+          }}
           reportName='BPMAS'
         />
       </Fixed>

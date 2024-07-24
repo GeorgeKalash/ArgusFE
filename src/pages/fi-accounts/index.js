@@ -30,29 +30,31 @@ const MfAccounts = () => {
     endpointId: FinancialRepository.Account.page,
     datasetId: ResourceIds.Accounts,
     filter: {
-      filterFn: fetchWithSearch
+      filterFn: fetchWithFilter
     }
   })
 
-  async function fetchWithSearch({ filters }) {
-    return await getRequest({
-      extension: FinancialRepository.Account.snapshot,
-      parameters: `_filter=${filters.qry}`
-    })
+  async function fetchWithFilter({ filters, pagination }) {
+    if (filters?.qry) {
+      return await getRequest({
+        extension: FinancialRepository.Account.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+    } else {
+      return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+    }
   }
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
-
     const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
     var parameters = defaultParams
-
     const response = await getRequest({
       extension: FinancialRepository.Account.page,
       parameters: parameters
     })
 
-    return { ...response, _startAt: _startAt, _params: params }
+    return { ...response, _startAt: _startAt }
   }
 
   const columns = [
@@ -125,7 +127,7 @@ const MfAccounts = () => {
           labels={_labels}
           inputSearch={true}
           reportName='FIACC'
-          onGo={refetch}
+          onGo={value => filterBy('params', value)}
         />
       </Fixed>
       <Grow>

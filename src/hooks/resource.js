@@ -70,12 +70,8 @@ export function useResourceQuery({ endpointId, filter, datasetId, queryFn, searc
       setSearchValue('')
       setFilters({})
     },
-    refetch(value) {
-      if (!value.hasOwnProperty('params')) {
-        query.refetch()
-      } else {
-        setApiOption(value)
-      }
+    refetch() {
+      query.refetch()
     },
     invalidate: () => {
       queryClient.invalidateQueries([endpointId])
