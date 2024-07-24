@@ -212,7 +212,13 @@ const GridToolbar = ({
             <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', pt: '7px !important' }}>
               <Button
                 sx={{ height: !onGenerateReport ? '35px' : '42px' }}
-                onClick={() => (searchValue ? onSearch(searchValue) : onGo(formatDataForApi(paramsArray)))}
+                onClick={() => {
+                  if (searchValue) {
+                    onSearch(searchValue)
+                  } else {
+                    onGo(formatDataForApi(paramsArray))
+                  }
+                }}
                 variant='contained'
               >
                 {platformLabels.Apply}
