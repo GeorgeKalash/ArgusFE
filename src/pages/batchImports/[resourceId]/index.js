@@ -222,15 +222,9 @@ const BatchImports = () => {
           const col = columns.find(c => c.field === key);
           let value = row[key];
     
-          if (value === '') {
-            value = null;
-          }
+          value = value === '' ? null : value;
     
-          if (col) {
-            acc[key] = convertValue(value, col.dataType, true);
-          } else {
-            acc[key] = value;
-          }
+          acc[key] = col ? convertValue(value, col.dataType, true) : value;
     
           return acc;
         }, {});
