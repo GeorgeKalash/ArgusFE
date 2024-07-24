@@ -42,7 +42,7 @@ export function useResourceQuery({ endpointId, filter, datasetId, queryFn, searc
   })
 
   function invalidateCache() {
-    queryClient.invalidateQueries([endpointId])
+    // queryClient.invalidateQueries([endpointId])
     query.refetch()
   }
 
@@ -76,7 +76,7 @@ export function useResourceQuery({ endpointId, filter, datasetId, queryFn, searc
       setSearchValue('')
       setFilters({})
     },
-    refetch(value) {
+    refetch() {
       query.refetch()
     },
     invalidate: () => {
