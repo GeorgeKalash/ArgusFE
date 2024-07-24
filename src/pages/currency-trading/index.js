@@ -34,6 +34,7 @@ export default function CurrencyTrading() {
     query: { data },
     filterBy,
     clearFilter,
+    refetch,
     labels: labels,
     access
   } = useResourceQuery({
@@ -116,6 +117,7 @@ export default function CurrencyTrading() {
             isLoading={false}
             pageSize={50}
             paginationType='client'
+            refetch={refetch}
             maxAccess={access}
           />
         </Grow>

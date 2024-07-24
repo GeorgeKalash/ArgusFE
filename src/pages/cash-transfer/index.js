@@ -199,7 +199,7 @@ const CashTransfer = () => {
         recordId: recordId ? recordId : null
       },
       width: 950,
-      title: 'Cash Transfer'
+      title: _labels.cashTransfer
     })
   }
 
