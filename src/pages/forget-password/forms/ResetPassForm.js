@@ -13,7 +13,7 @@ import NewPassword from 'src/components/Shared/NewPassword'
 import axios from 'axios'
 import { useRouter } from 'next/router'
 
-const ResetChPassForm = ({ labels, username = '' }) => {
+const ResetPassForm = ({ labels, username = '' }) => {
   const [score, setScore] = useState(0)
   const { stack: stackError } = useError()
   const auth = useAuth()
@@ -47,14 +47,14 @@ const ResetChPassForm = ({ labels, username = '' }) => {
         axios
           .post(`${process.env.NEXT_PUBLIC_AuthURL}MA.asmx/resetPW`, bodyFormData)
           .then(res => {
-            toast.success('Password changed successfully!')
+            toast.success(labels.passSuccess)
             router.push('/login')
           })
           .catch(error => {
             stackError({ message: error })
           })
       } else {
-        toast.error('Passwords do not match!')
+        toast.error(labels.passNotMatching)
       }
     }
   })
@@ -90,4 +90,4 @@ const ResetChPassForm = ({ labels, username = '' }) => {
   )
 }
 
-export default ResetChPassForm
+export default ResetPassForm

@@ -7,7 +7,7 @@ import { useTheme } from '@mui/material/styles'
 import * as yup from 'yup'
 import BlankLayout from 'src/@core/layouts/BlankLayout'
 import { ControlContext } from 'src/providers/ControlContext'
-import ResetChPassForm from './forms/ResetChPassForm'
+import ResetPassForm from './forms/ResetPassForm'
 import { useWindow } from 'src/windows'
 import { useAuth } from 'src/hooks/useAuth'
 import { useForm } from 'src/hooks/form.js'
@@ -67,7 +67,7 @@ const Reset = () => {
 
   function openForm(username) {
     stack({
-      Component: ResetChPassForm,
+      Component: ResetPassForm,
       props: {
         labels: platformLabels,
         username
@@ -120,7 +120,7 @@ const Reset = () => {
                     type='text'
                     onChange={formik.handleChange}
                     error={formik.touched.username && Boolean(formik.errors.username)}
-                    placeholder={platformLabels.enterId}
+                    placeholder={platformLabels.enterUserName}
                     InputLabelProps={{ shrink: true }}
                     InputProps={{
                       startAdornment: (
@@ -142,7 +142,6 @@ const Reset = () => {
             </CardContent>
           </Card>
 
-          {/* Footer Section */}
           <Box component='footer' sx={{ mt: 'auto' }}>
             © {new Date().getFullYear()} Argus. All rights reserved. 3.1.8 API: 2.8.8
           </Box>
