@@ -447,7 +447,6 @@ const Table = ({
         checked={params.value}
         onChange={e => {
           const checked = e.target.checked
-          let updatedRows = {}
           if (rowSelection !== 'single') {
             params.node.setDataValue(params.colDef.field, checked)
           } else {
