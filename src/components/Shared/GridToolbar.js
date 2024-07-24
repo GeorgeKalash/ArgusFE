@@ -213,11 +213,7 @@ const GridToolbar = ({
               <Button
                 sx={{ height: !onGenerateReport ? '35px' : '42px' }}
                 onClick={() => {
-                  if (searchValue) {
-                    onSearch(searchValue)
-                  } else {
-                    onGo(formatDataForApi(paramsArray))
-                  }
+                  searchValue ? onSearch(searchValue) : onGo(formatDataForApi(paramsArray))
                 }}
                 variant='contained'
               >
