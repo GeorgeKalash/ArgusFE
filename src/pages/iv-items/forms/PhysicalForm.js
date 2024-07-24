@@ -29,7 +29,6 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
   const { platformLabels } = useContext(ControlContext)
 
   const { recordId } = store
-  console.log(recordId, 'ec')
 
   const { formik } = useForm({
     maxAccess,
@@ -74,7 +73,6 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
         toast.success(platformLabels.Added)
       } else {
         toast.success(platformLabels.Edited)
-        console.log(formik.values.recordId)
       }
       invalidate()
     } catch {}
