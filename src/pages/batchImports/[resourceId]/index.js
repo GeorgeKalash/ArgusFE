@@ -141,36 +141,35 @@ const BatchImports = () => {
     }
     
     const parseCSV = (text) => {
-      const lines = text.split('\n').filter(line => line.trim() !== '');
-
-      if (lines.length === 0) {
-        return;
-      }
-      
+      const lines = text.split('\n').filter(line => line.trim());
+    
+      if (lines.length === 0) return;
+    
       const headers = lines[0].split(',').map(header => header.trim());
   
       const columnMap = columns.reduce((map, col) => {
         map[col.headerName] = col;
 
         return map;
-      }, {})
-  
+      }, {});
+    
       const orderedColumns = headers.map(header => columnMap[header]);
 
       const rows = lines.slice(1).map(line => {
         const values = line.split(',').map(value => value.trim());
 
         return orderedColumns.reduce((obj, col, index) => {
+          const header = headers[index];
           if (col) {
             obj[col.field] = convertValue(values[index], col.dataType);
           } else {
-            obj[headers[index]] = values[index];
+            obj[header] = values[index];
           }
 
-          return obj
-        }, {})
-      })
-
+          return obj;
+        }, {});
+      });
+    
       const dataFromCSV = transform(rows);
       setState(prevState => ({
         ...prevState,
