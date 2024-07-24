@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 
 const defaultProvider = {
@@ -49,12 +49,10 @@ const AuthProvider = ({ children }) => {
         if (savedLanguageId) {
           setLanguageId(parseInt(savedLanguageId))
         }
-        setLoading(false)
       } else {
         if (savedLanguageId) {
           setLanguageId(parseInt(savedLanguageId))
         }
-        setLoading(false)
       }
     }
     initAuth()
@@ -73,6 +71,8 @@ const AuthProvider = ({ children }) => {
       } catch (error) {
         console.error('Error fetching data:', error)
       }
+
+      setLoading(false)
     }
 
     fetchData()
@@ -124,26 +124,28 @@ const AuthProvider = ({ children }) => {
         userType: getUS2.data.record.userType,
         employeeId: getUS2.data.record.employeeId,
         fullName: getUS2.data.record.fullName,
+        dashboardId: getUS2.data.record.dashboardId,
         role: 'admin',
         expiresAt: jwt(signIn3.data.record.accessToken).exp,
         ...signIn3.data.record
       }
 
-      setUser(loggedUser)
       setLanguageId(loggedUser.languageId)
       window.localStorage.setItem('languageId', loggedUser.languageId)
-
-      if (params.rememberMe) {
-        window.localStorage.setItem('userData', JSON.stringify(loggedUser))
+      if (getUS2.data.record.umcpnl === true) {
+        errorCallback({
+          username: params.username,
+          loggedUser,
+          getUS2: getUS2.data.record
+        })
       } else {
+        setUser(loggedUser)
         window.sessionStorage.setItem('userData', JSON.stringify(loggedUser))
+        const returnUrl = router.query.returnUrl
+        const redirectURL = returnUrl && returnUrl !== '/' ? returnUrl : '/'
+        router.replace(redirectURL)
       }
-
-      const returnUrl = router.query.returnUrl
-      const redirectURL = returnUrl && returnUrl !== '/' ? returnUrl : '/'
-      router.replace(redirectURL)
     } catch (error) {
-      console.log({ logError: error })
       if (errorCallback) errorCallback(error)
     }
   }
@@ -152,7 +154,6 @@ const AuthProvider = ({ children }) => {
     setUser(null)
     window.localStorage.removeItem('userData')
     window.sessionStorage.removeItem('userData')
-
     await router.push('/login')
     router.reload()
   }
@@ -209,6 +210,8 @@ const AuthProvider = ({ children }) => {
     login: handleLogin,
     logout: handleLogout,
     getAccessToken,
+    encryptePWD,
+    getAC,
     apiUrl: getAC?.data?.record.api || (typeof window !== 'undefined' ? window.localStorage.getItem('apiUrl') : '')
   }
 

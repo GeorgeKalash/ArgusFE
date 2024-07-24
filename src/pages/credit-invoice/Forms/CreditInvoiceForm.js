@@ -30,8 +30,10 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { LOTransportationForm } from 'src/components/Shared/LOTransportationForm'
+import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
+import { useForm } from 'src/hooks/form'
 
-export default function CreditInvoiceForm({ _labels, maxAccess, recordId, plantId, userData }) {
+export default function CreditInvoiceForm({ _labels, access, recordId, plantId, userData }) {
   const { height } = useWindowDimensions()
   const [isLoading, setIsLoading] = useState(false)
   const [isPosted, setIsPosted] = useState(false)
@@ -45,6 +47,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, plantI
   const [toCurrencyRef, setToCurrencyRef] = useState(null)
   const [baseCurrencyRef, setBaseCurrencyRef] = useState(null)
   const [visible, setVisible] = useState(false)
+  const [selectedFunctionId, setFunctionId] = useState(SystemFunction.CreditInvoicePurchase)
 
   const [initialValues, setInitialData] = useState({
     recordId: recordId || null,
@@ -72,14 +75,21 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, plantI
     cashAccountName: '',
     cashAccountRef: ''
   })
+
+  const { maxAccess } = useDocumentType({
+    functionId: selectedFunctionId,
+    access: access,
+    enabled: !recordId
+  })
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
     endpointId: CTTRXrepository.CreditInvoice.page
   })
 
-  const formik = useFormik({
+  const { formik } = useForm({
     initialValues,
+    maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -816,12 +826,13 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, plantI
                 name='reference'
                 label={_labels.reference}
                 value={formik?.values?.reference}
+                editMode={editMode}
                 maxAccess={maxAccess}
                 maxLength='30'
-                readOnly={true}
-                required
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('reference', '')}
+                readOnly={editMode}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
-                helperText={formik.touched.reference && formik.errors.reference}
               />
             </Grid>
           </Grid>
@@ -891,7 +902,11 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, plantI
               row
               value={formik.values.functionId}
               defaultValue={SystemFunction.CreditInvoicePurchase}
-              onChange={e => setOperationType(e.target.value)}
+              onChange={e => {
+                setOperationType(e.target.value)
+                setFunctionId(e.target.value)
+                formik.setFieldValue('reference', '')
+              }}
             >
               <FormControlLabel
                 value={SystemFunction.CreditInvoicePurchase}

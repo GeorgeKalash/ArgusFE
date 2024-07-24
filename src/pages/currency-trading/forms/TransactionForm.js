@@ -34,6 +34,7 @@ import { useForm } from 'src/hooks/form'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
 import { ControlContext } from 'src/providers/ControlContext'
+import CustomDatePickerHijri from 'src/components/Inputs/CustomDatePickerHijri'
 
 const FormContext = React.createContext(null)
 
@@ -415,19 +416,21 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
 
   async function setOperationType(type) {
     if (type) {
-      const res = await getRequest({
-        extension: SystemRepository.Defaults.get,
-        parameters:
-          type === SystemFunction.CurrencyPurchase
-            ? '_key=ct_cash_purchase_ratetype_id'
-            : type === SystemFunction.CurrencySale
-            ? '_key=ct_cash_sales_ratetype_id'
-            : ''
-      })
+      try {
+        const res = await getRequest({
+          extension: SystemRepository.Defaults.get,
+          parameters:
+            type === SystemFunction.CurrencyPurchase
+              ? '_key=ct_cash_purchase_ratetype_id'
+              : type === SystemFunction.CurrencySale
+              ? '_key=ct_cash_sales_ratetype_id'
+              : ''
+        })
 
-      setRateType(res.record.value)
+        setRateType(res.record.value)
 
-      formik.setFieldValue('functionId', type)
+        formik.setFieldValue('functionId', type)
+      } catch (e) {}
     }
   }
 
@@ -1037,6 +1040,18 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                         error={formik.touched.birth_date && Boolean(formik.errors.birth_date)}
                         readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                         maxAccess={maxAccess}
+                      />
+                    </Grid>
+
+                    <Grid item xs={7}>
+                      <CustomDatePickerHijri
+                        name='birthdatehijri'
+                        label={labels.birthDateHijri}
+                        value={formik.values?.birth_date}
+                        onChange={(name, value) => {
+                          formik.setFieldValue('birth_date', value)
+                        }}
+                        onClear={() => formik.setFieldValue('birth_date', '')}
                       />
                     </Grid>
                     <Grid container xs={12}>

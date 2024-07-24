@@ -38,7 +38,6 @@ export const ResourceIds = {
   GlobalExchangeBuyMap: 36114,
   currencyExchangeMap: 36112,
   SourceOfIncome: 36117,
-  updateExchangerRates: 35106,
   ExchangeTables: 32101,
   NumberRange: 20103,
   BpRelationType: 21107,
@@ -141,6 +140,8 @@ export const ResourceIds = {
   CATransaction: 33312,
   FiscalYears: 20109,
   CARebuildAccountBalance: 33501,
+  CATransaction: 33312,
+  UserDashboard: 51400,
   ProductionRequestLog: 42321,
   PointOfSale: 54101,
   Common: 140,
@@ -153,5 +154,10 @@ export const ResourceIds = {
   RebuildAccountBalances: 31501,
   RoleCategories: 21102,
   SourceOfIncomeType: 36311,
-  ProfessionGroups: 36310
+  ProfessionGroups: 36310,
+  ChangePassword: 20118,
+  PaymentVouchers: 31305,
+  Roles: 21103,
+  Checkbook: 33201,
+  MobileSystemDefaults: 36123
 }
