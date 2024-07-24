@@ -6,7 +6,6 @@ export function useResourceQuery({ endpointId, filter, datasetId, queryFn, searc
   const [searchValue, setSearchValue] = useState('')
   const [filters, setFilters] = useState(filter?.default || {})
   const [apiOption, setApiOption] = useState('')
-
   const isSearchMode = !!searchValue
 
   const isFilterMode =
