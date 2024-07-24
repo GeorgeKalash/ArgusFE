@@ -141,17 +141,17 @@ const BatchImports = () => {
     }
     
     const parseCSV = (text) => {
-      const lines = text.split('\n').filter(line => line.trim());
+      const lines = text.split('\n').filter(line => line.trim())
     
       if (lines.length === 0) return;
     
-      const headers = lines[0].split(',').map(header => header.trim());
+      const headers = lines[0].split(',').map(header => header.trim())
   
       const columnMap = columns.reduce((map, col) => {
         map[col.headerName] = col;
 
-        return map;
-      }, {});
+        return map
+      }, {})
     
       const orderedColumns = headers.map(header => columnMap[header]);
 
@@ -167,8 +167,8 @@ const BatchImports = () => {
           }
 
           return obj;
-        }, {});
-      });
+        }, {})
+      })
     
       const dataFromCSV = transform(rows);
       setState(prevState => ({
