@@ -41,25 +41,18 @@ export function useResourceQuery({ endpointId, filter, datasetId, queryFn, searc
     enabled: access?.record?.maxAccess > 0 && enabled
   })
 
-  function invalidateCache() {
-    queryClient.invalidateQueries([endpointId])
-    query.refetch()
-  }
-
   return {
     access,
     labels,
     query: query,
     search(value) {
       setSearchValue(value)
-      invalidateCache()
     },
     filterBy(name, value) {
       setFilters({
         ...filters,
         [name]: value
       })
-      invalidateCache()
     },
     clearFilter(name) {
       setFilters(filters => {
@@ -80,11 +73,7 @@ export function useResourceQuery({ endpointId, filter, datasetId, queryFn, searc
     refetch(value) {
       if (!value.hasOwnProperty('params')) {
         query.refetch()
-      } else if (searchValue) {
-        setSearchValue(searchValue)
-        invalidateCache()
       } else {
-        invalidateCache()
         setApiOption(value)
       }
     },
