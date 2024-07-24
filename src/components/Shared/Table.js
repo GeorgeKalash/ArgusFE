@@ -33,6 +33,7 @@ const Table = ({
   paginationType = '',
   viewCheckButtons = false,
   showCheckboxColumn = false,
+  rowSelection = '',
   pagination = true,
   setData,
   ...props
@@ -47,7 +48,6 @@ const Table = ({
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
   const columnsAccess = props.maxAccess && props.maxAccess.record.controls
   const { stack } = useWindow()
-  const [checkedRows, setCheckedRows] = useState({})
   const [checked, setChecked] = useState(false)
 
   const columns = props.columns
@@ -346,13 +346,6 @@ const Table = ({
     })
 
     setChecked(e.target.checked)
-    setCheckedRows(
-      allNodes.reduce((acc, node) => {
-        if (e.target.checked) acc[node.id] = node.data
-
-        return acc
-      }, {})
-    )
 
     if (typeof setData === 'function') onSelectionChanged
   }
@@ -454,9 +447,18 @@ const Table = ({
         checked={params.value}
         onChange={e => {
           const checked = e.target.checked
-          const updatedRows = { ...checkedRows, [params.node.id]: checked }
-          setCheckedRows(updatedRows)
-          params.node.setDataValue(params.colDef.field, checked)
+          let updatedRows = {}
+          if (rowSelection !== 'single') {
+            params.node.setDataValue(params.colDef.field, checked)
+          } else {
+            params.api.forEachNode(node => {
+              if (node.id === params.node.id) {
+                node.setDataValue(params.colDef.field, checked)
+              } else if (checked) {
+                node.setDataValue(params.colDef.field, false)
+              }
+            })
+          }
         }}
       />
     )
@@ -469,7 +471,8 @@ const Table = ({
             headerName: '',
             field: 'checked',
             cellRenderer: checkboxCellRenderer,
-            headerComponent: params => <Checkbox checked={checked} onChange={e => selectAll(params, e)} />,
+            headerComponent: params =>
+              rowSelection !== 'single' && <Checkbox checked={checked} onChange={e => selectAll(params, e)} />,
             suppressMenu: true // if i want to remove menu from header
           }
         ]
@@ -504,7 +507,7 @@ const Table = ({
             columnDefs={columnDefs}
             pagination={false}
             paginationPageSize={pageSize}
-            rowSelection={'multiple'}
+            rowSelection={'single'}
             suppressAggFuncInHeader={true}
             getRowClass={getRowClass}
             rowHeight={35}
