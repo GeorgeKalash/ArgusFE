@@ -432,6 +432,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
   })
 
   const isClosed = clientIndividualFormik.values.status === 1
+  const wip = clientIndividualFormik.values.wip === 2
 
   const postRtDefault = obj => {
     const date = new Date()
@@ -676,13 +677,13 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       key: 'Approval',
       condition: true,
       onClick: 'onApproval',
-      disabled: !isClosed
+      disabled: !(isClosed || wip)
     },
     {
       key: 'Close',
       condition: !isClosed,
       onClick: onClose,
-      disabled: isClosed || !editMode
+      disabled: isClosed || (wip && !isClosed) || !editMode || (isClosed && !wip)
     },
     {
       key: 'Reopen',
@@ -765,9 +766,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                   label={labels.birthDate}
                   value={clientIndividualFormik.values?.birthDate}
                   required={true}
-                  onChange={(name, value) => {
-                    clientIndividualFormik.setFieldValue('birthDate', new Date(value)?.getTime() || '')
-                  }}
+                  onChange={clientIndividualFormik.setFieldValue}
                   onClear={() => clientIndividualFormik.setFieldValue('birthDate', '')}
                   disabledDate={'>='}
                   readOnly={editMode && true}
@@ -782,7 +781,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                   label={labels.birthDateHijri}
                   value={clientIndividualFormik.values?.birthDate}
                   onChange={(name, value) => {
-                    clientIndividualFormik.setFieldValue('birthDate', value?.valueOf() || '')
+                    clientIndividualFormik.setFieldValue('birthDate', value)
                   }}
                   onClear={() => clientIndividualFormik.setFieldValue('birthDate', '')}
                 />

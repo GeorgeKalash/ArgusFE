@@ -43,7 +43,7 @@ const BeneficiaryBank = () => {
     } else {
       return await getRequest({
         extension: RemittanceOutwardsRepository.Beneficiary.snapshot,
-        parameters: `_clientId=${_clientId}&_dispersalType=${_dispersalType}&_filter=${filters.qry}`
+        parameters: `_clientId=${_clientId}&_dispersalType=${_dispersalType}&_filter=${filters.qry}&_currencyId=0`
       })
     }
   }
