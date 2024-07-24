@@ -17,22 +17,13 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { useRefBehavior } from 'src/hooks/useReferenceProxy'
 
-export default function ItemsForm({ labels, recordId, maxAccess: access }) {
-  const [editMode, setEditMode] = useState(!!recordId)
+export default function ItemsForm({ labels, maxAccess: access, setStore, store }) {
   const { platformLabels } = useContext(ControlContext)
   const [showLotCategories, setShowLotCategories] = useState(false)
   const [showSerialProfiles, setShowSerialProfiles] = useState(false)
+  const { recordId } = store
 
   const { getRequest, postRequest } = useContext(RequestsContext)
-
-  console.log(access, 'accesss')
-
-  const { changeDT, maxAccess } = useRefBehavior({
-    access: access,
-    readOnlyOnEditMode: editMode
-  })
-
-  console.log(maxAccess, 'maxacces1')
 
   const invalidate = useInvalidate({
     endpointId: InventoryRepository.Items.qry
@@ -95,20 +86,26 @@ export default function ItemsForm({ labels, recordId, maxAccess: access }) {
     onSubmit: async obj => {
       const recordId = obj.recordId
 
-      const response = await postRequest({
-        extension: InventoryRepository.Items.set,
-        record: JSON.stringify(obj)
-      })
-
-      if (!recordId) {
-        toast.success(platformLabels.Added)
-        formik.setValues({
-          ...obj,
-          recordId: response.recordId
-        })
-      } else toast.success(platformLabels.Edited)
-      setEditMode(true)
       try {
+        const response = await postRequest({
+          extension: InventoryRepository.Items.set,
+          record: JSON.stringify(obj)
+        })
+
+        if (!recordId) {
+          toast.success(platformLabels.Added)
+          formik.setValues({
+            ...obj,
+            recordId: response.recordId
+          })
+          setStore(prevStore => ({
+            ...prevStore,
+            recordId: response.recordId
+          }))
+        } else {
+          toast.success(platformLabels.Edited)
+        }
+
         const res = await getRequest({
           extension: InventoryRepository.Items.get,
           parameters: `_recordId=${response.recordId}`
@@ -119,6 +116,13 @@ export default function ItemsForm({ labels, recordId, maxAccess: access }) {
 
       invalidate()
     }
+  })
+
+  const editMode = !!recordId || formik.values.recordId
+
+  const { changeDT, maxAccess } = useRefBehavior({
+    access: access,
+    readOnlyOnEditMode: editMode
   })
 
   useEffect(() => {

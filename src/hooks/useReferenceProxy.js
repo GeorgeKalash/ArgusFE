@@ -25,7 +25,6 @@ export function useRefBehavior({ access, readOnlyOnEditMode }) {
     refBehavior: query.data,
     maxAccess: query?.data?.maxAccess,
     changeDT(value) {
-      console.log(value, 'nravalue')
       setNraId(value?.nraId)
     }
   }

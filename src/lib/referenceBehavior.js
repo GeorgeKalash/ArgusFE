@@ -70,12 +70,10 @@ const refBehavior = async (getRequest, maxAccess, selectNraId = undefined, readO
   let sku = { readOnly: false, mandatory: false }
   let reference = { readOnly: false, mandatory: false }
   let isExternal
-  console.log(readOnlyOnEditMode, 'issa')
 
   const nraId = selectNraId
 
   if (nraId) {
-    console.log(readOnlyOnEditMode, 'readOnlyOnEditMode')
     isExternal = await fetchData(getRequest, nraId, 'isExternal')
 
     sku = {

@@ -1,4 +1,4 @@
-import { useContext } from 'react'
+import { useContext, useState } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
@@ -11,13 +11,13 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
-import ItemsForm from './forms/ItemsForm'
-import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
+import ItemWindow from './window/ItemWindow'
 
 const IvItems = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
@@ -114,10 +114,10 @@ const IvItems = () => {
 
   function openForm(recordId) {
     stack({
-      Component: ItemsForm,
+      Component: ItemWindow,
       props: {
         labels: _labels,
-        recordId: recordId,
+        recordId: recordId ? recordId : null,
         maxAccess: access
       },
       width: 1200,
@@ -125,8 +125,6 @@ const IvItems = () => {
       title: _labels.items
     })
   }
-
-  console.log(SystemFunction.Items)
 
   const add = () => {
     openForm()
