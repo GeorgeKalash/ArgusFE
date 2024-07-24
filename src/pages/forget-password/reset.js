@@ -2,16 +2,17 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { useState, useEffect, useContext } from 'react'
 import axios from 'axios'
 
-import { Card, CardContent, Button, Grid, Box, CardMedia } from '@mui/material'
+import { Card, CardContent, Button, Grid, Box, IconButton, InputAdornment } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { useFormik } from 'formik'
 import * as yup from 'yup'
 import BlankLayout from 'src/@core/layouts/BlankLayout'
 import { ControlContext } from 'src/providers/ControlContext'
 import ResetChPassForm from './forms/ResetChPassForm'
 import { useWindow } from 'src/windows'
 import { useAuth } from 'src/hooks/useAuth'
-import { unstable_gridTabIndexColumnGroupHeaderSelector } from '@mui/x-data-grid'
+import { useForm } from 'src/hooks/form.js'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 
 const Reset = () => {
   const theme = useTheme()
@@ -21,28 +22,12 @@ const Reset = () => {
   const auth = useAuth()
 
   useEffect(() => {
-    console.log(auth)
-    console.log(auth?.user)
-    setAccountId(auth?.user?.accountId)
-    /* const fetchData = async () => {
-      const matchHostname = window.location.hostname.match(/^(.+)\.softmachine\.co$/)
-
-      const accountName = matchHostname ? matchHostname[1] : 'byc-deploy'
-
-      try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=${accountName}`)
-
-        setAccountId(response.data.record.accountId)
-      } catch (error) {
-        console.error('Error fetching data:', error)
-      }
-    }
-
-    fetchData() */
+    setAccountId(auth?.getAC?.data?.record?.accountId)
   }, [])
 
-  const validation = useFormik({
+  const { formik } = useForm({
     enableReinitialize: true,
+    validateOnChange: true,
     initialValues: {
       username: ''
     },
@@ -81,41 +66,48 @@ const Reset = () => {
   })
 
   function openForm(username) {
-    console.log('username', username)
     stack({
       Component: ResetChPassForm,
       props: {
         labels: platformLabels,
-        username: username
+        username
       },
-      width: 500,
-      height: 360,
-      title: platformLabels.Activity
+      expandable: false,
+      closable: false,
+      draggable: false,
+      width: 600,
+      height: 400,
+      spacing: false,
+      title: platformLabels.resetPass
     })
   }
 
   const handleKeyDown = event => {
     if (event.key === 'Enter') {
-      validation.handleSubmit()
+      formik.handleSubmit()
     }
   }
 
   return (
-    Boolean(Object.keys(platformLabels)?.length) && (
-      <>
-        <Box className='content-center' sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-          <Card sx={{ zIndex: 1, width: '28rem', marginBottom: 10, marginTop: 'auto' }}>
-            <CardMedia
-              component='img'
-              image='/images/logos/ArgusLogo.png'
-              alt='ArgusERP'
-              sx={{
-                height: 60,
+    <VertLayout>
+      <Grow>
+        <Grid className='content-center' sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+          <Card sx={{ zIndex: 0, width: '28rem', marginBottom: 10, marginTop: 'auto' }}>
+            <Grid
+              item
+              style={{
+                color: 'white',
+                fontSize: '1.2rem',
+                height: '50px',
                 backgroundColor: theme.palette.primary.main,
-                objectFit: 'contain',
-                p: 4
+                padding: '16px',
+                display: 'flex',
+                justifyContent: 'left',
+                alignItems: 'center'
               }}
-            />
+            >
+              {platformLabels.resetPass}
+            </Grid>
             <CardContent sx={{ p: theme => `${theme.spacing(8, 9, 0)} !important` }} onKeyDown={handleKeyDown}>
               <Grid container spacing={5}>
                 <Grid item xs={12}>
@@ -124,23 +116,25 @@ const Reset = () => {
                     size='small'
                     fullWidth
                     label={platformLabels.Username}
-                    value={validation.values.username}
+                    value={formik.values.username}
                     type='text'
-                    onChange={validation.handleChange}
-                    error={validation.touched.username && Boolean(validation.errors.username)}
-                    helperText={validation.touched.username && validation.errors.username}
+                    onChange={formik.handleChange}
+                    error={formik.touched.username && Boolean(formik.errors.username)}
                     placeholder={platformLabels.enterId}
                     InputLabelProps={{ shrink: true }}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position='start'>
+                          <IconButton edge='start'>
+                            <img src='/images/password/mail.png' />
+                          </IconButton>
+                        </InputAdornment>
+                      )
+                    }}
                   />
                 </Grid>
                 <Grid item xs={12} container justifyContent='flex-end'>
-                  <Button
-                    size='small'
-                    type='submit'
-                    variant='contained'
-                    sx={{ mb: 7 }}
-                    onClick={validation.handleSubmit}
-                  >
+                  <Button size='small' type='submit' variant='contained' sx={{ mb: 7 }} onClick={formik.handleSubmit}>
                     {platformLabels.Reset}
                   </Button>
                 </Grid>
@@ -152,9 +146,9 @@ const Reset = () => {
           <Box component='footer' sx={{ mt: 'auto' }}>
             © {new Date().getFullYear()} Argus. All rights reserved. 3.1.8 API: 2.8.8
           </Box>
-        </Box>
-      </>
-    )
+        </Grid>
+      </Grow>
+    </VertLayout>
   )
 }
 Reset.getLayout = page => <BlankLayout>{page}</BlankLayout>

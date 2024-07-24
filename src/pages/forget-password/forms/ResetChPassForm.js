@@ -1,21 +1,24 @@
 import React, { useContext, useState } from 'react'
-import { Box, Button, Grid, IconButton, InputAdornment, LinearProgress } from '@mui/material'
+import { Grid, IconButton, InputAdornment } from '@mui/material'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { VertLayout } from 'src/components/Shared/Layouts/Grow'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { useForm } from 'src/hooks/form'
 import toast from 'react-hot-toast'
 import * as yup from 'yup'
 import { AuthContext } from 'src/providers/AuthContext'
 import { useAuth } from 'src/hooks/useAuth'
 import { useError } from 'src/error'
-import { SystemRepository } from 'src/repositories/SystemRepository'
+import NewPassword from 'src/components/Shared/NewPassword'
+import axios from 'axios'
+import { useRouter } from 'next/router'
 
-const ResetChPassForm = ({ _labels, username = '' }) => {
+const ResetChPassForm = ({ labels, username = '' }) => {
   const [score, setScore] = useState(0)
   const { stack: stackError } = useError()
   const auth = useAuth()
   const { encryptePWD } = useContext(AuthContext)
+  const router = useRouter()
 
   const { formik } = useForm({
     enableReinitialize: true,
@@ -23,33 +26,33 @@ const ResetChPassForm = ({ _labels, username = '' }) => {
     initialValues: {
       username: username ? username : auth?.user?.username,
       code: '',
-      password: '',
+      newPassword: '',
       confirmPassword: ''
     },
     validationSchema: yup.object({
-      password: yup.string().required(),
+      newPassword: yup.string().required(),
       confirmPassword: yup.string().required()
     }),
     onSubmit: async () => {
-      if (formik.values.password === formik.values.confirmPassword) {
+      if (formik.values.newPassword === formik.values.confirmPassword) {
         const resetPWVal = {
           userName: formik.values.username,
-          password: encryptePWD(formik.values.password)
+          password: encryptePWD(formik.values.newPassword),
+          code: formik.values.code
         }
 
-        try {
-          const response = await postRequest({
-            extension: SystemRepository.ResetPW.set,
-            record: resetPWVal,
-            url: `${process.env.NEXT_PUBLIC_AuthURL}MA.asmx/`
+        var bodyFormData = new FormData()
+        bodyFormData.append('record', JSON.stringify(resetPWVal))
+
+        axios
+          .post(`${process.env.NEXT_PUBLIC_AuthURL}MA.asmx/resetPW`, bodyFormData)
+          .then(res => {
+            toast.success('Password changed successfully!')
+            router.push('/login')
           })
-
-          toast.success('Password changed successfully!')
-          router.push('/login')
-          router.reload()
-        } catch (error) {
-          stackError({ message: error.message })
-        }
+          .catch(error => {
+            stackError({ message: error })
+          })
       } else {
         toast.error('Passwords do not match!')
       }
@@ -65,34 +68,23 @@ const ResetChPassForm = ({ _labels, username = '' }) => {
               name='code'
               size='small'
               fullWidth
-              label='code'
+              label={labels.code}
               value={formik.values.code}
               onChange={formik.handleChange}
               error={formik.touched.code && formik.errors.code}
-              /*  InputProps={{
+              InputProps={{
                 startAdornment: (
                   <InputAdornment position='start'>
                     <IconButton edge='start'>
                       <img src='/images/password/forgotPWD1.png' />
                     </IconButton>
                   </InputAdornment>
-                ),
-                endAdornment: (
-                  <InputAdornment position='end'>
-                    <IconButton
-                      edge='end'
-                      onClick={() => setShowPassword(!showPassword)}
-                      onMouseDown={e => e.preventDefault()}
-                    >
-                      <Icon icon={showPassword ? 'mdi:eye-outline' : 'mdi:eye-off-outline'} />
-                    </IconButton>
-                  </InputAdornment>
                 )
-              }} */
+              }}
             />
           </Grid>
         </Grid>
-        <NewPassword formik={formik} labels={_labels} score={score} setScore={setScore} />
+        <NewPassword formik={formik} labels={labels} score={score} setScore={setScore} />
       </Grow>
     </VertLayout>
   )

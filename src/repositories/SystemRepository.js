@@ -176,8 +176,5 @@ export const SystemRepository = {
   },
   TimeZone: {
     get: service + 'getTZN'
-  },
-  ResetPW: {
-    set: service + 'resetPW'
   }
 }
