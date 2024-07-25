@@ -31,6 +31,7 @@ const GridToolbar = ({
   previewReport,
   onSearchClear,
   onGenerateReport,
+  refetch,
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
@@ -213,7 +214,7 @@ const GridToolbar = ({
               <Button
                 sx={{ height: !onGenerateReport ? '35px' : '42px' }}
                 onClick={() => {
-                  searchValue ? onSearch(searchValue) : onGo(formatDataForApi(paramsArray))
+                  refetch(), searchValue ? onSearch(searchValue) : onGo(formatDataForApi(paramsArray))
                 }}
                 variant='contained'
               >

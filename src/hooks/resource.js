@@ -41,10 +41,6 @@ export function useResourceQuery({ endpointId, filter, datasetId, queryFn, searc
     enabled: access?.record?.maxAccess > 0 && enabled
   })
 
-  function invalidateCache() {
-    query.refetch()
-  }
-
   return {
     access,
     labels,
@@ -53,7 +49,6 @@ export function useResourceQuery({ endpointId, filter, datasetId, queryFn, searc
       setSearchValue(value)
     },
     filterBy(name, value) {
-      value && invalidateCache()
       setFilters({
         ...filters,
         [name]: value

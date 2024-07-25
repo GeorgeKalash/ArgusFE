@@ -137,6 +137,7 @@ const BPMasterData = () => {
           }}
           labels={_labels}
           inputSearch={true}
+          refetch={refetch}
           onGo={value => {
             filterBy('params', value)
           }}

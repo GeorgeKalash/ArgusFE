@@ -17,7 +17,7 @@ const MfAccounts = () => {
   const { stack } = useWindow()
 
   const {
-    query: { data },
+    query: { data, ...test },
     labels: _labels,
     filterBy,
     clearFilter,
@@ -127,8 +127,11 @@ const MfAccounts = () => {
           }}
           labels={_labels}
           inputSearch={true}
+          refetch={refetch}
           reportName='FIACC'
-          onGo={value => filterBy('params', value)}
+          onGo={value => {
+            filterBy('params', value)
+          }}
         />
       </Fixed>
       <Grow>
