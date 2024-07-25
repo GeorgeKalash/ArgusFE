@@ -78,11 +78,6 @@ const GridToolbar = ({
     }
   }
 
-  const formatDataForApi = paramsArray => {
-    const formattedData = paramsArray.map(({ fieldId, value }) => `${fieldId}|${value}`).join('^')
-
-    return formattedData
-  }
   function clear() {
     setSearchValue('')
     onSearch('')
