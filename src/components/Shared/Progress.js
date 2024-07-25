@@ -48,6 +48,18 @@ const ProgressBar = styled.div`
   transition: width 1.5s ease-in-out;
 `
 
+function ProgressBarComponent({ label, topLabel, width }) {
+  return (
+    <div>
+      <Label>{topLabel}: </Label>
+      <ProgressBarBackground>
+        <ProgressBar style={{ width }} />
+        <ProgressBarLabel>{label}</ProgressBarLabel>
+      </ProgressBarBackground>
+    </div>
+  )
+} 
+
 export const ProgressForm = ({ recordId, access, window }) => {
   const { getRequest } = useContext(RequestsContext);
   const [intervalId, setIntervalId] = useState();
@@ -134,16 +146,16 @@ export const ProgressForm = ({ recordId, access, window }) => {
                 maxAccess={access}
             />
           </Grid>
-          <Label>{platformLabels.currentPhase}: </Label>
-          <ProgressBarBackground>
-            <ProgressBar style={{ width: `${currentPhaseProgress}%` }} />
-            <ProgressBarLabel>{`${platformLabels.Step} ${formik.values.currentPhase} of ${formik.values.phases}...`}</ProgressBarLabel>
-          </ProgressBarBackground>
-          <Label>{platformLabels.Completed}: </Label>
-          <ProgressBarBackground>
-            <ProgressBar style={{ width: `${completedProgress}%` }} />
-            <ProgressBarLabel>{`${platformLabels.Step} ${formik.values.completed} of ${formik.values.iterations}...`}</ProgressBarLabel>
-          </ProgressBarBackground>
+          <ProgressBarComponent 
+            label={`${platformLabels.Step} ${formik.values.currentPhase} of ${formik.values.phases}...`} 
+            topLabel={platformLabels.currentPhase}
+            width={`${currentPhaseProgress}%`} 
+          />
+          <ProgressBarComponent 
+            label={`${platformLabels.Step} ${formik.values.completed} of ${formik.values.iterations}...`} 
+            topLabel={platformLabels.Completed} 
+            width={`${completedProgress}%`} 
+          />
           <CustomTextArea
             name='log'
             label={platformLabels.Log}
