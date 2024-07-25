@@ -79,18 +79,18 @@ export const ProgressForm = ({ recordId, access, window }) => {
     enableReinitialize: true,
   });
 
+  const fetchData = async () => {
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.THD.get,
+        parameters: `_recordId=${recordId}`
+      });
+
+      formik.setValues(res.record);
+    } catch (e) {}
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await getRequest({
-          extension: SystemRepository.THD.get,
-          parameters: `_recordId=${recordId}`
-        });
-
-        formik.setValues(res.record);
-      } catch (e) {}
-    };
-
     const interval = setInterval(() => {
       fetchData();
     }, 2000);
@@ -98,6 +98,10 @@ export const ProgressForm = ({ recordId, access, window }) => {
 
     return () => clearInterval(interval);
   }, [recordId, getRequest]);
+
+  useEffect(() => {
+    fetchData();
+  }, [])
 
   useEffect(() => {
     if (formik.values.status < 0 || formik.values.status === null) {
