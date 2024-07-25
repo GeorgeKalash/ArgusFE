@@ -4,6 +4,7 @@ import { useState } from 'react'
 
 import ItemsForm from '../forms/ItemsForm.js'
 import PhysicalForm from '../forms/PhysicalForm.js'
+import VendorList from '../forms/VendorList.js'
 
 const ItemWindow = ({ recordId, labels, maxAccess }) => {
   const [activeTab, setActiveTab] = useState(0)
@@ -13,7 +14,11 @@ const ItemWindow = ({ recordId, labels, maxAccess }) => {
     recordId: recordId || null
   })
 
-  const tabs = [{ label: labels.items }, { label: labels.physical, disabled: !store.recordId }]
+  const tabs = [
+    { label: labels.items },
+    { label: labels.physical, disabled: !store.recordId },
+    { label: labels.vendor, disabled: !store.recordId }
+  ]
 
   return (
     <>
@@ -23,6 +28,9 @@ const ItemWindow = ({ recordId, labels, maxAccess }) => {
       </CustomTabPanel>
       <CustomTabPanel height={660} index={1} value={activeTab}>
         <PhysicalForm labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} editMode={editMode} />
+      </CustomTabPanel>
+      <CustomTabPanel height={660} index={2} value={activeTab}>
+        <VendorList labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} />
       </CustomTabPanel>
     </>
   )
