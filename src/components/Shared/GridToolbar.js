@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Tooltip, Typography } from '@mui/material'
+import { Box, Button, Grid, Tooltip, Typography, DialogActions } from '@mui/material'
 import Icon from 'src/@core/components/icon'
 import CustomTextField from '../Inputs/CustomTextField'
 import { useState, useEffect, useContext } from 'react'
@@ -9,16 +9,11 @@ import { TrxType } from 'src/resources/AccessLevels'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import CustomComboBox from '../Inputs/CustomComboBox'
 import { ControlContext } from 'src/providers/ControlContext'
+import { getButtons } from './Buttons'
 
 const GridToolbar = ({
   initialLoad,
   onAdd,
-  openRPB,
-  onTree,
-  refreshGrid,
-  disableRPB = false,
-  onGo,
-  onRefresh = false,
   paramsArray,
   children,
   labels,
@@ -28,6 +23,7 @@ const GridToolbar = ({
   onSearch,
   previewReport,
   onSearchClear,
+  actions = [],
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
@@ -38,7 +34,11 @@ const GridToolbar = ({
   const { stack } = useWindow()
   const [selectedReport, setSelectedReport] = useState(null)
   const [reportStore, setReportStore] = useState([])
+  const [tooltip, setTooltip] = useState('')
 
+  const functionMapping = {
+    actions
+  }
   useEffect(() => {
     getReportLayout()
   }, [previewReport])
@@ -89,18 +89,46 @@ const GridToolbar = ({
     if (onSearchClear) onSearchClear()
   }
 
+  const handleButtonMouseEnter = text => {
+    setTooltip(text)
+  }
+
+  const handleButtonMouseLeave = () => {
+    setTooltip(null)
+  }
+
+  const buttons = getButtons(platformLabels)
+
   return (
-    <Grid container spacing={4} sx={{ display: 'flex', padding: 2 }}>
-      <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', pl: 2, zIndex: 0 }}>
+    <DialogActions sx={{ padding: '8px !important' }}>
+      <style>
+        {`
+          .button-container {
+            position: relative;
+            display: inline-block;
+          }
+          .toast {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #333333ad;
+            color: white;
+            padding: 3px 7px;
+            border-radius: 7px;
+            opacity: 0;
+            transition: opacity 0.3s, top 0.3s;
+            z-index: 1;
+          }
+          .button-container:hover .toast {
+            opacity: 1;
+            top: -40px;
+          }
+        `}
+      </style>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
         <Grid container spacing={4} sx={{ display: 'flex', padding: 1 }}>
           {children && children}
-          {initialLoad && (
-            <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', py: '7px !important' }}>
-              <Button onClick={initialLoad} variant='contained'>
-                <Icon icon='mdi:reload' />
-              </Button>
-            </Grid>
-          )}
           {onAdd && addBtnVisible && (
             <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', pt: '7px !important' }}>
               <Tooltip title={platformLabels.add}>
@@ -137,54 +165,55 @@ const GridToolbar = ({
               />
             </Grid>
           )}
-          {onTree && (
-            <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: '7px !important' }}>
-              <Tooltip title={platformLabels.Tree}>
-                <Button
-                  onClick={onTree}
-                  variant='contained'
-                  sx={{
-                    mr: 1,
-                    '&:hover': {
-                      opacity: 0.8
-                    },
-                    width: '20px',
-                    height: '35px',
-                    objectFit: 'contain'
-                  }}
-                >
-                  <img src='/images/buttonsIcons/tree.png' alt={platformLabels.Tree} />
-                </Button>
-              </Tooltip>
-            </Box>
-          )}
-          {openRPB && (
-            <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', py: '7px !important' }}>
-              <Button onClick={openRPB} variant='contained' disabled={disableRPB}>
-                {platformLabels.OpenRPB}
-              </Button>
-            </Grid>
-          )}
-          {onRefresh && (
-            <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
-              <Button variant='contained' onClick={refreshGrid}>
-                {platformLabels.Refresh}
-              </Button>
-            </Box>
-          )}
-          {onGo && (
-            <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', py: '7px !important' }}>
-              <Button
-                disabled={paramsArray.length === 0}
-                onClick={() => onGo({ _startAt: 0, _pageSize: 30, params: formatDataForApi(paramsArray) })}
-                variant='contained'
-              >
-                {platformLabels.GO}
-              </Button>
-            </Grid>
-          )}
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            {buttons
+              .filter(button => actions.some(action => action.key === button.key))
+              .map((button, index) => {
+                const correspondingAction = actions.find(action => action.key === button.key)
+                const isVisible = eval(correspondingAction.condition)
+                const isDisabled = eval(correspondingAction.disabled)
+                const handleClick = functionMapping[correspondingAction.onClick] || correspondingAction.onClick
+
+                return (
+                  isVisible && (
+                    <div
+                      className='button-container'
+                      onMouseEnter={() => (isDisabled ? null : handleButtonMouseEnter(button.label))}
+                      onMouseLeave={handleButtonMouseLeave}
+                      key={index}
+                    >
+                      <Button
+                        onClick={handleClick}
+                        variant='contained'
+                        sx={{
+                          mt: 1,
+                          mr: 1,
+                          backgroundColor: button.color,
+                          '&:hover': {
+                            backgroundColor: button.color,
+                            opacity: 0.8
+                          },
+                          border: button.border,
+                          width: 'auto',
+                          height: '35px',
+                          objectFit: 'contain'
+                        }}
+                        disabled={isDisabled}
+                      >
+                        {button.image ? (
+                          <img src={`/images/buttonsIcons/${button.image}`} alt={button.key} />
+                        ) : (
+                          button.label
+                        )}
+                      </Button>
+                      {button.image ? tooltip && <div className='toast'>{tooltip}</div> : null}
+                    </div>
+                  )
+                )
+              })}
+          </Box>
         </Grid>
-      </Grid>
+      </Box>
       {paramsArray && paramsArray.length > 0 && (
         <Box sx={{ pl: 2 }}>
           <Grid container>
@@ -235,7 +264,7 @@ const GridToolbar = ({
       ) : (
         <Box></Box>
       )}
-    </Grid>
+    </DialogActions>
   )
 }
 

@@ -1,28 +1,17 @@
-// ** React Imports
 import { useEffect, useState, useContext } from 'react'
-
-// ** MUI Imports
 import { Autocomplete, Box, Button, TextField } from '@mui/material'
-
-// ** Custom Imports
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import ReportParameterBrowser from 'src/components/Shared/ReportParameterBrowser'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { DevExpressRepository } from 'src/repositories/DevExpressRepository'
-
-// ** Statics
 import { ExportFormat } from 'src/statics/ExportFormat'
 import { VertLayout } from './Layouts/VertLayout'
 import { Fixed } from './Layouts/Fixed'
 
 const ReportViewer = ({ resourceId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-
-  //states
   const [reportStore, setReportStore] = useState([])
   const [selectedReport, setSelectedReport] = useState(null)
   const [selectedFormat, setSelectedFormat] = useState(ExportFormat[0])
@@ -125,15 +114,25 @@ const ReportViewer = ({ resourceId }) => {
     return formattedData
   }
 
+  const actions = [
+    {
+      key: 'OpenRPB',
+      condition: true,
+      onClick: () => setReportParamWindowOpen(true),
+      disabled: !selectedReport?.parameters
+    },
+    {
+      key: 'GO',
+      condition: true,
+      onClick: () => generateReport({ _startAt: 0, _pageSize: 30, params: formatDataForApi(paramsArray) }),
+      disabled: false
+    }
+  ]
+
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar
-          openRPB={() => setReportParamWindowOpen(true)}
-          disableRPB={!selectedReport?.parameters}
-          onGo={generateReport}
-          paramsArray={paramsArray}
-        >
+        <GridToolbar actions={actions} paramsArray={paramsArray}>
           <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between' }}>
             <Autocomplete
               size='small'
@@ -158,8 +157,18 @@ const ReportViewer = ({ resourceId }) => {
               disableClearable
             />
             <Button
-              sx={{ ml: 2 }}
               variant='contained'
+              sx={{
+                ml: 2,
+                mt: 2,
+                backgroundColor: '#231F20',
+                '&:hover': {
+                  opacity: 0.8
+                },
+                width: 'auto',
+                height: '35px',
+                objectFit: 'contain'
+              }}
               disabled={!selectedReport || !selectedFormat}
               onClick={() => generateReport({ params: formatDataForApi(paramsArray) })}
               size='small'
@@ -169,11 +178,11 @@ const ReportViewer = ({ resourceId }) => {
           </Box>
         </GridToolbar>
       </Fixed>
-        {pdf && (
-          <Box id='reportContainer' sx={{ flex: 1, display: 'flex', p: 2 }}>
-            <iframe title={selectedReport?.layoutName} src={pdf} width='100%' height='100%' allowFullScreen />
-          </Box>
-        )}
+      {pdf && (
+        <Box id='reportContainer' sx={{ flex: 1, display: 'flex', p: 2 }}>
+          <iframe title={selectedReport?.layoutName} src={pdf} width='100%' height='100%' allowFullScreen />
+        </Box>
+      )}
       <ReportParameterBrowser
         disabled={!selectedReport?.parameters}
         reportName={selectedReport?.parameters}

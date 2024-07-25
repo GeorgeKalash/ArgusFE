@@ -176,6 +176,24 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'OpenRPB',
+    label: platformLabels.OpenRPB,
+    color: '#231F20',
+    main: false
+  },
+  {
+    key: 'Refresh',
+    label: platformLabels.Refresh,
+    color: '#231F20',
+    main: false
+  },
+  {
+    key: 'GO',
+    label: platformLabels.GO,
+    color: '#231F20',
+    main: false
+  },
+  {
     key: 'Clear',
     label: platformLabels.Clear,
     condition: 'isCleared',
