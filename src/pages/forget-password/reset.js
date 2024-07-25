@@ -17,13 +17,8 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 const Reset = () => {
   const theme = useTheme()
   const { platformLabels } = useContext(ControlContext)
-  const [accountId, setAccountId] = useState({})
   const { stack } = useWindow()
   const auth = useAuth()
-
-  useEffect(() => {
-    setAccountId(auth?.getAC?.data?.record?.accountId)
-  }, [])
 
   const { formik } = useForm({
     enableReinitialize: true,
@@ -54,7 +49,7 @@ const Reset = () => {
           axios
             .post(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/mailCode`, bodyFormData2, {
               headers: {
-                AccountId: accountId
+                AccountId: auth?.getAC?.data?.record?.accountId
               }
             })
             .catch(error => {})
