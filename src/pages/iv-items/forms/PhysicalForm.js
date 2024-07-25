@@ -49,7 +49,16 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
     },
     enableReinitialize: true,
     validateOnChange: true,
-    validationSchema: yup.object({}),
+    validationSchema: yup.object({
+      metalId: yup
+        .string()
+        .nullable()
+        .test('is-metalId-required', 'Metal ID is required when isMetal is true', function (value) {
+          const { isMetal } = this.parent
+
+          return isMetal ? value != null && value.trim() !== '' : true
+        })
+    }),
 
     onSubmit: async values => {
       try {
