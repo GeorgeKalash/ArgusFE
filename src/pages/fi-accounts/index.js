@@ -17,7 +17,7 @@ const MfAccounts = () => {
   const { stack } = useWindow()
 
   const {
-    query: { data, ...test },
+    query: { data },
     labels: _labels,
     filterBy,
     clearFilter,

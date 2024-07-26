@@ -41,7 +41,6 @@ const BPMasterData = () => {
     endpointId: BusinessPartnerRepository.MasterData.snapshot,
     datasetId: ResourceIds.BPMasterData,
     filter: {
-      endpointId: BusinessPartnerRepository.MasterData.snapshot,
       filterFn: fetchWithFilter
     }
   })
