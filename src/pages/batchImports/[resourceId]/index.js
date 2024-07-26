@@ -262,7 +262,6 @@ const BatchImports = () => {
         <Table
           columns={columns}
           gridData={gridData}
-          refetch={refetch}
           rowId={['recordId']}
           isLoading={false}
           pageSize={50}
