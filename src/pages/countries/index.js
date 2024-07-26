@@ -78,8 +78,7 @@ const Countries = () => {
       headerName: _labels.ibanLength,
       flex: 1,
       align: 'right',
-
-      valueGetter: ({ row }) => getFormattedNumberMax(row?.ibanLength, 5, 0)
+      type: 'number'
     }
   ]
 
@@ -123,6 +122,7 @@ const Countries = () => {
         <Table
           columns={columns}
           gridData={data}
+          fetchGridData={fetchGridData}
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
