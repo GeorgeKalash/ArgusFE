@@ -130,7 +130,7 @@ const Table = ({
 
         const incrementPage = () => {
           if (page < pageCount) {
-            api({ ...api, _startAt: page * pageSize, _pageSize: pageSize })
+            api({ _startAt: page * pageSize, _pageSize: pageSize })
           }
         }
 
