@@ -44,8 +44,8 @@ export function useResourceQuery({ endpointId, filter, datasetId, queryFn, searc
     access,
     labels,
     query: query,
-    search(query) {
-      setSearchValue(query)
+    search(value) {
+      setSearchValue(value)
     },
     filterBy(name, value) {
       setFilters({
