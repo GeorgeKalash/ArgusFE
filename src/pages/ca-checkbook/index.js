@@ -45,35 +45,35 @@ const Checkbook = () => {
 
   const columns = [
     {
-        field: 'bankAccountName',
-        headerName: _labels.bankAccountName,
-        flex: 1
+      field: 'bankAccountName',
+      headerName: _labels.bankAccountName,
+      flex: 1
     },
     {
-        field: 'bankAccountRef',
-        headerName: _labels.bankAccountRef,
-        flex: 1
+      field: 'bankAccountRef',
+      headerName: _labels.bankAccountRef,
+      flex: 1
     },
     {
-        field: 'size',
-        headerName: _labels.size,
-        flex: 1
+      field: 'size',
+      headerName: _labels.size,
+      flex: 1
     },
     {
-        field: 'firstCheckNo',
-        headerName: _labels.firstCheckNo,
-        flex: 1
+      field: 'firstCheckNo',
+      headerName: _labels.firstCheckNo,
+      flex: 1
     },
     {
-        field: 'lastCheckNo',
-        headerName: _labels.lastCheckNo,
-        flex: 1
+      field: 'lastCheckNo',
+      headerName: _labels.lastCheckNo,
+      flex: 1
     },
     {
-        field: 'issueDate',
-        headerName: _labels.issueDate,
-        flex: 1,
-        valueGetter: ({ row }) => formatDateDefault(row?.issueDate)
+      field: 'issueDate',
+      headerName: _labels.issueDate,
+      flex: 1,
+      type: 'date'
     }
   ]
 
@@ -101,12 +101,12 @@ const Checkbook = () => {
 
   const del = async obj => {
     try {
-        await postRequest({
+      await postRequest({
         extension: CashBankRepository.CACheckbook.del,
         record: JSON.stringify(obj)
-        })
-        invalidate()
-        toast.success(platformLabels.Deleted)
+      })
+      invalidate()
+      toast.success(platformLabels.Deleted)
     } catch (exception) {}
   }
 

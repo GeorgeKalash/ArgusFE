@@ -69,6 +69,7 @@ const ProductsWindow = ({ labels, maxAccess, onProductSubmit, outWardsData, wind
           columns={columns}
           gridData={gridData}
           rowId={['productId']}
+          rowSelection='single'
           isLoading={false}
           maxAccess={maxAccess}
           pagination={false}

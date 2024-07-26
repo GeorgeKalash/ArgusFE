@@ -98,6 +98,8 @@ const SystemChecks = () => {
       extension: SystemRepository.SystemChecks.set,
       record: JSON.stringify(resultObject)
     })
+      .then(() => {})
+      .catch(e => {})
     toast.success('Record Updated Successfully')
   }
 
