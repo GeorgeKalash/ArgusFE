@@ -51,7 +51,7 @@ const convertValue = (value, dataType, isAPI = false) => {
   }
 }
 
-const parseCSV = (text, columns, setGridData, refetch) => {
+const parseCSV = (text, columns) => {
   const lines = text.split('\n').filter(line => line.trim());
 
   if (lines.length === 0) return;
@@ -81,9 +81,7 @@ const parseCSV = (text, columns, setGridData, refetch) => {
     }, {});
   });
 
-  const dataFromCSV = transform(rows);
-  setGridData(dataFromCSV);
-  refetch();
+  return transform(rows);
 };
 
 const getImportData = async (gridData, objectName, endPoint, columns, access, platformLabels, postRequest, stack, stackError) => {
@@ -206,7 +204,8 @@ const BatchImports = () => {
       const reader = new FileReader()
       reader.onload = (e) => {
         const text = e.target.result
-        parseCSV(text, columns, setGridData, refetch)
+        const data = parseCSV(text, columns)
+        setGridData(data)
       }
       reader.readAsText(file)
     }
