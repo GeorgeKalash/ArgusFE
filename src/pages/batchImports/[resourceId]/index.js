@@ -84,7 +84,7 @@ const parseCSV = (text, columns) => {
   return transform(rows);
 };
 
-const getImportData = async (gridData, objectName, endPoint, columns, access, platformLabels, postRequest, stack, stackError) => {
+const getImportData = (gridData, columns, stackError) => {
   const mandatoryColumns = columns.filter(col => col.mandatory);
 
   const missingFields = gridData.list.flatMap(row =>
@@ -113,29 +113,7 @@ const getImportData = async (gridData, objectName, endPoint, columns, access, pl
     }, {});
   });
 
-  const data = {
-    [objectName]: convertedData
-  };
-
-  try {
-    const res = await postRequest({
-      extension: endPoint,
-      record: JSON.stringify(data)
-    });
-
-    stack({
-      Component: ProgressForm,
-      props: {
-        recordId: res.recordId,
-        access
-      },
-      width: 500,
-      height: 450,
-      title: platformLabels.Progress
-    });
-
-    toast.success(platformLabels.Imported);
-  } catch (exception) {}
+  return convertedData;
 };
 
 const BatchImports = () => {
@@ -218,11 +196,39 @@ const BatchImports = () => {
     refetch();
   };
 
+  const handleClick = async () => {
+    const convertedData = getImportData(gridData, columns, stackError)
+
+    const data = {
+      [objectName]: convertedData
+    };
+
+    try {
+      const res = await postRequest({
+        extension: endPoint,
+        record: JSON.stringify(data)
+      });
+  
+      stack({
+        Component: ProgressForm,
+        props: {
+          recordId: res.recordId,
+          access
+        },
+        width: 500,
+        height: 450,
+        title: platformLabels.Progress
+      });
+  
+      toast.success(platformLabels.Imported);
+    } catch (exception) {}
+  }
+
   const actions = [
     {
       key: 'Import',
       condition: true,
-      onClick: () => getImportData(gridData, objectName, endPoint, columns, access, platformLabels, postRequest, stack, stackError),
+      onClick: () => handleClick(),
       disabled: !name
     }
   ];
