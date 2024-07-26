@@ -1,81 +1,28 @@
-import { Box, Button, Grid, Tooltip, Typography, DialogActions } from '@mui/material'
-import Icon from 'src/@core/components/icon'
+import { Box, Button, Grid, Tooltip, DialogActions } from '@mui/material'
 import CustomTextField from '../Inputs/CustomTextField'
-import { useState, useEffect, useContext } from 'react'
-import { RequestsContext } from 'src/providers/RequestsContext'
-import PreviewReport from './PreviewReport'
-import { useWindow } from 'src/windows'
+import { useState, useContext } from 'react'
 import { TrxType } from 'src/resources/AccessLevels'
-import { SystemRepository } from 'src/repositories/SystemRepository'
-import CustomComboBox from '../Inputs/CustomComboBox'
 import { ControlContext } from 'src/providers/ControlContext'
 import { getButtons } from './Buttons'
 
 const GridToolbar = ({
-  initialLoad,
   onAdd,
-  paramsArray,
   children,
-  labels,
-  onClear,
   inputSearch,
-  search,
   onSearch,
-  previewReport,
   onSearchClear,
   actions = [],
+  right = false,
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
   const addBtnVisible = onAdd && maxAccess > TrxType.GET
   const [searchValue, setSearchValue] = useState('')
-  const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const { stack } = useWindow()
-  const [selectedReport, setSelectedReport] = useState(null)
-  const [reportStore, setReportStore] = useState([])
   const [tooltip, setTooltip] = useState('')
 
   const functionMapping = {
     actions
-  }
-  useEffect(() => {
-    getReportLayout()
-  }, [previewReport])
-
-  useEffect(() => {
-    if (reportStore.length > 0) {
-      setSelectedReport(reportStore[0])
-    } else {
-      setSelectedReport(null)
-    }
-  }, [reportStore])
-
-  const getReportLayout = () => {
-    setReportStore([])
-    if (previewReport) {
-      var parameters = `_resourceId=${previewReport}`
-      getRequest({
-        extension: SystemRepository.ReportLayout,
-        parameters: parameters
-      })
-        .then(res => {
-          if (res?.list) {
-            const formattedReports = res.list.map(item => ({
-              api_url: item.api,
-              reportClass: item.instanceName,
-              parameters: item.parameters,
-              layoutName: item.layoutName,
-              assembly: 'ArgusRPT.dll'
-            }))
-            setReportStore(formattedReports)
-            if (formattedReports.length > 0) {
-              setSelectedReport(formattedReports[0])
-            }
-          }
-        })
-        .catch(error => {})
-    }
   }
 
   function clear() {
@@ -121,9 +68,9 @@ const GridToolbar = ({
           }
         `}
       </style>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-        <Grid container spacing={4} sx={{ display: 'flex', padding: 1 }}>
-          {children && children}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', px: 2 }}>
+        <Grid container spacing={2} sx={{ display: 'flex' }}>
+          {!right && children}
           {onAdd && addBtnVisible && (
             <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', pt: '7px !important' }}>
               <Tooltip title={platformLabels.add}>
@@ -147,7 +94,7 @@ const GridToolbar = ({
             </Grid>
           )}
           {inputSearch && (
-            <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', pt: '7px !important' }}>
+            <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', m: '0px !important' }}>
               <CustomTextField
                 name='search'
                 value={searchValue}
@@ -165,8 +112,8 @@ const GridToolbar = ({
               .filter(button => actions.some(action => action.key === button.key))
               .map((button, index) => {
                 const correspondingAction = actions.find(action => action.key === button.key)
-                const isVisible = eval(correspondingAction.condition)
-                const isDisabled = eval(correspondingAction.disabled)
+                const isVisible = correspondingAction.condition
+                const isDisabled = correspondingAction.disabled
                 const handleClick = functionMapping[correspondingAction.onClick] || correspondingAction.onClick
 
                 return (
@@ -208,57 +155,8 @@ const GridToolbar = ({
               })}
           </Box>
         </Grid>
+        {right && children}
       </Box>
-      {paramsArray && paramsArray.length > 0 && (
-        <Box sx={{ pl: 2 }}>
-          <Grid container>
-            {paramsArray.map((param, i) => {
-              return (
-                <Grid key={i} item xs={6}>
-                  <Typography>{`${param.caption}: ${param.display}`}</Typography>
-                </Grid>
-              )
-            })}
-          </Grid>
-        </Box>
-      )}
-      {previewReport ? (
-        <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', py: '7px !important' }}>
-          <CustomComboBox
-            label={platformLabels.SelectReport}
-            valueField='caption'
-            displayField='layoutName'
-            store={reportStore}
-            value={selectedReport}
-            onChange={(e, newValue) => setSelectedReport(newValue)}
-            sx={{ width: 250 }}
-            disableClearable
-          />
-          <Button
-            sx={{ ml: 2 }}
-            variant='contained'
-            disabled={!selectedReport}
-            onClick={() =>
-              stack({
-                Component: PreviewReport,
-                props: {
-                  selectedReport: selectedReport
-                },
-                width: 1000,
-                height: 500,
-                title: platformLabels.PreviewReport
-              })
-            }
-            size='small'
-          >
-            <Tooltip title={platformLabels.Preview}>
-              <img src='/images/buttonsIcons/preview.png' alt={platformLabels.Preview} />
-            </Tooltip>
-          </Button>
-        </Grid>
-      ) : (
-        <Box></Box>
-      )}
     </DialogActions>
   )
 }

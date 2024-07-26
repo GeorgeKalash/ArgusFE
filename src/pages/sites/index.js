@@ -14,6 +14,7 @@ import SitesForm from './forms/SitesForm'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import PreviewReportToolbar from 'src/components/Shared/previewReportToolbar'
 
 const Sites = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -130,7 +131,10 @@ const Sites = () => {
             labels={_labels}
             inputSearch={true}
             previewReport={ResourceIds.Sites}
-          />
+            right={true}
+          >
+            <PreviewReportToolbar previewReport={ResourceIds.Sites} />
+          </GridToolbar>
         </Fixed>
         <Grow>
           <Table

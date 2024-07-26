@@ -9,6 +9,7 @@ import { DevExpressRepository } from 'src/repositories/DevExpressRepository'
 import { ExportFormat } from 'src/statics/ExportFormat'
 import { VertLayout } from './Layouts/VertLayout'
 import { Fixed } from './Layouts/Fixed'
+import ParamsArrayToolbar from './paramsArrayToolbar'
 
 const ReportViewer = ({ resourceId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -132,8 +133,8 @@ const ReportViewer = ({ resourceId }) => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar actions={actions} paramsArray={paramsArray}>
-          <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between' }}>
+        <GridToolbar actions={actions}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
             <Autocomplete
               size='small'
               options={reportStore}
@@ -160,13 +161,12 @@ const ReportViewer = ({ resourceId }) => {
               variant='contained'
               sx={{
                 ml: 2,
-                mt: 2,
                 backgroundColor: '#231F20',
                 '&:hover': {
                   opacity: 0.8
                 },
                 width: 'auto',
-                height: '35px',
+                height: '40px',
                 objectFit: 'contain'
               }}
               disabled={!selectedReport || !selectedFormat}
@@ -176,6 +176,7 @@ const ReportViewer = ({ resourceId }) => {
               Generate Report
             </Button>
           </Box>
+          <ParamsArrayToolbar paramsArray={paramsArray} />
         </GridToolbar>
       </Fixed>
       {pdf && (
