@@ -131,7 +131,6 @@ export const ProgressForm = ({ recordId, access, window }) => {
   return (
     <FormShell 
       form={formik} 
-      resourceId={recordId} 
       maxAccess={access} 
       isInfo={false}
       editMode={true}
