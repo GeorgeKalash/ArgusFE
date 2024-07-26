@@ -11,6 +11,7 @@ import ResourceComboBox from './ResourceComboBox'
 import { ResourceLookup } from './ResourceLookup'
 import { formatDateDefault } from 'src/lib/date-helper'
 import CustomTextField from '../Inputs/CustomTextField'
+import { useError } from 'src/error'
 
 const formatDateTo = value => {
   const date = new Date(value)
@@ -217,6 +218,7 @@ const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, windo
   const { getRequest } = useContext(RequestsContext)
   const [items, setItems] = useState([])
   const [parameters, setParameters] = useState([])
+  const { stack: stackError } = useError()
 
   const getParameterDefinition = reportName => {
     const parameters = `_reportName=${reportName}`
@@ -283,18 +285,21 @@ const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, windo
 
   const mergeFieldWithApiDetails = async () => {
     const fieldComponentArray = []
-
+    let list = ''
     await Promise.all(
       parameters.map(async field => {
         const detailedApiDetails = (await fetchData(field)) || ''
         if (!detailedApiDetails) {
-          console.log(` key ${field?.id} has not details in apiMappings`)
+          list += list ? ', ' + field.caption : field.caption
         }
         if (field.controlType) {
           fieldComponentArray.push({ ...field, apiDetails: detailedApiDetails })
         }
       })
     )
+    if (list) {
+      stackError({ message: `${list} - has not in apiMappings` })
+    }
     setItems(fieldComponentArray.filter(field => field !== null))
   }
 
