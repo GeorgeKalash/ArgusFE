@@ -127,7 +127,7 @@ const FiOpeningBalance = () => {
         maxAccess={access}
         reportName='FIOBA'
         onGo={({ params }) => {
-          filterBy('params', params)
+          filterBy('params', params), refetch()
         }}
       />
       <Table

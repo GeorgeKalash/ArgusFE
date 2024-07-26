@@ -137,8 +137,8 @@ const BPMasterData = () => {
           labels={_labels}
           inputSearch={true}
           onGo={({ params, search }) => {
-            refetch()
             search ? filterBy('qry', search) : filterBy('params', params)
+            refetch()
           }}
           reportName='BPMAS'
         />

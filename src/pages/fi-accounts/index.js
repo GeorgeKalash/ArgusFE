@@ -129,8 +129,8 @@ const MfAccounts = () => {
           inputSearch={true}
           reportName='FIACC'
           onGo={({ params, search }) => {
-            refetch()
             search ? filterBy('qry', search) : filterBy('params', params)
+            refetch()
           }}
         />
       </Fixed>
