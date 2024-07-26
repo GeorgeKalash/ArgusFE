@@ -65,5 +65,10 @@ export const InventoryRepository = {
     set: service + 'setIT',
     del: service + 'delIT',
     snapshot: service + 'snapshotIT2'
+  },
+  Currency: {
+    qry: service + 'qryITC',
+    get: service + 'getITC',
+    set: service + 'setITC'
   }
 }

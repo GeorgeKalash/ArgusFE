@@ -1,17 +1,9 @@
-// ** React Imports
 import { useState, useContext } from 'react'
-
 import { useWindow } from 'src/windows'
-
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -52,17 +44,17 @@ const VendorList = ({ store, labels, maxAccess }) => {
   const columns = [
     {
       field: 'vendorName',
-      headerName: 'vendor Name',
+      headerName: labels.vendorName,
       flex: 1
     },
     {
       field: 'currencyRef',
-      headerName: labels.currencyRef,
+      headerName: labels.currency,
       flex: 1
     },
     {
       field: 'baseLaborPrice',
-      headerName: labels.baseLaborPrice,
+      headerName: labels.baseLabor,
       flex: 1
     },
     {
@@ -82,12 +74,12 @@ const VendorList = ({ store, labels, maxAccess }) => {
     },
     {
       field: 'isPreferred',
-      headerName: labels.isPreferred,
+      headerName: labels.isPreffered,
       flex: 1
     },
     {
       field: 'deliveryLeadDays',
-      headerName: labels.deliveryLeadDays,
+      headerName: labels.dld,
       flex: 1
     }
   ]
@@ -109,8 +101,6 @@ const VendorList = ({ store, labels, maxAccess }) => {
   const edit = obj => {
     openForm(obj)
   }
-
-  console.log(recordId, 'indexxxx')
 
   function openForm(record) {
     stack({

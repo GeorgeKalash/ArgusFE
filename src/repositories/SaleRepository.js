@@ -56,11 +56,9 @@ export const SaleRepository = {
   WorkFlow: {
     graph: service + 'graph'
   },
-  PosUsers: {
-    qry: service + 'qrySP',
-    get: service + 'getSP',
-    set: service + 'setSP',
-    del: service + 'delSP',
-    page: service + 'pageSP'
+  Sales: {
+    qry: service + 'qryPR',
+    get: service + 'getPR',
+    set: service + 'setPR'
   }
 }

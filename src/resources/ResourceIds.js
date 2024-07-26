@@ -160,5 +160,6 @@ export const ResourceIds = {
   Checkbook: 33201,
   Items: 41201,
   PhysicalProperty: 41240,
-  PriceList: 50202
+  PriceList: 50202,
+  SalesList: 51203
 }

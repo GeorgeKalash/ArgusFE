@@ -9,8 +9,6 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useEffect } from 'react'
 
-import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
-
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { useForm } from 'src/hooks/form'
@@ -19,76 +17,77 @@ import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
 import { ControlContext } from 'src/providers/ControlContext'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import CustomTextField from 'src/components/Inputs/CustomTextField'
 
-const VendorForm = ({ labels, editMode, maxAccess, recordId, store, record }) => {
+const VendorForm = ({ labels, editMode, maxAccess, store, record }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: DocumentReleaseRepository.StrategyPrereq.qry
+    endpointId: PurchaseRepository.PriceList.qry
   })
 
-  const { recordId: stgId } = store
-  console.log(stgId, 'stg')
+  const { recordId: itemId } = store
 
   const validationSchema = yup.object({})
 
   const { formik } = useForm({
     maxAccess,
-    initialValues: { vendorId: '', currencyId: '', ...record },
+    initialValues: {
+      itemId,
+      vendorId: '',
+      currencyId: '',
+      baseLaborPrice: '',
+      priceList: '',
+      markdown: '',
+      sku: '',
+      isPreferred: false,
+      deliveryLeadDays: '',
+      ...record
+    },
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema,
-    onSubmit: values => {
-      postPreReq(values)
-    }
-  })
+    onSubmit: async obj => {
+      const vendorId = formik.values.vendorId
+      const currencyId = formik.values.currencyId
 
-  const postPreReq = async obj => {
-    const isNewRecord = !obj?.recordId
-
-    try {
-      const res = await postRequest({
+      const response = await postRequest({
         extension: PurchaseRepository.PriceList.set,
         record: JSON.stringify(obj)
       })
 
-      if (isNewRecord) {
+      if (!vendorId && !currencyId) {
         toast.success(platformLabels.Added)
-      } else {
-        toast.success(platformLabels.Edited)
-      }
-      invalidate()
-    } catch (error) {}
-  }
+      } else toast.success(platformLabels.Edited)
 
-  //   console.log(stgId, 'ali')
-  //   console.log(record, 'record')
-  //   console.log(record.currencyId, 'currency')
+      formik.setValues(obj)
+
+      invalidate()
+    }
+  })
 
   useEffect(() => {
     const fetchData = async () => {
       if (record && record.currencyId && record.vendorId) {
         try {
-          console.log('Fetching data with record.currencyId:', record.currencyId)
-
           const res = await getRequest({
             extension: PurchaseRepository.PriceList.get,
-            parameters: `_itemId=${stgId}&_vendorId=${formik.values.vendorId}&_currencyId=${formik.values.currencyId}`
+            parameters: `_itemId=${itemId}&_vendorId=${formik.values.vendorId}&_currencyId=${formik.values.currencyId}`
           })
-          console.log('Response from getRequest:', res)
 
           if (res.record) {
             formik.setValues(res.record)
           }
-        } catch (error) {
-          console.error('Error fetching data:', error)
-        }
+        } catch (error) {}
       }
     }
 
     fetchData()
   }, [record])
+
+  console.log(formik.values)
 
   return (
     <FormShell
@@ -104,18 +103,24 @@ const VendorForm = ({ labels, editMode, maxAccess, recordId, store, record }) =>
             <Grid item xs={12}>
               <ResourceLookup
                 endpointId={PurchaseRepository.Vendor.snapshot}
-                parameters={{
-                  _type: 0
-                }}
                 name='vendorId'
-                label={labels.account}
-                valueField='vendorRef'
-                displayField='vendorName'
+                label={labels.vendor}
                 form={formik}
+                displayFieldWidth={2}
+                valueField='vendorRef'
+                displayField='name'
+                required
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                valueShow='vendorRef'
+                secondValueShow='vendorName'
                 onChange={(event, newValue) => {
                   formik.setFieldValue('vendorId', newValue ? newValue.recordId : '')
-                  formik.setFieldValue('vendorRef', newValue ? newValue.reference : '')
                   formik.setFieldValue('vendorName', newValue ? newValue.name : '')
+                  formik.setFieldValue('vendorRef', newValue ? newValue.reference : '')
+                  console.log(newValue.name, 'name')
                 }}
                 maxAccess={maxAccess}
               />
@@ -125,7 +130,6 @@ const VendorForm = ({ labels, editMode, maxAccess, recordId, store, record }) =>
                 endpointId={SystemRepository.Currency.qry}
                 name='currencyId'
                 label={labels.currency}
-                readOnly={formik.values.status == '3'}
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 columnsInDropDown={[
@@ -139,6 +143,69 @@ const VendorForm = ({ labels, editMode, maxAccess, recordId, store, record }) =>
                   formik.setFieldValue('currencyId', newValue?.recordId || null)
                 }}
                 error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomNumberField
+                name='baseLaborPrice'
+                label={labels.baseLabor}
+                value={formik.values.baseLaborPrice}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('baseLaborPrice', '')}
+                required
+                error={formik.touched.baseLaborPrice && Boolean(formik.errors.baseLaborPrice)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomNumberField
+                name='priceList'
+                label={labels.priceList}
+                value={formik.values.priceList}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('priceList', '')}
+                required
+                error={formik.touched.priceList && Boolean(formik.errors.priceList)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomNumberField
+                name='markdown'
+                label={labels.markdown}
+                value={formik.values.markdown}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('markdown', '')}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='sku'
+                label={labels.sku}
+                value={formik.values.sku}
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('sku', '')}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name='isPreferred'
+                    checked={formik.values?.isPreferred}
+                    onChange={formik.handleChange}
+                    maxAccess={maxAccess}
+                  />
+                }
+                label={labels.isPreffered}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomNumberField
+                name='deliveryLeadDays'
+                label={labels.dld}
+                value={formik.values.deliveryLeadDays}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('deliveryLeadDays', '')}
               />
             </Grid>
           </Grid>
