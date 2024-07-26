@@ -14,6 +14,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
+import * as yup from 'yup'
 
 const SmsRequestLog = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -27,7 +28,11 @@ const SmsRequestLog = () => {
       resourceId: ''
     },
     enableReinitialize: true,
-    validateOnChange: true
+    validateOnChange: true,
+    validationSchema: yup.object({
+      moduleId: yup.string().required(' '),
+      resourceId: yup.string().required(' ')
+    })
   })
 
   async function fetchWithFilter({ filters }) {
