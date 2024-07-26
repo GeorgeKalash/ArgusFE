@@ -132,7 +132,7 @@ const UndeliveredCreditOrder = () => {
               field: 'date',
               headerName: labels.date,
               flex: 1,
-              valueGetter: ({ row }) => formatDateDefault(row?.date)
+              type: 'date'
             },
             {
               field: 'plantRef',

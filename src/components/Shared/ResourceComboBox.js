@@ -57,7 +57,7 @@ export default function ResourceComboBox({
       ? values[name]
       : (datasetId
           ? filteredStore.find(item => item[valueField] === values[name]?.toString())
-          : filteredStore.find(item => item[valueField] === values[name])) ?? '') || value
+          : filteredStore.find(item => item[valueField] === (values[name] || values))) ?? '') || value
 
   return <CustomComboBox {...{ ...rest, name, store: filteredStore, valueField, value: _value, name }} />
 }

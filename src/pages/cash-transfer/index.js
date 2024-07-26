@@ -124,7 +124,7 @@ const CashTransfer = () => {
       field: 'date',
       headerName: _labels.date,
       flex: 1,
-      valueGetter: ({ row }) => formatDateDefault(row?.date)
+      type: 'date'
     },
     {
       field: 'fromPlantName',
@@ -199,7 +199,7 @@ const CashTransfer = () => {
         recordId: recordId ? recordId : null
       },
       width: 950,
-      title: 'Cash Transfer'
+      title: _labels.cashTransfer
     })
   }
 

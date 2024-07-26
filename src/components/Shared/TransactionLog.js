@@ -85,14 +85,13 @@ const TransactionLog = props => {
       field: 'eventDt',
       headerName: _labels.eventDate,
       flex: 1,
-      valueGetter: ({ row }) => formatDateDefault(row?.eventDt) + ' ' + formatTime(row?.eventDt)
+      type: 'date'
     },
     {
       field: 'userName',
       headerName: _labels.username,
       flex: 1
     },
-    ,
     {
       field: 'ttName',
       headerName: _labels.trxName,
