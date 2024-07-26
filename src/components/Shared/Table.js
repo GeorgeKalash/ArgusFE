@@ -491,8 +491,8 @@ const Table = ({
               minHeight: '40px !important'
             },
             '.ag-header-cell': {
-              height: '40px !important',
-              minHeight: '40px !important'
+              height: '40px !important'
+              // minHeight: '40px !important'
             },
             '.ag-cell': {
               borderRight: '1px solid #d0d0d0 !important'
