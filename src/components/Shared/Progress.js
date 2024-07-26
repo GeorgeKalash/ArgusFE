@@ -2,7 +2,6 @@ import styled from 'styled-components'
 import React, { useContext, useEffect, useState } from 'react'
 import FormShell from './FormShell'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useForm } from 'src/hooks/form.js'
 import { Grow } from './Layouts/Grow'
 import { VertLayout } from './Layouts/VertLayout'
 import { Grid } from '@mui/material'
@@ -65,18 +64,15 @@ export const ProgressForm = ({ recordId, access, window }) => {
   const [intervalId, setIntervalId] = useState();
   const { platformLabels } = useContext(ControlContext)
 
-  const { formik } = useForm({
-    initialValues: {
-      recordId,
-      iterations: 0,
-      completed: 0,
-      phases: 0,
-      currentPhase: 0,
-      currentPhaseName: '',
-      logInfo: '',
-      status: 0,
-    },
-    enableReinitialize: true,
+  const [data, setData] = useState({
+    recordId,
+    iterations: 0,
+    completed: 0,
+    phases: 0,
+    currentPhase: 0,
+    currentPhaseName: '',
+    logInfo: '',
+    status: 0,
   });
 
   const fetchData = async () => {
@@ -86,7 +82,7 @@ export const ProgressForm = ({ recordId, access, window }) => {
         parameters: `_recordId=${recordId}`
       });
 
-      formik.setValues(res.record);
+      setData(res.record);
     } catch (e) {}
   };
 
@@ -104,20 +100,20 @@ export const ProgressForm = ({ recordId, access, window }) => {
   }, [])
 
   useEffect(() => {
-    if (formik.values.status < 0 || formik.values.status === null) {
+    if (data.status < 0 || data.status === null) {
       if (intervalId) {
         clearInterval(intervalId);
         setIntervalId(null);
       }
     }
-  }, [formik.values.status, intervalId]);
+  }, [data.status, intervalId]);
 
-  const currentPhaseProgress = formik.values.phases ? (formik.values.currentPhase / formik.values.phases) * 100 : 0;
-  const completedProgress = formik.values.iterations ? (formik.values.completed / formik.values.iterations) * 100 : 0;
+  const currentPhaseProgress = data.phases ? (data.currentPhase / data.phases) * 100 : 0;
+  const completedProgress = data.iterations ? (data.completed / data.iterations) * 100 : 0;
 
   const tasksCompleted = currentPhaseProgress === 100 && completedProgress === 100;
   
-  const hasLogError = !!formik.values.logInfo;
+  const hasLogError = !!data.logInfo;
 
   const actions = [
     {
@@ -129,8 +125,8 @@ export const ProgressForm = ({ recordId, access, window }) => {
   ]
 
   return (
-    <FormShell 
-      form={formik} 
+    <FormShell
+      form={data} 
       maxAccess={access} 
       isInfo={false}
       editMode={true}
@@ -144,25 +140,25 @@ export const ProgressForm = ({ recordId, access, window }) => {
             <CustomTextField
                 name='phase'
                 label={platformLabels.Phase}
-                value={formik.values.currentPhaseName}
+                value={data.currentPhaseName}
                 readOnly={true}
                 maxAccess={access}
             />
           </Grid>
           <ProgressBarComponent 
-            label={`${platformLabels.Step} ${formik.values.currentPhase} of ${formik.values.phases}...`} 
+            label={`${platformLabels.Step} ${data.currentPhase} of ${data.phases}...`} 
             topLabel={platformLabels.currentPhase}
             width={`${currentPhaseProgress}%`} 
           />
           <ProgressBarComponent 
-            label={`${platformLabels.Step} ${formik.values.completed} of ${formik.values.iterations}...`} 
+            label={`${platformLabels.Step} ${data.completed} of ${data.iterations}...`} 
             topLabel={platformLabels.Completed} 
             width={`${completedProgress}%`} 
           />
           <CustomTextArea
             name='log'
             label={platformLabels.Log}
-            value={formik.values.logInfo}
+            value={data.logInfo}
             rows={4}
             maxAccess={access}
             readOnly={true}
