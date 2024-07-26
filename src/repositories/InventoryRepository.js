@@ -5,6 +5,9 @@ export const InventoryRepository = {
     snapshot: service + 'snapshotIT',
     get: service + 'getIT'
   },
+  Group: {
+    qry: service + 'qryGRP'
+  },
   Category: {
     qry: service + 'qryCA',
     get: service + 'getCA',
