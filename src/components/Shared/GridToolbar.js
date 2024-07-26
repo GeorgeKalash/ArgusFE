@@ -1,25 +1,27 @@
-import { Box, Button, Grid, Tooltip, Typography } from '@mui/material'
+import { Box, Button, Grid, Tooltip } from '@mui/material'
 import Icon from 'src/@core/components/icon'
 import CustomTextField from '../Inputs/CustomTextField'
 import { useState, useEffect, useContext } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import PreviewReport from './PreviewReport'
 import { useWindow } from 'src/windows'
+
+// ** Resources
 import { TrxType } from 'src/resources/AccessLevels'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import CustomComboBox from '../Inputs/CustomComboBox'
 import { ControlContext } from 'src/providers/ControlContext'
+import ReportParameterBrowser from 'src/components/Shared/ReportParameterBrowser'
 
 const GridToolbar = ({
   initialLoad,
   onAdd,
-  openRPB,
   onTree,
   refreshGrid,
   disableRPB = false,
   onGo,
   onRefresh = false,
-  paramsArray,
+  reportName,
   children,
   labels,
   onClear,
@@ -28,6 +30,7 @@ const GridToolbar = ({
   onSearch,
   previewReport,
   onSearchClear,
+  onGenerateReport,
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
@@ -38,6 +41,7 @@ const GridToolbar = ({
   const { stack } = useWindow()
   const [selectedReport, setSelectedReport] = useState(null)
   const [reportStore, setReportStore] = useState([])
+  const [paramsArray, setParamsArray] = useState([])
 
   useEffect(() => {
     getReportLayout()
@@ -50,6 +54,20 @@ const GridToolbar = ({
       setSelectedReport(null)
     }
   }, [reportStore])
+
+  const openRPB = () => {
+    stack({
+      Component: ReportParameterBrowser,
+      props: {
+        reportName: reportName,
+        paramsArray: paramsArray,
+        setParamsArray: setParamsArray
+      },
+      width: 700,
+      height: 500,
+      title: 'Report Parameters Browser'
+    })
+  }
 
   const getReportLayout = () => {
     setReportStore([])
@@ -79,10 +97,22 @@ const GridToolbar = ({
   }
 
   const formatDataForApi = paramsArray => {
-    const formattedData = paramsArray.map(({ fieldId, value }) => `${fieldId}|${value}`).join('^')
+    let minValue = Infinity
+
+    for (const [index, { fieldId, value }] of Object.entries(paramsArray)) {
+      const numericValue = Number(fieldId)
+      if (numericValue < minValue) {
+        minValue = numericValue
+      }
+    }
+
+    const formattedData = paramsArray
+      .map(({ fieldId, value }) => `${fieldId}|${value}`)
+      .reduce((acc, curr, index) => acc + (index === minValue ? `${curr}` : `^${curr}`), '')
 
     return formattedData
   }
+
   function clear() {
     setSearchValue('')
     onSearch('')
@@ -158,9 +188,15 @@ const GridToolbar = ({
               </Tooltip>
             </Box>
           )}
-          {openRPB && (
-            <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', py: '7px !important' }}>
-              <Button onClick={openRPB} variant='contained' disabled={disableRPB}>
+          {reportName && (
+            <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', pt: '7px !important' }}>
+              <Button
+                onClick={openRPB}
+                variant='contained'
+                size='small'
+                disabled={disableRPB}
+                sx={{ height: !onGenerateReport ? '35px' : '42px' }}
+              >
                 {platformLabels.OpenRPB}
               </Button>
             </Grid>
@@ -173,13 +209,15 @@ const GridToolbar = ({
             </Box>
           )}
           {onGo && (
-            <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', py: '7px !important' }}>
+            <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', pt: '7px !important' }}>
               <Button
-                disabled={paramsArray.length === 0}
-                onClick={() => onGo({ _startAt: 0, _pageSize: 30, params: formatDataForApi(paramsArray) })}
+                sx={{ height: !onGenerateReport ? '35px' : '42px' }}
+                onClick={() => {
+                  onGo({ params: formatDataForApi(paramsArray), search: searchValue })
+                }}
                 variant='contained'
               >
-                {platformLabels.GO}
+                {platformLabels.Apply}
               </Button>
             </Grid>
           )}
@@ -202,56 +240,58 @@ const GridToolbar = ({
           )}
         </Grid>
       </Grid>
-      {paramsArray && paramsArray.length > 0 && (
-        <Box sx={{ pl: 2 }}>
-          <Grid container>
-            {paramsArray.map((param, i) => {
-              return (
-                <Grid key={i} item xs={6}>
-                  <Typography>{`${param.caption}: ${param.display}`}</Typography>
+
+      <Grid container spacing={4} sx={{ display: 'flex', pl: 7, pt: 5, flexDirection: 'column' }}>
+        {paramsArray && paramsArray.length > 0 && (
+          <Box sx={{ pl: 2 }}>
+            <Grid container spacing={0} sx={{ margin: 0, padding: 0 }}>
+              {paramsArray.map((param, i) => (
+                <Grid key={i} item sx={{ margin: 0, padding: 0 }}>
+                  [<b>{param.caption}:</b> {param.display}]
                 </Grid>
-              )
-            })}
+              ))}
+            </Grid>
+          </Box>
+        )}
+
+        {previewReport ? (
+          <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', py: '7px !important' }}>
+            <CustomComboBox
+              label={platformLabels.SelectReport}
+              valueField='caption'
+              displayField='layoutName'
+              store={reportStore}
+              value={selectedReport}
+              onChange={(e, newValue) => setSelectedReport(newValue)}
+              sx={{ width: 250 }}
+              disableClearable
+            />
+            <Button
+              sx={{ ml: 2 }}
+              variant='contained'
+              disabled={!selectedReport}
+              onClick={() =>
+                stack({
+                  Component: PreviewReport,
+                  props: {
+                    selectedReport: selectedReport
+                  },
+                  width: 1000,
+                  height: 500,
+                  title: platformLabels.PreviewReport
+                })
+              }
+              size='small'
+            >
+              <Tooltip title={platformLabels.Preview}>
+                <img src='/images/buttonsIcons/preview.png' alt={platformLabels.Preview} />
+              </Tooltip>
+            </Button>
           </Grid>
-        </Box>
-      )}
-      {previewReport ? (
-        <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', py: '7px !important' }}>
-          <CustomComboBox
-            label={platformLabels.SelectReport}
-            valueField='caption'
-            displayField='layoutName'
-            store={reportStore}
-            value={selectedReport}
-            onChange={(e, newValue) => setSelectedReport(newValue)}
-            sx={{ width: 250 }}
-            disableClearable
-          />
-          <Button
-            sx={{ ml: 2 }}
-            variant='contained'
-            disabled={!selectedReport}
-            onClick={() =>
-              stack({
-                Component: PreviewReport,
-                props: {
-                  selectedReport: selectedReport
-                },
-                width: 1000,
-                height: 500,
-                title: platformLabels.PreviewReport
-              })
-            }
-            size='small'
-          >
-            <Tooltip title={platformLabels.Preview}>
-              <img src='/images/buttonsIcons/preview.png' alt={platformLabels.Preview} />
-            </Tooltip>
-          </Button>
-        </Grid>
-      ) : (
-        <Box></Box>
-      )}
+        ) : (
+          <Box></Box>
+        )}
+      </Grid>
     </Grid>
   )
 }
