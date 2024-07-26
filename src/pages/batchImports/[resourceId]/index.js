@@ -51,7 +51,7 @@ const convertValue = (value, dataType, isAPI = false) => {
   }
 }
 
-const parseCSV = (text, columns, setState, refetch) => {
+const parseCSV = (text, columns, setGridData, refetch) => {
   const lines = text.split('\n').filter(line => line.trim());
 
   if (lines.length === 0) return;
@@ -82,17 +82,14 @@ const parseCSV = (text, columns, setState, refetch) => {
   });
 
   const dataFromCSV = transform(rows);
-  setState(prevState => ({
-    ...prevState,
-    gridData: dataFromCSV
-  }));
+  setGridData(dataFromCSV);
   refetch();
 };
 
-const getImportData = async (state, columns, access, platformLabels, postRequest, stack, stackError) => {
+const getImportData = async (gridData, objectName, endPoint, columns, access, platformLabels, postRequest, stack, stackError) => {
   const mandatoryColumns = columns.filter(col => col.mandatory);
 
-  const missingFields = state.gridData.list.flatMap(row =>
+  const missingFields = gridData.list.flatMap(row =>
     mandatoryColumns
       .filter(col => row[col.field] === null || row[col.field] === undefined || row[col.field] === '')
       .map(col => col.headerName)
@@ -107,7 +104,7 @@ const getImportData = async (state, columns, access, platformLabels, postRequest
     return;
   }
 
-  const convertedData = state.gridData.list.map(row => {
+  const convertedData = gridData.list.map(row => {
     return Object.keys(row).reduce((acc, key) => {
       const col = columns.find(c => c.field === key);
       let value = row[key];
@@ -119,12 +116,12 @@ const getImportData = async (state, columns, access, platformLabels, postRequest
   });
 
   const data = {
-    [state.objectName]: convertedData
+    [objectName]: convertedData
   };
 
   try {
     const res = await postRequest({
-      extension: state.endPoint,
+      extension: endPoint,
       record: JSON.stringify(data)
     });
 
@@ -148,14 +145,11 @@ const BatchImports = () => {
   const { stack: stackError } = useError()
   const router = useRouter()
 
-  const [columns, setColumns] = useState([])
-
-  const [state, setState] = useState({
-    gridData: [],
-    name: '',
-    objectName: '',
-    endPoint: ''
-  })
+  const [columns, setColumns] = useState([]);
+  const [gridData, setGridData] = useState([]);
+  const [name, setName] = useState('');
+  const [objectName, setObjectName] = useState('');
+  const [endPoint, setEndPoint] = useState('');
 
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { resourceId } = router.query
@@ -187,114 +181,102 @@ const BatchImports = () => {
               { field: 'recordId', headerName: '', flex: .4 },
               ...modifiedFields
             ])
-                  
-            setState(prevState => ({
-              ...prevState,
-              objectName: res.record.objectName,
-              endPoint: res.record.endPoint
-            }));
-          }
-        } catch (exception) {}
-      })()
-    }, [resourceId])
-      
+
+            setObjectName(res.record.objectName);
+            setEndPoint(res.record.endPoint);
+        }
+      } catch (exception) {}
+    })();
+  }, []);
+
+  const refetch = () => {
+    setGridData(prevGridData => {
+      const transformedData = transform(prevGridData.list);
+
+      return transformedData
+    })
+  }
+
   const handleFileChange = (event) => {
     const file = event.target.files[0]
 
-    setState(prevState => ({
-      ...prevState,
-      name: file.name
-    }));
+    setName(file.name);
 
     if (file) {
       const reader = new FileReader()
       reader.onload = (e) => {
         const text = e.target.result
-        parseCSV(text, columns, setState, refetch)
+        parseCSV(text, columns, setGridData, refetch)
       }
       reader.readAsText(file)
     }
   }
 
   const clearFile = () => {
-    setState(prevState => ({
-      ...prevState,
-      name: '',
-      gridData: []
-    }));
+    setName('');
+    setGridData([]);
     document.getElementById('csvInput').value = null;
     refetch();
-  };
-
-  const refetch = () => {
-      setState(prevState => {
-          const transformedData = transform(prevState.gridData.list);
-
-          return {
-              ...prevState,
-              gridData: transformedData
-          };
-      });
   };
 
   const actions = [
     {
       key: 'Import',
       condition: true,
-      onClick: () => getImportData(state, columns, access, platformLabels, postRequest, stack, stackError),
-      disabled: !state.name
+      onClick: () => getImportData(gridData, objectName, endPoint, columns, access, platformLabels, postRequest, stack, stackError),
+      disabled: !name
     }
-  ]
+  ];
 
   return (
-      <VertLayout>
-          <Fixed>
-              <GridToolbar onClear={true} refreshGrid={() => clearFile()}>
-                <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between' }}>
-                  <CustomTextField
-                    name='name'
-                    label={platformLabels.SelectCSV}
-                    value={state.name}
-                    readOnly={true}
-                    disabled={!!state.name}
-                  />
-                  <Button
-                    sx={{ ml: 6, minWidth: '90px !important' }}
-                    variant='contained'
-                    size='small'
-                    disabled={!!state.name}
-                    onClick={() => document.getElementById('csvInput').click()}
-                  >
-                    {platformLabels.Browse}...
-                  </Button>
-                  <input
-                      id="csvInput"
-                      type="file"
-                      accept=".csv"
-                      style={{ display: 'none' }}
-                      onChange={(e) => handleFileChange(e)}
-                  />
-                </Box>
-              </GridToolbar>
-          </Fixed>
-          <Grow>
-            <Table
-                columns={columns}
-                gridData={state.gridData}
-                refetch={refetch}
-                rowId={['recordId']}
-                isLoading={false}
-                pageSize={50}
-                paginationType='api'
-                pagination={false}
-                maxAccess={access}
-                textTransform={true}
+    <VertLayout>
+      <Fixed>
+        <GridToolbar onClear={true} refreshGrid={clearFile}>
+          <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between' }}>
+            <CustomTextField
+              name='name'
+              label={platformLabels.SelectCSV}
+              value={name}
+              readOnly={true}
+              disabled={!!name}
             />
-          </Grow>
-          <Fixed>
-            <WindowToolbar smallBox={true} actions={actions} />
-          </Fixed>
-      </VertLayout>
+            <Button
+              sx={{ ml: 6, minWidth: '90px !important' }}
+              variant='contained'
+              size='small'
+              disabled={!!name}
+              onClick={() => document.getElementById('csvInput').click()}
+            >
+              {platformLabels.Browse}...
+            </Button>
+            <input
+              id="csvInput"
+              type="file"
+              accept=".csv"
+              style={{ display: 'none' }}
+              onChange={handleFileChange}
+            />
+          </Box>
+        </GridToolbar>
+      </Fixed>
+      <Grow>
+        <Table
+          columns={columns}
+          gridData={gridData}
+          refetch={refetch}
+          rowId={['recordId']}
+          isLoading={false}
+          pageSize={50}
+          paginationType='api'
+          pagination={false}
+          maxAccess={access}
+          textTransform={true}
+        />
+      </Grow>
+      <Fixed>
+        <WindowToolbar smallBox={true} actions={actions} />
+      </Fixed>
+    </VertLayout>
   )
 }
 
