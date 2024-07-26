@@ -89,7 +89,7 @@ const parseCSV = (text, columns, setState, refetch) => {
   refetch();
 };
 
-const getImportData = async (state, columns, access, platformLabels, postRequest, stack, stackError, invalidate) => {
+const getImportData = async (state, columns, access, platformLabels, postRequest, stack, stackError) => {
   const mandatoryColumns = columns.filter(col => col.mandatory);
 
   const missingFields = state.gridData.list.flatMap(row =>
@@ -138,7 +138,7 @@ const getImportData = async (state, columns, access, platformLabels, postRequest
       height: 450,
       title: platformLabels.Progress
     });
-    invalidate();
+
     toast.success(platformLabels.Imported);
   } catch (exception) {}
 };
@@ -162,8 +162,7 @@ const BatchImports = () => {
   const { platformLabels } = useContext(ControlContext)
 
   const {
-    access,
-    invalidate
+    access
   } = useResourceQuery({
     datasetId: resourceId
   })
@@ -242,7 +241,7 @@ const BatchImports = () => {
     {
       key: 'Import',
       condition: true,
-      onClick: () => getImportData(state, columns, access, platformLabels, postRequest, stack, stackError, invalidate),
+      onClick: () => getImportData(state, columns, access, platformLabels, postRequest, stack, stackError),
       disabled: !state.name
     }
   ]
