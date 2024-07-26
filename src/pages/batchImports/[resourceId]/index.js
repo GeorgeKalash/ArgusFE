@@ -242,7 +242,8 @@ const BatchImports = () => {
     {
       key: 'Import',
       condition: true,
-      onClick: () => getImportData(state, columns, access, platformLabels, postRequest, stack, stackError, invalidate)
+      onClick: () => getImportData(state, columns, access, platformLabels, postRequest, stack, stackError, invalidate),
+      disabled: !state.name
     }
   ]
 
