@@ -22,7 +22,7 @@ const GridToolbar = ({
   paramsArray,
   children,
   labels,
-  onClear = false,
+  onClear,
   inputSearch,
   search,
   onSearch,
