@@ -48,7 +48,12 @@ const VendorForm = ({ labels, editMode, maxAccess, store, record }) => {
     },
     enableReinitialize: true,
     validateOnChange: true,
-    validationSchema,
+    validationSchema: yup.object({
+      vendorId: yup.string().required(' '),
+      currencyId: yup.string().required(' '),
+      baseLaborPrice: yup.string().required(' '),
+      priceList: yup.string().required(' ')
+    }),
     onSubmit: async obj => {
       const vendorId = formik.values.vendorId
       const currencyId = formik.values.currencyId

@@ -20,14 +20,17 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { SaleRepository } from 'src/repositories/SaleRepository'
+import { InventoryRepository } from 'src/repositories/InventoryRepository'
 
-const SalesForm = ({ labels, editMode, maxAccess, store, record }) => {
+const SalesForm = ({ labels, maxAccess, store, record, cId }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: PurchaseRepository.PriceList.qry
+    endpointId: SaleRepository.Sales.qry
   })
+
+  console.log(record, 'recc')
 
   const { recordId: itemId } = store
 
@@ -37,19 +40,33 @@ const SalesForm = ({ labels, editMode, maxAccess, store, record }) => {
     maxAccess,
     initialValues: {
       itemId,
+      currencyId: cId,
+      plId: '',
+      priceType: '',
+      value: '',
+      priceWithVat: '',
+      minPrice: '',
 
       ...record
     },
     enableReinitialize: true,
     validateOnChange: true,
-    validationSchema,
+    validationSchema: yup.object({
+      currencyId: yup.string().required(' '),
+      plId: yup.string().required(' '),
+      priceType: yup.string().required(' '),
+      value: yup.string().required(' ')
+    }),
     onSubmit: async obj => {
+      const plId = formik.values.plId
+      const currencyId = formik.values.currencyId
+
       const response = await postRequest({
         extension: SaleRepository.Sales.set,
         record: JSON.stringify(obj)
       })
 
-      if (!vendorId && !currencyId) {
+      if (!plId && !currencyId) {
         toast.success(platformLabels.Added)
       } else toast.success(platformLabels.Edited)
 
@@ -58,15 +75,17 @@ const SalesForm = ({ labels, editMode, maxAccess, store, record }) => {
       invalidate()
     }
   })
+  const editMode = !!record
 
   useEffect(() => {
     const fetchData = async () => {
-      if (record) {
+      if (record && record.plId) {
         try {
           const res = await getRequest({
             extension: SaleRepository.Sales.get,
-            parameters: `_itemId=${itemId}}`
+            parameters: `_itemId=${itemId}&_plId=${formik.values.plId}&_currencyId=${formik.values.currencyId}`
           })
+          console.log(res, 'res')
 
           if (res.record) {
             formik.setValues(res.record)
@@ -78,7 +97,28 @@ const SalesForm = ({ labels, editMode, maxAccess, store, record }) => {
     fetchData()
   }, [record])
 
-  console.log(formik.values)
+  useEffect(() => {
+    if (!editMode) {
+      ;(async () => {
+        const responsePriceLevel = await getRequest({
+          extension: SaleRepository.PriceLevel.qry,
+          parameters: `_filter=`
+        })
+        if (responsePriceLevel.list && responsePriceLevel.list.length > 0) {
+          const firstPriceLevel = responsePriceLevel.list[0]
+          formik.setFieldValue('plId', firstPriceLevel.recordId)
+        }
+
+        const responsePriceType = await getRequest({
+          extension: InventoryRepository.Items.pack
+        })
+        if (responsePriceType.record && responsePriceType.record.priceTypes.length > 0) {
+          const firstPriceType = responsePriceType.record.priceTypes[0]
+          formik.setFieldValue('priceType', parseInt(firstPriceType.key))
+        }
+      })()
+    }
+  }, [])
 
   return (
     <FormShell
@@ -90,7 +130,106 @@ const SalesForm = ({ labels, editMode, maxAccess, store, record }) => {
     >
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}></Grid>
+          <Grid container spacing={4}>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={SaleRepository.PriceLevel.qry}
+                parameters='_filter='
+                name='plId'
+                label={labels.priceLevel}
+                valueField='recordId'
+                displayField={'name'}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                maxAccess={maxAccess}
+                readOnly={editMode}
+                required
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('plId', newValue ? newValue.recordId : '')
+                }}
+                error={formik.touched.plId && Boolean(formik.errors.plId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={InventoryRepository.Currency.qry}
+                parameters={`_itemId=${itemId}`}
+                name='currencyId'
+                label={labels.currency}
+                valueField='currencyId'
+                displayField={['currencyName']}
+                columnsInDropDown={[{ key: 'currencyName', value: 'Name' }]}
+                values={formik.values}
+                readOnly
+                required
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('currencyId', newValue?.currencyId || '')
+                }}
+                onClear={() => formik.setFieldValue('currencyId', '')}
+                error={!formik.values.currencyId && check}
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={InventoryRepository.Items.pack}
+                getList={response => {
+                  const formattedPriceTypes = response.record.priceTypes.map(priceTypes => ({
+                    key: parseInt(priceTypes.key),
+                    value: priceTypes.value
+                  }))
+
+                  return formattedPriceTypes
+                }}
+                values={formik.values}
+                name='priceType'
+                label={labels.priceType}
+                valueField='key'
+                displayField='value'
+                displayFieldWidth={1}
+                required
+                maxAccess={!editMode && maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('priceType', newValue?.key || '')
+                }}
+                error={formik.touched.priceType && formik.errors.priceType}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomNumberField
+                name='value'
+                label={labels.price}
+                value={formik.values.value}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('value', '')}
+                required
+                error={formik.touched.value && Boolean(formik.errors.value)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomNumberField
+                name='priceWithVat'
+                label={labels.pwv}
+                value={formik.values.priceWithVat}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('priceWithVat', '')}
+                readOnly
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomNumberField
+                name='minPrice'
+                label={labels.minPrice}
+                value={formik.values.minPrice}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('minPrice', '')}
+              />
+            </Grid>
+          </Grid>
         </Grow>
       </VertLayout>
     </FormShell>

@@ -25,13 +25,14 @@ const SalesList = ({ store, labels, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId } = store
   const { platformLabels } = useContext(ControlContext)
-  useState
 
   const { stack } = useWindow()
 
   const [initialValues, setInitialValues] = useState({
     currencyId: ''
   })
+
+  console.log(recordId, 'recordId')
 
   const [check, setCheck] = useState(false)
 
@@ -60,15 +61,15 @@ const SalesList = ({ store, labels, maxAccess }) => {
     })()
   }, [recordId])
 
-  console.log(formik.values.currencyId, 'currencyId')
-
   async function fetchGridData() {
-    const response = await getRequest({
-      extension: SaleRepository.Sales.qry,
-      parameters: `&_itemId=${recordId}&_currencyId=${formik.values.currencyId}`
-    })
+    if (formik.values.currencyId) {
+      const response = await getRequest({
+        extension: SaleRepository.Sales.qry,
+        parameters: `&_itemId=${recordId}&_currencyId=${formik.values.currencyId}`
+      })
 
-    return response
+      return response
+    }
   }
 
   console.log(formik, 'formik')
@@ -123,16 +124,6 @@ const SalesList = ({ store, labels, maxAccess }) => {
     }
   ]
 
-  const delVendor = async obj => {
-    await postRequest({
-      extension: PurchaseRepository.PriceList.del,
-      record: JSON.stringify(obj)
-    })
-    refetch()
-
-    toast.success(platformLabels.Deleted)
-  }
-
   const add = () => {
     if (!formik.values.currencyId) {
       setCheck(true)
@@ -154,6 +145,7 @@ const SalesList = ({ store, labels, maxAccess }) => {
         recordId: recordId ? recordId : null,
         record: record,
         maxAccess,
+        cId: formik.values.currencyId,
 
         store
       },
@@ -166,8 +158,8 @@ const SalesList = ({ store, labels, maxAccess }) => {
     <VertLayout>
       <Fixed>
         <GridToolbar onAdd={add} maxAccess={maxAccess} />
-        <Grid container spacing={2} ml={40} mt={-13}>
-          <Grid item xs={3}>
+        <Grid container spacing={2} mt={-13}>
+          <Grid item xs={3} ml={40}>
             <ResourceComboBox
               endpointId={InventoryRepository.Currency.qry}
               parameters={`_itemId=${recordId}`}
@@ -192,12 +184,11 @@ const SalesList = ({ store, labels, maxAccess }) => {
         <Table
           columns={columns}
           gridData={data}
-          rowId={['vendorId', 'currencyId']}
+          rowId={['plId', 'currencyId']}
           isLoading={false}
           pageSize={50}
           onEdit={edit}
           pagination={false}
-          onDelete={delVendor}
           maxAccess={maxAccess}
           height={200}
         />
