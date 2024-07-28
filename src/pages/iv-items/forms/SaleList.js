@@ -77,6 +77,7 @@ const SalesList = ({ store, labels, maxAccess }) => {
   const {
     query: { data },
     labels: _labels,
+    invalidate,
 
     refetch
   } = useResourceQuery({
@@ -154,6 +155,17 @@ const SalesList = ({ store, labels, maxAccess }) => {
     })
   }
 
+  const del = async obj => {
+    try {
+      await postRequest({
+        extension: SaleRepository.Sales.del,
+        record: JSON.stringify(obj)
+      })
+      invalidate()
+      toast.success(platformLabels.Deleted)
+    } catch (exception) {}
+  }
+
   return (
     <VertLayout>
       <Fixed>
@@ -188,6 +200,7 @@ const SalesList = ({ store, labels, maxAccess }) => {
           isLoading={false}
           pageSize={50}
           onEdit={edit}
+          onDelete={del}
           pagination={false}
           maxAccess={maxAccess}
           height={200}

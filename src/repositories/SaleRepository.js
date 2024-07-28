@@ -54,6 +54,7 @@ export const SaleRepository = {
   Sales: {
     qry: service + 'qryPR',
     get: service + 'getPR',
-    set: service + 'setPR'
+    set: service + 'setPR',
+    del: service + 'delPR'
   }
 }
