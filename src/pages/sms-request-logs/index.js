@@ -13,8 +13,6 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { useForm } from 'src/hooks/form'
-import * as yup from 'yup'
 
 const SmsRequestLog = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -22,21 +20,14 @@ const SmsRequestLog = () => {
   const languageId = user.languageId
   const datasetId = DataSets.MODULE
 
-  const { formik } = useForm({
-    initialValues: {
-      moduleId: '10',
-      resourceId: ''
-    },
-    enableReinitialize: true,
-    validateOnChange: true,
-    validationSchema: yup.object({
-      moduleId: yup.string().required(' '),
-      resourceId: yup.string().required(' ')
-    })
+  const [values, setValues] = useState({
+    moduleId: '10',
+    resourceId: ''
   })
 
   async function fetchWithFilter({ filters }) {
     const resourceId = filters?.resourceId
+    console.log(resourceId)
     if (!filters || !filters?.resourceId) {
       return { list: [] }
     } else {
@@ -52,7 +43,6 @@ const SmsRequestLog = () => {
     refetch,
     labels: labels,
     filterBy,
-    paginationParameters,
     access,
     filters
   } = useResourceQuery({
@@ -84,15 +74,12 @@ const SmsRequestLog = () => {
                 parameters={`_dataset=${datasetId}&_language=${languageId}`}
                 label={labels.Module}
                 name='moduleId'
-                values={formik.values}
+                values={values}
                 valueField='key'
                 displayField='value'
                 required
                 onChange={(event, newValue) => {
-                  if (newValue) formik.setFieldValue('moduleId', newValue?.key)
-                  formik.setFieldValue('resourceId', '')
-                  filters.resourceId = ''
-                  fetchWithFilter(filters)
+                  setValues({ moduleId: newValue?.key || '10', resourceId: '' })
                 }}
                 sx={{ pr: 2 }}
               />
@@ -101,18 +88,16 @@ const SmsRequestLog = () => {
               {' '}
               <ResourceComboBox
                 endpointId={SystemRepository.ModuleClassRES.qry}
-                parameters={`_moduleId=${formik.values.moduleId}&_filter=`}
+                parameters={`_moduleId=${values.moduleId}&_filter=`}
                 label={labels.ResourceId}
                 name='resourceId'
-                values={formik.values}
+                values={values}
                 required
                 valueField='key'
                 displayField='value'
                 onChange={(event, newValue) => {
-                  if (newValue) {
-                    onChange(newValue?.key)
-                    formik.setFieldValue('resourceId', newValue?.key)
-                  }
+                  onChange(newValue?.key || '')
+                  setValues({ ...values, resourceId: newValue?.key || '' })
                 }}
               />
             </Grid>
