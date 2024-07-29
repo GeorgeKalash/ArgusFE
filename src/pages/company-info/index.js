@@ -1,5 +1,5 @@
-import { Box, Grid } from '@mui/material'
-import React, { useContext, useEffect, useRef, useState } from 'react'
+import { Grid } from '@mui/material'
+import React, { useContext, useEffect, useRef } from 'react'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FormShell from 'src/components/Shared/FormShell'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
@@ -27,20 +27,22 @@ const CompanyInfo = () => {
   }, [])
 
   async function getData() {
-    const res = await getRequest({
-      extension: SystemRepository.CompanyInfo.get,
-      parameters: `_filter=`
-    })
-    res.record.accountId = getStorageData('userData')?.accountId
-    formik.setValues({
-      name: res.record.name,
-      webSite: res.record.taxNo,
-      taxNo: res.record.taxNo,
-      licenseNo: res.record.licenseNo,
-      crNo: res.record.crNo,
-      logoUrl: res.record.logoUrl,
-      flName: res.record.flName
-    })
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.CompanyInfo.get,
+        parameters: `_filter=`
+      })
+      res.record.accountId = getStorageData('userData')?.accountId
+      formik.setValues({
+        name: res.record.name,
+        webSite: res.record.taxNo,
+        taxNo: res.record.taxNo,
+        licenseNo: res.record.licenseNo,
+        crNo: res.record.crNo,
+        logoUrl: res.record.logoUrl,
+        flName: res.record.flName
+      })
+    } catch (e) {}
   }
 
   const { formik } = useForm({
@@ -64,16 +66,16 @@ const CompanyInfo = () => {
   })
 
   const post = async obj => {
-    const result = await postRequest({
-      extension: SystemRepository.CompanyInfo.set,
-      record: JSON.stringify({ ...obj, attachment: null })
-    })
-    if (imageUploadRef.current) {
-      imageUploadRef.current.submit()
-    }
-    if (result) {
+    try {
+      await postRequest({
+        extension: SystemRepository.CompanyInfo.set,
+        record: JSON.stringify({ ...obj, attachment: null })
+      })
+      if (imageUploadRef.current) {
+        imageUploadRef.current.submit()
+      }
       toast.success('Record Edited Successfully')
-    }
+    } catch (e) {}
   }
 
   return (
