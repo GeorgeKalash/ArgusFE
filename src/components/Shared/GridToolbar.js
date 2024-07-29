@@ -7,12 +7,13 @@ import { getButtons } from './Buttons'
 
 const GridToolbar = ({
   onAdd,
-  children,
+  leftSection,
+  rightSection,
   inputSearch,
   onSearch,
   onSearchClear,
   actions = [],
-  right = false,
+  column,
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
@@ -20,10 +21,6 @@ const GridToolbar = ({
   const [searchValue, setSearchValue] = useState('')
   const { platformLabels } = useContext(ControlContext)
   const [tooltip, setTooltip] = useState('')
-
-  const functionMapping = {
-    actions
-  }
 
   function clear() {
     setSearchValue('')
@@ -42,7 +39,7 @@ const GridToolbar = ({
   const buttons = getButtons(platformLabels)
 
   return (
-    <DialogActions sx={{ padding: '8px !important' }}>
+    <DialogActions sx={{ px: '0px !important', py: '4px !important', flexDirection: column ? 'column' : 'row' }}>
       <style>
         {`
           .button-container {
@@ -68,95 +65,92 @@ const GridToolbar = ({
           }
         `}
       </style>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', px: 2 }}>
-        <Grid container spacing={2} sx={{ display: 'flex' }}>
-          {!right && children}
-          {onAdd && addBtnVisible && (
-            <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', pt: '7px !important' }}>
-              <Tooltip title={platformLabels.add}>
-                <Button
-                  onClick={onAdd}
-                  variant='contained'
-                  style={{ backgroundColor: 'transparent', border: '1px solid #4eb558' }}
-                  sx={{
-                    mr: 1,
-                    '&:hover': {
-                      opacity: 0.8
-                    },
-                    width: '20px',
-                    height: '35px',
-                    objectFit: 'contain'
-                  }}
-                >
-                  <img src='/images/buttonsIcons/add.png' alt={platformLabels.add} />
-                </Button>
-              </Tooltip>
-            </Grid>
-          )}
-          {inputSearch && (
-            <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', m: '0px !important' }}>
-              <CustomTextField
-                name='search'
-                value={searchValue}
-                label={platformLabels.Search}
-                onClear={clear}
-                onChange={e => setSearchValue(e.target.value)}
-                onSearch={onSearch}
-                search={true}
-                height={35}
-              />
-            </Grid>
-          )}
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            {buttons
-              .filter(button => actions.some(action => action.key === button.key))
-              .map((button, index) => {
-                const correspondingAction = actions.find(action => action.key === button.key)
-                const isVisible = correspondingAction.condition
-                const isDisabled = correspondingAction.disabled
-                const handleClick = functionMapping[correspondingAction.onClick] || correspondingAction.onClick
+      <Grid container spacing={2} sx={{ display: 'flex', px: 2, width: '100%' }}>
+        {leftSection}
+        {onAdd && addBtnVisible && (
+          <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', pt: '7px !important' }}>
+            <Tooltip title={platformLabels.add}>
+              <Button
+                onClick={onAdd}
+                variant='contained'
+                style={{ backgroundColor: 'transparent', border: '1px solid #4eb558' }}
+                sx={{
+                  mr: 1,
+                  '&:hover': {
+                    opacity: 0.8
+                  },
+                  width: '20px',
+                  height: '35px',
+                  objectFit: 'contain'
+                }}
+              >
+                <img src='/images/buttonsIcons/add.png' alt={platformLabels.add} />
+              </Button>
+            </Tooltip>
+          </Grid>
+        )}
+        {inputSearch && (
+          <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', m: '0px !important' }}>
+            <CustomTextField
+              name='search'
+              value={searchValue}
+              label={platformLabels.Search}
+              onClear={clear}
+              onChange={e => setSearchValue(e.target.value)}
+              onSearch={onSearch}
+              search={true}
+              height={35}
+            />
+          </Grid>
+        )}
+        <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', m: '0px !important' }}>
+          {buttons
+            .filter(button => actions.some(action => action.key === button.key))
+            .map((button, index) => {
+              const correspondingAction = actions.find(action => action.key === button.key)
+              const isVisible = correspondingAction.condition
+              const isDisabled = correspondingAction.disabled
+              const handleClick = correspondingAction.onClick
 
-                return (
-                  isVisible && (
-                    <div
-                      className='button-container'
-                      onMouseEnter={() => (isDisabled ? null : handleButtonMouseEnter(button.label))}
-                      onMouseLeave={handleButtonMouseLeave}
-                      key={index}
-                    >
-                      <Button
-                        onClick={handleClick}
-                        variant='contained'
-                        sx={{
-                          mt: 1,
-                          mr: 1,
+              return (
+                isVisible && (
+                  <div
+                    className='button-container'
+                    onMouseEnter={() => (isDisabled ? null : handleButtonMouseEnter(button.label))}
+                    onMouseLeave={handleButtonMouseLeave}
+                    key={index}
+                  >
+                    <Button
+                      onClick={handleClick}
+                      variant='contained'
+                      sx={{
+                        mr: 1,
+                        backgroundColor: button.color,
+                        '&:hover': {
                           backgroundColor: button.color,
-                          '&:hover': {
-                            backgroundColor: button.color,
-                            opacity: 0.8
-                          },
-                          border: button.border,
-                          width: 'auto',
-                          height: '35px',
-                          objectFit: 'contain'
-                        }}
-                        disabled={isDisabled}
-                      >
-                        {button.image ? (
-                          <img src={`/images/buttonsIcons/${button.image}`} alt={button.key} />
-                        ) : (
-                          button.label
-                        )}
-                      </Button>
-                      {button.image ? tooltip && <div className='toast'>{tooltip}</div> : null}
-                    </div>
-                  )
+                          opacity: 0.8
+                        },
+                        border: button.border,
+                        width: 'auto',
+                        height: '35px',
+                        objectFit: 'contain'
+                      }}
+                      disabled={isDisabled}
+                    >
+                      {button.image ? (
+                        <img src={`/images/buttonsIcons/${button.image}`} alt={button.key} />
+                      ) : (
+                        button.label
+                      )}
+                    </Button>
+                    {button.image ? tooltip && <div className='toast'>{tooltip}</div> : null}
+                  </div>
                 )
-              })}
-          </Box>
+              )
+            })}
         </Grid>
-        {right && children}
-      </Box>
+      </Grid>
+      {rightSection}
     </DialogActions>
   )
 }

@@ -1,4 +1,4 @@
-import { useContext } from 'react'
+import { useContext, useState } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
@@ -11,10 +11,13 @@ import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import ReportParameterBrowser from 'src/components/Shared/ReportParameterBrowser'
+import ParamsArrayToolbar from 'src/components/Shared/paramsArrayToolbar'
 
 const MfAccounts = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const [paramsArray, setParamsArray] = useState([])
 
   const {
     query: { data },
@@ -30,21 +33,24 @@ const MfAccounts = () => {
     endpointId: FinancialRepository.Account.page,
     datasetId: ResourceIds.Accounts,
     filter: {
-      filterFn: fetchWithSearch
+      filterFn: fetchWithFilter
     }
   })
 
-  async function fetchWithSearch({ filters }) {
-    return await getRequest({
-      extension: FinancialRepository.Account.snapshot,
-      parameters: `_filter=${filters.qry}`
-    })
+  async function fetchWithFilter({ filters, pagination }) {
+    if (filters?.qry) {
+      return await getRequest({
+        extension: FinancialRepository.Account.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+    } else {
+      return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+    }
   }
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
-
-    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}`
+    const { _startAt = 0, _pageSize = 50, params } = options
+    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
     var parameters = defaultParams
 
     const response = await getRequest({
@@ -110,6 +116,38 @@ const MfAccounts = () => {
     openForm(obj?.recordId)
   }
 
+  const openRPB = () => {
+    stack({
+      Component: ReportParameterBrowser,
+      props: {
+        reportName: 'FIACC',
+        paramsArray: paramsArray,
+        setParamsArray: setParamsArray
+      },
+      width: 700,
+      height: 500,
+      title: 'Report Parameters Browser'
+    })
+  }
+
+  const actions = [
+    {
+      key: 'OpenRPB',
+      condition: true,
+      onClick: openRPB,
+      disabled: false
+    },
+    {
+      key: 'GO',
+      condition: true,
+      onClick: ({ params, search }) => {
+        search ? filterBy('qry', search) : filterBy('params', params)
+        refetch()
+      },
+      disabled: false
+    }
+  ]
+
   return (
     <VertLayout>
       <Fixed>
@@ -124,6 +162,9 @@ const MfAccounts = () => {
           }}
           labels={_labels}
           inputSearch={true}
+          actions={actions}
+          column={true}
+          rightSection={paramsArray && paramsArray.length > 0 && <ParamsArrayToolbar paramsArray={paramsArray} />}
         />
       </Fixed>
       <Grow>

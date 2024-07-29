@@ -189,7 +189,7 @@ export const getButtons = platformLabels => [
   },
   {
     key: 'GO',
-    label: platformLabels.GO,
+    label: platformLabels.Apply,
     color: '#231F20',
     main: false
   },

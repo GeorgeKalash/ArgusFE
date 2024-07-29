@@ -1,18 +1,14 @@
-import { Box, Grid, Typography } from '@mui/material'
+import { Box, Grid } from '@mui/material'
 
 const ParamsArrayToolbar = ({ paramsArray }) => {
   return (
-    <Box sx={{ pl: 2 }}>
-      <Grid container>
-        {paramsArray.map((param, i) => {
-          return (
-            <Grid key={i} item xs={6}>
-              <Typography>{`${param.caption}: ${param.display}`}</Typography>
-            </Grid>
-          )
-        })}
-      </Grid>
-    </Box>
+    <Grid container spacing={2} sx={{ display: 'flex', px: 2, width: '100%', mt: 1 }}>
+      {paramsArray.map((param, i) => (
+        <Grid key={i} item>
+          [<b>{param.caption}:</b> {param.display}]
+        </Grid>
+      ))}
+    </Grid>
   )
 }
 

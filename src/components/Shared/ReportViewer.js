@@ -2,7 +2,6 @@ import { useEffect, useState, useContext } from 'react'
 import { Autocomplete, Box, Button, TextField } from '@mui/material'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import ReportParameterBrowser from 'src/components/Shared/ReportParameterBrowser'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { DevExpressRepository } from 'src/repositories/DevExpressRepository'
@@ -10,16 +9,16 @@ import { ExportFormat } from 'src/statics/ExportFormat'
 import { VertLayout } from './Layouts/VertLayout'
 import { Fixed } from './Layouts/Fixed'
 import ParamsArrayToolbar from './paramsArrayToolbar'
+import { useWindow } from 'src/windows'
 
 const ReportViewer = ({ resourceId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [reportStore, setReportStore] = useState([])
   const [selectedReport, setSelectedReport] = useState(null)
   const [selectedFormat, setSelectedFormat] = useState(ExportFormat[0])
-  const [paramsArray, setParamsArray] = useState([])
-  const [reportParamWindowOpen, setReportParamWindowOpen] = useState(false)
   const [pdf, setPDF] = useState(null)
-  const [errorMessage, setErrorMessage] = useState(null)
+  const [paramsArray, setParamsArray] = useState([])
+  const { stack } = useWindow()
 
   const getReportLayout = () => {
     var parameters = `_resourceId=${resourceId}`
@@ -39,9 +38,7 @@ const ReportViewer = ({ resourceId }) => {
           }))
         ])
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch(error => {})
   }
 
   const getReportTemplate = () => {
@@ -62,14 +59,12 @@ const ReportViewer = ({ resourceId }) => {
           }))
         ])
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch(error => {})
   }
 
   const generateReport = ({ params = '' }) => {
     const obj = {
-      api_url: selectedReport.api_url + '?_params=',
+      api_url: selectedReport.api_url + '?_params=' + params,
       assembly: selectedReport.assembly,
       format: selectedFormat.key,
       reportClass: selectedReport.reportClass
@@ -80,7 +75,6 @@ const ReportViewer = ({ resourceId }) => {
       record: JSON.stringify(obj)
     })
       .then(res => {
-        console.log({ generateReportRES: res })
         switch (selectedFormat.key) {
           case 1:
             setPDF(res.recordId)
@@ -91,10 +85,7 @@ const ReportViewer = ({ resourceId }) => {
             break
         }
       })
-      .catch(error => {
-        console.log({ generateReportERROR: error })
-        setErrorMessage(error)
-      })
+      .catch(error => {})
   }
 
   useEffect(() => {
@@ -109,8 +100,33 @@ const ReportViewer = ({ resourceId }) => {
       })
   }, [reportStore])
 
+  const openRPB = () => {
+    stack({
+      Component: ReportParameterBrowser,
+      props: {
+        reportName: selectedReport?.parameters,
+        paramsArray: paramsArray,
+        setParamsArray: setParamsArray
+      },
+      width: 700,
+      height: 500,
+      title: 'Report Parameters Browser'
+    })
+  }
+
   const formatDataForApi = paramsArray => {
-    const formattedData = paramsArray.map(({ fieldId, value }) => `${fieldId}|${value}`).join('^')
+    let minValue = Infinity
+
+    for (const [index, { fieldId, value }] of Object.entries(paramsArray)) {
+      const numericValue = Number(fieldId)
+      if (numericValue < minValue) {
+        minValue = numericValue
+      }
+    }
+
+    const formattedData = paramsArray
+      .map(({ fieldId, value }) => `${fieldId}|${value}`)
+      .reduce((acc, curr, index) => acc + (index === minValue ? `${curr}` : `^${curr}`), '')
 
     return formattedData
   }
@@ -119,7 +135,7 @@ const ReportViewer = ({ resourceId }) => {
     {
       key: 'OpenRPB',
       condition: true,
-      onClick: () => setReportParamWindowOpen(true),
+      onClick: openRPB,
       disabled: !selectedReport?.parameters
     },
     {
@@ -133,66 +149,43 @@ const ReportViewer = ({ resourceId }) => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar actions={actions}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <Autocomplete
-              size='small'
-              options={reportStore}
-              value={selectedReport}
-              getOptionLabel={option => option.layoutName || option.caption || ''}
-              onChange={(e, newValue) => setSelectedReport(newValue)}
-              renderInput={params => (
-                <TextField {...params} label='Select a report template' variant='outlined' fullWidth />
-              )}
-              sx={{ width: 300 }}
-              disableClearable
-            />
-            <Autocomplete
-              size='small'
-              options={ExportFormat}
-              value={selectedFormat}
-              getOptionLabel={option => option.value}
-              onChange={(e, newValue) => setSelectedFormat(newValue)}
-              renderInput={params => <TextField {...params} label='Select Format' variant='outlined' fullWidth />}
-              sx={{ width: 200, pl: 2 }}
-              disableClearable
-            />
-            <Button
-              variant='contained'
-              sx={{
-                ml: 2,
-                backgroundColor: '#231F20',
-                '&:hover': {
-                  opacity: 0.8
-                },
-                width: 'auto',
-                height: '40px',
-                objectFit: 'contain'
-              }}
-              disabled={!selectedReport || !selectedFormat}
-              onClick={() => generateReport({ params: formatDataForApi(paramsArray) })}
-              size='small'
-            >
-              Generate Report
-            </Button>
-          </Box>
-          <ParamsArrayToolbar paramsArray={paramsArray} />
-        </GridToolbar>
+        <GridToolbar
+          actions={actions}
+          column={true}
+          leftSection={
+            <Box sx={{ display: 'flex', padding: 2, justifyContent: 'space-between' }}>
+              <Autocomplete
+                size='small'
+                options={reportStore}
+                value={selectedReport}
+                getOptionLabel={option => option.layoutName || option.caption || ''}
+                onChange={(e, newValue) => setSelectedReport(newValue)}
+                renderInput={params => (
+                  <TextField {...params} label='Select a report template' variant='outlined' fullWidth />
+                )}
+                sx={{ width: 300, height: 35 }}
+                disableClearable
+              />
+              <Autocomplete
+                size='small'
+                options={ExportFormat}
+                value={selectedFormat}
+                getOptionLabel={option => option.value}
+                onChange={(e, newValue) => setSelectedFormat(newValue)}
+                renderInput={params => <TextField {...params} label='Select Format' variant='outlined' fullWidth />}
+                sx={{ width: 200, pl: 2, height: 35 }}
+                disableClearable
+              />
+            </Box>
+          }
+          rightSection={paramsArray && paramsArray.length > 0 && <ParamsArrayToolbar paramsArray={paramsArray} />}
+        ></GridToolbar>
       </Fixed>
       {pdf && (
         <Box id='reportContainer' sx={{ flex: 1, display: 'flex', p: 2 }}>
           <iframe title={selectedReport?.layoutName} src={pdf} width='100%' height='100%' allowFullScreen />
         </Box>
       )}
-      <ReportParameterBrowser
-        disabled={!selectedReport?.parameters}
-        reportName={selectedReport?.parameters}
-        open={reportParamWindowOpen}
-        onClose={() => setReportParamWindowOpen(false)}
-        paramsArray={paramsArray}
-        setParamsArray={setParamsArray}
-      />
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </VertLayout>
   )
 }

@@ -15,30 +15,35 @@ const FiOpeningBalance = () => {
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
       extension: FinancialRepository.FiOpeningBalance.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
     })
 
     return { ...response, _startAt: _startAt }
   }
 
-  const invalidate = useInvalidate({
-    endpointId: FinancialRepository.FiOpeningBalance.page
-  })
+  async function fetchWithFilter({ filters, pagination }) {
+    return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+  }
 
   const {
     query: { data },
     labels: _labels,
     paginationParameters,
+    filterBy,
     refetch,
+    invalidate,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: FinancialRepository.FiOpeningBalance.page,
-    datasetId: ResourceIds.FiOpeningBalances
+    datasetId: ResourceIds.FiOpeningBalances,
+    filter: {
+      filterFn: fetchWithFilter
+    }
   })
 
   const columns = [
@@ -117,7 +122,14 @@ const FiOpeningBalance = () => {
 
   return (
     <>
-      <GridToolbar onAdd={add} maxAccess={access} />
+      <GridToolbar
+        onAdd={add}
+        maxAccess={access}
+        reportName='FIOBA'
+        onGo={({ params }) => {
+          filterBy('params', params), refetch()
+        }}
+      />
       <Table
         columns={columns}
         gridData={data}

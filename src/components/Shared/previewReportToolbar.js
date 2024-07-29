@@ -54,7 +54,7 @@ const PreviewReportToolbar = ({ previewReport }) => {
   }
 
   return (
-    <Grid item sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+    <Grid item sx={{ display: 'flex', mr: 2 }}>
       <CustomComboBox
         label={platformLabels.SelectReport}
         valueField='caption'
@@ -63,6 +63,7 @@ const PreviewReportToolbar = ({ previewReport }) => {
         value={selectedReport}
         onChange={(e, newValue) => setSelectedReport(newValue)}
         sx={{ width: 250 }}
+        height={35}
         disableClearable
       />
       <Button
@@ -81,7 +82,6 @@ const PreviewReportToolbar = ({ previewReport }) => {
         }
         sx={{
           ml: 2,
-          mt: 0.5,
           backgroundColor: '#231F20',
           '&:hover': {
             backgroundColor: '#231F20',

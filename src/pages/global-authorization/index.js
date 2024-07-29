@@ -123,42 +123,46 @@ const GlobalAuthorization = () => {
           }}
           labels={labels}
           inputSearch={true}
-        >
-          <Grid item sx={{ width: '350px' }}>
-            <ResourceComboBox
-              datasetId={DataSets.MODULE}
-              name='moduleId'
-              values={{
-                moduleId: filters.moduleId
-              }}
-              valueField='key'
-              displayField='value'
-              onChange={(event, newValue) => {
-                onChange(newValue?.key)
-              }}
-            />
-          </Grid>
-          <Grid item>
-            <Button
-              variant='contained'
-              sx={{
-                ml: 2,
-                backgroundColor: '#231F20',
-                '&:hover': {
-                  backgroundColor: '#231F20',
-                  opacity: 0.8
-                },
-                width: 'auto',
-                height: '35px',
-                objectFit: 'contain'
-              }}
-              onClick={() => openApplyModuleLevel()}
-              disabled={!filters.moduleId}
-            >
-              <Icon icon='mdi:arrow-expand-right' fontSize={20} />
-            </Button>
-          </Grid>
-        </GridToolbar>
+          leftSection={
+            <>
+              <Grid item sx={{ width: '350px' }}>
+                <ResourceComboBox
+                  datasetId={DataSets.MODULE}
+                  name='moduleId'
+                  values={{
+                    moduleId: filters.moduleId
+                  }}
+                  valueField='key'
+                  displayField='value'
+                  onChange={(event, newValue) => {
+                    onChange(newValue?.key)
+                  }}
+                  height={35}
+                />
+              </Grid>
+              <Grid item>
+                <Button
+                  variant='contained'
+                  sx={{
+                    ml: 2,
+                    backgroundColor: '#231F20',
+                    '&:hover': {
+                      backgroundColor: '#231F20',
+                      opacity: 0.8
+                    },
+                    width: 'auto',
+                    height: '35px',
+                    objectFit: 'contain'
+                  }}
+                  onClick={() => openApplyModuleLevel()}
+                  disabled={!filters.moduleId}
+                >
+                  <Icon icon='mdi:arrow-expand-right' fontSize={20} />
+                </Button>
+              </Grid>
+            </>
+          }
+        />
       </Fixed>
       <Table
         columns={[

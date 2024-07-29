@@ -120,38 +120,34 @@ const Sites = () => {
   }
 
   return (
-    <>
-      <VertLayout>
-        <Fixed>
-          <GridToolbar
-            onAdd={add}
-            maxAccess={access}
-            onSearch={search}
-            onSearchClear={clear}
-            labels={_labels}
-            inputSearch={true}
-            previewReport={ResourceIds.Sites}
-            right={true}
-          >
-            <PreviewReportToolbar previewReport={ResourceIds.Sites} />
-          </GridToolbar>
-        </Fixed>
-        <Grow>
-          <Table
-            columns={columns}
-            gridData={data}
-            rowId={['recordId']}
-            onEdit={edit}
-            onDelete={del}
-            refetch={refetch}
-            maxAccess={access}
-            pageSize={50}
-            paginationParameters={paginationParameters}
-            paginationType='api'
-          />
-        </Grow>
-      </VertLayout>
-    </>
+    <VertLayout>
+      <Fixed>
+        <GridToolbar
+          onAdd={add}
+          maxAccess={access}
+          onSearch={search}
+          onSearchClear={clear}
+          labels={_labels}
+          inputSearch={true}
+          previewReport={ResourceIds.Sites}
+          rightSection={<PreviewReportToolbar previewReport={ResourceIds.Sites} />}
+        />
+      </Fixed>
+      <Grow>
+        <Table
+          columns={columns}
+          gridData={data}
+          rowId={['recordId']}
+          onEdit={edit}
+          onDelete={del}
+          refetch={refetch}
+          maxAccess={access}
+          pageSize={50}
+          paginationParameters={paginationParameters}
+          paginationType='api'
+        />
+      </Grow>
+    </VertLayout>
   )
 }
 
