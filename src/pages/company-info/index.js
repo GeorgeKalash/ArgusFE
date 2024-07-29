@@ -72,7 +72,7 @@ const CompanyInfo = () => {
         record: JSON.stringify({ ...obj, attachment: null })
       })
       if (imageUploadRef.current) {
-        imageUploadRef.current.submit()
+        await imageUploadRef.current.submit()
       }
       toast.success('Record Edited Successfully')
     } catch (e) {}
