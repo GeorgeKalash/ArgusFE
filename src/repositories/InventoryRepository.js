@@ -42,6 +42,12 @@ export const InventoryRepository = {
     del: service + 'delSGP',
     snapshot: service + 'snapshotSGP'
   },
+  Physical: {
+    qry: service + 'qryPP',
+    get: service + 'getPP',
+    set: service + 'setPP',
+    calc: service + 'calcPP'
+  },
   MaterialsAdjustment: {
     qry: service + 'qryADJ',
     get: service + 'getADJ',
@@ -53,5 +59,19 @@ export const InventoryRepository = {
   },
   MaterialsAdjustmentDetail: {
     qry: service + 'qryADI'
+  },
+  Items: {
+    pack: service + 'packIT',
+    page: service + 'pageIT',
+    qry: service + 'qryIT',
+    get: service + 'getIT',
+    set: service + 'setIT',
+    del: service + 'delIT',
+    snapshot: service + 'snapshotIT2'
+  },
+  Currency: {
+    qry: service + 'qryITC',
+    get: service + 'getITC',
+    set: service + 'setITC'
   }
 }

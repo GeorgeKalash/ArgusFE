@@ -12,6 +12,7 @@ export default function ResourceComboBox({
   parameters = '_filter=',
   filter = () => true,
   value,
+  reducer,
   ...rest
 }) {
   const { store: data } = rest
@@ -35,12 +36,21 @@ export default function ResourceComboBox({
             parameters
           })
             .then(res => {
-              setStore(res.list)
+              let data = []
+              if (typeof reducer === 'function') {
+                data = reducer(res)
+              } else {
+                data = res.list
+              }
+              setStore(data)
             })
             .catch(error => {})
   }, [parameters])
 
-  const filteredStore = data ? data : store.filter(filter)
+  let filteredStore = []
+  try {
+    filteredStore = data ? data : store.filter(filter)
+  } catch (error) {}
 
   const _value =
     (typeof values[name] === 'object'
