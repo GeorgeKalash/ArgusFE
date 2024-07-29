@@ -32,8 +32,8 @@ export default function BatchPostForm({ access }) {
     maxAccess: access,
     validateOnChange: true,
     validationSchema: yup.object({
-        startDate: yup.string().required(' '),
-        endDate: yup.string().required(' '),
+        startDate: yup.string().required(),
+        endDate: yup.string().required(),
     }),
     onSubmit: async obj => {
       try {
