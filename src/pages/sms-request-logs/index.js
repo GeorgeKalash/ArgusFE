@@ -1,4 +1,4 @@
-import { Box } from '@mui/material'
+import { Box, Grid } from '@mui/material'
 import { useContext, useState } from 'react'
 import { useResourceQuery } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -77,41 +77,46 @@ const SmsRequestLog = () => {
           }}
           labels={labels}
         >
-          <Box sx={{ display: 'flex', width: '700px', justifyContent: 'flex-start', pt: 2, pl: 2, pb: 2 }}>
-            <ResourceComboBox
-              endpointId={SystemRepository.KeyValueStore}
-              parameters={`_dataset=${datasetId}&_language=${languageId}`}
-              label={labels.Module}
-              name='moduleId'
-              values={formik.values}
-              valueField='key'
-              displayField='value'
-              required
-              onChange={(event, newValue) => {
-                if (newValue) formik.setFieldValue('moduleId', newValue?.key)
-                formik.setFieldValue('resourceId', '')
-                filters.resourceId = ''
-                fetchWithFilter(filters)
-              }}
-              sx={{ pr: 2 }}
-            />
-            <ResourceComboBox
-              endpointId={SystemRepository.ModuleClassRES.qry}
-              parameters={`_moduleId=${formik.values.moduleId}&_filter=`}
-              label={labels.ResourceId}
-              name='resourceId'
-              values={formik.values}
-              required
-              valueField='key'
-              displayField='value'
-              onChange={(event, newValue) => {
-                if (newValue) {
-                  onChange(newValue?.key)
-                  formik.setFieldValue('resourceId', newValue?.key)
-                }
-              }}
-            />
-          </Box>
+          <Grid container style={{ width: '700px' }} padding={1}>
+            <Grid xs={5}>
+              <ResourceComboBox
+                endpointId={SystemRepository.KeyValueStore}
+                parameters={`_dataset=${datasetId}&_language=${languageId}`}
+                label={labels.Module}
+                name='moduleId'
+                values={formik.values}
+                valueField='key'
+                displayField='value'
+                required
+                onChange={(event, newValue) => {
+                  if (newValue) formik.setFieldValue('moduleId', newValue?.key)
+                  formik.setFieldValue('resourceId', '')
+                  filters.resourceId = ''
+                  fetchWithFilter(filters)
+                }}
+                sx={{ pr: 2 }}
+              />
+            </Grid>
+            <Grid xs={6}>
+              {' '}
+              <ResourceComboBox
+                endpointId={SystemRepository.ModuleClassRES.qry}
+                parameters={`_moduleId=${formik.values.moduleId}&_filter=`}
+                label={labels.ResourceId}
+                name='resourceId'
+                values={formik.values}
+                required
+                valueField='key'
+                displayField='value'
+                onChange={(event, newValue) => {
+                  if (newValue) {
+                    onChange(newValue?.key)
+                    formik.setFieldValue('resourceId', newValue?.key)
+                  }
+                }}
+              />
+            </Grid>
+          </Grid>
         </GridToolbar>
       </Fixed>
       <Grow>
