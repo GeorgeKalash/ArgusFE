@@ -151,7 +151,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store }
                 <Grid item xs={5.9}>
                   <ResourceComboBox
                     endpointId={InventoryRepository.Items.pack}
-                    getList={response => {
+                    reducer={response => {
                       return response.record.categories
                     }}
                     values={formik.values}
@@ -177,7 +177,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store }
                 <Grid item xs={6}>
                   <ResourceComboBox
                     endpointId={InventoryRepository.Items.pack}
-                    getList={response => {
+                    reducer={response => {
                       const formattedPriceTypes = response.record.priceTypes.map(priceTypes => ({
                         key: parseInt(priceTypes.key),
                         value: priceTypes.value
@@ -214,7 +214,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store }
                 <Grid item xs={6}>
                   <ResourceComboBox
                     endpointId={InventoryRepository.Items.pack}
-                    getList={response => {
+                    reducer={response => {
                       const formattedprocurementMethod = response.record.procurementMethods.map(procurementMethods => ({
                         key: parseInt(procurementMethods.key),
                         value: procurementMethods.value
@@ -274,7 +274,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store }
                 <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={InventoryRepository.Items.pack}
-                    getList={response => {
+                    reducer={response => {
                       return response.record.itemGroups
                     }}
                     values={formik.values}
@@ -298,7 +298,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store }
                 <Grid item xs={5.9}>
                   <ResourceComboBox
                     endpointId={InventoryRepository.Items.pack}
-                    getList={response => {
+                    reducer={response => {
                       return response.record.measurementSchedules
                     }}
                     values={formik.values}
@@ -323,7 +323,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store }
                 <Grid item xs={6}>
                   <ResourceComboBox
                     endpointId={InventoryRepository.Items.pack}
-                    getList={response => {
+                    reducer={response => {
                       const formattedvaluationMethod = response.record.valuations.map(valuations => ({
                         key: parseInt(valuations.key),
                         value: valuations.value
@@ -428,7 +428,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store }
                 <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={InventoryRepository.Items.pack}
-                    getList={response => {
+                    reducer={response => {
                       return response.record.taxSchedules
                     }}
                     values={formik.values}
@@ -448,7 +448,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store }
                 <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={InventoryRepository.Items.pack}
-                    getList={response => {
+                    reducer={response => {
                       const formattedtrackByList = response.record.trackByList.map(trackByList => ({
                         key: parseInt(trackByList.key),
                         value: trackByList.value
@@ -478,7 +478,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store }
                   <Grid item xs={12}>
                     <ResourceComboBox
                       endpointId={InventoryRepository.Items.pack}
-                      getList={response => {
+                      reducer={response => {
                         return response.record.lotCategories
                       }}
                       values={formik.values}
@@ -507,7 +507,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store }
                   <Grid item xs={12}>
                     <ResourceComboBox
                       endpointId={InventoryRepository.Items.pack}
-                      getList={response => {
+                      reducer={response => {
                         return response.record.serialProfiles
                       }}
                       required

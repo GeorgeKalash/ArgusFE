@@ -12,7 +12,7 @@ export default function ResourceComboBox({
   parameters = '_filter=',
   filter = () => true,
   value,
-  getList,
+  reducer,
   ...rest
 }) {
   const { store: data } = rest
@@ -37,8 +37,8 @@ export default function ResourceComboBox({
           })
             .then(res => {
               let data = []
-              if (typeof getList === 'function') {
-                data = getList(res)
+              if (typeof reducer === 'function') {
+                data = reducer(res)
               } else {
                 data = res.list
               }

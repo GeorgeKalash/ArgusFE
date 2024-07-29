@@ -184,7 +184,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={InventoryRepository.Items.pack}
-                getList={response => {
+                reducer={response => {
                   const formattedShape = response.record.shapes.map(shape => ({
                     key: parseInt(shape.key),
                     value: shape.value
@@ -312,7 +312,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={InventoryRepository.Items.pack}
-                getList={response => {
+                reducer={response => {
                   return response.record.metals
                 }}
                 values={formik.values}
@@ -335,7 +335,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={InventoryRepository.Items.pack}
-                getList={response => {
+                reducer={response => {
                   return response.record.metalColors
                 }}
                 values={formik.values}

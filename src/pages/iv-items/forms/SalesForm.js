@@ -177,7 +177,7 @@ const SalesForm = ({ labels, maxAccess, store, record, cId }) => {
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={InventoryRepository.Items.pack}
-                getList={response => {
+                reducer={response => {
                   const formattedPriceTypes = response.record.priceTypes.map(priceTypes => ({
                     key: parseInt(priceTypes.key),
                     value: priceTypes.value
