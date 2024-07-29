@@ -1,5 +1,5 @@
 import { DialogContent } from '@mui/material'
-import { useContext, useState } from 'react'
+import { useState } from 'react'
 import WindowToolbar from './WindowToolbar'
 import TransactionLog from './TransactionLog'
 import { TrxType } from 'src/resources/AccessLevels'
@@ -11,9 +11,7 @@ import Approvals from './Approvals'
 import ResourceRecordRemarks from './ResourceRecordRemarks'
 import GlobalIntegrationGrid from './GlobalIntegrationGrid'
 import AccountBalance from './AccountBalance'
-import FinancialTransaction from './FinancialTransaction'
 import CashTransaction from './CashTransaction'
-import { ControlContext } from 'src/providers/ControlContext'
 
 export default function FormShell({
   form,
@@ -42,7 +40,6 @@ export default function FormShell({
   const [windowInfo, setWindowInfo] = useState(null)
   const { stack } = useWindow()
   const [selectedReport, setSelectedReport] = useState(null)
-  const { platformLabels } = useContext(ControlContext)
   const { clear } = useGlobalRecord()
 
   const windowToolbarVisible = editMode
@@ -102,15 +99,6 @@ export default function FormShell({
       width: 1200,
       height: 670,
       title: 'Cash Transaction'
-    })
-  }
-  function onClickIT() {
-    stack({
-      Component: FinancialTransaction,
-      props: { formValues: form.values },
-      width: 1000,
-      height: 620,
-      title: platformLabels.financialTransaction
     })
   }
 
@@ -225,7 +213,6 @@ export default function FormShell({
           actions={actions}
           onApproval={onApproval}
           onRecordRemarks={onRecordRemarks}
-          onClickIT={onClickIT}
           transactionClicked={transactionClicked}
           editMode={editMode}
           disabledSubmit={disabledSubmit}
