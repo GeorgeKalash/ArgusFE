@@ -146,9 +146,10 @@ const BatchImports = () => {
               parameters: `_resourceId=${resourceId}`
             })
 
-            const modifiedFields = res.record.fields.map(({ name, ...rest }) => ({
+            const modifiedFields = res.record.fields.map(({ name, dataType, ...rest }) => ({
               field: name,
               headerName: name,
+              type : (dataType == 2 || dataType == 3) && "number",
               flex: 1,
               ...rest,
             }))
