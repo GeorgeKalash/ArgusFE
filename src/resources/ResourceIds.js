@@ -40,6 +40,7 @@ export const ResourceIds = {
   SourceOfIncome: 36117,
   ExchangeTables: 32101,
   NumberRange: 20103,
+  FiscalYears: 20109,
   BpRelationType: 21107,
   IdCategories: 21106,
   Groups: 21101,
@@ -106,6 +107,7 @@ export const ResourceIds = {
   SalesTarget: 51209,
   SystemFunction: 20105,
   ModuleDeactivation: 23107,
+  CompanyInfo: 20120,
   Dispersal: 36109,
   OutwardsTransfer: 36301,
   FI_dimensions: 31112,
@@ -113,6 +115,7 @@ export const ResourceIds = {
   BeneficiaryCash: 36304,
   Beneficiary: 36305,
   CashAccounts: 33102,
+  CashAccount: 31202,
   CorrespondentControl: 36119,
   PersonalSettings: 20119,
   CashTransfer: 33309,
@@ -160,5 +163,8 @@ export const ResourceIds = {
   Checkbook: 33201,
   PaymentVouchers: 31305,
   PaymentVoucherExpenses: 31343,
-  MobileSystemDefaults: 36123
+  MobileSystemDefaults: 36123,
+  Measurement: 41102,
+  Category: 41103,
+  InventoryGroup: 41105
 }
