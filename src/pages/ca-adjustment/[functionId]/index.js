@@ -78,13 +78,13 @@ const CAadjustment = () => {
       field: 'date',
       headerName: _labels.date,
       flex: 1,
-      valueGetter: ({ row }) => formatDateDefault(row?.date)
+      type: 'date'
     },
     {
       field: 'amount',
       headerName: _labels.amount,
       flex: 1,
-      valueGetter: ({ row }) => getFormattedNumber(row?.amount)
+      type: 'number'
     },
     {
       field: 'currencyRef',

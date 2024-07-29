@@ -1,10 +1,10 @@
-import { DialogContent, Box } from '@mui/material'
+import { DialogContent } from '@mui/material'
 import { useContext, useState } from 'react'
 import WindowToolbar from './WindowToolbar'
 import TransactionLog from './TransactionLog'
 import { TrxType } from 'src/resources/AccessLevels'
 import { ClientRelationForm } from './ClientRelationForm'
-import { useWindow } from 'src/windows'
+import { useGlobalRecord, useWindow } from 'src/windows'
 import PreviewReport from './PreviewReport'
 import GeneralLedger from 'src/components/Shared/GeneralLedger'
 import Approvals from './Approvals'
@@ -43,6 +43,7 @@ export default function FormShell({
   const { stack } = useWindow()
   const [selectedReport, setSelectedReport] = useState(null)
   const { platformLabels } = useContext(ControlContext)
+  const { clear } = useGlobalRecord()
 
   const windowToolbarVisible = editMode
     ? maxAccess < TrxType.EDIT
@@ -53,16 +54,15 @@ export default function FormShell({
     : true
 
   function handleReset() {
-    form.resetForm({
-      values: form.initialValues
-    })
-
+    if (typeof clear === 'function') {
+      clear()
+    } else {
+      form.resetForm({
+        values: form.initialValues
+      })
+    }
     if (setIDInfoAutoFilled) {
       setIDInfoAutoFilled(false)
-    }
-
-    if (typeof setEditMode === 'function') {
-      setEditMode(false)
     }
   }
 

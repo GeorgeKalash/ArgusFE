@@ -29,12 +29,12 @@ const Window = React.memo(
     disabledInfo,
     onApply,
     disabledApply,
+    spacing,
     ...props
   }) => {
     const { settings } = useSettings()
     const { navCollapsed } = settings
     const [expanded, setExpanded] = useState(false)
-    const [position, setPosition] = useState({ x: 0, y: 0 })
     const paperRef = useRef(null)
     const maxAccess = props.maxAccess?.record.maxAccess
 
@@ -59,15 +59,8 @@ const Window = React.memo(
     }, [])
 
     const handleExpandToggle = useCallback(() => {
-      if (!expanded) {
-        setPosition({ x: 0, y: 0 })
-      }
       setExpanded(prev => !prev)
     }, [expanded])
-
-    const handleDrag = useCallback((e, ui) => {
-      setPosition(prev => ({ x: prev.x + ui.deltaX, y: prev.y + ui.deltaY }))
-    }, [])
 
     return (
       <Box
@@ -75,8 +68,8 @@ const Window = React.memo(
         sx={{
           bottom: 0,
           position: 'absolute',
-          width: containerWidth,
-          height: containerHeight,
+          width: spacing ? containerWidth : '100%',
+          height: spacing ? containerHeight : '100%',
           backgroundColor: 'rgba(0, 0, 0, 0.1)',
           display: 'flex',
           justifyContent: 'center',
@@ -88,8 +81,7 @@ const Window = React.memo(
           handle='#draggable-dialog-title'
           cancel={'[class*="MuiDialogContent-root"]'}
           bounds='parent'
-          position={position}
-          onDrag={handleDrag}
+          position={expanded && { x: 0, y: 0 }}
           onStart={() => draggable}
         >
           <Box sx={{ position: 'relative', pointerEvents: 'all' }}>

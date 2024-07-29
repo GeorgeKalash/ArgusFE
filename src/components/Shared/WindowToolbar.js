@@ -1,4 +1,4 @@
-import { Autocomplete, Box, Button, DialogActions } from '@mui/material'
+import { Box, Button, DialogActions } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'

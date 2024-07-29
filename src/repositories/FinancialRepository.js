@@ -138,5 +138,15 @@ export const FinancialRepository = {
     get: service + 'getDI',
     set: service + 'setDI',
     del: service + 'delDI'
+  },
+  PaymentVouchers: {
+    qry: service + 'qryPV',
+    page: service + 'pagePV',
+    get: service + 'getPV',
+    set2: service + 'set2PV',
+    set: service + 'setPV',
+    del: service + 'delPV',
+    post: service + 'postPV',
+    cancel: service + 'cancelPV',
   }
 }
