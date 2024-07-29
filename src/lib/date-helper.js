@@ -69,7 +69,7 @@ function formatTimestampToDate(timestamp) {
   return formattedDate
 }
 function getTimeInTimeZone(dateString, timeZone = 0) {
-  const timestamp = parseInt(dateString.match(/\/Date\((\d+)\)\//)[1], 10)
+  const timestamp = parseInt(dateString?.match(/\/Date\((\d+)\)\//)[1], 10)
   const currentDate = new Date(timestamp)
 
   currentDate.setHours(currentDate.getHours() + timeZone)
