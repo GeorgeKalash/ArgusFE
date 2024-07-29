@@ -91,6 +91,7 @@ const Table = ({
   useEffect(() => {
     const areAllValuesTrue = props?.gridData?.list?.every(item => item?.checked === true)
     setChecked(areAllValuesTrue)
+
     if (typeof setData === 'function') onSelectionChanged
 
     props?.gridData &&
@@ -445,7 +446,8 @@ const Table = ({
     return (
       <Checkbox
         checked={params.value}
-        onChange={e => {
+        onChange={async e => {
+          console.log('params', params)
           const checked = e.target.checked
           if (rowSelection !== 'single') {
             params.node.setDataValue(params.colDef.field, checked)
@@ -461,6 +463,28 @@ const Table = ({
         }}
       />
     )
+  }
+
+  const onGridReady = params => {
+    params.api.sizeColumnsToFit()
+
+    // Update checkbox state based on initial data
+    const allData = params.api.getModel().rowsToDisplay
+    allData.forEach(rowNode => {
+      console.log('yes model')
+      const checked = rowNode.data?.checked || false
+      params.api
+        .getCellRendererInstances({ rowIndex: rowNode.rowIndex, column: 'checked' })[0]
+        ?.setDataValue('checked', checked)
+    })
+  }
+
+  const onFirstDataRendered = async params => {
+    params.api.sizeColumnsToFit()
+    await params.api.forEachNode(node => {
+      const checked = node.data?.checked || false
+      node.setDataValue('checked', checked)
+    })
   }
 
   const columnDefs = [
@@ -510,6 +534,8 @@ const Table = ({
             suppressAggFuncInHeader={true}
             getRowClass={getRowClass}
             rowHeight={35}
+            // onGridReady={onGridReady}
+            onFirstDataRendered={onFirstDataRendered}
           />
         </Box>
       </Grow>
