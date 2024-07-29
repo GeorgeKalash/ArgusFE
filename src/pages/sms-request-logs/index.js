@@ -150,10 +150,9 @@ const SmsRequestLog = () => {
           gridData={data && filters?.resourceId ? data : { list: [] }}
           rowId={['recordId']}
           isLoading={false}
-          pageSize={data?.list?.length}
+          pageSize={50}
           maxAccess={access}
           refetch={refetch}
-          paginationParameters={paginationParameters}
           paginationType='client'
         />
       </Grow>
