@@ -139,7 +139,8 @@ const SmsRequestLog = () => {
               field: 'smsBody',
               headerName: labels.SmsBody,
               wrapText: true,
-              autoHeight: true
+              autoHeight: true,
+              flex: 1
             },
             {
               field: 'smsStatusName',
