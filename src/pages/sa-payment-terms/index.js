@@ -4,15 +4,15 @@ import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
-import SmsTemplatesForms from './forms/SmsTemplatesForm'
 import { useWindow } from 'src/windows'
 import { SaleRepository } from 'src/repositories/SaleRepository'
+import { ControlContext } from 'src/providers/ControlContext'
+import PaaymentTermsForms from './forms/PaaymentTermsForms'
 
 const PaaymentTerms = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -23,8 +23,8 @@ const PaaymentTerms = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: SaleRepository.PaymentTerms.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      extension: SaleRepository.PaymentTerms.qry,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
     })
 
     return { ...response, _startAt: _startAt }
@@ -38,13 +38,14 @@ const PaaymentTerms = () => {
     refetch
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SaleRepository.PaymentTerms.page,
-    datasetId: ResourceIds.SmsTemplates
+    endpointId: SaleRepository.PaymentTerms.qry,
+    datasetId: ResourceIds.PaymentTerm
   })
 
   const invalidate = useInvalidate({
-    endpointId: SaleRepository.PaymentTerms.page
+    endpointId: SaleRepository.PaymentTerms.qry
   })
+  const { platformLabels } = useContext(ControlContext)
 
   const columns = [
     {
@@ -53,9 +54,25 @@ const PaaymentTerms = () => {
       flex: 1
     },
     {
-      field: 'smsBody',
-      headerName: _labels.smsBody,
+      field: 'ptName',
+      headerName: _labels.paymentType,
       flex: 1
+    },
+    {
+      field: 'days',
+      headerName: _labels.days,
+      flex: 1
+    },
+    {
+      field: 'discountDays',
+      headerName: _labels.discountDays,
+      flex: 1
+    },
+    {
+      field: 'discount',
+      headerName: _labels.discount,
+      flex: 1,
+      type: 'number'
     }
   ]
 
@@ -69,15 +86,15 @@ const PaaymentTerms = () => {
 
   function openForm(recordId) {
     stack({
-      Component: SmsTemplatesForms,
+      Component: PaaymentTermsForms,
       props: {
         labels: _labels,
         recordId: recordId,
         maxAccess: access
       },
-      width: 500,
-      height: 270,
-      title: _labels.smsTemplate
+      width: 700,
+      height: 470,
+      title: _labels.paymentTerms
     })
   }
 
@@ -87,7 +104,7 @@ const PaaymentTerms = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
   }
 
   return (
