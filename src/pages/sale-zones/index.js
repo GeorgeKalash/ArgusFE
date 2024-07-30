@@ -100,8 +100,8 @@ const SalesZone = () => {
         maxAccess: access
       },
       width: 600,
-      height: 500,
-      title: _labels.plantGroup
+      height: 450,
+      title: _labels.saleZones
     })
   }
 
