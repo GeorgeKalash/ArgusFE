@@ -27,7 +27,6 @@ const SmsRequestLog = () => {
 
   async function fetchWithFilter({ filters }) {
     const resourceId = filters?.resourceId
-    console.log(resourceId)
     if (!filters || !filters?.resourceId) {
       return { list: [] }
     } else {
@@ -85,7 +84,6 @@ const SmsRequestLog = () => {
               />
             </Grid>
             <Grid xs={6}>
-              {' '}
               <ResourceComboBox
                 endpointId={SystemRepository.ModuleClassRES.qry}
                 parameters={`_moduleId=${values.moduleId}&_filter=`}
