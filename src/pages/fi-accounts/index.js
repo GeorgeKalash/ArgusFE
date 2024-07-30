@@ -1,7 +1,6 @@
 import { useContext, useState } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
-import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import AccountsWindow from './Windows/AccountsWindow'
@@ -11,13 +10,11 @@ import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import ReportParameterBrowser from 'src/components/Shared/ReportParameterBrowser'
-import ParamsArrayToolbar from 'src/components/Shared/paramsArrayToolbar'
+import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
 const MfAccounts = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
-  const [paramsArray, setParamsArray] = useState([])
 
   const {
     query: { data },
@@ -116,54 +113,23 @@ const MfAccounts = () => {
     openForm(obj?.recordId)
   }
 
-  const openRPB = () => {
-    stack({
-      Component: ReportParameterBrowser,
-      props: {
-        reportName: 'FIACC',
-        paramsArray: paramsArray,
-        setParamsArray: setParamsArray
-      },
-      width: 700,
-      height: 500,
-      title: 'Report Parameters Browser'
-    })
+  const onApply = ({ search, paramsArray }) => {
+    console.log(search)
+    search == [] ? filterBy('params', paramsArray) : filterBy('qry', search)
+    refetch()
   }
-
-  const actions = [
-    {
-      key: 'OpenRPB',
-      condition: true,
-      onClick: openRPB,
-      disabled: false
-    },
-    {
-      key: 'GO',
-      condition: true,
-      onClick: ({ params, search }) => {
-        search ? filterBy('qry', search) : filterBy('params', params)
-        refetch()
-      },
-      disabled: false
-    }
-  ]
 
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar
-          onAdd={addAccounts}
-          maxAccess={access}
-          onSearch={value => {
-            filterBy('qry', value)
-          }}
+        <RPBGridToolbar
+          add={addAccounts}
+          access={access}
+          onApply={onApply}
+          reportName={'FIACC'}
           onSearchClear={() => {
             clearFilter('qry')
           }}
-          labels={_labels}
-          inputSearch={true}
-          actions={actions}
-          bottomSection={paramsArray && paramsArray.length > 0 && <ParamsArrayToolbar paramsArray={paramsArray} />}
         />
       </Fixed>
       <Grow>

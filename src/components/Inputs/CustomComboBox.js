@@ -30,7 +30,6 @@ const CustomComboBox = ({
   columnsInDropDown,
   editMode = false,
   hasBorder = true,
-  height,
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
@@ -145,8 +144,7 @@ const CustomComboBox = ({
           InputProps={{
             ...params.InputProps,
             style: {
-              border: 'none', // Set width to 100%
-              height: height ? height : 'auto'
+              border: 'none' // Set width to 100%
             }
           }}
           sx={{

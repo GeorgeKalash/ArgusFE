@@ -11,6 +11,7 @@ import { useWindow } from 'src/windows'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
 const BPMasterData = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -122,25 +123,22 @@ const BPMasterData = () => {
     toast.success('Record Deleted Successfully')
   }
 
+  const onApply = ({ search, paramsArray }) => {
+    search ? filterBy('qry', search) : filterBy('params', paramsArray)
+    refetch()
+  }
+
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar
-          onAdd={add}
-          maxAccess={access}
-          onSearch={value => {
-            filterBy('qry', value)
-          }}
+        <RPBGridToolbar
+          add={add}
+          access={access}
+          onApply={onApply}
+          reportName={'BPMAS'}
           onSearchClear={() => {
             clearFilter('qry')
           }}
-          labels={_labels}
-          inputSearch={true}
-          onGo={({ params, search }) => {
-            search ? filterBy('qry', search) : filterBy('params', params)
-            refetch()
-          }}
-          reportName='BPMAS'
         />
       </Fixed>
       <Grow>

@@ -116,7 +116,6 @@ const UndeliveredCreditOrder = () => {
                 onChange={(event, newValue) => {
                   onChange(newValue?.recordId)
                 }}
-                height={35}
               />
             </Grid>
           }

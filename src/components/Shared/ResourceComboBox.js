@@ -12,7 +12,6 @@ export default function ResourceComboBox({
   parameters = '_filter=',
   filter = () => true,
   value,
-  height,
   ...rest
 }) {
   const { store: data } = rest
@@ -50,5 +49,5 @@ export default function ResourceComboBox({
           ? filteredStore.find(item => item[valueField] === values[name]?.toString())
           : filteredStore.find(item => item[valueField] === (values[name] || values))) ?? '') || value
 
-  return <CustomComboBox {...{ ...rest, name, store: filteredStore, valueField, value: _value, name, height }} />
+  return <CustomComboBox {...{ ...rest, name, store: filteredStore, valueField, value: _value, name }} />
 }

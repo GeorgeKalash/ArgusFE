@@ -137,7 +137,6 @@ const GlobalAuthorization = () => {
                   onChange={(event, newValue) => {
                     onChange(newValue?.key)
                   }}
-                  height={35}
                 />
               </Grid>
               <Grid item>

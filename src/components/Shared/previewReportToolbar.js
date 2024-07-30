@@ -63,7 +63,6 @@ const PreviewReportToolbar = ({ previewReport }) => {
         value={selectedReport}
         onChange={(e, newValue) => setSelectedReport(newValue)}
         sx={{ width: 250 }}
-        height={35}
         disableClearable
       />
       <Button
