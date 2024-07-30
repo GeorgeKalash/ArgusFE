@@ -55,6 +55,7 @@ export default function SmsTemplatesForms({ labels, maxAccess, recordId }) {
       invalidate()
     }
   })
+  console.log(maxAccess, 'maxxxx')
 
   useEffect(() => {
     ;(async function () {
