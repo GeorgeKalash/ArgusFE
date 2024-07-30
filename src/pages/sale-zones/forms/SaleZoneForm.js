@@ -49,10 +49,7 @@ export default function SaleZoneForm({ labels, maxAccess, recordId }) {
 
         if (!obj.recordId) {
           toast.success(platformLabels.Added)
-          formik.setValues({
-            ...obj,
-            recordId: response.recordId
-          })
+          formik.setFieldValue('recordId', response.recordId)
         } else toast.success(platformLabels.Edited)
 
         invalidate()
@@ -142,7 +139,12 @@ export default function SaleZoneForm({ labels, maxAccess, recordId }) {
             <Grid item xs={12}>
               <ResourceLookup
                 endpointId={SaleRepository.SalesZone.qry}
-                parameters={`_pageSize=1000&_sortField="recordId"&_filter=`}
+                parameters={{
+                  _startAt: 0,
+                  _pageSize: 100,
+                  _sortField: 'recordId',
+                  _filter: ''
+                }}
                 name='parentId'
                 label={labels.parent}
                 valueField='parentRef'
