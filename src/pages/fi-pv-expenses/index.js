@@ -38,8 +38,7 @@ const FiPaymentVouchers = () => {
     labels: _labels,
     paginationParameters,
     refetch,
-    access,
-    invalidate
+    access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: FinancialRepository.PaymentVouchers.page,
@@ -107,7 +106,7 @@ const FiPaymentVouchers = () => {
         extension: FinancialRepository.PaymentVouchers.del,
         record: JSON.stringify(obj)
       })
-      invalidate()
+      refetch()
       toast.success(platformLabels.Deleted)
     } catch (error) {}
   }
