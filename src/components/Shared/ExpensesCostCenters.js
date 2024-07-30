@@ -32,7 +32,7 @@ export default function ExpensesCostCenters({ labels, maxAccess, row, window, up
           ...costCenter,
           id:  index + 1,
           ccSeqNo: index + 1,
-          seqNo:  index + 1,
+          seqNo:  row.id,
           pvId: recordId
         }))
 
