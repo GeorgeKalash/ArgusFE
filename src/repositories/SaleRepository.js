@@ -57,5 +57,11 @@ export const SaleRepository = {
     set: service + 'setSP',
     del: service + 'delSP',
     page: service + 'pageSP'
+  },
+  ReturnReasons: {
+    qry: service + 'qryRR',
+    get: service + 'getRR',
+    set: service + 'setRR',
+    del: service + 'delRR'
   }
 }
