@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { Grid } from '@mui/material'
@@ -28,14 +29,9 @@ export default function ExpensesCostCenters({ labels, maxAccess, row, window, up
           balance: null,
           amountAssigned: null,
         },
-        validate: values => {
-            const errors = {}
-            if (values.balance != 0) {
-              errors.balance = ' '
-            }
-
-            return errors
-        },         
+        validationSchema: yup.object({
+          balance: yup.number().oneOf([0]),
+        }),        
         onSubmit: async obj => {
             try {
                 const costCenters = obj.costCenters.map((costCenter, index) => ({
