@@ -4,7 +4,6 @@ import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import Tree from 'src/components/Shared/Tree'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useWindow } from 'src/windows'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -82,14 +81,6 @@ const SalesZone = () => {
       invalidate()
       toast.success(platformLabels.Deleted)
     } catch (error) {}
-    try {
-      await postRequest({
-        extension: SaleRepository.SalesZone.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
   }
 
   function openForm(recordId) {
@@ -97,7 +88,7 @@ const SalesZone = () => {
       Component: SaleZoneForm,
       props: {
         labels: _labels,
-        recordId: recordId ? recordId : null,
+        recordId: recordId,
         maxAccess: access
       },
       width: 600,

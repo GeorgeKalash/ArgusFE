@@ -1,4 +1,3 @@
-// ** MUI Imports
 import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
@@ -32,25 +31,23 @@ export default function SaleZoneForm({ labels, maxAccess, recordId }) {
       name: '',
       szRef: '',
       countryId: '',
-      parentId: '',
-      parentName: ''
+      productionOrderLevel: '',
+      parentId: ''
     },
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required(' '),
-      countryId: yup.string().required(' ')
+      name: yup.string().required(),
+      countryId: yup.string().required()
     }),
     onSubmit: async obj => {
       try {
-        const recordId = obj.recordId
-
         const response = await postRequest({
           extension: SaleRepository.SalesZone.set,
           record: JSON.stringify(obj)
         })
 
-        if (!recordId) {
+        if (!obj.recordId) {
           toast.success(platformLabels.Added)
           formik.setValues({
             ...obj,
@@ -62,7 +59,7 @@ export default function SaleZoneForm({ labels, maxAccess, recordId }) {
       } catch (error) {}
     }
   })
-  const editMode = !!formik.values.recordId || !!recordId
+  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
