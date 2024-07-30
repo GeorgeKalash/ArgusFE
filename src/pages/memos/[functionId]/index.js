@@ -48,24 +48,23 @@ const Financial = () => {
     paginationParameters,
     access
   } = useResourceQuery({
-    queryFn: fetchGridData,
     endpointId: FinancialRepository.FiMemo.qry,
     datasetId: ResourceIds.CreditNote,
-    functionId: functionId,
+
     filter: {
       endpointId: FinancialRepository.FiMemo.snapshot,
-      filterFn: fetchWithSearch
+      filterFn: fetchWithSearch,
+      default: { functionId }
     }
   })
 
-  async function fetchWithSearch({ options = {}, filters }) {
-    return (
-      filters.qry &&
-      (await getRequest({
-        extension: FinancialRepository.FiMemo.snapshot,
-        parameters: `_filter=${filters.qry}&_functionId=${functionId}`
-      }))
-    )
+  async function fetchWithSearch({ filters, pagination }) {
+    return filters.qry
+      ? await getRequest({
+          extension: FinancialRepository.FiMemo.snapshot,
+          parameters: `_filter=${filters.qry}&_functionId=${functionId}`
+        })
+      : await fetchGridData(pagination)
   }
 
   const columns = [
