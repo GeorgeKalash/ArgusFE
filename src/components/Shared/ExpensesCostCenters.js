@@ -12,97 +12,87 @@ import CustomTextField from '../Inputs/CustomTextField'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 
 export default function ExpensesCostCenters({ labels, maxAccess, row, window, updateRow, recordId, readOnly }) {
-    const { formik } = useForm({
-        maxAccess,
-        enableReinitialize: true,
-        validateOnChange: true,
-        initialValues: {
-          costCenters: row.costCenters || [{
-            id: 1,
-            pvId: recordId || 0,
-            seqNo: 1,
-            ccSeqNo: '',
-            ccId: '',
-            amount: '',
-          }],
-          row,
-          balance: null,
-          amountAssigned: null,
-        },
-        validationSchema: yup.object({
-          balance: yup.number().oneOf([0]),
-        }),        
-        onSubmit: async obj => {
-            try {
-                const costCenters = obj.costCenters.map((costCenter, index) => ({
-                        ...costCenter,
-                        id: row.id,
-                        ccSeqNo: index + 1,
-                        seqNo: row.id,
-                        pvId: recordId
-                    })
-                );
-
-                updateRow({ changes: { costCenters } })
-                window.close()
-            } catch (error) { }
+  const { formik } = useForm({
+    maxAccess,
+    enableReinitialize: true,
+    validateOnChange: true,
+    initialValues: {
+      costCenters: row.costCenters || [
+        {
+          id: 1,
+          pvId: recordId || 0,
+          seqNo: 1,
+          ccSeqNo: '',
+          ccId: '',
+          amount: ''
         }
-    })
-            
+      ]
+    },
+    onSubmit: async obj => {
+      try {
+        const costCenters = obj.costCenters.map((costCenter, index) => ({
+          ...costCenter,
+          id:  index + 1,
+          ccSeqNo: index + 1,
+          seqNo:  index + 1,
+          pvId: recordId
+        }))
+
+        updateRow({ changes: { costCenters } })
+        window.close()
+      } catch (error) {}
+    }
+  })
+
   const columns = [
     {
-        component: 'resourcelookup',
-        label: labels.costCenter,
-        name: 'reference',
-        props: {
-          valueField: 'reference',
-          displayField: 'reference',
-          displayFieldWidth: 2,
-          endpointId: GeneralLedgerRepository.CostCenter.snapshot,
-          mapping: [
-            { from: 'recordId', to: 'ccId' },
-            { from: 'name', to: 'ccName' },
-            { from: 'reference', to: 'ccRef' }
-          ],
-          columnsInDropDown: [
-            { key: 'reference', value: 'Reference' },
-            { key: 'name', value: 'Name' }
-          ],
-          readOnly
-        }
-      },
-      {
-        component: 'textfield',
-        label: labels.name,
-        name: 'ccName',
-        props: {
-          readOnly: true
-        }
-      },
-      {
-        component: 'textfield',
-        label: labels.amount,
-        name: 'amount',
-        props: {
-          readOnly
-        }
-      },
+      component: 'resourcelookup',
+      label: labels.costCenter,
+      name: 'reference',
+      props: {
+        valueField: 'reference',
+        displayField: 'reference',
+        displayFieldWidth: 2,
+        endpointId: GeneralLedgerRepository.CostCenter.snapshot,
+        mapping: [
+          { from: 'recordId', to: 'ccId' },
+          { from: 'name', to: 'ccName' },
+          { from: 'reference', to: 'ccRef' }
+        ],
+        columnsInDropDown: [
+          { key: 'reference', value: 'Reference' },
+          { key: 'name', value: 'Name' }
+        ],
+        readOnly
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.name,
+      name: 'ccName',
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.amount,
+      name: 'amount',
+      props: {
+        readOnly
+      }
+    }
   ]
 
+  const totalAmount = formik.values?.costCenters?.reduce((amount, row) => {
+    const amountValue = parseFloat(row.amount?.toString().replace(/,/g, '')) || 0
 
-    const totalAmount = formik.values?.costCenters?.reduce((amount, row) => {
-      const amountValue = parseFloat(row.amount?.toString().replace(/,/g, '')) || 0
+    return amount + amountValue
+  }, 0)
 
-      return amount + amountValue
-    }, 0)
+  const balance = row.amount - totalAmount
 
-
-    const balance = row.amount - totalAmount
-
-    useEffect(() => {
-        formik.setFieldValue('balance', balance)
-    }, [balance])
-
+  const canSubmit = balance > 0 || balance < 0;
 
   return (
     <FormShell
@@ -111,42 +101,43 @@ export default function ExpensesCostCenters({ labels, maxAccess, row, window, up
       maxAccess={maxAccess}
       isCleared={false}
       isInfo={false}
+      disabledSubmit={canSubmit}
     >
       <VertLayout>
         <Fixed>
           <Grid container spacing={4}>
             <Grid item xs={12}>
-                <CustomTextField
-                    name='amount'
-                    label={labels.amount}
-                    value={row.amount}
-                    maxAccess={maxAccess}
-                    readOnly
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('amount', '')}
-                    error={formik.touched.amount && Boolean(formik.errors.amount)}
-                />
+              <CustomTextField
+                name='amount'
+                label={labels.amount}
+                value={row.amount}
+                maxAccess={maxAccess}
+                readOnly
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('amount', '')}
+                error={formik.touched.amount && Boolean(formik.errors.amount)}
+              />
             </Grid>
             <Grid item xs={12}>
-                <CustomTextField
-                    name='amountAssigned'
-                    label={labels.amountAssigned}
-                    value={totalAmount}
-                    maxAccess={maxAccess}
-                    readOnly
-                />
+              <CustomTextField
+                name='amountAssigned'
+                label={labels.amountAssigned}
+                value={totalAmount}
+                maxAccess={maxAccess}
+                readOnly
+              />
             </Grid>
             <Grid item xs={12}>
-                <CustomTextField
-                    name='balance'
-                    label={labels.balance}
-                    value={formik.values.balance}
-                    maxAccess={maxAccess}
-                    readOnly
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('balance', '')}
-                    error={formik.touched.balance && Boolean(formik.errors.balance)}
-                />
+              <CustomTextField
+                name='balance'
+                label={labels.balance}
+                value={balance}
+                maxAccess={maxAccess}
+                readOnly
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('balance', '')}
+                error={canSubmit}
+              />
             </Grid>
           </Grid>
         </Fixed>
