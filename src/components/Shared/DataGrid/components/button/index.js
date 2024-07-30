@@ -22,7 +22,7 @@ function DataGridButton({ row, column, field, update, updateRow }) {
     >
       {
        !!column.img ? 
-        <img src='/images/buttonsIcons/costCenter.png' alt='popup' /> 
+        column.img
         : <img src='/images/buttonsIcons/popup.png' alt='popup' />
       }
     </Button>

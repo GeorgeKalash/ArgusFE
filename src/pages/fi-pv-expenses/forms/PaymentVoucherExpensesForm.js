@@ -385,7 +385,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
   {
       component: 'button',
       name: 'hasCostCenters',
-      img: 'costCenters',
+      img: <img src='/images/buttonsIcons/costCenter.png' alt='popup' />,
       label: labels.costCenter,
       onClick: (e, row, update, updateRow) => {
         stack({
