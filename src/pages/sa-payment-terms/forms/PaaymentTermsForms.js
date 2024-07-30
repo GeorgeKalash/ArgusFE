@@ -17,7 +17,6 @@ import { DataSets } from 'src/resources/DataSets'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 export default function PaaymentTermsForms({ labels, maxAccess, recordId }) {
-  const [editMode, setEditMode] = useState(!!recordId)
   const { platformLabels } = useContext(ControlContext)
 
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -54,11 +53,12 @@ export default function PaaymentTermsForms({ labels, maxAccess, recordId }) {
         toast.success(platformLabels.Added)
         formik.setFieldValue('recordId', response.recordId)
       } else toast.success(platformLabels.Edited)
-      setEditMode(true)
 
       invalidate()
     }
   })
+
+  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
