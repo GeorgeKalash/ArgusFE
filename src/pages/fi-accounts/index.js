@@ -163,8 +163,7 @@ const MfAccounts = () => {
           labels={_labels}
           inputSearch={true}
           actions={actions}
-          column={true}
-          rightSection={paramsArray && paramsArray.length > 0 && <ParamsArrayToolbar paramsArray={paramsArray} />}
+          bottomSection={paramsArray && paramsArray.length > 0 && <ParamsArrayToolbar paramsArray={paramsArray} />}
         />
       </Fixed>
       <Grow>

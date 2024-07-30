@@ -151,7 +151,6 @@ const ReportViewer = ({ resourceId }) => {
       <Fixed>
         <GridToolbar
           actions={actions}
-          column={true}
           leftSection={
             <Box sx={{ display: 'flex', padding: 2, justifyContent: 'space-between' }}>
               <Autocomplete
@@ -178,7 +177,7 @@ const ReportViewer = ({ resourceId }) => {
               />
             </Box>
           }
-          rightSection={paramsArray && paramsArray.length > 0 && <ParamsArrayToolbar paramsArray={paramsArray} />}
+          bottomSection={paramsArray && paramsArray.length > 0 && <ParamsArrayToolbar paramsArray={paramsArray} />}
         ></GridToolbar>
       </Fixed>
       {pdf && (

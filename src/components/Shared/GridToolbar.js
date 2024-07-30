@@ -9,11 +9,11 @@ const GridToolbar = ({
   onAdd,
   leftSection,
   rightSection,
+  bottomSection,
   inputSearch,
   onSearch,
   onSearchClear,
   actions = [],
-  column,
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
@@ -39,7 +39,7 @@ const GridToolbar = ({
   const buttons = getButtons(platformLabels)
 
   return (
-    <DialogActions sx={{ px: '0px !important', py: '4px !important', flexDirection: column ? 'column' : 'row' }}>
+    <DialogActions sx={{ px: '0px !important', py: '4px !important', flexDirection: 'column' }}>
       <style>
         {`
           .button-container {
@@ -149,8 +149,9 @@ const GridToolbar = ({
               )
             })}
         </Grid>
+        {rightSection}
       </Grid>
-      {rightSection}
+      {bottomSection}
     </DialogActions>
   )
 }
