@@ -57,5 +57,11 @@ export const SaleRepository = {
     set: service + 'setSP',
     del: service + 'delSP',
     page: service + 'pageSP'
+  },
+  ReturnPolicy: {
+    qry: service + 'qryRPO',
+    get: service + 'getRPO',
+    set: service + 'setRPO',
+    del: service + 'delRPO'
   }
 }
