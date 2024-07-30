@@ -15,7 +15,6 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import { DataSets } from 'src/resources/DataSets'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
-import { LabelSharp } from '@mui/icons-material'
 
 export default function PaaymentTermsForms({ labels, maxAccess, recordId }) {
   const [editMode, setEditMode] = useState(!!recordId)
@@ -41,19 +40,17 @@ export default function PaaymentTermsForms({ labels, maxAccess, recordId }) {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required(' '),
-      reference: yup.string().required(' '),
-      type: yup.string().required(' ')
+      name: yup.string().required(),
+      reference: yup.string().required(),
+      type: yup.string().required()
     }),
     onSubmit: async obj => {
-      const recordId = obj.recordId
-
       const response = await postRequest({
         extension: SaleRepository.PaymentTerms.set,
         record: JSON.stringify(obj)
       })
 
-      if (!recordId) {
+      if (!obj.recordId) {
         toast.success(platformLabels.Added)
         formik.setValues({
           ...obj,

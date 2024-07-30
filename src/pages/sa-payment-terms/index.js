@@ -1,5 +1,4 @@
-import { useState, useContext } from 'react'
-import { Box } from '@mui/material'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
@@ -22,12 +21,14 @@ const PaaymentTerms = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    const response = await getRequest({
-      extension: SaleRepository.PaymentTerms.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
-    })
+    try {
+      const response = await getRequest({
+        extension: SaleRepository.PaymentTerms.qry,
+        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
+      })
 
-    return { ...response, _startAt: _startAt }
+      return { ...response, _startAt: _startAt }
+    } catch (error) {}
   }
 
   const {
