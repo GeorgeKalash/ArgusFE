@@ -45,10 +45,7 @@ export default function ClientGroupsForm({ labels, maxAccess, recordId }) {
 
         if (!obj.recordId) {
           toast.success(platformLabels.Added)
-          formik.setValues({
-            ...obj,
-            recordId: response.recordId
-          })
+          formik.setFieldValue('recordId', response.recordId)
         } else toast.success(platformLabels.Edited)
 
         invalidate()
