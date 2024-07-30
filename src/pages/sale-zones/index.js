@@ -23,13 +23,14 @@ const SalesZone = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    const response = await getRequest({
-      extension: SaleRepository.SalesZone.qry,
+    try {
+      const response = await getRequest({
+        extension: SaleRepository.SalesZone.qry,
+        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=`
+      })
 
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=`
-    })
-
-    return { ...response, _startAt: _startAt }
+      return { ...response, _startAt: _startAt }
+    } catch (error) {}
   }
 
   const {

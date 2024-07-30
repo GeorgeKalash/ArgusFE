@@ -79,8 +79,6 @@ export default function SaleZoneForm({ labels, maxAccess, recordId }) {
     })()
   }, [])
 
-  console.log(maxAccess, 'maxxx')
-
   return (
     <FormShell resourceId={ResourceIds.SalesZone} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
@@ -124,7 +122,7 @@ export default function SaleZoneForm({ labels, maxAccess, recordId }) {
                 ]}
                 values={formik.values}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('countryId', newValue ? newValue.recordId : '')
+                  formik.setFieldValue('countryId', newValue?.recordId || '')
                 }}
                 error={formik.touched.countryId && Boolean(formik.errors.countryId)}
                 maxAccess={maxAccess}
