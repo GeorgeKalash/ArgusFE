@@ -15,29 +15,39 @@ export const ResourceLookup = ({
   errorCheck,
   filter = {},
   viewHelperText = true,
+  minChars = 3,
   ...rest
 }) => {
   const { getRequest } = useContext(RequestsContext)
   const [errorMessage, setErrorMessage] = useState()
   const [store, setStore] = useState([])
+  const [loading, setLoading] = useState(false)
 
   const onLookup = searchQry => {
     setStore([])
-    getRequest({
-      extension: endpointId,
-      parameters: new URLSearchParams({ ...parameters, _filter: searchQry })
-    })
-      .then(res => {
-        if (filter) {
-          res.list = res.list.filter(item => {
-            return Object.keys(filter).every(key => {
-              return parseInt(item[key]) == parseInt(filter[key])
-            })
-          })
-        }
-        setStore(res.list)
+    if (searchQry?.length >= minChars) {
+      setLoading(true)
+
+      getRequest({
+        extension: endpointId,
+        parameters: new URLSearchParams({ ...parameters, _filter: searchQry }),
+        type: 'lookup'
       })
-      .catch(error => {})
+        .then(res => {
+          if (filter) {
+            res.list = res.list.filter(item => {
+              return Object.keys(filter).every(key => {
+                return parseInt(item[key]) == parseInt(filter[key])
+              })
+            })
+          }
+          setStore(res.list)
+        })
+        .catch(error => {})
+        .finally(() => {
+          setLoading(false)
+        })
+    }
   }
   const check = errorCheck ? errorCheck : name
 
@@ -69,6 +79,7 @@ export const ResourceLookup = ({
           error,
           onKeyUp,
           name,
+          loading,
           ...rest
         }}
       />

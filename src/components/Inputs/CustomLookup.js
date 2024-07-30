@@ -4,6 +4,7 @@ import ClearIcon from '@mui/icons-material/Clear'
 import { useEffect, useState } from 'react'
 import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
 import PopperComponent from '../Shared/Popper/PopperComponent'
+import CircularProgress from '@mui/material/CircularProgress' // Import CircularProgress from MUI or use any other spinner component
 
 const CustomLookup = ({
   type = 'text',
@@ -33,6 +34,7 @@ const CustomLookup = ({
   editMode,
   hasBorder = true,
   hidden = false,
+  loading,
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
@@ -171,16 +173,22 @@ const CustomLookup = ({
                         </IconButton>
                       </InputAdornment>
                     )}
-                    <InputAdornment sx={{ margin: '0px !important' }} position='end'>
-                      <IconButton
-                        sx={{ margin: '0px !important', padding: '0px !important' }}
-                        tabIndex={-1}
-                        edge='end'
-                        style={{ pointerEvents: 'none' }}
-                      >
-                        <SearchIcon style={{ cursor: 'pointer', border: '0px', fontSize: 20 }} />
-                      </IconButton>
-                    </InputAdornment>
+                    {!loading ? (
+                      <InputAdornment sx={{ margin: '0px !important' }} position='end'>
+                        <IconButton
+                          sx={{ margin: '0px !important', padding: '0px !important' }}
+                          tabIndex={-1}
+                          edge='end'
+                          style={{ pointerEvents: 'none' }}
+                        >
+                          <SearchIcon style={{ cursor: 'pointer', border: '0px', fontSize: 20 }} />
+                        </IconButton>
+                      </InputAdornment>
+                    ) : (
+                      <InputAdornment sx={{ margin: '0px !important' }} position='end'>
+                        <CircularProgress size={20} style={{ marginLeft: 5 }} />
+                      </InputAdornment>
+                    )}
                   </div>
                 )
               }}
