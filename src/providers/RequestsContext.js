@@ -123,6 +123,7 @@ const RequestsProvider = ({ showLoading = false, children }) => {
 
     var bodyFormData = new FormData()
     bodyFormData.append('record', body.record)
+    body?.file && bodyFormData.append('file', body.file)
 
     return axios({
       method: 'POST',
