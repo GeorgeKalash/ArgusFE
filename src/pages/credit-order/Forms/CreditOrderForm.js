@@ -33,14 +33,15 @@ import useResourceParams from 'src/hooks/useResourceParams'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
 import { useForm } from 'src/hooks/form'
 import FormGrid from 'src/components/form/layout/FormGrid'
-import Approvals from 'src/components/Shared/Approvals'
 import WorkFlow from 'src/components/Shared/WorkFlow'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
+import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 
-export default function CreditOrderForm({ labels, maxAccess, recordId, expanded, plantId, userData, window }) {
+export default function CreditOrderForm({ labels, access, recordId, plantId, userData, window }) {
   const { platformLabels } = useContext(ControlContext)
   const { height } = useWindowDimensions()
   const [isLoading, setIsLoading] = useState(false)
@@ -51,6 +52,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
   const [editMode, setEditMode] = useState(!!recordId)
   const { stack: stackError } = useError()
   const [toCurrency, setToCurrency] = useState(null)
+  const [selectedFunctionId, setFunctionId] = useState(SystemFunction.CurrencyCreditOrderPurchase)
   const [toCurrencyRef, setToCurrencyRef] = useState(null)
   const [baseCurrencyRef, setBaseCurrencyRef] = useState(null)
   const { stack } = useWindow()
@@ -80,6 +82,12 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
     maxRate: '',
     rateCalcMethod: '',
     isTFRClicked: false
+  })
+
+  const { maxAccess } = useDocumentType({
+    functionId: selectedFunctionId,
+    access: access,
+    enabled: !recordId
   })
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -706,7 +714,6 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
       })
     } catch (error) {}
   }
-
   useEffect(() => {
     ;(async function () {
       try {
@@ -723,7 +730,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
           setIsTFR(res.record.releaseStatus === 3 && res.record.status !== 3 ? true : false)
           res.record.date = formatDateFromApi(res.record.date)
           res.record.deliveryDate = formatDateFromApi(res.record.deliveryDate)
-          setOperationType(res.record.functionId)
+          await setOperationType(res.record.functionId)
           formik.setValues(res.record)
           const baseCurrency = await getBaseCurrency()
           getCorrespondentById(res.record.corId ?? '', baseCurrency, res.record.plantId)
@@ -850,10 +857,10 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
                 editMode={editMode}
                 maxAccess={maxAccess}
                 maxLength='30'
-                readOnly={true}
-                required
+                readOnly={editMode}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('reference', '')}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
-                helperText={formik.touched.reference && formik.errors.reference}
               />
             </Grid>
           </Grid>
@@ -920,7 +927,11 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
               row
               value={formik.values.functionId}
               defaultValue={SystemFunction.CurrencyCreditOrderPurchase}
-              onChange={e => setOperationType(e.target.value)}
+              onChange={async e => {
+                await setOperationType(e.target.value)
+                setFunctionId(e.target.value)
+                formik.setFieldValue('reference', '')
+              }}
             >
               <FormControlLabel
                 value={SystemFunction.CurrencyCreditOrderPurchase}

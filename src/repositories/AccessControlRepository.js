@@ -60,6 +60,10 @@ export const AccessControlRepository = {
     qry: service + 'qryCRL',
     set2: service + 'set2CRL'
   },
+  UserSiteView: {
+    qry: service + 'qryUSI',
+    set2: service + 'set2USI'
+  },
   SGReleaseCode: {
     qry: service + 'qryRCO',
     set: service + 'setRCO',

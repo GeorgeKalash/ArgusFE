@@ -8,12 +8,6 @@ export const SaleRepository = {
     del: service + 'delPL',
     page: service + 'pagePL'
   },
-  SalesPerson: {
-    qry: service + 'qrySP',
-    get: service + 'getSP',
-    set: service + 'setSP',
-    del: service + 'delSP'
-  },
   CommissionSchedule: {
     qry: service + 'qryCSC',
     get: service + 'getCSC',
@@ -29,7 +23,8 @@ export const SaleRepository = {
     get: service + 'getSP',
     set: service + 'setSP',
     del: service + 'delSP',
-    page: service + 'pageSP'
+    page: service + 'pageSP',
+    snapshot: service + 'snapshotSP'
   },
   SalesZone: {
     qry: service + 'qrySZ',
