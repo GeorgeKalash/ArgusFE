@@ -12,6 +12,7 @@ import ResourceRecordRemarks from './ResourceRecordRemarks'
 import GlobalIntegrationGrid from './GlobalIntegrationGrid'
 import AccountBalance from './AccountBalance'
 import CashTransaction from './CashTransaction'
+import FinancialTransaction from './FinancialTransaction'
 
 export default function FormShell({
   form,
@@ -195,6 +196,17 @@ export default function FormShell({
               title: 'Client Relation'
             })
           }
+          onClickIT={() => {
+            stack({
+              Component: FinancialTransaction,
+              props: {
+                formValues: form.values
+              },
+              width: 1050,
+              height: 600,
+              title: 'Financial Transaction'
+            })
+          }}
           onGenerateReport={() =>
             stack({
               Component: PreviewReport,

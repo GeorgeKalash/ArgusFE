@@ -40,19 +40,19 @@ const FinancialTransaction = ({ formValues }) => {
       field: 'date',
       headerName: labels.date,
       flex: 1,
-      valueGetter: ({ row }) => formatDateDefault(row?.date)
+      type: 'date'
     },
     {
       field: 'amount',
       headerName: labels.amount,
       flex: 1,
-      valueGetter: ({ row }) => getFormattedNumber(row?.amount)
+      type: 'number'
     },
     {
       field: 'baseAmount',
       headerName: labels.baseAmount,
       flex: 1,
-      valueGetter: ({ row }) => getFormattedNumber(row?.baseAmount)
+      type: 'number'
     },
     {
       field: 'accountRef',
