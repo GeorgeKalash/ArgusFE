@@ -165,5 +165,10 @@ export const ResourceIds = {
   Measurement: 41102,
   Category: 41103,
   InventoryGroup: 41105,
-  IRReplenishmentGrps: 46102
+  IRReplenishmentGrps: 46102,
+  ClientGroups: 51104,
+  ReturnPolicy: 51108,
+  SalesTeam: 51117,
+  PriceGroups: 51107,
+  PaymentTerm: 51102
 }
