@@ -6,7 +6,7 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 import GroupInfoWindow from './Windows/GroupInfoWindow'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
@@ -34,15 +34,12 @@ const SecurityGroup = () => {
     labels: _labels,
     refetch,
     paginationParameters,
-    access
+    access,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: AccessControlRepository.SecurityGroup.qry,
     datasetId: ResourceIds.SecurityGroup
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: AccessControlRepository.SecurityGroup.qry
   })
 
   function openForm(recordId) {
@@ -50,7 +47,7 @@ const SecurityGroup = () => {
       Component: GroupInfoWindow,
       props: {
         labels: _labels,
-        recordId: recordId ? recordId : null,
+        recordId: recordId,
         maxAccess: access
       },
       width: 900,
@@ -99,7 +96,7 @@ const SecurityGroup = () => {
       <Grow>
         <Table
           columns={columns}
-          gridData={data ? data : { list: [] }}
+          gridData={data}
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
