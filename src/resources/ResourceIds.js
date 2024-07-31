@@ -165,5 +165,6 @@ export const ResourceIds = {
   Measurement: 41102,
   Category: 41103,
   InventoryGroup: 41105,
-  SalesTeam: 51117
+  SalesTeam: 51117,
+  PaymentTerm: 51102
 }
