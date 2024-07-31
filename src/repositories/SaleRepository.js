@@ -34,7 +34,10 @@ export const SaleRepository = {
     page: service + 'pageSZ'
   },
   SalesTeam: {
-    qry: service + 'qrySPT'
+    qry: service + 'qrySPT',
+    get: service + 'getSPT',
+    set: service + 'setSPT',
+    del: service + 'delSPT'
   },
   Target: {
     qry: service + 'qryTGT',
@@ -57,5 +60,18 @@ export const SaleRepository = {
     set: service + 'setSP',
     del: service + 'delSP',
     page: service + 'pageSP'
+  },
+  PriceGroups: {
+    qry: service + 'qryPG',
+    get: service + 'getPG',
+    set: service + 'setPG',
+    del: service + 'delPG'
+  },
+  PaymentTerms: {
+    qry: service + 'qryPT',
+    get: service + 'getPT',
+    set: service + 'setPT',
+    del: service + 'delPT',
+    page: service + 'pagePT'
   }
 }
