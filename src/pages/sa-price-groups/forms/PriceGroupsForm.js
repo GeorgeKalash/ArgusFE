@@ -24,7 +24,7 @@ export default function PriceGroupsForm({ labels, maxAccess, recordId }) {
 
   const { formik } = useForm({
     initialValues: {
-      recordId: null,
+      recordId: recordId || null,
       reference: '',
       name: '',
       minUnitPrice: '',
