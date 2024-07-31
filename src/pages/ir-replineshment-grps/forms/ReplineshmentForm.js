@@ -14,17 +14,13 @@ import { ControlContext } from 'src/providers/ControlContext'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { IVReplenishementRepository } from 'src/repositories/IVReplenishementRepository'
 
-export default function ReplineshmentForm({ labels, maxAccess, recordId }) {
+export default function ReplineshmentForm({ labels, maxAccess, recordId, invalidate }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
-  const invalidate = useInvalidate({
-    endpointId: IVReplenishementRepository.ReplenishmentGroups.qry
-  })
-
   const { formik } = useForm({
     initialValues: {
-      recordId: null,
+      recordId: recordId || null,
       reference: '',
       name: '',
       defaultMaxQty: '',

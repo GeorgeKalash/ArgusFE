@@ -75,7 +75,8 @@ const ReplenishmentGroups = () => {
       Component: ReplineshmentForm,
       props: {
         labels: _labels,
-        recordId: recordId,
+        recordId,
+        invalidate,
         maxAccess: access
       },
       width: 600,
