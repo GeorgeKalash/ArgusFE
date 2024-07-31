@@ -6,7 +6,7 @@ import { Grid } from '@mui/material'
 
 const RPBGridToolbar = ({ add, access, onApply, reportName, onSearchClear, hasSearch = true, ...rest }) => {
   const { stack } = useWindow()
-  const [rpbParams, setRpbParams] = useState('')
+  const [rpbParams, setRpbParams] = useState([])
   const [search, setSearch] = useState('')
 
   const openRPB = () => {
