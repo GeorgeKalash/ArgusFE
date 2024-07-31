@@ -165,5 +165,8 @@ export const ResourceIds = {
   MobileSystemDefaults: 36123,
   Measurement: 41102,
   Category: 41103,
-  InventoryGroup: 41105
+  InventoryGroup: 41105,
+  SalesTeam: 51117,
+  PriceGroups: 51107,
+  PaymentTerm: 51102
 }
