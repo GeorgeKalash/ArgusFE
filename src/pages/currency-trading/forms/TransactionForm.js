@@ -914,7 +914,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                                 ? newRow.fcAmount / exRate
                                 : 0
 
-                            exchange.rate && update({ lcAmount: lcAmount })
+                            !isNaN(lcAmount) && update({ lcAmount: lcAmount })
                           }
 
                           update({
@@ -935,9 +935,15 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                         name: 'fcAmount',
                         async onChange({ row: { update, newRow } }) {
                           const fcAmount = newRow.fcAmount
-                          !isNaN(fcAmount) &&
+                          const rateCalcMethod = newRow.rateCalcMethod
+                          const exRate = newRow.exRate
+
+                          const lcAmount =
+                            rateCalcMethod === 1 ? fcAmount * exRate : rateCalcMethod === 2 ? fcAmount / exRate : 0
+
+                          !isNaN(lcAmount) &&
                             update({
-                              lcAmount: newRow.exRate * fcAmount
+                              lcAmount: lcAmount?.toFixed(2)
                             })
                         },
                         defaultValue: ''
@@ -952,11 +958,26 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                         updateOn: 'blur',
                         async onChange({ row: { update, newRow } }) {
                           const fcAmount = newRow.fcAmount
-                          if (newRow.exRate >= newRow.minRate && newRow.exRate <= newRow.maxRate) {
-                            !isNaN(newRow.exRate * fcAmount) &&
-                              update({
-                                lcAmount: newRow.exRate * fcAmount
-                              })
+                          const lcAmount = newRow.lcAmount
+                          const rateCalcMethod = newRow.rateCalcMethod
+                          const exRate = newRow.exRate
+
+                          if (exRate >= newRow.minRate && exRate <= newRow.maxRate) {
+                            if (fcAmount) {
+                              const lcAmount =
+                                rateCalcMethod === 1 ? fcAmount * exRate : rateCalcMethod === 2 ? fcAmount / exRate : 0
+                              !isNaN(lcAmount) &&
+                                update({
+                                  lcAmount: lcAmount.toFixed(2)
+                                })
+                            } else if (lcAmount) {
+                              const fcAmount =
+                                rateCalcMethod === 2 ? lcAmount * exRate : rateCalcMethod === 1 ? lcAmount / exRate : 0
+                              !isNaN(fcAmount) &&
+                                update({
+                                  fcAmount: fcAmount.toFixed(2)
+                                })
+                            }
                           } else {
                             stackError({
                               message: `Rate not in the [${newRow.minRate}-${newRow.maxRate}]range.`
@@ -980,10 +1001,15 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                         },
                         async onChange({ row: { update, newRow } }) {
                           const lcAmount = newRow.lcAmount
-                          const fcAmount = lcAmount ? lcAmount / newRow.exRate : ''
+                          const rateCalcMethod = newRow.rateCalcMethod
+                          const exRate = newRow.exRate
+
+                          const fcAmount =
+                            rateCalcMethod === 2 ? lcAmount * exRate : rateCalcMethod === 1 ? lcAmount / exRate : 0
+
                           if (fcAmount && newRow.exRate)
                             update({
-                              fcAmount: fcAmount
+                              fcAmount: fcAmount.toFixed(2)
                             })
                         },
 
