@@ -116,7 +116,7 @@ const SalesZone = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} onTree={onTreeClick} />
+        <GridToolbar onAdd={add} maxAccess={access} onTree={onTreeClick} previewReport={ResourceIds.SalesZone} />
       </Fixed>
       <Grow>
         <Table
