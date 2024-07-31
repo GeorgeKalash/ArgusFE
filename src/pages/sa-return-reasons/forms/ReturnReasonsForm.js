@@ -13,13 +13,9 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 
-export default function ReturnReasonsForm({ labels, maxAccess, recordId }) {
+export default function ReturnReasonsForm({ labels, maxAccess, recordId, invalidate }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-
-  const invalidate = useInvalidate({
-    endpointId: SaleRepository.ReturnReasons.qry
-  })
 
   const { formik } = useForm({
     initialValues: {

@@ -72,8 +72,9 @@ const ReturnReasons = () => {
       Component: ReturnReasonsForm,
       props: {
         labels: _labels,
-        recordId: recordId,
-        maxAccess: access
+        recordId,
+        maxAccess: access,
+        invalidate
       },
       width: 600,
       height: 200,
