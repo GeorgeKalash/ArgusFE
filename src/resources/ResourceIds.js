@@ -166,6 +166,8 @@ export const ResourceIds = {
   Category: 41103,
   InventoryGroup: 41105,
   ReturnReasons: 51109,
+  ClientGroups: 51104,
+  ReturnPolicy: 51108,
   SalesTeam: 51117,
   PriceGroups: 51107,
   PaymentTerm: 51102
