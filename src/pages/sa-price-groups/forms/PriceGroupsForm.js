@@ -105,12 +105,14 @@ export default function PriceGroupsForm({ labels, maxAccess, recordId }) {
             <Grid item xs={12}>
               <CustomTextField
                 name='reference'
+                required
                 label={labels.reference}
                 value={formik.values.reference}
                 maxAccess={maxAccess}
                 maxLength='30'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('reference', '')}
+                error={formik.touched.reference && Boolean(formik.errors.reference)}
               />
             </Grid>
             <Grid item xs={12}>
