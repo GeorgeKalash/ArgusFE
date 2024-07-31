@@ -4,18 +4,18 @@ import { useWindow } from 'src/windows'
 import ReportParameterBrowser from 'src/components/Shared/ReportParameterBrowser'
 import { Grid } from '@mui/material'
 
-const RPBGridToolbar = ({ add, access, onApply, reportName, onSearchClear, doSearch = true, ...rest }) => {
+const RPBGridToolbar = ({ add, access, onApply, reportName, onSearchClear, hasSearch = true, ...rest }) => {
   const { stack } = useWindow()
-  const [paramsArray, setParamsArray] = useState([])
-  const [search, setSearch] = useState([])
+  const [rpbParams, setRpbParams] = useState([])
+  const [search, setSearch] = useState('')
 
   const openRPB = () => {
     stack({
       Component: ReportParameterBrowser,
       props: {
         reportName: reportName,
-        paramsArray,
-        setParamsArray
+        rpbParams,
+        setRpbParams
       },
       width: 700,
       height: 500,
@@ -33,29 +33,27 @@ const RPBGridToolbar = ({ add, access, onApply, reportName, onSearchClear, doSea
     {
       key: 'GO',
       condition: true,
-      onClick: () => onApply({ search, paramsArray }),
+      onClick: () => onApply({ search, rpbParams }),
       disabled: false
     }
   ]
 
   return (
     <GridToolbar
-      onAdd={add}
-      maxAccess={access}
-      onSearch={() => onApply({ search, paramsArray })}
+      onSearch={() => onApply({ search, rpbParams })}
       onSearchClear={() => {
-        setSearch([])
+        setSearch('')
       }}
       onSearchChange={e => {
         setSearch(e.target.value)
       }}
-      inputSearch={doSearch}
+      inputSearch={hasSearch}
       actions={actions}
       bottomSection={
-        paramsArray &&
-        paramsArray.length > 0 && (
+        rpbParams &&
+        rpbParams.length > 0 && (
           <Grid container spacing={2} sx={{ display: 'flex', px: 2 }}>
-            {paramsArray.map((param, i) => (
+            {rpbParams.map((param, i) => (
               <Grid key={i} item>
                 [<b>{param.caption}:</b> {param.display}]
               </Grid>

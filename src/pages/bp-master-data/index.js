@@ -1,7 +1,6 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
-import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -123,20 +122,19 @@ const BPMasterData = () => {
     toast.success('Record Deleted Successfully')
   }
 
-  const onApply = ({ search, paramsArray }) => {
-    if (search.length === 0 && paramsArray.length === 0) {
+  const onApply = ({ search, rpbParams }) => {
+    if (search.length === 0 && rpbParams.length === 0) {
       clearFilter('qry')
-      refetch()
     } else {
       filterBy('qry', search)
-      refetch()
     }
+    refetch()
   }
 
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar add={add} access={access} onApply={onApply} reportName={'BPMAS'} />
+        <RPBGridToolbar onAdd={add} maxAccess={access} onApply={onApply} reportName={'BPMAS'} />
       </Fixed>
       <Grow>
         <Table

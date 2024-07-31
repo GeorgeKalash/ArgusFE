@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -113,8 +113,8 @@ const MfAccounts = () => {
     openForm(obj?.recordId)
   }
 
-  const onApply = ({ search, paramsArray }) => {
-    if (search.length === 0 && paramsArray.length === 0) {
+  const onApply = ({ search, rpbParams }) => {
+    if (search.length === 0 && rpbParams.length === 0) {
       clearFilter('qry')
       refetch()
     } else {
@@ -126,7 +126,7 @@ const MfAccounts = () => {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar add={addAccounts} access={access} onApply={onApply} reportName={'FIACC'} />
+        <RPBGridToolbar onAdd={addAccounts} maxAccess={access} onApply={onApply} reportName={'FIACC'} />
       </Fixed>
       <Grow>
         <Table

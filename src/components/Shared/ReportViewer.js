@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext } from 'react'
-import { Autocomplete, Box, Button, TextField } from '@mui/material'
+import { Autocomplete, Box, TextField } from '@mui/material'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { DevExpressRepository } from 'src/repositories/DevExpressRepository'
@@ -95,25 +95,25 @@ const ReportViewer = ({ resourceId }) => {
       })
   }, [reportStore])
 
-  const formatDataForApi = paramsArray => {
+  const formatDataForApi = rpbParams => {
     let minValue = Infinity
 
-    for (const [index, { fieldId, value }] of Object.entries(paramsArray)) {
+    for (const [index, { fieldId, value }] of Object.entries(rpbParams)) {
       const numericValue = Number(fieldId)
       if (numericValue < minValue) {
         minValue = numericValue
       }
     }
 
-    const formattedData = paramsArray
+    const formattedData = rpbParams
       .map(({ fieldId, value }) => `${fieldId}|${value}`)
       .reduce((acc, curr, index) => acc + (index === minValue ? `${curr}` : `^${curr}`), '')
 
     return formattedData
   }
 
-  const onApply = ({ paramsArray }) => {
-    generateReport({ _startAt: 0, _pageSize: 30, params: formatDataForApi(paramsArray) })
+  const onApply = ({ rpbParams }) => {
+    generateReport({ _startAt: 0, _pageSize: 30, params: formatDataForApi(rpbParams) })
   }
 
   return (
@@ -121,7 +121,7 @@ const ReportViewer = ({ resourceId }) => {
       <Fixed>
         <RPBGridToolbar
           onApply={onApply}
-          doSearch={false}
+          hasSearch={false}
           reportName={selectedReport?.parameters}
           leftSection={
             <Box sx={{ display: 'flex', padding: 2, justifyContent: 'space-between' }}>

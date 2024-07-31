@@ -99,7 +99,10 @@ const GridToolbar = ({
                   value={searchValue}
                   label={platformLabels.Search}
                   onClear={clear}
-                  onChange={(e => setSearchValue(e.target.value), onSearchChange)}
+                  onChange={e => {
+                    setSearchValue(e.target.value)
+                    onSearchChange
+                  }}
                   onSearch={onSearch}
                   search={true}
                   height={35}
