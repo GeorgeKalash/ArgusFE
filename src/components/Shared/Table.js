@@ -33,6 +33,7 @@ const Table = ({
   paginationType = '',
   viewCheckButtons = false,
   showCheckboxColumn = false,
+  useStatus = true,
   rowSelection = '',
   pagination = true,
   setData,
@@ -420,7 +421,22 @@ const Table = ({
                   <Image src={editIcon} alt='Edit' width={18} height={18} />
                 </IconButton>
               )}
-              {!isStatus3 && !isStatusCanceled && deleteBtnVisible && !isWIP && (
+              {!useStatus && deleteBtnVisible && (
+                <IconButton
+                  size='small'
+                  onClick={e => {
+                    if (props.deleteConfirmationType == 'strict') {
+                      openDeleteConfirmation(data)
+                    } else {
+                      openDelete(data)
+                    }
+                  }}
+                  color='error'
+                >
+                  <Image src={deleteIcon} alt={platformLabels.Delete} width={18} height={18} />
+                </IconButton>
+              )}
+              {useStatus && !isStatus3 && !isStatusCanceled && deleteBtnVisible && !isWIP && (
                 <IconButton
                   size='small'
                   onClick={e => {
