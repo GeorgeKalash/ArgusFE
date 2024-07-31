@@ -914,7 +914,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                                 ? newRow.fcAmount / exRate
                                 : 0
 
-                            !isNaN(fcAmount) && update({ lcAmount: lcAmount })
+                            !isNaN(lcAmount) && update({ lcAmount: lcAmount })
                           }
 
                           update({
