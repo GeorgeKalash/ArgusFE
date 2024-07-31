@@ -82,7 +82,7 @@ const RPBGridToolbar = ({
       bottomSection={
         rpbParams &&
         rpbParams.length > 0 && (
-          <Grid container spacing={2} sx={{ display: 'flex', px: 2, pt: 2 }}>
+          <Grid container sx={{ display: 'flex', pt: 2, margin: '0px !important' }}>
             {rpbParams.map((param, i) => (
               <Grid key={i} item>
                 [<b>{param.caption}:</b> {param.display}]

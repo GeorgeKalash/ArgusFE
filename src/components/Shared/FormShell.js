@@ -52,7 +52,7 @@ export default function FormShell({
 
   function handleReset() {
     if (typeof clear === 'function') {
-      clear()
+      clear(form)
     } else {
       form.resetForm({
         values: form.initialValues

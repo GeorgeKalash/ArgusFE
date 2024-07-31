@@ -467,7 +467,8 @@ const Table = ({
     params.api.sizeColumnsToFit()
     await params.api.forEachNode(node => {
       const checked = node.data?.checked || false
-      node?.setDataValue('checked', checked)
+
+      // node?.setDataValue('checked', checked)
     })
   }
 

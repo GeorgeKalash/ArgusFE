@@ -23,11 +23,17 @@ export function WindowProvider({ children }) {
     <WindowContext.Provider value={{ stack: addToStack }}>
       <ClearContext.Provider
         value={{
-          clear() {
+          clear(form) {
             const currentValue = { ...stack[stack.length - 1] }
-            closeWindow()
-            currentValue.props.recordId = null
-            addToStack(currentValue)
+            if (currentValue.props.recordId) {
+              closeWindow()
+              currentValue.props.recordId = null
+              addToStack(currentValue)
+            } else {
+              form.resetForm({
+                values: form.initialValues
+              })
+            }
           }
         }}
       >
