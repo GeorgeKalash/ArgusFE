@@ -326,12 +326,14 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
     const selectedRowData = productData?.find(row => row.checked)
     handleSelectedProduct(selectedRowData)
   }
+
   function handleSelectedProduct(selectedRowData) {
     formik.setFieldValue('bankType', selectedRowData?.interfaceId)
     formik.setFieldValue('productId', selectedRowData?.productId)
     formik.setFieldValue('commission', selectedRowData?.fees)
     formik.setFieldValue('defaultCommission', selectedRowData?.fees)
     formik.setFieldValue('lcAmount', selectedRowData?.baseAmount)
+    formik.setFieldValue('fcAmount', selectedRowData?.originAmount)
     formik.setFieldValue('dispersalId', selectedRowData?.dispersalId)
     formik.setFieldValue('exRate', selectedRowData?.exRate)
     formik.setFieldValue('rateCalcMethod', selectedRowData?.rateCalcMethod)
@@ -572,13 +574,19 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       if (plantId && formik.values.countryId && formik.values.currencyId && formik.values.dispersalType) {
         var parameters = `_plantId=${plantId}&_countryId=${formik.values.countryId}&_dispersalType=${
           formik.values.dispersalType
-        }&_currencyId=${formik.values.currencyId}&_amount=${formik.values.fcAmount || 0}`
+        }&_currencyId=${formik.values.currencyId}&_fcAmount=${formik.values.fcAmount || 0}&_lcAmount=${
+          formik.values.lcAmount || 0
+        }`
 
         const res = await getRequest({
           extension: RemittanceOutwardsRepository.ProductDispersalEngine.qry,
           parameters: parameters
         })
-        if (res.list.length == 1) handleSelectedProduct(res.list[0])
+        if (res.list.length == 1) {
+          handleSelectedProduct(res.list[0])
+          if (formik.values.lcAmount) formik.setFieldValue('fcAmount', res.list[0].originAmount)
+          if (formik.values.fcAmount) formik.setFieldValue('lcAmount', res.list[0].baseAmount)
+        }
       }
     } catch (error) {}
   }
@@ -766,7 +774,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                     maxAccess={maxAccess}
                     onChange={e => formik.setFieldValue('fcAmount', e.target.value)}
                     onBlur={async () => {
-                      await checkProduct()
+                      if (!formik.values.lcAmount) await checkProduct()
                     }}
                     onClear={() => formik.setFieldValue('fcAmount', '')}
                     error={formik.touched.fcAmount && Boolean(formik.errors.fcAmount)}
@@ -782,6 +790,9 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                     readOnly={formik.values.fcAmount}
                     maxAccess={maxAccess}
                     onChange={e => formik.setFieldValue('lcAmount', e.target.value)}
+                    onBlur={async () => {
+                      if (!formik.values.fcAmount) await checkProduct()
+                    }}
                     onClear={() => formik.setFieldValue('lcAmount', '')}
                     error={formik.touched.lcAmount && Boolean(formik.errors.lcAmount)}
                     maxLength={10}

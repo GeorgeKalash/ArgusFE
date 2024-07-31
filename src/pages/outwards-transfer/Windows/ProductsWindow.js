@@ -40,8 +40,9 @@ const ProductsWindow = ({ labels, maxAccess, onProductSubmit, outWardsData, wind
       var countryId = outWardsData.countryId
       var currencyId = outWardsData.currencyId
       var dispersalType = outWardsData.dispersalType
-      var amount = outWardsData?.fcAmount || 0
-      var parameters = `_plantId=${plant}&_countryId=${countryId}&_dispersalType=${dispersalType}&_currencyId=${currencyId}&_amount=${amount}`
+      var fcAmount = outWardsData?.fcAmount || 0
+      var lcAmount = outWardsData?.lcAmount || 0
+      var parameters = `_plantId=${plant}&_countryId=${countryId}&_dispersalType=${dispersalType}&_currencyId=${currencyId}&_fcAmount=${fcAmount}&_lcAmount=${lcAmount}`
 
       try {
         const res = await getRequest({
