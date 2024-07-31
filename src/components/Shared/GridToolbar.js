@@ -238,7 +238,7 @@ const GridToolbar = ({
         )}
 
         {previewReport ? (
-          <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', py: '7px !important', ml: 320, mt: -12 }}>
+          <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', py: '7px !important' }}>
             <CustomComboBox
               label={platformLabels.SelectReport}
               valueField='caption'
