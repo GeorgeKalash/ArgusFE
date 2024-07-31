@@ -116,11 +116,12 @@ const MfAccounts = () => {
   const onApply = ({ search, rpbParams }) => {
     if (search.length === 0 && rpbParams.length === 0) {
       clearFilter('qry')
-      refetch()
+    } else if (search.length === 0) {
+      filterBy('qry', rpbParams)
     } else {
       filterBy('qry', search)
-      refetch()
     }
+    refetch()
   }
 
   return (
