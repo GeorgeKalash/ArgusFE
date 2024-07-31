@@ -143,11 +143,11 @@ const TransactionLog = props => {
       <Table
         height={200}
         columns={columns}
-        gridData={gridData}
+        gridData={gridData ?? { list: [] }}
         rowId={['recordId']}
+        onEdit={showInfo}
         isLoading={false}
         maxAccess={access}
-        onEdit={showInfo}
         pagination={false}
       />
       <Grid data-unique-id item xs={4} sx={{ paddingBottom: '15px', height: '18vh', overflow: 'auto' }}>

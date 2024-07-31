@@ -20,7 +20,6 @@ export default function FormShell({
   isCleared = true,
   children,
   editMode,
-  setEditMode,
   disabledSubmit,
   infoVisible = true,
   postVisible = false,
@@ -143,7 +142,6 @@ export default function FormShell({
               },
               width: 700,
               height: 600,
-              height: 'auto',
               title: 'Transaction Log'
             })
           }
