@@ -11,7 +11,6 @@ import { useForm } from 'src/hooks/form'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { ControlContext } from 'src/providers/ControlContext'
-import { SaleRepository } from 'src/repositories/SaleRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { IVReplenishementRepository } from 'src/repositories/IVReplenishementRepository'
 
@@ -28,15 +27,52 @@ export default function ReplineshmentForm({ labels, maxAccess, recordId }) {
       recordId: null,
       reference: '',
       name: '',
-      maxPct: '',
-      maxDaysBack: ''
+      defaultMaxQty: '',
+      defaultMinQty: ''
     },
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),
-      maxPct: yup.number().required().min(0, ' must be greater than 0').max(1000, ' must be less than or equal to 100')
+      reference: yup.string().required(),
+      defaultMinQty: yup
+        .number()
+        .nullable()
+        .min(0, 'Must be greater than or equal to 0')
+        .max(1000)
+        .test('lessThanMax', 'minUnitPrice must be less than or equal to defaultMaxQty', function (value) {
+          const { defaultMaxQty } = this.parent
+
+          return (
+            defaultMaxQty === undefined ||
+            defaultMaxQty === null ||
+            value === undefined ||
+            value === null ||
+            value <= defaultMaxQty
+          )
+        }),
+      defaultMaxQty: yup
+        .number()
+        .nullable()
+        .max(1000, 'Must be less than or equal to 1000')
+        .test('greaterThanMin', 'defaultMaxQty must be greater than or equal to defaultMinQty', function (value) {
+          const { defaultMinQty } = this.parent
+
+          return (
+            defaultMinQty === undefined ||
+            defaultMinQty === null ||
+            value === undefined ||
+            value === null ||
+            value >= defaultMinQty
+          )
+        }),
+      defaultRequiredQty: yup
+        .number()
+        .nullable()
+        .min(0, 'Must be greater than or equal to 0')
+        .max(1000, 'Must be less than or equal to 1000')
     }),
+
     onSubmit: async obj => {
       try {
         const response = await postRequest({
@@ -78,6 +114,7 @@ export default function ReplineshmentForm({ labels, maxAccess, recordId }) {
               <CustomTextField
                 name='reference'
                 label={labels.reference}
+                required
                 value={formik.values.reference}
                 maxAccess={maxAccess}
                 maxLength='30'
@@ -100,26 +137,38 @@ export default function ReplineshmentForm({ labels, maxAccess, recordId }) {
             </Grid>
             <Grid item xs={12}>
               <CustomNumberField
-                name='maxPct'
-                required
-                label={labels.maxPt}
-                value={formik.values.maxPct}
+                name='defaultMaxQty'
+                label={labels.defaultMaxQty}
+                value={formik.values.defaultMaxQty}
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('maxPct', '')}
-                error={formik.touched.maxPct && Boolean(formik.errors.maxPct)}
+                onClear={() => formik.setFieldValue('defaultMaxQty', '')}
                 allowNegative={false}
+                error={formik.touched.defaultMaxQty && Boolean(formik.errors.defaultMaxQty)}
               />
             </Grid>
             <Grid item xs={12}>
               <CustomNumberField
-                name='maxDaysBack'
-                label={labels.maxDaysBack}
-                value={formik.values.maxDaysBack}
+                name='defaultMinQty'
+                label={labels.defaultMinQty}
+                value={formik.values.defaultMinQty}
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('maxDaysBack', '')}
+                onClear={() => formik.setFieldValue('defaultMinQty', '')}
                 allowNegative={false}
+                error={formik.touched.defaultMinQty && Boolean(formik.errors.defaultMinQty)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomNumberField
+                name='defaultRequiredQty'
+                label={labels.defaultRequiredQty}
+                value={formik.values.defaultRequiredQty}
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('defaultRequiredQty', '')}
+                allowNegative={false}
+                error={formik.touched.defaultRequiredQty && Boolean(formik.errors.defaultRequiredQty)}
               />
             </Grid>
           </Grid>
