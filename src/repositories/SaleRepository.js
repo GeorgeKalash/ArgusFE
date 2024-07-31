@@ -34,7 +34,10 @@ export const SaleRepository = {
     page: service + 'pageSZ'
   },
   SalesTeam: {
-    qry: service + 'qrySPT'
+    qry: service + 'qrySPT',
+    get: service + 'getSPT',
+    set: service + 'setSPT',
+    del: service + 'delSPT'
   },
   Target: {
     qry: service + 'qryTGT',
