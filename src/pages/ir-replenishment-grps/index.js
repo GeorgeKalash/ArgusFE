@@ -10,7 +10,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
-import ReplineshmentForm from './forms/ReplineshmentForm'
+import ReplineshmentForm from '../ir-replenishment-grps/forms/ReplineshmentForm'
 import { IVReplenishementRepository } from 'src/repositories/IVReplenishementRepository'
 
 const ReplenishmentGroups = () => {

@@ -14,7 +14,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { IVReplenishementRepository } from 'src/repositories/IVReplenishementRepository'
 
-export default function ReplineshmentForm({ labels, maxAccess, recordId, invalidate }) {
+export default function ReplineshmentForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
