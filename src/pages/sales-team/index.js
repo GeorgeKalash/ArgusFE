@@ -77,7 +77,7 @@ const SalesTeam = () => {
       Component: SalesTeamForm,
       props: {
         labels: _labels,
-        recordId: recordId,
+        recordId,
         maxAccess: access
       },
       width: 600,
