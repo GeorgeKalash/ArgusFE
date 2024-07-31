@@ -124,7 +124,7 @@ const BPMasterData = () => {
 
   const onApply = ({ search, rpbParams }) => {
     if (!search && rpbParams.length === 0) {
-      clearFilter('qry')
+      clearFilter('params')
     } else if (!search) {
       filterBy('params', rpbParams)
     } else {
