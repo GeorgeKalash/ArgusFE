@@ -24,7 +24,7 @@ export default function FiscalYearForm({ labels, maxAccess, setStore, store }) {
   const { recordId } = store
 
   const invalidate = useInvalidate({
-    endpointId: SystemRepository.FiscalYears.qry
+    endpointId: SystemRepository.FiscalYears.page
   })
 
   const { formik } = useForm({
@@ -43,8 +43,8 @@ export default function FiscalYearForm({ labels, maxAccess, setStore, store }) {
       fiscalYear: yup
         .number()
         .transform((value, originalValue) => validateNumberField(value, originalValue))
-        .min(1900, 'Value must be greater than or equal to 0')
-        .max(2099, 'Value must be less than or equal to 32,767'),
+        .min(1900, labels.yearMin)
+        .max(2099, labels.yearMax),
       startDate: yup.string().required(' '),
       endDate: yup.string().required(' '),
       periods: yup.string().required(' '),
@@ -73,7 +73,7 @@ export default function FiscalYearForm({ labels, maxAccess, setStore, store }) {
     }
   })
 
-  const editMode = !!recordId || formik.values.fiscalYear
+  const editMode = !!recordId
 
   useEffect(() => {
     ;(async function () {
@@ -109,6 +109,7 @@ export default function FiscalYearForm({ labels, maxAccess, setStore, store }) {
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('fiscalYear', '')}
                 error={formik.touched.fiscalYear && Boolean(formik.errors.fiscalYear)}
+                helperText={formik.touched.fiscalYear && formik.errors.fiscalYear}
                 maxAccess={maxAccess}
                 required
               />

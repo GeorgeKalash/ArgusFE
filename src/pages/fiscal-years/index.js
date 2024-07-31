@@ -5,13 +5,13 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import FiscalYearWindow from './Windows/FiscalYearWindow'
 import { ControlContext } from 'src/providers/ControlContext'
+import { useResourceQuery } from 'src/hooks/resource'
 
 const FiscalYear = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -19,27 +19,27 @@ const FiscalYear = () => {
   const { platformLabels } = useContext(ControlContext)
 
   async function fetchGridData(options = {}) {
-    const { _filter = '' } = options
+    const { _startAt = 0, _pageSize = 50 } = options
 
-    return await getRequest({
+    const response = await getRequest({
       extension: SystemRepository.FiscalYears.page,
-      parameters: `_filter=${_filter}`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
     })
+
+    return { ...response, _startAt: _startAt }
   }
 
   const {
     query: { data },
     refetch,
     labels: _labels,
-    access
+    access,
+    paginationParameters,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: SystemRepository.FiscalYears.page,
     datasetId: ResourceIds.FiscalYears
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: SystemRepository.FiscalYears.page
   })
 
   const columns = [
@@ -107,7 +107,8 @@ const FiscalYear = () => {
           onDelete={del}
           isLoading={false}
           pageSize={50}
-          paginationType='client'
+          paginationParameters={paginationParameters}
+          paginationType='api'
           maxAccess={access}
           refetch={refetch}
           globalStatus={false}
