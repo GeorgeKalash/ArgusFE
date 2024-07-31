@@ -21,14 +21,12 @@ const ReplenishmentGroups = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    try {
-      const response = await getRequest({
-        extension: IVReplenishementRepository.ReplenishmentGroups.qry,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=`
-      })
+    const response = await getRequest({
+      extension: IVReplenishementRepository.ReplenishmentGroups.qry,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
+    })
 
-      return { ...response, _startAt: _startAt }
-    } catch (error) {}
+    return { ...response, _startAt: _startAt }
   }
 
   const {
@@ -53,21 +51,6 @@ const ReplenishmentGroups = () => {
     {
       field: 'name',
       headerName: _labels.name,
-      flex: 1
-    },
-    {
-      field: 'defaultMinQty',
-      headerName: _labels.defaultMinQty,
-      flex: 1
-    },
-    {
-      field: 'defaultMaxQty',
-      headerName: _labels.defaultMaxQty,
-      flex: 1
-    },
-    {
-      field: 'defaultRequiredQty',
-      headerName: _labels.defaultRequiredQty,
       flex: 1
     }
   ]

@@ -13,13 +13,14 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import { IVReplenishementRepository } from 'src/repositories/IVReplenishementRepository'
 
 export default function ReplineshmentForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: SaleRepository.ReturnPolicy.qry
+    endpointId: IVReplenishementRepository.ReplenishmentGroups.qry
   })
 
   const { formik } = useForm({
@@ -34,16 +35,12 @@ export default function ReplineshmentForm({ labels, maxAccess, recordId }) {
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),
-      maxPct: yup
-        .number()
-        .required()
-        .min(0.01, ' must be greater than 0')
-        .max(100, ' must be less than or equal to 100')
+      maxPct: yup.number().required().min(0, ' must be greater than 0').max(1000, ' must be less than or equal to 100')
     }),
     onSubmit: async obj => {
       try {
         const response = await postRequest({
-          extension: SaleRepository.ReturnPolicy.set,
+          extension: IVReplenishementRepository.ReplenishmentGroups.set,
           record: JSON.stringify(obj)
         })
 
@@ -62,7 +59,7 @@ export default function ReplineshmentForm({ labels, maxAccess, recordId }) {
       try {
         if (recordId) {
           const res = await getRequest({
-            extension: SaleRepository.ReturnPolicy.get,
+            extension: IVReplenishementRepository.ReplenishmentGroups.get,
             parameters: `_recordId=${recordId}`
           })
 
@@ -73,7 +70,7 @@ export default function ReplineshmentForm({ labels, maxAccess, recordId }) {
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.ReturnPolicy} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell resourceId={ResourceIds.IRReplenishmentGrps} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -122,6 +119,7 @@ export default function ReplineshmentForm({ labels, maxAccess, recordId }) {
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('maxDaysBack', '')}
+                allowNegative={false}
               />
             </Grid>
           </Grid>
