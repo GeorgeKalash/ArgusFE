@@ -3,7 +3,7 @@ import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
@@ -11,9 +11,9 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { useWindow } from 'src/windows'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import { ControlContext } from 'src/providers/ControlContext'
-import PaaymentTermsForms from './forms/PaaymentTermsForms'
+import PaymentTermsForms from './forms/PaymentTermsForms'
 
-const PaaymentTerms = () => {
+const PaymentTerms = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const { stack } = useWindow()
@@ -36,6 +36,7 @@ const PaaymentTerms = () => {
     labels: _labels,
     access,
     paginationParameters,
+    invalidate,
     refetch
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -43,9 +44,6 @@ const PaaymentTerms = () => {
     datasetId: ResourceIds.PaymentTerm
   })
 
-  const invalidate = useInvalidate({
-    endpointId: SaleRepository.PaymentTerms.qry
-  })
   const { platformLabels } = useContext(ControlContext)
 
   const columns = [
@@ -87,7 +85,7 @@ const PaaymentTerms = () => {
 
   function openForm(recordId) {
     stack({
-      Component: PaaymentTermsForms,
+      Component: PaymentTermsForms,
       props: {
         labels: _labels,
         recordId: recordId,
@@ -100,12 +98,14 @@ const PaaymentTerms = () => {
   }
 
   const del = async obj => {
-    await postRequest({
-      extension: SaleRepository.PaymentTerms.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success(platformLabels.Deleted)
+    try {
+      await postRequest({
+        extension: SaleRepository.PaymentTerms.del,
+        record: JSON.stringify(obj)
+      })
+      invalidate()
+      toast.success(platformLabels.Deleted)
+    } catch (exception) {}
   }
 
   return (
@@ -132,4 +132,4 @@ const PaaymentTerms = () => {
   )
 }
 
-export default PaaymentTerms
+export default PaymentTerms

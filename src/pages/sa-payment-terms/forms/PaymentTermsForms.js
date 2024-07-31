@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -16,7 +16,7 @@ import { SaleRepository } from 'src/repositories/SaleRepository'
 import { DataSets } from 'src/resources/DataSets'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
-export default function PaaymentTermsForms({ labels, maxAccess, recordId }) {
+export default function PaymentTermsForms({ labels, maxAccess, recordId }) {
   const { platformLabels } = useContext(ControlContext)
 
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -27,7 +27,7 @@ export default function PaaymentTermsForms({ labels, maxAccess, recordId }) {
 
   const { formik } = useForm({
     initialValues: {
-      recordId: null,
+      recordId: recordId || null,
       name: '',
       reference: '',
       type: '',
@@ -110,6 +110,7 @@ export default function PaaymentTermsForms({ labels, maxAccess, recordId }) {
                 datasetId={DataSets.PAYMENT_TERM_TYPE}
                 name='type'
                 label={labels.type}
+                required
                 valueField='key'
                 displayField='value'
                 values={formik.values}
