@@ -63,5 +63,18 @@ export const SaleRepository = {
     get: service + 'getRR',
     set: service + 'setRR',
     del: service + 'delRR'
+  },
+  PriceGroups: {
+    qry: service + 'qryPG',
+    get: service + 'getPG',
+    set: service + 'setPG',
+    del: service + 'delPG'
+  },
+  PaymentTerms: {
+    qry: service + 'qryPT',
+    get: service + 'getPT',
+    set: service + 'setPT',
+    del: service + 'delPT',
+    page: service + 'pagePT'
   }
 }
