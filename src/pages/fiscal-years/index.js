@@ -12,6 +12,7 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { formatDateDefault } from 'src/lib/date-helper'
 import FiscalYearWindow from './Windows/FiscalYearWindow'
+import date from 'src/components/Shared/DataGrid/components/date'
 
 const FiscalYear = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -51,14 +52,14 @@ const FiscalYear = () => {
       field: 'startDate',
       headerName: _labels.startDate,
       flex: 1,
-      valueGetter: ({ row }) => formatDateDefault(row?.startDate)
+      type: date
     },
     ,
     {
       field: 'endDate',
       headerName: _labels.endDate,
       flex: 1,
-      valueGetter: ({ row }) => formatDateDefault(row?.endDate)
+      type: date
     }
   ]
 
@@ -110,6 +111,7 @@ const FiscalYear = () => {
           paginationType='client'
           maxAccess={access}
           refetch={refetch}
+          globalStatus={false}
         />
       </Grow>
     </VertLayout>

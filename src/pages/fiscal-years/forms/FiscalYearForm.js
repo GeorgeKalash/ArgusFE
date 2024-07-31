@@ -48,19 +48,19 @@ export default function FiscalYearForm({ labels, maxAccess, recordId, editMode }
       status: yup.string().required(' ')
     }),
     onSubmit: async obj => {
-      const recordId = obj.recordId
-
+      const fiscalYear = obj.fiscalYear
       const response = await postRequest({
         extension: SystemRepository.FiscalYears.set,
         record: JSON.stringify(obj)
       })
 
-      if (!recordId) {
+      if (!fiscalYear) {
         toast.success('Record Added Successfully')
 
         formik.setFieldValue('fiscalYear', obj.fiscalYear)
         formik.setFieldValue('recordId', obj.fiscalYear)
         console.log('response', response)
+        console.log('formik', formik.values)
       } else toast.success('Record Edited Successfully')
 
       invalidate()
@@ -80,7 +80,8 @@ export default function FiscalYearForm({ labels, maxAccess, recordId, editMode }
             ...res.record,
 
             startDate: formatDateFromApi(res.record.startDate),
-            endDate: formatDateFromApi(res.record.endDate)
+            endDate: formatDateFromApi(res.record.endDate),
+            recordId: res.record.fiscalYear
           })
         }
       } catch (exception) {}
