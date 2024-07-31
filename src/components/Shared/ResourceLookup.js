@@ -21,18 +21,18 @@ export const ResourceLookup = ({
   const { getRequest } = useContext(RequestsContext)
   const [errorMessage, setErrorMessage] = useState()
   const [store, setStore] = useState([])
-  const [loading, setLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const [renderOption, setRenderOption] = useState(false)
 
   const onLookup = searchQry => {
     setStore([])
     setRenderOption(false)
     if (searchQry?.length >= minChars) {
-      setLoading(true)
+      setIsLoading(true)
       getRequest({
         extension: endpointId,
         parameters: new URLSearchParams({ ...parameters, _filter: searchQry }),
-        type: 'lookup'
+        disableLoading: true
       })
         .then(res => {
           if (filter) {
@@ -47,7 +47,7 @@ export const ResourceLookup = ({
         })
         .catch(error => {})
         .finally(() => {
-          setLoading(false)
+          setIsLoading(false)
           setRenderOption(true)
         })
     }
@@ -82,7 +82,7 @@ export const ResourceLookup = ({
           error,
           onKeyUp,
           name,
-          loading,
+          isLoading,
           renderOption,
           ...rest
         }}

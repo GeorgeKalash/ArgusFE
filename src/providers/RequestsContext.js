@@ -51,8 +51,8 @@ const RequestsProvider = ({ showLoading = false, children }) => {
 
   const getRequest = async body => {
     const accessToken = await getAccessToken()
-
-    body?.type !== 'lookup' && !loading && setLoading(true)
+    const disableLoading = body.disableLoading || false
+    !disableLoading && !loading && setLoading(true)
 
     return axios({
       method: 'GET',
@@ -64,7 +64,7 @@ const RequestsProvider = ({ showLoading = false, children }) => {
       }
     })
       .then(res => {
-        body?.type !== 'lookup' && debouncedCloseLoading()
+        !disableLoading && debouncedCloseLoading()
 
         return res.data
       })

@@ -34,7 +34,7 @@ const CustomLookup = ({
   editMode,
   hasBorder = true,
   hidden = false,
-  loading,
+  isLoading,
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
@@ -78,7 +78,7 @@ const CustomLookup = ({
           }
           isOptionEqualToValue={(option, value) => (value ? option[valueField] === value[valueField] : '')}
           onChange={(event, newValue) => onChange(name, newValue)}
-          PopperComponent={PopperComponent}
+          PopperComponent={props.renderOption && PopperComponent}
           PaperComponent={({ children }) =>
             props.renderOption && <Paper style={{ width: `${displayFieldWidth * 100}%` }}>{children}</Paper>
           }
@@ -175,7 +175,7 @@ const CustomLookup = ({
                         </IconButton>
                       </InputAdornment>
                     )}
-                    {!loading ? (
+                    {!isLoading ? (
                       <InputAdornment sx={{ margin: '0px !important' }} position='end'>
                         <IconButton
                           sx={{ margin: '0px !important', padding: '0px !important' }}
@@ -188,7 +188,7 @@ const CustomLookup = ({
                       </InputAdornment>
                     ) : (
                       <InputAdornment sx={{ margin: '0px !important' }} position='end'>
-                        <CircularProgress size={20} style={{ marginLeft: 5 }} />
+                        <CircularProgress size={15} style={{ marginLeft: 5 }} />
                       </InputAdornment>
                     )}
                   </div>
