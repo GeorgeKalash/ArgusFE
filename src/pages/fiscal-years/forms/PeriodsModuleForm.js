@@ -2,20 +2,20 @@ import { useForm } from 'src/hooks/form'
 import { useContext, useEffect } from 'react'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import FormShell from 'src/components/Shared/FormShell'
-import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { useWindow } from 'src/windows'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { DataSets } from 'src/resources/DataSets'
 import { CommonContext } from 'src/providers/CommonContext'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const PeriodsForm = ({ recordId, labels, maxAccess, row, window, editMode }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getAllKvsByDataset } = useContext(CommonContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const post = obj => {
     const data = {
@@ -29,14 +29,12 @@ const PeriodsForm = ({ recordId, labels, maxAccess, row, window, editMode }) => 
         }))
     }
 
-    console.log('data')
-    console.log(data)
     postRequest({
       extension: SystemRepository.FiscalModulePack.set2,
       record: JSON.stringify(data)
     })
       .then(res => {
-        if (res) toast.success('Record Edited Successfully')
+        if (res) toast.success(platformLabels.Edited)
         window.close()
       })
       .catch(error => {})
@@ -50,18 +48,6 @@ const PeriodsForm = ({ recordId, labels, maxAccess, row, window, editMode }) => 
     enableReinitialize: false,
     validateOnChange: true,
 
-    /* validationSchema: yup.object({
-        modules: yup
-        .array()
-        .of(
-          yup.object().shape({
-            statusName: yup.string().required(' '),
-            startDate: yup.string().required(' '),
-            endDate: yup.string().required(' ')
-          })
-        )
-        .required(' ')
-    }), */
     onSubmit: values => {
       post(values.modules)
     }
@@ -101,9 +87,7 @@ const PeriodsForm = ({ recordId, labels, maxAccess, row, window, editMode }) => 
 
   const getModules = () => {
     ;(async function () {
-      console.log('in')
       const moduleData = await getAllModules()
-      console.log(moduleData)
       const defaultParams = `_fiscalYear=${recordId}&_periodId=${row.periodId}`
       var parameters = defaultParams
       getRequest({
@@ -111,9 +95,6 @@ const PeriodsForm = ({ recordId, labels, maxAccess, row, window, editMode }) => 
         parameters: parameters
       })
         .then(res => {
-          console.log('here res')
-          console.log(res)
-
           const modules = []
 
           moduleData.forEach(x => {
@@ -136,17 +117,12 @@ const PeriodsForm = ({ recordId, labels, maxAccess, row, window, editMode }) => 
             modules.push(obj)
           })
 
-          console.log('modules')
-          console.log(modules)
-
           const mappedModules = modules.map(({ id, ...rest }, index) => {
             return {
               id: index + 1,
               ...rest
             }
           })
-
-          console.log('mappedModules', mappedModules)
 
           formik.setValues({
             modules: mappedModules

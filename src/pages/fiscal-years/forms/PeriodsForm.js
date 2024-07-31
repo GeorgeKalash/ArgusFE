@@ -13,10 +13,16 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { DataSets } from 'src/resources/DataSets'
 import { formatDateFromApi } from 'src/lib/date-helper'
+import { ControlContext } from 'src/providers/ControlContext'
 
-const PeriodsForm = ({ recordId, labels, maxAccess, editMode }) => {
+const PeriodsForm = ({ labels, maxAccess, store }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const { platformLabels } = useContext(ControlContext)
+
+  const { recordId } = store
+
+  const editMode = !!recordId
 
   const post = obj => {
     const data = {
@@ -31,7 +37,7 @@ const PeriodsForm = ({ recordId, labels, maxAccess, editMode }) => {
       record: JSON.stringify(data)
     })
       .then(res => {
-        if (res) toast.success('Record Edited Successfully')
+        if (res) toast.success(platformLabels.Edited)
         getPeriods()
       })
       .catch(error => {})
@@ -39,6 +45,7 @@ const PeriodsForm = ({ recordId, labels, maxAccess, editMode }) => {
 
   const { formik } = useForm({
     initialValues: {
+      recordId: recordId,
       periods: []
     },
     maxAccess,
@@ -119,13 +126,10 @@ const PeriodsForm = ({ recordId, labels, maxAccess, editMode }) => {
   ]
 
   useEffect(() => {
-    console.log('in in')
-
     recordId && getPeriods()
   }, [recordId])
 
   const getPeriods = () => {
-    console.log('in')
     const defaultParams = `_fiscalYear=${recordId}`
     var parameters = defaultParams
     getRequest({
@@ -133,12 +137,7 @@ const PeriodsForm = ({ recordId, labels, maxAccess, editMode }) => {
       parameters: parameters
     })
       .then(res => {
-        console.log('list', res?.list)
-        console.log('listLength', res.list?.length)
-
         if (res.list?.length > 0) {
-          console.log('inL')
-
           const periods = res.list.map(({ id, periodId, startDate, endDate, ...rest }, index) => {
             return {
               id: index + 1,
@@ -149,9 +148,9 @@ const PeriodsForm = ({ recordId, labels, maxAccess, editMode }) => {
               ...rest
             }
           })
-          console.log('periods', periods)
 
           formik.setValues({
+            recordId: recordId,
             periods: periods
           })
         }

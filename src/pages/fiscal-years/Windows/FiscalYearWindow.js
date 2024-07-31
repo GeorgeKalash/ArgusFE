@@ -12,16 +12,20 @@ const FiscalYearWindow = ({ labels, maxAccess, recordId }) => {
 
   const editMode = !!recordId
 
-  const tabs = [{ label: labels.fiscalYear }, { label: labels.periods, disabled: !editMode }]
+  const [store, setStore] = useState({
+    recordId: recordId || null
+  })
+
+  const tabs = [{ label: labels.fiscalYear }, { label: labels.periods, disabled: !store.recordId }]
 
   return (
     <>
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
       <CustomTabPanel index={0} height={height} value={activeTab}>
-        <FiscalYearForm labels={labels} maxAccess={maxAccess} editMode={editMode} recordId={recordId} />
+        <FiscalYearForm labels={labels} maxAccess={maxAccess} editMode={editMode} setStore={setStore} store={store} />
       </CustomTabPanel>
       <CustomTabPanel height={height} index={1} value={activeTab}>
-        <PeriodsForm recordId={recordId} maxAccess={maxAccess} labels={labels} editMode={editMode} />
+        <PeriodsForm maxAccess={maxAccess} labels={labels} editMode={editMode} setStore={setStore} store={store} />
       </CustomTabPanel>
     </>
   )

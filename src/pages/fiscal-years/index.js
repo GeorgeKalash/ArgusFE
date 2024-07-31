@@ -10,19 +10,19 @@ import { useWindow } from 'src/windows'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { formatDateDefault } from 'src/lib/date-helper'
 import FiscalYearWindow from './Windows/FiscalYearWindow'
-import date from 'src/components/Shared/DataGrid/components/date'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const FiscalYear = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const { platformLabels } = useContext(ControlContext)
 
   async function fetchGridData(options = {}) {
     const { _filter = '' } = options
 
     return await getRequest({
-      extension: SystemRepository.FiscalYears.qry,
+      extension: SystemRepository.FiscalYears.page,
       parameters: `_filter=${_filter}`
     })
   }
@@ -34,12 +34,12 @@ const FiscalYear = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SystemRepository.FiscalYears.qry,
+    endpointId: SystemRepository.FiscalYears.page,
     datasetId: ResourceIds.FiscalYears
   })
 
   const invalidate = useInvalidate({
-    endpointId: SystemRepository.FiscalYears.qry
+    endpointId: SystemRepository.FiscalYears.page
   })
 
   const columns = [
@@ -52,14 +52,14 @@ const FiscalYear = () => {
       field: 'startDate',
       headerName: _labels.startDate,
       flex: 1,
-      type: date
+      type: 'date'
     },
     ,
     {
       field: 'endDate',
       headerName: _labels.endDate,
       flex: 1,
-      type: date
+      type: 'date'
     }
   ]
 
@@ -81,7 +81,6 @@ const FiscalYear = () => {
   }
 
   const edit = obj => {
-    console.log('obj', obj)
     openForm(obj.fiscalYear)
   }
 
@@ -91,7 +90,7 @@ const FiscalYear = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
   }
 
   return (

@@ -16,9 +16,12 @@ import { useForm } from 'src/hooks/form'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { DataSets } from 'src/resources/DataSets'
 import { formatDateFromApi } from 'src/lib/date-helper'
+import { ControlContext } from 'src/providers/ControlContext'
 
-export default function FiscalYearForm({ labels, maxAccess, recordId, editMode }) {
+export default function FiscalYearForm({ labels, maxAccess, setStore, store }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { recordId } = store
 
   const invalidate = useInvalidate({
     endpointId: SystemRepository.FiscalYears.qry
@@ -54,18 +57,23 @@ export default function FiscalYearForm({ labels, maxAccess, recordId, editMode }
         record: JSON.stringify(obj)
       })
 
-      if (!fiscalYear) {
-        toast.success('Record Added Successfully')
-
-        formik.setFieldValue('fiscalYear', obj.fiscalYear)
-        formik.setFieldValue('recordId', obj.fiscalYear)
-        console.log('response', response)
-        console.log('formik', formik.values)
-      } else toast.success('Record Edited Successfully')
+      if (!recordId) {
+        toast.success(platformLabels.Added)
+        formik.setValues({
+          ...obj,
+          recordId: fiscalYear
+        })
+        setStore(prevStore => ({
+          ...prevStore,
+          recordId: fiscalYear
+        }))
+      } else toast.success(platformLabels.Edited)
 
       invalidate()
     }
   })
+
+  const editMode = !!recordId || formik.values.fiscalYear
 
   useEffect(() => {
     ;(async function () {
@@ -145,6 +153,7 @@ export default function FiscalYearForm({ labels, maxAccess, recordId, editMode }
                   }
                 }}
                 maxAccess={maxAccess}
+                readOnly={editMode}
                 error={formik.touched.periods && Boolean(formik.errors.periods)}
                 required
               />
