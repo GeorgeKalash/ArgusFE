@@ -105,6 +105,7 @@ const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore,
               <CustomTextField
                 name='reference'
                 label={labels.reference}
+                readOnly={editMode}
                 value={formik.values.reference}
                 required
                 onChange={formik.handleChange}
