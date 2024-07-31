@@ -44,8 +44,8 @@ const RPBGridToolbar = ({ add, access, onApply, reportName, onSearchClear, hasSe
       onSearchClear={() => {
         setSearch('')
       }}
-      onSearchChange={e => {
-        setSearch(e.target.value)
+      onSearchChange={value => {
+        setSearch(value)
       }}
       inputSearch={hasSearch}
       actions={actions}

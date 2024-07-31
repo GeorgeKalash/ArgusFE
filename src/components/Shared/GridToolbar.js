@@ -101,7 +101,7 @@ const GridToolbar = ({
                   onClear={clear}
                   onChange={e => {
                     setSearchValue(e.target.value)
-                    if (onSearchChange) onSearchChange(e)
+                    if (onSearchChange) onSearchChange(e.target.value)
                   }}
                   onSearch={onSearch}
                   search={true}
