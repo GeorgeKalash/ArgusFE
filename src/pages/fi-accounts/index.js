@@ -117,17 +117,32 @@ const MfAccounts = () => {
     if (!search && rpbParams.length === 0) {
       clearFilter('qry')
     } else if (!search) {
-      filterBy('qry', rpbParams)
+      filterBy('params', rpbParams)
     } else {
       filterBy('qry', search)
     }
     refetch()
   }
 
+  const onSearch = value => {
+    filterBy('qry', value)
+  }
+
+  const onClear = () => {
+    clearFilter('qry')
+  }
+
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar onAdd={addAccounts} maxAccess={access} onApply={onApply} reportName={'FIACC'} />
+        <RPBGridToolbar
+          onAdd={addAccounts}
+          maxAccess={access}
+          onApply={onApply}
+          onSearch={onSearch}
+          onClear={onClear}
+          reportName={'FIACC'}
+        />
       </Fixed>
       <Grow>
         <Table

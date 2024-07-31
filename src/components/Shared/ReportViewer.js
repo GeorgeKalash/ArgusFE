@@ -95,25 +95,8 @@ const ReportViewer = ({ resourceId }) => {
       })
   }, [reportStore])
 
-  const formatDataForApi = rpbParams => {
-    let minValue = Infinity
-
-    for (const [index, { fieldId, value }] of Object.entries(rpbParams)) {
-      const numericValue = Number(fieldId)
-      if (numericValue < minValue) {
-        minValue = numericValue
-      }
-    }
-
-    const formattedData = rpbParams
-      .map(({ fieldId, value }) => `${fieldId}|${value}`)
-      .reduce((acc, curr, index) => acc + (index === minValue ? `${curr}` : `^${curr}`), '')
-
-    return formattedData
-  }
-
   const onApply = ({ rpbParams }) => {
-    generateReport({ _startAt: 0, _pageSize: 30, params: formatDataForApi(rpbParams) })
+    generateReport({ _startAt: 0, _pageSize: 30, params: rpbParams })
   }
 
   return (

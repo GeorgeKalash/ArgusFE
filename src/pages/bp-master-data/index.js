@@ -123,18 +123,35 @@ const BPMasterData = () => {
   }
 
   const onApply = ({ search, rpbParams }) => {
-    if (search.length === 0 && rpbParams.length === 0) {
+    if (!search && rpbParams.length === 0) {
       clearFilter('qry')
+    } else if (!search) {
+      filterBy('params', rpbParams)
     } else {
       filterBy('qry', search)
     }
     refetch()
   }
 
+  const onSearch = value => {
+    filterBy('qry', value)
+  }
+
+  const onClear = () => {
+    clearFilter('qry')
+  }
+
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar onAdd={add} maxAccess={access} onApply={onApply} reportName={'BPMAS'} />
+        <RPBGridToolbar
+          onAdd={add}
+          maxAccess={access}
+          onApply={onApply}
+          onSearch={onSearch}
+          onClear={onClear}
+          reportName={'BPMAS'}
+        />
       </Fixed>
       <Grow>
         <Table

@@ -4,7 +4,17 @@ import { useWindow } from 'src/windows'
 import ReportParameterBrowser from 'src/components/Shared/ReportParameterBrowser'
 import { Grid } from '@mui/material'
 
-const RPBGridToolbar = ({ add, access, onApply, reportName, onSearchClear, hasSearch = true, ...rest }) => {
+const RPBGridToolbar = ({
+  add,
+  access,
+  onApply,
+  reportName,
+  onSearchClear,
+  onSearch,
+  onClear,
+  hasSearch = true,
+  ...rest
+}) => {
   const { stack } = useWindow()
   const [rpbParams, setRpbParams] = useState([])
   const [search, setSearch] = useState('')
@@ -23,6 +33,23 @@ const RPBGridToolbar = ({ add, access, onApply, reportName, onSearchClear, hasSe
     })
   }
 
+  const formatDataForApi = rpbParams => {
+    let minValue = Infinity
+
+    for (const [index, { fieldId, value }] of Object.entries(rpbParams)) {
+      const numericValue = Number(fieldId)
+      if (numericValue < minValue) {
+        minValue = numericValue
+      }
+    }
+
+    const formattedData = rpbParams
+      .map(({ fieldId, value }) => `${fieldId}|${value}`)
+      .reduce((acc, curr, index) => acc + (index === minValue ? `${curr}` : `^${curr}`), '')
+
+    return formattedData
+  }
+
   const actions = [
     {
       key: 'OpenRPB',
@@ -33,16 +60,19 @@ const RPBGridToolbar = ({ add, access, onApply, reportName, onSearchClear, hasSe
     {
       key: 'GO',
       condition: true,
-      onClick: () => onApply({ search, rpbParams }),
+      onClick: () => onApply({ rpbParams: formatDataForApi(rpbParams), search: search }),
       disabled: false
     }
   ]
 
   return (
     <GridToolbar
-      onSearch={() => onApply({ search, rpbParams })}
+      onSearch={value => {
+        onSearch(value)
+      }}
       onSearchClear={() => {
         setSearch('')
+        onClear()
       }}
       onSearchChange={value => {
         setSearch(value)
@@ -52,7 +82,7 @@ const RPBGridToolbar = ({ add, access, onApply, reportName, onSearchClear, hasSe
       bottomSection={
         rpbParams &&
         rpbParams.length > 0 && (
-          <Grid container spacing={2} sx={{ display: 'flex', px: 2 }}>
+          <Grid container spacing={2} sx={{ display: 'flex', px: 2, pt: 2 }}>
             {rpbParams.map((param, i) => (
               <Grid key={i} item>
                 [<b>{param.caption}:</b> {param.display}]
