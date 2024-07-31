@@ -4,7 +4,7 @@ import { useWindow } from 'src/windows'
 import ReportParameterBrowser from 'src/components/Shared/ReportParameterBrowser'
 import { Grid } from '@mui/material'
 
-const RPBGridToolbar = ({ add, access, onApply, reportName, onSearchClear, ...rest }) => {
+const RPBGridToolbar = ({ add, access, onApply, reportName, onSearchClear, doSearch = true, ...rest }) => {
   const { stack } = useWindow()
   const [paramsArray, setParamsArray] = useState([])
   const [search, setSearch] = useState([])
@@ -44,13 +44,12 @@ const RPBGridToolbar = ({ add, access, onApply, reportName, onSearchClear, ...re
       maxAccess={access}
       onSearch={() => onApply({ search, paramsArray })}
       onSearchClear={() => {
-        setSearch()
-        onSearchClear()
+        setSearch([])
       }}
       onSearchChange={e => {
         setSearch(e.target.value)
       }}
-      inputSearch={onSearchClear ? true : false}
+      inputSearch={doSearch}
       actions={actions}
       bottomSection={
         paramsArray &&

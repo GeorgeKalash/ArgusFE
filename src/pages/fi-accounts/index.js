@@ -114,23 +114,19 @@ const MfAccounts = () => {
   }
 
   const onApply = ({ search, paramsArray }) => {
-    console.log(search)
-    search == [] ? filterBy('params', paramsArray) : filterBy('qry', search)
-    refetch()
+    if (search.length === 0 && paramsArray.length === 0) {
+      clearFilter('qry')
+      refetch()
+    } else {
+      filterBy('qry', search)
+      refetch()
+    }
   }
 
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar
-          add={addAccounts}
-          access={access}
-          onApply={onApply}
-          reportName={'FIACC'}
-          onSearchClear={() => {
-            clearFilter('qry')
-          }}
-        />
+        <RPBGridToolbar add={addAccounts} access={access} onApply={onApply} reportName={'FIACC'} />
       </Fixed>
       <Grow>
         <Table

@@ -126,7 +126,7 @@ const FiOpeningBalance = () => {
 
   return (
     <VertLayout>
-      <RPBGridToolbar add={add} access={access} onApply={onApply} reportName={'FIOBA'} />
+      <RPBGridToolbar doSearch={false} add={add} access={access} onApply={onApply} reportName={'FIOBA'} />
       <Table
         columns={columns}
         gridData={data}

@@ -121,6 +121,7 @@ const ReportViewer = ({ resourceId }) => {
       <Fixed>
         <RPBGridToolbar
           onApply={onApply}
+          doSearch={false}
           reportName={selectedReport?.parameters}
           leftSection={
             <Box sx={{ display: 'flex', padding: 2, justifyContent: 'space-between' }}>
