@@ -9,7 +9,6 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { useWindow } from 'src/windows'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
-import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 
 const FiOpeningBalance = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -121,30 +120,14 @@ const FiOpeningBalance = () => {
     })
   }
 
-  const onApply = ({ search, rpbParams }) => {
-    if (!search && rpbParams.length === 0) {
-      clearFilter('qry')
-    } else if (!search) {
-      filterBy('params', rpbParams)
-    } else {
-      filterBy('qry', search)
-    }
+  const onApply = ({ rpbParams }) => {
+    filterBy('params', rpbParams)
     refetch()
-  }
-
-  const onSearch = value => {
-    filterBy('qry', value)
-  }
-
-  const onClear = () => {
-    clearFilter('qry')
   }
 
   return (
     <VertLayout>
-      <Fixed>
-        <RPBGridToolbar onAdd={add} maxAccess={access} onApply={onApply} onSearch={onSearch} onClear={onClear} />
-      </Fixed>
+      <RPBGridToolbar hasSearch={false} onAdd={add} maxAccess={access} onApply={onApply} reportName={'FIOBA'} />
       <Table
         columns={columns}
         gridData={data}
