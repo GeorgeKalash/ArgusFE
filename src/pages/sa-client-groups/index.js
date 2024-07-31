@@ -83,8 +83,9 @@ const ClientGroups = () => {
       Component: ClientGroupsForm,
       props: {
         labels: _labels,
-        recordId: recordId,
-        maxAccess: access
+        recordId,
+        maxAccess: access,
+        invalidate
       },
       width: 600,
       height: 450,

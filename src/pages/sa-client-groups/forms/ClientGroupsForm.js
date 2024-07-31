@@ -4,7 +4,6 @@ import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { SystemRepository } from 'src/repositories/SystemRepository'
@@ -15,13 +14,9 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 
-export default function ClientGroupsForm({ labels, maxAccess, recordId }) {
+export default function ClientGroupsForm({ labels, maxAccess, recordId, invalidate }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-
-  const invalidate = useInvalidate({
-    endpointId: SaleRepository.ClientGroups.qry
-  })
 
   const { formik } = useForm({
     initialValues: {
@@ -102,19 +97,22 @@ export default function ClientGroupsForm({ labels, maxAccess, recordId }) {
             <Grid item xs={12}>
               <ResourceLookup
                 endpointId={SystemRepository.NumberRange.snapshot}
-                name='nraId'
-                label={labels.numberRange}
+                form={formik}
                 valueField='reference'
                 displayField='description'
-                valueShow='nraRef'
-                secondValueShow='nraName'
-                form={formik}
+                name='nraRef'
+                label={labels.numberRange}
+                secondDisplayField={true}
+                secondValue={formik.values.nraDescription}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('nraId', newValue?.recordId || '')
-                  formik.setFieldValue('nraName', newValue?.description || '')
-                  formik.setFieldValue('nraRef', newValue?.reference || '')
+                  const { recordId, reference, description } = newValue || {}
+                  formik.setValues({
+                    ...formik.values,
+                    nraId: recordId || null,
+                    nraRef: reference || '',
+                    nraDescription: description || ''
+                  })
                 }}
-                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>
