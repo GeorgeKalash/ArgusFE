@@ -145,6 +145,7 @@ export default function ReplineshmentForm({ labels, maxAccess, recordId }) {
                 onClear={() => formik.setFieldValue('defaultMaxQty', '')}
                 allowNegative={false}
                 error={formik.touched.defaultMaxQty && Boolean(formik.errors.defaultMaxQty)}
+                helperText={formik.touched.defaultMaxQty && formik.errors.defaultMaxQty}
               />
             </Grid>
             <Grid item xs={12}>
@@ -157,6 +158,7 @@ export default function ReplineshmentForm({ labels, maxAccess, recordId }) {
                 onClear={() => formik.setFieldValue('defaultMinQty', '')}
                 allowNegative={false}
                 error={formik.touched.defaultMinQty && Boolean(formik.errors.defaultMinQty)}
+                helperText={formik.touched.defaultMinQty && formik.errors.defaultMinQty}
               />
             </Grid>
             <Grid item xs={12}>
@@ -169,6 +171,7 @@ export default function ReplineshmentForm({ labels, maxAccess, recordId }) {
                 onClear={() => formik.setFieldValue('defaultRequiredQty', '')}
                 allowNegative={false}
                 error={formik.touched.defaultRequiredQty && Boolean(formik.errors.defaultRequiredQty)}
+                helperText={formik.touched.defaultRequiredQty && formik.errors.defaultRequiredQty}
               />
             </Grid>
           </Grid>

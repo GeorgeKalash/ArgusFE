@@ -81,7 +81,7 @@ const ReplenishmentGroups = () => {
       },
       width: 600,
       height: 500,
-      title: _labels.replenishmentGroups
+      title: _labels.repGroups
     })
   }
 
