@@ -487,6 +487,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
           currencyId: formik.values.currencyId,
           dispersalType: formik.values.dispersalType,
           fcAmount: formik.values.fcAmount,
+          lcAmount: formik.values.lcAmount,
           productId: formik.values.productId
         },
         onProductSubmit
@@ -761,6 +762,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                     label={labels.fcAmount}
                     value={formik.values.fcAmount}
                     required
+                    readOnly={formik.values.lcAmount}
                     maxAccess={maxAccess}
                     onChange={e => formik.setFieldValue('fcAmount', e.target.value)}
                     onBlur={async () => {
@@ -768,6 +770,20 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                     }}
                     onClear={() => formik.setFieldValue('fcAmount', '')}
                     error={formik.touched.fcAmount && Boolean(formik.errors.fcAmount)}
+                    maxLength={10}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    name='lcAmount'
+                    label={labels.lcAmount}
+                    value={formik.values.lcAmount}
+                    required
+                    readOnly={formik.values.fcAmount}
+                    maxAccess={maxAccess}
+                    onChange={e => formik.setFieldValue('lcAmount', e.target.value)}
+                    onClear={() => formik.setFieldValue('lcAmount', '')}
+                    error={formik.touched.lcAmount && Boolean(formik.errors.lcAmount)}
                     maxLength={10}
                   />
                 </Grid>
@@ -834,20 +850,6 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                       maxLength={10}
                     />
                   </Grid>
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomNumberField
-                    name='lcAmount'
-                    label={labels.lcAmount}
-                    value={formik.values.lcAmount}
-                    required
-                    readOnly
-                    maxAccess={maxAccess}
-                    onChange={e => formik.setFieldValue('lcAmount', e.target.value)}
-                    onClear={() => formik.setFieldValue('lcAmount', '')}
-                    error={formik.touched.lcAmount && Boolean(formik.errors.lcAmount)}
-                    maxLength={10}
-                  />
                 </Grid>
                 <Grid item xs={12}>
                   <CustomNumberField
