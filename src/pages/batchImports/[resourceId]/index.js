@@ -132,6 +132,7 @@ const BatchImports = () => {
   const [file, setFile] = useState({})
 
   const [importsConfiguration, setImportsConfiguration] = useState([]);
+  const [csvInputValue, setCsvInputValue] = useState(null)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { resourceId } = router.query
   const { platformLabels } = useContext(ControlContext)
@@ -168,14 +169,6 @@ const BatchImports = () => {
   const objectName = importsConfiguration?.record?.objectName || ''
   const endPoint = importsConfiguration?.record?.endPoint || ''
 
-  const refetch = () => {
-    setGridData(prevGridData => {
-      const transformedData = transform(prevGridData.list)
-
-      return transformedData
-    })
-  }
-
   const handleFileChange = event => {
     const file = event.target.files[0]
 
@@ -195,8 +188,7 @@ const BatchImports = () => {
   const clearFile = () => {
     setFile({})
     setGridData([])
-    document.getElementById('csvInput').value = null
-    refetch()
+    setCsvInputValue(null)
   }
 
   const handleClick = async () => {
@@ -265,7 +257,14 @@ const BatchImports = () => {
               >
                 {platformLabels.Browse}...
               </Button>
-              <input id='csvInput' type='file' accept='.csv' style={{ display: 'none' }} onChange={handleFileChange} />
+              <input
+                id='csvInput'
+                type='file'
+                accept='.csv'
+                style={{ display: 'none' }}
+                value={csvInputValue}
+                onChange={handleFileChange}
+              />
               <Button
                 onClick={clearFile}
                 sx={{
