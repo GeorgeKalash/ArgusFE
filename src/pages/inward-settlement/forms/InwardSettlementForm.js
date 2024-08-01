@@ -47,6 +47,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
     recordId: recordId || null,
     plantId: parseInt(plantId),
     cashAccountId: null,
+    cashAccountName: '',
     inwardId: null,
     corId: null,
     corRef: '',
@@ -62,12 +63,9 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
     token: '',
     plantName: '',
     plantRef: '',
-    cashAccountName: '',
     inwardRef: '',
     dtName: '',
-    statusName: '',
-    corRef: '',
-    corName: ''
+    statusName: ''
   }
 
   const { maxAccess } = useDocumentType({
@@ -298,17 +296,22 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                     />
                   </Grid>
                   <Grid item xs={6}>
-                    <CustomDatePicker
-                      name='inwardDate'
-                      required
-                      label={labels.inwardDate}
-                      value={formik?.values?.inwardDate}
-                      readOnly={editMode}
-                      onChange={formik.setFieldValue}
-                      editMode={editMode}
+                    <ResourceComboBox
+                      endpointId={SystemRepository.Currency.qry}
+                      name='correspondantCurrency'
+                      label={labels.correspondantCurrency}
+                      valueField='recordId'
+                      displayField={['reference', 'name']}
+                      columnsInDropDown={[
+                        { key: 'reference', value: 'Reference' },
+                        { key: 'name', value: 'Name' }
+                      ]}
+                      values={formik.values}
                       maxAccess={maxAccess}
-                      onClear={() => formik.setFieldValue('inwardDate', '')}
-                      error={formik.touched.inwardDate && Boolean(formik.errors.inwardDate)}
+                      onChange={(event, newValue) => {
+                        formik.setFieldValue('correspondantCurrency', newValue?.recordId || null)
+                      }}
+                      error={formik.touched.correspondantCurrency && Boolean(formik.errors.correspondantCurrency)}
                     />
                   </Grid>
                 </Grid>
@@ -473,7 +476,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                       values={formik.values}
                       endpointId={SystemRepository.Country.qry}
                       name='countryId'
-                      label={labels.countryId}
+                      label={labels.country}
                       valueField='recordId'
                       displayField={['reference', 'name']}
                       maxAccess={maxAccess}
@@ -662,7 +665,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                   <Grid item xs={4}>
                     <ResourceComboBox
                       endpointId={SystemRepository.Country.qry}
-                      label={labels.Nationality}
+                      label={labels.nationality}
                       name='nationalityId'
                       displayField={['reference', 'name']}
                       valueField='recordId'
@@ -683,7 +686,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                     <ResourceComboBox
                       endpointId={BusinessPartnerRepository.RelationTypes.qry}
                       name='relationId'
-                      label={labels.relation}
+                      label={labels.relationId}
                       valueField='recordId'
                       displayField='name'
                       values={formik.values}
