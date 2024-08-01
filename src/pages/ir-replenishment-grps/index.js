@@ -76,7 +76,7 @@ const ReplenishmentGroups = () => {
       props: {
         labels: _labels,
         recordId,
-        invalidate,
+
         maxAccess: access
       },
       width: 600,
