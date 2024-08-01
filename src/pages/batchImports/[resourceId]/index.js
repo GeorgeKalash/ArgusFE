@@ -12,7 +12,7 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { ControlContext } from 'src/providers/ControlContext'
 import { useResourceQuery } from 'src/hooks/resource'
 import toast from 'react-hot-toast'
-import { formatDate, formatDateDefault, formatDateForImport } from 'src/lib/date-helper'
+import { formatDate, formatDateDefault } from 'src/lib/date-helper'
 import { ProgressForm } from 'src/components/Shared/ThreadProgress'
 import { useWindow } from 'src/windows'
 import { useError } from 'src/error'
@@ -117,6 +117,14 @@ const getImportData = (gridData, columns, stackError) => {
   })
 
   return convertedData
+}
+
+const formatDateForImport = (dateString) => {
+  const [day, month, year] = dateString.split('/').map(part => parseInt(part, 10));
+  const fullYear = year < 100 ? 2000 + year : year;
+  const date = new Date(Date.UTC(fullYear, month - 1, day, 0, 0, 0));
+
+  return date.toISOString().split('.')[0] + 'Z';
 }
 
 const BatchImports = () => {

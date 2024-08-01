@@ -91,13 +91,6 @@ const formatDate = (dateString) => {
   return `/Date(${timestamp})/`;
 };
 
-const formatDateForImport = (dateString) => {
-  const [day, month, year] = dateString.split('/').map(part => parseInt(part, 10));
-  const fullYear = year < 100 ? 2000 + year : year;
-  const date = new Date(Date.UTC(fullYear, month - 1, day, 0, 0, 0));
-
-  return date.toISOString().split('.')[0] + 'Z';
-}
 
 export {
   formatDateFromApi,
@@ -107,6 +100,5 @@ export {
   formatTimestampToDate,
   formatDateFromApiInline,
   getTimeInTimeZone,
-  formatDate,
-  formatDateForImport
+  formatDate
 }
