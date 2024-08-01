@@ -51,12 +51,14 @@ export default function FormShell({
     : true
 
   function handleReset() {
-    if (typeof clear === 'function') {
-      clear()
-    } else {
+    if (!form.values?.recordId) {
       form.resetForm({
         values: form.initialValues
       })
+    } else {
+      if (typeof clear === 'function') {
+        clear()
+      }
     }
     if (setIDInfoAutoFilled) {
       setIDInfoAutoFilled(false)
