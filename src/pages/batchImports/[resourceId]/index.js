@@ -13,7 +13,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { useResourceQuery } from 'src/hooks/resource'
 import toast from 'react-hot-toast'
 import { formatDate, formatDateDefault } from 'src/lib/date-helper'
-import { ProgressForm } from 'src/components/Shared/ThreadProgress'
+import { ThreadProgress } from 'src/components/Shared/ThreadProgress'
 import { useWindow } from 'src/windows'
 import { useError } from 'src/error'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
@@ -214,7 +214,7 @@ const BatchImports = () => {
         })
   
         stack({
-          Component: ProgressForm,
+          Component: ThreadProgress,
           props: {
             recordId: res.recordId,
             access

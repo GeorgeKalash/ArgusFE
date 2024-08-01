@@ -59,7 +59,7 @@ function ProgressBarComponent({ label, topLabel, width }) {
   )
 } 
 
-export const ProgressForm = ({ recordId, access, window }) => {
+export const ThreadProgress = ({ recordId, access, window }) => {
   const { getRequest } = useContext(RequestsContext);
   const [intervalId, setIntervalId] = useState();
   const { platformLabels } = useContext(ControlContext)
