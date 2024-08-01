@@ -1,26 +1,15 @@
-// ** React Imports
 import { useEffect, useState, useContext } from 'react'
-
-// ** MUI Imports
 import { Autocomplete, Box, TextField } from '@mui/material'
-
-// ** Custom Imports
-import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { DevExpressRepository } from 'src/repositories/DevExpressRepository'
-
-// ** Statics
 import { ExportFormat } from 'src/statics/ExportFormat'
 import { VertLayout } from './Layouts/VertLayout'
 import { Fixed } from './Layouts/Fixed'
+import RPBGridToolbar from './RPBGridToolbar'
 
 const ReportViewer = ({ resourceId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-
-  //states
   const [reportStore, setReportStore] = useState([])
   const [selectedReport, setSelectedReport] = useState(null)
   const [selectedFormat, setSelectedFormat] = useState(ExportFormat[0])
@@ -106,40 +95,44 @@ const ReportViewer = ({ resourceId }) => {
       })
   }, [reportStore])
 
+  const onApply = ({ rpbParams }) => {
+    generateReport({ _startAt: 0, _pageSize: 30, params: rpbParams })
+  }
+
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar
+        <RPBGridToolbar
+          onApply={onApply}
+          hasSearch={false}
           reportName={selectedReport?.parameters}
-          disableRPB={!selectedReport?.parameters}
-          onGo={generateReport}
-          onGenerateReport={generateReport}
-        >
-          <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between' }}>
-            <Autocomplete
-              size='small'
-              options={reportStore}
-              value={selectedReport}
-              getOptionLabel={option => option.layoutName || option.caption || ''}
-              onChange={(e, newValue) => setSelectedReport(newValue)}
-              renderInput={params => (
-                <TextField {...params} label='Select a report template' variant='outlined' fullWidth />
-              )}
-              sx={{ width: 300 }}
-              disableClearable
-            />
-            <Autocomplete
-              size='small'
-              options={ExportFormat}
-              value={selectedFormat}
-              getOptionLabel={option => option.value}
-              onChange={(e, newValue) => setSelectedFormat(newValue)}
-              renderInput={params => <TextField {...params} label='Select Format' variant='outlined' fullWidth />}
-              sx={{ width: 200, pl: 2 }}
-              disableClearable
-            />
-          </Box>
-        </GridToolbar>
+          leftSection={
+            <Box sx={{ display: 'flex', padding: 2, justifyContent: 'space-between' }}>
+              <Autocomplete
+                size='small'
+                options={reportStore}
+                value={selectedReport}
+                getOptionLabel={option => option.layoutName || option.caption || ''}
+                onChange={(e, newValue) => setSelectedReport(newValue)}
+                renderInput={params => (
+                  <TextField {...params} label='Select a report template' variant='outlined' fullWidth />
+                )}
+                sx={{ width: 300, height: 35 }}
+                disableClearable
+              />
+              <Autocomplete
+                size='small'
+                options={ExportFormat}
+                value={selectedFormat}
+                getOptionLabel={option => option.value}
+                onChange={(e, newValue) => setSelectedFormat(newValue)}
+                renderInput={params => <TextField {...params} label='Select Format' variant='outlined' fullWidth />}
+                sx={{ width: 200, pl: 2, height: 35 }}
+                disableClearable
+              />
+            </Box>
+          }
+        />
       </Fixed>
       {pdf && (
         <Box id='reportContainer' sx={{ flex: 1, display: 'flex', p: 2 }}>

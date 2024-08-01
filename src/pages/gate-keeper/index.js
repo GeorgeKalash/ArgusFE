@@ -189,11 +189,20 @@ const GateKeeper = () => {
     }
   ]
 
+  const actions = [
+    {
+      key: 'Refresh',
+      condition: true,
+      onClick: () => invalidate(),
+      disabled: false
+    }
+  ]
+
   return (
     <FormShell form={formik} infoVisible={false} isCleared={false}>
       <VertLayout>
         <Fixed>
-          <GridToolbar onRefresh={true} refreshGrid={() => invalidate()} />
+          <GridToolbar actions={actions} />
         </Fixed>
         <Grow>
           <DataGrid
