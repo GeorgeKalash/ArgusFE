@@ -52,7 +52,7 @@ export default function FiscalYearForm({ labels, maxAccess, setStore, store }) {
     }),
     onSubmit: async obj => {
       const fiscalYear = obj.fiscalYear
-      const response = await postRequest({
+      await postRequest({
         extension: SystemRepository.FiscalYears.set,
         record: JSON.stringify(obj)
       })
