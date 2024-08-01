@@ -13,7 +13,6 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
-import { reference } from '@popperjs/core'
 
 export default function StatesForm({ labels, maxAccess, recordId }) {
   const [editMode, setEditMode] = useState(!!recordId)
@@ -81,6 +80,19 @@ export default function StatesForm({ labels, maxAccess, recordId }) {
           <Grid container spacing={4}>
             <Grid item xs={12}>
               <CustomTextField
+                name='reference'
+                label={labels.reference}
+                value={formik.values.reference}
+                required
+                maxAccess={maxAccess}
+                maxLength='40'
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('reference', '')}
+                error={formik.touched.reference && Boolean(formik.errors.reference)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
                 name='name'
                 label={labels.name}
                 value={formik.values.name}
@@ -111,19 +123,7 @@ export default function StatesForm({ labels, maxAccess, recordId }) {
                 }}
               />
             </Grid>
-            <Grid item xs={12}>
-              <CustomTextField
-                name='reference'
-                label={labels.reference}
-                value={formik.values.reference}
-                required
-                maxAccess={maxAccess}
-                maxLength='40'
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('reference', '')}
-                error={formik.touched.reference && Boolean(formik.errors.reference)}
-              />
-            </Grid>
+
             <Grid item xs={12}>
               <FormControlLabel
                 control={
