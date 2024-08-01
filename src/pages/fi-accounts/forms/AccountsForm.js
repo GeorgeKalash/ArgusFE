@@ -138,8 +138,6 @@ const AccountsForms = ({ labels, editMode, maxAccess, setStore, store }) => {
                     }
                   }}
                   error={formik.touched.groupId && Boolean(formik.errors.groupId)}
-
-                  // helperText={formik.touched.groupId && formik.errors.groupId}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -153,8 +151,6 @@ const AccountsForms = ({ labels, editMode, maxAccess, setStore, store }) => {
                   onChange={formik.handleChange}
                   onClear={() => formik.setFieldValue('reference', '')}
                   error={formik.touched.reference && Boolean(formik.errors.reference)}
-
-                  // helperText={formik.touched.reference && formik.errors.reference}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -168,8 +164,6 @@ const AccountsForms = ({ labels, editMode, maxAccess, setStore, store }) => {
                   onChange={formik.handleChange}
                   onClear={() => formik.setFieldValue('name', '')}
                   error={formik.touched.name && Boolean(formik.errors.name)}
-
-                  // helperText={formik.touched.name && formik.errors.name}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -182,8 +176,6 @@ const AccountsForms = ({ labels, editMode, maxAccess, setStore, store }) => {
                   onChange={formik.handleChange}
                   onClear={() => formik.setFieldValue('keyWords', '')}
                   error={formik.touched.keyWords && Boolean(formik.errors.keyWords)}
-
-                  // helperText={formik.touched.keyWords && formik.errors.keyWords}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -196,8 +188,6 @@ const AccountsForms = ({ labels, editMode, maxAccess, setStore, store }) => {
                   onChange={formik.handleChange}
                   onClear={() => formik.setFieldValue('flName', '')}
                   error={formik.touched.flName && Boolean(formik.errors.flName)}
-
-                  // helperText={formik.touched.flName && formik.errors.flName}
                 />
               </Grid>
             </Grid>
@@ -252,8 +242,6 @@ const AccountsForms = ({ labels, editMode, maxAccess, setStore, store }) => {
                     }
                   }}
                   error={formik.touched.szId && Boolean(formik.errors.szId)}
-
-                  // helperText={formik.touched.szId && formik.errors.szId}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -273,8 +261,6 @@ const AccountsForms = ({ labels, editMode, maxAccess, setStore, store }) => {
                     }
                   }}
                   error={formik.touched.spId && Boolean(formik.errors.spId)}
-
-                  // helperText={formik.touched.spId && formik.errors.spId}
                 />
               </Grid>
               <Grid item xs={12}>
