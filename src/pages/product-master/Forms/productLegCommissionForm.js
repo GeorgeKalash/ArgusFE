@@ -84,6 +84,7 @@ const ProductLegCommissionForm = ({ row, labels, maxAccess, store }) => {
           parameters: parameters
         })
           .then(commissionFees => {
+            console.log(commissionFees)
             const commissionFeesMap = commissionFees.list.reduce((acc, fee) => {
               acc[fee.commissionId] = fee.commission
 
