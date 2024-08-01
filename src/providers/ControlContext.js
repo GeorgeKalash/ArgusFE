@@ -25,14 +25,14 @@ const ControlProvider = ({ children }) => {
     : {}
 
   const getPlatformLabels = (resourceId, callback) => {
-    var parameters = '_dataset=' + resourceId + '&_language=1'
+    var parameters = '_dataset=' + resourceId + `&_language=${user?.languageId || 1}`
 
     axios({
       method: 'GET',
       url: apiUrl + KVSRepository.getPlatformLabels + '?' + parameters,
       headers: {
         'Content-Type': 'multipart/form-data',
-        LanguageId: user?.languageId || languageId
+        LanguageId: user?.languageId || 1
       }
     })
       .then(res => {
