@@ -108,28 +108,7 @@ const ProductLegForm = ({ store, labels, expanded, editMode, maxAccess }) => {
 
     setCommission(result)
 
-    const button = [
-      {
-        component: 'button',
-        name: 'saved',
-        label: labels.commission,
-        onClick: (e, row) => {
-          stack({
-            Component: ProductLegCommissionForm,
-            props: {
-              labels: labels,
-              maxAccess: maxAccess,
-              row,
-              store
-            },
-            width: 600,
-
-            title: labels?.commission
-          })
-        }
-      }
-    ]
-    setCommissionColumns([...columns, ...result, ...button])
+    setCommissionColumns([...columns, ...result])
   }
 
   useEffect(() => {
