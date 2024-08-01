@@ -172,5 +172,6 @@ export const ResourceIds = {
   ReturnPolicy: 51108,
   SalesTeam: 51117,
   PriceGroups: 51107,
-  PaymentTerm: 51102
+  PaymentTerm: 51102,
+  DocumentTypeDefault: 51106
 }
