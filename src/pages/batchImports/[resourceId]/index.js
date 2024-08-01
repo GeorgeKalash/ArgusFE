@@ -85,7 +85,7 @@ const parseCSV = (text, columns) => {
   return transform(rows)
 }
 
-const getImportData = (gridData, columns, stackError) => {
+const getImportData = (gridData, columns) => {
   const mandatoryColumns = columns.filter(col => col.mandatory)
 
   const missingFields = gridData.list.flatMap(row =>
@@ -96,13 +96,9 @@ const getImportData = (gridData, columns, stackError) => {
 
   if (missingFields.length > 0) {
     const uniqueMissingFields = [...new Set(missingFields)]
-    stackError({
-      message: `${uniqueMissingFields.join(', ')} ${uniqueMissingFields.length > 1 ? 'are' : 'is'} mandatory field${
+    throw new Error(`${uniqueMissingFields.join(', ')} ${uniqueMissingFields.length > 1 ? 'are' : 'is'} mandatory field${
         uniqueMissingFields.length > 1 ? 's' : ''
-      }.`
-    })
-
-    return
+    }.`)
   }
 
   const convertedData = gridData.list.map(row => {
@@ -204,31 +200,38 @@ const BatchImports = () => {
   }
 
   const handleClick = async () => {
-    const convertedData = getImportData(gridData, columns, stackError)
-
-    const data = {
-      [objectName]: convertedData
-    }
-
     try {
-      const res = await postRequest({
-        extension: endPoint,
-        record: JSON.stringify(data)
-      })
+      const convertedData = getImportData(gridData, columns)
 
-      stack({
-        Component: ProgressForm,
-        props: {
-          recordId: res.recordId,
-          access
-        },
-        width: 500,
-        height: 450,
-        title: platformLabels.Progress
+      const data = {
+        [objectName]: convertedData
+      }
+  
+      try {
+        const res = await postRequest({
+          extension: endPoint,
+          record: JSON.stringify(data)
+        })
+  
+        stack({
+          Component: ProgressForm,
+          props: {
+            recordId: res.recordId,
+            access
+          },
+          width: 500,
+          height: 450,
+          title: platformLabels.Progress
+        })
+  
+        toast.success(platformLabels.Imported)
+      } catch (exception) {}
+    } catch (error) {
+      stackError({
+        message: error?.message
       })
-
-      toast.success(platformLabels.Imported)
-    } catch (exception) {}
+    }
+    
   }
 
   const actions = [
