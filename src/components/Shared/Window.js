@@ -74,7 +74,7 @@ const Window = React.memo(
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          pointerEvents: 'none'
+          zIndex: 999
         }}
       >
         <Draggable
@@ -83,6 +83,7 @@ const Window = React.memo(
           bounds='parent'
           position={expanded && { x: 0, y: 0 }}
           onStart={() => draggable}
+          style={{ zIndex: 1000 }}
         >
           <Box sx={{ position: 'relative', pointerEvents: 'all' }}>
             <Paper

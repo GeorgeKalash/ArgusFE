@@ -1,4 +1,3 @@
-import { Box } from '@mui/material'
 import React, { useContext, useEffect, useState } from 'react'
 import Window from 'src/components/Shared/Window'
 import useResourceParams from 'src/hooks/useResourceParams'
@@ -7,21 +6,6 @@ import { v4 as uuidv4 } from 'uuid'
 const WindowContext = React.createContext(null)
 const ClearContext = React.createContext(null)
 
-function Overlay() {
-  return (
-    <Box
-      sx={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        backgroundColor: 'transparent', 
-        zIndex: 999 
-      }}
-    />
-  )
-}
 
 export function WindowProvider({ children }) {
   const [stack, setStack] = useState([])
@@ -49,10 +33,8 @@ export function WindowProvider({ children }) {
         }}
       >
         {children}
-        {stack.length > 0 && <Overlay />}
         {stack.map(
           ({ id, Component, title, width = 800, props, onClose, closable, expandable, draggable, height, styles }) => (
-            <div key={id} style={{ zIndex: 1000 }}>
               <Window
                 key={id}
                 sx={{ display: 'flex !important', flex: '1' }}
@@ -76,7 +58,6 @@ export function WindowProvider({ children }) {
                   }}
                 />
               </Window>
-            </div>
           )
         )}
       </ClearContext.Provider>
