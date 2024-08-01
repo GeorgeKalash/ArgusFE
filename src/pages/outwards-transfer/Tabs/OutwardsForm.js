@@ -138,7 +138,8 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
         receiptRef: ''
       }
     ],
-    instantCashDetails: {}
+    instantCashDetails: {},
+    products: [{}]
   }
 
   const { formik } = useForm({
@@ -178,6 +179,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
         const copy = { ...values }
         delete copy.amountRows
         delete copy.instantCashDetails
+        delete copy.products
         copy.date = formatDateToApi(copy.date)
         copy.valueDate = formatDateToApi(copy.valueDate)
         copy.defaultValueDate = formatDateToApi(copy.defaultValueDate)
@@ -323,7 +325,8 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
   const Balance = amount - receivedTotal
 
   const onProductSubmit = productData => {
-    const selectedRowData = productData?.find(row => row.checked)
+    formik.setFieldValue('products', productData?.list)
+    const selectedRowData = productData?.list?.find(row => row.checked)
     handleSelectedProduct(selectedRowData)
   }
 
@@ -483,15 +486,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       props: {
         maxAccess: maxAccess,
         labels: labels,
-        outWardsData: {
-          plantId: formik.values.plantId,
-          countryId: formik.values.countryId,
-          currencyId: formik.values.currencyId,
-          dispersalType: formik.values.dispersalType,
-          fcAmount: formik.values.fcAmount,
-          lcAmount: formik.values.lcAmount,
-          productId: formik.values.productId
-        },
+        products: formik.values.products,
         onProductSubmit
       },
       width: 900,
@@ -569,8 +564,11 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
     await chooseClient(res.record.headerView.clientId)
   }
 
-  async function checkProduct() {
+  async function fillProducts() {
     try {
+      if (!formik.values.fcAmount && !formik.values.lcAmount) {
+        return
+      }
       if (plantId && formik.values.countryId && formik.values.currencyId && formik.values.dispersalType) {
         var parameters = `_plantId=${plantId}&_countryId=${formik.values.countryId}&_dispersalType=${
           formik.values.dispersalType
@@ -582,10 +580,14 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
           extension: RemittanceOutwardsRepository.ProductDispersalEngine.qry,
           parameters: parameters
         })
-        if (res.list.length == 1) {
-          handleSelectedProduct(res.list[0])
-          if (formik.values.lcAmount) formik.setFieldValue('fcAmount', res.list[0].originAmount)
-          if (formik.values.fcAmount) formik.setFieldValue('lcAmount', res.list[0].baseAmount)
+        if (res.list.length > 0) {
+          formik.setFieldValue('products', res.list)
+          if (res.list.length == 1) {
+            formik.setFieldValue('products[0].checked', true)
+            handleSelectedProduct(res.list[0])
+            if (formik.values.lcAmount) formik.setFieldValue('fcAmount', res.list[0].originAmount)
+            if (formik.values.fcAmount) formik.setFieldValue('lcAmount', res.list[0].baseAmount)
+          }
         }
       }
     } catch (error) {}
@@ -710,6 +712,8 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                     values={formik.values}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('countryId', newValue ? newValue?.countryId : '')
+                      formik.setFieldValue('fcAmount', '')
+                      formik.setFieldValue('lcAmount', '')
                       if (!newValue) {
                         formik.setFieldValue('dispersalType', '')
                         formik.setFieldValue('currencyId', '')
@@ -774,7 +778,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                     maxAccess={maxAccess}
                     onChange={e => formik.setFieldValue('fcAmount', e.target.value)}
                     onBlur={async () => {
-                      if (!formik.values.lcAmount) await checkProduct()
+                      if (!formik.values.lcAmount) await fillProducts()
                     }}
                     onClear={() => formik.setFieldValue('fcAmount', '')}
                     error={formik.touched.fcAmount && Boolean(formik.errors.fcAmount)}
@@ -791,7 +795,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                     maxAccess={maxAccess}
                     onChange={e => formik.setFieldValue('lcAmount', e.target.value)}
                     onBlur={async () => {
-                      if (!formik.values.fcAmount) await checkProduct()
+                      if (!formik.values.fcAmount) await fillProducts()
                     }}
                     onClear={() => formik.setFieldValue('lcAmount', '')}
                     error={formik.touched.lcAmount && Boolean(formik.errors.lcAmount)}
