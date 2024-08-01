@@ -128,12 +128,10 @@ const BatchImports = () => {
   const { stack: stackError } = useError()
   const router = useRouter()
 
-  const [columns, setColumns] = useState([])
   const [gridData, setGridData] = useState([])
   const [name, setName] = useState('')
-  const [objectName, setObjectName] = useState('')
-  const [endPoint, setEndPoint] = useState('')
 
+  const [importsConfiguration, setImportsConfiguration] = useState([]);
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { resourceId } = router.query
   const { platformLabels } = useContext(ControlContext)
@@ -151,22 +149,24 @@ const BatchImports = () => {
             parameters: `_resourceId=${resourceId}`
           })
 
-          const modifiedFields = res.record.fields.map(({ name, dataType, ...rest }) => ({
-            field: name,
-            headerName: name,
-            type: (dataType == 2 || dataType == 3) && 'number',
-            flex: 1,
-            ...rest
-          }))
+          setImportsConfiguration(res)
 
-          setColumns([{ field: 'recordId', headerName: '', flex: 0.4 }, ...modifiedFields])
-
-          setObjectName(res.record.objectName)
-          setEndPoint(res.record.endPoint)
         }
       } catch (exception) {}
     })()
   }, [])
+
+  const modifiedFields = importsConfiguration?.record?.fields?.map(({ name, dataType, ...rest }) => ({
+    field: name,
+    headerName: name,
+    type: (dataType === 2 || dataType === 3) ? 'number' : undefined,
+    flex: 1,
+    ...rest
+  })) || []
+  
+  const columns = [{ field: 'recordId', headerName: '', flex: 0.4 }, ...modifiedFields]
+  const objectName = importsConfiguration?.record?.objectName || ''
+  const endPoint = importsConfiguration?.record?.endPoint || ''
 
   const refetch = () => {
     setGridData(prevGridData => {
