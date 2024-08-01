@@ -107,6 +107,7 @@ export const ResourceIds = {
   SalesTarget: 51209,
   SystemFunction: 20105,
   ModuleDeactivation: 23107,
+  CompanyInfo: 20120,
   Dispersal: 36109,
   OutwardsTransfer: 36301,
   FI_dimensions: 31112,
@@ -163,5 +164,11 @@ export const ResourceIds = {
   MobileSystemDefaults: 36123,
   Measurement: 41102,
   Category: 41103,
-  InventoryGroup: 41105
+  InventoryGroup: 41105,
+  ReturnReasons: 51109,
+  ClientGroups: 51104,
+  ReturnPolicy: 51108,
+  SalesTeam: 51117,
+  PriceGroups: 51107,
+  PaymentTerm: 51102
 }
