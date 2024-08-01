@@ -11,7 +11,6 @@ import { RemittanceSettingsRepository } from 'src/repositories/RemittanceReposit
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useWindow } from 'src/windows'
-import ProductLegCommissionForm from './productLegCommissionForm'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
