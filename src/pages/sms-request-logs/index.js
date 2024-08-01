@@ -65,42 +65,43 @@ const SmsRequestLog = () => {
             filterBy('qry', value)
           }}
           labels={labels}
-        >
-          <Grid container style={{ width: '700px' }} padding={1}>
-            <Grid xs={5}>
-              <ResourceComboBox
-                endpointId={SystemRepository.KeyValueStore}
-                parameters={`_dataset=${datasetId}&_language=${languageId}`}
-                label={labels.Module}
-                name='moduleId'
-                values={values}
-                valueField='key'
-                displayField='value'
-                required
-                onChange={(event, newValue) => {
-                  setValues({ moduleId: newValue?.key || '10', resourceId: '' })
-                }}
-                sx={{ pr: 2 }}
-              />
+          leftSection={
+            <Grid container sx={{ width: '700px', m: 1 }} spacing={2}>
+              <Grid item xs={5}>
+                <ResourceComboBox
+                  endpointId={SystemRepository.KeyValueStore}
+                  parameters={`_dataset=${datasetId}&_language=${languageId}`}
+                  label={labels.Module}
+                  name='moduleId'
+                  values={values}
+                  valueField='key'
+                  displayField='value'
+                  required
+                  onChange={(event, newValue) => {
+                    setValues({ moduleId: newValue?.key || '10', resourceId: '' })
+                  }}
+                  sx={{ pr: 2 }}
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <ResourceComboBox
+                  endpointId={SystemRepository.ModuleClassRES.qry}
+                  parameters={`_moduleId=${values.moduleId}&_filter=`}
+                  label={labels.ResourceId}
+                  name='resourceId'
+                  values={values}
+                  required
+                  valueField='key'
+                  displayField='value'
+                  onChange={(event, newValue) => {
+                    onChange(newValue?.key || '')
+                    setValues({ ...values, resourceId: newValue?.key || '' })
+                  }}
+                />
+              </Grid>
             </Grid>
-            <Grid xs={6}>
-              <ResourceComboBox
-                endpointId={SystemRepository.ModuleClassRES.qry}
-                parameters={`_moduleId=${values.moduleId}&_filter=`}
-                label={labels.ResourceId}
-                name='resourceId'
-                values={values}
-                required
-                valueField='key'
-                displayField='value'
-                onChange={(event, newValue) => {
-                  onChange(newValue?.key || '')
-                  setValues({ ...values, resourceId: newValue?.key || '' })
-                }}
-              />
-            </Grid>
-          </Grid>
-        </GridToolbar>
+          }
+        />
       </Fixed>
       <Grow>
         <Table
