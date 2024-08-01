@@ -82,10 +82,9 @@ const ProductLegForm = ({ store, labels, expanded, editMode, maxAccess }) => {
   })
 
   const getColumns = async () => {
-    var parameters = '_filter='
     const response = await getRequest({
       extension: CurrencyTradingSettingsRepository.CommissionType.qry,
-      parameters: parameters
+      parameters: '_filter='
     })
 
     const result = await response.list.map(item => ({
@@ -178,6 +177,7 @@ const ProductLegForm = ({ store, labels, expanded, editMode, maxAccess }) => {
           }
         } catch (error) {
           console.error('Error fetching commission fees:', error)
+
           return
         }
       })
