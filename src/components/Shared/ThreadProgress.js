@@ -92,21 +92,19 @@ export const ProgressForm = ({ recordId, access, window }) => {
     }, 2000);
     setIntervalId(interval);
 
-    return () => clearInterval(interval);
-  }, [recordId, getRequest]);
-
-  useEffect(() => {
-    fetchData();
-  }, [])
-
-  useEffect(() => {
     if (data.status < 0 || data.status === null) {
       if (intervalId) {
         clearInterval(intervalId);
         setIntervalId(null);
       }
     }
-  }, [data.status, intervalId]);
+
+    return () => clearInterval(interval);
+  }, [recordId, getRequest, data.status, intervalId]);
+
+  useEffect(() => {
+    fetchData();
+  }, [])
 
   const currentPhaseProgress = data.phases ? (data.currentPhase / data.phases) * 100 : 0;
   const completedProgress = data.iterations ? (data.completed / data.iterations) * 100 : 0;
