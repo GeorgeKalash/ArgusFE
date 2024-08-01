@@ -14,7 +14,7 @@ const ControlContext = createContext()
 const ControlProvider = ({ children }) => {
   const { getRequest } = useContext(RequestsContext)
   const [apiPlatformLabels, setApiPlatformLabels] = useState(null)
-  const { user, apiUrl, languageId } = useContext(AuthContext)
+  const { user, fetchData, languageId } = useContext(AuthContext)
 
   useEffect(() => {
     getPlatformLabels(ResourceIds.Common, setApiPlatformLabels)
@@ -25,20 +25,21 @@ const ControlProvider = ({ children }) => {
     : {}
 
   const getPlatformLabels = (resourceId, callback) => {
-    var parameters = '_dataset=' + resourceId + `&_language=${user?.languageId || 1}`
-
-    axios({
-      method: 'GET',
-      url: apiUrl + KVSRepository.getPlatformLabels + '?' + parameters,
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        LanguageId: user?.languageId || 1
-      }
-    })
-      .then(res => {
-        callback(res.data.list)
+    fetchData().then(apiUrl => {
+      var parameters = '_dataset=' + resourceId + '&_language=1'
+      axios({
+        method: 'GET',
+        url: apiUrl + KVSRepository.getPlatformLabels + '?' + parameters,
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          LanguageId: user?.languageId || languageId
+        }
       })
-      .catch(error => {})
+        .then(res => {
+          callback(res.data.list)
+        })
+        .catch(error => {})
+    })
   }
 
   const getLabels = (resourceId, callback) => {
