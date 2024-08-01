@@ -226,7 +226,7 @@ const AccountsForms = ({ labels, editMode, maxAccess, setStore, store }) => {
               </Grid>
               <Grid item xs={12}>
                 <ResourceComboBox
-                  endpointId={SaleRepository.SalesZone.qry}
+                  endpointId={SaleRepository.SalesZone.page}
                   parameters={`_startAt=0&_pageSize=1000&_sortField="recordId"&_filter=`}
                   name='szId'
                   label={labels.salesZone}

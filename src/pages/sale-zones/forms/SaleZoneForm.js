@@ -22,7 +22,7 @@ export default function SaleZoneForm({ labels, maxAccess, recordId }) {
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: SaleRepository.SalesZone.qry
+    endpointId: SaleRepository.SalesZone.page
   })
 
   const { formik } = useForm({
@@ -138,7 +138,7 @@ export default function SaleZoneForm({ labels, maxAccess, recordId }) {
             </Grid>
             <Grid item xs={12}>
               <ResourceLookup
-                endpointId={SaleRepository.SalesZone.qry}
+                endpointId={SaleRepository.SalesZone.page}
                 parameters={{
                   _startAt: 0,
                   _pageSize: 100,

@@ -24,7 +24,7 @@ const SalesZone = () => {
 
     try {
       const response = await getRequest({
-        extension: SaleRepository.SalesZone.qry,
+        extension: SaleRepository.SalesZone.page,
         parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=`
       })
 
@@ -40,7 +40,7 @@ const SalesZone = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SaleRepository.SalesZone.qry,
+    endpointId: SaleRepository.SalesZone.page,
     datasetId: ResourceIds.SalesZone
   })
 

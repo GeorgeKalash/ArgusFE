@@ -19,7 +19,7 @@ export default function ClientGroupsForm({ labels, maxAccess, recordId }) {
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: SaleRepository.ClientGroups.qry
+    endpointId: SaleRepository.ClientGroups.page
   })
 
   const { formik } = useForm({
