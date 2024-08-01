@@ -1,4 +1,4 @@
-import { Grid } from '@mui/material'
+import { Checkbox, FormControlLabel, Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
@@ -13,6 +13,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
+import { reference } from '@popperjs/core'
 
 export default function StatesForm({ labels, maxAccess, recordId }) {
   const [editMode, setEditMode] = useState(!!recordId)
@@ -25,13 +26,14 @@ export default function StatesForm({ labels, maxAccess, recordId }) {
   })
 
   const { formik } = useForm({
-    initialValues: { recordId: null, name: '', countryId: '' },
+    initialValues: { recordId: null, name: '', countryId: '', reference: '', isInactive: false },
     enableReinitialize: true,
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(' '),
-      countryId: yup.string().required(' ')
+      countryId: yup.string().required(' '),
+      reference: yup.string().required()
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
@@ -63,11 +65,14 @@ export default function StatesForm({ labels, maxAccess, recordId }) {
             parameters: `_recordId=${recordId}`
           })
 
-          formik.setValues(res.record)
+          formik.setValues({
+            ...res.record,
+            isInactive: Boolean(res.record.isInactive)
+          })
         }
       } catch (exception) {}
     })()
-  }, [])
+  }, [recordId])
 
   return (
     <FormShell resourceId={ResourceIds.States} form={formik} maxAccess={maxAccess} editMode={editMode}>
@@ -91,6 +96,7 @@ export default function StatesForm({ labels, maxAccess, recordId }) {
               <ResourceComboBox
                 endpointId={SystemRepository.Country.qry}
                 name='countryId'
+                required
                 label={labels.countryId}
                 valueField='recordId'
                 displayField='name'
@@ -99,12 +105,36 @@ export default function StatesForm({ labels, maxAccess, recordId }) {
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
                 ]}
-                required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('countryId', newValue?.recordId)
                 }}
-                error={formik.touched.countryId && Boolean(formik.errors.countryId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='reference'
+                label={labels.reference}
+                value={formik.values.reference}
+                required
+                maxAccess={maxAccess}
+                maxLength='40'
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('reference', '')}
+                error={formik.touched.reference && Boolean(formik.errors.reference)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name='isInactive'
+                    maxAccess={maxAccess}
+                    checked={formik.values?.isInactive}
+                    onChange={formik.handleChange}
+                  />
+                }
+                label={labels.isInactive}
               />
             </Grid>
           </Grid>
