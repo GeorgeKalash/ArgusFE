@@ -1,5 +1,5 @@
 import { DialogContent } from '@mui/material'
-import { useState } from 'react'
+import { useContext, useState } from 'react'
 import WindowToolbar from './WindowToolbar'
 import TransactionLog from './TransactionLog'
 import { TrxType } from 'src/resources/AccessLevels'
@@ -12,6 +12,7 @@ import ResourceRecordRemarks from './ResourceRecordRemarks'
 import GlobalIntegrationGrid from './GlobalIntegrationGrid'
 import AccountBalance from './AccountBalance'
 import CashTransaction from './CashTransaction'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function FormShell({
   form,
@@ -36,10 +37,10 @@ export default function FormShell({
   visibleClear,
   actions
 }) {
-  const [windowInfo, setWindowInfo] = useState(null)
   const { stack } = useWindow()
   const [selectedReport, setSelectedReport] = useState(null)
   const { clear } = useGlobalRecord()
+  const { platformLabels } = useContext(ControlContext)
 
   const windowToolbarVisible = editMode
     ? maxAccess < TrxType.EDIT
@@ -73,7 +74,7 @@ export default function FormShell({
       },
       width: 1000,
       height: 500,
-      title: 'Approvals'
+      title: platformLabels.Approvals
     })
   }
 
@@ -86,7 +87,7 @@ export default function FormShell({
       },
       width: 800,
       height: 500,
-      title: 'Resource Record Remarks'
+      title: platformLabels.ResourceRecordRemarks
     })
   }
 
@@ -99,7 +100,8 @@ export default function FormShell({
       },
       width: 1200,
       height: 670,
-      title: 'Cash Transaction'
+      title: platformLabels,
+      CashTransaction
     })
   }
 
@@ -144,7 +146,7 @@ export default function FormShell({
               },
               width: 700,
               height: 600,
-              title: 'Transaction Log'
+              title: platformLabels.TransactionLog
             })
           }
           onClickGL={() =>
@@ -157,7 +159,7 @@ export default function FormShell({
               },
               width: 1000,
               height: 620,
-              title: 'General Ledger'
+              title: platformLabels.GeneralLedger
             })
           }
           onClickGIA={() =>
@@ -165,12 +167,11 @@ export default function FormShell({
               Component: GlobalIntegrationGrid,
               props: {
                 masterId: form.values?.recordId,
-
                 masterSource: masterSource
               },
               width: 700,
               height: 500,
-              title: 'Integration Account'
+              title: platformLabels.IntegrationAccount
             })
           }
           onClickAC={() =>
@@ -178,7 +179,7 @@ export default function FormShell({
               Component: AccountBalance,
               width: 1000,
               height: 620,
-              title: 'Account Balance'
+              title: platformLabels.AccountBalance
             })
           }
           onClientRelation={() =>
@@ -192,7 +193,7 @@ export default function FormShell({
               },
               width: 900,
               height: 600,
-              title: 'Client Relation'
+              title: platformLabels.ClientRelation
             })
           }
           onGenerateReport={() =>
@@ -204,7 +205,7 @@ export default function FormShell({
               },
               width: 1150,
               height: 700,
-              title: 'Preview Report'
+              title: platformLabels.PreviewReport
             })
           }
           isSaved={isSaved}
@@ -229,13 +230,6 @@ export default function FormShell({
           previewReport={previewReport}
           visibleClear={visibleClear}
           functionId={functionId}
-        />
-      )}
-      {windowInfo && (
-        <TransactionLog
-          resourceId={resourceId}
-          onInfoClose={() => setWindowInfo(false)}
-          recordId={form.values?.recordId}
         />
       )}
     </>
