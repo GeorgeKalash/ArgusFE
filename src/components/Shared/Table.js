@@ -462,6 +462,16 @@ const Table = ({
     )
   }
 
+  const onFirstDataRendered = async params => {
+    params.api.sizeColumnsToFit()
+    await params.api.forEachNode(node => {
+      if (rowSelection === 'single') {
+        const checked = node.data?.checked || false
+        node.setDataValue('checked', checked)
+      }
+    })
+  }
+
   const columnDefs = [
     ...(showCheckboxColumn
       ? [
@@ -509,6 +519,7 @@ const Table = ({
             suppressAggFuncInHeader={true}
             getRowClass={getRowClass}
             rowHeight={35}
+            onFirstDataRendered={onFirstDataRendered}
           />
         </Box>
       </Grow>
