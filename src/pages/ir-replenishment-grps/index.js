@@ -22,7 +22,7 @@ const ReplenishmentGroups = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: IVReplenishementRepository.ReplenishmentGroups.qry,
+      extension: IVReplenishementRepository.ReplenishmentGroups.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
     })
 
@@ -38,7 +38,7 @@ const ReplenishmentGroups = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: IVReplenishementRepository.ReplenishmentGroups.qry,
+    endpointId: IVReplenishementRepository.ReplenishmentGroups.page,
     datasetId: ResourceIds.IRReplenishmentGrps
   })
 
