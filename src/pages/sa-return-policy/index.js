@@ -2,40 +2,46 @@ import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-import Tree from 'src/components/Shared/Tree'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useWindow } from 'src/windows'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import PlantGroupsForm from './forms/PlantGroupsForm'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
+import { SaleRepository } from 'src/repositories/SaleRepository'
+import ReturnPolicyForm from './forms/ReturnPolicyForm'
 
-const Plant = () => {
+const ReturnPolicy = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
-  async function fetchGridData() {
-    return await getRequest({
-      extension: SystemRepository.PlantGroup.qry,
-      parameters: `_filter=`
-    })
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50 } = options
+
+    try {
+      const response = await getRequest({
+        extension: SaleRepository.ReturnPolicy.qry,
+        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=`
+      })
+
+      return { ...response, _startAt: _startAt }
+    } catch (error) {}
   }
 
   const {
     query: { data },
     labels: _labels,
-    refetch,
     invalidate,
+    paginationParameters,
+    refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SystemRepository.PlantGroup.qry,
-    datasetId: ResourceIds.PlantGroups
+    endpointId: SaleRepository.ReturnPolicy.qry,
+    datasetId: ResourceIds.ReturnPolicy
   })
 
   const columns = [
@@ -50,8 +56,13 @@ const Plant = () => {
       flex: 1
     },
     {
-      field: 'parentName',
-      headerName: _labels.parent,
+      field: 'maxPct',
+      headerName: _labels.maxPt,
+      flex: 1
+    },
+    {
+      field: 'maxDaysBack',
+      headerName: _labels.maxDaysBack,
       flex: 1
     }
   ]
@@ -63,15 +74,7 @@ const Plant = () => {
   const del = async obj => {
     try {
       await postRequest({
-        extension: SystemRepository.PlantGroup.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
-    try {
-      await postRequest({
-        extension: SystemRepository.PlantGroup.del,
+        extension: SaleRepository.ReturnPolicy.del,
         record: JSON.stringify(obj)
       })
       invalidate()
@@ -81,27 +84,15 @@ const Plant = () => {
 
   function openForm(recordId) {
     stack({
-      Component: PlantGroupsForm,
+      Component: ReturnPolicyForm,
       props: {
         labels: _labels,
-        recordId: recordId ? recordId : null,
+        recordId: recordId,
         maxAccess: access
       },
       width: 600,
-      height: 300,
-      title: _labels.plantGroup
-    })
-  }
-
-  function onTreeClick() {
-    stack({
-      Component: Tree,
-      props: {
-        data: data
-      },
-      width: 500,
-      height: 400,
-      title: _labels.tree
+      height: 500,
+      title: _labels.returnPolicy
     })
   }
 
@@ -109,19 +100,10 @@ const Plant = () => {
     openForm(obj?.recordId)
   }
 
-  const actions = [
-    {
-      key: 'Tree',
-      condition: true,
-      onClick: onTreeClick,
-      disabled: false
-    }
-  ]
-
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar actions={actions} onAdd={add} maxAccess={access} />
+        <GridToolbar onAdd={add} maxAccess={access} />
       </Fixed>
       <Grow>
         <Table
@@ -133,7 +115,8 @@ const Plant = () => {
           isLoading={false}
           pageSize={50}
           refetch={refetch}
-          paginationType='client'
+          paginationParameters={paginationParameters}
+          paginationType='api'
           maxAccess={access}
         />
       </Grow>
@@ -141,4 +124,4 @@ const Plant = () => {
   )
 }
 
-export default Plant
+export default ReturnPolicy

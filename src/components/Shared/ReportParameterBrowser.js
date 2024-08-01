@@ -75,10 +75,10 @@ const GetLookup = ({ field, formik }) => {
   )
 }
 
-const GetComboBox = ({ field, formik, paramsArray }) => {
+const GetComboBox = ({ field, formik, rpbParams }) => {
   const apiDetails = field?.apiDetails
   useEffect(() => {
-    if (!formik.values?.parameters?.[field.id]?.value && field.value && paramsArray?.length < 1) {
+    if (!formik.values?.parameters?.[field.id]?.value && field.value && rpbParams?.length < 1) {
       formik.setFieldValue(`parameters[${field.id}]`, {
         fieldId: field.id,
         fieldKey: field.key,
@@ -154,9 +154,9 @@ const GetComboBox = ({ field, formik, paramsArray }) => {
   )
 }
 
-const GetDate = ({ field, formik, paramsArray }) => {
+const GetDate = ({ field, formik, rpbParams }) => {
   useEffect(() => {
-    if (!formik.values?.parameters?.[field.id]?.value && field.value && paramsArray?.length < 1) {
+    if (!formik.values?.parameters?.[field.id]?.value && field.value && rpbParams?.length < 1) {
       formik.setFieldValue(`parameters[${field.id}]`, {
         fieldId: field.id,
         fieldKey: field.key,
@@ -214,7 +214,7 @@ const GetTextField = ({ field, formik }) => {
   )
 }
 
-const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, window }) => {
+const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window }) => {
   const { getRequest } = useContext(RequestsContext)
   const [items, setItems] = useState([])
   const [parameters, setParameters] = useState([])
@@ -278,7 +278,7 @@ const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, windo
           return acc
         }, [])
 
-      setParamsArray(processedArray)
+      setRpbParams(processedArray)
       window.close()
     }
   })
@@ -310,7 +310,7 @@ const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, windo
   }, [parameters])
 
   useEffect(() => {
-    const mappedData = paramsArray.reduce((acc, item) => {
+    const mappedData = rpbParams.reduce((acc, item) => {
       acc[item?.fieldId] = {
         ...item,
         value: item.fieldKey === 'date' ? formatDateFrom(item.value) : item.value
@@ -333,9 +333,9 @@ const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, windo
           if (item.controlType === 5 && item.apiDetails?.type === LOOKUP) {
             return <GetLookup key={item.fieldId} formik={formik} field={item} />
           } else if (item.controlType === 5 && item.apiDetails?.type === COMBOBOX) {
-            return <GetComboBox key={item.fieldId} formik={formik} field={item} paramsArray={paramsArray} />
+            return <GetComboBox key={item.fieldId} formik={formik} field={item} rpbParams={rpbParams} />
           } else if (item.controlType === 4) {
-            return <GetDate key={item.fieldId} formik={formik} field={item} paramsArray={paramsArray} />
+            return <GetDate key={item.fieldId} formik={formik} field={item} rpbParams={rpbParams} />
           } else if (item.controlType === 1) {
             return <GetTextField key={item.fieldId} formik={formik} field={item} apiDetails={item.apiDetails} />
           }
