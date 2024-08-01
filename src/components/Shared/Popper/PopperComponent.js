@@ -83,7 +83,8 @@ const PopperComponent = ({ children, anchorEl, open }) => {
       ref={popperRef}
       sx={{
         zIndex: '2 !important',
-        display: open && isVisible ? 'block' : 'none'
+        display: open && isVisible ? 'block' : 'none',
+        zIndex: 1300
       }}
       style={{
         position: 'absolute',
