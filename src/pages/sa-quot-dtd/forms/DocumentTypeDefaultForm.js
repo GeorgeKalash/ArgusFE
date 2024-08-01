@@ -44,16 +44,16 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, dtId }) {
           record: JSON.stringify(obj)
         })
 
-        if (!obj.dtId) {
+        if (!formik.values.recordId) {
+          formik.setFieldValue('recordId', formik.values.dtId)
           toast.success(platformLabels.Added)
-          formik.setFieldValue('dtId', response.dtId)
         } else toast.success(platformLabels.Edited)
 
         invalidate()
       } catch (error) {}
     }
   })
-  const editMode = !!formik.values.dtId
+  const editMode = !!formik.values.recordId
   useEffect(() => {
     ;(async function () {
       try {
@@ -93,7 +93,6 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, dtId }) {
                   formik && formik.setFieldValue('dtId', newValue?.recordId)
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
-                helperText={formik.touched.dtId && formik.errors.dtId}
               />
             </Grid>
             <Grid item xs={12}>
