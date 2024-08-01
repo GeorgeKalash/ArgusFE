@@ -73,8 +73,7 @@ const ReturnReasons = () => {
       props: {
         labels: _labels,
         recordId,
-        maxAccess: access,
-        invalidate
+        maxAccess: access
       },
       width: 600,
       height: 200,
