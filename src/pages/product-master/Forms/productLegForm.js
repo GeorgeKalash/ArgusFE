@@ -10,7 +10,6 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { useWindow } from 'src/windows'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
@@ -18,10 +17,9 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { useState } from 'react'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 
-const ProductLegForm = ({ store, labels, expanded, editMode, maxAccess }) => {
+const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
   const { recordId: pId, countries, _seqNo } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
   const [commissionColumns, setCommissionColumns] = useState()
   const [commission, setCommission] = useState()
