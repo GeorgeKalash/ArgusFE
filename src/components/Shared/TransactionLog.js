@@ -129,7 +129,7 @@ const TransactionLog = props => {
             <Grid container xs={12}>
               <Grid item xs={6}>
                 {_labels.recordId}
-              </Grid>{' '}
+              </Grid>
               <Grid item xs={6}>
                 {recordId}
               </Grid>
@@ -137,7 +137,7 @@ const TransactionLog = props => {
             <Grid container xs={12}>
               <Grid item xs={6}>
                 {_labels.resourceId}
-              </Grid>{' '}
+              </Grid>
               <Grid tem xs={6}>
                 {resourceId}
               </Grid>
