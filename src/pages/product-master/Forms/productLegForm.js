@@ -43,9 +43,7 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
         if (res) toast.success(platformLabels.Edited)
         getScheduleRange()
       })
-      .catch(error => {
-        // setErrorMessage(error)
-      })
+      .catch(error => {})
   }
 
   const formik = useFormik({
@@ -54,7 +52,7 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
         {
           id: 1,
           seqNo: '',
-          rangeSeqNo: 1, //incremental
+          rangeSeqNo: 1,
           fromAmount: '',
           toAmount: ''
         }
