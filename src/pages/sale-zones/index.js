@@ -2,6 +2,7 @@ import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
+import Tree from 'src/components/Shared/Tree'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useWindow } from 'src/windows'
 import { useResourceQuery } from 'src/hooks/resource'
@@ -11,9 +12,9 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SaleRepository } from 'src/repositories/SaleRepository'
-import ReturnReasonsForm from './forms/ReturnReasonsForm'
+import SaleZoneForm from './forms/SaleZoneForm'
 
-const ReturnReasons = () => {
+const SalesZone = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -23,7 +24,7 @@ const ReturnReasons = () => {
 
     try {
       const response = await getRequest({
-        extension: SaleRepository.ReturnReasons.qry,
+        extension: SaleRepository.SalesZone.qry,
         parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=`
       })
 
@@ -34,20 +35,35 @@ const ReturnReasons = () => {
   const {
     query: { data },
     labels: _labels,
-    invalidate,
-    paginationParameters,
     refetch,
+    invalidate,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SaleRepository.ReturnReasons.qry,
-    datasetId: ResourceIds.ReturnReasons
+    endpointId: SaleRepository.SalesZone.qry,
+    datasetId: ResourceIds.SalesZone
   })
 
   const columns = [
     {
+      field: 'szRef',
+      headerName: _labels.reference,
+      flex: 1
+    },
+    {
       field: 'name',
       headerName: _labels.name,
+      flex: 1
+    },
+
+    {
+      field: 'parentRef',
+      headerName: _labels.parentRef,
+      flex: 1
+    },
+    {
+      field: 'parentName',
+      headerName: _labels.parent,
       flex: 1
     }
   ]
@@ -59,7 +75,7 @@ const ReturnReasons = () => {
   const del = async obj => {
     try {
       await postRequest({
-        extension: SaleRepository.ReturnReasons.del,
+        extension: SaleRepository.SalesZone.del,
         record: JSON.stringify(obj)
       })
       invalidate()
@@ -69,15 +85,27 @@ const ReturnReasons = () => {
 
   function openForm(recordId) {
     stack({
-      Component: ReturnReasonsForm,
+      Component: SaleZoneForm,
       props: {
         labels: _labels,
-        recordId,
+        recordId: recordId,
         maxAccess: access
       },
       width: 600,
-      height: 200,
-      title: _labels.returnResons
+      height: 450,
+      title: _labels.saleZones
+    })
+  }
+
+  function onTreeClick() {
+    stack({
+      Component: Tree,
+      props: {
+        data: data
+      },
+      width: 500,
+      height: 400,
+      title: _labels.tree
     })
   }
 
@@ -88,7 +116,7 @@ const ReturnReasons = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <GridToolbar onAdd={add} maxAccess={access} onTree={onTreeClick} previewReport={ResourceIds.SalesZone} />
       </Fixed>
       <Grow>
         <Table
@@ -100,8 +128,7 @@ const ReturnReasons = () => {
           isLoading={false}
           pageSize={50}
           refetch={refetch}
-          paginationParameters={paginationParameters}
-          paginationType='api'
+          paginationType='client'
           maxAccess={access}
         />
       </Grow>
@@ -109,4 +136,4 @@ const ReturnReasons = () => {
   )
 }
 
-export default ReturnReasons
+export default SalesZone
