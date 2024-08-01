@@ -24,7 +24,7 @@ const DocumentTypeDefault = () => {
     try {
       const response = await getRequest({
         extension: SaleRepository.DocumentTypeDefault.qry,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_functionId=0`
+        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_functionId=5100`
       })
 
       return { ...response, _startAt: _startAt }

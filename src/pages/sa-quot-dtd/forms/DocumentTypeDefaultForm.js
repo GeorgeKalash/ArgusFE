@@ -1,4 +1,4 @@
-import { Grid } from '@mui/material'
+import { Checkbox, FormControlLabel, Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
@@ -13,6 +13,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import { SystemRepository } from 'src/repositories/SystemRepository'
 
 export default function DocumentTypeDefaultForm({ labels, maxAccess, dtId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -26,15 +27,16 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, dtId }) {
     initialValues: {
       dtId: dtId || null,
       spId: '',
-      minUnitPrice: '',
-      maxUnitPrice: ''
+      disableSKULookup: false,
+      validity: ''
     },
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required(),
-      reference: yup.string().required()
+      dtId: yup.string().required(),
+      validity: yup.number().required().max(999, 'Validity must be at most 100')
     }),
+
     onSubmit: async obj => {
       try {
         const response = await postRequest({
@@ -72,9 +74,9 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, dtId }) {
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
-            {/* <Grid item xs={12}>
+            <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={SaleRepository.DocumentType.qry}
+                endpointId={SystemRepository.DocumentType.qry}
                 parameters={`_dgId=5100&_startAt=0&_pageSize=1000&_filter=`}
                 name='dtId'
                 label={labels.documentType}
@@ -93,7 +95,7 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, dtId }) {
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
                 helperText={formik.touched.dtId && formik.errors.dtId}
               />
-            </Grid> */}
+            </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={SaleRepository.SalesPerson.qry}
@@ -112,29 +114,48 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, dtId }) {
             </Grid>
             <Grid item xs={12}>
               <CustomNumberField
-                name='minUnitPrice'
+                name='validity'
                 required
-                label={labels.minUnitPrice}
-                value={formik.values.minUnitPrice}
+                label={labels.validity}
+                value={formik.values.validity}
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('minUnitPrice', '')}
-                error={formik.touched.minUnitPrice && Boolean(formik.errors.minUnitPrice)}
+                onClear={() => formik.setFieldValue('validity', '')}
+                error={formik.touched.validity && Boolean(formik.errors.validity)}
                 allowNegative={false}
-                decimalScale={3}
               />
             </Grid>
             <Grid item xs={12}>
-              <CustomNumberField
-                name='maxUnitPrice'
-                label={labels.maxUnitPrice}
-                value={formik.values.maxUnitPrice}
+              <ResourceComboBox
+                endpointId={SystemRepository.Plant.qry}
+                name='plantId'
+                label={labels.plant}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'plant Ref' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
                 maxAccess={maxAccess}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('maxUnitPrice', '')}
-                error={formik.touched.maxUnitPrice && Boolean(formik.errors.maxUnitPrice)}
-                allowNegative={false}
-                decimalScale={3}
+                onChange={(event, newValue) => {
+                  const plantId = newValue?.recordId || ''
+                  formik.setFieldValue('plantId', plantId)
+                }}
+                error={formik.touched.plantId && Boolean(formik.errors.plantId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    maxAccess={maxAccess}
+                    name='disableSKULookup'
+                    checked={formik.values?.disableSKULookup}
+                    onChange={formik.handleChange}
+                  />
+                }
+                label={labels.dsl}
               />
             </Grid>
           </Grid>
