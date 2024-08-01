@@ -186,7 +186,7 @@ const BatchImports = () => {
   }
 
   const clearFile = () => {
-    setFile({})
+    setFile(null)
     setGridData([])
     setCsvInputValue(null)
   }
@@ -231,7 +231,7 @@ const BatchImports = () => {
       key: 'Import',
       condition: true,
       onClick: () => handleClick(),
-      disabled: !file.name
+      disabled: !file?.name
     }
   ]
 
@@ -244,15 +244,15 @@ const BatchImports = () => {
               <CustomTextField
                 name='name'
                 label={platformLabels.SelectCSV}
-                value={file.name}
+                value={file?.name}
                 readOnly={true}
-                disabled={!!file.name}
+                disabled={!!file?.name}
               />
               <Button
                 sx={{ ml: 6, minWidth: '90px !important' }}
                 variant='contained'
                 size='small'
-                disabled={!!file.name}
+                disabled={!!file?.name}
                 onClick={() => document.getElementById('csvInput').click()}
               >
                 {platformLabels.Browse}...
