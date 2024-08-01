@@ -129,7 +129,7 @@ const BatchImports = () => {
   const router = useRouter()
 
   const [gridData, setGridData] = useState([])
-  const [name, setName] = useState('')
+  const [file, setFile] = useState({})
 
   const [importsConfiguration, setImportsConfiguration] = useState([]);
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -179,7 +179,7 @@ const BatchImports = () => {
   const handleFileChange = event => {
     const file = event.target.files[0]
 
-    setName(file.name)
+    setFile(file)
 
     if (file) {
       const reader = new FileReader()
@@ -193,7 +193,7 @@ const BatchImports = () => {
   }
 
   const clearFile = () => {
-    setName('')
+    setFile({})
     setGridData([])
     document.getElementById('csvInput').value = null
     refetch()
@@ -239,7 +239,7 @@ const BatchImports = () => {
       key: 'Import',
       condition: true,
       onClick: () => handleClick(),
-      disabled: !name
+      disabled: !file.name
     }
   ]
 
@@ -252,15 +252,15 @@ const BatchImports = () => {
               <CustomTextField
                 name='name'
                 label={platformLabels.SelectCSV}
-                value={name}
+                value={file.name}
                 readOnly={true}
-                disabled={!!name}
+                disabled={!!file.name}
               />
               <Button
                 sx={{ ml: 6, minWidth: '90px !important' }}
                 variant='contained'
                 size='small'
-                disabled={!!name}
+                disabled={!!file.name}
                 onClick={() => document.getElementById('csvInput').click()}
               >
                 {platformLabels.Browse}...
