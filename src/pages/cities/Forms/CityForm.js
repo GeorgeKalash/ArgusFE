@@ -75,7 +75,10 @@ export default function CityForm({ labels, recordId, maxAccess }) {
             parameters: `_recordId=${recordId}`
           })
 
-          formik.setValues(res.record)
+          formik.setValues({
+            ...res.record,
+            isInactive: Boolean(res.record.isInactive)
+          })
         }
       } catch {}
     })()

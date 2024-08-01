@@ -111,7 +111,7 @@ const City = () => {
         maxAccess: access
       },
       width: 500,
-      height: 360,
+      height: 460,
       title: _labels.cities
     })
   }
