@@ -466,8 +466,10 @@ const Table = ({
   const onFirstDataRendered = async params => {
     params.api.sizeColumnsToFit()
     await params.api.forEachNode(node => {
-      const checked = node.data?.checked || false
-      node.setDataValue('checked', checked)
+      if (rowSelection === 'single') {
+        const checked = node.data?.checked || false
+        node.setDataValue('checked', checked)
+      }
     })
   }
 

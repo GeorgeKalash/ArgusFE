@@ -61,6 +61,25 @@ export const SaleRepository = {
     del: service + 'delSP',
     page: service + 'pageSP'
   },
+  ReturnReasons: {
+    qry: service + 'qryRR',
+    get: service + 'getRR',
+    set: service + 'setRR',
+    del: service + 'delRR'
+  },
+  ClientGroups: {
+    qry: service + 'qryCG',
+    get: service + 'getCG',
+    set: service + 'setCG',
+    del: service + 'delCG',
+    page: service + 'pageCG'
+  },
+  ReturnPolicy: {
+    qry: service + 'qryRPO',
+    get: service + 'getRPO',
+    set: service + 'setRPO',
+    del: service + 'delRPO'
+  },
   PriceGroups: {
     qry: service + 'qryPG',
     get: service + 'getPG',
