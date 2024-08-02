@@ -8,12 +8,6 @@ export const SaleRepository = {
     del: service + 'delPL',
     page: service + 'pagePL'
   },
-  SalesPerson: {
-    qry: service + 'qrySP',
-    get: service + 'getSP',
-    set: service + 'setSP',
-    del: service + 'delSP'
-  },
   CommissionSchedule: {
     qry: service + 'qryCSC',
     get: service + 'getCSC',
@@ -29,7 +23,8 @@ export const SaleRepository = {
     get: service + 'getSP',
     set: service + 'setSP',
     del: service + 'delSP',
-    page: service + 'pageSP'
+    page: service + 'pageSP',
+    snapshot: service + 'snapshotSP'
   },
   SalesZone: {
     qry: service + 'qrySZ',
@@ -39,7 +34,10 @@ export const SaleRepository = {
     page: service + 'pageSZ'
   },
   SalesTeam: {
-    qry: service + 'qrySPT'
+    qry: service + 'qrySPT',
+    get: service + 'getSPT',
+    set: service + 'setSPT',
+    del: service + 'delSPT'
   },
   Target: {
     qry: service + 'qryTGT',
@@ -62,5 +60,37 @@ export const SaleRepository = {
     set: service + 'setSP',
     del: service + 'delSP',
     page: service + 'pageSP'
+  },
+  ReturnReasons: {
+    qry: service + 'qryRR',
+    get: service + 'getRR',
+    set: service + 'setRR',
+    del: service + 'delRR'
+  },
+  ClientGroups: {
+    qry: service + 'qryCG',
+    get: service + 'getCG',
+    set: service + 'setCG',
+    del: service + 'delCG',
+    page: service + 'pageCG'
+  },
+  ReturnPolicy: {
+    qry: service + 'qryRPO',
+    get: service + 'getRPO',
+    set: service + 'setRPO',
+    del: service + 'delRPO'
+  },
+  PriceGroups: {
+    qry: service + 'qryPG',
+    get: service + 'getPG',
+    set: service + 'setPG',
+    del: service + 'delPG'
+  },
+  PaymentTerms: {
+    qry: service + 'qryPT',
+    get: service + 'getPT',
+    set: service + 'setPT',
+    del: service + 'delPT',
+    page: service + 'pagePT'
   }
 }

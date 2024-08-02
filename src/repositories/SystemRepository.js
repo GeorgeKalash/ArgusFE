@@ -167,6 +167,15 @@ export const SystemRepository = {
     get: service + 'getRMK',
     del: service + 'delRMK'
   },
+  CompanyInfo: {
+    get: service + 'getCOM',
+    set: service + 'setCOM'
+  },
+  Attachment: {
+    get: service + 'getAT',
+    set: service + 'setAT',
+    del: service + 'delAT'
+  },
   SystemChecks: {
     qry: service + 'qryCHK',
     set: service + 'set2CHK'
@@ -176,5 +185,8 @@ export const SystemRepository = {
   },
   TimeZone: {
     get: service + 'getTZN'
+  },
+  SMSRequest: {
+    qry: service + 'qrySMS'
   }
 }

@@ -75,7 +75,7 @@ const States = () => {
         maxAccess: access
       },
       width: 500,
-      height: 300,
+      height: 400,
       title: _labels.State
     })
   }

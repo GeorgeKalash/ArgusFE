@@ -1,7 +1,6 @@
 import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
-import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import AccountsWindow from './Windows/AccountsWindow'
@@ -11,6 +10,7 @@ import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
 const MfAccounts = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -30,21 +30,24 @@ const MfAccounts = () => {
     endpointId: FinancialRepository.Account.page,
     datasetId: ResourceIds.Accounts,
     filter: {
-      filterFn: fetchWithSearch
+      filterFn: fetchWithFilter
     }
   })
 
-  async function fetchWithSearch({ filters }) {
-    return await getRequest({
-      extension: FinancialRepository.Account.snapshot,
-      parameters: `_filter=${filters.qry}`
-    })
+  async function fetchWithFilter({ filters, pagination }) {
+    if (filters?.qry) {
+      return await getRequest({
+        extension: FinancialRepository.Account.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+    } else {
+      return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+    }
   }
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
-
-    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}`
+    const { _startAt = 0, _pageSize = 50, params } = options
+    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
     var parameters = defaultParams
 
     const response = await getRequest({
@@ -110,20 +113,35 @@ const MfAccounts = () => {
     openForm(obj?.recordId)
   }
 
+  const onApply = ({ search, rpbParams }) => {
+    if (!search && rpbParams.length === 0) {
+      clearFilter('params')
+    } else if (!search) {
+      filterBy('params', rpbParams)
+    } else {
+      filterBy('qry', search)
+    }
+    refetch()
+  }
+
+  const onSearch = value => {
+    filterBy('qry', value)
+  }
+
+  const onClear = () => {
+    clearFilter('qry')
+  }
+
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar
+        <RPBGridToolbar
           onAdd={addAccounts}
           maxAccess={access}
-          onSearch={value => {
-            filterBy('qry', value)
-          }}
-          onSearchClear={() => {
-            clearFilter('qry')
-          }}
-          labels={_labels}
-          inputSearch={true}
+          onApply={onApply}
+          onSearch={onSearch}
+          onClear={onClear}
+          reportName={'FIACC'}
         />
       </Fixed>
       <Grow>
