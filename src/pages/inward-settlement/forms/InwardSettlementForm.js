@@ -119,24 +119,57 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
           extension: RTCLRepository.CtClientIndividual.get2,
           parameters: `_clientId=${clientId}`
         })
-        formik.setFieldValue('idNo', res?.record?.clientIDView?.idNo)
-        formik.setFieldValue('expiryDate', formatDateFromApi(res?.record?.clientIDView?.idExpiryDate))
-        formik.setFieldValue('firstName', res?.record?.clientIndividual?.firstName)
-        formik.setFieldValue('middleName', res?.record?.clientIndividual?.middleName)
-        formik.setFieldValue('lastName', res?.record?.clientIndividual?.lastName)
-        formik.setFieldValue('familyName', res?.record?.clientIndividual?.familyName)
-        formik.setFieldValue('fl_firstName', res?.record?.clientIndividual?.fl_firstName)
-        formik.setFieldValue('fl_middleName', res?.record?.clientIndividual?.fl_middleName)
-        formik.setFieldValue('fl_lastName', res?.record?.clientIndividual?.fl_lastName)
-        formik.setFieldValue('fl_familyName', res?.record?.clientIndividual?.fl_familyName)
-        formik.setFieldValue('professionId', res?.record?.clientIndividual?.professionId)
-        formik.setFieldValue('cellPhone', res?.record?.clientMaster?.cellPhone)
-        formik.setFieldValue('nationalityId', res?.record?.clientMaster?.nationalityId)
-        formik.setFieldValue('hiddenTrxCount', res?.record?.clientRemittance?.trxCountPerYear)
-        formik.setFieldValue('hiddenTrxAmount', res?.record?.clientRemittance?.trxAmountPerYear)
-        formik.setFieldValue('hiddenSponserName', res?.record?.clientIndividual?.sponsorName)
+        formik.setFieldValue('cl_category', res?.record?.clientMaster?.category)
+        formik.setFieldValue('cl_isResident', res?.record?.clientIndividual?.isResident)
+        formik.setFieldValue('cl_firstName', res?.record?.clientIndividual?.firstName)
+        formik.setFieldValue('cl_middleName', res?.record?.clientIndividual?.middleName)
+        formik.setFieldValue('cl_lastName', res?.record?.clientIndividual?.lastName)
+        formik.setFieldValue('cl_fl_firstName', res?.record?.clientIndividual?.fl_firstName)
+        formik.setFieldValue('cl_fl_middleName', res?.record?.clientIndividual?.fl_middleName)
+        formik.setFieldValue('cl_fl_lastName', res?.record?.clientIndividual?.fl_lastName)
+        formik.setFieldValue('cl_countryId', res?.record?.clientIDView?.idCountryId)
+        formik.setFieldValue('cl_idtId', res?.record?.clientIDView?.idtId)
+        formik.setFieldValue('cl_state', res?.record?.addressView?.stateName)
+        formik.setFieldValue('cl_idNo', res?.record?.clientIDView?.idNo)
+        formik.setFieldValue('cl_city', res?.record?.addressView?.city)
+        formik.setFieldValue('cl_idIssueDate', formatDateFromApi(res?.record?.clientIDView?.idIssueDate))
+        formik.setFieldValue('cl_cityDistrict', res?.record?.addressView?.cityDistrict)
+        formik.setFieldValue('cl_idExpiryDate', formatDateFromApi(res?.record?.clientIDView?.idExpiryDate))
+        formik.setFieldValue('cl_professionId', res?.record?.clientIndividual?.professionId)
+        formik.setFieldValue('cl_sponsor', res?.record?.clientIndividual?.sponsorName)
+        formik.setFieldValue('cl_idIssueCountry', res?.record?.clientIDView?.idCountryId)
+        formik.setFieldValue('cl_nationalityId', res?.record?.clientMaster?.nationalityId)
+        formik.setFieldValue('cl_birthDate', formatDateFromApi(res?.record?.clientIndividual?.birthDate))
+
+        formik.setFieldValue('cl_relationId', res?.record?.clientRemittance?.trxCountPerYear)
       }
     } catch (error) {}
+  }
+
+  const emptyFields = () => {
+    formik.setFieldValue('cl_category', '')
+    formik.setFieldValue('cl_isResident', '')
+    formik.setFieldValue('cl_firstName', '')
+    formik.setFieldValue('cl_middleName', '')
+    formik.setFieldValue('cl_lastName', '')
+    formik.setFieldValue('cl_fl_firstName', '')
+    formik.setFieldValue('cl_fl_middleName', '')
+    formik.setFieldValue('cl_fl_lastName', '')
+    formik.setFieldValue('cl_countryId', '')
+    formik.setFieldValue('cl_idtId', '')
+    formik.setFieldValue('cl_state', '')
+    formik.setFieldValue('cl_idNo', '')
+    formik.setFieldValue('cl_city', '')
+    formik.setFieldValue('cl_idIssueDate', '')
+    formik.setFieldValue('cl_cityDistrict', '')
+    formik.setFieldValue('cl_idExpiryDate', '')
+    formik.setFieldValue('cl_professionId', '')
+    formik.setFieldValue('cl_sponsor', '')
+    formik.setFieldValue('cl_idIssueCountry', '')
+    formik.setFieldValue('cl_nationalityId', '')
+    formik.setFieldValue('cl_birthDate', '')
+
+    formik.setFieldValue('cl_relationId', '')
   }
 
   useEffect(() => {
@@ -430,6 +463,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                       secondValueShow='clientName'
                       maxAccess={maxAccess}
                       editMode={editMode}
+                      onClear={emptyFields()}
                       onChange={async (event, newValue) => {
                         formik.setFieldValue('clientId', newValue ? newValue.recordId : '')
                         formik.setFieldValue('clientName', newValue ? newValue.name : '')
@@ -442,7 +476,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                   <Grid item xs={4}>
                     <ResourceComboBox
                       datasetId={DataSets.ID_CATEGORY}
-                      name='category'
+                      name='cl_category'
                       readOnly
                       label={labels.category}
                       valueField='key'
@@ -453,7 +487,12 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                   <Grid item xs={4}>
                     <FormControlLabel
                       control={
-                        <Checkbox name='isResident' checked={formik.values.isResident} maxAccess={maxAccess} readOnly />
+                        <Checkbox
+                          name='cl_isResident'
+                          checked={formik.values.isResident}
+                          maxAccess={maxAccess}
+                          readOnly
+                        />
                       }
                       label={labels.isResident}
                     />
@@ -464,9 +503,9 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                 <Grid container spacing={2}>
                   <Grid item xs={4}>
                     <CustomTextField
-                      name='firstName'
+                      name='cl_firstName'
                       label={labels.firstName}
-                      value={formik?.values?.firstName}
+                      value={formik?.values?.cl_firstName}
                       maxAccess={maxAccess}
                       readOnly
                     />
@@ -475,7 +514,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                     <ResourceComboBox
                       values={formik.values}
                       endpointId={SystemRepository.Country.qry}
-                      name='countryId'
+                      name='cl_countryId'
                       label={labels.country}
                       valueField='recordId'
                       displayField={['reference', 'name']}
@@ -487,7 +526,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                     <ResourceComboBox
                       values={formik.values}
                       endpointId={CurrencyTradingSettingsRepository.IdTypes.qry}
-                      name='idtId'
+                      name='cl_idtId'
                       label={labels.idtId}
                       valueField='recordId'
                       displayField={['name']}
@@ -501,27 +540,27 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                 <Grid container spacing={2}>
                   <Grid item xs={4}>
                     <CustomTextField
-                      name='middleName'
+                      name='cl_middleName'
                       label={labels.middleName}
-                      value={formik?.values?.middleName}
+                      value={formik?.values?.cl_middleName}
                       maxAccess={maxAccess}
                       readOnly
                     />
                   </Grid>
                   <Grid item xs={4}>
                     <CustomTextField
-                      name='state'
+                      name='cl_state'
                       label={labels.state}
-                      value={formik?.values?.state}
+                      value={formik?.values?.cl_state}
                       maxAccess={maxAccess}
                       readOnly
                     />
                   </Grid>
                   <Grid item xs={4}>
                     <CustomTextField
-                      name='idNo'
+                      name='cl_idNo'
                       label={labels.idNo}
-                      value={formik?.values?.idNo}
+                      value={formik?.values?.cl_idNo}
                       maxAccess={maxAccess}
                       readOnly
                     />
@@ -532,27 +571,27 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                 <Grid container spacing={2}>
                   <Grid item xs={4}>
                     <CustomTextField
-                      name='lastName'
+                      name='cl_lastName'
                       label={labels.lastName}
-                      value={formik?.values?.lastName}
+                      value={formik?.values?.cl_lastName}
                       maxAccess={maxAccess}
                       readOnly
                     />
                   </Grid>
                   <Grid item xs={4}>
                     <CustomTextField
-                      name='city'
+                      name='cl_city'
                       label={labels.city}
-                      value={formik.values.city}
+                      value={formik?.values?.cl_city}
                       readOnly
                       maxAccess={maxAccess}
                     />
                   </Grid>
                   <Grid item xs={4}>
                     <CustomDatePicker
-                      name='idIssueDate'
+                      name='cl_idIssueDate'
                       label={labels.idIssueDate}
-                      value={formik?.values?.idIssueDate}
+                      value={formik?.values?.cl_idIssueDate}
                       maxAccess={maxAccess}
                       readOnly
                     />
@@ -563,27 +602,27 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                 <Grid container spacing={2}>
                   <Grid item xs={4}>
                     <CustomTextField
-                      name='fl_firstName'
+                      name='cl_fl_firstName'
                       label={labels.fl_firstName}
-                      value={formik?.values?.fl_firstName}
+                      value={formik?.values?.cl_fl_firstName}
                       maxAccess={maxAccess}
                       readOnly
                     />
                   </Grid>
                   <Grid item xs={4}>
                     <CustomTextField
-                      name='cityDistrict'
+                      name='cl_cityDistrict'
                       label={labels.cityDistrict}
-                      value={formik.values.cityDistrict}
+                      value={formik?.values?.cl_cityDistrict}
                       maxAccess={maxAccess}
                       readOnly
                     />
                   </Grid>
                   <Grid item xs={4}>
                     <CustomDatePicker
-                      name='idExpiryDate'
+                      name='cl_idExpiryDate'
                       label={labels.idExpiryDate}
-                      value={formik?.values?.idExpiryDate}
+                      value={formik?.values?.cl_idExpiryDate}
                       maxAccess={maxAccess}
                       readOnly
                     />
@@ -594,9 +633,9 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                 <Grid container spacing={2}>
                   <Grid item xs={4}>
                     <CustomTextField
-                      name='fl_middleName'
+                      name='cl_fl_middleName'
                       label={labels.fl_middleName}
-                      value={formik?.values?.fl_middleName}
+                      value={formik?.values?.cl_fl_middleName}
                       maxAccess={maxAccess}
                       readOnly
                     />
@@ -605,7 +644,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                     <ResourceComboBox
                       endpointId={RemittanceSettingsRepository.Profession.qry}
                       label={labels.profession}
-                      name='professionId'
+                      name='cl_professionId'
                       displayField={['reference', 'name']}
                       valueField='recordId'
                       values={formik.values}
@@ -616,7 +655,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                     <ResourceComboBox
                       values={formik.values}
                       endpointId={SystemRepository.Country.qry}
-                      name='idIssueCountry'
+                      name='cl_idIssueCountry'
                       label={labels.idIssueCountry}
                       valueField='recordId'
                       displayField={['reference', 'name']}
@@ -630,9 +669,9 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                 <Grid container spacing={2}>
                   <Grid item xs={4}>
                     <CustomTextField
-                      name='fl_lastName'
+                      name='cl_fl_lastName'
                       label={labels.fl_lastName}
-                      value={formik?.values?.fl_lastName}
+                      value={formik?.values?.cl_fl_lastName}
                       maxAccess={maxAccess}
                       readOnly
                     />
@@ -641,7 +680,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                     <ResourceComboBox
                       endpointId={RemittanceSettingsRepository.Profession.qry}
                       label={labels.profession}
-                      name='professionId'
+                      name='cl_professionId'
                       displayField={['reference', 'name']}
                       valueField='recordId'
                       values={formik.values}
@@ -650,7 +689,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                   </Grid>
                   <Grid item xs={4}>
                     <CustomDatePicker
-                      name='birthDate'
+                      name='cl_birthDate'
                       label={labels.birthDate}
                       value={formik?.values?.birthDate}
                       editMode
@@ -666,7 +705,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                     <ResourceComboBox
                       endpointId={SystemRepository.Country.qry}
                       label={labels.nationality}
-                      name='nationalityId'
+                      name='cl_nationalityId'
                       displayField={['reference', 'name']}
                       valueField='recordId'
                       values={formik.values}
@@ -675,9 +714,9 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                   </Grid>
                   <Grid item xs={4}>
                     <CustomTextField
-                      name='sponsor'
+                      name='cl_sponsor'
                       label={labels.sponsor}
-                      value={formik?.values?.sponsor}
+                      value={formik?.values?.cl_sponsor}
                       maxAccess={maxAccess}
                       readOnly
                     />
@@ -685,7 +724,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                   <Grid item xs={4}>
                     <ResourceComboBox
                       endpointId={BusinessPartnerRepository.RelationTypes.qry}
-                      name='relationId'
+                      name='cl_relationId'
                       label={labels.relationId}
                       valueField='recordId'
                       displayField='name'
