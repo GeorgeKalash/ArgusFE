@@ -84,6 +84,14 @@ function getTimeInTimeZone(dateString, timeZone = 0) {
   return `${newHours}:${newMinutes}:${newSeconds}`
 }
 
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  const timestamp = date.getTime();
+
+  return `/Date(${timestamp})/`;
+};
+
+
 export {
   formatDateFromApi,
   formatDateToApi,
@@ -91,5 +99,6 @@ export {
   formatDateDefault,
   formatTimestampToDate,
   formatDateFromApiInline,
-  getTimeInTimeZone
+  getTimeInTimeZone,
+  formatDate
 }
