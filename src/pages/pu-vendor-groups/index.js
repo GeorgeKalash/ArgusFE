@@ -1,54 +1,60 @@
-import { useState, useContext } from 'react'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useWindow } from 'src/windows'
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { useWindow } from 'src/windows'
-import IdCategoryForm from './forms/IdCategoryForm'
 import { ControlContext } from 'src/providers/ControlContext'
+import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
+import VendorGroupsForm from './forms/VendorGroupsForm'
 
-const IdCategories = () => {
+const VendorGroups = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
-  async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+  async function fetchGridData() {
+    try {
+      const response = await getRequest({
+        extension: PurchaseRepository.VendorGroups.qry,
+        parameters: `_filter=&_sortField=`
+      })
 
-    const response = await getRequest({
-      extension: BusinessPartnerRepository.CategoryID.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
-    })
-
-    return { ...response, _startAt: _startAt }
+      return response
+    } catch (error) {}
   }
 
   const {
     query: { data },
     labels: _labels,
-    paginationParameters,
+    invalidate,
     refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: BusinessPartnerRepository.CategoryID.page,
-    datasetId: ResourceIds.IdCategories
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: BusinessPartnerRepository.CategoryID.page
+    endpointId: PurchaseRepository.VendorGroups.qry,
+    datasetId: ResourceIds.VendorGroups
   })
 
   const columns = [
     {
+      field: 'reference',
+      headerName: _labels.reference,
+      flex: 1
+    },
+    {
       field: 'name',
       headerName: _labels.name,
+      flex: 1
+    },
+    {
+      field: 'nraName',
+      headerName: _labels.nra,
       flex: 1
     }
   ]
@@ -57,31 +63,33 @@ const IdCategories = () => {
     openForm()
   }
 
-  const edit = obj => {
-    openForm(obj?.recordId)
+  const del = async obj => {
+    try {
+      await postRequest({
+        extension: PurchaseRepository.VendorGroups.del,
+        record: JSON.stringify(obj)
+      })
+      invalidate()
+      toast.success(platformLabels.Deleted)
+    } catch (error) {}
   }
 
   function openForm(recordId) {
     stack({
-      Component: IdCategoryForm,
+      Component: VendorGroupsForm,
       props: {
         labels: _labels,
         recordId: recordId,
         maxAccess: access
       },
       width: 600,
-      height: 400,
-      title: _labels.idCategory
+      height: 500,
+      title: _labels.vendorGroups
     })
   }
 
-  const del = async obj => {
-    await postRequest({
-      extension: BusinessPartnerRepository.CategoryID.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success(platformLabels.Deleted)
+  const edit = obj => {
+    openForm(obj?.recordId)
   }
 
   return (
@@ -98,14 +106,13 @@ const IdCategories = () => {
           onDelete={del}
           isLoading={false}
           pageSize={50}
-          paginationType='api'
-          paginationParameters={paginationParameters}
           refetch={refetch}
+          paginationType='client'
           maxAccess={access}
         />
-      </Grow>{' '}
+      </Grow>
     </VertLayout>
   )
 }
 
-export default IdCategories
+export default VendorGroups

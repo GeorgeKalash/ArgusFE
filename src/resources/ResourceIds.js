@@ -20,6 +20,7 @@ export const ResourceIds = {
   CostCenterGroup: 30111,
   Interface: 36108,
   DocumentsOnHold: 10301,
+  SmsRequestLog: 20132,
   Countries: 20101,
   LegalStatus: 21108,
   Correspondent: 36101,
@@ -172,5 +173,6 @@ export const ResourceIds = {
   ReturnPolicy: 51108,
   SalesTeam: 51117,
   PriceGroups: 51107,
-  PaymentTerm: 51102
+  PaymentTerm: 51102,
+  VendorGroups: 50101
 }
