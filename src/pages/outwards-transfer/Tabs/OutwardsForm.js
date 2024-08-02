@@ -139,7 +139,8 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       }
     ],
     instantCashDetails: {},
-    products: [{}]
+    products: [{}],
+    ICRates: [{}]
   }
 
   const { formik } = useForm({
@@ -500,15 +501,6 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       width: 900,
       height: 500
     })
-  }
-  async function getICRates() {
-    try {
-      const res = await getRequest({
-        extension: RemittanceBankInterface.InstantCashRates.qry,
-        parameters: `_filter=&_key=vatPct`
-      })
-      formik.setFieldValue('vatRate', parseInt(res.record.value))
-    } catch (error) {}
   }
 
   function openBankWindow() {
