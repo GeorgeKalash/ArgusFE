@@ -22,7 +22,7 @@ export default function SaleZoneForm({ labels, maxAccess, recordId }) {
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: SaleRepository.SalesZone.qry
+    endpointId: SaleRepository.SalesZone.page
   })
 
   const { formik } = useForm({
