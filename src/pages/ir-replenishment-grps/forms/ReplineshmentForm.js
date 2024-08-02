@@ -19,7 +19,7 @@ export default function ReplineshmentForm({ labels, maxAccess, recordId }) {
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: IVReplenishementRepository.ReplenishmentGroups.qry
+    endpointId: IVReplenishementRepository.ReplenishmentGroups.page
   })
 
   const { formik } = useForm({
