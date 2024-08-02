@@ -111,15 +111,12 @@ export default function VendorGroupsForm({ labels, maxAccess, recordId }) {
                 firstValue={formik.values.nraRef}
                 secondValue={formik.values.nraDescription}
                 onChange={(event, newValue) => {
-                  if (newValue) {
-                    formik.setFieldValue('nraId', newValue?.recordId)
-                    formik.setFieldValue('nraRef', newValue?.reference)
-                    formik.setFieldValue('nraDescription', newValue?.description || '')
-                  } else {
-                    formik.setFieldValue('nraId', '')
-                    formik.setFieldValue('nraRef', '')
-                    formik.setFieldValue('nraDescription', '')
-                  }
+                  formik.setValues({
+                    ...formik.values,
+                    nraId: newValue?.recordId || '',
+                    nraRef: newValue?.reference || '',
+                    nraDescription: newValue?.description || ''
+                  })
                 }}
                 maxAccess={maxAccess}
               />
