@@ -35,6 +35,7 @@ const ProductsWindow = ({ labels, maxAccess, onProductSubmit, products, window }
       flex: 1
     }
   ]
+
   useEffect(() => {
     setGridData({ list: products })
   }, [products])

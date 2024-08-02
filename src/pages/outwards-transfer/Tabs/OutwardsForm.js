@@ -487,11 +487,28 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
         maxAccess: maxAccess,
         labels: labels,
         products: formik.values.products,
+        outwardsData: {
+          deliveryMode: '',
+          sourceCurrency: 'AED', //mn aya 3mle
+          targetCurrency: formik.values.currencyId, //le ha tusal
+          sourceAmount: formik.values.lcAmount, //500 mn aya 3mle
+          originatingCountry: 'AED',
+          destinationCountry: formik.values.countryId
+        },
         onProductSubmit
       },
       width: 900,
       height: 500
     })
+  }
+  async function getICRates() {
+    try {
+      const res = await getRequest({
+        extension: RemittanceBankInterface.InstantCashRates.qry,
+        parameters: `_filter=&_key=vatPct`
+      })
+      formik.setFieldValue('vatRate', parseInt(res.record.value))
+    } catch (error) {}
   }
 
   function openBankWindow() {
