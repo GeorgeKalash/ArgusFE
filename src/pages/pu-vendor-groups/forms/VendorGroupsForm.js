@@ -11,7 +11,6 @@ import { useForm } from 'src/hooks/form'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { ControlContext } from 'src/providers/ControlContext'
-import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { SystemRepository } from 'src/repositories/SystemRepository'
@@ -111,12 +110,9 @@ export default function VendorGroupsForm({ labels, maxAccess, recordId }) {
                 firstValue={formik.values.nraRef}
                 secondValue={formik.values.nraDescription}
                 onChange={(event, newValue) => {
-                  formik.setValues({
-                    ...formik.values,
-                    nraId: newValue?.recordId || '',
-                    nraRef: newValue?.reference || '',
-                    nraDescription: newValue?.description || ''
-                  })
+                  formik.setFieldValue('nraId', newValue ? newValue.recordId : null)
+                  formik.setFieldValue('nraRef', newValue ? newValue.reference : null)
+                  formik.setFieldValue('nraDescription', newValue ? newValue.description : null)
                 }}
                 maxAccess={maxAccess}
               />

@@ -18,16 +18,14 @@ const VendorGroups = () => {
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
-  async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
-
+  async function fetchGridData() {
     try {
       const response = await getRequest({
         extension: PurchaseRepository.VendorGroups.qry,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=`
+        parameters: `_filter=&_sortField=`
       })
 
-      return { ...response, _startAt: _startAt }
+      return response
     } catch (error) {}
   }
 
@@ -35,7 +33,6 @@ const VendorGroups = () => {
     query: { data },
     labels: _labels,
     invalidate,
-    paginationParameters,
     refetch,
     access
   } = useResourceQuery({
@@ -110,8 +107,7 @@ const VendorGroups = () => {
           isLoading={false}
           pageSize={50}
           refetch={refetch}
-          paginationParameters={paginationParameters}
-          paginationType='api'
+          paginationType='client'
           maxAccess={access}
         />
       </Grow>
