@@ -34,7 +34,12 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, dtId }) {
     validateOnChange: true,
     validationSchema: yup.object({
       dtId: yup.string().required(),
-      validity: yup.number().required().max(999, 'Validity must be at most 100')
+      validity: yup
+        .number()
+        .nullable()
+        .test('max', platformLabels.validity1000, value => !value || value <= 1000)
+        .transform((value, originalValue) => (originalValue.trim() === '' ? null : value))
+        .required()
     }),
 
     onSubmit: async obj => {
@@ -88,6 +93,7 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, dtId }) {
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 values={formik.values}
+                required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik && formik.setFieldValue('dtId', newValue?.recordId)
@@ -121,6 +127,7 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, dtId }) {
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('validity', '')}
                 error={formik.touched.validity && Boolean(formik.errors.validity)}
+                helperText={formik.touched.validity && formik.values.validity > 1000 ? platformLabels.validity1000 : ''}
                 allowNegative={false}
               />
             </Grid>
