@@ -13,6 +13,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
+import { useInvalidate } from 'src/hooks/resource'
 
 export default function ClientGroupsForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
