@@ -10,7 +10,6 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import CustomTextField from '../Inputs/CustomTextField'
 import { ControlContext } from 'src/providers/ControlContext'
 
-
 const ProgressBarLabel = styled.span`
   font-size: 16px;
   font-weight: 600;
@@ -40,7 +39,6 @@ const ProgressBarBackground = styled.div`
   position: relative;
 `
 
-
 const ProgressBar = styled.div`
   height: 100%;
   background-color: #cce6ff;
@@ -57,11 +55,10 @@ function ProgressBarComponent({ label, topLabel, width }) {
       </ProgressBarBackground>
     </div>
   )
-} 
+}
 
 export const ThreadProgress = ({ recordId, access, window }) => {
-  const { getRequest } = useContext(RequestsContext);
-  const [intervalId, setIntervalId] = useState();
+  const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
   const [data, setData] = useState({
@@ -72,46 +69,43 @@ export const ThreadProgress = ({ recordId, access, window }) => {
     currentPhase: 0,
     currentPhaseName: '',
     logInfo: '',
-    status: 0,
-  });
+    status: 0
+  })
 
   const fetchData = async () => {
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.THD.get,
-        parameters: `_recordId=${recordId}`
-      });
+    const res = await getRequest({
+      extension: SystemRepository.THD.get,
+      parameters: `_recordId=${recordId}`
+    })
 
-      setData(res.record);
-    } catch (e) {}
-  };
-
+    return res.record
+  }
   useEffect(() => {
-    const interval = setInterval(() => {
-      fetchData();
-    }, 2000);
-    setIntervalId(interval);
-
-    if (data.status < 0 || data.status === null) {
-      if (intervalId) {
-        clearInterval(intervalId);
-        setIntervalId(null);
-      }
+    const fetchDataAndSet = async () => {
+      const data = await fetchData()
+      setData(data)
     }
-
-    return () => clearInterval(interval);
-  }, [recordId, getRequest, data.status, intervalId]);
-
-  useEffect(() => {
-    fetchData();
+  
+    fetchDataAndSet()
+  
+    const interval = setInterval(async () => {
+      const data = await fetchData()
+      setData(data)
+  
+      if (data.status < 0 || data.status === null) {
+        clearInterval(interval)
+      }
+    }, 2000)
+  
+    return () => clearInterval(interval)
   }, [])
 
-  const currentPhaseProgress = data.phases ? (data.currentPhase / data.phases) * 100 : 0;
-  const completedProgress = data.iterations ? (data.completed / data.iterations) * 100 : 0;
+  const currentPhaseProgress = data.phases ? (data.currentPhase / data.phases) * 100 : 0
+  const completedProgress = data.iterations ? (data.completed / data.iterations) * 100 : 0
 
-  const tasksCompleted = currentPhaseProgress === 100 && completedProgress === 100;
-  
-  const hasLogError = !!data.logInfo;
+  const tasksCompleted = currentPhaseProgress === 100 && completedProgress === 100
+
+  const hasLogError = !!data.logInfo
 
   const actions = [
     {
@@ -124,8 +118,8 @@ export const ThreadProgress = ({ recordId, access, window }) => {
 
   return (
     <FormShell
-      form={data} 
-      maxAccess={access} 
+      form={data}
+      maxAccess={access}
       isInfo={false}
       editMode={true}
       isCleared={false}
@@ -136,22 +130,22 @@ export const ThreadProgress = ({ recordId, access, window }) => {
         <Grow>
           <Grid item xs={12}>
             <CustomTextField
-                name='phase'
-                label={platformLabels.Phase}
-                value={data.currentPhaseName}
-                readOnly={true}
-                maxAccess={access}
+              name='phase'
+              label={platformLabels.Phase}
+              value={data.currentPhaseName}
+              readOnly={true}
+              maxAccess={access}
             />
           </Grid>
-          <ProgressBarComponent 
-            label={`${platformLabels.Step} ${data.currentPhase} of ${data.phases}...`} 
+          <ProgressBarComponent
+            label={`${platformLabels.Step} ${data.currentPhase} of ${data.phases}...`}
             topLabel={platformLabels.currentPhase}
-            width={`${currentPhaseProgress}%`} 
+            width={`${currentPhaseProgress}%`}
           />
-          <ProgressBarComponent 
-            label={`${platformLabels.Step} ${data.completed} of ${data.iterations}...`} 
-            topLabel={platformLabels.Completed} 
-            width={`${completedProgress}%`} 
+          <ProgressBarComponent
+            label={`${platformLabels.Step} ${data.completed} of ${data.iterations}...`}
+            topLabel={platformLabels.Completed}
+            width={`${completedProgress}%`}
           />
           <CustomTextArea
             name='log'
@@ -164,5 +158,5 @@ export const ThreadProgress = ({ recordId, access, window }) => {
         </Grow>
       </VertLayout>
     </FormShell>
-  );
+  )
 }
