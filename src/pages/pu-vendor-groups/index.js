@@ -3,47 +3,43 @@ import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { ResourceIds } from 'src/resources/ResourceIds'
-import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
-import { useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
+import { useResourceQuery } from 'src/hooks/resource'
+import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
-import VendorsWindow from './windows/VendorsWindow'
 import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
+import VendorGroupsForm from './forms/VendorGroupsForm'
 
-const PuVendors = () => {
+const VendorGroups = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
+  const { stack } = useWindow()
+
+  async function fetchGridData() {
+    try {
+      const response = await getRequest({
+        extension: PurchaseRepository.VendorGroups.qry,
+        parameters: `_filter=&_sortField=`
+      })
+
+      return response
+    } catch (error) {}
+  }
 
   const {
     query: { data },
     labels: _labels,
-    paginationParameters,
     invalidate,
     refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: PurchaseRepository.Vendor.qry,
-    datasetId: ResourceIds.PuVendors
+    endpointId: PurchaseRepository.VendorGroups.qry,
+    datasetId: ResourceIds.VendorGroups
   })
-
-  async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
-    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=&_sortField=`
-    var parameters = defaultParams
-
-    const response = await getRequest({
-      extension: PurchaseRepository.Vendor.qry,
-      parameters: parameters
-    })
-
-    return { ...response, _startAt: _startAt }
-  }
 
   const columns = [
     {
@@ -57,39 +53,38 @@ const PuVendors = () => {
       flex: 1
     },
     {
-      field: 'flName',
-      headerName: _labels.flName,
+      field: 'nraName',
+      headerName: _labels.nra,
       flex: 1
     }
   ]
 
-  const del = obj => {
-    postRequest({
-      extension: PurchaseRepository.Vendor.del,
-      record: JSON.stringify(obj)
-    })
-      .then(res => {
-        toast.success(platformLabels.Deleted)
-        invalidate()
-      })
-      .catch(error => {})
+  const add = () => {
+    openForm()
   }
 
-  const add = () => {
-    openForm('')
+  const del = async obj => {
+    try {
+      await postRequest({
+        extension: PurchaseRepository.VendorGroups.del,
+        record: JSON.stringify(obj)
+      })
+      invalidate()
+      toast.success(platformLabels.Deleted)
+    } catch (error) {}
   }
 
   function openForm(recordId) {
     stack({
-      Component: VendorsWindow,
+      Component: VendorGroupsForm,
       props: {
         labels: _labels,
-        recordId: recordId ? recordId : null,
+        recordId: recordId,
         maxAccess: access
       },
-      width: 700,
-      height: 800,
-      title: _labels?.productMaster
+      width: 600,
+      height: 500,
+      title: _labels.vendorGroups
     })
   }
 
@@ -107,13 +102,12 @@ const PuVendors = () => {
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          paginationParameters={paginationParameters}
-          paginationType='api'
-          refetch={refetch}
           onEdit={edit}
           onDelete={del}
           isLoading={false}
           pageSize={50}
+          refetch={refetch}
+          paginationType='client'
           maxAccess={access}
         />
       </Grow>
@@ -121,4 +115,4 @@ const PuVendors = () => {
   )
 }
 
-export default PuVendors
+export default VendorGroups

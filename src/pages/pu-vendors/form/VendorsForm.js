@@ -17,6 +17,7 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { DataSets } from 'src/resources/DataSets'
+import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
 
 export default function VendorsForm({ labels, maxAccess, recordId, setStore }) {
   const [editMode, setEditMode] = useState(!!recordId)
@@ -35,10 +36,15 @@ export default function VendorsForm({ labels, maxAccess, recordId, setStore }) {
       reference: '',
       name: '',
       flName: '',
-      riskLevelId: '',
-      diplomatStatus: '',
-      sraId: '',
-      pfgId: '',
+      currencyId: '',
+      paymentMethod: '',
+      tradeDiscount: '',
+      keywords: '',
+      groupId: '',
+      isTaxable,
+      status: '',
+      taxId: '',
+      taxRef: '',
       isInactive: false
     },
     maxAccess,
@@ -52,7 +58,7 @@ export default function VendorsForm({ labels, maxAccess, recordId, setStore }) {
       const data = { ...obj, monthlyIncome: obj.monthlyIncome }
 
       const response = await postRequest({
-        extension: RemittanceSettingsRepository.Profession.set,
+        extension: PurchaseRepository.Vendor.set,
         record: JSON.stringify(data)
       })
 
@@ -79,7 +85,7 @@ export default function VendorsForm({ labels, maxAccess, recordId, setStore }) {
       try {
         if (recordId) {
           const res = await getRequest({
-            extension: RemittanceSettingsRepository.Profession.get,
+            extension: PurchaseRepository.Vendor.get,
             parameters: `_recordId=${recordId}`
           })
           setStore({
@@ -99,8 +105,8 @@ export default function VendorsForm({ labels, maxAccess, recordId, setStore }) {
           <Grid container spacing={4}>
             <Grid item xs={12}>
               <ResourceComboBox
-                // endpointId={SystemRepository.Country.qry}
-                name='vendorsGroup'
+                endpointId={PurchaseRepository.vendorGroup.qry}
+                name='groupId'
                 label={labels.vendorGroup}
                 valueField='recordId'
                 displayField={['reference', 'name']}
@@ -110,7 +116,7 @@ export default function VendorsForm({ labels, maxAccess, recordId, setStore }) {
                 ]}
                 values={formik.values}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('taxId', newValue ? newValue.recordId : '')
+                  formik.setFieldValue('groupId', newValue ? newValue.recordId : '')
                 }}
                 error={formik.touched.taxId && Boolean(formik.errors.taxId)}
                 maxAccess={maxAccess}
@@ -189,7 +195,7 @@ export default function VendorsForm({ labels, maxAccess, recordId, setStore }) {
               <FormControlLabel
                 control={
                   <Checkbox
-                    name='tax'
+                    name='isTaxable'
                     checked={formik.values?.tax}
                     onChange={formik.handleChange}
                     maxAccess={maxAccess}
@@ -259,8 +265,8 @@ export default function VendorsForm({ labels, maxAccess, recordId, setStore }) {
               <FormControlLabel
                 control={
                   <Checkbox
-                    name='inactive'
-                    checked={formik.values?.inactive}
+                    name='isInactive'
+                    checked={formik.values?.isInactive}
                     onChange={formik.handleChange}
                     maxAccess={maxAccess}
                   />
