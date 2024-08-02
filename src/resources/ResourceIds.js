@@ -20,6 +20,7 @@ export const ResourceIds = {
   CostCenterGroup: 30111,
   Interface: 36108,
   DocumentsOnHold: 10301,
+  SmsRequestLog: 20132,
   Countries: 20101,
   LegalStatus: 21108,
   Correspondent: 36101,
