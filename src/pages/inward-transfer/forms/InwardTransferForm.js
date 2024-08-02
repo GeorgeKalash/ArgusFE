@@ -48,6 +48,8 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
     releaseStatus: '',
     exRate: 1,
     rateCalcMethod: 1,
+    taxAmount: null,
+    netAmount: null,
     baseAmount: '',
     reference: '',
     date: new Date(),
@@ -103,7 +105,8 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
     commissionReceiver: '',
     expiryDate: null,
     sourceOfIncome: '',
-    purposeOfTransfer: ''
+    purposeOfTransfer: '',
+    charges: null
   }
 
   const { maxAccess } = useDocumentType({
@@ -139,7 +142,8 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
       receiver_payoutType: yup.string().required(),
       receiver_ttNo: yup.string().required(),
       commissionAgent: yup.number().required(),
-      commissionReceiver: yup.number().required()
+      commissionReceiver: yup.number().required(),
+      charges: yup.number().required()
     }),
     onSubmit: async () => {
       try {
@@ -163,6 +167,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
           extension: RemittanceOutwardsRepository.InwardsTransfer.get,
           parameters: `_recordId=${res.recordId}`
         })
+        res2.record.date = formatDateFromApi(res2.record.date)
         formik.setValues(res2.record)
         toast.success(platformLabels.Added)
       } catch (error) {
@@ -190,6 +195,8 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
 
   useEffect(() => {
     const fetchRecord = async () => {
+      getDefaultVAT()
+
       if (recordId) {
         try {
           const res = await getRequest({
@@ -207,7 +214,6 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
               receiver_idExpiryDate: formatDateFromApi(res.record.receiver_idExpiryDate),
               expiryDate: formatDateFromApi(res.record.expiryDate)
             }
-
             formik.setValues(record)
           }
         } catch (error) {
@@ -218,6 +224,16 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
     fetchRecord()
   }, [])
 
+  async function getDefaultVAT() {
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.Defaults.get,
+        parameters: `_filter=&_key=vatPct`
+      })
+      formik.setFieldValue('vatPct', parseInt(res.record.value))
+    } catch (error) {}
+  }
+
   const actions = [
     {
       key: 'Close',
@@ -226,6 +242,18 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
       disabled: isClosed || !editMode
     }
   ]
+
+  function calculateAmounts(charges) {
+    const amount = formik.values.amount
+    const vatPct = formik.values.vatPct
+
+    const taxAmount = (charges * vatPct) / 100
+
+    const netAmount = amount - charges - taxAmount
+
+    formik.setFieldValue('taxAmount', taxAmount.toFixed(2))
+    formik.setFieldValue('netAmount', netAmount.toFixed(2))
+  }
 
   return (
     <FormShell
@@ -357,7 +385,10 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       value={formik.values.amount}
                       maxAccess={maxAccess}
                       readOnly={editMode}
-                      onChange={e => formik.setFieldValue('amount', e.target.value)}
+                      onChange={e => {
+                        formik.setFieldValue('amount', e.target.value)
+                        formik.values.charges && calculateAmounts(formik.values.charges)
+                      }}
                       onClear={() => formik.setFieldValue('amount', '')}
                       error={formik.touched.amount && Boolean(formik.errors.amount)}
                       maxLength={15}
@@ -1108,6 +1139,51 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       readOnly={editMode}
                     />
                   </Grid>
+                </Grid>
+              </Grid>
+              <Grid item xs={12}>
+                <Grid container spacing={2}>
+                  <Grid item xs={3}>
+                    <CustomNumberField
+                      name='charges'
+                      required
+                      label={labels.charges}
+                      value={formik.values.charges}
+                      maxAccess={maxAccess}
+                      readOnly={editMode}
+                      onChange={e => {
+                        formik.setFieldValue('charges', e.target.value)
+                        formik.values.amount && calculateAmounts(e.target.value)
+                      }}
+                      onClear={() => formik.setFieldValue('charges', '')}
+                      error={formik.touched.charges && Boolean(formik.errors.charges)}
+                      maxLength={12}
+                      decimalScale={2}
+                    />
+                  </Grid>
+                  <Grid item xs={3}>
+                    <CustomNumberField
+                      name='taxAmount'
+                      label={labels.taxAmount}
+                      value={formik.values.taxAmount}
+                      maxAccess={maxAccess}
+                      readOnly
+                      maxLength={12}
+                      decimalScale={2}
+                    />
+                  </Grid>
+                  <Grid item xs={3}>
+                    <CustomNumberField
+                      name='netAmount'
+                      label={labels.netAmount}
+                      value={formik.values.netAmount}
+                      maxAccess={maxAccess}
+                      readOnly
+                      maxLength={12}
+                      decimalScale={2}
+                    />
+                  </Grid>
+                  <Grid item xs={3}></Grid>
                 </Grid>
               </Grid>
             </Grid>

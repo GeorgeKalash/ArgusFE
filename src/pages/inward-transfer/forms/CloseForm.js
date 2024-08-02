@@ -51,6 +51,8 @@ export default function CloseForm({ form, labels, maxAccess, window, recordId, w
       receiver_ttNo: yup.string().required()
     }),
     onSubmit: () => {
+      console.log('hy')
+
       setMismatchedFields([])
       const mismatches = Object.keys(formik.values).filter(key => formik.values[key] != form.values[key])
       if (mismatches.length === 0) {

@@ -118,14 +118,14 @@ const InwardTransfer = () => {
       } else {
         if (plantId === '') {
           stackError({
-            message: `This user does not have a default plant.`
+            message: platformLabels.mustHaveDefaultPlant
           })
 
           return
         }
         if (cashAccountId === '') {
           stackError({
-            message: `This user does not have a default cash account.`
+            message: platformLabels.mustHaveDefaultCashAcc
           })
 
           return
