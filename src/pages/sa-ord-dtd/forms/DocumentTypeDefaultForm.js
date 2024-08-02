@@ -55,7 +55,6 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, dtId }) {
       } catch (error) {}
     }
   })
-  console.log(formik.values)
   const editMode = !!formik.values.recordId
   useEffect(() => {
     ;(async function () {
@@ -159,6 +158,7 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, dtId }) {
                 onChange={(event, newValue) => {
                   formik.setFieldValue('allocateBy', newValue?.key)
                 }}
+                error={formik.touched.allocateBy && Boolean(formik.errors.allocateBy)}
               />
             </Grid>
             <Grid item xs={12}>
