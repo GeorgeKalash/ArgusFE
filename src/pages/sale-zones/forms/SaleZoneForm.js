@@ -138,7 +138,7 @@ export default function SaleZoneForm({ labels, maxAccess, recordId }) {
             </Grid>
             <Grid item xs={12}>
               <ResourceLookup
-                endpointId={SaleRepository.SalesZone.page}
+                endpointId={SaleRepository.SalesZone.qry}
                 parameters={{
                   _startAt: 0,
                   _pageSize: 100,
