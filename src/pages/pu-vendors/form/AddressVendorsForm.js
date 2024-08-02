@@ -4,9 +4,8 @@ import { useContext, useEffect, useState } from 'react'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import AddressGridTab from 'src/components/Shared/AddressGridTab'
 import { useWindow } from 'src/windows'
-import BPAddressForm from './BPAddressForm'
 
-const AddressMasterDataForm = ({ store, maxAccess, labels, editMode, ...props }) => {
+const AddressVendorsForm = ({ store, maxAccess, labels, editMode, ...props }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [addressGridData, setAddressGridData] = useState([]) //for address tab
@@ -83,4 +82,4 @@ const AddressMasterDataForm = ({ store, maxAccess, labels, editMode, ...props })
   )
 }
 
-export default AddressMasterDataForm
+export default AddressVendorsForm
