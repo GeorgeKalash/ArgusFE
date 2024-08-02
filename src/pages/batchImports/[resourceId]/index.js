@@ -2,7 +2,7 @@ import { useRouter } from 'next/router'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import Table from 'src/components/Shared/Table'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
@@ -128,11 +128,11 @@ const BatchImports = () => {
   const { stack: stackError } = useError()
   const router = useRouter()
 
-  const [gridData, setGridData] = useState([])
-  const [file, setFile] = useState({})
+  const [parsedFileContent, setParsedFileContent] = useState([])
+  const [file, setFile] = useState(null)
+  const imageInputRef = useRef(null)
 
   const [importsConfiguration, setImportsConfiguration] = useState([]);
-  const [csvInputValue, setCsvInputValue] = useState(null)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { resourceId } = router.query
   const { platformLabels } = useContext(ControlContext)
@@ -179,7 +179,7 @@ const BatchImports = () => {
       reader.onload = e => {
         const text = e.target.result
         const data = parseCSV(text, columns)
-        setGridData(data)
+        setParsedFileContent(data)
       }
       reader.readAsText(file)
     }
@@ -187,13 +187,13 @@ const BatchImports = () => {
 
   const clearFile = () => {
     setFile(null)
-    setGridData([])
-    setCsvInputValue(null)
+    setParsedFileContent([])
+    imageInputRef.current.value = null
   }
 
   const handleClick = async () => {
     try {
-      const convertedData = getImportData(gridData, columns)
+      const convertedData = getImportData(parsedFileContent, columns)
 
       const data = {
         [objectName]: convertedData
@@ -253,16 +253,15 @@ const BatchImports = () => {
                 variant='contained'
                 size='small'
                 disabled={!!file?.name}
-                onClick={() => document.getElementById('csvInput').click()}
+                onClick={() => imageInputRef.current.click()}
               >
                 {platformLabels.Browse}...
               </Button>
               <input
-                id='csvInput'
                 type='file'
                 accept='.csv'
+                ref={imageInputRef}
                 style={{ display: 'none' }}
-                value={csvInputValue}
                 onChange={handleFileChange}
               />
               <Button
@@ -286,7 +285,7 @@ const BatchImports = () => {
       <Grow>
         <Table
           columns={columns}
-          gridData={gridData}
+          gridData={parsedFileContent}
           rowId={['recordId']}
           isLoading={false}
           pageSize={50}
