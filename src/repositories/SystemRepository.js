@@ -191,5 +191,8 @@ export const SystemRepository = {
   },
   THD: {
     get: service + 'getTHD'
+  },
+  SMSRequest: {
+    qry: service + 'qrySMS'
   }
 }
