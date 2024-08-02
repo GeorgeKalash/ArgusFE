@@ -14,5 +14,12 @@ export const PurchaseRepository = {
     get: service + 'getVEN',
     set: service + 'setVEN',
     del: service + 'delVEN'
+  },
+  Address: {
+    qry: service + 'qryAD',
+    page: service + 'pageAD',
+    get: service + 'getAD',
+    set: service + 'setAD',
+    del: service + 'delAD'
   }
 }

@@ -13,7 +13,7 @@ const VendorsWindow = ({ labels, maxAccess, recordId, height }) => {
     name: null
   })
 
-  const tabs = [{ label: labels?.profession }, { label: labels?.address, disabled: !store.recordId }]
+  const tabs = [{ label: labels?.vendor }, { label: labels?.address, disabled: !store.recordId }]
 
   return (
     <>

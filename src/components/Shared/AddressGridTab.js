@@ -12,18 +12,14 @@ const AddressGridTab = ({
   addAddress,
   delAddress,
   editAddress,
-  maxAccess
-
+  maxAccess,
+  columns
 }) => {
-
-  const {
-    labels: labels,
-    access
-  } = useResourceParams({
+  const { labels: labels, access } = useResourceParams({
     datasetId: ResourceIds.Address
   })
 
-  const columns = [
+  const tableColumns = [
     {
       field: 'name',
       headerName: labels.name,
@@ -60,7 +56,6 @@ const AddressGridTab = ({
       flex: 1
     }
   ]
-
   return (
     <VertLayout>
       <Fixed>
@@ -68,7 +63,7 @@ const AddressGridTab = ({
       </Fixed>
       <Grow>
         <Table
-          columns={columns}
+          columns={columns || tableColumns}
           gridData={addressGridData}
           rowId={['recordId']}
           api={getAddressGridData}

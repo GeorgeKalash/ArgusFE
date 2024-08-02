@@ -4,6 +4,10 @@ import { useContext, useEffect, useState } from 'react'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import AddressGridTab from 'src/components/Shared/AddressGridTab'
 import { useWindow } from 'src/windows'
+import AddressForm from 'src/components/Shared/AddressForm'
+import { useInvalidate } from 'src/hooks/resource'
+import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
+import VendorsAddressForm from './VendorsAddressForm'
 
 const AddressVendorsForm = ({ store, maxAccess, labels, editMode, ...props }) => {
   const { recordId } = store
@@ -11,12 +15,12 @@ const AddressVendorsForm = ({ store, maxAccess, labels, editMode, ...props }) =>
   const [addressGridData, setAddressGridData] = useState([]) //for address tab
   const { stack } = useWindow()
 
-  const getAddressGridData = bpId => {
+  const getAddressGridData = vendorId => {
     setAddressGridData([])
-    const defaultParams = `_bpId=${bpId}`
+    const defaultParams = `_vendorId=${vendorId}`
     var parameters = defaultParams
     getRequest({
-      extension: BusinessPartnerRepository.BPAddress.qry,
+      extension: PurchaseRepository.Address.qry,
       parameters: parameters
     })
       .then(res => {
@@ -27,16 +31,16 @@ const AddressVendorsForm = ({ store, maxAccess, labels, editMode, ...props }) =>
   }
 
   const delAddress = obj => {
-    const bpId = recordId
-    obj.bpId = bpId
+    const vendorId = recordId
+    obj.vendorId = vendorId
     obj.addressId = obj.recordId
     postRequest({
-      extension: BusinessPartnerRepository.BPAddress.del,
+      extension: PurchaseRepository.Address.del,
       record: JSON.stringify(obj)
     })
       .then(res => {
         toast.success('Record Deleted Successfully')
-        getAddressGridData(bpId)
+        getAddressGridData(vendorId)
       })
       .catch(error => {})
   }
@@ -47,13 +51,13 @@ const AddressVendorsForm = ({ store, maxAccess, labels, editMode, ...props }) =>
 
   function openForm(id) {
     stack({
-      Component: BPAddressForm,
+      Component: VendorsAddressForm,
       props: {
         _labels: labels,
         maxAccess: maxAccess,
         editMode: editMode,
         recordId: id,
-        bpId: recordId,
+        vendorId: recordId,
         getAddressGridData: getAddressGridData
       },
       width: 600,
@@ -69,6 +73,19 @@ const AddressVendorsForm = ({ store, maxAccess, labels, editMode, ...props }) =>
     recordId && getAddressGridData(recordId)
   }, [recordId])
 
+  const columns = [
+    {
+      field: 'city',
+      headerName: labels.city,
+      flex: 1
+    },
+    {
+      field: 'street1',
+      headerName: labels.street1,
+      flex: 1
+    }
+  ]
+
   return (
     <AddressGridTab
       addressGridData={addressGridData}
@@ -76,6 +93,7 @@ const AddressVendorsForm = ({ store, maxAccess, labels, editMode, ...props }) =>
       delAddress={delAddress}
       editAddress={editAddress}
       labels={labels}
+      columns={columns}
       maxAccess={maxAccess}
       {...props}
     />

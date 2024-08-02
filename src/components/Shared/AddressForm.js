@@ -34,6 +34,7 @@ const AddressForm = ({ recordId, address, setAddress = () => {}, editMode, onSub
     })()
   }, [recordId])
 
+  console.log(address)
   return (
     <AddressFormShell
       editMode={editMode}

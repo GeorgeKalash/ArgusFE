@@ -18,8 +18,10 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { DataSets } from 'src/resources/DataSets'
 import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
+import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
+import { SystemFunction } from 'src/resources/SystemFunction'
 
-export default function VendorsForm({ labels, maxAccess, recordId, setStore }) {
+export default function VendorsForm({ labels, maxAccess: access, recordId, setStore }) {
   const [editMode, setEditMode] = useState(!!recordId)
   const [readOnly, setReadOnly] = useState(false)
 
@@ -28,6 +30,12 @@ export default function VendorsForm({ labels, maxAccess, recordId, setStore }) {
 
   const invalidate = useInvalidate({
     endpointId: RemittanceSettingsRepository.Profession.page
+  })
+
+  const { maxAccess, changeDT } = useDocumentType({
+    functionId: SystemFunction.Vendor,
+    access: access,
+    enabled: !recordId
   })
 
   const { formik } = useForm({
@@ -41,28 +49,34 @@ export default function VendorsForm({ labels, maxAccess, recordId, setStore }) {
       tradeDiscount: '',
       keywords: '',
       groupId: '',
-      isTaxable,
       status: '',
       taxId: '',
       taxRef: '',
-      isInactive: false
+      isInactive: false,
+      isTaxable: false
     },
     maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
+    validate: values => {
+      const errors = {}
+
+      if (values.isTaxable && !values.taxRef) {
+        errors.taxRef = ' '
+      }
+
+      return errors
+    },
     validationSchema: yup.object().shape({
-      name: yup.string().required(' ')
+      name: yup.string().required()
     }),
     onSubmit: async obj => {
-      const recordId = obj.recordId
-      const data = { ...obj, monthlyIncome: obj.monthlyIncome }
-
       const response = await postRequest({
         extension: PurchaseRepository.Vendor.set,
-        record: JSON.stringify(data)
+        record: JSON.stringify(obj)
       })
 
-      if (!recordId) {
+      if (!obj.recordId) {
         setStore({
           recordId: response.recordId,
           name: obj.name
@@ -75,7 +89,6 @@ export default function VendorsForm({ labels, maxAccess, recordId, setStore }) {
         })
       } else toast.success(platformLabels.Edited)
 
-      setEditMode(true)
       invalidate()
     }
   })
@@ -105,7 +118,7 @@ export default function VendorsForm({ labels, maxAccess, recordId, setStore }) {
           <Grid container spacing={4}>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={PurchaseRepository.vendorGroup.qry}
+                endpointId={PurchaseRepository.VendorGroups.qry}
                 name='groupId'
                 label={labels.vendorGroup}
                 valueField='recordId'
@@ -117,6 +130,7 @@ export default function VendorsForm({ labels, maxAccess, recordId, setStore }) {
                 values={formik.values}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('groupId', newValue ? newValue.recordId : '')
+                  changeDT(newValue)
                 }}
                 error={formik.touched.taxId && Boolean(formik.errors.taxId)}
                 maxAccess={maxAccess}
@@ -196,7 +210,7 @@ export default function VendorsForm({ labels, maxAccess, recordId, setStore }) {
                 control={
                   <Checkbox
                     name='isTaxable'
-                    checked={formik.values?.tax}
+                    checked={formik.values?.isTaxable}
                     onChange={formik.handleChange}
                     maxAccess={maxAccess}
                   />
@@ -211,6 +225,8 @@ export default function VendorsForm({ labels, maxAccess, recordId, setStore }) {
                 value={formik.values.taxRef}
                 onChange={formik.handleChange}
                 maxLength='10'
+                readOnly={!formik.values?.isTaxable}
+                required={formik.values?.isTaxable}
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('taxRef', '')}
                 error={formik.touched.taxRef && Boolean(formik.errors.taxRef)}
@@ -257,7 +273,7 @@ export default function VendorsForm({ labels, maxAccess, recordId, setStore }) {
               <CustomNumberField
                 name='tradeDiscount'
                 label={labels.tradeDiscount}
-                valueField='recordId'
+                value={formik.values.tradeDiscount}
                 onChange={e => formik.setFieldValue('tradeDiscount', e.target.value)}
               />
             </Grid>

@@ -14,7 +14,6 @@ export const AddressFormShell = ({
   optional = false,
   onSubmit
 }) => {
-
   const [required, setRequired] = useState(!optional)
 
   const initialValues = {
@@ -87,6 +86,7 @@ export const AddressFormShell = ({
     }
   })
 
+  console.log(formik)
   useEffect(() => {
     if (optional && (formik.values.name || formik.values.street1 || formik.values.countryId || formik.values.cityId)) {
       setRequired(true)
