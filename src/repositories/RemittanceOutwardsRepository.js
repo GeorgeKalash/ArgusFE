@@ -37,6 +37,14 @@ export const RemittanceOutwardsRepository = {
     del: service + 'delIWS',
     snapshot: service + 'snapshotIWS'
   },
+  InwardsTransfer: {
+    get: service + 'getIW',
+    set: service + 'setIW',
+    del: service + 'delIW',
+    snapshot: service + 'snapshotIW',
+    close: service + 'closeIW',
+    reopen: service + 'reopenIW'
+  },
   Beneficiary: {
     qry: service + 'qryBEN',
     get: service + 'getBEN',

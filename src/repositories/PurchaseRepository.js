@@ -1,7 +1,7 @@
-const service = 'IR.asmx/'
+const service = 'PU.asmx/'
 
-export const IVReplenishementRepository = {
-  ReplenishmentGroups: {
+export const PurchaseRepository = {
+  VendorGroups: {
     qry: service + 'qryGRP',
     page: service + 'pageGRP',
     get: service + 'getGRP',
