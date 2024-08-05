@@ -174,5 +174,6 @@ export const ResourceIds = {
   SalesTeam: 51117,
   PriceGroups: 51107,
   PaymentTerm: 51102,
-  PuVendors: 50201
+  PuVendors: 50201,
+  VendorsGroup: 50101
 }
