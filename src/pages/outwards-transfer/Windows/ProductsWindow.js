@@ -3,9 +3,12 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
+import { RemittanceBankInterface } from 'src/repositories/RemittanceBankInterface'
+import { RequestsContext } from 'src/providers/RequestsContext'
 
 const ProductsWindow = ({ labels, maxAccess, onProductSubmit, products, window }) => {
+  const { getRequest } = useContext(RequestsContext)
   const [gridData, setGridData] = useState([])
   const [iCRates, setICRates] = useState([])
 
@@ -48,19 +51,22 @@ const ProductsWindow = ({ labels, maxAccess, onProductSubmit, products, window }
   }
 
   function mergeICRates() {
-    const updatedData = gridData.map(item => {
-      if (item.interface === 1) {
-        for (const rate of iCRates) {
-          if (item.originAmount >= rate.amountRangeFrom && item.originAmount <= rate.amountRangeTo) {
-            return { ...item, fees: rate.charge }
-          }
-        }
+    console.log('updatedData ', gridData)
 
-        return item
-      }
-    })
+    //const updatedData = gridData.list.map(item => {
+    // if (item.interface === 1) {
+    //   for (const rate of iCRates) {
+    //     if (item.originAmount >= rate.amountRangeFrom && item.originAmount <= rate.amountRangeTo) {
+    //       return { ...item, fees: rate.charge }
+    //     }
+    //   }
+    //   return item
+    // }
+    //})
 
-    setGridData(updatedData)
+    //setGridData(updatedData)
+
+    return gridData
   }
 
   const mergedData = mergeICRates()
