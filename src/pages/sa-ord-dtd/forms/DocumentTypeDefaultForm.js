@@ -82,6 +82,7 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, dtId }) {
                 parameters={`_dgId=5101&_startAt=0&_pageSize=1000&_filter=`}
                 name='dtId'
                 label={labels.documentType}
+                required
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
