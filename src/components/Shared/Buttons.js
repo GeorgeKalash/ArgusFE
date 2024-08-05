@@ -176,6 +176,24 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'OpenRPB',
+    label: platformLabels.OpenRPB,
+    color: '#231F20',
+    main: false
+  },
+  {
+    key: 'Refresh',
+    label: platformLabels.Refresh,
+    color: '#231F20',
+    main: false
+  },
+  {
+    key: 'GO',
+    label: platformLabels.Apply,
+    color: '#231F20',
+    main: false
+  },
+  {
     key: 'Clear',
     label: platformLabels.Clear,
     condition: 'isCleared',
@@ -203,5 +221,12 @@ export const getButtons = platformLabels => [
     disabled: 'disabledSubmit || isPosted || isClosed',
     image: 'save.png',
     main: true
-  }
+  },
+  {
+    key: 'Import',
+    label: platformLabels.Import,
+    color: '#000',
+    image: 'import.png',
+    main: false
+  },
 ]

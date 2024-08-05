@@ -4,6 +4,7 @@ import ClearIcon from '@mui/icons-material/Clear'
 import { useEffect, useState } from 'react'
 import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
 import PopperComponent from '../Shared/Popper/PopperComponent'
+import CircularProgress from '@mui/material/CircularProgress' // Import CircularProgress from MUI or use any other spinner component
 
 const CustomLookup = ({
   type = 'text',
@@ -33,6 +34,7 @@ const CustomLookup = ({
   editMode,
   hasBorder = true,
   hidden = false,
+  isLoading,
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
@@ -77,7 +79,9 @@ const CustomLookup = ({
           isOptionEqualToValue={(option, value) => (value ? option[valueField] === value[valueField] : '')}
           onChange={(event, newValue) => onChange(name, newValue)}
           PopperComponent={PopperComponent}
-          PaperComponent={({ children }) => <Paper style={{ width: `${displayFieldWidth * 100}%` }}>{children}</Paper>}
+          PaperComponent={({ children }) =>
+            props.renderOption && <Paper style={{ width: `${displayFieldWidth * 100}%` }}>{children}</Paper>
+          }
           renderOption={(props, option) => {
             if (columnsInDropDown && columnsInDropDown.length > 0) {
               return (
@@ -171,16 +175,22 @@ const CustomLookup = ({
                         </IconButton>
                       </InputAdornment>
                     )}
-                    <InputAdornment sx={{ margin: '0px !important' }} position='end'>
-                      <IconButton
-                        sx={{ margin: '0px !important', padding: '0px !important' }}
-                        tabIndex={-1}
-                        edge='end'
-                        style={{ pointerEvents: 'none' }}
-                      >
-                        <SearchIcon style={{ cursor: 'pointer', border: '0px', fontSize: 20 }} />
-                      </IconButton>
-                    </InputAdornment>
+                    {!isLoading ? (
+                      <InputAdornment sx={{ margin: '0px !important' }} position='end'>
+                        <IconButton
+                          sx={{ margin: '0px !important', padding: '0px !important' }}
+                          tabIndex={-1}
+                          edge='end'
+                          style={{ pointerEvents: 'none' }}
+                        >
+                          <SearchIcon style={{ cursor: 'pointer', border: '0px', fontSize: 20 }} />
+                        </IconButton>
+                      </InputAdornment>
+                    ) : (
+                      <InputAdornment sx={{ margin: '0px !important' }} position='end'>
+                        <CircularProgress size={15} style={{ marginLeft: 5 }} />
+                      </InputAdornment>
+                    )}
                   </div>
                 )
               }}
