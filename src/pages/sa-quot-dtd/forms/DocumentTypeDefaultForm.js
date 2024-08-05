@@ -34,14 +34,8 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, dtId }) {
     validateOnChange: true,
     validationSchema: yup.object({
       dtId: yup.string().required(),
-      validity: yup
-        .number()
-        .nullable()
-        .test('max', platformLabels.validity1000, value => !value || value <= 1000)
-        .transform((value, originalValue) =>
-          typeof originalValue === 'string' && originalValue.trim() === '' ? null : value
-        )
-        .required()
+
+      validity: yup.number().required()
     }),
 
     onSubmit: async obj => {
@@ -131,6 +125,8 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, dtId }) {
                 error={formik.touched.validity && Boolean(formik.errors.validity)}
                 helperText={formik.touched.validity && formik.values.validity > 1000 ? platformLabels.validity1000 : ''}
                 allowNegative={false}
+                decimalScale={0}
+                maxLength={3}
               />
             </Grid>
             <Grid item xs={12}>
