@@ -52,6 +52,7 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
             })
           }
         }
+
         return commissions
       })
     }
@@ -66,6 +67,12 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
       .catch(error => {})
   }
 
+  const dynamicShape = commission.reduce((acc, item) => {
+    acc[item.name] = yup.string().required(' ')
+
+    return acc
+  }, {})
+
   const formik = useFormik({
     initialValues: {
       productLegs: [
@@ -74,10 +81,7 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
           seqNo: '',
           rangeSeqNo: 1,
           fromAmount: '',
-          toAmount: '',
-          5: 8,
-          6: 7,
-          7: 9
+          toAmount: ''
         }
       ]
     },
@@ -88,8 +92,9 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
         .array()
         .of(
           yup.object().shape({
-            toAmount: yup.string().required('to Amount is required'),
-            fromAmount: yup.string().required('From Amount is required')
+            ...dynamicShape,
+            toAmount: yup.string().required(' '),
+            fromAmount: yup.string().required(' ')
           })
         )
         .required('productLegs array is required')
