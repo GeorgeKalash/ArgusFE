@@ -24,7 +24,7 @@ const DocumentTypeDefault = () => {
     try {
       const response = await getRequest({
         extension: SaleRepository.DocumentTypeDefault.qry,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_functionId=5101`
+        parameters: `_filter=&_functionId=5101`
       })
 
       return { ...response, _startAt: _startAt }
@@ -35,7 +35,6 @@ const DocumentTypeDefault = () => {
     query: { data },
     labels: _labels,
     invalidate,
-    paginationParameters,
     refetch,
     access
   } = useResourceQuery({
@@ -116,8 +115,7 @@ const DocumentTypeDefault = () => {
           isLoading={false}
           pageSize={50}
           refetch={refetch}
-          paginationParameters={paginationParameters}
-          paginationType='api'
+          paginationType='client'
           maxAccess={access}
         />
       </Grow>
