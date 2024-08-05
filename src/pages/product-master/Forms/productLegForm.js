@@ -153,7 +153,7 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
 
       const productLegsPromises = res.list.map(async (item, index) => {
         const commissionFees = await allCommissionFees?.list?.filter(value => value.rangeSeqNo === item.rangeSeqNo)
-        console.log(allCommissionFees)
+
         try {
           const commissionFeesMap = commissionFees.reduce((acc, fee) => {
             acc[fee?.commissionId] = fee?.commission
