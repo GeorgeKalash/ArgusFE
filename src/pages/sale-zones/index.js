@@ -24,8 +24,8 @@ const SalesZone = () => {
 
     try {
       const response = await getRequest({
-        extension: SaleRepository.SalesZone.qry,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=`
+        extension: SaleRepository.SalesZone.page,
+        parameters: `_pageSize=${_pageSize}&_startAt=${_startAt}&_filter=&_sortField=`
       })
 
       return { ...response, _startAt: _startAt }
@@ -37,10 +37,11 @@ const SalesZone = () => {
     labels: _labels,
     refetch,
     invalidate,
+    paginationParameters,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SaleRepository.SalesZone.qry,
+    endpointId: SaleRepository.SalesZone.page,
     datasetId: ResourceIds.SalesZone
   })
 
@@ -128,7 +129,8 @@ const SalesZone = () => {
           isLoading={false}
           pageSize={50}
           refetch={refetch}
-          paginationType='client'
+          paginationParameters={paginationParameters}
+          paginationType='api'
           maxAccess={access}
         />
       </Grow>
