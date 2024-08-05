@@ -221,5 +221,12 @@ export const getButtons = platformLabels => [
     disabled: 'disabledSubmit || isPosted || isClosed',
     image: 'save.png',
     main: true
-  }
+  },
+  {
+    key: 'Import',
+    label: platformLabels.Import,
+    color: '#000',
+    image: 'import.png',
+    main: false
+  },
 ]

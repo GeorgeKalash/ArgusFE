@@ -4,7 +4,6 @@ import 'ag-grid-community/styles/ag-grid.css'
 import 'ag-grid-community/styles/ag-theme-alpine.css'
 import { Box, IconButton, TextField } from '@mui/material'
 import Checkbox from '@mui/material/Checkbox'
-
 import Image from 'next/image'
 import editIcon from '../../../public/images/TableIcons/edit.png'
 import { useState } from 'react'
@@ -45,16 +44,16 @@ const Table = ({
   const [startAt, setStartAt] = useState(0)
   const { languageId } = useContext(AuthContext)
   const { platformLabels } = useContext(ControlContext)
-  const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
-  const columnsAccess = props.maxAccess && props.maxAccess.record.controls
+  const maxAccess = props?.maxAccess && props?.maxAccess.record.maxAccess
+  const columnsAccess = props?.maxAccess && props?.maxAccess.record.controls
   const { stack } = useWindow()
   const [checked, setChecked] = useState(false)
 
-  const columns = props.columns
+  const columns = props?.columns
     .filter(
       ({ field }) =>
         accessLevel({
-          maxAccess: props.maxAccess,
+          maxAccess: props?.maxAccess,
           name: field
         }) !== HIDDEN
     )
@@ -109,9 +108,9 @@ const Table = ({
             if (paginationType === 'api') {
               api({ _startAt: (newPage - 1) * pageSize, _pageSize: pageSize })
             } else {
-              var slicedGridData = props.gridData?.list.slice((newPage - 2) * pageSize, newPage * pageSize)
+              var slicedGridData = props?.gridData?.list.slice((newPage - 2) * pageSize, newPage * pageSize)
               setGridData({
-                ...props.gridData?.list,
+                ...props?.gridData?.list,
                 list: slicedGridData
               })
               setStartAt((newPage - 2) * pageSize + pageSize)
@@ -142,7 +141,7 @@ const Table = ({
         )
       }
       if (paginationType === 'api') {
-        const gridData = props.gridData
+        const gridData = props?.gridData
         const startAt = gridData?._startAt ?? 0
         const totalRecords = gridData?.count ? gridData?.count : 0
         const page = Math.ceil(gridData?.count ? (startAt === 0 ? 1 : (startAt + 1) / pageSize) : 1)
@@ -218,7 +217,7 @@ const Table = ({
           </Box>
         )
       } else {
-        const gridData = props.gridData
+        const gridData = props?.gridData
 
         if (gridData && gridData?.list) {
           const originalGridData = gridData && gridData.list
@@ -363,7 +362,7 @@ const Table = ({
       props: {
         open: [true, {}],
         fullScreen: false,
-        onConfirm: () => props.onDelete(obj)
+        onConfirm: () => props?.onDelete(obj)
       },
       width: 450,
       height: 170,
@@ -375,7 +374,7 @@ const Table = ({
       Component: StrictDeleteConfirmation,
       props: {
         action() {
-          props.onDelete(obj)
+          props?.onDelete(obj)
         }
       },
       width: 500,
@@ -384,8 +383,8 @@ const Table = ({
     })
   }
 
-  if (props.onEdit || props.onDelete || props?.popupComponent) {
-    const deleteBtnVisible = maxAccess ? props.onDelete && maxAccess > TrxType.EDIT : props.onDelete ? true : false
+  if (props?.onEdit || props?.onDelete || props?.popupComponent) {
+    const deleteBtnVisible = maxAccess ? props?.onDelete && maxAccess > TrxType.EDIT : props?.onDelete ? true : false
 
     if (!filteredColumns?.some(column => column.field === 'actions'))
       filteredColumns?.push({
@@ -400,21 +399,21 @@ const Table = ({
 
           return (
             <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
-              {props.onEdit && (
+              {props?.onEdit && (
                 <IconButton
                   size='small'
                   onClick={e => {
-                    props.onEdit(data)
+                    props?.onEdit(data)
                   }}
                 >
                   <Image src={editIcon} alt='Edit' width={18} height={18} />
                 </IconButton>
               )}
-              {props.popupComponent && (
+              {props?.popupComponent && (
                 <IconButton
                   size='small'
                   onClick={e => {
-                    props.popupComponent(data)
+                    props?.popupComponent(data)
                   }}
                 >
                   <Image src={editIcon} alt='Edit' width={18} height={18} />
@@ -424,7 +423,7 @@ const Table = ({
                 <IconButton
                   size='small'
                   onClick={e => {
-                    if (props.deleteConfirmationType == 'strict') {
+                    if (props?.deleteConfirmationType == 'strict') {
                       openDeleteConfirmation(data)
                     } else {
                       openDelete(data)
@@ -494,7 +493,7 @@ const Table = ({
       <Grow>
         <Box
           className='ag-theme-alpine'
-          style={{ flex: 1, width: '1000px !important', height: props.height || 'auto' }}
+          style={{ flex: 1, width: '1000px !important', height: props?.height || 'auto' }}
           sx={{
             '.ag-header': {
               height: '40px !important',

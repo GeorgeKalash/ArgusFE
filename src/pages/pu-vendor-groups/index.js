@@ -10,24 +10,22 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
-import { SaleRepository } from 'src/repositories/SaleRepository'
-import ReturnPolicyForm from './forms/ReturnPolicyForm'
+import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
+import VendorGroupsForm from './forms/VendorGroupsForm'
 
-const ReturnPolicy = () => {
+const VendorGroups = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
-  async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
-
+  async function fetchGridData() {
     try {
       const response = await getRequest({
-        extension: SaleRepository.ReturnPolicy.page,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=`
+        extension: PurchaseRepository.VendorGroups.qry,
+        parameters: `_filter=&_sortField=`
       })
 
-      return { ...response, _startAt: _startAt }
+      return response
     } catch (error) {}
   }
 
@@ -35,13 +33,12 @@ const ReturnPolicy = () => {
     query: { data },
     labels: _labels,
     invalidate,
-    paginationParameters,
     refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SaleRepository.ReturnPolicy.page,
-    datasetId: ResourceIds.ReturnPolicy
+    endpointId: PurchaseRepository.VendorGroups.qry,
+    datasetId: ResourceIds.VendorGroups
   })
 
   const columns = [
@@ -56,13 +53,8 @@ const ReturnPolicy = () => {
       flex: 1
     },
     {
-      field: 'maxPct',
-      headerName: _labels.maxPt,
-      flex: 1
-    },
-    {
-      field: 'maxDaysBack',
-      headerName: _labels.maxDaysBack,
+      field: 'nraName',
+      headerName: _labels.nra,
       flex: 1
     }
   ]
@@ -74,7 +66,7 @@ const ReturnPolicy = () => {
   const del = async obj => {
     try {
       await postRequest({
-        extension: SaleRepository.ReturnPolicy.del,
+        extension: PurchaseRepository.VendorGroups.del,
         record: JSON.stringify(obj)
       })
       invalidate()
@@ -84,7 +76,7 @@ const ReturnPolicy = () => {
 
   function openForm(recordId) {
     stack({
-      Component: ReturnPolicyForm,
+      Component: VendorGroupsForm,
       props: {
         labels: _labels,
         recordId: recordId,
@@ -92,7 +84,7 @@ const ReturnPolicy = () => {
       },
       width: 600,
       height: 500,
-      title: _labels.returnPolicy
+      title: _labels.vendorGroups
     })
   }
 
@@ -115,8 +107,7 @@ const ReturnPolicy = () => {
           isLoading={false}
           pageSize={50}
           refetch={refetch}
-          paginationParameters={paginationParameters}
-          paginationType='api'
+          paginationType='client'
           maxAccess={access}
         />
       </Grow>
@@ -124,4 +115,4 @@ const ReturnPolicy = () => {
   )
 }
 
-export default ReturnPolicy
+export default VendorGroups

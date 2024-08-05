@@ -11,39 +11,35 @@ import { useForm } from 'src/hooks/form'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { ControlContext } from 'src/providers/ControlContext'
-import { SaleRepository } from 'src/repositories/SaleRepository'
-import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
+import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
+import { SystemRepository } from 'src/repositories/SystemRepository'
 
-export default function ReturnPolicyForm({ labels, maxAccess, recordId }) {
+export default function VendorGroupsForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: SaleRepository.ReturnPolicy.page
+    endpointId: PurchaseRepository.VendorGroups.qry
   })
 
   const { formik } = useForm({
     initialValues: {
-      recordId: null,
+      recordId: recordId || null,
       reference: '',
       name: '',
-      maxPct: '',
-      maxDaysBack: ''
+      nraId: ''
     },
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),
-      maxPct: yup
-        .number()
-        .required()
-        .min(0.01, ' must be greater than 0')
-        .max(100, ' must be less than or equal to 100')
+      reference: yup.string().required()
     }),
     onSubmit: async obj => {
       try {
         const response = await postRequest({
-          extension: SaleRepository.ReturnPolicy.set,
+          extension: PurchaseRepository.VendorGroups.set,
           record: JSON.stringify(obj)
         })
 
@@ -62,7 +58,7 @@ export default function ReturnPolicyForm({ labels, maxAccess, recordId }) {
       try {
         if (recordId) {
           const res = await getRequest({
-            extension: SaleRepository.ReturnPolicy.get,
+            extension: PurchaseRepository.VendorGroups.get,
             parameters: `_recordId=${recordId}`
           })
 
@@ -73,19 +69,21 @@ export default function ReturnPolicyForm({ labels, maxAccess, recordId }) {
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.ReturnPolicy} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell resourceId={ResourceIds.VendorGroups} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
             <Grid item xs={12}>
               <CustomTextField
                 name='reference'
+                required
                 label={labels.reference}
                 value={formik.values.reference}
                 maxAccess={maxAccess}
                 maxLength='30'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('reference', '')}
+                error={formik.touched.reference && Boolean(formik.errors.reference)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -102,26 +100,21 @@ export default function ReturnPolicyForm({ labels, maxAccess, recordId }) {
               />
             </Grid>
             <Grid item xs={12}>
-              <CustomNumberField
-                name='maxPct'
-                required
-                label={labels.maxPt}
-                value={formik.values.maxPct}
+              <ResourceLookup
+                endpointId={SystemRepository.NumberRange.snapshot}
+                form={formik}
+                name='nraId'
+                label={labels.nra}
+                valueField='reference'
+                displayField='description'
+                firstValue={formik.values.nraRef}
+                secondValue={formik.values.nraDescription}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('nraId', newValue ? newValue.recordId : null)
+                  formik.setFieldValue('nraRef', newValue ? newValue.reference : null)
+                  formik.setFieldValue('nraDescription', newValue ? newValue.description : null)
+                }}
                 maxAccess={maxAccess}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('maxPct', '')}
-                error={formik.touched.maxPct && Boolean(formik.errors.maxPct)}
-                allowNegative={false}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomNumberField
-                name='maxDaysBack'
-                label={labels.maxDaysBack}
-                value={formik.values.maxDaysBack}
-                maxAccess={maxAccess}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('maxDaysBack', '')}
               />
             </Grid>
           </Grid>
