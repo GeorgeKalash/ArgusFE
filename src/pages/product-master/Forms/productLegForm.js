@@ -24,6 +24,10 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
   const [commissionColumns, setCommissionColumns] = useState()
   const [commission, setCommission] = useState()
 
+  const isNumeric = str => {
+    return !isNaN(str) && !isNaN(parseFloat(str))
+  }
+
   const post = obj => {
     const data = {
       productId: pId,
@@ -33,7 +37,23 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
         rangeSeqNo: id,
         productId: pId,
         ...rest
-      }))
+      })),
+      productScheduleFees: obj.flatMap(({ id, seqNo, rangeSeqNo, saved, productId, ...rest }, index) => {
+        const commissions = []
+
+        for (const [key, value] of Object.entries(rest)) {
+          if (isNumeric(key)) {
+            commissions.push({
+              seqNo: seqNo,
+              rangeSeqNo: id,
+              productId: productId,
+              commissionId: parseInt(key),
+              commission: value
+            })
+          }
+        }
+        return commissions
+      })
     }
     postRequest({
       extension: RemittanceSettingsRepository.ProductScheduleRanges.set2,
@@ -54,7 +74,10 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
           seqNo: '',
           rangeSeqNo: 1,
           fromAmount: '',
-          toAmount: ''
+          toAmount: '',
+          5: 8,
+          6: 7,
+          7: 9
         }
       ]
     },
@@ -85,7 +108,7 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
     const result = await response.list.map(item => ({
       component: 'numberfield',
       label: item.name,
-      name: item.recordId
+      name: item.recordId.toString()
     }))
 
     const columns = [
