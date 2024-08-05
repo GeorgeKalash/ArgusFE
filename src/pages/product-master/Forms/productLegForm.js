@@ -145,6 +145,7 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
         extension: RemittanceSettingsRepository.ProductScheduleFees.qry, //qryPSF
         parameters: `_productId=${pId}&_seqNo=${_seqNo}&_rangeSeqNo=${0}`
       })
+
       const res = await getRequest({
         extension: RemittanceSettingsRepository.ProductScheduleRanges.qry,
         parameters: parameters
