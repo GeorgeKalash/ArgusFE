@@ -349,24 +349,37 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
               }))
           }
 
-          const getbase = await getRequest({
-            extension: CTTRXrepository.CurrencyTrading.get3,
-            parameters: `_clientId=${clientId}`
-          })
-          const totalBaseAmount = parseInt(getbase.record.baseAmount) + parseInt(total)
+          const hasKYC = fetchInfoByKey({ key: values.id_number })
+          if (hasKYC.record) {
+            if (hasKYC.record.clientId) {
+              const getbase = await getRequest({
+                extension: CTTRXrepository.CurrencyTrading.get3,
+                parameters: `_clientId=${hasKYC.record.clientId}`
+              })
+              const totalBaseAmount = parseInt(getbase.record.baseAmount) + parseInt(total)
+              if (totalBaseAmount > baseAmount.value && !recordId && !hasKYC.record.clientRemittance) {
+                stackError({
+                  message: `This client must be KYC.`
+                })
 
-          const response = await postRequest({
-            extension: CTTRXrepository.CurrencyTrading.set2,
-            record: JSON.stringify(payload)
-          })
+                return
+              }
+            }
+          } else {
+          }
 
-          const actionMessage = !recordId ? platformLabels.Edited : platformLabels.Added
-          toast.success(actionMessage)
-          formik.setFieldValue('recordId', response.recordId)
-          await getData(response.recordId)
+          // const response = await postRequest({
+          //   extension: CTTRXrepository.CurrencyTrading.set2,
+          //   record: JSON.stringify(payload)
+          // })
 
-          if (totalBaseAmount > baseAmount.value && !recordId) viewOTP(response.recordId)
-          invalidate()
+          // const actionMessage = !recordId ? platformLabels.Edited : platformLabels.Added
+          // toast.success(actionMessage)
+          // formik.setFieldValue('recordId', response.recordId)
+          // await getData(response.recordId)
+
+          // if (totalBaseAmount > baseAmount.value && !recordId) viewOTP(response.recordId, receivedClient)
+          // invalidate()
         }
 
         return
@@ -581,12 +594,13 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
 
   const balance = total - receivedTotal
 
-  function viewOTP(recId) {
+  function viewOTP(recId, receivedClient) {
     stack({
       Component: OTPPhoneVerification,
       props: {
         formValidation: formik,
         recordId: recId,
+        clientId: receivedClient,
         functionId: formik.values.functionId,
         onSuccess: () => {
           onClose(recId)
@@ -1077,6 +1091,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                         onChange={(name, value) => {
                           formik.setFieldValue('birth_date', value)
                         }}
+                        readOnly={editMode || isClosed}
                         onClear={() => formik.setFieldValue('birth_date', '')}
                       />
                     </Grid>
