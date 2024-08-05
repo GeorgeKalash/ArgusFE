@@ -103,6 +103,7 @@ const PuVendors = () => {
     filterBy('params', rpbParams)
     refetch()
   }
+
   return (
     <VertLayout>
       <Fixed>
