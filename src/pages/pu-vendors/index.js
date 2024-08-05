@@ -78,7 +78,7 @@ const PuVendors = () => {
   }
 
   const add = () => {
-    openForm('')
+    openForm()
   }
 
   function openForm(recordId) {
@@ -86,11 +86,11 @@ const PuVendors = () => {
       Component: VendorsWindow,
       props: {
         labels: _labels,
-        recordId: recordId ? recordId : null,
+        recordId: recordId || null,
         maxAccess: access
       },
       width: 700,
-      height: 800,
+      height: 850,
       title: _labels?.productMaster
     })
   }

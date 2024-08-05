@@ -25,7 +25,6 @@ const VendorsWindow = ({ labels, maxAccess, recordId, height }) => {
         <VendorsAddressGrid
           height={height}
           labels={labels}
-          resourceId={ResourceIds.Profession}
           recordId={store.recordId}
           maxAccess={maxAccess}
           store={store}
