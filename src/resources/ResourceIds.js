@@ -151,6 +151,7 @@ export const ResourceIds = {
   IncreaseDecreaseAdj: 33301,
   CashTransactions: 33312,
   ReceiptVoucher: 31304,
+  InwardTransfer: 36309,
   FIDocTypeDefaults: 31103,
   GenerateOpeningBalances: 31314,
   DimensionsValues: 31111,
@@ -173,5 +174,6 @@ export const ResourceIds = {
   ReturnPolicy: 51108,
   SalesTeam: 51117,
   PriceGroups: 51107,
-  PaymentTerm: 51102
+  PaymentTerm: 51102,
+  VendorGroups: 50101
 }

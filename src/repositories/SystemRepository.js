@@ -186,6 +186,12 @@ export const SystemRepository = {
   TimeZone: {
     get: service + 'getTZN'
   },
+  ETL: {
+    get: service + 'getETL'
+  },
+  THD: {
+    get: service + 'getTHD'
+  },
   SMSRequest: {
     qry: service + 'qrySMS'
   }
