@@ -22,7 +22,7 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const [commissionColumns, setCommissionColumns] = useState()
-  const [commission, setCommission] = useState()
+  const [commission, setCommission] = useState([])
 
   const isNumeric = str => {
     return !isNaN(str) && !isNaN(parseFloat(str))
