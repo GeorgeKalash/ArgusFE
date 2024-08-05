@@ -24,20 +24,22 @@ export default function BatchPostForm({ access }) {
   const api = query.get('api')
   const status = query.get('status')
 
+  const today = new Date()
+
   const { formik } = useForm({
-    initialValues: { 
-        startDate: null, 
-        endDate: null, 
-        status: parseInt(status), 
-        batchId: 0, 
-        plantId: 0 
+    initialValues: {
+      startDate: new Date(today.getFullYear(), 0, 1),
+      endDate: today,
+      status: parseInt(status),
+      batchId: 0,
+      plantId: 0
     },
-    enableReinitialize: true,
+    enableReinitialize: false,
     maxAccess: access,
     validateOnChange: true,
     validationSchema: yup.object({
-        startDate: yup.string().required(),
-        endDate: yup.string().required(),
+      startDate: yup.string().required(),
+      endDate: yup.string().required()
     }),
     onSubmit: async obj => {
       try {
@@ -53,6 +55,7 @@ export default function BatchPostForm({ access }) {
           },
           width: 500,
           height: 450,
+          closable: false,
           title: platformLabels.Progress
         })
 
@@ -86,66 +89,66 @@ export default function BatchPostForm({ access }) {
         <Grow>
           <Grid container spacing={4}>
             <Grid item xs={12}>
-                <CustomDatePicker
-                  name='startDate'
-                  label={platformLabels.startDate}
-                  value={formik.values?.startDate}
-                  required
-                  onChange={formik.setFieldValue}
-                  onClear={() => formik.setFieldValue('startDate', '')}
-                  error={formik.touched.startDate && Boolean(formik.errors.startDate)}
-                />
-            </Grid>
-            <Grid item xs={12}>
-                <CustomDatePicker
-                  name='endDate'
-                  label={platformLabels.endDate}
-                  value={formik.values?.endDate}
-                  required
-                  onChange={formik.setFieldValue}
-                  onClear={() => formik.setFieldValue('endDate', '')}
-                  error={formik.touched.endDate && Boolean(formik.errors.endDate)}
-                />
-            </Grid>
-            <Grid item xs={12}>
-                <ResourceComboBox
-                    endpointId={SystemRepository.Plant.qry}
-                    name='plantId'
-                    label={platformLabels.plant}
-                    valueField='recordId'
-                    displayField={['reference', 'name']}
-                    columnsInDropDown={[
-                        { key: 'reference', value: 'plant Ref' },
-                        { key: 'name', value: 'Name' }
-                    ]}
-                    values={formik.values}
-                    onChange={(event, newValue) => {
-                        formik.setFieldValue('plantId', newValue?.recordId || '')
-                    }}
-                    error={formik.touched.plantId && Boolean(formik.errors.plantId)}
+              <CustomDatePicker
+                name='startDate'
+                label={platformLabels.startDate}
+                value={formik.values?.startDate}
+                required
+                onChange={formik.setFieldValue}
+                onClear={() => formik.setFieldValue('startDate', '')}
+                error={formik.touched.startDate && Boolean(formik.errors.startDate)}
               />
             </Grid>
             <Grid item xs={12}>
-                <ResourceLookup
-                    endpointId={SystemRepository.Batch.snapshot}
-                    parameters={{
-                      _sortBy: 'recordId desc',
-                      _functionId: 5102
-                    }}
-                    name='batchId'
-                    label={platformLabels.batch}
-                    valueField='reference'
-                    displayField='name'
-                    valueShow='batchRef'
-                    secondValueShow='batchName'
-                    form={formik}
-                    onChange={(event, newValue) => {
-                        formik.setFieldValue('batchId', newValue?.recordId || '')
-                        formik.setFieldValue('batchRef', newValue?.reference || '')
-                        formik.setFieldValue('batchName', newValue?.name || '')
-                    }}
-                    error={formik.touched.batchId && Boolean(formik.errors.batchId)}
-                />
+              <CustomDatePicker
+                name='endDate'
+                label={platformLabels.endDate}
+                value={formik.values?.endDate}
+                required
+                onChange={formik.setFieldValue}
+                onClear={() => formik.setFieldValue('endDate', '')}
+                error={formik.touched.endDate && Boolean(formik.errors.endDate)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={SystemRepository.Plant.qry}
+                name='plantId'
+                label={platformLabels.plant}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'plant Ref' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('plantId', newValue?.recordId || '')
+                }}
+                error={formik.touched.plantId && Boolean(formik.errors.plantId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceLookup
+                endpointId={SystemRepository.Batch.snapshot}
+                parameters={{
+                  _sortBy: 'recordId desc',
+                  _functionId: 5102
+                }}
+                name='batchId'
+                label={platformLabels.batch}
+                valueField='reference'
+                displayField='name'
+                valueShow='batchRef'
+                secondValueShow='batchName'
+                form={formik}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('batchId', newValue?.recordId || '')
+                  formik.setFieldValue('batchRef', newValue?.reference || '')
+                  formik.setFieldValue('batchName', newValue?.name || '')
+                }}
+                error={formik.touched.batchId && Boolean(formik.errors.batchId)}
+              />
             </Grid>
           </Grid>
         </Grow>
