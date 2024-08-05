@@ -12,10 +12,14 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { ControlContext } from 'src/providers/ControlContext'
+import { useWindow } from 'src/windows'
+import { ThreadProgress } from 'src/components/Shared/ThreadProgress'
 
 export default function BatchPostForm({ access }) {
   const { postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const { stack } = useWindow()
+
   const query = new URLSearchParams(window.location.search)
   const api = query.get('api')
   const status = query.get('status')
@@ -37,9 +41,19 @@ export default function BatchPostForm({ access }) {
     }),
     onSubmit: async obj => {
       try {
-        await postRequest({
+        const res = await postRequest({
           extension: api,
           record: JSON.stringify(obj)
+        })
+
+        stack({
+          Component: ThreadProgress,
+          props: {
+            recordId: res.recordId
+          },
+          width: 500,
+          height: 450,
+          title: platformLabels.Progress
         })
 
         toast.success(platformLabels.Added)
