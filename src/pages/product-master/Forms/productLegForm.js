@@ -45,7 +45,7 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
         for (const [key, value] of Object.entries(rest)) {
           if (isNumeric(key)) {
             commissions.push({
-              seqNo: seqNo,
+              seqNo: _seqNo,
               rangeSeqNo: id,
               productId: pId,
               commissionId: parseInt(key),
@@ -141,7 +141,7 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
     const parameters = defaultParams
 
     try {
-      const commissionFees = await getRequest({
+      const allCommissionFees = await getRequest({
         extension: RemittanceSettingsRepository.ProductScheduleFees.qry, //qryPSF
         parameters: `_productId=${pId}&_seqNo=${_seqNo}&_rangeSeqNo=${0}`
       })
@@ -152,8 +152,10 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
       })
 
       const productLegsPromises = res.list.map(async (item, index) => {
+        const commissionFees = await allCommissionFees?.list?.filter(value => value.rangeSeqNo === item.rangeSeqNo)
+        console.log(allCommissionFees)
         try {
-          const commissionFeesMap = commissionFees.list.reduce((acc, fee) => {
+          const commissionFeesMap = commissionFees.reduce((acc, fee) => {
             acc[fee?.commissionId] = fee?.commission
 
             return acc
