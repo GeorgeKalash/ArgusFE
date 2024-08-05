@@ -92,10 +92,6 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, recordId, d
     })()
   }, [])
 
-  useEffect(() => {
-    console.log(formik.values)
-  }, [formik])
-
   return (
     <FormShell
       resourceId={ResourceIds.IncreaseDecreaseAdj}
