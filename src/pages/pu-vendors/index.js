@@ -13,6 +13,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import VendorsWindow from './windows/VendorsWindow'
 import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
+import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
 const PuVendors = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -22,6 +23,7 @@ const PuVendors = () => {
   const {
     query: { data },
     labels: _labels,
+    filterBy,
     paginationParameters,
     invalidate,
     refetch,
@@ -97,10 +99,14 @@ const PuVendors = () => {
     openForm(obj?.recordId)
   }
 
+  const onApply = ({ rpbParams }) => {
+    filterBy('params', rpbParams)
+    refetch()
+  }
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <RPBGridToolbar hasSearch={false} onAdd={add} maxAccess={access} onApply={onApply} reportName={'PUVEN'} />
       </Fixed>
       <Grow>
         <Table

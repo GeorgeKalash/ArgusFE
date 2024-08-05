@@ -1,5 +1,5 @@
 import { Grid, FormControlLabel, Checkbox } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -22,9 +22,6 @@ import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
 
 export default function VendorsForm({ labels, maxAccess: access, recordId, setStore }) {
-  const [editMode, setEditMode] = useState(!!recordId)
-  const [readOnly, setReadOnly] = useState(false)
-
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -40,7 +37,7 @@ export default function VendorsForm({ labels, maxAccess: access, recordId, setSt
 
   const { formik } = useForm({
     initialValues: {
-      recordId: null,
+      recordId: recordId || null,
       reference: '',
       name: '',
       flName: '',
@@ -92,6 +89,7 @@ export default function VendorsForm({ labels, maxAccess: access, recordId, setSt
       invalidate()
     }
   })
+  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
@@ -134,7 +132,6 @@ export default function VendorsForm({ labels, maxAccess: access, recordId, setSt
                 }}
                 error={formik.touched.taxId && Boolean(formik.errors.taxId)}
                 maxAccess={maxAccess}
-                readOnly={editMode}
               />
             </Grid>
             <Grid item xs={12}>
@@ -189,7 +186,6 @@ export default function VendorsForm({ labels, maxAccess: access, recordId, setSt
               <ResourceLookup
                 endpointId={FinancialRepository.Account.snapshot}
                 name='accountId'
-                readOnly={readOnly}
                 label={labels.accountRef}
                 valueField='reference'
                 displayField='name'
@@ -249,7 +245,6 @@ export default function VendorsForm({ labels, maxAccess: access, recordId, setSt
                 }}
                 error={formik.touched.taxId && Boolean(formik.errors.taxId)}
                 maxAccess={maxAccess}
-                readOnly={editMode}
               />
             </Grid>
             <Grid item xs={12}>
@@ -272,6 +267,8 @@ export default function VendorsForm({ labels, maxAccess: access, recordId, setSt
             <Grid item xs={12}>
               <CustomNumberField
                 name='tradeDiscount'
+                maxLength={4}
+                decimalScale={2}
                 label={labels.tradeDiscount}
                 value={formik.values.tradeDiscount}
                 onChange={e => formik.setFieldValue('tradeDiscount', e.target.value)}

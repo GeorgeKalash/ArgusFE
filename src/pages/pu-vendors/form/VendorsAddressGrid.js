@@ -1,15 +1,12 @@
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useContext, useEffect, useState } from 'react'
-import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import AddressGridTab from 'src/components/Shared/AddressGridTab'
 import { useWindow } from 'src/windows'
-import AddressForm from 'src/components/Shared/AddressForm'
-import { useInvalidate } from 'src/hooks/resource'
 import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
 import VendorsAddressForm from './VendorsAddressForm'
 
-const AddressVendorsForm = ({ store, maxAccess, labels, editMode, ...props }) => {
+const VendorsAddressGrid = ({ store, maxAccess, labels, editMode, ...props }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [addressGridData, setAddressGridData] = useState([]) //for address tab
@@ -100,4 +97,4 @@ const AddressVendorsForm = ({ store, maxAccess, labels, editMode, ...props }) =>
   )
 }
 
-export default AddressVendorsForm
+export default VendorsAddressGrid

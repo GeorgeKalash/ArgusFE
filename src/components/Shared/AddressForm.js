@@ -16,6 +16,7 @@ const AddressForm = ({ recordId, address, setAddress = () => {}, editMode, onSub
       data.addressId = res.recordId
       if (recordId) {
         toast.success('Record Edit Successfully')
+        onSubmit()
       } else onSubmit(data)
     })
   }
@@ -34,7 +35,6 @@ const AddressForm = ({ recordId, address, setAddress = () => {}, editMode, onSub
     })()
   }, [recordId])
 
-  console.log(address)
   return (
     <AddressFormShell
       editMode={editMode}

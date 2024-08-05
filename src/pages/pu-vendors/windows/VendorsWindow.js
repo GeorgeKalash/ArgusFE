@@ -2,8 +2,8 @@ import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import { CustomTabs } from 'src/components/Shared/CustomTabs'
 import { useState } from 'react'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import VendorsForm from '../form/vendorsForm'
-import AddressVendorsForm from '../form/AddressVendorsForm'
+import VendorsForm from '../form/VendorsForm'
+import VendorsAddressGrid from '../form/VendorsAddressGrid'
 
 const VendorsWindow = ({ labels, maxAccess, recordId, height }) => {
   const [activeTab, setActiveTab] = useState(0)
@@ -22,7 +22,7 @@ const VendorsWindow = ({ labels, maxAccess, recordId, height }) => {
         <VendorsForm labels={labels} maxAccess={maxAccess} recordId={recordId} setStore={setStore} />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
-        <AddressVendorsForm
+        <VendorsAddressGrid
           height={height}
           labels={labels}
           resourceId={ResourceIds.Profession}

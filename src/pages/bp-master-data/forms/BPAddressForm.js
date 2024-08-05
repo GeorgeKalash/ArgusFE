@@ -9,19 +9,20 @@ const BPAddressForm = ({ getAddressGridData, recordId, bpId, window, props }) =>
   const { postRequest } = useContext(RequestsContext)
 
   const onSubmit = async obj => {
-    obj.bpId = bpId
     try {
-      await postRequest({
-        extension: BusinessPartnerRepository.BPAddress.set,
-        record: JSON.stringify(obj)
-      })
+      if (obj) {
+        obj.bpId = bpId
+        await postRequest({
+          extension: BusinessPartnerRepository.BPAddress.set,
+          record: JSON.stringify(obj)
+        })
 
-      if (!recordId) {
-        toast.success('Record Added Successfully')
-      } else {
-        toast.success('Record Edited Successfully')
+        if (!recordId) {
+          toast.success('Record Added Successfully')
+        } else {
+          toast.success('Record Edited Successfully')
+        }
       }
-
       await getAddressGridData(bpId)
       window.close()
     } catch (error) {}
