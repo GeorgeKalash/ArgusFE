@@ -21,7 +21,7 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
   const { recordId: pId, countries, _seqNo } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const [commissionColumns, setCommissionColumns] = useState()
+  const [commissionColumns, setCommissionColumns] = useState([])
   const [commission, setCommission] = useState([])
 
   const isNumeric = str => {
@@ -67,12 +67,6 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
       .catch(error => {})
   }
 
-  const dynamicShape = commission.reduce((acc, item) => {
-    acc[item.name] = yup.string().required(' ')
-
-    return acc
-  }, {})
-
   const formik = useFormik({
     initialValues: {
       productLegs: [
@@ -81,7 +75,12 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
           seqNo: '',
           rangeSeqNo: 1,
           fromAmount: '',
-          toAmount: ''
+          toAmount: '',
+          ...commissionColumns.reduce((acc, item) => {
+            acc[item.name] = ''
+
+            return acc
+          }, {})
         }
       ]
     },
@@ -92,12 +91,14 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
         .array()
         .of(
           yup.object().shape({
-            ...dynamicShape,
-            toAmount: yup.string().required(' '),
-            fromAmount: yup.string().required(' ')
+            ...commissionColumns.reduce((acc, item) => {
+              acc[item.name] = yup.string().required()
+
+              return acc
+            }, {})
           })
         )
-        .required('productLegs array is required')
+        .required(' ')
     }),
     onSubmit: values => {
       post(values.productLegs)
@@ -167,7 +168,7 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
 
           const rows = commission.map(commissionType => {
             return {
-              [commissionType?.name]: commissionFeesMap[commissionType?.name] || 0
+              [commissionType?.name]: commissionFeesMap[commissionType?.name] || ''
             }
           })
 
