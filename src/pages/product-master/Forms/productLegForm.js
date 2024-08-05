@@ -32,11 +32,12 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
     const data = {
       productId: pId,
       seqNo: _seqNo,
-      productScheduleRanges: obj.map(({ id, seqNo, rangeSeqNo, saved, productId, ...rest }, index) => ({
+      productScheduleRanges: obj.map(({ id, fromAmount, toAmount }, index) => ({
         seqNo: _seqNo,
         rangeSeqNo: id,
         productId: pId,
-        ...rest
+        fromAmount,
+        toAmount
       })),
       productScheduleFees: obj.flatMap(({ id, seqNo, rangeSeqNo, saved, productId, ...rest }, index) => {
         const commissions = []
@@ -46,9 +47,9 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
             commissions.push({
               seqNo: seqNo,
               rangeSeqNo: id,
-              productId: productId,
+              productId: pId,
               commissionId: parseInt(key),
-              commission: value
+              commission: value || 0
             })
           }
         }
@@ -75,12 +76,7 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
           seqNo: '',
           rangeSeqNo: 1,
           fromAmount: '',
-          toAmount: '',
-          ...commissionColumns.reduce((acc, item) => {
-            acc[item.name] = ''
-
-            return acc
-          }, {})
+          toAmount: ''
         }
       ]
     },
@@ -91,11 +87,8 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
         .array()
         .of(
           yup.object().shape({
-            ...commissionColumns.reduce((acc, item) => {
-              acc[item.name] = yup.string().required()
-
-              return acc
-            }, {})
+            fromAmount: yup.string().required(),
+            toAmount: yup.string().required()
           })
         )
         .required(' ')
