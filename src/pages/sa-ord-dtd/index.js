@@ -10,10 +10,10 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
-import ReplineshmentForm from '../ir-replenishment-grps/forms/ReplineshmentForm'
-import { IVReplenishementRepository } from 'src/repositories/IVReplenishementRepository'
+import { SaleRepository } from 'src/repositories/SaleRepository'
+import DocumentTypeDefaultForm from './forms/DocumentTypeDefaultForm'
 
-const ReplenishmentGroups = () => {
+const DocumentTypeDefault = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -21,36 +21,48 @@ const ReplenishmentGroups = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    const response = await getRequest({
-      extension: IVReplenishementRepository.ReplenishmentGroups.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
-    })
+    try {
+      const response = await getRequest({
+        extension: SaleRepository.DocumentTypeDefault.qry,
+        parameters: `_filter=&_functionId=5101`
+      })
 
-    return { ...response, _startAt: _startAt }
+      return { ...response, _startAt: _startAt }
+    } catch (error) {}
   }
 
   const {
     query: { data },
     labels: _labels,
     invalidate,
-    paginationParameters,
     refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: IVReplenishementRepository.ReplenishmentGroups.page,
-    datasetId: ResourceIds.IRReplenishmentGrps
+    endpointId: SaleRepository.DocumentTypeDefault.qry,
+    datasetId: ResourceIds.DocumentTypeDefault
   })
 
   const columns = [
     {
-      field: 'reference',
-      headerName: _labels.reference,
+      field: 'commitItems',
+      headerName: _labels.commitItems,
       flex: 1
     },
     {
-      field: 'name',
-      headerName: _labels.name,
+      field: 'dtName',
+      headerName: _labels.documentType,
+      flex: 1
+    },
+    {
+      field: 'spName',
+      headerName: _labels.salesPerson,
+      flex: 1
+    },
+
+    {
+      field: 'plantName',
+      headerName: _labels.plant,
       flex: 1
     }
   ]
@@ -62,7 +74,7 @@ const ReplenishmentGroups = () => {
   const del = async obj => {
     try {
       await postRequest({
-        extension: IVReplenishementRepository.ReplenishmentGroups.del,
+        extension: SaleRepository.DocumentTypeDefault.del,
         record: JSON.stringify(obj)
       })
       invalidate()
@@ -70,23 +82,22 @@ const ReplenishmentGroups = () => {
     } catch (error) {}
   }
 
-  function openForm(recordId) {
+  function openForm(dtId) {
     stack({
-      Component: ReplineshmentForm,
+      Component: DocumentTypeDefaultForm,
       props: {
         labels: _labels,
-        recordId,
-
+        dtId,
         maxAccess: access
       },
       width: 600,
       height: 500,
-      title: _labels.repGroups
+      title: _labels.dtDefault
     })
   }
 
   const edit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj?.dtId)
   }
 
   return (
@@ -98,14 +109,13 @@ const ReplenishmentGroups = () => {
         <Table
           columns={columns}
           gridData={data}
-          rowId={['recordId']}
+          rowId={['dtId']}
           onEdit={edit}
           onDelete={del}
           isLoading={false}
           pageSize={50}
           refetch={refetch}
-          paginationParameters={paginationParameters}
-          paginationType='api'
+          paginationType='client'
           maxAccess={access}
         />
       </Grow>
@@ -113,4 +123,4 @@ const ReplenishmentGroups = () => {
   )
 }
 
-export default ReplenishmentGroups
+export default DocumentTypeDefault

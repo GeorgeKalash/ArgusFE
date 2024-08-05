@@ -19,7 +19,7 @@ export default function PriceGroupsForm({ labels, maxAccess, recordId }) {
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: SaleRepository.PriceGroups.qry
+    endpointId: SaleRepository.PriceGroups.page
   })
 
   const { formik } = useForm({
