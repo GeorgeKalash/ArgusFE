@@ -3,14 +3,10 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
-import { useContext, useEffect, useState } from 'react'
-import { RemittanceBankInterface } from 'src/repositories/RemittanceBankInterface'
-import { RequestsContext } from 'src/providers/RequestsContext'
+import { useEffect, useState } from 'react'
 
 const ProductsWindow = ({ labels, maxAccess, onProductSubmit, products, window }) => {
-  const { getRequest } = useContext(RequestsContext)
   const [gridData, setGridData] = useState([])
-  const [iCRates, setICRates] = useState([])
 
   const columns = [
     {
@@ -40,42 +36,10 @@ const ProductsWindow = ({ labels, maxAccess, onProductSubmit, products, window }
     }
   ]
 
-  async function getICRates() {
-    try {
-      const res = await getRequest({
-        extension: RemittanceBankInterface.InstantCashRates.qry,
-        parameters: `_deliveryMode=7&_sourceCurrency=AED&_targetCurrency=PKR&_sourceAmount=5000&_originatingCountry=AE&_destinationCountry=PK`
-      })
-      setICRates(res.list)
-    } catch (error) {}
-  }
-
-  function mergeICRates() {
-    console.log('updatedData ', gridData)
-
-    //const updatedData = gridData.list.map(item => {
-    // if (item.interface === 1) {
-    //   for (const rate of iCRates) {
-    //     if (item.originAmount >= rate.amountRangeFrom && item.originAmount <= rate.amountRangeTo) {
-    //       return { ...item, fees: rate.charge }
-    //     }
-    //   }
-    //   return item
-    // }
-    //})
-
-    //setGridData(updatedData)
-
-    return gridData
-  }
-
-  const mergedData = mergeICRates()
-
   useEffect(() => {
     ;(async function () {
       try {
         setGridData({ list: products })
-        await getICRates()
       } catch (error) {}
     })()
   }, [])
@@ -85,7 +49,7 @@ const ProductsWindow = ({ labels, maxAccess, onProductSubmit, products, window }
       <Grow>
         <Table
           columns={columns}
-          gridData={mergedData}
+          gridData={gridData}
           rowId={['productId']}
           rowSelection='single'
           isLoading={false}
@@ -98,7 +62,7 @@ const ProductsWindow = ({ labels, maxAccess, onProductSubmit, products, window }
       <Fixed>
         <WindowToolbar
           onSave={() => {
-            onProductSubmit(mergedData)
+            onProductSubmit(gridData)
             window.close()
           }}
           isSaved={true}

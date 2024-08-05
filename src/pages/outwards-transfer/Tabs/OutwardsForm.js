@@ -40,6 +40,7 @@ import { useForm } from 'src/hooks/form'
 import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
 import { useInvalidate } from 'src/hooks/resource'
 import { ControlContext } from 'src/providers/ControlContext'
+import { RemittanceBankInterface } from 'src/repositories/RemittanceBankInterface'
 
 export default function OutwardsForm({ labels, access, recordId, cashAccountId, plantId, userId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -589,17 +590,48 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
           extension: RemittanceOutwardsRepository.ProductDispersalEngine.qry,
           parameters: parameters
         })
+
         if (res.list.length > 0) {
-          formik.setFieldValue('products', res.list)
-          if (res.list.length == 1) {
-            formik.setFieldValue('products[0].checked', true)
-            handleSelectedProduct(res.list[0])
-            if (formik.values.lcAmount) formik.setFieldValue('fcAmount', res.list[0].originAmount)
-            if (formik.values.fcAmount) formik.setFieldValue('lcAmount', res.list[0].baseAmount)
-          }
+          await mergeICRates(res.list)
         }
       }
     } catch (error) {}
+  }
+  async function mergeICRates(data) {
+    const getRates = await getRequest({
+      extension: RemittanceBankInterface.InstantCashRates.qry,
+      parameters: `_deliveryMode=7&_sourceCurrency=AED&_targetCurrency=PKR&_sourceAmount=5000&_originatingCountry=AE&_destinationCountry=PK`
+    })
+
+    const updatedData = data.map(item => {
+      if (item.interfaceId === 1) {
+        const matchingRate = getRates.list.find(
+          rate => item.originAmount >= rate.amountRangeFrom && item.originAmount <= rate.amountRangeTo
+        )
+
+        if (matchingRate) {
+          const updatedItem = {
+            ...item,
+            fees: matchingRate.charge,
+            exRate: matchingRate.settlementRate
+          }
+
+          if (data.length === 1) {
+            formik.setFieldValue('products[0].checked', true)
+            handleSelectedProduct(updatedItem)
+            formik.setFieldValue('exRate', matchingRate.settlementRate)
+            formik.setFieldValue('commission', matchingRate.charge)
+            formik.setFieldValue('defaultCommission', matchingRate.charge)
+          }
+
+          return updatedItem
+        }
+      }
+
+      return item
+    })
+
+    formik.setFieldValue('products', updatedData)
   }
 
   useEffect(() => {
