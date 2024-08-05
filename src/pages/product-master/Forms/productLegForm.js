@@ -45,7 +45,7 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
         for (const [key, value] of Object.entries(rest)) {
           if (isNumeric(key)) {
             commissions.push({
-              seqNo: _seqNo,
+              seqNo: seqNo,
               rangeSeqNo: id,
               productId: pId,
               commissionId: parseInt(key),
@@ -137,15 +137,14 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
   }, [_seqNo])
 
   const getScheduleRange = async () => {
-    const defaultParams = `_productId=${pId}&_seqNo=${0}`
+    const defaultParams = `_productId=${pId}&_seqNo=${_seqNo}`
     const parameters = defaultParams
 
     try {
       const commissionFees = await getRequest({
         extension: RemittanceSettingsRepository.ProductScheduleFees.qry, //qryPSF
-        parameters: `_productId=${item.productId}&_seqNo=${item.seqNo}&_rangeSeqNo=${item.rangeSeqNo}`
+        parameters: `_productId=${pId}&_seqNo=${_seqNo}&_rangeSeqNo=${0}`
       })
-
       const res = await getRequest({
         extension: RemittanceSettingsRepository.ProductScheduleRanges.qry,
         parameters: parameters
