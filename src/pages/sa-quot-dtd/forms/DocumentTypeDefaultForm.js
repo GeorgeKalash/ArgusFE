@@ -38,7 +38,9 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, dtId }) {
         .number()
         .nullable()
         .test('max', platformLabels.validity1000, value => !value || value <= 1000)
-        .transform((value, originalValue) => (originalValue.trim() === '' ? null : value))
+        .transform((value, originalValue) =>
+          typeof originalValue === 'string' && originalValue.trim() === '' ? null : value
+        )
         .required()
     }),
 
