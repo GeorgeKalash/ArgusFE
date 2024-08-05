@@ -18,7 +18,7 @@ export default function ReturnReasonsForm({ labels, maxAccess, recordId }) {
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: SaleRepository.ReturnReasons.qry
+    endpointId: SaleRepository.ReturnReasons.page
   })
 
   const { formik } = useForm({

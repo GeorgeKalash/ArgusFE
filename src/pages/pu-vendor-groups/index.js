@@ -10,36 +10,35 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
-import ReplineshmentForm from '../ir-replenishment-grps/forms/ReplineshmentForm'
-import { IVReplenishementRepository } from 'src/repositories/IVReplenishementRepository'
+import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
+import VendorGroupsForm from './forms/VendorGroupsForm'
 
-const ReplenishmentGroups = () => {
+const VendorGroups = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
-  async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+  async function fetchGridData() {
+    try {
+      const response = await getRequest({
+        extension: PurchaseRepository.VendorGroups.qry,
+        parameters: `_filter=&_sortField=`
+      })
 
-    const response = await getRequest({
-      extension: IVReplenishementRepository.ReplenishmentGroups.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
-    })
-
-    return { ...response, _startAt: _startAt }
+      return response
+    } catch (error) {}
   }
 
   const {
     query: { data },
     labels: _labels,
     invalidate,
-    paginationParameters,
     refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: IVReplenishementRepository.ReplenishmentGroups.page,
-    datasetId: ResourceIds.IRReplenishmentGrps
+    endpointId: PurchaseRepository.VendorGroups.qry,
+    datasetId: ResourceIds.VendorGroups
   })
 
   const columns = [
@@ -52,6 +51,11 @@ const ReplenishmentGroups = () => {
       field: 'name',
       headerName: _labels.name,
       flex: 1
+    },
+    {
+      field: 'nraName',
+      headerName: _labels.nra,
+      flex: 1
     }
   ]
 
@@ -62,7 +66,7 @@ const ReplenishmentGroups = () => {
   const del = async obj => {
     try {
       await postRequest({
-        extension: IVReplenishementRepository.ReplenishmentGroups.del,
+        extension: PurchaseRepository.VendorGroups.del,
         record: JSON.stringify(obj)
       })
       invalidate()
@@ -72,16 +76,15 @@ const ReplenishmentGroups = () => {
 
   function openForm(recordId) {
     stack({
-      Component: ReplineshmentForm,
+      Component: VendorGroupsForm,
       props: {
         labels: _labels,
-        recordId,
-
+        recordId: recordId,
         maxAccess: access
       },
       width: 600,
       height: 500,
-      title: _labels.repGroups
+      title: _labels.vendorGroups
     })
   }
 
@@ -104,8 +107,7 @@ const ReplenishmentGroups = () => {
           isLoading={false}
           pageSize={50}
           refetch={refetch}
-          paginationParameters={paginationParameters}
-          paginationType='api'
+          paginationType='client'
           maxAccess={access}
         />
       </Grow>
@@ -113,4 +115,4 @@ const ReplenishmentGroups = () => {
   )
 }
 
-export default ReplenishmentGroups
+export default VendorGroups
