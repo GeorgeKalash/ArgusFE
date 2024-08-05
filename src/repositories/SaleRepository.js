@@ -65,8 +65,7 @@ export const SaleRepository = {
     qry: service + 'qryRR',
     get: service + 'getRR',
     set: service + 'setRR',
-    del: service + 'delRR',
-    page: service + 'pageRR'
+    del: service + 'delRR'
   },
   ClientGroups: {
     qry: service + 'qryCG',
@@ -79,15 +78,13 @@ export const SaleRepository = {
     qry: service + 'qryRPO',
     get: service + 'getRPO',
     set: service + 'setRPO',
-    del: service + 'delRPO',
-    page: service + 'pageRPO'
+    del: service + 'delRPO'
   },
   PriceGroups: {
     qry: service + 'qryPG',
     get: service + 'getPG',
     set: service + 'setPG',
-    del: service + 'delPG',
-    page: service + 'pagePG'
+    del: service + 'delPG'
   },
   PaymentTerms: {
     qry: service + 'qryPT',
@@ -100,6 +97,10 @@ export const SaleRepository = {
     qry: service + 'qryDTD',
     get: service + 'getDTD',
     set: service + 'setDTD',
-    del: service + 'delDTD'
+    del: service + 'delDTD',
+    page: service + 'pageDTD'
+  },
+  DocumentType: {
+    qry: service + 'qryDT'
   }
 }
