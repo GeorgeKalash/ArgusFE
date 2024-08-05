@@ -16,6 +16,7 @@ const VendorsAddressForm = ({ getAddressGridData, recordId, vendorId, window, pr
           address: obj,
           addressId: obj.recordId
         }
+
         await postRequest({
           extension: PurchaseRepository.Address.set,
           record: JSON.stringify(data)
@@ -27,6 +28,7 @@ const VendorsAddressForm = ({ getAddressGridData, recordId, vendorId, window, pr
           toast.success('Record Edited Successfully')
         }
       }
+
       getAddressGridData(vendorId)
       window.close()
     } catch (error) {}

@@ -56,6 +56,7 @@ const AddressGridTab = ({
       flex: 1
     }
   ]
+
   return (
     <VertLayout>
       <Fixed>

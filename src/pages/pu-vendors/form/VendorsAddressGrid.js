@@ -9,13 +9,15 @@ import VendorsAddressForm from './VendorsAddressForm'
 const VendorsAddressGrid = ({ store, maxAccess, labels, editMode, ...props }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const [addressGridData, setAddressGridData] = useState([]) //for address tab
+  const [addressGridData, setAddressGridData] = useState([])
   const { stack } = useWindow()
 
   const getAddressGridData = vendorId => {
     setAddressGridData([])
+
     const defaultParams = `_vendorId=${vendorId}`
     var parameters = defaultParams
+
     getRequest({
       extension: PurchaseRepository.Address.qry,
       parameters: parameters

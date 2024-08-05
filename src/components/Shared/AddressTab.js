@@ -14,7 +14,6 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true }) =>
     datasetId: ResourceIds.Address
   })
 
-  console.log(addressValidation)
   return (
     <VertLayout>
       <Grid container gap={2}>
