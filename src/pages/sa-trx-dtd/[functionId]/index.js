@@ -27,7 +27,7 @@ const CAadjustment = () => {
 
   async function fetchGridData(options = {}) {
     const {
-      pagination: { _startAt = 0, _pageSize = 50 }
+      pagination: { _startAt = 0 }
     } = options
 
     const response = await getRequest({

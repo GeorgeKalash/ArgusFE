@@ -76,7 +76,6 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, dtId, funct
       } catch (error) {}
     }
   })
-  console.log(formik.values)
   const editMode = !!formik.values.recordId
 
   useEffect(() => {
@@ -203,7 +202,7 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, dtId, funct
               <ResourceComboBox
                 datasetId={DataSets.SA_ALLOCATE_BY}
                 name='allocateBy'
-                required={formik.values.commitItems}
+                required={!!formik.values.commitItems}
                 readOnly={!formik.values.commitItems}
                 label={labels.allocateBy}
                 valueField='key'
@@ -211,7 +210,7 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, dtId, funct
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('allocateBy', newValue?.key)
+                  formik.setFieldValue('allocateBy', newValue?.key || '')
                 }}
                 error={formik.touched.allocateBy && formik.values.commitItems && Boolean(formik.errors.allocateBy)}
               />
