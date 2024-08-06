@@ -11,7 +11,7 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SaleRepository } from 'src/repositories/SaleRepository'
-import DocumentTypeDefaultForm from './forms/DocumentTypeDefaultForm'
+import DocumentTypeDefaultForm from './forms/DocumentTypeDefaultForms'
 
 const DocumentTypeDefault = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -24,7 +24,7 @@ const DocumentTypeDefault = () => {
     try {
       const response = await getRequest({
         extension: SaleRepository.DocumentTypeDefault.page,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_functionId=5100`
+        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_functionId=5107`
       })
 
       return { ...response, _startAt: _startAt }
@@ -51,18 +51,13 @@ const DocumentTypeDefault = () => {
       flex: 1
     },
     {
-      field: 'spName',
-      headerName: _labels.salesPerson,
+      field: 'commitItems',
+      headerName: _labels.commitItems,
       flex: 1
     },
     {
-      field: 'validity',
-      headerName: _labels.validity,
-      flex: 1
-    },
-    {
-      field: 'plantName',
-      headerName: _labels.plant,
+      field: 'disableSKULookup',
+      headerName: _labels.dsl,
       flex: 1
     }
   ]
