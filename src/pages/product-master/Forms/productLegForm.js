@@ -91,7 +91,7 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
             toAmount: yup.string().required()
           })
         )
-        .required(' ')
+        .required()
     }),
     onSubmit: values => {
       post(values.productLegs)
@@ -151,7 +151,7 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
         parameters: parameters
       })
 
-      const productLegsPromises = res.list.map(async (item, index) => {
+      const productLegsPromises = res?.list?.map(async (item, index) => {
         const commissionFees = await allCommissionFees?.list?.filter(value => value.rangeSeqNo === item.rangeSeqNo)
 
         try {
@@ -174,8 +174,6 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
             ...Object.assign({}, ...rows)
           }
         } catch (error) {
-          console.error('Error fetching commission fees:', error)
-
           return
         }
       })
@@ -183,9 +181,7 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
       const productLegs = await Promise.all(productLegsPromises)
 
       formik.setFieldValue('productLegs', productLegs)
-    } catch (error) {
-      console.error('Error fetching schedule range:', error)
-    }
+    } catch (error) {}
   }
 
   return (
