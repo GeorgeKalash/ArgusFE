@@ -56,8 +56,6 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, dtId }) {
   })
   const editMode = !!formik.values.recordId
 
-  console.log(formik.values)
-
   useEffect(() => {
     ;(async function () {
       try {
