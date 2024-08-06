@@ -40,42 +40,44 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, recordId, d
     },
     maxAccess,
     enableReinitialize: false,
-    validateOnChange: true,
     validationSchema: yup.object({
       dtId: yup.string().required(),
-      allocateBy: yup.string().test('required-allocateBy', ' ', function (value) {
-        const { commitItems } = this.parent
-        if (commitItems) {
-          return !!value
-        }
+      allocateBy: yup
+        .string()
+        .transform(value => (value === null ? '' : value))
+        .test('required-allocateBy', ' ', function (value) {
+          const { commitItems } = this.parent
+          if (commitItems) {
+            return !!value
+          }
 
-        return true
-      })
+          return true
+        })
     }),
     onSubmit: async obj => {
-      const recordId = obj.dtId
-
-      const response = await postRequest({
-        extension: SaleRepository.DocumentTypeDefault.set,
-        record: JSON.stringify(obj)
-      })
-
-      if (!recordId) {
-        toast.success(platformLabels.Added)
-        formik.setValues({
+      try {
+        const submitObj = {
           ...obj,
-          baseAmount: obj.amount,
+          allocateBy: obj.allocateBy === null ? '' : obj.allocateBy
+        }
 
-          recordId: response.recordId
+        const response = await postRequest({
+          extension: SaleRepository.DocumentTypeDefault.set,
+          record: JSON.stringify(submitObj)
         })
-      } else {
-        toast.success(platformLabels.Edited)
-      }
 
-      invalidate()
+        if (!formik.values.recordId) {
+          formik.setFieldValue('recordId', formik.values.dtId)
+
+          toast.success(platformLabels.Added)
+        } else toast.success(platformLabels.Edited)
+
+        invalidate()
+      } catch (error) {}
     }
   })
-  const editMode = !!formik.values.recordId || !!recordId
+  console.log(formik.values)
+  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
@@ -202,6 +204,7 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, recordId, d
                 datasetId={DataSets.SA_ALLOCATE_BY}
                 name='allocateBy'
                 required={formik.values.commitItems}
+                readOnly={!formik.values.commitItems}
                 label={labels.allocateBy}
                 valueField='key'
                 displayField='value'
