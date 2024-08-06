@@ -79,7 +79,10 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
     initialValues,
     enableReinitialize: false,
     validateOnChange: true,
-    validationSchema: yup.object({}),
+    validationSchema: yup.object({
+      inwardId: yup.string().required(),
+      clientId: yup.string().required()
+    }),
     onSubmit: async () => {
       try {
         const copy = { ...formik.values }
@@ -110,92 +113,151 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
     }
   })
   const editMode = !!formik.values.recordId
-  const isClosed = formik.values.status === 4
+  const isClosed = formik.values.wip === 2
 
   const chooseClient = async clientId => {
-    try {
-      if (clientId) {
-        const res = await getRequest({
-          extension: RTCLRepository.CtClientIndividual.get2,
-          parameters: `_clientId=${clientId}`
-        })
-        formik.setFieldValue('cl_category', res?.record?.clientMaster?.category)
-        formik.setFieldValue('cl_isResident', res?.record?.clientIndividual?.isResident)
-        formik.setFieldValue('cl_firstName', res?.record?.clientIndividual?.firstName)
-        formik.setFieldValue('cl_middleName', res?.record?.clientIndividual?.middleName)
-        formik.setFieldValue('cl_lastName', res?.record?.clientIndividual?.lastName)
-        formik.setFieldValue('cl_fl_firstName', res?.record?.clientIndividual?.fl_firstName)
-        formik.setFieldValue('cl_fl_middleName', res?.record?.clientIndividual?.fl_middleName)
-        formik.setFieldValue('cl_fl_lastName', res?.record?.clientIndividual?.fl_lastName)
-        formik.setFieldValue('cl_countryId', res?.record?.clientIDView?.idCountryId)
-        formik.setFieldValue('cl_idtId', res?.record?.clientIDView?.idtId)
-        formik.setFieldValue('cl_state', res?.record?.addressView?.stateName)
-        formik.setFieldValue('cl_idNo', res?.record?.clientIDView?.idNo)
-        formik.setFieldValue('cl_city', res?.record?.addressView?.city)
-        formik.setFieldValue('cl_idIssueDate', formatDateFromApi(res?.record?.clientIDView?.idIssueDate))
-        formik.setFieldValue('cl_cityDistrict', res?.record?.addressView?.cityDistrict)
-        formik.setFieldValue('cl_idExpiryDate', formatDateFromApi(res?.record?.clientIDView?.idExpiryDate))
-        formik.setFieldValue('cl_professionId', res?.record?.clientIndividual?.professionId)
-        formik.setFieldValue('cl_sponsor', res?.record?.clientIndividual?.sponsorName)
-        formik.setFieldValue('cl_idIssueCountry', res?.record?.clientIDView?.idCountryId)
-        formik.setFieldValue('cl_nationalityId', res?.record?.clientMaster?.nationalityId)
-        formik.setFieldValue('cl_birthDate', formatDateFromApi(res?.record?.clientIndividual?.birthDate))
+    if (clientId) {
+      try {
+        if (clientId) {
+          const res = await getRequest({
+            extension: RTCLRepository.CtClientIndividual.get2,
+            parameters: `_clientId=${clientId}`
+          })
+          formik.setFieldValue('cl_category', res?.record?.clientMaster?.category)
+          formik.setFieldValue('cl_isResident', res?.record?.clientIndividual?.isResident)
+          formik.setFieldValue('cl_firstName', res?.record?.clientIndividual?.firstName)
+          formik.setFieldValue('cl_middleName', res?.record?.clientIndividual?.middleName)
+          formik.setFieldValue('cl_lastName', res?.record?.clientIndividual?.lastName)
+          formik.setFieldValue('cl_fl_firstName', res?.record?.clientIndividual?.fl_firstName)
+          formik.setFieldValue('cl_fl_middleName', res?.record?.clientIndividual?.fl_middleName)
+          formik.setFieldValue('cl_fl_lastName', res?.record?.clientIndividual?.fl_lastName)
+          formik.setFieldValue('cl_countryId', res?.record?.clientIDView?.idCountryId)
+          formik.setFieldValue('cl_idtId', res?.record?.clientIDView?.idtId)
+          formik.setFieldValue('cl_state', res?.record?.addressView?.stateName)
+          formik.setFieldValue('cl_idNo', res?.record?.clientIDView?.idNo)
+          formik.setFieldValue('cl_city', res?.record?.addressView?.city)
+          formik.setFieldValue('cl_idIssueDate', formatDateFromApi(res?.record?.clientIDView?.idIssueDate))
+          formik.setFieldValue('cl_cityDistrict', res?.record?.addressView?.cityDistrict)
+          formik.setFieldValue('cl_idExpiryDate', formatDateFromApi(res?.record?.clientIDView?.idExpiryDate))
+          formik.setFieldValue('cl_professionId', res?.record?.clientIndividual?.professionId)
+          formik.setFieldValue('cl_sponsor', res?.record?.clientIndividual?.sponsorName)
+          formik.setFieldValue('cl_idIssueCountry', res?.record?.clientIDView?.idCountryId)
+          formik.setFieldValue('cl_nationalityId', res?.record?.clientMaster?.nationalityId)
+          formik.setFieldValue('cl_birthDate', formatDateFromApi(res?.record?.clientIndividual?.birthDate))
 
-        formik.setFieldValue('cl_relationId', res?.record?.clientRemittance?.trxCountPerYear)
+          formik.setFieldValue('cl_relationId', res?.record?.clientRemittance?.trxCountPerYear)
+        }
+      } catch (error) {}
+    } else {
+      formik.setFieldValue('cl_category', '')
+      formik.setFieldValue('cl_isResident', '')
+      formik.setFieldValue('cl_firstName', '')
+      formik.setFieldValue('cl_middleName', '')
+      formik.setFieldValue('cl_lastName', '')
+      formik.setFieldValue('cl_fl_firstName', '')
+      formik.setFieldValue('cl_fl_middleName', '')
+      formik.setFieldValue('cl_fl_lastName', '')
+      formik.setFieldValue('cl_countryId', '')
+      formik.setFieldValue('cl_idtId', '')
+      formik.setFieldValue('cl_state', '')
+      formik.setFieldValue('cl_idNo', '')
+      formik.setFieldValue('cl_city', '')
+      formik.setFieldValue('cl_idIssueDate', '')
+      formik.setFieldValue('cl_cityDistrict', '')
+      formik.setFieldValue('cl_idExpiryDate', '')
+      formik.setFieldValue('cl_professionId', '')
+      formik.setFieldValue('cl_sponsor', '')
+      formik.setFieldValue('cl_idIssueCountry', '')
+      formik.setFieldValue('cl_nationalityId', '')
+      formik.setFieldValue('cl_birthDate', '')
+
+      formik.setFieldValue('cl_relationId', '')
+    }
+  }
+
+  const chooseInward = async recordId => {
+    if (recordId) {
+      try {
+        if (recordId) {
+          const res = await getRequest({
+            extension: RemittanceOutwardsRepository.InwardsTransfer.get,
+            parameters: `_recordId=${recordId}`
+          })
+          formik.setFieldValue('inwardDate', formatDateFromApi(res?.record?.date))
+          formik.setFieldValue('corName', res?.record?.corName)
+          formik.setFieldValue('corRef', res?.record?.corRef)
+          formik.setFieldValue('currencyId', res?.record?.currencyId)
+          formik.setFieldValue('firstName', res?.record?.sender_firstName)
+          formik.setFieldValue('lastName', res?.record?.sender_lastName)
+          formik.setFieldValue('middleName', res?.record?.sender_middleName)
+          formik.setFieldValue('nationalityId', res?.record?.sender_nationalityId)
+          formik.setFieldValue('sourceOfIncome', res?.record?.sourceOfIncome)
+          formik.setFieldValue('charges', res?.record?.charges)
+        }
+      } catch (error) {}
+    } else {
+      formik.setFieldValue('inwardDate', '')
+      formik.setFieldValue('corName', '')
+      formik.setFieldValue('corRef', '')
+      formik.setFieldValue('currencyId', '')
+      formik.setFieldValue('firstName', '')
+      formik.setFieldValue('lastName', '')
+      formik.setFieldValue('middleName', '')
+      formik.setFieldValue('nationalityId', '')
+      formik.setFieldValue('sourceOfIncome', '')
+      formik.setFieldValue('charges', '')
+    }
+  }
+
+  const fetchRecord = async () => {
+    if (recordId) {
+      try {
+        const res = await getRequest({
+          extension: RemittanceOutwardsRepository.InwardSettlement.get,
+          parameters: `_recordId=${recordId}`
+        })
+
+        if (res.record) {
+          const record = {
+            ...res.record,
+            date: formatDateFromApi(res.record.date)
+          }
+          formik.setValues(record)
+        }
+      } catch (error) {
+        stackError(error)
+      }
+    }
+  }
+
+  useEffect(() => {
+    fetchRecord()
+  }, [])
+
+  const onClose = async recId => {
+    try {
+      const res = await postRequest({
+        extension: RemittanceOutwardsRepository.InwardSettlement.close,
+        record: JSON.stringify({
+          recordId: formik.values.recordId ?? recId
+        })
+      })
+
+      if (res.recordId) {
+        if (recordId) toast.success(platformLabels.Closed)
+        invalidate()
       }
     } catch (error) {}
   }
 
-  const emptyFields = () => {
-    formik.setFieldValue('cl_category', '')
-    formik.setFieldValue('cl_isResident', '')
-    formik.setFieldValue('cl_firstName', '')
-    formik.setFieldValue('cl_middleName', '')
-    formik.setFieldValue('cl_lastName', '')
-    formik.setFieldValue('cl_fl_firstName', '')
-    formik.setFieldValue('cl_fl_middleName', '')
-    formik.setFieldValue('cl_fl_lastName', '')
-    formik.setFieldValue('cl_countryId', '')
-    formik.setFieldValue('cl_idtId', '')
-    formik.setFieldValue('cl_state', '')
-    formik.setFieldValue('cl_idNo', '')
-    formik.setFieldValue('cl_city', '')
-    formik.setFieldValue('cl_idIssueDate', '')
-    formik.setFieldValue('cl_cityDistrict', '')
-    formik.setFieldValue('cl_idExpiryDate', '')
-    formik.setFieldValue('cl_professionId', '')
-    formik.setFieldValue('cl_sponsor', '')
-    formik.setFieldValue('cl_idIssueCountry', '')
-    formik.setFieldValue('cl_nationalityId', '')
-    formik.setFieldValue('cl_birthDate', '')
-
-    formik.setFieldValue('cl_relationId', '')
-  }
-
-  useEffect(() => {
-    const fetchRecord = async () => {
-      if (recordId) {
-        try {
-          const res = await getRequest({
-            extension: RemittanceOutwardsRepository.InwardSettlement.get,
-            parameters: `_recordId=${recordId}`
-          })
-
-          if (res.record) {
-            const record = {
-              ...res.record,
-              date: formatDateFromApi(res.record.date)
-            }
-
-            formik.setValues(record)
-          }
-        } catch (error) {
-          stackError(error)
-        }
-      }
+  const actions = [
+    {
+      key: 'Close',
+      condition: !isClosed,
+      onClick: onClose,
+      disabled: isClosed || !editMode
     }
-    fetchRecord()
-  }, [])
+  ]
 
   return (
     <FormShell
@@ -204,7 +266,10 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
       editMode={editMode}
       maxAccess={maxAccess}
       functionId={SystemFunction.InwardSettlement}
-      disabledSubmit={editMode}
+      actions={actions}
+      onClose={onClose}
+      isClosed={isClosed}
+      disabledSubmit={isClosed}
     >
       <VertLayout>
         <Fixed>
@@ -275,31 +340,39 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
               <Grid item xs={12}>
                 <Grid container spacing={2}>
                   <Grid item xs={6}>
-                    <CustomTextField
-                      name='inwardRef'
+                    <ResourceLookup
+                      endpointId={RemittanceOutwardsRepository.InwardsTransfer.snapshot}
+                      valueField='reference'
+                      displayField='name'
+                      name='inwardId'
                       label={labels.inwardRef}
-                      value={formik?.values?.inwardRef}
-                      maxAccess={maxAccess}
-                      maxLength='50'
-                      readOnly={editMode}
+                      form={formik}
                       required
-                      error={formik.touched.inwardRef && Boolean(formik.errors.inwardRef)}
-                      onChange={formik.handleChange}
-                      onClear={() => formik.setFieldValue('inwardRef', '')}
+                      displayFieldWidth={2}
+                      valueShow='inwardRef'
+                      secondValueShow='name'
+                      maxAccess={maxAccess}
+                      editMode={editMode}
+                      columnsInDropDown={[
+                        { key: 'reference', value: 'Reference' },
+                        { key: 'name', value: 'Name' }
+                      ]}
+                      onChange={async (event, newValue) => {
+                        formik.setFieldValue('inwardId', newValue ? newValue.recordId : '')
+                        formik.setFieldValue('inwardName', newValue ? newValue.name : '')
+                        formik.setFieldValue('inwardRef', newValue ? newValue.reference : '')
+                        await chooseInward(newValue?.recordId)
+                      }}
+                      errorCheck={'inwardId'}
                     />
                   </Grid>
                   <Grid item xs={6}>
                     <CustomDatePicker
                       name='inwardDate'
-                      required
                       label={labels.inwardDate}
                       value={formik?.values?.inwardDate}
-                      readOnly={editMode}
-                      onChange={formik.setFieldValue}
-                      editMode={editMode}
+                      readOnly
                       maxAccess={maxAccess}
-                      onClear={() => formik.setFieldValue('inwardDate', '')}
-                      error={formik.touched.inwardDate && Boolean(formik.errors.inwardDate)}
                     />
                   </Grid>
                 </Grid>
@@ -309,23 +382,15 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                   <Grid item xs={6}>
                     <ResourceLookup
                       endpointId={RemittanceSettingsRepository.Correspondent.snapshot}
+                      values={formik.values}
                       valueField='reference'
                       displayField='name'
-                      name='corId'
+                      name='corRef'
+                      readOnly
+                      valueShow='corName'
                       label={labels.Correspondant}
                       form={formik}
-                      required={formik.values.corId}
-                      displayFieldWidth={2}
-                      valueShow='corRef'
-                      secondValueShow='corName'
                       maxAccess={maxAccess}
-                      editMode={editMode}
-                      onChange={async (event, newValue) => {
-                        formik.setFieldValue('corId', newValue ? newValue.recordId : null)
-                        formik.setFieldValue('corName', newValue ? newValue.name : null)
-                        formik.setFieldValue('corRef', newValue ? newValue.reference : null)
-                      }}
-                      errorCheck={'corId'}
                     />
                   </Grid>
                   <Grid item xs={6}>
@@ -361,12 +426,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                       label={labels.firstName}
                       value={formik?.values?.firstName}
                       maxAccess={maxAccess}
-                      readOnly={editMode}
-                      maxLength='20'
-                      required
-                      error={formik.touched.firstName && Boolean(formik.errors.firstName)}
-                      onChange={formik.handleChange}
-                      onClear={() => formik.setFieldValue('firstName', '')}
+                      readOnly
                     />
                   </Grid>
                   <Grid item xs={4}>
@@ -375,11 +435,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                       label={labels.middleName}
                       value={formik?.values?.middleName}
                       maxAccess={maxAccess}
-                      readOnly={editMode}
-                      maxLength='20'
-                      error={formik.touched.middleName && Boolean(formik.errors.middleName)}
-                      onChange={formik.handleChange}
-                      onClear={() => formik.setFieldValue('middleName', '')}
+                      readOnly
                     />
                   </Grid>
                   <Grid item xs={4}>
@@ -388,12 +444,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                       label={labels.lastName}
                       value={formik?.values?.lastName}
                       maxAccess={maxAccess}
-                      readOnly={editMode}
-                      maxLength='20'
-                      required
-                      error={formik.touched.lastName && Boolean(formik.errors.lastName)}
-                      onChange={formik.handleChange}
-                      onClear={() => formik.setFieldValue('lastName', '')}
+                      readOnly
                     />
                   </Grid>
                 </Grid>
@@ -404,7 +455,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                     <ResourceComboBox
                       values={formik.values}
                       endpointId={SystemRepository.Country.qry}
-                      name='nationality'
+                      name='nationalityId'
                       label={labels.nationality}
                       valueField='record'
                       displayField={['reference', 'name']}
@@ -413,9 +464,9 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                         { key: 'name', value: 'Name' }
                       ]}
                       onChange={(event, newValue) => {
-                        formik.setFieldValue('nationality', newValue ? newValue.record : '')
+                        formik.setFieldValue('nationalityId', newValue ? newValue.record : '')
                       }}
-                      error={formik.touched.nationality && Boolean(formik.errors.nationality)}
+                      error={formik.touched.nationalityId && Boolean(formik.errors.nationalityId)}
                       maxAccess={maxAccess}
                       readOnly={editMode}
                       required
@@ -463,7 +514,6 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                       secondValueShow='clientName'
                       maxAccess={maxAccess}
                       editMode={editMode}
-                      onClear={emptyFields()}
                       onChange={async (event, newValue) => {
                         formik.setFieldValue('clientId', newValue ? newValue.recordId : '')
                         formik.setFieldValue('clientName', newValue ? newValue.name : '')
@@ -724,11 +774,20 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                   <Grid item xs={4}>
                     <ResourceComboBox
                       endpointId={BusinessPartnerRepository.RelationTypes.qry}
-                      name='cl_relationId'
-                      label={labels.relationId}
+                      name='relationId'
+                      label={labels.relation}
+                      columnsInDropDown={[
+                        { key: 'reference', value: 'Reference' },
+                        { key: 'name', value: 'Name' }
+                      ]}
                       valueField='recordId'
                       displayField='name'
                       values={formik.values}
+                      required
+                      onChange={(event, newValue) => {
+                        formik && formik.setFieldValue('relationId', newValue?.recordId || '')
+                      }}
+                      error={formik.touched.relationId && Boolean(formik.errors.relationId)}
                     />
                   </Grid>
                 </Grid>
@@ -758,17 +817,9 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                       name='currencyId'
                       label={labels.currency}
                       valueField='recordId'
-                      displayField={['reference', 'name']}
-                      columnsInDropDown={[
-                        { key: 'reference', value: 'Reference' },
-                        { key: 'name', value: 'Name' }
-                      ]}
                       values={formik.values}
                       maxAccess={maxAccess}
-                      onChange={(event, newValue) => {
-                        formik.setFieldValue('currencyId', newValue?.recordId || null)
-                      }}
-                      error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
+                      readOnly
                     />
                   </Grid>
                   <Grid item xs={4}>
@@ -812,12 +863,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                       label={labels.charges}
                       value={formik.values.charges}
                       maxAccess={maxAccess}
-                      readOnly={editMode}
-                      onChange={e => formik.setFieldValue('charges', e.target.value)}
-                      onClear={() => formik.setFieldValue('charges', '')}
-                      error={formik.touched.charges && Boolean(formik.errors.charges)}
-                      maxLength={15}
-                      decimalScale={2}
+                      readOnly
                     />
                   </Grid>
                   <Grid item xs={4}>
@@ -864,17 +910,9 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                       name='sourceOfIncome'
                       label={labels.sourceOfIncome}
                       valueField='recordId'
-                      displayField={['reference', 'name']}
-                      columnsInDropDown={[
-                        { key: 'reference', value: 'Reference' },
-                        { key: 'name', value: 'Name' }
-                      ]}
+                      readOnly
                       values={formik.values}
                       maxAccess={maxAccess}
-                      onChange={(event, newValue) => {
-                        formik.setFieldValue('sourceOfIncome', newValue?.recordId || null)
-                      }}
-                      error={formik.touched.sourceOfIncome && Boolean(formik.errors.sourceOfIncome)}
                     />
                   </Grid>
                   <Grid item xs={4}></Grid>

@@ -179,7 +179,7 @@ const GlobalAuthorization = () => {
             field: 'Resource Global',
             headerName: labels.resourceGlobal,
             width: 200,
-            renderCell: params => (
+            cellRenderer: params => (
               <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
                 <IconButton size='small' onClick={() => openResourceGlobal(params.row)}>
                   <Icon icon='mdi:application-edit-outline' fontSize={18} />
@@ -191,7 +191,7 @@ const GlobalAuthorization = () => {
             field: 'field Global',
             headerName: labels.fieldGlobal,
             width: 200,
-            renderCell: params => (
+            cellRenderer: params => (
               <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
                 <IconButton size='small' onClick={() => openFieldGlobal(params.row)}>
                   <Icon icon='mdi:application-edit-outline' fontSize={18} />
