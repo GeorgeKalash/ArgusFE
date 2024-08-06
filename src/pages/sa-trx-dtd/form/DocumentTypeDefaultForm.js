@@ -17,7 +17,7 @@ import { SaleRepository } from 'src/repositories/SaleRepository'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { DataSets } from 'src/resources/DataSets'
 
-export default function DocumentTypeDefaultForm({ labels, maxAccess, recordId, dtId, functionId }) {
+export default function DocumentTypeDefaultForm({ labels, maxAccess, dtId, functionId }) {
   const { platformLabels } = useContext(ControlContext)
 
   const { getRequest, postRequest } = useContext(RequestsContext)
