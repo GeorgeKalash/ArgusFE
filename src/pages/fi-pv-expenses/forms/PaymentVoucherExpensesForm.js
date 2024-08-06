@@ -158,12 +158,10 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
   const editMode = !!formik.values.recordId
 
   async function getPaymentVouchers(recordId) {
-    try {
-      return await getRequest({
-        extension: FinancialRepository.PaymentVouchers.get,
-        parameters: `_recordId=${recordId}`
-      })
-    } catch (error) {}
+    return await getRequest({
+      extension: FinancialRepository.PaymentVouchers.get,
+      parameters: `_recordId=${recordId}`
+    })
   }
 
   const onPost = async () => {
@@ -183,25 +181,25 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
 
   useEffect(() => {
     ;(async function () {
-      if (recordId) {
-        const res = await getPaymentVouchers(recordId)
-        res.record.date = formatDateFromApi(res.record.date)
-        await getExpenses(res.record)
-      }
-      await getDefaultVAT()
+      try {
+        if (recordId) {
+          const res = await getPaymentVouchers(recordId)
+          res.record.date = formatDateFromApi(res.record.date)
+          await getExpenses(res.record)
+        }
+        await getDefaultVAT()
+      } catch (e) {}
     })()
   }, [])
 
   async function getDefaultVAT() {
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.Defaults.get,
-        parameters: `_filter=&_key=vatPct`
-      })
+    const res = await getRequest({
+      extension: SystemRepository.Defaults.get,
+      parameters: `_filter=&_key=vatPct`
+    })
 
-      const vatPctValue = parseInt(res.record.value)
-      formik.setFieldValue('vatPct', vatPctValue)
-    } catch (error) {}
+    const vatPctValue = parseInt(res.record.value)
+    formik.setFieldValue('vatPct', vatPctValue)
   }
 
   const onWorkFlowClick = async () => {
@@ -405,45 +403,41 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
   ]
 
   const getCostCenters = async (pvId, seqNo) => {
-    try {
-      const res = await getRequest({
-        extension: FinancialRepository.PaymentVoucherCostCenters.qry,
-        parameters: `_pvId=${pvId}&_seqNo=${seqNo}`
-      })
+    const res = await getRequest({
+      extension: FinancialRepository.PaymentVoucherCostCenters.qry,
+      parameters: `_pvId=${pvId}&_seqNo=${seqNo}`
+    })
 
-      return res.list.map(item => ({
-        ...item,
-        id: item.ccSeqNo
-      }))
-    } catch (exception) {}
+    return res.list.map(item => ({
+      ...item,
+      id: item.ccSeqNo
+    }))
   }
 
   const getExpenses = async data => {
-    try {
-      const res = await getRequest({
-        extension: FinancialRepository.PaymentVoucherExpenses.qry,
-        parameters: `_pvId=${data.recordId}`
+    const res = await getRequest({
+      extension: FinancialRepository.PaymentVoucherExpenses.qry,
+      parameters: `_pvId=${data.recordId}`
+    })
+
+    const expensesList = await Promise.all(
+      res.list.map(async item => {
+        const costCenters = await getCostCenters(data.recordId, item.seqNo)
+
+        return {
+          ...item,
+          id: item.seqNo,
+          isVAT: item.vatAmount != 0,
+          hasCostCenters: true,
+          costCenters: costCenters
+        }
       })
+    )
 
-      const expensesList = await Promise.all(
-        res.list.map(async item => {
-          const costCenters = await getCostCenters(data.recordId, item.seqNo)
-
-          return {
-            ...item,
-            id: item.seqNo,
-            isVAT: item.vatAmount != 0,
-            hasCostCenters: true,
-            costCenters: costCenters
-          }
-        })
-      )
-
-      formik.setValues({
-        ...data,
-        expenses: expensesList
-      })
-    } catch (exception) {}
+    formik.setValues({
+      ...data,
+      expenses: expensesList
+    })
   }
 
   const subtotalSum = formik.values?.expenses?.reduce((subtotal, row) => {
