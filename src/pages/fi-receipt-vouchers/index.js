@@ -97,7 +97,7 @@ export default function CurrencyTrading() {
 
   const columns = [
     {
-      field: 'Date',
+      field: 'date',
       headerName: labels.date,
       flex: 1,
       type: 'date'
