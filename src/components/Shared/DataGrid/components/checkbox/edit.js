@@ -8,7 +8,7 @@ export default function checkBoxEdit({ id, field, value, update, row, column: { 
       name={field}
       autoFocus
       checked={value}
-      disabled={!row?.saved && field === 'select' || props.disabled}
+      disabled={(!row?.saved && field === 'select') || props?.disabled}
       onChange={e => {
         update({
           id,
