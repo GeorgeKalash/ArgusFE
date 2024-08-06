@@ -226,7 +226,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     >
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
@@ -384,7 +384,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 maxAccess={maxAccess}
               />
             </Grid>
-            <Grid container item xs={6} spacing={4}>
+            <Grid container item xs={6} spacing={2}>
               <Grid item xs={12}>
                 <ResourceComboBox
                   endpointId={SystemRepository.Currency.qry}
