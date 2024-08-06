@@ -47,6 +47,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
   const { stack } = useWindow()
   const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
+  const DEFAULT_DELIVERYMODE = 7
 
   const { maxAccess } = useDocumentType({
     functionId: SystemFunction.Outwards,
@@ -67,9 +68,11 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
     productId: '',
     dispersalId: '',
     countryId: '',
+    countryref: '',
     dispersalType: '',
     dispersalTypeName: '',
     currencyId: '',
+    currencyRef: '',
     idNo: '',
     beneficiaryId: '',
     beneficiarySeqNo: '',
@@ -489,14 +492,6 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
         maxAccess: maxAccess,
         labels: labels,
         products: formik.values.products,
-        outwardsData: {
-          deliveryMode: '',
-          sourceCurrency: 'AED', //mn aya 3mle
-          targetCurrency: formik.values.currencyId, //le ha tusal
-          sourceAmount: formik.values.lcAmount, //500 mn aya 3mle
-          originatingCountry: 'AED',
-          destinationCountry: formik.values.countryId
-        },
         onProductSubmit
       },
       width: 900,
@@ -543,6 +538,36 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
         parameters: `_filter=&_key=vatPct`
       })
       formik.setFieldValue('vatRate', parseInt(res.record.value))
+    } catch (error) {}
+  }
+  async function getDefaultCountry() {
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.Defaults.get,
+        parameters: `_filter=&_key=countryId`
+      })
+
+      const countryRef = await getRequest({
+        extension: SystemRepository.Country.get,
+        parameters: `_recordId=${res?.record?.value}`
+      })
+
+      return countryRef.record.reference
+    } catch (error) {}
+  }
+  async function getDefaultCurrency() {
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.Defaults.get,
+        parameters: `_filter=&_key=baseCurrencyId`
+      })
+
+      const currencyRef = await getRequest({
+        extension: SystemRepository.Currency.get,
+        parameters: `_recordId=${res?.record?.value}`
+      })
+
+      return currencyRef.record.reference
     } catch (error) {}
   }
 
@@ -598,9 +623,15 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
     } catch (error) {}
   }
   async function mergeICRates(data) {
+    const syCountryId = await getDefaultCountry()
+    const srcAmount = formik.values.lcAmount
+    const trgtAmount = formik.values.fcAmount
+    const srcCurrency = await getDefaultCurrency()
+    const targetCurrency = formik.values.currencyRef
+
     const getRates = await getRequest({
       extension: RemittanceBankInterface.InstantCashRates.qry,
-      parameters: `_deliveryMode=7&_sourceCurrency=AED&_targetCurrency=PKR&_sourceAmount=5000&_originatingCountry=AE&_destinationCountry=PK`
+      parameters: `_deliveryMode=${DEFAULT_DELIVERYMODE}&_sourceCurrency=${srcCurrency}&_targetCurrency=${targetCurrency}&_sourceAmount=${srcAmount}&_originatingCountry=${syCountryId}&_destinationCountry=${formik.values.countryRef}`
     })
 
     const updatedData = data.map(item => {
@@ -753,6 +784,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                     values={formik.values}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('countryId', newValue ? newValue?.countryId : '')
+                      formik.setFieldValue('countryRef', newValue ? newValue?.countryRef : '')
                       formik.setFieldValue('fcAmount', '')
                       formik.setFieldValue('lcAmount', '')
                       if (!newValue) {
@@ -805,6 +837,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                     readOnly={!formik.values.dispersalType || isClosed || isPosted}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('currencyId', newValue?.currencyId)
+                      formik.setFieldValue('currencyRef', newValue?.currencyRef)
                     }}
                     error={formik.touched.dispersalType && Boolean(formik.errors.dispersalType)}
                   />
