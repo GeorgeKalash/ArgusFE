@@ -31,8 +31,8 @@ export default function BatchPostForm({ access }) {
       startDate: new Date(today.getFullYear(), 0, 1),
       endDate: today,
       status: parseInt(status),
-      batchId: 0,
-      plantId: 0
+      batchId: '',
+      plantId: ''
     },
     enableReinitialize: false,
     maxAccess: access,
