@@ -31,8 +31,8 @@ const CAadjustment = () => {
     } = options
 
     const response = await getRequest({
-      extension: SaleRepository.DocumentTypeDefault.page,
-      parameters: `_startAt=${_startAt}&_params=&_pageSize=50&_sortBy=reference&_functionId=${functionId}`
+      extension: SaleRepository.DocumentTypeDefault.qry,
+      parameters: `_sortBy=reference&_functionId=${functionId}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -42,11 +42,10 @@ const CAadjustment = () => {
     query: { data },
     labels: _labels,
     access,
-    paginationParameters,
     invalidate,
     refetch
   } = useResourceQuery({
-    endpointId: SaleRepository.DocumentTypeDefault.page,
+    endpointId: SaleRepository.DocumentTypeDefault.qry,
     datasetId: ResourceIds.DocumentTypeDefault,
 
     filter: {
@@ -135,9 +134,8 @@ const CAadjustment = () => {
           onDelete={del}
           isLoading={false}
           pageSize={50}
-          paginationParameters={paginationParameters}
           refetch={refetch}
-          paginationType='api'
+          paginationType='client'
           maxAccess={access}
         />
       </Grow>
