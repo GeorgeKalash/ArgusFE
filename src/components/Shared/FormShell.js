@@ -35,7 +35,6 @@ export default function FormShell({
   previewReport = false,
   setIDInfoAutoFilled,
   visibleClear,
-  setKey,
   actions
 }) {
   const { stack } = useWindow()
@@ -52,17 +51,13 @@ export default function FormShell({
     : true
 
   function handleReset() {
-    if (typeof setKey === 'function') {
-      setKey(prev => prev + 1)
+    if (!form.values?.recordId) {
+      form.resetForm({
+        values: form.initialValues
+      })
     } else {
-      if (!form.values?.recordId) {
-        form.resetForm({
-          values: form.initialValues
-        })
-      } else {
-        if (typeof clear === 'function') {
-          clear()
-        }
+      if (typeof clear === 'function') {
+        clear()
       }
     }
 
