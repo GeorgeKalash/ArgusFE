@@ -163,6 +163,8 @@ export const ResourceIds = {
   PaymentVouchers: 31305,
   Roles: 21103,
   Checkbook: 33201,
+  PaymentVouchers: 31305,
+  PaymentVoucherExpenses: 31343,
   MobileSystemDefaults: 36123,
   Measurement: 41102,
   Category: 41103,
@@ -175,5 +177,6 @@ export const ResourceIds = {
   SalesTeam: 51117,
   PriceGroups: 51107,
   PaymentTerm: 51102,
+  DocumentTypeDefault: 51106,
   VendorGroups: 50101
 }
