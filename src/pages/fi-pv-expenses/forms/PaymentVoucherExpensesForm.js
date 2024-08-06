@@ -379,6 +379,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
     {
       component: 'button',
       name: 'hasCostCenters',
+      defaultValue: true,
       props: {
         imgSrc: '/images/buttonsIcons/costCenter.png'
       },
@@ -699,12 +700,7 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
           </Grid>
           <DataGrid
             onChange={value => {
-              const updatedExpenses = value.map(expense => ({
-                ...expense,
-                hasCostCenters: true
-              }))
-
-              formik.setFieldValue('expenses', updatedExpenses)
+              formik.setFieldValue('expenses', value)
             }}
             value={formik?.values?.expenses}
             error={formik?.errors?.expenses}
