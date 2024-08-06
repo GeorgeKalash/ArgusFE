@@ -96,7 +96,7 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, recordId, d
 
   return (
     <FormShell
-      resourceId={ResourceIds.IncreaseDecreaseAdj}
+      resourceId={ResourceIds.DocumentTypeDefault}
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}
