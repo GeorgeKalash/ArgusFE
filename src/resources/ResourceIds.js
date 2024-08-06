@@ -163,6 +163,8 @@ export const ResourceIds = {
   PaymentVouchers: 31305,
   Roles: 21103,
   Checkbook: 33201,
+  PaymentVouchers: 31305,
+  PaymentVoucherExpenses: 31343,
   MobileSystemDefaults: 36123,
   Measurement: 41102,
   Category: 41103,
