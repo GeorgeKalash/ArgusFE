@@ -23,7 +23,7 @@ const DocumentTypeDefault = () => {
 
     try {
       const response = await getRequest({
-        extension: SaleRepository.DocumentTypeDefault.page,
+        extension: SaleRepository.DocumentTypeDefault.qry,
         parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_functionId=5106`
       })
 
@@ -35,12 +35,11 @@ const DocumentTypeDefault = () => {
     query: { data },
     labels: _labels,
     invalidate,
-    paginationParameters,
     refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SaleRepository.DocumentTypeDefault.page,
+    endpointId: SaleRepository.DocumentTypeDefault.qry,
     datasetId: ResourceIds.DocumentTypeDefault
   })
 
@@ -110,8 +109,7 @@ const DocumentTypeDefault = () => {
           isLoading={false}
           pageSize={50}
           refetch={refetch}
-          paginationParameters={paginationParameters}
-          paginationType='api'
+          paginationType='client'
           maxAccess={access}
         />
       </Grow>
