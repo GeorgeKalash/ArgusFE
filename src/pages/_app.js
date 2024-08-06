@@ -130,10 +130,10 @@ const App = props => {
           <meta name='keywords' content='Argus, ERP, ArgusERP' />
           <meta name='viewport' content='initial-scale=1, width=device-width' />
         </Head>
-        <RequestsProvider>
-          <ErrorProvider>
-            <WindowProvider>
-              <AuthProvider>
+        <AuthProvider>
+          <RequestsProvider>
+            <ErrorProvider>
+              <WindowProvider>
                 <QueryClientProvider client={queryClient}>
                   <RequestsProvider>
                     <ControlProvider>
@@ -184,10 +184,10 @@ const App = props => {
                     </ControlProvider>
                   </RequestsProvider>
                 </QueryClientProvider>
-              </AuthProvider>
-            </WindowProvider>
-          </ErrorProvider>
-        </RequestsProvider>
+              </WindowProvider>
+            </ErrorProvider>
+          </RequestsProvider>
+        </AuthProvider>
       </CacheProvider>
     </Provider>
   )
