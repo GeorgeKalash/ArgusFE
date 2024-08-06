@@ -48,6 +48,7 @@ const Table = ({
   const columnsAccess = props?.maxAccess && props?.maxAccess.record.controls
   const { stack } = useWindow()
   const [checked, setChecked] = useState(false)
+  const [focus, setFocus] = useState(false)
 
   const columns = props?.columns
     .filter(
@@ -102,6 +103,7 @@ const Table = ({
     if (pagination) {
       const TextInput = ({ value, pageCount }) => {
         const jumpToPage = e => {
+          setFocus(false)
           const newPage = e.target.value
 
           if ((e.key === 'Enter' || e.keyCode === 13) && newPage > 0)
@@ -115,6 +117,7 @@ const Table = ({
               })
               setStartAt((newPage - 2) * pageSize + pageSize)
             }
+          setFocus(true)
         }
 
         const handleInput = e => {
@@ -133,10 +136,11 @@ const Table = ({
                 height: '30px'
               }
             }}
-            autoFocus={true}
+            autoFocus={focus}
             onInput={handleInput}
             defaultValue={value}
             onKeyUp={jumpToPage}
+            onBlur={() => setFocus(false)}
           />
         )
       }
