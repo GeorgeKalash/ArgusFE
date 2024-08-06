@@ -99,7 +99,7 @@ function FormProvider({ formik, maxAccess, labels, children }) {
   return <FormContext.Provider value={{ formik, maxAccess, labels }}>{children}</FormContext.Provider>
 }
 
-export default function TransactionForm({ recordId, labels, access, plantId }) {
+export default function TransactionForm({ recordId, labels, access, plantId, setKey }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [infoAutoFilled, setInfoAutoFilled] = useState(false)
   const [idInfoAutoFilled, setIDInfoAutoFilled] = useState(false)
@@ -725,6 +725,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       isClosed={isClosed}
       disabledSubmit={balance && true}
       previewReport={editMode}
+      setKey={setKey}
     >
       <VertLayout>
         <Grow>

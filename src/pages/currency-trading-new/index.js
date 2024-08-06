@@ -12,6 +12,7 @@ export default function CurrencyTrading() {
   const { getRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
   const [plantId, setPlantId] = useState(null)
+  const [key, setKey] = useState(0)
 
   const { labels: _labels, access } = useResourceParams({
     datasetId: ResourceIds.CashInvoice
@@ -46,5 +47,12 @@ export default function CurrencyTrading() {
     access && openForm()
   }, [access])
 
-  return plantId && access && <TransactionForm labels={_labels} access={access} plantId={plantId} />
+  return (
+    plantId &&
+    access && (
+      <Box key={key}>
+        <TransactionForm labels={_labels} access={access} plantId={plantId} setKey={setKey} />
+      </Box>
+    )
+  )
 }
