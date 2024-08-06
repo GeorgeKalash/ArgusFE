@@ -29,7 +29,7 @@ export default function CurrencyTrading() {
         recordId: recordId || null
       },
       width: 1000,
-      height: 690,
+      height: 700,
       title: labels.receiptVoucher
     })
   }
