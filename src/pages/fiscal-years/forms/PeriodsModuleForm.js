@@ -88,6 +88,7 @@ const PeriodsForm = ({ recordId, labels, maxAccess, row, window, editMode }) => 
     ;(async function () {
       try {
         const moduleData = await getAllModules()
+
         const res = await getRequest({
           extension: SystemRepository.FiscalModule.qry,
           parameters: `_fiscalYear=${recordId}&_periodId=${row.periodId}`
