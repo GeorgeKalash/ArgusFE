@@ -11,9 +11,9 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SaleRepository } from 'src/repositories/SaleRepository'
-import DocumentTypeDefaultForm from './forms/DocumentTypeDefaultForm'
+import ConsignmentSitesForm from './forms/ConsignmentSitesForm'
 
-const DocumentTypeDefault = () => {
+const ConsignmentSites = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -23,8 +23,8 @@ const DocumentTypeDefault = () => {
 
     try {
       const response = await getRequest({
-        extension: SaleRepository.DocumentTypeDefault.page,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_functionId=5100`
+        extension: SaleRepository.ConsignmentSites.qry,
+        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_clientId=0`
       })
 
       return { ...response, _startAt: _startAt }
@@ -40,29 +40,29 @@ const DocumentTypeDefault = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SaleRepository.DocumentTypeDefault.page,
-    datasetId: ResourceIds.DocumentTypeDefault
+    endpointId: SaleRepository.ConsignmentSites.qry,
+    datasetId: ResourceIds.ConsignmentSites
   })
 
   const columns = [
     {
-      field: 'dtName',
-      headerName: _labels.documentType,
+      field: 'clientRef',
+      headerName: _labels.clientRef,
       flex: 1
     },
     {
-      field: 'spName',
-      headerName: _labels.salesPerson,
+      field: 'clientName',
+      headerName: _labels.clientName,
       flex: 1
     },
     {
-      field: 'validity',
-      headerName: _labels.validity,
+      field: 'siteRef',
+      headerName: _labels.siteRef,
       flex: 1
     },
     {
-      field: 'plantName',
-      headerName: _labels.plant,
+      field: 'siteName',
+      headerName: _labels.siteName,
       flex: 1
     }
   ]
@@ -74,7 +74,7 @@ const DocumentTypeDefault = () => {
   const del = async obj => {
     try {
       await postRequest({
-        extension: SaleRepository.DocumentTypeDefault.del,
+        extension: SaleRepository.ConsignmentSites.del,
         record: JSON.stringify(obj)
       })
       invalidate()
@@ -82,22 +82,22 @@ const DocumentTypeDefault = () => {
     } catch (error) {}
   }
 
-  function openForm(dtId) {
+  function openForm(clientId) {
     stack({
-      Component: DocumentTypeDefaultForm,
+      Component: ConsignmentSitesForm,
       props: {
         labels: _labels,
-        dtId,
+        clientId,
         maxAccess: access
       },
       width: 600,
-      height: 500,
-      title: _labels.dtDefault
+      height: 300,
+      title: _labels.consignmentSites
     })
   }
 
   const edit = obj => {
-    openForm(obj?.dtId)
+    openForm(obj?.clientId)
   }
 
   return (
@@ -109,7 +109,7 @@ const DocumentTypeDefault = () => {
         <Table
           columns={columns}
           gridData={data}
-          rowId={['dtId']}
+          rowId={['clientId']}
           onEdit={edit}
           onDelete={del}
           isLoading={false}
@@ -124,4 +124,4 @@ const DocumentTypeDefault = () => {
   )
 }
 
-export default DocumentTypeDefault
+export default ConsignmentSites

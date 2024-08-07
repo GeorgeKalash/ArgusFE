@@ -102,5 +102,12 @@ export const SaleRepository = {
   },
   DocumentType: {
     qry: service + 'qryDT'
+  },
+  ConsignmentSites: {
+    qry: service + 'qryCCS',
+    get: service + 'getCCS',
+    set: service + 'setCCS',
+    del: service + 'delCCS',
+    page: service + 'pageCCS'
   }
 }
