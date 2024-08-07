@@ -64,7 +64,7 @@ const FiscalYear = () => {
   ]
 
   const add = () => {
-    openForm('')
+    openForm()
   }
 
   function openForm(recordId) {
@@ -73,7 +73,7 @@ const FiscalYear = () => {
       props: {
         labels: _labels,
         maxAccess: access,
-        recordId: recordId ? recordId : null
+        recordId: recordId
       },
       width: 800,
       title: _labels.fiscalYear
@@ -85,12 +85,14 @@ const FiscalYear = () => {
   }
 
   const del = async obj => {
-    await postRequest({
-      extension: SystemRepository.FiscalYears.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success(platformLabels.Deleted)
+    try {
+      await postRequest({
+        extension: SystemRepository.FiscalYears.del,
+        record: JSON.stringify(obj)
+      })
+      invalidate()
+      toast.success(platformLabels.Deleted)
+    } catch (error) {}
   }
 
   return (

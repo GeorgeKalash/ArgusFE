@@ -17,6 +17,7 @@ import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { DataSets } from 'src/resources/DataSets'
 import { formatDateFromApi } from 'src/lib/date-helper'
 import { ControlContext } from 'src/providers/ControlContext'
+import Typography from '@mui/material/Typography'
 
 export default function FiscalYearForm({ labels, maxAccess, setStore, store }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -42,16 +43,16 @@ export default function FiscalYearForm({ labels, maxAccess, setStore, store }) {
     validationSchema: yup.object({
       fiscalYear: yup
         .number()
+        .required()
         .transform((value, originalValue) => validateNumberField(value, originalValue))
         .min(1900, labels.yearMin)
         .max(2099, labels.yearMax),
-      startDate: yup.string().required(' '),
-      endDate: yup.string().required(' '),
-      periods: yup.string().required(' '),
-      status: yup.string().required(' ')
+      startDate: yup.string().required(),
+      endDate: yup.string().required(),
+      periods: yup.string().required(),
+      status: yup.string().required()
     }),
     onSubmit: async obj => {
-      const fiscalYear = obj.fiscalYear
       await postRequest({
         extension: SystemRepository.FiscalYears.set,
         record: JSON.stringify(obj)
@@ -59,13 +60,10 @@ export default function FiscalYearForm({ labels, maxAccess, setStore, store }) {
 
       if (!recordId) {
         toast.success(platformLabels.Added)
-        formik.setValues({
-          ...obj,
-          recordId: fiscalYear
-        })
+        formik.setFieldValue('recordId', obj.fiscalYear)
         setStore(prevStore => ({
           ...prevStore,
-          recordId: fiscalYear
+          recordId: obj.fiscalYear
         }))
       } else toast.success(platformLabels.Edited)
 
@@ -109,7 +107,6 @@ export default function FiscalYearForm({ labels, maxAccess, setStore, store }) {
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('fiscalYear', '')}
                 error={formik.touched.fiscalYear && Boolean(formik.errors.fiscalYear)}
-                helperText={formik.touched.fiscalYear && formik.errors.fiscalYear}
                 maxAccess={maxAccess}
                 required
               />
@@ -139,25 +136,28 @@ export default function FiscalYearForm({ labels, maxAccess, setStore, store }) {
               />
             </Grid>
             <Grid item xs={12}>
-              <ResourceComboBox
-                datasetId={DataSets.FY_PERIODS}
-                name='periods'
-                label={labels.periods}
-                valueField='key'
-                displayField='value'
-                values={formik.values}
-                onChange={(event, newValue) => {
-                  if (newValue) {
-                    formik.setFieldValue('periods', newValue?.key)
-                  } else {
-                    formik.setFieldValue('periods', '')
-                  }
-                }}
-                maxAccess={maxAccess}
-                readOnly={editMode}
-                error={formik.touched.periods && Boolean(formik.errors.periods)}
-                required
-              />
+              <Grid container spacing={2} alignItems='center'>
+                <Grid item xs={4}>
+                  <ResourceComboBox
+                    datasetId={DataSets.FY_PERIODS}
+                    name='periods'
+                    label={labels.periods}
+                    valueField='key'
+                    displayField='value'
+                    values={formik.values}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('periods', newValue ? newValue.key : '')
+                    }}
+                    maxAccess={maxAccess}
+                    readOnly={editMode}
+                    error={formik.touched.periods && Boolean(formik.errors.periods)}
+                    required
+                  />
+                </Grid>
+                <Grid item>
+                  <Typography>{labels.months}</Typography>
+                </Grid>
+              </Grid>
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
@@ -168,11 +168,7 @@ export default function FiscalYearForm({ labels, maxAccess, setStore, store }) {
                 displayField='value'
                 values={formik.values}
                 onChange={(event, newValue) => {
-                  if (newValue) {
-                    formik.setFieldValue('status', newValue?.key)
-                  } else {
-                    formik.setFieldValue('status', '')
-                  }
+                  formik.setFieldValue('status', newValue ? newValue.key : '')
                 }}
                 maxAccess={maxAccess}
                 error={formik.touched.status && Boolean(formik.errors.status)}

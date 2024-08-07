@@ -24,23 +24,23 @@ const PeriodsForm = ({ labels, maxAccess, store }) => {
 
   const editMode = !!recordId
 
-  const post = obj => {
-    const data = {
-      fiscalYear: recordId,
-      periods: obj.map(({ id, periodId, ...rest }) => ({
-        periodId: id,
-        ...rest
-      }))
-    }
-    postRequest({
-      extension: SystemRepository.FiscalPeriodPack.set2,
-      record: JSON.stringify(data)
-    })
-      .then(res => {
-        if (res) toast.success(platformLabels.Edited)
-        getPeriods()
+  const post = async obj => {
+    try {
+      const data = {
+        fiscalYear: recordId,
+        periods: obj.map(({ id, periodId, ...rest }) => ({
+          periodId: id,
+          ...rest
+        }))
+      }
+      await postRequest({
+        extension: SystemRepository.FiscalPeriodPack.set2,
+        record: JSON.stringify(data)
       })
-      .catch(error => {})
+
+      toast.success(platformLabels.Edited)
+      getPeriods()
+    } catch (error) {}
   }
 
   const { formik } = useForm({
@@ -56,12 +56,12 @@ const PeriodsForm = ({ labels, maxAccess, store }) => {
         .array()
         .of(
           yup.object().shape({
-            statusName: yup.string().required(' '),
-            startDate: yup.string().required(' '),
-            endDate: yup.string().required(' ')
+            statusName: yup.string().required(),
+            startDate: yup.string().required(),
+            endDate: yup.string().required()
           })
         )
-        .required(' ')
+        .required()
     }),
     onSubmit: values => {
       post(values.periods)
@@ -126,36 +126,33 @@ const PeriodsForm = ({ labels, maxAccess, store }) => {
   ]
 
   useEffect(() => {
-    recordId && getPeriods()
+    if (recordId) getPeriods()
   }, [recordId])
 
-  const getPeriods = () => {
-    const defaultParams = `_fiscalYear=${recordId}`
-    var parameters = defaultParams
-    getRequest({
-      extension: SystemRepository.Period.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        if (res.list?.length > 0) {
-          const periods = res.list.map(({ id, periodId, startDate, endDate, ...rest }, index) => {
-            return {
-              id: index + 1,
-              periodId: index + 1,
-              startDate: formatDateFromApi(startDate),
-              endDate: formatDateFromApi(endDate),
-              saved: true,
-              ...rest
-            }
-          })
-
-          formik.setValues({
-            recordId: recordId,
-            periods: periods
-          })
-        }
+  const getPeriods = async () => {
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.Period.qry,
+        parameters: `_fiscalYear=${recordId}`
       })
-      .catch(error => {})
+      if (res.list?.length > 0) {
+        const periods = res.list.map(({ id, periodId, startDate, endDate, ...rest }, index) => {
+          return {
+            id: index + 1,
+            periodId: index + 1,
+            startDate: formatDateFromApi(startDate),
+            endDate: formatDateFromApi(endDate),
+            saved: true,
+            ...rest
+          }
+        })
+
+        formik.setValues({
+          recordId: recordId,
+          periods: periods
+        })
+      }
+    } catch (error) {}
   }
 
   return (

@@ -17,27 +17,27 @@ const PeriodsForm = ({ recordId, labels, maxAccess, row, window, editMode }) => 
   const { getAllKvsByDataset } = useContext(CommonContext)
   const { platformLabels } = useContext(ControlContext)
 
-  const post = obj => {
-    const data = {
-      fiscalYear: recordId,
-      periodId: row.periodId,
-      fiscalModules: obj
-        .filter(({ status }) => status !== 0)
-        .map(({ id, status, ...rest }) => ({
-          status: parseInt(status, 10),
-          ...rest
-        }))
-    }
+  const post = async obj => {
+    try {
+      const data = {
+        fiscalYear: recordId,
+        periodId: row.periodId,
+        fiscalModules: obj
+          .filter(({ status }) => status !== 0)
+          .map(({ id, status, ...rest }) => ({
+            status: parseInt(status, 10),
+            ...rest
+          }))
+      }
 
-    postRequest({
-      extension: SystemRepository.FiscalModulePack.set2,
-      record: JSON.stringify(data)
-    })
-      .then(res => {
-        if (res) toast.success(platformLabels.Edited)
-        window.close()
+      await postRequest({
+        extension: SystemRepository.FiscalModulePack.set2,
+        record: JSON.stringify(data)
       })
-      .catch(error => {})
+
+      toast.success(platformLabels.Edited)
+      window.close()
+    } catch (error) {}
   }
 
   const { formik } = useForm({
@@ -70,65 +70,59 @@ const PeriodsForm = ({ recordId, labels, maxAccess, row, window, editMode }) => 
         datasetId: DataSets.FY_PERIOD_STATUS,
         valueField: 'key',
         displayField: 'value',
-        widthDropDown: 200,
         mapping: [
           { from: 'key', to: 'status' },
           { from: 'value', to: 'statusName' }
         ],
         columnsInDropDown: [{ key: 'value', value: 'Name' }],
-        displayFieldWidth: 2
+        displayFieldWidth: 1
       }
     }
   ]
 
   useEffect(() => {
-    recordId && getModules()
+    if (recordId) getModules()
   }, [recordId])
 
   const getModules = () => {
     ;(async function () {
-      const moduleData = await getAllModules()
-      const defaultParams = `_fiscalYear=${recordId}&_periodId=${row.periodId}`
-      var parameters = defaultParams
-      getRequest({
-        extension: SystemRepository.FiscalModule.qry,
-        parameters: parameters
-      })
-        .then(res => {
-          const modules = []
-
-          moduleData.forEach(x => {
-            const obj = {
-              fiscalYear: recordId,
-              periodId: row.periodId,
-              moduleId: parseInt(x.key, 10),
-              moduleName: x.value,
-              status: 0,
-              statusName: null
-            }
-
-            res?.list?.forEach(module => {
-              if (module.moduleId === obj.moduleId) {
-                obj.status = module.status
-                obj.statusName = module.statusName
-              }
-            })
-
-            modules.push(obj)
-          })
-
-          const mappedModules = modules.map(({ id, ...rest }, index) => {
-            return {
-              id: index + 1,
-              ...rest
-            }
-          })
-
-          formik.setValues({
-            modules: mappedModules
-          })
+      try {
+        const moduleData = await getAllModules()
+        const res = await getRequest({
+          extension: SystemRepository.FiscalModule.qry,
+          parameters: `_fiscalYear=${recordId}&_periodId=${row.periodId}`
         })
-        .catch(error => {})
+        const modules = []
+
+        moduleData.forEach(x => {
+          const obj = {
+            fiscalYear: recordId,
+            periodId: row.periodId,
+            moduleId: parseInt(x.key, 10),
+            moduleName: x.value,
+            status: 0,
+            statusName: null
+          }
+
+          res?.list?.forEach(module => {
+            if (module.moduleId === obj.moduleId) {
+              obj.status = module.status
+              obj.statusName = module.statusName
+            }
+          })
+
+          modules.push(obj)
+        })
+
+        const mappedModules = modules.map(({ id, ...rest }, index) => {
+          return {
+            id: index + 1,
+            ...rest
+          }
+        })
+
+        formik.setFieldValue('modules', mappedModules)
+      } catch (error) {}
     })()
   }
 
