@@ -147,13 +147,6 @@ export const SystemRepository = {
     get: service + 'getDE',
     set: service + 'set2DE'
   },
-  FiscalYears: {
-    page: service + 'pageFY',
-    qry: service + 'qryFY',
-    set: service + 'setFY',
-    get: service + 'getFY',
-    del: service + 'delFY'
-  },
   ModuleClassRES: {
     qry: service + 'qryRES'
   },
