@@ -40,6 +40,7 @@ import { useForm } from 'src/hooks/form'
 import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
 import { useInvalidate } from 'src/hooks/resource'
 import { ControlContext } from 'src/providers/ControlContext'
+import InfoForm from './InfoForm'
 
 export default function OutwardsForm({ labels, access, recordId, cashAccountId, plantId, userId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -493,7 +494,18 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       height: 500
     })
   }
-
+  function openInfo() {
+    stack({
+      Component: InfoForm,
+      props: {
+        labels,
+        formik
+      },
+      width: 700,
+      height: 610,
+      title: labels.Information
+    })
+  }
   function openBankWindow() {
     if (formik.values.bankType === 1) {
       stack({
@@ -927,6 +939,17 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                 </Grid>
                 <Grid item xs={12}>
                   <CustomNumberField label='Balance To Pay' value={getFormattedNumber(Balance) ?? '0'} readOnly />
+                </Grid>
+                <Grid item xs={12}>
+                  <Button
+                    sx={{
+                      backgroundColor: '#908c8c',
+                      color: '#000000'
+                    }}
+                    onClick={() => openInfo()}
+                  >
+                    Information
+                  </Button>
                 </Grid>
               </FieldSet>
             </Grid>
