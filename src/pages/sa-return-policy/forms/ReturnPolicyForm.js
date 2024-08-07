@@ -19,7 +19,7 @@ export default function ReturnPolicyForm({ labels, maxAccess, recordId }) {
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: SaleRepository.ReturnPolicy.qry
+    endpointId: SaleRepository.ReturnPolicy.page
   })
 
   const { formik } = useForm({
