@@ -13,11 +13,11 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { ControlContext } from 'src/providers/ControlContext'
 import MeasurementUnitForm from './MeasurementUnitForm'
 
-const MeasurementUnit = ({ recordId }) => {
+const MeasurementUnit = ({ store, maxAccess, labels }) => {
+  const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
-
 
   async function fetchGridData() {
     try {
@@ -34,10 +34,8 @@ const MeasurementUnit = ({ recordId }) => {
 
   const {
     query: { data },
-    labels: _labels,
     invalidate,
-    refetch,
-    access
+    refetch
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: InventoryRepository.MeasurementUnit.qry,
@@ -47,17 +45,17 @@ const MeasurementUnit = ({ recordId }) => {
   const columns = [
     {
       field: 'reference',
-      headerName: _labels.reference,
+      headerName: labels.reference,
       flex: 1
     },
     {
       field: 'name',
-      headerName: _labels.name,
+      headerName: labels.name,
       flex: 1
     },
     {
       field: 'qty',
-      headerName: _labels.qty,
+      headerName: labels.qty,
       flex: 1
     }
   ]
@@ -74,14 +72,14 @@ const MeasurementUnit = ({ recordId }) => {
     stack({
       Component: MeasurementUnitForm,
       props: {
-        labels: _labels,
+        labels,
         recordId,
         msId,
         invalidate
       },
       width: 450,
       height: 330,
-      title: _labels.measurementUnit
+      title: labels.measurementUnit
     })
   }
 
@@ -99,7 +97,7 @@ const MeasurementUnit = ({ recordId }) => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <GridToolbar onAdd={add} maxAccess={maxAccess} />
       </Fixed>
       <Grow>
         <Table

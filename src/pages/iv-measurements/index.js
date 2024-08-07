@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
@@ -9,15 +9,15 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
-import MeasurementWindow from './Windows/MeasurementsWindow'
 import { ControlContext } from 'src/providers/ControlContext'
+import MeasurementWindow from './Windows/MeasurementWindow'
+import { useWindow } from 'src/windows'
 
 const Measurement = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
-  const [selectedRecordId, setSelectedRecordId] = useState(null)
-  const [windowOpen, setWindowOpen] = useState(false)
+  const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -58,12 +58,11 @@ const Measurement = () => {
   ]
 
   const add = () => {
-    setWindowOpen(true)
+    openForm()
   }
 
   const edit = obj => {
-    setSelectedRecordId(obj.recordId)
-    setWindowOpen(true)
+    openForm(obj?.recordId)
   }
 
   const del = async obj => {
@@ -75,6 +74,20 @@ const Measurement = () => {
       invalidate()
       toast.success(platformLabels.Deleted)
     } catch (exception) {}
+  }
+
+  function openForm(recordId) {
+    stack({
+      Component: MeasurementWindow,
+      props: {
+        labels: _labels,
+        recordId: recordId,
+        maxAccess: access
+      },
+      width: 600,
+      height: 400,
+      title: _labels.measurement
+    })
   }
 
   return (
@@ -98,19 +111,6 @@ const Measurement = () => {
           maxAccess={access}
         />
       </Grow>
-      {windowOpen && (
-        <MeasurementWindow
-          onClose={() => {
-            setWindowOpen(false)
-            setSelectedRecordId(null)
-          }}
-          labels={_labels}
-          maxAccess={access}
-          recordId={selectedRecordId}
-          setSelectedRecordId={setSelectedRecordId}
-          invalidate={invalidate}
-        />
-      )}
     </VertLayout>
   )
 }

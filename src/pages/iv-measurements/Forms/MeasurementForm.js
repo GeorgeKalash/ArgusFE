@@ -12,7 +12,8 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { ControlContext } from 'src/providers/ControlContext'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 
-export default function MeasurementForm({ labels, maxAccess, recordId, invalidate }) {
+export default function MeasurementForm({ labels, maxAccess, setStore, store, invalidate }) {
+  const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -38,6 +39,10 @@ export default function MeasurementForm({ labels, maxAccess, recordId, invalidat
         })
 
         if (!obj.recordId) {
+          setStore(prevStore => ({
+            ...prevStore,
+            recordId: response.recordId
+          }))
           toast.success(platformLabels.Added)
           formik.setFieldValue('recordId', response.recordId)
         } else toast.success(platformLabels.Edited)
