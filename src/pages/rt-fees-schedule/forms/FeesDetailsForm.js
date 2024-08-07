@@ -5,20 +5,16 @@ import { DataGrid } from 'src/components/Shared/DataGrid'
 import FormShell from 'src/components/Shared/FormShell'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
-import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { ControlContext } from 'src/providers/ControlContext'
 import { useState } from 'react'
-import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
+import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 
-const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
-  const { recordId: pId, _seqNo } = store
+const FeesDetailsForm = ({ store, labels, editMode, maxAccess }) => {
+  const { recordId: pId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const [commissionColumns, setCommissionColumns] = useState([])
@@ -30,10 +26,11 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
 
   const post = obj => {
     const data = {
-      scheduleId: sId,
-      scheduleRef: '',
-      productScheduleRanges: obj.map(({ id, fromAmount, toAmount }, index) => ({
-        seqNo: id,
+      productId: pId,
+      seqNo: _seqNo,
+      feeScheduleDetail: obj.map(({ id, fromAmount, toAmount }, index) => ({
+        seqNo: _seqNo,
+        rangeSeqNo: id,
         productId: pId,
         fromAmount,
         toAmount
@@ -57,7 +54,7 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
       })
     }
     postRequest({
-      extension: RemittanceSettingsRepository.ProductScheduleRanges.set2,
+      extension: RemittanceOutwardsRepository.FreeScheduleDetail.set,
       record: JSON.stringify(data)
     })
       .then(res => {
@@ -99,7 +96,7 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
 
   const getColumns = async () => {
     const response = await getRequest({
-      extension: CurrencyTradingSettingsRepository.CommissionType.qry,
+      extension: RemittanceOutwardsRepository.FreeScheduleDetail.qry,
       parameters: '_filter='
     })
 
@@ -141,12 +138,12 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
 
     try {
       const allCommissionFees = await getRequest({
-        extension: RemittanceSettingsRepository.ProductScheduleFees.qry, //qryPSF
+        extension: RemittanceOutwardsRepository.FreeScheduleDetail.qry, //qryPSF
         parameters: `_productId=${pId}&_seqNo=${_seqNo}&_rangeSeqNo=${0}`
       })
 
       const res = await getRequest({
-        extension: RemittanceSettingsRepository.ProductScheduleRanges.qry,
+        extension: RemittanceOutwardsRepository.FreeScheduleDetail.qry,
         parameters: parameters
       })
 
@@ -186,73 +183,8 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
   return (
     store.plantId &&
     store.currencyId && (
-      <FormShell form={formik} resourceId={ResourceIds.ProductMaster} maxAccess={maxAccess} editMode={editMode}>
+      <FormShell form={formik} resourceId={ResourceIds.FeeSchedule} maxAccess={maxAccess} editMode={editMode}>
         <VertLayout>
-          <Fixed>
-            <Grid container xs={12} spacing={3}>
-              <Grid item xs={3}>
-                <ResourceComboBox
-                  endpointId={SystemRepository.Plant.qry}
-                  name='plantId'
-                  label={labels.plant}
-                  valueField='recordId'
-                  values={store}
-                  readOnly={true}
-                  displayField={['reference', 'name']}
-                  columnsInDropDown={[
-                    { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
-                  ]}
-                />
-              </Grid>
-              <Grid item xs={3}>
-                <ResourceComboBox
-                  store={countries}
-                  name='countryId'
-                  label={labels.country}
-                  readOnly={true}
-                  valueField='countryId'
-                  displayField={['countryRef', 'countryName']}
-                  columnsInDropDown={[
-                    { key: 'countryRef', value: 'Reference' },
-                    { key: 'countryName', value: 'Name' }
-                  ]}
-                  values={store}
-                />
-              </Grid>
-              <Grid item xs={3}>
-                <ResourceComboBox
-                  name='currencyId'
-                  label={labels.currency}
-                  endpointId={SystemRepository.Currency.qry}
-                  valueField='recordId'
-                  values={store}
-                  displayField={['reference', 'name']}
-                  columnsInDropDown={[
-                    { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
-                  ]}
-                  readOnly={true}
-                />
-              </Grid>
-              <Grid item xs={3}>
-                {}
-                <ResourceComboBox
-                  store={store?.dispersals}
-                  name='dispersalId'
-                  label={labels.dispersal}
-                  valueField='recordId'
-                  values={store}
-                  displayField={['reference', 'name']}
-                  columnsInDropDown={[
-                    { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
-                  ]}
-                  readOnly={true}
-                />
-              </Grid>
-            </Grid>
-          </Fixed>
           <Grow key={_seqNo}>
             <DataGrid
               onChange={value => formik.setFieldValue('productLegs', value)}
@@ -267,4 +199,4 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
   )
 }
 
-export default ProductLegForm
+export default FeesDetailsForm
