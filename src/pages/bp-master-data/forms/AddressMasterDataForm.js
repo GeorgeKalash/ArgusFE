@@ -5,12 +5,14 @@ import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepos
 import AddressGridTab from 'src/components/Shared/AddressGridTab'
 import { useWindow } from 'src/windows'
 import BPAddressForm from './BPAddressForm'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const AddressMasterDataForm = ({ store, maxAccess, labels, editMode, ...props }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [addressGridData, setAddressGridData] = useState([]) //for address tab
   const { stack } = useWindow()
+  const { platformLabels } = useContext(ControlContext)
 
   const getAddressGridData = bpId => {
     setAddressGridData([])
@@ -36,7 +38,8 @@ const AddressMasterDataForm = ({ store, maxAccess, labels, editMode, ...props })
       record: JSON.stringify(obj)
     })
       .then(res => {
-        toast.success('Record Deleted Successfully')
+        toast.success(platformLabels.Deleted)
+
         getAddressGridData(bpId)
       })
       .catch(error => {})

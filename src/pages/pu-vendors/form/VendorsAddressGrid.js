@@ -5,12 +5,14 @@ import AddressGridTab from 'src/components/Shared/AddressGridTab'
 import { useWindow } from 'src/windows'
 import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
 import VendorsAddressForm from './VendorsAddressForm'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const VendorsAddressGrid = ({ store, maxAccess, labels, editMode, ...props }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [addressGridData, setAddressGridData] = useState([])
   const { stack } = useWindow()
+  const { platformLabels } = useContext(ControlContext)
 
   const getAddressGridData = vendorId => {
     setAddressGridData([])
@@ -38,7 +40,7 @@ const VendorsAddressGrid = ({ store, maxAccess, labels, editMode, ...props }) =>
       record: JSON.stringify(obj)
     })
       .then(res => {
-        toast.success('Record Deleted Successfully')
+        toast.success(platformLabels.Deleted)
         getAddressGridData(vendorId)
       })
       .catch(error => {})

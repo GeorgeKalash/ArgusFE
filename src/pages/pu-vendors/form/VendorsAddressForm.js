@@ -3,10 +3,12 @@ import AddressForm from 'src/components/Shared/AddressForm'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import toast from 'react-hot-toast'
 import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const VendorsAddressForm = ({ getAddressGridData, recordId, vendorId, window, props }) => {
   const [address, setAddress] = useState()
   const { postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const onSubmit = async obj => {
     try {
@@ -23,9 +25,9 @@ const VendorsAddressForm = ({ getAddressGridData, recordId, vendorId, window, pr
         })
 
         if (!obj.recordId) {
-          toast.success('Record Added Successfully')
+          toast.success(platformLabels.Added)
         } else {
-          toast.success('Record Edited Successfully')
+          toast.success(platformLabels.Edited)
         }
       }
 
