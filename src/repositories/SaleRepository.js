@@ -92,5 +92,23 @@ export const SaleRepository = {
     set: service + 'setPT',
     del: service + 'delPT',
     page: service + 'pagePT'
+  },
+  SaleZoneLevel: {
+    qry: service + 'qryZOL',
+    set2: service + 'set2ZOL'
+  },
+  SaleTransaction: {
+    qry: service + 'qryTR',
+    get: service + 'getTR',
+    set: service + 'setTR',
+    del: service + 'delTR',
+    snapshot: service + 'snapshotTR'
+  },
+  SalesOrder: {
+    qry: service + 'qryORD',
+    get: service + 'getORD',
+    set: service + 'setORD',
+    del: service + 'delORD',
+    snapshot: service + 'snapshotORD'
   }
 }

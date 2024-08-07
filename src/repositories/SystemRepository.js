@@ -185,5 +185,11 @@ export const SystemRepository = {
   },
   TimeZone: {
     get: service + 'getTZN'
+  },
+  GovernmentOrganization: {
+    qry: service + 'qryGO',
+    set: service + 'setGO',
+    get: service + 'getGO',
+    del: service + 'delGO'
   }
 }

@@ -120,6 +120,12 @@ export const FinancialRepository = {
     set: service + 'setPV',
     del: service + 'delPV',
     post: service + 'postPV',
-    cancel: service + 'cancelPV',
+    cancel: service + 'cancelPV'
+  },
+  AgingProfile: {
+    qry: service + 'qryAGP',
+    get: service + 'getAGP',
+    set: service + 'setAGP',
+    del: service + 'delAGP'
   }
 }

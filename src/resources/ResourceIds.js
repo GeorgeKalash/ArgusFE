@@ -170,5 +170,32 @@ export const ResourceIds = {
   ReturnPolicy: 51108,
   SalesTeam: 51117,
   PriceGroups: 51107,
-  PaymentTerm: 51102
+  PaymentTerm: 51102,
+  Module: 20128, //filter
+  NotificationGroups: 23103,
+  FinancialStatements: 30106,
+  FIAgingProfile: 31104,
+  Item: 41201,
+  Overhead: 42104,
+  VendorGroup: 50101,
+  Vendor: 50201,
+  PurchaseInvoices: 50304,
+  SaleZone: 51103,
+  SalesZoneLevels: 51111,
+  Client: 51202,
+  SalesQuotation: 51301,
+  SalesOrder: 51302,
+  Driver: 52201,
+  Vehicle: 52202,
+  SecurityGroupsFilter: 90101,
+  AssetClass: 43101,
+  AssetGroup: 43102,
+  Location: 43103,
+  MDAssets: 43200,
+  StockCounts: 44201, //stock count cycle
+  ReplenishmentGroup: 46102,
+  Design: 42109,
+  GovernmentOrganizationFilter: 70106,
+  NotificationTransaction: 23301, // Notification center
+  MFJobOrders: 42302
 }
