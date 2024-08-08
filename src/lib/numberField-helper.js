@@ -28,8 +28,7 @@ const getFormattedNumber = (value, decimal) => {
 
   let formattedDecimalPart = ''
   let formattedValue = ''
-  // If there is a decimal part
-  // ensure it has exactly as much decimal places as required
+
   if (decimalPart !== undefined) {
     if (decimal !== undefined) {
       formattedDecimalPart = `.${decimalPart.slice(0, decimal)}`
@@ -38,11 +37,10 @@ const getFormattedNumber = (value, decimal) => {
     }
     formattedValue = `${formattedIntegerPart}${formattedDecimalPart}`
   } else {
-    formattedValue = parseInt(formattedIntegerPart)?.toFixed(decimal)
+    if (decimal) {
+      formattedValue = parseInt(formattedIntegerPart)?.toFixed(decimal)
+    }
   }
-
-  // Combine the formatted parts
-  // const formattedValue = `${formattedIntegerPart}${formattedDecimalPart}`
 
   return formattedValue
 }
