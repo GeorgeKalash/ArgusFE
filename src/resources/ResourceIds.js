@@ -141,8 +141,9 @@ export const ResourceIds = {
   LOTransportation: 40302,
   OpeningBalance: 33311,
   AccountBalance: 33107,
-  CARebuildAccountBalance: 33501,
   CATransaction: 33312,
+  FiscalYears: 20109,
+  CARebuildAccountBalance: 33501,
   CATransaction: 33312,
   UserDashboard: 51400,
   ProductionRequestLog: 42321,
@@ -163,6 +164,8 @@ export const ResourceIds = {
   PaymentVouchers: 31305,
   Roles: 21103,
   Checkbook: 33201,
+  PaymentVouchers: 31305,
+  PaymentVoucherExpenses: 31343,
   MobileSystemDefaults: 36123,
   Measurement: 41102,
   Category: 41103,
@@ -177,5 +180,6 @@ export const ResourceIds = {
   PaymentTerm: 51102,
   DocumentTypeDefault: 51106,
   VendorGroups: 50101,
-  IntegrationLogics: 30101 
+  IntegrationLogics: 30101, 
+  ConsignmentSites: 51110
 }

@@ -6,38 +6,37 @@ import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { useForm } from 'src/hooks/form'
-import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { useForm } from 'src/hooks/form'
+import { SystemRepository } from 'src/repositories/SystemRepository'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+
 import { ControlContext } from 'src/providers/ControlContext'
 import { SaleRepository } from 'src/repositories/SaleRepository'
-import CustomNumberField from 'src/components/Inputs/CustomNumberField'
-import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 
 export default function DocumentTypeDefaultForm({ labels, maxAccess, dtId }) {
-  const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
+  const { getRequest, postRequest } = useContext(RequestsContext)
+
   const invalidate = useInvalidate({
-    endpointId: SaleRepository.DocumentTypeDefault.page
+    endpointId: SaleRepository.DocumentTypeDefault.qry
   })
 
   const { formik } = useForm({
     initialValues: {
-      dtId: dtId || null,
-      spId: '',
-      disableSKULookup: false,
-      validity: ''
+      recordId: dtId || null,
+      commitItems: false,
+      dtId: '',
+
+      disableSKULookup: false
     },
-    enableReinitialize: true,
-    validateOnChange: true,
+    maxAccess,
+    enableReinitialize: false,
     validationSchema: yup.object({
-      dtId: yup.string().required(),
-
-      validity: yup.number().required()
+      dtId: yup.string().required()
     }),
-
     onSubmit: async obj => {
       try {
         const response = await postRequest({
@@ -47,6 +46,7 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, dtId }) {
 
         if (!formik.values.recordId) {
           formik.setFieldValue('recordId', formik.values.dtId)
+
           toast.success(platformLabels.Added)
         } else toast.success(platformLabels.Edited)
 
@@ -55,6 +55,7 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, dtId }) {
     }
   })
   const editMode = !!formik.values.recordId
+
   useEffect(() => {
     ;(async function () {
       try {
@@ -64,9 +65,9 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, dtId }) {
             parameters: `_dtId=${dtId}`
           })
 
-          formik.setValues({ ...res.record, recordId: dtId })
+          formik.setValues({ ...res.record, recordId: res.record.dtId })
         }
-      } catch (error) {}
+      } catch (exception) {}
     })()
   }, [])
 
@@ -78,77 +79,40 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, dtId }) {
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
-                parameters={`_dgId=5100&_startAt=0&_pageSize=1000&_filter=`}
+                parameters={`_startAt=0&_pageSize=1000&_dgId=${5107}`}
                 name='dtId'
+                required
                 label={labels.documentType}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
                 ]}
-                readOnly={editMode}
                 valueField='recordId'
                 displayField={['reference', 'name']}
+                readOnly={editMode}
                 values={formik.values}
-                required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik && formik.setFieldValue('dtId', newValue?.recordId)
+                  formik && formik.setFieldValue('dtId', newValue?.recordId || '')
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
               />
             </Grid>
+
             <Grid item xs={12}>
-              <ResourceComboBox
-                endpointId={SaleRepository.SalesPerson.qry}
-                name='spId'
-                label={labels.salesPerson}
-                valueField='recordId'
-                displayField='name'
-                columnsInDropDown={[{ key: 'name', value: 'name' }]}
-                values={formik.values}
-                maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('spId', newValue ? newValue.recordId : '')
-                }}
-                error={formik.touched.spId && Boolean(formik.errors.spId)}
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    maxAccess={maxAccess}
+                    name='commitItems'
+                    checked={formik.values?.commitItems}
+                    onChange={formik.handleChange}
+                  />
+                }
+                label={labels.commitItems}
               />
             </Grid>
-            <Grid item xs={12}>
-              <CustomNumberField
-                name='validity'
-                required
-                label={labels.validity}
-                value={formik.values.validity}
-                maxAccess={maxAccess}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('validity', '')}
-                error={formik.touched.validity && Boolean(formik.errors.validity)}
-                helperText={formik.touched.validity && formik.values.validity > 1000 ? platformLabels.validity1000 : ''}
-                allowNegative={false}
-                decimalScale={0}
-                maxLength={3}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <ResourceComboBox
-                endpointId={SystemRepository.Plant.qry}
-                name='plantId'
-                label={labels.plant}
-                valueField='recordId'
-                displayField={['reference', 'name']}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'plant Ref' },
-                  { key: 'name', value: 'Name' }
-                ]}
-                values={formik.values}
-                maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  const plantId = newValue?.recordId || ''
-                  formik.setFieldValue('plantId', plantId)
-                }}
-                error={formik.touched.plantId && Boolean(formik.errors.plantId)}
-              />
-            </Grid>
+
             <Grid item xs={12}>
               <FormControlLabel
                 control={
