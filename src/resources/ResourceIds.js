@@ -176,5 +176,6 @@ export const ResourceIds = {
   PriceGroups: 51107,
   PaymentTerm: 51102,
   DocumentTypeDefault: 51106,
-  VendorGroups: 50101
+  VendorGroups: 50101,
+  IntegrationLogics: 30101 
 }

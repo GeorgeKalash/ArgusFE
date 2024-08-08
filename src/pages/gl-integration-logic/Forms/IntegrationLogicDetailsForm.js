@@ -1,0 +1,229 @@
+import { Checkbox, FormControlLabel, Grid } from '@mui/material'
+import { useContext, useEffect } from 'react'
+import { useForm } from 'src/hooks/form'
+import * as yup from 'yup'
+import FormShell from 'src/components/Shared/FormShell'
+import toast from 'react-hot-toast'
+import { RequestsContext } from 'src/providers/RequestsContext'
+import { ResourceIds } from 'src/resources/ResourceIds'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import { DataSets } from 'src/resources/DataSets'
+import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
+import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
+import CustomTextArea from 'src/components/Inputs/CustomTextArea'
+
+export default function IntegrationLogicDetailsForm({ ilId, recordId, labels, maxAccess, getGridData, window, editMode }) {
+  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
+
+  const { formik } = useForm({
+    initialValues: {
+      recordId: recordId || null,
+      ilId,
+      sign: '',
+      tagId: '',
+      integrationLevel: '',
+      masterSource: '',
+      postTypeId: '',
+      description: '',
+      isCostElement: false
+    },
+    enableReinitialize: true,
+    validateOnChange: true,
+    validationSchema: yup.object({
+      sign: yup.string().required(),
+      integrationLevel: yup.string().required(),
+      masterSource: yup.string().required(),
+      postTypeId: yup.string().required()
+    }),
+    onSubmit: async obj => {
+      try {
+        const res2 = await fetchData()
+        const seqNo = res2.list.length > 0 ? res2.list[res2.list.length - 1]?.seqNo + 1 : 1
+
+        const data = {
+          ...obj,
+          seqNo
+        }
+
+        const dataToSave = {
+          ilId,
+          details: [...res2.list, data]
+        }
+
+        const response = await postRequest({
+          extension: GeneralLedgerRepository.IntegrationLogicDetails.set2,
+          record: JSON.stringify(dataToSave)
+        })
+
+        !recordId ? toast.success(platformLabels.Added) : toast.success(platformLabels.Edited)
+
+        formik.setFieldValue('recordId', response.recordId)
+        await getGridData(ilId)
+        window.close()
+      } catch (error) {}
+    }
+  })
+
+  async function fetchData() {
+    try {
+      if (ilId) {
+        const response = await getRequest({
+          extension: GeneralLedgerRepository.IntegrationLogicDetails.qry,
+          parameters: `_ilId=${ilId}`
+        })
+
+        return response
+      }
+    } catch (error) {}
+  }
+
+  const getIntegrationLogicById = async recordId => {
+    try {
+      const res = await getRequest({
+        extension: GeneralLedgerRepository.IntegrationLogicDetails.get,
+        parameters: `_recordId=${recordId}`
+      })
+
+      formik.setValues(res.record)
+    } catch (error) {}
+  }
+
+  useEffect(() => {
+    recordId && getIntegrationLogicById(recordId)
+  }, [recordId])
+
+  return (
+    <FormShell
+      resourceId={ResourceIds.IntegrationLogics}
+      form={formik}
+      maxAccess={maxAccess}
+      editMode={editMode}
+      isCleared={false}
+      isInfo={false}
+    >
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={4}>
+            <Grid item xs={12}>
+              <ResourceLookup
+                endpointId={GeneralLedgerRepository.IntegrationPostTypes.snapshot}
+                parameters={{
+                  _type: 0
+                }}
+                required
+                name='postTypeId'
+                label={labels.postTypes}
+                valueField='reference'
+                displayField='name'
+                valueShow='postTypeRef'
+                secondValueShow='postTypeName'
+                form={formik}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('postTypeId', newValue?.recordId || '')
+                  formik.setFieldValue('postTypeRef', newValue?.reference || '')
+                  formik.setFieldValue('postTypeName', newValue?.name || '')
+                }}
+                error={formik.touched.postTypeId && Boolean(formik.errors.postTypeId)}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.Sign}
+                name='sign'
+                label={labels.sign}
+                values={formik.values}
+                valueField='key'
+                displayField='value'
+                required
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik && formik.setFieldValue('sign', newValue ? newValue.key : '')
+                }}
+                error={formik.touched.sign && Boolean(formik.errors.sign)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.GLI_MASTER_SOURCE}
+                name='masterSource'
+                label={labels.masterSource}
+                values={formik.values}
+                valueField='key'
+                displayField='value'
+                required
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik && formik.setFieldValue('masterSource', newValue ? newValue.key : '')
+                }}
+                error={formik.touched.masterSource && Boolean(formik.errors.masterSource)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.GLI_TAG}
+                name='tagId'
+                label={labels.tag}
+                values={formik.values}
+                valueField='key'
+                displayField='value'
+                required
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik && formik.setFieldValue('tagId', newValue ? newValue.key : '')
+                }}
+                error={formik.touched.tagId && Boolean(formik.errors.tagId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.GLI_INTEGRATION_LEVEL}
+                name='integrationLevel'
+                label={labels.integrationLevel}
+                values={formik.values}
+                valueField='key'
+                displayField='value'
+                required
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik && formik.setFieldValue('integrationLevel', newValue ? newValue.key : '')
+                }}
+                error={formik.touched.integrationLevel && Boolean(formik.errors.integrationLevel)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextArea
+                name='description'
+                label={labels.description}
+                value={formik.values.description}
+                maxLength='100'
+                rows={2}
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('description', '')}
+                error={formik.touched.description && Boolean(formik.errors.description)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name='isCostElement'
+                    maxAccess={maxAccess}
+                    checked={formik.values?.isCostElement}
+                    onChange={formik.handleChange}
+                  />
+                }
+                label={labels.isCostElement}
+              />
+            </Grid>
+          </Grid>
+        </Grow>
+      </VertLayout>
+    </FormShell>
+  )
+}
