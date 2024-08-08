@@ -12,10 +12,12 @@ import { DataSets } from 'src/resources/DataSets'
 import { CommonContext } from 'src/providers/CommonContext'
 import { ControlContext } from 'src/providers/ControlContext'
 
-const PeriodsForm = ({ recordId, labels, maxAccess, row, window, editMode }) => {
+const PeriodsModuleForm = ({ recordId, labels, maxAccess, row, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getAllKvsByDataset } = useContext(CommonContext)
   const { platformLabels } = useContext(ControlContext)
+
+  const editMode = !!recordId
 
   const post = async obj => {
     try {
@@ -164,4 +166,4 @@ const PeriodsForm = ({ recordId, labels, maxAccess, row, window, editMode }) => 
   )
 }
 
-export default PeriodsForm
+export default PeriodsModuleForm

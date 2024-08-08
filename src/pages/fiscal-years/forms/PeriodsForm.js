@@ -111,11 +111,10 @@ const PeriodsForm = ({ labels, maxAccess, store }) => {
         stack({
           Component: PeriodsModuleForm,
           props: {
-            labels: labels,
-            maxAccess: maxAccess,
+            labels,
+            maxAccess,
             row,
-            recordId,
-            editMode: editMode
+            recordId
           },
           width: 600,
 
