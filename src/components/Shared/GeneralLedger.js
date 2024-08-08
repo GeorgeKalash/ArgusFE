@@ -65,6 +65,7 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
         currencyId: '',
         sign: '',
         signName: '',
+        sourceReference: '',
         notes: '',
         functionId: functionId,
         exRate: '',
@@ -217,12 +218,12 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
         costCenterId: row.costCenterId,
         costCenterRef: row.costCenterRef,
         costCenterName: row.costCenterName,
-
         currencyRef: row.currencyRef,
         currencyId: row.currencyId,
 
         sign: row.sign,
         signName: row.signName,
+        sourceReference: row.sourceReference,
         notes: row.notes,
         exRate: row.exRate,
         rateCalcMethod: row.rateCalcMethod,
@@ -482,6 +483,14 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
                 { from: 'value', to: 'signName' },
                 { from: 'key', to: 'sign' }
               ]
+            }
+          },
+          {
+            component: 'textfield',
+            label: _labels.sourceReference,
+            name: 'sourceReference',
+            props: {
+              maxLength: 2
             }
           },
           {
