@@ -248,21 +248,19 @@ export default function VendorsForm({ labels, maxAccess: access, recordId, setSt
               />
             </Grid>
             <Grid item xs={12}>
-              <Grid item xs={12}>
-                <ResourceComboBox
-                  datasetId={DataSets.PAYMENT_METHOD}
-                  name='paymentMethod'
-                  label={labels.payment}
-                  valueField='key'
-                  displayField='value'
-                  values={formik.values}
-                  onChange={async (event, newValue) => {
-                    formik.setFieldValue('paymentMethod', newValue?.key)
-                  }}
-                  error={formik.touched.paymentMethod && Boolean(formik.errors.paymentMethod)}
-                  maxAccess={maxAccess}
-                />
-              </Grid>
+              <ResourceComboBox
+                datasetId={DataSets.PAYMENT_METHOD}
+                name='paymentMethod'
+                label={labels.payment}
+                valueField='key'
+                displayField='value'
+                values={formik.values}
+                onChange={async (event, newValue) => {
+                  formik.setFieldValue('paymentMethod', newValue?.key)
+                }}
+                error={formik.touched.paymentMethod && Boolean(formik.errors.paymentMethod)}
+                maxAccess={maxAccess}
+              />
             </Grid>
             <Grid item xs={12}>
               <CustomNumberField

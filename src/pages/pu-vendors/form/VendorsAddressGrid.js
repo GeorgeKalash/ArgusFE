@@ -55,8 +55,8 @@ const VendorsAddressGrid = ({ store, maxAccess, labels, editMode, ...props }) =>
       Component: VendorsAddressForm,
       props: {
         _labels: labels,
-        maxAccess: maxAccess,
-        editMode: editMode,
+        maxAccess,
+        editMode,
         recordId: id,
         vendorId: recordId,
         getAddressGridData: getAddressGridData

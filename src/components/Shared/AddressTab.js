@@ -191,8 +191,6 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true }) =>
             </FormGrid>
 
             <FormGrid hideonempty xs={12}>
-              {}
-
               <ResourceLookup
                 endpointId={SystemRepository.City.snapshot}
                 parameters={{
