@@ -56,27 +56,27 @@ const AuthProvider = ({ children }) => {
       }
     }
     initAuth()
+  }, [])
 
-    const fetchData = async () => {
-      const matchHostname = window.location.hostname.match(/^(.+)\.softmachine\.co$/)
+  const fetchData = async () => {
+    const matchHostname = window.location.hostname.match(/^(.+)\.softmachine\.co$/)
+    const accountName = matchHostname ? matchHostname[1] : 'byc-deploy'
 
-      const accountName = matchHostname ? matchHostname[1] : 'byc-deploy'
+    try {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=${accountName}`)
 
-      try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=${accountName}`)
-
-        setCompanyName(response.data.record.companyName)
-        setGetAC(response)
-        window.localStorage.setItem('apiUrl', response.data.record.api)
-      } catch (error) {
-        console.error('Error fetching data:', error)
-      }
+      setCompanyName(response.data.record.companyName)
+      setGetAC(response)
+      window.localStorage.setItem('apiUrl', response.data.record.api)
 
       setLoading(false)
-    }
 
-    fetchData()
-  }, [])
+      return window.localStorage.getItem('apiUrl')
+    } catch (error) {
+      console.error('Error fetching data:', error)
+      setLoading(false)
+    }
+  }
 
   const handleLogin = async (params, errorCallback) => {
     try {
@@ -211,6 +211,7 @@ const AuthProvider = ({ children }) => {
     logout: handleLogout,
     getAccessToken,
     encryptePWD,
+    fetchData,
     getAC,
     apiUrl: getAC?.data?.record.api || (typeof window !== 'undefined' ? window.localStorage.getItem('apiUrl') : '')
   }
