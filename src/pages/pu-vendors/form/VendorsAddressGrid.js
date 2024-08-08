@@ -62,6 +62,7 @@ const VendorsAddressGrid = ({ store, maxAccess, labels, editMode, ...props }) =>
         getAddressGridData: getAddressGridData
       },
       width: 600,
+      height: 500,
       title: labels.address
     })
   }
