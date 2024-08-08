@@ -1,7 +1,6 @@
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import { CustomTabs } from 'src/components/Shared/CustomTabs'
 import { useState } from 'react'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import VendorsForm from '../form/VendorsForm'
 import VendorsAddressGrid from '../form/VendorsAddressGrid'
 
