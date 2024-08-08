@@ -56,7 +56,7 @@ const ItemForm = ({ tlId, labels, seqNo, getGridData, maxAccess, window }) => {
       record: JSON.stringify(obj)
     })
       .then(res => {
-        if (!recordId) {
+        if (!obj.seqNo) {
           toast.success(platformLabels.Added)
         } else toast.success(platformLabels.Edited)
 
@@ -83,7 +83,7 @@ const ItemForm = ({ tlId, labels, seqNo, getGridData, maxAccess, window }) => {
   }, [seqNo])
 
   return (
-    <FormShell form={formik} resourceId={ResourceIds.Dispersal} editMode={seqNo} maxAccess={maxAccess}>
+    <FormShell form={formik} maxAccess={maxAccess} infoVisible={false}>
       <VertLayout>
         <Grow>
           <Grid container gap={2}>

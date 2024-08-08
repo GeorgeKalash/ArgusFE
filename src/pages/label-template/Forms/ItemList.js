@@ -48,12 +48,20 @@ const ItemList = ({ recordId: tlId, labels, maxAccess }) => {
     {
       field: 'x',
       headerName: 'X',
-      flex: 1
+      flex: 1,
+      type: {
+        field: 'number',
+        decimal: 2
+      }
     },
     {
       field: 'y',
       headerName: 'Y',
-      flex: 1
+      flex: 1,
+      type: {
+        field: 'number',
+        decimal: 2
+      }
     },
     {
       field: 'font',
@@ -63,7 +71,11 @@ const ItemList = ({ recordId: tlId, labels, maxAccess }) => {
     {
       field: 'fontSize',
       headerName: labels.fontSize,
-      flex: 1
+      flex: 1,
+      type: {
+        field: 'number',
+        decimal: 2
+      }
     }
   ]
 

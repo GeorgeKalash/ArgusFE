@@ -86,7 +86,7 @@ const LabelTemplate = () => {
         editMode: recordId && true
       },
       width: 800,
-      height: 500,
+      height: 450,
       title: _labels.labeltemplate
     })
   }

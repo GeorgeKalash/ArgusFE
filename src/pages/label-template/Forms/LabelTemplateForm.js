@@ -91,7 +91,7 @@ const LabelTemplateForm = ({ labels, maxAccess, store, setStore, editMode }) => 
 
   return (
     <FormShell form={formik} resourceId={ResourceIds.Plants} maxAccess={maxAccess} editMode={editMode}>
-      <Grid container spacing={4}>
+      <Grid container spacing={2}>
         <Grid item xs={12}>
           <CustomTextField
             name='name'
@@ -110,6 +110,7 @@ const LabelTemplateForm = ({ labels, maxAccess, store, setStore, editMode }) => 
             type='number'
             label={labels.width}
             value={formik.values.width}
+            required
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('width', '')}
             error={formik.touched.width && Boolean(formik.errors.width)}
@@ -122,6 +123,7 @@ const LabelTemplateForm = ({ labels, maxAccess, store, setStore, editMode }) => 
             type='number'
             label={labels.height}
             value={formik.values.height}
+            required
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('height', '')}
             error={formik.touched.height && Boolean(formik.errors.height)}
