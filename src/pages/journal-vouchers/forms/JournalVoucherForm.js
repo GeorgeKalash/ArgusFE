@@ -42,12 +42,13 @@ export default function JournalVoucherForm({ labels, access, recordId, general =
       dtId: documentType?.dtId,
       status: 1,
       rateCalcMethod: 1,
-      exRate: 1
+      exRate: 1,
+      sourceReference: ''
     },
     validateOnChange: true,
     validationSchema: yup.object({
-      date: yup.string().required('This field is required'),
-      currencyId: yup.string().required('This field is required')
+      date: yup.string().required(),
+      currencyId: yup.string().required()
     }),
     onSubmit: async obj => {
       const data = {
@@ -174,7 +175,7 @@ export default function JournalVoucherForm({ labels, access, recordId, general =
             required
           />
         </Grid>
-        <Grid item xs={12}>
+        <Grid item xs={6}>
           <CustomTextArea
             name='notes'
             label={labels.notes}
@@ -185,6 +186,18 @@ export default function JournalVoucherForm({ labels, access, recordId, general =
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('notes', '')}
             error={formik.touched.notes && Boolean(formik.errors.notes)}
+          />
+        </Grid>
+        <Grid item xs={6}>
+          <CustomTextField
+            name='sourceReference'
+            label={labels.sourceReference}
+            value={formik.values.sourceReference}
+            onChange={formik.handleChange}
+            onClear={() => formik.setFieldValue('sourceReference', '')}
+            maxLength='20'
+            maxAccess={maxAccess}
+            error={formik.touched.sourceReference && Boolean(formik.errors.sourceReference)}
           />
         </Grid>
       </Grid>
