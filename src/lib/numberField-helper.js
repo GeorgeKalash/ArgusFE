@@ -27,21 +27,23 @@ const getFormattedNumber = (value, decimal) => {
   const formattedIntegerPart = new Intl.NumberFormat('en-US').format(integerPart)
 
   let formattedDecimalPart = ''
-  let formattedValue = ''
 
+  // If there is a decimal part
+  // ensure it has exactly as much decimal places as required
   if (decimalPart !== undefined) {
     if (decimal !== undefined) {
       formattedDecimalPart = `.${decimalPart.slice(0, decimal)}`
     } else {
       formattedDecimalPart = `.${decimalPart}`
     }
-    formattedValue = `${formattedIntegerPart}${formattedDecimalPart}`
-  } else {
-    if (decimal) {
-      formattedValue = parseInt(formattedIntegerPart)?.toFixed(decimal)
-    }
   }
 
+  // Combine the formatted parts
+  let formattedValue = `${formattedIntegerPart}${formattedDecimalPart}`
+
+  if (decimal !== undefined && decimal >= 0 && !formattedValue.includes('.')) {
+    formattedValue += '.' + '0'.repeat(decimal)
+  }
   return formattedValue
 }
 
