@@ -18,7 +18,7 @@ const VendorsWindow = ({ labels, maxAccess, recordId }) => {
   return (
     <>
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-      <CustomTabPanel height={height} index={0} value={activeTab}>
+      <CustomTabPanel index={0} value={activeTab}>
         <VendorsForm labels={labels} maxAccess={maxAccess} recordId={recordId} setStore={setStore} />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
