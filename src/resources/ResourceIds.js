@@ -141,8 +141,9 @@ export const ResourceIds = {
   LOTransportation: 40302,
   OpeningBalance: 33311,
   AccountBalance: 33107,
-  CARebuildAccountBalance: 33501,
   CATransaction: 33312,
+  FiscalYears: 20109,
+  CARebuildAccountBalance: 33501,
   CATransaction: 33312,
   UserDashboard: 51400,
   ProductionRequestLog: 42321,
@@ -179,5 +180,6 @@ export const ResourceIds = {
   PaymentTerm: 51102,
   DocumentTypeDefault: 51106,
   VendorGroups: 50101,
+  ConsignmentSites: 51110,
   LabelTemplates: 44102
 }
