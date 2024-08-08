@@ -5,7 +5,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import VendorsForm from '../form/VendorsForm'
 import VendorsAddressGrid from '../form/VendorsAddressGrid'
 
-const VendorsWindow = ({ labels, maxAccess, recordId, height }) => {
+const VendorsWindow = ({ labels, maxAccess, recordId }) => {
   const [activeTab, setActiveTab] = useState(0)
 
   const [store, setStore] = useState({
@@ -23,7 +23,6 @@ const VendorsWindow = ({ labels, maxAccess, recordId, height }) => {
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
         <VendorsAddressGrid
-          height={height}
           labels={labels}
           recordId={store.recordId}
           maxAccess={maxAccess}

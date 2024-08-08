@@ -26,7 +26,7 @@ export default function VendorsForm({ labels, maxAccess: access, recordId, setSt
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: RemittanceSettingsRepository.Profession.page
+    endpointId: PurchaseRepository.Vendor.qry
   })
 
   const { maxAccess, changeDT } = useDocumentType({
@@ -68,25 +68,24 @@ export default function VendorsForm({ labels, maxAccess: access, recordId, setSt
       name: yup.string().required()
     }),
     onSubmit: async obj => {
-      const response = await postRequest({
-        extension: PurchaseRepository.Vendor.set,
-        record: JSON.stringify(obj)
-      })
-
-      if (!obj.recordId) {
-        setStore({
-          recordId: response.recordId,
-          name: obj.name
+      try {
+        const response = await postRequest({
+          extension: PurchaseRepository.Vendor.set,
+          record: JSON.stringify(obj)
         })
-        toast.success(platformLabels.Added)
 
-        formik.setValues({
-          ...obj,
-          recordId: response.recordId
-        })
-      } else toast.success(platformLabels.Edited)
+        if (!obj.recordId) {
+          setStore({
+            recordId: response.recordId,
+            name: obj.name
+          })
 
-      invalidate()
+          toast.success(platformLabels.Added)
+          formik.setFieldValue('recordId', response.recordId)
+        } else toast.success(platformLabels.Edited)
+
+        invalidate()
+      } catch (e) {}
     }
   })
   const editMode = !!formik.values.recordId

@@ -1,10 +1,8 @@
 import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
-import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -36,12 +34,10 @@ const PuVendors = () => {
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
-    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=&_sortField=`
-    var parameters = defaultParams
 
     const response = await getRequest({
-      extension: PurchaseRepository.Vendor.qry,
-      parameters: parameters
+      extension: PurchaseRepository.Vendor.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=&_sortField=`
     })
 
     return { ...response, _startAt: _startAt }
@@ -86,7 +82,7 @@ const PuVendors = () => {
       Component: VendorsWindow,
       props: {
         labels: _labels,
-        recordId: recordId || null,
+        recordId: recordId,
         maxAccess: access
       },
       width: 700,
