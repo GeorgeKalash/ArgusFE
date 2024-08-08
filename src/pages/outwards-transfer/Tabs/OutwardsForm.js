@@ -124,6 +124,9 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
     hiddenSponserName: '',
     otpVerified: false,
     bankType: '',
+    corCurrencyId: '',
+    corAmount: '',
+    corCommission: '',
     amountRows: [
       {
         id: 1,
