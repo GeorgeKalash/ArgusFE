@@ -64,12 +64,6 @@ const Table = ({
           valueGetter: ({ data }) => formatDateDefault(data?.[col.field])
         }
       }
-      if (col.type?.field === 'number') {
-        return {
-          ...col,
-          valueGetter: ({ data }) => getFormattedNumber(data?.[col.field], col.type?.decimal)
-        }
-      }
       if (col.type === 'number' || col?.type?.field === 'number') {
         return {
           ...col,
