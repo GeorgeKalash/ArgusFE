@@ -1,10 +1,8 @@
-import { useContext } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useResourceQuery } from 'src/hooks/resource'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
@@ -17,30 +15,20 @@ const MeasurementUnit = ({ store, maxAccess, labels }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const [measurementUnitGridData, setMeasurementUnitGridData] = useState([])
   const { stack } = useWindow()
+  const editMode = !!store.recordId
 
-  async function fetchGridData() {
+  const getMeasurementUnitGridData = async msId => {
     try {
-      if (recordId) {
-        const response = await getRequest({
-          extension: InventoryRepository.MeasurementUnit.qry,
-          parameters: `_msId=${recordId}`
-        })
-    
-        return response
-      }
+      const response = await getRequest({
+        extension: InventoryRepository.MeasurementUnit.qry,
+        parameters: `_msId=${msId}`
+      })
+
+      setMeasurementUnitGridData(response) 
     } catch (error) {}
   }
-
-  const {
-    query: { data },
-    invalidate,
-    refetch
-  } = useResourceQuery({
-    queryFn: fetchGridData,
-    endpointId: InventoryRepository.MeasurementUnit.qry,
-    datasetId: ResourceIds.Measurement
-  })
 
   const columns = [
     {
@@ -61,21 +49,23 @@ const MeasurementUnit = ({ store, maxAccess, labels }) => {
   ]
 
   const add = () => {
-    openForm(null, recordId)
+    openForm()
   }
 
   const edit = obj => {
-    openForm(obj?.recordId, recordId)
+    openForm(obj?.recordId)
   }
 
-  function openForm(recordId, msId) {
+  const openForm = id => { 
     stack({
       Component: MeasurementUnitForm,
       props: {
         labels,
-        recordId,
-        msId,
-        invalidate
+        maxAccess: maxAccess,
+        recordId: id,
+        msId: recordId,
+        editMode: editMode,
+        getMeasurementUnitGridData
       },
       width: 450,
       height: 330,
@@ -83,14 +73,18 @@ const MeasurementUnit = ({ store, maxAccess, labels }) => {
     })
   }
 
+  useEffect(() => {
+    recordId && getMeasurementUnitGridData(recordId)
+  }, [recordId])
+
   const del = async obj => {
     try {
       await postRequest({
         extension: InventoryRepository.MeasurementUnit.del,
         record: JSON.stringify(obj)
       })
-      invalidate()
       toast.success(platformLabels.Deleted)
+      await getMeasurementUnitGridData(recordId)
     } catch (exception) {}
   }
 
@@ -102,14 +96,14 @@ const MeasurementUnit = ({ store, maxAccess, labels }) => {
       <Grow>
         <Table
           columns={columns}
-          gridData={data}
+          gridData={measurementUnitGridData}
           rowId={['recordId']}
+          api={getMeasurementUnitGridData}
           onEdit={edit}
           onDelete={del}
           isLoading={false}
-          pageSize={50}
+          maxAccess={maxAccess}
           pagination={false}
-          refetch={refetch}
         />
       </Grow>
     </VertLayout>

@@ -11,11 +11,16 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { ControlContext } from 'src/providers/ControlContext'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
+import { useInvalidate } from 'src/hooks/resource'
 
-export default function MeasurementForm({ labels, maxAccess, setStore, store, invalidate }) {
+export default function MeasurementForm({ labels, maxAccess, setStore, store, editMode }) {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+
+  const invalidate = useInvalidate({
+    endpointId: InventoryRepository.Measurement.page
+  })
 
   const { formik } = useForm({
     initialValues: {
@@ -51,8 +56,6 @@ export default function MeasurementForm({ labels, maxAccess, setStore, store, in
       } catch (error) {}
     }
   })
-
-  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {

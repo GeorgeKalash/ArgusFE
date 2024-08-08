@@ -13,7 +13,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
-export default function MeasurementUnitForm({ labels, maxAccess, recordId, msId, invalidate }) {
+export default function MeasurementUnitForm({ msId, recordId, labels, maxAccess, getMeasurementUnitGridData, window, editMode }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -48,27 +48,27 @@ export default function MeasurementUnitForm({ labels, maxAccess, recordId, msId,
         !recordId ? toast.success(platformLabels.Added) : toast.success(platformLabels.Edited)
 
         formik.setFieldValue('recordId', response.recordId)
-        invalidate()
+  
+        await getMeasurementUnitGridData(msId)
+        window.close()
       } catch (error) {}
     }
   })
 
-  const editMode = !!formik?.values?.recordId
+  const getMeasurementUnitById = async recordId => {
+    try {
+      const res = await getRequest({
+        extension: InventoryRepository.MeasurementUnit.get,
+        parameters: `_recordId=${recordId}`
+      })
+
+      formik.setValues(res.record)
+    } catch (error) {}
+  }
 
   useEffect(() => {
-    ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: InventoryRepository.MeasurementUnit.get,
-            parameters: `_recordId=${recordId}`
-          })
-
-          formik.setValues(res.record)
-        }
-      } catch (exception) {}
-    })()
-  }, [])
+    recordId && getMeasurementUnitById(recordId)
+  }, [recordId])
 
   return (
     <FormShell 
