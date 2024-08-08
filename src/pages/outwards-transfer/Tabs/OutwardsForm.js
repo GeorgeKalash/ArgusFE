@@ -127,6 +127,16 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
     corCurrencyId: '',
     corAmount: '',
     corCommission: '',
+    corExRate: '',
+    corRateCalcMethod: '',
+    corEvalExRate: '',
+    corEvalRateCalcMethod: '',
+    corFCCommission: '',
+    corBaseAmount: '',
+    grossProfitFromExRate: '',
+    netCommissionRevenue: '',
+    netCommssionCost: '',
+    taxPercent: '',
     amountRows: [
       {
         id: 1,
@@ -342,7 +352,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
     formik.setFieldValue('lcAmount', selectedRowData?.baseAmount)
     formik.setFieldValue('fcAmount', selectedRowData?.originAmount)
     formik.setFieldValue('dispersalId', selectedRowData?.dispersalId)
-    formik.setFieldValue('exRate', selectedRowData?.exRate)
+    formik.setFieldValue('exRate', selectedRowData?.exRate.toFixed(5))
     formik.setFieldValue('rateCalcMethod', selectedRowData?.rateCalcMethod)
     formik.setFieldValue('corId', selectedRowData?.corId)
     formik.setFieldValue('corRef', selectedRowData?.corRef)
@@ -474,7 +484,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       key: 'Post',
       condition: true,
       onClick: onPost,
-      disabled: !isPosted
+      disabled: !isPosted || !formik.values.corId
     },
     {
       key: 'GL',
@@ -548,6 +558,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
         parameters: `_filter=&_key=vatPct`
       })
       formik.setFieldValue('vatRate', parseInt(res.record.value))
+      formik.setFieldValue('taxPercent', parseInt(res.record.value))
     } catch (error) {}
   }
 
@@ -842,7 +853,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                     secondValueShow='corName'
                     maxAccess={maxAccess}
                     editMode={editMode}
-                    readOnly
+                    readOnly={formik.values.corId || (isClosed && formik.values.corId)}
                     onChange={async (event, newValue) => {
                       formik.setFieldValue('corId', newValue ? newValue.recordId : null)
                       formik.setFieldValue('corName', newValue ? newValue.name : null)
@@ -855,7 +866,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                   <Grid item xs={6}>
                     <CustomNumberField
                       name='exRate'
-                      label={labels.exchangeRate}
+                      label={labels.exRateMultiply}
                       value={formik.values.exRate}
                       required
                       readOnly
@@ -869,7 +880,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                   <Grid item xs={6}>
                     <CustomNumberField
                       name='exRate2'
-                      label={labels.exchangeRate}
+                      label={labels.exRateDivide}
                       value={formik.values?.exRate ? 1 / formik.values.exRate : ''}
                       required
                       readOnly
@@ -947,8 +958,13 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                   <Button
                     sx={{
                       backgroundColor: '#908c8c',
-                      color: '#000000'
+                      color: '#000000',
+                      '&:disabled': {
+                        backgroundColor: '#eaeaea',
+                        color: '#000000'
+                      }
                     }}
+                    disabled={!editMode && !formik.values.corId}
                     onClick={() => openInfo()}
                   >
                     Information
