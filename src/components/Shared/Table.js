@@ -30,6 +30,7 @@ import { Fixed } from './Layouts/Fixed'
 
 const Table = ({
   paginationType = '',
+  globalStatus = true,
   viewCheckButtons = false,
   showCheckboxColumn = false,
   rowSelection = '',
@@ -419,7 +420,22 @@ const Table = ({
                   <Image src={editIcon} alt='Edit' width={18} height={18} />
                 </IconButton>
               )}
-              {!isStatus3 && !isStatusCanceled && deleteBtnVisible && !isWIP && (
+              {!globalStatus && deleteBtnVisible && (
+                <IconButton
+                  size='small'
+                  onClick={e => {
+                    if (props.deleteConfirmationType == 'strict') {
+                      openDeleteConfirmation(data)
+                    } else {
+                      openDelete(data)
+                    }
+                  }}
+                  color='error'
+                >
+                  <Image src={deleteIcon} alt={platformLabels.Delete} width={18} height={18} />
+                </IconButton>
+              )}
+              {globalStatus && !isStatus3 && !isStatusCanceled && deleteBtnVisible && !isWIP && (
                 <IconButton
                   size='small'
                   onClick={e => {
