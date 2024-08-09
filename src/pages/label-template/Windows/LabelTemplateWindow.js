@@ -3,7 +3,7 @@ import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import { useState } from 'react'
 import { CustomTabs } from 'src/components/Shared/CustomTabs'
 import LabelTemplateForm from '../Forms/LabelTemplateForm'
-import ItemList from '../Forms/Itemlist'
+import ItemList from '../Forms/ItemList'
 
 const LabelTemplateWindow = ({ labels, editMode, maxAccess, recordId, height }) => {
   const [store, setStore] = useState({
