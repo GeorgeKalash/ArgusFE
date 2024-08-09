@@ -4,7 +4,7 @@ import { CustomTabs } from 'src/components/Shared/CustomTabs'
 import LabelTemplateForm from '../Forms/LabelTemplateForm'
 import ItemList from '../Forms/ItemList'
 
-const LabelTemplateWindow = ({ labels, maxAccess, recordId, height }) => {
+const LabelTemplateWindow = ({ labels, maxAccess, recordId }) => {
   const [store, setStore] = useState({
     recordId: recordId
   })

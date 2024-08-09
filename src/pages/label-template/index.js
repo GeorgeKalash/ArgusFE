@@ -81,7 +81,8 @@ const LabelTemplate = () => {
       Component: LabelTemplateWindow,
       props: {
         labels: _labels,
-        recordId: recordId
+        recordId: recordId,
+        maxAccess: access
       },
       width: 800,
       height: 450,
