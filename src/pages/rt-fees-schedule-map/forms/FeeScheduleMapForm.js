@@ -36,9 +36,7 @@ export default function FeeScheduleMapForm({ labels, maxAccess, recordId, record
       dispersalMode: '',
       functionId: '',
       scheduleId: '',
-      functionName: '',
-
-      ...record
+      functionName: ''
     },
     maxAccess,
     enableReinitialize: true,
@@ -85,10 +83,18 @@ export default function FeeScheduleMapForm({ labels, maxAccess, recordId, record
   useEffect(() => {
     ;(async function () {
       try {
-        if (record && record.currencyId && record.corId && record.functionId && record.scheduleId && record.countryId) {
+        if (
+          record &&
+          record.currencyId &&
+          record.corId &&
+          record.functionId &&
+          record.scheduleId &&
+          record.countryId &&
+          recordId
+        ) {
           const res = await getRequest({
             extension: RemittanceOutwardsRepository.FeeScheduleMap.get,
-            parameters: `_currencyId=${formik.values.currencyId}&_corId=${formik.values.corId}&_functionId=${formik.values.functionId}&_dispersalMode=${formik.values.dispersalMode}&_countryId=${formik.values.countryId}`
+            parameters: `_currencyId=${record.currencyId}&_corId=${record.corId}&_functionId=${record.functionId}&_dispersalMode=${record.dispersalMode}&_countryId=${record.countryId}`
           })
 
           formik.setValues({
