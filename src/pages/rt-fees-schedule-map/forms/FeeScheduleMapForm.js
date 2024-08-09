@@ -67,16 +67,15 @@ export default function FeeScheduleMapForm({ labels, maxAccess, recordId, record
       if (!currencyId && !corId && !dispersalMode && !functionId && !countryId) {
         toast.success(platformLabels.Added)
       } else toast.success(platformLabels.Edited)
-      formik.setValues({
-        ...obj,
+      formik.setFieldValue(
+        'recordId',
 
-        recordId:
-          String(obj.currencyId * 1000) +
+        String(obj.currencyId * 1000) +
           String(obj.corId * 10000) +
           String(obj.dispersalMode * 10) +
           String(obj.functionId) +
           String(obj.countryId * 100)
-      })
+      )
 
       invalidate()
     }

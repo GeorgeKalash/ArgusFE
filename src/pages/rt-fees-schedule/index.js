@@ -16,25 +16,24 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import FeesSceduleWindow from './window/FeesSceduleWindow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const FeeSchedule = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const { stack } = useWindow()
+  const { platformLabels } = useContext(ControlContext)
 
-  async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
-
+  async function fetchGridData() {
     return await getRequest({
-      extension: RemittanceOutwardsRepository.FeeSchedule.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      extension: RemittanceOutwardsRepository.FeeSchedule.qry
     })
   }
 
   const {
     query: { data },
     labels: _labels,
-    paginationParameters,
+    invalidate,
 
     refetch,
     access
@@ -42,10 +41,6 @@ const FeeSchedule = () => {
     queryFn: fetchGridData,
     endpointId: RemittanceOutwardsRepository.FeeSchedule.qry,
     datasetId: ResourceIds.FeeSchedule
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: RemittanceOutwardsRepository.FeeSchedule.qry
   })
 
   const columns = [
@@ -75,7 +70,7 @@ const FeeSchedule = () => {
       Component: FeesSceduleWindow,
       props: {
         labels: _labels,
-        recordId: recordId ? recordId : null,
+        recordId,
         maxAccess: access
       },
       width: 1000,
@@ -89,12 +84,14 @@ const FeeSchedule = () => {
   }
 
   const del = async obj => {
-    await postRequest({
-      extension: RemittanceOutwardsRepository.FeeSchedule.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success('Record Deleted Successfully')
+    try {
+      await postRequest({
+        extension: RemittanceOutwardsRepository.FeeSchedule.del,
+        record: JSON.stringify(obj)
+      })
+      invalidate()
+      toast.success(platformLabels.Deleted)
+    } catch (exception) {}
   }
 
   return (
@@ -112,8 +109,7 @@ const FeeSchedule = () => {
           isLoading={false}
           pageSize={50}
           refetch={refetch}
-          paginationParameters={paginationParameters}
-          paginationType='api'
+          paginationType='client'
           maxAccess={access}
         />
       </Grow>

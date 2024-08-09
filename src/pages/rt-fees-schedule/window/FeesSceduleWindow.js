@@ -4,10 +4,8 @@ import { useState } from 'react'
 import FeesSceduleForm from '../forms/FeesSceduleForm'
 import FeesDetailsForm from '../forms/FeesDetailsForm'
 
-const FeesSceduleWindow = ({ height, recordId, labels, maxAccess }) => {
+const FeesSceduleWindow = ({ recordId, labels, maxAccess }) => {
   const [activeTab, setActiveTab] = useState(0)
-
-  const editMode = !!recordId
 
   const [store, setStore] = useState({
     recordId: recordId || null
@@ -25,18 +23,17 @@ const FeesSceduleWindow = ({ height, recordId, labels, maxAccess }) => {
   return (
     <>
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-      <CustomTabPanel height={height} index={0} value={activeTab} disabledApply={!editMode && true}>
+      <CustomTabPanel index={0} value={activeTab}>
         <FeesSceduleForm
           labels={labels}
           setStore={setStore}
           store={store}
-          editMode={editMode}
           maxAccess={maxAccess}
           onChange={onStrategiesChange}
         />
       </CustomTabPanel>
-      <CustomTabPanel height={height} index={1} value={activeTab}>
-        <FeesDetailsForm labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} editMode={editMode} />
+      <CustomTabPanel index={1} value={activeTab}>
+        <FeesDetailsForm labels={labels} store={store} />
       </CustomTabPanel>
     </>
   )

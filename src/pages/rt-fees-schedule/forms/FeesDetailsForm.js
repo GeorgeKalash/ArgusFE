@@ -1,4 +1,3 @@
-import { Grid, Box, Checkbox } from '@mui/material'
 import { useFormik } from 'formik'
 import { useContext, useEffect, useState } from 'react'
 import { DataGrid } from 'src/components/Shared/DataGrid'
@@ -9,10 +8,12 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { DataSets } from 'src/resources/DataSets'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
+import { ControlContext } from 'src/providers/ControlContext'
 
-const FeesDetailsForm = ({ store, labels, editMode, maxAccess }) => {
+const FeesDetailsForm = ({ store, labels }) => {
   const { recordId: pId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   useEffect(() => {
     getGridData(pId)
@@ -35,11 +36,10 @@ const FeesDetailsForm = ({ store, labels, editMode, maxAccess }) => {
     })
 
     if (scheduleId) {
-      var parameters = `_scheduleId=${scheduleId}`
       getRequest({
         extension: RemittanceOutwardsRepository.FeeScheduleDetail.qry,
 
-        parameters: parameters
+        parameters: `_scheduleId=${scheduleId}`
       })
         .then(res => {
           const result = res.list
@@ -128,7 +128,7 @@ const FeesDetailsForm = ({ store, labels, editMode, maxAccess }) => {
       record: JSON.stringify(data)
     })
       .then(res => {
-        toast.success('Record Successfully')
+        toast.success(platformLabels.Submit)
       })
       .catch(error => {})
   }
