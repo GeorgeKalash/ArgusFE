@@ -17,7 +17,6 @@ const IntegrationLogicDetails = ({  labels, maxAccess, store }) => {
   const [gridData, setGridData] = useState([])
   const { stack } = useWindow()
   const { recordId } = store
-  const editMode = !!store.recordId
 
   const getGridData = async ilId => {
     try {
@@ -90,7 +89,7 @@ const IntegrationLogicDetails = ({  labels, maxAccess, store }) => {
       props: {
         labels,
         maxAccess,
-        editMode,
+        store,
         recordId: id,
         ilId: recordId,
         getGridData
