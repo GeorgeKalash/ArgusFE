@@ -18,7 +18,7 @@ import { useState } from 'react'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 
 const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
-  const { recordId: pId, _seqNo } = store
+  const { recordId: pId, countries, _seqNo } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const [commissionColumns, setCommissionColumns] = useState([])
@@ -30,10 +30,11 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
 
   const post = obj => {
     const data = {
-      scheduleId: sId,
-      scheduleRef: '',
+      productId: pId,
+      seqNo: _seqNo,
       productScheduleRanges: obj.map(({ id, fromAmount, toAmount }, index) => ({
-        seqNo: id,
+        seqNo: _seqNo,
+        rangeSeqNo: id,
         productId: pId,
         fromAmount,
         toAmount
