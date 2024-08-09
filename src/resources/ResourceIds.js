@@ -180,5 +180,6 @@ export const ResourceIds = {
   PaymentTerm: 51102,
   DocumentTypeDefault: 51106,
   VendorGroups: 50101,
+  IntegrationLogics: 30101, 
   ConsignmentSites: 51110
 }
