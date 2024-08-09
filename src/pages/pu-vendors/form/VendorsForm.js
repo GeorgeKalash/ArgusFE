@@ -26,7 +26,7 @@ export default function VendorsForm({ labels, maxAccess: access, recordId, setSt
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: PurchaseRepository.Vendor.qry
+    endpointId: PurchaseRepository.Vendor.page
   })
 
   const { maxAccess, changeDT } = useDocumentType({

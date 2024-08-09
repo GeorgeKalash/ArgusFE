@@ -28,7 +28,7 @@ const PuVendors = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: PurchaseRepository.Vendor.qry,
+    endpointId: PurchaseRepository.Vendor.page,
     datasetId: ResourceIds.PuVendors
   })
 
@@ -36,8 +36,8 @@ const PuVendors = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: PurchaseRepository.Vendor.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=&_sortField=`
+      extension: PurchaseRepository.Vendor.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
     return { ...response, _startAt: _startAt }
