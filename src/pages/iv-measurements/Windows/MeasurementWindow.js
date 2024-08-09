@@ -19,10 +19,10 @@ const MeasurementWindow = ({ recordId, labels, maxAccess }) => {
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
 
       <CustomTabPanel index={0} value={activeTab}>
-        <MeasurementForm labels={labels} setStore={setStore} store={store} editMode={editMode} maxAccess={maxAccess} />
+        <MeasurementForm labels={labels} setStore={setStore} store={store} maxAccess={maxAccess} />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
-        <MeasurementUnit labels={labels} maxAccess={maxAccess} store={store} setStore={setStore} />
+        <MeasurementUnit labels={labels} maxAccess={maxAccess} store={store} />
       </CustomTabPanel>
     </>
   )

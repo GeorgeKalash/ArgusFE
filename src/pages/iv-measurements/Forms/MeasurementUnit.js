@@ -17,7 +17,6 @@ const MeasurementUnit = ({ store, maxAccess, labels }) => {
   const { platformLabels } = useContext(ControlContext)
   const [measurementUnitGridData, setMeasurementUnitGridData] = useState([])
   const { stack } = useWindow()
-  const editMode = !!store.recordId
 
   const getMeasurementUnitGridData = async msId => {
     try {
@@ -64,7 +63,7 @@ const MeasurementUnit = ({ store, maxAccess, labels }) => {
         maxAccess: maxAccess,
         recordId: id,
         msId: recordId,
-        editMode: editMode,
+        store,
         getMeasurementUnitGridData
       },
       width: 450,
