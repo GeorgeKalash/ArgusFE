@@ -118,33 +118,12 @@ export default function FeeScheduleMapForm({ labels, maxAccess, recordId, record
         <Grow>
           <Grid container spacing={4}>
             <Grid item xs={12}>
-              <ResourceComboBox
-                endpointId={RemittanceOutwardsRepository.FeeSchedule.qry}
-                parameters='_startAt=0&_pageSize=50&filter='
-                name='scheduleId'
-                label={labels.schedule}
-                valueField='recordId'
-                displayField={['reference', 'name']}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
-                values={formik.values}
-                required
-                readOnly={false}
-                maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('scheduleId', newValue?.recordId || null)
-                }}
-                error={formik.touched.scheduleId && Boolean(formik.errors.scheduleId)}
-              />
-            </Grid>
-            <Grid item xs={12}>
               <ResourceLookup
                 endpointId={RemittanceSettingsRepository.Correspondent.snapshot}
                 valueField='reference'
                 displayField='name'
                 name='corId'
+                readOnly={editMode}
                 label={labels.cor}
                 form={formik}
                 required
@@ -164,6 +143,7 @@ export default function FeeScheduleMapForm({ labels, maxAccess, recordId, record
               <ResourceComboBox
                 endpointId={SystemRepository.Country.qry}
                 name='countryId'
+                readOnly={editMode}
                 label={labels.country}
                 valueField='recordId'
                 displayField={['reference', 'name']}
@@ -171,7 +151,6 @@ export default function FeeScheduleMapForm({ labels, maxAccess, recordId, record
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
                 ]}
-                readOnly={false}
                 values={formik.values}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('countryId', newValue ? newValue.recordId : '')
@@ -187,6 +166,7 @@ export default function FeeScheduleMapForm({ labels, maxAccess, recordId, record
                 name='currencyId'
                 label={labels.currency}
                 valueField='recordId'
+                readOnly={editMode}
                 displayField={['reference', 'name']}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
@@ -194,7 +174,6 @@ export default function FeeScheduleMapForm({ labels, maxAccess, recordId, record
                 ]}
                 values={formik.values}
                 required
-                readOnly={false}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('currencyId', newValue?.recordId || null)
@@ -209,6 +188,7 @@ export default function FeeScheduleMapForm({ labels, maxAccess, recordId, record
                   name='functionId'
                   label={labels.function}
                   required
+                  readOnly={editMode}
                   valueField='key'
                   displayField='value'
                   values={formik.values}
@@ -228,6 +208,7 @@ export default function FeeScheduleMapForm({ labels, maxAccess, recordId, record
                 label={labels.dispersalMode}
                 datasetId={DataSets.RT_Dispersal_Type}
                 valueField='key'
+                readOnly={editMode}
                 displayField='value'
                 values={formik.values}
                 required
@@ -235,6 +216,28 @@ export default function FeeScheduleMapForm({ labels, maxAccess, recordId, record
                   formik.setFieldValue('dispersalMode', newValue?.key)
                 }}
                 error={formik.touched.dispersalMode && Boolean(formik.errors.dispersalMode)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={RemittanceOutwardsRepository.FeeSchedule.qry}
+                parameters='_startAt=0&_pageSize=50&filter='
+                name='scheduleId'
+                label={labels.schedule}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                required
+                readOnly={false}
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('scheduleId', newValue?.recordId || null)
+                }}
+                error={formik.touched.scheduleId && Boolean(formik.errors.scheduleId)}
               />
             </Grid>
           </Grid>

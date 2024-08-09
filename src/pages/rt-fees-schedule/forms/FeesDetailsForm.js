@@ -6,6 +6,7 @@ import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import * as yup from 'yup'
 import { DataSets } from 'src/resources/DataSets'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import { ControlContext } from 'src/providers/ControlContext'
@@ -58,14 +59,15 @@ const FeesDetailsForm = ({ store, labels }) => {
   const columns = [
     {
       component: 'textfield',
-      label: labels.amountTo,
-      name: 'amountTo'
-    },
-    {
-      component: 'textfield',
       label: labels.amountFrom,
       name: 'amountFrom'
     },
+    {
+      component: 'textfield',
+      label: labels.amountTo,
+      name: 'amountTo'
+    },
+
     {
       component: 'resourcecombobox',
       name: 'feeType',
@@ -91,7 +93,19 @@ const FeesDetailsForm = ({ store, labels }) => {
   const formik = useFormik({
     enableReinitialize: true,
     validateOnChange: true,
-
+    validationSchema: yup.object({
+      FeeScheduleDetail: yup
+        .array()
+        .of(
+          yup.object().shape({
+            amountFrom: yup.string().required(),
+            amountTo: yup.string().required(),
+            feeAmount: yup.string().required(),
+            feeType: yup.string().required()
+          })
+        )
+        .required()
+    }),
     initialValues: {
       scheduleId: pId,
       FeeScheduleDetail: [
