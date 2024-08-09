@@ -1,12 +1,29 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useState } from 'react'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FormShell from 'src/components/Shared/FormShell'
 import { RequestsContext } from 'src/providers/RequestsContext'
+import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
 export default function InfoForm({ labels, formik }) {
   const { getRequest } = useContext(RequestsContext)
+  const [owiFields, setowiFieldsIFields] = useState({})
+
+  useEffect(() => {
+    ;(async function () {
+      try {
+        const res = await getRequest({
+          extension: RemittanceOutwardsRepository.OutwardGLInformation.get,
+          parameters: `_recordId=${formik.values?.recordId}`
+        })
+        res.record.corExRate = parseFloat(res.record.corExRate).toFixed(5)
+        res.record.corEvalExRate = parseFloat(res.record.corEvalExRate).toFixed(5)
+        setowiFieldsIFields(res.record)
+      } catch (error) {}
+    })()
+  }, [])
 
   return (
     <FormShell resourceId={ResourceIds.OutwardsTransfer} form={formik} isCleared={false} isInfo={false} isSaved={false}>
@@ -16,65 +33,72 @@ export default function InfoForm({ labels, formik }) {
             name='corCurrencyRef'
             readOnly
             label={labels.corCurrency}
-            value={formik.values.corCurrencyRef}
+            value={owiFields?.corCurrencyRef}
           />
         </Grid>
         <Grid item xs={12} sx={{ mx: 5 }}>
-          <CustomTextField name='corExRate' readOnly label={labels.corCurrencyRate} value={formik.values.corExRate} />
+          <CustomNumberField
+            name='corExRate'
+            readOnly
+            label={labels.corCurrencyRate}
+            value={owiFields?.corExRate}
+            decimalScale={5}
+          />
         </Grid>
         <Grid item xs={12} sx={{ mx: 5 }}>
-          <CustomTextField
+          <CustomNumberField
             name='corEvalExRate'
             readOnly
             label={labels.corCurrencyEval}
-            value={formik.values.corEvalExRate}
+            value={owiFields?.corEvalExRate}
+            decimalScale={5}
           />
         </Grid>
         <Grid item xs={12} sx={{ mx: 5 }}>
-          <CustomTextField name='taxPercent' readOnly label={labels.TaxPct} value={formik.values.vatRate} />
+          <CustomNumberField name='taxPercent' readOnly label={labels.TaxPct} value={owiFields?.taxPercent} />
         </Grid>
 
         <Grid item xs={12} sx={{ mx: 5 }}>
-          <CustomTextField name='corAmount' readOnly label={labels.corAmount} value={formik.values.corAmount} />
+          <CustomNumberField name='corAmount' readOnly label={labels.corAmount} value={owiFields?.corAmount} />
         </Grid>
         <Grid item xs={12} sx={{ mx: 5 }}>
-          <CustomTextField
+          <CustomNumberField
             name='corComission'
             readOnly
             label={labels.corComission}
-            value={formik.values.corCommission}
+            value={owiFields?.corCommission}
           />
         </Grid>
         <Grid item xs={12} sx={{ mx: 5 }}>
-          <CustomTextField
+          <CustomNumberField
             name='corBaseAmount'
             readOnly
             label={labels.corBaseAmount}
-            value={formik.values.corBaseAmount}
+            value={owiFields?.corBaseAmount}
           />
         </Grid>
         <Grid item xs={12} sx={{ mx: 5 }}>
-          <CustomTextField
+          <CustomNumberField
             name='grossProfitFromExRate'
             readOnly
             label={labels.grossProfit}
-            value={formik.values.grossProfitFromExRate}
+            value={owiFields?.grossProfit}
           />
         </Grid>
         <Grid item xs={12} sx={{ mx: 5 }}>
-          <CustomTextField
+          <CustomNumberField
             name='netCommssionCost '
             readOnly
             label={labels.netCommission}
-            value={formik.values.etCommssionCost}
+            value={owiFields?.baseCorCommission}
           />
         </Grid>
         <Grid item xs={12} sx={{ mx: 5 }}>
-          <CustomTextField
+          <CustomNumberField
             name='netCommissionRevenue'
             readOnly
             label={labels.netCommissionRevenue}
-            value={formik.values.netCommissionRevenue}
+            value={owiFields?.netCommissionRevenue}
           />
         </Grid>
       </Grid>

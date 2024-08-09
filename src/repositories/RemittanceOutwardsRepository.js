@@ -54,5 +54,8 @@ export const RemittanceOutwardsRepository = {
     get: service + 'getBEC',
     set: service + 'set2BEC',
     del: service + 'delBEC'
+  },
+  OutwardGLInformation: {
+    get: service + 'getOWI'
   }
 }

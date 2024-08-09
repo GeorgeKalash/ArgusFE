@@ -124,18 +124,6 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
     hiddenSponserName: '',
     otpVerified: false,
     bankType: '',
-    corCurrencyId: '',
-    corAmount: '',
-    corCommission: '',
-    corExRate: '',
-    corRateCalcMethod: '',
-    corEvalExRate: '',
-    corEvalRateCalcMethod: '',
-    corBaseAmount: '',
-    grossProfitFromExRate: '',
-    netCommissionRevenue: '',
-    netCommssionCost: '',
-    taxPercent: '',
     amountRows: [
       {
         id: 1,
@@ -153,6 +141,21 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
     ],
     instantCashDetails: {},
     products: [{}]
+
+    // infoData: {
+    //   corCurrencyId: '',
+    //   corCurrencyRef: '',
+    //   corAmount: '',
+    //   corCommission: '',
+    //   corExRate: '',
+    //   corRateCalcMethod: '',
+    //   corEvalExRate: '',
+    //   corEvalRateCalcMethod: '',
+    //   corBaseAmount: '',
+    //   grossProfitFromExRate: '',
+    //   netCommissionRevenue: '',
+    //   netCommssionCost: ''
+    // }
   }
 
   const { formik } = useForm({
@@ -558,7 +561,6 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
         parameters: `_filter=&_key=vatPct`
       })
       formik.setFieldValue('vatRate', parseInt(res.record.value))
-      formik.setFieldValue('taxPercent', parseInt(res.record.value))
     } catch (error) {}
   }
 
