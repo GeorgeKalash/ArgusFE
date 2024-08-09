@@ -148,5 +148,11 @@ export const FinancialRepository = {
     del: service + 'delPV',
     post: service + 'postPV',
     cancel: service + 'cancelPV',
+  },
+  PaymentVoucherExpenses: {
+    qry: service + 'qryPVX',
+  },
+  PaymentVoucherCostCenters: {
+    qry: service + 'qryPVC',
   }
 }

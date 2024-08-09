@@ -9,9 +9,12 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { formatDateDefault, formatDateFromApi } from 'src/lib/date-helper'
 import ResourceComboBox from './ResourceComboBox'
 import { useError } from 'src/error'
+import { Grow } from './Layouts/Grow'
+import { VertLayout } from './Layouts/VertLayout'
+import { Fixed } from './Layouts/Fixed'
 
 const TransactionLog = props => {
-  const { recordId, resourceId, onInfoClose } = props
+  const { recordId, resourceId } = props
   const { getRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
 
@@ -100,65 +103,70 @@ const TransactionLog = props => {
   ]
 
   return (
-    <div onClose={onInfoClose} Title={_labels.title} style={{ padding: '10px' }}>
-      <Grid container xs={12} sx={{ paddingBottom: '25px' }}>
-        <Grid item xs={5}>
-          <ResourceComboBox
-            datasetId={DataSets.TRX_TYPE}
-            name='idtId'
-            label={_labels.trxType}
-            valueField='key'
-            displayField='value'
-            value={transactionType}
-            required
-            onChange={(event, newValue) => {
-              if (newValue) {
-                setTransactionType(newValue.key)
-              } else {
-                setTransactionType(0)
-              }
-            }}
-          />
-        </Grid>
-        <Grid container xs={2}></Grid>
-        <Grid container xs={4} spacing={4}>
-          <Grid container xs={12}>
-            <Grid item xs={6}>
-              {_labels.recordId}
-            </Grid>{' '}
-            <Grid item xs={6}>
-              {recordId}
+    <VertLayout>
+      <Fixed>
+        <Grid container xs={12} sx={{ paddingBottom: '25px', m: 2 }}>
+          <Grid item xs={5}>
+            <ResourceComboBox
+              datasetId={DataSets.TRX_TYPE}
+              name='idtId'
+              label={_labels.trxType}
+              valueField='key'
+              displayField='value'
+              value={transactionType}
+              required
+              onChange={(event, newValue) => {
+                if (newValue) {
+                  setTransactionType(newValue.key)
+                } else {
+                  setTransactionType(0)
+                }
+              }}
+            />
+          </Grid>
+          <Grid container xs={2}></Grid>
+          <Grid container xs={4} spacing={4}>
+            <Grid container xs={12}>
+              <Grid item xs={6}>
+                {_labels.recordId}
+              </Grid>
+              <Grid item xs={6}>
+                {recordId}
+              </Grid>
+            </Grid>
+            <Grid container xs={12}>
+              <Grid item xs={6}>
+                {_labels.resourceId}
+              </Grid>
+              <Grid tem xs={6}>
+                {resourceId}
+              </Grid>
             </Grid>
           </Grid>
-          <Grid container xs={12}>
-            <Grid item xs={6}>
-              {_labels.resourceId}
-            </Grid>{' '}
-            <Grid tem xs={6}>
-              {resourceId}
-            </Grid>
-          </Grid>
         </Grid>
-      </Grid>
-      <Table
-        height={200}
-        columns={columns}
-        gridData={gridData}
-        rowId={['recordId']}
-        isLoading={false}
-        maxAccess={access}
-        onEdit={showInfo}
-        pagination={false}
-      />
-      <Grid data-unique-id item xs={4} sx={{ paddingBottom: '15px', height: '18vh', overflow: 'auto' }}>
-        {Object.entries(info).map(([key, value]) => (
-          <Grid key={key} style={{ display: 'flex', alignItems: 'center' }}>
-            <Grid style={{ minWidth: '100px', fontWeight: 'bold' }}>{key}:</Grid>
-            <Grid>{key && key === 'date' ? formatDateDefault(value) : value}</Grid>
-          </Grid>
-        ))}
-      </Grid>
-    </div>
+      </Fixed>
+      <Grow>
+        <Table
+          columns={columns}
+          gridData={gridData ?? { list: [] }}
+          rowId={['recordId']}
+          onEdit={showInfo}
+          isLoading={false}
+          maxAccess={access}
+          pagination={false}
+        />
+      </Grow>
+      <Fixed>
+        <Grid data-unique-id item xs={4} sx={{ paddingBottom: '15px', height: '18vh', overflow: 'auto', m: 2 }}>
+          {Object.entries(info).map(([key, value]) => (
+            <Grid key={key} style={{ display: 'flex', alignItems: 'center' }}>
+              <Grid style={{ minWidth: '100px', fontWeight: 'bold' }}>{key}:</Grid>
+              <Grid>{key && key === 'date' ? formatDateDefault(value) : value}</Grid>
+            </Grid>
+          ))}
+        </Grid>
+      </Fixed>
+    </VertLayout>
   )
 }
 

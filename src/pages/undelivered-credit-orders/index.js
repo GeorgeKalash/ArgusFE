@@ -1,4 +1,4 @@
-import { Box } from '@mui/material'
+import { Box, Grid } from '@mui/material'
 import { useContext, useState } from 'react'
 import { useResourceQuery } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -98,27 +98,28 @@ const UndeliveredCreditOrder = () => {
           }}
           labels={labels}
           inputSearch={true}
-        >
-          <Box sx={{ display: 'flex', width: '350px', pt: 2, pl: 2 }}>
-            <ResourceComboBox
-              endpointId={RemittanceSettingsRepository.Correspondent.qry}
-              label={labels.correspondent}
-              columnsInDropDown={[
-                { key: 'reference', value: 'Reference' },
-                { key: 'name', value: 'Name' }
-              ]}
-              name='corId'
-              values={{
-                corId: filters.corId
-              }}
-              valueField='recordId'
-              displayField={['reference', 'name']}
-              onChange={(event, newValue) => {
-                onChange(newValue?.recordId)
-              }}
-            />
-          </Box>
-        </GridToolbar>
+          leftSection={
+            <Grid item sx={{ display: 'flex', width: '300px' }}>
+              <ResourceComboBox
+                endpointId={RemittanceSettingsRepository.Correspondent.qry}
+                label={labels.correspondent}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                name='corId'
+                values={{
+                  corId: filters.corId
+                }}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                onChange={(event, newValue) => {
+                  onChange(newValue?.recordId)
+                }}
+              />
+            </Grid>
+          }
+        />
       </Fixed>
       <Grow>
         <Table

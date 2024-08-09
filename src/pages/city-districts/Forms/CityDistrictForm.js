@@ -1,4 +1,4 @@
-import { Grid } from '@mui/material'
+import { Checkbox, FormControlLabel, Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
@@ -34,7 +34,8 @@ export default function CityDistrictForm({ labels, recordId, maxAccess }) {
       cityId: null,
       countryName: '',
       cityName: '',
-      cityRef: ''
+      cityRef: '',
+      isInactive: false
     },
     maxAccess,
     enableReinitialize: true,
@@ -75,7 +76,10 @@ export default function CityDistrictForm({ labels, recordId, maxAccess }) {
             parameters: `_recordId=${recordId}`
           })
 
-          formik.setValues(res.record)
+          formik.setValues({
+            ...res.record,
+            isInactive: Boolean(res.record.isInactive)
+          })
         }
       } catch (exception) {}
     })()
@@ -169,6 +173,19 @@ export default function CityDistrictForm({ labels, recordId, maxAccess }) {
                 errorCheck={'cityId'}
                 maxAccess={maxAccess}
                 readOnly={!formik.values.countryId && true}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name='isInactive'
+                    maxAccess={maxAccess}
+                    checked={formik.values?.isInactive}
+                    onChange={formik.handleChange}
+                  />
+                }
+                label={labels.isInactive}
               />
             </Grid>
           </Grid>
