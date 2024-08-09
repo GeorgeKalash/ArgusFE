@@ -26,7 +26,7 @@ const FeeSchedule = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     return await getRequest({
-      extension: RemittanceOutwardsRepository.FreeSchedule.qry,
+      extension: RemittanceOutwardsRepository.FeeSchedule.qry,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
   }
@@ -40,12 +40,12 @@ const FeeSchedule = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: RemittanceOutwardsRepository.FreeSchedule.qry,
+    endpointId: RemittanceOutwardsRepository.FeeSchedule.qry,
     datasetId: ResourceIds.FeeSchedule
   })
 
   const invalidate = useInvalidate({
-    endpointId: RemittanceOutwardsRepository.FreeSchedule.qry
+    endpointId: RemittanceOutwardsRepository.FeeSchedule.qry
   })
 
   const columns = [
@@ -90,7 +90,7 @@ const FeeSchedule = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: RemittanceOutwardsRepository.FreeSchedule.del,
+      extension: RemittanceOutwardsRepository.FeeSchedule.del,
       record: JSON.stringify(obj)
     })
     invalidate()
