@@ -95,7 +95,9 @@ export default function IntegrationLogicDetailsForm({ ilId, recordId, labels, ma
   }
 
   useEffect(() => {
-    recordId && getIntegrationLogicById(recordId)
+    if (recordId) {
+      getIntegrationLogicById(recordId)
+    }
   }, [recordId])
 
   return (
