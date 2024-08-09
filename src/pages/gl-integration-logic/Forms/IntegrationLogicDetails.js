@@ -101,7 +101,9 @@ const IntegrationLogicDetails = ({  labels, maxAccess, store }) => {
   }
 
   useEffect(() => {
-    recordId && getGridData(recordId)
+    if (recordId) {
+      getGridData(recordId)
+    }
   }, [recordId])
 
   return (
