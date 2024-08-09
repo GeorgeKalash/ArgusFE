@@ -6,9 +6,7 @@ import ItemList from '../Forms/ItemList'
 
 const LabelTemplateWindow = ({ labels, maxAccess, recordId, height }) => {
   const [store, setStore] = useState({
-    recordId: recordId,
-    labelTemplate: null,
-    item: null
+    recordId: recordId
   })
 
   const [activeTab, setActiveTab] = useState(0)
