@@ -13,11 +13,12 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { useInvalidate } from 'src/hooks/resource'
 
-export default function MeasurementForm({ labels, maxAccess, setStore, store, editMode }) {
+export default function MeasurementForm({ labels, maxAccess, setStore, store }) {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-
+  const editMode = !!store.recordId
+  
   const invalidate = useInvalidate({
     endpointId: InventoryRepository.Measurement.page
   })
