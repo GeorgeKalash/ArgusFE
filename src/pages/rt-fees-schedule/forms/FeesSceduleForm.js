@@ -17,7 +17,7 @@ import { useForm } from 'src/hooks/form'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 
-const FeesSceduleForm = ({ labels, editMode, maxAccess, setStore, store, onChange }) => {
+const FeesSceduleForm = ({ labels, maxAccess, setStore, store, onChange }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { recordId } = store
 
@@ -60,6 +60,7 @@ const FeesSceduleForm = ({ labels, editMode, maxAccess, setStore, store, onChang
       toast.success(message)
 
       if (isNewRecord) {
+        formik.setFieldValue('recordId', res.recordId)
         setStore(prevStore => ({
           ...prevStore,
           recordId: res.recordId
@@ -69,6 +70,8 @@ const FeesSceduleForm = ({ labels, editMode, maxAccess, setStore, store, onChang
       invalidate()
     } catch {}
   }
+
+  const editMode = !!recordId
 
   useEffect(() => {
     if (recordId) {
