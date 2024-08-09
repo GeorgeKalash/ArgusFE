@@ -21,7 +21,7 @@ const FeesSceduleWindow = ({ height, recordId, labels, maxAccess, expanded }) =>
     })
   }
 
-  const tabs = [{ label: labels.FeesScedule }, { label: labels.details, disabled: !store.recordId }]
+  const tabs = [{ label: labels.feesScedule }, { label: labels.details, disabled: !store.recordId }]
 
   return (
     <>

@@ -58,6 +58,11 @@ const FeeSchedule = () => {
       field: 'name',
       headerName: _labels.name,
       flex: 1
+    },
+    {
+      field: 'originCurrency',
+      headerName: _labels.originCurrency,
+      flex: 1
     }
   ]
 
@@ -73,9 +78,9 @@ const FeeSchedule = () => {
         recordId: recordId ? recordId : null,
         maxAccess: access
       },
-      width: 600,
-      height: 400,
-      title: _labels.FeesSceduleWindow
+      width: 1000,
+      height: 500,
+      title: _labels.feesScedule
     })
   }
 

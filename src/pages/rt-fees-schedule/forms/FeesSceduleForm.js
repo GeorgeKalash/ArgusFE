@@ -15,6 +15,7 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { useForm } from 'src/hooks/form'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 
 const FeesSceduleForm = ({ labels, editMode, maxAccess, setStore, store, onChange }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -29,7 +30,8 @@ const FeesSceduleForm = ({ labels, editMode, maxAccess, setStore, store, onChang
     initialValues: {
       recordId: null,
       name: '',
-      reference: ''
+      reference: '',
+      originCurrency: ''
     },
     enableReinitialize: true,
     validateOnChange: true,
@@ -113,6 +115,21 @@ const FeesSceduleForm = ({ labels, editMode, maxAccess, setStore, store, onChang
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('name', '')}
             error={formik.touched.name && Boolean(formik.errors.name)}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <ResourceComboBox
+            datasetId={DataSets.Remittance_Fee_Type}
+            name='originCurrency'
+            label={labels.originCurrency}
+            valueField='key'
+            displayField='value'
+            values={formik.values}
+            maxAccess={maxAccess}
+            onChange={(event, newValue) => {
+              formik.setFieldValue('originCurrency', newValue?.key)
+            }}
+            error={formik.touched.originCurrency && Boolean(formik.errors.originCurrency)}
           />
         </Grid>
       </Grid>

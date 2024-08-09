@@ -64,7 +64,13 @@ export const RemittanceOutwardsRepository = {
   FreeScheduleDetail: {
     qry: service + 'qryFSD',
     get: service + 'getFSD',
-    set: service + 'setFSD',
+    set2: service + 'set2FSD',
     del: service + 'delFSD'
+  },
+  FreeScheduleMap: {
+    qry: service + 'qryFSM',
+    get: service + 'getFSM',
+    set: service + 'setFSM',
+    del: service + 'delFSM'
   }
 }
