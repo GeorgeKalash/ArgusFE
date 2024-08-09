@@ -181,6 +181,6 @@ export const ResourceIds = {
   DocumentTypeDefault: 51106,
   VendorGroups: 50101,
   FeeSchedule: 36314,
-  FreeScheduleMap: 36315,
+  FeeScheduleMap: 36315,
   ConsignmentSites: 51110
 }

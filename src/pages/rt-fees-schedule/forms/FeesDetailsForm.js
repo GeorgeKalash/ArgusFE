@@ -39,7 +39,7 @@ const FeesDetailsForm = ({ store, labels, editMode, maxAccess }) => {
     if (scheduleId) {
       var parameters = `_scheduleId=${scheduleId}`
       getRequest({
-        extension: RemittanceOutwardsRepository.FreeScheduleDetail.qry,
+        extension: RemittanceOutwardsRepository.FeeScheduleDetail.qry,
 
         parameters: parameters
       })
@@ -128,7 +128,7 @@ const FeesDetailsForm = ({ store, labels, editMode, maxAccess }) => {
     }
 
     postRequest({
-      extension: RemittanceOutwardsRepository.FreeScheduleDetail.set2,
+      extension: RemittanceOutwardsRepository.FeeScheduleDetail.set2,
       record: JSON.stringify(data)
     })
       .then(res => {

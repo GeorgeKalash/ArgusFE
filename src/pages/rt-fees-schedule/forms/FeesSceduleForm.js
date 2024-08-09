@@ -22,7 +22,7 @@ const FeesSceduleForm = ({ labels, maxAccess, setStore, store, onChange }) => {
   const { recordId } = store
 
   const invalidate = useInvalidate({
-    endpointId: RemittanceOutwardsRepository.FreeSchedule.qry
+    endpointId: RemittanceOutwardsRepository.FeeSchedule.qry
   })
 
   const { formik } = useForm({
@@ -53,7 +53,7 @@ const FeesSceduleForm = ({ labels, maxAccess, setStore, store, onChange }) => {
     const isNewRecord = !obj?.recordId
     try {
       const res = await postRequest({
-        extension: RemittanceOutwardsRepository.FreeSchedule.set,
+        extension: RemittanceOutwardsRepository.FeeSchedule.set,
         record: JSON.stringify(obj)
       })
 
@@ -83,7 +83,7 @@ const FeesSceduleForm = ({ labels, maxAccess, setStore, store, onChange }) => {
   const getStrategyId = recordId => {
     const defaultParams = `_recordId=${recordId}`
     getRequest({
-      extension: RemittanceOutwardsRepository.FreeSchedule.get,
+      extension: RemittanceOutwardsRepository.FeeSchedule.get,
       parameters: defaultParams
     })
       .then(res => {

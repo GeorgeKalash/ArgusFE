@@ -12,9 +12,9 @@ import { useWindow } from 'src/windows'
 
 import { ControlContext } from 'src/providers/ControlContext'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
-import FreeScheduleMapForm from './FreeScheduleMapForm'
+import FeeScheduleMapForm from './forms/FeeScheduleMapForm'
 
-const FreeScheduleMap = () => {
+const FeeScheduleMap = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -24,7 +24,7 @@ const FreeScheduleMap = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: RemittanceOutwardsRepository.FreeScheduleMap.qry,
+      extension: RemittanceOutwardsRepository.FeeScheduleMap.qry,
 
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
@@ -40,12 +40,12 @@ const FreeScheduleMap = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: RemittanceOutwardsRepository.FreeScheduleMap.qry,
-    datasetId: ResourceIds.FreeScheduleMap
+    endpointId: RemittanceOutwardsRepository.FeeScheduleMap.qry,
+    datasetId: ResourceIds.FeeScheduleMap
   })
 
   const invalidate = useInvalidate({
-    endpointId: RemittanceOutwardsRepository.FreeScheduleMap.qry
+    endpointId: RemittanceOutwardsRepository.FeeScheduleMap.qry
   })
 
   const columns = [
@@ -96,7 +96,7 @@ const FreeScheduleMap = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: RemittanceOutwardsRepository.FreeScheduleMap.del,
+      extension: RemittanceOutwardsRepository.FeeScheduleMap.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -105,7 +105,7 @@ const FreeScheduleMap = () => {
 
   function openForm(record) {
     stack({
-      Component: FreeScheduleMapForm,
+      Component: FeeScheduleMapForm,
       props: {
         labels: _labels,
         record,
@@ -148,4 +148,4 @@ const FreeScheduleMap = () => {
   )
 }
 
-export default FreeScheduleMap
+export default FeeScheduleMap

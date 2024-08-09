@@ -18,12 +18,12 @@ import { RemittanceSettingsRepository } from 'src/repositories/RemittanceReposit
 import { DataSets } from 'src/resources/DataSets'
 import { ControlContext } from 'src/providers/ControlContext'
 
-export default function FreeScheduleMapForm({ labels, maxAccess, recordId, record }) {
+export default function FeeScheduleMapForm({ labels, maxAccess, recordId, record }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: RemittanceOutwardsRepository.FreeScheduleMap.qry
+    endpointId: RemittanceOutwardsRepository.FeeScheduleMap.qry
   })
 
   const { formik } = useForm({
@@ -81,7 +81,7 @@ export default function FreeScheduleMapForm({ labels, maxAccess, recordId, recor
       const countryId = formik.values.countryId
 
       await postRequest({
-        extension: RemittanceOutwardsRepository.FreeScheduleMap.set,
+        extension: RemittanceOutwardsRepository.FeeScheduleMap.set,
         record: JSON.stringify(obj)
       })
 
@@ -124,7 +124,7 @@ export default function FreeScheduleMapForm({ labels, maxAccess, recordId, recor
       try {
         if (record && record.currencyId && record.corId && record.functionId && record.scheduleId && record.countryId) {
           const res = await getRequest({
-            extension: RemittanceOutwardsRepository.FreeScheduleMap.get,
+            extension: RemittanceOutwardsRepository.FeeScheduleMap.get,
             parameters: `_currencyId=${formik.values.currencyId}&_corId=${formik.values.corId}&_functionId=${formik.values.functionId}&_dispersalMode=${formik.values.dispersalMode}&_countryId=${formik.values.countryId}`
           })
 
@@ -143,16 +143,16 @@ export default function FreeScheduleMapForm({ labels, maxAccess, recordId, recor
     })()
   }, [])
 
-  console.log(formik.values.functionId)
+  console.log(formik.values)
 
   return (
-    <FormShell resourceId={ResourceIds.FreeScheduleMap} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell resourceId={ResourceIds.FeeScheduleMap} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={RemittanceOutwardsRepository.FreeSchedule.qry}
+                endpointId={RemittanceOutwardsRepository.FeeSchedule.qry}
                 parameters='_startAt=0&_pageSize=50&filter='
                 name='scheduleId'
                 label={labels.schedule}
