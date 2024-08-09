@@ -60,7 +60,7 @@ const FeeSchedule = () => {
       flex: 1
     },
     {
-      field: 'originCurrency',
+      field: 'originCurrencyName',
       headerName: _labels.originCurrency,
       flex: 1
     }
