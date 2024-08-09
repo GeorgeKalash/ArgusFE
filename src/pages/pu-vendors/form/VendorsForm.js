@@ -90,6 +90,15 @@ export default function VendorsForm({ labels, maxAccess: access, recordId, setSt
   })
   const editMode = !!formik.values.recordId
 
+  const actions = [
+    {
+      key: 'RecordRemarks',
+      condition: true,
+      onClick: 'onRecordRemarks',
+      disabled: !editMode
+    }
+  ]
+
   useEffect(() => {
     ;(async function () {
       try {
@@ -109,7 +118,13 @@ export default function VendorsForm({ labels, maxAccess: access, recordId, setSt
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.PuVendors} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell
+      resourceId={ResourceIds.PuVendors}
+      form={formik}
+      actions={actions}
+      maxAccess={maxAccess}
+      editMode={editMode}
+    >
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>

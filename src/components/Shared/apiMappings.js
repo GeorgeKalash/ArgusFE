@@ -232,7 +232,7 @@ export const apiMappings = {
       { key: 'name', value: 'Name' }
     ]
   },
-  [ResourceIds.VendorsGroup]: {
+  [ResourceIds.VendorGroups]: {
     type: COMBOBOX,
     endpoint: PurchaseRepository.VendorGroups.qry,
     parameters: '_filter=',
