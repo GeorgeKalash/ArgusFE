@@ -18,7 +18,7 @@ export default function MeasurementForm({ labels, maxAccess, setStore, store }) 
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const editMode = !!store.recordId
-  
+
   const invalidate = useInvalidate({
     endpointId: InventoryRepository.Measurement.page
   })
@@ -31,6 +31,7 @@ export default function MeasurementForm({ labels, maxAccess, setStore, store }) 
       type: 0,
       serialItems: false
     },
+    maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
