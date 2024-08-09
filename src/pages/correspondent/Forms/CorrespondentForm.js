@@ -155,6 +155,25 @@ const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore,
               />
             </Grid>
             <Grid item xs={12}>
+              <ResourceLookup
+                endpointId={FinancialRepository.Account.snapshot}
+                name='accountId'
+                label={labels.accountRef}
+                valueField='reference'
+                displayField='name'
+                valueShow='accountRef'
+                secondValueShow='accountName'
+                form={formik}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('accountId', newValue?.recordId || '')
+                  formik.setFieldValue('accountRef', newValue?.reference || '')
+                  formik.setFieldValue('accountName', newValue?.name || '')
+                }}
+                error={formik.touched.accountId && Boolean(formik.errors.accountId)}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={SystemRepository.Currency.qry}
                 name='currencyId'
@@ -224,25 +243,6 @@ const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore,
                   formik.setFieldValue('iwRateTypeId', newValue?.recordId)
                 }}
                 error={formik.touched.iwRateTypeId && Boolean(formik.errors.iwRateTypeId)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <ResourceLookup
-                endpointId={FinancialRepository.Account.snapshot}
-                name='accountId'
-                label={labels.accountRef}
-                valueField='reference'
-                displayField='name'
-                valueShow='accountRef'
-                secondValueShow='accountName'
-                form={formik}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('accountId', newValue?.recordId || '')
-                  formik.setFieldValue('accountRef', newValue?.reference || '')
-                  formik.setFieldValue('accountName', newValue?.name || '')
-                }}
-                error={formik.touched.accountId && Boolean(formik.errors.accountId)}
-                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
