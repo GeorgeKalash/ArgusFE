@@ -180,5 +180,7 @@ export const ResourceIds = {
   PaymentTerm: 51102,
   DocumentTypeDefault: 51106,
   VendorGroups: 50101,
+  FeeSchedule: 36314,
+  FeeScheduleMap: 36315,
   ConsignmentSites: 51110
 }

@@ -55,6 +55,24 @@ export const RemittanceOutwardsRepository = {
     set: service + 'set2BEC',
     del: service + 'delBEC'
   },
+  FeeSchedule: {
+    qry: service + 'qryFSC',
+    get: service + 'getFSC',
+    set: service + 'setFSC',
+    del: service + 'delFSC'
+  },
+  FeeScheduleDetail: {
+    qry: service + 'qryFSD',
+    get: service + 'getFSD',
+    set2: service + 'set2FSD',
+    del: service + 'delFSD'
+  },
+  FeeScheduleMap: {
+    qry: service + 'qryFSM',
+    get: service + 'getFSM',
+    set: service + 'setFSM',
+    del: service + 'delFSM'
+  },
   OutwardGLInformation: {
     get: service + 'getOWI'
   }
