@@ -203,6 +203,13 @@ export const getButtons = platformLabels => [
     main: true
   },
   {
+    key: 'Audit',
+    label: platformLabels.Audit,
+    color: '#231f20',
+    image: 'info.png',
+    main: false
+  },
+  {
     key: 'Info',
     label: platformLabels.Info,
     condition: 'isInfo && infoVisible',
@@ -228,5 +235,5 @@ export const getButtons = platformLabels => [
     color: '#000',
     image: 'import.png',
     main: false
-  },
+  }
 ]
