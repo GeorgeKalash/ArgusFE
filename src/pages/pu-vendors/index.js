@@ -37,7 +37,7 @@ const PuVendors = () => {
 
     const response = await getRequest({
       extension: PurchaseRepository.Vendor.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=`
     })
 
     return { ...response, _startAt: _startAt }
