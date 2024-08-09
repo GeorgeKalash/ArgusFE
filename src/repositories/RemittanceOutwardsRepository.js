@@ -72,5 +72,8 @@ export const RemittanceOutwardsRepository = {
     get: service + 'getFSM',
     set: service + 'setFSM',
     del: service + 'delFSM'
+  },
+  OutwardGLInformation: {
+    get: service + 'getOWI'
   }
 }
