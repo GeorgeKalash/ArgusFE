@@ -16,9 +16,11 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { DataSets } from 'src/resources/DataSets'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function FreeScheduleMapForm({ labels, maxAccess, recordId, record }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: RemittanceOutwardsRepository.FreeScheduleMap.qry
@@ -84,8 +86,8 @@ export default function FreeScheduleMapForm({ labels, maxAccess, recordId, recor
       })
 
       if (!currencyId && !corId && !dispersalMode && !functionId && !countryId) {
-        toast.success('Record Added Successfully')
-      } else toast.success('Record Edited Successfully')
+        toast.success(platformLabels.Added)
+      } else toast.success(platformLabels.Edited)
       formik.setValues({
         ...obj,
 
@@ -148,6 +150,28 @@ export default function FreeScheduleMapForm({ labels, maxAccess, recordId, recor
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={RemittanceOutwardsRepository.FreeSchedule.qry}
+                parameters='_startAt=0&_pageSize=50&filter='
+                name='scheduleId'
+                label={labels.schedule}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                required
+                readOnly={false}
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('scheduleId', newValue?.recordId || null)
+                }}
+                error={formik.touched.scheduleId && Boolean(formik.errors.scheduleId)}
+              />
+            </Grid>
             <Grid item xs={12}>
               <ResourceLookup
                 endpointId={RemittanceSettingsRepository.Correspondent.snapshot}
@@ -244,28 +268,6 @@ export default function FreeScheduleMapForm({ labels, maxAccess, recordId, recor
                   formik.setFieldValue('dispersalMode', newValue?.key)
                 }}
                 error={formik.touched.dispersalMode && Boolean(formik.errors.dispersalMode)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <ResourceComboBox
-                endpointId={RemittanceOutwardsRepository.FreeSchedule.qry}
-                parameters='_startAt=0&_pageSize=50&filter='
-                name='scheduleId'
-                label={labels.schedule}
-                valueField='recordId'
-                displayField={['reference', 'name']}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
-                values={formik.values}
-                required
-                readOnly={false}
-                maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('scheduleId', newValue?.recordId || null)
-                }}
-                error={formik.touched.scheduleId && Boolean(formik.errors.scheduleId)}
               />
             </Grid>
           </Grid>

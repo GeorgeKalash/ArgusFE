@@ -36,8 +36,9 @@ const FeesSceduleForm = ({ labels, maxAccess, setStore, store, onChange }) => {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required(' '),
-      reference: yup.string().required(' ')
+      name: yup.string().required(),
+      reference: yup.string().required(),
+      originCurrency: yup.string().required()
     }),
     onSubmit: values => {
       postGroups(values)
@@ -124,6 +125,7 @@ const FeesSceduleForm = ({ labels, maxAccess, setStore, store, onChange }) => {
           <ResourceComboBox
             datasetId={DataSets.Remittance_Fee_Type}
             name='originCurrency'
+            required
             label={labels.originCurrency}
             valueField='key'
             displayField='value'
