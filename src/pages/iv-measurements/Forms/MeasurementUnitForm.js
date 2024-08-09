@@ -13,9 +13,10 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
-export default function MeasurementUnitForm({ msId, recordId, labels, maxAccess, getMeasurementUnitGridData, window, editMode }) {
+export default function MeasurementUnitForm({ msId, recordId, labels, maxAccess, getMeasurementUnitGridData, window, store }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const editMode = !!store.recordId
 
   const { formik } = useForm({
     initialValues: {
