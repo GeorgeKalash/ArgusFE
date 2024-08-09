@@ -68,7 +68,9 @@ export default function MeasurementUnitForm({ msId, recordId, labels, maxAccess,
   }
 
   useEffect(() => {
-    recordId && getMeasurementUnitById(recordId)
+    if (recordId) {
+      getMeasurementUnitById(recordId)
+    }
   }, [recordId])
 
   return (

@@ -73,7 +73,9 @@ const MeasurementUnit = ({ store, maxAccess, labels }) => {
   }
 
   useEffect(() => {
-    recordId && getMeasurementUnitGridData(recordId)
+    if (recordId) {
+      getMeasurementUnitGridData(recordId)
+    }
   }, [recordId])
 
   const del = async obj => {
