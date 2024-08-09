@@ -52,6 +52,11 @@ const IntegrationLogicDetails = ({  labels, maxAccess, store }) => {
       flex: 1
     },
     {
+      field: 'integrationLevelName',
+      headerName: labels.integrationLevel,
+      flex: 1
+    },
+    {
       field: 'description',
       headerName: labels.description,
       flex: 1
