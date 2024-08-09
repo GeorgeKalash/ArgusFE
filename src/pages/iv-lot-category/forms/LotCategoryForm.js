@@ -16,7 +16,6 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 
 export default function LotCategoryForm({ labels, maxAccess, recordId }) {
-  const [editMode, setEditMode] = useState(!!recordId)
   const { platformLabels } = useContext(ControlContext)
 
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -27,7 +26,7 @@ export default function LotCategoryForm({ labels, maxAccess, recordId }) {
 
   const { formik } = useForm({
     initialValues: {
-      recordId: null,
+      recordId: recordId,
       reference: '',
       name: '',
       udt1: '',
@@ -45,25 +44,25 @@ export default function LotCategoryForm({ labels, maxAccess, recordId }) {
       name: yup.string().required(' ')
     }),
     onSubmit: async obj => {
-      const recordId = obj.recordId
-
       const response = await postRequest({
         extension: InventoryRepository.LotCategory.set,
         record: JSON.stringify(obj)
       })
 
-      if (!recordId) {
+      if (!obj.recordId) {
         toast.success(platformLabels.Added)
         formik.setValues({
           ...obj,
           recordId: response.recordId
         })
-      } else toast.success(platformLabels.Edited)
-      setEditMode(true)
-
+      } else {
+        toast.success(platformLabels.Edited)
+      }
       invalidate()
     }
   })
+
+  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
@@ -81,14 +80,14 @@ export default function LotCategoryForm({ labels, maxAccess, recordId }) {
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.CommissionType} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell resourceId={ResourceIds.LotCategories} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
             <Grid item xs={12}>
               <CustomTextField
                 name='reference'
-                label={labels.reference}
+                label={labels.Reference}
                 value={formik.values.reference}
                 required
                 maxAccess={maxAccess}
@@ -118,8 +117,10 @@ export default function LotCategoryForm({ labels, maxAccess, recordId }) {
                 valueField='reference'
                 displayField='description'
                 name='nraRef'
-                label={labels.NumericRange}
+                displayFieldWidth='2'
+                label={labels.numberRange}
                 secondDisplayField={true}
+                display
                 secondValue={formik.values.nraDescription}
                 onChange={(event, newValue) => {
                   if (newValue) {
@@ -138,7 +139,7 @@ export default function LotCategoryForm({ labels, maxAccess, recordId }) {
               <CustomTextField
                 name='udd1'
                 label={labels.userDefinedDate1}
-                value={formik.values.reference}
+                value={formik.values.udd1}
                 required
                 maxAccess={maxAccess}
                 maxLength='20'
@@ -150,19 +151,19 @@ export default function LotCategoryForm({ labels, maxAccess, recordId }) {
               <CustomTextField
                 name='udd2'
                 label={labels.userDefinedDate2}
-                value={formik.values.reference}
+                value={formik.values.udd2}
                 required
                 maxAccess={maxAccess}
                 maxLength='20'
                 onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('reference', '')}
+                onClear={() => formik.setFieldValue('udd2', '')}
               />
             </Grid>
             <Grid item xs={12}>
               <CustomTextField
                 name='udt1'
                 label={labels.userDefinedText1}
-                value={formik.values.reference}
+                value={formik.values.udt1}
                 required
                 maxAccess={maxAccess}
                 maxLength='20'
@@ -174,7 +175,7 @@ export default function LotCategoryForm({ labels, maxAccess, recordId }) {
               <CustomTextField
                 name='udt2'
                 label={labels.userDefinedText2}
-                value={formik.values.reference}
+                value={formik.values.udt2}
                 required
                 maxAccess={maxAccess}
                 maxLength='20'
@@ -186,7 +187,7 @@ export default function LotCategoryForm({ labels, maxAccess, recordId }) {
               <CustomTextField
                 name='udn1'
                 label={labels.userDefinedNumeric1}
-                value={formik.values.reference}
+                value={formik.values.udn1}
                 required
                 maxAccess={maxAccess}
                 maxLength='20'
@@ -198,7 +199,7 @@ export default function LotCategoryForm({ labels, maxAccess, recordId }) {
               <CustomTextField
                 name='udn2'
                 label={labels.userDefinedNumeric2}
-                value={formik.values.reference}
+                value={formik.values.udn2}
                 required
                 maxAccess={maxAccess}
                 maxLength='20'

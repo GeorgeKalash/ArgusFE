@@ -13,7 +13,7 @@ import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 
-const Index = () => {
+const IvLotCategory = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
@@ -34,6 +34,7 @@ const Index = () => {
     invalidate,
     access
   } = useResourceQuery({
+    endpointId: InventoryRepository.LotCategory.qry,
     queryFn: fetchGridData,
     datasetId: ResourceIds.LotCategories
   })
@@ -142,4 +143,4 @@ const Index = () => {
   )
 }
 
-export default Index
+export default IvLotCategory
