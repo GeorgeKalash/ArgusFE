@@ -8,7 +8,6 @@ export const SCRepository = {
     del: service + 'delLBT'
   },
   Item: {
-    page: service + 'pageLBI',
     qry: service + 'qryLBI',
     set: service + 'setLBI',
     get: service + 'getLBI',

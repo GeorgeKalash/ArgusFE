@@ -25,6 +25,7 @@ const LabelTemplate = () => {
     invalidate,
     access
   } = useResourceQuery({
+    endpointId: SCRepository.LabelTemplate.qry,
     queryFn: fetchGridData,
     datasetId: ResourceIds.LabelTemplates
   })

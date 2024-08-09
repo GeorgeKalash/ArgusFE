@@ -15,10 +15,10 @@ const LabelTemplateWindow = ({ labels, maxAccess, recordId }) => {
   return (
     <>
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-      <CustomTabPanel height={height} index={0} value={activeTab}>
+      <CustomTabPanel index={0} value={activeTab}>
         <LabelTemplateForm labels={labels} maxAccess={maxAccess} store={store} setStore={setStore} />
       </CustomTabPanel>
-      <CustomTabPanel height={height} index={1} value={activeTab}>
+      <CustomTabPanel index={1} value={activeTab}>
         <ItemList labels={labels} maxAccess={maxAccess} recordId={store?.recordId} />
       </CustomTabPanel>
     </>

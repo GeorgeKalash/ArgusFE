@@ -149,7 +149,7 @@ const ItemForm = ({ tlId, labels, seqNo, getGridData, maxAccess, window }) => {
                   required
                   readOnly={false}
                   onChange={formik.handleChange}
-                  onClear={() => formik.setFieldValue('itemKey', '')}
+                  onClear={() => formik.setFieldValue('x', '')}
                   error={formik.touched.itemKey && Boolean(formik.errors.itemKey)}
                   maxAccess={maxAccess}
                 />
@@ -177,7 +177,7 @@ const ItemForm = ({ tlId, labels, seqNo, getGridData, maxAccess, window }) => {
                   required
                   readOnly={false}
                   onChange={formik.handleChange}
-                  onClear={() => formik.setFieldValue('itemKey', '')}
+                  onClear={() => formik.setFieldValue('y', '')}
                   error={formik.touched.itemKey && Boolean(formik.errors.itemKey)}
                   maxAccess={maxAccess}
                 />
