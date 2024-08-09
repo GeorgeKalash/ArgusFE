@@ -1,7 +1,4 @@
-// ** MUI Imports
 import { Grid } from '@mui/material'
-
-// ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import FormShell from 'src/components/Shared/FormShell'
@@ -17,7 +14,7 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { DataSets } from 'src/resources/DataSets'
 import { SCRepository } from 'src/repositories/SCRepository'
 
-const LabelTemplateForm = ({ labels, maxAccess, store, setStore, editMode }) => {
+const LabelTemplateForm = ({ labels, maxAccess, store, setStore }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { recordId } = store
@@ -29,7 +26,7 @@ const LabelTemplateForm = ({ labels, maxAccess, store, setStore, editMode }) => 
   const { formik } = useForm({
     maxAccess,
     initialValues: {
-      recordId: recordId || null,
+      recordId: recordId,
       name: '',
       width: '',
       height: '',
@@ -50,6 +47,8 @@ const LabelTemplateForm = ({ labels, maxAccess, store, setStore, editMode }) => 
       postLabelTemplate(values)
     }
   })
+
+  const editMode = !!formik.values.recordId
 
   const postLabelTemplate = async obj => {
     await postRequest({
@@ -78,6 +77,7 @@ const LabelTemplateForm = ({ labels, maxAccess, store, setStore, editMode }) => 
             extension: SCRepository.LabelTemplate.get,
             parameters: `_recordId=${recordId}`
           })
+
           var result = res.record
           formik.setValues(result)
           setStore(prevStore => ({

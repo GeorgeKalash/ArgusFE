@@ -4,7 +4,6 @@ import { useFormik } from 'formik'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import FormShell from 'src/components/Shared/FormShell'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { DataSets } from 'src/resources/DataSets'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useContext, useEffect } from 'react'
@@ -50,7 +49,6 @@ const ItemForm = ({ tlId, labels, seqNo, getGridData, maxAccess, window }) => {
   })
 
   const post = obj => {
-    const recordId = obj.seqNo
     postRequest({
       extension: SCRepository.Item.set,
       record: JSON.stringify(obj)
@@ -79,7 +77,7 @@ const ItemForm = ({ tlId, labels, seqNo, getGridData, maxAccess, window }) => {
       .catch(error => {})
   }
   useEffect(() => {
-    seqNo && getDispersalById(seqNo)
+    if (seqNo) getDispersalById(seqNo)
   }, [seqNo])
 
   return (

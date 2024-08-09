@@ -80,7 +80,7 @@ const ItemList = ({ recordId: tlId, labels, maxAccess }) => {
   ]
 
   useEffect(() => {
-    tlId && getGridData()
+    if (tlId) getGridData()
   }, [tlId])
 
   const add = () => {

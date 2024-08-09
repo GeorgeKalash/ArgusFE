@@ -3,7 +3,6 @@ import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useResourceQuery } from 'src/hooks/resource'
 import LabelTemplateWindow from './Windows/LabelTemplateWindow'
@@ -82,8 +81,7 @@ const LabelTemplate = () => {
       Component: LabelTemplateWindow,
       props: {
         labels: _labels,
-        recordId: recordId ? recordId : null,
-        editMode: recordId && true
+        recordId: recordId
       },
       width: 800,
       height: 450,

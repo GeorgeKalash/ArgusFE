@@ -1,13 +1,12 @@
-// ** Custom Imports
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import { useState } from 'react'
 import { CustomTabs } from 'src/components/Shared/CustomTabs'
 import LabelTemplateForm from '../Forms/LabelTemplateForm'
 import ItemList from '../Forms/ItemList'
 
-const LabelTemplateWindow = ({ labels, editMode, maxAccess, recordId, height }) => {
+const LabelTemplateWindow = ({ labels, maxAccess, recordId, height }) => {
   const [store, setStore] = useState({
-    recordId: recordId || null,
+    recordId: recordId,
     labelTemplate: null,
     item: null
   })
@@ -19,16 +18,10 @@ const LabelTemplateWindow = ({ labels, editMode, maxAccess, recordId, height }) 
     <>
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
       <CustomTabPanel height={height} index={0} value={activeTab}>
-        <LabelTemplateForm
-          labels={labels}
-          maxAccess={maxAccess}
-          store={store}
-          setStore={setStore}
-          editMode={store.recordId}
-        />
+        <LabelTemplateForm labels={labels} maxAccess={maxAccess} store={store} setStore={setStore} />
       </CustomTabPanel>
       <CustomTabPanel height={height} index={1} value={activeTab}>
-        <ItemList labels={labels} maxAccess={maxAccess} editMode={editMode} recordId={store?.recordId} />
+        <ItemList labels={labels} maxAccess={maxAccess} recordId={store?.recordId} />
       </CustomTabPanel>
     </>
   )
