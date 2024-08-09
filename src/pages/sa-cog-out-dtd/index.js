@@ -23,8 +23,8 @@ const DocumentTypeDefault = () => {
 
     try {
       const response = await getRequest({
-        extension: SaleRepository.DocumentTypeDefault.page,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_functionId=5100`
+        extension: SaleRepository.DocumentTypeDefault.qry,
+        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_functionId=5106`
       })
 
       return { ...response, _startAt: _startAt }
@@ -35,12 +35,11 @@ const DocumentTypeDefault = () => {
     query: { data },
     labels: _labels,
     invalidate,
-    paginationParameters,
     refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SaleRepository.DocumentTypeDefault.page,
+    endpointId: SaleRepository.DocumentTypeDefault.qry,
     datasetId: ResourceIds.DocumentTypeDefault
   })
 
@@ -51,18 +50,13 @@ const DocumentTypeDefault = () => {
       flex: 1
     },
     {
-      field: 'spName',
-      headerName: _labels.salesPerson,
+      field: 'commitItems',
+      headerName: _labels.commitItems,
       flex: 1
     },
     {
-      field: 'validity',
-      headerName: _labels.validity,
-      flex: 1
-    },
-    {
-      field: 'plantName',
-      headerName: _labels.plant,
+      field: 'disableSKULookup',
+      headerName: _labels.dsl,
       flex: 1
     }
   ]
@@ -115,8 +109,7 @@ const DocumentTypeDefault = () => {
           isLoading={false}
           pageSize={50}
           refetch={refetch}
-          paginationParameters={paginationParameters}
-          paginationType='api'
+          paginationType='client'
           maxAccess={access}
         />
       </Grow>

@@ -40,6 +40,7 @@ import { useForm } from 'src/hooks/form'
 import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
 import { useInvalidate } from 'src/hooks/resource'
 import { ControlContext } from 'src/providers/ControlContext'
+import InfoForm from './InfoForm'
 
 export default function OutwardsForm({ labels, access, recordId, cashAccountId, plantId, userId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -115,6 +116,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
     defaultValueDate: new Date(),
     vatAmount: null,
     vatRate: null,
+    taxPercent: null,
     tdAmount: 0,
     giftCode: '',
     details: '',
@@ -338,7 +340,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
     formik.setFieldValue('lcAmount', selectedRowData?.baseAmount)
     formik.setFieldValue('fcAmount', selectedRowData?.originAmount)
     formik.setFieldValue('dispersalId', selectedRowData?.dispersalId)
-    formik.setFieldValue('exRate', selectedRowData?.exRate)
+    formik.setFieldValue('exRate', parseFloat(selectedRowData?.exRate).toFixed(5))
     formik.setFieldValue('rateCalcMethod', selectedRowData?.rateCalcMethod)
     formik.setFieldValue('corId', selectedRowData?.corId)
     formik.setFieldValue('corRef', selectedRowData?.corRef)
@@ -356,6 +358,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
     formik.setValues({
       ...data.headerView,
       date: formatDateFromApi(data.headerView.date),
+      exRate: parseFloat(data.headerView.exRate).toFixed(5),
       defaultValueDate: formatDateFromApi(data.headerView.defaultValueDate),
       valueDate: formatDateFromApi(data.headerView.valueDate),
       ttNo: data.ttNo,
@@ -470,13 +473,19 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       key: 'Post',
       condition: true,
       onClick: onPost,
-      disabled: !isPosted
+      disabled: !isPosted || !formik.values.corId
     },
     {
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
       disabled: !editMode
+    },
+    {
+      key: 'Audit',
+      condition: true,
+      onClick: openInfo,
+      disabled: (editMode && !formik.values.corId) || !editMode
     }
   ]
 
@@ -493,7 +502,18 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       height: 500
     })
   }
-
+  function openInfo() {
+    stack({
+      Component: InfoForm,
+      props: {
+        labels,
+        formik
+      },
+      width: 700,
+      height: 610,
+      title: labels.Audit
+    })
+  }
   function openBankWindow() {
     if (formik.values.bankType === 1) {
       stack({
@@ -533,6 +553,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
         parameters: `_filter=&_key=vatPct`
       })
       formik.setFieldValue('vatRate', parseInt(res.record.value))
+      formik.setFieldValue('taxPercent', parseFloat(res.record.value))
     } catch (error) {}
   }
 
@@ -840,10 +861,11 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                   <Grid item xs={6}>
                     <CustomNumberField
                       name='exRate'
-                      label={labels.exchangeRate}
+                      label={labels.exRateMultiply}
                       value={formik.values.exRate}
                       required
                       readOnly
+                      decimalScale={5}
                       maxAccess={maxAccess}
                       onChange={e => formik.setFieldValue('exRate', e.target.value)}
                       onClear={() => formik.setFieldValue('exRate', '')}
@@ -854,7 +876,8 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                   <Grid item xs={6}>
                     <CustomNumberField
                       name='exRate2'
-                      label={labels.exchangeRate}
+                      decimalScale={5}
+                      label={labels.exRateDivide}
                       value={formik.values?.exRate ? 1 / formik.values.exRate : ''}
                       required
                       readOnly

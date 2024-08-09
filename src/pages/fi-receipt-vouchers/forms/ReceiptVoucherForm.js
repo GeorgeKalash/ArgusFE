@@ -65,14 +65,15 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       contactId: null,
       collectorId: null,
       isVerified: true,
-      template: 1
+      template: 1,
+      sourceReference: ''
     },
     validationSchema: yup.object({
-      accountId: yup.string().required(' '),
-      currencyId: yup.string().required(' '),
-      cashAccountId: yup.string().required(' '),
-      amount: yup.string().required(' '),
-      paymentMethod: yup.string().required(' ')
+      accountId: yup.string().required(),
+      currencyId: yup.string().required(),
+      cashAccountId: yup.string().required(),
+      amount: yup.string().required(),
+      paymentMethod: yup.string().required()
     }),
     onSubmit: async obj => {
       try {
@@ -226,7 +227,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     >
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
@@ -270,7 +271,6 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
               />
             </Grid>
-
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={SystemRepository.Plant.qry}
@@ -312,7 +312,6 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 maxAccess={maxAccess}
               />
             </Grid>
-
             <Grid item xs={6}>
               <ResourceComboBox
                 datasetId={DataSets.PAYMENT_METHOD}
@@ -384,7 +383,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 maxAccess={maxAccess}
               />
             </Grid>
-            <Grid container item xs={6} spacing={4}>
+            <Grid container item xs={6} spacing={2}>
               <Grid item xs={12}>
                 <ResourceComboBox
                   endpointId={SystemRepository.Currency.qry}
@@ -464,6 +463,18 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                   }}
                   error={formik.touched.templateId && Boolean(formik.errors.templateId)}
                   maxAccess={maxAccess}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <CustomTextField
+                  name='sourceReference'
+                  label={labels.sourceReference}
+                  value={formik.values.sourceReference}
+                  onChange={formik.handleChange}
+                  onClear={() => formik.setFieldValue('sourceReference', '')}
+                  maxLength='20'
+                  maxAccess={maxAccess}
+                  error={formik.touched.sourceReference && Boolean(formik.errors.sourceReference)}
                 />
               </Grid>
             </Grid>

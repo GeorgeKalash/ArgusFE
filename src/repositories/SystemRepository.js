@@ -147,9 +147,6 @@ export const SystemRepository = {
     get: service + 'getDE',
     set: service + 'set2DE'
   },
-  FiscalYears: {
-    qry: service + 'qryFY'
-  },
   ModuleClassRES: {
     qry: service + 'qryRES'
   },
@@ -194,5 +191,24 @@ export const SystemRepository = {
   },
   SMSRequest: {
     qry: service + 'qrySMS'
+  },
+  FiscalYears: {
+    page: service + 'pageFY',
+    qry: service + 'qryFY',
+    set: service + 'setFY',
+    get: service + 'getFY',
+    del: service + 'delFY'
+  },
+  Period: {
+    qry: service + 'qryFPE'
+  },
+  FiscalPeriodPack: {
+    set2: service + 'set2FPE'
+  },
+  FiscalModulePack: {
+    set2: service + 'set2FMO'
+  },
+  FiscalModule: {
+    qry: service + 'qryFMO'
   }
 }
