@@ -8,8 +8,7 @@ const IntegrationLogicWindow = ({ labels, maxAccess, recordId }) => {
   const [activeTab, setActiveTab] = useState(0)
 
   const [store, setStore] = useState({
-    recordId: recordId || null,
-    TaxDetail: []
+    recordId: recordId || null
   })
   const editMode = !!store.recordId
 
