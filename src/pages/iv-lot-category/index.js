@@ -9,7 +9,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import CommissionTypesForm from './forms/CommissionTypesForm'
+import LotCategoryForm from './forms/LotCategoryForm'
 import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
@@ -20,21 +20,18 @@ const Index = () => {
   const { platformLabels } = useContext(ControlContext)
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
-
     const response = await getRequest({
-      extension: InventoryRepository.Category.qry,
-      parameters: `${_pageSize}&_name=`
+      extension: InventoryRepository.LotCategory.qry,
+      parameters: ``
     })
 
-    return { ...response, _startAt: _startAt }
+    return response
   }
 
   const {
     query: { data },
     labels: _labels,
     refetch,
-    paginationParameters,
     invalidate,
     access
   } = useResourceQuery({
@@ -55,7 +52,7 @@ const Index = () => {
     },
     {
       field: 'naraRef',
-      headerName: _labels.numberRange,
+      headerName: _labels.NumericRange,
       flex: 1
     },
     {
@@ -80,12 +77,12 @@ const Index = () => {
     },
     {
       field: 'udn1',
-      headerName: _labels.userDefinedNumber1,
+      headerName: _labels.userDefinedNumeric1,
       flex: 1
     },
     {
       field: 'udn2',
-      headerName: _labels.userDefinedNumber2,
+      headerName: _labels.userDefinedNumeric2,
       flex: 1
     }
   ]
@@ -99,25 +96,27 @@ const Index = () => {
   }
 
   const del = async obj => {
-    await postRequest({
-      extension: CurrencyTradingSettingsRepository.CommissionType.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success(platformLabels.Deleted)
+    try {
+      await postRequest({
+        extension: InventoryRepository.LotCategory.del,
+        record: JSON.stringify(obj)
+      })
+      invalidate()
+      toast.success(platformLabels.Deleted)
+    } catch (e) {}
   }
 
   function openForm(recordId) {
     stack({
-      Component: CommissionTypesForm,
+      Component: LotCategoryForm,
       props: {
         labels: _labels,
         recordId: recordId,
         maxAccess: access
       },
       width: 500,
-      height: 300,
-      title: _labels.CommissionTypes
+      height: 650,
+      title: _labels.lotCategory
     })
   }
 
@@ -136,9 +135,8 @@ const Index = () => {
           isLoading={false}
           refetch={refetch}
           pageSize={50}
-          paginationParameters={paginationParameters}
           maxAccess={access}
-          paginationType='api'
+          paginationType='client'
         />
       </Grow>
     </VertLayout>

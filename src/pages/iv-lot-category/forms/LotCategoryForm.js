@@ -1,0 +1,213 @@
+import { Grid } from '@mui/material'
+import { useContext, useEffect, useState } from 'react'
+import * as yup from 'yup'
+import FormShell from 'src/components/Shared/FormShell'
+import toast from 'react-hot-toast'
+import { RequestsContext } from 'src/providers/RequestsContext'
+import { useInvalidate } from 'src/hooks/resource'
+import { ResourceIds } from 'src/resources/ResourceIds'
+import CustomTextField from 'src/components/Inputs/CustomTextField'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { useForm } from 'src/hooks/form'
+import { ControlContext } from 'src/providers/ControlContext'
+import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
+import { SystemRepository } from 'src/repositories/SystemRepository'
+import { InventoryRepository } from 'src/repositories/InventoryRepository'
+
+export default function LotCategoryForm({ labels, maxAccess, recordId }) {
+  const [editMode, setEditMode] = useState(!!recordId)
+  const { platformLabels } = useContext(ControlContext)
+
+  const { getRequest, postRequest } = useContext(RequestsContext)
+
+  const invalidate = useInvalidate({
+    endpointId: InventoryRepository.LotCategory.qry
+  })
+
+  const { formik } = useForm({
+    initialValues: {
+      recordId: null,
+      reference: '',
+      name: '',
+      udt1: '',
+      udt2: '',
+      udd1: '',
+      udd2: '',
+      udn1: '',
+      udn2: ''
+    },
+    enableReinitialize: true,
+    maxAccess,
+    validateOnChange: true,
+    validationSchema: yup.object({
+      reference: yup.string().required(' '),
+      name: yup.string().required(' ')
+    }),
+    onSubmit: async obj => {
+      const recordId = obj.recordId
+
+      const response = await postRequest({
+        extension: InventoryRepository.LotCategory.set,
+        record: JSON.stringify(obj)
+      })
+
+      if (!recordId) {
+        toast.success(platformLabels.Added)
+        formik.setValues({
+          ...obj,
+          recordId: response.recordId
+        })
+      } else toast.success(platformLabels.Edited)
+      setEditMode(true)
+
+      invalidate()
+    }
+  })
+
+  useEffect(() => {
+    ;(async function () {
+      try {
+        if (recordId) {
+          const res = await getRequest({
+            extension: InventoryRepository.LotCategory.get,
+            parameters: `_recordId=${recordId}`
+          })
+
+          formik.setValues(res.record)
+        }
+      } catch (exception) {}
+    })()
+  }, [])
+
+  return (
+    <FormShell resourceId={ResourceIds.CommissionType} form={formik} maxAccess={maxAccess} editMode={editMode}>
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={4}>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='reference'
+                label={labels.reference}
+                value={formik.values.reference}
+                required
+                maxAccess={maxAccess}
+                maxLength='30'
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('reference', '')}
+                error={formik.touched.reference && Boolean(formik.errors.reference)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='name'
+                label={labels.name}
+                value={formik.values.name}
+                required
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('name', '')}
+                error={formik.touched.name && Boolean(formik.errors.name)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceLookup
+                endpointId={SystemRepository.NumberRange.snapshot}
+                form={formik}
+                valueField='reference'
+                displayField='description'
+                name='nraRef'
+                label={labels.NumericRange}
+                secondDisplayField={true}
+                secondValue={formik.values.nraDescription}
+                onChange={(event, newValue) => {
+                  if (newValue) {
+                    formik.setFieldValue('nraId', newValue?.recordId)
+                    formik.setFieldValue('nraRef', newValue?.reference)
+                    formik.setFieldValue('nraDescription', newValue?.description)
+                  } else {
+                    formik.setFieldValue('nraId', null)
+                    formik.setFieldValue('nraRef', '')
+                    formik.setFieldValue('nraDescription', '')
+                  }
+                }}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='udd1'
+                label={labels.userDefinedDate1}
+                value={formik.values.reference}
+                required
+                maxAccess={maxAccess}
+                maxLength='30'
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('udd1', '')}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='udd2'
+                label={labels.userDefinedDate2}
+                value={formik.values.reference}
+                required
+                maxAccess={maxAccess}
+                maxLength='30'
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('reference', '')}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='udt1'
+                label={labels.userDefinedText1}
+                value={formik.values.reference}
+                required
+                maxAccess={maxAccess}
+                maxLength='30'
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('udt1', '')}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='udt2'
+                label={labels.userDefinedText2}
+                value={formik.values.reference}
+                required
+                maxAccess={maxAccess}
+                maxLength='30'
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('udt2', '')}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='udn1'
+                label={labels.userDefinedNumeric1}
+                value={formik.values.reference}
+                required
+                maxAccess={maxAccess}
+                maxLength='30'
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('udn1', '')}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='udn2'
+                label={labels.userDefinedNumeric2}
+                value={formik.values.reference}
+                required
+                maxAccess={maxAccess}
+                maxLength='30'
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('udn2', '')}
+              />
+            </Grid>
+          </Grid>
+        </Grow>
+      </VertLayout>
+    </FormShell>
+  )
+}

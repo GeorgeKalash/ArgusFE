@@ -14,6 +14,12 @@ export const InventoryRepository = {
     set: service + 'setCA',
     del: service + 'delCA'
   },
+  LotCategory: {
+    qry: service + 'qryLCA',
+    get: service + 'getLCA',
+    set: service + 'setLCA',
+    del: service + 'delLCA'
+  },
   Measurement: {
     qry: service + 'qryMS',
     get: service + 'getMS',
