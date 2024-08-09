@@ -39,20 +39,11 @@ export default function InfoForm({ labels, formik }) {
         </Grid>
         <Grid item xs={12} sx={{ mx: 5 }}>
           <CustomTextField
-            name='corFCCommission'
-            readOnly
-            label={labels.commissionPayable}
-            value={formik.values.corFCCommission}
-          />
-        </Grid>
-        <Grid item xs={12} sx={{ mx: 5 }}>
-          <CustomTextField
             name='corComission'
             readOnly
             label={labels.corComission}
             value={formik.values.corCommission}
           />
-          {/* fees */}
         </Grid>
         <Grid item xs={12} sx={{ mx: 5 }}>
           <CustomTextField
