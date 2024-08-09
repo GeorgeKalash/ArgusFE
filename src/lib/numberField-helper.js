@@ -17,19 +17,14 @@ export function handleChangeNumber(inputValue, digitsBeforePoint, digitsAfterPoi
 const getFormattedNumber = (value, decimal) => {
   if (!value && value !== 0) return
 
-  // Remove non-numeric and non-decimal characters (but preserving minus sign for negative numbers)
   const sanitizedValue = value.toString().replace(/[^0-9.-]/g, '')
 
-  // Split the value into integer and decimal parts
   const [integerPart, decimalPart] = sanitizedValue.split('.')
 
-  // Format the integer part with commas
   const formattedIntegerPart = new Intl.NumberFormat('en-US').format(integerPart)
 
   let formattedDecimalPart = ''
 
-  // If there is a decimal part
-  // ensure it has exactly as much decimal places as required
   if (decimalPart !== undefined) {
     if (decimal !== undefined) {
       formattedDecimalPart = `.${decimalPart.slice(0, decimal)}`
@@ -38,8 +33,11 @@ const getFormattedNumber = (value, decimal) => {
     }
   }
 
-  // Combine the formatted parts
-  const formattedValue = `${formattedIntegerPart}${formattedDecimalPart}`
+  let formattedValue = `${formattedIntegerPart}${formattedDecimalPart}`
+
+  if (decimal !== undefined && decimal >= 0 && !formattedValue.includes('.')) {
+    formattedValue += '.' + '0'.repeat(decimal)
+  }
 
   return formattedValue
 }
