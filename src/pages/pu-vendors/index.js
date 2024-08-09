@@ -22,6 +22,7 @@ const PuVendors = () => {
     query: { data },
     labels: _labels,
     filterBy,
+    clearFilter,
     paginationParameters,
     invalidate,
     refetch,
@@ -29,15 +30,28 @@ const PuVendors = () => {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: PurchaseRepository.Vendor.page,
-    datasetId: ResourceIds.PuVendors
+    datasetId: ResourceIds.PuVendors,
+    filter: {
+      filterFn: fetchWithFilter
+    }
   })
+  async function fetchWithFilter({ filters, pagination }) {
+    if (filters?.qry) {
+      return await getRequest({
+        extension: PurchaseRepository.Vendor.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+    } else {
+      return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+    }
+  }
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
       extension: PurchaseRepository.Vendor.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -95,15 +109,36 @@ const PuVendors = () => {
     openForm(obj?.recordId)
   }
 
-  const onApply = ({ rpbParams }) => {
-    filterBy('params', rpbParams)
+  const onApply = ({ search, rpbParams }) => {
+    if (!search && rpbParams.length === 0) {
+      clearFilter('params')
+    } else if (!search) {
+      filterBy('params', rpbParams)
+    } else {
+      filterBy('qry', search)
+    }
     refetch()
+  }
+
+  const onSearch = value => {
+    filterBy('qry', value)
+  }
+
+  const onClear = () => {
+    clearFilter('qry')
   }
 
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar hasSearch={false} onAdd={add} maxAccess={access} onApply={onApply} reportName={'PUVEN'} />
+        <RPBGridToolbar
+          onAdd={add}
+          maxAccess={access}
+          onApply={onApply}
+          onSearch={onSearch}
+          onClear={onClear}
+          reportName={'PUVEN'}
+        />
       </Fixed>
       <Grow>
         <Table

@@ -9,6 +9,7 @@ export const PurchaseRepository = {
     del: service + 'delGRP'
   },
   Vendor: {
+    snapshot: service + 'snapshotVEN',
     qry: service + 'qryVEN',
     page: service + 'pageVEN',
     get: service + 'getVEN',

@@ -142,7 +142,7 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true }) =>
                 displayField={['reference', 'name']}
                 readOnly={readOnly}
                 required={required}
-                displayFieldWidth={2}
+                displayFieldWidth={1.5}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' },

@@ -109,7 +109,7 @@ export default function VendorsForm({ labels, maxAccess: access, recordId, setSt
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.Profession} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell resourceId={ResourceIds.PuVendors} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
@@ -159,21 +159,9 @@ export default function VendorsForm({ labels, maxAccess: access, recordId, setSt
             </Grid>
             <Grid item xs={12}>
               <CustomTextField
-                name='flName'
-                label={labels.flName}
-                value={formik.values.flName}
-                maxLength='50'
-                maxAccess={maxAccess}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('flName', '')}
-                error={formik.touched.flName && Boolean(formik.errors.flName)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomTextField
-                name='keyWord'
+                name='keywords'
                 label={labels.keyWords}
-                value={formik.values.keyWords}
+                value={formik.values.keywords}
                 maxLength='30'
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
@@ -198,6 +186,18 @@ export default function VendorsForm({ labels, maxAccess: access, recordId, setSt
                 }}
                 error={formik.touched.accountId && Boolean(formik.errors.accountId)}
                 maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='flName'
+                label={labels.flName}
+                value={formik.values.flName}
+                maxLength='50'
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('flName', '')}
+                error={formik.touched.flName && Boolean(formik.errors.flName)}
               />
             </Grid>
             <Grid item xs={12}>
