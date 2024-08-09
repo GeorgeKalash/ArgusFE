@@ -90,6 +90,11 @@ const Financial = () => {
       flex: 1
     },
     {
+      field: 'sourceReference',
+      headerName: _labels.sourceReference,
+      flex: 1
+    },
+    {
       field: 'amount',
       headerName: _labels.amount,
       flex: 1,

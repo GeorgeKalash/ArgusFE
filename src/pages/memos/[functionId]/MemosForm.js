@@ -58,7 +58,8 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
       subtotal: '',
       notes: '',
       vatAmount: '',
-      isSubjectToVAT: false
+      isSubjectToVAT: false,
+      sourceReference: ''
     },
     maxAccess,
     enableReinitialize: false,
@@ -482,6 +483,17 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                 }}
                 error={formik.touched.templateId && Boolean(formik.errors.templateId)}
                 maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <CustomTextField
+                name='sourceReference'
+                readOnly={postedOrCanceled}
+                label={labels.sourceReference}
+                value={formik.values.sourceReference}
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('sourceReference', '')}
               />
             </Grid>
             <Grid item xs={6.01}>
