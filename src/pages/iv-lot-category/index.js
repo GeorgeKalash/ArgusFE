@@ -23,8 +23,8 @@ const Index = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: CurrencyTradingSettingsRepository.CommissionType.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      extension: InventoryRepository.Category.qry,
+      parameters: `${_pageSize}&_name=`
     })
 
     return { ...response, _startAt: _startAt }
@@ -35,31 +35,57 @@ const Index = () => {
     labels: _labels,
     refetch,
     paginationParameters,
+    invalidate,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: InventoryRepository.Category.page,
     datasetId: ResourceIds.CommissionType
   })
 
-  const invalidate = useInvalidate({
-    endpointId: CurrencyTradingSettingsRepository.CommissionType.page
-  })
-
   const columns = [
-    {
-      field: 'reference',
-      headerName: _labels.reference,
-      flex: 1
-    },
     {
       field: 'name',
       headerName: _labels.name,
       flex: 1
     },
     {
-      field: 'typeName',
-      headerName: _labels.type,
+      field: 'caRef',
+      headerName: _labels.reference,
+      flex: 1
+    },
+    {
+      field: 'naraRef',
+      headerName: _labels.numberRange,
+      flex: 1
+    },
+    {
+      field: 'udd1',
+      headerName: _labels.userDefinedDate1,
+      flex: 1
+    },
+    {
+      field: 'udd2',
+      headerName: _labels.userDefinedDate2,
+      flex: 1
+    },
+    {
+      field: 'udt1',
+      headerName: _labels.userDefinedText1,
+      flex: 1
+    },
+    {
+      field: 'udt2',
+      headerName: _labels.userDefinedText2,
+      flex: 1
+    },
+    {
+      field: 'udn1',
+      headerName: _labels.userDefinedNumber1,
+      flex: 1
+    },
+    {
+      field: 'udn2',
+      headerName: _labels.userDefinedNumber2,
       flex: 1
     }
   ]
