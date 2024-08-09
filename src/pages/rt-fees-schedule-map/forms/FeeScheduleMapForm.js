@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -52,27 +52,6 @@ export default function FeeScheduleMapForm({ labels, maxAccess, recordId, record
       countryId: yup.string().required()
     }),
 
-    //   onSubmit: async obj => {
-    //     const recordId = obj.recordId
-
-    //     const response = await postRequest({
-    //       extension: RemittanceOutwardsRepository.FreeScheduleMap.set,
-    //       record: JSON.stringify(obj)
-    //     })
-
-    //     if (!recordId) {
-    //       toast.success('Record Added Successfully')
-    //       formik.setValues({
-    //         ...obj,
-    //         recordId: response.recordId
-    //       })
-    //     } else toast.success('Record Edited Successfully')
-    //     setEditMode(true)
-
-    //     invalidate()
-    //   }
-    // })
-
     onSubmit: async obj => {
       const currencyId = formik.values.currencyId
       const corId = formik.values.corId
@@ -104,21 +83,6 @@ export default function FeeScheduleMapForm({ labels, maxAccess, recordId, record
   })
   const editMode = !!formik.values.recordId || !!recordId
 
-  // useEffect(() => {
-  //   ;(async function () {
-  //     try {
-  //       if (recordId) {
-  //         const res = await getRequest({
-  //           extension: RemittanceOutwardsRepository.FreeScheduleMap.get,
-  //           parameters: `_recordId=${recordId}`
-  //         })
-
-  //         formik.setValues(res.record)
-  //       }
-  //     } catch (exception) {}
-  //   })()
-  // }, [])
-
   useEffect(() => {
     ;(async function () {
       try {
@@ -142,8 +106,6 @@ export default function FeeScheduleMapForm({ labels, maxAccess, recordId, record
       } catch (exception) {}
     })()
   }, [])
-
-  console.log(formik.values)
 
   return (
     <FormShell resourceId={ResourceIds.FeeScheduleMap} form={formik} maxAccess={maxAccess} editMode={editMode}>

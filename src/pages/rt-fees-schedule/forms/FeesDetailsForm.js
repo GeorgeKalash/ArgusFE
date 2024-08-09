@@ -3,10 +3,8 @@ import { useFormik } from 'formik'
 import { useContext, useEffect, useState } from 'react'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import FormShell from 'src/components/Shared/FormShell'
-import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { DataSets } from 'src/resources/DataSets'
@@ -45,14 +43,12 @@ const FeesDetailsForm = ({ store, labels, editMode, maxAccess }) => {
       })
         .then(res => {
           const result = res.list
-          console.log(result, 'resss')
 
           const processedData = result.map((item, index) => ({
             ...item,
             id: index + 1,
             seqNo: index + 1
           }))
-          console.log(processedData, 'prooo')
           result && formik.setValues({ FeeScheduleDetail: processedData })
         })
         .catch(error => {})

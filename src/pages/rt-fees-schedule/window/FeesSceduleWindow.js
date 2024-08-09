@@ -1,11 +1,10 @@
-// ** Custom Imports
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import { CustomTabs } from 'src/components/Shared/CustomTabs'
 import { useState } from 'react'
 import FeesSceduleForm from '../forms/FeesSceduleForm'
 import FeesDetailsForm from '../forms/FeesDetailsForm'
 
-const FeesSceduleWindow = ({ height, recordId, labels, maxAccess, expanded }) => {
+const FeesSceduleWindow = ({ height, recordId, labels, maxAccess }) => {
   const [activeTab, setActiveTab] = useState(0)
 
   const editMode = !!recordId
