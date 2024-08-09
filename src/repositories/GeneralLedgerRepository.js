@@ -78,6 +78,7 @@ export const GeneralLedgerRepository = {
   IntegrationLogicDetails: {
     qry: service + 'qryID',
     page: service + 'pageID',
+    get: service + 'getID',
     set: service + 'setID',
     set2: service + 'set2ID',
     del: service + 'delID'

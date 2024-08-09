@@ -87,7 +87,7 @@ export default function IntegrationLogicDetailsForm({ ilId, recordId, labels, ma
     try {
       const res = await getRequest({
         extension: GeneralLedgerRepository.IntegrationLogicDetails.get,
-        parameters: `_recordId=${recordId}`
+        parameters: `_seqNo=${recordId}&_ilId=${ilId}`
       })
 
       formik.setValues(res.record)
@@ -95,7 +95,9 @@ export default function IntegrationLogicDetailsForm({ ilId, recordId, labels, ma
   }
 
   useEffect(() => {
+    console.log(recordId, 'recordId')
     if (recordId) {
+      console.log(recordId, 'recordId')
       getIntegrationLogicById(recordId)
     }
   }, [recordId])
@@ -123,13 +125,13 @@ export default function IntegrationLogicDetailsForm({ ilId, recordId, labels, ma
                 label={labels.postTypes}
                 valueField='reference'
                 displayField='name'
-                valueShow='postTypeRef'
-                secondValueShow='postTypeName'
+                valueShow='ptRef'
+                secondValueShow='ptName'
                 form={formik}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('postTypeId', newValue?.recordId || '')
-                  formik.setFieldValue('postTypeRef', newValue?.reference || '')
-                  formik.setFieldValue('postTypeName', newValue?.name || '')
+                  formik.setFieldValue('ptRef', newValue?.reference || '')
+                  formik.setFieldValue('ptName', newValue?.name || '')
                 }}
                 error={formik.touched.postTypeId && Boolean(formik.errors.postTypeId)}
                 maxAccess={maxAccess}

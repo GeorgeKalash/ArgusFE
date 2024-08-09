@@ -80,7 +80,7 @@ const IntegrationLogicDetails = ({  labels, maxAccess, store }) => {
   }
 
   const edit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj?.seqNo)
   }
 
   const openForm = id => {
