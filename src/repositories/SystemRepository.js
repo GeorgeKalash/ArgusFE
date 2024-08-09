@@ -183,6 +183,9 @@ export const SystemRepository = {
   TimeZone: {
     get: service + 'getTZN'
   },
+  Batch: {
+    snapshot: service + 'snapshotBAT'
+  },
   ETL: {
     get: service + 'getETL'
   },

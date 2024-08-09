@@ -75,7 +75,7 @@ export function ImmediateWindow({ datasetId, Component, titleName, height, props
   const [rendered, setRendered] = useState(false)
 
   useEffect(() => {
-    if (_labels[titleName] && !rendered) {
+    if ((_labels[titleName] || titleName) && !rendered) {
       openForm()
       setRendered(true)
     }
@@ -94,7 +94,7 @@ export function ImmediateWindow({ datasetId, Component, titleName, height, props
       draggable: false,
       width: 600,
       height: height || 400,
-      title: _labels[titleName]
+      title: (_labels[titleName] || titleName)
     })
   }
 
