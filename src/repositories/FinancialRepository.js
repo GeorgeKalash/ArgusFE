@@ -127,5 +127,11 @@ export const FinancialRepository = {
     get: service + 'getAGP',
     set: service + 'setAGP',
     del: service + 'delAGP'
+  },
+  FIDimension: {
+    qry: service + 'qryDI',
+    get: service + 'getDI',
+    set: service + 'setDI',
+    del: service + 'delDI'
   }
 }

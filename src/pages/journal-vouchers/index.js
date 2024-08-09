@@ -5,7 +5,7 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 import { formatDateDefault } from 'src/lib/date-helper'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import JournalVoucherForm from './forms/JournalVoucherForm'
@@ -22,44 +22,43 @@ const JournalVoucher = () => {
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
       extension: GeneralLedgerRepository.JournalVoucher.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_params=&_sortField=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_params=${params || ''}&_sortField=`
     })
 
     return { ...response, _startAt: _startAt }
   }
 
+  async function fetchWithFilter({ filters, pagination }) {
+    if (filters?.qry) {
+      return await getRequest({
+        extension: GeneralLedgerRepository.JournalVoucher.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+    } else {
+      return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+    }
+  }
+
   const {
     query: { data },
     labels: _labels,
-    search,
-    clear,
+    filterBy,
+    clearFilter,
     paginationParameters,
-    access
+    invalidate,
+    access,
+    refetch
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: GeneralLedgerRepository.JournalVoucher.qry,
     datasetId: ResourceIds.JournalVoucher,
-    search: {
-      endpointId: GeneralLedgerRepository.JournalVoucher.snapshot,
-      searchFn: fetchWithSearch
+    filter: {
+      filterFn: fetchWithFilter
     }
-  })
-
-  async function fetchWithSearch({ qry }) {
-    const response = await getRequest({
-      extension: GeneralLedgerRepository.JournalVoucher.snapshot,
-      parameters: `_filter=${qry}`
-    })
-
-    return response
-  }
-
-  const invalidate = useInvalidate({
-    endpointId: GeneralLedgerRepository.JournalVoucher.qry
   })
 
   const columns = [
@@ -122,16 +121,35 @@ const JournalVoucher = () => {
     toast.success('Record Deleted Successfully')
   }
 
+  const onApply = ({ search, rpbParams }) => {
+    if (!search && rpbParams.length === 0) {
+      clearFilter('params')
+    } else if (!search) {
+      filterBy('params', rpbParams)
+    } else {
+      filterBy('qry', search)
+    }
+    refetch()
+  }
+
+  const onSearch = value => {
+    filterBy('qry', value)
+  }
+
+  const onClear = () => {
+    clearFilter('qry')
+  }
+
   return (
     <VertLayout>
       <Fixed>
         <GridToolbar
           onAdd={add}
           maxAccess={access}
-          onSearch={search}
-          onSearchClear={clear}
-          labels={_labels}
-          inputSearch={true}
+          onApply={onApply}
+          onSearch={onSearch}
+          onClear={onClear}
+          reportName={'GLTR'}
         />{' '}
       </Fixed>
       <Grow>

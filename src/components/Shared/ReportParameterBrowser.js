@@ -4,6 +4,8 @@ import * as yup from 'yup'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import { InventoryRepository } from 'src/repositories/InventoryRepository'
+import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { useForm } from 'src/hooks/form'
 import FormShell from './FormShell'
 import { apiMappings, COMBOBOX, LOOKUP } from './apiMappings'
@@ -77,6 +79,8 @@ const GetLookup = ({ field, formik }) => {
 
 const GetComboBox = ({ field, formik, rpbParams }) => {
   const apiDetails = field?.apiDetails
+  let newParams = apiDetails?.parameters
+
   useEffect(() => {
     if (!formik.values?.parameters?.[field.id]?.value && field.value && rpbParams?.length < 1) {
       formik.setFieldValue(`parameters[${field.id}]`, {
@@ -89,12 +93,24 @@ const GetComboBox = ({ field, formik, rpbParams }) => {
     }
   }, [])
 
+  console.log('fatima logs:')
+  console.log(field)
+  console.log(formik)
+  if (apiDetails?.endpoint === SystemRepository.DocumentType.qry) {
+    newParams += `&_dgId=${field?.data}`
+  } else if (apiDetails?.endpoint === InventoryRepository.Dimension.qry) {
+    newParams = `_dimension=${field?.data}`
+  } else if (apiDetails?.endpoint === FinancialRepository.FIDimension.qry) {
+    newParams = `_dimension=${field?.data}`
+  }
+
+  console.log(newParams)
   return (
     <Grid item xs={12} key={field.id}>
       {field?.classId ? (
         <ResourceComboBox
           endpointId={apiDetails.endpoint}
-          parameters={apiDetails?.parameters}
+          parameters={newParams}
           name={`parameters[${field.id}]`}
           label={field.caption}
           valueField={apiDetails.valueField}

@@ -40,7 +40,6 @@ export const apiMappings = {
   [ResourceIds.FiscalYears]: {
     type: COMBOBOX,
     endpoint: SystemRepository.FiscalYears.qry,
-    parameters: '',
     valueField: 'fiscalYear',
     displayField: 'fiscalYear'
   },
@@ -95,7 +94,6 @@ export const apiMappings = {
   [ResourceIds.ProductionLines]: {
     type: COMBOBOX,
     endpoint: ManufacturingRepository.ProductionLine.qry,
-    parameters: '',
     valueField: 'recordId',
     displayField: ['reference', 'name'],
     columnsInDropDown: [
@@ -115,7 +113,7 @@ export const apiMappings = {
   [ResourceIds.DocumentTypes]: {
     type: COMBOBOX,
     endpoint: SystemRepository.DocumentType.qry,
-    parameters: '_filter=',
+    parameters: '_startAt=0&_pageSize=2000', //_dgId appended
     valueField: 'recordId',
     displayField: 'name',
     displayField: ['reference', 'name'],
@@ -127,7 +125,6 @@ export const apiMappings = {
   [ResourceIds.Plants]: {
     type: COMBOBOX,
     endpoint: SystemRepository.Plant.qry,
-    parameters: '',
     valueField: 'recordId',
     displayField: ['reference', 'name'],
     columnsInDropDown: [
@@ -157,7 +154,6 @@ export const apiMappings = {
   [ResourceIds.Groups]: {
     type: COMBOBOX,
     endpoint: BusinessPartnerRepository.Group.qry,
-    parameters: '',
     valueField: 'recordId',
     displayField: ['reference', 'name'],
     columnsInDropDown: [
@@ -179,7 +175,6 @@ export const apiMappings = {
   [ResourceIds.GLAccountGroups]: {
     type: COMBOBOX,
     endpoint: GeneralLedgerRepository.GLAccountGroups.qry,
-    parameters: '',
     valueField: 'recordId',
     displayField: ['reference', 'name'],
     columnsInDropDown: [
@@ -236,7 +231,6 @@ export const apiMappings = {
   [ResourceIds.PlantGroups]: {
     type: COMBOBOX,
     endpoint: SystemRepository.PlantGroup.qry,
-    parameters: '',
     valueField: 'recordId',
     displayField: ['reference', 'name'],
     columnsInDropDown: [
@@ -259,7 +253,6 @@ export const apiMappings = {
     //CHECK SPECIAL
     type: COMBOBOX,
     endpoint: LogisticsRepository.LoCarrier.qry,
-    parameters: '',
     valueField: 'recordId',
     displayField: ['reference', 'name'],
     columnsInDropDown: [
@@ -270,7 +263,6 @@ export const apiMappings = {
   [ResourceIds.NotificationGroups]: {
     type: COMBOBOX,
     endpoint: AccessControlRepository.NotificationGroup.qry,
-    parameters: '',
     valueField: 'recordId',
     displayField: ['reference', 'name'],
     columnsInDropDown: [
@@ -281,7 +273,6 @@ export const apiMappings = {
   [ResourceIds.FinancialStatements]: {
     type: COMBOBOX,
     endpoint: FinancialStatementRepository.FinancialStatement.qry,
-    parameters: '',
     valueField: 'recordId',
     displayField: ['name'],
     columnsInDropDown: [{ key: 'name', value: 'Name' }]
@@ -298,7 +289,6 @@ export const apiMappings = {
   [ResourceIds.FIAgingProfile]: {
     type: COMBOBOX,
     endpoint: FinancialRepository.AgingProfile.qry,
-    parameters: '',
     valueField: 'recordId',
     displayField: ['name'],
     columnsInDropDown: [{ key: 'name', value: 'Name' }]
@@ -326,7 +316,6 @@ export const apiMappings = {
   [ResourceIds.WorkCenters]: {
     type: COMBOBOX,
     endpoint: ManufacturingRepository.WorkCenter.qry,
-    parameters: '',
     valueField: 'recordId',
     displayField: ['reference', 'name'],
     columnsInDropDown: [
@@ -346,7 +335,6 @@ export const apiMappings = {
   [ResourceIds.Machines]: {
     type: COMBOBOX,
     endpoint: ManufacturingRepository.Machine.qry,
-    parameters: '',
     valueField: 'recordId',
     displayField: ['reference', 'name'],
     columnsInDropDown: [
@@ -357,7 +345,6 @@ export const apiMappings = {
   [ResourceIds.VendorGroup]: {
     type: COMBOBOX,
     endpoint: PurchaseRepository.VendorGroup.qry,
-    parameters: '',
     valueField: 'recordId',
     displayField: ['reference', 'name'],
     columnsInDropDown: [
@@ -432,7 +419,6 @@ export const apiMappings = {
   [ResourceIds.ClientGroups]: {
     type: COMBOBOX,
     endpoint: SaleRepository.ClientGroups.qry,
-    parameters: '',
     valueField: 'recordId',
     displayField: ['reference', 'name'],
     columnsInDropDown: [
@@ -443,7 +429,6 @@ export const apiMappings = {
   [ResourceIds.SalesZoneLevels]: {
     type: COMBOBOX,
     endpoint: SaleRepository.SaleZoneLevel.qry,
-    parameters: '',
     valueField: 'levelId',
     displayField: 'name'
   },
@@ -506,14 +491,12 @@ export const apiMappings = {
   [ResourceIds.Driver]: {
     type: COMBOBOX,
     endpoint: DeliveryRepository.Driver.qry,
-    parameters: '',
     valueField: 'recordId',
     displayField: 'name'
   },
   [ResourceIds.Vehicle]: {
     type: COMBOBOX,
     endpoint: DeliveryRepository.Vehicle.qry,
-    parameters: '',
     valueField: 'recordId',
     displayField: 'name'
   },
@@ -538,7 +521,6 @@ export const apiMappings = {
   [ResourceIds.AssetClass]: {
     type: COMBOBOX,
     endpoint: FixedAssetsRepository.Asset.qry,
-    parameters: '',
     valueField: 'recordId',
     displayField: ['reference', 'name'],
     columnsInDropDown: [
@@ -549,7 +531,6 @@ export const apiMappings = {
   [ResourceIds.AssetGroup]: {
     type: COMBOBOX,
     endpoint: FixedAssetsRepository.AssetGroup.qry,
-    parameters: '',
     valueField: 'recordId',
     displayField: ['reference', 'name'],
     columnsInDropDown: [
@@ -560,7 +541,6 @@ export const apiMappings = {
   [ResourceIds.Location]: {
     type: COMBOBOX,
     endpoint: FixedAssetsRepository.Location.qry,
-    parameters: '',
     valueField: 'recordId',
     displayField: ['reference', 'name'],
     columnsInDropDown: [
@@ -571,7 +551,6 @@ export const apiMappings = {
   [ResourceIds.MDAssets]: {
     type: COMBOBOX,
     endpoint: FixedAssetsRepository.Assets.qry,
-    parameters: '',
     valueField: 'recordId',
     displayField: ['reference', 'name'],
     columnsInDropDown: [
@@ -614,7 +593,6 @@ export const apiMappings = {
   [ResourceIds.ReplenishmentGroup]: {
     type: COMBOBOX,
     endpoint: IVReplenishementRepository.ReplenishmentGroup.qry,
-    parameters: '',
     valueField: 'recordId',
     displayField: ['reference', 'name'],
     columnsInDropDown: [
@@ -625,7 +603,6 @@ export const apiMappings = {
   [ResourceIds.PointOfSale]: {
     type: COMBOBOX,
     endpoint: POSRepository.PointOfSale.qry,
-    parameters: '',
     valueField: 'recordId',
     displayField: 'reference'
   },
@@ -645,7 +622,6 @@ export const apiMappings = {
   [ResourceIds.GovernmentOrganizationFilter]: {
     type: COMBOBOX,
     endpoint: SystemRepository.GovernmentOrganization.qry,
-    parameters: '',
     valueField: 'recordId',
     displayField: 'name'
   },
@@ -653,7 +629,6 @@ export const apiMappings = {
     //NotificationLabelFilter
     type: COMBOBOX,
     endpoint: AccessControlRepository.NotificationLabel.qry,
-    parameters: '',
     valueField: 'recordId',
     displayField: 'label'
   },
@@ -677,11 +652,23 @@ export const apiMappings = {
       { key: 'phone', value: 'Phone' }
     ]
   },
-  //2 DIMENSIONS,
+  [ResourceIds.IVDimension]: {
+    type: COMBOBOX,
+    endpoint: InventoryRepository.Dimension.qry,
+    //_dimension appended
+    valueField: 'id',
+    displayField: 'name'
+  },
+  [ResourceIds.FIDimValues]: {
+    type: COMBOBOX,
+    endpoint: FinancialRepository.FIDimension.qry,
+    //_dimension appended
+    valueField: 'id',
+    displayField: 'name'
+  },
   [ResourceIds.CostCenterGroup]: {
     type: COMBOBOX,
     endpoint: GeneralLedgerRepository.CostCenterGroup.qry,
-    parameters: '',
     valueField: 'recordId',
     displayField: ['reference', 'name'],
     columnsInDropDown: [

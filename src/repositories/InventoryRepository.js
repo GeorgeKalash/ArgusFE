@@ -53,5 +53,11 @@ export const InventoryRepository = {
   },
   MaterialsAdjustmentDetail: {
     qry: service + 'qryADI'
+  },
+  Dimension: {
+    qry: service + 'qryDI',
+    get: service + 'getDI',
+    set: service + 'setDI',
+    del: service + 'delDI'
   }
 }

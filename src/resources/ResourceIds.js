@@ -197,5 +197,7 @@ export const ResourceIds = {
   Design: 42109,
   GovernmentOrganizationFilter: 70106,
   NotificationTransaction: 23301, // Notification center
-  MFJobOrders: 42302
+  MFJobOrders: 42302,
+  IVDimension: 41106, 
+  FIDimValues: 31111
 }
