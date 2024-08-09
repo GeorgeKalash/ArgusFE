@@ -92,7 +92,7 @@ export default function LotCategoryForm({ labels, maxAccess, recordId }) {
                 value={formik.values.reference}
                 required
                 maxAccess={maxAccess}
-                maxLength='30'
+                maxLength='10'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('reference', '')}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
@@ -104,6 +104,7 @@ export default function LotCategoryForm({ labels, maxAccess, recordId }) {
                 label={labels.name}
                 value={formik.values.name}
                 required
+                maxLength='30'
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
@@ -140,7 +141,7 @@ export default function LotCategoryForm({ labels, maxAccess, recordId }) {
                 value={formik.values.reference}
                 required
                 maxAccess={maxAccess}
-                maxLength='30'
+                maxLength='20'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('udd1', '')}
               />
@@ -152,7 +153,7 @@ export default function LotCategoryForm({ labels, maxAccess, recordId }) {
                 value={formik.values.reference}
                 required
                 maxAccess={maxAccess}
-                maxLength='30'
+                maxLength='20'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('reference', '')}
               />
@@ -164,7 +165,7 @@ export default function LotCategoryForm({ labels, maxAccess, recordId }) {
                 value={formik.values.reference}
                 required
                 maxAccess={maxAccess}
-                maxLength='30'
+                maxLength='20'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('udt1', '')}
               />
@@ -176,7 +177,7 @@ export default function LotCategoryForm({ labels, maxAccess, recordId }) {
                 value={formik.values.reference}
                 required
                 maxAccess={maxAccess}
-                maxLength='30'
+                maxLength='20'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('udt2', '')}
               />
@@ -188,7 +189,7 @@ export default function LotCategoryForm({ labels, maxAccess, recordId }) {
                 value={formik.values.reference}
                 required
                 maxAccess={maxAccess}
-                maxLength='30'
+                maxLength='20'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('udn1', '')}
               />
@@ -200,7 +201,7 @@ export default function LotCategoryForm({ labels, maxAccess, recordId }) {
                 value={formik.values.reference}
                 required
                 maxAccess={maxAccess}
-                maxLength='30'
+                maxLength='20'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('udn2', '')}
               />

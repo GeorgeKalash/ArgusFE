@@ -3,8 +3,7 @@ import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
@@ -19,7 +18,7 @@ const Index = () => {
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
 
-  async function fetchGridData(options = {}) {
+  async function fetchGridData() {
     const response = await getRequest({
       extension: InventoryRepository.LotCategory.qry,
       parameters: ``
@@ -36,7 +35,7 @@ const Index = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    datasetId: ResourceIds.CommissionType
+    datasetId: ResourceIds.LotCategories
   })
 
   const columns = [
