@@ -35,6 +35,7 @@ export default function IntegrationLogicDetailsForm({ ilId, recordId, labels, ma
     validateOnChange: true,
     validationSchema: yup.object({
       sign: yup.string().required(),
+      tagId: yup.string().required(),
       integrationLevel: yup.string().required(),
       masterSource: yup.string().required(),
       postTypeId: yup.string().required()
