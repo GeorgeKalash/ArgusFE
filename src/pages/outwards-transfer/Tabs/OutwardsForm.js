@@ -116,6 +116,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
     defaultValueDate: new Date(),
     vatAmount: null,
     vatRate: null,
+    taxPercent: null,
     tdAmount: 0,
     giftCode: '',
     details: '',
@@ -141,21 +142,6 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
     ],
     instantCashDetails: {},
     products: [{}]
-
-    // infoData: {
-    //   corCurrencyId: '',
-    //   corCurrencyRef: '',
-    //   corAmount: '',
-    //   corCommission: '',
-    //   corExRate: '',
-    //   corRateCalcMethod: '',
-    //   corEvalExRate: '',
-    //   corEvalRateCalcMethod: '',
-    //   corBaseAmount: '',
-    //   grossProfitFromExRate: '',
-    //   netCommissionRevenue: '',
-    //   netCommssionCost: ''
-    // }
   }
 
   const { formik } = useForm({
@@ -494,6 +480,12 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       condition: true,
       onClick: 'onClickGL',
       disabled: !editMode
+    },
+    {
+      key: 'Audit',
+      condition: true,
+      onClick: openInfo,
+      disabled: (editMode && !formik.values.corId) || !editMode
     }
   ]
 
@@ -519,7 +511,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       },
       width: 700,
       height: 610,
-      title: labels.Information
+      title: labels.Audit
     })
   }
   function openBankWindow() {
@@ -561,6 +553,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
         parameters: `_filter=&_key=vatPct`
       })
       formik.setFieldValue('vatRate', parseInt(res.record.value))
+      formik.setFieldValue('taxPercent', parseFloat(res.record.value))
     } catch (error) {}
   }
 
@@ -957,22 +950,6 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                 </Grid>
                 <Grid item xs={12}>
                   <CustomNumberField label='Balance To Pay' value={getFormattedNumber(Balance) ?? '0'} readOnly />
-                </Grid>
-                <Grid item xs={12}>
-                  <Button
-                    sx={{
-                      backgroundColor: '#908c8c',
-                      color: '#000000',
-                      '&:disabled': {
-                        backgroundColor: '#eaeaea',
-                        color: '#000000'
-                      }
-                    }}
-                    disabled={(editMode && !formik.values.corId) || !editMode}
-                    onClick={() => openInfo()}
-                  >
-                    Information
-                  </Button>
                 </Grid>
               </FieldSet>
             </Grid>
