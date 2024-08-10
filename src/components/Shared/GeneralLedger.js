@@ -490,7 +490,7 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
             label: _labels.sourceReference,
             name: 'sourceReference',
             props: {
-              maxLength: 2
+              maxLength: 20
             }
           },
           {
