@@ -135,6 +135,13 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'FI Trx',
+    label: platformLabels.FinTrx,
+    color: '#3E048C',
+    image: 'popup-window.png',
+    main: false
+  },
+  {
     key: 'Shipment',
     label: platformLabels.Shipment,
     color: '#843c54',
