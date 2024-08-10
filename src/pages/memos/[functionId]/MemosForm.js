@@ -489,6 +489,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
               <CustomTextField
                 name='sourceReference'
                 readOnly={postedOrCanceled}
+                maxLength='20'
                 label={labels.sourceReference}
                 value={formik.values.sourceReference}
                 maxAccess={maxAccess}
