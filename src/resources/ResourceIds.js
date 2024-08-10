@@ -182,5 +182,6 @@ export const ResourceIds = {
   VendorGroups: 50101,
   FeeSchedule: 36314,
   FeeScheduleMap: 36315,
+  IntegrationLogics: 30101,
   ConsignmentSites: 51110
 }
