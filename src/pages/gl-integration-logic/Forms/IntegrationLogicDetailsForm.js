@@ -113,7 +113,7 @@ export default function IntegrationLogicDetailsForm({ ilId, recordId, labels, ma
     >
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <ResourceLookup
                 endpointId={GeneralLedgerRepository.IntegrationPostTypes.snapshot}
@@ -207,7 +207,7 @@ export default function IntegrationLogicDetailsForm({ ilId, recordId, labels, ma
                 label={labels.description}
                 value={formik.values.description}
                 maxLength='100'
-                rows={2}
+                rows={4}
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('description', '')}

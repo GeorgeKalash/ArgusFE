@@ -73,16 +73,10 @@ export default function IntegrationLogicForm({ labels, maxAccess, setStore, stor
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.IntegrationLogics}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={editMode}
-      isCleared={false}
-    >
+    <FormShell resourceId={ResourceIds.IntegrationLogics} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <CustomTextField
                 name='name'
@@ -104,7 +98,6 @@ export default function IntegrationLogicForm({ labels, maxAccess, setStore, stor
                 valueField='key'
                 displayField='value'
                 required
-                readOnly={editMode}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik && formik.setFieldValue('distributionLevel', newValue ? newValue.key : '')

@@ -11,7 +11,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 import IntegrationLogicDetailsForm from './IntegrationLogicDetailsForm'
 
-const IntegrationLogicDetails = ({  labels, maxAccess, store }) => {
+const IntegrationLogicDetails = ({ labels, maxAccess, store }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const [gridData, setGridData] = useState([])
@@ -25,7 +25,7 @@ const IntegrationLogicDetails = ({  labels, maxAccess, store }) => {
         parameters: `_ilId=${ilId}`
       })
 
-      setGridData(response) 
+      setGridData(response)
     } catch (error) {}
   }
 
@@ -33,12 +33,12 @@ const IntegrationLogicDetails = ({  labels, maxAccess, store }) => {
     {
       field: 'ptName',
       headerName: labels.postTypes,
-      flex: 1
+      flex: 0.8
     },
     {
       field: 'signName',
       headerName: labels.sign,
-      flex: 1
+      flex: 0.6
     },
     {
       field: 'msName',
@@ -58,10 +58,11 @@ const IntegrationLogicDetails = ({  labels, maxAccess, store }) => {
     {
       field: 'description',
       headerName: labels.description,
-      flex: 1
+      wrapText: true,
+      autoHeight: true,
+      flex: 1.75
     }
   ]
-
 
   const del = async obj => {
     try {
@@ -94,8 +95,8 @@ const IntegrationLogicDetails = ({  labels, maxAccess, store }) => {
         ilId: recordId,
         getGridData
       },
-      width: 700,
-      height: 600,
+      width: 650,
+      height: 550,
       title: labels.integrationLogicDetails
     })
   }

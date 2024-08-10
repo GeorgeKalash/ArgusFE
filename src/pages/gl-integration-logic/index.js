@@ -92,7 +92,7 @@ const GLIntegrationLogic = () => {
         recordId,
         maxAccess: access
       },
-      width: 1000,
+      width: 1100,
       height: 500,
       title: _labels.integrationLogic
     })
