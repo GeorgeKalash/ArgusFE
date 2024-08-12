@@ -43,17 +43,17 @@ export default function IntegrationLogicDetailsForm({ ilId, recordId, labels, ma
     }),
     onSubmit: async obj => {
       try {
-        const res2 = await fetchData()
-        const seqNo = res2.list.length > 0 ? res2.list[res2.list.length - 1]?.seqNo + 1 : 1
-
-        const data = {
-          ...obj,
-          seqNo
-        }
-
+        const res2 = await fetchData();
+    
+        const updatedList = obj?.seqNo
+          ? res2?.list?.map(item => 
+              item?.seqNo === obj?.seqNo ? obj : item
+            )
+          : [...res2?.list, { ...obj, seqNo: res2?.list?.length > 0 ? res2.list[res2?.list?.length - 1]?.seqNo + 1 : 1 }];
+    
         const dataToSave = {
           ilId,
-          details: [...res2.list, data]
+          details: updatedList
         }
 
         const response = await postRequest({
