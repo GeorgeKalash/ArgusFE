@@ -24,7 +24,6 @@ export default function DeliveryMethodsForm({ labels, maxAccess, recordId }) {
   const { formik } = useForm({
     initialValues: {
       recordId: recordId || null,
-      reference: '',
       name: ''
     },
     enableReinitialize: true,
