@@ -19,7 +19,7 @@ const ItemForm = ({ tlId, labels, seqNo, getGridData, maxAccess, window }) => {
 
   const formik = useFormik({
     initialValues: {
-      seqNo: seqNo,
+      seqNo,
       labelTemplateId: tlId,
       itemKey: '',
       displayType: '',
@@ -29,7 +29,7 @@ const ItemForm = ({ tlId, labels, seqNo, getGridData, maxAccess, window }) => {
       scale: '',
       displayAreaWidth: '',
       displayAreaHeight: '',
-      fontSize: '',
+      fontSize: 0,
       font: ''
     },
     enableReinitialize: false,
@@ -41,7 +41,8 @@ const ItemForm = ({ tlId, labels, seqNo, getGridData, maxAccess, window }) => {
       y: yup.string().required(),
       scale: yup.string().required(),
       displayAreaWidth: yup.string().required(),
-      displayAreaHeight: yup.string().required()
+      displayAreaHeight: yup.string().required(),
+      fontSize: yup.number().nullable().min(0)
     }),
     onSubmit: values => {
       post(values)

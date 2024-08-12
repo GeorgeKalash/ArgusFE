@@ -40,8 +40,8 @@ const LabelTemplateForm = ({ labels, maxAccess, store, setStore }) => {
       name: yup.string().required(),
       width: yup.string().required(),
       height: yup.string().required(),
-      labelHomeX: yup.number().nullable().min(0, ' '),
-      labelHomeY: yup.number().nullable().min(0, ' ')
+      labelHomeX: yup.number().nullable().min(0),
+      labelHomeY: yup.number().nullable().min(0)
     }),
     onSubmit: values => {
       postLabelTemplate(values)
