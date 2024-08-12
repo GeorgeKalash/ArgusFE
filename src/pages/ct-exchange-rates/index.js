@@ -303,6 +303,47 @@ const CTExchangeRates = () => {
     })
   }
 
+  const emptyRowValues = () => {
+    const rows = [
+      {
+        id: 1,
+        currencyId: null,
+        raCurrencyId: null,
+        rateTypeId: null,
+        plantId: null,
+        plantName: '',
+        rateCalcMethod: null,
+        rateCalcMethodName: '',
+        minRate: null,
+        maxRate: null,
+        rate: null
+      }
+    ]
+
+    const data = {
+      currencyId: formik.values.currencyId,
+      rateTypeId: formik.values.saRateTypeId,
+      raCurrencyId: formik.values.raCurrencyId,
+      exchangeMaps: rows
+    }
+    postRequest({
+      extension: CurrencyTradingSettingsRepository.ExchangeMap.set2,
+      record: JSON.stringify(data)
+    })
+      .then(res => {
+        if (res) {
+          toast.success(platformLabels.Saved)
+          formik.setValues({
+            ...formik.values,
+            rows: rows
+          })
+        }
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
   return (
     <VertLayout>
       <Grow>
@@ -382,7 +423,7 @@ const CTExchangeRates = () => {
                     <VertLayout>
                       <Fixed>
                         <Grid container xs={12} spacing={2}>
-                          <Grid item xs={9}>
+                          <Grid item xs={8}>
                             <ResourceComboBox
                               endpointId={MultiCurrencyRepository.RateType.qry}
                               name='puRateTypeId'
@@ -402,7 +443,7 @@ const CTExchangeRates = () => {
                               error={formik.touched.puRateTypeId && Boolean(formik.errors.puRateTypeId)}
                             />
                           </Grid>
-                          <Grid item xs={3}>
+                          <Grid item xs={2}>
                             <Button
                               onClick={() => copyRowValues(puFormik)}
                               variant='contained'
@@ -416,6 +457,22 @@ const CTExchangeRates = () => {
                               }
                             >
                               Copy
+                            </Button>
+                          </Grid>
+                          <Grid item xs={2}>
+                            <Button
+                              onClick={() => emptyRowValues()}
+                              variant='contained'
+                              disabled={
+                                !puFormik?.values?.rows ||
+                                !formik.values.puRateTypeId ||
+                                !puFormik?.values?.rows[0]?.rateCalcMethod ||
+                                !puFormik?.values?.rows[0]?.rate ||
+                                !puFormik?.values?.rows[0]?.minRate ||
+                                !puFormik?.values?.rows[0]?.maxRate
+                              }
+                            >
+                              Clear
                             </Button>
                           </Grid>
                         </Grid>
