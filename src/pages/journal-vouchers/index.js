@@ -15,6 +15,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { responsiveFontSizes } from '@material-ui/core'
+import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
 const JournalVoucher = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -143,14 +144,8 @@ const JournalVoucher = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar
-          onAdd={add}
-          maxAccess={access}
-          onApply={onApply}
-          onSearch={onSearch}
-          onClear={onClear}
-          reportName={'GLTR'}
-        />{' '}
+      <RPBGridToolbar onAdd={add} maxAccess={access} onApply={onApply} onSearch={onSearch}
+          onClear={onClear} reportName={'GLTR'} />
       </Fixed>
       <Grow>
         <Table

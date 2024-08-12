@@ -210,11 +210,10 @@ export const ResourceIds = {
   Location: 43103,
   MDAssets: 43200,
   StockCounts: 44201, //stock count cycle
-  ReplenishmentGroup: 46102,
   Design: 42109,
   GovernmentOrganizationFilter: 70106,
   NotificationTransaction: 23301, // Notification center
   MFJobOrders: 42302,
-  IVDimension: 41106, 
+  IVDimension: 41106,
   FIDimValues: 31111
 }

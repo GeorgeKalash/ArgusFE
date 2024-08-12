@@ -14,6 +14,7 @@ import FiPaymentVouchersForm from './forms/FiPaymentVouchersForm'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { useError } from 'src/error'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
 const FiPaymentVouchers = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -22,30 +23,35 @@ const FiPaymentVouchers = () => {
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
       extension: FinancialRepository.PaymentVouchers.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}&filter=`
     })
 
     return { ...response, _startAt: _startAt }
   }
 
+  async function fetchWithFilter({ filters, pagination }) {
+    return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+  }
+
   const {
     query: { data },
     labels: _labels,
+    filterBy,
     paginationParameters,
     refetch,
-    access
+    access,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: FinancialRepository.PaymentVouchers.page,
-    datasetId: ResourceIds.PaymentVouchers
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: FinancialRepository.PaymentVouchers.page
+    datasetId: ResourceIds.PaymentVouchers,
+    filter: {
+      filterFn: fetchWithFilter
+    }
   })
 
   const columns = [
@@ -119,10 +125,15 @@ const FiPaymentVouchers = () => {
     toast.success(platformLabels.Deleted)
   }
 
+  const onApply = ({ rpbParams }) => {
+    filterBy('params', rpbParams)
+    refetch()
+  }
+
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+      <RPBGridToolbar hasSearch={false} onAdd={add} maxAccess={access} onApply={onApply} reportName={'FIPV'} />
       </Fixed>
       <Grow>
         <Table

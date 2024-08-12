@@ -342,9 +342,9 @@ export const apiMappings = {
       { key: 'name', value: 'Name' }
     ]
   },
-  [ResourceIds.VendorGroup]: {
+  [ResourceIds.VendorGroups]: {
     type: COMBOBOX,
-    endpoint: PurchaseRepository.VendorGroup.qry,
+    endpoint: PurchaseRepository.VendorGroups.qry,
     valueField: 'recordId',
     displayField: ['reference', 'name'],
     columnsInDropDown: [
@@ -590,9 +590,9 @@ export const apiMappings = {
       { key: 'description', value: 'Description' }
     ]
   },
-  [ResourceIds.ReplenishmentGroup]: {
+  [ResourceIds.IRReplenishmentGrps]: {
     type: COMBOBOX,
-    endpoint: IVReplenishementRepository.ReplenishmentGroup.qry,
+    endpoint: IVReplenishementRepository.ReplenishmentGroups.qry,
     valueField: 'recordId',
     displayField: ['reference', 'name'],
     columnsInDropDown: [
