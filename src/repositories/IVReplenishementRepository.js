@@ -1,8 +1,9 @@
 const service = 'IR.asmx/'
 
 export const IVReplenishementRepository = {
-  ReplenishmentGroup: {
+  ReplenishmentGroups: {
     qry: service + 'qryGRP',
+    page: service + 'pageGRP',
     get: service + 'getGRP',
     set: service + 'setGRP',
     del: service + 'delGRP'

@@ -1,8 +1,9 @@
 const service = 'PU.asmx/'
 
 export const PurchaseRepository = {
-  VendorGroup: {
+  VendorGroups: {
     qry: service + 'qryGRP',
+    page: service + 'pageGRP',
     get: service + 'getGRP',
     set: service + 'setGRP',
     del: service + 'delGRP'

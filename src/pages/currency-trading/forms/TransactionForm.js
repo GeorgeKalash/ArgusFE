@@ -349,11 +349,33 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
               }))
           }
 
-          const getbase = await getRequest({
-            extension: CTTRXrepository.CurrencyTrading.get3,
-            parameters: `_clientId=${clientId}`
-          })
-          const totalBaseAmount = parseInt(getbase.record.baseAmount) + parseInt(total)
+          const hasKYC = await fetchInfoByKey({ key: values.id_number })
+
+          let totalBaseAmount = ''
+          if (total > baseAmount.value && !recordId) {
+            if (!hasKYC?.clientRemittance) {
+              stackError({
+                message: `You need to create full KYC file for this client.`
+              })
+
+              return
+            }
+          } else {
+            if (hasKYC?.clientId) {
+              const getbase = await getRequest({
+                extension: CTTRXrepository.CurrencyTrading.get3,
+                parameters: `_clientId=${hasKYC.clientId}`
+              })
+              totalBaseAmount = parseInt(getbase.record.baseAmount) + parseInt(total)
+              if (totalBaseAmount > baseAmount.value && !hasKYC.clientRemittance && !recordId) {
+                stackError({
+                  message: `You need to create full KYC file for this client.`
+                })
+
+                return
+              }
+            }
+          }
 
           const response = await postRequest({
             extension: CTTRXrepository.CurrencyTrading.set2,
@@ -363,9 +385,9 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
           const actionMessage = !recordId ? platformLabels.Edited : platformLabels.Added
           toast.success(actionMessage)
           formik.setFieldValue('recordId', response.recordId)
-          await getData(response.recordId)
-
-          if (totalBaseAmount > baseAmount.value && !recordId) viewOTP(response.recordId)
+          const receivedClient = await getData(response.recordId)
+          if ((total > baseAmount.value || totalBaseAmount > baseAmount.value) && !recordId)
+            viewOTP(response.recordId, receivedClient)
           invalidate()
         }
 
@@ -512,6 +534,8 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       formik.setFieldValue('cashAccountId', record.headerView.cashAccountId)
       formik.setFieldValue('otp', record.headerView.otpVerified)
       setOperationType(record.headerView.functionId)
+
+      return record?.clientIndividual?.clientId
     } catch (error) {}
   }
   const { userId } = JSON.parse(window.sessionStorage.getItem('userData'))
@@ -571,8 +595,10 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     } catch (e) {}
   }
 
-  const total = formik.values.operations.reduce((acc, { lcAmount }) => {
-    return acc + (lcAmount || 0)
+  const total = formik.values.operations.reduce((sumLc, row) => {
+    const curValue = parseFloat(row.lcAmount.toString().replace(/,/g, '')) || 0
+
+    return sumLc + curValue
   }, 0)
 
   const receivedTotal = formik.values.amount.reduce((acc, { amount }) => {
@@ -581,12 +607,13 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
 
   const balance = total - receivedTotal
 
-  function viewOTP(recId) {
+  function viewOTP(recId, receivedClient) {
     stack({
       Component: OTPPhoneVerification,
       props: {
         formValidation: formik,
         recordId: recId,
+        clientId: receivedClient,
         functionId: formik.values.functionId,
         onSuccess: () => {
           onClose(recId)
@@ -1077,6 +1104,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                         onChange={(name, value) => {
                           formik.setFieldValue('birth_date', value)
                         }}
+                        readOnly={editMode || isClosed}
                         onClear={() => formik.setFieldValue('birth_date', '')}
                       />
                     </Grid>

@@ -93,6 +93,23 @@ export const SaleRepository = {
     del: service + 'delPT',
     page: service + 'pagePT'
   },
+  DocumentTypeDefault: {
+    qry: service + 'qryDTD',
+    get: service + 'getDTD',
+    set: service + 'setDTD',
+    del: service + 'delDTD',
+    page: service + 'pageDTD'
+  },
+  DocumentType: {
+    qry: service + 'qryDT'
+  },
+  ConsignmentSites: {
+    qry: service + 'qryCCS',
+    get: service + 'getCCS',
+    set: service + 'setCCS',
+    del: service + 'delCCS',
+    page: service + 'pageCCS'
+  },
   SaleZoneLevel: {
     qry: service + 'qryZOL',
     set2: service + 'set2ZOL'
