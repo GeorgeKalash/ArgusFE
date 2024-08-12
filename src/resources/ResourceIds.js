@@ -189,6 +189,9 @@ export const ResourceIds = {
   FeeScheduleMap: 36315,
   IntegrationLogics: 30101,
   ConsignmentSites: 51110,
+  DeliveryMethods: 50104,
+  SystemFunctionIntegrations: 30105,
+  PUPaymentTerms: 50106,
   Module: 20128, //filter
   NotificationGroups: 23103,
   FinancialStatements: 30106,
