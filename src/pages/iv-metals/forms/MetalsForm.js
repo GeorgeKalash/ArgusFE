@@ -73,7 +73,7 @@ export default function MetalsForm({ labels, maxAccess, setStore, store }) {
       try {
         if (recordId) {
           const res = await getRequest({
-            extension: FInventoryRepository.Metals.get,
+            extension: InventoryRepository.Metals.get,
             parameters: `_recordId=${recordId}`
           })
 

@@ -10,6 +10,7 @@ import toast from 'react-hot-toast'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
+import { InventoryRepository } from 'src/repositories/InventoryRepository'
 
 const ScrapForm = ({ store, setStore, maxAccess, labels }) => {
   const { recordId } = store
@@ -19,20 +20,40 @@ const ScrapForm = ({ store, setStore, maxAccess, labels }) => {
     enableReinitialize: true,
     validateOnChange: true,
     maxAccess,
-
     validationSchema: yup.object({
-      scrap: yup.array().of(yup.object().shape({})).required(' ')
+      scrap: yup
+        .array()
+        .of(
+          yup.object().shape({
+            laborValuePerGram: yup
+              .number()
+              .nullable()
+              .test('is-valid-reportingPurity', function (value) {
+                if (!value) return true
+                return value >= 0.001 && value <= 1
+              }),
+            purity: yup
+              .number()
+              .nullable()
+              .test('is-valid-reportingPurity', function (value) {
+                if (!value) return true
+                return value >= 0.001 && value <= 1
+              })
+          })
+        )
+        .required()
     }),
 
     initialValues: {
       scrap: [
         {
           id: 1,
-          taxCodeId: recordId || null,
-          date: '',
-          amount: '',
-
-          seqNo: ''
+          metalId: recordId || null,
+          seqNo: '',
+          itemId: '',
+          itemName: '',
+          laborValuePerGram: '',
+          purity: ''
         }
       ]
     },
@@ -44,8 +65,7 @@ const ScrapForm = ({ store, setStore, maxAccess, labels }) => {
   const postHistory = obj => {
     const items = obj?.scrap.map((item, index) => ({
       ...item,
-      date: formatDateToApiFunction(item.date),
-      taxCodeId: recordId,
+      metalId: recordId,
       seqNo: index + 1
     }))
 
@@ -55,7 +75,7 @@ const ScrapForm = ({ store, setStore, maxAccess, labels }) => {
     }
 
     postRequest({
-      extension: FinancialRepository.TaxHistoryPack.set2,
+      extension: InventoryRepository.Scrap.set,
       record: JSON.stringify(data)
     })
       .then(res => {
@@ -70,22 +90,16 @@ const ScrapForm = ({ store, setStore, maxAccess, labels }) => {
   useEffect(() => {
     if (recordId) {
       getRequest({
-        extension: FinancialRepository.TaxHistoryPack.qry,
-        parameters: `_taxCodeId=${recordId}`
+        extension: InventoryRepository.Scrap.qry,
+        parameters: `_metalId=${recordId}`
       })
         .then(res => {
           if (res?.list?.length > 0) {
             const items = res.list.map((item, index) => ({
               ...item,
-              id: index + 1,
-              date: formatDateFromApi(item.date),
-              amount: item.amount
+              id: index + 1
             }))
             formik.setValues({ scrap: items })
-            setStore(prevStore => ({
-              ...prevStore,
-              scrap: items
-            }))
           }
         })
         .catch(error => {})
@@ -99,7 +113,7 @@ const ScrapForm = ({ store, setStore, maxAccess, labels }) => {
         resourceId={ResourceIds.TaxCodes}
         maxAccess={maxAccess}
         infoVisible={false}
-        editMode={editMode}
+        // editMode={editMode}
       >
         <VertLayout>
           <Grow>
@@ -109,15 +123,50 @@ const ScrapForm = ({ store, setStore, maxAccess, labels }) => {
               error={formik.errors.scrap}
               columns={[
                 {
-                  component: 'date',
-                  label: labels.date,
-                  name: 'date'
+                  component: 'resourcecombobox',
+                  label: labels.sku,
+                  name: 'itemId',
+                  props: {
+                    endpointId: InventoryRepository.Item.snapshot,
+                    valueField: 'recordId',
+                    displayField: 'sku',
+                    mapping: [
+                      { from: 'recordId', to: 'itemId' },
+                      { from: 'sku', to: 'sku' },
+                      { from: 'name', to: 'itemName' }
+                    ],
+                    columnsInDropDown: [
+                      { key: 'sku', value: 'SKU' },
+                      { key: 'name', value: 'Name' }
+                    ],
+                    displayFieldWidth: 2
+                  }
+                },
+                {
+                  component: 'textfield',
+                  label: labels.itemName,
+                  name: 'itemName',
+                  props: {
+                    readOnly: true
+                  }
+                },
+                {
+                  component: 'numberfield',
+                  label: labels.laborValuePerGram,
+                  name: 'laborValuePerGram',
+                  props: {
+                    maxLength: 6,
+                    decimalScale: 5
+                  }
                 },
                 {
                   component: 'numberfield',
                   label: labels.amount,
-                  name: 'amount',
-                  decimalScale: 2
+                  name: 'purity',
+                  props: {
+                    maxLength: 6,
+                    decimalScale: 5
+                  }
                 }
               ]}
             />

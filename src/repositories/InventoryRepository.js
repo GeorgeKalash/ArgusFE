@@ -60,5 +60,11 @@ export const InventoryRepository = {
     set: service + 'setMTL',
     del: service + 'delMTL',
     snapshot: service + 'snapshotMTL'
+  },
+  Scrap: {
+    qry: service + 'qryMTS',
+    get: service + 'getMTS',
+    set: service + 'setMTS',
+    del: service + 'delMTS'
   }
 }
