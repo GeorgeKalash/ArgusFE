@@ -189,5 +189,6 @@ export const ResourceIds = {
   FeeScheduleMap: 36315,
   IntegrationLogics: 30101,
   ConsignmentSites: 51110,
-  PUOrderStatus: 50105
+  PUOrderStatus: 50105,
+  PUPaymentTerms: 50106
 }
