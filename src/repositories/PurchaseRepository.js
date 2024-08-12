@@ -14,5 +14,12 @@ export const PurchaseRepository = {
     get: service + 'getDM',
     set: service + 'setDM',
     del: service + 'delDM'
+  },
+  PaymentTerms: {
+    qry: service + 'qryPT',
+    page: service + 'pagePT',
+    get: service + 'getPT',
+    set: service + 'setPT',
+    del: service + 'delPT'
   }
 }
