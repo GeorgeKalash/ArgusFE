@@ -152,6 +152,11 @@ export const ResourceIds = {
   IncreaseDecreaseAdj: 33301,
   CashTransactions: 33312,
   ReceiptVoucher: 31304,
+  CreditNote: 31306,
+  DebitNote: 31311,
+  ServiceBillReceived: 31312,
+  ServiceInvoice: 31313,
+  FinancialTransaction: 31302,
   InwardTransfer: 36309,
   FIDocTypeDefaults: 31103,
   GenerateOpeningBalances: 31314,
@@ -182,4 +187,8 @@ export const ResourceIds = {
   VendorGroups: 50101,
   ConsignmentSites: 51110,
   LabelTemplates: 44102
+  FeeSchedule: 36314,
+  FeeScheduleMap: 36315,
+  IntegrationLogics: 30101,
+  
 }
