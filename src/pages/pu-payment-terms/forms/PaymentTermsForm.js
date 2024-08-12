@@ -32,7 +32,7 @@ export default function PaymentTermsForm({ labels, maxAccess, recordId }) {
       type: '',
       discount: '',
       discountDays: '',
-      days: ''
+      days: 0
     },
     maxAccess,
     enableReinitialize: true,
@@ -135,7 +135,7 @@ export default function PaymentTermsForm({ labels, maxAccess, recordId }) {
                 label={labels.days}
                 value={formik.values.days}
                 onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('days', '')}
+                onClear={() => formik.setFieldValue('days', 0)}
               />
             </Grid>
             <Grid item xs={12}>
