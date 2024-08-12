@@ -127,7 +127,7 @@ const FiPaymentVouchers = () => {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar hasSearch={false} onAdd={add} maxAccess={access} onApply={onApply} reportName={'FIPVX'} />
+        <RPBGridToolbar hasSearch={false} onAdd={add} maxAccess={access} onApply={onApply} reportName={'FIPV'} />
       </Fixed>
       <Grow>
         <Table

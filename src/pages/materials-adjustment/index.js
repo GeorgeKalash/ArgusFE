@@ -9,6 +9,9 @@ import { useWindow } from 'src/windows'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import MaterialsAdjustmentForm from './Forms/MaterialsAdjustmentForm'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const MaterialsAdjustment = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)

@@ -26,7 +26,7 @@ const JournalVoucher = () => {
     const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
-      extension: GeneralLedgerRepository.JournalVoucher.qry,
+      extension: GeneralLedgerRepository.JournalVoucher.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_params=${params || ''}&_sortField=`
     })
 
@@ -35,11 +35,13 @@ const JournalVoucher = () => {
 
   async function fetchWithFilter({ filters, pagination }) {
     if (filters?.qry) {
+      console.log('fl', filters?.qry)
       return await getRequest({
         extension: GeneralLedgerRepository.JournalVoucher.snapshot,
         parameters: `_filter=${filters.qry}`
       })
     } else {
+      console.log('in', filters?.params)
       return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
     }
   }
@@ -55,7 +57,7 @@ const JournalVoucher = () => {
     refetch
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: GeneralLedgerRepository.JournalVoucher.qry,
+    endpointId: GeneralLedgerRepository.JournalVoucher.page,
     datasetId: ResourceIds.JournalVoucher,
     filter: {
       filterFn: fetchWithFilter
@@ -144,8 +146,14 @@ const JournalVoucher = () => {
   return (
     <VertLayout>
       <Fixed>
-      <RPBGridToolbar onAdd={add} maxAccess={access} onApply={onApply} onSearch={onSearch}
-          onClear={onClear} reportName={'GLTR'} />
+        <RPBGridToolbar
+          onAdd={add}
+          maxAccess={access}
+          onApply={onApply}
+          onSearch={onSearch}
+          onClear={onClear}
+          reportName={'GLTR'}
+        />
       </Fixed>
       <Grow>
         <Table
