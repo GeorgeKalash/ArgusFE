@@ -199,7 +199,6 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
         valueField: 'recordId',
         displayField: 'reference',
         displayFieldWidth: 3,
-        readOnly: true,
         mapping: [
           { from: 'recordId', to: 'dispersalId' },
           { from: 'name', to: 'dispersalName' },
@@ -230,6 +229,7 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
         valueField: 'key',
         displayField: 'value',
         displayFieldWidth: 2,
+        readOnly: true,
         mapping: [
           { from: 'key', to: 'dispersalType' },
           { from: 'value', to: 'dispersalTypeName' },
