@@ -12,6 +12,7 @@ export default function ResourceComboBox({
   parameters = '_filter=',
   filter = () => true,
   value,
+
   ...rest
 }) {
   const { store: data } = rest
@@ -20,8 +21,10 @@ export default function ResourceComboBox({
   const { getAllKvsByDataset } = useContext(CommonContext)
 
   const [store, setStore] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
+    setIsLoading(true)
     if (parameters)
       if (datasetId)
         getAllKvsByDataset({
@@ -32,9 +35,11 @@ export default function ResourceComboBox({
         endpointId &&
           getRequest({
             extension: endpointId,
-            parameters
+            parameters,
+            disableLoading: true
           })
             .then(res => {
+              setIsLoading(false)
               setStore(res.list)
             })
             .catch(error => {})
@@ -49,5 +54,5 @@ export default function ResourceComboBox({
           ? filteredStore.find(item => item[valueField] === values[name]?.toString())
           : filteredStore.find(item => item[valueField] === (values[name] || values))) ?? '') || value
 
-  return <CustomComboBox {...{ ...rest, name, store: filteredStore, valueField, value: _value, name }} />
+  return <CustomComboBox {...{ ...rest, name, store: filteredStore, valueField, value: _value, name, isLoading }} />
 }

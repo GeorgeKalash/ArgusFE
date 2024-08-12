@@ -1,5 +1,5 @@
 // ** MUI Imports
-import { Autocomplete, Paper, TextField } from '@mui/material'
+import { Autocomplete, CircularProgress, Paper, TextField } from '@mui/material'
 import { ControlAccessLevel, TrxType } from 'src/resources/AccessLevels'
 import { Box } from '@mui/material'
 import React from 'react'
@@ -30,6 +30,7 @@ const CustomComboBox = ({
   columnsInDropDown,
   editMode = false,
   hasBorder = true,
+  isLoading,
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
@@ -143,6 +144,12 @@ const CustomComboBox = ({
           helperText={helperText}
           InputProps={{
             ...params.InputProps,
+            endAdornment: (
+              <>
+                {isLoading ? <CircularProgress color='inherit' size={20} /> : null}
+                {params.InputProps.endAdornment}
+              </>
+            ),
             style: {
               border: 'none' // Set width to 100%
             }

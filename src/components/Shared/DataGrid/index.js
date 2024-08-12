@@ -300,6 +300,13 @@ export function DataGrid({
         disableMultipleSelection
         getRowId={row => row[idName]}
         rowSelectionModel={[rowSelectionModel]}
+        onCellClick={params => {
+          const cellMode = apiRef.current.getCellMode(params.id, params.field)
+          if (cellMode === 'view') {
+            apiRef.current.startCellEditMode({ id: params.id, field: params.field })
+            apiRef.current.setCellFocus(params.id, params.field)
+          }
+        }}
         onStateChange={state => {
           if (Object.entries(state.editRows)[0]) {
             const [id, obj] = Object.entries(state.editRows)[0]
