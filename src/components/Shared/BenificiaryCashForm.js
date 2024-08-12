@@ -405,7 +405,8 @@ const BenificiaryCashForm = ({
                   displayField={['reference', 'name']}
                   columnsInDropDown={[
                     { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
+                    { key: 'name', value: 'Name' },
+                    { key: 'flName', value: 'Foreign Language Name' }
                   ]}
                   readOnly={(formik.values.countryId && editMode) || countryId || editMode}
                   values={formik.values}
@@ -599,7 +600,8 @@ const BenificiaryCashForm = ({
                   displayField={['reference', 'name']}
                   columnsInDropDown={[
                     { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
+                    { key: 'name', value: 'Name' },
+                    { key: 'flName', value: 'Foreign Language Name' }
                   ]}
                   values={formik.values}
                   onChange={(event, newValue) => {
@@ -662,7 +664,8 @@ const BenificiaryCashForm = ({
                   displayField={['reference', 'name']}
                   columnsInDropDown={[
                     { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
+                    { key: 'name', value: 'Name' },
+                    { key: 'flName', value: 'Foreign Language Name' }
                   ]}
                   values={formik.values}
                   required
