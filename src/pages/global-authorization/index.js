@@ -80,7 +80,7 @@ const GlobalAuthorization = () => {
       props: {
         labels: labels,
         maxAccess: access,
-        row: { resourceId: row.key, resourceName: row.value, moduleId: filters.moduleId },
+        row: { resourceId: row.data.key, resourceName: row.data.value, moduleId: filters.moduleId },
         invalidate,
         resourceId: ResourceIds.GlobalAuthorization
       },
@@ -96,7 +96,7 @@ const GlobalAuthorization = () => {
       props: {
         labels: labels,
         maxAccess: access,
-        row: { resourceId: row.key, resourceName: row.value },
+        row: { resourceId: row.data.key, resourceName: row.data.value },
         invalidate,
         resourceId: ResourceIds.GlobalAuthorization
       },
@@ -179,9 +179,9 @@ const GlobalAuthorization = () => {
             field: 'Resource Global',
             headerName: labels.resourceGlobal,
             width: 200,
-            cellRenderer: params => (
+            cellRenderer: row => (
               <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
-                <IconButton size='small' onClick={() => openResourceGlobal(params.row)}>
+                <IconButton size='small' onClick={() => openResourceGlobal(row)}>
                   <Icon icon='mdi:application-edit-outline' fontSize={18} />
                 </IconButton>
               </Box>
@@ -191,9 +191,9 @@ const GlobalAuthorization = () => {
             field: 'field Global',
             headerName: labels.fieldGlobal,
             width: 200,
-            cellRenderer: params => (
+            cellRenderer: row => (
               <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
-                <IconButton size='small' onClick={() => openFieldGlobal(params.row)}>
+                <IconButton size='small' onClick={() => openFieldGlobal(row)}>
                   <Icon icon='mdi:application-edit-outline' fontSize={18} />
                 </IconButton>
               </Box>
