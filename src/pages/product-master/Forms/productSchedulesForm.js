@@ -199,6 +199,7 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
         valueField: 'recordId',
         displayField: 'reference',
         displayFieldWidth: 3,
+        readOnly: true,
         mapping: [
           { from: 'recordId', to: 'dispersalId' },
           { from: 'name', to: 'dispersalName' },
