@@ -234,11 +234,14 @@ const CTExchangeRates = () => {
       formik.setFieldValue('rows', [])
       if (cuId && rateTypeId) {
         const parameters = `_currencyId=${cuId}&_rateTypeId=${rateTypeId}&_raCurrencyId=${raCurrencyId}`
+
         const values = await getRequest({
           extension: CurrencyTradingSettingsRepository.ExchangeMap.qry,
           parameters: parameters
         })
+
         // Create a mapping of plantId to values entry for efficient lookup
+
         const valuesMap = values.list.reduce((acc, fee) => {
           acc[fee.plantId] = fee
 
