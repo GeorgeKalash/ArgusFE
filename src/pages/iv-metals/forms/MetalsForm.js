@@ -29,10 +29,19 @@ export default function MetalsForm({ labels, maxAccess, setStore, store }) {
     maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
+    validateOnBlur: true,
     validationSchema: yup.object({
       reference: yup.string().required(),
-      purity: yup.string().required()
+      purity: yup.number().required().min(0.001).max(1),
+      reportingPurity: yup
+        .number()
+        .nullable()
+        .test('is-valid-reportingPurity', function (value) {
+          if (!value) return true
+          return value >= 0.001 && value <= 1
+        })
     }),
+
     onSubmit: async obj => {
       const recordId = obj.recordId
 
@@ -100,6 +109,7 @@ export default function MetalsForm({ labels, maxAccess, setStore, store }) {
                 name='reference'
                 label={labels.reference}
                 value={formik.values.reference}
+                maxLength='3'
                 required
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
@@ -115,8 +125,6 @@ export default function MetalsForm({ labels, maxAccess, setStore, store }) {
                 required
                 maxAccess={maxAccess}
                 maxLength={6}
-                min={0.001}
-                max={1}
                 decimalScale={5}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('purity', '')}
@@ -142,13 +150,13 @@ export default function MetalsForm({ labels, maxAccess, setStore, store }) {
                 name='reportingPurity'
                 label={labels.reportingPurity}
                 value={formik.values.reportingPurity}
+                required
                 maxAccess={maxAccess}
                 maxLength={6}
-                // min={0.001}
-                // max={1}
                 decimalScale={5}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('reportingPurity', '')}
+                error={formik.touched.purity && Boolean(formik.errors.reportingPurity)}
               />
             </Grid>
           </Grid>
