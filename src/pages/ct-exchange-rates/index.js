@@ -304,37 +304,34 @@ const CTExchangeRates = () => {
   }
 
   const emptyRowValues = () => {
-    const rows = [
-      {
-        id: 1,
+    const rows = puFormik.values.rows.map(row => {
+      return {
+        ...row,
         currencyId: null,
         raCurrencyId: null,
         rateTypeId: null,
-        plantId: null,
-        plantName: '',
         rateCalcMethod: null,
         rateCalcMethodName: '',
         minRate: null,
         maxRate: null,
         rate: null
       }
-    ]
+    })
+
+    console.log(puFormik.values)
 
     const data = {
-      currencyId: formik.values.currencyId,
-      rateTypeId: formik.values.saRateTypeId,
-      raCurrencyId: formik.values.raCurrencyId,
-      exchangeMaps: rows
+      rows: rows
     }
     postRequest({
       extension: CurrencyTradingSettingsRepository.ExchangeMap.set2,
       record: JSON.stringify(data)
     })
       .then(res => {
+        console.log(res)
         if (res) {
           toast.success(platformLabels.Saved)
-          formik.setValues({
-            ...formik.values,
+          puFormik.setValues({
             rows: rows
           })
         }
