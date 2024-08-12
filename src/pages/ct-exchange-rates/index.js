@@ -62,7 +62,8 @@ const CTExchangeRates = () => {
     {
       component: 'textfield',
       label: labels.plant,
-      name: 'plantName'
+      name: 'plantName',
+      props: { readOnly: true }
     },
     {
       component: 'resourcecombobox',
@@ -108,7 +109,6 @@ const CTExchangeRates = () => {
             minRate: yup.string().required('minRate is required'),
             maxRate: yup.string().required('maxRate is required'),
             rate: yup.string().required('rate is required'),
-            plantName: yup.string().required('plant is required'),
             rateCalcMethodName: yup.string().required('rateCalcMethod is required')
 
             // rateCalcMethod: yup.string().required('rateCalcMethod is required')
