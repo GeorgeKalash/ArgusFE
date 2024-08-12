@@ -3,7 +3,6 @@ import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import { Grid, Box, Button } from '@mui/material'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import { useEffect, useState } from 'react'
-import { useFormik } from 'formik'
 import * as yup from 'yup'
 import { useContext } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -13,7 +12,6 @@ import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepositor
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import toast from 'react-hot-toast'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useWindowDimensions } from 'src/lib/useWindowDimensions'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useResourceQuery } from 'src/hooks/resource'
@@ -24,6 +22,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { ControlContext } from 'src/providers/ControlContext'
+import { useForm } from 'src/hooks/form'
 
 const CTExchangeRates = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -31,7 +30,6 @@ const CTExchangeRates = () => {
   const { platformLabels } = useContext(ControlContext)
 
   //state
-  const [errorMessage, setErrorMessage] = useState()
   const [plantStore, setPlantsStore] = useState(null)
   const { height } = useWindowDimensions()
 
@@ -39,7 +37,8 @@ const CTExchangeRates = () => {
     datasetId: ResourceIds.CtExchangeRates
   })
 
-  const formik = useFormik({
+  const { formik } = useForm({
+    maxAccess: access,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -97,7 +96,8 @@ const CTExchangeRates = () => {
   ]
 
   //purchase grid
-  const puFormik = useFormik({
+  const { formik: puFormik } = useForm({
+    maxAccess: access,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -108,6 +108,7 @@ const CTExchangeRates = () => {
             minRate: yup.string().required('minRate is required'),
             maxRate: yup.string().required('maxRate is required'),
             rate: yup.string().required('rate is required'),
+            plantName: yup.string().required('plant is required'),
             rateCalcMethodName: yup.string().required('rateCalcMethod is required')
 
             // rateCalcMethod: yup.string().required('rateCalcMethod is required')
@@ -138,7 +139,8 @@ const CTExchangeRates = () => {
   })
 
   //sales grid
-  const saFormik = useFormik({
+  const { formik: saFormik } = useForm({
+    maxAccess: access,
     enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -176,24 +178,21 @@ const CTExchangeRates = () => {
     }
   })
 
-  const postExchangeMaps = (obj, currencyId, raCurrencyId, rateTypeId) => {
-    const data = {
-      currencyId: currencyId,
-      rateTypeId: rateTypeId,
-      raCurrencyId: raCurrencyId,
-      exchangeMaps: obj.rows
-    }
+  const postExchangeMaps = async (obj, currencyId, raCurrencyId, rateTypeId) => {
+    try {
+      const data = {
+        currencyId: currencyId,
+        rateTypeId: rateTypeId,
+        raCurrencyId: raCurrencyId,
+        exchangeMaps: obj.rows
+      }
 
-    postRequest({
-      extension: CurrencyTradingSettingsRepository.ExchangeMap.set2,
-      record: JSON.stringify(data)
-    })
-      .then(res => {
-        if (res) toast.success(platformLabels.Saved)
+      await postRequest({
+        extension: CurrencyTradingSettingsRepository.ExchangeMap.set2,
+        record: JSON.stringify(data)
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      toast.success(platformLabels.Saved)
+    } catch (error) {}
   }
 
   useEffect(() => {
@@ -230,53 +229,47 @@ const CTExchangeRates = () => {
     })
   }
 
-  const getExchangeRates = (cuId, rateTypeId, raCurrencyId, formik) => {
-    formik.setFieldValue('rows', [])
-    if (cuId && rateTypeId) {
-      const parameters = `_currencyId=${cuId}&_rateTypeId=${rateTypeId}&_raCurrencyId=${raCurrencyId}`
-      getRequest({
-        extension: CurrencyTradingSettingsRepository.ExchangeMap.qry,
-        parameters: parameters
-      })
-        .then(values => {
-          //step 1: display all plants
+  const getExchangeRates = async (cuId, rateTypeId, raCurrencyId, formik) => {
+    try {
+      formik.setFieldValue('rows', [])
+      if (cuId && rateTypeId) {
+        const parameters = `_currencyId=${cuId}&_rateTypeId=${rateTypeId}&_raCurrencyId=${raCurrencyId}`
+        const values = await getRequest({
+          extension: CurrencyTradingSettingsRepository.ExchangeMap.qry,
+          parameters: parameters
+        })
+        // Create a mapping of plantId to values entry for efficient lookup
+        const valuesMap = values.list.reduce((acc, fee) => {
+          acc[fee.plantId] = fee
 
-          // Create a mapping of plantId to values entry for efficient lookup
-          const valuesMap = values.list.reduce((acc, fee) => {
-            acc[fee.plantId] = fee
+          return acc
+        }, {})
 
-            return acc
-          }, {})
+        // Combine exchangeTable and values
+        const rows = plantStore.map((plant, index) => {
+          const value = valuesMap[plant.recordId] || 0
 
-          // Combine exchangeTable and values
-          const rows = plantStore.map((plant, index) => {
-            const value = valuesMap[plant.recordId] || 0
-
-            return {
-              id: index,
-              currencyId: cuId,
-              raCurrencyId: raCurrencyId,
-              rateTypeId: rateTypeId,
-              plantId: plant.recordId,
-              plantName: plant.name,
-              rateCalcMethod: value.rateCalcMethod,
-              rateCalcMethodName: value.rateCalcMethodName,
-              rate: value.rate,
-              minRate: value.minRate,
-              maxRate: value.maxRate
-            }
-          })
-
-          formik.setValues({
-            ...formik.values,
-            rows: rows
-          })
+          return {
+            id: index,
+            currencyId: cuId,
+            raCurrencyId: raCurrencyId,
+            rateTypeId: rateTypeId,
+            plantId: plant.recordId,
+            plantName: plant.name,
+            rateCalcMethod: value.rateCalcMethod,
+            rateCalcMethodName: value.rateCalcMethodName,
+            rate: value.rate,
+            minRate: value.minRate,
+            maxRate: value.maxRate
+          }
         })
 
-        .catch(error => {
-          setErrorMessage(error)
+        formik.setValues({
+          ...formik.values,
+          rows: rows
         })
-    }
+      }
+    } catch (error) {}
   }
 
   const getDefaultBaseCurrencyId = () => {
@@ -288,9 +281,7 @@ const CTExchangeRates = () => {
       .then(res => {
         formik.setFieldValue('raCurrencyId', parseInt(res?.record?.value))
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch(error => {})
   }
 
   const handleSubmit = () => {
@@ -359,7 +350,7 @@ const CTExchangeRates = () => {
                       onChange={(event, newValue) => {
                         formik.setFieldValue('rateAgainst', newValue?.key)
                         if (!newValue) {
-                          formik.setFieldValue('raCurrencyId', null)
+                          formik.setFieldValue('raCurrencyId', 0)
                         } else {
                           if (newValue.key === '1') getDefaultBaseCurrencyId()
                         }
@@ -384,7 +375,7 @@ const CTExchangeRates = () => {
                       readOnly={!formik.values.rateAgainst || formik.values.rateAgainst === '1' ? true : false}
                       maxAccess={access}
                       onChange={(event, newValue) => {
-                        formik && formik.setFieldValue('raCurrencyId', newValue?.recordId)
+                        formik.setFieldValue('raCurrencyId', newValue?.recordId)
                       }}
                       error={formik.touched.raCurrencyId && Boolean(formik.errors.raCurrencyId)}
                       helperText={formik.touched.raCurrencyId && formik.errors.raCurrencyId}
@@ -521,7 +512,6 @@ const CTExchangeRates = () => {
       <Fixed>
         <WindowToolbar onSave={handleSubmit} isSaved={true} smallBox={true} />
       </Fixed>
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </VertLayout>
   )
 }
