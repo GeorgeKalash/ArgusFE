@@ -391,7 +391,8 @@ export default function BenificiaryBankForm({
                   displayField={['reference', 'name']}
                   columnsInDropDown={[
                     { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
+                    { key: 'name', value: 'Name' },
+                    { key: 'flName', value: 'FL Name' }
                   ]}
                   readOnly={(formik.values.countryId && editMode) || countryId || editMode}
                   values={formik.values}
@@ -435,7 +436,8 @@ export default function BenificiaryBankForm({
                   displayField={['reference', 'name']}
                   columnsInDropDown={[
                     { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
+                    { key: 'name', value: 'Name' },
+                    { key: 'flName', value: 'FL Name' }
                   ]}
                   values={formik.values}
                   required
@@ -526,7 +528,8 @@ export default function BenificiaryBankForm({
                   displayField={['reference', 'name']}
                   columnsInDropDown={[
                     { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
+                    { key: 'name', value: 'Name' },
+                    { key: 'flName', value: 'FL Name' }
                   ]}
                   values={formik.values}
                   onChange={(event, newValue) => {
@@ -592,7 +595,6 @@ export default function BenificiaryBankForm({
                   label={_labels.country}
                   valueField='recordId'
                   displayField={['reference', 'name', 'flName']}
-                  displayFieldWidth={1.25}
                   columnsInDropDown={[
                     { key: 'reference', value: 'Reference' },
                     { key: 'name', value: 'Name' },
