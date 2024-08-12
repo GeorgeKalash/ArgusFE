@@ -123,7 +123,6 @@ const SystemFunctionIntegration = () => {
       props: {
         endpointId: GeneralLedgerRepository.IntegrationLogic.qry,
         displayField: 'name',
-        valueField: 'ilId',
         mapping: [
           { from: 'name', to: 'name' },
           { from: 'recordId', to: 'ilId' }
