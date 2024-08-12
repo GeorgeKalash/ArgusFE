@@ -17,6 +17,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
+import { FinancialRepository } from 'src/repositories/FinancialRepository'
 
 const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -40,7 +41,8 @@ const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore,
       owRateTypeId: null,
       iwRateTypeId: null,
       isInactive: false,
-      interfaceId: null
+      interfaceId: null,
+      accountId: null
     },
     validationSchema: yup.object({
       reference: yup.string().required(),
@@ -149,6 +151,25 @@ const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore,
                   })
                 }}
                 errorCheck={'bpId'}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceLookup
+                endpointId={FinancialRepository.Account.snapshot}
+                name='accountId'
+                label={labels.accountRef}
+                valueField='reference'
+                displayField='name'
+                valueShow='accountRef'
+                secondValueShow='accountName'
+                form={formik}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('accountId', newValue?.recordId || '')
+                  formik.setFieldValue('accountRef', newValue?.reference || '')
+                  formik.setFieldValue('accountName', newValue?.name || '')
+                }}
+                error={formik.touched.accountId && Boolean(formik.errors.accountId)}
                 maxAccess={maxAccess}
               />
             </Grid>
