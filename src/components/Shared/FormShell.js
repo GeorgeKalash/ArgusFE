@@ -163,6 +163,17 @@ export default function FormShell({
               title: platformLabels.GeneralLedger
             })
           }
+          onClickIT={() =>
+            stack({
+              Component: FinancialTransaction,
+              props: {
+                formValues: form.values
+              },
+              width: 1000,
+              height: 620,
+              title: platformLabels.financialTransaction
+            })
+          }
           onClickGIA={() =>
             stack({
               Component: GlobalIntegrationGrid,
