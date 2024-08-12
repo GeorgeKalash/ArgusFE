@@ -11,8 +11,9 @@ export default function ResourceComboBox({
   values = {},
   parameters = '_filter=',
   filter = () => true,
+  gridStore,
+  setAbroadStore,
   value,
-
   ...rest
 }) {
   const { store: data } = rest
@@ -21,17 +22,19 @@ export default function ResourceComboBox({
   const { getAllKvsByDataset } = useContext(CommonContext)
 
   const [store, setStore] = useState([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
+  const isAboardStore = typeof setAbroadStore === 'function' ? true : false
 
   useEffect(() => {
-    setIsLoading(true)
-    if (parameters)
-      if (datasetId)
+    if (parameters && !gridStore) {
+      setIsLoading(true)
+      if (datasetId) {
         getAllKvsByDataset({
           _dataset: datasetId,
-          callback: setStore
+          callback: isAboardStore ? setAbroadStore : setStore
         })
-      else
+        setIsLoading(false)
+      } else
         endpointId &&
           getRequest({
             extension: endpointId,
@@ -40,19 +43,33 @@ export default function ResourceComboBox({
           })
             .then(res => {
               setIsLoading(false)
-              setStore(res.list)
+              if (isAboardStore) setAbroadStore(res.list)
+              else setStore(res.list)
             })
             .catch(error => {})
+    }
   }, [parameters])
 
-  const filteredStore = data ? data : store.filter(filter)
+  const filteredStore = data ? data : store?.filter?.(filter) || []
 
   const _value =
     (typeof values[name] === 'object'
       ? values[name]
       : (datasetId
-          ? filteredStore.find(item => item[valueField] === values[name]?.toString())
-          : filteredStore.find(item => item[valueField] === (values[name] || values))) ?? '') || value
+          ? filteredStore?.find(item => item[valueField] === values[name]?.toString())
+          : filteredStore?.find(item => item[valueField] === (values[name] || values))) ?? '') || value
 
-  return <CustomComboBox {...{ ...rest, name, store: filteredStore, valueField, value: _value, name, isLoading }} />
+  return (
+    <CustomComboBox
+      {...{
+        ...rest,
+        name,
+        store: isAboardStore ? gridStore : store,
+        valueField,
+        value: _value,
+        name,
+        isLoading
+      }}
+    />
+  )
 }

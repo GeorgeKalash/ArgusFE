@@ -6,7 +6,7 @@ import {
 } from '@mui/x-data-grid'
 import components from './components'
 import { Box, IconButton } from '@mui/material'
-import { useContext, useEffect, useRef, useState } from 'react'
+import { useCallback, useContext, useEffect, useRef, useState } from 'react'
 import { useError } from 'src/error'
 import DeleteDialog from '../DeleteDialog'
 import { HIDDEN, accessLevel } from 'src/services/api/maxAccess'
@@ -29,6 +29,15 @@ export function DataGrid({
   rowSelectionModel,
   disabled = false
 }) {
+  const [stores, setStores] = useState({})
+
+  const updateStore = useCallback((columnId, newStore) => {
+    setStores(prevStores => ({
+      ...prevStores,
+      [columnId]: newStore
+    }))
+  }, [])
+
   async function processDependenciesForColumn(newRow, oldRow, editCell) {
     const column = columns.find(({ name }) => name === editCell.field)
 
@@ -402,6 +411,8 @@ export function DataGrid({
               )
             },
             renderEditCell(params) {
+              const columnId = column.name // Adjust according to your column definition
+
               const Component =
                 typeof column.component === 'string' ? components[column.component].edit : column.component.edit
 
@@ -453,6 +464,8 @@ export function DataGrid({
                       ...column,
                       props: column.propsReducer ? column?.propsReducer({ row, props }) : props
                     }}
+                    store={stores[columnId]}
+                    setStore={newStore => updateStore(columnId, newStore)}
                     update={update}
                     updateRow={updateRow}
                     isLoading={isUpdatingField}
