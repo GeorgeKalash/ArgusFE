@@ -186,9 +186,8 @@ export const ResourceIds = {
   DocumentTypeDefault: 51106,
   VendorGroups: 50101,
   ConsignmentSites: 51110,
-  LabelTemplates: 44102
+  LabelTemplates: 44102,
   FeeSchedule: 36314,
   FeeScheduleMap: 36315,
-  IntegrationLogics: 30101,
-  
+  IntegrationLogics: 30101
 }
