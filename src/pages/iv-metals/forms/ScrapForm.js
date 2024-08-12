@@ -21,19 +21,11 @@ const ScrapForm = ({ store, setStore, maxAccess, labels }) => {
     maxAccess,
 
     validationSchema: yup.object({
-      TaxHistoryView: yup
-        .array()
-        .of(
-          yup.object().shape({
-            amount: yup.string().required(' '),
-            date: yup.string().required(' ')
-          })
-        )
-        .required(' ')
+      scrap: yup.array().of(yup.object().shape({})).required(' ')
     }),
 
     initialValues: {
-      TaxHistoryView: [
+      scrap: [
         {
           id: 1,
           taxCodeId: recordId || null,
@@ -50,7 +42,7 @@ const ScrapForm = ({ store, setStore, maxAccess, labels }) => {
   })
 
   const postHistory = obj => {
-    const items = obj?.TaxHistoryView.map((item, index) => ({
+    const items = obj?.scrap.map((item, index) => ({
       ...item,
       date: formatDateToApiFunction(item.date),
       taxCodeId: recordId,
@@ -70,7 +62,7 @@ const ScrapForm = ({ store, setStore, maxAccess, labels }) => {
         toast.success('Record Edited Successfully')
         setStore(prevStore => ({
           ...prevStore,
-          TaxHistoryView: items
+          scrap: items
         }))
       })
       .catch(error => {})
@@ -89,10 +81,10 @@ const ScrapForm = ({ store, setStore, maxAccess, labels }) => {
               date: formatDateFromApi(item.date),
               amount: item.amount
             }))
-            formik.setValues({ TaxHistoryView: items })
+            formik.setValues({ scrap: items })
             setStore(prevStore => ({
               ...prevStore,
-              TaxHistoryView: items
+              scrap: items
             }))
           }
         })
@@ -112,9 +104,9 @@ const ScrapForm = ({ store, setStore, maxAccess, labels }) => {
         <VertLayout>
           <Grow>
             <DataGrid
-              onChange={value => formik.setFieldValue('TaxHistoryView', value)}
-              value={formik.values.TaxHistoryView}
-              error={formik.errors.TaxHistoryView}
+              onChange={value => formik.setFieldValue('scrap', value)}
+              value={formik.values.scrap}
+              error={formik.errors.scrap}
               columns={[
                 {
                   component: 'date',
