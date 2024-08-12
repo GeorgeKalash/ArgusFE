@@ -59,6 +59,9 @@ const CustomNumberField = ({
       if (inputValue?.length > maxLength - decimalScale) {
         e.target.value = value
       }
+      if (e.target.value <= min) {
+        e.target.value = 0
+      }
 
       onChange(e)
     }

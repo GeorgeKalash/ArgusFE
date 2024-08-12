@@ -12,6 +12,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SCRepository } from 'src/repositories/SCRepository'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 const ItemForm = ({ tlId, labels, seqNo, getGridData, maxAccess, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -41,8 +42,7 @@ const ItemForm = ({ tlId, labels, seqNo, getGridData, maxAccess, window }) => {
       y: yup.string().required(),
       scale: yup.string().required(),
       displayAreaWidth: yup.string().required(),
-      displayAreaHeight: yup.string().required(),
-      fontSize: yup.number().nullable().min(0)
+      displayAreaHeight: yup.string().required()
     }),
     onSubmit: values => {
       post(values)
@@ -212,12 +212,13 @@ const ItemForm = ({ tlId, labels, seqNo, getGridData, maxAccess, window }) => {
                 />
               </Grid>
               <Grid item xs={5}>
-                <CustomTextField
+                <CustomNumberField
                   name='fontSize'
                   label={labels.fontSize}
                   type='number'
                   value={formik.values.fontSize}
                   required
+                  min={0}
                   readOnly={false}
                   onChange={formik.handleChange}
                   onClear={() => formik.setFieldValue('fontSize', '')}
