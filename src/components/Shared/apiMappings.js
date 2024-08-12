@@ -6,7 +6,6 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { LogisticsRepository } from 'src/repositories/LogisticsRepository'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
-import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
@@ -224,17 +223,6 @@ export const apiMappings = {
   [ResourceIds.LoCarriers]: {
     type: COMBOBOX,
     endpoint: LogisticsRepository.LoCarrier.qry,
-    parameters: '_filter=',
-    valueField: 'recordId',
-    displayField: ['reference', 'name'],
-    columnsInDropDown: [
-      { key: 'reference', value: 'Reference' },
-      { key: 'name', value: 'Name' }
-    ]
-  },
-  [ResourceIds.VendorGroups]: {
-    type: COMBOBOX,
-    endpoint: PurchaseRepository.VendorGroups.qry,
     parameters: '_filter=',
     valueField: 'recordId',
     displayField: ['reference', 'name'],
