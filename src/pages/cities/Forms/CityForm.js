@@ -29,6 +29,7 @@ export default function CityForm({ labels, recordId, maxAccess }) {
     initialValues: {
       recordId: null,
       name: '',
+      flName: '',
       reference: '',
       countryId: null,
       stateId: null,
@@ -41,9 +42,9 @@ export default function CityForm({ labels, recordId, maxAccess }) {
     validateOnChange: true,
 
     validationSchema: yup.object({
-      name: yup.string().required(' '),
-      reference: yup.string().required(' '),
-      countryId: yup.string().required(' ')
+      name: yup.string().required(),
+      reference: yup.string().required(),
+      countryId: yup.string().required()
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
@@ -113,6 +114,18 @@ export default function CityForm({ labels, recordId, maxAccess }) {
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
                 error={formik.touched.name && formik.errors.name}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='flName'
+                label={labels.flName}
+                value={formik.values.flName}
+                maxAccess={maxAccess}
+                maxLength='40'
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('flName', '')}
+                error={formik.touched.flName && Boolean(formik.errors.flName)}
               />
             </Grid>
             <Grid item xs={12}>

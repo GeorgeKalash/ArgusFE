@@ -57,6 +57,11 @@ const States = () => {
       flex: 1
     },
     {
+      field: 'flName',
+      headerName: _labels.flName,
+      flex: 1
+    },
+    {
       field: 'countryName',
       headerName: _labels.countryId,
       flex: 1
