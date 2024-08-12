@@ -23,7 +23,7 @@ const PriceGroups = () => {
 
     try {
       const response = await getRequest({
-        extension: SaleRepository.PriceGroups.qry,
+        extension: SaleRepository.PriceGroups.page,
         parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=`
       })
 
@@ -40,7 +40,7 @@ const PriceGroups = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SaleRepository.PriceGroups.qry,
+    endpointId: SaleRepository.PriceGroups.page,
     datasetId: ResourceIds.PriceGroups
   })
 

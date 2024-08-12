@@ -30,6 +30,7 @@ import { Fixed } from './Layouts/Fixed'
 
 const Table = ({
   paginationType = '',
+  globalStatus = true,
   viewCheckButtons = false,
   showCheckboxColumn = false,
   rowSelection = '',
@@ -48,6 +49,7 @@ const Table = ({
   const columnsAccess = props?.maxAccess && props?.maxAccess.record.controls
   const { stack } = useWindow()
   const [checked, setChecked] = useState(false)
+  const [focus, setFocus] = useState(false)
 
   const columns = props?.columns
     .filter(
@@ -102,6 +104,7 @@ const Table = ({
     if (pagination) {
       const TextInput = ({ value, pageCount }) => {
         const jumpToPage = e => {
+          setFocus(false)
           const newPage = e.target.value
 
           if ((e.key === 'Enter' || e.keyCode === 13) && newPage > 0)
@@ -115,6 +118,7 @@ const Table = ({
               })
               setStartAt((newPage - 2) * pageSize + pageSize)
             }
+          setFocus(true)
         }
 
         const handleInput = e => {
@@ -133,10 +137,11 @@ const Table = ({
                 height: '30px'
               }
             }}
-            autoFocus={true}
+            autoFocus={focus}
             onInput={handleInput}
             defaultValue={value}
             onKeyUp={jumpToPage}
+            onBlur={() => setFocus(false)}
           />
         )
       }
@@ -419,7 +424,22 @@ const Table = ({
                   <Image src={editIcon} alt='Edit' width={18} height={18} />
                 </IconButton>
               )}
-              {!isStatus3 && !isStatusCanceled && deleteBtnVisible && !isWIP && (
+              {!globalStatus && deleteBtnVisible && (
+                <IconButton
+                  size='small'
+                  onClick={e => {
+                    if (props.deleteConfirmationType == 'strict') {
+                      openDeleteConfirmation(data)
+                    } else {
+                      openDelete(data)
+                    }
+                  }}
+                  color='error'
+                >
+                  <Image src={deleteIcon} alt={platformLabels.Delete} width={18} height={18} />
+                </IconButton>
+              )}
+              {globalStatus && !isStatus3 && !isStatusCanceled && deleteBtnVisible && !isWIP && (
                 <IconButton
                   size='small'
                   onClick={e => {

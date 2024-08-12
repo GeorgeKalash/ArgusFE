@@ -29,6 +29,14 @@ export const RemittanceOutwardsRepository = {
     post: service + 'postOW',
     snapshot: service + 'snapshotOW'
   },
+  InwardsTransfer: {
+    get: service + 'getIW',
+    set: service + 'setIW',
+    del: service + 'delIW',
+    snapshot: service + 'snapshotIW',
+    close: service + 'closeIW',
+    reopen: service + 'reopenIW'
+  },
   Beneficiary: {
     qry: service + 'qryBEN',
     get: service + 'getBEN',
@@ -46,5 +54,26 @@ export const RemittanceOutwardsRepository = {
     get: service + 'getBEC',
     set: service + 'set2BEC',
     del: service + 'delBEC'
+  },
+  FeeSchedule: {
+    qry: service + 'qryFSC',
+    get: service + 'getFSC',
+    set: service + 'setFSC',
+    del: service + 'delFSC'
+  },
+  FeeScheduleDetail: {
+    qry: service + 'qryFSD',
+    get: service + 'getFSD',
+    set2: service + 'set2FSD',
+    del: service + 'delFSD'
+  },
+  FeeScheduleMap: {
+    qry: service + 'qryFSM',
+    get: service + 'getFSM',
+    set: service + 'setFSM',
+    del: service + 'delFSM'
+  },
+  OutwardGLInformation: {
+    get: service + 'getOWI'
   }
 }
