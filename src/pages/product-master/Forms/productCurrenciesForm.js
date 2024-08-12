@@ -84,20 +84,20 @@ const ProductCurrenciesForm = ({ store, setStore, labels, editMode, maxAccess })
       label: labels.country,
       name: 'countryId',
       props: {
-        store: countries,
-        valueField: 'countryId',
-        displayField: 'countryRef',
-        displayFieldWidth: 2,
+        endpointId: SystemRepository.Country.qry,
+        valueField: 'recordId',
+        displayField: 'reference',
         mapping: [
-          { from: 'countryId', to: 'countryId' },
-          { from: 'countryName', to: 'countryName' },
-          ,
-          { from: 'countryRef', to: 'countryRef' }
+          { from: 'name', to: 'countryName' },
+          { from: 'reference', to: 'countryRef' },
+          { from: 'recordId', to: 'countryId' }
         ],
         columnsInDropDown: [
-          { key: 'countryRef', value: 'Reference' },
-          { key: 'countryName', value: 'Name' }
-        ]
+          { key: 'reference', value: 'Reference' },
+          { key: 'name', value: 'Name' },
+          { key: 'flName', value: 'FlName' }
+        ],
+        displayFieldWidth: 2
       }
     },
     {
@@ -123,7 +123,8 @@ const ProductCurrenciesForm = ({ store, setStore, labels, editMode, maxAccess })
         ],
         columnsInDropDown: [
           { key: 'reference', value: 'Reference' },
-          { key: 'name', value: 'Name' }
+          { key: 'name', value: 'Name' },
+          { key: 'flName', value: 'FlName' }
         ],
         displayFieldWidth: 2
       }

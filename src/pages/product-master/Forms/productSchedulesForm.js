@@ -104,19 +104,20 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
       label: labels.country,
       name: 'countryId',
       props: {
-        store: countries,
-        valueField: 'countryId',
-        displayField: 'countryRef',
-        displayFieldWidth: 4,
+        endpointId: SystemRepository.Country.qry,
+        valueField: 'recordId',
+        displayField: 'reference',
         mapping: [
-          { from: 'countryId', to: 'countryId' },
-          { from: 'countryName', to: 'countryName' },
-          { from: 'countryRef', to: 'countryRef' }
+          { from: 'name', to: 'countryName' },
+          { from: 'reference', to: 'countryRef' },
+          { from: 'recordId', to: 'countryId' }
         ],
         columnsInDropDown: [
-          { key: 'countryRef', value: 'Reference' },
-          { key: 'countryName', value: 'Name' }
-        ]
+          { key: 'reference', value: 'Reference' },
+          { key: 'name', value: 'Name' },
+          { key: 'flName', value: 'FlName' }
+        ],
+        displayFieldWidth: 2
       },
 
       async onChange({ row: { update, oldRow, newRow } }) {
@@ -139,7 +140,7 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
         endpointId: SystemRepository.Plant.qry,
         valueField: 'recordId',
         displayField: 'reference',
-        displayFieldWidth: 4,
+        displayFieldWidth: 2,
         mapping: [
           { from: 'recordId', to: 'plantId' },
           { from: 'name', to: 'plantName' },
@@ -164,19 +165,20 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
       label: labels.currency,
       name: 'currencyId',
       props: {
-        store: filters,
-        valueField: 'currencyId',
-        displayField: 'currencyRef',
-        displayFieldWidth: 4,
+        endpointId: SystemRepository.Currency.qry,
+        valueField: 'recordId',
+        displayField: 'reference',
         mapping: [
-          { from: 'currencyId', to: 'currencyId' },
-          { from: 'currencyName', to: 'currencyName' },
-          { from: 'currencyRef', to: 'currencyRef' }
+          { from: 'recordId', to: 'currencyId' },
+          { from: 'reference', to: 'currencyRef' },
+          { from: 'name', to: 'currencyName' }
         ],
         columnsInDropDown: [
-          { key: 'currencyRef', value: 'Reference' },
-          { key: 'currencyName', value: 'Name' }
-        ]
+          { key: 'reference', value: 'Reference' },
+          { key: 'name', value: 'Name' },
+          { key: 'flName', value: 'FlName' }
+        ],
+        displayFieldWidth: 2
       }
     },
     {
