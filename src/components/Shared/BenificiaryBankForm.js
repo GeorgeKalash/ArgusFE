@@ -595,7 +595,6 @@ export default function BenificiaryBankForm({
                   label={_labels.country}
                   valueField='recordId'
                   displayField={['reference', 'name', 'flName']}
-                  displayFieldWidth={1.25}
                   columnsInDropDown={[
                     { key: 'reference', value: 'Reference' },
                     { key: 'name', value: 'Name' },

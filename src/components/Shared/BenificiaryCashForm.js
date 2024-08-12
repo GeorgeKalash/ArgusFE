@@ -408,6 +408,7 @@ const BenificiaryCashForm = ({
                     { key: 'name', value: 'Name' },
                     { key: 'flName', value: 'Foreign Language Name' }
                   ]}
+                  displayFieldWidth={0.8}
                   readOnly={(formik.values.countryId && editMode) || countryId || editMode}
                   values={formik.values}
                   onChange={(event, newValue) => {
@@ -603,6 +604,7 @@ const BenificiaryCashForm = ({
                     { key: 'name', value: 'Name' },
                     { key: 'flName', value: 'Foreign Language Name' }
                   ]}
+                  displayFieldWidth={0.8}
                   values={formik.values}
                   onChange={(event, newValue) => {
                     formik.setFieldValue('cobId', newValue ? newValue.recordId : '')
@@ -667,6 +669,7 @@ const BenificiaryCashForm = ({
                     { key: 'name', value: 'Name' },
                     { key: 'flName', value: 'Foreign Language Name' }
                   ]}
+                  displayFieldWidth={0.8}
                   values={formik.values}
                   required
                   readOnly={(formik.values.currencyId && editMode) || currencyId || editMode}
@@ -718,7 +721,7 @@ const BenificiaryCashForm = ({
                     { key: 'name', value: 'Name' },
                     { key: 'flName', value: 'Foreign Language Name' }
                   ]}
-                  displayFieldWidth={1.25}
+                  displayFieldWidth={0.8}
                   values={formik.values}
                   onChange={(event, newValue) => {
                     if (newValue) {
