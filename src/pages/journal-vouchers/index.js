@@ -35,13 +35,13 @@ const JournalVoucher = () => {
 
   async function fetchWithFilter({ filters, pagination }) {
     if (filters?.qry) {
-      console.log('fl', filters?.qry)
+
       return await getRequest({
         extension: GeneralLedgerRepository.JournalVoucher.snapshot,
         parameters: `_filter=${filters.qry}`
       })
     } else {
-      console.log('in', filters?.params)
+      
       return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
     }
   }
