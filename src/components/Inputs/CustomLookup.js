@@ -74,7 +74,18 @@ const CustomLookup = ({
             }
           }}
           getOptionLabel={option =>
-            typeof option === 'object' ? `${option[valueField] ? option[valueField] : ''}` : option
+            /* typeof option === 'object' ? `${option[valueField] ? option[valueField] : ''}` : option */
+            {
+              if (typeof displayField == 'object') {
+                const text = displayField
+                  .map(header => option[header] && option[header]?.toString())
+                  ?.filter(item => item)
+                  ?.join(' ')
+                if (text !== undefined) return text
+              } else {
+                typeof option === 'object' ? `${option[valueField] ? option[valueField] : ''}` : option
+              }
+            }
           }
           isOptionEqualToValue={(option, value) => (value ? option[valueField] === value[valueField] : '')}
           onChange={(event, newValue) => onChange(name, newValue)}

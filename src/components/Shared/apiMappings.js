@@ -625,10 +625,10 @@ export const apiMappings = {
     //FIX AFTER LOOKUP FIX //fix display format
     type: LOOKUP,
     endpoint: SystemRepository.Address.snapshot,
-    //valueField: 'name',
+    valueField: ['name', 'city', 'email1'],
     secondDisplayField: false,
     valueOnSelection: 'recordId',
-    displayField: 'name',
+    displayField: ['name', 'city', 'email1'],
     //displayFieldWidth: 1,
     //firstFieldWidth: '40%',
     columnsInDropDown: [
