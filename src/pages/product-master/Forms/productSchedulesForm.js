@@ -139,7 +139,7 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
         endpointId: SystemRepository.Plant.qry,
         valueField: 'recordId',
         displayField: 'reference',
-        displayFieldWidth: 4,
+        displayFieldWidth: 2,
         mapping: [
           { from: 'recordId', to: 'plantId' },
           { from: 'name', to: 'plantName' },
@@ -227,6 +227,7 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
         valueField: 'key',
         displayField: 'value',
         displayFieldWidth: 2,
+        readOnly: true,
         mapping: [
           { from: 'key', to: 'dispersalType' },
           { from: 'value', to: 'dispersalTypeName' },

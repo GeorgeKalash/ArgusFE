@@ -2,29 +2,26 @@ import { useEffect, useState, useContext } from 'react'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { useWindow } from 'src/windows'
-import ProductDispersalForm from './productDispersalForm'
+import ItemForm from './ItemForm'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { ControlContext } from 'src/providers/ControlContext'
-import toast from 'react-hot-toast'
+import { SCRepository } from 'src/repositories/SCRepository'
 
-const ProductDispersalList = ({ store, setStore, labels, maxAccess }) => {
-  const { recordId: pId } = store
+const ItemList = ({ recordId: tlId, labels, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [gridData, setGridData] = useState()
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
 
-  const getGridData = pId => {
+  const getGridData = () => {
     setGridData([])
-    const defaultParams = `_productId=${pId}`
-    var parameters = defaultParams
+
     getRequest({
-      extension: RemittanceSettingsRepository.ProductDispersal.qry,
-      parameters: parameters
+      extension: SCRepository.Item.qry,
+      parameters: `_labelTemplateId=${tlId}`
     })
       .then(res => {
         setGridData(res)
@@ -34,72 +31,91 @@ const ProductDispersalList = ({ store, setStore, labels, maxAccess }) => {
           dispersals: res.list
         }))
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch(error => {})
   }
 
   const columns = [
     {
-      field: 'reference',
-      headerName: labels.reference,
+      field: 'itemKey',
+      headerName: labels.itemKey,
       flex: 1
     },
     {
-      field: 'name',
-      headerName: labels.name,
+      field: 'displayTypeName',
+      headerName: labels.displayType,
       flex: 1
     },
     {
-      field: 'dispersalTypeName',
-      headerName: labels.dispersalType,
+      field: 'x',
+      headerName: 'X',
+      flex: 1,
+      type: {
+        field: 'number',
+        decimal: 2
+      }
+    },
+    {
+      field: 'y',
+      headerName: 'Y',
+      flex: 1,
+      type: {
+        field: 'number',
+        decimal: 2
+      }
+    },
+    {
+      field: 'font',
+      headerName: labels.font,
       flex: 1
     },
     {
-      field: 'isInactive',
-      headerName: labels.isInactive,
-      flex: 1
-    },
-    {
-      field: 'isDefault',
-      headerName: labels.isDefault,
-      flex: 1
+      field: 'fontSize',
+      headerName: labels.fontSize,
+      flex: 1,
+      type: {
+        field: 'number',
+        decimal: 2
+      }
     }
   ]
 
   useEffect(() => {
-    pId && getGridData(pId)
-  }, [pId])
+    if (tlId) getGridData()
+  }, [tlId])
 
   const add = () => {
-    openForm('')
+    openForm()
   }
 
   const edit = object => {
-    openForm(object.recordId)
+    openForm(object.seqNo)
   }
 
-  const del = async obj => {
-    await postRequest({
-      extension: RemittanceSettingsRepository.ProductDispersal.del,
+  const del = obj => {
+    postRequest({
+      extension: SCRepository.Item.del,
       record: JSON.stringify(obj)
     })
-    await getGridData(pId)
-    toast.success(platformLabels.Deleted)
+      .then(res => {
+        getGridData()
+        toast.success(platformLabels.Deleted)
+      })
+      .catch(error => {})
   }
 
-  function openForm(recordId) {
+  function openForm(seqNo) {
     stack({
-      Component: ProductDispersalForm,
+      Component: ItemForm,
       props: {
         labels,
-        recordId: recordId ? recordId : null,
-        pId,
+        seqNo: seqNo || gridData?.list?.length + 1,
+        tlId,
         maxAccess,
         getGridData
       },
-      width: 500,
-      title: labels?.dispersal
+      width: 700,
+      height: 450,
+      title: labels?.item
     })
   }
 
@@ -112,8 +128,7 @@ const ProductDispersalList = ({ store, setStore, labels, maxAccess }) => {
         <Table
           columns={columns}
           gridData={gridData}
-          rowId={['recordId']}
-          api={getGridData}
+          rowId={['seqNo']}
           onEdit={edit}
           onDelete={del}
           isLoading={false}
@@ -125,4 +140,4 @@ const ProductDispersalList = ({ store, setStore, labels, maxAccess }) => {
   )
 }
 
-export default ProductDispersalList
+export default ItemList

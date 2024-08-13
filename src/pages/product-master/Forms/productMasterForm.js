@@ -48,8 +48,6 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
   const invalidate = useInvalidate({
     endpointId: RemittanceSettingsRepository.Correspondent.qry
   })
-  console.log('maxAccess')
-  console.log(maxAccess)
 
   const { formik } = useForm({
     maxAccess,
@@ -57,9 +55,9 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required(' '),
-      commissionBase: yup.string().required(' '),
-      isInactive: yup.string().required(' ')
+      name: yup.string().required(),
+      commissionBase: yup.string().required(),
+      isInactive: yup.string().required()
     }),
     onSubmit: values => {
       postProductMaster(values)
