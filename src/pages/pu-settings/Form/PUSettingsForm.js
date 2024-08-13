@@ -67,8 +67,6 @@ const PUSettingsForm = () => {
     }
   })
 
-  console.log(formik)
-
   return (
     <FormShell form={formik} isSaved={true} editMode={false} isInfo={false} isCleared={false}>
       <VertLayout>
