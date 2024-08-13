@@ -49,10 +49,7 @@ const RemittanceDefaults = ({ _labels }) => {
         res.list.map(obj => (myObject[obj.key] = obj.value))
         myObject['nraRef'] = null
 
-        console.log('Processed Data:', myObject) // Log processed data
-
         if (myObject['rt-fii-accountGroupId']) {
-          console.log('trrrrrruuuue')
           rtDefaultValidation.setFieldValue('rt-fii-accountGroupId', parseInt(myObject['rt-fii-accountGroupId']))
         }
 
@@ -63,9 +60,7 @@ const RemittanceDefaults = ({ _labels }) => {
 
         rtDefaultFormValidation.setValues(myObject)
       })
-      .catch(error => {
-        console.error('Error:', error)
-      })
+      .catch(error => {})
   }
 
   const getNumberRange = nraId => {
@@ -108,8 +103,6 @@ const RemittanceDefaults = ({ _labels }) => {
       postRtDefault(values)
     }
   })
-
-  console.log(rtDefaultValidation.values, 'rtdefault')
 
   const postRtDefault = obj => {
     var data = []
