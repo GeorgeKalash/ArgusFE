@@ -637,25 +637,6 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
         return
       }
       if (plantId && data.countryId && data.currencyId && data.dispersalType) {
-        var parameters = `_plantId=${plantId}&_countryId=${data.countryId}&_dispersalType=${data.dispersalType}&_currencyId=${data.currencyId}&_fcAmount=${data.fcAmount}&_lcAmount=${data.lcAmount}`
-
-        const res = await getRequest({
-          extension: RemittanceOutwardsRepository.ProductDispersalEngine.qry,
-          parameters: parameters
-        })
-
-        if (res.list.length > 0) {
-          await mergeICRates(res.list)
-        }
-      }
-    } catch (error) {}
-  }
-  async function fillProducts(data) {
-    try {
-      if (!data.fcAmount && !data.lcAmount) {
-        return
-      }
-      if (plantId && data.countryId && data.currencyId && data.dispersalType) {
         var parameters = `_plantId=${plantId}&_countryId=${data.countryId}&_dispersalType=${
           data.dispersalType
         }&_currencyId=${data.currencyId}&_fcAmount=${data.fcAmount || 0}&_lcAmount=${data.lcAmount || 0}`
@@ -665,9 +646,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
           parameters: parameters
         })
 
-        if (res.list.length > 0) {
-          await mergeICRates(res.list)
-        } else handleSelectedProduct()
+        res.list.length > 0 ? await mergeICRates(res.list) : handleSelectedProduct()
       }
     } catch (error) {}
   }
@@ -700,7 +679,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
             formik.setFieldValue('products[0].checked', true)
             handleSelectedProduct(updatedItem)
             if (formik.values.lcAmount) formik.setFieldValue('fcAmount', matchingRate.originAmount)
-            if (formik.values.fcAmount) formik.setFieldValue('lcAmount', rmatchingRate.baseAmount)
+            if (formik.values.fcAmount) formik.setFieldValue('lcAmount', matchingRate.baseAmount)
             formik.setFieldValue('exRate', matchingRate.settlementRate)
             formik.setFieldValue('commission', matchingRate.charge)
             formik.setFieldValue('defaultCommission', matchingRate.charge)
