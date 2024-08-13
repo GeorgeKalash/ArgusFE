@@ -320,7 +320,12 @@ const CTExchangeRates = () => {
     })
       .then(res => {
         if (res) {
-          getExchangeRates(formik.values.currencyId, formik.values.puRateTypeId, formik.values.raCurrencyId, form)
+          getExchangeRates(
+            formik.values.currencyId,
+            form === 'puFormik' ? formik.values.puRateTypeId : formik.values.saRateTypeId,
+            formik.values.raCurrencyId,
+            form
+          )
           toast.success(platformLabels.Saved)
         }
       })
