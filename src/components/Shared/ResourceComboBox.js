@@ -26,8 +26,7 @@ export default function ResourceComboBox({
   const isAboardStore = typeof setAbroadStore === 'function' ? true : false
 
   useEffect(() => {
-    if (parameters && !gridStore) {
-      setIsLoading(true)
+    if (parameters && !gridStore && !data) {
       if (datasetId) {
         getAllKvsByDataset({
           _dataset: datasetId,
@@ -64,7 +63,7 @@ export default function ResourceComboBox({
       {...{
         ...rest,
         name,
-        store: isAboardStore ? gridStore : store,
+        store: (isAboardStore ? gridStore : store) || data,
         valueField,
         value: _value,
         name,

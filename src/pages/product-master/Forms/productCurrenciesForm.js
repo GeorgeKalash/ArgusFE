@@ -91,7 +91,6 @@ const ProductCurrenciesForm = ({ store, setStore, labels, editMode, maxAccess })
         mapping: [
           { from: 'countryId', to: 'countryId' },
           { from: 'countryName', to: 'countryName' },
-          ,
           { from: 'countryRef', to: 'countryRef' }
         ],
         columnsInDropDown: [
