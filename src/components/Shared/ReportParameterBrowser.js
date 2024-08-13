@@ -47,7 +47,6 @@ const GetLookup = ({ field, formik }) => {
         endpointId={apiDetails.endpoint}
         parameters={apiDetails.parameters}
         firstFieldWidth={apiDetails.firstFieldWidth}
-        valueField={apiDetails.displayField}
         displayField={apiDetails.valueField}
         secondDisplayField={apiDetails.secondDisplayField}
         columnsInDropDown={apiDetails.columnsInDropDown}
@@ -59,6 +58,11 @@ const GetLookup = ({ field, formik }) => {
         firstValue={formik.values.parameters?.[field.id]?.display}
         secondValue={formik.values.parameters?.[field.id]?.display2}
         onChange={(event, newValue) => {
+          const display = apiDetails?.displayField
+            ?.map(header => newValue?.[header] && newValue?.[header]?.toString())
+            ?.filter(item => item)
+            ?.join(' ')
+
           formik.setFieldValue(
             `parameters[${field.id}]`,
             newValue?.[apiDetails.valueOnSelection]
@@ -67,7 +71,7 @@ const GetLookup = ({ field, formik }) => {
                   fieldKey: field.key,
                   value: newValue?.[apiDetails.valueOnSelection] || '',
                   caption: field.caption,
-                  display: newValue?.[apiDetails.displayField],
+                  display: display ? display : newValue?.[apiDetails.displayField],
                   display2: newValue?.[apiDetails.valueField]
                 }
               : ''
@@ -95,9 +99,6 @@ const GetComboBox = ({ field, formik, rpbParams }) => {
     }
   }, [])
 
-  console.log('fatima logs:')
-  console.log(field)
-  console.log(formik)
   if (apiDetails?.endpoint === SystemRepository.DocumentType.qry) {
     newParams += `&_dgId=${field?.data}`
   } else if (apiDetails?.endpoint === InventoryRepository.Dimension.qry) {

@@ -249,7 +249,7 @@ export const apiMappings = {
       { key: 'name', value: 'Name' }
     ]
   },
-  
+
   /* [ResourceIds.Module]: {
     //CHECK SPECIAL
     type: COMBOBOX,
