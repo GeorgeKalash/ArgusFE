@@ -249,6 +249,7 @@ export const apiMappings = {
       { key: 'name', value: 'Name' }
     ]
   },
+  
   /* [ResourceIds.Module]: {
     //CHECK SPECIAL
     type: COMBOBOX,
@@ -629,6 +630,7 @@ export const apiMappings = {
     secondDisplayField: false,
     valueOnSelection: 'recordId',
     displayField: ['name', 'city', 'email1'],
+
     //displayFieldWidth: 1,
     //firstFieldWidth: '40%',
     columnsInDropDown: [
@@ -642,6 +644,7 @@ export const apiMappings = {
   [ResourceIds.IVDimension]: {
     type: COMBOBOX,
     endpoint: InventoryRepository.Dimension.qry,
+
     //_dimension appended
     valueField: 'id',
     displayField: 'name'
@@ -649,6 +652,7 @@ export const apiMappings = {
   [ResourceIds.FIDimValues]: {
     type: COMBOBOX,
     endpoint: FinancialRepository.FIDimension.qry,
+
     //_dimension appended
     valueField: 'id',
     displayField: 'name'
