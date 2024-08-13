@@ -12,6 +12,8 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import { FinancialRepository } from 'src/repositories/FinancialRepository'
 
 const RemittanceDefaults = ({ _labels }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -47,13 +49,23 @@ const RemittanceDefaults = ({ _labels }) => {
         res.list.map(obj => (myObject[obj.key] = obj.value))
         myObject['nraRef'] = null
 
-        rtDefaultFormValidation.setValues(myObject)
+        console.log('Processed Data:', myObject) // Log processed data
 
-        if (myObject && myObject['rt-nra-product']) {
+        if (myObject['rt-fii-accountGroupId']) {
+          console.log('trrrrrruuuue')
+          rtDefaultValidation.setFieldValue('rt-fii-accountGroupId', parseInt(myObject['rt-fii-accountGroupId']))
+        }
+
+        if (myObject['rt-nra-product']) {
+          rtDefaultFormValidation.setFieldValue('rt-nra-product', myObject['rt-nra-product'])
           getNumberRange(myObject['rt-nra-product'])
         }
+
+        rtDefaultFormValidation.setValues(myObject)
       })
-      .catch(error => {})
+      .catch(error => {
+        console.error('Error:', error)
+      })
   }
 
   const getNumberRange = nraId => {
@@ -88,13 +100,16 @@ const RemittanceDefaults = ({ _labels }) => {
     enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
-      'rt-nra-product': null
+      'rt-nra-product': null,
+      'rt-fii-accountGroupId': ''
     },
 
     onSubmit: values => {
       postRtDefault(values)
     }
   })
+
+  console.log(rtDefaultValidation.values, 'rtdefault')
 
   const postRtDefault = obj => {
     var data = []
@@ -146,6 +161,20 @@ const RemittanceDefaults = ({ _labels }) => {
                 }
               }}
               maxAccess={access}
+            />
+          </Grid>
+          <Grid item xs={12} sx={{ marginLeft: '0.5rem', marginRight: '0.5rem' }}>
+            {' '}
+            <ResourceComboBox
+              endpointId={FinancialRepository.Group.qry}
+              name='rt-fii-accountGroupId'
+              label={_labels.dag}
+              valueField='recordId'
+              displayField='name'
+              values={rtDefaultValidation.values}
+              onChange={(event, newValue) => {
+                rtDefaultValidation.setFieldValue('rt-fii-accountGroupId', newValue?.recordId || '')
+              }}
             />
           </Grid>
         </Grid>
