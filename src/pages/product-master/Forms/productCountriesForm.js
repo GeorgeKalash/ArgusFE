@@ -94,7 +94,8 @@ const ProductCountriesForm = ({ store, setStore, labels, editMode, height, expan
         ],
         columnsInDropDown: [
           { key: 'reference', value: 'Reference' },
-          { key: 'name', value: 'Name' }
+          { key: 'name', value: 'Name' },
+          { key: 'flName', value: 'FlName' }
         ]
       }
     },

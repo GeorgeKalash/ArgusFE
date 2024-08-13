@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
@@ -55,6 +55,11 @@ const CityDistricts = () => {
     {
       field: 'name',
       headerName: _labels.name,
+      flex: 1
+    },
+    {
+      field: 'flName',
+      headerName: _labels.flName,
       flex: 1
     },
     {
