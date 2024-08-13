@@ -126,7 +126,7 @@ const ProductCurrenciesForm = ({ store, setStore, labels, editMode, maxAccess })
           { key: 'name', value: 'Name' },
           { key: 'flName', value: 'FlName' }
         ],
-        displayFieldWidth: 2
+        displayFieldWidth: 1
       }
     },
     {
