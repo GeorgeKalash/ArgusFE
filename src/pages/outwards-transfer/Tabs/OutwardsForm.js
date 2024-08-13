@@ -637,62 +637,87 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
         return
       }
       if (plantId && data.countryId && data.currencyId && data.dispersalType) {
-        var parameters = `_plantId=${plantId}&_countryId=${data.countryId}&_dispersalType=${
-          data.dispersalType
-        }&_currencyId=${data.currencyId}&_fcAmount=${data.fcAmount || 0}&_lcAmount=${data.lcAmount || 0}`
+        formik.setFieldValue('products', [])
+        var parameters = `_plantId=${plantId}&_countryId=${data.countryId}&_dispersalType=${data.dispersalType}&_currencyId=${data.currencyId}&_fcAmount=${data.fcAmount}&_lcAmount=${data.lcAmount}`
 
         const res = await getRequest({
           extension: RemittanceOutwardsRepository.ProductDispersalEngine.qry,
           parameters: parameters
         })
 
-        res.list.length > 0 ? await mergeICRates(res.list) : handleSelectedProduct()
+        if (res.list.length > 0) {
+          const InstantCashProduct = res.list.find(item => item.interfaceId === 1)
+          InstantCashProduct ? await mergeICRates(res.list) : await displayProduct(res.list)
+        } else handleSelectedProduct()
       }
     } catch (error) {}
   }
   async function mergeICRates(data) {
     const syCountryId = await getDefaultCountry()
-    const srcAmount = formik.values.lcAmount
-    const trgtAmount = formik.values.fcAmount
     const srcCurrency = await getDefaultCurrency()
     const targetCurrency = formik.values.currencyRef
+    const { srcAmount, trgtAmount, countryRef } = formik.values
 
     const getRates = await getRequest({
       extension: RemittanceBankInterface.InstantCashRates.qry,
-      parameters: `_deliveryMode=${DEFAULT_DELIVERYMODE}&_sourceCurrency=${srcCurrency}&_targetCurrency=${targetCurrency}&_sourceAmount=${srcAmount}&_originatingCountry=${syCountryId}&_destinationCountry=${formik.values.countryRef}`
+      parameters: `_deliveryMode=${DEFAULT_DELIVERYMODE}&_sourceCurrency=AED&_targetCurrency=PKR&_sourceAmount=5000&_targetAmount=2000&_originatingCountry=AE&_destinationCountry=PK`
+
+      //parameters: `_deliveryMode=${DEFAULT_DELIVERYMODE}&_sourceCurrency=${srcCurrency}&_targetCurrency=${targetCurrency}&_sourceAmount=${srcAmount}&_targetAmount=${trgtAmount}&_originatingCountry=${syCountryId}&_destinationCountry=${countryRef}`
     })
 
-    const updatedData = data.map(item => {
-      if (item.interfaceId === 1) {
-        const matchingRate = getRates.list.find(
-          rate => item.originAmount >= rate.amountRangeFrom && item.originAmount <= rate.amountRangeTo
-        )
-
-        if (matchingRate) {
-          const updatedItem = {
-            ...item,
-            fees: matchingRate.charge,
-            exRate: matchingRate.settlementRate
-          }
-
-          if (data.length === 1) {
-            formik.setFieldValue('products[0].checked', true)
-            handleSelectedProduct(updatedItem)
-            if (formik.values.lcAmount) formik.setFieldValue('fcAmount', matchingRate.originAmount)
-            if (formik.values.fcAmount) formik.setFieldValue('lcAmount', matchingRate.baseAmount)
-            formik.setFieldValue('exRate', matchingRate.settlementRate)
-            formik.setFieldValue('commission', matchingRate.charge)
-            formik.setFieldValue('defaultCommission', matchingRate.charge)
-          } else handleSelectedProduct()
-
-          return updatedItem
+    const updateICProduct = (product, matchingRate) => {
+      if (matchingRate) {
+        return {
+          ...product,
+          fees: matchingRate.charge,
+          exRate: matchingRate.settlementRate
         }
       }
 
-      return item
-    })
+      return product
+    }
 
-    formik.setFieldValue('products', updatedData)
+    if (data.length === 1) {
+      const matchingRate = getRates.list.find(
+        rate => data[0].originAmount >= rate.amountRangeFrom && data[0].originAmount <= rate.amountRangeTo
+      )
+
+      const updatedProduct = updateICProduct(data[0], matchingRate)
+
+      if (matchingRate) {
+        if (formik.values.lcAmount) formik.setFieldValue('fcAmount', matchingRate.originAmount)
+        if (formik.values.fcAmount) formik.setFieldValue('lcAmount', matchingRate.baseAmount)
+      }
+
+      formik.setFieldValue('products[0].checked', true)
+      handleSelectedProduct(updatedProduct)
+      formik.setFieldValue('products', [updatedProduct])
+    } else {
+      handleSelectedProduct()
+
+      const updatedData = data.map(item =>
+        item.interfaceId === 1
+          ? updateICProduct(
+              item,
+              getRates.list.find(
+                rate => item.originAmount >= rate.amountRangeFrom && item.originAmount <= rate.amountRangeTo
+              )
+            )
+          : item
+      )
+
+      formik.setFieldValue('products', updatedData)
+    }
+  }
+
+  async function displayProduct(data) {
+    formik.setFieldValue('products', data)
+    if (data.length === 1) {
+      formik.setFieldValue('products[0].checked', true)
+      handleSelectedProduct(data[0])
+    } else {
+      handleSelectedProduct()
+    }
   }
 
   useEffect(() => {
