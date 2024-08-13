@@ -45,7 +45,8 @@ export const SystemRepository = {
     page: service + 'pageCU',
     get: service + 'getCU',
     set: service + 'setCU',
-    del: service + 'delCU'
+    del: service + 'delCU',
+    snapshot: service + 'snapshotCU'
   },
   City: {
     qry: service + 'qryCIT',
