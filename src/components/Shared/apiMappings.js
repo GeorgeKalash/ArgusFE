@@ -249,7 +249,7 @@ export const apiMappings = {
       { key: 'name', value: 'Name' }
     ]
   },
-  [ResourceIds.Module]: {
+  /* [ResourceIds.Module]: {
     //CHECK SPECIAL
     type: COMBOBOX,
     endpoint: LogisticsRepository.LoCarrier.qry,
@@ -259,7 +259,7 @@ export const apiMappings = {
       { key: 'reference', value: 'Reference' },
       { key: 'name', value: 'Name' }
     ]
-  },
+  }, */
   [ResourceIds.NotificationGroups]: {
     type: COMBOBOX,
     endpoint: AccessControlRepository.NotificationGroup.qry,
@@ -412,7 +412,7 @@ export const apiMappings = {
   [ResourceIds.SaleZone]: {
     type: COMBOBOX,
     endpoint: SaleRepository.SalesZone.qry,
-    parameters: '_startAt=0&_pageSize=1000&_filter=&_sortField=recordId', //test
+    parameters: '_startAt=0&_pageSize=1000&_filter=&_sortField=recordId',
     valueField: 'recordId',
     displayField: 'name'
   },
@@ -455,17 +455,6 @@ export const apiMappings = {
       { key: 'reference', value: 'Reference' },
       { key: 'name', value: 'Name' },
       { key: 'szName', value: 'Sale Zone' }
-    ]
-  },
-  [ResourceIds.SalesQuotation]: {
-    type: COMBOBOX,
-    endpoint: SaleRepository.SaleTransaction.qry,
-    parameters: '_startAt=0&_sortBy=name&_pageSize=2000&_params=&_dgId=0',
-    valueField: 'recordId',
-    displayField: ['reference', 'name'],
-    columnsInDropDown: [
-      { key: 'reference', value: 'Reference' },
-      { key: 'name', value: 'Name' }
     ]
   },
   [ResourceIds.SalesOrder]: {
@@ -633,7 +622,6 @@ export const apiMappings = {
     displayField: 'label'
   },
   [ResourceIds.Address]: {
-    //MasterAddFilter //CHECK DISPLAY
     type: LOOKUP,
     endpoint: SystemRepository.Address.snapshot,
     parameters: {

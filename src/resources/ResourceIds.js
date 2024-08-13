@@ -203,7 +203,6 @@ export const ResourceIds = {
   SaleZone: 51103,
   SalesZoneLevels: 51111,
   Client: 51202,
-  SalesQuotation: 51301,
   SalesOrder: 51302,
   Driver: 52201,
   Vehicle: 52202,
