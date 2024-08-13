@@ -316,7 +316,7 @@ const CTExchangeRates = () => {
     }
     await postRequest({
       extension: CurrencyTradingSettingsRepository.ExchangeMap.set2,
-      record: JSON.stringify(data)
+      record: JSON.stringify(data)``
     })
       .then(res => {
         if (res) {
