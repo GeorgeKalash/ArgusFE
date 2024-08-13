@@ -40,6 +40,7 @@ import { useForm } from 'src/hooks/form'
 import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
 import { useInvalidate } from 'src/hooks/resource'
 import { ControlContext } from 'src/providers/ControlContext'
+import InfoForm from './InfoForm'
 import { RemittanceBankInterface } from 'src/repositories/RemittanceBankInterface'
 
 export default function OutwardsForm({ labels, access, recordId, cashAccountId, plantId, userId, window }) {
@@ -119,6 +120,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
     defaultValueDate: new Date(),
     vatAmount: null,
     vatRate: null,
+    taxPercent: null,
     tdAmount: 0,
     giftCode: '',
     details: '',
@@ -335,20 +337,25 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
     handleSelectedProduct(selectedRowData)
   }
 
-  function handleSelectedProduct(selectedRowData) {
+  function handleSelectedProduct(selectedRowData, clearAmounts) {
     formik.setFieldValue('bankType', selectedRowData?.interfaceId)
     formik.setFieldValue('productId', selectedRowData?.productId)
     formik.setFieldValue('commission', selectedRowData?.fees)
     formik.setFieldValue('defaultCommission', selectedRowData?.fees)
-    formik.setFieldValue('lcAmount', selectedRowData?.baseAmount)
-    formik.setFieldValue('fcAmount', selectedRowData?.originAmount)
     formik.setFieldValue('dispersalId', selectedRowData?.dispersalId)
-    formik.setFieldValue('exRate', selectedRowData?.exRate)
+    formik.setFieldValue('exRate', parseFloat(selectedRowData?.exRate).toFixed(5))
     formik.setFieldValue('rateCalcMethod', selectedRowData?.rateCalcMethod)
     formik.setFieldValue('corId', selectedRowData?.corId)
     formik.setFieldValue('corRef', selectedRowData?.corRef)
     formik.setFieldValue('corName', selectedRowData?.corName)
     calculateValueDate(selectedRowData?.valueDays)
+    if (clearAmounts) {
+      formik.setFieldValue('lcAmount', '')
+      formik.setFieldValue('fcAmount', '')
+    } else {
+      formik.setFieldValue('lcAmount', formik.values.lcAmount || selectedRowData?.baseAmount)
+      formik.setFieldValue('fcAmount', formik.values.fcAmount || selectedRowData?.originAmount)
+    }
   }
 
   const fillOutwardsData = async data => {
@@ -358,15 +365,19 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       bankFees: item.bankFees ? parseFloat(item.bankFees).toFixed(2) : null,
       amount: parseFloat(item.amount).toFixed(2)
     }))
-    formik.setValues({
+    formik.setValues(prevValues => ({
+      ...prevValues,
       ...data.headerView,
       date: formatDateFromApi(data.headerView.date),
+      exRate: parseFloat(data.headerView.exRate).toFixed(5),
       defaultValueDate: formatDateFromApi(data.headerView.defaultValueDate),
       valueDate: formatDateFromApi(data.headerView.valueDate),
       ttNo: data.ttNo,
       bankType: data.headerView.interfaceId,
-      amountRows: modifiedList
-    })
+      amountRows: modifiedList,
+      products: prevValues.products,
+      instantCashDetails: prevValues.instantCashDetails
+    }))
   }
 
   function openRelevantWindow(formValues) {
@@ -475,13 +486,19 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       key: 'Post',
       condition: true,
       onClick: onPost,
-      disabled: !isPosted
+      disabled: !isPosted || !formik.values.corId
     },
     {
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
       disabled: !editMode
+    },
+    {
+      key: 'Audit',
+      condition: true,
+      onClick: openInfo,
+      disabled: (editMode && !formik.values.corId) || !editMode
     }
   ]
 
@@ -492,13 +509,25 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
         maxAccess: maxAccess,
         labels: labels,
         products: formik.values.products,
-        onProductSubmit
+        onProductSubmit,
+        editMode
       },
       width: 900,
       height: 500
     })
   }
-
+  function openInfo() {
+    stack({
+      Component: InfoForm,
+      props: {
+        labels,
+        formik
+      },
+      width: 700,
+      height: 610,
+      title: labels.Audit
+    })
+  }
   function openBankWindow() {
     if (formik.values.bankType === 1) {
       stack({
@@ -538,6 +567,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
         parameters: `_filter=&_key=vatPct`
       })
       formik.setFieldValue('vatRate', parseInt(res.record.value))
+      formik.setFieldValue('taxPercent', parseFloat(res.record.value))
     } catch (error) {}
   }
   async function getDefaultCountry() {
@@ -597,19 +627,17 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
     const res = await getOutwards(recordId)
     await fillOutwardsData(res.record)
     await chooseClient(res.record.headerView.clientId)
+
+    return res
   }
 
-  async function fillProducts() {
+  async function fillProducts(data) {
     try {
-      if (!formik.values.fcAmount && !formik.values.lcAmount) {
+      if (!data.fcAmount && !data.lcAmount) {
         return
       }
-      if (plantId && formik.values.countryId && formik.values.currencyId && formik.values.dispersalType) {
-        var parameters = `_plantId=${plantId}&_countryId=${formik.values.countryId}&_dispersalType=${
-          formik.values.dispersalType
-        }&_currencyId=${formik.values.currencyId}&_fcAmount=${formik.values.fcAmount || 0}&_lcAmount=${
-          formik.values.lcAmount || 0
-        }`
+      if (plantId && data.countryId && data.currencyId && data.dispersalType) {
+        var parameters = `_plantId=${plantId}&_countryId=${data.countryId}&_dispersalType=${data.dispersalType}&_currencyId=${data.currencyId}&_fcAmount=${data.fcAmount}&_lcAmount=${data.lcAmount}`
 
         const res = await getRequest({
           extension: RemittanceOutwardsRepository.ProductDispersalEngine.qry,
@@ -619,6 +647,27 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
         if (res.list.length > 0) {
           await mergeICRates(res.list)
         }
+      }
+    } catch (error) {}
+  }
+  async function fillProducts(data) {
+    try {
+      if (!data.fcAmount && !data.lcAmount) {
+        return
+      }
+      if (plantId && data.countryId && data.currencyId && data.dispersalType) {
+        var parameters = `_plantId=${plantId}&_countryId=${data.countryId}&_dispersalType=${
+          data.dispersalType
+        }&_currencyId=${data.currencyId}&_fcAmount=${data.fcAmount || 0}&_lcAmount=${data.lcAmount || 0}`
+
+        const res = await getRequest({
+          extension: RemittanceOutwardsRepository.ProductDispersalEngine.qry,
+          parameters: parameters
+        })
+
+        if (res.list.length > 0) {
+          await mergeICRates(res.list)
+        } else handleSelectedProduct()
       }
     } catch (error) {}
   }
@@ -650,10 +699,12 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
           if (data.length === 1) {
             formik.setFieldValue('products[0].checked', true)
             handleSelectedProduct(updatedItem)
+            if (formik.values.lcAmount) formik.setFieldValue('fcAmount', matchingRate.originAmount)
+            if (formik.values.fcAmount) formik.setFieldValue('lcAmount', rmatchingRate.baseAmount)
             formik.setFieldValue('exRate', matchingRate.settlementRate)
             formik.setFieldValue('commission', matchingRate.charge)
             formik.setFieldValue('defaultCommission', matchingRate.charge)
-          }
+          } else handleSelectedProduct()
 
           return updatedItem
         }
@@ -669,7 +720,10 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
     ;(async function () {
       try {
         if (recordId) {
-          await refetchForm(recordId)
+          const res = await refetchForm(recordId)
+          const copy = { ...res.record.headerView }
+          copy.lcAmount = 0
+          await fillProducts(copy)
         } else {
           await getDefaultDT()
         }
@@ -690,7 +744,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       actions={actions}
       previewReport={editMode}
       functionId={SystemFunction.Outwards}
-      disabledSubmit={isClosed}
+      disabledSubmit={isClosed || editMode}
     >
       <VertLayout>
         <Grow>
@@ -701,7 +755,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                   name='reference'
                   label={labels.Reference}
                   value={formik?.values?.reference}
-                  maxAccess={maxAccess}
+                  maxAccess={!editMode && maxAccess}
                   maxLength='30'
                   readOnly={editMode}
                   onChange={formik.handleChange}
@@ -716,7 +770,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                   value={formik?.values?.date}
                   onChange={formik.setFieldValue}
                   editMode={editMode}
-                  readOnly={isClosed || isPosted}
+                  readOnly={isClosed || isPosted || editMode}
                   maxAccess={maxAccess}
                   onClear={() => formik.setFieldValue('date', '')}
                   error={formik.touched.date && Boolean(formik.errors.date)}
@@ -757,7 +811,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                   label={labels.valueDate}
                   value={formik?.values?.valueDate}
                   onChange={formik.setFieldValue}
-                  readOnly={isClosed || isPosted}
+                  readOnly={isClosed || isPosted || editMode}
                   required
                   maxAccess={maxAccess}
                   onClear={() => formik.setFieldValue('valueDate', '')}
@@ -774,7 +828,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                     name='countryId'
                     label={labels.Country}
                     required
-                    readOnly={isClosed || isPosted}
+                    readOnly={isClosed || isPosted || editMode}
                     displayField={['countryRef', 'countryName']}
                     columnsInDropDown={[
                       { key: 'countryRef', value: 'Reference' },
@@ -787,6 +841,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                       formik.setFieldValue('countryRef', newValue ? newValue?.countryRef : '')
                       formik.setFieldValue('fcAmount', '')
                       formik.setFieldValue('lcAmount', '')
+                      handleSelectedProduct(null, true)
                       if (!newValue) {
                         formik.setFieldValue('dispersalType', '')
                         formik.setFieldValue('currencyId', '')
@@ -801,7 +856,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                     parameters={formik.values.countryId && `_countryId=${formik.values.countryId}`}
                     label={labels.DispersalType}
                     required
-                    readOnly={isClosed || isPosted || !formik.values.countryId}
+                    readOnly={isClosed || isPosted || !formik.values.countryId || editMode}
                     name='dispersalType'
                     displayField='dispersalTypeName'
                     valueField='dispersalType'
@@ -834,7 +889,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                     ]}
                     valueField='currencyId'
                     values={formik.values}
-                    readOnly={!formik.values.dispersalType || isClosed || isPosted}
+                    readOnly={!formik.values.dispersalType || isClosed || isPosted || editMode}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('currencyId', newValue?.currencyId)
                       formik.setFieldValue('currencyRef', newValue?.currencyRef)
@@ -848,13 +903,27 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                     label={labels.fcAmount}
                     value={formik.values.fcAmount}
                     required
-                    readOnly={formik.values.lcAmount}
+                    allowClear={!editMode}
+                    readOnly={formik.values.lcAmount || editMode}
                     maxAccess={maxAccess}
                     onChange={e => formik.setFieldValue('fcAmount', e.target.value)}
                     onBlur={async () => {
-                      if (!formik.values.lcAmount) await fillProducts()
+                      if (!formik.values.lcAmount)
+                        await fillProducts({
+                          countryId: formik.values.countryId,
+                          currencyId: formik.values.currencyId,
+                          dispersalType: formik.values.dispersalType,
+                          lcAmount: formik.values.lcAmount || 0,
+                          fcAmount: formik.values.fcAmount || 0
+                        })
                     }}
-                    onClear={() => formik.setFieldValue('fcAmount', '')}
+                    onClear={() => {
+                      formik.setFieldValue('fcAmount', '')
+                      if (!formik.values.lcAmount) {
+                        handleSelectedProduct(null, true)
+                        formik.setFieldValue('products', [])
+                      }
+                    }}
                     error={formik.touched.fcAmount && Boolean(formik.errors.fcAmount)}
                     maxLength={10}
                   />
@@ -865,13 +934,27 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                     label={labels.lcAmount}
                     value={formik.values.lcAmount}
                     required
-                    readOnly={formik.values.fcAmount}
+                    allowClear={!editMode}
+                    readOnly={formik.values.fcAmount || editMode}
                     maxAccess={maxAccess}
                     onChange={e => formik.setFieldValue('lcAmount', e.target.value)}
                     onBlur={async () => {
-                      if (!formik.values.fcAmount) await fillProducts()
+                      if (!formik.values.fcAmount)
+                        await fillProducts({
+                          countryId: formik.values.countryId,
+                          currencyId: formik.values.currencyId,
+                          dispersalType: formik.values.dispersalType,
+                          lcAmount: formik.values.lcAmount || 0,
+                          fcAmount: formik.values.fcAmount || 0
+                        })
                     }}
-                    onClear={() => formik.setFieldValue('lcAmount', '')}
+                    onClear={() => {
+                      formik.setFieldValue('lcAmount', '')
+                      if (!formik.values.fcAmount) {
+                        handleSelectedProduct(null, true)
+                        formik.setFieldValue('products', [])
+                      }
+                    }}
                     error={formik.touched.lcAmount && Boolean(formik.errors.lcAmount)}
                     maxLength={10}
                   />
@@ -887,37 +970,37 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                     Product
                   </Button>
                 </Grid>
-                <Grid item xs={12}>
-                  <ResourceLookup
-                    endpointId={RemittanceSettingsRepository.Correspondent.snapshot}
-                    valueField='reference'
-                    displayField='name'
-                    name='corId'
-                    label={labels.Correspondant}
-                    form={formik}
-                    required={formik.values.corId}
-                    displayFieldWidth={2}
-                    valueShow='corRef'
-                    secondValueShow='corName'
-                    maxAccess={maxAccess}
-                    editMode={editMode}
-                    readOnly
-                    onChange={async (event, newValue) => {
-                      formik.setFieldValue('corId', newValue ? newValue.recordId : null)
-                      formik.setFieldValue('corName', newValue ? newValue.name : null)
-                      formik.setFieldValue('corRef', newValue ? newValue.reference : null)
-                    }}
-                    errorCheck={'corId'}
-                  />
+                <Grid container xs={12} spacing={1} sx={{ pt: 2, pl: 2 }}>
+                  <Grid item xs={6}>
+                    <CustomTextField
+                      name='corRef'
+                      label={labels.corRef}
+                      value={formik.values?.corRef}
+                      readOnly
+                      required={formik.values.corId}
+                      maxAccess={maxAccess}
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <CustomTextField
+                      name='corName'
+                      label={labels.corName}
+                      value={formik.values?.corName}
+                      readOnly
+                      required={formik.values.corId}
+                      maxAccess={maxAccess}
+                    />
+                  </Grid>
                 </Grid>
                 <Grid container xs={12} spacing={1} sx={{ pt: 2, pl: 2 }}>
                   <Grid item xs={6}>
                     <CustomNumberField
                       name='exRate'
-                      label={labels.exchangeRate}
+                      label={labels.exRateMultiply}
                       value={formik.values.exRate}
                       required
                       readOnly
+                      decimalScale={5}
                       maxAccess={maxAccess}
                       onChange={e => formik.setFieldValue('exRate', e.target.value)}
                       onClear={() => formik.setFieldValue('exRate', '')}
@@ -928,7 +1011,8 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                   <Grid item xs={6}>
                     <CustomNumberField
                       name='exRate2'
-                      label={labels.exchangeRate}
+                      decimalScale={5}
+                      label={labels.exRateDivide}
                       value={formik.values?.exRate ? 1 / formik.values.exRate : ''}
                       required
                       readOnly
@@ -977,6 +1061,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                     onChange={e => {
                       formik.setFieldValue('tdAmount', e.target.value)
                     }}
+                    readOnly={editMode}
                     onClear={() => formik.setFieldValue('tdAmount', 0)}
                     error={formik.touched.tdAmount && Boolean(formik.errors.tdAmount)}
                     maxLength={10}
@@ -1018,7 +1103,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                     label={labels.Client}
                     form={formik}
                     required
-                    readOnly={isClosed || isPosted}
+                    readOnly={isClosed || isPosted || editMode}
                     displayFieldWidth={2}
                     valueShow='clientRef'
                     secondValueShow='clientName'
@@ -1235,6 +1320,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                     <Grid item xs={6} sx={{ pl: 2 }}>
                       <CustomTextField
                         name='giftCode'
+                        readOnly={editMode}
                         label={labels.giftCode}
                         value={formik.values?.giftCode}
                         onChange={formik.handleChange}
@@ -1259,6 +1345,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                           formik.setFieldValue('poeId', newValue ? newValue?.recordId : '')
                         }}
                         required
+                        readOnly={editMode}
                         error={formik.touched.poeId && Boolean(formik.errors.poeId)}
                         helperText={formik.touched.poeId && formik.errors.poeId}
                       />
@@ -1273,6 +1360,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                         value={formik.values.details}
                         rows={3}
                         maxLength='100'
+                        readOnly={editMode}
                         editMode={editMode}
                         maxAccess={maxAccess}
                         onChange={e => formik.setFieldValue('details', e.target.value)}
@@ -1300,7 +1388,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                     { key: 'shortName', value: 'ShortName' }
                   ]}
                   required
-                  readOnly={!formik.values.clientId || !formik.values.dispersalType || isClosed || isPosted}
+                  readOnly={!formik.values.clientId || !formik.values.dispersalType || isClosed || isPosted || editMode}
                   maxAccess={maxAccess}
                   editMode={editMode}
                   secondDisplayField={false}
@@ -1336,9 +1424,9 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                       onChange={value => formik.setFieldValue('amountRows', value)}
                       value={formik.values.amountRows}
                       error={formik.errors.amountRows}
-                      disabled={isClosed}
-                      allowAddNewLine={!isClosed}
-                      allowDelete={!isClosed}
+                      disabled={isClosed || editMode}
+                      allowAddNewLine={!isClosed || !editMode}
+                      allowDelete={!isClosed || editMode}
                       maxAccess={maxAccess}
                       name='amountRows'
                       height={170}

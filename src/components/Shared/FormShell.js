@@ -12,6 +12,7 @@ import ResourceRecordRemarks from './ResourceRecordRemarks'
 import GlobalIntegrationGrid from './GlobalIntegrationGrid'
 import AccountBalance from './AccountBalance'
 import CashTransaction from './CashTransaction'
+import FinancialTransaction from './FinancialTransaction'
 import { ControlContext } from 'src/providers/ControlContext'
 
 export default function FormShell({
@@ -160,6 +161,17 @@ export default function FormShell({
               width: 1000,
               height: 620,
               title: platformLabels.GeneralLedger
+            })
+          }
+          onClickIT={() =>
+            stack({
+              Component: FinancialTransaction,
+              props: {
+                formValues: form.values
+              },
+              width: 1000,
+              height: 620,
+              title: platformLabels.financialTransaction
             })
           }
           onClickGIA={() =>

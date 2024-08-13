@@ -20,7 +20,7 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, dtId }) {
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: SaleRepository.DocumentTypeDefault.qry
+    endpointId: SaleRepository.DocumentTypeDefault.page
   })
 
   const { formik } = useForm({

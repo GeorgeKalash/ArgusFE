@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -21,6 +21,7 @@ import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { useWindow } from 'src/windows'
 import WorkFlow from 'src/components/Shared/WorkFlow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function CAadjustmentForm({ labels, access, recordId, functionId }) {
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -28,6 +29,8 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
     access: access,
     enabled: !recordId
   })
+  const { platformLabels } = useContext(ControlContext)
+
   const { stack } = useWindow()
 
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -78,7 +81,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       })
 
       if (!recordId) {
-        toast.success('Record Added Successfully')
+        toast.success(platformLabels.Added)
         formik.setValues({
           ...obj,
           baseAmount: obj.amount,
@@ -86,7 +89,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
           recordId: response.recordId
         })
       } else {
-        toast.success('Record Edited Successfully')
+        toast.success(platformLabels.Edited)
       }
 
       try {
@@ -129,8 +132,16 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       })
 
       if (res?.recordId) {
-        toast.success('Record Posted Successfully')
+        toast.success(platformLabels.Posted)
         invalidate()
+
+        const getRes = await getRequest({
+          extension: CashBankRepository.CAadjustment.get,
+          parameters: `_recordId=${formik.values.recordId}`
+        })
+
+        getRes.record.date = formatDateFromApi(getRes.record.date)
+        formik.setValues(getRes.record)
       }
     } catch (error) {}
   }
@@ -160,6 +171,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       onClick: 'onClickGL',
       disabled: !editMode
     },
+
     {
       key: 'Post',
       condition: true,
@@ -189,7 +201,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       actions={actions}
       functionId={functionId}
       previewReport={editMode}
-      disabledSubmit={formik.values.status == '3'}
+      disabledSubmit={formik.values.status !== 1}
     >
       <VertLayout>
         <Grow>
