@@ -106,7 +106,6 @@ const GetComboBox = ({ field, formik, rpbParams }) => {
     newParams = `_dimension=${field?.data}`
   }
 
-  console.log(newParams)
   return (
     <Grid item xs={12} key={field.id}>
       {field?.classId ? (
@@ -286,6 +285,7 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
     validateOnChange: true,
     onSubmit: values => {
       setRpbParams([])
+
       const processedArray = values?.parameters
         ?.filter((item, index) => item?.fieldId && item?.value != null)
         ?.reduce((acc, item) => {
