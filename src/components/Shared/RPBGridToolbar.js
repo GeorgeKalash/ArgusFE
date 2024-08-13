@@ -75,7 +75,7 @@ const RPBGridToolbar = ({
         onClear()
       }}
       onSearchChange={value => {
-        setSearch(value)
+        value != '' ? setSearch(value) : (setSearch(''), onClear())
       }}
       inputSearch={hasSearch}
       actions={actions}

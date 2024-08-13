@@ -622,16 +622,15 @@ export const apiMappings = {
     displayField: 'label'
   },
   [ResourceIds.Address]: {
+    //FIX AFTER LOOKUP FIX //fix display format
     type: LOOKUP,
     endpoint: SystemRepository.Address.snapshot,
-    parameters: {
-      _type: 0
-    },
-    valueField: 'name',
+    //valueField: 'name',
+    secondDisplayField: false,
     valueOnSelection: 'recordId',
-    displayField: 'city',
-    displayFieldWidth: 2,
-    firstFieldWidth: '40%',
+    displayField: 'name',
+    //displayFieldWidth: 1,
+    //firstFieldWidth: '40%',
     columnsInDropDown: [
       { key: 'name', value: 'Name' },
       { key: 'city', value: 'City' },
@@ -664,4 +663,6 @@ export const apiMappings = {
       { key: 'name', value: 'Name' }
     ]
   }
+
+  //check fields of lookups.. //fix fawzis resources
 }

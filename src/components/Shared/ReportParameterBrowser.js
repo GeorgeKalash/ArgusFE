@@ -49,6 +49,8 @@ const GetLookup = ({ field, formik }) => {
         firstFieldWidth={apiDetails.firstFieldWidth}
         valueField={apiDetails.displayField}
         displayField={apiDetails.valueField}
+        secondDisplayField={apiDetails.secondDisplayField}
+        columnsInDropDown={apiDetails.columnsInDropDown}
         name={field.key}
         displayFieldWidth={apiDetails.displayFieldWidth}
         required={field.mandatory}
@@ -215,13 +217,15 @@ const GetTextField = ({ field, formik }) => {
         value={formik.values?.parameters?.[field.id]?.value || null}
         required={field.mandatory}
         onChange={e => {
-          formik.setFieldValue(`parameters[${field.id}]`, {
-            fieldId: field.id,
-            fieldKey: field.key,
-            value: e.target.value,
-            caption: field.caption,
-            display: e.target.value
-          })
+          e.target.value != ''
+            ? formik.setFieldValue(`parameters[${field.id}]`, {
+                fieldId: field.id,
+                fieldKey: field.key,
+                value: e.target.value,
+                caption: field.caption,
+                display: e.target.value
+              })
+            : formik.setFieldValue(`parameters[${field.id}]`, '')
         }}
         error={Boolean(formik.errors?.parameters?.[field.id])}
         onClear={() => formik.setFieldValue(`parameters[${field.id}]`, '')}
@@ -281,6 +285,7 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
     enableReinitialize: true,
     validateOnChange: true,
     onSubmit: values => {
+      setRpbParams([])
       const processedArray = values?.parameters
         ?.filter((item, index) => item?.fieldId && item?.value != null)
         ?.reduce((acc, item) => {
