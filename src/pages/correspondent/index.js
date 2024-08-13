@@ -26,11 +26,17 @@ const Correspondent = () => {
     paginationParameters,
     invalidate,
     refetch,
+    filterBy,
+    clearFilter,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: RemittanceSettingsRepository.Correspondent.qry,
-    datasetId: ResourceIds.Correspondent
+    datasetId: ResourceIds.Correspondent,
+    filter: {
+      endpointId: RemittanceSettingsRepository.Correspondent.snapshot,
+      filterFn: fetchWithSearch
+    }
   })
 
   async function fetchGridData(options = {}) {
@@ -45,6 +51,15 @@ const Correspondent = () => {
     })
 
     return { ...response, _startAt: _startAt }
+  }
+
+  async function fetchWithSearch({ filters, pagination }) {
+    return filters.qry
+      ? await getRequest({
+          extension: RemittanceSettingsRepository.Correspondent.snapshot,
+          parameters: `_filter=${filters.qry}`
+        })
+      : await fetchGridData(pagination)
   }
 
   const columns = [
@@ -118,7 +133,17 @@ const Correspondent = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={addCorrespondent} maxAccess={access} />
+        <GridToolbar
+          onAdd={addCorrespondent}
+          maxAccess={access}
+          onSearch={value => {
+            filterBy('qry', value)
+          }}
+          onSearchClear={() => {
+            clearFilter('qry')
+          }}
+          inputSearch={true}
+        />
       </Fixed>
       <Grow>
         <Table
