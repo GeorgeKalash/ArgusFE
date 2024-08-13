@@ -103,7 +103,7 @@ export const ThreadProgress = ({ recordId, access, window }) => {
   const currentPhaseProgress = data.phases ? (data.currentPhase / data.phases) * 100 : 0
   const completedProgress = data.iterations ? (data.completed / data.iterations) * 100 : 0
 
-  const tasksCompleted = currentPhaseProgress === 100 && completedProgress === 100
+  const tasksCompleted = data.currentPhase === data.phases && data.completed === data.iterations
 
   const hasLogError = !!data.logInfo
 
