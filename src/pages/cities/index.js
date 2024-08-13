@@ -70,7 +70,11 @@ const City = () => {
       headerName: _labels.name,
       flex: 1
     },
-    ,
+    {
+      field: 'flName',
+      headerName: _labels.flName,
+      flex: 1
+    },
     {
       field: 'countryName',
       headerName: _labels.country,

@@ -58,12 +58,12 @@ const FeesDetailsForm = ({ store, labels }) => {
 
   const columns = [
     {
-      component: 'textfield',
+      component: 'numberfield',
       label: labels.amountFrom,
       name: 'amountFrom'
     },
     {
-      component: 'textfield',
+      component: 'numberfield',
       label: labels.amountTo,
       name: 'amountTo'
     },

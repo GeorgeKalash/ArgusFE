@@ -11,9 +11,11 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const MfAccounts = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
   const {
@@ -81,14 +83,15 @@ const MfAccounts = () => {
     }
   ]
 
-  const delAccounts = obj => {
-    postRequest({
-      extension: FinancialRepository.Account.del,
-      record: JSON.stringify(obj)
-    }).then(res => {
-      toast.success('Record Deleted Successfully')
+  const delAccounts = async obj => {
+    try {
+      await postRequest({
+        extension: FinancialRepository.Account.del,
+        record: JSON.stringify(obj)
+      })
       invalidate()
-    })
+      toast.success(platformLabels.Deleted)
+    } catch (exception) {}
   }
 
   const addAccounts = () => {
