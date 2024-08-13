@@ -303,37 +303,21 @@ const CTExchangeRates = () => {
     })
   }
 
-  const emptyRowValues = () => {
-    const rows = puFormik.values.rows.map(row => {
-      return {
-        ...row,
-        currencyId: null,
-        raCurrencyId: null,
-        rateTypeId: null,
-        rateCalcMethod: null,
-        rateCalcMethodName: '',
-        minRate: null,
-        maxRate: null,
-        rate: null
-      }
-    })
-
-    console.log(puFormik.values)
-
+  const emptyExchangeMapsRowValues = async form => {
     const data = {
-      rows: rows
+      currencyId: formik.values.currencyId,
+      rateTypeId: form === 'puFormik' ? formik.values.puRateTypeId : formik.values.saRateTypeId,
+      raCurrencyId: formik.values.raCurrencyId,
+      exchangeMaps: []
     }
-    postRequest({
+    await postRequest({
       extension: CurrencyTradingSettingsRepository.ExchangeMap.set2,
       record: JSON.stringify(data)
     })
       .then(res => {
-        console.log(res)
         if (res) {
+          getExchangeRates(formik.values.currencyId, formik.values.puRateTypeId, formik.values.raCurrencyId, form)
           toast.success(platformLabels.Saved)
-          puFormik.setValues({
-            rows: rows
-          })
         }
       })
       .catch(error => {
@@ -419,7 +403,7 @@ const CTExchangeRates = () => {
                   <FieldSet sx={{ flex: 1 }}>
                     <VertLayout>
                       <Fixed>
-                        <Grid container xs={12} spacing={2}>
+                        <Grid container xs={12} spacing={2} sx={{ mb: 2 }}>
                           <Grid item xs={8}>
                             <ResourceComboBox
                               endpointId={MultiCurrencyRepository.RateType.qry}
@@ -458,7 +442,7 @@ const CTExchangeRates = () => {
                           </Grid>
                           <Grid item xs={2}>
                             <Button
-                              onClick={() => emptyRowValues()}
+                              onClick={() => emptyExchangeMapsRowValues(puFormik)}
                               variant='contained'
                               disabled={
                                 !puFormik?.values?.rows ||
@@ -493,8 +477,8 @@ const CTExchangeRates = () => {
                   <FieldSet sx={{ flex: 1 }}>
                     <VertLayout>
                       <Fixed>
-                        <Grid container xs={12} spacing={2}>
-                          <Grid item xs={9}>
+                        <Grid container xs={12} spacing={2} sx={{ mb: 2 }}>
+                          <Grid item xs={8}>
                             <ResourceComboBox
                               endpointId={MultiCurrencyRepository.RateType.qry}
                               name='saRateTypeId'
@@ -514,7 +498,7 @@ const CTExchangeRates = () => {
                               error={formik.touched.saRateTypeId && Boolean(formik.errors.saRateTypeId)}
                             />
                           </Grid>
-                          <Grid item xs={3}>
+                          <Grid item xs={2}>
                             <Button
                               onClick={() => copyRowValues(saFormik)}
                               variant='contained'
@@ -528,6 +512,22 @@ const CTExchangeRates = () => {
                               }
                             >
                               Copy
+                            </Button>
+                          </Grid>
+                          <Grid item xs={2}>
+                            <Button
+                              onClick={() => emptyExchangeMapsRowValues(saFormik)}
+                              variant='contained'
+                              disabled={
+                                !saFormik?.values?.rows ||
+                                !formik.values.saRateTypeId ||
+                                !saFormik?.values?.rows[0]?.rateCalcMethod ||
+                                !saFormik?.values?.rows[0]?.rate ||
+                                !saFormik?.values?.rows[0]?.minRate ||
+                                !saFormik?.values?.rows[0]?.maxRate
+                              }
+                            >
+                              Clear
                             </Button>
                           </Grid>
                         </Grid>
