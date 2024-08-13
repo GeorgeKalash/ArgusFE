@@ -210,5 +210,8 @@ export const SystemRepository = {
   },
   FiscalModule: {
     qry: service + 'qryFMO'
+  },
+  PUSettings: {
+    set2: service + 'set2DE',
   }
 }
