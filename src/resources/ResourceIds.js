@@ -191,5 +191,6 @@ export const ResourceIds = {
   ConsignmentSites: 51110,
   DeliveryMethods: 50104,
   SystemFunctionIntegrations: 30105,
-  PUPaymentTerms: 50106
+  PUPaymentTerms: 50106,
+  PuVendors: 50201
 }
