@@ -352,7 +352,7 @@ export const apiMappings = {
       { key: 'name', value: 'Name' }
     ]
   },
-  [ResourceIds.Vendor]: {
+  [ResourceIds.PuVendors]: {
     type: LOOKUP,
     endpoint: PurchaseRepository.Vendor.snapshot,
     valueField: 'reference',
