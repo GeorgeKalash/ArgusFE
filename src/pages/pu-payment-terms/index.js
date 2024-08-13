@@ -3,47 +3,45 @@ import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { SystemRepository } from 'src/repositories/SystemRepository'
+import { useWindow } from 'src/windows'
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import CityDistrictForm from './Forms/CityDistrictForm'
-import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
+import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
+import PaymentTermsForm from './forms/PaymentTermsForm'
 
-const CityDistricts = () => {
+const PaymentTerm = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    const response = await getRequest({
-      extension: SystemRepository.CityDistrict.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
-    })
+    try {
+      const response = await getRequest({
+        extension: PurchaseRepository.PaymentTerms.qry,
+        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=`
+      })
 
-    return { ...response, _startAt: _startAt }
+      return { ...response, _startAt: _startAt }
+    } catch (error) {}
   }
-
-  const { stack } = useWindow()
-
-  const invalidate = useInvalidate({
-    endpointId: SystemRepository.CityDistrict.page
-  })
 
   const {
     query: { data },
     labels: _labels,
-    refetch,
+    invalidate,
     paginationParameters,
+    refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SystemRepository.CityDistrict.page,
-    datasetId: ResourceIds.CityDistrict
+    endpointId: PurchaseRepository.PaymentTerms.qry,
+    datasetId: ResourceIds.PUPaymentTerms
   })
 
   const columns = [
@@ -58,52 +56,58 @@ const CityDistricts = () => {
       flex: 1
     },
     {
-      field: 'flName',
-      headerName: _labels.flName,
+      field: 'ptName',
+      headerName: _labels.paymentType,
       flex: 1
     },
     {
-      field: 'countryName',
-      headerName: _labels.country,
+      field: 'days',
+      headerName: _labels.days,
       flex: 1
     },
     {
-      field: 'cityName',
-      headerName: _labels.city,
+      field: 'discountDays',
+      headerName: _labels.discountDays,
+      flex: 1
+    },
+    {
+      field: 'discount',
+      headerName: _labels.discount,
       flex: 1
     }
   ]
-
-  const del = async obj => {
-    await postRequest({
-      extension: SystemRepository.CityDistrict.del,
-      record: JSON.stringify(obj)
-    })
-
-    toast.success(platformLabels.Deleted)
-    invalidate()
-  }
 
   const add = () => {
     openForm()
   }
 
-  const edit = obj => {
-    openForm(obj?.recordId)
+  const del = async obj => {
+    try {
+      await postRequest({
+        extension: PurchaseRepository.PaymentTerms.del,
+        record: JSON.stringify(obj)
+      })
+      invalidate()
+      toast.success(platformLabels.Deleted)
+    } catch (error) {}
   }
 
   function openForm(recordId) {
     stack({
-      Component: CityDistrictForm,
+      Component: PaymentTermsForm,
       props: {
         labels: _labels,
         recordId: recordId,
         maxAccess: access
       },
-      width: 700,
-      height: 530,
-      title: _labels.cityDistrict
+      width: 600,
+      height: 450,
+      title: _labels.paymentTerms
     })
+  }
+
+  const edit = obj => {
+    openForm(obj?.recordId)
   }
 
   return (
@@ -120,14 +124,14 @@ const CityDistricts = () => {
           onDelete={del}
           isLoading={false}
           pageSize={50}
-          maxAccess={access}
           refetch={refetch}
           paginationParameters={paginationParameters}
           paginationType='api'
+          maxAccess={access}
         />
       </Grow>
     </VertLayout>
   )
 }
 
-export default CityDistricts
+export default PaymentTerm

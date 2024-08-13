@@ -3,20 +3,20 @@ import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import AccountsWindow from './Windows/AccountsWindow'
 import { useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
-import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 import { ControlContext } from 'src/providers/ControlContext'
+import VendorsWindow from './windows/VendorsWindow'
+import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
+import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
-const MfAccounts = () => {
+const PuVendors = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
+  const { platformLabels } = useContext(ControlContext)
 
   const {
     query: { data },
@@ -25,21 +25,20 @@ const MfAccounts = () => {
     clearFilter,
     paginationParameters,
     invalidate,
-    access,
-    refetch
+    refetch,
+    access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: FinancialRepository.Account.page,
-    datasetId: ResourceIds.Accounts,
+    endpointId: PurchaseRepository.Vendor.page,
+    datasetId: ResourceIds.PuVendors,
     filter: {
       filterFn: fetchWithFilter
     }
   })
-
   async function fetchWithFilter({ filters, pagination }) {
     if (filters?.qry) {
       return await getRequest({
-        extension: FinancialRepository.Account.snapshot,
+        extension: PurchaseRepository.Vendor.snapshot,
         parameters: `_filter=${filters.qry}`
       })
     } else {
@@ -49,12 +48,10 @@ const MfAccounts = () => {
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
-    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
-    var parameters = defaultParams
 
     const response = await getRequest({
-      extension: FinancialRepository.Account.page,
-      parameters: parameters
+      extension: PurchaseRepository.Vendor.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -72,47 +69,43 @@ const MfAccounts = () => {
       flex: 1
     },
     {
-      field: 'groupName',
-      headerName: _labels.accountGroup,
-      flex: 1
-    },
-    {
-      field: 'typeName',
-      headerName: _labels.type,
+      field: 'flName',
+      headerName: _labels.flName,
       flex: 1
     }
   ]
 
-  const delAccounts = async obj => {
-    try {
-      await postRequest({
-        extension: FinancialRepository.Account.del,
-        record: JSON.stringify(obj)
+  const del = obj => {
+    postRequest({
+      extension: PurchaseRepository.Vendor.del,
+      record: JSON.stringify(obj)
+    })
+      .then(res => {
+        toast.success(platformLabels.Deleted)
+        invalidate()
       })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (exception) {}
+      .catch(error => {})
   }
 
-  const addAccounts = () => {
+  const add = () => {
     openForm()
   }
 
   function openForm(recordId) {
     stack({
-      Component: AccountsWindow,
+      Component: VendorsWindow,
       props: {
         labels: _labels,
-        recordId: recordId ? recordId : null,
+        recordId: recordId,
         maxAccess: access
       },
-      width: 600,
-      height: 600,
-      title: _labels.Accounts
+      width: 700,
+      height: 750,
+      title: _labels?.vendor
     })
   }
 
-  const popup = obj => {
+  const edit = obj => {
     openForm(obj?.recordId)
   }
 
@@ -139,12 +132,12 @@ const MfAccounts = () => {
     <VertLayout>
       <Fixed>
         <RPBGridToolbar
-          onAdd={addAccounts}
+          onAdd={add}
           maxAccess={access}
           onApply={onApply}
           onSearch={onSearch}
           onClear={onClear}
-          reportName={'FIACC'}
+          reportName={'PUVEN'}
         />
       </Fixed>
       <Grow>
@@ -155,9 +148,8 @@ const MfAccounts = () => {
           paginationParameters={paginationParameters}
           paginationType='api'
           refetch={refetch}
-          onEdit={popup}
-          onDelete={delAccounts}
-          deleteConfirmationType={'strict'}
+          onEdit={edit}
+          onDelete={del}
           isLoading={false}
           pageSize={50}
           maxAccess={access}
@@ -167,4 +159,4 @@ const MfAccounts = () => {
   )
 }
 
-export default MfAccounts
+export default PuVendors

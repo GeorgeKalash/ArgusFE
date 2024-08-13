@@ -157,8 +157,7 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
         return curr.sign == '1' ? acc + parseNumber(curr.baseAmount) : acc
       }, 0)
 
-      const baseBalance = baseDebit - baseCredit
-
+      const baseBalance = parseFloat((baseDebit - baseCredit).toFixed(2))
       setBaseGridData({
         base: 'Base',
         credit: baseCredit,

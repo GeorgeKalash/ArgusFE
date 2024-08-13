@@ -3,107 +3,86 @@ import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { SystemRepository } from 'src/repositories/SystemRepository'
+import { useWindow } from 'src/windows'
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import CityDistrictForm from './Forms/CityDistrictForm'
-import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
+import DeliveryMethodsForm from './forms/DeliveryMethodsForm'
+import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
 
-const CityDistricts = () => {
+const DeliveryMethods = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    const response = await getRequest({
-      extension: SystemRepository.CityDistrict.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
-    })
+    try {
+      const response = await getRequest({
+        extension: PurchaseRepository.DeliveryMethods.qry,
+        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=`
+      })
 
-    return { ...response, _startAt: _startAt }
+      return { ...response, _startAt: _startAt }
+    } catch (error) {}
   }
-
-  const { stack } = useWindow()
-
-  const invalidate = useInvalidate({
-    endpointId: SystemRepository.CityDistrict.page
-  })
 
   const {
     query: { data },
     labels: _labels,
-    refetch,
+    invalidate,
     paginationParameters,
+    refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SystemRepository.CityDistrict.page,
-    datasetId: ResourceIds.CityDistrict
+    endpointId: PurchaseRepository.DeliveryMethods.qry,
+    datasetId: ResourceIds.DeliveryMethods
   })
 
   const columns = [
     {
-      field: 'reference',
-      headerName: _labels.reference,
-      flex: 1
-    },
-    {
       field: 'name',
       headerName: _labels.name,
       flex: 1
-    },
-    {
-      field: 'flName',
-      headerName: _labels.flName,
-      flex: 1
-    },
-    {
-      field: 'countryName',
-      headerName: _labels.country,
-      flex: 1
-    },
-    {
-      field: 'cityName',
-      headerName: _labels.city,
-      flex: 1
     }
   ]
-
-  const del = async obj => {
-    await postRequest({
-      extension: SystemRepository.CityDistrict.del,
-      record: JSON.stringify(obj)
-    })
-
-    toast.success(platformLabels.Deleted)
-    invalidate()
-  }
 
   const add = () => {
     openForm()
   }
 
-  const edit = obj => {
-    openForm(obj?.recordId)
+  const del = async obj => {
+    try {
+      await postRequest({
+        extension: PurchaseRepository.DeliveryMethods.del,
+        record: JSON.stringify(obj)
+      })
+      invalidate()
+      toast.success(platformLabels.Deleted)
+    } catch (error) {}
   }
 
   function openForm(recordId) {
     stack({
-      Component: CityDistrictForm,
+      Component: DeliveryMethodsForm,
       props: {
         labels: _labels,
         recordId: recordId,
         maxAccess: access
       },
-      width: 700,
-      height: 530,
-      title: _labels.cityDistrict
+      width: 600,
+      height: 250,
+      title: _labels.deliveryMethods
     })
+  }
+
+  const edit = obj => {
+    openForm(obj?.recordId)
   }
 
   return (
@@ -120,14 +99,14 @@ const CityDistricts = () => {
           onDelete={del}
           isLoading={false}
           pageSize={50}
-          maxAccess={access}
           refetch={refetch}
           paginationParameters={paginationParameters}
           paginationType='api'
+          maxAccess={access}
         />
       </Grow>
     </VertLayout>
   )
 }
 
-export default CityDistricts
+export default DeliveryMethods

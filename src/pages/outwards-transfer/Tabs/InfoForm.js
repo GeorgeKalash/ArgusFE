@@ -5,11 +5,48 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FormShell from 'src/components/Shared/FormShell'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
+import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
 export default function InfoForm({ labels, formik }) {
   const { getRequest } = useContext(RequestsContext)
   const [owiFields, setowiFieldsIFields] = useState({})
+  const [baseCurSymbol, setBaseCurSymbol] = useState('')
+  const [corCurSymbol, setCorCurSymbol] = useState('')
+
+  async function getDefaultBaseCurrency() {
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.Defaults.get,
+        parameters: `_filter=&_key=baseCurrencyId`
+      })
+
+      return res?.record?.value
+    } catch (error) {}
+  }
+  async function getCurrencySymbol(currencyId) {
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.Currency.get,
+        parameters: `_recordId=${currencyId}`
+      })
+
+      return res?.record?.symbol
+    } catch (error) {}
+  }
+  async function getBaseCurrencySymbol() {
+    try {
+      const getBaseCurId = await getDefaultBaseCurrency()
+      const symbol = await getCurrencySymbol(getBaseCurId)
+      setBaseCurSymbol(symbol)
+    } catch (error) {}
+  }
+  async function getCorCurrencySymbol() {
+    try {
+      const symbol = await getCurrencySymbol(formik.values.corCurrencyId)
+      setCorCurSymbol(symbol)
+    } catch (error) {}
+  }
 
   useEffect(() => {
     ;(async function () {
@@ -20,7 +57,14 @@ export default function InfoForm({ labels, formik }) {
         })
         res.record.corExRate = parseFloat(res.record.corExRate).toFixed(5)
         res.record.corEvalExRate = parseFloat(res.record.corEvalExRate).toFixed(5)
+        res.record.netCommissionRevenue = parseFloat(res.record.netCommissionRevenue).toFixed(2)
+        res.record.baseCorCommission = parseFloat(res.record.baseCorCommission).toFixed(2)
+        res.record.grossProfit = parseFloat(res.record.grossProfit).toFixed(2)
+        res.record.corBaseAmount = parseFloat(res.record.corBaseAmount).toFixed(2)
         setowiFieldsIFields(res.record)
+
+        await getBaseCurrencySymbol()
+        await getCorCurrencySymbol()
       } catch (error) {}
     })()
   }, [])
@@ -46,12 +90,11 @@ export default function InfoForm({ labels, formik }) {
           />
         </Grid>
         <Grid item xs={12} sx={{ mx: 5 }}>
-          <CustomNumberField
+          <CustomTextField
             name='corEvalExRate'
             readOnly
             label={labels.corCurrencyEval}
-            value={owiFields?.corEvalExRate}
-            decimalScale={5}
+            value={`${owiFields?.corEvalExRate} ${corCurSymbol}`}
           />
         </Grid>
         <Grid item xs={12} sx={{ mx: 5 }}>
@@ -59,46 +102,51 @@ export default function InfoForm({ labels, formik }) {
         </Grid>
 
         <Grid item xs={12} sx={{ mx: 5 }}>
-          <CustomNumberField name='corAmount' readOnly label={labels.corAmount} value={owiFields?.corAmount} />
+          <CustomTextField
+            name='corAmount'
+            readOnly
+            label={labels.corAmount}
+            value={`${owiFields?.corAmount} ${corCurSymbol}`}
+          />
         </Grid>
         <Grid item xs={12} sx={{ mx: 5 }}>
-          <CustomNumberField
+          <CustomTextField
             name='corComission'
             readOnly
             label={labels.corComission}
-            value={owiFields?.corCommission}
+            value={`${owiFields?.corCommission} ${corCurSymbol}`}
           />
         </Grid>
         <Grid item xs={12} sx={{ mx: 5 }}>
-          <CustomNumberField
+          <CustomTextField
             name='corBaseAmount'
             readOnly
             label={labels.corBaseAmount}
-            value={owiFields?.corBaseAmount}
+            value={`${owiFields?.corBaseAmount} ${baseCurSymbol}`}
           />
         </Grid>
         <Grid item xs={12} sx={{ mx: 5 }}>
-          <CustomNumberField
+          <CustomTextField
             name='grossProfitFromExRate'
             readOnly
             label={labels.grossProfit}
-            value={owiFields?.grossProfit}
+            value={`${owiFields?.grossProfit} ${baseCurSymbol}`}
           />
         </Grid>
         <Grid item xs={12} sx={{ mx: 5 }}>
-          <CustomNumberField
-            name='netCommssionCost '
+          <CustomTextField
+            name='netCommssionCost'
             readOnly
             label={labels.netCommission}
-            value={owiFields?.baseCorCommission}
+            value={`${owiFields?.baseCorCommission} ${baseCurSymbol}`}
           />
         </Grid>
         <Grid item xs={12} sx={{ mx: 5 }}>
-          <CustomNumberField
+          <CustomTextField
             name='netCommissionRevenue'
             readOnly
             label={labels.netCommissionRevenue}
-            value={owiFields?.netCommissionRevenue}
+            value={`${owiFields?.netCommissionRevenue} ${baseCurSymbol}`}
           />
         </Grid>
       </Grid>
