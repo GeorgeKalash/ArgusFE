@@ -60,10 +60,6 @@ const CustomNumberField = ({
         e.target.value = value
       }
 
-      if (min && (inputValue < min || inputValue === '')) {
-        e.target.value = 0
-      }
-
       onChange(e)
     }
   }

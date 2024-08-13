@@ -218,9 +218,15 @@ const ItemForm = ({ tlId, labels, seqNo, getGridData, maxAccess, window }) => {
                   type='number'
                   value={formik.values.fontSize}
                   required
-                  min={0}
                   readOnly={false}
-                  onChange={formik.handleChange}
+                  onChange={e => {
+                    const inputValue = e.target.value
+                    if (inputValue < 0 || inputValue === '') {
+                      e.target.value = 0
+                    }
+
+                    formik.handleChange
+                  }}
                   onClear={() => formik.setFieldValue('fontSize', '')}
                   error={formik.touched.fontSize && Boolean(formik.errors.fontSize)}
                   maxAccess={maxAccess}
