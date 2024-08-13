@@ -353,7 +353,7 @@ const CTExchangeRates = () => {
                       onChange={(event, newValue) => {
                         formik.setFieldValue('rateAgainst', newValue?.key)
                         if (!newValue) {
-                          formik.setFieldValue('raCurrencyId', null)
+                          formik.setFieldValue('raCurrencyId', 0)
                         } else {
                           if (newValue.key === '1') getDefaultBaseCurrencyId()
                         }
