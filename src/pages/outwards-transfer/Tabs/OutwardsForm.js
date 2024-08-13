@@ -612,11 +612,17 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
           formik.setFieldValue('products', res.list)
           if (res.list.length == 1) {
             formik.setFieldValue('products[0].checked', true)
-            handleSelectedProduct(res.list[0])
+            !editMode && handleSelectedProduct(res.list[0])
             if (formik.values.lcAmount) formik.setFieldValue('fcAmount', res.list[0].originAmount)
             if (formik.values.fcAmount) formik.setFieldValue('lcAmount', res.list[0].baseAmount)
-          } else handleSelectedProduct()
-        }
+          } else {
+            const matchedProduct = res.list.find(product => product.productId === data.productId)
+            if (matchedProduct) {
+              const matchedIndex = res.list.findIndex(product => product.productId === data.productId)
+              formik.setFieldValue(`products[${matchedIndex}].checked`, true)
+            }
+          }
+        } else handleSelectedProduct()
       }
     } catch (error) {}
   }
