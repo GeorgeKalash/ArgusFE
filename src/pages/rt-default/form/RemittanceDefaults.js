@@ -157,7 +157,6 @@ const RemittanceDefaults = ({ _labels }) => {
             />
           </Grid>
           <Grid item xs={12} sx={{ marginLeft: '0.5rem', marginRight: '0.5rem' }}>
-            {' '}
             <ResourceComboBox
               endpointId={FinancialRepository.Group.qry}
               name='rt-fii-accountGroupId'
