@@ -12,6 +12,7 @@ import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTrad
 import { ResourceIds } from 'src/resources/ResourceIds'
 import toast from 'react-hot-toast'
 import { useWindowDimensions } from 'src/lib/useWindowDimensions'
+import { getButtons } from 'src/components/Shared/Buttons'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useResourceQuery } from 'src/hooks/resource'
 import FieldSet from 'src/components/Shared/FieldSet'
@@ -26,6 +27,8 @@ const CTExchangeRates = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const [plantStore, setPlantsStore] = useState(null)
+  const buttons = getButtons(platformLabels)
+  const clearButton = buttons.find(button => button.key === 'Clear')
 
   const { labels: labels, access } = useResourceQuery({
     datasetId: ResourceIds.CtExchangeRates
@@ -442,20 +445,35 @@ const CTExchangeRates = () => {
                             </Button>
                           </Grid>
                           <Grid item xs={2}>
-                            <Button
-                              onClick={() => emptyExchangeMapsRowValues(puFormik)}
-                              variant='contained'
-                              disabled={
-                                !puFormik?.values?.rows ||
-                                !formik.values.puRateTypeId ||
-                                !puFormik?.values?.rows[0]?.rateCalcMethod ||
-                                !puFormik?.values?.rows[0]?.rate ||
-                                !puFormik?.values?.rows[0]?.minRate ||
-                                !puFormik?.values?.rows[0]?.maxRate
-                              }
-                            >
-                              Clear
-                            </Button>
+                            <div className='button-container'>
+                              <Button
+                                onClick={() => emptyExchangeMapsRowValues(puFormik)}
+                                variant='contained'
+                                sx={{
+                                  mr: 1,
+                                  backgroundColor: clearButton.color,
+                                  '&:hover': {
+                                    backgroundColor: clearButton.color,
+                                    opacity: 0.8
+                                  },
+                                  border: clearButton.border,
+                                  width: '78px !important',
+                                  height: '42px',
+                                  objectFit: 'contain',
+                                  minWidth: '78px !important'
+                                }}
+                                disabled={
+                                  !puFormik?.values?.rows ||
+                                  !formik.values.puRateTypeId ||
+                                  !puFormik?.values?.rows[0]?.rateCalcMethod ||
+                                  !puFormik?.values?.rows[0]?.rate ||
+                                  !puFormik?.values?.rows[0]?.minRate ||
+                                  !puFormik?.values?.rows[0]?.maxRate
+                                }
+                              >
+                                <img src={`/images/buttonsIcons/${clearButton.image}`} alt={clearButton.key} />
+                              </Button>
+                            </div>
                           </Grid>
                         </Grid>
                       </Fixed>
@@ -516,20 +534,35 @@ const CTExchangeRates = () => {
                             </Button>
                           </Grid>
                           <Grid item xs={2}>
-                            <Button
-                              onClick={() => emptyExchangeMapsRowValues(saFormik)}
-                              variant='contained'
-                              disabled={
-                                !saFormik?.values?.rows ||
-                                !formik.values.saRateTypeId ||
-                                !saFormik?.values?.rows[0]?.rateCalcMethod ||
-                                !saFormik?.values?.rows[0]?.rate ||
-                                !saFormik?.values?.rows[0]?.minRate ||
-                                !saFormik?.values?.rows[0]?.maxRate
-                              }
-                            >
-                              Clear
-                            </Button>
+                            <div className='button-container'>
+                              <Button
+                                onClick={() => emptyExchangeMapsRowValues(saFormik)}
+                                variant='contained'
+                                sx={{
+                                  mr: 1,
+                                  backgroundColor: clearButton.color,
+                                  '&:hover': {
+                                    backgroundColor: clearButton.color,
+                                    opacity: 0.8
+                                  },
+                                  border: clearButton.border,
+                                  width: '78px !important',
+                                  height: '42px',
+                                  objectFit: 'contain',
+                                  minWidth: '78px !important'
+                                }}
+                                disabled={
+                                  !saFormik?.values?.rows ||
+                                  !formik.values.saRateTypeId ||
+                                  !saFormik?.values?.rows[0]?.rateCalcMethod ||
+                                  !saFormik?.values?.rows[0]?.rate ||
+                                  !saFormik?.values?.rows[0]?.minRate ||
+                                  !saFormik?.values?.rows[0]?.maxRate
+                                }
+                              >
+                                <img src={`/images/buttonsIcons/${clearButton.image}`} alt={clearButton.key} />
+                              </Button>
+                            </div>
                           </Grid>
                         </Grid>
                       </Fixed>
