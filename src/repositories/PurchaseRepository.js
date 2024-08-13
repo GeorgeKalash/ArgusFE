@@ -23,11 +23,19 @@ export const PurchaseRepository = {
     del: service + 'delPT'
   },
   Vendor: {
+    snapshot: service + 'snapshotVEN',
     qry: service + 'qryVEN',
+    page: service + 'pageVEN',
     get: service + 'getVEN',
     set: service + 'setVEN',
-    del: service + 'delVEN',
-    snapshot: service + 'snapshotVEN'
+    del: service + 'delVEN'
+  },
+  Address: {
+    qry: service + 'qryAD',
+    page: service + 'pageAD',
+    get: service + 'getAD',
+    set: service + 'setAD',
+    del: service + 'delAD'
   },
   PurchaseInvoiceHeader: {
     qry: service + 'qryIVC',

@@ -1,25 +1,27 @@
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useContext, useEffect, useState } from 'react'
-import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import AddressGridTab from 'src/components/Shared/AddressGridTab'
 import { useWindow } from 'src/windows'
-import BPAddressForm from './BPAddressForm'
+import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
+import VendorsAddressForm from './VendorsAddressForm'
 import { ControlContext } from 'src/providers/ControlContext'
 
-const AddressMasterDataForm = ({ store, maxAccess, labels, editMode, ...props }) => {
+const VendorsAddressGrid = ({ store, maxAccess, labels, editMode, ...props }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const [addressGridData, setAddressGridData] = useState([]) //for address tab
+  const [addressGridData, setAddressGridData] = useState([])
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
 
-  const getAddressGridData = bpId => {
+  const getAddressGridData = vendorId => {
     setAddressGridData([])
-    const defaultParams = `_bpId=${bpId}`
+
+    const defaultParams = `_vendorId=${vendorId}`
     var parameters = defaultParams
+
     getRequest({
-      extension: BusinessPartnerRepository.BPAddress.qry,
+      extension: PurchaseRepository.Address.qry,
       parameters: parameters
     })
       .then(res => {
@@ -30,17 +32,16 @@ const AddressMasterDataForm = ({ store, maxAccess, labels, editMode, ...props })
   }
 
   const delAddress = obj => {
-    const bpId = recordId
-    obj.bpId = bpId
+    const vendorId = recordId
+    obj.vendorId = vendorId
     obj.addressId = obj.recordId
     postRequest({
-      extension: BusinessPartnerRepository.BPAddress.del,
+      extension: PurchaseRepository.Address.del,
       record: JSON.stringify(obj)
     })
       .then(res => {
         toast.success(platformLabels.Deleted)
-
-        getAddressGridData(bpId)
+        getAddressGridData(vendorId)
       })
       .catch(error => {})
   }
@@ -51,16 +52,17 @@ const AddressMasterDataForm = ({ store, maxAccess, labels, editMode, ...props })
 
   function openForm(id) {
     stack({
-      Component: BPAddressForm,
+      Component: VendorsAddressForm,
       props: {
         _labels: labels,
-        maxAccess: maxAccess,
-        editMode: editMode,
+        maxAccess,
+        editMode,
         recordId: id,
-        bpId: recordId,
+        vendorId: recordId,
         getAddressGridData: getAddressGridData
       },
       width: 600,
+      height: 500,
       title: labels.address
     })
   }
@@ -73,6 +75,19 @@ const AddressMasterDataForm = ({ store, maxAccess, labels, editMode, ...props })
     recordId && getAddressGridData(recordId)
   }, [recordId])
 
+  const columns = [
+    {
+      field: 'city',
+      headerName: labels.city,
+      flex: 1
+    },
+    {
+      field: 'street1',
+      headerName: labels.street1,
+      flex: 1
+    }
+  ]
+
   return (
     <AddressGridTab
       addressGridData={addressGridData}
@@ -80,10 +95,11 @@ const AddressMasterDataForm = ({ store, maxAccess, labels, editMode, ...props })
       delAddress={delAddress}
       editAddress={editAddress}
       labels={labels}
+      columns={columns}
       maxAccess={maxAccess}
       {...props}
     />
   )
 }
 
-export default AddressMasterDataForm
+export default VendorsAddressGrid

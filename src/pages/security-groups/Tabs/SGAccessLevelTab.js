@@ -113,7 +113,7 @@ const SGAccessLevelTab = ({ labels, maxAccess, storeRecordId }) => {
       props: {
         labels: labels,
         maxAccess,
-        row,
+        row: row.data,
         invalidate,
         resourceId: ResourceIds.SecurityGroup
       },
@@ -129,7 +129,7 @@ const SGAccessLevelTab = ({ labels, maxAccess, storeRecordId }) => {
       props: {
         labels: labels,
         maxAccess,
-        row,
+        row: row.data,
         invalidate,
         resourceId: ResourceIds.SecurityGroup
       },
@@ -215,9 +215,9 @@ const SGAccessLevelTab = ({ labels, maxAccess, storeRecordId }) => {
               field: '',
               headerName: labels.resourceGlobal,
               width: 200,
-              renderCell: params => (
+              cellRenderer: row => (
                 <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
-                  <IconButton size='small' onClick={() => openResourceGlobal(params.row)}>
+                  <IconButton size='small' onClick={() => openResourceGlobal(row)}>
                     <Icon icon='mdi:application-edit-outline' fontSize={18} />
                   </IconButton>
                 </Box>
@@ -227,9 +227,9 @@ const SGAccessLevelTab = ({ labels, maxAccess, storeRecordId }) => {
               field: 'Control Access',
               headerName: labels.controlAccess,
               width: 200,
-              renderCell: params => (
+              cellRenderer: row => (
                 <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
-                  <IconButton size='small' onClick={() => openFieldGlobal(params.row)}>
+                  <IconButton size='small' onClick={() => openFieldGlobal(row)}>
                     <Icon icon='mdi:application-edit-outline' fontSize={18} />
                   </IconButton>
                 </Box>
