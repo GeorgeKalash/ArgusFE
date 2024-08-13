@@ -13,6 +13,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SCRepository } from 'src/repositories/SCRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import { replace } from 'stylis'
 
 const ItemForm = ({ tlId, labels, seqNo, getGridData, maxAccess, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -218,6 +219,7 @@ const ItemForm = ({ tlId, labels, seqNo, getGridData, maxAccess, window }) => {
                   type='number'
                   value={formik.values.fontSize}
                   required
+                  decimalScale={0}
                   readOnly={false}
                   onChange={e => {
                     const inputValue = e.target.value
@@ -225,7 +227,7 @@ const ItemForm = ({ tlId, labels, seqNo, getGridData, maxAccess, window }) => {
                       e.target.value = 0
                     }
 
-                    formik.handleChange
+                    formik.handleChange(e)
                   }}
                   onClear={() => formik.setFieldValue('fontSize', '')}
                   error={formik.touched.fontSize && Boolean(formik.errors.fontSize)}
