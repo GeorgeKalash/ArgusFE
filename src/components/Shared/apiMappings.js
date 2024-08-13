@@ -249,18 +249,6 @@ export const apiMappings = {
       { key: 'name', value: 'Name' }
     ]
   },
-  
-  /* [ResourceIds.Module]: {
-    //CHECK SPECIAL
-    type: COMBOBOX,
-    endpoint: LogisticsRepository.LoCarrier.qry,
-    valueField: 'recordId',
-    displayField: ['reference', 'name'],
-    columnsInDropDown: [
-      { key: 'reference', value: 'Reference' },
-      { key: 'name', value: 'Name' }
-    ]
-  }, */
   [ResourceIds.NotificationGroups]: {
     type: COMBOBOX,
     endpoint: AccessControlRepository.NotificationGroup.qry,
@@ -491,6 +479,8 @@ export const apiMappings = {
     displayField: 'name'
   },
   [ResourceIds.SecurityGroupsFilter]: {
+    //true resourceId: SecurityGroup = 23102, security groups report asp broken!
+
     type: COMBOBOX,
     endpoint: AccessControlRepository.SecurityGroup.qry,
     parameters: '_startAt=0&_pageSize=1000',
@@ -610,6 +600,8 @@ export const apiMappings = {
     ]
   },
   [ResourceIds.GovernmentOrganizationFilter]: {
+    // true resourceId  GovOrg = 70113, Branch Workforce report working well asp
+
     type: COMBOBOX,
     endpoint: SystemRepository.GovernmentOrganization.qry,
     valueField: 'recordId',
@@ -668,5 +660,7 @@ export const apiMappings = {
     ]
   }
 
-  //check fields of lookups.. //fix fawzis resources
+  //check fields of lookups.. after omar fix
+  //check rebecca fix BUG IN DELETE IN SEARCH rebecca
+  //HR filters not migrated
 }
