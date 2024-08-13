@@ -48,7 +48,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       plantId: '',
       date: new Date(),
       currencyId: '',
-      status: '',
+      status: 1,
       cashAccountId: '',
       amount: '',
       baseAmount: '',
@@ -64,6 +64,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       amount: yup.string().required(' '),
       currencyId: yup.string().required(' '),
       cashAccountId: yup.string().required(' '),
+      dtId: yup.string().required(' '),
       date: yup.string().required(' ')
     }),
     onSubmit: async obj => {
@@ -224,7 +225,6 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                 onChange={(event, newValue) => {
                   changeDT(newValue)
                   formik && formik.setFieldValue('dtId', newValue?.recordId)
-                  formik && formik.setFieldValue('status', newValue?.activeStatus)
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
               />
