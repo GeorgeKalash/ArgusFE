@@ -46,7 +46,7 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
   })
 
   const invalidate = useInvalidate({
-    endpointId: RemittanceSettingsRepository.Correspondent.qry
+    endpointId: RemittanceSettingsRepository.ProductMaster.qry
   })
 
   const { formik } = useForm({
