@@ -13,7 +13,8 @@ export const RemittanceSettingsRepository = {
     page: service + 'pagePRO',
     get: service + 'getPRO',
     set: service + 'setPRO',
-    del: service + 'delPRO'
+    del: service + 'delPRO',
+    snapshot: service + 'snapshotPRO'
   },
   ProductCountries: {
     qry: service + 'qryPCO',
