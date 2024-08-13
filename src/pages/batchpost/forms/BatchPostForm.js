@@ -31,8 +31,6 @@ export default function BatchPostForm({ access }) {
       startDate: new Date(today.getFullYear(), 0, 1),
       endDate: today,
       status: parseInt(status),
-      batchId: '',
-      plantId: ''
     },
     enableReinitialize: false,
     maxAccess: access,
@@ -123,7 +121,11 @@ export default function BatchPostForm({ access }) {
                 ]}
                 values={formik.values}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('plantId', newValue?.recordId || '')
+                  if (newValue?.recordId) {
+                    formik.setFieldValue('plantId', newValue?.recordId);
+                  } else {
+                    delete formik?.values?.plantId;
+                  }
                 }}
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
               />
@@ -143,7 +145,9 @@ export default function BatchPostForm({ access }) {
                 secondValueShow='batchName'
                 form={formik}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('batchId', newValue?.recordId || '')
+                  if (newValue?.recordId) {
+                    formik.setFieldValue('batchId', newValue?.recordId)
+                  }
                   formik.setFieldValue('batchRef', newValue?.reference || '')
                   formik.setFieldValue('batchName', newValue?.name || '')
                 }}
