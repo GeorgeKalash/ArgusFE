@@ -31,8 +31,8 @@ export default function BatchPostForm({ access }) {
       startDate: new Date(today.getFullYear(), 0, 1),
       endDate: today,
       status: parseInt(status),
-      batchId: '',
-      plantId: ''
+      batchId: 0,
+      plantId: 0
     },
     enableReinitialize: false,
     maxAccess: access,
@@ -143,7 +143,7 @@ export default function BatchPostForm({ access }) {
                 secondValueShow='batchName'
                 form={formik}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('batchId', newValue?.recordId || '')
+                  formik.setFieldValue('batchId', newValue?.recordId || 0)
                   formik.setFieldValue('batchRef', newValue?.reference || '')
                   formik.setFieldValue('batchName', newValue?.name || '')
                 }}
