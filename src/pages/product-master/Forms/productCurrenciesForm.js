@@ -26,12 +26,12 @@ const ProductCurrenciesForm = ({ store, setStore, labels, editMode, maxAccess })
         .array()
         .of(
           yup.object().shape({
-            countryId: yup.string().required('currency  is required'),
-            countryId: yup.string().required('Country  is required'),
-            dispersalType: yup.string().required('Dispersal Type  is required')
+            countryId: yup.string().required(),
+            countryId: yup.string().required(),
+            dispersalType: yup.string().required()
           })
         )
-        .required('Operations array is required')
+        .required()
     }),
     initialValues: {
       currencies: [
@@ -84,20 +84,20 @@ const ProductCurrenciesForm = ({ store, setStore, labels, editMode, maxAccess })
       label: labels.country,
       name: 'countryId',
       props: {
-        endpointId: SystemRepository.Country.qry,
-        valueField: 'recordId',
-        displayField: 'reference',
+        store: countries,
+        valueField: 'countryId',
+        displayField: 'countryRef',
+        displayFieldWidth: 2,
         mapping: [
-          { from: 'name', to: 'countryName' },
-          { from: 'reference', to: 'countryRef' },
-          { from: 'recordId', to: 'countryId' }
+          { from: 'countryId', to: 'countryId' },
+          { from: 'countryName', to: 'countryName' },
+          ,
+          { from: 'countryRef', to: 'countryRef' }
         ],
         columnsInDropDown: [
-          { key: 'reference', value: 'Reference' },
-          { key: 'name', value: 'Name' },
-          { key: 'flName', value: 'FlName' }
-        ],
-        displayFieldWidth: 2
+          { key: 'countryRef', value: 'Reference' },
+          { key: 'countryName', value: 'Name' }
+        ]
       }
     },
     {

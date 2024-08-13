@@ -104,20 +104,19 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
       label: labels.country,
       name: 'countryId',
       props: {
-        endpointId: SystemRepository.Country.qry,
-        valueField: 'recordId',
-        displayField: 'reference',
+        store: countries,
+        valueField: 'countryId',
+        displayField: 'countryRef',
+        displayFieldWidth: 4,
         mapping: [
-          { from: 'name', to: 'countryName' },
-          { from: 'reference', to: 'countryRef' },
-          { from: 'recordId', to: 'countryId' }
+          { from: 'countryId', to: 'countryId' },
+          { from: 'countryName', to: 'countryName' },
+          { from: 'countryRef', to: 'countryRef' }
         ],
         columnsInDropDown: [
-          { key: 'reference', value: 'Reference' },
-          { key: 'name', value: 'Name' },
-          { key: 'flName', value: 'FlName' }
-        ],
-        displayFieldWidth: 2
+          { key: 'countryRef', value: 'Reference' },
+          { key: 'countryName', value: 'Name' }
+        ]
       },
 
       async onChange({ row: { update, oldRow, newRow } }) {
@@ -165,20 +164,19 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
       label: labels.currency,
       name: 'currencyId',
       props: {
-        endpointId: SystemRepository.Currency.qry,
-        valueField: 'recordId',
-        displayField: 'reference',
+        store: filters,
+        valueField: 'currencyId',
+        displayField: 'currencyRef',
+        displayFieldWidth: 4,
         mapping: [
-          { from: 'recordId', to: 'currencyId' },
-          { from: 'reference', to: 'currencyRef' },
-          { from: 'name', to: 'currencyName' }
+          { from: 'currencyId', to: 'currencyId' },
+          { from: 'currencyName', to: 'currencyName' },
+          { from: 'currencyRef', to: 'currencyRef' }
         ],
         columnsInDropDown: [
-          { key: 'reference', value: 'Reference' },
-          { key: 'name', value: 'Name' },
-          { key: 'flName', value: 'FlName' }
-        ],
-        displayFieldWidth: 2
+          { key: 'currencyRef', value: 'Reference' },
+          { key: 'currencyName', value: 'Name' }
+        ]
       }
     },
     {
