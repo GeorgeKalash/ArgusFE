@@ -26,7 +26,7 @@ const FiPaymentVouchers = () => {
 
     const response = await getRequest({
       extension: FinancialRepository.PaymentVouchers.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=`
     })
 
     return { ...response, _startAt: _startAt }
@@ -50,10 +50,10 @@ const FiPaymentVouchers = () => {
 
   const columns = [
     {
-        field: 'reference',
-        headerName: _labels.reference,
-        flex: 1
-    },
+      field: 'reference',
+      headerName: _labels.reference,
+      flex: 1
+    }
   ]
 
   const add = () => {
@@ -107,7 +107,6 @@ const FiPaymentVouchers = () => {
         }
       }
     } catch (error) {}
-    
   }
 
   const del = async obj => {

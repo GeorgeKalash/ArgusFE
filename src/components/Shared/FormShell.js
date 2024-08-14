@@ -167,7 +167,8 @@ export default function FormShell({
             stack({
               Component: FinancialTransaction,
               props: {
-                formValues: form.values
+                formValues: form.values,
+                functionId
               },
               width: 1000,
               height: 620,
