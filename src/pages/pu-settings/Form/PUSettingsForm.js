@@ -14,6 +14,7 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { useForm } from 'src/hooks/form'
 import FormShell from 'src/components/Shared/FormShell'
 import { ControlContext } from 'src/providers/ControlContext'
+import toast from 'react-hot-toast'
 
 const PUSettingsForm = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
