@@ -1,4 +1,4 @@
-import { useContext } from 'react'
+import { useContext, useEffect } from 'react'
 import { Grid } from '@mui/material'
 import * as yup from 'yup'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -57,7 +57,7 @@ const PUSettingsForm = () => {
         })
 
         const response = await postRequest({
-          extension: SystemRepository.PUSettings.set2,
+          extension: SystemRepository.Defaults.set,
           record: JSON.stringify({ sysDefaults: data })
         })
 
@@ -67,6 +67,27 @@ const PUSettingsForm = () => {
       } catch (error) {}
     }
   })
+
+  const getData = async () => {
+    try {
+      const response = await getRequest({
+        extension: SystemRepository.Defaults.qry,
+        parameters: `_filter=`
+      })
+      const myObject = {}
+      response.list.forEach(obj => {
+        if (arrayAllow.includes(obj.key)) {
+          myObject[obj.key] = obj.key ? parseInt(obj.value) : null
+          formik.setFieldValue(obj.key, parseInt(obj.value))
+        }
+      })
+
+    } catch (error) {}
+  }
+  
+  useEffect(() => {
+    getData()
+  }, [access])
 
   return (
     <FormShell form={formik} isSaved={true} editMode={false} isInfo={false} isCleared={false}>
