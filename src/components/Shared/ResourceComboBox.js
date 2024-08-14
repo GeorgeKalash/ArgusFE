@@ -28,16 +28,14 @@ export default function ResourceComboBox({
 
   const apiUrl = endpointId || datasetId
 
-  console.log()
-
   useEffect(() => {
-    fetchData()
+    if (!cacheStore[apiUrl]) fetchData()
   }, [parameters])
 
   const fetchData = () => {
-    if (parameters && !cacheStore[apiUrl] && !data) {
+    if (parameters && !data && (datasetId || endpointId)) {
       setIsLoading(true)
-      if (datasetId)
+      if (datasetId) {
         getAllKvsByDataset({
           _dataset: datasetId,
           callback: list => {
@@ -48,23 +46,24 @@ export default function ResourceComboBox({
             }
           }
         })
-      setIsLoading(false)
-    } else
-      endpointId &&
-        getRequest({
-          extension: endpointId,
-          parameters,
-          disableLoading: true
-        })
-          .then(res => {
-            setIsLoading(false)
-            if (dataGrid) updateStore(endpointId, res.list)
-            else setStore(res.list)
+        setIsLoading(false)
+      } else
+        endpointId &&
+          getRequest({
+            extension: endpointId,
+            parameters,
+            disableLoading: true
           })
-          .catch(error => {})
+            .then(res => {
+              setIsLoading(false)
+              if (dataGrid) updateStore(endpointId, res.list)
+              else setStore(res.list)
+            })
+            .catch(error => {})
+    }
   }
 
-  const filteredStore = data ? data : cacheStore?.[apiUrl]?.filter?.(filter)
+  const filteredStore = data ? data : dataGrid ? cacheStore[apiUrl]?.filter?.(filter) : store?.filter?.(filter)
 
   const _value =
     (typeof values[name] === 'object'
