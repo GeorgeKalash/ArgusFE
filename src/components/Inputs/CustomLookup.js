@@ -85,6 +85,7 @@ const CustomLookup = ({
 
             return typeof option === 'object' ? `${option[valueField] ? option[valueField] : ''}` : option
           }}
+          
           // isOptionEqualToValue={(option, value) =>
           //   value && !Array.isArray(valueField)  ? option[valueField] === value[valueField] : ''
           // }

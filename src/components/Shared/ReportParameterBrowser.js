@@ -291,6 +291,7 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
     validateOnChange: true,
     onSubmit: values => {
       setRpbParams([])
+      
       const processedArray = values?.parameters
         ?.filter((item, index) => item?.fieldId && item?.value != null)
         ?.reduce((acc, item) => {
