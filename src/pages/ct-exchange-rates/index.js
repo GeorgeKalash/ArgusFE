@@ -307,31 +307,24 @@ const CTExchangeRates = () => {
     })
   }
 
-  const emptyExchangeMapsRowValues = async form => {
+  const emptyExchangeMapsRowValues = async (form, RateTypeId) => {
     const data = {
       currencyId: formik.values.currencyId,
-      rateTypeId: form === 'puFormik' ? formik.values.puRateTypeId : formik.values.saRateTypeId,
+      rateTypeId: RateTypeId,
       raCurrencyId: formik.values.raCurrencyId,
       exchangeMaps: []
     }
     await postRequest({
       extension: CurrencyTradingSettingsRepository.ExchangeMap.set2,
-      record: JSON.stringify(data)``
+      record: JSON.stringify(data)
     })
       .then(res => {
         if (res) {
-          getExchangeRates(
-            formik.values.currencyId,
-            form === 'puFormik' ? formik.values.puRateTypeId : formik.values.saRateTypeId,
-            formik.values.raCurrencyId,
-            form
-          )
+          getExchangeRates(formik.values.currencyId, RateTypeId, formik.values.raCurrencyId, form)
           toast.success(platformLabels.Saved)
         }
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch(error => {})
   }
 
   return (
@@ -347,7 +340,6 @@ const CTExchangeRates = () => {
                       endpointId={SystemRepository.Currency.qry}
                       name='currencyId'
                       label={labels.currency}
-                      refresh={true}
                       valueField='recordId'
                       displayField={['reference', 'name']}
                       columnsInDropDown={[
@@ -367,7 +359,6 @@ const CTExchangeRates = () => {
                     <ResourceComboBox
                       name='rateAgainst'
                       label={labels.rateAgainst}
-                      refresh={true}
                       datasetId={DataSets.MC_RATE_AGAINST}
                       values={formik.values}
                       valueField='key'
@@ -389,7 +380,6 @@ const CTExchangeRates = () => {
                       endpointId={SystemRepository.Currency.qry}
                       name='raCurrencyId'
                       label={labels.currency}
-                      refresh={true}
                       valueField='recordId'
                       displayField={['reference', 'name']}
                       columnsInDropDown={[
@@ -421,7 +411,6 @@ const CTExchangeRates = () => {
                               endpointId={MultiCurrencyRepository.RateType.qry}
                               name='puRateTypeId'
                               label={labels.rateType}
-                              refresh={true}
                               valueField='recordId'
                               displayField={['reference', 'name']}
                               columnsInDropDown={[
@@ -456,7 +445,7 @@ const CTExchangeRates = () => {
                           <Grid item xs={2}>
                             <div className='button-container'>
                               <Button
-                                onClick={() => emptyExchangeMapsRowValues(puFormik)}
+                                onClick={() => emptyExchangeMapsRowValues(puFormik, formik.values.puRateTypeId)}
                                 variant='contained'
                                 sx={{
                                   mr: 1,
@@ -511,7 +500,6 @@ const CTExchangeRates = () => {
                               endpointId={MultiCurrencyRepository.RateType.qry}
                               name='saRateTypeId'
                               label={labels.rateType}
-                              refresh={true}
                               valueField='recordId'
                               displayField={['reference', 'name']}
                               columnsInDropDown={[
@@ -546,7 +534,7 @@ const CTExchangeRates = () => {
                           <Grid item xs={2}>
                             <div className='button-container'>
                               <Button
-                                onClick={() => emptyExchangeMapsRowValues(saFormik)}
+                                onClick={() => emptyExchangeMapsRowValues(saFormik, formik.values.saRateTypeId)}
                                 variant='contained'
                                 sx={{
                                   mr: 1,

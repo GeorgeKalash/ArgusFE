@@ -23,7 +23,7 @@ const CustomComboBox = ({
   required = false,
   autoFocus = false,
   disabled = false,
-  readOnly = false,
+  readOnly = true,
   neverPopulate = false,
   displayFieldWidth = 1,
   sx,
