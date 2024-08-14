@@ -30,7 +30,8 @@ export default function GeographicRegionsForm({ labels, maxAccess, recordId }) {
     validateOnChange: true,
     validationSchema: yup.object({
       reference: yup.string().required(),
-      name: yup.string().required()
+      name: yup.string().required(),
+      flName: yup.string().required()
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
@@ -104,6 +105,7 @@ export default function GeographicRegionsForm({ labels, maxAccess, recordId }) {
             <Grid item xs={12}>
               <CustomTextField
                 name='flName'
+                required
                 label={labels.flName}
                 value={formik.values.flName}
                 maxAccess={maxAccess}
