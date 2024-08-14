@@ -320,6 +320,8 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
       <Grow>
         <DataGrid
           onChange={value => formik2.setFieldValue('generalAccount', value)}
+          allowDelete={!!isRaw}
+          allowAddNewLine={!!isRaw}
           value={formik2.values.generalAccount}
           error={formik2.errors.generalAccount}
           name='glTransactions'
@@ -336,9 +338,8 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
                 parameters: '_type=',
                 valueField: 'recordId',
                 displayField: 'accountRef',
-                props: {
-                  readOnly: !isRaw
-                },
+                readOnly: !isRaw,
+
                 columnsInDropDown: [
                   { key: 'accountRef', value: 'reference' },
                   { key: 'name', value: 'name' }
@@ -398,9 +399,7 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
                 valueField: 'recordId',
                 displayField: 'reference',
                 displayFieldWidth: 3,
-                props: {
-                  readOnly: !isRaw
-                },
+                readOnly: !isRaw,
                 columnsInDropDown: [
                   { key: 'reference', value: 'reference' },
                   { key: 'name', value: 'name' }
@@ -424,12 +423,11 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
               component: 'resourcelookup',
               label: _labels.costRef,
               name: 'costCenterRef',
-              props: {
-                readOnly: !isRaw
-              },
+
               props: {
                 endpointId: GeneralLedgerRepository.CostCenter.snapshot,
                 valueField: 'recordId',
+                readOnly: !isRaw,
                 displayField: 'reference',
                 displayFieldWidth: 3,
                 columnsInDropDown: [
@@ -531,6 +529,9 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
             {
               component: 'numberfield',
               label: _labels.exRate,
+              props: {
+                readOnly: !isRaw
+              },
               name: 'exRate',
               async onChange({ row: { update, oldRow, newRow } }) {
                 const updatedRateRow = getRate({
