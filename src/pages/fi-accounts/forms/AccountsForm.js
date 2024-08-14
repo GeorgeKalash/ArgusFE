@@ -5,7 +5,7 @@ import { useContext, useEffect } from 'react'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FormShell from 'src/components/Shared/FormShell'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useInvalidate } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { SaleRepository } from 'src/repositories/SaleRepository'
@@ -15,13 +15,15 @@ import { useForm } from 'src/hooks/form'
 import { MasterSource } from 'src/resources/MasterSource'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
-const AccountsForms = ({ labels, editMode, maxAccess, setStore, store }) => {
+const AccountsForms = ({ labels, maxAccess, setStore, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const { recordId } = store
 
   const invalidate = useInvalidate({
-    endpointId: FinancialRepository.Account.qry
+    endpointId: FinancialRepository.Account.page
   })
 
   const { formik } = useForm({
@@ -65,9 +67,9 @@ const AccountsForms = ({ labels, editMode, maxAccess, setStore, store }) => {
             recordId: res.recordId
           }))
           formik.setFieldValue('recordId', res.recordId)
-          toast.success('Record Added Successfully')
+          toast.success(platformLabels.Added)
           invalidate()
-        } else toast.success('Record Edited Successfully')
+        } else toast.success(platformLabels.Edited)
       })
       .catch(error => {})
   }
@@ -86,6 +88,8 @@ const AccountsForms = ({ labels, editMode, maxAccess, setStore, store }) => {
       formik.setValues(res.record)
     })
   }
+
+  const editMode = !!formik.values.recordId
 
   const actions = [
     {
@@ -138,8 +142,6 @@ const AccountsForms = ({ labels, editMode, maxAccess, setStore, store }) => {
                     }
                   }}
                   error={formik.touched.groupId && Boolean(formik.errors.groupId)}
-
-                  // helperText={formik.touched.groupId && formik.errors.groupId}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -153,8 +155,6 @@ const AccountsForms = ({ labels, editMode, maxAccess, setStore, store }) => {
                   onChange={formik.handleChange}
                   onClear={() => formik.setFieldValue('reference', '')}
                   error={formik.touched.reference && Boolean(formik.errors.reference)}
-
-                  // helperText={formik.touched.reference && formik.errors.reference}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -168,8 +168,6 @@ const AccountsForms = ({ labels, editMode, maxAccess, setStore, store }) => {
                   onChange={formik.handleChange}
                   onClear={() => formik.setFieldValue('name', '')}
                   error={formik.touched.name && Boolean(formik.errors.name)}
-
-                  // helperText={formik.touched.name && formik.errors.name}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -182,8 +180,6 @@ const AccountsForms = ({ labels, editMode, maxAccess, setStore, store }) => {
                   onChange={formik.handleChange}
                   onClear={() => formik.setFieldValue('keyWords', '')}
                   error={formik.touched.keyWords && Boolean(formik.errors.keyWords)}
-
-                  // helperText={formik.touched.keyWords && formik.errors.keyWords}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -196,8 +192,6 @@ const AccountsForms = ({ labels, editMode, maxAccess, setStore, store }) => {
                   onChange={formik.handleChange}
                   onClear={() => formik.setFieldValue('flName', '')}
                   error={formik.touched.flName && Boolean(formik.errors.flName)}
-
-                  // helperText={formik.touched.flName && formik.errors.flName}
                 />
               </Grid>
             </Grid>
@@ -252,8 +246,6 @@ const AccountsForms = ({ labels, editMode, maxAccess, setStore, store }) => {
                     }
                   }}
                   error={formik.touched.szId && Boolean(formik.errors.szId)}
-
-                  // helperText={formik.touched.szId && formik.errors.szId}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -273,8 +265,6 @@ const AccountsForms = ({ labels, editMode, maxAccess, setStore, store }) => {
                     }
                   }}
                   error={formik.touched.spId && Boolean(formik.errors.spId)}
-
-                  // helperText={formik.touched.spId && formik.errors.spId}
                 />
               </Grid>
               <Grid item xs={12}>

@@ -22,6 +22,8 @@ import { useFormik } from 'formik'
 import { AuthContext } from 'src/providers/AuthContext'
 import { formatDateToApi, formatDateToApiFunction } from 'src/lib/date-helper'
 import { getRate, DIRTYFIELD_AMOUNT, DIRTYFIELD_BASE_AMOUNT, DIRTYFIELD_RATE } from 'src/utils/RateCalculator'
+import { Grow } from './Layouts/Grow'
+import { Fixed } from './Layouts/Fixed'
 
 const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -65,6 +67,7 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
         currencyId: '',
         sign: '',
         signName: '',
+        sourceReference: '',
         notes: '',
         functionId: functionId,
         exRate: '',
@@ -146,16 +149,17 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
         return isNaN(number) ? 0 : number
       }
 
-      const baseCredit = generalAccountData.reduce((acc, curr) => {
+      const baseCreditAmount = generalAccountData.reduce((acc, curr) => {
         return curr.sign == '2' ? acc + parseNumber(curr.baseAmount) : acc
       }, 0)
+      const baseCredit = parseFloat(baseCreditAmount).toFixed(2)
 
-      const baseDebit = generalAccountData.reduce((acc, curr) => {
+      const baseDebitAmount = generalAccountData.reduce((acc, curr) => {
         return curr.sign == '1' ? acc + parseNumber(curr.baseAmount) : acc
       }, 0)
+      const baseDebit = parseFloat(baseDebitAmount).toFixed(2)
 
-      const baseBalance = baseDebit - baseCredit
-
+      const baseBalance = parseFloat((baseDebit - baseCredit).toFixed(2))
       setBaseGridData({
         base: 'Base',
         credit: baseCredit,
@@ -217,12 +221,12 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
         costCenterId: row.costCenterId,
         costCenterRef: row.costCenterRef,
         costCenterName: row.costCenterName,
-
         currencyRef: row.currencyRef,
         currencyId: row.currencyId,
 
         sign: row.sign,
         signName: row.signName,
+        sourceReference: row.sourceReference,
         notes: row.notes,
         exRate: row.exRate,
         rateCalcMethod: row.rateCalcMethod,
@@ -295,22 +299,23 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
       disabledSubmit={baseGridData.balance !== 0}
       infoVisible={false}
     >
-        {formik && (
-          <Grid container spacing={2} padding={1}>
-            <Grid item xs={12} sm={6}>
-              <CustomTextField name='reference' label={_labels.reference} value={formik.reference} readOnly={true} />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <CustomDatePicker name='date' label={_labels.date} value={formik.date} readOnly={true} />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <CustomTextField name='currency' label={_labels.currency} value={formik.currencyRef} readOnly={true} />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <CustomTextField name='notes' label={_labels.notes} value={formik.notes} readOnly={true} />
-            </Grid>
+      {formik && (
+        <Grid container spacing={2} padding={1}>
+          <Grid item xs={12} sm={6}>
+            <CustomTextField name='reference' label={_labels.reference} value={formik.reference} readOnly={true} />
           </Grid>
-        )}
+          <Grid item xs={12} sm={6}>
+            <CustomDatePicker name='date' label={_labels.date} value={formik.date} readOnly={true} />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <CustomTextField name='currency' label={_labels.currency} value={formik.currencyRef} readOnly={true} />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <CustomTextField name='notes' label={_labels.notes} value={formik.notes} readOnly={true} />
+          </Grid>
+        </Grid>
+      )}
+      <Grow>
         <DataGrid
           onChange={value => formik2.setFieldValue('generalAccount', value)}
           value={formik2.values.generalAccount}
@@ -486,6 +491,14 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
             },
             {
               component: 'textfield',
+              label: _labels.sourceReference,
+              name: 'sourceReference',
+              props: {
+                maxLength: 20
+              }
+            },
+            {
+              component: 'textfield',
               label: _labels.notes,
               name: 'notes'
             },
@@ -548,31 +561,30 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
             }
           ]}
         />
-
-        <Grid container spacing={2}>
-          <Grid item xs={6}>
+      </Grow>
+      <Fixed>
+        <Grid container sx={{ flex: 1 }}>
+          <Grid item xs={6} height={150} sx={{ display: 'flex', flex: 1 }}>
             <Table
               gridData={{ count: 1, list: [baseGridData] }}
               maxAccess={access}
-              height={150}
               columns={[
-                { field: 'base', headerName: _labels.base, flex: 1.5 },
-                { field: 'credit', headerName: _labels.credit, align: 'right', flex: 1.5 },
-                { field: 'debit', headerName: _labels.debit, align: 'right', flex: 1.5 },
-                { field: 'balance', headerName: _labels.balance, align: 'right', flex: 1.5 }
+                { field: 'base', headerName: _labels.base, flex: 1 },
+                { field: 'credit', headerName: _labels.credit, type: 'number', flex: 1 },
+                { field: 'debit', headerName: _labels.debit, type: 'number', flex: 1 },
+                { field: 'balance', headerName: _labels.balance, type: 'number', flex: 1 }
               ]}
               rowId={['seqNo']}
               pagination={false}
             />
           </Grid>
-          <Grid item xs={6}>
+          <Grid item xs={6} height={150} sx={{ display: 'flex', flex: 1 }}>
             <Table
-              height={150}
               columns={[
-                { field: 'currency', headerName: 'Currency', flex: 1.5 },
-                { field: 'debit', headerName: 'Debit', align: 'right', flex: 1.5 },
-                { field: 'credit', headerName: 'Credit', align: 'right', flex: 1.5 },
-                { field: 'balance', headerName: 'Balance', align: 'right', flex: 1.5 }
+                { field: 'currency', headerName: 'Currency', flex: 1 },
+                { field: 'debit', headerName: 'Debit', type: 'number', flex: 1 },
+                { field: 'credit', headerName: 'Credit', type: 'number', flex: 1 },
+                { field: 'balance', headerName: 'Balance', type: 'number', flex: 1 }
               ]}
               gridData={{ count: currencyGridData.length, list: currencyGridData }}
               rowId={['recordId']}
@@ -582,6 +594,7 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
             />
           </Grid>
         </Grid>
+      </Fixed>
     </FormShell>
   )
 }

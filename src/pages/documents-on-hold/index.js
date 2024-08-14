@@ -95,10 +95,15 @@ const DocumentsOnHold = () => {
       flex: 1
     },
     {
+      field: 'strategyName',
+      headerName: _labels.strategy,
+      flex: 1
+    },
+    {
       field: 'date',
       headerName: _labels.date,
       flex: 1,
-      valueGetter: ({ row }) => formatDateDefault(row?.date)
+      type: 'date'
     }
   ]
 

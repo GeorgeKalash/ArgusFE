@@ -29,7 +29,7 @@ export default function CurrencyTrading() {
         recordId: recordId || null
       },
       width: 1000,
-      height: 780,
+      height: 700,
       title: labels.receiptVoucher
     })
   }
@@ -97,10 +97,10 @@ export default function CurrencyTrading() {
 
   const columns = [
     {
-      field: 'Date',
+      field: 'date',
       headerName: labels.date,
       flex: 1,
-      valueGetter: ({ row }) => formatDateDefault(row?.date)
+      type: 'date'
     },
     {
       field: 'reference',

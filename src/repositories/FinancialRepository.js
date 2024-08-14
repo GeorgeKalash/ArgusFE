@@ -85,6 +85,33 @@ export const FinancialRepository = {
     set: service + 'setOBA',
     del: service + 'delOBA'
   },
+  FiMemo: {
+    qry: service + 'qryMEM',
+    get: service + 'getMEM',
+    del: service + 'delMEM',
+    post: service + 'postMEM',
+    cancel: service + 'cancelMEM',
+    snapshot: service + 'snapshotMEM'
+  },
+  CreditNote: {
+    set: service + 'setCN',
+    del: service + 'delCN'
+  },
+  DebitNote: {
+    set: service + 'setDN',
+    del: service + 'delDN'
+  },
+  ServiceBillReceived: {
+    set: service + 'setSB',
+    del: service + 'delSB'
+  },
+  ServiceInvoice: {
+    set: service + 'setSI',
+    del: service + 'delSI'
+  },
+  FinancialTransaction: {
+    qry: service + 'qryTRX'
+  },
   ReceiptVouchers: {
     qry: service + 'qryRV',
     get: service + 'getRV',
@@ -121,5 +148,11 @@ export const FinancialRepository = {
     del: service + 'delPV',
     post: service + 'postPV',
     cancel: service + 'cancelPV',
+  },
+  PaymentVoucherExpenses: {
+    qry: service + 'qryPVX',
+  },
+  PaymentVoucherCostCenters: {
+    qry: service + 'qryPVC',
   }
 }

@@ -67,7 +67,7 @@ const OutwardsModification = () => {
       field: 'date',
       headerName: _labels.date,
       flex: 1,
-      valueGetter: ({ row }) => formatDateDefault(row?.date)
+      type: 'date'
     },
     {
       field: 'rsName',
@@ -94,8 +94,8 @@ const OutwardsModification = () => {
         recordId,
         access
       },
-      width: 1260,
-      height: 720,
+      width: 1200,
+      height: 670,
       title: _labels.outwardsModification
     })
   }

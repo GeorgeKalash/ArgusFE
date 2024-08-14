@@ -31,12 +31,28 @@ const Currencies = () => {
     labels: _labels,
     refetch,
     invalidate,
+    filterBy,
+    clearFilter,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: SystemRepository.Currency.qry,
-    datasetId: ResourceIds.Currencies
+    datasetId: ResourceIds.Currencies,
+
+    filter: {
+      endpointId: SystemRepository.Currency.snapshot,
+      filterFn: fetchWithSearch
+    }
   })
+
+  async function fetchWithSearch({ filters, pagination }) {
+    return filters.qry
+      ? await getRequest({
+          extension: SystemRepository.Currency.snapshot,
+          parameters: `_filter=${filters.qry}`
+        })
+      : await fetchGridData(pagination)
+  }
 
   const columns = [
     {
@@ -49,7 +65,6 @@ const Currencies = () => {
       headerName: _labels.name,
       flex: 1
     },
-    ,
     {
       field: 'flName',
       headerName: _labels.foreignLanguage,
@@ -98,7 +113,17 @@ const Currencies = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <GridToolbar
+          onAdd={add}
+          maxAccess={access}
+          onSearch={value => {
+            filterBy('qry', value)
+          }}
+          onSearchClear={() => {
+            clearFilter('qry')
+          }}
+          inputSearch={true}
+        />
       </Fixed>
       <Grow>
         <Table

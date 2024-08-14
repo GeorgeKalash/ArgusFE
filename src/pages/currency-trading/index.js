@@ -34,6 +34,7 @@ export default function CurrencyTrading() {
     query: { data },
     filterBy,
     clearFilter,
+    refetch,
     labels: labels,
     access
   } = useResourceQuery({
@@ -80,7 +81,7 @@ export default function CurrencyTrading() {
                 field: 'createdDate',
                 headerName: labels.date,
                 flex: 1,
-                valueGetter: ({ row }) => formatDateDefault(row?.date)
+                type: 'date'
               },
               {
                 field: 'clientName',
@@ -116,6 +117,7 @@ export default function CurrencyTrading() {
             isLoading={false}
             pageSize={50}
             paginationType='client'
+            refetch={refetch}
             maxAccess={access}
           />
         </Grow>

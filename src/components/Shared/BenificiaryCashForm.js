@@ -38,6 +38,7 @@ const BenificiaryCashForm = ({
   setResetForm,
   onChange,
   setValidSubmit,
+  onSuccess,
   submitMainForm = true
 }) => {
   const [maxAccess, setMaxAccess] = useState({ record: [] })
@@ -145,10 +146,9 @@ const BenificiaryCashForm = ({
           extension: RemittanceOutwardsRepository.BeneficiaryCash.set,
           record: JSON.stringify(data)
         })
-        if (res.recordId) {
-          toast.success('Record Updated Successfully')
-        }
 
+        toast.success('Record Updated Successfully')
+        if (onSuccess) onSuccess(res.recordId, values.name)
         setEditMode(true)
       }
     }
@@ -405,8 +405,10 @@ const BenificiaryCashForm = ({
                   displayField={['reference', 'name']}
                   columnsInDropDown={[
                     { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
+                    { key: 'name', value: 'Name' },
+                    { key: 'flName', value: 'Foreign Language Name' }
                   ]}
+                  displayFieldWidth={0.8}
                   readOnly={(formik.values.countryId && editMode) || countryId || editMode}
                   values={formik.values}
                   onChange={(event, newValue) => {
@@ -599,8 +601,10 @@ const BenificiaryCashForm = ({
                   displayField={['reference', 'name']}
                   columnsInDropDown={[
                     { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
+                    { key: 'name', value: 'Name' },
+                    { key: 'flName', value: 'Foreign Language Name' }
                   ]}
+                  displayFieldWidth={0.8}
                   values={formik.values}
                   onChange={(event, newValue) => {
                     formik.setFieldValue('cobId', newValue ? newValue.recordId : '')
@@ -662,8 +666,10 @@ const BenificiaryCashForm = ({
                   displayField={['reference', 'name']}
                   columnsInDropDown={[
                     { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
+                    { key: 'name', value: 'Name' },
+                    { key: 'flName', value: 'Foreign Language Name' }
                   ]}
+                  displayFieldWidth={0.8}
                   values={formik.values}
                   required
                   readOnly={(formik.values.currencyId && editMode) || currencyId || editMode}
@@ -715,7 +721,7 @@ const BenificiaryCashForm = ({
                     { key: 'name', value: 'Name' },
                     { key: 'flName', value: 'Foreign Language Name' }
                   ]}
-                  displayFieldWidth={1.25}
+                  displayFieldWidth={0.8}
                   values={formik.values}
                   onChange={(event, newValue) => {
                     if (newValue) {

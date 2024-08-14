@@ -89,14 +89,14 @@ const ClientsList = () => {
       headerName: labels.createdDate,
       flex: 1,
       editable: false,
-      valueGetter: ({ row }) => formatDateDefault(row?.createdDate)
+      type: 'date'
     },
     {
       field: 'expiryDate',
       headerName: labels.expiryDate,
       flex: 1,
       editable: false,
-      valueGetter: ({ row }) => formatDateDefault(row?.expiryDate)
+      type: 'date'
     }
   ]
 
@@ -157,17 +157,17 @@ const ClientsList = () => {
     <VertLayout>
       <Fixed>
         <GridToolbar
-            onAdd={addClient}
-            maxAccess={access}
-            onSearch={value => {
-              filterBy('qry', value)
-            }}
-            onSearchClear={() => {
-              clearFilter('qry')
-            }}
-            labels={labels}
-            inputSearch={true}
-          />
+          onAdd={addClient}
+          maxAccess={access}
+          onSearch={value => {
+            filterBy('qry', value)
+          }}
+          onSearchClear={() => {
+            clearFilter('qry')
+          }}
+          labels={labels}
+          inputSearch={true}
+        />
       </Fixed>
       <Grow>
         <Table

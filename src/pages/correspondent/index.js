@@ -25,13 +25,29 @@ const Correspondent = () => {
     labels: _labels,
     paginationParameters,
     invalidate,
+    filterBy,
+    clearFilter,
     refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: RemittanceSettingsRepository.Correspondent.qry,
-    datasetId: ResourceIds.Correspondent
+    datasetId: ResourceIds.Correspondent,
+
+    filter: {
+      endpointId: RemittanceSettingsRepository.Correspondent.snapshot,
+      filterFn: fetchWithSearch
+    }
   })
+
+  async function fetchWithSearch({ filters, pagination }) {
+    return filters.qry
+      ? await getRequest({
+          extension: RemittanceSettingsRepository.Correspondent.snapshot,
+          parameters: `_filter=${filters.qry}`
+        })
+      : await fetchGridData(pagination)
+  }
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -106,7 +122,7 @@ const Correspondent = () => {
         recordId: recordId ? recordId : null
       },
       width: 900,
-      height: 600,
+      height: 660,
       title: _labels.correspondent
     })
   }
@@ -118,7 +134,17 @@ const Correspondent = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={addCorrespondent} maxAccess={access} />
+        <GridToolbar
+          onAdd={addCorrespondent}
+          maxAccess={access}
+          onSearch={value => {
+            filterBy('qry', value)
+          }}
+          onSearchClear={() => {
+            clearFilter('qry')
+          }}
+          inputSearch={true}
+        />
       </Fixed>
       <Grow>
         <Table

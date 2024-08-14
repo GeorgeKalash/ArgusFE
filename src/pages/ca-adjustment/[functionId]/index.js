@@ -15,9 +15,11 @@ import { formatDateDefault } from 'src/lib/date-helper'
 import { getFormattedNumber } from 'src/lib/numberField-helper'
 import { useRouter } from 'next/router'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const CAadjustment = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const { stack } = useWindow()
 
@@ -76,13 +78,13 @@ const CAadjustment = () => {
       field: 'date',
       headerName: _labels.date,
       flex: 1,
-      valueGetter: ({ row }) => formatDateDefault(row?.date)
+      type: 'date'
     },
     {
       field: 'amount',
       headerName: _labels.amount,
       flex: 1,
-      valueGetter: ({ row }) => getFormattedNumber(row?.amount)
+      type: 'number'
     },
     {
       field: 'currencyRef',
@@ -135,7 +137,7 @@ const CAadjustment = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
   }
 
   return (
