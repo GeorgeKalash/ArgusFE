@@ -56,7 +56,6 @@ const Financial = () => {
     datasetId: ResourceIds.CreditNote,
 
     filter: {
-      //endpointId: FinancialRepository.FiMemo.snapshot,
       filterFn: fetchWithSearch,
       default: { functionId }
     }

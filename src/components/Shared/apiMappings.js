@@ -618,8 +618,6 @@ export const apiMappings = {
     type: LOOKUP,
     endpoint: SystemRepository.Address.snapshot,
     firstField: ['name', 'city', 'street1', 'email1', 'phone'],
-    
-    // secondField: 'city',
     secondDisplayField: false,
     valueOnSelection: 'recordId',
     columnsInDropDown: [

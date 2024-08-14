@@ -20,7 +20,6 @@ export const FixedAssetsRepository = {
     del: service + 'delLOC'
   },
   Assets: {
-    //MDAssets
     qry: service + 'qryAST',
     get: service + 'getAST',
     set: service + 'setAST',
