@@ -24,6 +24,7 @@ import { formatDateToApi, formatDateToApiFunction } from 'src/lib/date-helper'
 import { getRate, DIRTYFIELD_AMOUNT, DIRTYFIELD_BASE_AMOUNT, DIRTYFIELD_RATE } from 'src/utils/RateCalculator'
 import { Grow } from './Layouts/Grow'
 import { Fixed } from './Layouts/Fixed'
+import { VertLayout } from './Layouts/VertLayout'
 
 const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -302,20 +303,24 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
       infoVisible={false}
     >
       {formik && (
-        <Grid container spacing={2} padding={1}>
-          <Grid item xs={12} sm={6}>
-            <CustomTextField name='reference' label={_labels.reference} value={formik.reference} readOnly={true} />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <CustomDatePicker name='date' label={_labels.date} value={formik.date} readOnly={true} />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <CustomTextField name='currency' label={_labels.currency} value={formik.currencyRef} readOnly={true} />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <CustomTextField name='notes' label={_labels.notes} value={formik.notes} readOnly={true} />
-          </Grid>
-        </Grid>
+        <VertLayout>
+          <Fixed>
+            <Grid container spacing={2} padding={1}>
+              <Grid item xs={12} sm={6}>
+                <CustomTextField name='reference' label={_labels.reference} value={formik.reference} readOnly={true} />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <CustomDatePicker name='date' label={_labels.date} value={formik.date} readOnly={true} />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <CustomTextField name='currency' label={_labels.currency} value={formik.currencyRef} readOnly={true} />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <CustomTextField name='notes' label={_labels.notes} value={formik.notes} readOnly={true} />
+              </Grid>
+            </Grid>
+          </Fixed>
+        </VertLayout>
       )}
       <Grow>
         <DataGrid
