@@ -75,10 +75,8 @@ const PUSettingsForm = () => {
           extension: SystemRepository.Defaults.qry,
           parameters: `_filter=`
         })
-        const myObject = {}
         response.list.forEach(obj => {
           if (arrayAllow.includes(obj.key)) {
-            myObject[obj.key] = obj.key ? parseInt(obj.value) : null
             formik.setFieldValue(obj.key, parseInt(obj.value))
           }
         })
