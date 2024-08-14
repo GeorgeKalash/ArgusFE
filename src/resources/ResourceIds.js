@@ -194,6 +194,7 @@ export const ResourceIds = {
   SystemFunctionIntegrations: 30105,
   PUPaymentTerms: 50106,
   PuVendors: 50201,
+  PUSettings: 50107,
   Module: 20128, //filter
   NotificationGroups: 23103,
   FinancialStatements: 30106,
