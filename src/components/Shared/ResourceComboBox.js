@@ -12,6 +12,7 @@ export default function ResourceComboBox({
   parameters = '_filter=',
   filter = () => true,
   value,
+  refresh,
   ...rest
 }) {
   const { store: data } = rest
@@ -22,6 +23,10 @@ export default function ResourceComboBox({
   const [store, setStore] = useState([])
 
   useEffect(() => {
+    fetchData()
+  }, [parameters])
+
+  const fetchData = () => {
     if (parameters)
       if (datasetId)
         getAllKvsByDataset({
@@ -38,7 +43,7 @@ export default function ResourceComboBox({
               setStore(res.list)
             })
             .catch(error => {})
-  }, [parameters])
+  }
 
   const filteredStore = data ? data : store.filter(filter)
 
@@ -49,5 +54,7 @@ export default function ResourceComboBox({
           ? filteredStore.find(item => item[valueField] === values[name]?.toString())
           : filteredStore.find(item => item[valueField] === (values[name] || values))) ?? '') || value
 
-  return <CustomComboBox {...{ ...rest, name, store: filteredStore, valueField, value: _value, name }} />
+  return (
+    <CustomComboBox {...{ ...rest, refresh, fetchData, name, store: filteredStore, valueField, value: _value, name }} />
+  )
 }

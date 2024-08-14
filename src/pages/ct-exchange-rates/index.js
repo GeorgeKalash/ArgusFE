@@ -347,6 +347,7 @@ const CTExchangeRates = () => {
                       endpointId={SystemRepository.Currency.qry}
                       name='currencyId'
                       label={labels.currency}
+                      refresh={true}
                       valueField='recordId'
                       displayField={['reference', 'name']}
                       columnsInDropDown={[
@@ -366,6 +367,7 @@ const CTExchangeRates = () => {
                     <ResourceComboBox
                       name='rateAgainst'
                       label={labels.rateAgainst}
+                      refresh={true}
                       datasetId={DataSets.MC_RATE_AGAINST}
                       values={formik.values}
                       valueField='key'
@@ -387,6 +389,7 @@ const CTExchangeRates = () => {
                       endpointId={SystemRepository.Currency.qry}
                       name='raCurrencyId'
                       label={labels.currency}
+                      refresh={true}
                       valueField='recordId'
                       displayField={['reference', 'name']}
                       columnsInDropDown={[
@@ -418,6 +421,7 @@ const CTExchangeRates = () => {
                               endpointId={MultiCurrencyRepository.RateType.qry}
                               name='puRateTypeId'
                               label={labels.rateType}
+                              refresh={true}
                               valueField='recordId'
                               displayField={['reference', 'name']}
                               columnsInDropDown={[
@@ -507,6 +511,7 @@ const CTExchangeRates = () => {
                               endpointId={MultiCurrencyRepository.RateType.qry}
                               name='saRateTypeId'
                               label={labels.rateType}
+                              refresh={true}
                               valueField='recordId'
                               displayField={['reference', 'name']}
                               columnsInDropDown={[
