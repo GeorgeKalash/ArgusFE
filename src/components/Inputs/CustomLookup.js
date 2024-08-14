@@ -74,8 +74,8 @@ const CustomLookup = ({
             }
           }}
           getOptionLabel={option => {
-            if (typeof displayField == 'object') {
-              const text = displayField
+            if (typeof valueField == 'object') {
+              const text = valueField
                 .map(header => option[header] && option[header]?.toString())
                 ?.filter(item => item)
                 ?.join(' ')
@@ -85,7 +85,9 @@ const CustomLookup = ({
 
             return typeof option === 'object' ? `${option[valueField] ? option[valueField] : ''}` : option
           }}
-          isOptionEqualToValue={(option, value) => (value ? option[valueField] === value[valueField] : '')}
+          // isOptionEqualToValue={(option, value) =>
+          //   value && !Array.isArray(valueField)  ? option[valueField] === value[valueField] : ''
+          // }
           onChange={(event, newValue) => onChange(name, newValue)}
           PopperComponent={PopperComponent}
           PaperComponent={({ children }) =>
