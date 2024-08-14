@@ -398,7 +398,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
             </Grid>
             <Grid item xs={4} sx={{ pl: 1, pt: 2 }}>
               <ResourceLookup
-                endpointId={RemittanceOutwardsRepository.Beneficiary.snapshot}
+                endpointId={RemittanceOutwardsRepository.Beneficiary.snapshot2}
                 parameters={{
                   _clientId: formik.values.clientId,
                   _dispersalType: formik.values.dispersalType,

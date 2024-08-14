@@ -9,6 +9,7 @@ import { useFormik } from 'formik'
 import { useWindow } from 'src/windows'
 import BenificiaryCashForm from 'src/components/Shared/BenificiaryCashForm'
 import BenificiaryBankForm from 'src/components/Shared/BenificiaryBankForm'
+import { Checkbox } from '@mui/material'
 
 const BeneficiaryWindow = ({ clientId }) => {
   const { stack } = useWindow()
@@ -72,6 +73,14 @@ const BeneficiaryWindow = ({ clientId }) => {
       field: 'dispersalTypeName',
       headerName: _labels.dispersalType,
       flex: 1
+    },
+    {
+      field: 'isInactive',
+      headerName: _labels.isInactive,
+      flex: 1,
+      renderCell: ({ row }) => {
+        return <Checkbox checked={row.isInactive} style={{ pointerEvents: 'none' }} />
+      }
     }
   ]
 

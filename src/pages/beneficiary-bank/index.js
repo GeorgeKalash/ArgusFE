@@ -113,6 +113,11 @@ const BeneficiaryBank = () => {
       field: 'isBlocked',
       headerName: _labels.isBlocked,
       flex: 1
+    },
+    {
+      field: 'isInactive',
+      headerName: _labels.isInactive,
+      flex: 1
     }
   ]
 
