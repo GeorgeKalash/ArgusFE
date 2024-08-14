@@ -625,7 +625,7 @@ export const apiMappings = {
   [ResourceIds.Address]: {
     type: LOOKUP,
     endpoint: SystemRepository.Address.snapshot,
-    firstField: ['name', 'city', 'email1'],
+    firstField: ['name', 'city','street1', 'email1','phone'],
     // secondField: 'city',
     secondDisplayField: false,
     valueOnSelection: 'recordId',
