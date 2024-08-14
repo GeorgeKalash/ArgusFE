@@ -68,7 +68,7 @@ const RPBGridToolbar = ({
   return (
     <GridToolbar
       onSearch={value => {
-        onSearch(value)
+        value != '' ? onSearch(value) : (setSearch(''), onClear())
       }}
       onSearchClear={() => {
         setSearch('')
