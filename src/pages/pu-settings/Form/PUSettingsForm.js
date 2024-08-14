@@ -67,27 +67,24 @@ const PUSettingsForm = () => {
       } catch (error) {}
     }
   })
-
-  const getData = async () => {
-    try {
-      const response = await getRequest({
-        extension: SystemRepository.Defaults.qry,
-        parameters: `_filter=`
-      })
-      const myObject = {}
-      response.list.forEach(obj => {
-        if (arrayAllow.includes(obj.key)) {
-          myObject[obj.key] = obj.key ? parseInt(obj.value) : null
-          formik.setFieldValue(obj.key, parseInt(obj.value))
-        }
-      })
-
-    } catch (error) {}
-  }
   
   useEffect(() => {
-    getData()
-  }, [access])
+    ;(async function () {
+      try {
+        const response = await getRequest({
+          extension: SystemRepository.Defaults.qry,
+          parameters: `_filter=`
+        })
+        const myObject = {}
+        response.list.forEach(obj => {
+          if (arrayAllow.includes(obj.key)) {
+            myObject[obj.key] = obj.key ? parseInt(obj.value) : null
+            formik.setFieldValue(obj.key, parseInt(obj.value))
+          }
+        })
+      } catch (error) {}
+    })()
+  }, [])
 
   return (
     <FormShell form={formik} isSaved={true} editMode={false} isInfo={false} isCleared={false}>
