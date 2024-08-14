@@ -107,6 +107,8 @@ export default function JournalVoucherForm({ labels, access, recordId, general =
     }
   ]
 
+  const isRaw = formik.values.status == 1
+
   return (
     <FormShell
       actions={actions}
@@ -115,6 +117,7 @@ export default function JournalVoucherForm({ labels, access, recordId, general =
       functionId={SystemFunction.JournalVoucher}
       maxAccess={maxAccess}
       editMode={editMode}
+      disabledSubmit={!isRaw}
     >
       <VertLayout>
         <Grow>
@@ -126,7 +129,7 @@ export default function JournalVoucherForm({ labels, access, recordId, general =
                 filter={!editMode ? item => item.activeStatus === 1 : undefined}
                 name='dtId'
                 label={labels.documentType}
-                readOnly={editMode}
+                readOnly={editMode || !isRaw}
                 valueField='recordId'
                 displayField='name'
                 values={formik.values}
@@ -143,7 +146,7 @@ export default function JournalVoucherForm({ labels, access, recordId, general =
                 name='reference'
                 label={labels.reference}
                 value={formik.values.reference}
-                readOnly={editMode}
+                readOnly={editMode || !isRaw}
                 maxAccess={!editMode && maxAccess}
                 maxLength='30'
                 onChange={formik.handleChange}
@@ -155,6 +158,7 @@ export default function JournalVoucherForm({ labels, access, recordId, general =
               <CustomDatePicker
                 name='date'
                 label={labels.date}
+                readOnly={!isRaw}
                 onChange={formik.setFieldValue}
                 value={formik.values.date}
                 maxAccess={maxAccess}
@@ -167,6 +171,7 @@ export default function JournalVoucherForm({ labels, access, recordId, general =
                 endpointId={SystemRepository.Currency.qry}
                 name='currencyId'
                 label={labels.currency}
+                readOnly={!isRaw}
                 valueField='recordId'
                 displayField='reference'
                 values={formik.values}
@@ -183,6 +188,7 @@ export default function JournalVoucherForm({ labels, access, recordId, general =
                 name='notes'
                 label={labels.notes}
                 value={formik.values.notes}
+                readOnly={!isRaw}
                 maxLength='100'
                 rows={3}
                 maxAccess={maxAccess}
