@@ -70,7 +70,11 @@ const City = () => {
       headerName: _labels.name,
       flex: 1
     },
-    ,
+    {
+      field: 'flName',
+      headerName: _labels.flName,
+      flex: 1
+    },
     {
       field: 'countryName',
       headerName: _labels.country,
@@ -111,7 +115,7 @@ const City = () => {
         maxAccess: access
       },
       width: 500,
-      height: 360,
+      height: 460,
       title: _labels.cities
     })
   }
