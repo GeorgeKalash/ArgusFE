@@ -34,7 +34,8 @@ const CommonProvider = ({ children }) => {
 
     getRequest({
       extension: SystemRepository.KeyValueStore,
-      parameters: parameters
+      parameters: parameters,
+      disableLoading: true
     })
       .then(res => {
         callback(res.list)

@@ -271,10 +271,12 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
           toast.success(actionMessage)
           await refetchForm(res.recordId)
           invalidate()
-
           !recordId && viewOTP(res.recordId)
         }
-      } catch (error) {}
+      } catch (error) {
+        setSubmitted(false)
+        setValidSubmit(false)
+      }
     })()
   }, [validSubmit])
 
