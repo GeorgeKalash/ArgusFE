@@ -6,7 +6,7 @@ const RBIndex = () => {
   return (
     <ImmediateWindow
       datasetId={ResourceIds.RebuildAccountBalances}
-      titleName={'rab'}
+      labelKey={'rab'}
       Component={RebuildAccountBalances}
       height={460}
     />
