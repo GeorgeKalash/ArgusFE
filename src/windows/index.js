@@ -8,7 +8,7 @@ const ClearContext = React.createContext(null)
 
 export function WindowProvider({ children }) {
   const [stack, setStack] = useState([])
-  const [key, setKey] = useState(0)
+  const [rerenderFlag, setRerenderFlag] = useState(false)
 
   function closeWindow() {
     setStack(stack => {
@@ -23,7 +23,7 @@ export function WindowProvider({ children }) {
   return (
     <WindowContext.Provider value={{ stack: addToStack }}>
       <ClearContext.Provider
-        key={key}
+        key={rerenderFlag}
         value={{
           clear() {
             const currentValue = { ...stack[stack.length - 1] }
@@ -32,7 +32,7 @@ export function WindowProvider({ children }) {
               currentValue.props.recordId = null
               addToStack(currentValue)
             } else {
-              setKey(prev => prev + 1)
+              setRerenderFlag(!rerenderFlag)
             }
           }
         }}
