@@ -49,9 +49,9 @@ export const apiMappings = {
     parameters: {
       _type: 0
     },
-    valueField: 'reference',
+    firstField: 'reference',
     valueOnSelection: 'recordId',
-    displayField: 'name',
+    secondField: 'name',
     displayFieldWidth: 2,
     firstFieldWidth: '40%'
   },
@@ -104,9 +104,9 @@ export const apiMappings = {
   [ResourceIds.Accounts]: {
     type: LOOKUP,
     endpoint: FinancialRepository.Account.snapshot,
-    valueField: 'reference',
+    firstField: 'reference',
+    secondField: 'name',
     valueOnSelection: 'recordId',
-    displayField: 'name',
     displayFieldWidth: 2,
     firstFieldWidth: '40%'
   },
@@ -147,9 +147,9 @@ export const apiMappings = {
       _countryId: 0,
       _stateId: 0
     },
-    valueField: 'reference',
     valueOnSelection: 'recordId',
-    displayField: 'name'
+    firstField: 'reference',
+    secondField: 'name'
   },
   [ResourceIds.Groups]: {
     type: COMBOBOX,
@@ -200,9 +200,9 @@ export const apiMappings = {
       _countryId: 0,
       _stateId: 0
     },
-    valueField: 'accountRef',
+    firstField: 'accountRef',
     valueOnSelection: 'recordId',
-    displayField: 'name',
+    secondField: 'name',
     displayFieldWidth: 2,
     firstFieldWidth: '40%'
   },
@@ -269,9 +269,9 @@ export const apiMappings = {
   [ResourceIds.ChartOfAccounts]: {
     type: LOOKUP,
     endpoint: GeneralLedgerRepository.ChartOfAccounts.snapshot,
-    valueField: 'accountRef',
+    firstField: 'accountRef',
+    secondField: 'name',
     valueOnSelection: 'recordId',
-    displayField: 'name',
     displayFieldWidth: 2,
     firstFieldWidth: '40%'
   },
@@ -296,9 +296,9 @@ export const apiMappings = {
   [ResourceIds.Item]: {
     type: LOOKUP,
     endpoint: InventoryRepository.Item.snapshot,
-    valueField: 'sku',
+    firstField: 'sku',
+    secondField: 'name',
     valueOnSelection: 'recordId',
-    displayField: 'name',
     displayFieldWidth: 2,
     firstFieldWidth: '40%'
   },
@@ -315,9 +315,9 @@ export const apiMappings = {
   [ResourceIds.Overhead]: {
     type: LOOKUP,
     endpoint: ManufacturingRepository.Overhead.snapshot,
-    valueField: 'reference',
+    firstField: 'reference',
+    secondField: 'name',
     valueOnSelection: 'recordId',
-    displayField: 'name',
     displayFieldWidth: 2,
     firstFieldWidth: '40%'
   },
@@ -344,9 +344,9 @@ export const apiMappings = {
   [ResourceIds.PuVendors]: {
     type: LOOKUP,
     endpoint: PurchaseRepository.Vendor.snapshot,
-    valueField: 'reference',
+    firstField: 'reference',
+    secondField: 'name',
     valueOnSelection: 'recordId',
-    displayField: 'name',
     displayFieldWidth: 2,
     firstFieldWidth: '40%',
     columnsInDropDown: [
@@ -362,7 +362,7 @@ export const apiMappings = {
       _functionId: 0
     },
     valueOnSelection: 'recordId',
-    valueField: 'reference',
+    firstField: 'reference',
     secondValueShow: false,
     displayFieldWidth: 2,
     firstFieldWidth: '40%'
@@ -370,9 +370,9 @@ export const apiMappings = {
   [ResourceIds.Expense_Types]: {
     type: LOOKUP,
     endpoint: FinancialRepository.ExpenseTypes.snapshot,
-    valueField: 'reference',
+    firstField: 'reference',
+    secondField: 'name',
     valueOnSelection: 'recordId',
-    displayField: 'name',
     displayFieldWidth: 2,
     firstFieldWidth: '40%'
   },
@@ -435,9 +435,9 @@ export const apiMappings = {
   [ResourceIds.Client]: {
     type: LOOKUP,
     endpoint: SaleRepository.Client.snapshot,
-    valueField: 'reference',
+    firstField: 'reference',
+    secondField: 'name',
     valueOnSelection: 'recordId',
-    displayField: 'name',
     displayFieldWidth: 2,
     firstFieldWidth: '40%',
     columnsInDropDown: [
@@ -449,7 +449,7 @@ export const apiMappings = {
   [ResourceIds.SalesOrder]: {
     type: LOOKUP,
     endpoint: SaleRepository.SalesOrder.snapshot,
-    valueField: 'reference',
+    firstField: 'reference',
     valueOnSelection: 'recordId',
     secondValueShow: false,
     displayFieldWidth: 2,
@@ -560,8 +560,8 @@ export const apiMappings = {
     type: LOOKUP,
     endpoint: ManufacturingRepository.MFJobOrder.snapshot,
     valueOnSelection: 'recordId',
-    displayField: 'itemName',
-    valueField: 'reference',
+    firstField: 'reference',
+    secondField: 'itemName',
     displayFieldWidth: 2,
     firstFieldWidth: '40%',
     columnsInDropDown: [
@@ -589,9 +589,9 @@ export const apiMappings = {
   [ResourceIds.Design]: {
     type: LOOKUP,
     endpoint: ManufacturingRepository.Design.snapshot,
-    valueField: 'reference',
+    firstField: 'reference',
+    secondField: 'name',
     valueOnSelection: 'recordId',
-    displayField: 'name',
     displayFieldWidth: 2,
     firstFieldWidth: '40%',
     columnsInDropDown: [
@@ -615,16 +615,12 @@ export const apiMappings = {
     displayField: 'label'
   },
   [ResourceIds.Address]: {
-    //FIX AFTER LOOKUP FIX //fix display format
     type: LOOKUP,
     endpoint: SystemRepository.Address.snapshot,
-    valueField: ['name', 'city', 'email1'],
+    firstField: ['name', 'city','street1', 'email1','phone'],
+    // secondField: 'city',
     secondDisplayField: false,
     valueOnSelection: 'recordId',
-    displayField: ['name', 'city', 'email1'],
-
-    //displayFieldWidth: 1,
-    //firstFieldWidth: '40%',
     columnsInDropDown: [
       { key: 'name', value: 'Name' },
       { key: 'city', value: 'City' },

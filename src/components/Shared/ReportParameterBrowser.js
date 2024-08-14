@@ -17,15 +17,17 @@ import { useError } from 'src/error'
 
 const formatDateTo = value => {
   const date = new Date(value)
-  const formattedDate = date.toISOString().slice(0, 10).replace(/-/g, '')
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
 
-  return formattedDate
+  return `${year}${month}${day}`
 }
 
 const formatDateFrom = value => {
   let timestamp
 
-  if (value.indexOf('-') > -1) {
+  if (value.indexOf('-') > -1 || value.indexOf('/') > -1) {
     timestamp = new Date(value.toString()).getTime()
   } else {
     const year = value.slice(0, 4)
@@ -47,8 +49,8 @@ const GetLookup = ({ field, formik }) => {
         endpointId={apiDetails.endpoint}
         parameters={apiDetails.parameters}
         firstFieldWidth={apiDetails.firstFieldWidth}
-        valueField={apiDetails.displayField}
-        displayField={apiDetails.valueField}
+        valueField={apiDetails.firstField}
+        displayField={apiDetails.secondField}
         secondDisplayField={apiDetails.secondDisplayField}
         columnsInDropDown={apiDetails.columnsInDropDown}
         name={field.key}
@@ -59,6 +61,13 @@ const GetLookup = ({ field, formik }) => {
         firstValue={formik.values.parameters?.[field.id]?.display}
         secondValue={formik.values.parameters?.[field.id]?.display2}
         onChange={(event, newValue) => {
+          const display = Array.isArray(apiDetails?.firstField)
+            ? apiDetails?.firstField
+                ?.map(header => newValue?.[header] && newValue?.[header]?.toString())
+                ?.filter(item => item)
+                ?.join(' ')
+            : newValue?.[apiDetails.firstField]
+
           formik.setFieldValue(
             `parameters[${field.id}]`,
             newValue?.[apiDetails.valueOnSelection]
@@ -67,8 +76,8 @@ const GetLookup = ({ field, formik }) => {
                   fieldKey: field.key,
                   value: newValue?.[apiDetails.valueOnSelection] || '',
                   caption: field.caption,
-                  display: newValue?.[apiDetails.displayField],
-                  display2: newValue?.[apiDetails.valueField]
+                  display: display ? display : newValue?.[apiDetails.firstField],
+                  display2: newValue?.[apiDetails.secondField]
                 }
               : ''
           )
@@ -95,9 +104,6 @@ const GetComboBox = ({ field, formik, rpbParams }) => {
     }
   }, [])
 
-  console.log('fatima logs:')
-  console.log(field)
-  console.log(formik)
   if (apiDetails?.endpoint === SystemRepository.DocumentType.qry) {
     newParams += `&_dgId=${field?.data}`
   } else if (apiDetails?.endpoint === InventoryRepository.Dimension.qry) {
@@ -177,9 +183,9 @@ const GetDate = ({ field, formik, rpbParams }) => {
       formik.setFieldValue(`parameters[${field.id}]`, {
         fieldId: field.id,
         fieldKey: field.key,
-        value: new Date(field.value.toString())?.getTime(),
+        value: new Date(field.value.toString())?.getTime() || '',
         caption: field.caption,
-        display: field.value
+        display: formatDateDefault(new Date(field?.value?.toString()))
       })
     }
   }, [])
@@ -190,7 +196,7 @@ const GetDate = ({ field, formik, rpbParams }) => {
         name={`parameters[${field.id}]`}
         label={field.caption}
         value={formik.values?.parameters?.[field.id]?.value}
-        required={true}
+        required={field.mandatory}
         onChange={(name, newValue) => {
           formik.setFieldValue(`parameters[${field.id}]`, {
             fieldId: field.id,
@@ -200,7 +206,7 @@ const GetDate = ({ field, formik, rpbParams }) => {
             display: formatDateDefault(newValue)
           })
         }}
-        error={formik.touched?.parameters?.[field?.id] && Boolean(formik.errors?.parameters?.[field?.id])}
+        error={formik.errors?.parameters?.[field?.id] && Boolean(formik.errors?.parameters?.[field?.id])}
         onClear={() => formik.setFieldValue(`parameters[${field.id}]`, undefined)}
       />
     </Grid>
@@ -285,14 +291,14 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
     validateOnChange: true,
     onSubmit: values => {
       setRpbParams([])
-
       const processedArray = values?.parameters
         ?.filter((item, index) => item?.fieldId && item?.value != null)
         ?.reduce((acc, item) => {
           if (item?.fieldId) {
             acc[item.fieldId] = {
               ...item,
-              value: item.fieldKey === 'date' ? formatDateTo(item.value) : item.value
+              value:
+                item.fieldKey === 'date' || item.fieldKey?.indexOf('Date') > -1 ? formatDateTo(item.value) : item.value
             }
           }
 
@@ -334,7 +340,7 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
     const mappedData = rpbParams.reduce((acc, item) => {
       acc[item?.fieldId] = {
         ...item,
-        value: item.fieldKey === 'date' ? formatDateFrom(item.value) : item.value
+        value: item.fieldKey === 'date' || item.fieldKey?.indexOf('Date') > -1 ? formatDateFrom(item.value) : item.value
       }
 
       return acc
