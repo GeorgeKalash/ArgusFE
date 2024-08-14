@@ -1,12 +1,12 @@
-// ** MUI Imports
-import { Autocomplete, CircularProgress, Paper, TextField } from '@mui/material'
+import { Autocomplete, IconButton, CircularProgress, Paper, TextField } from '@mui/material'
 import { ControlAccessLevel, TrxType } from 'src/resources/AccessLevels'
 import { Box } from '@mui/material'
+import RefreshIcon from '@mui/icons-material/Refresh'
 import React from 'react'
 import PopperComponent from '../Shared/Popper/PopperComponent'
 
 const CustomComboBox = ({
-  type = 'text', //any valid HTML5 input type
+  type = 'text',
   name,
   label,
   value: _value,
@@ -17,8 +17,8 @@ const CustomComboBox = ({
   onChange,
   error,
   helperText,
-  variant = 'outlined', //outlined, standard, filled
-  size = 'small', //small, medium
+  variant = 'outlined',
+  size = 'small',
   fullWidth = true,
   required = false,
   autoFocus = false,
@@ -30,6 +30,8 @@ const CustomComboBox = ({
   columnsInDropDown,
   editMode = false,
   hasBorder = true,
+  fetchData,
+  refresh = true,
   isLoading,
   ...props
 }) => {
@@ -124,7 +126,6 @@ const CustomComboBox = ({
           return (
             <Box>
               <li {...props}>
-                {/* <Box sx={{ flex: 1 }}>{option[valueField]}</Box> */}
                 <Box sx={{ flex: 1 }}>{option[displayField]}</Box>
               </li>
             </Box>
@@ -145,19 +146,22 @@ const CustomComboBox = ({
           InputProps={{
             ...params.InputProps,
             endAdornment: (
-              <>
+              <React.Fragment>
+                {refresh && (
+                  <IconButton onClick={fetchData} size='small' aria-label='refresh data' sx={{ p: '0px !important' }}>
+                    <RefreshIcon />
+                  </IconButton>
+                )}
+
                 {isLoading ? <CircularProgress color='inherit' size={20} /> : null}
                 {params.InputProps.endAdornment}
-              </>
-            ),
-            style: {
-              border: 'none' // Set width to 100%
-            }
+              </React.Fragment>
+            )
           }}
           sx={{
             '& .MuiOutlinedInput-root': {
               '& fieldset': {
-                border: !hasBorder && 'none' // Hide border
+                border: !hasBorder && 'none'
               }
             }
           }}

@@ -14,6 +14,7 @@ export default function ResourceComboBox({
   filter = () => true,
   dataGrid,
   value,
+  refresh,
   ...rest
 }) {
   const { store: data } = rest
@@ -30,9 +31,13 @@ export default function ResourceComboBox({
   console.log()
 
   useEffect(() => {
+    fetchData()
+  }, [parameters])
+
+  const fetchData = () => {
     if (parameters && !cacheStore[apiUrl] && !data) {
       setIsLoading(true)
-      if (datasetId) {
+      if (datasetId)
         getAllKvsByDataset({
           _dataset: datasetId,
           callback: list => {
@@ -43,22 +48,21 @@ export default function ResourceComboBox({
             }
           }
         })
-        setIsLoading(false)
-      } else
-        endpointId &&
-          getRequest({
-            extension: endpointId,
-            parameters,
-            disableLoading: true
+      setIsLoading(false)
+    } else
+      endpointId &&
+        getRequest({
+          extension: endpointId,
+          parameters,
+          disableLoading: true
+        })
+          .then(res => {
+            setIsLoading(false)
+            if (dataGrid) updateStore(endpointId, res.list)
+            else setStore(res.list)
           })
-            .then(res => {
-              setIsLoading(false)
-              if (dataGrid) updateStore(endpointId, res.list)
-              else setStore(res.list)
-            })
-            .catch(error => {})
-    }
-  }, [parameters])
+          .catch(error => {})
+  }
 
   const filteredStore = data ? data : cacheStore?.[apiUrl]?.filter?.(filter)
 
@@ -73,6 +77,8 @@ export default function ResourceComboBox({
     <CustomComboBox
       {...{
         ...rest,
+        refresh,
+        fetchData,
         name,
         store: (dataGrid ? cacheStore[apiUrl] : store) || data,
         valueField,
