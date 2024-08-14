@@ -23,7 +23,7 @@ const CustomComboBox = ({
   required = false,
   autoFocus = false,
   disabled = false,
-  readOnly = true,
+  readOnly = false,
   neverPopulate = false,
   displayFieldWidth = 1,
   sx,
@@ -31,7 +31,7 @@ const CustomComboBox = ({
   editMode = false,
   hasBorder = true,
   fetchData,
-  refresh = false,
+  refresh = true,
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
