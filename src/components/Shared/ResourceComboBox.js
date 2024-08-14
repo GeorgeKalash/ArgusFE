@@ -2,6 +2,7 @@ import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import { useContext, useEffect, useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { CommonContext } from 'src/providers/CommonContext'
+import { useCacheDataContext } from 'src/providers/CacheDataContext'
 
 export default function ResourceComboBox({
   endpointId,
@@ -11,26 +12,36 @@ export default function ResourceComboBox({
   values = {},
   parameters = '_filter=',
   filter = () => true,
-  gridStore,
-  setAbroadStore,
+  dataGrid,
   value,
   ...rest
 }) {
   const { store: data } = rest
-  const { getRequest } = useContext(RequestsContext)
 
+  const { getRequest } = useContext(RequestsContext)
+  const { cacheStore = {}, updateStore = () => {} } = useCacheDataContext() || {}
   const { getAllKvsByDataset } = useContext(CommonContext)
 
   const [store, setStore] = useState([])
   const [isLoading, setIsLoading] = useState(false)
-  const isAboardStore = typeof setAbroadStore === 'function' ? true : false
+
+  const apiUrl = endpointId || datasetId
+
+  console.log()
 
   useEffect(() => {
-    if (parameters && !gridStore && !data) {
+    if (parameters && !cacheStore[apiUrl] && !data) {
+      setIsLoading(true)
       if (datasetId) {
         getAllKvsByDataset({
           _dataset: datasetId,
-          callback: isAboardStore ? setAbroadStore : setStore
+          callback: list => {
+            if (dataGrid) {
+              updateStore(datasetId, list)
+            } else {
+              setStore(list)
+            }
+          }
         })
         setIsLoading(false)
       } else
@@ -42,14 +53,14 @@ export default function ResourceComboBox({
           })
             .then(res => {
               setIsLoading(false)
-              if (isAboardStore) setAbroadStore(res.list)
+              if (dataGrid) updateStore(endpointId, res.list)
               else setStore(res.list)
             })
             .catch(error => {})
     }
   }, [parameters])
 
-  const filteredStore = data ? data : store?.filter?.(filter) || []
+  const filteredStore = data ? data : cacheStore?.[apiUrl]?.filter?.(filter)
 
   const _value =
     (typeof values[name] === 'object'
@@ -63,7 +74,7 @@ export default function ResourceComboBox({
       {...{
         ...rest,
         name,
-        store: (isAboardStore ? gridStore : store) || data,
+        store: (dataGrid ? cacheStore[apiUrl] : store) || data,
         valueField,
         value: _value,
         name,

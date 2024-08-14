@@ -24,8 +24,7 @@ export default function ResourceComboBoxEdit({
       name={field}
       value={changes}
       autoFocus
-      gridStore={store}
-      setAbroadStore={setStore}
+      dataGrid={true}
       label={''}
       hasBorder={false}
       onChange={(e, value) => {
