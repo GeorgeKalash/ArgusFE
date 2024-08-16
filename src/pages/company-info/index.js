@@ -80,7 +80,7 @@ const CompanyInfo = () => {
   }
 
   return (
-    <FormShell resourceId={ResourceIds.CompanyInfo} form={formik} maxAccess={maxAccess}>
+    <FormShell resourceId={ResourceIds.CompanyInfo} form={formik} infoVisible={false} maxAccess={maxAccess}>
       <VertLayout>
         <Grid container spacing={4}>
           <Grid item xs={12}>
