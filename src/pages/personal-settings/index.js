@@ -6,7 +6,7 @@ const PersonalSet = () => {
   return (
     <ImmediateWindow
       datasetId={ResourceIds.PersonalSettings}
-      titleName={'personalSettings'}
+      labelKey={'personalSettings'}
       Component={PersonalSettings}
     />
   )

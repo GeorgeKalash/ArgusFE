@@ -44,6 +44,10 @@ export default function PaymentTermsForms({ labels, maxAccess, recordId }) {
       type: yup.string().required()
     }),
     onSubmit: async obj => {
+      if (!obj.days) {
+        obj.days = 0
+      }
+
       const response = await postRequest({
         extension: SaleRepository.PaymentTerms.set,
         record: JSON.stringify(obj)
