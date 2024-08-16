@@ -119,7 +119,6 @@ export default function CbBanksForms({ labels, maxAccess, recordId, setStore }) 
                 name='swiftCode'
                 label={labels.swiftCode}
                 value={formik.values.swiftCode}
-                rows={2}
                 maxLength='20'
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
