@@ -34,6 +34,7 @@ export default function VendorsForm({ labels, maxAccess: access, recordId, setSt
     enabled: !recordId
   })
 
+  console.log(access, maxAccess)
   const { formik } = useForm({
     initialValues: {
       recordId: recordId || null,
@@ -87,6 +88,8 @@ export default function VendorsForm({ labels, maxAccess: access, recordId, setSt
       } catch (e) {}
     }
   })
+
+  console.log(formik, 'formik')
   const editMode = !!formik.values.recordId
 
   const actions = [

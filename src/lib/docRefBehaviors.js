@@ -22,21 +22,21 @@ const mergeWithMaxAccess = (maxAccess, reference, dcTypeRequired) => {
 
   let obj = controls.find(obj => obj.controlId === 'reference')
   if (obj) {
-    obj.accessLevel = reference?.mandatory ? MANDATORY : DISABLED
+    obj.accessLevel = reference?.mandatory ? MANDATORY : ''
   } else {
     if (reference?.mandatory) {
       controls.push({
         sgId: 18,
         resourceId: ResourceIds.JournalVoucher,
         controlId: 'reference',
-        accessLevel: reference?.mandatory ? MANDATORY : DISABLED
+        accessLevel: reference?.mandatory ? MANDATORY : ''
       })
     } else if (reference?.readOnly) {
       controls.push({
         sgId: 18,
         resourceId: ResourceIds.JournalVoucher,
         controlId: 'reference',
-        accessLevel: reference?.readOnly ? DISABLED : MANDATORY
+        accessLevel: reference?.readOnly ? '' : MANDATORY
       })
     } else {
       controls = maxAccess.record.controls.filter(obj => obj.controlId != 'reference')
