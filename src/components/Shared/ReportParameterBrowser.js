@@ -183,7 +183,7 @@ const GetDate = ({ field, formik, rpbParams }) => {
       formik.setFieldValue(`parameters[${field.id}]`, {
         fieldId: field.id,
         fieldKey: field.key,
-        value: new Date(field.value.toString())?.getTime() || '',
+        value: new Date(field.value.toString())?.getTime() || null,
         caption: field.caption,
         display: formatDateDefault(new Date(field?.value?.toString()))
       })
@@ -206,7 +206,7 @@ const GetDate = ({ field, formik, rpbParams }) => {
             display: formatDateDefault(newValue)
           })
         }}
-        error={formik.errors?.parameters?.[field?.id] && Boolean(formik.errors?.parameters?.[field?.id])}
+        error={formik.touched?.parameters?.[field?.id] && Boolean(formik.errors?.parameters?.[field?.id])}
         onClear={() => formik.setFieldValue(`parameters[${field.id}]`, undefined)}
       />
     </Grid>
@@ -279,7 +279,7 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
       const errors = { parameters: [] }
       items.forEach(item => {
         if (item?.mandatory && item?.id) {
-          if (!values?.parameters?.[item?.id]) {
+          if (!values?.parameters?.[item?.id] || !values?.parameters?.[item?.id]?.value) {
             errors.parameters[item?.id] = 'This field is required'
           }
         }
