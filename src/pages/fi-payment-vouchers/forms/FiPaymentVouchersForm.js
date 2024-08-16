@@ -195,6 +195,12 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
       disabled: !editMode || isPosted || isCancelled
     },
     {
+      key: 'FI Trx',
+      condition: true,
+      onClick: 'onClickIT',
+      disabled: !editMode
+    },
+    {
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',

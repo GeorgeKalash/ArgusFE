@@ -24,6 +24,7 @@ import { formatDateToApi, formatDateToApiFunction } from 'src/lib/date-helper'
 import { getRate, DIRTYFIELD_AMOUNT, DIRTYFIELD_BASE_AMOUNT, DIRTYFIELD_RATE } from 'src/utils/RateCalculator'
 import { Grow } from './Layouts/Grow'
 import { Fixed } from './Layouts/Fixed'
+import { VertLayout } from './Layouts/VertLayout'
 
 const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -138,6 +139,8 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
 
     datasetId: ResourceIds.GeneralLedger
   })
+
+  const isRaw = formValues.status == 1
 
   useEffect(() => {
     if (formik2 && formik2.values && formik2.values.generalAccount && Array.isArray(formik2.values.generalAccount)) {
@@ -296,7 +299,7 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
       resourceId={ResourceIds.GeneralLedger}
       form={formik2}
       maxAccess={access}
-      disabledSubmit={baseGridData.balance !== 0}
+      disabledSubmit={baseGridData.balance !== 0 || !isRaw}
       infoVisible={false}
     >
       {formik && (
@@ -318,6 +321,8 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
       <Grow>
         <DataGrid
           onChange={value => formik2.setFieldValue('generalAccount', value)}
+          allowDelete={!!isRaw}
+          allowAddNewLine={!!isRaw}
           value={formik2.values.generalAccount}
           error={formik2.errors.generalAccount}
           name='glTransactions'
@@ -334,6 +339,8 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
                 parameters: '_type=',
                 valueField: 'recordId',
                 displayField: 'accountRef',
+                readOnly: !isRaw,
+
                 columnsInDropDown: [
                   { key: 'accountRef', value: 'reference' },
                   { key: 'name', value: 'name' }
@@ -379,7 +386,10 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
             {
               component: 'textfield',
               label: _labels.accountName,
-              name: 'accountName'
+              name: 'accountName',
+              props: {
+                readOnly: !isRaw
+              }
             },
             {
               component: 'resourcelookup',
@@ -390,6 +400,7 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
                 valueField: 'recordId',
                 displayField: 'reference',
                 displayFieldWidth: 3,
+                readOnly: !isRaw,
                 columnsInDropDown: [
                   { key: 'reference', value: 'reference' },
                   { key: 'name', value: 'name' }
@@ -404,15 +415,20 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
             {
               component: 'textfield',
               label: _labels.thirdPartyName,
+              props: {
+                readOnly: !isRaw
+              },
               name: 'tpAccountName'
             },
             {
               component: 'resourcelookup',
               label: _labels.costRef,
               name: 'costCenterRef',
+
               props: {
                 endpointId: GeneralLedgerRepository.CostCenter.snapshot,
                 valueField: 'recordId',
+                readOnly: !isRaw,
                 displayField: 'reference',
                 displayFieldWidth: 3,
                 columnsInDropDown: [
@@ -429,6 +445,9 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
             {
               component: 'textfield',
               label: _labels.costName,
+              props: {
+                readOnly: !isRaw
+              },
               name: 'costCenterName'
             },
             {
@@ -438,6 +457,7 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
               props: {
                 endpointId: SystemRepository.Currency.qry,
                 displayField: 'reference',
+                readOnly: !isRaw,
                 valueField: 'recordId',
                 mapping: [
                   { from: 'reference', to: 'currencyRef' },
@@ -481,6 +501,7 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
               name: 'signName',
               props: {
                 datasetId: DataSets.Sign,
+                readOnly: !isRaw,
                 displayField: 'value',
                 valueField: 'key',
                 mapping: [
@@ -494,17 +515,24 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
               label: _labels.sourceReference,
               name: 'sourceReference',
               props: {
-                maxLength: 20
+                maxLength: 20,
+                readOnly: !isRaw
               }
             },
             {
               component: 'textfield',
               label: _labels.notes,
-              name: 'notes'
+              name: 'notes',
+              props: {
+                readOnly: !isRaw
+              }
             },
             {
               component: 'numberfield',
               label: _labels.exRate,
+              props: {
+                readOnly: !isRaw
+              },
               name: 'exRate',
               async onChange({ row: { update, oldRow, newRow } }) {
                 const updatedRateRow = getRate({
@@ -524,6 +552,9 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
             {
               component: 'numberfield',
               label: _labels.amount,
+              props: {
+                readOnly: !isRaw
+              },
               name: 'amount',
               async onChange({ row: { update, oldRow, newRow } }) {
                 const updatedRateRow = getRate({
@@ -543,6 +574,9 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
             {
               component: 'numberfield',
               label: _labels.baseAmount,
+              props: {
+                readOnly: !isRaw
+              },
               name: 'baseAmount',
               async onChange({ row: { update, oldRow, newRow } }) {
                 const updatedRateRow = getRate({

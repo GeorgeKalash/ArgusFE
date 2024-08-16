@@ -8,6 +8,13 @@ export const PurchaseRepository = {
     set: service + 'setGRP',
     del: service + 'delGRP'
   },
+  PUOrderStatus: {
+    qry: service + 'qryPOS',
+    page: service + 'pagePOS',
+    get: service + 'getPOS',
+    set: service + 'setPOS',
+    del: service + 'delPOS'
+  },
   DeliveryMethods: {
     qry: service + 'qryDM',
     page: service + 'pageDM',

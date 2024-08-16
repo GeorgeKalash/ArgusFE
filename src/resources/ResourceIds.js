@@ -164,7 +164,7 @@ export const ResourceIds = {
   RebuildAccountBalances: 31501,
   RoleCategories: 21102,
   SourceOfIncomeType: 36311,
-  ProfessionGroups: 36310,
+  ProfessionGroups: 36121,
   ChangePassword: 20118,
   PaymentVouchers: 31305,
   Roles: 21103,
@@ -219,5 +219,8 @@ export const ResourceIds = {
   NotificationTransaction: 23301, // Notification center
   MFJobOrders: 42302,
   IVDimension: 41106,
-  FIDimValues: 31111
+  FIDimValues: 31111,
+  ConsignmentSites: 51110,
+  PUOrderStatus: 50105,
+  PUPaymentTerms: 50106
 }
