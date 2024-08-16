@@ -1,6 +1,5 @@
 import { useEffect, useState, useContext } from 'react'
 import { Grid } from '@mui/material'
-import * as yup from 'yup'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
@@ -291,7 +290,7 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
     validateOnChange: true,
     onSubmit: values => {
       setRpbParams([])
-      
+
       const processedArray = values?.parameters
         ?.filter((item, index) => item?.fieldId && item?.value != null)
         ?.reduce((acc, item) => {
