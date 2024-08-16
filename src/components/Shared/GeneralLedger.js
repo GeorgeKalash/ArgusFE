@@ -149,13 +149,15 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
         return isNaN(number) ? 0 : number
       }
 
-      const baseCredit = generalAccountData.reduce((acc, curr) => {
+      const baseCreditAmount = generalAccountData.reduce((acc, curr) => {
         return curr.sign == '2' ? acc + parseNumber(curr.baseAmount) : acc
       }, 0)
+      const baseCredit = parseFloat(baseCreditAmount).toFixed(2)
 
-      const baseDebit = generalAccountData.reduce((acc, curr) => {
+      const baseDebitAmount = generalAccountData.reduce((acc, curr) => {
         return curr.sign == '1' ? acc + parseNumber(curr.baseAmount) : acc
       }, 0)
+      const baseDebit = parseFloat(baseDebitAmount).toFixed(2)
 
       const baseBalance = parseFloat((baseDebit - baseCredit).toFixed(2))
       setBaseGridData({

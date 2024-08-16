@@ -42,7 +42,7 @@ import { useInvalidate } from 'src/hooks/resource'
 import { ControlContext } from 'src/providers/ControlContext'
 import InfoForm from './InfoForm'
 
-export default function OutwardsForm({ labels, access, recordId, cashAccountId, plantId, userId, window }) {
+export default function OutwardsForm({ labels, access, recordId, cashAccountId, plantId, userId, dtId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
@@ -60,7 +60,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
 
   const initialValues = {
     recordId: recordId || null,
-    dtId: null,
+    dtId: dtId || null,
     plantId: plantId,
     cashAccountId: cashAccountId,
     userId: userId,
@@ -432,6 +432,13 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
           extension: RTCLRepository.CtClientIndividual.get2,
           parameters: `_clientId=${clientId}`
         })
+        if (!res.record?.clientRemittance) {
+          stackError({
+            message: `Chosen Client Has No KYC.`
+          })
+
+          return
+        }
         formik.setFieldValue('idNo', res?.record?.clientIDView?.idNo)
         formik.setFieldValue('expiryDate', formatDateFromApi(res?.record?.clientIDView?.idExpiryDate))
         formik.setFieldValue('firstName', res?.record?.clientIndividual?.firstName)
@@ -566,18 +573,6 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
     } catch (error) {}
   }
 
-  const getDefaultDT = async () => {
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.UserFunction.get,
-        parameters: `_userId=${userId}&_functionId=${SystemFunction.Outwards}`
-      })
-      res.record ? formik.setFieldValue('dtId', res.record.dtId) : formik.setFieldValue('dtId', '')
-    } catch (error) {
-      formik.setFieldValue('dtId', '')
-    }
-  }
-
   function onInstantCashSubmit(obj) {
     formik.setFieldValue('instantCashDetails', obj)
   }
@@ -612,11 +607,17 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
           formik.setFieldValue('products', res.list)
           if (res.list.length == 1) {
             formik.setFieldValue('products[0].checked', true)
-            handleSelectedProduct(res.list[0])
+            !editMode && handleSelectedProduct(res.list[0])
             if (formik.values.lcAmount) formik.setFieldValue('fcAmount', res.list[0].originAmount)
             if (formik.values.fcAmount) formik.setFieldValue('lcAmount', res.list[0].baseAmount)
-          } else handleSelectedProduct()
-        }
+          } else {
+            const matchedProduct = res.list.find(product => product.productId === data.productId)
+            if (matchedProduct) {
+              const matchedIndex = res.list.findIndex(product => product.productId === data.productId)
+              formik.setFieldValue(`products[${matchedIndex}].checked`, true)
+            }
+          }
+        } else handleSelectedProduct()
       }
     } catch (error) {}
   }
@@ -629,8 +630,6 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
           const copy = { ...res.record.headerView }
           copy.lcAmount = 0
           await fillProducts(copy)
-        } else {
-          await getDefaultDT()
         }
         await getDefaultVAT()
       } catch (error) {}
@@ -1020,6 +1019,17 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
 
                         return
                       }
+
+                      const today = new Date()
+                      const expiryDate = new Date(parseInt(newValue?.expiryDate.replace(/\/Date\((\d+)\)\//, '$1')))
+                      if (expiryDate < today) {
+                        stackError({
+                          message: `Expired Client.`
+                        })
+
+                        return
+                      }
+
                       formik.setFieldValue('clientId', newValue ? newValue.recordId : '')
                       formik.setFieldValue('clientName', newValue ? newValue.name : '')
                       formik.setFieldValue('clientRef', newValue ? newValue.reference : '')

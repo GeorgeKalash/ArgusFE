@@ -1,4 +1,4 @@
-import { Autocomplete, IconButton, InputAdornment, Paper, TextField } from '@mui/material'
+import { Autocomplete, IconButton, CircularProgress, Paper, TextField } from '@mui/material'
 import { ControlAccessLevel, TrxType } from 'src/resources/AccessLevels'
 import { Box } from '@mui/material'
 import RefreshIcon from '@mui/icons-material/Refresh'
@@ -32,6 +32,7 @@ const CustomComboBox = ({
   hasBorder = true,
   fetchData,
   refresh = true,
+  isLoading,
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
@@ -146,10 +147,15 @@ const CustomComboBox = ({
             ...params.InputProps,
             endAdornment: (
               <React.Fragment>
-                {refresh && !readOnly && (
-                  <IconButton onClick={fetchData} size='small' aria-label='refresh data' sx={{ p: '0px !important' }}>
-                    <RefreshIcon />
-                  </IconButton>
+                {isLoading ? (
+                  <CircularProgress color='inherit' size={20} />
+                ) : (
+                  refresh &&
+                  !readOnly && (
+                    <IconButton onClick={fetchData} size='small' aria-label='refresh data' sx={{ p: '0px !important' }}>
+                      <RefreshIcon />
+                    </IconButton>
+                  )
                 )}
                 {params.InputProps.endAdornment}
               </React.Fragment>
