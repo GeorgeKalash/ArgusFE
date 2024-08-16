@@ -181,7 +181,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
         })
 
         getRes.record.date = formatDateFromApi(getRes.record.date)
-        getRes.record.date = formatDateFromApi(getRes.record.dueDate)
+        getRes.record.dueDate = formatDateFromApi(getRes.record.dueDate)
         formik.setValues(getRes.record)
       }
     } catch (error) {}
@@ -202,9 +202,9 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
           extension: FinancialRepository.FiMemo.get,
           parameters: `_recordId=${formik.values.recordId}`
         })
-
+        getRes.record.dueDate = formatDateFromApi(getRes.record.dueDate)
         getRes.record.date = formatDateFromApi(getRes.record.date)
-        getRes.record.date = formatDateFromApi(getRes.record.dueDate)
+
         formik.setValues(getRes.record)
       }
     } catch (error) {}
