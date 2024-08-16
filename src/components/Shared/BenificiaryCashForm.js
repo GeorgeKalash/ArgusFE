@@ -571,27 +571,14 @@ const BenificiaryCashForm = ({
                 />
               </FormGrid>
               <FormGrid hideonempty xs={12}>
-                <ResourceComboBox
-                  endpointId={SystemRepository.Country.qry}
-                  name='nationalityId'
-                  label={_labels.country}
-                  valueField='recordId'
-                  displayField={['reference', 'name', 'flName']}
-                  columnsInDropDown={[
-                    { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' },
-                    { key: 'flName', value: 'Foreign Language Name' }
-                  ]}
-                  values={formik.values}
-                  displayFieldWidth={1.25}
-                  onChange={(event, newValue) => {
-                    if (newValue) {
-                      formik.setFieldValue('nationalityId', newValue?.recordId)
-                    } else {
-                      formik.setFieldValue('nationalityId', '')
-                    }
-                  }}
-                  error={formik.touched.nationalityId && Boolean(formik.errors.nationalityId)}
+                <CustomDatePicker
+                  name='birthDate'
+                  label={_labels.birthDate}
+                  value={formik.values?.birthDate}
+                  onChange={formik.setFieldValue}
+                  disabledDate={'>='}
+                  onClear={() => formik.setFieldValue('birthDate', '')}
+                  error={formik.touched.birthDate && Boolean(formik.errors.birthDate)}
                   maxAccess={maxAccess}
                   readOnly={editMode}
                 />
@@ -684,19 +671,7 @@ const BenificiaryCashForm = ({
                   error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
                 />
               </FormGrid>
-              <FormGrid hideonempty xs={12}>
-                <CustomDatePicker
-                  name='birthDate'
-                  label={_labels.birthDate}
-                  value={formik.values?.birthDate}
-                  onChange={formik.setFieldValue}
-                  disabledDate={'>='}
-                  onClear={() => formik.setFieldValue('birthDate', '')}
-                  error={formik.touched.birthDate && Boolean(formik.errors.birthDate)}
-                  maxAccess={maxAccess}
-                  readOnly={editMode}
-                />
-              </FormGrid>
+
               <FormGrid hideonempty xs={12}>
                 <ResourceComboBox
                   datasetId={DataSets.GENDER}
