@@ -148,11 +148,19 @@ const CustomComboBox = ({
             endAdornment: (
               <React.Fragment>
                 {isLoading ? (
-                  <CircularProgress color='inherit' size={20} />
+                  <CircularProgress color='inherit' size={18} />
                 ) : (
                   refresh &&
                   !readOnly && (
-                    <IconButton onClick={fetchData} size='small' aria-label='refresh data' sx={{ p: '0px !important' }}>
+                    <IconButton
+                      onClick={fetchData}
+                      aria-label='refresh data'
+                      sx={{
+                        p: '0px !important',
+                        marginRight: '-10px'
+                      }}
+                      size='small'
+                    >
                       <RefreshIcon />
                     </IconButton>
                   )
@@ -166,6 +174,11 @@ const CustomComboBox = ({
               '& fieldset': {
                 border: !hasBorder && 'none'
               }
+            },
+            '& .MuiAutocomplete-clearIndicator': {
+              pl: '0px !important',
+              marginRight: '-10px',
+              visibility: 'visible'
             }
           }}
         />

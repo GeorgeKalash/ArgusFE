@@ -11,7 +11,6 @@ import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepositor
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import toast from 'react-hot-toast'
-import { useWindowDimensions } from 'src/lib/useWindowDimensions'
 import { getButtons } from 'src/components/Shared/Buttons'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useResourceQuery } from 'src/hooks/resource'
@@ -22,6 +21,8 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { ControlContext } from 'src/providers/ControlContext'
 import { useForm } from 'src/hooks/form'
+import { useWindow } from 'src/windows'
+import ClearDialog from 'src/components/Shared/ClearDialog'
 
 const CTExchangeRates = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -29,6 +30,7 @@ const CTExchangeRates = () => {
   const [plantStore, setPlantsStore] = useState(null)
   const buttons = getButtons(platformLabels)
   const clearButton = buttons.find(button => button.key === 'Clear')
+  const { stack } = useWindow()
 
   const { labels: labels, access } = useResourceQuery({
     datasetId: ResourceIds.CtExchangeRates
@@ -93,7 +95,6 @@ const CTExchangeRates = () => {
     }
   ]
 
-  //purchase grid
   const { formik: puFormik } = useForm({
     maxAccess: access,
     enableReinitialize: true,
@@ -133,7 +134,6 @@ const CTExchangeRates = () => {
     }
   })
 
-  //sales grid
   const { formik: saFormik } = useForm({
     maxAccess: access,
     enableReinitialize: false,
@@ -196,7 +196,6 @@ const CTExchangeRates = () => {
         getExchangeRates(formik.values.currencyId, formik.values.puRateTypeId, formik.values.raCurrencyId, puFormik)
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formik.values.currencyId, formik.values.raCurrencyId, formik.values.puRateTypeId])
 
   useEffect(() => {
@@ -205,7 +204,6 @@ const CTExchangeRates = () => {
         getExchangeRates(formik.values.currencyId, formik.values.saRateTypeId, formik.values.raCurrencyId, saFormik)
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formik.values.currencyId, formik.values.raCurrencyId, formik.values.saRateTypeId])
 
   useEffect(() => {
@@ -235,15 +233,12 @@ const CTExchangeRates = () => {
           parameters: parameters
         })
 
-        // Create a mapping of plantId to values entry for efficient lookup
-
         const valuesMap = values.list.reduce((acc, fee) => {
           acc[fee.plantId] = fee
 
           return acc
         }, {})
 
-        // Combine exchangeTable and values
         const rows = plantStore.map((plant, index) => {
           const value = valuesMap[plant.recordId] || 0
 
@@ -325,6 +320,20 @@ const CTExchangeRates = () => {
         }
       })
       .catch(error => {})
+  }
+
+  function openClear(form, RateTypeId) {
+    stack({
+      Component: ClearDialog,
+      props: {
+        open: [true, {}],
+        fullScreen: false,
+        onConfirm: () => emptyExchangeMapsRowValues(form, RateTypeId)
+      },
+      width: 450,
+      height: 170,
+      title: platformLabels.Clear
+    })
   }
 
   return (
@@ -445,7 +454,7 @@ const CTExchangeRates = () => {
                           <Grid item xs={2}>
                             <div className='button-container'>
                               <Button
-                                onClick={() => emptyExchangeMapsRowValues(puFormik, formik.values.puRateTypeId)}
+                                onClick={() => openClear(puFormik, formik.values.puRateTypeId)}
                                 variant='contained'
                                 sx={{
                                   mr: 1,
@@ -534,7 +543,7 @@ const CTExchangeRates = () => {
                           <Grid item xs={2}>
                             <div className='button-container'>
                               <Button
-                                onClick={() => emptyExchangeMapsRowValues(saFormik, formik.values.saRateTypeId)}
+                                onClick={() => openClear(saFormik, formik.values.saRateTypeId)}
                                 variant='contained'
                                 sx={{
                                   mr: 1,
