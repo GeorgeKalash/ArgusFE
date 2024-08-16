@@ -146,7 +146,13 @@ const documentType = async (getRequest, functionId = undefined, maxAccess, selec
       mandatory: isExternal?.external ? true : false
     }
     if (maxAccess) maxAccess = await mergeWithMaxAccess(maxAccess, reference, dcTypeRequired)
-  } else if (!nraId) {
+  } else if (!nraId && functionId) {
+    if (maxAccess) maxAccess = await mergeWithMaxAccess(maxAccess, reference, dcTypeRequired)
+  } else if (!nraId && !functionId) {
+    reference = {
+      readOnly: false,
+      mandatory: true
+    }
     if (maxAccess) maxAccess = await mergeWithMaxAccess(maxAccess, reference, dcTypeRequired)
   }
 
