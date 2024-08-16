@@ -79,7 +79,7 @@ const AutoPostExclusion = () => {
     },
     {
       field: 'cgName',
-      headerName: _labels.cgName,
+      headerName: _labels.correspondentGroup,
       flex: 1
     }
   ]
@@ -107,12 +107,14 @@ const AutoPostExclusion = () => {
   }
 
   const del = async obj => {
-    await postRequest({
-      extension: RemittanceOutwardsRepository.AutoPostExclusion.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success(platformLabels.Deleted)
+    try {
+      await postRequest({
+        extension: RemittanceOutwardsRepository.AutoPostExclusion.del,
+        record: JSON.stringify(obj)
+      })
+      invalidate()
+      toast.success(platformLabels.Deleted)
+    } catch (error) {}
   }
 
   return (

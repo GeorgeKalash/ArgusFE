@@ -147,22 +147,6 @@ export default function AutoPostExclusionForm({ labels, maxAccess, recordId }) {
               </Grid>
             </Grid>
             <Grid item xs={12}>
-              <ResourceComboBox
-                name='dispersalType'
-                label={labels.dispersal}
-                datasetId={DataSets.RT_Dispersal_Type}
-                valueField='key'
-                readOnly={editMode}
-                displayField='value'
-                values={formik.values}
-                required
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('dispersalType', newValue?.key)
-                }}
-                error={formik.touched.dispersalType && Boolean(formik.errors.dispersalType)}
-              />
-            </Grid>
-            <Grid item xs={12}>
               <ResourceLookup
                 endpointId={RemittanceSettingsRepository.Correspondent.snapshot}
                 valueField='reference'
@@ -194,7 +178,6 @@ export default function AutoPostExclusionForm({ labels, maxAccess, recordId }) {
                   { key: 'flName', value: 'FL Name' }
                 ]}
                 values={formik.values}
-                required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('currencyId', newValue?.recordId || null)
@@ -202,6 +185,21 @@ export default function AutoPostExclusionForm({ labels, maxAccess, recordId }) {
                 error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
               />
             </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                name='dispersalType'
+                label={labels.dispersal}
+                datasetId={DataSets.RT_Dispersal_Type}
+                valueField='key'
+                readOnly={editMode}
+                displayField='value'
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('dispersalType', newValue?.key)
+                }}
+              />
+            </Grid>
+
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={SystemRepository.Country.qry}
@@ -245,19 +243,7 @@ export default function AutoPostExclusionForm({ labels, maxAccess, recordId }) {
                 decimalScale={2}
               />
             </Grid>
-            <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='isInactive'
-                    maxAccess={maxAccess}
-                    checked={formik.values?.isInactive}
-                    onChange={formik.handleChange}
-                  />
-                }
-                label={labels.isInactive}
-              />
-            </Grid>
+
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={SystemRepository.PlantGroup.qry}
@@ -276,6 +262,37 @@ export default function AutoPostExclusionForm({ labels, maxAccess, recordId }) {
                   formik.setFieldValue('plantGroupId', newValue?.recordId)
                 }}
                 error={formik.touched.plantGroupId && Boolean(formik.errors.plantGroupId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={RemittanceSettingsRepository.CorrespondentGroup.qry}
+                name='cgId'
+                label={labels.correspondentGroup}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                valueField='recordId'
+                displayField='name'
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('cgId', newValue?.recordId)
+                }}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name='isInactive'
+                    maxAccess={maxAccess}
+                    checked={formik.values?.isInactive}
+                    onChange={formik.handleChange}
+                  />
+                }
+                label={labels.isInactive}
               />
             </Grid>
           </Grid>
