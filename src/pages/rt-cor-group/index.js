@@ -42,7 +42,7 @@ const CorrespondentGroup = () => {
     endpointId: RemittanceSettingsRepository.CorrespondentGroup.page,
     datasetId: ResourceIds.CorrespondentGroup
   })
-  
+
   const columns = [
     {
       field: 'reference',
@@ -67,7 +67,7 @@ const CorrespondentGroup = () => {
   const del = async obj => {
     try {
       await postRequest({
-        extension: BusinessPartnerRepository.RelationTypes.del,
+        extension: RemittanceSettingsRepository.CorrespondentGroup.del,
         record: JSON.stringify(obj)
       })
       invalidate()
