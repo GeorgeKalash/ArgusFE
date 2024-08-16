@@ -32,8 +32,9 @@ const CompanyInfo = () => {
         extension: SystemRepository.CompanyInfo.get,
         parameters: `_filter=`
       })
-      res.record.accountId = getStorageData('userData')?.accountId
+
       formik.setValues({
+        ...formik.values,
         name: res.record.name,
         webSite: res.record.taxNo,
         taxNo: res.record.taxNo,
@@ -89,8 +90,7 @@ const CompanyInfo = () => {
               value={formik.values?.accountId}
               onChange={formik.handleChange}
               readOnly={true}
-              onClear={() => formik.setFieldValue('posMsg', '')}
-              error={formik.errors && Boolean(formik.errors.posMsg)}
+              onClear={() => formik.setFieldValue('accountId', '')}
               maxAccess={maxAccess}
             />
           </Grid>
