@@ -75,5 +75,11 @@ export const RemittanceOutwardsRepository = {
   },
   OutwardGLInformation: {
     get: service + 'getOWI'
+  },
+  AutoPostExclusion: {
+    qry: service + 'qryAPX',
+    get: service + 'getAPX',
+    set: service + 'setAPX',
+    del: service + 'delAPX'
   }
 }

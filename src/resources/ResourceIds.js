@@ -222,5 +222,6 @@ export const ResourceIds = {
   FIDimValues: 31111,
   ConsignmentSites: 51110,
   PUOrderStatus: 50105,
-  PUPaymentTerms: 50106
+  PUPaymentTerms: 50106,
+  AutoPostExclusion: 36124
 }
