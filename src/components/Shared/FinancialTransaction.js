@@ -9,13 +9,13 @@ import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { formatDateDefault } from 'src/lib/date-helper'
 import { getFormattedNumber } from 'src/lib/numberField-helper'
 
-const FinancialTransaction = ({ formValues }) => {
+const FinancialTransaction = ({ formValues, functionId }) => {
   const { getRequest } = useContext(RequestsContext)
 
   async function fetchGridData() {
     return await getRequest({
       extension: FinancialRepository.FinancialTransaction.qry,
-      parameters: `_functionId=${formValues.functionId}&_recordId=${formValues.recordId}`
+      parameters: `_functionId=${formValues.functionId || functionId}&_recordId=${formValues.recordId}`
     })
   }
 
