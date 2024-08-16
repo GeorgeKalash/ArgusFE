@@ -272,10 +272,18 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
             parameters: `_userId=${userId}&_key=cashAccountId`
           })
 
+          if (!cashAccountRecord) {
+            stackError({
+              message: `Cash Account is Invalid`
+            })
+            return
+          }
+
           const { record: baseAmount } = await getRequest({
             extension: CurrencyTradingSettingsRepository.Defaults.get,
             parameters: '_key=ct_minOtp_CIVAmount'
           })
+
           const clientId = values.clientId || 0
 
           const payload = {
