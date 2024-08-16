@@ -220,12 +220,6 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       onClick: onPost,
       disabled: isPosted || !editMode || isCancelled
     }
-    // {
-    //   key: 'saveClear',
-    //   condition: true,
-    //   onClick: 'onSaveClear',
-    //   disabled: isPosted || !editMode || isCancelled
-    // }
   ]
 
   return (
