@@ -146,5 +146,12 @@ export const RemittanceSettingsRepository = {
     get: service + 'getPFG',
     set: service + 'setPFG',
     del: service + 'delPFG'
+  },
+  CorrespondentGroup: {
+    qry: service + 'qryCGP',
+    page: service + 'pageCGP',
+    get: service + 'getCGP',
+    set: service + 'setCGP',
+    del: service + 'delCGP'
   }
 }

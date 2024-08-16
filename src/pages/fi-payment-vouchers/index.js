@@ -56,10 +56,10 @@ const FiPaymentVouchers = () => {
 
   const columns = [
     {
-        field: 'reference',
-        headerName: _labels.reference,
-        flex: 1
-    },
+      field: 'reference',
+      headerName: _labels.reference,
+      flex: 1
+    }
   ]
 
   const add = () => {
@@ -113,7 +113,6 @@ const FiPaymentVouchers = () => {
         }
       }
     } catch (error) {}
-    
   }
 
   const del = async obj => {
@@ -133,7 +132,7 @@ const FiPaymentVouchers = () => {
   return (
     <VertLayout>
       <Fixed>
-      <RPBGridToolbar hasSearch={false} onAdd={add} maxAccess={access} onApply={onApply} reportName={'FIPV'} />
+        <RPBGridToolbar hasSearch={false} onAdd={add} maxAccess={access} onApply={onApply} reportName={'FIPV'} />
       </Fixed>
       <Grow>
         <Table
