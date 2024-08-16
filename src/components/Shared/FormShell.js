@@ -61,6 +61,7 @@ export default function FormShell({
         clear()
       }
     }
+
     if (setIDInfoAutoFilled) {
       setIDInfoAutoFilled(false)
     }
@@ -161,6 +162,17 @@ export default function FormShell({
               width: 1000,
               height: 620,
               title: platformLabels.GeneralLedger
+            })
+          }
+          onClickIT={() =>
+            stack({
+              Component: FinancialTransaction,
+              props: {
+                formValues: form.values
+              },
+              width: 1000,
+              height: 620,
+              title: platformLabels.financialTransaction
             })
           }
           onClickGIA={() =>

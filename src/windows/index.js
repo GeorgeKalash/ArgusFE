@@ -8,6 +8,7 @@ const ClearContext = React.createContext(null)
 
 export function WindowProvider({ children }) {
   const [stack, setStack] = useState([])
+  const [rerenderFlag, setRerenderFlag] = useState(false)
 
   function closeWindow() {
     setStack(stack => {
@@ -22,12 +23,17 @@ export function WindowProvider({ children }) {
   return (
     <WindowContext.Provider value={{ stack: addToStack }}>
       <ClearContext.Provider
+        key={rerenderFlag}
         value={{
           clear() {
             const currentValue = { ...stack[stack.length - 1] }
-            closeWindow()
-            currentValue.props.recordId = null
-            addToStack(currentValue)
+            if (Object.keys(currentValue).length) {
+              closeWindow()
+              currentValue.props.recordId = null
+              addToStack(currentValue)
+            } else {
+              setRerenderFlag(!rerenderFlag)
+            }
           }
         }}
       >
@@ -65,7 +71,7 @@ export function WindowProvider({ children }) {
   )
 }
 
-export function ImmediateWindow({ datasetId, Component, titleName, height, props = {} }) {
+export function ImmediateWindow({ datasetId, Component, labelKey, titleName, height, props = {} }) {
   const { stack } = useWindow()
 
   const { labels: _labels, access } = useResourceParams({
@@ -75,7 +81,7 @@ export function ImmediateWindow({ datasetId, Component, titleName, height, props
   const [rendered, setRendered] = useState(false)
 
   useEffect(() => {
-    if (_labels[titleName] && !rendered) {
+    if ((_labels[labelKey] || titleName) && !rendered) {
       openForm()
       setRendered(true)
     }
@@ -94,7 +100,7 @@ export function ImmediateWindow({ datasetId, Component, titleName, height, props
       draggable: false,
       width: 600,
       height: height || 400,
-      title: _labels[titleName]
+      title: _labels[labelKey] || titleName
     })
   }
 

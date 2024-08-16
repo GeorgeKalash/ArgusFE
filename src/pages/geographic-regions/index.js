@@ -11,9 +11,11 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import GeographicRegionsForm from './forms/GeographicRegionsForm'
 import { useWindow } from 'src/windows'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const GeographicRegions = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -54,6 +56,11 @@ const GeographicRegions = () => {
       field: 'name',
       headerName: _labels.name,
       flex: 1
+    },
+    {
+      field: 'flName',
+      headerName: _labels.flName,
+      flex: 1
     }
   ]
 
@@ -74,7 +81,7 @@ const GeographicRegions = () => {
         maxAccess: access
       },
       width: 500,
-      height: 270,
+      height: 350,
       title: _labels.GeographicRegions
     })
   }
@@ -85,7 +92,7 @@ const GeographicRegions = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
   }
 
   return (

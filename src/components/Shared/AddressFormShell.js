@@ -14,7 +14,6 @@ export const AddressFormShell = ({
   optional = false,
   onSubmit
 }) => {
-
   const [required, setRequired] = useState(!optional)
 
   const initialValues = {

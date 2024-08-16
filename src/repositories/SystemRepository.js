@@ -45,7 +45,8 @@ export const SystemRepository = {
     page: service + 'pageCU',
     get: service + 'getCU',
     set: service + 'setCU',
-    del: service + 'delCU'
+    del: service + 'delCU',
+    snapshot: service + 'snapshotCU'
   },
   City: {
     qry: service + 'qryCIT',
@@ -183,6 +184,9 @@ export const SystemRepository = {
   TimeZone: {
     get: service + 'getTZN'
   },
+  Batch: {
+    snapshot: service + 'snapshotBAT'
+  },
   ETL: {
     get: service + 'getETL'
   },
@@ -210,5 +214,11 @@ export const SystemRepository = {
   },
   FiscalModule: {
     qry: service + 'qryFMO'
+  },
+  GovernmentOrganization: {
+    qry: service + 'qryGO',
+    set: service + 'setGO',
+    get: service + 'getGO',
+    del: service + 'delGO'
   }
 }

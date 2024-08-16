@@ -59,7 +59,8 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
       notes: '',
       vatAmount: '',
       isSubjectToVAT: false,
-      sourceReference: ''
+      sourceReference: '',
+      dueDate: new Date()
     },
     maxAccess,
     enableReinitialize: false,
@@ -69,7 +70,8 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
       currencyId: yup.string().required(' '),
       accountId: yup.string().required(' '),
       subtotal: yup.number().required(' '),
-      date: yup.string().required(' ')
+      date: yup.string().required(' '),
+      dueDate: yup.string().required(' ')
     }),
     onSubmit: async obj => {
       if (!obj.recordId) {
@@ -151,7 +153,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
 
           formik.setValues({
             ...res.record,
-
+            dueDate: formatDateFromApi(res.record.dueDate),
             date: formatDateFromApi(res.record.date)
           })
         }
@@ -179,6 +181,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
         })
 
         getRes.record.date = formatDateFromApi(getRes.record.date)
+        getRes.record.dueDate = formatDateFromApi(getRes.record.dueDate)
         formik.setValues(getRes.record)
       }
     } catch (error) {}
@@ -199,8 +202,9 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
           extension: FinancialRepository.FiMemo.get,
           parameters: `_recordId=${formik.values.recordId}`
         })
-
+        getRes.record.dueDate = formatDateFromApi(getRes.record.dueDate)
         getRes.record.date = formatDateFromApi(getRes.record.date)
+
         formik.setValues(getRes.record)
       }
     } catch (error) {}
@@ -318,6 +322,19 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                     maxAccess={maxAccess}
                     onClear={() => formik.setFieldValue('date', '')}
                     error={formik.touched.date && Boolean(formik.errors.date)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomDatePicker
+                    name='dueDate'
+                    readOnly={postedOrCanceled}
+                    label={labels.dueDate}
+                    value={formik.values.dueDate}
+                    required
+                    onChange={formik.setFieldValue}
+                    maxAccess={maxAccess}
+                    onClear={() => formik.setFieldValue('dueDate', '')}
+                    error={formik.touched.dueDate && Boolean(formik.errors.dueDate)}
                   />
                 </Grid>
                 <Grid item xs={12}>
