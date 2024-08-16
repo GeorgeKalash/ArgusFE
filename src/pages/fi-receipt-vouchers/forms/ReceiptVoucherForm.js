@@ -25,6 +25,7 @@ import { DataSets } from 'src/resources/DataSets'
 import { getStorageData } from 'src/storage/storage'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { ControlContext } from 'src/providers/ControlContext'
+import { SaleRepository } from 'src/repositories/SaleRepository'
 
 export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -66,7 +67,8 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       collectorId: null,
       isVerified: true,
       template: 1,
-      sourceReference: ''
+      sourceReference: '',
+      spId: ''
     },
     validationSchema: yup.object({
       accountId: yup.string().required(),
@@ -79,7 +81,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       try {
         const response = await postRequest({
           extension: FinancialRepository.ReceiptVouchers.set,
-          record: JSON.stringify(obj)
+          record: JSON.stringify({ ...obj, date: formatDateToApi(obj.date) })
         })
         if (!obj.recordId) {
           toast.success(platformLabels.Added)
@@ -218,11 +220,17 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       onClick: onPost,
       disabled: isPosted || !editMode || isCancelled
     }
+    // {
+    //   key: 'saveClear',
+    //   condition: true,
+    //   onClick: 'onSaveClear',
+    //   disabled: isPosted || !editMode || isCancelled
+    // }
   ]
 
   return (
     <FormShell
-      resourceId={ResourceIds.FiOpeningBalances}
+      resourceId={ResourceIds.ReceiptVoucher}
       functionId={SystemFunction.ReceiptVoucher}
       form={formik}
       actions={actions}
@@ -313,10 +321,29 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                   formik.setFieldValue('accountId', newValue?.recordId || '')
                   formik.setFieldValue('accountRef', newValue?.reference || '')
                   formik.setFieldValue('accountName', newValue?.name || '')
+                  formik.setFieldValue('spId', newValue?.spId || '')
                 }}
                 error={formik.touched.accountId && Boolean(formik.errors.accountId)}
                 maxAccess={maxAccess}
               />
+            </Grid>
+            <Grid item xs={12}>
+              <Grid item xs={6}>
+                <ResourceComboBox
+                  endpointId={SaleRepository.SalesPerson.qry}
+                  name='spId'
+                  readOnly={!formik.values.accountId}
+                  label={labels.salePerson}
+                  valueField='sptId'
+                  displayField={'name'}
+                  values={formik.values}
+                  onChange={async (event, newValue) => {
+                    formik.setFieldValue('spId', newValue?.spId || '')
+                  }}
+                  error={formik.touched.spId && Boolean(formik.errors.spId)}
+                  maxAccess={maxAccess}
+                />
+              </Grid>
             </Grid>
             <Grid item xs={6}>
               <ResourceComboBox
