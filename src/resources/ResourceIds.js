@@ -220,5 +220,8 @@ export const ResourceIds = {
   MFJobOrders: 42302,
   IVDimension: 41106,
   FIDimValues: 31111,
-  CorrespondentGroup: 36125
+  CorrespondentGroup: 36125,
+  ConsignmentSites: 51110,
+  PUOrderStatus: 50105,
+  PUPaymentTerms: 50106
 }
