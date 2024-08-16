@@ -9,6 +9,7 @@ import { useFormik } from 'formik'
 import { useWindow } from 'src/windows'
 import BenificiaryCashForm from 'src/components/Shared/BenificiaryCashForm'
 import BenificiaryBankForm from 'src/components/Shared/BenificiaryBankForm'
+import { Checkbox } from '@mui/material'
 
 const BeneficiaryWindow = ({ clientId }) => {
   const { stack } = useWindow()
@@ -36,10 +37,19 @@ const BeneficiaryWindow = ({ clientId }) => {
     datasetId: ResourceIds.Beneficiary
   })
   async function fetchGridData() {
-    return await getRequest({
+    const res = await getRequest({
       extension: RemittanceOutwardsRepository.Beneficiary.qry,
       parameters: `_clientId=${clientId}`
     })
+    res.list = res.list.map(item => {
+      if (item.isInactive === null) {
+        item.isInactive = false
+      }
+
+      return item
+    })
+
+    return res
   }
 
   const columns = [
@@ -71,6 +81,11 @@ const BeneficiaryWindow = ({ clientId }) => {
     {
       field: 'dispersalTypeName',
       headerName: _labels.dispersalType,
+      flex: 1
+    },
+    {
+      field: 'isInactive',
+      headerName: _labels.isInactive,
       flex: 1
     }
   ]
