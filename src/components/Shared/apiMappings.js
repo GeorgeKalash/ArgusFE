@@ -14,7 +14,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import { DeliveryRepository } from 'src/repositories/DeliveryRepository'
 import { FixedAssetsRepository } from 'src/repositories/FixedAssetsRepository'
-import { StockCountRepository } from 'src/repositories/StockCountRepository'
+import { SCRepository } from 'src/repositories/SCRepository'
 import { IVReplenishementRepository } from 'src/repositories/IVReplenishementRepository'
 import { POSRepository } from 'src/repositories/POSRepository'
 
@@ -52,7 +52,7 @@ export const apiMappings = {
     firstField: 'reference',
     valueOnSelection: 'recordId',
     secondField: 'name',
-    displayFieldWidth: 2,
+    displayFieldWidth: 1,
     firstFieldWidth: '40%'
   },
   [ResourceIds.Category]: {
@@ -107,7 +107,7 @@ export const apiMappings = {
     firstField: 'reference',
     secondField: 'name',
     valueOnSelection: 'recordId',
-    displayFieldWidth: 2,
+    displayFieldWidth: 1,
     firstFieldWidth: '40%'
   },
   [ResourceIds.DocumentTypes]: {
@@ -203,7 +203,7 @@ export const apiMappings = {
     firstField: 'accountRef',
     valueOnSelection: 'recordId',
     secondField: 'name',
-    displayFieldWidth: 2,
+    displayFieldWidth: 1,
     firstFieldWidth: '40%'
   },
   [ResourceIds.FlAccountGroups]: {
@@ -272,7 +272,7 @@ export const apiMappings = {
     firstField: 'accountRef',
     secondField: 'name',
     valueOnSelection: 'recordId',
-    displayFieldWidth: 2,
+    displayFieldWidth: 1,
     firstFieldWidth: '40%'
   },
   [ResourceIds.FIAgingProfile]: {
@@ -299,7 +299,7 @@ export const apiMappings = {
     firstField: 'sku',
     secondField: 'name',
     valueOnSelection: 'recordId',
-    displayFieldWidth: 2,
+    displayFieldWidth: 1,
     firstFieldWidth: '40%'
   },
   [ResourceIds.WorkCenters]: {
@@ -318,7 +318,7 @@ export const apiMappings = {
     firstField: 'reference',
     secondField: 'name',
     valueOnSelection: 'recordId',
-    displayFieldWidth: 2,
+    displayFieldWidth: 1,
     firstFieldWidth: '40%'
   },
   [ResourceIds.Machines]: {
@@ -347,7 +347,7 @@ export const apiMappings = {
     firstField: 'reference',
     secondField: 'name',
     valueOnSelection: 'recordId',
-    displayFieldWidth: 2,
+    displayFieldWidth: 1,
     firstFieldWidth: '40%',
     columnsInDropDown: [
       { key: 'reference', value: 'Reference' },
@@ -364,7 +364,7 @@ export const apiMappings = {
     valueOnSelection: 'recordId',
     firstField: 'reference',
     secondValueShow: false,
-    displayFieldWidth: 2,
+    displayFieldWidth: 1,
     firstFieldWidth: '40%'
   },
   [ResourceIds.Expense_Types]: {
@@ -373,7 +373,7 @@ export const apiMappings = {
     firstField: 'reference',
     secondField: 'name',
     valueOnSelection: 'recordId',
-    displayFieldWidth: 2,
+    displayFieldWidth: 1,
     firstFieldWidth: '40%'
   },
   [ResourceIds.PriceLevels]: {
@@ -438,7 +438,7 @@ export const apiMappings = {
     firstField: 'reference',
     secondField: 'name',
     valueOnSelection: 'recordId',
-    displayFieldWidth: 2,
+    displayFieldWidth: 1,
     firstFieldWidth: '40%',
     columnsInDropDown: [
       { key: 'reference', value: 'Reference' },
@@ -452,7 +452,7 @@ export const apiMappings = {
     firstField: 'reference',
     valueOnSelection: 'recordId',
     secondValueShow: false,
-    displayFieldWidth: 2,
+    displayFieldWidth: 1,
     firstFieldWidth: '40%'
   },
   [ResourceIds.SalesPerson]: {
@@ -540,7 +540,7 @@ export const apiMappings = {
   },
   [ResourceIds.StockCounts]: {
     type: COMBOBOX,
-    endpoint: StockCountRepository.StockCount.qry,
+    endpoint: SCRepository.StockCount.qry,
     parameters: '_startAt=0&_pageSize=1000&_params=',
     valueField: 'recordId',
     displayField: 'reference'
@@ -562,7 +562,7 @@ export const apiMappings = {
     valueOnSelection: 'recordId',
     firstField: 'reference',
     secondField: 'itemName',
-    displayFieldWidth: 2,
+    displayFieldWidth: 1,
     firstFieldWidth: '40%',
     columnsInDropDown: [
       { key: 'reference', value: 'Reference' },
@@ -592,7 +592,7 @@ export const apiMappings = {
     firstField: 'reference',
     secondField: 'name',
     valueOnSelection: 'recordId',
-    displayFieldWidth: 2,
+    displayFieldWidth: 1,
     firstFieldWidth: '40%',
     columnsInDropDown: [
       { key: 'reference', value: 'Reference' },
