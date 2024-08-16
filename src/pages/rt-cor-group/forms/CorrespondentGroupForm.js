@@ -42,17 +42,14 @@ export default function CorrespondentGroupForm({ labels, maxAccess, recordId }) 
 
         if (!obj.recordId) {
           toast.success(platformLabels.Added)
-          formik.setValues({
-            ...obj,
-            recordId: response.recordId
-          })
+          formik.setFieldValue('recordId', response?.recordId)
         } else toast.success(platformLabels.Edited)
 
         invalidate()
       } catch (error) {}
     }
   })
-  const editMode = !!recordId || formik.values.recordId
+  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
