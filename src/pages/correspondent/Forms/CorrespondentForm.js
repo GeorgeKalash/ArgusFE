@@ -36,6 +36,7 @@ const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore,
       name: null,
       reference: null,
       bpId: null,
+      cgId: null,
       currencyId: null,
       currencyRef: null,
       owRateTypeId: null,
@@ -48,6 +49,7 @@ const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore,
       reference: yup.string().required(),
       name: yup.string().required(),
       bpId: yup.string().required(),
+      cgId: yup.number().required(),
       bpRef: yup.string().required(),
       bpName: yup.string().required()
     }),
@@ -189,6 +191,26 @@ const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore,
                   formik.setFieldValue('currencyId', newValue?.recordId)
                 }}
                 error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={RemittanceSettingsRepository.CorrespondentGroup.qry}
+                name='cgId'
+                label={labels.group}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('cgId', newValue?.recordId)
+                  formik.setFieldValue('cgName', newValue?.cgName)
+                  formik.setFieldValue('cgRef', newValue?.cgRef)
+                }}
+                error={formik.touched.cgId && Boolean(formik.errors.cgId)}
               />
             </Grid>
             <Grid item xs={12}>
