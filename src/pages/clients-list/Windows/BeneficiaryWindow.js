@@ -37,10 +37,19 @@ const BeneficiaryWindow = ({ clientId }) => {
     datasetId: ResourceIds.Beneficiary
   })
   async function fetchGridData() {
-    return await getRequest({
+    const res = await getRequest({
       extension: RemittanceOutwardsRepository.Beneficiary.qry,
       parameters: `_clientId=${clientId}`
     })
+    res.list = res.list.map(item => {
+      if (item.isInactive === null) {
+        item.isInactive = false
+      }
+
+      return item
+    })
+
+    return res
   }
 
   const columns = [
@@ -77,10 +86,7 @@ const BeneficiaryWindow = ({ clientId }) => {
     {
       field: 'isInactive',
       headerName: _labels.isInactive,
-      flex: 1,
-      renderCell: ({ row }) => {
-        return <Checkbox checked={row.isInactive} style={{ pointerEvents: 'none' }} />
-      }
+      flex: 1
     }
   ]
 
