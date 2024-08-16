@@ -133,7 +133,6 @@ export default function CbBanksForms({ labels, maxAccess, recordId, setStore }) 
                 value={formik.values.accNoLength}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('accNoLength', '')}
-                readOnly={editMode}
                 error={formik.touched.accNoLength && Boolean(formik.errors.accNoLength)}
               />
             </Grid>
