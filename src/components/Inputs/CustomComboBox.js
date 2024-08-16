@@ -146,7 +146,7 @@ const CustomComboBox = ({
             ...params.InputProps,
             endAdornment: (
               <React.Fragment>
-                {refresh && (
+                {refresh && !readOnly && (
                   <IconButton onClick={fetchData} size='small' aria-label='refresh data' sx={{ p: '0px !important' }}>
                     <RefreshIcon />
                   </IconButton>
