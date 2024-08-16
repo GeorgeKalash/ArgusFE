@@ -36,5 +36,12 @@ export const PurchaseRepository = {
     get: service + 'getAD',
     set: service + 'setAD',
     del: service + 'delAD'
+  },
+  PurchaseInvoiceHeader: {
+    qry: service + 'qryIVC',
+    get: service + 'getIVC',
+    set: service + 'setIVC',
+    del: service + 'delIVC',
+    snapshot: service + 'snapshotIVC'
   }
 }

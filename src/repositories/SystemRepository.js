@@ -214,5 +214,11 @@ export const SystemRepository = {
   },
   FiscalModule: {
     qry: service + 'qryFMO'
+  },
+  GovernmentOrganization: {
+    qry: service + 'qryGO',
+    set: service + 'setGO',
+    get: service + 'getGO',
+    del: service + 'delGO'
   }
 }

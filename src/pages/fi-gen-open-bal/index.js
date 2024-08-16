@@ -6,7 +6,7 @@ const RBIndex = () => {
   return (
     <ImmediateWindow
       datasetId={ResourceIds.GenerateOpeningBalances}
-      titleName={'gob'}
+      labelKey={'gob'}
       Component={GenerateOpening}
       height={460}
     />
