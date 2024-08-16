@@ -17,6 +17,8 @@ import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepositor
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useForm } from 'src/hooks/form'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 export default function JournalVoucherForm({ labels, access, recordId, general = {} }) {
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -105,6 +107,8 @@ export default function JournalVoucherForm({ labels, access, recordId, general =
     }
   ]
 
+  const isRaw = formik.values.status == 1
+
   return (
     <FormShell
       actions={actions}
@@ -113,81 +117,89 @@ export default function JournalVoucherForm({ labels, access, recordId, general =
       functionId={SystemFunction.JournalVoucher}
       maxAccess={maxAccess}
       editMode={editMode}
+      disabledSubmit={!isRaw}
     >
-      <Grid container spacing={4}>
-        <Grid item xs={12}>
-          <ResourceComboBox
-            endpointId={SystemRepository.DocumentType.qry}
-            parameters={`_dgId=${SystemFunction.JournalVoucher}&_startAt=${0}&_pageSize=${50}`}
-            filter={!editMode ? item => item.activeStatus === 1 : undefined}
-            name='dtId'
-            label={labels.documentType}
-            readOnly={editMode}
-            valueField='recordId'
-            displayField='name'
-            values={formik.values}
-            onChange={async (event, newValue) => {
-              formik.setFieldValue('dtId', newValue?.recordId || '')
-              changeDT(newValue)
-            }}
-            error={formik.touched.dtId && Boolean(formik.errors.dtId)}
-            maxAccess={maxAccess}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <CustomTextField
-            name='reference'
-            label={labels.reference}
-            value={formik.values.reference}
-            readOnly={editMode}
-            maxAccess={!editMode && maxAccess}
-            maxLength='30'
-            onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('reference', '')}
-            error={formik.touched.reference && Boolean(formik.errors.reference)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <CustomDatePicker
-            name='date'
-            label={labels.date}
-            onChange={formik.setFieldValue}
-            value={formik.values.date}
-            maxAccess={maxAccess}
-            required
-            error={formik.touched.date && Boolean(formik.errors.date)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <ResourceComboBox
-            endpointId={SystemRepository.Currency.qry}
-            name='currencyId'
-            label={labels.currency}
-            valueField='recordId'
-            displayField='reference'
-            values={formik.values}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('currencyId', newValue?.recordId)
-            }}
-            error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
-            maxAccess={maxAccess}
-            required
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <CustomTextArea
-            name='notes'
-            label={labels.notes}
-            value={formik.values.notes}
-            maxLength='100'
-            rows={3}
-            maxAccess={maxAccess}
-            onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('notes', '')}
-            error={formik.touched.notes && Boolean(formik.errors.notes)}
-          />
-        </Grid>
-      </Grid>
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={4}>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={SystemRepository.DocumentType.qry}
+                parameters={`_dgId=${SystemFunction.JournalVoucher}&_startAt=${0}&_pageSize=${50}`}
+                filter={!editMode ? item => item.activeStatus === 1 : undefined}
+                name='dtId'
+                label={labels.documentType}
+                readOnly={editMode || !isRaw}
+                valueField='recordId'
+                displayField='name'
+                values={formik.values}
+                onChange={async (event, newValue) => {
+                  formik.setFieldValue('dtId', newValue?.recordId || '')
+                  changeDT(newValue)
+                }}
+                error={formik.touched.dtId && Boolean(formik.errors.dtId)}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='reference'
+                label={labels.reference}
+                value={formik.values.reference}
+                readOnly={editMode || !isRaw}
+                maxAccess={!editMode && maxAccess}
+                maxLength='30'
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('reference', '')}
+                error={formik.touched.reference && Boolean(formik.errors.reference)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomDatePicker
+                name='date'
+                label={labels.date}
+                readOnly={!isRaw}
+                onChange={formik.setFieldValue}
+                value={formik.values.date}
+                maxAccess={maxAccess}
+                required
+                error={formik.touched.date && Boolean(formik.errors.date)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={SystemRepository.Currency.qry}
+                name='currencyId'
+                label={labels.currency}
+                readOnly={!isRaw}
+                valueField='recordId'
+                displayField='reference'
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('currencyId', newValue?.recordId)
+                }}
+                error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
+                maxAccess={maxAccess}
+                required
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextArea
+                name='notes'
+                label={labels.notes}
+                value={formik.values.notes}
+                readOnly={!isRaw}
+                maxLength='100'
+                rows={3}
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('notes', '')}
+                error={formik.touched.notes && Boolean(formik.errors.notes)}
+              />
+            </Grid>
+          </Grid>
+        </Grow>
+      </VertLayout>
     </FormShell>
   )
 }
