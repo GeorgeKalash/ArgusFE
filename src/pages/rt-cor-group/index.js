@@ -35,17 +35,14 @@ const CorrespondentGroup = () => {
     labels: _labels,
     paginationParameters,
     refetch,
-    access
+    access,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: RemittanceSettingsRepository.CorrespondentGroup.page,
     datasetId: ResourceIds.CorrespondentGroup
   })
-
-  const invalidate = useInvalidate({
-    endpointId: RemittanceSettingsRepository.CorrespondentGroup.page
-  })
-
+  
   const columns = [
     {
       field: 'reference',
