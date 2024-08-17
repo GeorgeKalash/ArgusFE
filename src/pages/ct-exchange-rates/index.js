@@ -71,6 +71,7 @@ const CTExchangeRates = () => {
       props: {
         datasetId: DataSets.MC_RATE_CALC_METHOD,
         displayField: 'value',
+        refresh: false,
         valueField: 'key',
         mapping: [
           { from: 'key', to: 'rateCalcMethod' },
@@ -225,7 +226,7 @@ const CTExchangeRates = () => {
   const getExchangeRates = async (cuId, rateTypeId, raCurrencyId, formik) => {
     try {
       formik.setFieldValue('rows', [])
-      if (cuId && rateTypeId) {
+      if (cuId && raCurrencyId && rateTypeId) {
         const parameters = `_currencyId=${cuId}&_rateTypeId=${rateTypeId}&_raCurrencyId=${raCurrencyId}`
 
         const values = await getRequest({
@@ -372,11 +373,12 @@ const CTExchangeRates = () => {
                       values={formik.values}
                       valueField='key'
                       displayField='value'
+                      refresh={false}
                       required
                       onChange={(event, newValue) => {
                         formik.setFieldValue('rateAgainst', newValue?.key)
                         if (!newValue) {
-                          formik.setFieldValue('raCurrencyId', 0)
+                          formik.setFieldValue('raCurrencyId', null)
                         } else {
                           if (newValue.key === '1') getDefaultBaseCurrencyId()
                         }
@@ -485,16 +487,18 @@ const CTExchangeRates = () => {
                         </Grid>
                       </Fixed>
                       <Grow>
-                        {formik.values.currencyId != null && formik.values.puRateTypeId != null && (
-                          <DataGrid
-                            onChange={value => puFormik.setFieldValue('rows', value)}
-                            value={puFormik.values.rows}
-                            error={puFormik.errors.rows}
-                            columns={exchangeRatesInlineGridColumns}
-                            allowDelete={false}
-                            allowAddNewLine={false}
-                          />
-                        )}
+                        {formik.values.currencyId != null &&
+                          formik.values.raCurrencyId != null &&
+                          formik.values.puRateTypeId != null && (
+                            <DataGrid
+                              onChange={value => puFormik.setFieldValue('rows', value)}
+                              value={puFormik.values.rows}
+                              error={puFormik.errors.rows}
+                              columns={exchangeRatesInlineGridColumns}
+                              allowDelete={false}
+                              allowAddNewLine={false}
+                            />
+                          )}
                       </Grow>
                     </VertLayout>
                   </FieldSet>
@@ -574,16 +578,18 @@ const CTExchangeRates = () => {
                         </Grid>
                       </Fixed>
                       <Grow>
-                        {formik.values.currencyId != null && formik.values.saRateTypeId != null && (
-                          <DataGrid
-                            onChange={value => saFormik.setFieldValue('rows', value)}
-                            value={saFormik.values.rows}
-                            error={saFormik.errors.rows}
-                            columns={exchangeRatesInlineGridColumns}
-                            allowDelete={false}
-                            allowAddNewLine={false}
-                          />
-                        )}
+                        {formik.values.currencyId != null &&
+                          formik.values.raCurrencyId != null &&
+                          formik.values.saRateTypeId != null && (
+                            <DataGrid
+                              onChange={value => saFormik.setFieldValue('rows', value)}
+                              value={saFormik.values.rows}
+                              error={saFormik.errors.rows}
+                              columns={exchangeRatesInlineGridColumns}
+                              allowDelete={false}
+                              allowAddNewLine={false}
+                            />
+                          )}
                       </Grow>
                     </VertLayout>
                   </FieldSet>
