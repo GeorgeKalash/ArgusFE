@@ -296,11 +296,12 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
 
   return (
     <FormShell
-      resourceId={ResourceIds.GeneralLedger}
+      resourceId={ResourceIds.JournalVoucher}
       form={formik2}
       maxAccess={access}
       disabledSubmit={baseGridData.balance !== 0 || !isRaw}
       infoVisible={false}
+      previewReport={true}
     >
       {formik && (
         <Grid container spacing={2} padding={1}>
