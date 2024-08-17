@@ -171,7 +171,7 @@ export default function AutoPostExclusionForm({ labels, maxAccess, recordId }) {
                 name='currencyId'
                 label={labels.currencyName}
                 valueField='recordId'
-                displayField={['reference', 'name']}
+                displayField={['reference', 'name', 'flName']}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' },
@@ -207,11 +207,12 @@ export default function AutoPostExclusionForm({ labels, maxAccess, recordId }) {
                 label={labels.country}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
+                  { key: 'name', value: 'Name' },
+                  { key: 'flName', value: 'FL Name' }
                 ]}
                 values={formik.values}
                 valueField='recordId'
-                displayField='name'
+                displayField={['reference', 'name', 'flName']}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('countryId', newValue?.recordId)
@@ -256,7 +257,7 @@ export default function AutoPostExclusionForm({ labels, maxAccess, recordId }) {
                 ]}
                 values={formik.values}
                 valueField='recordId'
-                displayField='name'
+                displayField={['reference', 'name']}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('plantGroupId', newValue?.recordId)
