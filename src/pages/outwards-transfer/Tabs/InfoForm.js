@@ -1,4 +1,4 @@
-import { Grid } from '@mui/material'
+import { Box, Grid, Typography } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
@@ -94,27 +94,72 @@ export default function InfoForm({ labels, formik }) {
             name='corEvalExRate'
             readOnly
             label={labels.corCurrencyEval}
-            value={`${owiFields?.corEvalExRate} ${corCurSymbol}`}
+            InputProps={{
+              startAdornment: (
+                <Box component='span'>
+                  <Typography component='span'>{owiFields?.corEvalExRate}</Typography>
+                  <Typography
+                    component='span'
+                    sx={{
+                      color: 'red',
+                      ml: 1
+                    }}
+                  >
+                    {corCurSymbol}
+                  </Typography>
+                </Box>
+              )
+            }}
           />
         </Grid>
         <Grid item xs={12} sx={{ mx: 5 }}>
           <CustomNumberField name='taxPercent' readOnly label={labels.TaxPct} value={owiFields?.taxPercent} />
         </Grid>
-
         <Grid item xs={12} sx={{ mx: 5 }}>
           <CustomTextField
             name='corAmount'
             readOnly
             label={labels.corAmount}
-            value={`${owiFields?.corAmount} ${corCurSymbol}`}
+            InputProps={{
+              startAdornment: (
+                <Box component='span'>
+                  <Typography component='span'>{owiFields?.corAmount}</Typography>
+                  <Typography
+                    component='span'
+                    sx={{
+                      color: 'red',
+                      ml: 1
+                    }}
+                  >
+                    {corCurSymbol}
+                  </Typography>
+                </Box>
+              )
+            }}
           />
         </Grid>
+
         <Grid item xs={12} sx={{ mx: 5 }}>
           <CustomTextField
             name='corComission'
             readOnly
             label={labels.corComission}
-            value={`${owiFields?.corCommission} ${corCurSymbol}`}
+            InputProps={{
+              startAdornment: (
+                <Box component='span'>
+                  <Typography component='span'>{owiFields?.corCommission}</Typography>
+                  <Typography
+                    component='span'
+                    sx={{
+                      color: 'red',
+                      ml: 1
+                    }}
+                  >
+                    {corCurSymbol}
+                  </Typography>
+                </Box>
+              )
+            }}
           />
         </Grid>
         <Grid item xs={12} sx={{ mx: 5 }}>
@@ -122,7 +167,22 @@ export default function InfoForm({ labels, formik }) {
             name='corBaseAmount'
             readOnly
             label={labels.corBaseAmount}
-            value={`${owiFields?.corBaseAmount} ${baseCurSymbol}`}
+            InputProps={{
+              startAdornment: (
+                <Box component='span'>
+                  <Typography component='span'>{owiFields?.corBaseAmount}</Typography>
+                  <Typography
+                    component='span'
+                    sx={{
+                      color: 'red',
+                      ml: 1
+                    }}
+                  >
+                    {baseCurSymbol}
+                  </Typography>
+                </Box>
+              )
+            }}
           />
         </Grid>
         <Grid item xs={12} sx={{ mx: 5 }}>
@@ -130,7 +190,22 @@ export default function InfoForm({ labels, formik }) {
             name='grossProfitFromExRate'
             readOnly
             label={labels.grossProfit}
-            value={`${owiFields?.grossProfit} ${baseCurSymbol}`}
+            InputProps={{
+              startAdornment: (
+                <Box component='span'>
+                  <Typography component='span'>{owiFields?.grossProfit}</Typography>
+                  <Typography
+                    component='span'
+                    sx={{
+                      color: 'red',
+                      ml: 1
+                    }}
+                  >
+                    {baseCurSymbol}
+                  </Typography>
+                </Box>
+              )
+            }}
           />
         </Grid>
         <Grid item xs={12} sx={{ mx: 5 }}>
@@ -138,7 +213,22 @@ export default function InfoForm({ labels, formik }) {
             name='netCommssionCost'
             readOnly
             label={labels.netCommission}
-            value={`${owiFields?.baseCorCommission} ${baseCurSymbol}`}
+            InputProps={{
+              startAdornment: (
+                <Box component='span'>
+                  <Typography component='span'>{owiFields?.baseCorCommission}</Typography>
+                  <Typography
+                    component='span'
+                    sx={{
+                      color: 'red',
+                      ml: 1
+                    }}
+                  >
+                    {baseCurSymbol}
+                  </Typography>
+                </Box>
+              )
+            }}
           />
         </Grid>
         <Grid item xs={12} sx={{ mx: 5 }}>
@@ -146,7 +236,22 @@ export default function InfoForm({ labels, formik }) {
             name='netCommissionRevenue'
             readOnly
             label={labels.netCommissionRevenue}
-            value={`${owiFields?.netCommissionRevenue} ${baseCurSymbol}`}
+            InputProps={{
+              startAdornment: (
+                <Box component='span'>
+                  <Typography component='span'>{owiFields?.netCommissionRevenue}</Typography>
+                  <Typography
+                    component='span'
+                    sx={{
+                      color: 'red',
+                      ml: 1
+                    }}
+                  >
+                    {baseCurSymbol}
+                  </Typography>
+                </Box>
+              )
+            }}
           />
         </Grid>
       </Grid>

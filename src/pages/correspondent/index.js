@@ -80,6 +80,11 @@ const Correspondent = () => {
       flex: 1
     },
     {
+      field: 'cgName',
+      headerName: _labels.group,
+      flex: 1
+    },
+    {
       field: 'currencyRef',
       headerName: _labels.currency,
       flex: 1
