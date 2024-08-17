@@ -199,6 +199,7 @@ const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore,
                 name='cgId'
                 label={labels.group}
                 valueField='recordId'
+                required
                 displayField={['reference', 'name']}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
@@ -207,8 +208,6 @@ const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore,
                 values={formik.values}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('cgId', newValue?.recordId)
-                  formik.setFieldValue('cgName', newValue?.cgName)
-                  formik.setFieldValue('cgRef', newValue?.cgRef)
                 }}
                 error={formik.touched.cgId && Boolean(formik.errors.cgId)}
               />
