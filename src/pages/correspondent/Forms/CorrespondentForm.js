@@ -70,7 +70,7 @@ const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore,
             recordId: res.recordId
           }))
           toast.success(platformLabels.Added)
-
+          getCorrespondentById(res.recordId)
           formik.setFieldValue('recordId', res.recordId)
         } else {
           toast.success(platformLabels.Edited)
