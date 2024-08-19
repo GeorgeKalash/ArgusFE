@@ -17,7 +17,7 @@ import { SaleRepository } from 'src/repositories/SaleRepository'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { DataSets } from 'src/resources/DataSets'
 
-export default function DocumentTypeDefaultForm({ labels, maxAccess, dtId, functionId }) {
+export default function DocumentTypeDefaultForm({ labels, maxAccess, recordId, functionId }) {
   const { platformLabels } = useContext(ControlContext)
 
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -28,9 +28,9 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, dtId, funct
 
   const { formik } = useForm({
     initialValues: {
-      recordId: dtId || null,
-      commitItems: false,
       dtId: '',
+      recordId: recordId || null,
+      commitItems: false,
       plantId: '',
       spId: '',
       allocateBy: null,
@@ -81,13 +81,18 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, dtId, funct
   useEffect(() => {
     ;(async function () {
       try {
-        if (dtId) {
+        if (recordId) {
           const res = await getRequest({
             extension: SaleRepository.DocumentTypeDefault.get,
-            parameters: `_dtId=${dtId}`
+            parameters: `_dtId=${recordId}`
           })
 
-          formik.setValues({ ...res.record, recordId: res.record.dtId, allocateBy: res.record.allocateBy || '' })
+          formik.setValues({
+            ...res.record,
+            recordId: res.record.dtId,
+            allocateBy: res.record.allocateBy || '',
+            disableSKULookup: Boolean(res.record.disableSKULookup)
+          })
         }
       } catch (exception) {}
     })()
