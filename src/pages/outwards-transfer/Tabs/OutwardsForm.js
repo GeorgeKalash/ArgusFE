@@ -684,39 +684,41 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       return product
     }
 
-    if (data.length === 1) {
-      const matchingRate = getRates.list.find(
-        rate => data[0].originAmount >= rate.amountRangeFrom && data[0].originAmount <= rate.amountRangeTo
-      )
+    if (getRates?.list) {
+      if (data.length === 1) {
+        const matchingRate = getRates.list.find(
+          rate => data[0].originAmount >= rate.amountRangeFrom && data[0].originAmount <= rate.amountRangeTo
+        )
 
-      const updatedProduct = updateICProduct(data[0], matchingRate)
+        const updatedProduct = updateICProduct(data[0], matchingRate)
 
-      if (matchingRate) {
-        if (formik.values.lcAmount) formik.setFieldValue('fcAmount', matchingRate.originAmount)
-        if (formik.values.fcAmount) formik.setFieldValue('lcAmount', matchingRate.baseAmount)
-      }
+        if (matchingRate) {
+          if (formik.values.lcAmount) formik.setFieldValue('fcAmount', matchingRate.originAmount)
+          if (formik.values.fcAmount) formik.setFieldValue('lcAmount', matchingRate.baseAmount)
+        }
 
-      formik.setFieldValue('products[0].checked', true)
-      !editMode && handleSelectedProduct(updatedProduct)
-      formik.setFieldValue('products', [updatedProduct])
-    } else {
-      handleSelectedProduct()
+        formik.setFieldValue('products[0].checked', true)
+        !editMode && handleSelectedProduct(updatedProduct)
+        formik.setFieldValue('products', [updatedProduct])
+      } else {
+        !editMode && handleSelectedProduct()
 
-      const updatedData = data.map(item =>
-        item.interfaceId === 1
-          ? updateICProduct(
-              item,
-              getRates.list.find(
-                rate => item.originAmount >= rate.amountRangeFrom && item.originAmount <= rate.amountRangeTo
+        const updatedData = data.map(item =>
+          item.interfaceId === 1
+            ? updateICProduct(
+                item,
+                getRates.list.find(
+                  rate => item.originAmount >= rate.amountRangeFrom && item.originAmount <= rate.amountRangeTo
+                )
               )
-            )
-          : item
-      )
+            : item
+        )
 
-      formik.setFieldValue('products', updatedData)
-      const matchedIndex = updatedData.findIndex(product => product.productId === data.productId)
-      if (matchedIndex) {
-        formik.setFieldValue(`products[${matchedIndex}].checked`, true)
+        formik.setFieldValue('products', updatedData)
+        const matchedIndex = updatedData.findIndex(product => product.productId === data.productId)
+        if (matchedIndex) {
+          formik.setFieldValue(`products[${matchedIndex}].checked`, true)
+        }
       }
     }
   }
@@ -727,7 +729,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       formik.setFieldValue('products[0].checked', true)
       !editMode && handleSelectedProduct(data[0])
     } else {
-      handleSelectedProduct()
+      !editMode && handleSelectedProduct()
       const matchedIndex = data.findIndex(product => product.productId === data.productId)
       if (matchedIndex) {
         formik.setFieldValue(`products[${matchedIndex}].checked`, true)
