@@ -17,7 +17,6 @@ import { ControlContext } from 'src/providers/ControlContext'
 export default function CostCenterForm({ labels, maxAccess, recordId, onSubmit }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const editMode = !!recordId
 
   const { formik } = useForm({
     initialValues: {
@@ -57,6 +56,8 @@ export default function CostCenterForm({ labels, maxAccess, recordId, onSubmit }
   const invalidate = useInvalidate({
     endpointId: GeneralLedgerRepository.CostCenter.page
   })
+
+  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
