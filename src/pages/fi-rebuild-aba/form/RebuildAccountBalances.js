@@ -19,15 +19,13 @@ export default function RebuildAccountBalances({ _labels, access }) {
   const { platformLabels } = useContext(ControlContext)
 
   const { formik } = useForm({
-    initialValues: { fiscalYear: '', groupId: '', recordId: 'N/A', accountId: '' },
+    initialValues: { fiscalYear: '', groupId: 0, recordId: 'N/A', accountId: 0 },
     enableReinitialize: true,
     maxAccess: access,
     validateOnChange: true,
 
     validationSchema: yup.object({
-      fiscalYear: yup.string().required(' '),
-      groupId: yup.string().required(' '),
-      accountId: yup.string().required(' ')
+      fiscalYear: yup.string().required(' ')
     }),
     onSubmit: async obj => {
       try {
@@ -89,7 +87,6 @@ export default function RebuildAccountBalances({ _labels, access }) {
             </Grid>
             <Grid item xs={12}>
               <ResourceLookup
-                required
                 endpointId={FinancialRepository.Account.snapshot}
                 name='accountId'
                 label={_labels.account}
@@ -119,7 +116,6 @@ export default function RebuildAccountBalances({ _labels, access }) {
                 valueField='recordId'
                 displayField='name'
                 values={formik.values}
-                required
                 onChange={(event, newValue) => {
                   formik.setFieldValue('groupId', newValue?.recordId || null)
                 }}
