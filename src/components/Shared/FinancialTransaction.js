@@ -22,12 +22,14 @@ const FinancialTransaction = ({ formValues, functionId }) => {
   const {
     query: { data },
     labels: labels,
-
     access
   } = useResourceQuery({
-    queryFn: fetchGridData,
     endpointId: FinancialRepository.FinancialTransaction.qry,
-    datasetId: ResourceIds.FinancialTransaction
+    datasetId: ResourceIds.FinancialTransaction,
+    filter: {
+      filterFn: fetchGridData,
+      default: { functionId }
+    }
   })
 
   const columns = [

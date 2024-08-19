@@ -11,11 +11,12 @@ import { useResourceQuery } from 'src/hooks/resource'
 import RecordRemarksForm from './RecordRemarksForm'
 import { useWindow } from 'src/windows'
 import DeleteDialog from '../DeleteDialog'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const RecordRemarks = ({ recordId, resourceId, expanded }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState([false, {}])
+  const { platformLabels } = useContext(ControlContext)
   const userId = JSON.parse(window.sessionStorage.getItem('userData'))?.userId
 
   const fetchGridData = () => {
@@ -61,12 +62,27 @@ const RecordRemarks = ({ recordId, resourceId, expanded }) => {
   }
 
   const onDelete = async obj => {
+    console.log(obj)
     await postRequest({
       extension: SystemRepository.RecordRemarks.del,
       record: JSON.stringify(obj)
     })
     toast.success('Record Deleted Successfully')
     invalidate()
+  }
+
+  function openDelete(obj) {
+    stack({
+      Component: DeleteDialog,
+      props: {
+        open: [true, {}],
+        fullScreen: false,
+        onConfirm: () => onDelete(obj)
+      },
+      width: 450,
+      height: 170,
+      title: platformLabels.Delete
+    })
   }
 
   return (
@@ -104,7 +120,13 @@ const RecordRemarks = ({ recordId, resourceId, expanded }) => {
                       </IconButton>
 
                       {row.userId === userId && (
-                        <IconButton size='small' onClick={() => setDeleteDialogOpen([true, row])} color='error'>
+                        <IconButton
+                          size='small'
+                          onClick={() => {
+                            openDelete(row)
+                          }}
+                          color='error'
+                        >
                           <Icon icon='mdi:delete-forever' fontSize={18} />
                         </IconButton>
                       )}
@@ -116,15 +138,6 @@ const RecordRemarks = ({ recordId, resourceId, expanded }) => {
           </Table>
         </TableContainer>
       </Grid>
-
-      <DeleteDialog
-        open={deleteDialogOpen}
-        onClose={() => setDeleteDialogOpen([false, {}])}
-        onConfirm={obj => {
-          setDeleteDialogOpen([false, {}])
-          onDelete(obj)
-        }}
-      />
     </Box>
   )
 }

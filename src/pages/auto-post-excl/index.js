@@ -101,7 +101,7 @@ const AutoPostExclusion = () => {
         maxAccess: access
       },
       width: 800,
-      height: 550,
+      height: 450,
       title: _labels.autoPostExclusion
     })
   }

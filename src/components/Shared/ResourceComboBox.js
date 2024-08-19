@@ -79,7 +79,7 @@ export default function ResourceComboBox({
         refresh,
         fetchData,
         name,
-        store: (dataGrid ? cacheStore[apiUrl] : store) || data,
+        store: (dataGrid ? cacheStore[apiUrl] : filteredStore) || data,
         valueField,
         value: _value,
         name,

@@ -46,7 +46,6 @@ export default function AutoPostExclusionForm({ labels, maxAccess, recordId }) {
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),
-      plantGroupId: yup.string().required(),
       functionId: yup.string().required(),
       minAmount: yup
         .number()
@@ -112,192 +111,200 @@ export default function AutoPostExclusionForm({ labels, maxAccess, recordId }) {
   return (
     <FormShell resourceId={ResourceIds.AutoPostExclusion} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
-        <Grow>
-          <Grid container spacing={4}>
-            <Grid item xs={12}>
-              <CustomTextField
-                name='name'
-                label={labels.name}
-                value={formik.values.name}
-                required
-                maxAccess={maxAccess}
-                maxLength='30'
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('name', '')}
-                error={formik.touched.name && Boolean(formik.errors.name)}
-              />
-            </Grid>
-            <Grid item xs={12}>
+        <Grid container gap={2}>
+          <Grow>
+            <Grid container gap={2}>
+              <Grid item xs={12}>
+                <CustomTextField
+                  name='name'
+                  label={labels.name}
+                  value={formik.values.name}
+                  required
+                  maxAccess={maxAccess}
+                  maxLength='30'
+                  onChange={formik.handleChange}
+                  onClear={() => formik.setFieldValue('name', '')}
+                  error={formik.touched.name && Boolean(formik.errors.name)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    datasetId={DataSets.RT_Function}
+                    name='functionId'
+                    label={labels.function}
+                    required
+                    valueField='key'
+                    displayField='value'
+                    values={formik.values}
+                    maxAccess={maxAccess}
+                    onClear={() => formik.setFieldValue('functionId', '')}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('functionId', newValue?.key || '')
+                    }}
+                    error={formik.touched.functionId && Boolean(formik.errors.functionId)}
+                  />
+                </Grid>
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceLookup
+                  endpointId={RemittanceSettingsRepository.Correspondent.snapshot}
+                  valueField='reference'
+                  displayField='name'
+                  name='corId'
+                  label={labels.corName}
+                  form={formik}
+                  displayFieldWidth={2}
+                  valueShow='corRef'
+                  readOnly={editMode}
+                  secondValueShow='corName'
+                  maxAccess={maxAccess}
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('corId', newValue ? newValue.recordId : '')
+                    formik.setFieldValue('corName', newValue ? newValue.name : '')
+                    formik.setFieldValue('corRef', newValue ? newValue.reference : '')
+                  }}
+                />
+              </Grid>
               <Grid item xs={12}>
                 <ResourceComboBox
-                  datasetId={DataSets.RT_Function}
-                  name='functionId'
-                  label={labels.function}
-                  required
-                  valueField='key'
-                  displayField='value'
+                  endpointId={SystemRepository.Currency.qry}
+                  name='currencyId'
+                  label={labels.currencyName}
+                  valueField='recordId'
+                  readOnly={editMode}
+                  displayField={['reference', 'name', 'flName']}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' },
+                    { key: 'flName', value: 'FL Name' }
+                  ]}
                   values={formik.values}
                   maxAccess={maxAccess}
-                  onClear={() => formik.setFieldValue('functionId', '')}
                   onChange={(event, newValue) => {
-                    formik.setFieldValue('functionId', newValue?.key || '')
+                    formik.setFieldValue('currencyId', newValue?.recordId || null)
                   }}
-                  error={formik.touched.functionId && Boolean(formik.errors.functionId)}
+                  error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  name='dispersalType'
+                  label={labels.dispersal}
+                  datasetId={DataSets.RT_Dispersal_Type}
+                  valueField='key'
+                  readOnly={editMode}
+                  displayField='value'
+                  values={formik.values}
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('dispersalType', newValue?.key)
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  endpointId={SystemRepository.Country.qry}
+                  name='countryId'
+                  label={labels.country}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' },
+                    { key: 'flName', value: 'FL Name' }
+                  ]}
+                  readOnly={editMode}
+                  values={formik.values}
+                  valueField='recordId'
+                  displayField={['reference', 'name', 'flName']}
+                  maxAccess={maxAccess}
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('countryId', newValue?.recordId)
+                  }}
+                  error={formik.touched.countryId && Boolean(formik.errors.countryId)}
                 />
               </Grid>
             </Grid>
-            <Grid item xs={12}>
-              <ResourceLookup
-                endpointId={RemittanceSettingsRepository.Correspondent.snapshot}
-                valueField='reference'
-                displayField='name'
-                name='corId'
-                label={labels.corName}
-                form={formik}
-                displayFieldWidth={2}
-                valueShow='corRef'
-                secondValueShow='corName'
-                maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('corId', newValue ? newValue.recordId : '')
-                  formik.setFieldValue('corName', newValue ? newValue.name : '')
-                  formik.setFieldValue('corRef', newValue ? newValue.reference : '')
-                }}
-              />
+          </Grow>
+          <Grow>
+            <Grid container gap={2}>
+              <Grid item xs={12}>
+                <CustomNumberField
+                  name='minAmount'
+                  label={labels.minAmount}
+                  value={formik.values.minAmount}
+                  maxAccess={maxAccess}
+                  onChange={e => formik.setFieldValue('minAmount', e.target.value)}
+                  onClear={() => formik.setFieldValue('minAmount', '')}
+                  error={formik.touched.minAmount && Boolean(formik.errors.minAmount)}
+                  decimalScale={2}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <CustomNumberField
+                  name='maxAmount'
+                  label={labels.maxAmount}
+                  value={formik.values.maxAmount}
+                  maxAccess={maxAccess}
+                  onChange={e => formik.setFieldValue('maxAmount', e.target.value)}
+                  onClear={() => formik.setFieldValue('maxAmount', '')}
+                  error={formik.touched.maxAmount && Boolean(formik.errors.maxAmount)}
+                  decimalScale={2}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  endpointId={SystemRepository.PlantGroup.qry}
+                  name='plantGroupId'
+                  label={labels.plantGroup}
+                  readOnly={editMode}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' }
+                  ]}
+                  values={formik.values}
+                  valueField='recordId'
+                  displayField={['reference', 'name']}
+                  maxAccess={maxAccess}
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('plantGroupId', newValue?.recordId)
+                  }}
+                  error={formik.touched.plantGroupId && Boolean(formik.errors.plantGroupId)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  endpointId={RemittanceSettingsRepository.CorrespondentGroup.qry}
+                  name='cgId'
+                  readOnly={editMode}
+                  label={labels.correspondentGroup}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' }
+                  ]}
+                  values={formik.values}
+                  valueField='recordId'
+                  displayField='name'
+                  maxAccess={maxAccess}
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('cgId', newValue?.recordId)
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      name='isInactive'
+                      maxAccess={maxAccess}
+                      checked={formik.values?.isInactive}
+                      onChange={formik.handleChange}
+                    />
+                  }
+                  label={labels.isInactive}
+                />
+              </Grid>
             </Grid>
-            <Grid item xs={12}>
-              <ResourceComboBox
-                endpointId={SystemRepository.Currency.qry}
-                name='currencyId'
-                label={labels.currencyName}
-                valueField='recordId'
-                displayField={['reference', 'name', 'flName']}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' },
-                  { key: 'flName', value: 'FL Name' }
-                ]}
-                values={formik.values}
-                maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('currencyId', newValue?.recordId || null)
-                }}
-                error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <ResourceComboBox
-                name='dispersalType'
-                label={labels.dispersal}
-                datasetId={DataSets.RT_Dispersal_Type}
-                valueField='key'
-                readOnly={editMode}
-                displayField='value'
-                values={formik.values}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('dispersalType', newValue?.key)
-                }}
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <ResourceComboBox
-                endpointId={SystemRepository.Country.qry}
-                name='countryId'
-                label={labels.country}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' },
-                  { key: 'flName', value: 'FL Name' }
-                ]}
-                values={formik.values}
-                valueField='recordId'
-                displayField={['reference', 'name', 'flName']}
-                maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('countryId', newValue?.recordId)
-                }}
-                error={formik.touched.countryId && Boolean(formik.errors.countryId)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomNumberField
-                name='minAmount'
-                label={labels.minAmount}
-                value={formik.values.minAmount}
-                maxAccess={maxAccess}
-                onChange={e => formik.setFieldValue('minAmount', e.target.value)}
-                onClear={() => formik.setFieldValue('minAmount', '')}
-                error={formik.touched.minAmount && Boolean(formik.errors.minAmount)}
-                decimalScale={2}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomNumberField
-                name='maxAmount'
-                label={labels.maxAmount}
-                value={formik.values.maxAmount}
-                maxAccess={maxAccess}
-                onChange={e => formik.setFieldValue('maxAmount', e.target.value)}
-                onClear={() => formik.setFieldValue('maxAmount', '')}
-                error={formik.touched.maxAmount && Boolean(formik.errors.maxAmount)}
-                decimalScale={2}
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <ResourceComboBox
-                endpointId={SystemRepository.PlantGroup.qry}
-                name='plantGroupId'
-                required
-                label={labels.plantGroup}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
-                values={formik.values}
-                valueField='recordId'
-                displayField={['reference', 'name']}
-                maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('plantGroupId', newValue?.recordId)
-                }}
-                error={formik.touched.plantGroupId && Boolean(formik.errors.plantGroupId)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <ResourceComboBox
-                endpointId={RemittanceSettingsRepository.CorrespondentGroup.qry}
-                name='cgId'
-                label={labels.correspondentGroup}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
-                values={formik.values}
-                valueField='recordId'
-                displayField='name'
-                maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('cgId', newValue?.recordId)
-                }}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='isInactive'
-                    maxAccess={maxAccess}
-                    checked={formik.values?.isInactive}
-                    onChange={formik.handleChange}
-                  />
-                }
-                label={labels.isInactive}
-              />
-            </Grid>
-          </Grid>
-        </Grow>
+          </Grow>
+        </Grid>
       </VertLayout>
     </FormShell>
   )

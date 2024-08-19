@@ -104,7 +104,7 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
     onSubmit: async values => {
       {
         const data = {
-          transactions: values.generalAccount.map(({ id, exRate, tpAccount, functionId, ...rest }) => ({
+          transactions: values.generalAccount.map(({ id, tpAccount, functionId, ...rest }) => ({
             seqNo: id,
             ...rest
           })),
@@ -113,6 +113,8 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
           recordId: formValues.recordId,
           reference: values.reference
         }
+
+        console.log(data)
 
         const response = await postRequest({
           extension: GeneralLedgerRepository.GeneralLedger.set2,
@@ -135,7 +137,10 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
     labels: _labels,
     access
   } = useResourceQuery({
-    queryFn: fetchGridData,
+    filter: {
+      filterFn: fetchGridData,
+      default: { functionId }
+    },
 
     datasetId: ResourceIds.GeneralLedger
   })
@@ -389,7 +394,7 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
               label: _labels.accountName,
               name: 'accountName',
               props: {
-                readOnly: !isRaw
+                readOnly: true
               }
             },
             {
@@ -417,7 +422,7 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
               component: 'textfield',
               label: _labels.thirdPartyName,
               props: {
-                readOnly: !isRaw
+                readOnly: true
               },
               name: 'tpAccountName'
             },
@@ -447,7 +452,7 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
               component: 'textfield',
               label: _labels.costName,
               props: {
-                readOnly: !isRaw
+                readOnly: true
               },
               name: 'costCenterName'
             },

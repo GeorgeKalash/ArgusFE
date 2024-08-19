@@ -40,7 +40,7 @@ export default function CbBanksForms({ labels, maxAccess, recordId, setStore }) 
     validationSchema: yup.object({
       name: yup.string().required(' '),
       reference: yup.string().required(' '),
-      swiftCode: yup.number()
+      swiftCode: yup.string().required(' ')
     }),
     onSubmit: async obj => {
       const response = await postRequest({
