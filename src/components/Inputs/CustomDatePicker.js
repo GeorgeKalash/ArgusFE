@@ -125,11 +125,11 @@ const CustomDatePicker = ({
             }
           },
           actionBar: {
-            actions: ['today']
+            actions: ['accept', 'today']
           }
         }}
         slots={{
-          actionBar: (props) => (<PickersActionBar {...props} actions={['today']} />)
+          actionBar: (props) => (<PickersActionBar {...props} actions={['accept', 'today']} />)
         }}
       />
     </LocalizationProvider>
