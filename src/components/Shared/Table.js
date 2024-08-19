@@ -404,16 +404,6 @@ const Table = ({
 
           return (
             <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
-              {props?.onEdit && (
-                <IconButton
-                  size='small'
-                  onClick={e => {
-                    props?.onEdit(data)
-                  }}
-                >
-                  <Image src={editIcon} alt='Edit' width={18} height={18} />
-                </IconButton>
-              )}
               {props?.popupComponent && (
                 <IconButton
                   size='small'
@@ -424,6 +414,17 @@ const Table = ({
                   <Image src={'/images/TableIcons/documentCheck.png'} alt='Edit' width={18} height={18} />
                 </IconButton>
               )}
+              {props?.onEdit && (
+                <IconButton
+                  size='small'
+                  onClick={e => {
+                    props?.onEdit(data)
+                  }}
+                >
+                  <Image src={editIcon} alt='Edit' width={18} height={18} />
+                </IconButton>
+              )}
+
               {!globalStatus && deleteBtnVisible && (
                 <IconButton
                   size='small'
