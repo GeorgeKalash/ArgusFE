@@ -82,12 +82,12 @@ const ConsignmentSites = () => {
     } catch (error) {}
   }
 
-  function openForm(clientId) {
+  function openForm(record) {
     stack({
       Component: ConsignmentSitesForm,
       props: {
         labels: _labels,
-        clientId,
+        recordId: record?.clientId,
         maxAccess: access
       },
       width: 600,
@@ -97,7 +97,7 @@ const ConsignmentSites = () => {
   }
 
   const edit = obj => {
-    openForm(obj?.clientId)
+    openForm(obj)
   }
 
   return (
