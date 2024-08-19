@@ -534,7 +534,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       bldgNo: obj.bldgNo,
       unitNo: obj.unitNo,
       subNo: obj.subNo,
-      poBox: obj.poBox,
+      poBox: obj.poBox
     }
 
     const obj6 = {
@@ -663,6 +663,12 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       key: 'Client Relation',
       condition: true,
       onClick: 'onClientRelation',
+      disabled: !editMode
+    },
+    {
+      key: 'Client Relation',
+      condition: true,
+      onClick: 'onAddClientRelation',
       disabled: !editMode
     },
     {

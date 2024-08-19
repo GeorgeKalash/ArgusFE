@@ -32,6 +32,7 @@ export default function FormShell({
   isPosted = false,
   isClosed = false,
   clientRelation = false,
+  addClientRelation = false,
   setErrorMessage,
   previewReport = false,
   setIDInfoAutoFilled,
@@ -197,6 +198,20 @@ export default function FormShell({
             })
           }
           onClientRelation={() =>
+            stack({
+              Component: ClientRelationForm,
+              props: {
+                recordId: form.values?.recordId ?? form.values.clientId,
+                name: form.values.firstName ? form.values.firstName + ' ' + form.values.lastName : form.values.name,
+                reference: form.values.reference,
+                setErrorMessage: setErrorMessage
+              },
+              width: 900,
+              height: 600,
+              title: platformLabels.ClientRelation
+            })
+          }
+          onAddClientRelation={() =>
             stack({
               Component: ClientRelationForm,
               props: {
