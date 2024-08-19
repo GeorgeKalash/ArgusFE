@@ -17,8 +17,7 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { DataSets } from 'src/resources/DataSets'
 import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
-import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
-import { SystemFunction } from 'src/resources/SystemFunction'
+import { useFieldBehavior } from 'src/hooks/useFieldBehaviors'
 
 export default function VendorsForm({ labels, maxAccess: access, recordId, setStore }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -28,10 +27,9 @@ export default function VendorsForm({ labels, maxAccess: access, recordId, setSt
     endpointId: PurchaseRepository.Vendor.page
   })
 
-  const { maxAccess, changeDT } = useDocumentType({
-    functionId: SystemFunction.Vendor,
+  const { maxAccess, changeDT } = useFieldBehavior({
     access: access,
-    enabled: !recordId
+    editMode: !!recordId
   })
 
   const { formik } = useForm({
@@ -135,6 +133,7 @@ export default function VendorsForm({ labels, maxAccess: access, recordId, setSt
                 label={labels.vendorGroup}
                 valueField='recordId'
                 displayField={['reference', 'name']}
+                readOnly={!!editMode}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
