@@ -666,7 +666,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       disabled: !editMode
     },
     {
-      key: 'Client Relation',
+      key: 'Add Client Relation',
       condition: true,
       onClick: 'onAddClientRelation',
       disabled: !editMode
