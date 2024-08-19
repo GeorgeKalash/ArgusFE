@@ -26,8 +26,8 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, recordId })
 
   const { formik } = useForm({
     initialValues: {
-      dtId: '',
       recordId: recordId || null,
+      dtId: '',
       spId: '',
       commitItems: false,
       disableSKULookup: false,
@@ -56,7 +56,9 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, recordId })
     }
   })
   const editMode = !!formik.values.recordId
-  console.log(recordId)
+
+  console.log(formik.values)
+
   useEffect(() => {
     ;(async function () {
       try {
@@ -65,6 +67,7 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, recordId })
             extension: SaleRepository.DocumentTypeDefault.get,
             parameters: `_dtId=${recordId}`
           })
+          console.log(res.record, 'res')
 
           formik.setValues({ ...res.record, recordId: recordId })
         }
