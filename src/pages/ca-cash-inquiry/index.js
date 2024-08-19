@@ -57,12 +57,14 @@ const CashEnquiry = () => {
     {
       field: 'amount',
       headerName: _labels.amount,
-      flex: 1
+      flex: 1,
+      type: 'number'
     },
     {
       field: 'baseAmount',
       headerName: _labels.BaseAmount,
-      flex: 1
+      flex: 1,
+      type: 'number'
     },
     {
       field: 'cashAccountRef',
