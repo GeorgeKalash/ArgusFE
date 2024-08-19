@@ -683,6 +683,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
 
       return product
     }
+    console.log('check enter 1', getRates?.list)
 
     if (getRates?.list) {
       if (data.length === 1) {
@@ -720,10 +721,14 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
           formik.setFieldValue(`products[${matchedIndex}].checked`, true)
         }
       }
+    } else {
+      console.log('check enter 2')
+      displayProduct(data)
     }
   }
 
   async function displayProduct(data) {
+    console.log('check enter 3', data)
     formik.setFieldValue('products', data)
     if (data.length === 1) {
       formik.setFieldValue('products[0].checked', true)
