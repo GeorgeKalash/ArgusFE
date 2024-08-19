@@ -421,7 +421,7 @@ const Table = ({
                     props?.popupComponent(data)
                   }}
                 >
-                  <Image src={editIcon} alt='Edit' width={18} height={18} />
+                  <Image src={'/images/TableIcons/documentCheck.png'} alt='Edit' width={18} height={18} />
                 </IconButton>
               )}
               {!globalStatus && deleteBtnVisible && (
