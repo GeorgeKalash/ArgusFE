@@ -34,7 +34,7 @@ export default function VendorsForm({ labels, maxAccess: access, recordId, setSt
 
   const { formik } = useForm({
     initialValues: {
-      recordId: recordId || null,
+      recordId: recordId,
       reference: '',
       name: '',
       flName: '',
@@ -76,9 +76,9 @@ export default function VendorsForm({ labels, maxAccess: access, recordId, setSt
             recordId: response.recordId,
             name: obj.name
           })
-
-          toast.success(platformLabels.Added)
           formik.setFieldValue('recordId', response.recordId)
+          getData(response.recordId)
+          toast.success(platformLabels.Added)
         } else toast.success(platformLabels.Edited)
 
         invalidate()
@@ -99,21 +99,25 @@ export default function VendorsForm({ labels, maxAccess: access, recordId, setSt
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: PurchaseRepository.Vendor.get,
-            parameters: `_recordId=${recordId}`
-          })
-          setStore({
-            recordId: res.record.recordId,
-            name: res.record.name
-          })
-          formik.setValues(res.record)
-        }
-      } catch (exception) {}
+      await getData(recordId)
     })()
   }, [])
+
+  const getData = async recordId => {
+    try {
+      if (recordId) {
+        const res = await getRequest({
+          extension: PurchaseRepository.Vendor.get,
+          parameters: `_recordId=${recordId}`
+        })
+        setStore({
+          recordId: res.record.recordId,
+          name: res.record.name
+        })
+        formik.setValues(res.record)
+      }
+    } catch (exception) {}
+  }
 
   return (
     <FormShell
