@@ -18,7 +18,7 @@ import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ControlContext } from 'src/providers/ControlContext'
 
-export default function RVDocTypeDefaultsForm({ labels, maxAccess, dtId }) {
+export default function RVDocTypeDefaultsForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
@@ -27,7 +27,7 @@ export default function RVDocTypeDefaultsForm({ labels, maxAccess, dtId }) {
   const { platformLabels } = useContext(ControlContext)
 
   const { formik } = useForm({
-    initialValues: { dtId: dtId, accountId: '', plantId: '', recordId: dtId },
+    initialValues: { accountId: '', plantId: '', dtId: '', recordId: recordId || null },
     maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
@@ -42,8 +42,8 @@ export default function RVDocTypeDefaultsForm({ labels, maxAccess, dtId }) {
         record: JSON.stringify(obj)
       })
 
-      if (!dtId) {
-        formik.setFieldValue('recordId', obj.dtId)
+      if (!formik.values.recordId) {
+        formik.setFieldValue('recordId', formik.values.dtId)
       }
 
       toast.success(platformLabels.Submit)
@@ -56,13 +56,13 @@ export default function RVDocTypeDefaultsForm({ labels, maxAccess, dtId }) {
   useEffect(() => {
     ;(async function () {
       try {
-        if (dtId) {
+        if (recordId) {
           const res = await getRequest({
             extension: FinancialRepository.FIDocTypeDefaults.get,
-            parameters: `_dtId=${dtId}`
+            parameters: `_dtId=${recordId}`
           })
 
-          formik.setValues({ ...res.record, recordId: dtId })
+          formik.setValues({ ...res.record, recordId: recordId })
         }
       } catch (exception) {}
     })()
