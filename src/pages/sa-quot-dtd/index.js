@@ -82,12 +82,12 @@ const DocumentTypeDefault = () => {
     } catch (error) {}
   }
 
-  function openForm(dtId) {
+  function openForm(record) {
     stack({
       Component: DocumentTypeDefaultForm,
       props: {
         labels: _labels,
-        dtId,
+        recordId: record?.dtId,
         maxAccess: access
       },
       width: 600,
@@ -97,7 +97,7 @@ const DocumentTypeDefault = () => {
   }
 
   const edit = obj => {
-    openForm(obj?.dtId)
+    openForm(obj)
   }
 
   return (
