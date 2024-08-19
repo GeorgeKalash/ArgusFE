@@ -96,7 +96,6 @@ export default function CityForm({ labels, recordId, maxAccess }) {
                 value={formik.values.reference}
                 required
                 maxAccess={maxAccess}
-                readOnly={editMode}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('reference', '')}
                 error={formik.touched.reference && formik.errors.reference}
@@ -109,7 +108,6 @@ export default function CityForm({ labels, recordId, maxAccess }) {
                 value={formik.values.name}
                 required
                 maxAccess={maxAccess}
-                readOnly={editMode}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
                 error={formik.touched.name && formik.errors.name}
