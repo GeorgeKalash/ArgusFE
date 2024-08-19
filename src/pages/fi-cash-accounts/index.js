@@ -5,15 +5,17 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import CashAccountForm from './forms/CashAccountForm'
 import { useWindow } from 'src/windows'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const CashAccounts = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
@@ -27,20 +29,13 @@ const CashAccounts = () => {
     return { ...response, _startAt: _startAt }
   }
 
-  async function fetchWithSearch({ qry }) {
-    return await getRequest({
-      extension: CashBankRepository.CashAccount.snapshot,
-      parameters: `_filter=${qry}&_type=2`
-    })
-  }
-
   const {
     query: { data },
     labels: _labels,
     refetch,
     search,
     clear,
-    paginationParameters,
+    invalidate,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -51,10 +46,12 @@ const CashAccounts = () => {
       searchFn: fetchWithSearch
     }
   })
-
-  const invalidate = useInvalidate({
-    endpointId: CashBankRepository.CashAccount.qry
-  })
+  async function fetchWithSearch({ qry }) {
+    return await getRequest({
+      extension: CashBankRepository.CashAccount.snapshot,
+      parameters: `_filter=${qry}&_type=2`
+    })
+  }
 
   const columns = [
     {
@@ -100,12 +97,14 @@ const CashAccounts = () => {
   ]
 
   const del = async obj => {
-    await postRequest({
-      extension: CashBankRepository.CashAccount.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success('Record Deleted Successfully')
+    try {
+      await postRequest({
+        extension: CashBankRepository.CashAccount.del,
+        record: JSON.stringify(obj)
+      })
+      invalidate()
+      toast.success(platformLabels.Deleted)
+    } catch (error) {}
   }
 
   const add = () => {
@@ -121,11 +120,10 @@ const CashAccounts = () => {
       props: {
         labels: _labels,
         recordId: recordId ? recordId : null,
-        maxAccess: access,
-        invalidate: invalidate
+        maxAccess: access
       },
       width: 600,
-      height: 600,
+      height: 500,
       title: _labels.cashAccount
     })
   }
@@ -153,7 +151,6 @@ const CashAccounts = () => {
           pageSize={50}
           maxAccess={access}
           refetch={refetch}
-          paginationParameters={paginationParameters}
           paginationType='client'
         />
       </Grow>

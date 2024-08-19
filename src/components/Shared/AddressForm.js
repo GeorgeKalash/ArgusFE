@@ -14,20 +14,25 @@ const AddressForm = ({ recordId, address, setAddress = () => {}, editMode, onSub
       record: JSON.stringify(data)
     }).then(res => {
       data.addressId = res.recordId
-      onSubmit(data)
-      toast.success('Record Updated Successfully')
+      if (recordId) {
+        toast.success('Record Edit Successfully')
+        onSubmit()
+      } else onSubmit(data)
     })
   }
+
   useEffect(() => {
     ;(async function () {
       if (recordId) {
-        const res = await getRequest({
-          extension: SystemRepository.Address.get,
-          parameters: `_filter=` + '&_recordId=' + recordId
-        })
-        setAddress(res.record)
+        try {
+          const res = await getRequest({
+            extension: SystemRepository.Address.get,
+            parameters: `_filter=` + '&_recordId=' + recordId
+          })
+          setAddress(res.record)
+        } catch (error) {}
       }
-    })
+    })()
   }, [recordId])
 
   return (

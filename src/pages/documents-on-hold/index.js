@@ -15,7 +15,7 @@ import CreditInvoiceForm from '../credit-invoice/Forms/CreditInvoiceForm'
 import { KVSRepository } from 'src/repositories/KVSRepository'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 import TransactionForm from '../currency-trading/forms/TransactionForm'
-import OutwardsTab from '../outwards-transfer/Tabs/OutwardsTab'
+import OutwardsForm from '../outwards-transfer/Tabs/OutwardsForm'
 import ClientTemplateForm from '../clients-list/forms/ClientTemplateForm'
 import { RTCLRepository } from 'src/repositories/RTCLRepository'
 
@@ -24,6 +24,7 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import CashCountForm from '../cash-count/forms/CashCountForm'
 import CashTransferTab from '../cash-transfer/Tabs/CashTransferTab'
+import OutwardsModificationForm from '../outwards-modification/Forms/OutwardsModificationForm'
 
 const DocumentsOnHold = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -33,7 +34,6 @@ const DocumentsOnHold = () => {
   const [selectedSeqNo, setSelectedSeqNo] = useState(null)
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
-  const [gridData, setGridData] = useState([])
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
@@ -50,23 +50,32 @@ const DocumentsOnHold = () => {
   const {
     query: { data },
     labels: _labels,
+    filterBy,
+    clearFilter,
     refetch,
+    clear,
     paginationParameters,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: DocumentReleaseRepository.DocumentsOnHold.qry,
-    datasetId: ResourceIds.DocumentsOnHold
+    datasetId: ResourceIds.DocumentsOnHold,
+    filter: {
+      endpointId: DocumentReleaseRepository.DocumentsOnHold.qry,
+      filterFn: fetchWithSearch
+    }
   })
 
-  const invalidate = useInvalidate({
-    endpointId: DocumentReleaseRepository.DocumentsOnHold.qry
-  })
-  const [searchValue, setSearchValue] = useState('')
+  async function fetchWithSearch({ options = {}, filters }) {
+    const { _startAt = 0, _pageSize = 50 } = options
 
-  function onSearchClear() {
-    setSearchValue('')
-    setGridData({ count: 0, list: [], message: '', statusId: 1 })
+    return (
+      filters.qry &&
+      (await getRequest({
+        extension: DocumentReleaseRepository.DocumentsOnHold.qry,
+        parameters: `_filter=${filters.qry}&_functionId=0&_reference=${filters.qry}&_sortBy=reference desc&_response=0&_status=1&_pageSize=${_pageSize}&_startAt=${_startAt}`
+      }))
+    )
   }
 
   const columns = [
@@ -86,10 +95,15 @@ const DocumentsOnHold = () => {
       flex: 1
     },
     {
+      field: 'strategyName',
+      headerName: _labels.strategy,
+      flex: 1
+    },
+    {
       field: 'date',
       headerName: _labels.date,
       flex: 1,
-      valueGetter: ({ row }) => formatDateDefault(row?.date)
+      type: 'date'
     }
   ]
 
@@ -185,7 +199,7 @@ const DocumentsOnHold = () => {
         break
 
       case SystemFunction.Outwards:
-        relevantComponent = OutwardsTab
+        relevantComponent = OutwardsForm
         labels = await getLabels(ResourceIds.OutwardsTransfer)
         relevantAccess = await getAccess(ResourceIds.OutwardsTransfer)
 
@@ -200,6 +214,16 @@ const DocumentsOnHold = () => {
 
         windowWidth = 1100
         title = labels.CashTransfer
+        break
+
+      case SystemFunction.OutwardsModification:
+        relevantComponent = OutwardsModificationForm
+        labels = await getLabels(ResourceIds.OutwardsModification)
+        relevantAccess = await getAccess(ResourceIds.OutwardsModification)
+
+        windowWidth = 1260
+        windowHeight = 720
+        title = labels.outwardsModification
         break
 
       default:
@@ -222,36 +246,17 @@ const DocumentsOnHold = () => {
     }
   }
 
-  const search = inp => {
-    setSearchValue(inp)
-    setGridData({ count: 0, list: [], message: '', statusId: 1 })
-    const input = inp
-
-    if (input) {
-      var parameters = `_startAt=0&_functionId=0&_reference=${input}&_sortBy=reference desc&_response=0&_status=1&_pageSize=50`
-
-      getRequest({
-        extension: DocumentReleaseRepository.DocumentsOnHold.qry,
-        parameters: parameters
-      })
-        .then(res => {
-          setGridData(res)
-        })
-        .catch(error => {
-          setErrorMessage(error)
-        })
-    } else {
-      setGridData({ count: 0, list: [], message: '', statusId: 1 })
-    }
-  }
-
   return (
     <VertLayout>
       <Fixed>
         <GridToolbar
           maxAccess={access}
-          onSearch={search}
-          onSearchClear={onSearchClear}
+          onSearch={value => {
+            filterBy('qry', value)
+          }}
+          onSearchClear={() => {
+            clearFilter('qry')
+          }}
           labels={_labels}
           inputSearch={true}
         />
@@ -259,7 +264,7 @@ const DocumentsOnHold = () => {
       <Grow>
         <Table
           columns={columns}
-          gridData={searchValue.length > 0 ? gridData : data}
+          gridData={data}
           rowId={['functionId', 'seqNo', 'recordId']}
           onEdit={edit}
           popupComponent={popupComponent}

@@ -13,7 +13,8 @@ export const RemittanceSettingsRepository = {
     page: service + 'pagePRO',
     get: service + 'getPRO',
     set: service + 'setPRO',
-    del: service + 'delPRO'
+    del: service + 'delPRO',
+    snapshot: service + 'snapshotPRO'
   },
   ProductCountries: {
     qry: service + 'qryPCO',
@@ -131,5 +132,26 @@ export const RemittanceSettingsRepository = {
     qry: service + 'qryIFM',
     get: service + 'getIFM',
     set2: service + 'set2IFM'
+  },
+  SourceOfIncomeType: {
+    qry: service + 'qrySIT',
+    page: service + 'pageSIT',
+    get: service + 'getSIT',
+    set: service + 'setSIT',
+    del: service + 'delSIT'
+  },
+  ProfessionGroups: {
+    qry: service + 'qryPFG',
+    page: service + 'pagePFG',
+    get: service + 'getPFG',
+    set: service + 'setPFG',
+    del: service + 'delPFG'
+  },
+  CorrespondentGroup: {
+    qry: service + 'qryCGP',
+    page: service + 'pageCGP',
+    get: service + 'getCGP',
+    set: service + 'setCGP',
+    del: service + 'delCGP'
   }
 }

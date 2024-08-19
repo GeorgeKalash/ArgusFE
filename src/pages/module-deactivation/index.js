@@ -87,16 +87,17 @@ const ModuleDeactivation = () => {
         obj.isInactive = true
       }
     })
+    try {
+      const resultObject = {
+        modules: checkedObjects
+      }
 
-    const resultObject = {
-      modules: checkedObjects
-    }
-
-    await postRequest({
-      extension: AccessControlRepository.ModuleDeactivation.set2,
-      record: JSON.stringify(resultObject)
-    })
-    toast.success('Record Updated Successfully')
+      await postRequest({
+        extension: AccessControlRepository.ModuleDeactivation.set2,
+        record: JSON.stringify(resultObject)
+      })
+      toast.success('Record Updated Successfully')
+    } catch (e) {}
   }
 
   return (
@@ -109,7 +110,6 @@ const ModuleDeactivation = () => {
           isLoading={false}
           maxAccess={access}
           showCheckboxColumn={true}
-          handleCheckedRows={() => {}}
           pagination={false}
         />
       </Grow>

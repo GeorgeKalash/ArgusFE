@@ -11,47 +11,34 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-const RelationList = ({ store , labels, editMode, maxAccess }) => {
+const RelationList = ({ store, labels, maxAccess }) => {
+  const { recordId } = store
+  const [relationGridData, setRelationGridData] = useState([])
+  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { stack } = useWindow()
+  const editMode = !!store.recordId
 
-const { recordId } = store
-const [relationGridData, setRelationGridData] = useState([])
-const { getRequest, postRequest } = useContext(RequestsContext)
-const { stack } = useWindow()
-
-
-useEffect(()=>{
-  recordId && getRelationGridData(recordId)
-},[recordId])
-
-  const getRelationGridData = bpId => {
-    setRelationGridData([])
-    const defaultParams = `_bpId=${bpId}`
-    var parameters = defaultParams
-
-    getRequest({
-      extension: BusinessPartnerRepository.Relation.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setRelationGridData(res)
+  const getRelationGridData = async bpId => {
+    try {
+      const res = await getRequest({
+        extension: BusinessPartnerRepository.Relation.qry,
+        parameters: `_bpId=${bpId}`
       })
-      .catch(error => {
-      })
+
+      setRelationGridData(res)
+    } catch (error) {}
   }
 
-  const delRelation = obj => {
-    const bpId = recordId
-    postRequest({
-      extension: BusinessPartnerRepository.Relation.del,
-      record: JSON.stringify(obj)
-    })
-      .then(res => {
-        toast.success('Record Deleted Successfully')
-        getRelationGridData(bpId)
+  const delRelation = async obj => {
+    try {
+      await postRequest({
+        extension: BusinessPartnerRepository.Relation.del,
+        record: JSON.stringify(obj)
       })
-      .catch(error => {
 
-      })
+      toast.success('Record Deleted Successfully')
+      await getRelationGridData(recordId)
+    } catch (error) {}
   }
 
   const columns = [
@@ -69,41 +56,42 @@ useEffect(()=>{
       field: 'startDate',
       headerName: labels.from,
       flex: 1,
-      valueGetter: ({ row }) => formatDateDefault(row?.startDate)
-
+      type: 'date'
     },
     {
       field: 'endDate',
       headerName: labels.to,
       flex: 1,
-      valueGetter: ({ row }) =>  formatDateDefault(row?.endDate)
-
+      type: 'date'
     }
   ]
 
   const addRelation = () => {
-    openForm('')
+    openForm()
   }
 
-  const editRelation = (obj) => {
+  const editRelation = obj => {
     openForm(obj?.recordId)
   }
 
-  const openForm = (id) => {
+  const openForm = id => {
     stack({
-      Component:  RelationForm,
+      Component: RelationForm,
       props: {
-            labels: labels,
-            maxAccess: maxAccess,
-            editMode : editMode,
-            recordId :  id,
-            bpId : recordId,
-            getRelationGridData : getRelationGridData
+        labels: labels,
+        maxAccess: maxAccess,
+        editMode: editMode,
+        recordId: id,
+        bpId: recordId,
+        getRelationGridData: getRelationGridData
       },
       width: 500,
       title: labels.relation
     })
   }
+  useEffect(() => {
+    recordId && getRelationGridData(recordId)
+  }, [recordId])
 
   return (
     <VertLayout>
@@ -121,8 +109,8 @@ useEffect(()=>{
           isLoading={false}
           maxAccess={maxAccess}
           pagination={false}
-        /> 
-      </Grow> 
+        />
+      </Grow>
     </VertLayout>
   )
 }

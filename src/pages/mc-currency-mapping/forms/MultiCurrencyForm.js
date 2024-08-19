@@ -12,10 +12,12 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useInvalidate } from 'src/hooks/resource'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function MultiCurrencyForm({ labels, maxAccess, currencyId, rateTypeId, window }) {
-  const [isLoading, setIsLoading] = useState(false)
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
+
   const editMode = !!currencyId && !!rateTypeId
 
   const invalidate = useInvalidate({
@@ -32,9 +34,9 @@ export default function MultiCurrencyForm({ labels, maxAccess, currencyId, rateT
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      currencyId: yup.string().required('This field is required'),
-      rateTypeId: yup.string().required('This field is required'),
-      exId: yup.string().required('This field is required')
+      currencyId: yup.string().required(' '),
+      rateTypeId: yup.string().required(' '),
+      exId: yup.string().required(' ')
     }),
     onSubmit: async obj => {
       const response = await postRequest({
@@ -43,29 +45,27 @@ export default function MultiCurrencyForm({ labels, maxAccess, currencyId, rateT
       })
 
       if (!currencyId && !rateTypeId) {
-        toast.success('Record Added Successfully')
+        toast.success(platformLabels.Added)
       } else {
-        toast.success('Record Edited Successfully')
+        toast.success(platformLabels.Edited)
       }
 
       invalidate()
     }
   })
-
   useEffect(() => {
     ;(async function () {
       try {
         if (rateTypeId && currencyId) {
-          setIsLoading(true)
-
           const res = await getRequest({
             extension: MultiCurrencyRepository.McExchangeMap.get,
             parameters: `_currencyId=${currencyId}&_rateTypeId=${rateTypeId}`
           })
-          formik.setValues(res.record)
+          formik.setValues({
+            ...res.record
+          })
         }
       } catch (e) {}
-      setIsLoading(false)
     })()
   }, [])
 
@@ -93,7 +93,6 @@ export default function MultiCurrencyForm({ labels, maxAccess, currencyId, rateT
                   formik && formik.setFieldValue('currencyId', newValue?.recordId)
                 }}
                 error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
-                helperText={formik.touched.currencyId && formik.errors.currencyId}
               />
             </Grid>
             <Grid item xs={12}>
@@ -115,7 +114,6 @@ export default function MultiCurrencyForm({ labels, maxAccess, currencyId, rateT
                   formik && formik.setFieldValue('rateTypeId', newValue?.recordId)
                 }}
                 error={formik.touched.rateTypeId && Boolean(formik.errors.rateTypeId)}
-                helperText={formik.touched.rateTypeId && formik.errors.rateTypeId}
               />
             </Grid>
             <Grid item xs={12}>
@@ -136,7 +134,6 @@ export default function MultiCurrencyForm({ labels, maxAccess, currencyId, rateT
                   formik.setFieldValue('exId', newValue?.recordId || null)
                 }}
                 error={formik.touched.exId && Boolean(formik.errors.exId)}
-                helperText={formik.touched.exId && formik.errors.exId}
               />
             </Grid>
           </Grid>

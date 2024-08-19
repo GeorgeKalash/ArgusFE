@@ -11,12 +11,14 @@ import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId: pId, countries, currencies } = store
   const [filters, setFilters] = useState(currencies)
   const [rowSelectionModel, setRowSelectionModel] = useState([])
+  const { platformLabels } = useContext(ControlContext)
 
   const formik = useFormik({
     enableReinitialize: false,
@@ -28,8 +30,7 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
           yup.object().shape({
             countryId: yup.string().required('currency  is required'),
             currencyId: yup.string().required('Country  is required'),
-            dispersalId: yup.string().required('Dispersal Type  is required'),
-            plantId: yup.string().required('plantId Type  is required')
+            dispersalId: yup.string().required('Dispersal Type  is required')
           })
         )
         .required('schedules array is required')
@@ -40,7 +41,7 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
           id: 1,
           productId: pId,
           seqNo: 1,
-          plantId: '',
+          plantId: 0,
           plantRef: '',
           plantName: '',
           countryId: '',
@@ -81,7 +82,7 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
       record: JSON.stringify(data)
     })
       .then(res => {
-        if (res) toast.success('Record Edited Successfully')
+        if (res) toast.success(platformLabels.Edited)
         setStore(prevStore => ({
           ...prevStore,
           plantId: lastObject.plantId,
@@ -137,7 +138,7 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
         endpointId: SystemRepository.Plant.qry,
         valueField: 'recordId',
         displayField: 'reference',
-        displayFieldWidth: 4,
+        displayFieldWidth: 2,
         mapping: [
           { from: 'recordId', to: 'plantId' },
           { from: 'name', to: 'plantName' },
@@ -225,6 +226,8 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
         valueField: 'key',
         displayField: 'value',
         displayFieldWidth: 2,
+        readOnly: true,
+        refresh: false,
         mapping: [
           { from: 'key', to: 'dispersalType' },
           { from: 'value', to: 'dispersalTypeName' },
@@ -278,17 +281,20 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
             value={formik.values.schedules}
             error={formik.errors.schedules}
             columns={columns}
-            onSelectionChange={row =>
-              row &&
-              setStore(prevStore => ({
-                ...prevStore,
-                plantId: row.plantId,
-                currencyId: row.currencyId,
-                countryId: row.countryId,
-                dispersalId: row.dispersalId,
-                _seqNo: row.seqNo
-              }))
-            }
+            rowSelectionModel={rowSelectionModel}
+            onSelectionChange={row => {
+              if (row) {
+                setStore(prevStore => ({
+                  ...prevStore,
+                  plantId: row.plantId,
+                  currencyId: row.currencyId,
+                  countryId: row.countryId,
+                  dispersalId: row.dispersalId,
+                  _seqNo: row.seqNo
+                }))
+                setRowSelectionModel(row.id)
+              }
+            }}
           />
         </Grow>
       </VertLayout>

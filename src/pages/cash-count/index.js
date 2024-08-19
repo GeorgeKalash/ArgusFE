@@ -1,51 +1,50 @@
-// ** React Imports
 import { useContext } from 'react'
-
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
-
-// ** Helpers
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
-
-// ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { CTTRXrepository } from 'src/repositories/CTTRXRepository'
 import CashCountForm from './forms/CashCountForm'
-import { CCTRXrepository } from 'src/repositories/CCTRXRepository'
-import { formatDateDefault } from 'src/lib/date-helper'
+import { CashCountRepository } from 'src/repositories/CashCountRepository'
+import { formatDateDefault, getTimeInTimeZone } from 'src/lib/date-helper'
+import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
+import { SystemFunction } from 'src/resources/SystemFunction'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const CashCount = () => {
   const { stack } = useWindow()
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
-  async function fetchGridData() {
+  async function fetchWithSearch({ options = {}, filters }) {
+    const { _startAt = 0, _pageSize = 50 } = options
+
     return await getRequest({
-      extension: CCTRXrepository.CashCountTransaction.qry,
-      parameters: `&filter=`
+      extension: CashCountRepository.CashCountTransaction.snapshot,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=${filters.qry}`
     })
   }
 
   const {
     query: { data },
+    filterBy,
+    clearFilter,
     labels: _labels,
     refetch,
-    invalidate,
-    access
+    access,
+    invalidate
   } = useResourceQuery({
-    queryFn: fetchGridData,
-    endpointId: CCTRXrepository.CashCountTransaction.qry,
-    datasetId: ResourceIds.CashCountTransaction
+    endpointId: CashCountRepository.CashCountTransaction.snapshot,
+    datasetId: ResourceIds.CashCountTransaction,
+    filter: {
+      endpointId: CashCountRepository.CashCountTransaction.snapshot,
+      filterFn: fetchWithSearch
+    }
   })
 
   const columns = [
@@ -58,7 +57,7 @@ const CashCount = () => {
       field: 'date',
       headerName: _labels.date,
       flex: 1,
-      valueGetter: ({ row }) => formatDateDefault(row?.date)
+      type: 'number'
     },
     {
       field: 'plantName',
@@ -71,9 +70,16 @@ const CashCount = () => {
       flex: 1
     },
     {
-      field: 'time',
-      headerName: _labels.time,
-      flex: 1
+      field: 'startTime',
+      headerName: _labels.startTime,
+      flex: 1,
+      type: 'timeZone'
+    },
+    {
+      field: 'endTime',
+      headerName: _labels.endTime,
+      flex: 1,
+      type: 'timeZone'
     },
     {
       field: 'statusName',
@@ -93,7 +99,7 @@ const CashCount = () => {
   ]
 
   const add = () => {
-    openForm()
+    proxyAction()
   }
   function openForm(recordId) {
     stack({
@@ -109,23 +115,40 @@ const CashCount = () => {
     })
   }
 
+  const { proxyAction } = useDocumentTypeProxy({
+    functionId: SystemFunction.CashCountTransaction,
+    action: openForm,
+    hasDT: false
+  })
+
   const edit = obj => {
     openForm(obj.recordId)
   }
 
   const del = async obj => {
     await postRequest({
-      extension: CCTRXrepository.CashCountTransaction.del,
+      extension: CashCountRepository.CashCountTransaction.del,
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
   }
 
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />{' '}
+        <GridToolbar
+          onAdd={add}
+          maxAccess={access}
+          onSearch={value => {
+            filterBy('qry', value)
+          }}
+          onSearchClear={() => {
+            clearFilter('qry')
+          }}
+          labels={_labels}
+          inputSearch={true}
+        />{' '}
       </Fixed>
       <Grow>
         <Table
@@ -134,9 +157,10 @@ const CashCount = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
+          deleteConfirmationType={'strict'}
           isLoading={false}
-          pageSize={50}
           refetch={refetch}
+          pageSize={50}
           paginationType='client'
           maxAccess={access}
         />

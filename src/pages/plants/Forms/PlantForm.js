@@ -6,47 +6,48 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 import FormShell from 'src/components/Shared/FormShell'
-import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
-import { useFormik } from 'formik'
 import { useInvalidate } from 'src/hooks/resource'
+import { useForm } from 'src/hooks/form'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const PlantForm = ({ _labels, maxAccess, store, setStore, editMode }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { recordId } = store
+  const { platformLabels } = useContext(ControlContext)
+  const { recordId, address } = store
 
   const invalidate = useInvalidate({
     endpointId: SystemRepository.Plant.page
   })
 
-  const [initialValues, setInitialData] = useState({
-    recordId: recordId || null,
-    addressId: null,
-    address: null,
-    reference: null,
-    name: null,
-    segmentRef: null,
-    licenseNo: null,
-    crNo: null,
-    costCenterId: null,
-    costCenterName: null,
-    groupId: null,
-    groupName: null,
-    segmentName: null
-  })
-
-  const formik = useFormik({
-    enableReinitialize: true,
+  const { formik } = useForm({
+    maxAccess,
+    initialValues: {
+      recordId: recordId || null,
+      addressId: null,
+      address: null,
+      reference: null,
+      name: null,
+      segmentRef: null,
+      licenseNo: null,
+      crNo: null,
+      costCenterId: null,
+      costCenterName: null,
+      groupId: null,
+      groupName: null,
+      segmentName: null,
+      flName: ''
+    },
+    enableReinitialize: false,
     validateOnChange: false,
-    initialValues,
     validationSchema: yup.object({
-      reference: yup.string().required('This field is required'),
-      name: yup.string().required('This field is required')
+      reference: yup.string().required(' '),
+      name: yup.string().required(' ')
     }),
     onSubmit: values => {
       postPlant(values)
@@ -54,46 +55,66 @@ const PlantForm = ({ _labels, maxAccess, store, setStore, editMode }) => {
   })
 
   const postPlant = async obj => {
+    const addressId = address?.recordId || null
+    if (addressId) {
+      obj = { ...obj, addressId }
+    }
     await postRequest({
       extension: SystemRepository.Plant.set,
       record: JSON.stringify(obj)
     })
       .then(res => {
-        if (res.recordId) {
-          toast.success('Record Added Successfully')
+        if (!editMode) {
+          formik.setFieldValue('recordId', res.recordId)
+          toast.success(platformLabels.Added)
+        } else toast.success(platformLabels.Edited)
 
-          setStore(prevStore => ({
-            ...prevStore,
-            plant: obj,
-            recordId: res.recordId
-          }))
-          invalidate()
-        } else toast.success('Record Edited Successfully')
+        setStore(prevStore => ({
+          ...prevStore,
+          plant: obj,
+          recordId: res.recordId
+        }))
+
+        invalidate()
       })
       .catch(error => {})
   }
 
+  const actions = [
+    {
+      key: 'RecordRemarks',
+      condition: true,
+      onClick: 'onRecordRemarks',
+      disabled: !editMode
+    }
+  ]
   useEffect(() => {
-    var parameters = `_filter=` + '&_recordId=' + recordId
-    if (recordId) {
-      getRequest({
-        extension: SystemRepository.Plant.get,
-        parameters: parameters
-      })
-        .then(res => {
+    ;(async function () {
+      try {
+        if (recordId) {
+          const res = await getRequest({
+            extension: SystemRepository.Plant.get,
+            parameters: `_recordId=${recordId}`
+          })
           var result = res.record
-          setInitialData(result)
+          formik.setValues(result)
           setStore(prevStore => ({
             ...prevStore,
             plant: result
           }))
-        })
-        .catch(error => {})
-    }
-  }, [recordId])
+        }
+      } catch (error) {}
+    })()
+  }, [])
 
   return (
-    <FormShell form={formik} resourceId={ResourceIds.Plants} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell
+      form={formik}
+      resourceId={ResourceIds.Plants}
+      maxAccess={maxAccess}
+      editMode={editMode}
+      actions={actions}
+    >
       <Grid container spacing={4}>
         <Grid item xs={12}>
           <CustomTextField
@@ -105,7 +126,6 @@ const PlantForm = ({ _labels, maxAccess, store, setStore, editMode }) => {
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('reference', '')}
             error={formik.touched.reference && Boolean(formik.errors.reference)}
-            helperText={formik.touched.reference && formik.errors.reference}
             maxLength='4'
             maxAccess={maxAccess}
           />
@@ -119,7 +139,6 @@ const PlantForm = ({ _labels, maxAccess, store, setStore, editMode }) => {
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('name', '')}
             error={formik.touched.name && Boolean(formik.errors.name)}
-            helperText={formik.touched.name && formik.errors.name}
             maxLength='40'
             maxAccess={maxAccess}
           />
@@ -132,7 +151,6 @@ const PlantForm = ({ _labels, maxAccess, store, setStore, editMode }) => {
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('licenseNo', '')}
             error={formik.touched.licenseNo && Boolean(formik.errors.licenseNo)}
-            helperText={formik.touched.licenseNo && formik.errors.licenseNo}
             maxLength='40'
             maxAccess={maxAccess}
           />
@@ -145,7 +163,6 @@ const PlantForm = ({ _labels, maxAccess, store, setStore, editMode }) => {
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('crNo', '')}
             error={formik.touched.crNo && Boolean(formik.errors.crNo)}
-            helperText={formik.touched.crNo && formik.errors.crNo}
             maxLength='40'
             maxAccess={maxAccess}
           />
@@ -163,7 +180,6 @@ const PlantForm = ({ _labels, maxAccess, store, setStore, editMode }) => {
               formik.setFieldValue('costCenterId', newValue?.recordId)
             }}
             error={formik.touched.costCenterId && Boolean(formik.errors.costCenterId)}
-            helperText={formik.touched.costCenterId && formik.errors.costCenterId}
             maxAccess={maxAccess}
           />
         </Grid>
@@ -179,8 +195,19 @@ const PlantForm = ({ _labels, maxAccess, store, setStore, editMode }) => {
               formik.setFieldValue('groupId', newValue?.recordId)
             }}
             error={formik.touched.groupId && Boolean(formik.errors.groupId)}
-            helperText={formik.touched.groupId && formik.errors.groupId}
             maxAccess={maxAccess}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <CustomTextField
+            name='flName'
+            label={_labels.flName}
+            value={formik.values.flName}
+            maxLength='30'
+            maxAccess={maxAccess}
+            onChange={formik.handleChange}
+            onClear={() => formik.setFieldValue('flName', '')}
+            error={formik.touched.flName && Boolean(formik.errors.flName)}
           />
         </Grid>
       </Grid>

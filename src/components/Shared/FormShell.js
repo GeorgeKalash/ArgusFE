@@ -1,16 +1,19 @@
-import { DialogContent, Box } from '@mui/material'
-import { useState } from 'react'
+import { DialogContent } from '@mui/material'
+import { useContext, useState } from 'react'
 import WindowToolbar from './WindowToolbar'
 import TransactionLog from './TransactionLog'
 import { TrxType } from 'src/resources/AccessLevels'
 import { ClientRelationForm } from './ClientRelationForm'
-import { useWindow } from 'src/windows'
+import { useGlobalRecord, useWindow } from 'src/windows'
 import PreviewReport from './PreviewReport'
 import GeneralLedger from 'src/components/Shared/GeneralLedger'
 import Approvals from './Approvals'
 import ResourceRecordRemarks from './ResourceRecordRemarks'
 import GlobalIntegrationGrid from './GlobalIntegrationGrid'
 import AccountBalance from './AccountBalance'
+import CashTransaction from './CashTransaction'
+import FinancialTransaction from './FinancialTransaction'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function FormShell({
   form,
@@ -19,7 +22,6 @@ export default function FormShell({
   isCleared = true,
   children,
   editMode,
-  setEditMode,
   disabledSubmit,
   infoVisible = true,
   postVisible = false,
@@ -36,9 +38,10 @@ export default function FormShell({
   visibleClear,
   actions
 }) {
-  const [windowInfo, setWindowInfo] = useState(null)
   const { stack } = useWindow()
   const [selectedReport, setSelectedReport] = useState(null)
+  const { clear } = useGlobalRecord()
+  const { platformLabels } = useContext(ControlContext)
 
   const windowToolbarVisible = editMode
     ? maxAccess < TrxType.EDIT
@@ -49,16 +52,18 @@ export default function FormShell({
     : true
 
   function handleReset() {
-    form.resetForm({
-      values: form.initialValues
-    })
+    if (!form.values?.recordId) {
+      form.resetForm({
+        values: form.initialValues
+      })
+    } else {
+      if (typeof clear === 'function') {
+        clear()
+      }
+    }
 
     if (setIDInfoAutoFilled) {
       setIDInfoAutoFilled(false)
-    }
-
-    if (typeof setEditMode === 'function') {
-      setEditMode(false)
     }
   }
 
@@ -71,7 +76,7 @@ export default function FormShell({
       },
       width: 1000,
       height: 500,
-      title: 'Approvals'
+      title: platformLabels.Approvals
     })
   }
 
@@ -84,7 +89,21 @@ export default function FormShell({
       },
       width: 800,
       height: 500,
-      title: 'Resource Record Remarks'
+      title: platformLabels.ResourceRecordRemarks
+    })
+  }
+
+  const transactionClicked = () => {
+    stack({
+      Component: CashTransaction,
+      props: {
+        recordId: form.values?.recordId,
+        functionId: functionId
+      },
+      width: 1200,
+      height: 670,
+      title: platformLabels,
+      CashTransaction
     })
   }
 
@@ -129,8 +148,7 @@ export default function FormShell({
               },
               width: 700,
               height: 600,
-              height: 'auto',
-              title: 'Transaction Log'
+              title: platformLabels.TransactionLog
             })
           }
           onClickGL={() =>
@@ -143,7 +161,19 @@ export default function FormShell({
               },
               width: 1000,
               height: 620,
-              title: 'General Ledger'
+              title: platformLabels.GeneralLedger
+            })
+          }
+          onClickIT={() =>
+            stack({
+              Component: FinancialTransaction,
+              props: {
+                formValues: form.values,
+                functionId
+              },
+              width: 1000,
+              height: 620,
+              title: platformLabels.financialTransaction
             })
           }
           onClickGIA={() =>
@@ -155,7 +185,7 @@ export default function FormShell({
               },
               width: 700,
               height: 500,
-              title: 'Integration Account'
+              title: platformLabels.IntegrationAccount
             })
           }
           onClickAC={() =>
@@ -163,7 +193,7 @@ export default function FormShell({
               Component: AccountBalance,
               width: 1000,
               height: 620,
-              title: 'Account Balance'
+              title: platformLabels.AccountBalance
             })
           }
           onClientRelation={() =>
@@ -177,7 +207,7 @@ export default function FormShell({
               },
               width: 900,
               height: 600,
-              title: 'Client Relation'
+              title: platformLabels.ClientRelation
             })
           }
           onGenerateReport={() =>
@@ -185,11 +215,13 @@ export default function FormShell({
               Component: PreviewReport,
               props: {
                 selectedReport: selectedReport,
-                recordId: form.values?.recordId
+                recordId: form.values?.recordId,
+                functionId: form.values?.functionId,
+                resourceId: resourceId
               },
               width: 1150,
               height: 700,
-              title: 'Preview Report'
+              title: platformLabels.PreviewReport
             })
           }
           isSaved={isSaved}
@@ -198,6 +230,7 @@ export default function FormShell({
           actions={actions}
           onApproval={onApproval}
           onRecordRemarks={onRecordRemarks}
+          transactionClicked={transactionClicked}
           editMode={editMode}
           disabledSubmit={disabledSubmit}
           infoVisible={infoVisible}
@@ -213,13 +246,6 @@ export default function FormShell({
           previewReport={previewReport}
           visibleClear={visibleClear}
           functionId={functionId}
-        />
-      )}
-      {windowInfo && (
-        <TransactionLog
-          resourceId={resourceId}
-          onInfoClose={() => setWindowInfo(false)}
-          recordId={form.values?.recordId}
         />
       )}
     </>

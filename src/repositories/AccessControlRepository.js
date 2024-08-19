@@ -27,7 +27,10 @@ export const AccessControlRepository = {
     snapshotGRP: service + 'snapshotGRP'
   },
   RowAccessUserView: {
-    qry: service + 'qryROU'
+    qry: service + 'qryROU',
+    set2: service + 'set2ROU',
+    set: service + 'setROU',
+    del: service + 'delROU'
   },
   ModuleDeactivation: {
     qry: service + 'qryMOD',
@@ -43,5 +46,28 @@ export const AccessControlRepository = {
   },
   GlobalControlAuthorizationView: {
     qry: service + 'qryCGL'
+  },
+  UserReleaseCode: {
+    qry: service + 'qryUCO',
+    set: service + 'setUCO',
+    del: service + 'delUCO'
+  },
+  ModuleClass: {
+    qry: service + 'qryRES',
+    set: service + 'setRES'
+  },
+  SGControlAccess: {
+    qry: service + 'qryCRL',
+    set2: service + 'set2CRL'
+  },
+  UserSiteView: {
+    qry: service + 'qryUSI',
+    set2: service + 'set2USI'
+  },
+  NotificationLabel: {
+    qry: service + 'qryNLB',
+    get: service + 'getNLB',
+    set: service + 'setNLB',
+    del: service + 'delNLB'
   }
 }

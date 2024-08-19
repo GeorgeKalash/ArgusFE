@@ -5,18 +5,19 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import RateTypesForm from './forms/RateTypesForm'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useWindow } from 'src/windows'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const RateTypes = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const [errorMessage, setErrorMessage] = useState(null)
+  const { platformLabels } = useContext(ControlContext)
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -27,6 +28,15 @@ const RateTypes = () => {
     })
 
     return { ...response, _startAt: _startAt }
+  }
+
+  async function fetchWithSearch({ options = {}, filters }) {
+    const { _startAt = 0, _pageSize = 50 } = options
+
+    return await getRequest({
+      extension: MultiCurrencyRepository.RateType.snapshot,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=${filters.qry}`
+    })
   }
 
   const invalidate = useInvalidate({
@@ -44,7 +54,10 @@ const RateTypes = () => {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: MultiCurrencyRepository.RateType.page,
-    datasetId: ResourceIds.RateType
+    datasetId: ResourceIds.RateType,
+    filter: {
+      filterFn: fetchWithSearch
+    }
   })
 
   const columns = [
@@ -69,12 +82,14 @@ const RateTypes = () => {
   }
 
   const del = async obj => {
-    await postRequest({
-      extension: MultiCurrencyRepository.RateType.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success('Record Deleted Successfully')
+    try {
+      await postRequest({
+        extension: MultiCurrencyRepository.RateType.del,
+        record: JSON.stringify(obj)
+      })
+      invalidate()
+      toast.success(platformLabels.Deleted)
+    } catch (error) {}
   }
 
   function openForm(recordId) {
@@ -87,8 +102,8 @@ const RateTypes = () => {
         invalidate: invalidate
       },
       width: 600,
-      height: 600,
-      title: labels.RateType
+      height: 300,
+      title: labels.rateType
     })
   }
 
@@ -123,9 +138,6 @@ const RateTypes = () => {
           paginationParameters={paginationParameters}
         />
       </Grow>
-      {errorMessage && (
-        <ErrorWindow open={!!errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-      )}
     </VertLayout>
   )
 }

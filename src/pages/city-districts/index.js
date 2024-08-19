@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
@@ -11,9 +11,11 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import CityDistrictForm from './Forms/CityDistrictForm'
 import { useWindow } from 'src/windows'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const CityDistricts = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -56,6 +58,11 @@ const CityDistricts = () => {
       flex: 1
     },
     {
+      field: 'flName',
+      headerName: _labels.flName,
+      flex: 1
+    },
+    {
       field: 'countryName',
       headerName: _labels.country,
       flex: 1
@@ -73,7 +80,7 @@ const CityDistricts = () => {
       record: JSON.stringify(obj)
     })
 
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
     invalidate()
   }
 

@@ -11,9 +11,11 @@ import { useWindow } from 'src/windows'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const City = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const { stack } = useWindow()
 
@@ -32,7 +34,7 @@ const City = () => {
     access,
     search,
     clear,
-
+    refetch,
     paginationParameters
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -68,7 +70,11 @@ const City = () => {
       headerName: _labels.name,
       flex: 1
     },
-    ,
+    {
+      field: 'flName',
+      headerName: _labels.flName,
+      flex: 1
+    },
     {
       field: 'countryName',
       headerName: _labels.country,
@@ -82,12 +88,14 @@ const City = () => {
   ]
 
   const del = async obj => {
-    await postRequest({
-      extension: SystemRepository.City.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success('Record Deleted Successfully')
+    try {
+      await postRequest({
+        extension: SystemRepository.City.del,
+        record: JSON.stringify(obj)
+      })
+      invalidate()
+      toast.success(platformLabels.Deleted)
+    } catch (error) {}
   }
 
   const edit = obj => {
@@ -107,7 +115,7 @@ const City = () => {
         maxAccess: access
       },
       width: 500,
-      height: 360,
+      height: 460,
       title: _labels.cities
     })
   }
@@ -122,6 +130,7 @@ const City = () => {
           onSearchClear={clear}
           labels={_labels}
           inputSearch={true}
+          refetch={refetch}
         />
       </Fixed>
       <Grow>

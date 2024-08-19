@@ -11,21 +11,27 @@ import ExRatesForm from './forms/ExRatesForm'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
+import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
 const ExchangeRates = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-
+  const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
       extension: MultiCurrencyRepository.ExchangeRates.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=&exId=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}&exId=`
     })
 
     return { ...response, _startAt: _startAt }
+  }
+
+  async function fetchWithFilter({ filters, pagination }) {
+    return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
   const {
@@ -33,15 +39,16 @@ const ExchangeRates = () => {
     labels: _labels,
     paginationParameters,
     refetch,
-    access
+    access,
+    invalidate,
+    filterBy
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: MultiCurrencyRepository.ExchangeRates.page,
-    datasetId: ResourceIds.ExchangeRates
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: MultiCurrencyRepository.ExchangeRates.page
+    datasetId: ResourceIds.ExchangeRates,
+    filter: {
+      filterFn: fetchWithFilter
+    }
   })
 
   const formatDate = dateStr => {
@@ -86,7 +93,7 @@ const ExchangeRates = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
   }
 
   const edit = obj => {
@@ -112,10 +119,15 @@ const ExchangeRates = () => {
     })
   }
 
+  const onApply = ({ rpbParams }) => {
+    filterBy('params', rpbParams)
+    refetch()
+  }
+
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} labels={_labels} />
+        <RPBGridToolbar hasSearch={false} onAdd={add} maxAccess={access} onApply={onApply} reportName={'MCED'} />
       </Fixed>
       <Grow>
         <Table

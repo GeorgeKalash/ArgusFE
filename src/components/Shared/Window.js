@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo } from 'react'
+import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import { DialogTitle, DialogContent, Paper, Tabs, Tab, Box, Typography, IconButton } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
 import OpenInFullIcon from '@mui/icons-material/OpenInFull'
@@ -16,6 +16,9 @@ const Window = React.memo(
     height = 600,
     activeTab,
     setActiveTab,
+    draggable = true,
+    expandable = true,
+    closable = true,
     Title,
     onSave,
     onClear,
@@ -24,45 +27,40 @@ const Window = React.memo(
     editMode = false,
     disabledSubmit,
     disabledInfo,
-    canExpand = true,
     onApply,
     disabledApply,
+    spacing,
     ...props
   }) => {
     const { settings } = useSettings()
     const { navCollapsed } = settings
     const [expanded, setExpanded] = useState(false)
-    const [position, setPosition] = useState({ x: 0, y: 0 })
-
+    const paperRef = useRef(null)
     const maxAccess = props.maxAccess?.record.maxAccess
 
     const windowToolbarVisible = useMemo(
       () => (editMode ? maxAccess >= TrxType.EDIT : maxAccess >= TrxType.ADD),
       [editMode, maxAccess]
     )
-
     const containerWidth = `calc(calc(100 * var(--vw)) - ${navCollapsed ? '10px' : '310px'})`
     const containerHeight = `calc(calc(100 * var(--vh)) - 40px)`
     const containerHeightPanel = `calc(calc(100 * var(--vh)) - 180px)`
     const heightPanel = height - 120
-
     useEffect(() => {
       const transactionLogInfo = document.querySelector('[data-unique-id]')
       if (transactionLogInfo) {
         transactionLogInfo.style.height = expanded ? '30vh' : '18vh'
       }
     }, [expanded])
+    useEffect(() => {
+      if (paperRef.current) {
+        paperRef.current.focus()
+      }
+    }, [])
 
     const handleExpandToggle = useCallback(() => {
-      if (!expanded) {
-        setPosition({ x: 0, y: 0 })
-      }
       setExpanded(prev => !prev)
     }, [expanded])
-
-    const handleDrag = useCallback((e, ui) => {
-      setPosition(prev => ({ x: prev.x + ui.deltaX, y: prev.y + ui.deltaY }))
-    }, [])
 
     return (
       <Box
@@ -70,8 +68,8 @@ const Window = React.memo(
         sx={{
           bottom: 0,
           position: 'absolute',
-          width: containerWidth,
-          height: containerHeight,
+          width: spacing ? containerWidth : '100%',
+          height: spacing ? containerHeight : '100%',
           backgroundColor: 'rgba(0, 0, 0, 0.1)',
           display: 'flex',
           justifyContent: 'center',
@@ -82,11 +80,13 @@ const Window = React.memo(
           handle='#draggable-dialog-title'
           cancel={'[class*="MuiDialogContent-root"]'}
           bounds='parent'
-          position={position}
-          onDrag={handleDrag}
+          position={expanded && { x: 0, y: 0 }}
+          onStart={() => draggable}
         >
-          <Box sx={{ position: 'relative' }}>
+          <Box sx={{ position: 'relative', pointerEvents: 'all' }}>
             <Paper
+              ref={paperRef}
+              tabIndex={-1}
               sx={{
                 transition: 'width 0.3s, height 0.3s',
                 height: controlled ? (expanded ? containerHeight : height) : expanded ? containerHeight : height,
@@ -98,18 +98,19 @@ const Window = React.memo(
               <DialogTitle
                 id='draggable-dialog-title'
                 sx={{
-                  cursor: 'move',
+                  cursor: draggable ? 'move' : 'default',
                   pl: '15px !important',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   py: '0px !important',
                   margin: '0px !important',
-                  backgroundColor: '#231f20',
+                  backgroundColor: '#231F20',
                   borderTopLeftRadius: '5px',
                   borderTopRightRadius: '5px',
                   borderBottomLeftRadius: '0px',
-                  borderBottomRightRadius: '0px'
+                  borderBottomRightRadius: '0px',
+                  height: '40px'
                 }}
               >
                 <Box>
@@ -118,7 +119,7 @@ const Window = React.memo(
                   </Typography>
                 </Box>
                 <Box>
-                  {canExpand && (
+                  {expandable && (
                     <IconButton
                       tabIndex={-1}
                       edge='end'
@@ -130,15 +131,17 @@ const Window = React.memo(
                       <OpenInFullIcon />
                     </IconButton>
                   )}
-                  <IconButton
-                    tabIndex={-1}
-                    edge='end'
-                    sx={{ color: 'white !important' }}
-                    onClick={onClose}
-                    aria-label='clear input'
-                  >
-                    <ClearIcon />
-                  </IconButton>
+                  {closable && (
+                    <IconButton
+                      tabIndex={-1}
+                      edge='end'
+                      sx={{ color: 'white !important' }}
+                      onClick={onClose}
+                      aria-label='clear input'
+                    >
+                      <ClearIcon />
+                    </IconButton>
+                  )}
                 </Box>
               </DialogTitle>
               {tabs && (

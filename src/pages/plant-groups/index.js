@@ -1,53 +1,41 @@
-import { useState, useContext } from 'react'
-
-import { Box } from '@mui/material'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
-
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
 import Tree from 'src/components/Shared/Tree'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useWindow } from 'src/windows'
-
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
-
-// ** Resources
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import PlantGroupsForm from './forms/PlantGroupsForm'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const Plant = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-
+  const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
-  async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
-
+  async function fetchGridData() {
     return await getRequest({
       extension: SystemRepository.PlantGroup.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      parameters: `_filter=`
     })
   }
 
   const {
     query: { data },
     labels: _labels,
-    paginationParameters,
     refetch,
+    invalidate,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: SystemRepository.PlantGroup.qry,
     datasetId: ResourceIds.PlantGroups
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: SystemRepository.PlantGroup.qry
   })
 
   const columns = [
@@ -61,7 +49,6 @@ const Plant = () => {
       headerName: _labels.name,
       flex: 1
     },
-
     {
       field: 'parentName',
       headerName: _labels.parent,
@@ -74,12 +61,22 @@ const Plant = () => {
   }
 
   const del = async obj => {
-    await postRequest({
-      extension: SystemRepository.PlantGroup.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success('Record Deleted Successfully')
+    try {
+      await postRequest({
+        extension: SystemRepository.PlantGroup.del,
+        record: JSON.stringify(obj)
+      })
+      invalidate()
+      toast.success(platformLabels.Deleted)
+    } catch (error) {}
+    try {
+      await postRequest({
+        extension: SystemRepository.PlantGroup.del,
+        record: JSON.stringify(obj)
+      })
+      invalidate()
+      toast.success(platformLabels.Deleted)
+    } catch (error) {}
   }
 
   function openForm(recordId) {
@@ -91,7 +88,7 @@ const Plant = () => {
         maxAccess: access
       },
       width: 600,
-      height: 350,
+      height: 300,
       title: _labels.plantGroup
     })
   }
@@ -99,13 +96,12 @@ const Plant = () => {
   function onTreeClick() {
     stack({
       Component: Tree,
-
       props: {
         data: data
       },
       width: 500,
       height: 400,
-      title: 'Tree'
+      title: _labels.tree
     })
   }
 
@@ -113,10 +109,19 @@ const Plant = () => {
     openForm(obj?.recordId)
   }
 
+  const actions = [
+    {
+      key: 'Tree',
+      condition: true,
+      onClick: onTreeClick,
+      disabled: false
+    }
+  ]
+
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} onTree={onTreeClick} />
+        <GridToolbar actions={actions} onAdd={add} maxAccess={access} />
       </Fixed>
       <Grow>
         <Table
@@ -128,8 +133,7 @@ const Plant = () => {
           isLoading={false}
           pageSize={50}
           refetch={refetch}
-          paginationParameters={paginationParameters}
-          paginationType='api'
+          paginationType='client'
           maxAccess={access}
         />
       </Grow>

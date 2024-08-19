@@ -24,9 +24,7 @@ export default function ScheduleForm({ labels, maxAccess, recordId, editMode, se
     name: '',
     cellPhone: '',
     commissionPct: '',
-    userId: '',
-    userEmail: '',
-    username: '',
+
     plantId: '',
     sptId: '',
     targetType: ''
@@ -83,161 +81,153 @@ export default function ScheduleForm({ labels, maxAccess, recordId, editMode, se
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  const actions = [
+    {
+      key: 'RecordRemarks',
+      condition: true,
+      onClick: 'onRecordRemarks',
+      disabled: !editMode
+    }
+  ]
+
   return (
-    <FormShell resourceId={ResourceIds.SalesPerson} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell
+      resourceId={ResourceIds.SalesPerson}
+      form={formik}
+      maxAccess={maxAccess}
+      actions={actions}
+      editMode={editMode}
+    >
       <VertLayout>
         <Grow>
-        <Grid container spacing={4}>
-          <Grid item xs={12}>
-            <CustomTextField
-              name='spRef'
-              label={labels[1]}
-              value={formik.values.spRef}
-              required
-              maxAccess={maxAccess}
-              onChange={formik.handleChange}
-              onClear={() => formik.setFieldValue('spRef', '')}
-              error={formik.touched.spRef && Boolean(formik.errors.spRef)}
-              helperText={formik.touched.spRef && formik.errors.spRef}
-            />
+          <Grid container spacing={4}>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='spRef'
+                label={labels[1]}
+                value={formik.values.spRef}
+                required
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('spRef', '')}
+                error={formik.touched.spRef && Boolean(formik.errors.spRef)}
+                helperText={formik.touched.spRef && formik.errors.spRef}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='name'
+                label={labels[2]}
+                value={formik.values.name}
+                required
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('name', '')}
+                error={formik.touched.name && Boolean(formik.errors.name)}
+                helperText={formik.touched.name && formik.errors.name}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='cellPhone'
+                label={labels[3]}
+                value={formik.values.cellPhone}
+                maxAccess={maxAccess}
+                maxLength='15'
+                onChange={e => {
+                  const inputValue = e.target.value
+                  if (/^[0-9]*$/.test(inputValue)) {
+                    formik.setFieldValue('cellPhone', inputValue)
+                  }
+                }}
+                onClear={() => formik.setFieldValue('cellPhone', '')}
+                error={formik.touched.cellPhone && Boolean(formik.errors.cellPhone)}
+                helperText={formik.touched.cellPhone && formik.errors.cellPhone}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='commissionPct'
+                label={labels[4]}
+                value={formik.values.commissionPct}
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('commissionPct', '')}
+                error={formik.touched.commissionPct && Boolean(formik.errors.commissionPct)}
+                helperText={formik.touched.commissionPct && formik.errors.commissionPct}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={SystemRepository.Plant.qry}
+                name='plantId'
+                label={labels[6]}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('plantId', newValue?.recordId)
+                }}
+                error={formik.touched.plantId && Boolean(formik.errors.plantId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={SaleRepository.SalesTeam.qry}
+                name='sptId'
+                label={labels[7]}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('sptId', newValue?.recordId)
+                }}
+                error={formik.touched.sptId && Boolean(formik.errors.sptId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={SaleRepository.CommissionSchedule.qry}
+                name='commissionScheduleId'
+                label={labels[11]}
+                columnsInDropDown={[{ key: 'name', value: 'Name' }]}
+                values={formik.values}
+                valueField='recordId'
+                displayField='name'
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('commissionScheduleId', newValue?.recordId)
+                }}
+                error={formik.touched.commissionScheduleId && Boolean(formik.errors.commissionScheduleId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.TARGET_TYPE}
+                name='targetType'
+                label={labels[16]}
+                valueField='key'
+                displayField='value'
+                values={formik.values}
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('targetType', newValue?.key)
+                }}
+                error={formik.touched.targetType && Boolean(formik.errors.targetType)}
+              />
+            </Grid>
           </Grid>
-          <Grid item xs={12}>
-            <CustomTextField
-              name='name'
-              label={labels[2]}
-              value={formik.values.name}
-              required
-              maxAccess={maxAccess}
-              onChange={formik.handleChange}
-              onClear={() => formik.setFieldValue('name', '')}
-              error={formik.touched.name && Boolean(formik.errors.name)}
-              helperText={formik.touched.name && formik.errors.name}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <CustomTextField
-              name='cellPhone'
-              label={labels[3]}
-              value={formik.values.cellPhone}
-              maxAccess={maxAccess}
-              maxLength='15'
-              onChange={e => {
-                const inputValue = e.target.value
-                if (/^[0-9]*$/.test(inputValue)) {
-                  formik.setFieldValue('cellPhone', inputValue)
-                }
-              }}
-              onClear={() => formik.setFieldValue('cellPhone', '')}
-              error={formik.touched.cellPhone && Boolean(formik.errors.cellPhone)}
-              helperText={formik.touched.cellPhone && formik.errors.cellPhone}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <CustomTextField
-              name='commissionPct'
-              label={labels[4]}
-              value={formik.values.commissionPct}
-              maxAccess={maxAccess}
-              onChange={formik.handleChange}
-              onClear={() => formik.setFieldValue('commissionPct', '')}
-              error={formik.touched.commissionPct && Boolean(formik.errors.commissionPct)}
-              helperText={formik.touched.commissionPct && formik.errors.commissionPct}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <ResourceLookup
-              endpointId={SystemRepository.Users.snapshot}
-              name='userId'
-              label={labels[5]}
-              valueField='username'
-              displayField='username'
-              secondDisplayField={false}
-              valueShow='username'
-              form={formik}
-              onChange={(event, newValue) => {
-                if (newValue) {
-                  formik.setFieldValue('userId', newValue?.recordId)
-                  formik.setFieldValue('username', newValue?.username || '')
-                } else {
-                  formik.setFieldValue('userId', null)
-                  formik.setFieldValue('username', null)
-                }
-              }}
-              errorCheck={'userId'}
-              maxAccess={maxAccess}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <ResourceComboBox
-              endpointId={SystemRepository.Plant.qry}
-              name='plantId'
-              label={labels[6]}
-              columnsInDropDown={[
-                { key: 'reference', value: 'Reference' },
-                { key: 'name', value: 'Name' }
-              ]}
-              values={formik.values}
-              valueField='recordId'
-              displayField={['reference', 'name']}
-              maxAccess={maxAccess}
-              onChange={(event, newValue) => {
-                formik.setFieldValue('plantId', newValue?.recordId)
-              }}
-              error={formik.touched.plantId && Boolean(formik.errors.plantId)}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <ResourceComboBox
-              endpointId={SaleRepository.SalesTeam.qry}
-              name='sptId'
-              label={labels[7]}
-              columnsInDropDown={[
-                { key: 'reference', value: 'Reference' },
-                { key: 'name', value: 'Name' }
-              ]}
-              values={formik.values}
-              valueField='recordId'
-              displayField={['reference', 'name']}
-              maxAccess={maxAccess}
-              onChange={(event, newValue) => {
-                formik.setFieldValue('sptId', newValue?.recordId)
-              }}
-              error={formik.touched.sptId && Boolean(formik.errors.sptId)}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <ResourceComboBox
-              endpointId={SaleRepository.CommissionSchedule.qry}
-              name='commissionScheduleId'
-              label={labels[11]}
-              columnsInDropDown={[{ key: 'name', value: 'Name' }]}
-              values={formik.values}
-              valueField='recordId'
-              displayField='name'
-              maxAccess={maxAccess}
-              onChange={(event, newValue) => {
-                formik.setFieldValue('commissionScheduleId', newValue?.recordId)
-              }}
-              error={formik.touched.commissionScheduleId && Boolean(formik.errors.commissionScheduleId)}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <ResourceComboBox
-              datasetId={DataSets.TARGET_TYPE}
-              name='targetType'
-              label={labels[16]}
-              valueField='key'
-              displayField='value'
-              values={formik.values}
-              maxAccess={maxAccess}
-              onChange={(event, newValue) => {
-                formik.setFieldValue('targetType', newValue?.key)
-              }}
-              error={formik.touched.targetType && Boolean(formik.errors.targetType)}
-            />
-          </Grid>
-        </Grid>
-      </Grow>
+        </Grow>
       </VertLayout>
     </FormShell>
   )

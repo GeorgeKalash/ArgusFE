@@ -1,9 +1,13 @@
+import { ControlContext } from 'src/providers/ControlContext'
 import ConfirmationDialog from '../ConfirmationDialog'
+import { useContext } from 'react'
 
 const ApprovalsDialog = ({ window, responseValue, onConfirm, fullScreen }) => {
+  const { platformLabels } = useContext(ControlContext)
+
   return (
     <ConfirmationDialog
-      DialogText={`Are you sure you want to ${responseValue === 2 ? 'approve' : 'reject'} this document`}
+      DialogText={responseValue === 2 ? platformLabels.ApproveDoc : platformLabels.RejectDoc}
       okButtonAction={() => {
         onConfirm()
         window.close()
