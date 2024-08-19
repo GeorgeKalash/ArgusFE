@@ -9,7 +9,7 @@ import { useFormik } from 'formik'
 import { useWindow } from 'src/windows'
 import BenificiaryCashForm from 'src/components/Shared/BenificiaryCashForm'
 import BenificiaryBankForm from 'src/components/Shared/BenificiaryBankForm'
-import { Checkbox } from '@mui/material'
+import BenificiaryHistoryForm from '../forms/BenificiaryHistoryForm'
 
 const BeneficiaryWindow = ({ clientId }) => {
   const { stack } = useWindow()
@@ -64,8 +64,8 @@ const BeneficiaryWindow = ({ clientId }) => {
       flex: 2
     },
     {
-      field: 'nationalityName',
-      headerName: _labels.nationalityId,
+      field: 'countryName',
+      headerName: _labels.country,
       flex: 1
     },
     {
@@ -127,6 +127,19 @@ const BeneficiaryWindow = ({ clientId }) => {
     }
   }
 
+  const beneficiaryHistory = obj => {
+    stack({
+      Component: BenificiaryHistoryForm,
+      props: {
+        client: obj.clientId,
+        beneficiary: obj.beneficiaryId
+      },
+      width: 800,
+      height: 500,
+      title: _labels.beneficiaryHistory
+    })
+  }
+
   return (
     <FormShell
       resourceId={ResourceIds.Beneficiary}
@@ -147,6 +160,7 @@ const BeneficiaryWindow = ({ clientId }) => {
         pagination={false}
         maxAccess={access}
         onEdit={editBeneficiary}
+        historyButton={beneficiaryHistory}
       />
     </FormShell>
   )

@@ -6,6 +6,7 @@ import { Box, IconButton, TextField } from '@mui/material'
 import Checkbox from '@mui/material/Checkbox'
 import Image from 'next/image'
 import editIcon from '../../../public/images/TableIcons/edit.png'
+import historyIcon from '../../../public/images/TableIcons/history.png'
 import { useState } from 'react'
 import { useEffect } from 'react'
 import 'ag-grid-enterprise'
@@ -412,6 +413,17 @@ const Table = ({
                   }}
                 >
                   <Image src={editIcon} alt='Edit' width={18} height={18} />
+                </IconButton>
+              )}
+
+              {props?.historyButton && (
+                <IconButton
+                  size='small'
+                  onClick={e => {
+                    props?.historyButton(data)
+                  }}
+                >
+                  <Image src={historyIcon} alt='History' width={18} height={18} />
                 </IconButton>
               )}
               {props?.popupComponent && (
