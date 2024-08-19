@@ -697,7 +697,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       }
 
       formik.setFieldValue('products[0].checked', true)
-      handleSelectedProduct(updatedProduct)
+      !editMode && handleSelectedProduct(updatedProduct)
       formik.setFieldValue('products', [updatedProduct])
     } else {
       handleSelectedProduct()
@@ -714,6 +714,10 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       )
 
       formik.setFieldValue('products', updatedData)
+      const matchedIndex = updatedData.findIndex(product => product.productId === data.productId)
+      if (matchedIndex) {
+        formik.setFieldValue(`products[${matchedIndex}].checked`, true)
+      }
     }
   }
 
@@ -721,9 +725,13 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
     formik.setFieldValue('products', data)
     if (data.length === 1) {
       formik.setFieldValue('products[0].checked', true)
-      handleSelectedProduct(data[0])
+      !editMode && handleSelectedProduct(data[0])
     } else {
       handleSelectedProduct()
+      const matchedIndex = data.findIndex(product => product.productId === data.productId)
+      if (matchedIndex) {
+        formik.setFieldValue(`products[${matchedIndex}].checked`, true)
+      }
     }
   }
 
