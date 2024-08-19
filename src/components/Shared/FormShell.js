@@ -19,6 +19,7 @@ export default function FormShell({
   form,
   isSaved = true,
   isInfo = true,
+  isSavedClear = true,
   isCleared = true,
   children,
   editMode,
@@ -224,7 +225,7 @@ export default function FormShell({
             })
           }
           isSaved={isSaved}
-          isSavedClear={isSaved && isCleared}
+          isSavedClear={isSavedClear}
           isInfo={isInfo}
           isCleared={isCleared}
           actions={actions}
