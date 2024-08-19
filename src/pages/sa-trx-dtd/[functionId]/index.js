@@ -84,15 +84,15 @@ const CAadjustment = () => {
   ]
 
   const edit = obj => {
-    openForm(obj?.dtId)
+    openForm(obj)
   }
 
-  function openForm(dtId) {
+  function openForm(record) {
     stack({
       Component: DocumentTypeDefaultForm,
       props: {
         labels: _labels,
-        dtId,
+        recordId: record?.dtId,
         maxAccess: access,
         functionId
       },
