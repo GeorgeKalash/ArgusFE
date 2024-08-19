@@ -276,6 +276,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
             stackError({
               message: `The user does not have a default Cash Account`
             })
+
             return
           }
 
