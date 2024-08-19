@@ -80,7 +80,13 @@ const CompanyInfo = () => {
   }
 
   return (
-    <FormShell resourceId={ResourceIds.CompanyInfo} form={formik} infoVisible={false} maxAccess={maxAccess}>
+    <FormShell
+      resourceId={ResourceIds.CompanyInfo}
+      form={formik}
+      infoVisible={false}
+      isCleared={false}
+      maxAccess={maxAccess}
+    >
       <VertLayout>
         <Grid container spacing={4}>
           <Grid item xs={12}>
@@ -90,7 +96,6 @@ const CompanyInfo = () => {
               value={formik.values?.accountId}
               onChange={formik.handleChange}
               readOnly={true}
-              onClear={() => formik.setFieldValue('accountId', '')}
               maxAccess={maxAccess}
             />
           </Grid>
