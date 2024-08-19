@@ -272,9 +272,9 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
             parameters: `_userId=${userId}&_key=cashAccountId`
           })
 
-          if (!cashAccountRecord) {
+          if (!cashAccountRecord.value) {
             stackError({
-              message: `Cash Account is Invalid`
+              message: `The user does not have a default Cash Account`
             })
             return
           }
