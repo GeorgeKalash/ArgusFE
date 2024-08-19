@@ -61,6 +61,7 @@ export default function FormShell({
         clear()
       }
     }
+
     if (setIDInfoAutoFilled) {
       setIDInfoAutoFilled(false)
     }
@@ -167,7 +168,8 @@ export default function FormShell({
             stack({
               Component: FinancialTransaction,
               props: {
-                formValues: form.values
+                formValues: form.values,
+                functionId
               },
               width: 1000,
               height: 620,
@@ -213,7 +215,9 @@ export default function FormShell({
               Component: PreviewReport,
               props: {
                 selectedReport: selectedReport,
-                recordId: form.values?.recordId
+                recordId: form.values?.recordId,
+                functionId: form.values?.functionId,
+                resourceId: resourceId
               },
               width: 1150,
               height: 700,

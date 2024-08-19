@@ -43,7 +43,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import InfoForm from './InfoForm'
 import { RemittanceBankInterface } from 'src/repositories/RemittanceBankInterface'
 
-export default function OutwardsForm({ labels, access, recordId, cashAccountId, plantId, userId, window }) {
+export default function OutwardsForm({ labels, access, recordId, cashAccountId, plantId, userId, dtId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
@@ -62,7 +62,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
 
   const initialValues = {
     recordId: recordId || null,
-    dtId: null,
+    dtId: dtId || null,
     plantId: plantId,
     cashAccountId: cashAccountId,
     userId: userId,
@@ -437,6 +437,13 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
           extension: RTCLRepository.CtClientIndividual.get2,
           parameters: `_clientId=${clientId}`
         })
+        if (!res.record?.clientRemittance) {
+          stackError({
+            message: `Chosen Client Has No KYC.`
+          })
+
+          return
+        }
         formik.setFieldValue('idNo', res?.record?.clientIDView?.idNo)
         formik.setFieldValue('expiryDate', formatDateFromApi(res?.record?.clientIDView?.idExpiryDate))
         formik.setFieldValue('firstName', res?.record?.clientIndividual?.firstName)
@@ -728,8 +735,6 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
           const copy = { ...res.record.headerView }
           copy.lcAmount = 0
           await fillProducts(copy)
-        } else {
-          await getDefaultDT()
         }
         await getDefaultVAT()
       } catch (error) {}
@@ -1121,6 +1126,17 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
 
                         return
                       }
+
+                      const today = new Date()
+                      const expiryDate = new Date(parseInt(newValue?.expiryDate.replace(/\/Date\((\d+)\)\//, '$1')))
+                      if (expiryDate < today) {
+                        stackError({
+                          message: `Expired Client.`
+                        })
+
+                        return
+                      }
+
                       formik.setFieldValue('clientId', newValue ? newValue.recordId : '')
                       formik.setFieldValue('clientName', newValue ? newValue.name : '')
                       formik.setFieldValue('clientRef', newValue ? newValue.reference : '')
@@ -1376,7 +1392,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
               </FieldSet>
               <Grid item xs={5} sx={{ pl: 5 }}>
                 <ResourceLookup
-                  endpointId={RemittanceOutwardsRepository.Beneficiary.snapshot}
+                  endpointId={RemittanceOutwardsRepository.Beneficiary.snapshot2}
                   parameters={{
                     _clientId: formik.values.clientId,
                     _dispersalType: formik.values.dispersalType,

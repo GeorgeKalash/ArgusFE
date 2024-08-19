@@ -62,12 +62,7 @@ const Professions = () => {
       flex: 1
     },
     {
-      field: 'salaryRange',
-      headerName: _labels.salaryRange,
-      flex: 1
-    },
-    {
-      field: 'riskLevel',
+      field: 'riskLevelName',
       headerName: _labels.riskLevel,
       flex: 1
     }

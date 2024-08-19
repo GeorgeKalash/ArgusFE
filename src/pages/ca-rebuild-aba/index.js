@@ -6,7 +6,7 @@ const CaRebuildAba = () => {
   return (
     <ImmediateWindow
       datasetId={ResourceIds.CARebuildAccountBalance}
-      titleName={'accountRebuild'}
+      labelKey={'accountRebuild'}
       Component={CARebuildAccountBalance}
     />
   )
