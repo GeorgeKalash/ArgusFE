@@ -25,7 +25,7 @@ const mergeWithMaxAccess = (maxAccess, field, fieldName) => {
   } else {
     if (field.mandatory || field.readOnly) {
       controls.push({
-        sgId: 18,
+        sgId: '',
         resourceId: '',
         controlId: fieldName,
         accessLevel: field.mandatory ? MANDATORY : DISABLED
