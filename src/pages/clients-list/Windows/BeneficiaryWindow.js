@@ -10,6 +10,9 @@ import { useWindow } from 'src/windows'
 import BenificiaryCashForm from 'src/components/Shared/BenificiaryCashForm'
 import BenificiaryBankForm from 'src/components/Shared/BenificiaryBankForm'
 import BenificiaryHistoryForm from '../forms/BenificiaryHistoryForm'
+import { Box, IconButton } from '@mui/material'
+import Image from 'next/image'
+import historyIcon from '/public/images/TableIcons/history.png'
 
 const BeneficiaryWindow = ({ clientId }) => {
   const { stack } = useWindow()
@@ -64,6 +67,11 @@ const BeneficiaryWindow = ({ clientId }) => {
       flex: 2
     },
     {
+      field: 'nationalityName',
+      headerName: _labels.nationalityId,
+      flex: 1
+    },
+    {
       field: 'countryName',
       headerName: _labels.country,
       flex: 1
@@ -87,6 +95,18 @@ const BeneficiaryWindow = ({ clientId }) => {
       field: 'isInactive',
       headerName: _labels.isInactive,
       flex: 1
+    },
+    {
+      field: 'beneficiary history',
+      headerName: _labels.beneficiaryHistory,
+      flex: 1,
+      cellRenderer: row => (
+        <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
+          <IconButton size='small' onClick={() => beneficiaryHistory(row)}>
+            <Image src={historyIcon} alt='History' width={18} height={18} />
+          </IconButton>
+        </Box>
+      )
     }
   ]
 
@@ -131,10 +151,10 @@ const BeneficiaryWindow = ({ clientId }) => {
     stack({
       Component: BenificiaryHistoryForm,
       props: {
-        client: obj.clientId,
-        beneficiary: obj.beneficiaryId
+        client: obj.data.clientId,
+        beneficiary: obj.data.beneficiaryId
       },
-      width: 800,
+      width: 1100,
       height: 500,
       title: _labels.beneficiaryHistory
     })
@@ -160,7 +180,6 @@ const BeneficiaryWindow = ({ clientId }) => {
         pagination={false}
         maxAccess={access}
         onEdit={editBeneficiary}
-        historyButton={beneficiaryHistory}
       />
     </FormShell>
   )

@@ -47,6 +47,11 @@ export default function BenificiaryHistoryForm({ client, beneficiary }) {
       flex: 2
     },
     {
+      field: 'nationalityName',
+      headerName: _labels.nationalityId,
+      flex: 1
+    },
+    {
       field: 'countryName',
       headerName: _labels.country,
       flex: 1
