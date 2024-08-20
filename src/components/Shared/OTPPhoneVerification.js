@@ -66,9 +66,11 @@ const OTPPhoneVerification = ({
   }
 
   const checkSMS = value => {
+    if (onSuccess) onSuccess()
+
     if (value.length > 1) {
       var data = {
-        clientId: formValidation.values.clientId,
+        clientId: formValidation.values.clientId || clientId,
         recordId: recordId || null,
         secret: '',
         functionId: functionId,

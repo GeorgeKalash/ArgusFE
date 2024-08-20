@@ -17,33 +17,23 @@ import ResourceComboBox from './ResourceComboBox'
 import CustomDatePicker from '../Inputs/CustomDatePicker'
 import { Checkbox, FormControlLabel } from '@mui/material'
 import { useForm } from 'src/hooks/form'
+import OTPPhoneVerification from './OTPPhoneVerification'
+import { SystemFunction } from 'src/resources/SystemFunction'
+import { useWindow } from 'src/windows'
 
-export const ClientRelationForm = ({ recordId, seqNo }) => {
+export const ClientRelationForm = ({ seqNo, clientId, formValidation }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { stack } = useWindow()
 
   const { labels: _labels, access } = useResourceParams({
     datasetId: ResourceIds.ClientRelation
   })
 
-  function getGridData(parentId) {
-    var parameters = `_seqNo=${seqNo}`
-
-    getRequest({
-      extension: RTCLRepository.ClientRelation.get,
-      parameters: parameters
-    })
-      .then(res => {
-        const result = res.record
-        formik.setValues({ relations: result })
-      })
-      .catch(error => {})
-  }
-
   useEffect(() => {
     ;(async function () {
-      if (seqNo && recordId)
+      if (seqNo && clientId)
         try {
-          var parameters = `_seqNo=${seqNo}&_clientId=${recordId}`
+          var parameters = `_seqNo=${seqNo}&_clientId=${clientId}`
 
           const res = await getRequest({
             extension: RTCLRepository.ClientRelation.get,
@@ -51,44 +41,61 @@ export const ClientRelationForm = ({ recordId, seqNo }) => {
           })
 
           const result = res.record
-          formik.setValues({ result })
+          formik.setValues({
+            ...result,
+            activationDate: formatDateFromApi(result.activationDate),
+            expiryDate: formatDateFromApi(result.expiryDate)
+          })
         } catch (e) {}
     })()
   }, [])
 
   const { formik } = useForm({
+    maxAccess: access,
     enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
-      clientId: yup.string().required(),
+      parentId: yup.string().required(),
       rtId: yup.string().required(),
       expiryDate: yup.string().required(),
       activationDate: yup.string().required()
     }),
     initialValues: {
       seqNo: 0,
-      parentId: recordId,
-      clientId: '',
-      clientName: '',
-      clientRef: '',
+      parentId: '',
+      clientId: clientId,
+      parentName: '',
+      parentRef: '',
       rtId: '',
-      expiryDate: '',
-      activationDate: ''
+      expiryDate: null,
+      activationDate: new Date(),
+      otp: 0,
+      otpVerified: false
     },
     onSubmit: values => {
-      post(values)
+      stack({
+        Component: OTPPhoneVerification,
+        props: {
+          clientId: formValidation.values.recordId,
+          recordId: formValidation.values.recordId,
+          formValidation: formValidation,
+          functionId: SystemFunction.ClientRelation,
+          onSuccess: post
+        },
+        width: 400,
+        height: 400,
+        title: _labels.OTPVerification
+      })
     }
   })
 
   const post = obj => {
+    console.log('formValidation', 123)
+
     const data = {
-      rtId: obj.rtId,
-      parentId: recordId,
-      clientId: obj.clientId,
+      ...obj,
       activationDate: formatDateToApi(obj.activationDate),
-      expiryDate: formatDateToApi(obj.expiryDate),
-      otp: 0,
-      otpVerified: false
+      expiryDate: formatDateToApi(obj.expiryDate)
     }
 
     postRequest({
@@ -101,26 +108,26 @@ export const ClientRelationForm = ({ recordId, seqNo }) => {
       .catch(error => {})
   }
 
-  const editMode = false
+  const editMode = !!formik.values.seqNo
 
   return (
-    <FormShell form={formik} infoVisible={false}>
+    <FormShell form={formik} infoVisible={false} isSaved={!editMode} isCleared={!editMode}>
       <Grid container spacing={4} sx={{ p: 5 }}>
         <Grid item xs={12}>
           <ResourceLookup
             endpointId={CTCLRepository.CtClientIndividual.snapshot}
             parameters={{ _category: 1, _size: 30 }}
-            name='clientId'
+            name='parentId'
             label={_labels.clientRef}
             valueField='reference'
             displayField='name'
-            valueShow='clientRef'
-            secondValueShow='clientName'
+            valueShow='parentRef'
+            secondValueShow='parentName'
             form={formik}
             onChange={(event, newValue) => {
-              formik.setFieldValue('clientId', newValue ? newValue.recordId : 0)
-              formik.setFieldValue('clientRef', newValue ? newValue.reference : '')
-              formik.setFieldValue('clientName', newValue ? newValue.name : '')
+              formik.setFieldValue('parentId', newValue ? newValue.recordId : 0)
+              formik.setFieldValue('parentRef', newValue ? newValue.reference : '')
+              formik.setFieldValue('parentName', newValue ? newValue.name : '')
             }}
             maxAccess={access}
             readOnly={editMode}
@@ -129,7 +136,6 @@ export const ClientRelationForm = ({ recordId, seqNo }) => {
         <Grid item xs={12}>
           <ResourceComboBox
             endpointId={CurrencyTradingSettingsRepository.RelationType.qry}
-            parameters={{ _dgId: 0 }}
             name='rtId'
             label={_labels.relation}
             valueField='recordId'
@@ -149,12 +155,13 @@ export const ClientRelationForm = ({ recordId, seqNo }) => {
           />
         </Grid>
         <Grid item xs={12}>
+          {Boolean(formik.errors.expiryDate)}
           <CustomDatePicker
             name='expiryDate'
             label={_labels.expiryDate}
             value={formik.values?.expiryDate}
             onChange={formik.setFieldValue}
-            disabledDate={'>='}
+            // disabledDate={'>='}
             onClear={() => formik.setFieldValue('expiryDate', '')}
             error={formik.touched.expiryDate && Boolean(formik.errors.expiryDate)}
             maxAccess={access}
@@ -167,7 +174,7 @@ export const ClientRelationForm = ({ recordId, seqNo }) => {
             label={_labels.activationDate}
             value={formik.values?.activationDate}
             onChange={formik.setFieldValue}
-            disabledDate={'>='}
+            // disabledDate={'>='}
             onClear={() => formik.setFieldValue('activationDate', '')}
             error={formik.touched.activationDate && Boolean(formik.errors.activationDate)}
             maxAccess={access}
@@ -177,7 +184,13 @@ export const ClientRelationForm = ({ recordId, seqNo }) => {
         <Grid item xs={12}>
           <FormControlLabel
             control={
-              <Checkbox name='otp' checked={formik.values?.otp} onChange={formik.handleChange} maxAccess={access} />
+              <Checkbox
+                name='otp'
+                checked={formik.values?.otp}
+                disabled={true}
+                onChange={formik.handleChange}
+                maxAccess={access}
+              />
             }
             label={_labels.otp}
           />

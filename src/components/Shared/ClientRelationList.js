@@ -27,7 +27,7 @@ export const ClientRelationList = ({ recordId, name, reference, setErrorMessage 
   async function fetchGridData() {
     const response = await getRequest({
       extension: RTCLRepository.ClientRelation.qry,
-      parameters: `_parentId=${recordId}`
+      parameters: `_clientId=${recordId}`
     })
 
     return response
@@ -46,12 +46,12 @@ export const ClientRelationList = ({ recordId, name, reference, setErrorMessage 
 
   const columns = [
     {
-      field: 'clientRef',
+      field: 'parentRef',
       headerName: _labels.clientRef,
       flex: 1
     },
     {
-      field: 'clientName',
+      field: 'parentName',
       headerName: _labels.clientName,
       flex: 1
     },
@@ -102,13 +102,13 @@ export const ClientRelationList = ({ recordId, name, reference, setErrorMessage 
       Component: ClientRelationForm,
       props: {
         labels: _labels,
-        recordId: obj?.parentId,
+        clientId: obj?.clientId,
         seqNo: obj?.seqNo,
         maxAccess: access
       },
       width: 500,
       height: 450,
-      title: _labels.descriptionTemplate
+      title: _labels.clientRelation
     })
   }
 

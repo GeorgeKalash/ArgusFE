@@ -215,13 +215,14 @@ export default function FormShell({
             stack({
               Component: ClientRelationForm,
               props: {
-                recordId: form.values?.recordId ?? form.values.clientId,
+                clientId: form.values?.recordId ?? form.values.clientId,
                 name: form.values.firstName ? form.values.firstName + ' ' + form.values.lastName : form.values.name,
-                reference: form.values.reference
+                reference: form.values.reference,
+                formValidation: form
               },
               width: 500,
               height: 420,
-              title: platformLabels.ClientRelation
+              title: platformLabels.addClientRelation
             })
           }
           onGenerateReport={() =>
