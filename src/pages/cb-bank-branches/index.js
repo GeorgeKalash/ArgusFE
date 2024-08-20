@@ -73,6 +73,16 @@ const BankBranches = () => {
       field: 'bankName',
       headerName: _labels.bank,
       flex: 1
+    },
+    {
+      field: 'swiftCode',
+      headerName: _labels.swiftCode,
+      flex: 1
+    },
+    {
+      field: 'countryName',
+      headerName: _labels.country,
+      flex: 1
     }
   ]
 
@@ -89,7 +99,7 @@ const BankBranches = () => {
         maxAccess: access
       },
       width: 780,
-      height: 500,
+      height: 550,
       title: _labels.bankBranches
     })
   }
@@ -137,7 +147,7 @@ const BankBranches = () => {
           onApply={onApply}
           onSearch={onSearch}
           onClear={onClear}
-          reportName={'FIACC'}
+          reportName={'CABNB'}
         />
       </Fixed>
       <Grow>

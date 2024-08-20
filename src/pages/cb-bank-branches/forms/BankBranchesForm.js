@@ -15,6 +15,7 @@ import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
+import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 
 const BankBranchesForm = ({ labels, maxAccess, recordId }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -35,9 +36,12 @@ const BankBranchesForm = ({ labels, maxAccess, recordId }) => {
       addressLine2: '',
       addressLine3: '',
       addressLine4: '',
-
-      ////////
       countryId: '',
+      stateId: '',
+      cityId: '',
+      cityName: '',
+      districtId: '',
+      districtName: '',
       contact1: '',
       contact2: '',
       remarks: '',
@@ -46,7 +50,9 @@ const BankBranchesForm = ({ labels, maxAccess, recordId }) => {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required(' ')
+      name: yup.string().required(),
+      bankId: yup.string().required(),
+      countryId: yup.string().required()
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
@@ -116,6 +122,8 @@ const BankBranchesForm = ({ labels, maxAccess, recordId }) => {
                   maxAccess={maxAccess}
                   onChange={(event, newValue) => {
                     formik && formik.setFieldValue('bankId', newValue?.recordId)
+
+                    formik && formik.setFieldValue('countryId', newValue?.countryId)
                   }}
                   error={formik.touched.bankId && Boolean(formik.errors.bankId)}
                 />
@@ -197,13 +205,101 @@ const BankBranchesForm = ({ labels, maxAccess, recordId }) => {
                   valueField='recordId'
                   displayField='name'
                   required
+                  readOnly
                   maxAccess={maxAccess}
                   onChange={(event, newValue) => {
-                    formik.setFieldValue('countryId', newValue?.recordId)
+                    formik.setFieldValue('stateId', null)
+                    formik.setFieldValue('cityId', '')
+                    formik.setFieldValue('cityName', '')
+                    formik.setFieldValue('districtId', '')
+                    formik.setFieldValue('districtName', '')
+                    if (newValue) {
+                      formik.setFieldValue('countryId', newValue?.recordId)
+                    } else {
+                      formik.setFieldValue('countryId', '')
+                    }
                   }}
                   error={formik.touched.countryId && Boolean(formik.errors.countryId)}
                 />
               </Grid>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  endpointId={formik.values.countryId && SystemRepository.State.qry}
+                  parameters={formik.values.countryId && `_countryId=${formik.values.countryId || 0}`}
+                  name='stateId'
+                  label={labels.state}
+                  readOnly={(editMode || !formik.values.countryId) && true}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' }
+                  ]}
+                  values={formik.values}
+                  valueField='recordId'
+                  displayField='name'
+                  maxAccess={maxAccess}
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('stateId', newValue?.recordId)
+                    formik.setFieldValue('cityId', '')
+                    formik.setFieldValue('districtId', '')
+                    formik.setFieldValue('cityName', '')
+                    formik.setFieldValue('districtName', '')
+                  }}
+                  error={formik.touched.stateId && Boolean(formik.errors.stateId)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceLookup
+                  endpointId={SystemRepository.City.snapshot}
+                  parameters={{
+                    _countryId: formik.values.countryId,
+                    _stateId: formik.values.stateId ? formik.values.stateId : 0
+                  }}
+                  valueField='name'
+                  displayField='name'
+                  name='cityName'
+                  label={labels.city}
+                  readOnly={(editMode || !formik.values.countryId) && true}
+                  form={formik}
+                  secondDisplayField={false}
+                  onChange={(event, newValue) => {
+                    formik.setValues({
+                      ...formik.values,
+                      cityId: newValue?.recordId || '',
+
+                      cityName: newValue?.name || '',
+                      districtId: '',
+                      districtName: ''
+                    })
+                  }}
+                  maxAccess={maxAccess}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceLookup
+                  endpointId={SystemRepository.CityDistrict.snapshot}
+                  parameters={{
+                    _cityId: formik.values.cityId
+                  }}
+                  valueField='name'
+                  displayField='name'
+                  name='districtName'
+                  label={labels.cityDistrict}
+                  readOnly={(editMode || !formik.values.cityId) && true}
+                  form={formik}
+                  secondDisplayField={false}
+                  onChange={(event, newValue) => {
+                    if (newValue) {
+                      formik.setFieldValue('districtId', newValue?.recordId)
+                      formik.setFieldValue('districtName', newValue?.name)
+                    } else {
+                      formik.setFieldValue('districtId', '')
+                      formik.setFieldValue('districtName', '')
+                    }
+                  }}
+                  maxAccess={maxAccess}
+                />
+              </Grid>
+
               <Grid item xs={12}>
                 <CustomTextField
                   name='contact1'
