@@ -175,8 +175,20 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
         .array()
         .of(
           yup.object().shape({
-            type: yup.string().required('Type is required'),
-            amount: yup.string().nullable().required('amount is required')
+            type: yup
+              .string()
+              .required('Type is required')
+
+              .test('unique', 'Type must be unique', function (value) {
+                const { path, parent, options } = this
+                if (!parent.outwardId) {
+                  const arrayOfTypes = options.context.amountRows.map(row => row.type)
+                  const isUnique = arrayOfTypes.filter(item => item === value).length === 1
+
+                  return isUnique
+                } else return true
+              }),
+            amount: yup.string().nullable().required('Amount is required')
           })
         )
         .required('Cash array is required')

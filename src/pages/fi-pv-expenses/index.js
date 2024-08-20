@@ -30,17 +30,32 @@ const FiPaymentVouchers = () => {
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}&filter=`
     })
 
+    if (response && response?.list) {
+      response.list = response?.list?.map(item => ({
+        ...item,
+        isVerified: item?.isVerified === null ? false : item?.isVerified
+      }))
+    }
+
     return { ...response, _startAt: _startAt }
   }
 
   async function fetchWithFilter({ filters, pagination }) {
-    return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+    if (filters?.qry) {
+      return await getRequest({
+        extension: FinancialRepository.PaymentVouchers.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+    } else {
+      return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+    }
   }
 
   const {
     query: { data },
     labels: _labels,
     filterBy,
+    clearFilter,
     paginationParameters,
     refetch,
     access,
@@ -56,8 +71,60 @@ const FiPaymentVouchers = () => {
 
   const columns = [
     {
+      field: 'date',
+      headerName: _labels.date,
+      flex: 1,
+      type: 'date'
+    },
+    {
       field: 'reference',
       headerName: _labels.reference,
+      flex: 1
+    },
+    {
+      field: 'accountTypeName',
+      headerName: _labels.accountType,
+      flex: 1
+    },
+    {
+      field: 'accountRef',
+      headerName: _labels.account,
+      flex: 1
+    },
+    {
+      field: 'accountName',
+      headerName: _labels.accountName,
+      flex: 1
+    },
+    {
+      field: 'cashAccountName',
+      headerName: _labels.cashAccount,
+      flex: 1
+    },
+    {
+      field: 'amount',
+      headerName: _labels.amount,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'currencyRef',
+      headerName: _labels.currency,
+      flex: 1
+    },
+    {
+      field: 'notes',
+      headerName: _labels.notes,
+      flex: 1
+    },
+    {
+      field: 'statusName',
+      headerName: _labels.status,
+      flex: 1
+    },
+    {
+      field: 'isVerified',
+      headerName: _labels.isVerified,
       flex: 1
     }
   ]
@@ -119,15 +186,37 @@ const FiPaymentVouchers = () => {
     } catch (error) {}
   }
 
-  const onApply = ({ rpbParams }) => {
-    filterBy('params', rpbParams)
+  const onApply = ({ search, rpbParams }) => {
+    if (!search && rpbParams.length === 0) {
+      clearFilter('params')
+    } else if (!search) {
+      filterBy('params', rpbParams)
+    } else {
+      filterBy('qry', search)
+    }
     refetch()
+  }
+
+  const onSearch = value => {
+    filterBy('qry', value)
+  }
+
+  const onClear = () => {
+    clearFilter('qry')
   }
 
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar hasSearch={false} onAdd={add} maxAccess={access} onApply={onApply} reportName={'FIPV'} />
+        <RPBGridToolbar 
+          onSearch={onSearch}
+          onClear={onClear} 
+          labels={_labels} 
+          onAdd={add}
+          maxAccess={access} 
+          onApply={onApply} 
+          reportName={'FIPV'} 
+        />
       </Fixed>
       <Grow>
         <Table
