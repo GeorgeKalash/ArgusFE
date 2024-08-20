@@ -3,7 +3,6 @@ import FormShell from './FormShell'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { RTCLRepository } from 'src/repositories/RTCLRepository'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
-import { useFormik } from 'formik'
 import Grid from '@mui/system/Unstable_Grid/Grid'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import { formatDateFromApi, formatDateToApi, formatDateToApiFunction } from 'src/lib/date-helper'
@@ -11,7 +10,6 @@ import useResourceParams from 'src/hooks/useResourceParams'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import toast from 'react-hot-toast'
 import * as yup from 'yup'
-
 import { ResourceLookup } from './ResourceLookup'
 import ResourceComboBox from './ResourceComboBox'
 import CustomDatePicker from '../Inputs/CustomDatePicker'
@@ -90,12 +88,10 @@ export const ClientRelationForm = ({ seqNo, clientId, formValidation }) => {
   })
 
   const post = obj => {
-    console.log('formValidation', 123)
-
     const data = {
-      ...obj,
-      activationDate: formatDateToApi(obj.activationDate),
-      expiryDate: formatDateToApi(obj.expiryDate)
+      ...formik.values,
+      activationDate: formatDateToApi(formik.values.activationDate),
+      expiryDate: formatDateToApi(formik.values.expiryDate)
     }
 
     postRequest({

@@ -66,8 +66,6 @@ const OTPPhoneVerification = ({
   }
 
   const checkSMS = value => {
-    if (onSuccess) onSuccess()
-
     if (value.length > 1) {
       var data = {
         clientId: formValidation.values.clientId || clientId,
@@ -87,7 +85,9 @@ const OTPPhoneVerification = ({
           if (getData) getData(formValidation?.values?.clientId)
           window.close()
         })
-        .catch(error => {})
+        .catch(error => {
+          if (onSuccess) onSuccess()
+        })
     } else {
       setError('All Fields Required')
     }

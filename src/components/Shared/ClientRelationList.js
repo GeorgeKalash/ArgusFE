@@ -1,17 +1,9 @@
-import React, { useEffect, useContext, useState } from 'react'
-import FormShell from './FormShell'
+import React, { useContext } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { RTCLRepository } from 'src/repositories/RTCLRepository'
-import { CTCLRepository } from 'src/repositories/CTCLRepository'
-import { useFormik } from 'formik'
 import CustomTextField from '../Inputs/CustomTextField'
 import Grid from '@mui/system/Unstable_Grid/Grid'
-import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
-import { formatDateFromApi, formatDateToApiFunction } from 'src/lib/date-helper'
-import useResourceParams from 'src/hooks/useResourceParams'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import toast from 'react-hot-toast'
-import * as yup from 'yup'
 import { Grow } from './Layouts/Grow'
 import { Fixed } from './Layouts/Fixed'
 import { VertLayout } from './Layouts/VertLayout'
@@ -21,7 +13,7 @@ import { ClientRelationForm } from './ClientRelationForm'
 import { useWindow } from 'src/windows'
 
 export const ClientRelationList = ({ recordId, name, reference, setErrorMessage }) => {
-  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
 
   async function fetchGridData() {
@@ -72,30 +64,6 @@ export const ClientRelationList = ({ recordId, name, reference, setErrorMessage 
       type: 'date'
     }
   ]
-
-  const post = obj => {
-    const res = obj.relations.map(({ parentId, activationDate, expiryDate, ...rest }, index) => ({
-      parentId: recordId,
-      seqNo: index + 1,
-      activationDate: activationDate && formatDateToApiFunction(activationDate),
-      expiryDate: expiryDate && formatDateToApiFunction(expiryDate),
-      ...rest
-    }))
-
-    const data = {
-      parentId: recordId,
-      items: res
-    }
-
-    postRequest({
-      extension: RTCLRepository.ClientRelation.set2,
-      record: JSON.stringify(data)
-    })
-      .then(res => {
-        toast.success('Record Successfully')
-      })
-      .catch(error => {})
-  }
 
   const edit = obj => {
     stack({
