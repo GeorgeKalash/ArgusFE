@@ -3,7 +3,7 @@ import { useContext, useState } from 'react'
 import WindowToolbar from './WindowToolbar'
 import TransactionLog from './TransactionLog'
 import { TrxType } from 'src/resources/AccessLevels'
-import { ClientRelationForm } from './ClientRelationForm'
+import { ClientRelationList } from './ClientRelationList'
 import { useGlobalRecord, useWindow } from 'src/windows'
 import PreviewReport from './PreviewReport'
 import GeneralLedger from 'src/components/Shared/GeneralLedger'
@@ -14,6 +14,7 @@ import AccountBalance from './AccountBalance'
 import CashTransaction from './CashTransaction'
 import FinancialTransaction from './FinancialTransaction'
 import { ControlContext } from 'src/providers/ControlContext'
+import { ClientRelationForm } from './ClientRelationForm'
 
 export default function FormShell({
   form,
@@ -199,12 +200,11 @@ export default function FormShell({
           }
           onClientRelation={() =>
             stack({
-              Component: ClientRelationForm,
+              Component: ClientRelationList,
               props: {
                 recordId: form.values?.recordId ?? form.values.clientId,
                 name: form.values.firstName ? form.values.firstName + ' ' + form.values.lastName : form.values.name,
-                reference: form.values.reference,
-                setErrorMessage: setErrorMessage
+                reference: form.values.reference
               },
               width: 900,
               height: 600,
@@ -217,11 +217,10 @@ export default function FormShell({
               props: {
                 recordId: form.values?.recordId ?? form.values.clientId,
                 name: form.values.firstName ? form.values.firstName + ' ' + form.values.lastName : form.values.name,
-                reference: form.values.reference,
-                setErrorMessage: setErrorMessage
+                reference: form.values.reference
               },
-              width: 900,
-              height: 600,
+              width: 500,
+              height: 420,
               title: platformLabels.ClientRelation
             })
           }
@@ -251,6 +250,7 @@ export default function FormShell({
           isPosted={isPosted}
           isClosed={isClosed}
           clientRelation={clientRelation}
+          addClientRelation={addClientRelation}
           resourceId={resourceId}
           masterSource={masterSource}
           recordId={form.values?.recordId}

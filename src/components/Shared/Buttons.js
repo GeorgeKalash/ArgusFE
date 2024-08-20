@@ -129,8 +129,8 @@ export const getButtons = platformLabels => [
   },
   {
     key: 'Add Client Relation',
-    label: platformLabels.ClientRelation,
-    color: '#AC48AE',
+    label: platformLabels.AddClientRelation,
+    color: '#4eb558',
     image: 'clientRelations.png',
     main: false
   },

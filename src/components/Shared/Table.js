@@ -51,6 +51,7 @@ const Table = ({
   const [checked, setChecked] = useState(false)
   const [focus, setFocus] = useState(false)
 
+  console.log(gridData)
   const columns = props?.columns
     .filter(
       ({ field }) =>
