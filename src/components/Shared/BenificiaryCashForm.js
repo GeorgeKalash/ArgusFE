@@ -148,10 +148,11 @@ const BenificiaryCashForm = ({
           extension: RemittanceOutwardsRepository.BeneficiaryCash.set,
           record: JSON.stringify(data)
         })
-
-        toast.success('Record Updated Successfully')
-        if (onSuccess) onSuccess(res.recordId, values.name)
         setEditMode(true)
+        toast.success('Record Updated Successfully')
+        const [client, ben, benSeqNo] = res.recordId.split(',')
+        await refetchForm(client, ben, benSeqNo)
+        if (onSuccess) onSuccess(res.recordId, values.name)
       }
     }
   })
@@ -159,6 +160,7 @@ const BenificiaryCashForm = ({
   const { labels: _labels } = useResourceQuery({
     datasetId: ResourceIds.BeneficiaryCash
   })
+
   useEffect(() => {
     ;(async function () {
       if (formik.values.countryId && dispersalType) {
@@ -175,56 +177,7 @@ const BenificiaryCashForm = ({
       }
 
       if (beneficiary?.beneficiaryId && client?.clientId) {
-        const RTBEC = await getRequest({
-          extension: RemittanceOutwardsRepository.BeneficiaryCash.get,
-          parameters: `_clientId=${client?.clientId}&_beneficiaryId=${beneficiary?.beneficiaryId}&_seqNo=${beneficiary?.beneficiarySeqNo}`
-        })
-
-        const RTBEN = await getRequest({
-          extension: RemittanceOutwardsRepository.Beneficiary.get,
-          parameters: `_clientId=${client?.clientId}&_beneficiaryId=${beneficiary?.beneficiaryId}&_seqNo=${beneficiary?.beneficiarySeqNo}`
-        })
-
-        if (!RTBEC?.record?.firstName) setNotArabic(false)
-
-        const obj = {
-          //RTBEN
-          clientId: client?.clientId,
-          recordId: client?.clientId * 1000 + beneficiary?.beneficiaryId,
-          beneficiaryId: beneficiary?.beneficiaryId,
-          name: RTBEN?.record?.name,
-          dispersalType: dispersalType,
-          nationalityId: RTBEN?.record?.nationalityId,
-          isBlocked: RTBEN?.record?.isBlocked,
-          isInactive: RTBEN?.record?.isInactive,
-          stoppedDate: RTBEN?.record?.stoppedDate && formatDateFromApi(RTBEN.record.stoppedDate),
-          stoppedReason: RTBEN?.record?.stoppedReason,
-          gender: RTBEN?.record?.gender,
-          cobId: RTBEN?.record?.cobId,
-          cellPhone: RTBEN?.record?.cellPhone,
-          birthDate: RTBEN?.record?.birthDate && formatDateFromApi(RTBEN.record.birthDate),
-          currencyId: RTBEN?.record.currencyId,
-          addressLine1: RTBEN?.record?.addressLine1,
-          addressLine2: RTBEN?.record?.addressLine2,
-          clientRef: RTBEN?.record?.clientRef,
-          clientName: RTBEN?.record?.clientName,
-          countryId: RTBEN?.record?.countryId,
-          seqNo: RTBEN?.record?.seqNo,
-
-          //RTBEC
-          firstName: RTBEC?.record?.firstName,
-          lastName: RTBEC?.record?.lastName,
-          middleName: RTBEC?.record?.middleName,
-          familyName: RTBEC?.record?.familyName,
-          fl_firstName: RTBEC?.record?.fl_firstName,
-          fl_lastName: RTBEC?.record?.fl_lastName,
-          fl_middleName: RTBEC?.record?.fl_middleName,
-          fl_familyName: RTBEC?.record?.fl_familyName,
-          birthPlace: RTBEC?.record?.birthPlace,
-          seqNo: RTBEC?.record?.seqNo
-        }
-
-        formik.setValues(obj)
+        await refetchForm(client?.clientId, beneficiary?.beneficiaryId, beneficiary?.beneficiarySeqNo)
       }
     })()
   }, [beneficiary?.beneficiaryId, beneficiary?.beneficiarySeqNo, client?.clientId, formik.values.countryId])
@@ -292,6 +245,59 @@ const BenificiaryCashForm = ({
       if (submitted && !errors) setValidSubmit(true)
     }
   }, [submitted])
+
+  async function refetchForm(clientId, beneficiaryId, beneficiarySeqNo) {
+    const RTBEC = await getRequest({
+      extension: RemittanceOutwardsRepository.BeneficiaryCash.get,
+      parameters: `_clientId=${clientId}&_beneficiaryId=${beneficiaryId}&_seqNo=${beneficiarySeqNo}`
+    })
+
+    const RTBEN = await getRequest({
+      extension: RemittanceOutwardsRepository.Beneficiary.get,
+      parameters: `_clientId=${clientId}&_beneficiaryId=${beneficiaryId}&_seqNo=${beneficiarySeqNo}`
+    })
+
+    if (!RTBEC?.record?.firstName) setNotArabic(false)
+
+    const obj = {
+      //RTBEN
+      clientId: clientId,
+      recordId: clientId * 1000 + beneficiaryId,
+      beneficiaryId: beneficiaryId,
+      name: RTBEN?.record?.name,
+      dispersalType: dispersalType,
+      nationalityId: RTBEN?.record?.nationalityId,
+      isBlocked: RTBEN?.record?.isBlocked,
+      isInactive: RTBEN?.record?.isInactive,
+      stoppedDate: RTBEN?.record?.stoppedDate && formatDateFromApi(RTBEN.record.stoppedDate),
+      stoppedReason: RTBEN?.record?.stoppedReason,
+      gender: RTBEN?.record?.gender,
+      cobId: RTBEN?.record?.cobId,
+      cellPhone: RTBEN?.record?.cellPhone,
+      birthDate: RTBEN?.record?.birthDate && formatDateFromApi(RTBEN.record.birthDate),
+      currencyId: RTBEN?.record.currencyId,
+      addressLine1: RTBEN?.record?.addressLine1,
+      addressLine2: RTBEN?.record?.addressLine2,
+      clientRef: RTBEN?.record?.clientRef,
+      clientName: RTBEN?.record?.clientName,
+      countryId: RTBEN?.record?.countryId,
+      seqNo: RTBEN?.record?.seqNo,
+
+      //RTBEC
+      firstName: RTBEC?.record?.firstName,
+      lastName: RTBEC?.record?.lastName,
+      middleName: RTBEC?.record?.middleName,
+      familyName: RTBEC?.record?.familyName,
+      fl_firstName: RTBEC?.record?.fl_firstName,
+      fl_lastName: RTBEC?.record?.fl_lastName,
+      fl_middleName: RTBEC?.record?.fl_middleName,
+      fl_familyName: RTBEC?.record?.fl_familyName,
+      birthPlace: RTBEC?.record?.birthPlace,
+      seqNo: RTBEC?.record?.seqNo
+    }
+
+    formik.setValues(obj)
+  }
 
   const constructNameField = formValues => {
     const arabicRegex = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/
@@ -367,7 +373,6 @@ const BenificiaryCashForm = ({
       resourceId={ResourceIds.BeneficiaryCash}
       form={formik}
       editMode={editMode}
-      setEditMode={setEditMode}
       maxAccess={maxAccess}
       disabledSubmit={editMode}
       isCleared={viewBtns}
