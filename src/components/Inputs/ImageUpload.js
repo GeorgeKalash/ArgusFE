@@ -114,8 +114,8 @@ const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId }, ref) => 
         alt=''
         style={{
           width: 140,
-          height: 100,
-          objectFit: 'cover',
+          height: 140,
+          objectFit: 'contain',
           marginRight: 16,
           border: error && '2px solid #f44336'
         }}

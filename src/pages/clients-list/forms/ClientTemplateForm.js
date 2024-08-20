@@ -534,7 +534,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       bldgNo: obj.bldgNo,
       unitNo: obj.unitNo,
       subNo: obj.subNo,
-      poBox: obj.poBox,
+      poBox: obj.poBox
     }
 
     const obj6 = {
@@ -695,7 +695,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     stack({
       Component: BeneficiaryWindow,
       props: { clientId: recordId },
-      width: 1100,
+      width: 1300,
       height: 500,
       title: labels.beneficiaries
     })
