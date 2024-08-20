@@ -109,5 +109,10 @@ export const SaleRepository = {
     set: service + 'setCCS',
     del: service + 'delCCS',
     page: service + 'pageCCS'
+  },
+  SalesZoneLevel: {
+    qry: service + 'qryZOL',
+    set2: service + 'set2ZOL',
+    get: service + 'getZOL'
   }
 }

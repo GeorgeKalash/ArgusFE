@@ -194,5 +194,6 @@ export const ResourceIds = {
   SystemFunctionIntegrations: 30105,
   PUPaymentTerms: 50106,
   PuVendors: 50201,
-  PUSettings: 50107
+  PUSettings: 50107,
+  SalesZoneLevels: 51111
 }
