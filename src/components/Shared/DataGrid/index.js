@@ -71,9 +71,10 @@ export function DataGrid({
     if (!isUpdatingField && nextEdit) {
       const { id, field } = nextEdit
 
-      if (apiRef.current.getCellMode(id, field) === 'view') apiRef.current.startCellEditMode({ id, field })
-      apiRef.current.setCellFocus(id, field)
-
+      if (!disabled) {
+        if (apiRef.current.getCellMode(id, field) === 'view') apiRef.current.startCellEditMode({ id, field })
+        apiRef.current.setCellFocus(id, field)
+      }
       setNextEdit(null)
     }
   }, [isUpdatingField, nextEdit])
@@ -304,7 +305,7 @@ export function DataGrid({
           rowSelectionModel={[rowSelectionModel]}
           onCellClick={params => {
             const cellMode = apiRef.current.getCellMode(params.id, params.field)
-            if (cellMode === 'view') {
+            if (cellMode === 'view' && params.isEditable) {
               apiRef.current.startCellEditMode({ id: params.id, field: params.field })
               apiRef.current.setCellFocus(params.id, params.field)
             }

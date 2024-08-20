@@ -15,7 +15,7 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 
-export default function DocumentTypeDefaultForm({ labels, maxAccess, dtId }) {
+export default function DocumentTypeDefaultForm({ labels, maxAccess, recordId }) {
   const { platformLabels } = useContext(ControlContext)
 
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -26,10 +26,9 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, dtId }) {
 
   const { formik } = useForm({
     initialValues: {
-      recordId: dtId || null,
-      commitItems: false,
       dtId: '',
-
+      recordId: recordId || null,
+      commitItems: false,
       disableSKULookup: false
     },
     maxAccess,
@@ -59,13 +58,17 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, dtId }) {
   useEffect(() => {
     ;(async function () {
       try {
-        if (dtId) {
+        if (recordId) {
           const res = await getRequest({
             extension: SaleRepository.DocumentTypeDefault.get,
-            parameters: `_dtId=${dtId}`
+            parameters: `_dtId=${recordId}`
           })
 
-          formik.setValues({ ...res.record, recordId: res.record.dtId })
+          formik.setValues({
+            ...res.record,
+            recordId: recordId,
+            disableSKULookup: Boolean(res.record.disableSKULookup)
+          })
         }
       } catch (exception) {}
     })()

@@ -40,7 +40,8 @@ export default function AutoPostExclusionForm({ labels, maxAccess, recordId }) {
       maxAmount: '',
       isInactive: false,
       plantGroupId: '',
-      cgId: ''
+      cgId: '',
+      plantId: ''
     },
     enableReinitialize: true,
     validateOnChange: true,
@@ -287,6 +288,26 @@ export default function AutoPostExclusionForm({ labels, maxAccess, recordId }) {
                   onChange={(event, newValue) => {
                     formik.setFieldValue('cgId', newValue?.recordId)
                   }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  endpointId={SystemRepository.Plant.qry}
+                  name='plantId'
+                  label={labels.plant}
+                  valueField='recordId'
+                  displayField='name'
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' }
+                  ]}
+                  values={formik.values}
+                  maxAccess={maxAccess}
+                  onClear={() => formik.setFieldValue('plantId', '')}
+                  onChange={(event, newValue) => {
+                    formik && formik.setFieldValue('plantId', newValue?.recordId)
+                  }}
+                  error={formik.touched.plantId && Boolean(formik.errors.plantId)}
                 />
               </Grid>
               <Grid item xs={12}>

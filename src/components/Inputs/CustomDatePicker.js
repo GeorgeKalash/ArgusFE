@@ -8,6 +8,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import ClearIcon from '@mui/icons-material/Clear'
 import EventIcon from '@mui/icons-material/Event'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
+import { PickersActionBar } from '@mui/x-date-pickers/PickersActionBar'
 
 import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
 
@@ -122,7 +123,13 @@ const CustomDatePicker = ({
                 </InputAdornment>
               )
             }
+          },
+          actionBar: {
+            actions: ['accept', 'today']
           }
+        }}
+        slots={{
+          actionBar: (props) => (<PickersActionBar {...props} actions={['accept', 'today']} />)
         }}
       />
     </LocalizationProvider>
