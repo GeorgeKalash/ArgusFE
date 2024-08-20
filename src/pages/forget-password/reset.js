@@ -39,10 +39,9 @@ const Reset = () => {
           const mailCode = {
             userName: values.username,
             code: res.data.recordId,
-            resetUrl: `https://${window.location.host}/ForgotPassword.aspx?email=${values.username.replace(
-              '@',
-              '%40'
-            )}&code=${res.data.recordId}`
+            resetUrl: `https://${window.location.host}/reset.js?email=${values.username.replace('@', '%40')}&code=${
+              res.data.recordId
+            }`
           }
           var bodyFormData2 = new FormData()
           bodyFormData2.append('record', JSON.stringify(mailCode))
@@ -52,11 +51,10 @@ const Reset = () => {
                 AccountId: auth?.getAC?.data?.record?.accountId
               }
             })
+            .then(openForm(values?.username))
             .catch(error => {})
         })
         .catch(error => {})
-
-      openForm(values?.username)
     }
   })
 
