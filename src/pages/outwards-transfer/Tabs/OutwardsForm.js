@@ -653,11 +653,18 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
         })
 
         if (res.list.length > 0) {
+          formik.setFieldValue('products', res.list)
           const InstantCashProduct = res.list.find(item => item.interfaceId === 1)
           InstantCashProduct ? await mergeICRates(res.list) : await displayProduct(res.list)
-        } else handleSelectedProduct()
+        } else {
+          formik.setFieldValue('products', [])
+          handleSelectedProduct()
+        }
       }
-    } catch (error) {}
+    } catch (error) {
+      formik.setFieldValue('products', [])
+      handleSelectedProduct()
+    }
   }
   async function mergeICRates(data) {
     const syCountryId = await getDefaultCountry()
@@ -665,71 +672,71 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
     const targetCurrency = formik.values.currencyRef
     const { srcAmount, trgtAmount, countryRef } = formik.values
 
-    const getRates = await getRequest({
-      extension: RemittanceBankInterface.InstantCashRates.qry,
-      parameters: `_deliveryMode=${DEFAULT_DELIVERYMODE}&_sourceCurrency=AED&_targetCurrency=PKR&_sourceAmount=5000&_targetAmount=2000&_originatingCountry=AE&_destinationCountry=PK`
+    try {
+      const getRates = await getRequest({
+        extension: RemittanceBankInterface.InstantCashRates.qry,
+        parameters: `_deliveryMode=${DEFAULT_DELIVERYMODE}&_sourceCurrency=AED&_targetCurrency=PKR&_sourceAmount=5000&_targetAmount=2000&_originatingCountry=AE&_destinationCountry=PK`
 
-      //parameters: `_deliveryMode=${DEFAULT_DELIVERYMODE}&_sourceCurrency=${srcCurrency}&_targetCurrency=${targetCurrency}&_sourceAmount=${srcAmount}&_targetAmount=${trgtAmount}&_originatingCountry=${syCountryId}&_destinationCountry=${countryRef}`
-    })
+        //parameters: `_deliveryMode=${DEFAULT_DELIVERYMODE}&_sourceCurrency=${srcCurrency}&_targetCurrency=${targetCurrency}&_sourceAmount=${srcAmount}&_targetAmount=${trgtAmount}&_originatingCountry=${syCountryId}&_destinationCountry=${countryRef}`
+      })
 
-    const updateICProduct = (product, matchingRate) => {
-      if (matchingRate) {
-        return {
-          ...product,
-          fees: matchingRate.charge,
-          exRate: matchingRate.settlementRate
-        }
-      }
-
-      return product
-    }
-    console.log('check enter 1', getRates?.list)
-
-    if (getRates?.list) {
-      if (data.length === 1) {
-        const matchingRate = getRates.list.find(
-          rate => data[0].originAmount >= rate.amountRangeFrom && data[0].originAmount <= rate.amountRangeTo
-        )
-
-        const updatedProduct = updateICProduct(data[0], matchingRate)
-
+      const updateICProduct = (product, matchingRate) => {
         if (matchingRate) {
-          if (formik.values.lcAmount) formik.setFieldValue('fcAmount', matchingRate.originAmount)
-          if (formik.values.fcAmount) formik.setFieldValue('lcAmount', matchingRate.baseAmount)
+          return {
+            ...product,
+            fees: matchingRate.charge,
+            exRate: matchingRate.settlementRate
+          }
         }
 
-        formik.setFieldValue('products[0].checked', true)
-        !editMode && handleSelectedProduct(updatedProduct)
-        formik.setFieldValue('products', [updatedProduct])
-      } else {
-        !editMode && handleSelectedProduct()
-
-        const updatedData = data.map(item =>
-          item.interfaceId === 1
-            ? updateICProduct(
-                item,
-                getRates.list.find(
-                  rate => item.originAmount >= rate.amountRangeFrom && item.originAmount <= rate.amountRangeTo
-                )
-              )
-            : item
-        )
-
-        formik.setFieldValue('products', updatedData)
-        const matchedIndex = updatedData.findIndex(product => product.productId === data.productId)
-        if (matchedIndex) {
-          formik.setFieldValue(`products[${matchedIndex}].checked`, true)
-        }
+        return product
       }
-    } else {
-      console.log('check enter 2')
-      displayProduct(data)
+
+      if (getRates?.list) {
+        if (data.length === 1) {
+          const matchingRate = getRates.list.find(
+            rate => data[0].originAmount >= rate.amountRangeFrom && data[0].originAmount <= rate.amountRangeTo
+          )
+
+          const updatedProduct = updateICProduct(data[0], matchingRate)
+
+          if (matchingRate) {
+            if (formik.values.lcAmount) formik.setFieldValue('fcAmount', matchingRate.originAmount)
+            if (formik.values.fcAmount) formik.setFieldValue('lcAmount', matchingRate.baseAmount)
+          }
+
+          formik.setFieldValue('products[0].checked', true)
+          !editMode && handleSelectedProduct(updatedProduct)
+          formik.setFieldValue('products', [updatedProduct])
+        } else {
+          !editMode && handleSelectedProduct()
+
+          const updatedData = data.map(item =>
+            item.interfaceId === 1
+              ? updateICProduct(
+                  item,
+                  getRates.list.find(
+                    rate => item.originAmount >= rate.amountRangeFrom && item.originAmount <= rate.amountRangeTo
+                  )
+                )
+              : item
+          )
+
+          formik.setFieldValue('products', updatedData)
+          const matchedIndex = updatedData.findIndex(product => product.productId === data.productId)
+          if (matchedIndex) {
+            formik.setFieldValue(`products[${matchedIndex}].checked`, true)
+          }
+        }
+      } else {
+        displayProduct(data)
+      }
+    } catch (error) {
+      await displayProduct(data)
     }
   }
 
   async function displayProduct(data) {
-    console.log('check enter 3', data)
-    formik.setFieldValue('products', data)
     if (data.length === 1) {
       formik.setFieldValue('products[0].checked', true)
       !editMode && handleSelectedProduct(data[0])
