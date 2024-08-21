@@ -85,17 +85,17 @@ const Postoutwards = () => {
 
     {
       field: 'currencyRef',
-      headerName: _labels.currencyRef,
+      headerName: _labels.currency,
       flex: 1
     },
     {
       field: 'corName',
-      headerName: _labels.corName,
+      headerName: _labels.cor,
       flex: 1
     },
     {
       field: 'clientName',
-      headerName: _labels.name,
+      headerName: _labels.client,
       flex: 1
     },
     {
@@ -106,14 +106,14 @@ const Postoutwards = () => {
     }
   ]
 
-  const fetchRemittanceData = (countryId, currencyId, corId, dispersalType) => {
-    if (!countryId) return
+  const fetchRemittanceData = () => {
+    if (!formik.values.countryId) return
 
     getRequest({
       extension: RemittanceOutwardsRepository.Postoutwards.qry,
-      parameters: `_countryId=${countryId}&_currencyId=${currencyId || 0}&_corId=${corId || 0}&_dispersalType=${
-        dispersalType || 0
-      }`
+      parameters: `_countryId=${formik.values.countryId}&_currencyId=${formik.values.currencyId || 0}&_corId=${
+        formik.values.corId || 0
+      }&_dispersalType=${formik.values.dispersalType || 0}`
     })
       .then(response => {
         setData(response.list || [])
@@ -123,10 +123,12 @@ const Postoutwards = () => {
 
   useEffect(() => {
     const { countryId, currencyId, corId, dispersalType } = formik.values
-    if (countryId) {
+    if (!!countryId) {
       fetchRemittanceData(countryId, currencyId, corId, dispersalType)
     }
   }, [formik.values.countryId, formik.values.currencyId, formik.values.corId, formik.values.dispersalType])
+
+  console.log(formik.values)
 
   return (
     <FormShell
@@ -156,9 +158,12 @@ const Postoutwards = () => {
                     required
                     maxAccess={access}
                     onChange={(event, newValue) => {
-                      const selectedCountryId = newValue?.recordId
-                      formik.setFieldValue('countryId', selectedCountryId)
-                      fetchRemittanceData(selectedCountryId)
+                      if (newValue) {
+                        formik.setFieldValue('countryId', newValue.recordId)
+                      } else {
+                        formik.setFieldValue('countryId', '')
+                        setData([])
+                      }
                     }}
                     error={formik.touched.countryId && Boolean(formik.errors.countryId)}
                   />
@@ -169,7 +174,7 @@ const Postoutwards = () => {
                     valueField='reference'
                     displayField='name'
                     name='corId'
-                    label={_labels.corName}
+                    label={_labels.cor}
                     form={formik}
                     displayFieldWidth={2}
                     valueShow='corRef'
