@@ -11,9 +11,11 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import MetalsWindows from './Window/MetalsWindow'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const TaxCodes = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const { stack } = useWindow()
 
@@ -72,7 +74,7 @@ const TaxCodes = () => {
         record: JSON.stringify(obj)
       })
       invalidate()
-      toast.success('Record Deleted Successfully')
+      toast.success(platformLabels.Deleted)
     } catch (e) {}
   }
 
@@ -86,7 +88,7 @@ const TaxCodes = () => {
       },
       width: 800,
       height: 460,
-      title: _labels.taxCodes
+      title: _labels.metals
     })
   }
 

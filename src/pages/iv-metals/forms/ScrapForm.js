@@ -2,8 +2,6 @@ import { useContext, useEffect } from 'react'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import FormShell from 'src/components/Shared/FormShell'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { FinancialRepository } from 'src/repositories/FinancialRepository'
-import { formatDateFromApi, formatDateToApiFunction } from 'src/lib/date-helper'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
@@ -11,10 +9,12 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const ScrapForm = ({ store, setStore, maxAccess, labels }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const { formik } = useForm({
     enableReinitialize: true,
@@ -71,6 +71,7 @@ const ScrapForm = ({ store, setStore, maxAccess, labels }) => {
 
     const data = {
       taxCodeId: recordId,
+      metalId: recordId,
       items: items
     }
 
@@ -79,7 +80,7 @@ const ScrapForm = ({ store, setStore, maxAccess, labels }) => {
       record: JSON.stringify(data)
     })
       .then(res => {
-        toast.success('Record Edited Successfully')
+        toast.success(platformLabels.Added)
         setStore(prevStore => ({
           ...prevStore,
           scrap: items
@@ -87,6 +88,7 @@ const ScrapForm = ({ store, setStore, maxAccess, labels }) => {
       })
       .catch(error => {})
   }
+
   useEffect(() => {
     if (recordId) {
       getRequest({
@@ -152,7 +154,7 @@ const ScrapForm = ({ store, setStore, maxAccess, labels }) => {
                 },
                 {
                   component: 'numberfield',
-                  label: labels.laborValuePerGram,
+                  label: labels.LaborValuePerGram,
                   name: 'laborValuePerGram',
                   props: {
                     maxLength: 6,

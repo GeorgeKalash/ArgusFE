@@ -15,10 +15,12 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function MetalsForm({ labels, maxAccess, setStore, store }) {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: InventoryRepository.Metals.qry
@@ -55,12 +57,12 @@ export default function MetalsForm({ labels, maxAccess, setStore, store }) {
           ...prevStore,
           recordId: response.recordId
         }))
-        toast.success('Record Added Successfully')
+        toast.success(platformLabels.Added)
         formik.setValues({
           ...obj,
           recordId: response.recordId
         })
-      } else toast.success('Record Edited Successfully')
+      } else toast.success(platformLabels.Edited)
 
       invalidate()
     }
