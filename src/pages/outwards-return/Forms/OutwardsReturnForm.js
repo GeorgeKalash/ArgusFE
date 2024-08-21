@@ -186,6 +186,10 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
                   formik.setFieldValue('corId', newValue ? newValue.corId : '')
                   formik.setFieldValue('corName', newValue ? newValue.corName : '')
                   formik.setFieldValue('corRef', newValue ? newValue.corRef : '')
+                  formik.setFieldValue('corReplyStatus', newValue ? newValue.corReplyStatus : '')
+                  formik.setFieldValue('cashAccountId', newValue ? newValue.cashAccountId  : '')
+                  formik.setFieldValue('cashAccountName', newValue ? newValue.cashAccountName  : '')
+                  formik.setFieldValue('cashAccountRef', newValue ? newValue.cashAccountRef  : '')
                 }}
                 error={formik.touched.outwardRef && Boolean(formik.errors.outwardRef)}
                 maxAccess={maxAccess}
