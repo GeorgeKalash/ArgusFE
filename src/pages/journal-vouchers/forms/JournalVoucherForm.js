@@ -19,6 +19,7 @@ import { useForm } from 'src/hooks/form'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function JournalVoucherForm({ labels, access, recordId }) {
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -28,6 +29,7 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
   })
 
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: GeneralLedgerRepository.JournalVoucher.qry
@@ -48,8 +50,8 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
     },
     validateOnChange: true,
     validationSchema: yup.object({
-      date: yup.string().required('This field is required'),
-      currencyId: yup.string().required('This field is required')
+      date: yup.string().required(),
+      currencyId: yup.string().required()
     }),
     onSubmit: async obj => {
       const data = {
@@ -64,7 +66,7 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
         })
 
         if (!recordId) {
-          toast.success('Record Added Successfully')
+          toast.success(platformLabels.Added)
 
           const res = await getRequest({
             extension: GeneralLedgerRepository.JournalVoucher.get,
@@ -72,7 +74,7 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
           })
 
           formik.setValues(res.record)
-        } else toast.success('Record Edited Successfully')
+        } else toast.success(platformLabels.Edited)
 
         invalidate()
       } catch (error) {}
