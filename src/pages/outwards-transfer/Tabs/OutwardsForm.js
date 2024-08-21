@@ -78,6 +78,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
     clientRef: '',
     clientName: '',
     nationalityId: '',
+    category: '',
     fcAmount: null,
     corId: '',
     corRef: '',
@@ -464,6 +465,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
         formik.setFieldValue('professionId', res?.record?.clientIndividual?.professionId)
         formik.setFieldValue('cellPhone', res?.record?.clientMaster?.cellPhone)
         formik.setFieldValue('nationalityId', res?.record?.clientMaster?.nationalityId)
+        formik.setFieldValue('category', res?.record?.clientMaster?.category)
         formik.setFieldValue('hiddenTrxCount', res?.record?.clientRemittance?.trxCountPerYear)
         formik.setFieldValue('hiddenTrxAmount', res?.record?.clientRemittance?.trxAmountPerYear)
         formik.setFieldValue('hiddenSponserName', res?.record?.clientIndividual?.sponsorName)
