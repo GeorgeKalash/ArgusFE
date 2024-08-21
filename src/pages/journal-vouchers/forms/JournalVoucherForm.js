@@ -130,7 +130,6 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
     }
   ]
 
-  console.log(isPosted)
   return (
     <FormShell
       actions={actions}
