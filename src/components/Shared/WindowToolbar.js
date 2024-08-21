@@ -8,13 +8,14 @@ import { ControlContext } from 'src/providers/ControlContext'
 
 const WindowToolbar = ({
   onSave,
-  onCalculate,
+  onSaveClear,
   transactionClicked,
   onPost,
   onClear,
   onInfo,
   onApply,
   isSaved,
+  isSavedClear,
   isInfo,
   isCleared,
   recordId,
@@ -82,6 +83,7 @@ const WindowToolbar = ({
   const functionMapping = {
     actions,
     isSaved,
+    isSavedClear,
     isInfo,
     isCleared,
     disabledSubmit,
@@ -92,6 +94,7 @@ const WindowToolbar = ({
     isClosed,
     editMode,
     onSave,
+    onSaveClear,
     onPost,
     transactionClicked,
     onClear,
