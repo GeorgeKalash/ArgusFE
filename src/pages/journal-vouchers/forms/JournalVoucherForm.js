@@ -32,7 +32,7 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: GeneralLedgerRepository.JournalVoucher.qry
+    endpointId: GeneralLedgerRepository.JournalVoucher.page
   })
 
   const { formik } = useForm({
@@ -42,16 +42,12 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
       reference: '',
       date: new Date(),
       notes: '',
-      currencyId: '',
       dtId: documentType?.dtId,
-      status: 1,
-      rateCalcMethod: 1,
-      exRate: 1
+      status: 1
     },
     validateOnChange: true,
     validationSchema: yup.object({
-      date: yup.string().required(),
-      currencyId: yup.string().required()
+      date: yup.string().required()
     }),
     onSubmit: async obj => {
       const data = {
@@ -67,38 +63,57 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
 
         if (!recordId) {
           toast.success(platformLabels.Added)
-
-          const res = await getRequest({
-            extension: GeneralLedgerRepository.JournalVoucher.get,
-            parameters: `_recordId=${response.recordId}`
-          })
-
-          formik.setValues(res.record)
+          getData(response.recordId)
         } else toast.success(platformLabels.Edited)
 
         invalidate()
       } catch (error) {}
     }
   })
+
   const editMode = !!formik.values.recordId || !!recordId
+
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: GeneralLedgerRepository.JournalVoucher.get,
-            parameters: `_recordId=${recordId}`
-          })
-
-          formik.setValues({
-            ...res.record,
-
-            date: formatDateFromApi(res.record.date)
-          })
-        }
-      } catch (exception) {}
+      await getData(recordId)
     })()
   }, [])
+
+  const getData = async recordId => {
+    try {
+      if (recordId) {
+        const res = await getRequest({
+          extension: GeneralLedgerRepository.JournalVoucher.get,
+          parameters: `_recordId=${recordId}`
+        })
+
+        formik.setValues({
+          ...res.record,
+          date: formatDateFromApi(res.record.date)
+        })
+      }
+    } catch (exception) {}
+  }
+
+  const onPost = async () => {
+    const { ...rest } = formik.values
+    const copy = { ...rest }
+    copy.date = formatDateToApi(copy.date)
+    try {
+      const res = await postRequest({
+        extension: GeneralLedgerRepository.JournalVoucher.post,
+        record: JSON.stringify(copy)
+      })
+
+      if (res) {
+        toast.success(platformLabels.Added)
+        getData(recordId)
+        invalidate()
+      }
+    } catch (e) {}
+  }
+
+  const isPosted = formik.values.status === 3
 
   const actions = [
     {
@@ -106,6 +121,12 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
       condition: true,
       onClick: 'onClickGL',
       disabled: !editMode
+    },
+    {
+      key: 'Post',
+      condition: true,
+      onClick: onPost,
+      disabled: isPosted
     }
   ]
 
@@ -131,7 +152,7 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
                 filter={!editMode ? item => item.activeStatus === 1 : undefined}
                 name='dtId'
                 label={labels.documentType}
-                readOnly={editMode || !isRaw}
+                readOnly={editMode || !isRaw || isPosted}
                 valueField='recordId'
                 displayField='name'
                 values={formik.values}
@@ -148,7 +169,7 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
                 name='reference'
                 label={labels.reference}
                 value={formik.values.reference}
-                readOnly={editMode || !isRaw}
+                readOnly={editMode || !isRaw || isPosted}
                 maxAccess={!editMode && maxAccess}
                 maxLength='30'
                 onChange={formik.handleChange}
@@ -160,7 +181,7 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
               <CustomDatePicker
                 name='date'
                 label={labels.date}
-                readOnly={!isRaw}
+                readOnly={!isRaw || isPosted}
                 onChange={formik.setFieldValue}
                 value={formik.values.date}
                 maxAccess={maxAccess}
@@ -169,28 +190,11 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
               />
             </Grid>
             <Grid item xs={12}>
-              <ResourceComboBox
-                endpointId={SystemRepository.Currency.qry}
-                name='currencyId'
-                label={labels.currency}
-                readOnly={!isRaw}
-                valueField='recordId'
-                displayField='reference'
-                values={formik.values}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('currencyId', newValue?.recordId)
-                }}
-                error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
-                maxAccess={maxAccess}
-                required
-              />
-            </Grid>
-            <Grid item xs={12}>
               <CustomTextArea
                 name='notes'
                 label={labels.notes}
                 value={formik.values.notes}
-                readOnly={!isRaw}
+                readOnly={!isRaw || isPosted}
                 maxLength='100'
                 rows={3}
                 maxAccess={maxAccess}

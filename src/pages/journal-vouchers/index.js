@@ -35,13 +35,11 @@ const JournalVoucher = () => {
 
   async function fetchWithFilter({ filters, pagination }) {
     if (filters?.qry) {
-
       return await getRequest({
         extension: GeneralLedgerRepository.JournalVoucher.snapshot,
         parameters: `_filter=${filters.qry}`
       })
     } else {
-      
       return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
     }
   }
@@ -97,7 +95,7 @@ const JournalVoucher = () => {
         recordId: recordId
       },
       width: 500,
-      height: 500,
+      height: 400,
       title: _labels.generalJournal
     })
   }
