@@ -151,10 +151,12 @@ const BenificiaryCashForm = ({
           extension: RemittanceOutwardsRepository.BeneficiaryCash.set,
           record: JSON.stringify(data)
         })
+
         setEditMode(true)
         toast.success('Record Updated Successfully')
-        const [client, ben, benSeqNo] = res.recordId.split(',')
-        await refetchForm(client, ben, benSeqNo)
+
+        // const [client, ben, benSeqNo] = res.recordId.split(',')
+        // await refetchForm(client, ben, benSeqNo)
         if (onSuccess) onSuccess(res.recordId, values.name)
       }
     }
@@ -345,6 +347,7 @@ const BenificiaryCashForm = ({
 
   const splitName = name => {
     const nameParts = name.trim().split(/\s+/) // Split the name by whitespace
+    console.log('enter useEffect ', name, nameParts)
 
     if (nameParts.length === 2) {
       return {
