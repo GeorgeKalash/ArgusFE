@@ -10,6 +10,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import ResetPassForm from './forms/ResetPassForm'
 import { useWindow } from 'src/windows'
 import { useAuth } from 'src/hooks/useAuth'
+import { useError } from 'src/error'
 import { useForm } from 'src/hooks/form.js'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -19,6 +20,7 @@ const Reset = () => {
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
   const auth = useAuth()
+  const { stack: stackError } = useError()
 
   const { formik } = useForm({
     enableReinitialize: true,
@@ -41,7 +43,7 @@ const Reset = () => {
             code: res.data.recordId,
             resetUrl: `https://${window.location.host}/reset.js?email=${values.username.replace('@', '%40')}&code=${
               res.data.recordId
-            }`
+            }` //link needs later review
           }
           var bodyFormData2 = new FormData()
           bodyFormData2.append('record', JSON.stringify(mailCode))
@@ -52,9 +54,13 @@ const Reset = () => {
               }
             })
             .then(openForm(values?.username))
-            .catch(error => {})
+            .catch(error => {
+              stackError({ message: error })
+            })
         })
-        .catch(error => {})
+        .catch(error => {
+          stackError({ message: error })
+        })
     }
   })
 
