@@ -20,7 +20,7 @@ import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-export default function JournalVoucherForm({ labels, access, recordId, general = {} }) {
+export default function JournalVoucherForm({ labels, access, recordId }) {
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.JournalVoucher,
     access: access,
