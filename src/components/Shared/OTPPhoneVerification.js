@@ -85,9 +85,7 @@ const OTPPhoneVerification = ({
           if (getData) getData(formValidation?.values?.clientId)
           window.close()
         })
-        .catch(error => {
-          if (onSuccess) onSuccess()
-        })
+        .catch(error => {})
     } else {
       setError('All Fields Required')
     }
