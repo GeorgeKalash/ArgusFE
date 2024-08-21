@@ -31,7 +31,8 @@ const AddressBook = () => {
     refetch,
     labels: _labels,
     paginationParameters,
-    access
+    access,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: SystemRepository.Address.qry,
@@ -103,7 +104,8 @@ const AddressBook = () => {
       props: {
         _labels: _labels,
         access,
-        recordId: id
+        recordId: id,
+        invalidate
       },
       width: 600,
       height: 600,
