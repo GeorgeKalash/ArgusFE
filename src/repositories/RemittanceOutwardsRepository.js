@@ -94,5 +94,8 @@ export const RemittanceOutwardsRepository = {
     post: service + 'postOWM',
     reopen: service + 'reopenOWM',
     close: service + 'closeOWM'
+  },
+  Postoutwards: {
+    qry: service + 'qryOW3'
   }
 }
