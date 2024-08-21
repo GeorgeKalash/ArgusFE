@@ -115,9 +115,13 @@ const BankBranchesForm = ({ labels, maxAccess, recordId }) => {
                   endpointId={CashBankRepository.CbBank.qry}
                   name='bankId'
                   label={labels.bank}
-                  valueField='recordId'
-                  displayField='name'
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' }
+                  ]}
                   values={formik.values}
+                  valueField='recordId'
+                  displayField={['reference', 'name']}
                   required
                   maxAccess={maxAccess}
                   onChange={(event, newValue) => {
