@@ -74,9 +74,8 @@ const OutwardsCorrespondent = () => {
   }
   const rowColumns = [
     {
-      field: 'outwardRef',
-      headerName: '',
-      flex: 2
+      field: 'reference',
+      headerName: ''
     }
   ]
   const openCorrespondent = () => {
@@ -85,7 +84,7 @@ const OutwardsCorrespondent = () => {
       props: {
         maxAccess: access,
         labels: labels,
-        outwardsList: formik.values.outwards.find(item => item.checked)
+        outwardsList: formik.values.outwards.filter(item => item.checked)
       },
       width: 600,
       height: 500,
