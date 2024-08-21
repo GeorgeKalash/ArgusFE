@@ -5,7 +5,7 @@ import { RTCLRepository } from 'src/repositories/RTCLRepository'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import Grid from '@mui/system/Unstable_Grid/Grid'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
-import { formatDateFromApi, formatDateToApi, formatDateToApiFunction } from 'src/lib/date-helper'
+import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import useResourceParams from 'src/hooks/useResourceParams'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import toast from 'react-hot-toast'
@@ -87,7 +87,7 @@ export const ClientRelationForm = ({ seqNo, clientId, formValidation }) => {
     }
   })
 
-  const post = obj => {
+  const post = () => {
     const data = {
       ...formik.values,
       activationDate: formatDateToApi(formik.values.activationDate),
@@ -99,6 +99,7 @@ export const ClientRelationForm = ({ seqNo, clientId, formValidation }) => {
       record: JSON.stringify(data)
     })
       .then(res => {
+        formik.setFieldValue('otpVerified', true)
         toast.success('Record Successfully')
       })
       .catch(error => {})
@@ -157,7 +158,6 @@ export const ClientRelationForm = ({ seqNo, clientId, formValidation }) => {
             label={_labels.expiryDate}
             value={formik.values?.expiryDate}
             onChange={formik.setFieldValue}
-            // disabledDate={'>='}
             onClear={() => formik.setFieldValue('expiryDate', '')}
             error={formik.touched.expiryDate && Boolean(formik.errors.expiryDate)}
             maxAccess={access}
@@ -170,7 +170,6 @@ export const ClientRelationForm = ({ seqNo, clientId, formValidation }) => {
             label={_labels.activationDate}
             value={formik.values?.activationDate}
             onChange={formik.setFieldValue}
-            // disabledDate={'>='}
             onClear={() => formik.setFieldValue('activationDate', '')}
             error={formik.touched.activationDate && Boolean(formik.errors.activationDate)}
             maxAccess={access}

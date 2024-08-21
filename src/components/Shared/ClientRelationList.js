@@ -12,7 +12,7 @@ import { useResourceQuery } from 'src/hooks/resource'
 import { ClientRelationForm } from './ClientRelationForm'
 import { useWindow } from 'src/windows'
 
-export const ClientRelationList = ({ recordId, name, reference, setErrorMessage }) => {
+export const ClientRelationList = ({ recordId, name, reference }) => {
   const { getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
 
