@@ -106,11 +106,10 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
         record: JSON.stringify(copy)
       })
 
-      if (res) {
-        toast.success(platformLabels.Added)
-        getData(recordId)
-        invalidate()
-      }
+      getData(formik.values.recordId)
+      toast.success(platformLabels.Added)
+
+      invalidate()
     } catch (e) {}
   }
 
@@ -127,10 +126,11 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
       key: 'Post',
       condition: true,
       onClick: onPost,
-      disabled: isPosted
+      disabled: isPosted || !editMode
     }
   ]
 
+  console.log(isPosted)
   return (
     <FormShell
       actions={actions}
