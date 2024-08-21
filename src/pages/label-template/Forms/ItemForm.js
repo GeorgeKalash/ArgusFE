@@ -152,7 +152,7 @@ const ItemForm = ({ tlId, labels, seqNo, getGridData, maxAccess, window }) => {
                   readOnly={false}
                   onChange={formik.handleChange}
                   onClear={() => formik.setFieldValue('x', '')}
-                  error={formik.touched.itemKey && Boolean(formik.errors.itemKey)}
+                  error={formik.touched.x && Boolean(formik.errors.x)}
                   maxAccess={maxAccess}
                 />
               </Grid>
@@ -180,7 +180,7 @@ const ItemForm = ({ tlId, labels, seqNo, getGridData, maxAccess, window }) => {
                   readOnly={false}
                   onChange={formik.handleChange}
                   onClear={() => formik.setFieldValue('y', '')}
-                  error={formik.touched.itemKey && Boolean(formik.errors.itemKey)}
+                  error={formik.touched.y && Boolean(formik.errors.y)}
                   maxAccess={maxAccess}
                 />
               </Grid>
