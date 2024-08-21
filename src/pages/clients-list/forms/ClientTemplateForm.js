@@ -35,6 +35,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import CustomDatePickerHijri from 'src/components/Inputs/CustomDatePickerHijri'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import MoreDetails from './MoreDetails'
 
 const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = false }) => {
   const { stack } = useWindow()
@@ -1392,56 +1393,6 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         maxAccess={maxAccess}
                       />
                     </Grid>
-                  </FieldSet>
-                  <Grid item xs={12}>
-                    <Button
-                      variant='contained'
-                      onClick={() =>
-                        stack({
-                          Component: AddressFormShell,
-                          props: {
-                            readOnly: editMode && !allowEdit,
-                            optional: true,
-                            labels: labels,
-                            setAddress: setAddress,
-                            address: address,
-                            maxAccess: maxAccess
-                          },
-                          width: 500,
-                          height: 400,
-                          title: labels.workAddress
-                        })
-                      }
-                    >
-                      {labels.workAddress}
-                    </Button>
-                  </Grid>
-
-                  <Grid container xs={12} spacing={2} sx={{ p: 5 }}>
-                    <Grid item xs={12}>
-                      <CustomNumberField
-                        name='trxCountPerYear'
-                        onChange={clientIndividualFormik.handleChange}
-                        label={labels.trxCountPerYear}
-                        value={clientIndividualFormik.values.trxCountPerYear}
-                        error={
-                          clientIndividualFormik.touched.trxCountPerYear &&
-                          Boolean(clientIndividualFormik.errors.trxCountPerYear)
-                        }
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <CustomNumberField
-                        name='trxAmountPerYear'
-                        onChange={clientIndividualFormik.handleChange}
-                        label={labels.trxAmountPerYear}
-                        value={clientIndividualFormik.values.trxAmountPerYear}
-                        error={
-                          clientIndividualFormik.touched.trxAmountPerYear &&
-                          Boolean(clientIndividualFormik.errors.trxAmountPerYear)
-                        }
-                      />
-                    </Grid>
                     <Grid item xs={12}>
                       <ResourceComboBox
                         endpointId={RemittanceSettingsRepository.SalaryRange.qry}
@@ -1469,34 +1420,6 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         maxAccess={maxAccess}
                       />
                     </Grid>
-
-                    <Grid item xs={12}>
-                      <ResourceComboBox
-                        endpointId={CurrencyTradingSettingsRepository.RiskLevel.qry}
-                        name='riskLevel'
-                        label={labels.riskLevel}
-                        readOnly={editMode && !allowEdit}
-                        valueField='recordId'
-                        displayField={['reference', 'name']}
-                        columnsInDropDown={[
-                          { key: 'reference', value: 'Reference' },
-                          { key: 'name', value: 'Name' }
-                        ]}
-                        values={clientIndividualFormik.values}
-                        onChange={(event, newValue) => {
-                          if (newValue) {
-                            clientIndividualFormik.setFieldValue('riskLevel', newValue?.recordId)
-                          } else {
-                            clientIndividualFormik.setFieldValue('riskLevel', null)
-                          }
-                        }}
-                        error={
-                          clientIndividualFormik.touched.riskLevel && Boolean(clientIndividualFormik.errors.riskLevel)
-                        }
-                        maxAccess={maxAccess}
-                      />
-                    </Grid>
-
                     <Grid item xs={12}>
                       <ResourceComboBox
                         datasetId={DataSets.LANGUAGE}
@@ -1521,31 +1444,68 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         maxAccess={maxAccess}
                       />
                     </Grid>
-
                     <Grid item xs={12}>
-                      <ResourceComboBox
-                        datasetId={DataSets.CIVIL_STATUS}
-                        name='civilStatus'
-                        label={labels.civilStatus}
-                        valueField='key'
-                        displayField='value'
-                        values={clientIndividualFormik.values}
+                      <CustomTextField
+                        name='whatsAppNo'
+                        label={labels.whatsapp}
+                        value={clientIndividualFormik.values?.whatsAppNo}
                         readOnly={editMode && !allowEdit}
-                        onChange={(event, newValue) => {
-                          if (newValue) {
-                            clientIndividualFormik.setFieldValue('civilStatus', newValue?.key)
-                          } else {
-                            clientIndividualFormik.setFieldValue('civilStatus', newValue?.key)
-                          }
-                        }}
+                        onChange={clientIndividualFormik.handleChange}
+                        maxLength='15'
+                        phone={true}
+                        onClear={() => clientIndividualFormik.setFieldValue('whatsAppNo', '')}
                         error={
-                          clientIndividualFormik.touched.civilStatus &&
-                          Boolean(clientIndividualFormik.errors.civilStatus)
+                          clientIndividualFormik.touched.whatsAppNo && Boolean(clientIndividualFormik.errors.whatsAppNo)
                         }
                         maxAccess={maxAccess}
                       />
                     </Grid>
+                  </FieldSet>
+                  <Grid item xs={12}>
+                    <Button
+                      variant='contained'
+                      onClick={() =>
+                        stack({
+                          Component: AddressFormShell,
+                          props: {
+                            readOnly: editMode && !allowEdit,
+                            optional: true,
+                            labels: labels,
+                            setAddress: setAddress,
+                            address: address,
+                            maxAccess: maxAccess
+                          },
+                          width: 500,
+                          height: 400,
+                          title: labels.workAddress
+                        })
+                      }
+                    >
+                      {labels.workAddress}
+                    </Button>
+                    <Button
+                      sx={{ ml: 2 }}
+                      variant='contained'
+                      onClick={() =>
+                        stack({
+                          Component: MoreDetails,
+                          props: {
+                            readOnly: editMode && !allowEdit,
+                            labels: labels,
+                            clientFormik: clientIndividualFormik,
+                            maxAccess: maxAccess
+                          },
+                          width: 500,
+                          height: 400,
+                          title: labels.moreDetails
+                        })
+                      }
+                    >
+                      {labels.moreDetails}
+                    </Button>
+                  </Grid>
 
+                  <Grid container xs={12} spacing={2} sx={{ p: 5 }}>
                     <Grid item xs={12}>
                       <ResourceComboBox
                         name='status'
@@ -1563,61 +1523,6 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         }}
                         readOnly={true}
                         error={clientIndividualFormik.touched.status && Boolean(clientIndividualFormik.errors.status)}
-                        maxAccess={maxAccess}
-                      />
-                    </Grid>
-
-                    <Grid item xs={12}>
-                      <CustomTextField
-                        name='oldReference'
-                        label={labels.oldReference}
-                        value={clientIndividualFormik.values?.oldReference}
-                        readOnly={editMode && true}
-                        onChange={clientIndividualFormik.handleChange}
-                        maxLength='10'
-                        onClear={() => clientIndividualFormik.setFieldValue('oldReference', '')}
-                        error={
-                          clientIndividualFormik.touched.oldReference &&
-                          Boolean(clientIndividualFormik.errors.oldReference)
-                        }
-                        maxAccess={maxAccess}
-                      />
-                    </Grid>
-
-                    <Grid item xs={12}>
-                      <CustomTextField
-                        name='whatsAppNo'
-                        label={labels.whatsapp}
-                        value={clientIndividualFormik.values?.whatsAppNo}
-                        readOnly={editMode && !allowEdit}
-                        onChange={clientIndividualFormik.handleChange}
-                        maxLength='15'
-                        phone={true}
-                        onClear={() => clientIndividualFormik.setFieldValue('whatsAppNo', '')}
-                        error={
-                          clientIndividualFormik.touched.whatsAppNo && Boolean(clientIndividualFormik.errors.whatsAppNo)
-                        }
-                        maxAccess={maxAccess}
-                      />
-                    </Grid>
-
-                    <Grid item xs={12}>
-                      <ResourceComboBox
-                        datasetId={DataSets.TITLE}
-                        name='title'
-                        label={labels.title}
-                        valueField='key'
-                        displayField='value'
-                        readOnly={editMode && !allowEdit}
-                        values={clientIndividualFormik.values}
-                        onChange={(event, newValue) => {
-                          if (newValue) {
-                            clientIndividualFormik.setFieldValue('title', newValue?.key)
-                          } else {
-                            clientIndividualFormik.setFieldValue('title', null)
-                          }
-                        }}
-                        error={clientIndividualFormik.touched.title && Boolean(clientIndividualFormik.errors.title)}
                         maxAccess={maxAccess}
                       />
                     </Grid>
