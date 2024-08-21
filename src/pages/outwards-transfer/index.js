@@ -166,6 +166,15 @@ const OutwardsTransfer = () => {
     hasDT: false
   })
 
+  const getDefaultDT = async () => {
+    const res = await getRequest({
+      extension: SystemRepository.UserFunction.get,
+      parameters: `_userId=${userData.userId}&_functionId=${SystemFunction.Outwards}`
+    })
+
+    return res?.record?.dtId
+  }
+
   const addOutwards = async () => {
     await proxyAction()
   }
@@ -174,7 +183,8 @@ const OutwardsTransfer = () => {
     openForm(obj.recordId)
   }
 
-  function openOutWardsWindow(plantId, cashAccountId, recordId) {
+  async function openOutWardsWindow(plantId, cashAccountId, recordId) {
+    const dtId = await getDefaultDT()
     stack({
       Component: OutwardsForm,
       props: {
@@ -184,7 +194,8 @@ const OutwardsTransfer = () => {
         access,
         labels: _labels,
         recordId: recordId,
-        invalidate
+        invalidate,
+        dtId
       },
       width: 1100,
       height: 600,

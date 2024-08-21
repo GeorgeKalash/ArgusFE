@@ -88,5 +88,26 @@ export const ManufacturingRepository = {
   RoutingSequence: {
     set2: service + 'set2RTS', //RoutingSequencePack
     qry: service + 'qryRTS'
+  },
+  Overhead: {
+    qry: service + 'qryOVH',
+    set: service + 'setOVH',
+    get: service + 'getOVH',
+    del: service + 'delOVH',
+    snapshot: service + 'snapshotOVH'
+  },
+  Design: {
+    qry: service + 'qryDES',
+    set: service + 'setDES',
+    get: service + 'getDES',
+    del: service + 'delDES',
+    snapshot: service + 'snapshotDES'
+  },
+  MFJobOrder: {
+    qry: service + 'qryJOB',
+    set: service + 'setJOB',
+    get: service + 'getJOB',
+    del: service + 'delJOB',
+    snapshot: service + 'snapshotJOB'
   }
 }

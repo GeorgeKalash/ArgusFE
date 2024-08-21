@@ -10,7 +10,6 @@ const defaultProvider = {
   logout: () => Promise.resolve()
 }
 const AuthContext = createContext(defaultProvider)
-
 import axios from 'axios'
 import SHA1 from 'crypto-js/sha1'
 import jwt from 'jwt-decode'
@@ -18,10 +17,8 @@ import jwt from 'jwt-decode'
 const encryptePWD = pwd => {
   var encryptedPWD = SHA1(pwd).toString()
   var shuffledString = ''
-
   for (let i = 0; i < encryptedPWD.length; i = i + 8) {
     var subString = encryptedPWD.slice(i, i + 8)
-
     shuffledString += subString.charAt(6) + subString.charAt(7)
     shuffledString += subString.charAt(4) + subString.charAt(5)
     shuffledString += subString.charAt(2) + subString.charAt(3)
@@ -38,12 +35,10 @@ const AuthProvider = ({ children }) => {
   const [getAC, setGetAC] = useState({})
   const [languageId, setLanguageId] = useState(1)
   const router = useRouter()
-
   useEffect(() => {
     const initAuth = async () => {
       const userData = window.localStorage.getItem('userData') || window.sessionStorage.getItem('userData')
       const savedLanguageId = window.localStorage.getItem('languageId')
-
       if (userData) {
         setUser(JSON.parse(userData))
         if (savedLanguageId) {
@@ -60,7 +55,9 @@ const AuthProvider = ({ children }) => {
     const fetchData = async () => {
       const matchHostname = window.location.hostname.match(/^(.+)\.softmachine\.co$/)
 
-      const accountName = matchHostname ? matchHostname[1] : 'burger'
+
+      const accountName = matchHostname ? matchHostname[1] : 'anthonys'
+
 
       try {
         const response = await axios.get(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=${accountName}`)
@@ -87,7 +84,6 @@ const AuthProvider = ({ children }) => {
           dbs: JSON.parse(getAC.data.record.dbs)
         }
       })
-
       if (getUS2.data.record === null) {
         throw new Error(`User ${params.username} not found`)
       }
@@ -129,7 +125,6 @@ const AuthProvider = ({ children }) => {
         expiresAt: jwt(signIn3.data.record.accessToken).exp,
         ...signIn3.data.record
       }
-
       setLanguageId(loggedUser.languageId)
       window.localStorage.setItem('languageId', loggedUser.languageId)
       if (getUS2.data.record.umcpnl === true) {
@@ -171,7 +166,6 @@ const AuthProvider = ({ children }) => {
               refreshToken: user.refreshToken
             })
           )
-
           axios
             .post(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/newAT`, bodyFormData, {
               headers: {

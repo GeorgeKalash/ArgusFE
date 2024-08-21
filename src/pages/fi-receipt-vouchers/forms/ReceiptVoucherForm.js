@@ -201,6 +201,12 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       disabled: !editMode || isPosted || isCancelled
     },
     {
+      key: 'FI Trx',
+      condition: true,
+      onClick: 'onClickIT',
+      disabled: !editMode
+    },
+    {
       key: 'RecordRemarks',
       condition: true,
       onClick: 'onRecordRemarks',

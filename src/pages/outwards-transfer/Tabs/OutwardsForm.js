@@ -42,7 +42,7 @@ import { useInvalidate } from 'src/hooks/resource'
 import { ControlContext } from 'src/providers/ControlContext'
 import InfoForm from './InfoForm'
 
-export default function OutwardsForm({ labels, access, recordId, cashAccountId, plantId, userId, window }) {
+export default function OutwardsForm({ labels, access, recordId, cashAccountId, plantId, userId, dtId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
@@ -60,7 +60,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
 
   const initialValues = {
     recordId: recordId || null,
-    dtId: null,
+    dtId: dtId || null,
     plantId: plantId,
     cashAccountId: cashAccountId,
     userId: userId,
@@ -170,8 +170,20 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
         .array()
         .of(
           yup.object().shape({
-            type: yup.string().required('Type is required'),
-            amount: yup.string().nullable().required('amount is required')
+            type: yup
+              .string()
+              .required('Type is required')
+
+              .test('unique', 'Type must be unique', function (value) {
+                const { path, parent, options } = this
+                if (!parent.outwardId) {
+                  const arrayOfTypes = options.context.amountRows.map(row => row.type)
+                  const isUnique = arrayOfTypes.filter(item => item === value).length === 1
+
+                  return isUnique
+                } else return true
+              }),
+            amount: yup.string().nullable().required('Amount is required')
           })
         )
         .required('Cash array is required')
@@ -432,6 +444,13 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
           extension: RTCLRepository.CtClientIndividual.get2,
           parameters: `_clientId=${clientId}`
         })
+        if (!res.record?.clientRemittance) {
+          stackError({
+            message: `Chosen Client Has No KYC.`
+          })
+
+          return
+        }
         formik.setFieldValue('idNo', res?.record?.clientIDView?.idNo)
         formik.setFieldValue('expiryDate', formatDateFromApi(res?.record?.clientIDView?.idExpiryDate))
         formik.setFieldValue('firstName', res?.record?.clientIndividual?.firstName)
@@ -566,18 +585,6 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
     } catch (error) {}
   }
 
-  const getDefaultDT = async () => {
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.UserFunction.get,
-        parameters: `_userId=${userId}&_functionId=${SystemFunction.Outwards}`
-      })
-      res.record ? formik.setFieldValue('dtId', res.record.dtId) : formik.setFieldValue('dtId', '')
-    } catch (error) {
-      formik.setFieldValue('dtId', '')
-    }
-  }
-
   function onInstantCashSubmit(obj) {
     formik.setFieldValue('instantCashDetails', obj)
   }
@@ -635,8 +642,6 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
           const copy = { ...res.record.headerView }
           copy.lcAmount = 0
           await fillProducts(copy)
-        } else {
-          await getDefaultDT()
         }
         await getDefaultVAT()
       } catch (error) {}
@@ -1026,6 +1031,17 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
 
                         return
                       }
+
+                      const today = new Date()
+                      const expiryDate = new Date(parseInt(newValue?.expiryDate.replace(/\/Date\((\d+)\)\//, '$1')))
+                      if (expiryDate < today) {
+                        stackError({
+                          message: `Expired Client.`
+                        })
+
+                        return
+                      }
+
                       formik.setFieldValue('clientId', newValue ? newValue.recordId : '')
                       formik.setFieldValue('clientName', newValue ? newValue.name : '')
                       formik.setFieldValue('clientRef', newValue ? newValue.reference : '')
@@ -1281,7 +1297,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
               </FieldSet>
               <Grid item xs={5} sx={{ pl: 5 }}>
                 <ResourceLookup
-                  endpointId={RemittanceOutwardsRepository.Beneficiary.snapshot}
+                  endpointId={RemittanceOutwardsRepository.Beneficiary.snapshot2}
                   parameters={{
                     _clientId: formik.values.clientId,
                     _dispersalType: formik.values.dispersalType,

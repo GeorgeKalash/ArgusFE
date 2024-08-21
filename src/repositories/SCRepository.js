@@ -12,5 +12,11 @@ export const SCRepository = {
     set: service + 'setLBI',
     get: service + 'getLBI',
     del: service + 'delLBI'
+  },
+  StockCount: {
+    qry: service + 'qryHDR',
+    get: service + 'getHDR',
+    set: service + 'setHDR',
+    del: service + 'delHDR'
   }
 }

@@ -17,7 +17,6 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 export default function FiOpeningBalancesForms({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const editMode = !!recordId
 
   const invalidate = useInvalidate({
     endpointId: FinancialRepository.FiOpeningBalance.page
@@ -61,6 +60,8 @@ export default function FiOpeningBalancesForms({ labels, maxAccess, recordId }) 
       invalidate()
     }
   })
+
+  const editMode = !!formik.values.recordId
   useEffect(() => {
     ;(async function () {
       try {

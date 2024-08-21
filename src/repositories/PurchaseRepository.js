@@ -8,6 +8,13 @@ export const PurchaseRepository = {
     set: service + 'setGRP',
     del: service + 'delGRP'
   },
+  PUOrderStatus: {
+    qry: service + 'qryPOS',
+    page: service + 'pagePOS',
+    get: service + 'getPOS',
+    set: service + 'setPOS',
+    del: service + 'delPOS'
+  },
   DeliveryMethods: {
     qry: service + 'qryDM',
     page: service + 'pageDM',
@@ -36,5 +43,12 @@ export const PurchaseRepository = {
     get: service + 'getAD',
     set: service + 'setAD',
     del: service + 'delAD'
+  },
+  PurchaseInvoiceHeader: {
+    qry: service + 'qryIVC',
+    get: service + 'getIVC',
+    set: service + 'setIVC',
+    del: service + 'delIVC',
+    snapshot: service + 'snapshotIVC'
   }
 }

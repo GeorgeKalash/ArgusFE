@@ -388,7 +388,7 @@ const Table = ({
     })
   }
 
-  if (props?.onEdit || props?.onDelete || props?.popupComponent) {
+  if (props?.onEdit || props?.onDelete) {
     const deleteBtnVisible = maxAccess ? props?.onDelete && maxAccess > TrxType.EDIT : props?.onDelete ? true : false
 
     if (!filteredColumns?.some(column => column.field === 'actions'))
@@ -414,16 +414,7 @@ const Table = ({
                   <Image src={editIcon} alt='Edit' width={18} height={18} />
                 </IconButton>
               )}
-              {props?.popupComponent && (
-                <IconButton
-                  size='small'
-                  onClick={e => {
-                    props?.popupComponent(data)
-                  }}
-                >
-                  <Image src={editIcon} alt='Edit' width={18} height={18} />
-                </IconButton>
-              )}
+
               {!globalStatus && deleteBtnVisible && (
                 <IconButton
                   size='small'

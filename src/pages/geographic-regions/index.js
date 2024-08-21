@@ -61,7 +61,7 @@ const GeographicRegions = () => {
       field: 'flName',
       headerName: _labels.flName,
       flex: 1
-    },
+    }
   ]
 
   const add = () => {
@@ -81,7 +81,7 @@ const GeographicRegions = () => {
         maxAccess: access
       },
       width: 500,
-      height: 300,
+      height: 350,
       title: _labels.GeographicRegions
     })
   }

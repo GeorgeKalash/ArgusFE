@@ -91,7 +91,6 @@ const ProductCurrenciesForm = ({ store, setStore, labels, editMode, maxAccess })
         mapping: [
           { from: 'countryId', to: 'countryId' },
           { from: 'countryName', to: 'countryName' },
-          ,
           { from: 'countryRef', to: 'countryRef' }
         ],
         columnsInDropDown: [
@@ -147,6 +146,7 @@ const ProductCurrenciesForm = ({ store, setStore, labels, editMode, maxAccess })
         valueField: 'key',
         displayField: 'value',
         displayFieldWidth: 2,
+        refresh: false,
         mapping: [
           { from: 'key', to: 'dispersalType' },
           { from: 'value', to: 'dispersalTypeName' }

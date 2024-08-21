@@ -57,6 +57,7 @@ export default function BenificiaryBankForm({
     dispersalType: dispersalType || '',
     nationalityId: null,
     isBlocked: false,
+    isInactive: false,
     stoppedDate: null,
     stoppedReason: '',
     gender: null,
@@ -133,6 +134,7 @@ export default function BenificiaryBankForm({
           name: values.name,
           dispersalType: values.dispersalType,
           isBlocked: values.isBlocked,
+          isInactive: values.isInactive,
           stoppedDate: values.stoppedDate ? formatDateToApi(values.stoppedDate) : null,
           stoppedReason: values.stoppedReason,
           nationalityId: values.nationalityId,
@@ -211,6 +213,7 @@ export default function BenificiaryBankForm({
           dispersalType: dispersalType,
           nationalityId: RTBEN?.record?.nationalityId,
           isBlocked: RTBEN?.record?.isBlocked,
+          isInactive: RTBEN?.record?.isInactive,
           stoppedDate: RTBEN?.record?.stoppedDate && formatDateFromApi(RTBEN.record.stoppedDate),
           stoppedReason: RTBEN?.record?.stoppedReason,
           gender: RTBEN?.record?.gender,
@@ -272,6 +275,7 @@ export default function BenificiaryBankForm({
       name: values.name,
       dispersalType: values.dispersalType,
       isBlocked: values.isBlocked,
+      isInactive: values.isInactive,
       stoppedDate: values.stoppedDate ? formatDateToApi(values.stoppedDate) : null,
       stoppedReason: values.stoppedReason,
       nationalityId: values.nationalityId,
@@ -800,6 +804,21 @@ export default function BenificiaryBankForm({
                   onPaste={handleCopy}
                   onBlur={formik.handleBlur}
                   required={formik.values.IBAN}
+                />
+              </FormGrid>
+              <FormGrid hideonempty xs={12}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      name='isInactive'
+                      readOnly
+                      disabled={true}
+                      checked={formik.values?.isInactive}
+                      onChange={formik.handleChange}
+                      maxAccess={maxAccess}
+                    />
+                  }
+                  label={_labels.isInactive}
                 />
               </FormGrid>
               <FormGrid hideonempty xs={12}>

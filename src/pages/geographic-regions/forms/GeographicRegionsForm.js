@@ -1,4 +1,4 @@
-import { Grid } from '@mui/material'
+import { Checkbox, FormControlLabel, Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
@@ -24,7 +24,7 @@ export default function GeographicRegionsForm({ labels, maxAccess, recordId }) {
   })
 
   const { formik } = useForm({
-    initialValues: { recordId: null, reference: '', name: '', flName: '' },
+    initialValues: { recordId: null, reference: '', name: '', flName: '', isInactive: false },
     maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
@@ -62,7 +62,10 @@ export default function GeographicRegionsForm({ labels, maxAccess, recordId }) {
             parameters: `_recordId=${recordId}`
           })
 
-          formik.setValues(res.record)
+          formik.setValues({
+            ...res.record,
+            isInactive: Boolean(res.record.isInactive)
+          })
         }
       } catch (exception) {}
     })()
@@ -108,6 +111,19 @@ export default function GeographicRegionsForm({ labels, maxAccess, recordId }) {
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('flName', '')}
                 error={formik.touched.flName && Boolean(formik.errors.flName)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name='isInactive'
+                    checked={formik.values?.isInactive}
+                    onChange={formik.handleChange}
+                    maxAccess={maxAccess}
+                  />
+                }
+                label={labels.isInactive}
               />
             </Grid>
           </Grid>
