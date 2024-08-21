@@ -39,9 +39,11 @@ export const RemittanceOutwardsRepository = {
   },
   Beneficiary: {
     qry: service + 'qryBEN',
+    qry2: service + 'qryBEN2',
     get: service + 'getBEN',
     del: service + 'delBEN',
-    snapshot: service + 'snapshotBEN'
+    snapshot: service + 'snapshotBEN',
+    snapshot2: service + 'snapshotBEN2 '
   },
   BeneficiaryBank: {
     qry: service + 'qryBEB',
@@ -75,5 +77,22 @@ export const RemittanceOutwardsRepository = {
   },
   OutwardGLInformation: {
     get: service + 'getOWI'
+  },
+  AutoPostExclusion: {
+    qry: service + 'qryAPX',
+    get: service + 'getAPX',
+    set: service + 'setAPX',
+    del: service + 'delAPX'
+  },
+  OutwardsModification: {
+    qry: service + 'qryOWM',
+    page: service + 'pageOWM',
+    snapshot: service + 'snapshotOWM',
+    get: service + 'getOWM',
+    set2: service + 'set2OWM',
+    del: service + 'delOWM',
+    post: service + 'postOWM',
+    reopen: service + 'reopenOWM',
+    close: service + 'closeOWM'
   }
 }

@@ -243,6 +243,12 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
       disabled: !editMode || isPosted || isCancelled
     },
     {
+      key: 'FI Trx',
+      condition: true,
+      onClick: 'onClickIT',
+      disabled: !editMode
+    },
+    {
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',

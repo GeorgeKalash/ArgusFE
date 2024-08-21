@@ -30,8 +30,7 @@ export default function OpeningBalanceForm({ labels, maxAccess, recordId, record
       currencyId: '',
       currencyRef: '',
       amount: '',
-      baseAmount: '',
-      ...record
+      baseAmount: ''
     },
     maxAccess,
     enableReinitialize: true,
@@ -71,10 +70,10 @@ export default function OpeningBalanceForm({ labels, maxAccess, recordId, record
   useEffect(() => {
     ;(async function () {
       try {
-        if (record && record.currencyId && record.fiscalYear && record.cashAccountId) {
+        if (record && record.currencyId && record.fiscalYear && record.cashAccountId && recordId) {
           const res = await getRequest({
             extension: CashBankRepository.OpeningBalance.get,
-            parameters: `_fiscalYear=${formik.values.fiscalYear}&_cashAccountId=${formik.values.cashAccountId}&_currencyId=${formik.values.currencyId}`
+            parameters: `_fiscalYear=${record.fiscalYear}&_cashAccountId=${record.cashAccountId}&_currencyId=${record.currencyId}`
           })
 
           formik.setValues({

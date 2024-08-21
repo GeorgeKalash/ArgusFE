@@ -87,6 +87,7 @@ export const FinancialRepository = {
   },
   FiMemo: {
     qry: service + 'qryMEM',
+    page: service + 'pageMEM',
     get: service + 'getMEM',
     del: service + 'delMEM',
     post: service + 'postMEM',
@@ -148,11 +149,24 @@ export const FinancialRepository = {
     del: service + 'delPV',
     post: service + 'postPV',
     cancel: service + 'cancelPV',
+    snapshot: service + 'snapshotPV'
+  },
+  AgingProfile: {
+    qry: service + 'qryAGP',
+    get: service + 'getAGP',
+    set: service + 'setAGP',
+    del: service + 'delAGP'
+  },
+  FIDimension: {
+    qry: service + 'qryDI',
+    get: service + 'getDI',
+    set: service + 'setDI',
+    del: service + 'delDI'
   },
   PaymentVoucherExpenses: {
-    qry: service + 'qryPVX',
+    qry: service + 'qryPVX'
   },
   PaymentVoucherCostCenters: {
-    qry: service + 'qryPVC',
+    qry: service + 'qryPVC'
   }
 }
