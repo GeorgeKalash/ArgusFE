@@ -234,6 +234,15 @@ export const getButtons = platformLabels => [
     main: true
   },
   {
+    key: 'saveClear',
+    label: platformLabels.saveClear,
+    condition: 'isSavedClear',
+    onClick: 'onSaveClear',
+    color: '#231f20',
+    image: 'saveclear.png',
+    main: true
+  },
+  {
     key: 'Submit',
     label: platformLabels.Submit,
     condition: 'isSaved',

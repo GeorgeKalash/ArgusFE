@@ -20,6 +20,7 @@ export default function FormShell({
   form,
   isSaved = true,
   isInfo = true,
+  isSavedClear = true,
   isCleared = true,
   children,
   editMode,
@@ -129,14 +130,15 @@ export default function FormShell({
         <WindowToolbar
           print={print}
           onSave={() => form?.handleSubmit()}
+          onSaveClear={() => {
+            form?.handleSubmit(), handleReset()
+          }}
           onClear={() => handleReset()}
           onPost={() => {
-            // Set a flag in thexpt Formik state before calling handleSubmit
             form.setFieldValue('isOnPostClicked', true)
             form.handleSubmit()
           }}
           onTFR={() => {
-            // Set  flag in the Formik state before calling handleSubmit
             form.setFieldValue('isTFRClicked', true)
             form.handleSubmit()
           }}
@@ -240,6 +242,7 @@ export default function FormShell({
             })
           }
           isSaved={isSaved}
+          isSavedClear={isSavedClear}
           isInfo={isInfo}
           isCleared={isCleared}
           actions={actions}
