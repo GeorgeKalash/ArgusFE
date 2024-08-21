@@ -146,6 +146,7 @@ const ProductCurrenciesForm = ({ store, setStore, labels, editMode, maxAccess })
         valueField: 'key',
         displayField: 'value',
         displayFieldWidth: 2,
+        refresh: false,
         mapping: [
           { from: 'key', to: 'dispersalType' },
           { from: 'value', to: 'dispersalTypeName' }

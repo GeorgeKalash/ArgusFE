@@ -230,7 +230,9 @@ export default function FormShell({
               Component: PreviewReport,
               props: {
                 selectedReport: selectedReport,
-                recordId: form.values?.recordId
+                recordId: form.values?.recordId,
+                functionId: form.values?.functionId,
+                resourceId: resourceId
               },
               width: 1150,
               height: 700,

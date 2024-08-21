@@ -701,7 +701,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     stack({
       Component: BeneficiaryWindow,
       props: { clientId: recordId },
-      width: 1100,
+      width: 1300,
       height: 500,
       title: labels.beneficiaries
     })

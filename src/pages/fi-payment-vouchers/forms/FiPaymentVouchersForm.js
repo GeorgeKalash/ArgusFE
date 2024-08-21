@@ -72,12 +72,12 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
     enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
-      accountType: yup.string().required(' '),
-      currencyId: yup.number().required(' '),
-      date: yup.string().required(' '),
-      paymentMethod: yup.string().required(' '),
-      cashAccountId: yup.string().required(' '),
-      amount: yup.string().required(' ')
+      accountType: yup.string().required(),
+      currencyId: yup.number().required(),
+      date: yup.string().required(),
+      paymentMethod: yup.string().required(),
+      cashAccountId: yup.string().required(),
+      amount: yup.string().required()
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId

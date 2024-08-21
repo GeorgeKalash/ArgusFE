@@ -327,24 +327,39 @@ const BenificiaryCashForm = ({
   const splitName = name => {
     const nameParts = name.trim().split(/\s+/) // Split the name by whitespace
 
-    const firstName = nameParts.shift() || ''
-    const familyName = nameParts.pop() || ''
-    let middleName = ''
-    let lastName = ''
-
-    if (nameParts.length > 0) {
-      // If there are remaining parts after extracting first and last words
-      if (nameParts.length === 1) {
-        // If only one remaining part, assign it to middleName
-        middleName = nameParts[0]
-      } else {
-        // Otherwise, split remaining parts into middleName and lastName
-        middleName = nameParts.slice(0, -1).join(' ')
-        lastName = nameParts.slice(-1)[0]
+    if (nameParts.length === 2) {
+      return {
+        firstName: nameParts[0],
+        middleName: '',
+        lastName: nameParts[1],
+        familyName: ''
       }
     }
 
-    return { firstName, middleName, lastName, familyName }
+    if (nameParts.length === 3) {
+      return {
+        firstName: nameParts[0],
+        middleName: nameParts[1],
+        lastName: nameParts[2],
+        familyName: ''
+      }
+    }
+
+    if (nameParts.length > 3) {
+      const firstName = nameParts.shift()
+      const familyName = nameParts.pop()
+      const middleName = nameParts.slice(0, -1).join(' ') || ''
+      const lastName = nameParts[nameParts.length - 1] || ''
+
+      return { firstName, middleName, lastName, familyName }
+    }
+
+    return {
+      firstName: nameParts[0] || '',
+      middleName: '',
+      lastName: '',
+      familyName: ''
+    }
   }
 
   return (
