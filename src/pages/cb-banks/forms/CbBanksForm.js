@@ -19,7 +19,6 @@ import { ControlContext } from 'src/providers/ControlContext'
 export default function CbBanksForms({ labels, maxAccess, recordId, setStore }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const editMode = !!recordId
 
   const invalidate = useInvalidate({
     endpointId: CashBankRepository.CbBank.page
@@ -39,8 +38,7 @@ export default function CbBanksForms({ labels, maxAccess, recordId, setStore }) 
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(' '),
-      reference: yup.string().required(' '),
-      swiftCode: yup.string().required(' ')
+      reference: yup.string().required(' ')    
     }),
     onSubmit: async obj => {
       const response = await postRequest({
@@ -64,6 +62,8 @@ export default function CbBanksForms({ labels, maxAccess, recordId, setStore }) 
       invalidate()
     }
   })
+
+  const editMode = !!formik.values.recordId;
 
   useEffect(() => {
     ;(async function () {
