@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import * as yup from 'yup'
 import { useContext } from 'react'
@@ -22,22 +22,65 @@ const SalesZonesLevels = () => {
     datasetId: ResourceIds.SalesZoneLevels
   })
 
+  useEffect(() => {
+    getGridData()
+  }, [])
+
+  function getGridData() {
+    formik.setValues({
+      items: [
+        {
+          id: 1,
+          levelId: null,
+          name: ''
+        }
+      ]
+    })
+
+    getRequest({
+      extension: SaleRepository.SaleZoneLevel.qry
+    })
+      .then(res => {
+        const result = res.list
+
+        const processedData = result.map((item, index) => ({
+          id: index + 1,
+          levelId: item?.levelId,
+          name: item?.name
+        }))
+        res.list.length > 0 && formik.setValues({ items: processedData })
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
   const { formik } = useForm({
     maxAccess: access,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      rows: yup
-        .array()
-        .of(
-          yup.object().shape({
-            name: yup.string().required()
-          })
-        )
-        .required()
+      items: yup.array().of(
+        yup.object().shape({
+          levelId: yup
+            .number()
+            .required('Level ID is required')
+            .integer('Level ID must be an integer')
+            .min(0, 'Level ID must be at least 0')
+            .max(9, 'Level ID must be no more than 9')
+            .test('is-unique', 'Level ID must be unique', function (value) {
+              const { parent } = this
+              const itemList = formik.values.items
+              const duplicate = itemList.find(item => item.levelId === value && item.id !== parent.id)
+
+              return !duplicate
+            }),
+          name: yup.string().required()
+        })
+      )
     }),
     initialValues: {
-      rows: [
+      items: [
         {
           id: 1,
           levelId: null,
@@ -48,7 +91,7 @@ const SalesZonesLevels = () => {
     onSubmit: async values => {
       try {
         const data = {
-          items: values.rows
+          items: values.items
         }
 
         await postRequest({
@@ -64,8 +107,7 @@ const SalesZonesLevels = () => {
     {
       component: 'textfield',
       label: labels.levelId,
-      name: 'levelId',
-      props: { readOnly: true }
+      name: 'levelId'
     },
     {
       component: 'textfield',
@@ -78,12 +120,10 @@ const SalesZonesLevels = () => {
     <VertLayout>
       <Grow>
         <DataGrid
-          onChange={value => formik.setFieldValue('rows', value)}
-          value={formik.values.rows}
-          error={formik.errors.rows}
+          onChange={value => formik.setFieldValue('items', value)}
+          value={formik.values.items}
+          error={formik.errors.items}
           columns={columns}
-          allowDelete={false}
-          allowAddNewLine={false}
         />
       </Grow>
       <Fixed>
