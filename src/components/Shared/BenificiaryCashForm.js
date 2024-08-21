@@ -1,5 +1,5 @@
 import { Grid, FormControlLabel, Checkbox } from '@mui/material'
-import { useEffect, useState, useContext } from 'react'
+import { useEffect, useState, useContext, useRef } from 'react'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import * as yup from 'yup'
@@ -22,6 +22,7 @@ import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import FormGrid from 'src/components/form/layout/FormGrid'
+import { HIDDEN } from 'src/services/api/maxAccess'
 
 const BenificiaryCashForm = ({
   viewBtns = true,
@@ -46,6 +47,8 @@ const BenificiaryCashForm = ({
   const [editMode, setEditMode] = useState(beneficiary?.beneficiaryId && !editable)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [notArabic, setNotArabic] = useState(true)
+  const hiddenIsInActive = useRef(false)
+  const hiddenIsBlocked = useRef(false)
 
   const initialValues = {
     //RTBEN
@@ -174,6 +177,17 @@ const BenificiaryCashForm = ({
         const controls = { controls: qryCCL.list }
         const maxAccess = { record: controls }
         setMaxAccess(maxAccess)
+
+        const isInActiveAccessLevel = (maxAccess?.record?.controls ?? []).find(
+          ({ controlId }) => controlId === 'isInactive'
+        )
+
+        const isBlockedAccessLevel = (maxAccess?.record?.controls ?? []).find(
+          ({ controlId }) => controlId === 'isBlocked'
+        )
+
+        hiddenIsInActive.current = isInActiveAccessLevel?.accessLevel === HIDDEN
+        hiddenIsBlocked.current = isBlockedAccessLevel?.accessLevel === HIDDEN
       }
 
       if (beneficiary?.beneficiaryId && client?.clientId) {
@@ -188,7 +202,6 @@ const BenificiaryCashForm = ({
       setResetForm(false)
     }
   }, [resetForm])
-
   useEffect(() => {
     const values = formik.values
 
@@ -734,20 +747,24 @@ const BenificiaryCashForm = ({
                   readOnly={editMode}
                 />
               </FormGrid>
-              <FormGrid hideonempty xs={12} sx={{ position: 'relative', width: '100%' }}>
-                <FormControlLabel
-                  control={<Checkbox name='isInactive' disabled={true} checked={formik.values?.isInactive} />}
-                  label={_labels.isInactive}
-                  maxAccess={maxAccess}
-                />
-              </FormGrid>
-              <FormGrid hideonempty xs={12} sx={{ position: 'relative', width: '100%' }}>
-                <FormControlLabel
-                  control={<Checkbox name='isBlocked' disabled={true} checked={formik.values?.isBlocked} />}
-                  label={_labels.isBlocked}
-                  maxAccess={maxAccess}
-                />
-              </FormGrid>
+              {!hiddenIsInActive.current && (
+                <FormGrid hideonempty xs={12} sx={{ position: 'relative', width: '100%' }}>
+                  <FormControlLabel
+                    control={<Checkbox name='isInactive' disabled={true} checked={formik.values?.isInactive} />}
+                    label={_labels.isInactive}
+                    maxAccess={maxAccess}
+                  />
+                </FormGrid>
+              )}
+              {!hiddenIsBlocked.current && (
+                <FormGrid hideonempty xs={12} sx={{ position: 'relative', width: '100%' }}>
+                  <FormControlLabel
+                    control={<Checkbox name='isBlocked' disabled={true} checked={formik.values?.isBlocked} />}
+                    label={_labels.isBlocked}
+                    maxAccess={maxAccess}
+                  />
+                </FormGrid>
+              )}
               <FormGrid hideonempty xs={12}>
                 <CustomDatePicker
                   name='stoppedDate'
