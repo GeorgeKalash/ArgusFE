@@ -687,9 +687,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
     try {
       const getRates = await getRequest({
         extension: RemittanceBankInterface.InstantCashRates.qry,
-        parameters: `_deliveryMode=${DEFAULT_DELIVERYMODE}&_sourceCurrency=AED&_targetCurrency=PKR&_sourceAmount=5000&_targetAmount=2000&_originatingCountry=AE&_destinationCountry=PK`
-
-        //parameters: `_deliveryMode=${DEFAULT_DELIVERYMODE}&_sourceCurrency=${srcCurrency}&_targetCurrency=${targetCurrency}&_sourceAmount=${srcAmount}&_targetAmount=${trgtAmount}&_originatingCountry=${syCountryId}&_destinationCountry=${countryRef}`
+        parameters: `_deliveryMode=${DEFAULT_DELIVERYMODE}&_sourceCurrency=${srcCurrency}&_targetCurrency=${targetCurrency}&_sourceAmount=${srcAmount}&_targetAmount=${trgtAmount}&_originatingCountry=${syCountryId}&_destinationCountry=${countryRef}`
       })
 
       const updateICProduct = (product, matchingRate) => {
