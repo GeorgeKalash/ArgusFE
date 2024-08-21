@@ -5,6 +5,7 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { getButtons } from './Buttons'
 import CustomComboBox from '../Inputs/CustomComboBox'
 import { ControlContext } from 'src/providers/ControlContext'
+import ButtonTooltip from './ButtonTooltip'
 
 const WindowToolbar = ({
   onSave,
@@ -109,35 +110,6 @@ const WindowToolbar = ({
 
   return (
     <Box sx={{ padding: '8px !important' }}>
-      <style>
-        {`
-          .button-container {
-            position: relative;
-            display: inline-block;
-          }
-          .toast {
-            position: absolute;
-            top: -30px;
-            background-color: #333333ad;
-            color: white;
-            padding: 3px 7px;
-            border-radius: 7px;
-            opacity: 0;
-            transition: opacity 0.3s, top 0.3s;
-            z-index: 1 !important;
-            white-space: nowrap; 
-            overflow: hidden; 
-            text-overflow: ellipsis; 
-            display: none;
-            }
-          .button-container:hover .toast {
-            opacity: 1;
-            top: -40px;
-            display: inline;
-          }
-          }
-        `}
-      </style>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
         {previewReport ? (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -164,7 +136,7 @@ const WindowToolbar = ({
                 onMouseLeave={handleButtonMouseLeave}
               >
                 <img src='/images/buttonsIcons/preview.png' alt='Preview' />
-                {tooltip && <div className='toast'>{tooltip}</div>}
+                {tooltip && <ButtonTooltip tooltip={tooltip} />}
               </div>
             </Button>
           </Box>
@@ -208,7 +180,7 @@ const WindowToolbar = ({
                     >
                       <img src={`/images/buttonsIcons/${button.image}`} alt={button.key} />
                     </Button>
-                    {tooltip && <div className='toast'>{tooltip}</div>}
+                    {tooltip && <ButtonTooltip tooltip={tooltip} />}
                   </div>
                 )
               )
@@ -250,7 +222,7 @@ const WindowToolbar = ({
                   >
                     <img src={`/images/buttonsIcons/${button.image}`} alt={button.key} />
                   </Button>
-                  {tooltip && <div className='toast'>{tooltip}</div>}
+                  {tooltip && <ButtonTooltip tooltip={tooltip} />}
                 </div>
               )
             )
