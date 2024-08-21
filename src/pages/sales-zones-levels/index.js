@@ -52,7 +52,7 @@ const SalesZonesLevels = () => {
         }
 
         await postRequest({
-          extension: SaleRepository.SalesZoneLevel.set2,
+          extension: SaleRepository.SaleZoneLevel.set2,
           record: JSON.stringify(data)
         })
         toast.success(platformLabels.Saved)
