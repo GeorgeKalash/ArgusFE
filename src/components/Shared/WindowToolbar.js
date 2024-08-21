@@ -102,14 +102,13 @@ const WindowToolbar = ({
     onClientRelation,
     onClickGL: () => onClickGL(recordId),
     onClickAC: () => onClickAC(recordId),
-
     onClickGIA: () => onClickGIA(recordId)
   }
 
   const buttons = getButtons(platformLabels)
 
   return (
-    <DialogActions sx={{ padding: '8px !important' }}>
+    <Box sx={{ padding: '8px !important' }}>
       <style>
         {`
           .button-container {
@@ -119,19 +118,23 @@ const WindowToolbar = ({
           .toast {
             position: absolute;
             top: -30px;
-            left: 50%;
-            transform: translateX(-50%);
             background-color: #333333ad;
             color: white;
             padding: 3px 7px;
             border-radius: 7px;
             opacity: 0;
             transition: opacity 0.3s, top 0.3s;
-            z-index: 1;
-          }
+            z-index: 1 !important;
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            display: none;
+            }
           .button-container:hover .toast {
             opacity: 1;
             top: -40px;
+            display: inline;
+          }
           }
         `}
       </style>
@@ -254,7 +257,7 @@ const WindowToolbar = ({
           })}
         </Box>
       </Box>
-    </DialogActions>
+    </Box>
   )
 }
 
