@@ -225,5 +225,6 @@ export const ResourceIds = {
   PUOrderStatus: 50105,
   PUPaymentTerms: 50106,
   AutoPostExclusion: 36124,
-  OutwardsReturn: 36317
+  OutwardsReturn: 36317,
+  AutoPostExclusion: 36124
 }
