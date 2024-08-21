@@ -71,38 +71,38 @@ export const ClientRelationForm = ({ seqNo, clientId, formValidation }) => {
       otpVerified: false
     },
     onSubmit: values => {
-      stack({
-        Component: OTPPhoneVerification,
-        props: {
-          clientId: formValidation.values.recordId,
-          recordId: formValidation.values.recordId,
-          formValidation: formValidation,
-          functionId: SystemFunction.ClientRelation,
-          onSuccess: post
-        },
-        width: 400,
-        height: 400,
-        title: _labels.OTPVerification
+      const data = {
+        ...values,
+        activationDate: formatDateToApi(values.activationDate),
+        expiryDate: formatDateToApi(values.expiryDate)
+      }
+
+      postRequest({
+        extension: RTCLRepository.ClientRelation.set3,
+        record: JSON.stringify(data)
       })
+        .then(res => {
+          stack({
+            Component: OTPPhoneVerification,
+            props: {
+              clientId: formValidation.values.recordId,
+              recordId: formValidation.values.recordId,
+              formValidation: formValidation,
+              functionId: SystemFunction.ClientRelation,
+              onSuccess: verified
+            },
+            width: 400,
+            height: 400,
+            title: _labels.OTPVerification
+          })
+          toast.success('Record Successfully')
+        })
+        .catch(error => {})
     }
   })
 
-  const post = () => {
-    const data = {
-      ...formik.values,
-      activationDate: formatDateToApi(formik.values.activationDate),
-      expiryDate: formatDateToApi(formik.values.expiryDate)
-    }
-
-    postRequest({
-      extension: RTCLRepository.ClientRelation.set3,
-      record: JSON.stringify(data)
-    })
-      .then(res => {
-        formik.setFieldValue('otpVerified', true)
-        toast.success('Record Successfully')
-      })
-      .catch(error => {})
+  const verified = () => {
+    formik.setFieldValue('otpVerified', true)
   }
 
   const editMode = !!formik.values.seqNo
@@ -118,6 +118,7 @@ export const ClientRelationForm = ({ seqNo, clientId, formValidation }) => {
             label={_labels.clientRef}
             valueField='reference'
             displayField='name'
+            displayFieldWidth={2}
             valueShow='parentRef'
             secondValueShow='parentName'
             form={formik}
@@ -128,6 +129,7 @@ export const ClientRelationForm = ({ seqNo, clientId, formValidation }) => {
             }}
             maxAccess={access}
             readOnly={editMode}
+            required
           />
         </Grid>
         <Grid item xs={12}>
@@ -162,6 +164,7 @@ export const ClientRelationForm = ({ seqNo, clientId, formValidation }) => {
             error={formik.touched.expiryDate && Boolean(formik.errors.expiryDate)}
             maxAccess={access}
             readOnly={editMode}
+            required
           />
         </Grid>
         <Grid item xs={12}>
@@ -174,6 +177,7 @@ export const ClientRelationForm = ({ seqNo, clientId, formValidation }) => {
             error={formik.touched.activationDate && Boolean(formik.errors.activationDate)}
             maxAccess={access}
             readOnly={editMode}
+            required
           />
         </Grid>
         <Grid item xs={12}>
