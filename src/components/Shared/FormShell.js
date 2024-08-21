@@ -43,7 +43,7 @@ export default function FormShell({
   const [selectedReport, setSelectedReport] = useState(null)
   const { clear } = useGlobalRecord()
   const { platformLabels } = useContext(ControlContext)
-
+  const isSavedClearVisible = isSavedClear && isSaved && isCleared
   const windowToolbarVisible = editMode
     ? maxAccess < TrxType.EDIT
       ? false
@@ -227,7 +227,7 @@ export default function FormShell({
             })
           }
           isSaved={isSaved}
-          isSavedClear={isSavedClear}
+          isSavedClear={isSavedClearVisible}
           isInfo={isInfo}
           isCleared={isCleared}
           actions={actions}
