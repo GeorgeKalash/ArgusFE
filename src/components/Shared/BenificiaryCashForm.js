@@ -154,9 +154,6 @@ const BenificiaryCashForm = ({
 
         setEditMode(true)
         toast.success('Record Updated Successfully')
-
-        // const [client, ben, benSeqNo] = res.recordId.split(',')
-        // await refetchForm(client, ben, benSeqNo)
         if (onSuccess) onSuccess(res.recordId, values.name)
       }
     }
@@ -193,7 +190,56 @@ const BenificiaryCashForm = ({
       }
 
       if (beneficiary?.beneficiaryId && client?.clientId) {
-        await refetchForm(client?.clientId, beneficiary?.beneficiaryId, beneficiary?.beneficiarySeqNo)
+        const RTBEC = await getRequest({
+          extension: RemittanceOutwardsRepository.BeneficiaryCash.get,
+          parameters: `_clientId=${client?.clientId}&_beneficiaryId=${beneficiary?.beneficiaryId}&_seqNo=${beneficiary?.beneficiarySeqNo}`
+        })
+
+        const RTBEN = await getRequest({
+          extension: RemittanceOutwardsRepository.Beneficiary.get,
+          parameters: `_clientId=${client?.clientId}&_beneficiaryId=${beneficiary?.beneficiaryId}&_seqNo=${beneficiary?.beneficiarySeqNo}`
+        })
+
+        if (!RTBEC?.record?.firstName) setNotArabic(false)
+
+        const obj = {
+          //RTBEN
+          clientId: client?.clientId,
+          recordId: client?.clientId * 1000 + beneficiary?.beneficiaryId,
+          beneficiaryId: beneficiary?.beneficiaryId,
+          name: RTBEN?.record?.name,
+          dispersalType: dispersalType,
+          nationalityId: RTBEN?.record?.nationalityId,
+          isBlocked: RTBEN?.record?.isBlocked,
+          isInactive: RTBEN?.record?.isInactive,
+          stoppedDate: RTBEN?.record?.stoppedDate && formatDateFromApi(RTBEN.record.stoppedDate),
+          stoppedReason: RTBEN?.record?.stoppedReason,
+          gender: RTBEN?.record?.gender,
+          cobId: RTBEN?.record?.cobId,
+          cellPhone: RTBEN?.record?.cellPhone,
+          birthDate: RTBEN?.record?.birthDate && formatDateFromApi(RTBEN.record.birthDate),
+          currencyId: RTBEN?.record.currencyId,
+          addressLine1: RTBEN?.record?.addressLine1,
+          addressLine2: RTBEN?.record?.addressLine2,
+          clientRef: RTBEN?.record?.clientRef,
+          clientName: RTBEN?.record?.clientName,
+          countryId: RTBEN?.record?.countryId,
+          seqNo: RTBEN?.record?.seqNo,
+
+          //RTBEC
+          firstName: RTBEC?.record?.firstName,
+          lastName: RTBEC?.record?.lastName,
+          middleName: RTBEC?.record?.middleName,
+          familyName: RTBEC?.record?.familyName,
+          fl_firstName: RTBEC?.record?.fl_firstName,
+          fl_lastName: RTBEC?.record?.fl_lastName,
+          fl_middleName: RTBEC?.record?.fl_middleName,
+          fl_familyName: RTBEC?.record?.fl_familyName,
+          birthPlace: RTBEC?.record?.birthPlace,
+          seqNo: RTBEC?.record?.seqNo
+        }
+
+        formik.setValues(obj)
       }
     })()
   }, [beneficiary?.beneficiaryId, beneficiary?.beneficiarySeqNo, client?.clientId, formik.values.countryId])
@@ -261,59 +307,6 @@ const BenificiaryCashForm = ({
     }
   }, [submitted])
 
-  async function refetchForm(clientId, beneficiaryId, beneficiarySeqNo) {
-    const RTBEC = await getRequest({
-      extension: RemittanceOutwardsRepository.BeneficiaryCash.get,
-      parameters: `_clientId=${clientId}&_beneficiaryId=${beneficiaryId}&_seqNo=${beneficiarySeqNo}`
-    })
-
-    const RTBEN = await getRequest({
-      extension: RemittanceOutwardsRepository.Beneficiary.get,
-      parameters: `_clientId=${clientId}&_beneficiaryId=${beneficiaryId}&_seqNo=${beneficiarySeqNo}`
-    })
-
-    if (!RTBEC?.record?.firstName) setNotArabic(false)
-
-    const obj = {
-      //RTBEN
-      clientId: clientId,
-      recordId: clientId * 1000 + beneficiaryId,
-      beneficiaryId: beneficiaryId,
-      name: RTBEN?.record?.name,
-      dispersalType: dispersalType,
-      nationalityId: RTBEN?.record?.nationalityId,
-      isBlocked: RTBEN?.record?.isBlocked,
-      isInactive: RTBEN?.record?.isInactive,
-      stoppedDate: RTBEN?.record?.stoppedDate && formatDateFromApi(RTBEN.record.stoppedDate),
-      stoppedReason: RTBEN?.record?.stoppedReason,
-      gender: RTBEN?.record?.gender,
-      cobId: RTBEN?.record?.cobId,
-      cellPhone: RTBEN?.record?.cellPhone,
-      birthDate: RTBEN?.record?.birthDate && formatDateFromApi(RTBEN.record.birthDate),
-      currencyId: RTBEN?.record.currencyId,
-      addressLine1: RTBEN?.record?.addressLine1,
-      addressLine2: RTBEN?.record?.addressLine2,
-      clientRef: RTBEN?.record?.clientRef,
-      clientName: RTBEN?.record?.clientName,
-      countryId: RTBEN?.record?.countryId,
-      seqNo: RTBEN?.record?.seqNo,
-
-      //RTBEC
-      firstName: RTBEC?.record?.firstName,
-      lastName: RTBEC?.record?.lastName,
-      middleName: RTBEC?.record?.middleName,
-      familyName: RTBEC?.record?.familyName,
-      fl_firstName: RTBEC?.record?.fl_firstName,
-      fl_lastName: RTBEC?.record?.fl_lastName,
-      fl_middleName: RTBEC?.record?.fl_middleName,
-      fl_familyName: RTBEC?.record?.fl_familyName,
-      birthPlace: RTBEC?.record?.birthPlace,
-      seqNo: RTBEC?.record?.seqNo
-    }
-
-    formik.setValues(obj)
-  }
-
   const constructNameField = formValues => {
     const arabicRegex = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/
     var name = formValues?.name
@@ -347,40 +340,40 @@ const BenificiaryCashForm = ({
 
   const splitName = name => {
     const nameParts = name.trim().split(/\s+/) // Split the name by whitespace
-    console.log('enter useEffect ', name, nameParts)
+    if (!editMode) {
+      if (nameParts.length === 2) {
+        return {
+          firstName: nameParts[0],
+          middleName: '',
+          lastName: nameParts[1],
+          familyName: ''
+        }
+      }
 
-    if (nameParts.length === 2) {
+      if (nameParts.length === 3) {
+        return {
+          firstName: nameParts[0],
+          middleName: nameParts[1],
+          lastName: nameParts[2],
+          familyName: ''
+        }
+      }
+
+      if (nameParts.length > 3) {
+        const firstName = nameParts.shift()
+        const familyName = nameParts.pop()
+        const middleName = nameParts.slice(0, -1).join(' ') || ''
+        const lastName = nameParts[nameParts.length - 1] || ''
+
+        return { firstName, middleName, lastName, familyName }
+      }
+
       return {
-        firstName: nameParts[0],
+        firstName: nameParts[0] || '',
         middleName: '',
-        lastName: nameParts[1],
+        lastName: '',
         familyName: ''
       }
-    }
-
-    if (nameParts.length === 3) {
-      return {
-        firstName: nameParts[0],
-        middleName: nameParts[1],
-        lastName: nameParts[2],
-        familyName: ''
-      }
-    }
-
-    if (nameParts.length > 3) {
-      const firstName = nameParts.shift()
-      const familyName = nameParts.pop()
-      const middleName = nameParts.slice(0, -1).join(' ') || ''
-      const lastName = nameParts[nameParts.length - 1] || ''
-
-      return { firstName, middleName, lastName, familyName }
-    }
-
-    return {
-      firstName: nameParts[0] || '',
-      middleName: '',
-      lastName: '',
-      familyName: ''
     }
   }
 
@@ -469,7 +462,7 @@ const BenificiaryCashForm = ({
                 required
                 onChange={formik.handleChange}
                 onBlur={e => {
-                  constructNameField(formik.values)
+                  !editMode && constructNameField(formik.values)
                 }}
                 error={formik.touched.name && Boolean(formik.errors.name)}
                 maxAccess={maxAccess}
