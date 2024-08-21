@@ -71,7 +71,7 @@ export function WindowProvider({ children }) {
   )
 }
 
-export function ImmediateWindow({ datasetId, Component, titleName, height, props = {} }) {
+export function ImmediateWindow({ datasetId, Component, labelKey, titleName, height, props = {} }) {
   const { stack } = useWindow()
 
   const { labels: _labels, access } = useResourceParams({
@@ -81,7 +81,7 @@ export function ImmediateWindow({ datasetId, Component, titleName, height, props
   const [rendered, setRendered] = useState(false)
 
   useEffect(() => {
-    if ((_labels[titleName] || titleName) && !rendered) {
+    if ((_labels[labelKey] || titleName) && !rendered) {
       openForm()
       setRendered(true)
     }
@@ -100,7 +100,7 @@ export function ImmediateWindow({ datasetId, Component, titleName, height, props
       draggable: false,
       width: 600,
       height: height || 400,
-      title: (_labels[titleName] || titleName)
+      title: _labels[labelKey] || titleName
     })
   }
 

@@ -164,7 +164,7 @@ export const ResourceIds = {
   RebuildAccountBalances: 31501,
   RoleCategories: 21102,
   SourceOfIncomeType: 36311,
-  ProfessionGroups: 36310,
+  ProfessionGroups: 36121,
   ChangePassword: 20118,
   PaymentVouchers: 31305,
   Roles: 21103,
@@ -195,5 +195,33 @@ export const ResourceIds = {
   PUPaymentTerms: 50106,
   PuVendors: 50201,
   PUSettings: 50107,
-  SalesZoneLevels: 51111
+  Module: 20128, //filter
+  NotificationGroups: 23103,
+  FinancialStatements: 30106,
+  FIAgingProfile: 31104,
+  Item: 41201,
+  Overhead: 42104,
+  PurchaseInvoices: 50304,
+  SaleZone: 51103,
+  SalesZoneLevels: 51111,
+  Client: 51202,
+  SalesOrder: 51302,
+  Driver: 52201,
+  Vehicle: 52202,
+  SecurityGroupsFilter: 90101,
+  AssetClass: 43101,
+  AssetGroup: 43102,
+  Location: 43103,
+  MDAssets: 43200,
+  StockCounts: 44201, //stock count cycle
+  Design: 42109,
+  GovernmentOrganizationFilter: 70106,
+  NotificationTransaction: 23301, // Notification center
+  MFJobOrders: 42302,
+  IVDimension: 41106,
+  FIDimValues: 31111,
+  CorrespondentGroup: 36125,
+  ConsignmentSites: 51110,
+  PUOrderStatus: 50105,
+  AutoPostExclusion: 36124
 }

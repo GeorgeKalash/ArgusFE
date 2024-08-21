@@ -19,6 +19,7 @@ export default function FormShell({
   form,
   isSaved = true,
   isInfo = true,
+  isSavedClear = true,
   isCleared = true,
   children,
   editMode,
@@ -127,14 +128,15 @@ export default function FormShell({
         <WindowToolbar
           print={print}
           onSave={() => form?.handleSubmit()}
+          onSaveClear={() => {
+            form?.handleSubmit(), handleReset()
+          }}
           onClear={() => handleReset()}
           onPost={() => {
-            // Set a flag in thexpt Formik state before calling handleSubmit
             form.setFieldValue('isOnPostClicked', true)
             form.handleSubmit()
           }}
           onTFR={() => {
-            // Set  flag in the Formik state before calling handleSubmit
             form.setFieldValue('isTFRClicked', true)
             form.handleSubmit()
           }}
@@ -168,7 +170,8 @@ export default function FormShell({
             stack({
               Component: FinancialTransaction,
               props: {
-                formValues: form.values
+                formValues: form.values,
+                functionId
               },
               width: 1000,
               height: 620,
@@ -214,7 +217,9 @@ export default function FormShell({
               Component: PreviewReport,
               props: {
                 selectedReport: selectedReport,
-                recordId: form.values?.recordId
+                recordId: form.values?.recordId,
+                functionId: form.values?.functionId,
+                resourceId: resourceId
               },
               width: 1150,
               height: 700,
@@ -222,6 +227,7 @@ export default function FormShell({
             })
           }
           isSaved={isSaved}
+          isSavedClear={isSavedClear}
           isInfo={isInfo}
           isCleared={isCleared}
           actions={actions}

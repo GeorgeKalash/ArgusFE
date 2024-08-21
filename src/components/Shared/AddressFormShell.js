@@ -36,7 +36,8 @@ export const AddressFormShell = ({
     cityDistrict: address?.cityDistrict || '',
     bldgNo: address?.bldgNo || '',
     unitNo: address?.unitNo || '',
-    subNo: address?.subNo || ''
+    subNo: address?.subNo || '',
+    poBox: address?.poBox || ''
   }
 
   const { formik } = useForm({

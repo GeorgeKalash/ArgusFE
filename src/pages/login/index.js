@@ -208,7 +208,7 @@ const LoginPage = () => {
                   justifyContent: 'space-between'
                 }}
               >
-                <LinkStyled href='/pages/auth/forgot-password-v1'>{platformLabels.ForgotPass}</LinkStyled>
+                <LinkStyled href='/forget-password/reset'>{platformLabels.ForgotPass}</LinkStyled>
               </Box>
               <Button
                 fullWidth

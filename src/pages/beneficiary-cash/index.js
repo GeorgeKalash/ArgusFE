@@ -39,10 +39,19 @@ const BeneficiaryCash = () => {
   async function fetchWithSearch({ options = {}, filters }) {
     const { _clientId = 0, _dispersalType = 1 } = options
 
-    return await getRequest({
+    const res = await getRequest({
       extension: RemittanceOutwardsRepository.Beneficiary.snapshot,
       parameters: `_clientId=${_clientId}&_dispersalType=${_dispersalType}&_filter=${filters.qry}&_currencyId=0`
     })
+    res.list = res.list.map(item => {
+      if (item.isInactive === null) {
+        item.isInactive = false
+      }
+
+      return item
+    })
+
+    return res
   }
 
   async function openForm(obj) {
@@ -109,6 +118,11 @@ const BeneficiaryCash = () => {
     {
       field: 'isBlocked',
       headerName: _labels.isBlocked,
+      flex: 1
+    },
+    {
+      field: 'isInactive',
+      headerName: _labels.isInactive,
       flex: 1
     }
   ]

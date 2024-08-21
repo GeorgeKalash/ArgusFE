@@ -49,8 +49,8 @@ const RemittanceDefaults = ({ _labels }) => {
         res.list.map(obj => (myObject[obj.key] = obj.value))
         myObject['nraRef'] = null
 
-        if (myObject['rt-fii-accountGroupId']) {
-          rtDefaultValidation.setFieldValue('rt-fii-accountGroupId', parseInt(myObject['rt-fii-accountGroupId']))
+        if (myObject['rt_fii_accountGroupId']) {
+          rtDefaultValidation.setFieldValue('rt_fii_accountGroupId', parseInt(myObject['rt_fii_accountGroupId']))
         }
 
         if (myObject['rt-nra-product']) {
@@ -96,7 +96,7 @@ const RemittanceDefaults = ({ _labels }) => {
     validateOnChange: true,
     initialValues: {
       'rt-nra-product': null,
-      'rt-fii-accountGroupId': ''
+      'rt_fii_accountGroupId': ''
     },
 
     onSubmit: values => {
@@ -159,13 +159,13 @@ const RemittanceDefaults = ({ _labels }) => {
           <Grid item xs={12} sx={{ marginLeft: '0.5rem', marginRight: '0.5rem' }}>
             <ResourceComboBox
               endpointId={FinancialRepository.Group.qry}
-              name='rt-fii-accountGroupId'
+              name='rt_fii_accountGroupId'
               label={_labels.dag}
               valueField='recordId'
               displayField='name'
               values={rtDefaultValidation.values}
               onChange={(event, newValue) => {
-                rtDefaultValidation.setFieldValue('rt-fii-accountGroupId', newValue?.recordId || '')
+                rtDefaultValidation.setFieldValue('rt_fii_accountGroupId', newValue?.recordId || '')
               }}
             />
           </Grid>

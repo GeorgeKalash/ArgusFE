@@ -6,12 +6,13 @@ import {
 } from '@mui/x-data-grid'
 import components from './components'
 import { Box, IconButton } from '@mui/material'
-import { useContext, useEffect, useRef, useState } from 'react'
+import { useCallback, useContext, useEffect, useRef, useState } from 'react'
 import { useError } from 'src/error'
 import DeleteDialog from '../DeleteDialog'
 import { HIDDEN, accessLevel } from 'src/services/api/maxAccess'
 import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
+import { CacheDataProvider } from 'src/providers/CacheDataContext'
 
 export function DataGrid({
   idName = 'id',
@@ -70,9 +71,10 @@ export function DataGrid({
     if (!isUpdatingField && nextEdit) {
       const { id, field } = nextEdit
 
-      if (apiRef.current.getCellMode(id, field) === 'view') apiRef.current.startCellEditMode({ id, field })
-      apiRef.current.setCellFocus(id, field)
-
+      if (!disabled) {
+        if (apiRef.current.getCellMode(id, field) === 'view') apiRef.current.startCellEditMode({ id, field })
+        apiRef.current.setCellFocus(id, field)
+      }
       setNextEdit(null)
     }
   }, [isUpdatingField, nextEdit])
@@ -289,174 +291,185 @@ export function DataGrid({
   return (
     <Box sx={{ height: height ? height : 'auto', flex: '1 !important' }}>
       {/* Container with scroll */}
-      <MUIDataGrid
-        hideFooter
-        autoHeight={false}
-        columnResizable={false}
-        disableColumnFilter
-        disableColumnMenu
-        disableColumnSelector
-        disableSelectionOnClick
-        disableMultipleSelection
-        getRowId={row => row[idName]}
-        rowSelectionModel={[rowSelectionModel]}
-        onStateChange={state => {
-          if (Object.entries(state.editRows)[0]) {
-            const [id, obj] = Object.entries(state.editRows)[0]
-            currentEditCell.current = { id, field: Object.keys(obj)[0] }
-          }
-        }}
-        processRowUpdate={async () => {
-          setIsUpdating(true)
-
-          const row = await commitRowUpdate()
-
-          setIsUpdating(false)
-
-          return row
-        }}
-        onProcessRowUpdateError={e => {
-          console.error(
-            `[Datagrid - ERROR]: Error updating row with id ${currentEditCell.current.id} and field ${currentEditCell.current.field}.`
-          )
-          console.error('[Datagrid - ERROR]: Please handle all errors inside onChange of your respective field.')
-          console.error('[Datagrid - ERROR]:', e)
-
-          stackError({ message: 'Error occured while updating row.' })
-        }}
-        onCellKeyDown={handleCellKeyDown}
-        columnVisibilityModel={{
-          ...Object.fromEntries(
-            columns
-              .filter(({ name: fieldName }) => accessLevel({ maxAccess, name: `${name}.${fieldName}` }) === HIDDEN)
-              .map(({ name }) => [name, false])
-          ),
-          actions: allowDelete
-        }}
-        rows={value}
-        apiRef={apiRef}
-        editMode='cell'
-        sx={{
-          display: 'flex !important',
-          flex: '1 !important',
-          '& .MuiDataGrid-cell': {
-            padding: '0 !important'
-          },
-          '& .MuiDataGrid-columnHeaders': {
-            backgroundColor: bg
-          },
-          '& .MuiDataGrid-columnHeaderTitle': {
-            fontWeight: '900'
-          }
-        }}
-        onRowClick={handleRowClick} // Handle row click event
-        columns={[
-          ...columns.map(column => ({
-            field: column.name,
-            headerName: column.label || column.name,
-            editable: !disabled,
-            flex: column.flex || 1,
-            sortable: false,
-            renderCell(params) {
-              const Component =
-                typeof column.component === 'string' ? components[column.component].view : column.component.view
-
-              const cell = findCell(params)
-
-              async function updateRow({ changes }) {
-                updateRowState({ id: params.row.id, changes })
-              }
-
-              async function update({ newRow }) {
-                updateState({
-                  newRow
-                })
-              }
-
-              return (
-                <Box
-                  sx={{
-                    width: '100%',
-                    height: '100%',
-                    padding: '0 20px',
-                    backgroundColor: bg,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent:
-                      (column.component === 'checkbox' ||
-                        column.component === 'button' ||
-                        column.component === 'icon') &&
-                      'center',
-                    border: `1px solid ${error?.[cell.rowIndex]?.[params.field] ? '#ff0000' : 'transparent'}`
-                  }}
-                >
-                  <Component {...params} update={update} updateRow={updateRow} column={column} />
-                </Box>
-              )
-            },
-            renderEditCell(params) {
-              const Component =
-                typeof column.component === 'string' ? components[column.component].edit : column.component.edit
-
-              const maxAccessName = `${name}.${column.name}`
-
-              const props = {
-                ...column.props,
-                name: maxAccessName,
-                maxAccess
-              }
-
-              async function update({ field, value }) {
-                stageRowUpdate({
-                  changes: {
-                    [field]: value
-                  }
-                })
-
-                if (column.updateOn !== 'blur') await commitRowUpdate()
-              }
-
-              async function updateRow({ changes }) {
-                stageRowUpdate({
-                  changes
-                })
-
-                if (column.updateOn !== 'blur') await commitRowUpdate()
-              }
-              const row = apiRef.current.getRow(params.id)
-
-              return (
-                <Box
-                  sx={{
-                    width: '100%',
-                    height: '100%',
-                    padding: '0 0px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent:
-                      (column.component === 'checkbox' ||
-                        column.component === 'button' ||
-                        column.component === 'icon') &&
-                      'center'
-                  }}
-                >
-                  <Component
-                    {...params}
-                    column={{
-                      ...column,
-                      props: column.propsReducer ? column?.propsReducer({ row, props }) : props
-                    }}
-                    update={update}
-                    updateRow={updateRow}
-                    isLoading={isUpdatingField}
-                  />
-                </Box>
-              )
+      <CacheDataProvider>
+        <MUIDataGrid
+          hideFooter
+          autoHeight={false}
+          columnResizable={false}
+          disableColumnFilter
+          disableColumnMenu
+          disableColumnSelector
+          disableSelectionOnClick
+          disableMultipleSelection
+          getRowId={row => row[idName]}
+          rowSelectionModel={[rowSelectionModel]}
+          onCellClick={params => {
+            const cellMode = apiRef.current.getCellMode(params.id, params.field)
+            if (cellMode === 'view' && params.isEditable) {
+              apiRef.current.startCellEditMode({ id: params.id, field: params.field })
+              apiRef.current.setCellFocus(params.id, params.field)
             }
-          })),
-          actionsColumn
-        ]}
-      />
+          }}
+          onStateChange={state => {
+            if (Object.entries(state.editRows)[0]) {
+              const [id, obj] = Object.entries(state.editRows)[0]
+              currentEditCell.current = { id, field: Object.keys(obj)[0] }
+            }
+          }}
+          processRowUpdate={async () => {
+            setIsUpdating(true)
+
+            const row = await commitRowUpdate()
+
+            setIsUpdating(false)
+
+            return row
+          }}
+          onProcessRowUpdateError={e => {
+            console.error(
+              `[Datagrid - ERROR]: Error updating row with id ${currentEditCell.current.id} and field ${currentEditCell.current.field}.`
+            )
+            console.error('[Datagrid - ERROR]: Please handle all errors inside onChange of your respective field.')
+            console.error('[Datagrid - ERROR]:', e)
+
+            stackError({ message: 'Error occured while updating row.' })
+          }}
+          onCellKeyDown={handleCellKeyDown}
+          columnVisibilityModel={{
+            ...Object.fromEntries(
+              columns
+                .filter(({ name: fieldName }) => accessLevel({ maxAccess, name: `${name}.${fieldName}` }) === HIDDEN)
+                .map(({ name }) => [name, false])
+            ),
+            actions: allowDelete
+          }}
+          rows={value}
+          apiRef={apiRef}
+          editMode='cell'
+          sx={{
+            display: 'flex !important',
+            flex: '1 !important',
+            '& .MuiDataGrid-cell': {
+              padding: '0 !important'
+            },
+            '& .MuiDataGrid-columnHeaders': {
+              backgroundColor: bg
+            },
+            '& .MuiDataGrid-columnHeaderTitle': {
+              fontWeight: '900'
+            }
+          }}
+          onRowClick={handleRowClick} // Handle row click event
+          columns={[
+            ...columns.map(column => ({
+              field: column.name,
+              headerName: column.label || column.name,
+              editable: !disabled,
+              flex: column.flex || 1,
+              sortable: false,
+              renderCell(params) {
+                const Component =
+                  typeof column.component === 'string' ? components[column.component].view : column.component.view
+
+                const cell = findCell(params)
+
+                async function updateRow({ changes }) {
+                  updateRowState({ id: params.row.id, changes })
+                }
+
+                async function update({ newRow }) {
+                  updateState({
+                    newRow
+                  })
+                }
+
+                return (
+                  <Box
+                    sx={{
+                      width: '100%',
+                      height: '100%',
+                      padding: '0 20px',
+                      backgroundColor: bg,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent:
+                        (column.component === 'checkbox' ||
+                          column.component === 'button' ||
+                          column.component === 'icon') &&
+                        'center',
+                      border: `1px solid ${error?.[cell.rowIndex]?.[params.field] ? '#ff0000' : 'transparent'}`
+                    }}
+                  >
+                    <Component {...params} update={update} updateRow={updateRow} column={column} />
+                  </Box>
+                )
+              },
+              renderEditCell(params) {
+                const columnId = column.name // Adjust according to your column definition
+
+                const Component =
+                  typeof column.component === 'string' ? components[column.component].edit : column.component.edit
+
+                const maxAccessName = `${name}.${column.name}`
+
+                const props = {
+                  ...column.props,
+                  name: maxAccessName,
+                  maxAccess
+                }
+
+                async function update({ field, value }) {
+                  stageRowUpdate({
+                    changes: {
+                      [field]: value
+                    }
+                  })
+
+                  if (column.updateOn !== 'blur') await commitRowUpdate()
+                }
+
+                async function updateRow({ changes }) {
+                  stageRowUpdate({
+                    changes
+                  })
+
+                  if (column.updateOn !== 'blur') await commitRowUpdate()
+                }
+                const row = apiRef.current.getRow(params.id)
+
+                return (
+                  <Box
+                    sx={{
+                      width: '100%',
+                      height: '100%',
+                      padding: '0 0px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent:
+                        (column.component === 'checkbox' ||
+                          column.component === 'button' ||
+                          column.component === 'icon') &&
+                        'center'
+                    }}
+                  >
+                    <Component
+                      {...params}
+                      column={{
+                        ...column,
+                        props: column.propsReducer ? column?.propsReducer({ row, props }) : props
+                      }}
+                      update={update}
+                      updateRow={updateRow}
+                      isLoading={isUpdatingField}
+                    />
+                  </Box>
+                )
+              }
+            })),
+            actionsColumn
+          ]}
+        />
+      </CacheDataProvider>
     </Box>
   )
 }

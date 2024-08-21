@@ -61,7 +61,8 @@ export const SystemRepository = {
     page: service + 'pageCO',
     get: service + 'getCO',
     set: service + 'setCO',
-    del: service + 'delCO'
+    del: service + 'delCO',
+    snapshot: service + 'snapshotCO'
   },
   State: {
     qry: service + 'qryST',
@@ -214,5 +215,11 @@ export const SystemRepository = {
   },
   FiscalModule: {
     qry: service + 'qryFMO'
+  },
+  GovernmentOrganization: {
+    qry: service + 'qryGO',
+    set: service + 'setGO',
+    get: service + 'getGO',
+    del: service + 'delGO'
   }
 }

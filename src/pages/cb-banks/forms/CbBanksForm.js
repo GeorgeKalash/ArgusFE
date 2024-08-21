@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -13,9 +13,12 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useForm } from 'src/hooks/form'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function CbBanksForms({ labels, maxAccess, recordId, setStore }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const editMode = !!recordId
 
   const invalidate = useInvalidate({
@@ -28,6 +31,7 @@ export default function CbBanksForms({ labels, maxAccess, recordId, setStore }) 
       reference: '',
       name: '',
       swiftCode: '',
+      accNoLength: '',
       countryId: ''
     },
     maxAccess: maxAccess,
@@ -36,7 +40,7 @@ export default function CbBanksForms({ labels, maxAccess, recordId, setStore }) 
     validationSchema: yup.object({
       name: yup.string().required(' '),
       reference: yup.string().required(' '),
-      swiftCode: yup.number()
+      swiftCode: yup.string().required(' ')
     }),
     onSubmit: async obj => {
       const response = await postRequest({
@@ -45,13 +49,13 @@ export default function CbBanksForms({ labels, maxAccess, recordId, setStore }) 
       })
 
       if (!obj.recordId) {
-        toast.success('Record Added Successfully')
+        toast.success(platformLabels.Added)
         formik.setValues({
           ...obj,
           recordId: response.recordId
         })
       } else {
-        toast.success('Record Edited Successfully')
+        toast.success(platformLabels.Edited)
       }
       setStore({
         recordId: response.recordId,
@@ -115,13 +119,21 @@ export default function CbBanksForms({ labels, maxAccess, recordId, setStore }) 
                 name='swiftCode'
                 label={labels.swiftCode}
                 value={formik.values.swiftCode}
-                type='numeric'
-                rows={2}
                 maxLength='20'
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('swiftCode', '')}
                 error={formik.touched.swiftCode && Boolean(formik.errors.swiftCode)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomNumberField
+                name='accNoLength'
+                label={labels.accNoLength}
+                value={formik.values.accNoLength}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('accNoLength', '')}
+                error={formik.touched.accNoLength && Boolean(formik.errors.accNoLength)}
               />
             </Grid>
             <Grid item xs={12}>

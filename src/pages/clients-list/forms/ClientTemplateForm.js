@@ -87,6 +87,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     subNo: '',
     unitNo: '',
     bldgNo: '',
+    poBox: '',
 
     //end address
     //clientIndividual
@@ -255,6 +256,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
           subNo: obj.addressView?.subNo,
           unitNo: obj.addressView?.unitNo,
           bldgNo: obj.addressView?.bldgNo,
+          poBox: obj.addressView?.poBox,
 
           // //end address
 
@@ -531,7 +533,8 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       cityDistrictId: obj.cityDistrictId,
       bldgNo: obj.bldgNo,
       unitNo: obj.unitNo,
-      subNo: obj.subNo
+      subNo: obj.subNo,
+      poBox: obj.poBox
     }
 
     const obj6 = {
@@ -551,6 +554,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       postalCode: address.postalCode,
       cityDistrictId: address.cityDistrictId,
       bldgNo: address.bldgNo,
+      poBox: address.poBox,
       unitNo: address.unitNo,
       subNo: address.subNo
     }
@@ -691,7 +695,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     stack({
       Component: BeneficiaryWindow,
       props: { clientId: recordId },
-      width: 1100,
+      width: 1300,
       height: 500,
       title: labels.beneficiaries
     })

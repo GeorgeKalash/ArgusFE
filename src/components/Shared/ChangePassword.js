@@ -66,7 +66,7 @@ const ChangePassword = ({
             },
             data: bodyFormData
           }).then(res => {
-            toast.success('Password changed successfully!')
+            toast.success(_labels.passSuccess)
             formik.setFieldValue('password', '')
             formik.setFieldValue('newPassword', '')
             formik.setFieldValue('confirmPassword', '')
@@ -80,7 +80,7 @@ const ChangePassword = ({
           stackError({ message: error.message })
         }
       } else {
-        toast.error('Passwords do not match!')
+        toast.error(_labels.passNotMatching)
       }
     }
   })

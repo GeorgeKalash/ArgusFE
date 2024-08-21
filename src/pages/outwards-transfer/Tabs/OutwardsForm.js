@@ -78,6 +78,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
     clientRef: '',
     clientName: '',
     nationalityId: '',
+    category: '',
     fcAmount: null,
     corId: '',
     corRef: '',
@@ -170,8 +171,20 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
         .array()
         .of(
           yup.object().shape({
-            type: yup.string().required('Type is required'),
-            amount: yup.string().nullable().required('amount is required')
+            type: yup
+              .string()
+              .required('Type is required')
+
+              .test('unique', 'Type must be unique', function (value) {
+                const { path, parent, options } = this
+                if (!parent.outwardId) {
+                  const arrayOfTypes = options.context.amountRows.map(row => row.type)
+                  const isUnique = arrayOfTypes.filter(item => item === value).length === 1
+
+                  return isUnique
+                } else return true
+              }),
+            amount: yup.string().nullable().required('Amount is required')
           })
         )
         .required('Cash array is required')
@@ -452,6 +465,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
         formik.setFieldValue('professionId', res?.record?.clientIndividual?.professionId)
         formik.setFieldValue('cellPhone', res?.record?.clientMaster?.cellPhone)
         formik.setFieldValue('nationalityId', res?.record?.clientMaster?.nationalityId)
+        formik.setFieldValue('category', res?.record?.clientMaster?.category)
         formik.setFieldValue('hiddenTrxCount', res?.record?.clientRemittance?.trxCountPerYear)
         formik.setFieldValue('hiddenTrxAmount', res?.record?.clientRemittance?.trxAmountPerYear)
         formik.setFieldValue('hiddenSponserName', res?.record?.clientIndividual?.sponsorName)
@@ -1285,7 +1299,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
               </FieldSet>
               <Grid item xs={5} sx={{ pl: 5 }}>
                 <ResourceLookup
-                  endpointId={RemittanceOutwardsRepository.Beneficiary.snapshot}
+                  endpointId={RemittanceOutwardsRepository.Beneficiary.snapshot2}
                   parameters={{
                     _clientId: formik.values.clientId,
                     _dispersalType: formik.values.dispersalType,
