@@ -44,6 +44,7 @@ export default function FormShell({
   const { clear } = useGlobalRecord()
   const { platformLabels } = useContext(ControlContext)
   const isSavedClearVisible = isSavedClear && isSaved && isCleared
+
   const windowToolbarVisible = editMode
     ? maxAccess < TrxType.EDIT
       ? false
