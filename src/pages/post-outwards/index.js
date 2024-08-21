@@ -5,6 +5,7 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import Table from 'src/components/Shared/Table'
 import { useResourceQuery } from 'src/hooks/resource'
+import { Grid } from '@mui/material'
 import * as yup from 'yup'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
@@ -137,73 +138,92 @@ const Postoutwards = () => {
     >
       <VertLayout>
         <Fixed>
-          <ResourceComboBox
-            endpointId={SystemRepository.Country.qry}
-            name='countryId'
-            label={_labels.country}
-            columnsInDropDown={[
-              { key: 'reference', value: 'Reference' },
-              { key: 'name', value: 'Name' }
-            ]}
-            values={formik.values}
-            valueField='recordId'
-            displayField='name'
-            required
-            maxAccess={access}
-            onChange={(event, newValue) => {
-              const selectedCountryId = newValue?.recordId
-              formik.setFieldValue('countryId', selectedCountryId)
-              fetchRemittanceData(selectedCountryId)
-            }}
-            error={formik.touched.countryId && Boolean(formik.errors.countryId)}
-          />
-          <ResourceComboBox
-            endpointId={SystemRepository.Currency.qry}
-            name='currencyId'
-            label={_labels.currency}
-            valueField='recordId'
-            displayField={['reference', 'name']}
-            columnsInDropDown={[
-              { key: 'reference', value: 'Reference' },
-              { key: 'name', value: 'Name' },
-              { key: 'flName', value: 'Foreign Language Name' }
-            ]}
-            displayFieldWidth={0.8}
-            values={formik.values}
-            maxAccess={access}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('currencyId', newValue?.recordId || null)
-            }}
-            error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
-          />
-          <ResourceLookup
-            endpointId={RemittanceSettingsRepository.Correspondent.snapshot}
-            valueField='reference'
-            displayField='name'
-            name='corId'
-            label={_labels.corName}
-            form={formik}
-            displayFieldWidth={2}
-            valueShow='corRef'
-            secondValueShow='corName'
-            maxAccess={access}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('corId', newValue ? newValue.recordId : '')
-              formik.setFieldValue('corName', newValue ? newValue.name : '')
-              formik.setFieldValue('corRef', newValue ? newValue.reference : '')
-            }}
-          />
-          <ResourceComboBox
-            name='dispersalType'
-            label={_labels.dispersal}
-            datasetId={DataSets.RT_Dispersal_Type}
-            valueField='key'
-            displayField='value'
-            values={formik.values}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('dispersalType', newValue?.key)
-            }}
-          />
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={6}>
+              <Grid container spacing={2}>
+                <Grid item xs={10}>
+                  <ResourceComboBox
+                    endpointId={SystemRepository.Country.qry}
+                    name='countryId'
+                    label={_labels.country}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    values={formik.values}
+                    valueField='recordId'
+                    displayField='name'
+                    required
+                    maxAccess={access}
+                    onChange={(event, newValue) => {
+                      const selectedCountryId = newValue?.recordId
+                      formik.setFieldValue('countryId', selectedCountryId)
+                      fetchRemittanceData(selectedCountryId)
+                    }}
+                    error={formik.touched.countryId && Boolean(formik.errors.countryId)}
+                  />
+                </Grid>
+                <Grid item xs={10}>
+                  <ResourceLookup
+                    endpointId={RemittanceSettingsRepository.Correspondent.snapshot}
+                    valueField='reference'
+                    displayField='name'
+                    name='corId'
+                    label={_labels.corName}
+                    form={formik}
+                    displayFieldWidth={2}
+                    valueShow='corRef'
+                    secondValueShow='corName'
+                    maxAccess={access}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('corId', newValue ? newValue.recordId : '')
+                      formik.setFieldValue('corName', newValue ? newValue.name : '')
+                      formik.setFieldValue('corRef', newValue ? newValue.reference : '')
+                    }}
+                  />
+                </Grid>
+              </Grid>
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+              <Grid container spacing={2}>
+                <Grid item xs={10}>
+                  <ResourceComboBox
+                    endpointId={SystemRepository.Currency.qry}
+                    name='currencyId'
+                    label={_labels.currency}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' },
+                      { key: 'flName', value: 'Foreign Language Name' }
+                    ]}
+                    displayFieldWidth={0.8}
+                    values={formik.values}
+                    maxAccess={access}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('currencyId', newValue?.recordId || null)
+                    }}
+                    error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
+                  />
+                </Grid>
+                <Grid item xs={10}>
+                  <ResourceComboBox
+                    name='dispersalType'
+                    label={_labels.dispersal}
+                    datasetId={DataSets.RT_Dispersal_Type}
+                    valueField='key'
+                    displayField='value'
+                    values={formik.values}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('dispersalType', newValue?.key)
+                    }}
+                  />
+                </Grid>
+              </Grid>
+            </Grid>
+          </Grid>
         </Fixed>
         <Grow>
           <Table
