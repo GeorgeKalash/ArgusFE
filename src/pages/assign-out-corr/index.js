@@ -9,16 +9,17 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
-import toast from 'react-hot-toast'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { ControlContext } from 'src/providers/ControlContext'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
+import Table from 'src/components/Shared/Table'
+import { useWindow } from 'src/windows'
+import AssignCorrespondentForm from './AssignCorrespondentForm'
 
 const OutwardsCorrespondent = () => {
-  const { postRequest, getRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
+  const { getRequest } = useContext(RequestsContext)
+  const { stack } = useWindow()
 
   const initialValues = {
     countryId: '',
@@ -27,7 +28,8 @@ const OutwardsCorrespondent = () => {
     corId: 0,
     outwards: [
       {
-        id: 1
+        id: 1,
+        checked: false
       }
     ]
   }
@@ -38,18 +40,21 @@ const OutwardsCorrespondent = () => {
     validateOnChange: true,
     validationSchema: yup.object({
       countryId: yup.string().required()
-    }),
-    onSubmit: async obj => {}
+    })
   })
 
   async function fetchWithFilter({ filters }) {
+    if (!filters.countryId) return { list: [] }
     return await getRequest({
       extension: RemittanceOutwardsRepository.OutwardsTransfer.qry2,
-      parameters: `_countryId=${filters?.countryId}&_currencyId=${filters?.currencyId}&_dispersalType=${filters?.dispersalType}`
+      parameters: `_countryId=${filters?.countryId}&_currencyId=${filters?.currencyId ?? 0}&_dispersalType=${
+        filters?.dispersalType ?? 0
+      }`
     })
   }
 
   const {
+    query: { data },
     labels: labels,
     filterBy,
     access,
@@ -63,12 +68,39 @@ const OutwardsCorrespondent = () => {
   })
 
   const onChange = (index, value) => {
-    if (value) {
-      if (index === 'countryId') filterBy('countryId', value)
-      if (index === 'dispersalType') filterBy('dispersalType', value)
-      if (index === 'currencyId') filterBy('currencyId', value)
-    }
+    if (index === 'countryId') filterBy('countryId', value)
+    if (index === 'dispersalType') filterBy('dispersalType', value)
+    if (index === 'currencyId') filterBy('currencyId', value)
   }
+  const rowColumns = [
+    {
+      field: 'outwardRef',
+      headerName: '',
+      flex: 2
+    }
+  ]
+  const openCorrespondent = () => {
+    stack({
+      Component: AssignCorrespondentForm,
+      props: {
+        maxAccess: access,
+        labels: labels,
+        outwardsList: formik.values.outwards.find(item => item.checked)
+      },
+      width: 600,
+      height: 500,
+      title: labels.correspondent
+    })
+  }
+
+  const actions = [
+    {
+      key: 'Correspondent',
+      condition: true,
+      onClick: openCorrespondent,
+      disabled: !filters.countryId
+    }
+  ]
 
   return (
     <VertLayout>
@@ -91,8 +123,8 @@ const OutwardsCorrespondent = () => {
               displayFieldWidth={1.75}
               onChange={(event, newValue) => {
                 if (newValue) {
-                  formik.setFieldValue('countryId', newValue?.recordId)
-                  onChange('countryId', newValue?.recordId)
+                  formik.setFieldValue('countryId', newValue?.recordId || 0)
+                  onChange('countryId', newValue?.recordId || 0)
                 }
               }}
               error={formik.touched.countryId && Boolean(formik.errors.countryId)}
@@ -113,26 +145,23 @@ const OutwardsCorrespondent = () => {
               values={formik.values}
               maxAccess={access}
               onChange={(event, newValue) => {
-                formik.setFieldValue('currencyId', newValue?.recordId || null)
+                onChange('currencyId', newValue?.recordId || 0)
+                formik.setFieldValue('currencyId', newValue?.recordId || 0)
               }}
               error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
             />
           </Grid>
           <Grid item xs={2}>
             <ResourceComboBox
-              datasetId={DataSets.BENEFICIARY_RESOURCEIDS}
-              label={labels.dispersalType}
               name='dispersalType'
+              label={labels.dispersalType}
+              datasetId={DataSets.RT_Dispersal_Type}
               valueField='key'
               displayField='value'
               values={formik.values}
               onChange={(event, newValue) => {
-                if (newValue) {
-                  onChange('dispersalType', newValue?.key)
-                  if (formik.values.corId) onChange('corId', formik.values.corId)
-                  else onChange('corId', 0)
-                  formik.setFieldValue('dispersalType', newValue?.key)
-                }
+                onChange('dispersalType', newValue?.key || 0)
+                formik.setFieldValue('dispersalType', newValue?.key || 0)
               }}
               error={formik.touched.dispersalType && Boolean(formik.errors.dispersalType)}
             />
@@ -142,10 +171,24 @@ const OutwardsCorrespondent = () => {
       <FormShell
         form={formik}
         isInfo={false}
-        initialValues={initialValues}
+        isSaved={false}
+        isCleared={false}
+        isSavedClear={false}
+        actions={actions}
         resourceId={ResourceIds.CorrespondentOutwards}
       >
-        <Grow></Grow>
+        <Grow>
+          <Table
+            columns={rowColumns}
+            gridData={data}
+            rowId={['recordId']}
+            isLoading={false}
+            maxAccess={access}
+            pageSize={50}
+            paginationType='client'
+            showCheckboxColumn={true}
+          />
+        </Grow>
       </FormShell>
     </VertLayout>
   )
