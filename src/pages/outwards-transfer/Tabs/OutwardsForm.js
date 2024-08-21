@@ -78,6 +78,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
     clientRef: '',
     clientName: '',
     nationalityId: '',
+    category: '',
     fcAmount: null,
     corId: '',
     corRef: '',
@@ -170,8 +171,20 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
         .array()
         .of(
           yup.object().shape({
-            type: yup.string().required('Type is required'),
-            amount: yup.string().nullable().required('amount is required')
+            type: yup
+              .string()
+              .required('Type is required')
+
+              .test('unique', 'Type must be unique', function (value) {
+                const { path, parent, options } = this
+                if (!parent.outwardId) {
+                  const arrayOfTypes = options.context.amountRows.map(row => row.type)
+                  const isUnique = arrayOfTypes.filter(item => item === value).length === 1
+
+                  return isUnique
+                } else return true
+              }),
+            amount: yup.string().nullable().required('Amount is required')
           })
         )
         .required('Cash array is required')
@@ -425,36 +438,53 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
     formik.setFieldValue('beneficiarySeqNo', seqNo)
   }
 
-  const chooseClient = async clientId => {
+  const chooseClient = async (clientId, category) => {
     try {
       if (clientId) {
-        const res = await getRequest({
-          extension: RTCLRepository.CtClientIndividual.get2,
-          parameters: `_clientId=${clientId}`
-        })
-        if (!res.record?.clientRemittance) {
-          stackError({
-            message: `Chosen Client Has No KYC.`
+        if (category == 1) {
+          //client individual
+          const res = await getRequest({
+            extension: RTCLRepository.CtClientIndividual.get2,
+            parameters: `_clientId=${clientId}`
           })
+          if (!res.record?.clientRemittance) {
+            stackError({
+              message: `Chosen Client Has No KYC.`
+            })
 
-          return
+            return
+          }
+          formik.setFieldValue('idNo', res?.record?.clientIDView?.idNo)
+          formik.setFieldValue('expiryDate', formatDateFromApi(res?.record?.clientIDView?.idExpiryDate))
+          formik.setFieldValue('firstName', res?.record?.clientIndividual?.firstName)
+          formik.setFieldValue('middleName', res?.record?.clientIndividual?.middleName)
+          formik.setFieldValue('lastName', res?.record?.clientIndividual?.lastName)
+          formik.setFieldValue('familyName', res?.record?.clientIndividual?.familyName)
+          formik.setFieldValue('fl_firstName', res?.record?.clientIndividual?.fl_firstName)
+          formik.setFieldValue('fl_middleName', res?.record?.clientIndividual?.fl_middleName)
+          formik.setFieldValue('fl_lastName', res?.record?.clientIndividual?.fl_lastName)
+          formik.setFieldValue('fl_familyName', res?.record?.clientIndividual?.fl_familyName)
+          formik.setFieldValue('professionId', res?.record?.clientIndividual?.professionId)
+          formik.setFieldValue('cellPhone', res?.record?.clientMaster?.cellPhone)
+          formik.setFieldValue('nationalityId', res?.record?.clientMaster?.nationalityId)
+          formik.setFieldValue('hiddenTrxCount', res?.record?.clientRemittance?.trxCountPerYear)
+          formik.setFieldValue('hiddenTrxAmount', res?.record?.clientRemittance?.trxAmountPerYear)
+          formik.setFieldValue('hiddenSponserName', res?.record?.clientIndividual?.sponsorName)
+        } else if (category == 2) {
+          //client corporate
+          const res = await getRequest({
+            extension: CTCLRepository.ClientCorporate.get,
+            parameters: `_clientId=${clientId}`
+          })
+          if (!res) {
+            return
+          }
+          formik.setFieldValue('nationalityId', res?.record?.clientMaster?.nationalityId)
+          formik.setFieldValue('cellPhone', res?.record?.clientMaster?.cellPhone)
+          formik.setFieldValue('expiryDate', formatDateFromApi(res?.record?.clientMaster?.expiryDate))
+
+          //formik.setFieldValue('idNo', res?.record?.clientIDView?.idNo)
         }
-        formik.setFieldValue('idNo', res?.record?.clientIDView?.idNo)
-        formik.setFieldValue('expiryDate', formatDateFromApi(res?.record?.clientIDView?.idExpiryDate))
-        formik.setFieldValue('firstName', res?.record?.clientIndividual?.firstName)
-        formik.setFieldValue('middleName', res?.record?.clientIndividual?.middleName)
-        formik.setFieldValue('lastName', res?.record?.clientIndividual?.lastName)
-        formik.setFieldValue('familyName', res?.record?.clientIndividual?.familyName)
-        formik.setFieldValue('fl_firstName', res?.record?.clientIndividual?.fl_firstName)
-        formik.setFieldValue('fl_middleName', res?.record?.clientIndividual?.fl_middleName)
-        formik.setFieldValue('fl_lastName', res?.record?.clientIndividual?.fl_lastName)
-        formik.setFieldValue('fl_familyName', res?.record?.clientIndividual?.fl_familyName)
-        formik.setFieldValue('professionId', res?.record?.clientIndividual?.professionId)
-        formik.setFieldValue('cellPhone', res?.record?.clientMaster?.cellPhone)
-        formik.setFieldValue('nationalityId', res?.record?.clientMaster?.nationalityId)
-        formik.setFieldValue('hiddenTrxCount', res?.record?.clientRemittance?.trxCountPerYear)
-        formik.setFieldValue('hiddenTrxAmount', res?.record?.clientRemittance?.trxAmountPerYear)
-        formik.setFieldValue('hiddenSponserName', res?.record?.clientIndividual?.sponsorName)
       }
     } catch (error) {}
   }
@@ -1033,7 +1063,8 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                       formik.setFieldValue('clientId', newValue ? newValue.recordId : '')
                       formik.setFieldValue('clientName', newValue ? newValue.name : '')
                       formik.setFieldValue('clientRef', newValue ? newValue.reference : '')
-                      await chooseClient(newValue?.recordId)
+                      formik.setFieldValue('category', newValue ? newValue.category : 1)
+                      await chooseClient(newValue?.recordId, newValue?.category)
                       formik.setFieldValue('beneficiaryId', '')
                       formik.setFieldValue('beneficiaryName', '')
                     }}

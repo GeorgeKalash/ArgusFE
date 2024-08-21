@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { useWindow } from 'src/windows'
 import ReportParameterBrowser from 'src/components/Shared/ReportParameterBrowser'
@@ -18,6 +18,10 @@ const RPBGridToolbar = ({
   const { stack } = useWindow()
   const [rpbParams, setRpbParams] = useState([])
   const [search, setSearch] = useState('')
+
+  useEffect(() => {
+    setRpbParams([])
+  }, [reportName])
 
   const openRPB = () => {
     stack({

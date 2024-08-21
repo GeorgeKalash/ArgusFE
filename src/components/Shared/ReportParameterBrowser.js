@@ -354,7 +354,7 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
   }, [reportName])
 
   return (
-    <FormShell form={formik} infoVisible={false}>
+    <FormShell form={formik} infoVisible={false} isSavedClear={false}>
       <Grid container spacing={2} sx={{ px: 4, pt: 2 }}>
         {items?.map(item => {
           if (item.controlType === 5 && item.apiDetails?.type === LOOKUP) {
