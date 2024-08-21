@@ -50,6 +50,22 @@ const OutwardsReturn = () => {
       field: 'reference',
       headerName: _labels.reference,
       flex: 1
+    },
+    {
+      field: 'date',
+      headerName: _labels.date,
+      flex: 1,
+      type: 'date'
+    },
+    {
+      field: 'outwardRef',
+      headerName: _labels.outwardRef,
+      flex: 1
+    },
+    {
+      field: 'requestedByName',
+      headerName: _labels.requestedBy,
+      flex: 1
     }
   ]
 
@@ -87,7 +103,7 @@ const OutwardsReturn = () => {
         dtId
       },
       width: 600,
-      height: 400,
+      height: 600,
       title: _labels.outwardsReturn
     })
   }

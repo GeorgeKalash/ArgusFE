@@ -19,7 +19,8 @@ import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import toast from 'react-hot-toast'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
-
+import { SystemRepository } from 'src/repositories/SystemRepository'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 export default function OutwardsReturnForm({ labels, maxAccess: access, recordId, plantId, dtId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -179,8 +180,12 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
                   formik.setFieldValue('clientName', newValue ? newValue.clientName : '')
                   formik.setFieldValue('clientRef', newValue ? newValue.clientRef : '')
                   formik.setFieldValue('currencyId', newValue ? newValue.currencyId : '')
+                  formik.setFieldValue('currencyName', newValue ? newValue.currencyName : '')
+                  formik.setFieldValue('currencyRef', newValue ? newValue.currencyRef : '')
                   formik.setFieldValue('fcAmount', newValue ? newValue.fcAmount : '')
                   formik.setFieldValue('corId', newValue ? newValue.corId : '')
+                  formik.setFieldValue('corName', newValue ? newValue.corName : '')
+                  formik.setFieldValue('corRef', newValue ? newValue.corRef : '')
                 }}
                 error={formik.touched.outwardRef && Boolean(formik.errors.outwardRef)}
                 maxAccess={maxAccess}
@@ -200,6 +205,62 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
                   formik.setFieldValue('requestedBy', newValue?.key)
                 }}
                 error={formik.touched.requestedBy && Boolean(formik.errors.requestedBy)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={SystemRepository.Currency.qry}
+                name='currencyId'
+                label={labels.currency}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                values={formik.values}
+                readOnly
+                maxAccess={maxAccess}
+                error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomNumberField
+                name='fcAmount'
+                label={labels.fcAmount}
+                value={formik.values.fcAmount}
+                required
+                readOnly
+                maxAccess={maxAccess}
+                onChange={e => formik.setFieldValue('fcAmount', e.target.value)}
+                error={formik.touched.lcAmount && Boolean(formik.errors.lcAmount)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceLookup
+                valueField='reference'
+                displayField='name'
+                name='corId'
+                label={labels.correspondent}
+                form={formik}
+                required
+                valueShow='corRef'
+                secondValueShow='corName'
+                readOnly
+                maxAccess={maxAccess}
+                errorCheck={'corId'}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceLookup
+                readOnly
+                valueField='reference'
+                displayField='name'
+                name='clientId'
+                label={labels.client}
+                form={formik}
+                required
+                displayFieldWidth={2}
+                valueShow='clientRef'
+                secondValueShow='clientName'
+                maxAccess={maxAccess}
+                errorCheck={'clientId'}
               />
             </Grid>
           </Grid>
