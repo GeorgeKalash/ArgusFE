@@ -1460,6 +1460,26 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         maxAccess={maxAccess}
                       />
                     </Grid>
+                    <Grid item xs={12}>
+                      <ResourceComboBox
+                        name='status'
+                        label={labels.status}
+                        datasetId={DataSets.ACTIVE_STATUS}
+                        values={clientIndividualFormik.values}
+                        valueField='key'
+                        displayField='value'
+                        onChange={(event, newValue) => {
+                          if (newValue) {
+                            clientIndividualFormik.setFieldValue('status', newValue?.key)
+                          } else {
+                            clientIndividualFormik.setFieldValue('status', newValue?.key)
+                          }
+                        }}
+                        readOnly={true}
+                        error={clientIndividualFormik.touched.status && Boolean(clientIndividualFormik.errors.status)}
+                        maxAccess={maxAccess}
+                      />
+                    </Grid>
                   </FieldSet>
                   <Grid item xs={12}>
                     <Button
@@ -1505,164 +1525,127 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                     </Button>
                   </Grid>
 
-                  <Grid container xs={12} spacing={2} sx={{ p: 5 }}>
-                    <Grid item xs={12}>
-                      <ResourceComboBox
-                        name='status'
-                        label={labels.status}
-                        datasetId={DataSets.ACTIVE_STATUS}
-                        values={clientIndividualFormik.values}
-                        valueField='key'
-                        displayField='value'
-                        onChange={(event, newValue) => {
-                          if (newValue) {
-                            clientIndividualFormik.setFieldValue('status', newValue?.key)
-                          } else {
-                            clientIndividualFormik.setFieldValue('status', newValue?.key)
+                  <Grid container xs={12} sx={{ pt: 5 }}>
+                    <FieldSet title={labels.diplomat}>
+                      <Grid item xs={12}>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              name='isDiplomat'
+                              checked={clientIndividualFormik.values?.isDiplomat}
+                              disabled={
+                                (clientIndividualFormik.values?.isDiplomatReadOnly || editMode) && !allowEdit && true
+                              }
+                              onChange={clientIndividualFormik.handleChange}
+                            />
                           }
-                        }}
-                        readOnly={true}
-                        error={clientIndividualFormik.touched.status && Boolean(clientIndividualFormik.errors.status)}
-                        maxAccess={maxAccess}
-                      />
+                          label={labels?.isDiplomat}
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              name='isRelativeDiplomat'
+                              checked={clientIndividualFormik.values?.isRelativeDiplomat}
+                              disabled={editMode && !allowEdit}
+                              onChange={e => {
+                                clientIndividualFormik.handleChange(e),
+                                  clientIndividualFormik.setFieldValue('relativeDiplomatInfo', '')
+                              }}
+                            />
+                          }
+                          label={labels?.isDiplomatRelative}
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <CustomTextField
+                          name='relativeDiplomatInfo'
+                          label={labels.relativeDiplomatInfo}
+                          onBlur={clientIndividualFormik.handleBlur}
+                          value={clientIndividualFormik.values?.relativeDiplomatInfo}
+                          readOnly={
+                            (editMode && !allowEdit) || (!clientIndividualFormik.values?.isRelativeDiplomat && true)
+                          }
+                          onChange={clientIndividualFormik.handleChange}
+                          maxLength='10'
+                          required={clientIndividualFormik.values.isRelativeDiplomat ? true : false}
+                          onClear={() => clientIndividualFormik.setFieldValue('relativeDiplomatInfo', '')}
+                          error={
+                            clientIndividualFormik.touched.relativeDiplomatInfo &&
+                            Boolean(clientIndividualFormik.errors.relativeDiplomatInfo)
+                          }
+                          maxAccess={maxAccess}
+                        />
+                      </Grid>
+                    </FieldSet>
+                    <Grid container xs={12} sx={{ p: 5 }}>
+                      <Grid item xs={12}>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              name='otpVerified'
+                              disabled={true}
+                              readOnly={editMode && true}
+                              checked={clientIndividualFormik.values?.otpVerified}
+                              onChange={clientIndividualFormik.handleChange}
+                            />
+                          }
+                          label={labels?.OTPVerified}
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              name='govCellVerified'
+                              disabled={true}
+                              readOnly={editMode && true}
+                              checked={clientIndividualFormik.values?.govCellVerified}
+                              onChange={clientIndividualFormik.handleChange}
+                            />
+                          }
+                          label={labels?.govCellVerified}
+                        />
+                      </Grid>
+
+                      <Grid item xs={12}>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              disabled={
+                                clientIndividualFormik.values.gender === '2' && !editMode
+                                  ? false
+                                  : editMode && allowEdit
+                                  ? false
+                                  : true
+                              }
+                              name='coveredFace'
+                              checked={clientIndividualFormik.values.coveredFace}
+                              onChange={clientIndividualFormik.handleChange}
+                            />
+                          }
+                          label={labels?.coveredFace}
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              name='isEmployee'
+                              disabled={editMode && true}
+                              checked={clientIndividualFormik.values?.isEmployee}
+                              onChange={clientIndividualFormik.handleChange}
+                            />
+                          }
+                          label={labels?.isEmployed}
+                        />
+                      </Grid>
                     </Grid>
                   </Grid>
                 </Grid>
               </Grid>
             </Grid>
-            <Grid container spacing={2} sx={{ m: 0 }}>
-              <Grid container xs={6} spacing={2} sx={{ p: 5 }}>
-                <Grid item xs={12}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        name='otpVerified'
-                        disabled={true}
-                        readOnly={editMode && true}
-                        checked={clientIndividualFormik.values?.otpVerified}
-                        onChange={clientIndividualFormik.handleChange}
-                      />
-                    }
-                    label={labels?.OTPVerified}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        name='govCellVerified'
-                        disabled={true}
-                        readOnly={editMode && true}
-                        checked={clientIndividualFormik.values?.govCellVerified}
-                        onChange={clientIndividualFormik.handleChange}
-                      />
-                    }
-                    label={labels?.govCellVerified}
-                  />
-                </Grid>
-
-                <Grid item xs={12}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        disabled={
-                          clientIndividualFormik.values.gender === '2' && !editMode
-                            ? false
-                            : editMode && allowEdit
-                            ? false
-                            : true
-                        }
-                        name='coveredFace'
-                        checked={clientIndividualFormik.values.coveredFace}
-                        onChange={clientIndividualFormik.handleChange}
-                      />
-                    }
-                    label={labels?.coveredFace}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        name='isEmployee'
-                        disabled={editMode && true}
-                        checked={clientIndividualFormik.values?.isEmployee}
-                        onChange={clientIndividualFormik.handleChange}
-                      />
-                    }
-                    label={labels?.isEmployed}
-                  />
-                </Grid>
-              </Grid>
-
-              <Grid container xs={6} spacing={2} sx={{ pt: 5 }}>
-                <Grid container xs={12}>
-                  <FieldSet title={labels.diplomat}>
-                    <Grid item xs={12}>
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            name='isDiplomat'
-                            checked={clientIndividualFormik.values?.isDiplomat}
-                            disabled={
-                              (clientIndividualFormik.values?.isDiplomatReadOnly || editMode) && !allowEdit && true
-                            }
-                            onChange={clientIndividualFormik.handleChange}
-                          />
-                        }
-                        label={labels?.isDiplomat}
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            name='isRelativeDiplomat'
-                            checked={clientIndividualFormik.values?.isRelativeDiplomat}
-                            disabled={editMode && !allowEdit}
-                            onChange={e => {
-                              clientIndividualFormik.handleChange(e),
-                                clientIndividualFormik.setFieldValue('relativeDiplomatInfo', '')
-                            }}
-                          />
-                        }
-                        label={labels?.isDiplomatRelative}
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <CustomTextField
-                        name='relativeDiplomatInfo'
-                        label={labels.relativeDiplomatInfo}
-                        onBlur={clientIndividualFormik.handleBlur}
-                        value={clientIndividualFormik.values?.relativeDiplomatInfo}
-                        readOnly={
-                          (editMode && !allowEdit) || (!clientIndividualFormik.values?.isRelativeDiplomat && true)
-                        }
-                        onChange={clientIndividualFormik.handleChange}
-                        maxLength='10'
-                        required={clientIndividualFormik.values.isRelativeDiplomat ? true : false}
-                        onClear={() => clientIndividualFormik.setFieldValue('relativeDiplomatInfo', '')}
-                        error={
-                          clientIndividualFormik.touched.relativeDiplomatInfo &&
-                          Boolean(clientIndividualFormik.errors.relativeDiplomatInfo)
-                        }
-                        maxAccess={maxAccess}
-                      />
-                    </Grid>
-                  </FieldSet>
-                </Grid>
-              </Grid>
-            </Grid>
-            <Grid
-              sx={{
-                position: 'fixed',
-                bottom: 0,
-                left: 0,
-                width: '100%',
-                padding: 3,
-                textAlign: 'center'
-              }}
-            ></Grid>
           </Grid>
         </Grow>
       </VertLayout>
