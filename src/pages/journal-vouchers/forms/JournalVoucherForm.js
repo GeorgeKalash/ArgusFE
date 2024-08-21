@@ -72,6 +72,7 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
   })
 
   const editMode = !!formik.values.recordId || !!recordId
+  const isRaw = formik.values.status == 1
 
   useEffect(() => {
     ;(async function () {
@@ -129,8 +130,6 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
       disabled: isPosted
     }
   ]
-
-  const isRaw = formik.values.status == 1
 
   return (
     <FormShell
