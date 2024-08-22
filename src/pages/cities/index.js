@@ -22,10 +22,12 @@ const City = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    return await getRequest({
+    const response = await getRequest({
       extension: SystemRepository.City.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_countryId=0&_stateId=0`
     })
+
+    return { ...response, _startAt: _startAt }
   }
 
   const {

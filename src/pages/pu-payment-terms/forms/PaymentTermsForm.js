@@ -75,7 +75,7 @@ export default function PaymentTermsForm({ labels, maxAccess, recordId }) {
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.PUPaymentTerms} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell resourceId={ResourceIds.PaymentTerm} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>

@@ -39,6 +39,7 @@ const CompanyInfo = () => {
         webSite: res.record.taxNo,
         taxNo: res.record.taxNo,
         licenseNo: res.record.licenseNo,
+        plantId: res.record.plantId,
         crNo: res.record.crNo,
         logoUrl: res.record.logoUrl,
         flName: res.record.flName

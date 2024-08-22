@@ -63,6 +63,7 @@ export const SaleRepository = {
   },
   ReturnReasons: {
     qry: service + 'qryRR',
+    page: service + 'pageRR',
     get: service + 'getRR',
     set: service + 'setRR',
     del: service + 'delRR'
@@ -75,12 +76,14 @@ export const SaleRepository = {
     page: service + 'pageCG'
   },
   ReturnPolicy: {
+    page: service + 'pageRPO',
     qry: service + 'qryRPO',
     get: service + 'getRPO',
     set: service + 'setRPO',
     del: service + 'delRPO'
   },
   PriceGroups: {
+    page: service + 'pagePG',
     qry: service + 'qryPG',
     get: service + 'getPG',
     set: service + 'setPG',
