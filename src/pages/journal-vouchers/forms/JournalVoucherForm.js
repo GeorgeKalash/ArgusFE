@@ -113,8 +113,6 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
     } catch (e) {}
   }
 
-  const isPosted = formik.values.status === 3
-
   const actions = [
     {
       key: 'GL',
@@ -126,7 +124,7 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
       key: 'Post',
       condition: true,
       onClick: onPost,
-      disabled: isPosted || !editMode
+      disabled: !isRaw || !editMode
     }
   ]
 
@@ -139,7 +137,7 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
       maxAccess={maxAccess}
       editMode={editMode}
       disabledSubmit={!isRaw}
-      disabledSavedClear={isPosted}
+      disabledSavedClear={!isRaw}
     >
       <VertLayout>
         <Grow>
@@ -151,7 +149,7 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
                 filter={!editMode ? item => item.activeStatus === 1 : undefined}
                 name='dtId'
                 label={labels.documentType}
-                readOnly={editMode || !isRaw || isPosted}
+                readOnly={editMode || !isRaw}
                 valueField='recordId'
                 displayField='name'
                 values={formik.values}
@@ -168,7 +166,7 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
                 name='reference'
                 label={labels.reference}
                 value={formik.values.reference}
-                readOnly={editMode || !isRaw || isPosted}
+                readOnly={editMode || !isRaw}
                 maxAccess={!editMode && maxAccess}
                 maxLength='30'
                 onChange={formik.handleChange}
@@ -180,7 +178,7 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
               <CustomDatePicker
                 name='date'
                 label={labels.date}
-                readOnly={!isRaw || isPosted}
+                readOnly={!isRaw}
                 onChange={formik.setFieldValue}
                 value={formik.values.date}
                 maxAccess={maxAccess}
@@ -193,7 +191,7 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
                 name='notes'
                 label={labels.notes}
                 value={formik.values.notes}
-                readOnly={!isRaw || isPosted}
+                readOnly={!isRaw}
                 maxLength='100'
                 rows={3}
                 maxAccess={maxAccess}

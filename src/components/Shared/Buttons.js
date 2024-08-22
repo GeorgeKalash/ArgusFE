@@ -242,7 +242,7 @@ export const getButtons = platformLabels => [
     condition: 'isSaved',
     onClick: 'onSave',
     color: '#4eb558',
-    disabled: 'disabledSubmit || isPosted',
+    disabled: 'disabledSubmit || isPosted || isClosed',
     image: 'save.png',
     main: true
   },
