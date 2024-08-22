@@ -49,10 +49,17 @@ export const InventoryRepository = {
     set2: service + 'set2ADJ',
     post: service + 'postADJ',
     unpost: service + 'unpostADJ',
-    del: service + 'delADJ'
+    del: service + 'delADJ',
+    page: service + 'pageADJ'
   },
   MaterialsAdjustmentDetail: {
     qry: service + 'qryADI'
+  },
+  Dimension: {
+    qry: service + 'qryDI',
+    get: service + 'getDI',
+    set: service + 'setDI',
+    del: service + 'delDI'
   },
   Metals: {
     qry: service + 'qryMTL',

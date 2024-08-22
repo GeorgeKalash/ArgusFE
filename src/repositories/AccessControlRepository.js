@@ -63,5 +63,11 @@ export const AccessControlRepository = {
   UserSiteView: {
     qry: service + 'qryUSI',
     set2: service + 'set2USI'
+  },
+  NotificationLabel: {
+    qry: service + 'qryNLB',
+    get: service + 'getNLB',
+    set: service + 'setNLB',
+    del: service + 'delNLB'
   }
 }

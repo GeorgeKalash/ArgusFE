@@ -3,7 +3,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import RemittanceDefaults from './form/RemittanceDefaults'
 
 const RtIndex = () => {
-  return <ImmediateWindow datasetId={ResourceIds.SystemDefault} titleName={'rmd'} Component={RemittanceDefaults} />
+  return <ImmediateWindow datasetId={ResourceIds.SystemDefault} labelKey={'rmd'} Component={RemittanceDefaults} />
 }
 
 export default RtIndex
