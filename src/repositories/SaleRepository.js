@@ -63,6 +63,7 @@ export const SaleRepository = {
   },
   ReturnReasons: {
     qry: service + 'qryRR',
+    page: service + 'pageRR',
     get: service + 'getRR',
     set: service + 'setRR',
     del: service + 'delRR'
