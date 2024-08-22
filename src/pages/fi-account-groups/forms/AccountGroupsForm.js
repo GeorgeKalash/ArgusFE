@@ -16,10 +16,15 @@ import { MasterSource } from 'src/resources/MasterSource'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
+import { useInvalidate } from 'src/hooks/resource'
 
-export default function AccountGroupsForm({ labels, maxAccess, recordId, invalidate }) {
+export default function AccountGroupsForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+
+  const invalidate = useInvalidate({
+    endpointId: FinancialRepository.Group.qry
+  })
 
   const { formik } = useForm({
     initialValues: {
