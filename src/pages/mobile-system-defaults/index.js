@@ -6,7 +6,7 @@ const RtIndex = () => {
   return (
     <ImmediateWindow
       datasetId={ResourceIds.MobileSystemDefaults}
-      titleName={'mobileSystemDefaults'}
+      labelKey={'mobileSystemDefaults'}
       Component={MobileSystem}
     />
   )

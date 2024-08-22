@@ -17,6 +17,7 @@ export const DataSets = {
   PAYMENT_TERM_TYPE: 15,
   UNUSED2: 16,
   Sign: 157,
+  Remittance_Fee_Type: 179,
   PRICE_TYPE: 17,
   RX_FREQUENCY: 18,
   MC_RATE_CALC_METHOD: 19,
@@ -27,6 +28,7 @@ export const DataSets = {
   POST_TYPE: 24,
   SYSTEM_FUNCTION: 25,
   GLI_TAG: 26,
+  GLI_INTEGRATION_LEVEL: 178,
   INTEGRATION_CURRENCY: 27,
   GLI_MASTER_SOURCE: 28,
   DATA_SECTION: 29,
@@ -129,6 +131,7 @@ export const DataSets = {
   RCL_STATUS: 132,
   CA_FNCTN: 133,
   PRINT_DIRECTION: 134,
+  FeesType: 3613,
   RULE_END_POINT: 136,
   GENERATE_VARIATIONS: 145,
   LO_TYPE: 146,
@@ -161,5 +164,9 @@ export const DataSets = {
   DateFormat: 155,
   TimeZone: 154,
   TARGET_TYPE: 160,
-  BANK_ACCOUNT_TYPE: 161
+  BANK_ACCOUNT_TYPE: 161,
+  transferType: 3610,
+  receiverPayoutType: 3611,
+  Category: 3612,
+  PRODUCTION_ORDER_LEVEL: 164
 }

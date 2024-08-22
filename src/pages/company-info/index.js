@@ -32,12 +32,14 @@ const CompanyInfo = () => {
         extension: SystemRepository.CompanyInfo.get,
         parameters: `_filter=`
       })
-      res.record.accountId = getStorageData('userData')?.accountId
+
       formik.setValues({
+        ...formik.values,
         name: res.record.name,
         webSite: res.record.taxNo,
         taxNo: res.record.taxNo,
         licenseNo: res.record.licenseNo,
+        plantId: res.record.plantId,
         crNo: res.record.crNo,
         logoUrl: res.record.logoUrl,
         flName: res.record.flName
@@ -79,7 +81,13 @@ const CompanyInfo = () => {
   }
 
   return (
-    <FormShell resourceId={ResourceIds.CompanyInfo} form={formik} maxAccess={maxAccess}>
+    <FormShell
+      resourceId={ResourceIds.CompanyInfo}
+      form={formik}
+      infoVisible={false}
+      isCleared={false}
+      maxAccess={maxAccess}
+    >
       <VertLayout>
         <Grid container spacing={4}>
           <Grid item xs={12}>
@@ -89,8 +97,6 @@ const CompanyInfo = () => {
               value={formik.values?.accountId}
               onChange={formik.handleChange}
               readOnly={true}
-              onClear={() => formik.setFieldValue('posMsg', '')}
-              error={formik.errors && Boolean(formik.errors.posMsg)}
               maxAccess={maxAccess}
             />
           </Grid>

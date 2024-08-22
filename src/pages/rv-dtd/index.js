@@ -71,7 +71,7 @@ const RVDocTypeDefaults = () => {
   }
 
   const edit = obj => {
-    openForm(obj?.dtId)
+    openForm(obj)
   }
 
   const del = async obj => {
@@ -83,12 +83,12 @@ const RVDocTypeDefaults = () => {
     toast.success(platformLabels.Deleted)
   }
 
-  function openForm(dtId) {
+  function openForm(record) {
     stack({
       Component: RVDocTypeDefaultsForm,
       props: {
         labels: _labels,
-        dtId: dtId,
+        recordId: record?.dtId,
         maxAccess: access
       },
       width: 500,

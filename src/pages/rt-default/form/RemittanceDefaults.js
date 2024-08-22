@@ -12,6 +12,8 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import { FinancialRepository } from 'src/repositories/FinancialRepository'
 
 const RemittanceDefaults = ({ _labels }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -47,11 +49,16 @@ const RemittanceDefaults = ({ _labels }) => {
         res.list.map(obj => (myObject[obj.key] = obj.value))
         myObject['nraRef'] = null
 
-        rtDefaultFormValidation.setValues(myObject)
+        if (myObject['rt_fii_accountGroupId']) {
+          rtDefaultValidation.setFieldValue('rt_fii_accountGroupId', parseInt(myObject['rt_fii_accountGroupId']))
+        }
 
-        if (myObject && myObject['rt-nra-product']) {
+        if (myObject['rt-nra-product']) {
+          rtDefaultFormValidation.setFieldValue('rt-nra-product', myObject['rt-nra-product'])
           getNumberRange(myObject['rt-nra-product'])
         }
+
+        rtDefaultFormValidation.setValues(myObject)
       })
       .catch(error => {})
   }
@@ -88,7 +95,8 @@ const RemittanceDefaults = ({ _labels }) => {
     enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
-      'rt-nra-product': null
+      'rt-nra-product': null,
+      'rt_fii_accountGroupId': ''
     },
 
     onSubmit: values => {
@@ -146,6 +154,19 @@ const RemittanceDefaults = ({ _labels }) => {
                 }
               }}
               maxAccess={access}
+            />
+          </Grid>
+          <Grid item xs={12} sx={{ marginLeft: '0.5rem', marginRight: '0.5rem' }}>
+            <ResourceComboBox
+              endpointId={FinancialRepository.Group.qry}
+              name='rt_fii_accountGroupId'
+              label={_labels.dag}
+              valueField='recordId'
+              displayField='name'
+              values={rtDefaultValidation.values}
+              onChange={(event, newValue) => {
+                rtDefaultValidation.setFieldValue('rt_fii_accountGroupId', newValue?.recordId || '')
+              }}
             />
           </Grid>
         </Grid>

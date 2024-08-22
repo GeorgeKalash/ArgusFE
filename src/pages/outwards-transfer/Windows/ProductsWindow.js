@@ -3,13 +3,10 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
-import { useContext, useEffect, useState } from 'react'
-import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
-import { RequestsContext } from 'src/providers/RequestsContext'
+import { useEffect, useState } from 'react'
 
-const ProductsWindow = ({ labels, maxAccess, onProductSubmit, outWardsData, window }) => {
+const ProductsWindow = ({ labels, maxAccess, onProductSubmit, products, editMode, window }) => {
   const [gridData, setGridData] = useState([])
-  const { getRequest } = useContext(RequestsContext)
 
   const columns = [
     {
@@ -28,39 +25,19 @@ const ProductsWindow = ({ labels, maxAccess, onProductSubmit, outWardsData, wind
       flex: 1
     },
     {
+      field: 'originAmount',
+      headerName: labels.originAmount,
+      flex: 1
+    },
+    {
       field: 'baseAmount',
       headerName: labels.BaseAmount,
       flex: 1
     }
   ]
-
   useEffect(() => {
-    ;(async function () {
-      var plant = outWardsData.plantId
-      var countryId = outWardsData.countryId
-      var currencyId = outWardsData.currencyId
-      var dispersalType = outWardsData.dispersalType
-      var amount = outWardsData?.fcAmount || 0
-      var parameters = `_plantId=${plant}&_countryId=${countryId}&_dispersalType=${dispersalType}&_currencyId=${currencyId}&_amount=${amount}`
-
-      try {
-        const res = await getRequest({
-          extension: RemittanceOutwardsRepository.ProductDispersalEngine.qry,
-          parameters: parameters
-        })
-        if (res.list.length > 0) {
-          const updatedList = res.list.map(product => {
-            if (product.productId === outWardsData.productId) {
-              return { ...product, checked: true }
-            }
-
-            return product
-          })
-          setGridData({ list: updatedList })
-        }
-      } catch (error) {}
-    })()
-  }, [])
+    setGridData({ list: products })
+  }, [products])
 
   return (
     <VertLayout>
@@ -80,11 +57,12 @@ const ProductsWindow = ({ labels, maxAccess, onProductSubmit, outWardsData, wind
       <Fixed>
         <WindowToolbar
           onSave={() => {
-            onProductSubmit(gridData.list ? gridData.list : gridData)
+            onProductSubmit(gridData)
             window.close()
           }}
           isSaved={true}
           smallBox={true}
+          disabledSubmit={editMode}
         />
       </Fixed>
     </VertLayout>

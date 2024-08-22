@@ -63,6 +63,7 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
     subNo: null,
     unitNo: null,
     bldgNo: '',
+    poBox: null,
 
     //end address
 
@@ -174,7 +175,8 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
       cityDistrictId: obj.cityDistrictId,
       bldgNo: obj.bldgNo,
       unitNo: obj.unitNo,
-      subNo: obj.subNo
+      subNo: obj.subNo,
+      poBox: obj.poBox,
     }
 
     const data = {
@@ -234,6 +236,7 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
             subNo: obj.addressView?.subNo,
             unitNo: obj.addressView?.unitNo,
             bldgNo: obj.addressView?.bldgNo,
+            poBox: obj.addressView?.poBox,
 
             //end address
 

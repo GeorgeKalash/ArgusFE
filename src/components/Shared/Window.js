@@ -73,8 +73,7 @@ const Window = React.memo(
           backgroundColor: 'rgba(0, 0, 0, 0.1)',
           display: 'flex',
           justifyContent: 'center',
-          alignItems: 'center',
-          pointerEvents: 'none'
+          alignItems: 'center'
         }}
       >
         <Draggable

@@ -23,7 +23,7 @@ const ReturnReasons = () => {
 
     try {
       const response = await getRequest({
-        extension: SaleRepository.ReturnReasons.qry,
+        extension: SaleRepository.ReturnReasons.page,
         parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=`
       })
 
@@ -40,7 +40,7 @@ const ReturnReasons = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SaleRepository.ReturnReasons.qry,
+    endpointId: SaleRepository.ReturnReasons.page,
     datasetId: ResourceIds.ReturnReasons
   })
 
@@ -73,8 +73,7 @@ const ReturnReasons = () => {
       props: {
         labels: _labels,
         recordId,
-        maxAccess: access,
-        invalidate
+        maxAccess: access
       },
       width: 600,
       height: 200,

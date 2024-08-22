@@ -23,7 +23,7 @@ const ClientGroups = () => {
 
     try {
       const response = await getRequest({
-        extension: SaleRepository.ClientGroups.qry,
+        extension: SaleRepository.ClientGroups.page,
         parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=`
       })
 
@@ -40,7 +40,7 @@ const ClientGroups = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SaleRepository.ClientGroups.qry,
+    endpointId: SaleRepository.ClientGroups.page,
     datasetId: ResourceIds.ClientGroups
   })
 
@@ -84,8 +84,7 @@ const ClientGroups = () => {
       props: {
         labels: _labels,
         recordId,
-        maxAccess: access,
-        invalidate
+        maxAccess: access
       },
       width: 600,
       height: 450,

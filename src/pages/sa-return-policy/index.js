@@ -23,7 +23,7 @@ const ReturnPolicy = () => {
 
     try {
       const response = await getRequest({
-        extension: SaleRepository.ReturnPolicy.qry,
+        extension: SaleRepository.ReturnPolicy.page,
         parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=`
       })
 
@@ -40,7 +40,7 @@ const ReturnPolicy = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SaleRepository.ReturnPolicy.qry,
+    endpointId: SaleRepository.ReturnPolicy.page,
     datasetId: ResourceIds.ReturnPolicy
   })
 

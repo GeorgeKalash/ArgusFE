@@ -109,10 +109,19 @@ const Plant = () => {
     openForm(obj?.recordId)
   }
 
+  const actions = [
+    {
+      key: 'Tree',
+      condition: true,
+      onClick: onTreeClick,
+      disabled: false
+    }
+  ]
+
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} onTree={onTreeClick} />
+        <GridToolbar actions={actions} onAdd={add} maxAccess={access} />
       </Fixed>
       <Grow>
         <Table
