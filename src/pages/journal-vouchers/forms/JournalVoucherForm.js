@@ -139,6 +139,7 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
       maxAccess={maxAccess}
       editMode={editMode}
       disabledSubmit={!isRaw}
+      isSavedClear={false}
     >
       <VertLayout>
         <Grow>
