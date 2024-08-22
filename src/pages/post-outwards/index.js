@@ -24,11 +24,7 @@ const Postoutwards = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
-  const {
-    labels: _labels,
-    access,
-    refetch
-  } = useResourceQuery({
+  const { labels: _labels, access } = useResourceQuery({
     endpointId: RemittanceOutwardsRepository.Postoutwards.qry,
     datasetId: ResourceIds.PostOutwards
   })
@@ -224,8 +220,9 @@ const Postoutwards = () => {
             setData={setData}
             rowId={['recordId']}
             pageSize={50}
+            pagination={!!formik.values.countryId}
             paginationType='client'
-            refetch={refetch}
+            refetch={fetchRemittanceData}
             isLoading={false}
             maxAccess={access}
             showCheckboxColumn={true}
