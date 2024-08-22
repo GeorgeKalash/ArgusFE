@@ -238,7 +238,7 @@ export default function FormShell({
           transactionClicked={transactionClicked}
           editMode={editMode}
           disabledSubmit={disabledSubmit}
-          disabledSavedClear={disabledSavedClear}
+          disabledSavedClear={disabledSavedClear || disabledSubmit}
           infoVisible={infoVisible}
           postVisible={postVisible}
           isPosted={isPosted}
