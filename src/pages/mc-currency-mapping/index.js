@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
@@ -67,27 +67,31 @@ const MultiCurrencyMapping = () => {
     openForm()
   }
 
-  const popup = obj => {
-    openForm(obj?.currencyId, obj?.rateTypeId)
+  const edit = obj => {
+    openForm(obj)
   }
 
   const del = async obj => {
-    await postRequest({
-      extension: MultiCurrencyRepository.McExchangeMap.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success(platformLabels.Deleted)
+    try {
+      await postRequest({
+        extension: MultiCurrencyRepository.McExchangeMap.del,
+        record: JSON.stringify(obj)
+      })
+      invalidate()
+      toast.success(platformLabels.Deleted)
+    } catch (error) {}
   }
 
-  function openForm(currencyId, rateTypeId) {
+  function openForm(record) {
     stack({
       Component: MultiCurrencyForm,
       props: {
         labels: _labels,
-        currencyId: currencyId ? currencyId : null,
-        rateTypeId: rateTypeId ? rateTypeId : null,
+        record,
         maxAccess: access,
+        recordId: record
+          ? String(record.currencyId * 1000 + record.rateTypeId)
+          : null,
         invalidate: invalidate
       },
       width: 600,
@@ -106,7 +110,7 @@ const MultiCurrencyMapping = () => {
           columns={columns}
           gridData={data}
           rowId={['currencyId', 'rateTypeId']}
-          onEdit={popup}
+          onEdit={edit}
           onDelete={del}
           isLoading={false}
           pageSize={50}
