@@ -131,7 +131,14 @@ export default function FormShell({
           print={print}
           onSave={() => form?.handleSubmit()}
           onSaveClear={() => {
-            form?.handleSubmit(), handleReset()
+            try {
+              form.handleSubmit()
+              if (!Object.keys(form.errors).length) {
+                setTimeout(() => {
+                  form.isSubmitting && handleReset()
+                }, 1000)
+              }
+            } catch (error) {}
           }}
           onClear={() => handleReset()}
           onPost={() => {

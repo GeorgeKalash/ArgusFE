@@ -41,6 +41,8 @@ const ClassesForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store
     }
   })
 
+  console.log(formik)
+
   const postClass = obj => {
     const recordId = obj.recordId
     postRequest({
@@ -59,9 +61,7 @@ const ClassesForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store
         } else toast.success('Record Edited Successfully')
         invalidate()
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch(error => {})
   }
 
   useEffect(() => {
