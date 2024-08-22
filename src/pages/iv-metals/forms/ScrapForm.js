@@ -45,6 +45,7 @@ const ScrapForm = ({ store, setStore, maxAccess, labels }) => {
     }),
 
     initialValues: {
+      recordId: recordId,
       scrap: [
         {
           id: 1,
@@ -58,15 +59,15 @@ const ScrapForm = ({ store, setStore, maxAccess, labels }) => {
       ]
     },
     onSubmit: values => {
-      postHistory(values)
+      postScrap(values)
     }
   })
 
-  const postHistory = obj => {
-    const items = obj?.scrap.map((item, index) => ({
+  const postScrap = obj => {
+    const items = obj?.scrap.map(({ id, ...item }) => ({
       ...item,
       metalId: recordId,
-      seqNo: index + 1
+      seqNo: id
     }))
 
     const data = {
@@ -101,6 +102,7 @@ const ScrapForm = ({ store, setStore, maxAccess, labels }) => {
               ...item,
               id: index + 1
             }))
+
             formik.setValues({ scrap: items })
           }
         })
@@ -114,8 +116,9 @@ const ScrapForm = ({ store, setStore, maxAccess, labels }) => {
         form={formik}
         resourceId={ResourceIds.TaxCodes}
         maxAccess={maxAccess}
-        infoVisible={false}
-        // editMode={editMode}
+        infoVisible={true}
+        editMode={!!recordId}
+        isCleared={false}
       >
         <VertLayout>
           <Grow>

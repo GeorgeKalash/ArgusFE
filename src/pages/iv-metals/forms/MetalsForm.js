@@ -85,23 +85,13 @@ export default function MetalsForm({ labels, maxAccess, setStore, store }) {
     })()
   }, [])
 
-  const actions = [
-    {
-      key: 'Integration Account',
-      condition: true,
-      onClick: 'onClickGIA',
-      disabled: !editMode
-    }
-  ]
-
   return (
     <FormShell
       resourceId={ResourceIds.TaxCodes}
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}
-      actions={actions}
-      masterSource={MasterSource.TaxCode}
+      isCleared={false}
     >
       <VertLayout>
         <Grow>
