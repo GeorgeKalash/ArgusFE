@@ -76,6 +76,7 @@ export const SaleRepository = {
     page: service + 'pageCG'
   },
   ReturnPolicy: {
+    page: service + 'pageRPO',
     qry: service + 'qryRPO',
     get: service + 'getRPO',
     set: service + 'setRPO',
