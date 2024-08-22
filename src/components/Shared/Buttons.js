@@ -237,7 +237,7 @@ export const getButtons = platformLabels => [
   },
   {
     key: 'Submit',
-    label: platformLabels.Submit,
+    label: ' platformLabels.Submit',
     condition: 'isSaved',
     onClick: 'onSave',
     color: '#4eb558',

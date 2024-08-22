@@ -4,6 +4,8 @@ import { useState, useContext } from 'react'
 import { TrxType } from 'src/resources/AccessLevels'
 import { ControlContext } from 'src/providers/ControlContext'
 import { getButtons } from './Buttons'
+import Tippy from '@tippyjs/react'
+import 'tippy.js/dist/tippy.css'
 
 const GridToolbar = ({
   onAdd,
@@ -41,38 +43,13 @@ const GridToolbar = ({
 
   return (
     <DialogActions sx={{ px: '0px !important', py: '4px !important', flexDirection: 'column' }}>
-      <style>
-        {`
-          .button-container {
-            position: relative;
-            display: inline-block;
-          }
-          .toast {
-            position: absolute;
-            top: -30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #333333ad;
-            color: white;
-            padding: 3px 7px;
-            border-radius: 7px;
-            opacity: 0;
-            transition: opacity 0.3s, top 0.3s;
-            z-index: 1;
-          }
-          .button-container:hover .toast {
-            opacity: 1;
-            top: -40px;
-          }
-        `}
-      </style>
       <Grid container spacing={2} sx={{ display: 'flex', px: 2, width: '100%', justifyContent: 'space-between' }}>
         <Grid item>
           <Grid container spacing={2}>
             {leftSection}
             {onAdd && addBtnVisible && (
               <Grid item sx={{ display: 'flex', justifyContent: 'flex-start' }}>
-                <Tooltip title={platformLabels.add}>
+                <Tippy content={platformLabels.add} placement='bottom'>
                   <Button
                     onClick={onAdd}
                     variant='contained'
@@ -89,7 +66,7 @@ const GridToolbar = ({
                   >
                     <img src='/images/buttonsIcons/add.png' alt={platformLabels.add} />
                   </Button>
-                </Tooltip>
+                </Tippy>
               </Grid>
             )}
             {inputSearch && (
@@ -126,30 +103,31 @@ const GridToolbar = ({
                         onMouseLeave={handleButtonMouseLeave}
                         key={index}
                       >
-                        <Button
-                          onClick={handleClick}
-                          variant='contained'
-                          sx={{
-                            mr: 1,
-                            backgroundColor: button.color,
-                            '&:hover': {
+                        <Tippy content={tooltip} placement='bottom'>
+                          <Button
+                            onClick={handleClick}
+                            variant='contained'
+                            sx={{
+                              mr: 1,
                               backgroundColor: button.color,
-                              opacity: 0.8
-                            },
-                            border: button.border,
-                            width: 'auto',
-                            height: '35px',
-                            objectFit: 'contain'
-                          }}
-                          disabled={isDisabled}
-                        >
-                          {button.image ? (
-                            <img src={`/images/buttonsIcons/${button.image}`} alt={button.key} />
-                          ) : (
-                            button.label
-                          )}
-                        </Button>
-                        {button.image ? tooltip && <div className='toast'>{tooltip}</div> : null}
+                              '&:hover': {
+                                backgroundColor: button.color,
+                                opacity: 0.8
+                              },
+                              border: button.border,
+                              width: 'auto',
+                              height: '35px',
+                              objectFit: 'contain'
+                            }}
+                            disabled={isDisabled}
+                          >
+                            {button.image ? (
+                              <img src={`/images/buttonsIcons/${button.image}`} alt={button.key} />
+                            ) : (
+                              button.label
+                            )}
+                          </Button>
+                        </Tippy>
                       </div>
                     )
                   )

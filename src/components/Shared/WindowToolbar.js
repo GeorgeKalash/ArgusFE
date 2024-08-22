@@ -5,6 +5,8 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { getButtons } from './Buttons'
 import CustomComboBox from '../Inputs/CustomComboBox'
 import { ControlContext } from 'src/providers/ControlContext'
+import Tippy from '@tippyjs/react'
+import 'tippy.js/dist/tippy.css'
 
 const WindowToolbar = ({
   onSave,
@@ -112,35 +114,6 @@ const WindowToolbar = ({
 
   return (
     <Box sx={{ padding: '8px !important' }}>
-      <style>
-        {`
-          .button-container {
-            position: relative;
-            display: inline-block;
-          }
-          .toast {
-            position: absolute;
-            top: -30px;
-            background-color: #333333ad;
-            color: white;
-            padding: 3px 7px;
-            border-radius: 7px;
-            opacity: 0;
-            transition: opacity 0.3s, top 0.3s;
-            z-index: 1 !important;
-            white-space: nowrap; 
-            overflow: hidden; 
-            text-overflow: ellipsis; 
-            display: none;
-            }
-          .button-container:hover .toast {
-            opacity: 1;
-            top: -40px;
-            display: inline;
-          }
-          }
-        `}
-      </style>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
         {previewReport ? (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -154,22 +127,15 @@ const WindowToolbar = ({
               sx={{ width: 250 }}
               disableClearable
             />
-            <Button
-              sx={{ width: '20px', height: '35px', ml: 1 }}
-              variant='contained'
-              disabled={!selectedReport}
-              onClick={onGenerateReport}
-              size='small'
-            >
-              <div
-                className='button-container'
-                onMouseEnter={() => handleButtonMouseEnter(platformLabels.Preview)}
-                onMouseLeave={handleButtonMouseLeave}
-              >
-                <img src='/images/buttonsIcons/preview.png' alt='Preview' />
-                {tooltip && <div className='toast'>{tooltip}</div>}
-              </div>
-            </Button>
+            <Tippy content={tooltip} placement='top'>
+              <Button
+                sx={{ width: '20px', height: '35px', ml: 1 }}
+                variant='contained'
+                disabled={!selectedReport}
+                onClick={onGenerateReport}
+                size='small'
+              />
+            </Tippy>
           </Box>
         ) : (
           <Box></Box>
@@ -191,27 +157,28 @@ const WindowToolbar = ({
                     onMouseLeave={handleButtonMouseLeave}
                     key={index}
                   >
-                    <Button
-                      onClick={handleClick}
-                      variant='contained'
-                      sx={{
-                        mr: 1,
-                        backgroundColor: button.color,
-                        '&:hover': {
+                    <Tippy content={tooltip} placement='top'>
+                      <Button
+                        onClick={handleClick}
+                        variant='contained'
+                        sx={{
+                          mr: 1,
                           backgroundColor: button.color,
-                          opacity: 0.8
-                        },
-                        border: button.border,
-                        width: '50px !important',
-                        height: '35px',
-                        objectFit: 'contain',
-                        minWidth: '30px !important'
-                      }}
-                      disabled={isDisabled}
-                    >
-                      <img src={`/images/buttonsIcons/${button.image}`} alt={button.key} />
-                    </Button>
-                    {tooltip && <div className='toast'>{tooltip}</div>}
+                          '&:hover': {
+                            backgroundColor: button.color,
+                            opacity: 0.8
+                          },
+                          border: button.border,
+                          width: '50px !important',
+                          height: '35px',
+                          objectFit: 'contain',
+                          minWidth: '30px !important'
+                        }}
+                        disabled={isDisabled}
+                      >
+                        <img src={`/images/buttonsIcons/${button.image}`} alt={button.key} />
+                      </Button>
+                    </Tippy>
                   </div>
                 )
               )
@@ -233,27 +200,28 @@ const WindowToolbar = ({
                   onMouseLeave={handleButtonMouseLeave}
                   key={index}
                 >
-                  <Button
-                    onClick={handleClick}
-                    variant='contained'
-                    sx={{
-                      mr: 1,
-                      backgroundColor: button.color,
-                      '&:hover': {
+                  <Tippy content={tooltip} placement='top'>
+                    <Button
+                      onClick={handleClick}
+                      variant='contained'
+                      sx={{
+                        mr: 1,
                         backgroundColor: button.color,
-                        opacity: 0.8
-                      },
-                      border: button.border,
-                      width: '50px !important',
-                      height: '35px',
-                      objectFit: 'contain',
-                      minWidth: '30px !important'
-                    }}
-                    disabled={isDisabled}
-                  >
-                    <img src={`/images/buttonsIcons/${button.image}`} alt={button.key} />
-                  </Button>
-                  {tooltip && <div className='toast'>{tooltip}</div>}
+                        '&:hover': {
+                          backgroundColor: button.color,
+                          opacity: 0.8
+                        },
+                        border: button.border,
+                        width: '50px !important',
+                        height: '35px',
+                        objectFit: 'contain',
+                        minWidth: '30px !important'
+                      }}
+                      disabled={isDisabled}
+                    >
+                      <img src={`/images/buttonsIcons/${button.image}`} alt={button.key} />
+                    </Button>
+                  </Tippy>
                 </div>
               )
             )
