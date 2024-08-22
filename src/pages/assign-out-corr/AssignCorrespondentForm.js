@@ -1,6 +1,5 @@
 import { useContext } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useFormik } from 'formik'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -10,19 +9,21 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
+import { useForm } from 'src/hooks/form'
 
-export default function AssignCorrespondentForm({ maxAccess, labels, outwardsList, window }) {
+export default function AssignCorrespondentForm({ maxAccess, labels, outwardsList, refetch, window }) {
   const { postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
-  const formik = useFormik({
+  const { formik } = useForm({
+    maxAccess,
     initialValues: {
       corId: ''
     },
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      countryId: yup.string().required('Country ID is required')
+      corId: yup.string().required()
     }),
     onSubmit: async obj => {
       try {
@@ -35,7 +36,7 @@ export default function AssignCorrespondentForm({ maxAccess, labels, outwardsLis
           extension: RemittanceOutwardsRepository.CorrespondentOutwards.set,
           record: JSON.stringify(data)
         })
-
+        refetch()
         toast.success(platformLabels.Updated)
         window.close()
       } catch (error) {}
@@ -48,6 +49,7 @@ export default function AssignCorrespondentForm({ maxAccess, labels, outwardsLis
       isInfo={false}
       isCleared={false}
       isSavedClear={false}
+      maxAccess={maxAccess}
       resourceId={ResourceIds.CorrespondentOutwards}
     >
       <VertLayout>

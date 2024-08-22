@@ -1,12 +1,11 @@
 import { Grid } from '@mui/material'
-import { useContext } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { useResourceQuery } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataSets } from 'src/resources/DataSets'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { useFormik } from 'formik'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -16,26 +15,55 @@ import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutward
 import Table from 'src/components/Shared/Table'
 import { useWindow } from 'src/windows'
 import AssignCorrespondentForm from './AssignCorrespondentForm'
+import { useForm } from 'src/hooks/form'
 
 const OutwardsCorrespondent = () => {
   const { getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const [data, setData] = useState([])
+
+  const {
+    labels: labels,
+    maxAccess,
+    refetch
+  } = useResourceQuery({
+    queryFn: fetchWithFilter,
+    endpointId: RemittanceOutwardsRepository.OutwardsTransfer.qry2,
+    datasetId: ResourceIds.CorrespondentOutwards
+  })
+
+  const rowColumns = [
+    {
+      field: 'reference',
+      headerName: labels.reference
+    },
+    {
+      field: 'date',
+      headerName: labels.date
+    },
+    {
+      field: 'currencyRef',
+      headerName: labels.currency
+    },
+    {
+      field: 'clientName',
+      headerName: labels.client
+    },
+    {
+      field: 'amount',
+      headerName: labels.amount
+    }
+  ]
 
   const initialValues = {
     countryId: '',
     dispersalType: '',
-    currencyId: '',
-    corId: 0,
-    outwards: [
-      {
-        id: 1,
-        checked: false
-      }
-    ]
+    currencyId: ''
   }
 
-  const formik = useFormik({
+  const { formik } = useForm({
     initialValues,
+    maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -43,48 +71,27 @@ const OutwardsCorrespondent = () => {
     })
   })
 
-  async function fetchWithFilter({ filters }) {
-    if (!filters.countryId) return { list: [] }
-    return await getRequest({
+  async function fetchWithFilter() {
+    if (!formik.values.countryId) return
+
+    const res = await getRequest({
       extension: RemittanceOutwardsRepository.OutwardsTransfer.qry2,
-      parameters: `_countryId=${filters?.countryId}&_currencyId=${filters?.currencyId ?? 0}&_dispersalType=${
-        filters?.dispersalType ?? 0
-      }`
+      parameters: `_countryId=${formik.values?.countryId}&_currencyId=${
+        formik.values?.currencyId || 0
+      }&_dispersalType=${formik.values?.dispersalType || 0}`
     })
+
+    setData(res ?? { list: [] })
   }
 
-  const {
-    query: { data },
-    labels: labels,
-    filterBy,
-    access,
-    filters
-  } = useResourceQuery({
-    datasetId: ResourceIds.CorrespondentOutwards,
-    filter: {
-      endpointId: RemittanceOutwardsRepository.OutwardsTransfer.qry2,
-      filterFn: fetchWithFilter
-    }
-  })
-
-  const onChange = (index, value) => {
-    if (index === 'countryId') filterBy('countryId', value)
-    if (index === 'dispersalType') filterBy('dispersalType', value)
-    if (index === 'currencyId') filterBy('currencyId', value)
-  }
-  const rowColumns = [
-    {
-      field: 'reference',
-      headerName: ''
-    }
-  ]
   const openCorrespondent = () => {
     stack({
       Component: AssignCorrespondentForm,
       props: {
-        maxAccess: access,
+        maxAccess: maxAccess,
         labels: labels,
-        outwardsList: formik.values.outwards.filter(item => item.checked)
+        outwardsList: data?.list?.filter(item => item.checked),
+        refetch: fetchWithFilter
       },
       width: 600,
       height: 500,
@@ -97,99 +104,108 @@ const OutwardsCorrespondent = () => {
       key: 'Correspondent',
       condition: true,
       onClick: openCorrespondent,
-      disabled: !filters.countryId
+      disabled: !formik.values.countryId
     }
   ]
 
+  useEffect(() => {
+    ;(async function () {
+      try {
+        await fetchWithFilter()
+      } catch (error) {}
+    })()
+  }, [formik.values.countryId, formik.values.currencyId, formik.values.dispersalType])
+
   return (
-    <VertLayout>
-      <Fixed>
-        <Grid container spacing={2} sx={{ pt: 5, pl: 5 }}>
-          <Grid item xs={2}>
-            <ResourceComboBox
-              endpointId={SystemRepository.Country.qry}
-              name='countryId'
-              label={labels.country}
-              valueField='recordId'
-              required
-              displayField={['name']}
-              columnsInDropDown={[
-                { key: 'reference', value: 'Reference' },
-                { key: 'name', value: 'Name' },
-                { key: 'flName', value: 'Foreign Language Name' }
-              ]}
-              values={formik.values}
-              displayFieldWidth={1.75}
-              onChange={(event, newValue) => {
-                if (newValue) {
-                  formik.setFieldValue('countryId', newValue?.recordId || 0)
-                  onChange('countryId', newValue?.recordId || 0)
-                }
-              }}
-              error={formik.touched.countryId && Boolean(formik.errors.countryId)}
-              maxAccess={access}
-            />
+    <FormShell
+      form={formik}
+      isInfo={false}
+      isSaved={false}
+      isCleared={false}
+      isSavedClear={false}
+      actions={actions}
+      maxAccess={maxAccess}
+      resourceId={ResourceIds.CorrespondentOutwards}
+    >
+      <VertLayout>
+        <Fixed>
+          <Grid container spacing={2} sx={{ pt: 5 }}>
+            <Grid item xs={2}>
+              <ResourceComboBox
+                endpointId={SystemRepository.Country.qry}
+                name='countryId'
+                label={labels.country}
+                valueField='recordId'
+                required
+                displayField={['name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' },
+                  { key: 'flName', value: 'Foreign Language Name' }
+                ]}
+                values={formik.values}
+                displayFieldWidth={1.75}
+                onChange={(event, newValue) => {
+                  if (newValue) {
+                    formik.setFieldValue('countryId', newValue?.recordId || 0)
+                  }
+                }}
+                error={formik.touched.countryId && Boolean(formik.errors.countryId)}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={2}>
+              <ResourceComboBox
+                endpointId={SystemRepository.Currency.qry}
+                name='currencyId'
+                label={labels.currency}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('currencyId', newValue?.recordId || 0)
+                }}
+                error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
+              />
+            </Grid>
+            <Grid item xs={2}>
+              <ResourceComboBox
+                name='dispersalType'
+                label={labels.dispersalType}
+                datasetId={DataSets.RT_Dispersal_Type}
+                valueField='key'
+                displayField='value'
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('dispersalType', newValue?.key || 0)
+                }}
+                error={formik.touched.dispersalType && Boolean(formik.errors.dispersalType)}
+              />
+            </Grid>
           </Grid>
-          <Grid item xs={2}>
-            <ResourceComboBox
-              endpointId={SystemRepository.Currency.qry}
-              name='currencyId'
-              label={labels.currency}
-              valueField='recordId'
-              displayField={['reference', 'name']}
-              columnsInDropDown={[
-                { key: 'reference', value: 'Reference' },
-                { key: 'name', value: 'Name' }
-              ]}
-              values={formik.values}
-              maxAccess={access}
-              onChange={(event, newValue) => {
-                onChange('currencyId', newValue?.recordId || 0)
-                formik.setFieldValue('currencyId', newValue?.recordId || 0)
-              }}
-              error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
-            />
-          </Grid>
-          <Grid item xs={2}>
-            <ResourceComboBox
-              name='dispersalType'
-              label={labels.dispersalType}
-              datasetId={DataSets.RT_Dispersal_Type}
-              valueField='key'
-              displayField='value'
-              values={formik.values}
-              onChange={(event, newValue) => {
-                onChange('dispersalType', newValue?.key || 0)
-                formik.setFieldValue('dispersalType', newValue?.key || 0)
-              }}
-              error={formik.touched.dispersalType && Boolean(formik.errors.dispersalType)}
-            />
-          </Grid>
-        </Grid>
-      </Fixed>
-      <FormShell
-        form={formik}
-        isInfo={false}
-        isSaved={false}
-        isCleared={false}
-        isSavedClear={false}
-        actions={actions}
-        resourceId={ResourceIds.CorrespondentOutwards}
-      >
+        </Fixed>
+
         <Grow>
           <Table
             columns={rowColumns}
-            gridData={data}
+            gridData={data ?? { list: [] }}
+            setData={setData}
             rowId={['recordId']}
             isLoading={false}
-            maxAccess={access}
+            refetch={refetch}
+            maxAccess={maxAccess}
             pageSize={50}
             paginationType='client'
             showCheckboxColumn={true}
           />
         </Grow>
-      </FormShell>
-    </VertLayout>
+      </VertLayout>
+    </FormShell>
   )
 }
 
