@@ -33,32 +33,23 @@ const StrategiesWindow = ({ height, recordId, labels, maxAccess, expanded, onApp
   return (
     <>
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-      <CustomTabPanel height={height} index={0} value={activeTab} disabledApply={!editMode && true}>
+      <CustomTabPanel index={0} value={activeTab} disabledApply={!editMode && true}>
         <StrategiesForm
           labels={labels}
           setStore={setStore}
           store={store}
-          editMode={editMode}
           maxAccess={maxAccess}
           onChange={onStrategiesChange}
         />
       </CustomTabPanel>
-      <CustomTabPanel height={height} index={1} value={activeTab}>
+      <CustomTabPanel index={1} value={activeTab}>
         <CodeList labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} />
       </CustomTabPanel>
-      <CustomTabPanel height={height} index={2} value={activeTab}>
+      <CustomTabPanel index={2} value={activeTab}>
         <PreReqsList labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} />
       </CustomTabPanel>
-      <CustomTabPanel height={height} index={3} value={activeTab} onApply={onApply}>
-        <IndicatorForm
-          onApply={onApply}
-          labels={labels}
-          height={height}
-          expanded={expanded}
-          setStore={setStore}
-          maxAccess={maxAccess}
-          store={store}
-        />
+      <CustomTabPanel index={3} value={activeTab} onApply={onApply}>
+        <IndicatorForm labels={labels} height={height} expanded={expanded} maxAccess={maxAccess} store={store} />
       </CustomTabPanel>
     </>
   )

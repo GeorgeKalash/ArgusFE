@@ -26,9 +26,11 @@ import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepos
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const Strategies2 = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const [selectedRecordId, setSelectedRecordId] = useState(null)
   const { stack } = useWindow()
@@ -117,7 +119,7 @@ const Strategies2 = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
   }
 
   return (
