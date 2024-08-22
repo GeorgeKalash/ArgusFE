@@ -574,7 +574,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
           cashData: formik.values.instantCashDetails,
           outwardsData: {
             countryId: formik.values.countryId,
-            amount: formik.values.amount
+            amount: formik.values.amount || amount
           },
           clientData: {
             hiddenTrxAmount: formik.values.hiddenTrxAmount,
@@ -663,7 +663,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
   async function refetchForm(recordId) {
     const res = await getOutwards(recordId)
     await fillOutwardsData(res.record)
-    await chooseClient(res.record.headerView.clientId)
+    await chooseClient(res.record.headerView.clientId, res.record.headerView.category)
 
     return res
   }
@@ -685,7 +685,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
         if (res.list.length > 0) {
           formik.setFieldValue('products', res.list)
           const InstantCashProduct = res.list.find(item => item.interfaceId === 1)
-          InstantCashProduct ? await mergeICRates(res.list) : await displayProduct(res.list)
+          InstantCashProduct ? await mergeICRates(res.list, data) : await displayProduct(res.list, data.productId)
         } else {
           formik.setFieldValue('products', [])
           handleSelectedProduct()
@@ -696,11 +696,13 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       handleSelectedProduct()
     }
   }
-  async function mergeICRates(data) {
+  async function mergeICRates(data, outwardsList) {
     const syCountryId = await getDefaultCountry()
     const srcCurrency = await getDefaultCurrency()
-    const targetCurrency = formik.values.currencyRef
-    const { srcAmount, trgtAmount, countryRef } = formik.values
+    const targetCurrency = formik.values.currencyRef || outwardsList.currencyRef
+    const srcAmount = outwardsList?.lcAmount || formik.values.lcAmount || 0
+    const trgtAmount = outwardsList?.fcAmount || formik.values.fcAmount || 0
+    const countryRef = formik.values.countryRef || outwardsList.countryRef
 
     try {
       const getRates = await getRequest({
@@ -733,9 +735,9 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
             if (formik.values.fcAmount) formik.setFieldValue('lcAmount', matchingRate.baseAmount)
           }
 
-          formik.setFieldValue('products[0].checked', true)
           !editMode && handleSelectedProduct(updatedProduct)
           formik.setFieldValue('products', [updatedProduct])
+          formik.setFieldValue('products[0].checked', true)
         } else {
           !editMode && handleSelectedProduct()
 
@@ -757,22 +759,22 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
           }
         }
       } else {
-        displayProduct(data)
+        displayProduct(data, data.productId)
       }
     } catch (error) {
-      await displayProduct(data)
+      await displayProduct(data, data.productId)
     }
   }
 
-  async function displayProduct(data) {
+  async function displayProduct(data, productId) {
     if (data.length === 1) {
       formik.setFieldValue('products[0].checked', true)
       !editMode && handleSelectedProduct(data[0])
     } else {
       !editMode && handleSelectedProduct()
-      const matchedIndex = data.findIndex(product => product.productId === data.productId)
-      if (matchedIndex) {
-        formik.setFieldValue(`products[${matchedIndex}].checked`, true)
+      if (productId) {
+        const matchedIndex = data.findIndex(product => product.productId === productId)
+        if (matchedIndex) formik.setFieldValue(`products[${matchedIndex}].checked`, true)
       }
     }
   }
@@ -901,6 +903,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                       formik.setFieldValue('fcAmount', '')
                       formik.setFieldValue('lcAmount', '')
                       handleSelectedProduct(null, true)
+                      formik.setFieldValue('products', [])
                       if (!newValue) {
                         formik.setFieldValue('dispersalType', '')
                         formik.setFieldValue('currencyId', '')
