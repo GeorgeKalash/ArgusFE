@@ -1,50 +1,39 @@
-// ** React Imports
 import { useState, useContext } from 'react'
-
-// ** MUI Imports
-import {Box } from '@mui/material'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
-
-// ** Windows
-import IdCategoriesWindow from './Windows/IdCategoryWindow'
-
-// ** Helpers
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
-
-// ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { useWindow } from 'src/windows'
+import IdCategoryForm from './forms/IdCategoryForm'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const IdCategories = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
- 
-  const [selectedRecordId, setSelectedRecordId] = useState(null)
-
-  //states
-  const [windowOpen, setWindowOpen] = useState(false)
-  const [errorMessage, setErrorMessage] = useState(null)
+  const { platformLabels } = useContext(ControlContext)
+  const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    return await getRequest({
+    const response = await getRequest({
       extension: BusinessPartnerRepository.CategoryID.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
+
+    return { ...response, _startAt: _startAt }
   }
 
   const {
     query: { data },
     labels: _labels,
+    paginationParameters,
+    refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -57,23 +46,33 @@ const IdCategories = () => {
   })
 
   const columns = [
- 
     {
       field: 'name',
       headerName: _labels.name,
       flex: 1
     }
-
   ]
 
-
   const add = () => {
-    setWindowOpen(true)
+    openForm()
   }
 
   const edit = obj => {
-    setSelectedRecordId(obj.recordId)
-    setWindowOpen(true)
+    openForm(obj?.recordId)
+  }
+
+  function openForm(recordId) {
+    stack({
+      Component: IdCategoryForm,
+      props: {
+        labels: _labels,
+        recordId: recordId,
+        maxAccess: access
+      },
+      width: 600,
+      height: 400,
+      title: _labels.idCategory
+    })
   }
 
   const del = async obj => {
@@ -82,14 +81,15 @@ const IdCategories = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
   }
-  
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar onAdd={add} maxAccess={access} />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
@@ -98,24 +98,13 @@ const IdCategories = () => {
           onDelete={del}
           isLoading={false}
           pageSize={50}
-          paginationType='client'
+          paginationType='api'
+          paginationParameters={paginationParameters}
+          refetch={refetch}
           maxAccess={access}
         />
-      </Box>
-      {windowOpen && (
-        <IdCategoriesWindow
-          onClose={() => {
-            setWindowOpen(false)
-            setSelectedRecordId(null)
-          }}
-          labels={_labels}
-          maxAccess={access}
-          recordId={selectedRecordId}
-          setSelectedRecordId={setSelectedRecordId}
-        />
-      )}
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+      </Grow>{' '}
+    </VertLayout>
   )
 }
 

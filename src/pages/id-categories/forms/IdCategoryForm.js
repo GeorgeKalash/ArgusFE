@@ -1,4 +1,3 @@
-// ** MUI Imports
 import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import { useFormik } from 'formik'
@@ -8,184 +7,147 @@ import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-
-import {  FormControlLabel, Checkbox } from '@mui/material'
-
-// ** Custom Imports
+import { FormControlLabel, Checkbox } from '@mui/material'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import CustomTextArea from 'src/components/Inputs/CustomTextArea'
-
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
-
+import { useForm } from 'src/hooks/form'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 export default function IdCategoryForm({ labels, maxAccess, recordId }) {
-    const [isLoading, setIsLoading] = useState(false)
-    const [editMode, setEditMode] = useState(!!recordId)
-    
-    const [initialValues, setInitialData] = useState({
-        recordId: null,
-        
-        name: '',
-        org: false,
-        person: false,
-        group: false,
-        isUnique: false
+  const [editMode, setEditMode] = useState(!!recordId)
+
+  const { getRequest, postRequest } = useContext(RequestsContext)
+
+  const invalidate = useInvalidate({
+    endpointId: BusinessPartnerRepository.CategoryID.page
+  })
+
+  const { formik } = useForm({
+    initialValues: {
+      recordId: null,
+
+      name: '',
+      org: false,
+      person: false,
+      group: false,
+      isUnique: false
+    },
+    maxAccess,
+    enableReinitialize: true,
+    validateOnChange: true,
+    validationSchema: yup.object({
+      name: yup.string().required(' ')
+    }),
+    onSubmit: async obj => {
+      const recordId = obj.recordId
+
+      const response = await postRequest({
+        extension: BusinessPartnerRepository.CategoryID.set,
+        record: JSON.stringify(obj)
       })
 
-    const { getRequest, postRequest } = useContext(RequestsContext)
+      if (!recordId) {
+        toast.success('Record Added Successfully')
+        formik.setValues({
+          ...obj,
+          recordId: response.recordId
+        })
+      } else toast.success('Record Edited Successfully')
+      setEditMode(true)
 
-    //const editMode = !!recordId
+      invalidate()
+    }
+  })
 
-    const invalidate = useInvalidate({
-        endpointId: BusinessPartnerRepository.CategoryID.page
-      })
-  
-    const formik = useFormik({
-        initialValues,
-        enableReinitialize: true,
-        validateOnChange: true,
-        validationSchema: yup.object({
-          
-          name: yup.string().required('This field is required'),
-        }),
-        onSubmit: async obj => {
-          const recordId = obj.recordId
-
-          const response = await postRequest({
-            extension: BusinessPartnerRepository.CategoryID.set,
-            record: JSON.stringify(obj)
+  useEffect(() => {
+    ;(async function () {
+      try {
+        if (recordId) {
+          const res = await getRequest({
+            extension: BusinessPartnerRepository.CategoryID.get,
+            parameters: `_recordId=${recordId}`
           })
-          
-          if (!recordId) {
-            toast.success('Record Added Successfully')
-            setInitialData({
-              ...obj, // Spread the existing properties
-              recordId: response.recordId, // Update only the recordId field
-            });
-          }
-          else toast.success('Record Edited Successfully')
-          setEditMode(true)
 
-          invalidate()
+          formik.setValues(res.record)
         }
-      })
-    
-      useEffect(() => {
-        ;(async function () {
-          try {
-            if (recordId) {
-              setIsLoading(true)
-    
-              const res = await getRequest({
-                extension: BusinessPartnerRepository.CategoryID.get,
-                parameters: `_recordId=${recordId}`
-              })
-              
-              setInitialData(res.record)
-            }
-          } catch (exception) {
-            setErrorMessage(error)
-          }
-          setIsLoading(false)
-        })()
-      }, [])
-      
-    return (
-        <FormShell 
-            resourceId={ResourceIds.IdCategories}
-            form={formik} 
-            height={300} 
-            maxAccess={maxAccess} 
-            editMode={editMode}
-        >
-            <Grid container spacing={4}>
-                {/* <Grid item xs={12}>
-                    <CustomTextField
-                    name='reference'
-                    label={labels.reference}
-                    value={formik.values.reference}
-                    required
-                    maxAccess={maxAccess}
-                    maxLength='30'
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('reference', '')}
-                    error={formik.touched.reference && Boolean(formik.errors.reference)}
-                    helperText={formik.touched.reference && formik.errors.reference}
-                    />
-                </Grid> */}
-                <Grid item xs={12}>
-                    <CustomTextField
-                    name='name'
-                    label={labels.name}
-                    value={formik.values.name}
-                    required
-                    rows={2}
-                    maxAccess={maxAccess}
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('name', '')}
-                    error={formik.touched.name && Boolean(formik.errors.name)}
-                    helperText={formik.touched.name && formik.errors.name}
-                    />
-                </Grid>
+      } catch (exception) {}
+    })()
+  }, [])
 
-          <Grid item xs={12}>
-          <FormControlLabel
-           control={
-            <Checkbox
-              name="org"
-              checked={formik.values.org}
-              onChange={formik.handleChange}
-
-              maxAccess={maxAccess}
-            />
-          }
-          label={labels.organization}
-        />
-      </Grid>
-
-      <Grid item xs={12}>
-        <FormControlLabel
-          control={
-            <Checkbox
-            name="person"
-            checked={formik.values.person}
-              onChange={formik.handleChange}
-              maxAccess={maxAccess}
-            />
-          }
-          label={labels.person}
-        />
-      </Grid>
-
-      <Grid item xs={12}>
-        <FormControlLabel
-          control={
-            <Checkbox
-            name='group'
-            checked={formik.values.group}
-            onChange={formik.handleChange}
-            maxAccess={maxAccess}
-            />
-          }
-          label={labels.group}
-          />
-      </Grid>
-
-      <Grid item xs={12}>
-        <FormControlLabel
-          control={
-            <Checkbox
-              name="isUnique"
-              checked={formik.values.isUnique}
-              onChange={formik.handleChange}
-              maxAccess={maxAccess}
-            />
-          }
-          label={labels.unique}
-          />
-      </Grid>
-                
+  return (
+    <FormShell resourceId={ResourceIds.IdCategories} form={formik} maxAccess={maxAccess} editMode={editMode}>
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={4}>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='name'
+                label={labels.name}
+                value={formik.values.name}
+                required
+                rows={2}
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('name', '')}
+                error={formik.touched.name && Boolean(formik.errors.name)}
+              />
             </Grid>
-        </FormShell>
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name='org'
+                    checked={formik.values.org}
+                    onChange={formik.handleChange}
+                    maxAccess={maxAccess}
+                  />
+                }
+                label={labels.organization}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name='person'
+                    checked={formik.values.person}
+                    onChange={formik.handleChange}
+                    maxAccess={maxAccess}
+                  />
+                }
+                label={labels.person}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name='group'
+                    checked={formik.values.group}
+                    onChange={formik.handleChange}
+                    maxAccess={maxAccess}
+                  />
+                }
+                label={labels.group}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name='isUnique'
+                    checked={formik.values.isUnique}
+                    onChange={formik.handleChange}
+                    maxAccess={maxAccess}
+                  />
+                }
+                label={labels.unique}
+              />
+            </Grid>
+          </Grid>
+        </Grow>
+      </VertLayout>
+    </FormShell>
   )
 }

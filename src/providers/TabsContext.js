@@ -1,34 +1,31 @@
-// ** React Imports
-import React, { createContext, useEffect, useState, useContext } from 'react';
-
-// ** Next Import
+import React, { createContext, useEffect, useState, useContext } from 'react'
 import { useRouter } from 'next/router'
-
-// ** MUI Imports
-import { Tabs, Tab, Box } from '@mui/material'
-import { IconButton } from '@mui/material'
+import { Tabs, Tab, Box, IconButton, Menu, MenuItem } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import PropTypes from 'prop-types'
-import Menu from '@mui/material/Menu'
-import MenuItem from '@mui/material/MenuItem'
-
-// ** Context
 import { MenuContext } from 'src/providers/MenuContext'
+import { RequestsContext } from './RequestsContext'
 
 const TabsContext = createContext()
 
 function CustomTabPanel(props) {
   const { children, value, index, ...other } = props
 
-  //NOTE: EVERY PAGE PADDING CAN BE ADDED HERE
-
   return (
     <Box
       role='tabpanel'
-      hidden={value !== index}
       id={`simple-tabpanel-${index}`}
       aria-labelledby={`simple-tab-${index}`}
-      sx={{ height: '100%' }}
+      sx={{
+        display: value !== index ? 'none !important' : 'flex !important',
+        flexDirection: 'column',
+        width: '100%',
+        flex: '1 !important',
+        overflow: 'auto',
+        paddingTop: '5px',
+        position: 'relative',
+        backgroundColor: 'white'
+      }}
       {...other}
     >
       {children}
@@ -43,30 +40,36 @@ CustomTabPanel.propTypes = {
 }
 
 const TabsProvider = ({ children }) => {
-  // ** Hooks
   const router = useRouter()
-  const { menu, lastOpenedPage } = useContext(MenuContext)
+  const { menu, gear, lastOpenedPage } = useContext(MenuContext)
+  const { getRequest } = useContext(RequestsContext)
+  const { userId } = JSON.parse(window.sessionStorage.getItem('userData'))
+  const [anchorEl, setAnchorEl] = useState(null)
 
-  const getLabel = () => {
-    const parts = router.route.split('/')
+  const [openTabs, setOpenTabs] = useState([
+    {
+      page: children,
+      route: '/default/',
+      label: 'Home'
+    }
+  ])
+  const [currentTabIndex, setCurrentTabIndex] = useState(0)
+  const [tabsIndex, setTabsIndex] = useState(null)
+  const [initialLoadDone, setInitialLoadDone] = useState(false)
+  const { dashboardId } = JSON.parse(window.sessionStorage.getItem('userData'))
 
-    return parts[parts.length - 1]
-  }
-
-  const [anchorEl, setAnchorEl] = React.useState(null)
   const open = Boolean(anchorEl)
 
   const OpenItems = (event, i) => {
     setTabsIndex(i)
     event.preventDefault()
     setAnchorEl(event.currentTarget)
-  };
+  }
 
   const handleClose = () => {
     setAnchorEl(null)
-    
-    setTabsIndex()
-  };
+    setTabsIndex(null)
+  }
 
   const findNode = (nodes, targetRouter) => {
     for (const node of nodes) {
@@ -79,204 +82,250 @@ const TabsProvider = ({ children }) => {
         return node.name
       }
     }
-    
+
     return null
   }
 
-  // ** States
-  const [activeTabs, setActiveTabs] = useState([])
-  const [initialLoadDone, setInitialLoadDone] = useState(false)
-  const [value, setValue] = useState(0)
-  const [TabsIndex, setTabsIndex] = useState()
-  const [length, setLength] = useState(1)
-  const [closing, setClosing] = useState(false)
-
-
   const handleChange = (event, newValue) => {
-    setValue(newValue)
+    setCurrentTabIndex(newValue)
+    router.push(openTabs[newValue].route)
   }
 
-  const handleCloseAllTabs =  () => {
-    router.push('/default');
-    setActiveTabs([]);
-    setLength(0);
-    setValue()
-  };
-
-  const handleCloseOtherTab = (Tab) => {
-    const tab = activeTabs[Tab]
-      router.push(tab.route)
-      setActiveTabs([])
-      setActiveTabs([tab])
-      setLength(0)
-      setValue(0)
-
+  const handleCloseAllTabs = () => {
+    const firstTab = openTabs[0]
+    router.push(firstTab.route)
+    setOpenTabs([firstTab])
+    setCurrentTabIndex(0)
   }
 
-  const closeTab = (tabRoute) => {
-    setClosing(true)
-    const index = activeTabs.findIndex((tab) => tab.route === tabRoute);
-    const lastValue = activeTabs.length;
+  const handleCloseOtherTab = tabIndex => {
+    const homeTab = openTabs[0]
+    const selectedTab = openTabs[tabIndex]
+    const isHomeTabSelected = selectedTab.route === homeTab.route
 
-    if (lastValue === 1) {
-      setLength(0);
-      router.push('/default');
-      setActiveTabs([]);
-    } else {
-      if (index === lastValue - 1) {
-        const newValue = index > 0 ? index - 1 : 0;
-        if (activeTabs[newValue]) {
-          router.push(activeTabs[newValue].route);
-        }
-        setValue(newValue);
-      } else if (value === lastValue - 1) {
-        setValue(lastValue - 2);
-      }
-      
-      setActiveTabs((prevState) => {
-        return prevState.filter((tab) => tab.route !== tabRoute);
-      });
+    const newOpenTabs = openTabs.filter((tab, index) => index === 0 || index === tabIndex)
+
+    router.push(selectedTab.route)
+    setOpenTabs(newOpenTabs)
+    setCurrentTabIndex(isHomeTabSelected ? 0 : newOpenTabs.length - 1)
+  }
+
+  const closeTab = tabRoute => {
+    const index = openTabs.findIndex(tab => tab.route === tabRoute)
+    const activeTabsLength = openTabs.length
+
+    setOpenTabs(prevState => prevState.filter(tab => tab.route !== tabRoute))
+
+    if (activeTabsLength === 1) {
+      handleCloseAllTabs()
+
+      return
     }
-  };
+
+    if (currentTabIndex === index) {
+      const newValue = index === activeTabsLength - 1 ? index - 1 : index + 1
+      setCurrentTabIndex(newValue)
+      router.push(openTabs[newValue].route)
+    } else if (index < currentTabIndex) {
+      setCurrentTabIndex(currentValue => currentValue - 1)
+    }
+  }
 
   useEffect(() => {
-    if(length === 0){
-      setActiveTabs([])
-      setLength(1)
-    } else {
-    if (initialLoadDone && router.asPath != '/default') {
-      const isTabOpen = activeTabs.some((activeTab, index) => {
-        if (activeTab.page === children || activeTab.route === router.asPath) {
-          setValue(index);
-          
-          return true;
+    if (initialLoadDone) {
+      const isTabOpen = openTabs.some((activeTab, index) => {
+        if (activeTab.route === router.asPath) {
+          setCurrentTabIndex(index)
+
+          return true
         }
-        
-          return false;
+
+        return false
       })
-      if (isTabOpen) return
-      else {
-        const newValueState = activeTabs.length
-        setActiveTabs(prevState => {
-          return [
-            ...prevState,
-            {
-              page: children,
-              route: router.asPath,
-              label: lastOpenedPage ? lastOpenedPage.name : findNode(menu, router.asPath.replace(/\/$/, ''))
-            }
-          ]
-        })
-        setValue(newValueState)
-      }
-    }}
-  }, [children, router.asPath])
 
-  useEffect(() => {
-    if(closing && value){
-      if(activeTabs[value].route!=router.asPath){
-        router.push(activeTabs[value].route)
+      if (!isTabOpen) {
+        const newValueState = openTabs.length
+        setOpenTabs(prevState => [
+          ...prevState,
+          {
+            page: children,
+            route: router.asPath,
+            label: lastOpenedPage
+              ? lastOpenedPage.name
+              : findNode(menu, router.asPath.replace(/\/$/, '')) || findNode(gear, router.asPath.replace(/\/$/, ''))
+          }
+        ])
+        setCurrentTabIndex(newValueState)
+      } else {
+        setOpenTabs(prevState =>
+          prevState.map(tab => {
+            if (tab.route === router.asPath) {
+              return { ...tab, page: children }
+            }
+
+            return tab
+          })
+        )
       }
     }
+  }, [children, router.asPath, initialLoadDone, lastOpenedPage, menu, gear])
 
-    if (!activeTabs[0] && router.route != '/default' && router.asPath && menu.length > 0) {
-      setActiveTabs([
+  useEffect(() => {
+    if (!initialLoadDone && router.asPath && menu.length > 0) {
+      const newTabs = [
         {
+          page: router.asPath === '/default/' ? children : null,
+          route: '/default/',
+          label: 'Home'
+        }
+      ]
+
+      if (router.asPath !== '/default/') {
+        newTabs.push({
           page: children,
           route: router.asPath,
-          label: findNode(menu, router.asPath.replace(/\/$/, ''))
-        }
-      ])
+          label: lastOpenedPage
+            ? lastOpenedPage.name
+            : findNode(menu, router.asPath.replace(/\/$/, '')) || findNode(gear, router.asPath.replace(/\/$/, ''))
+        })
+        setCurrentTabIndex(1)
+      }
+
+      setOpenTabs(newTabs)
       setInitialLoadDone(true)
-    } setClosing(false)
-  }, [activeTabs, router, menu])
+    }
+  }, [router.asPath, menu, gear, children, lastOpenedPage, initialLoadDone])
 
   return (
     <>
-      <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%' }}>
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+      <Box
+        sx={{
+          display: 'flex !important',
+          flexDirection: 'column',
+          width: '100%',
+          flex: '1 !important',
+          overflow: 'auto'
+        }}
+      >
+        <Box sx={{ backgroundColor: '#231f20', pt: '5px', position: 'relative !important', zIndex: '3 !important' }}>
           <Tabs
-            value={value}
+            value={currentTabIndex}
             onChange={handleChange}
-            variant="scrollable"
-            scrollButtons="auto"
-            aria-label="scrollable auto tabs example"
-            sx={{maxHeight: '40px'}}
+            variant='scrollable'
+            scrollButtons={openTabs.length > 3 ? 'auto' : 'off'}
+            aria-label='scrollable auto tabs example'
+            sx={{
+              minHeight: '35px !important',
+              '.MuiTab-root': {
+                color: 'white',
+                backgroundColor: 'grey',
+                '&:hover': {
+                  color: 'grey',
+                  backgroundColor: '#ddd'
+                }
+              },
+              '.Mui-selected': {
+                color: '#231f20',
+                backgroundColor: 'white'
+              },
+              '.MuiTabs-indicator': {
+                backgroundColor: 'white'
+              },
+              '.MuiSvgIcon-root': {
+                color: 'white!important'
+              },
+              '.MuiTab-root .MuiSvgIcon-root': {
+                color: '#5A585E !important'
+              }
+            }}
           >
-            {activeTabs.length > 0 &&
-              activeTabs.map((activeTab, i) => {
-                return (
-                  !activeTab.isDefault && (
-                    <Tab
-                      key={i}
-                      label={activeTab?.label}
-                      onClick={() => router?.push(activeTab.route)}
-                      onContextMenu={(event) => OpenItems(event, i)}
-                      icon={
-                        <IconButton
-                          size='small'
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            closeTab(activeTab.route);
-                          }}
-                        >
-                          <CloseIcon fontSize='small' />
-                        </IconButton>
-                      }
-                      iconPosition='end'
-                      sx={{ minHeight: '40px' }}
-                    />
-                  )
-                )
-              })}
+            {openTabs.length > 0 &&
+              openTabs.map((activeTab, i) => (
+                <Tab
+                  key={i}
+                  label={activeTab?.label}
+                  onClick={() => {
+                    setCurrentTabIndex(i)
+                    router.push(activeTab.route)
+                  }}
+                  onContextMenu={event => OpenItems(event, i)}
+                  icon={
+                    activeTab.route === '/default/' ? null : (
+                      <IconButton
+                        size='small'
+                        onClick={event => {
+                          event.stopPropagation()
+                          closeTab(activeTab.route)
+                        }}
+                      >
+                        <CloseIcon fontSize='small' />
+                      </IconButton>
+                    )
+                  }
+                  iconPosition='end'
+                  sx={{
+                    minHeight: '35px !important',
+                    borderTopLeftRadius: 5,
+                    borderTopRightRadius: 5,
+                    py: '0px !important',
+                    mb: '0px !important',
+                    borderBottom: '0px !important',
+                    mr: '2px !important',
+                    fontWeight: '1.5rem',
+                    pr: '0px !important',
+                    pl: '10px !important',
+                    display: activeTab.route === '/default/' && dashboardId === null ? 'none' : 'flex'
+                  }}
+                />
+              ))}
           </Tabs>
         </Box>
-        {activeTabs.length > 0 &&
-          activeTabs.map((activeTab, i) => (
-            <CustomTabPanel key={i} index={i} value={value}>
+        {openTabs.length > 0 &&
+          openTabs.map((activeTab, i) => (
+            <CustomTabPanel key={activeTab.route} index={i} value={currentTabIndex}>
               {activeTab.page}
             </CustomTabPanel>
           ))}
       </Box>
       <Menu
         anchorEl={anchorEl}
-        id="account-menu"
+        id='account-menu'
         open={open}
         onClose={handleClose}
-        onClick={handleClose} 
+        onClick={handleClose}
         transformOrigin={{ horizontal: 'left', vertical: 'top' }}
         anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
       >
-        <MenuItem onClick={(event) => {
-          closeTab(activeTabs[TabsIndex]?.route);
-          event.stopPropagation();
-          handleClose();
-        }}>
-          <div>
-            Close Tab
-          </div>
+        <MenuItem
+          onClick={event => {
+            closeTab(openTabs[tabsIndex]?.route)
+            event.stopPropagation()
+            handleClose()
+          }}
+        >
+          <div>Close Tab</div>
         </MenuItem>
-        <MenuItem onClick={(event) =>{
-          event.stopPropagation();
-          handleCloseOtherTab(TabsIndex);
-          handleClose();
-        }}>
-          <div>
-            Close Other Tabs
-          </div>
+        <MenuItem
+          onClick={event => {
+            event.stopPropagation()
+            handleCloseOtherTab(tabsIndex)
+            handleClose()
+          }}
+        >
+          <div>Close Other Tabs</div>
         </MenuItem>
-        <MenuItem onClick={(event) =>{
-          event.stopPropagation();
-          handleCloseAllTabs();
-          handleClose();
-        }}>
-          <div>
-            Close All Tabs
-          </div>
+        <MenuItem
+          onClick={event => {
+            event.stopPropagation()
+            handleCloseAllTabs()
+            handleClose()
+          }}
+        >
+          <div>Close All Tabs</div>
         </MenuItem>
       </Menu>
     </>
-  );
-};
+  )
+}
 
 export { TabsContext, TabsProvider }

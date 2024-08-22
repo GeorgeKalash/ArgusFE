@@ -1,62 +1,51 @@
-// ** React Imports
-import { useEffect, useState, useContext } from 'react'
-
-// ** MUI Imports
-import { Box } from '@mui/material'
-
-// ** Third Party Imports
-import { useFormik } from 'formik'
-import * as yup from 'yup'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { ControlContext } from 'src/providers/ControlContext'
-import { CommonContext } from 'src/providers/CommonContext'
-import { SystemRepository } from 'src/repositories/SystemRepository'
-import { getNewActivity, populateActivity } from 'src/Models/CurrencyTradingSettings/Activity'
-
-// ** Helpers
-import { getFormattedNumberMax, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
-
-// ** Resources
-import { ResourceIds } from 'src/resources/ResourceIds'
-
-// ** Windows
-import ActivityWindow from './Windows/ActivityWindow'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
-import { DataSets } from 'src/resources/DataSets'
+import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { ResourceIds } from 'src/resources/ResourceIds'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import ActivityForm from './forms/ActivityForm'
+import { useWindow } from 'src/windows'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const Activities = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { getLabels, getAccess } = useContext(ControlContext)
-  const { getAllKvsByDataset } = useContext(CommonContext)
+  const { platformLabels } = useContext(ControlContext)
 
-  //controls
-  const [labels, setLabels] = useState(null)
-  const [access, setAccess] = useState(null)
+  const { stack } = useWindow()
 
-  //stores
-  const [gridData, setGridData] = useState([])
-  const [industryStore, setIndustryStore] = useState([])
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50 } = options
 
-  //states
-  const [windowOpen, setWindowOpen] = useState(false)
-  const [editMode, setEditMode] = useState(false)
-  const [errorMessage, setErrorMessage] = useState(null)
+    const response = await getRequest({
+      extension: CurrencyTradingSettingsRepository.Activity.qry,
 
-  const _labels = {
-    reference: labels && labels.find(item => item.key === '1').value,
-    name: labels && labels.find(item => item.key === '2').value,
-    flName: labels && labels.find(item => item.key === '3').value,
-    industryId: labels && labels.find(item => item.key === '4').value,
-    activity: labels && labels.find(item => item.key === '5').value
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+    })
+
+    return { ...response, _startAt: _startAt }
   }
+
+  const {
+    query: { data },
+    labels: _labels,
+    paginationParameters,
+    refetch,
+    access
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: CurrencyTradingSettingsRepository.Activity.qry,
+    datasetId: ResourceIds.Activity
+  })
+
+  const invalidate = useInvalidate({
+    endpointId: CurrencyTradingSettingsRepository.Activity.qry
+  })
 
   const columns = [
     {
@@ -76,162 +65,58 @@ const Activities = () => {
     }
   ]
 
-  const activityValidation = useFormik({
-    enableReinitialize: false,
-    validateOnChange: false,
-    validationSchema: yup.object({
-      reference: yup.string().required('This field is required'),
-      name: yup.string().required('This field is required'),
-      industry: yup.string().required('This field is required')
-    }),
-    onSubmit: values => {
-      console.log(values)
-      postActivity(values)
-    }
-  })
-
-  const handleSubmit = () => {
-    activityValidation.handleSubmit()
+  const add = () => {
+    openForm()
   }
 
-  const getGridData = () => {
-    var parameters = '_filter='
-    getRequest({
-      extension: CurrencyTradingSettingsRepository.Activity.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setGridData(res)
-        console.log(res)
-        setEditMode(true)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+  const edit = obj => {
+    openForm(obj?.recordId)
   }
 
-  const postActivity = obj => {
-    const recordId = obj.recordId
-    postRequest({
-      extension: CurrencyTradingSettingsRepository.Activity.set,
-      record: JSON.stringify(obj)
-    })
-      .then(res => {
-        getGridData()
-        setWindowOpen(false)
-        if (!recordId) toast.success('Record Added Successfully')
-        else toast.success('Record Edited Successfully')
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const delActivity = obj => {
-    postRequest({
+  const del = async obj => {
+    await postRequest({
       extension: CurrencyTradingSettingsRepository.Activity.del,
       record: JSON.stringify(obj)
     })
-      .then(res => {
-        console.log({ res })
-        getGridData()
-        toast.success('Record Deleted Successfully')
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
-  const addActivity = () => {
-    activityValidation.setValues(getNewActivity)
-    fillIndustryStore()
-    setEditMode(false)
-    setWindowOpen(true)
-  }
-
-  const editActivity = obj => {
-    console.log(obj)
-    fillIndustryStore()
-    getActById(obj)
-  }
-
-  const getActById = obj => {
-    const _recordId = obj.recordId
-    const defaultParams = `_recordId=${_recordId}`
-    var parameters = defaultParams
-    getRequest({
-      extension: CurrencyTradingSettingsRepository.Activity.get,
-      parameters: parameters
-    })
-      .then(res => {
-        activityValidation.setValues(populateActivity(res.record))
-        setEditMode(true)
-        setWindowOpen(true)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  useEffect(() => {
-    if (!access) getAccess(ResourceIds.Activity, setAccess)
-    else {
-      if (access.record.maxAccess > 0) {
-        getGridData()
-        fillIndustryStore()
-        getLabels(ResourceIds.Activity, setLabels)
-      } else {
-        setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
-      }
-    }
-  }, [access])
-
-  const fillIndustryStore = () => {
-    getAllKvsByDataset({
-      _dataset: DataSets.INDUSTRY,
-      callback: setIndustryStore
+  function openForm(recordId) {
+    stack({
+      Component: ActivityForm,
+      props: {
+        labels: _labels,
+        recordId: recordId,
+        maxAccess: access
+      },
+      width: 500,
+      height: 360,
+      title: _labels.Activity
     })
   }
 
   return (
-    <>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%'
-        }}
-      >
-        <GridToolbar onAdd={addActivity} maxAccess={access} />
+    <VertLayout>
+      <Fixed>
+        <GridToolbar onAdd={add} maxAccess={access} />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
-          gridData={gridData}
+          gridData={data}
           rowId={['recordId']}
-          api={getGridData}
-          onEdit={editActivity}
-          onDelete={delActivity}
+          onEdit={edit}
+          onDelete={del}
           isLoading={false}
           pageSize={50}
-          paginationType='client'
+          refetch={refetch}
+          paginationParameters={paginationParameters}
+          paginationType='api'
           maxAccess={access}
         />
-      </Box>
-      {windowOpen && (
-        <ActivityWindow
-          onClose={() => setWindowOpen(false)}
-          width={600}
-          height={400}
-          onSave={handleSubmit}
-          activityValidation={activityValidation}
-          industryStore={industryStore}
-          _labels={_labels}
-          maxAccess={access}
-          editMode={editMode}
-          onInfo={() => setWindowInfo(true)}
-        />
-      )}
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+      </Grow>
+    </VertLayout>
   )
 }
 

@@ -1,59 +1,49 @@
-// ** React Importsport
-import { useEffect, useState, useContext } from 'react'
-
-// ** MUI Imports
-import { Grid, Box, Button, Checkbox, FormControlLabel } from '@mui/material'
-
-// ** Third Party Imports
-import { useFormik } from 'formik'
-import * as yup from 'yup'
+import { useState, useContext } from 'react'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { CommonContext } from 'src/providers/CommonContext'
-import { getNewCommissionType, populateCommissionType } from 'src/Models/CurrencyTradingSettings/CommissionType'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
+import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { DataSets } from 'src/resources/DataSets'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import CommissionTypesForm from './forms/CommissionTypesForm'
+import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
 
-// ** Windows
-import CommissionTypeWindow from './Windows/CommissionTypeWindow'
-
-// ** Helpers
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
-
-const CommissionType = () => {
+const CommissionTypes = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { getLabels, getAccess } = useContext(ControlContext)
-  const { getAllKvsByDataset } = useContext(CommonContext)
-  const [windowInfo, setWindowInfo] = useState(null)
+  const { stack } = useWindow()
+  const { platformLabels } = useContext(ControlContext)
 
-  //stores
-  const [gridData, setGridData] = useState(null)
-  const [typeStore, setTypeStore] = useState([])
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50 } = options
 
-  //states
-  const [windowOpen, setWindowOpen] = useState(false)
-  const [editMode, setEditMode] = useState(false)
-  const [errorMessage, setErrorMessage] = useState(null)
+    const response = await getRequest({
+      extension: CurrencyTradingSettingsRepository.CommissionType.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+    })
 
-  //control
-  const [labels, setLabels] = useState(null)
-  const [access, setAccess] = useState(null)
-
-  const _labels = {
-    reference: labels && labels.find(item => item.key === '1').value,
-    name: labels && labels.find(item => item.key === '2').value,
-    type: labels && labels.find(item => item.key === '3').value,
-    comissiontype: labels && labels.find(item => item.key === '4').value
+    return { ...response, _startAt: _startAt }
   }
+
+  const {
+    query: { data },
+    labels: _labels,
+    refetch,
+    paginationParameters,
+    access
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: CurrencyTradingSettingsRepository.CommissionType.page,
+    datasetId: ResourceIds.CommissionType
+  })
+
+  const invalidate = useInvalidate({
+    endpointId: CurrencyTradingSettingsRepository.CommissionType.page
+  })
 
   const columns = [
     {
@@ -66,7 +56,6 @@ const CommissionType = () => {
       headerName: _labels.name,
       flex: 1
     },
-    ,
     {
       field: 'typeName',
       headerName: _labels.type,
@@ -74,150 +63,59 @@ const CommissionType = () => {
     }
   ]
 
-  const commissiontypeValidation = useFormik({
-    enableReinitialize: false,
-    validateOnChange: true,
-    validationSchema: yup.object({
-      reference: yup.string().required('This field is required'),
-      name: yup.string().required('This field is required'),
-      type: yup.string().required('This field is required')
-    }),
-    onSubmit: values => {
-      postCommissionType(values)
-    }
-  })
-
-  const handleSubmit = () => {
-    commissiontypeValidation.handleSubmit()
+  const add = () => {
+    openForm()
   }
 
-  const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
-    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
-    var parameters = defaultParams
-
-    getRequest({
-      extension: CurrencyTradingSettingsRepository.CommissionType.page,
-      parameters: parameters
-    })
-      .then(res => {
-        setGridData(res)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+  const edit = obj => {
+    openForm(obj?.recordId)
   }
 
-  const fillTypeStore = () => {
-    getAllKvsByDataset({
-      _dataset: DataSets.CT_COMMISSION_TYPES,
-      callback: setTypeStore
-    })
-  }
-
-  const postCommissionType = obj => {
-    const recordId = obj.recordId
-    postRequest({
-      extension: CurrencyTradingSettingsRepository.CommissionType.set,
-      record: JSON.stringify(obj)
-    })
-      .then(res => {
-        getGridData({})
-        setWindowOpen(false)
-        if (!recordId) toast.success('Record Added Successfully')
-        else toast.success('Record Editted Successfully')
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const delCommissionType = obj => {
-    postRequest({
+  const del = async obj => {
+    await postRequest({
       extension: CurrencyTradingSettingsRepository.CommissionType.del,
       record: JSON.stringify(obj)
     })
-      .then(res => {
-        getGridData({})
-        toast.success('Record Deleted Successfully')
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
-  const addCommissionType = () => {
-    commissiontypeValidation.setValues(getNewCommissionType())
-    fillTypeStore()
-    setEditMode(false)
-    setWindowOpen(true)
-  }
-
-  const editCommissionType = obj => {
-    const _recordId = obj.recordId
-    const defaultParams = `_recordId=${_recordId}`
-    var parameters = defaultParams
-    getRequest({
-      extension: CurrencyTradingSettingsRepository.CommissionType.get,
-      parameters: parameters
+  function openForm(recordId) {
+    stack({
+      Component: CommissionTypesForm,
+      props: {
+        labels: _labels,
+        recordId: recordId,
+        maxAccess: access
+      },
+      width: 500,
+      height: 300,
+      title: _labels.CommissionTypes
     })
-      .then(res => {
-        commissiontypeValidation.setValues(populateCommissionType(res.record))
-        fillTypeStore()
-        setEditMode(true)
-        setWindowOpen(true)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
   }
-
-  useEffect(() => {
-    if (!access) getAccess(ResourceIds.CommissionType, setAccess)
-    else {
-      if (access.record.maxAccess > 0) {
-        getGridData({ _startAt: 0, _pageSize: 50 })
-        fillTypeStore()
-        getLabels(ResourceIds.CommissionType, setLabels)
-      } else {
-        setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
-      }
-    }
-  }, [access])
 
   return (
-    <>
-      <Box>
-        <GridToolbar onAdd={addCommissionType} maxAccess={access} />
+    <VertLayout>
+      <Fixed>
+        <GridToolbar onAdd={add} maxAccess={access} />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
-          gridData={gridData}
+          gridData={data}
           rowId={['recordId']}
-          api={getGridData}
-          onEdit={editCommissionType}
-          onDelete={delCommissionType}
+          onEdit={edit}
+          onDelete={del}
           isLoading={false}
+          refetch={refetch}
           pageSize={50}
+          paginationParameters={paginationParameters}
           maxAccess={access}
-          paginationType='client'
+          paginationType='api'
         />
-      </Box>
-      {windowOpen && (
-        <CommissionTypeWindow
-          onClose={() => setWindowOpen(false)}
-          width={600}
-          height={400}
-          onSave={handleSubmit}
-          editMode={editMode}
-          commissiontypeValidation={commissiontypeValidation}
-          typeStore={typeStore}
-          labels={_labels}
-          maxAccess={access}
-          onInfo={() => setWindowInfo(true)}
-        />
-      )}
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+      </Grow>
+    </VertLayout>
   )
 }
 
-export default CommissionType
+export default CommissionTypes

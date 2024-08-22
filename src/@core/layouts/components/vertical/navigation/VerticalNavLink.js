@@ -19,7 +19,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogContentText,
-  DialogActions,
+  DialogActions
 } from '@mui/material'
 
 // ** Configs Import
@@ -36,6 +36,7 @@ import { handleURLQueries } from 'src/@core/layouts/utils'
 // ** Context
 import { MenuContext } from 'src/providers/MenuContext'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
+import { ControlContext } from 'src/providers/ControlContext'
 
 // ** Styled Components
 const MenuNavLink = styled(ListItemButton)(({ theme }) => ({
@@ -78,10 +79,11 @@ const VerticalNavLink = ({
   // ** Hooks
   const router = useRouter()
   const { handleBookmark } = useContext(MenuContext)
+  const { platformLabels } = useContext(ControlContext)
 
   // ** States
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isBookmarked, setIsBookmarked] = useState(item.icon ? true : false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isBookmarked, setIsBookmarked] = useState(item.icon ? true : false)
 
   // ** Vars
   const { navCollapsed } = settings
@@ -96,22 +98,22 @@ const VerticalNavLink = ({
   }
 
   const openDialog = () => {
-    setIsDialogOpen(true);
-  };
+    setIsDialogOpen(true)
+  }
 
   const closeDialog = () => {
-    setIsDialogOpen(false);
-  };
+    setIsDialogOpen(false)
+  }
 
   const toggleBookmarked = () => {
     setIsBookmarked(!isBookmarked)
-    closeDialog();
-  };
+    closeDialog()
+  }
 
-  const handleRightClick = (e) => {
-    e.preventDefault();
-    openDialog();
-  };
+  const handleRightClick = e => {
+    e.preventDefault()
+    openDialog()
+  }
 
   return (
     <CanViewNavLink navLink={item}>
@@ -187,7 +189,7 @@ const VerticalNavLink = ({
               />
             ) : null}
           </MenuItemTextMetaWrapper>
-          {isBookmarked &&
+          {isBookmarked && (
             <ListItemIcon
               sx={{
                 color: 'text.primary',
@@ -204,21 +206,17 @@ const VerticalNavLink = ({
               {/* Favorite Icon */}
               <UserIcon icon='mdi:star' />
             </ListItemIcon>
-          }
+          )}
         </MenuNavLink>
       </ListItem>
       <ConfirmationDialog
-          openCondition={isDialogOpen}
-          closeCondition={closeDialog}
-          DialogText={
-            isBookmarked ? 'Remove from favorites ?' : 'Add to favorites ?'
-          }
-          okButtonAction={() =>
-            handleBookmark(item, isBookmarked, toggleBookmarked)
-          }
-          cancelButtonAction={closeDialog}
-        />
-    </CanViewNavLink >
+        openCondition={isDialogOpen}
+        closeCondition={closeDialog}
+        DialogText={isBookmarked ? platformLabels.RemoveFav : platformLabels.AddFav}
+        okButtonAction={() => handleBookmark(item, isBookmarked, toggleBookmarked)}
+        cancelButtonAction={closeDialog}
+      />
+    </CanViewNavLink>
   )
 }
 

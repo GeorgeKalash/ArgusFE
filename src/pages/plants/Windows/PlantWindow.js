@@ -1,74 +1,74 @@
 // ** Custom Imports
-import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
+import PlantForm from '../Forms/PlantForm'
+import { useContext, useState } from 'react'
+import { CustomTabs } from 'src/components/Shared/CustomTabs'
+import { RequestsContext } from 'src/providers/RequestsContext'
+import { SystemRepository } from 'src/repositories/SystemRepository'
+import toast from 'react-hot-toast'
+import AddressForm from 'src/components/Shared/AddressForm'
+import { ControlContext } from 'src/providers/ControlContext'
 
-// **Tabs
-import PlantTab from 'src/pages/plants/Tabs/PlantTab'
-import AddressTab from 'src/components/Shared/AddressTab'
+const PlantWindow = ({ labels, editMode, maxAccess, recordId, height }) => {
+  const [store, setStore] = useState({
+    recordId: recordId || null,
+    plant: null,
+    address: null
+  })
 
-const PlantWindow = ({
-  onClose,
-  onSave,
-  plantValidation,
-  costCenterStore,
-  plantGroupStore,
-  segmentStore,
-  width,
-  height,
-  _labels,
-  editMode,
-  maxAccess,
+  const [activeTab, setActiveTab] = useState(0)
+  const { platformLabels } = useContext(ControlContext)
+  const tabs = [{ label: labels.plant }, { label: labels.address, disabled: !store.recordId }]
+  const { postRequest } = useContext(RequestsContext)
 
-  tabs,
-  activeTab,
-  setActiveTab,
-  countryStore,
-  stateStore,
-  fillStateStore,
-  cityStore,
-  setCityStore,
-  lookupCity,
-  cityDistrictStore,
-  setCityDistrictStore,
-  lookupCityDistrict,
-  fillCountryStore,
-  addressValidation
-}) => {
+  async function onSubmit(address) {
+    const addressId = address.addressId
+    setStore(prevStore => ({
+      ...prevStore,
+      address: { ...prevStore.address, recordId: addressId }
+    }))
+    if (!store.plant.addressId) {
+      const res = { ...store.plant, addressId: addressId }
+      if (res) {
+        const data = { ...res, recordId: store?.recordId }
+        await postRequest({
+          extension: SystemRepository.Plant.set,
+          record: JSON.stringify(data)
+        })
+          .then(() => {
+            toast.success(platformLabels.Added)
+          })
+          .catch(error => {})
+      }
+    } else {
+      toast.success(platformLabels.Edited)
+    }
+  }
+  function setAddress(res) {
+    setStore(prevStore => ({
+      ...prevStore,
+      address: res
+    }))
+  }
+
   return (
-    <Window id='PlantWindow' Title={_labels.plant} onClose={onClose} width={width} height={height} onSave={onSave}
-    tabs={tabs}
-      activeTab={activeTab}
-      setActiveTab={setActiveTab}>
-      <CustomTabPanel index={0} value={activeTab}>
-        <PlantTab
-          plantValidation={plantValidation}
-          costCenterStore={costCenterStore}
-          plantGroupStore={plantGroupStore}
-          segmentStore={segmentStore}
-          _labels={_labels}
+    <>
+      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
+      <CustomTabPanel height={height} index={0} value={activeTab}>
+        <PlantForm _labels={labels} maxAccess={maxAccess} store={store} setStore={setStore} editMode={store.recordId} />
+      </CustomTabPanel>
+      <CustomTabPanel height={height} index={1} value={activeTab}>
+        <AddressForm
+          _labels={labels}
           maxAccess={maxAccess}
           editMode={editMode}
+          recordId={store?.plant?.addressId}
+          address={store.address}
+          setAddress={setAddress}
+          onSubmit={onSubmit}
         />
       </CustomTabPanel>
-      <CustomTabPanel index={1} value={activeTab}>
-        <AddressTab
-          countryStore={countryStore}
-          stateStore={stateStore}
-          labels={_labels}
-          lookupCity={lookupCity}
-          fillStateStore={fillStateStore}
-          cityStore={cityStore}
-          setCityStore={setCityStore}
-          fillCountryStore={fillCountryStore}
-          addressValidation={addressValidation}
-          maxAccess={maxAccess}
-          lookupCityDistrict={lookupCityDistrict}
-          cityDistrictStore={cityDistrictStore}
-          setCityDistrictStore={setCityDistrictStore}
-          editMode={editMode}
-        />
-      </CustomTabPanel>
-    </Window>
+    </>
   )
 }
 

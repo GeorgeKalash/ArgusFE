@@ -1,92 +1,72 @@
-// ** Custom Imports
-import Window from 'src/components/Shared/Window'
-import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import Table from 'src/components/Shared/Table'
-import Checkbox from '@mui/material/Checkbox'
-import { useState } from 'react'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import WindowToolbar from 'src/components/Shared/WindowToolbar'
+import { useEffect, useState } from 'react'
 
-const ProductsWindow = ({
-    onClose,
-    width,
-    height,
-    onSave,
-    gridData,
-    setSelectedRow,
-    selectedRow,
-    maxAccess
-}) => {
+const ProductsWindow = ({ labels, maxAccess, onProductSubmit, products, editMode, window }) => {
+  const [gridData, setGridData] = useState([])
 
-    const handleCheckboxChange = (id) => {
-      setSelectedRow(id);
-
-      // Additional logic if needed
-    };
-
-    const columns = [
-        {
-            field: 'checkbox',
-            headerName: 'Select',
-            flex: 1,
-            renderCell: (params) => (
-              <Checkbox
-                checked={params.row.productId === selectedRow}
-                onChange={() => handleCheckboxChange(params.row.productId)}
-                color="primary"
-                inputProps={{ 'aria-label': 'secondary checkbox' }}
-              />
-            ),
-        },
-        {
-          field: 'productRef',
-          headerName: 'productRef',
-          flex: 1
-        },
-        {
-          field: 'productName',
-          headerName: 'productName',
-          flex: 1
-        },
-        {
-          field: 'dispersalRef',
-          headerName: 'dispersalRef',
-          flex: 1
-        },
-        {
-          field: 'fees',
-          headerName: 'fees',
-          flex: 1
-        },
-        {
-          field: 'baseAmount',
-          headerName: 'baseAmount',
-          flex: 1
-        }
-      ]
-
-return (
-
-        <Window
-        id='ProductsWindow'
-        Title='Products'
-        onClose={onClose}
-        width={width}
-        height={height}
-        onSave={onSave}
-        >
-            <CustomTabPanel>
-            <Table
-                width={width}
-                height={height}
-                columns={columns}
-                gridData={gridData}
-                rowId={['productId']}
-                isLoading={false}
-                pagination={false}
-                maxAccess={maxAccess}
-                />
-            </CustomTabPanel>
-        </Window> 
-        )
+  const columns = [
+    {
+      field: 'productName',
+      headerName: labels.ProductName,
+      flex: 1
+    },
+    {
+      field: 'corName',
+      headerName: labels.Correspondant,
+      flex: 1
+    },
+    {
+      field: 'fees',
+      headerName: labels.Fees,
+      flex: 1
+    },
+    {
+      field: 'originAmount',
+      headerName: labels.originAmount,
+      flex: 1
+    },
+    {
+      field: 'baseAmount',
+      headerName: labels.BaseAmount,
+      flex: 1
     }
-    
-    export default ProductsWindow
+  ]
+  useEffect(() => {
+    setGridData({ list: products })
+  }, [products])
+
+  return (
+    <VertLayout>
+      <Grow>
+        <Table
+          columns={columns}
+          gridData={gridData}
+          rowId={['productId']}
+          rowSelection='single'
+          isLoading={false}
+          maxAccess={maxAccess}
+          pagination={false}
+          showCheckboxColumn={true}
+          ChangeCheckedRow={setGridData}
+        />
+      </Grow>
+      <Fixed>
+        <WindowToolbar
+          onSave={() => {
+            onProductSubmit(gridData)
+            window.close()
+          }}
+          isSaved={true}
+          smallBox={true}
+          disabledSubmit={editMode}
+        />
+      </Fixed>
+    </VertLayout>
+  )
+}
+
+export default ProductsWindow

@@ -9,12 +9,13 @@ export const CurrencyTradingSettingsRepository = {
     del: service + 'delCOM'
   },
   RelationType: {
+    page: service + 'pageRT',
     qry: service + 'qryRT',
     get: service + 'getRT',
     set: service + 'setRT',
     del: service + 'delRT'
   },
-  UpdateExchangeRates: {
+  ExchangeRates: {
     qry: service + 'qryEX',
     get: service + 'getEX',
     set2: service + 'set2EX'
@@ -28,7 +29,7 @@ export const CurrencyTradingSettingsRepository = {
   },
   Defaults: {
     qry: service + 'qryDE',
-    get : service + 'getDE',
+    get: service + 'getDE',
     set2: service + 'set2DE'
   },
   IdFields: {
@@ -46,7 +47,7 @@ export const CurrencyTradingSettingsRepository = {
     get: service + 'getRSK',
     set: service + 'setRSK',
     del: service + 'delRSK',
-    page: service + 'pageRSK',
+    page: service + 'pageRSK'
   },
   PurposeExchange: {
     qry: service + 'qryPEX',
@@ -57,6 +58,7 @@ export const CurrencyTradingSettingsRepository = {
   },
   ExchangeMap: {
     qry: service + 'qryEXM',
+    get2: service + 'getEXM2',
     get: service + 'getEXM',
     set2: service + 'set2EXM'
   }

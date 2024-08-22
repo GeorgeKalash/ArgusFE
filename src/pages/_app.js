@@ -34,7 +34,7 @@ import GuestGuard from 'src/@core/components/auth/GuestGuard'
 import Spinner from 'src/@core/components/spinner'
 
 // ** Contexts
-import { AuthProvider } from 'src/providers/AuthContext'
+import { AuthContext, AuthProvider } from 'src/providers/AuthContext'
 import { RequestsProvider } from 'src/providers/RequestsContext'
 import { ControlProvider } from 'src/providers/ControlContext'
 import { CommonProvider } from 'src/providers/CommonContext'
@@ -62,11 +62,14 @@ import 'src/iconify-bundle/icons-bundle-react'
 // ** PrimeReact Styles
 import 'primereact/resources/primereact.min.css'
 import 'primereact/resources/themes/saga-blue/theme.css'
+import 'styles/globals.css'
+import 'styles/formgrid.css'
 
 // ** Global css styles
-import '../../styles/globals.css'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { WindowProvider } from 'src/windows'
+import { ErrorProvider } from 'src/error'
+import { useContext } from 'react'
 
 const clientSideEmotionCache = createEmotionCache()
 
@@ -84,7 +87,9 @@ if (themeConfig.routingLoader) {
 }
 
 const Guard = ({ children, authGuard, guestGuard }) => {
-  if (guestGuard) {
+  const { loading } = useContext(AuthContext)
+
+  if (loading || guestGuard) {
     return <GuestGuard fallback={<Spinner />}>{children}</GuestGuard>
   } else if (!guestGuard && !authGuard) {
     return <>{children}</>
@@ -93,13 +98,7 @@ const Guard = ({ children, authGuard, guestGuard }) => {
   }
 }
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: Infinity
-    }
-  }
-})
+const queryClient = new QueryClient({})
 
 // ** Configure JSS & ClassName
 const App = props => {
@@ -126,52 +125,74 @@ const App = props => {
     <Provider store={store}>
       <CacheProvider value={emotionCache}>
         <Head>
-          <title>{`${themeConfig.templateName} - Material Design React Admin Template`}</title>
-          <meta
-            name='description'
-            content={`${themeConfig.templateName} – Material Design React Admin Dashboard Template – is the most developer friendly & highly customizable Admin Dashboard Template based on MUI v5.`}
-          />
-          <meta name='keywords' content='Material Design, MUI, Admin Template, React Admin Template' />
+          <title>{`Argus ERP`}</title>
+          <meta name='description' content={`Argus ERP`} />
+          <meta name='keywords' content='Argus, ERP, ArgusERP' />
           <meta name='viewport' content='initial-scale=1, width=device-width' />
         </Head>
-
-        <AuthProvider>          
-
-          <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <GuestGuard fallback={<Spinner />}>
             <RequestsProvider>
-              <ControlProvider>
-                <CommonProvider>
-                  <SettingsProvider {...(setConfig ? { pageSettings: setConfig() } : {})}>
-                    <SettingsConsumer>
-                      {({ settings }) => {
-                        return (
-                          <ThemeComponent settings={settings}>
-                            <Guard authGuard={authGuard} guestGuard={guestGuard}>
-                              <AclGuard aclAbilities={aclAbilities} guestGuard={guestGuard} authGuard={authGuard}>
-                                <PrimeReactProvider>
-                                  {getLayout(
-                                    <WindowProvider>
-                                      <Component {...pageProps} />
-                                    </WindowProvider>
-                                  )}
-                                </PrimeReactProvider>
-                              </AclGuard>
-                            </Guard>
-                            <ReactHotToast>
-                              <Toaster
-                                position={settings.toastPosition}
-                                toastOptions={{ className: 'react-hot-toast' }}
-                              />
-                            </ReactHotToast>
-                          </ThemeComponent>
-                        )
-                      }}
-                    </SettingsConsumer>
-                  </SettingsProvider>
-                </CommonProvider>
-              </ControlProvider>
+              <ErrorProvider>
+                <WindowProvider>
+                  <QueryClientProvider client={queryClient}>
+                    <RequestsProvider>
+                      <ControlProvider>
+                        <CommonProvider>
+                          <SettingsProvider {...(setConfig ? { pageSettings: setConfig() } : {})}>
+                            <SettingsConsumer>
+                              {({ settings }) => {
+                                return (
+                                  <ThemeComponent settings={settings}>
+                                    <Guard authGuard={authGuard} guestGuard={guestGuard}>
+                                      <AclGuard
+                                        aclAbilities={aclAbilities}
+                                        guestGuard={guestGuard}
+                                        authGuard={authGuard}
+                                      >
+                                        <PrimeReactProvider>
+                                          {getLayout(
+                                            <ErrorProvider
+                                              key={typeof window !== 'undefined' ? window.location.pathname : ''}
+                                            >
+                                              <RequestsProvider
+                                                showLoading
+                                                key={typeof window !== 'undefined' ? window.location.pathname : ''}
+                                              >
+                                                <CommonProvider
+                                                  key={typeof window !== 'undefined' ? window.location.pathname : ''}
+                                                >
+                                                  <WindowProvider
+                                                    key={typeof window !== 'undefined' ? window.location.pathname : ''}
+                                                  >
+                                                    <Component {...pageProps} />
+                                                  </WindowProvider>
+                                                </CommonProvider>
+                                              </RequestsProvider>
+                                            </ErrorProvider>
+                                          )}
+                                        </PrimeReactProvider>
+                                      </AclGuard>
+                                    </Guard>
+                                    <ReactHotToast>
+                                      <Toaster
+                                        position={settings.toastPosition}
+                                        toastOptions={{ className: 'react-hot-toast' }}
+                                      />
+                                    </ReactHotToast>
+                                  </ThemeComponent>
+                                )
+                              }}
+                            </SettingsConsumer>
+                          </SettingsProvider>
+                        </CommonProvider>
+                      </ControlProvider>
+                    </RequestsProvider>
+                  </QueryClientProvider>
+                </WindowProvider>
+              </ErrorProvider>
             </RequestsProvider>
-          </QueryClientProvider>
+          </GuestGuard>
         </AuthProvider>
       </CacheProvider>
     </Provider>

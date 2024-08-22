@@ -1,58 +1,65 @@
-// ** React Importsport
-import { useEffect, useState, useContext } from 'react'
-
-// ** MUI Imports
-import { Grid, Box, Button, FormControlLabel } from '@mui/material'
-
-// ** Third Party Imports
-import { useFormik } from 'formik'
-import * as yup from 'yup'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { getNewCity, populateCity } from 'src/Models/System/City'
-import { defaultParams } from 'src/lib/defaults'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
-import { ContactSupportOutlined } from '@mui/icons-material'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { KVSRepository } from 'src/repositories/KVSRepository'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import CityForm from 'src/pages/cities/Forms/CityForm'
+import { useWindow } from 'src/windows'
+import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
-
-// ** Windows
-import CityWindow from './Windows/CityWindow'
-
 
 const City = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { getLabels, getAccess } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
 
-  //stores
-  const [gridData, setGridData] = useState([])
-  const [stateStore, setStateStore] = useState(null)
-  const [countryStore, setCountryStore] = useState([])
+  const { stack } = useWindow()
 
-  //states
-  const [windowOpen, setWindowOpen] = useState(false)
-  const [editMode, setEditMode] = useState(false)
-  const [errorMessage, setErrorMessage] = useState(null)
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50 } = options
 
-  //control
-  const [labels, setLabels] = useState(null)
-  const [access, setAccess] = useState(null)
+    const response = await getRequest({
+      extension: SystemRepository.City.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_countryId=0&_stateId=0`
+    })
 
-  const _labels = {
-    reference: labels && labels.find(item => item.key === "1").value,
-    name: labels && labels.find(item => item.key === "2").value,
-    country: labels && labels.find(item => item.key === "3").value,
-    state: labels && labels.find(item => item.key === "4").value,
-    cities: labels && labels.find(item => item.key === "5").value
+    return { ...response, _startAt: _startAt }
   }
+
+  const {
+    query: { data },
+    labels: _labels,
+    access,
+    search,
+    clear,
+    refetch,
+    paginationParameters
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: SystemRepository.City.page,
+    datasetId: ResourceIds.Cities,
+    search: {
+      endpointId: SystemRepository.City.snapshot,
+      searchFn: fetchWithSearch
+    }
+  })
+
+  async function fetchWithSearch({ qry }) {
+    const response = await getRequest({
+      extension: SystemRepository.City.snapshot,
+      parameters: `_filter=${qry}&_stateId=0&_countryId=0`
+    })
+
+    return response
+  }
+
+  const invalidate = useInvalidate({
+    endpointId: SystemRepository.City.page
+  })
 
   const columns = [
     {
@@ -65,7 +72,11 @@ const City = () => {
       headerName: _labels.name,
       flex: 1
     },
-    ,
+    {
+      field: 'flName',
+      headerName: _labels.flName,
+      flex: 1
+    },
     {
       field: 'countryName',
       headerName: _labels.country,
@@ -78,173 +89,66 @@ const City = () => {
     }
   ]
 
-  const cityValidation = useFormik({
-    enableReinitialize: false,
-    validateOnChange: true,
-    validationSchema: yup.object({
-      reference: yup.string().required('This field is required'),
-      name: yup.string().required('This field is required'),
-      countryId: yup.string().required('This field is required')
-
-      // stateId: yup.string().nullable()
-    }),
-    onSubmit: values => {
-      postCity(values)
-    }
-  })
-
-  const handleSubmit = () => {
-    cityValidation.handleSubmit()
+  const del = async obj => {
+    try {
+      await postRequest({
+        extension: SystemRepository.City.del,
+        record: JSON.stringify(obj)
+      })
+      invalidate()
+      toast.success(platformLabels.Deleted)
+    } catch (error) {}
   }
 
-  const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
-    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
-    var parameters = defaultParams + '&_countryId=0' + '&_stateId=0'
-    getRequest({
-      extension: SystemRepository.City.page,
-      parameters: parameters
+  const edit = obj => {
+    openForm(obj?.recordId)
+  }
+
+  const add = () => {
+    openForm()
+  }
+
+  function openForm(recordId) {
+    stack({
+      Component: CityForm,
+      props: {
+        labels: _labels,
+        recordId: recordId,
+        maxAccess: access
+      },
+      width: 500,
+      height: 460,
+      title: _labels.cities
     })
-      .then(res => {
-        setGridData(res)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
   }
-
-  const fillCountryStore = () => {
-    var parameters = `_filter=`
-    getRequest({
-      extension: SystemRepository.Country.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setCountryStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const fillStateStore = countryId => {
-    var parameters = `_countryId=${countryId}`
-    getRequest({
-      extension: SystemRepository.State.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setStateStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const postCity = obj => {
-    const recordId = obj.recordId
-    postRequest({
-      extension: SystemRepository.City.set,
-      record: JSON.stringify(obj)
-    })
-      .then(res => {
-        getGridData({})
-        setWindowOpen(false)
-        if (!recordId) toast.success('Record Added Successfully')
-        else toast.success('Record Editted Successfully')
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const delCity = obj => {
-    postRequest({
-      extension: SystemRepository.City.del,
-      record: JSON.stringify(obj)
-    })
-      .then(res => {
-        getGridData({})
-        toast.success('Record Deleted Successfully')
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const addCity = () => {
-    cityValidation.setValues(getNewCity())
-    fillCountryStore()
-    setStateStore([])
-    setEditMode(false)
-    setWindowOpen(true)
-  }
-
-  const editCity = obj => {
-    const _recordId = obj.recordId
-    const defaultParams = `_recordId=${_recordId}`
-    var parameters = defaultParams
-    getRequest({
-      extension: SystemRepository.City.get,
-      parameters: parameters
-    })
-      .then(res => {
-        setStateStore(null)
-        cityValidation.setValues(populateCity(res.record))
-        fillCountryStore()
-        fillStateStore(res.record.countryId)
-        setEditMode(true)
-        setWindowOpen(true)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-  useEffect(() => {
-    if (!access) getAccess(ResourceIds.Cities, setAccess)
-    else {
-      if (access.record.maxAccess > 0) {
-        getGridData({ _startAt: 0, _pageSize: 50 })
-        fillCountryStore()
-        getLabels(ResourceIds.Cities, setLabels)
-      } else {
-        setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
-      }
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [access])
 
   return (
-    <>
-      <Box>
-        <GridToolbar onAdd={addCity} maxAccess={access} />
+    <VertLayout>
+      <Fixed>
+        <GridToolbar
+          onAdd={add}
+          maxAccess={access}
+          onSearch={search}
+          onSearchClear={clear}
+          labels={_labels}
+          inputSearch={true}
+          refetch={refetch}
+        />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
-          gridData={gridData}
+          gridData={data}
           rowId={['recordId']}
-          api={getGridData}
-          onEdit={editCity}
-          onDelete={delCity}
+          onEdit={edit}
+          onDelete={del}
           maxAccess={access}
-          isLoading={false}
+          pageSize={50}
+          paginationParameters={paginationParameters}
+          paginationType='api'
         />
-      </Box>
-      {windowOpen && (
-        <CityWindow
-          onClose={() => setWindowOpen(false)}
-          width={600}
-          height={400}
-          cityValidation={cityValidation}
-          onSave={handleSubmit}
-          labels={_labels}
-          editMode={editMode}
-          stateStore={stateStore}
-          maxAccess={access}
-          countryStore={countryStore}
-          fillStateStore={fillStateStore}
-        />
-      )}
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+      </Grow>
+    </VertLayout>
   )
 }
 

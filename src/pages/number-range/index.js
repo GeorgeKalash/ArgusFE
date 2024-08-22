@@ -1,66 +1,64 @@
-import React, { useContext, useEffect } from 'react'
-import { Box, Grid } from '@mui/material'
-import GridToolbar from 'src/components/Shared/GridToolbar'
-import Table from 'src/components/Shared/Table'
-import { useState } from 'react'
-import { SystemRepository } from 'src/repositories/SystemRepository'
-import { ControlContext } from 'src/providers/ControlContext'
-import { RequestsContext } from 'src/providers/RequestsContext'
-import NumberRangeWindow from './Windows/NumberRangeWindow'
-import { useFormik } from 'formik'
-import { getNewNumberRange, populateNumberRange } from 'src/Models/System/NumberRange'
-import * as yup from 'yup'
+import { useState, useContext } from 'react'
 import toast from 'react-hot-toast'
-
-// ** Resources
+import Table from 'src/components/Shared/Table'
+import GridToolbar from 'src/components/Shared/GridToolbar'
+import { RequestsContext } from 'src/providers/RequestsContext'
+import { SystemRepository } from 'src/repositories/SystemRepository'
+import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { formatDateToApi } from 'src/lib/date-helper'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import NumberRangeForm from './forms/NumberRangeForm'
+import { useWindow } from 'src/windows'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const NumberRange = () => {
-  const { getLabels, getAccess } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
-  //control
-  const [labels, setLabels] = useState(null)
-  const [access, setAccess] = useState(null)
-  const [dateRequired, setDateRequired] = useState(null)
+  const { stack } = useWindow()
 
-  //stores
-  const [gridData, setGridData] = useState([])
-  const [typeStore, setTypeStore] = useState([])
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50 } = options
 
-  //states
-  const [activeTab, setActiveTab] = useState(0)
-  const [windowOpen, setWindowOpen] = useState(false)
-  const [errorMessage, setErrorMessage] = useState(null)
+    const response = await getRequest({
+      extension: SystemRepository.NumberRange.qry,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
+    })
 
-  useEffect(() => {
-    if (!access) getAccess(ResourceIds.NumberRange, setAccess)
-    else {
-      if (access.record.maxAccess > 0) {
-        getGridData({ _startAt: 0, _pageSize: 30 })
-
-        // fillSysFunctionsStore()
-        // fillActiveStatusStore()
-        getLabels(ResourceIds.NumberRange, setLabels)
-      } else {
-        setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
-      }
-    }
-  }, [access])
-
-  const _labels = {
-    reference: labels && labels.find(item => item.key === "1").value,
-    description: labels && labels.find(item => item.key === "2").value,
-    min: labels && labels.find(item => item.key === "3").value,
-    max: labels && labels.find(item => item.key === "4").value,
-    current: labels && labels.find(item => item.key === "5").value,
-    external: labels && labels.find(item => item.key === "6").value,
-    dateRange: labels && labels.find(item => item.key === "7").value,
-    startDate: labels && labels.find(item => item.key === "8").value,
-    endDate: labels && labels.find(item => item.key === "9").value,
-    title: labels && labels.find(item => item.key === "10").value
+    return { ...response, _startAt: _startAt }
   }
+
+  const {
+    query: { data },
+    labels: _labels,
+    paginationParameters,
+    refetch,
+    access,
+    search,
+    clear
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: SystemRepository.NumberRange.qry,
+    datasetId: ResourceIds.NumberRange,
+    search: {
+      endpointId: SystemRepository.NumberRange.snapshot,
+      searchFn: fetchWithSearch
+    }
+  })
+  async function fetchWithSearch({ qry }) {
+    const response = await getRequest({
+      extension: SystemRepository.NumberRange.snapshot,
+      parameters: `_filter=${qry}`
+    })
+
+    return response
+  }
+
+  const invalidate = useInvalidate({
+    endpointId: SystemRepository.NumberRange.qry
+  })
 
   const columns = [
     {
@@ -95,133 +93,65 @@ const NumberRange = () => {
     }
   ]
 
-  const addNumberRange = () => {
-    NumberRangeValidation.setValues(getNewNumberRange())
-    setWindowOpen(true)
+  const add = () => {
+    openForm()
   }
 
-  const delNumberRange = obj => {
-    postRequest({
+  const edit = obj => {
+    openForm(obj?.recordId)
+  }
+
+  function openForm(recordId) {
+    stack({
+      Component: NumberRangeForm,
+      props: {
+        labels: _labels,
+        recordId: recordId,
+        maxAccess: access
+      },
+      width: 700,
+      height: 620,
+      title: _labels.numberRange
+    })
+  }
+
+  const del = async obj => {
+    await postRequest({
       extension: SystemRepository.NumberRange.del,
       record: JSON.stringify(obj)
     })
-      .then(res => {
-        getGridData({})
-        toast.success('Record Deleted Successfully')
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const editNumberRange = obj => {
-    NumberRangeValidation.setValues(populateNumberRange(obj))
-
-    setWindowOpen(true)
-  }
-
-  const getGridData = ({ _startAt = 0, _pageSize = 30 }) => {
-    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
-    var parameters = defaultParams
-
-    getRequest({
-      extension: SystemRepository.NumberRange.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setGridData({ ...res, _startAt })
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const NumberRangeValidation = useFormik({
-    enableReinitialize: true,
-    validateOnChange: true,
-    validationSchema:
-      windowOpen &&
-      yup.object({
-        reference: yup.string().required('This field is required'),
-        min: yup.string().required('This field is required'),
-        max: yup.string().required('This field is required'),
-        current: yup.string().required('This field is required'),
-        description: yup.string().required('This field is required'),
-        startDate: dateRequired && yup.date().required('This field is required'),
-        endDate: dateRequired && yup.date().required('This field is required')
-      }),
-    onSubmit: values => {
-      // IN CASE FORMIK DIDN'T CONVERT A DATE FROM DATE OBJ TO DATE STRING (FORMAT SENT TO API)
-      // USE THE COMMENTED OUT CODE, THIS WILL MANUALLY CONVERT THE DATE USING formatDateToApi
-      // AND SEND apiValues TO API
-      // var apiValues = values
-
-      // if (apiValues.startDate) apiValues.startDate = formatDateToApi(apiValues.startDate)
-      // if (apiValues.endDate) apiValues.endDate = formatDateToApi(apiValues.endDate)
-
-      // console.log({ apiValues })
-
-      postNumberRange(values)
-    }
-  })
-
-  const postNumberRange = obj => {
-    const recordId = obj.recordId
-    postRequest({
-      extension: SystemRepository.NumberRange.set,
-      record: JSON.stringify(obj)
-    })
-      .then(res => {
-        getGridData({})
-        setWindowOpen(false)
-        if (!recordId) toast.success('Record Added Successfully')
-        else toast.success('Record Editted Successfully')
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const handleSubmit = () => {
-    NumberRangeValidation.handleSubmit()
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   return (
-    <>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%'
-        }}
-      >
-        <GridToolbar onAdd={addNumberRange} maxAccess={access} />
-
+    <VertLayout>
+      <Fixed>
+        <GridToolbar
+          onAdd={add}
+          maxAccess={access}
+          onSearch={search}
+          onSearchClear={clear}
+          labels={_labels}
+          inputSearch={true}
+        />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
-          gridData={gridData}
+          gridData={data}
           rowId={['recordId']}
-          api={getGridData}
+          onEdit={edit}
+          onDelete={del}
           isLoading={false}
+          pageSize={50}
+          refetch={refetch}
+          paginationParameters={paginationParameters}
+          paginationType='api'
           maxAccess={access}
-          onEdit={editNumberRange}
-          onDelete={delNumberRange}
         />
-      </Box>
-
-      {windowOpen && (
-        <NumberRangeWindow
-          onClose={() => setWindowOpen(false)}
-          width={600}
-          height={'65vh'}
-          onSave={handleSubmit}
-          NumberRangeValidation={NumberRangeValidation}
-          labels={_labels}
-          maxAccess={access}
-          setRequired={setDateRequired}
-        />
-      )}
-    </>
+      </Grow>
+    </VertLayout>
   )
 }
 

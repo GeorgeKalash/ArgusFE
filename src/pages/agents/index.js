@@ -1,48 +1,40 @@
-// ** React Importsport
-import { useState, useContext } from 'react'
-
-// ** MUI Imports
-import { Box } from '@mui/material'
-
-// ** Third Party Imports
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
-
-// ** Windows
-import AgentWindow from './Windows/AgentWindow'
-
-// ** Helpers
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { useWindow } from 'src/windows'
+import AgentForm from './Forms/AgentForm'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const Agent = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const [selectedRecordId, setSelectedRecordId] = useState(null)
+  const { platformLabels } = useContext(ControlContext)
 
-  //states
-  const [windowOpen, setWindowOpen] = useState(false)
-  const [errorMessage, setErrorMessage] = useState(null)
+  const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    return await getRequest({
+    const response = await getRequest({
       extension: RemittanceSettingsRepository.CorrespondentAgents.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
+
+    return { ...response, _startAt: _startAt }
   }
 
   const {
     query: { data },
     labels: _labels,
+    paginationParameters,
+    refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -60,7 +52,7 @@ const Agent = () => {
       headerName: _labels.name,
       flex: 1
     },
-    
+
     {
       field: 'countryRef',
       headerName: _labels.countryRef,
@@ -74,12 +66,11 @@ const Agent = () => {
   ]
 
   const add = () => {
-    setWindowOpen(true)
+    openForm()
   }
 
   const edit = obj => {
-    setSelectedRecordId(obj.recordId)
-    setWindowOpen(true)
+    openForm(obj?.recordId)
   }
 
   const del = async obj => {
@@ -88,39 +79,44 @@ const Agent = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
+  }
+
+  function openForm(recordId) {
+    stack({
+      Component: AgentForm,
+      props: {
+        labels: _labels,
+        recordId: recordId,
+        maxAccess: access
+      },
+      width: 500,
+      height: 360,
+      title: _labels.agents
+    })
   }
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar onAdd={add} maxAccess={access} />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
           rowId={['recordId']}
           onEdit={edit}
+          refetch={refetch}
           onDelete={del}
           isLoading={false}
           pageSize={50}
-          paginationType='client'
+          paginationParameters={paginationParameters}
+          paginationType='api'
           maxAccess={access}
         />
-      </Box>
-      {windowOpen && (
-        <AgentWindow
-        onClose={() => {
-          setWindowOpen(false)
-          setSelectedRecordId(null)
-        }}
-        labels={_labels}
-        maxAccess={access}
-        recordId={selectedRecordId}
-        setSelectedRecordId={setSelectedRecordId}
-        />
-      )}
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+      </Grow>
+    </VertLayout>
   )
 }
 

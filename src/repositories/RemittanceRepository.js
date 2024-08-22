@@ -13,7 +13,8 @@ export const RemittanceSettingsRepository = {
     page: service + 'pagePRO',
     get: service + 'getPRO',
     set: service + 'setPRO',
-    del: service + 'delPRO'
+    del: service + 'delPRO',
+    snapshot: service + 'snapshotPRO'
   },
   ProductCountries: {
     qry: service + 'qryPCO',
@@ -90,7 +91,7 @@ export const RemittanceSettingsRepository = {
     qry: service + 'qryEXB',
     set2: service + 'set2EXB'
   },
-  UpdateExchangeRates: {
+  ExchangeRates: {
     get: service + 'getEXB',
     qry: service + 'qryEXG2',
     set2: service + 'set2EXB'
@@ -106,17 +107,15 @@ export const RemittanceSettingsRepository = {
     set: service + 'setPFN',
     del: service + 'delPFN'
   },
-  ClientIndividual :{
+  ClientIndividual: {
     qry: service + 'qryCLI'
-
   },
-  SalaryRange :{
+  SalaryRange: {
     qry: service + 'qrySRA',
     page: service + 'pageSRA',
     get: service + 'getSRA',
     set: service + 'setSRA',
     del: service + 'delSRA'
-
   },
   SourceOfIncome: {
     qry: service + 'qrySI',
@@ -124,7 +123,35 @@ export const RemittanceSettingsRepository = {
     get: service + 'getSI',
     set: service + 'setSI',
     del: service + 'delSI'
+  },
+  CorrespondentControl: {
+    qry: service + 'qryCCL',
+    set: service + 'set2CCL'
+  },
+  InterfaceMaps: {
+    qry: service + 'qryIFM',
+    get: service + 'getIFM',
+    set2: service + 'set2IFM'
+  },
+  SourceOfIncomeType: {
+    qry: service + 'qrySIT',
+    page: service + 'pageSIT',
+    get: service + 'getSIT',
+    set: service + 'setSIT',
+    del: service + 'delSIT'
+  },
+  ProfessionGroups: {
+    qry: service + 'qryPFG',
+    page: service + 'pagePFG',
+    get: service + 'getPFG',
+    set: service + 'setPFG',
+    del: service + 'delPFG'
+  },
+  CorrespondentGroup: {
+    qry: service + 'qryCGP',
+    page: service + 'pageCGP',
+    get: service + 'getCGP',
+    set: service + 'setCGP',
+    del: service + 'delCGP'
   }
-
-
 }

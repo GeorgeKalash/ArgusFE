@@ -196,7 +196,7 @@ const columns = [
 const AnalyticsTable = () => {
   return (
     <Card>
-      <DataGrid autoHeight hideFooter rows={rows} columns={columns} disableRowSelectionOnClick pagination={undefined} />
+      <DataGrid autoHeight hideFooter rows={rows} columns={columns}  disableRowSelectionOnClick pagination={undefined} />
     </Card>
   )
 }

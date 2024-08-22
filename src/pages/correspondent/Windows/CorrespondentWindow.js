@@ -1,79 +1,61 @@
 // ** Custom Imports
-import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import CorrespondentTab from 'src/pages/correspondent/Tabs/CorrespondentTab'
-import CorrespondentCountriesTab from '../Tabs/CorrespondentCountriesTab'
-import CorrespondentCurrenciesTab from '../Tabs/CorrespondentCurrenciesTab'
+import { CustomTabs } from 'src/components/Shared/CustomTabs'
+import { useState } from 'react'
+import CorrespondentForm from '../Forms/CorrespondentForm'
+import CorrespondentCountriesForm from '../Forms/CorrespondentCountriesForm'
+import CorrespondentCurrenciesForm from '../Forms/CorrespondentCurrenciesForm'
 
-const CorrespondentWindow = ({
-  tabs,
-  activeTab,
-  setActiveTab,
-  onClose,
-  width,
-  height,
-  onSave,
-  editMode,
-  lookupBpMasterData,
-  bpMasterDataStore,
-  setBpMasterDataStore,
-  correspondentValidation,
+const CorrespondentWindow = ({ height, recordId, labels, maxAccess, expanded }) => {
+  const [activeTab, setActiveTab] = useState(0)
+  const [editMode, setEditMode] = useState(recordId)
 
-  //countries tab - inline edit grid
-  countriesGridValidation,
-  countriesInlineGridColumns,
+  const [store, setStore] = useState({
+    recordId: recordId || null,
+    countries: []
+  })
 
-  //currencies tab - inline edit grid
-  currenciesGridValidation,
-  currenciesInlineGridColumns,
-  corId,
-  labels,
-  maxAccess
-}) => {
+  const tabs = [
+    { label: labels.main },
+    { label: labels.countries, disabled: !store.recordId },
+    { label: labels.currencies, disabled: !editMode }
+  ]
+
   return (
-    <Window
-      id='CorrespondentWindow'
-      Title={labels.correspondent}
-      onClose={onClose}
-      tabs={tabs}
-      activeTab={activeTab}
-      setActiveTab={setActiveTab}
-      width={width}
-      height={height}
-      onSave={onSave}
-      correspondentValidation={correspondentValidation}
-    >
-      <CustomTabPanel index={0} value={activeTab}>
-        <CorrespondentTab
+    <>
+      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
+
+      <CustomTabPanel height={height} index={0} value={activeTab}>
+        <CorrespondentForm
           labels={labels}
-          correspondentValidation={correspondentValidation}
-          lookupBpMasterData={lookupBpMasterData}
-          bpMasterDataStore={bpMasterDataStore}
-          setBpMasterDataStore={setBpMasterDataStore}
+          setEditMode={setEditMode}
+          setStore={setStore}
+          store={store}
           editMode={editMode}
           maxAccess={maxAccess}
         />
       </CustomTabPanel>
-      <CustomTabPanel index={1} value={activeTab}>
-        <CorrespondentCountriesTab
-          correspondentValidation={correspondentValidation}
-          countriesGridValidation={countriesGridValidation}
-          countriesInlineGridColumns={countriesInlineGridColumns}
+      <CustomTabPanel height={height} index={1} value={activeTab}>
+        <CorrespondentCountriesForm
+          labels={labels}
+          setEditMode={setEditMode}
+          setStore={setStore}
           maxAccess={maxAccess}
-          corId={corId}
+          store={store}
+          expanded={expanded}
         />
       </CustomTabPanel>
-      <CustomTabPanel index={2} value={activeTab}>
-        <CorrespondentCurrenciesTab
-          correspondentValidation={correspondentValidation}
-          currenciesGridValidation={currenciesGridValidation}
-          currenciesInlineGridColumns={currenciesInlineGridColumns}
+      <CustomTabPanel height={height} index={2} value={activeTab}>
+        <CorrespondentCurrenciesForm
+          labels={labels}
+          setEditMode={setEditMode}
+          setStore={setStore}
           maxAccess={maxAccess}
-          editMode={editMode}
-          corId={corId}
+          expanded={expanded}
+          store={store}
         />
       </CustomTabPanel>
-    </Window>
+    </>
   )
 }
 

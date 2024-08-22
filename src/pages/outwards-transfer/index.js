@@ -1,393 +1,238 @@
-// ** React Importsport
-import { useEffect, useState, useContext } from 'react'
-
-// ** MUI Imports
-import { Grid, Box, Button, Checkbox, FormControlLabel } from '@mui/material'
-
-// ** Third Party Imports
-import { useFormik } from 'formik'
-import * as yup from 'yup'
-import toast from 'react-hot-toast'
-
-// ** Custom Imports
+import { useContext } from 'react'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { useResourceQuery } from 'src/hooks/resource'
+import { useWindow } from 'src/windows'
+import OutwardsForm from './Tabs/OutwardsForm'
+import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
+import toast from 'react-hot-toast'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
+import { SystemFunction } from 'src/resources/SystemFunction'
+import { useError } from 'src/error'
+import { getStorageData } from 'src/storage/storage'
 import { ControlContext } from 'src/providers/ControlContext'
 
-// ** Windows
-import OutwardsWindow from './Windows/OutwardsWindow'
-
-// ** Helpers
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
-import { getNewOutwards, populateOutwards } from 'src/Models/RemittanceActivities/Outwards'
-import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
-import ProductsWindow from './Windows/ProductsWindow'
-import { CurrencyTradingClientRepository } from 'src/repositories/CurrencyTradingClientRepository'
-import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
-
 const OutwardsTransfer = () => {
-  const { getRequest, postRequest } = useContext(RequestsContext)
-  const { getLabels, getAccess } = useContext(ControlContext)
+  const { postRequest, getRequest } = useContext(RequestsContext)
+  const { stack } = useWindow()
+  const { stack: stackError } = useError()
+  const { platformLabels } = useContext(ControlContext)
 
-  //stores
-  const [gridData, setGridData] = useState(null)
-  const [plantStore, setPlantStore] = useState(null)
-  const [countryStore, setCountryStore] = useState(null)
-  const [dispersalTypeStore, setDispersalTypeStore] = useState([])
-  const [currencyStore, setCurrencyStore] = useState([])
-  const [agentsStore, setAgentsStore] = useState([])
-  const [productsStore, setProductsStore] = useState([])
-  const [correspondentStore, setCorrespondentStore] = useState([])
-  
-  //states
-  const [windowOpen, setWindowOpen] = useState(false)
-  const [productsWindowOpen, setProductsWindowOpen] = useState(false)
-  const [editMode, setEditMode] = useState(false)
-  const [errorMessage, setErrorMessage] = useState(null)
-  const [selectedRow, setSelectedRow] = useState(null);
+  const {
+    query: { data },
+    filterBy,
+    refetch,
+    clearFilter,
+    labels: _labels,
+    access,
+    invalidate
+  } = useResourceQuery({
+    endpointId: RemittanceOutwardsRepository.OutwardsTransfer.snapshot,
+    datasetId: ResourceIds.OutwardsTransfer,
+    filter: {
+      endpointId: RemittanceOutwardsRepository.OutwardsTransfer.snapshot,
+      filterFn: fetchWithSearch
+    }
+  })
+  async function fetchWithSearch({ filters }) {
+    try {
+      if (!filters.qry) {
+        return { list: [] }
+      } else {
+        return await getRequest({
+          extension: RemittanceOutwardsRepository.OutwardsTransfer.snapshot,
+          parameters: `_filter=${filters.qry}`
+        })
+      }
+    } catch (error) {}
+  }
 
-  //control
-  const [labels, setLabels] = useState(null)
-  const [access, setAccess] = useState(null)
+  const userData = getStorageData('userData')
 
-  const _labels = {
-    reference: labels && labels.find(item => item.key === "1").value,
-    name: labels && labels.find(item => item.key === "2").value,
-    foreignLanguage: labels && labels.find(item => item.key === "3").value,
+  const getPlantId = async () => {
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.UserDefaults.get,
+        parameters: `_userId=${userData && userData.userId}&_key=plantId`
+      })
+
+      if (res.record.value) {
+        return res.record.value
+      }
+
+      return ''
+    } catch (error) {
+      return ''
+    }
+  }
+
+  const getCashAccountId = async () => {
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.UserDefaults.get,
+        parameters: `_userId=${userData && userData.userId}&_key=cashAccountId`
+      })
+
+      if (res.record.value) {
+        return res.record.value
+      }
+
+      return ''
+    } catch (error) {
+      return ''
+    }
+  }
+  async function openForm(recordId) {
+    try {
+      const plantId = await getPlantId()
+      const cashAccountId = await getCashAccountId()
+
+      if (plantId !== '' && cashAccountId !== '') {
+        openOutWardsWindow(plantId, cashAccountId, recordId)
+      } else {
+        if (plantId === '') {
+          stackError({
+            message: `The user does not have a default plant.`
+          })
+        }
+        if (cashAccountId === '') {
+          stackError({
+            message: `The user does not have a default cash account.`
+          })
+        }
+      }
+    } catch (error) {}
   }
 
   const columns = [
     {
+      field: 'reference',
+      headerName: _labels.reference,
+      flex: 1
+    },
+    {
       field: 'countryRef',
-      headerName: 'countryRef',
+      headerName: _labels.CountryRef,
       flex: 1
     },
     {
       field: 'dispersalName',
-      headerName: 'dispersalName',
+      headerName: _labels.DispersalName,
       flex: 1
     },
     ,
     {
       field: 'currencyRef',
-      headerName: 'currencyRef',
+      headerName: _labels.Currency,
       flex: 1
     },
     {
-      field: 'agent',
-      headerName: 'agent',
+      field: 'rsName',
+      headerName: _labels.ReleaseStatus,
+      flex: 1
+    },
+    {
+      field: 'statusName',
+      headerName: _labels.Status,
+      flex: 1
+    },
+    {
+      field: 'wipName',
+      headerName: _labels.WIP,
       flex: 1
     }
   ]
 
-  const outwardsValidation = useFormik({
-    enableReinitialize: true,
-    validateOnChange: true,
-    validationSchema: yup.object({
-      plantId: yup.string().required('This field is required'),
-      countryId: yup.string().required('This field is required'),
-      dispersalType: yup.string().required('This field is required'),
-      currencyId: yup.string().required('This field is required'),
-      agentId: yup.string().required('This field is required'),
-      idNo: yup.string().required('This field is required'),
-      amount: yup.string().required('This field is required'),
-      productId: yup.string().required('This field is required'),
-      fees: yup.string().required('This field is required'),
-      baseAmount: yup.string().required('This field is required'),
+  const delOutwards = async obj => {
+    try {
+      await postRequest({
+        extension: RemittanceOutwardsRepository.OutwardsTransfer.del,
+        record: JSON.stringify(obj)
+      })
+      invalidate()
+      toast.success(platformLabels.Deleted)
+    } catch (error) {}
+  }
 
-    }),
-    onSubmit: values => {
-
-    }
+  const { proxyAction } = useDocumentTypeProxy({
+    functionId: SystemFunction.Outwards,
+    action: openForm,
+    hasDT: false
   })
 
-  const handleSubmit = () => {
-    outwardsValidation.handleSubmit()
-  }
-
-  const handleProductSelection = () => {
-    const selectedRowData = productsStore?.list.find((row) => row.productId === selectedRow);
-    outwardsValidation.setFieldValue('productId', selectedRowData?.productId)
-    outwardsValidation.setFieldValue('fees', selectedRowData?.fees)
-    outwardsValidation.setFieldValue('baseAmount', selectedRowData?.baseAmount)
-    outwardsValidation.setFieldValue('net', selectedRowData?.fees + selectedRowData?.baseAmount)
-    setProductsWindowOpen(false);
-  }
-
-  const getGridData = () => {
-    // var parameters = '_filter='
-    // getRequest({
-    //   extension: SystemRepository.Currency.qry,
-    //   parameters: parameters
-    // })
-    //   .then(res => {
-    //     setGridData(res)
-    //   })
-    //   .catch(error => {
-    //     setErrorMessage(error)
-    //   })
-  }
-
-
-  const fillCountryStore = () => {
-    var parameters = '_filter='
-    getRequest({
-      extension: RemittanceOutwardsRepository.Country.qry,
-      parameters: parameters
+  const getDefaultDT = async () => {
+    const res = await getRequest({
+      extension: SystemRepository.UserFunction.get,
+      parameters: `_userId=${userData.userId}&_functionId=${SystemFunction.Outwards}`
     })
-      .then(res => {
-        setCountryStore(res)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+
+    return res?.record?.dtId
   }
 
-  const fillPlantStore = () => {
-    var parameters = '_filter='
-    getRequest({
-      extension: SystemRepository.Plant.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setPlantStore(res)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const onCountrySelection = (countryId) => {
-    //get dispersals list
-    var parameters = `_countryId=${countryId}`
-    getRequest({
-      extension: RemittanceOutwardsRepository.DispersalType.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setDispersalTypeStore(res)
-      })
-      .catch(error => {
-        setErrorMessage(error.response.data)
-      })
-  }
-
-  const onDispersalSelection = (countryId, dispersalType) => {
-    //get currencies list
-    var parameters = `_countryId=${countryId}&_dispersalType=${dispersalType}`
-    getRequest({
-      extension: RemittanceOutwardsRepository.Currency.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setCurrencyStore(res)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const onCurrencySelection = (countryId, dispersalType, currencyId) => {
-    //get agents list
-    var parameters = `_countryId=${countryId}&_dispersalType=${dispersalType}&_currencyId=${currencyId}`
-    getRequest({
-      extension: RemittanceOutwardsRepository.Agent.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setAgentsStore(res)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  //_type=2&_functionId=1&_plantId=1&_countryId=124&_currencyId=90&_dispersalType=2&_amount=200&_agentId=4
-  const onAmountDataFill = (formFields) => {
-
-    //get products list
-    // type, functionId, plantId, countryId, dispersalType, currencyId, amount, agentId
-    var type = 2;
-    var functionId = 1;
-    var plant = formFields?.plantId;
-    var countryId = formFields?.countryId
-    var currencyId = formFields?.currencyId
-    var dispersalType = formFields?.dispersalType
-    var agentId = formFields?.agentId ?? 0;
-    var amount = formFields?.amount ?? 0;
-
-
-    var parameters = `_type=${type}&_functionId=${functionId}&_plantId=${plant}&_countryId=${countryId}&_dispersalType=${dispersalType}&_currencyId=${currencyId}&_agentId=${agentId}&_amount=${amount}` 
-
-    getRequest({
-      extension: RemittanceOutwardsRepository.ProductDispersalEngine.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setProductsStore(res);
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const onIdNoBlur = (idNo) => {
-    var parameters = `_idNo=${idNo}` 
-
-    getRequest({
-      extension: CurrencyTradingClientRepository.Identity.get,
-      parameters: parameters
-    })
-      .then(res => {
-        if(res?.record?.clientId){
-          var clientParameters = `_recordId=${res?.record?.clientId}` 
-          getRequest({
-            extension: CurrencyTradingClientRepository.Client.get,
-            parameters: clientParameters
-          })
-            .then(clientRes => {
-              console.log(clientRes);
-              if(clientRes?.record){
-                outwardsValidation.setFieldValue('cl_reference', clientRes?.record?.reference)
-                outwardsValidation.setFieldValue('cl_name', clientRes?.record?.name)
-                outwardsValidation.setFieldValue('idType', res?.record?.idtId)
-                outwardsValidation.setFieldValue('nationalityId', clientRes?.record?.nationalityId)
-              }
-            })
-        }
-        else //clear the id field or show a message that there isn't any client with this ID
-        {
-          outwardsValidation.setFieldValue('idNo', '')
-          outwardsValidation.setFieldValue('cl_reference', '')
-          outwardsValidation.setFieldValue('cl_name', '')
-          outwardsValidation.setFieldValue('idType', '')
-          outwardsValidation.setFieldValue('nationalityId', '')
-        }
-
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-  
-  const lookupCorrespondent = searchQry => {
-
-    setCorrespondentStore([])
-    if(searchQry){
-    var parameters = `_filter=${searchQry}`
-    getRequest({
-      extension: RemittanceSettingsRepository.Correspondent.snapshot,
-      parameters: parameters
-    })
-      .then(res => {
-        setCorrespondentStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })}
-  }
-
-  const delOutwards = obj => {
-
-  }
-
-  const addOutwards = () => {
-    console.log(getNewOutwards())
-    outwardsValidation.setValues(getNewOutwards())
-    fillCountryStore()
-
-    //setUserDefaultPlant()
-    setEditMode(false)
-    setWindowOpen(true)
+  const addOutwards = async () => {
+    await proxyAction()
   }
 
   const editOutwards = obj => {
-     outwardsValidation.setValues(populateOutwards(obj))
-
-    // fillCountryStore()
-    // setEditMode(true)
-    // setWindowOpen(true)
+    openForm(obj.recordId)
   }
 
-  useEffect(() => {
-    if (!access) getAccess(ResourceIds.Currencies, setAccess)
-    else {
-      if (access.record.maxAccess > 0) {
-        getGridData()
-        fillPlantStore()
-        fillCountryStore()
-
-        //getLabels(ResourceIds.Currencies, setLabels)
-
-      } else {
-        setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
-      }
-    }
-  }, [access])
+  async function openOutWardsWindow(plantId, cashAccountId, recordId) {
+    const dtId = await getDefaultDT()
+    stack({
+      Component: OutwardsForm,
+      props: {
+        plantId: plantId,
+        cashAccountId: cashAccountId,
+        userId: userData.userId,
+        access,
+        labels: _labels,
+        recordId: recordId,
+        invalidate,
+        dtId
+      },
+      width: 1100,
+      height: 600,
+      title: _labels.OutwardsTransfer
+    })
+  }
 
   return (
-    <>
-      <Box>
-        <GridToolbar onAdd={addOutwards} maxAccess={access} />
+    <VertLayout>
+      <Fixed>
+        <GridToolbar
+          onAdd={addOutwards}
+          maxAccess={access}
+          onSearch={value => {
+            filterBy('qry', value)
+          }}
+          onSearchClear={() => {
+            clearFilter('qry')
+          }}
+          labels={_labels}
+          inputSearch={true}
+        />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
-          gridData={gridData}
+          gridData={data}
           rowId={['recordId']}
-          api={getGridData}
           onEdit={editOutwards}
           onDelete={delOutwards}
-          isLoading={false}
           pageSize={50}
           paginationType='client'
           maxAccess={access}
+          refetch={refetch}
         />
-      </Box>
-      {windowOpen && (
-        <OutwardsWindow
-          onClose={() => setWindowOpen(false)}
-          width={700}
-          height={450}
-          onSave={handleSubmit}
-          editMode={editMode}
-          outwardsValidation={outwardsValidation}
-          plantStore={plantStore}
-          countryStore={countryStore}
-          onCountrySelection={onCountrySelection}
-          dispersalTypeStore={dispersalTypeStore}
-          onDispersalSelection={onDispersalSelection}
-          currencyStore={currencyStore}
-          onCurrencySelection={onCurrencySelection}
-          agentsStore={agentsStore}
-          correspondentStore={correspondentStore}
-          lookupCorrespondent={lookupCorrespondent}
-          setCorrespondentStore={setCorrespondentStore}
-          onAmountDataFill={onAmountDataFill}
-          onIdNoBlur={onIdNoBlur}
-          labels={_labels}
-          setProductsWindowOpen={setProductsWindowOpen}
-          maxAccess={access}
-        />
-      )}
-
-      {productsWindowOpen && (
-        <ProductsWindow
-          onClose={() => setProductsWindowOpen(false)}
-          width={700}
-          height={200}
-          onSave={handleProductSelection}
-          gridData={productsStore}
-          setSelectedRow={setSelectedRow}
-          selectedRow={selectedRow}
-          maxAccess={access}
-        />
-      )}
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+      </Grow>
+    </VertLayout>
   )
 }
 

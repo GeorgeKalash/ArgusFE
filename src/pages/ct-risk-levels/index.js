@@ -1,50 +1,40 @@
-// ** React Imports
-import { useState, useContext } from 'react'
-
-// ** MUI Imports
-import {Box } from '@mui/material'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
-
-// ** Windows
-import CtRiskLevelsWindow from './Windows/CtRiskLevesWindow'
-
-// ** Helpers
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
-
-// ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import CtRiskLevelsForm from './forms/CtRiskLevelsForm'
+import { useWindow } from 'src/windows'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const CtRiskLevel = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
- 
-  const [selectedRecordId, setSelectedRecordId] = useState(null)
+  const { platformLabels } = useContext(ControlContext)
 
-  //states
-  const [windowOpen, setWindowOpen] = useState(false)
-  const [errorMessage, setErrorMessage] = useState(null)
+  const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    return await getRequest({
+    const response = await getRequest({
       extension: CurrencyTradingSettingsRepository.RiskLevel.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
+
+    return { ...response, _startAt: _startAt }
   }
 
   const {
     query: { data },
     labels: _labels,
+    paginationParameters,
+    refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -69,14 +59,26 @@ const CtRiskLevel = () => {
     }
   ]
 
-
   const add = () => {
-    setWindowOpen(true)
+    openForm()
   }
 
   const edit = obj => {
-    setSelectedRecordId(obj.recordId)
-    setWindowOpen(true)
+    openForm(obj?.recordId)
+  }
+
+  function openForm(recordId) {
+    stack({
+      Component: CtRiskLevelsForm,
+      props: {
+        labels: _labels,
+        recordId: recordId,
+        maxAccess: access
+      },
+      width: 500,
+      height: 330,
+      title: _labels.riskLevel
+    })
   }
 
   const del = async obj => {
@@ -85,40 +87,30 @@ const CtRiskLevel = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
   }
-  
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar onAdd={add} maxAccess={access} />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
           rowId={['recordId']}
           onEdit={edit}
+          refetch={refetch}
           onDelete={del}
           isLoading={false}
           pageSize={50}
-          paginationType='client'
+          paginationParameters={paginationParameters}
+          paginationType='api'
           maxAccess={access}
         />
-      </Box>
-      {windowOpen && (
-        <CtRiskLevelsWindow
-          onClose={() => {
-            setWindowOpen(false)
-            setSelectedRecordId(null)
-          }}
-          labels={_labels}
-          maxAccess={access}
-          recordId={selectedRecordId}
-          setSelectedRecordId={setSelectedRecordId}
-        />
-      )}
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+      </Grow>
+    </VertLayout>
   )
 }
 

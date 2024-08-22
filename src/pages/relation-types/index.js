@@ -1,207 +1,121 @@
-import React, { useContext, useEffect } from 'react'
-import { Box, Grid } from '@mui/material'
-import GridToolbar from 'src/components/Shared/GridToolbar'
+import { useState, useContext } from 'react'
+import { Box } from '@mui/material'
+import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
-import { useState } from 'react'
-import { SystemRepository } from 'src/repositories/SystemRepository'
-import { ControlContext } from 'src/providers/ControlContext'
+import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
-import TransactionLog from 'src/components/Shared/TransactionLog'
-import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
-import RelationTypeWindow from './Windows/RelationTypeWindow'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
-
-import { useFormik } from 'formik'
-import { getNewRelationType, populateRelationType } from 'src/Models/CurrencyTradingSettings/RelationType'
-import * as yup from 'yup'
-import toast from 'react-hot-toast'
-
-// ** Resources
+import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import RelationTypesWindow from './Windows/RelationTypesWindow'
+import { useWindow } from 'src/windows'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const RelationTypes = () => {
-  const { getLabels, getAccess } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { stack } = useWindow()
+  const { platformLabels } = useContext(ControlContext)
 
-  //control
-  const [labels, setLabels] = useState(null)
-  const [access, setAccess] = useState(null)
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50 } = options
 
-  //stores
-  const [gridData, setGridData] = useState([])
-  const [typeStore, setTypeStore] = useState([])
+    const response = await getRequest({
+      extension: CurrencyTradingSettingsRepository.RelationType.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+    })
 
-  //states
-  const [activeTab, setActiveTab] = useState(0)
-  const [windowOpen, setWindowOpen] = useState(false)
-  const [errorMessage, setErrorMessage] = useState(null)
-
-  const [windowInfo, setWindowInfo] = useState(null)
-  const [editMode, setEditMode] = useState(null)
-
-  useEffect(() => {
-    if (!access) getAccess(ResourceIds.RelationType, setAccess)
-    else {
-      if (access.record.maxAccess > 0) {
-        getGridData({ _startAt: 0, _pageSize: 30 })
-
-        // fillSysFunctionsStore()
-        // fillActiveStatusStore()
-        getLabels(ResourceIds.RelationType, setLabels)
-      } else {
-        setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
-      }
-    }
-    
-  }, [access])
-
-  const _labels = {
-    reference: labels && labels.find(item => item.key === '1').value,
-    name: labels && labels.find(item => item.key === '2').value,
-    flName: labels && labels.find(item => item.key === '3').value,
-    relationtype: labels && labels.find(item => item.key === '4').value
+    return { ...response, _startAt: _startAt }
   }
+
+  const {
+    query: { data },
+    labels: _labels,
+    paginationParameters,
+    refetch,
+    access
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: CurrencyTradingSettingsRepository.RelationType.page,
+    datasetId: ResourceIds.RelationType
+  })
+
+  const invalidate = useInvalidate({
+    endpointId: CurrencyTradingSettingsRepository.RelationType.page
+  })
 
   const columns = [
     {
       field: 'reference',
       headerName: _labels.reference,
-      flex: 1,
-      editable: false
+      flex: 1
     },
     {
       field: 'name',
       headerName: _labels.name,
-      flex: 1,
-      editable: false
+      flex: 1
     },
     {
       field: 'flName',
       headerName: _labels.flName,
-      flex: 1,
-      editable: false
+      flex: 1
     }
   ]
 
-  const addRelationType = () => {
-    relationTypeValidation.setValues(getNewRelationType())
-
-    setEditMode(false)
-    setWindowOpen(true)
+  function openForm(recordId) {
+    stack({
+      Component: RelationTypesWindow,
+      props: {
+        labels: _labels,
+        recordId: recordId ? recordId : null,
+        maxAccess: access
+      },
+      width: 600,
+      height: 600,
+      title: _labels.RelationTypes
+    })
   }
 
-  const delRelationType = obj => {
-    postRequest({
+  const add = () => {
+    openForm()
+  }
+
+  const edit = obj => {
+    openForm(obj.recordId)
+  }
+
+  const del = async obj => {
+    await postRequest({
       extension: CurrencyTradingSettingsRepository.RelationType.del,
       record: JSON.stringify(obj)
     })
-      .then(res => {
-        getGridData({})
-        toast.success('Record Deleted Successfully')
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const editRelationType = obj => {
-    relationTypeValidation.setValues(populateRelationType(obj))
-
-    setEditMode(true)
-    setWindowOpen(true)
-  }
-
-  const getGridData = ({ _startAt = 0, _pageSize = 30 }) => {
-    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
-    var parameters = defaultParams + '&_dgId=0'
-
-    getRequest({
-      extension: CurrencyTradingSettingsRepository.RelationType.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setGridData({ ...res, _startAt })
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const relationTypeValidation = useFormik({
-    enableReinitialize: false,
-    validateOnChange: false,
-    validationSchema: yup.object({
-      reference: yup.string().required('This field is required'),
-      name: yup.string().required('This field is required'),
-      flName: yup.string().required('This field is required')
-    }),
-    onSubmit: values => {
-      console.log({ values })
-      postRelationType(values)
-    }
-  })
-
-  const postRelationType = obj => {
-    const recordId = obj.recordId
-    postRequest({
-      extension: CurrencyTradingSettingsRepository.RelationType.set,
-      record: JSON.stringify(obj)
-    })
-      .then(res => {
-        getGridData({})
-        setWindowOpen(false)
-        if (!recordId) toast.success('Record Added Successfully')
-        else toast.success('Record Editted Successfully')
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const handleSubmit = () => {
-    relationTypeValidation.handleSubmit()
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   return (
-    <>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%'
-        }}
-      >
-        <GridToolbar onAdd={addRelationType} maxAccess={access} />
-
+    <VertLayout>
+      <Fixed>
+        <GridToolbar onAdd={add} maxAccess={access} />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
-          gridData={gridData}
+          gridData={data}
           rowId={['recordId']}
-          api={getGridData}
+          onEdit={edit}
+          onDelete={del}
           isLoading={false}
+          pageSize={50}
+          refetch={refetch}
+          paginationParameters={paginationParameters}
+          paginationType='api'
           maxAccess={access}
-          onEdit={editRelationType}
-          onDelete={delRelationType}
         />
-      </Box>
-
-      {windowOpen && (
-        <RelationTypeWindow
-          onClose={() => setWindowOpen(false)}
-          width={600}
-          height={400}
-          onSave={handleSubmit}
-          relationTypesValidation={relationTypeValidation}
-          labels={_labels}
-          maxAccess={access}
-          onInfo={() => setWindowInfo(true)}
-          editMode={editMode}
-        />
-      )}
-
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+      </Grow>
+    </VertLayout>
   )
 }
 

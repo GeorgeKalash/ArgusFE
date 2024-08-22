@@ -1,39 +1,92 @@
-import React , {useContext, useState, useEffect} from 'react'
+import React, { useContext, useState, useEffect } from 'react'
 import CustomLookup from '../Inputs/CustomLookup'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import ErrorWindow from './ErrorWindow'
 
-export const ResourceLookup = ({endpointId, name, form, parameters,  errorCheck,  ...rest}) => {
-
+export const ResourceLookup = ({
+  endpointId,
+  parameters,
+  form,
+  name,
+  firstValue,
+  secondValue,
+  valueShow,
+  secondValueShow,
+  errorCheck,
+  filter = {},
+  viewHelperText = true,
+  minChars = 3,
+  ...rest
+}) => {
   const { getRequest } = useContext(RequestsContext)
-  const [errorMessage, setErrorMessage]= useState()
+  const [errorMessage, setErrorMessage] = useState()
   const [store, setStore] = useState([])
-
-  useEffect(()=>{
-    setStore([])
-  },[parameters])
+  const [isLoading, setIsLoading] = useState(false)
+  const [renderOption, setRenderOption] = useState(false)
 
   const onLookup = searchQry => {
     setStore([])
-    getRequest({
-      extension: endpointId,
-      parameters: new URLSearchParams({ ...parameters, '_filter': searchQry })
+    setRenderOption(false)
+    if (searchQry?.length >= minChars) {
+      setIsLoading(true)
+      getRequest({
+        extension: endpointId,
+        parameters: new URLSearchParams({ ...parameters, _filter: searchQry }),
+        disableLoading: true
       })
-      .then(res => {
-        setStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+        .then(res => {
+          if (filter) {
+            res.list = res.list.filter(item => {
+              return Object.keys(filter).every(key => {
+                return parseInt(item[key]) == parseInt(filter[key])
+              })
+            })
+          }
+          setStore(res.list)
+          setRenderOption(true)
+        })
+        .catch(error => {})
+        .finally(() => {
+          setIsLoading(false)
+          setRenderOption(true)
+        })
+    }
   }
   const check = errorCheck ? errorCheck : name
-  const firstValue = form.values[name]
-  const error = form?.touched && form.touched[check] && Boolean(form.errors[check])
-  const helperText= form?.touched && form.touched[check] && form.errors[check]
 
-return (
+  const _firstValue = firstValue || (valueShow ? form.values[valueShow] : form.values[name])
+  const _secondValue = secondValue || (secondValueShow ? form.values[secondValueShow] : form.values[name])
+
+  const error = form?.touched && form.touched[check] && Boolean(form.errors[check])
+  const helperText = viewHelperText && form?.touched && form.touched[check] && form.errors[check]
+  useEffect(() => {
+    setStore([])
+  }, [_firstValue])
+
+  const onKeyUp = e => {
+    if (e.target.value?.length > 0) {
+      setStore([])
+    } else {
+    }
+  }
+
+  return (
     <>
-      <CustomLookup {...{ onLookup, store, setStore, firstValue, error, helperText, ...rest }}  />
+      <CustomLookup
+        {...{
+          onLookup,
+          store,
+          setStore,
+          firstValue: _firstValue,
+          secondValue: _secondValue,
+          error,
+          onKeyUp,
+          name,
+          isLoading,
+          renderOption,
+          ...rest
+        }}
+      />
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )

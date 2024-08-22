@@ -1,9 +1,10 @@
-// ** MUI Imports
-import { Box } from '@mui/material'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
+import useResourceParams from 'src/hooks/useResourceParams'
+import { ResourceIds } from 'src/resources/ResourceIds'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from './Layouts/Fixed'
+import { Grow } from './Layouts/Grow'
 
 const AddressGridTab = ({
   addressGridData,
@@ -12,10 +13,13 @@ const AddressGridTab = ({
   delAddress,
   editAddress,
   maxAccess,
-  labels
+  columns
 }) => {
+  const { labels: labels, access } = useResourceParams({
+    datasetId: ResourceIds.Address
+  })
 
-  const columns = [
+  const tableColumns = [
     {
       field: 'name',
       headerName: labels.name,
@@ -54,17 +58,13 @@ const AddressGridTab = ({
   ]
 
   return (
-    <>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%'
-        }}
-      >
+    <VertLayout>
+      <Fixed>
         <GridToolbar onAdd={addAddress} maxAccess={maxAccess} />
+      </Fixed>
+      <Grow>
         <Table
-          columns={columns}
+          columns={columns || tableColumns}
           gridData={addressGridData}
           rowId={['recordId']}
           api={getAddressGridData}
@@ -73,10 +73,9 @@ const AddressGridTab = ({
           isLoading={false}
           maxAccess={maxAccess}
           pagination={false}
-          height={300}
         />
-      </Box>
-    </>
+      </Grow>
+    </VertLayout>
   )
 }
 

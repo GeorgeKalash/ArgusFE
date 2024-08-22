@@ -1,126 +1,156 @@
-import { useEffect, useState } from 'react'
-import PropTypes from 'prop-types'
-
-// ** MUI Imports
-import { Box, Stack, IconButton, LinearProgress } from '@mui/material'
-import { DataGrid, gridClasses } from '@mui/x-data-grid'
-import { alpha, styled } from '@mui/material/styles'
-
-// ** Icons
-import Icon from 'src/@core/components/icon'
+import React, { useContext, useRef } from 'react'
+import { AgGridReact } from 'ag-grid-react'
+import 'ag-grid-community/styles/ag-grid.css'
+import 'ag-grid-community/styles/ag-theme-alpine.css'
+import { Box, IconButton, TextField } from '@mui/material'
+import Checkbox from '@mui/material/Checkbox'
+import Image from 'next/image'
+import editIcon from '../../../public/images/TableIcons/edit.png'
+import { useState } from 'react'
+import { useEffect } from 'react'
+import 'ag-grid-enterprise'
 import FirstPageIcon from '@mui/icons-material/FirstPage'
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore'
 import NavigateNextIcon from '@mui/icons-material/NavigateNext'
 import LastPageIcon from '@mui/icons-material/LastPage'
 import RefreshIcon from '@mui/icons-material/Refresh'
-
-// ** Custom Imports
+import { ControlContext } from 'src/providers/ControlContext'
+import { AuthContext } from 'src/providers/AuthContext'
+import { TrxType } from 'src/resources/AccessLevels'
+import deleteIcon from '../../../public/images/TableIcons/delete.png'
+import { useWindow } from 'src/windows'
 import DeleteDialog from './DeleteDialog'
+import StrictDeleteConfirmation from './StrictDeleteConfirmation'
+import { HIDDEN, accessLevel } from 'src/services/api/maxAccess'
+import { formatDateDefault, getTimeInTimeZone } from 'src/lib/date-helper'
+import { getFormattedNumber } from 'src/lib/numberField-helper'
+import { VertLayout } from './Layouts/VertLayout'
+import { Grow } from './Layouts/Grow'
+import { Fixed } from './Layouts/Fixed'
 
-// ** Resources
-import { ControlAccessLevel, TrxType } from 'src/resources/AccessLevels'
+const Table = ({
+  paginationType = '',
+  globalStatus = true,
+  viewCheckButtons = false,
+  showCheckboxColumn = false,
+  rowSelection = '',
+  pagination = true,
+  setData,
+  ...props
+}) => {
+  const pageSize = props?.pageSize || 10000
+  const api = props?.api ? props?.api : props?.paginationParameters || ''
+  const refetch = props?.refetch
+  const [gridData, setGridData] = useState({})
+  const [startAt, setStartAt] = useState(0)
+  const { languageId } = useContext(AuthContext)
+  const { platformLabels } = useContext(ControlContext)
+  const maxAccess = props?.maxAccess && props?.maxAccess.record.maxAccess
+  const columnsAccess = props?.maxAccess && props?.maxAccess.record.controls
+  const { stack } = useWindow()
+  const [checked, setChecked] = useState(false)
+  const [focus, setFocus] = useState(false)
 
-const ODD_OPACITY = 0.2
-
-const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
-  borderRadius: 0,
-  borderTop: `1px solid ${theme.palette.mode === 'light' ? '#cccccc' : '#303030'}`,
-  borderBottom: `1px solid ${theme.palette.mode === 'light' ? '#cccccc' : '#303030'}`,
-  '& .MuiDataGrid-main': {
-    // remove overflow hidden overwise sticky does not work
-    overflow: 'unset'
-  },
-  '& .MuiDataGrid-columnHeaders': {
-    position: 'sticky'
-  },
-  '& .MuiDataGrid-row:last-child': {
-    borderBottom: `1px solid ${theme.palette.mode === 'light' ? '#cccccc' : '#303030'}`
-  },
-  '& .MuiDataGrid-virtualScroller': {
-    // remove the space left for the header
-    marginTop: '0!important'
-  },
-  '& .MuiDataGrid-columnsContainer': {
-    backgroundColor: theme.palette.mode === 'light' ? '#fafafa' : '#1d1d1d'
-  },
-  '& .MuiDataGrid-iconSeparator': {
-    display: 'none'
-  },
-  '& .MuiDataGrid-columnHeader, .MuiDataGrid-cell': {
-    borderRight: `1px solid ${theme.palette.mode === 'light' ? '#cccccc' : '#303030'}`
-  },
-  '& .MuiDataGrid-columnsContainer, .MuiDataGrid-cell': {
-    borderBottom: `1px solid ${theme.palette.mode === 'light' ? '#cccccc' : '#303030'}`
-  },
-  '& .MuiDataGrid-cell': {
-    color: theme.palette.mode === 'light' ? 'rgba(0,0,0,.85)' : 'rgba(255,255,255,0.65)'
-  },
-  '& .MuiPaginationItem-root': {
-    borderRadius: 0
-  },
-  [`& .${gridClasses.row}.even`]: {
-    backgroundColor: theme.palette.grey[200],
-    '&:hover, &.Mui-hovered': {
-      backgroundColor: alpha(theme.palette.primary.main, ODD_OPACITY),
-      '@media (hover: none)': {
-        backgroundColor: 'transparent'
-      }
-    },
-    '&.Mui-selected': {
-      backgroundColor: alpha(theme.palette.primary.main, ODD_OPACITY + theme.palette.action.selectedOpacity),
-      '&:hover, &.Mui-hovered': {
-        backgroundColor: alpha(
-          theme.palette.primary.main,
-          ODD_OPACITY + theme.palette.action.selectedOpacity + theme.palette.action.hoverOpacity
-        ),
-        '@media (hover: none)': {
-          backgroundColor: alpha(theme.palette.primary.main, ODD_OPACITY + theme.palette.action.selectedOpacity)
+  const columns = props?.columns
+    .filter(
+      ({ field }) =>
+        accessLevel({
+          maxAccess: props?.maxAccess,
+          name: field
+        }) !== HIDDEN
+    )
+    .map(col => {
+      if (col.type === 'date') {
+        return {
+          ...col,
+          valueGetter: ({ data }) => formatDateDefault(data?.[col.field])
         }
       }
-    }
+      if (col.type === 'number' || col?.type?.field === 'number') {
+        return {
+          ...col,
+          valueGetter: ({ data }) => getFormattedNumber(data?.[col.field], col.type?.decimal)
+        }
+      }
+      if (col.type === 'timeZone') {
+        return {
+          ...col,
+          valueGetter: ({ data }) => data?.[col.field] && getTimeInTimeZone(data?.[col.field])
+        }
+      }
+
+      return col
+    })
+
+  const shouldRemoveColumn = column => {
+    const match = columnsAccess && columnsAccess.find(item => item.controlId === column.id)
+
+    return match && match.accessLevel === ControlAccessLevel.Hidden
   }
-}))
+  const filteredColumns = columns.filter(column => !shouldRemoveColumn(column))
 
-const TableContainer = styled(Box)({
-  // height: '600px', // Change this value as needed
-  // flex: 1,
-  // overflow: 'auto', // Enable scrolling within the container
-  position: 'relative'
-})
+  useEffect(() => {
+    const areAllValuesTrue = props?.gridData?.list?.every(item => item?.checked === true)
+    setChecked(areAllValuesTrue)
+    if (typeof setData === 'function') onSelectionChanged
 
-const PaginationContainer = styled(Box)({
-  width: '100%',
-  position: 'fixed',
-  bottom: '0',
-  backgroundColor: '#fff',
-  borderTop: '1px solid #ccc'
-})
-
-const Table = ({ pagination = true, paginationType = 'api', height, actionColumnHeader = null, ...props }) => {
-  const [gridData, setGridData] = useState(props.gridData)
-  const [startAt, setStartAt] = useState(0)
-  const [page, setPage] = useState(1)
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState([false, {}])
-
-  const pageSize = props.pageSize ? props.pageSize : 50
-  const originalGridData = props.gridData && props.gridData.list && props.gridData.list
-  const api = props.api
-  const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
-  const columnsAccess = props.maxAccess && props.maxAccess.record.controls
-
-  const getRowId = row => {
-    return props.rowId.map(field => row[field]).join('-')
-  }
+    props?.gridData &&
+      paginationType !== 'api' &&
+      pageSize &&
+      setGridData({ list: pageSize ? props?.gridData?.list?.slice(0, pageSize) : props?.gridData?.list })
+  }, [props?.gridData])
 
   const CustomPagination = () => {
     if (pagination) {
+      const TextInput = ({ value, pageCount }) => {
+        const jumpToPage = e => {
+          setFocus(false)
+          const newPage = e.target.value
+
+          if ((e.key === 'Enter' || e.keyCode === 13) && newPage > 0)
+            if (paginationType === 'api') {
+              api({ _startAt: (newPage - 1) * pageSize, _pageSize: pageSize })
+            } else {
+              var slicedGridData = props?.gridData?.list.slice((newPage - 2) * pageSize, newPage * pageSize)
+              setGridData({
+                ...props?.gridData?.list,
+                list: slicedGridData
+              })
+              setStartAt((newPage - 2) * pageSize + pageSize)
+            }
+          setFocus(true)
+        }
+
+        const handleInput = e => {
+          if (e.target.value > pageCount || e.target.value < 0) e.target.value = value
+          if (e.target.value === '0') e.target.value = value
+        }
+
+        return (
+          <TextField
+            size={'small'}
+            sx={{
+              px: 2,
+              p: 1,
+              width: '80px',
+              '& .MuiInputBase-root': {
+                height: '30px'
+              }
+            }}
+            autoFocus={focus}
+            onInput={handleInput}
+            defaultValue={value}
+            onKeyUp={jumpToPage}
+            onBlur={() => setFocus(false)}
+          />
+        )
+      }
       if (paginationType === 'api') {
-        const startAt = gridData._startAt
-        const totalRecords = gridData.count ? gridData.count : 0
-
-        const page = Math.ceil(gridData.count ? (startAt === 0 ? 1 : (startAt + 1) / pageSize) : 1)
-
-        const pageCount = Math.ceil(gridData.count ? gridData.count / pageSize : 1)
+        const gridData = props?.gridData
+        const startAt = gridData?._startAt ?? 0
+        const totalRecords = gridData?.count ? gridData?.count : 0
+        const page = Math.ceil(gridData?.count ? (startAt === 0 ? 1 : (startAt + 1) / pageSize) : 1)
+        const pageCount = Math.ceil(gridData?.count ? gridData.count / pageSize : 1)
 
         const incrementPage = () => {
           if (page < pageCount) {
@@ -143,35 +173,64 @@ const Table = ({ pagination = true, paginationType = 'api', height, actionColumn
         }
 
         return (
-          <PaginationContainer>
-            <IconButton onClick={goToFirstPage} disabled={page === 1}>
+          <Box
+            sx={{
+              width: '100%',
+              backgroundColor: '#fff',
+              borderTop: '1px solid #ccc',
+              fontSize: '0.9rem',
+              bottom: 0
+            }}
+          >
+            <IconButton
+              onClick={goToFirstPage}
+              disabled={page === 1}
+              sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+            >
               <FirstPageIcon />
             </IconButton>
-            <IconButton onClick={decrementPage} disabled={page === 1}>
+            <IconButton
+              onClick={decrementPage}
+              disabled={page === 1}
+              sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+            >
               <NavigateBeforeIcon />
             </IconButton>
-            Page: {page} of {pageCount}
-            <IconButton onClick={incrementPage} disabled={page === pageCount}>
+            {platformLabels.Page}
+            <TextInput value={page} pageCount={pageCount} />
+            {platformLabels.Of} {pageCount}
+            <IconButton
+              onClick={incrementPage}
+              disabled={page === pageCount}
+              sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+            >
               <NavigateNextIcon />
             </IconButton>
-            <IconButton onClick={goToLastPage} disabled={page === pageCount}>
+            <IconButton
+              onClick={goToLastPage}
+              disabled={page === pageCount}
+              sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+            >
               <LastPageIcon />
             </IconButton>
-            {api && (
-              <IconButton onClick={goToFirstPage}>
-                <RefreshIcon />
-              </IconButton>
-            )}
-            Displaying Records {startAt === 0 ? 1 : startAt} -{' '}
-            {totalRecords < pageSize ? totalRecords : page === pageCount ? totalRecords : startAt + pageSize} of{' '}
-            {totalRecords}
-          </PaginationContainer>
+            <IconButton onClick={refetch}>
+              <RefreshIcon />
+            </IconButton>
+            {platformLabels.DisplayingRecords} {startAt === 0 ? 1 : startAt} -{' '}
+            {totalRecords < pageSize ? totalRecords : page === pageCount ? totalRecords : startAt + pageSize}{' '}
+            {platformLabels.Of} {totalRecords}
+          </Box>
         )
       } else {
-        if (gridData && gridData.list) {
-          var _gridData = props.gridData.list
-          const pageCount = Math.ceil(originalGridData.length ? originalGridData.length / pageSize : 1)
-          const totalRecords = originalGridData.length
+        const gridData = props?.gridData
+
+        if (gridData && gridData?.list) {
+          const originalGridData = gridData && gridData.list
+          const page = Math.ceil(gridData.count ? (startAt === 0 ? 1 : (startAt + 1) / pageSize) : 1)
+
+          var _gridData = gridData?.list
+          const pageCount = Math.ceil(originalGridData?.length ? originalGridData?.length / pageSize : 1)
+          const totalRecords = originalGridData?.length
 
           const incrementPage = () => {
             if (page < pageCount) {
@@ -180,7 +239,7 @@ const Table = ({ pagination = true, paginationType = 'api', height, actionColumn
                 ...gridData,
                 list: slicedGridData
               })
-              setPage(page + 1)
+
               setStartAt(startAt + pageSize)
             }
           }
@@ -192,7 +251,6 @@ const Table = ({ pagination = true, paginationType = 'api', height, actionColumn
                 ...gridData,
                 list: slicedGridData
               })
-              setPage(page - 1)
               setStartAt(startAt - pageSize)
             }
           }
@@ -203,11 +261,10 @@ const Table = ({ pagination = true, paginationType = 'api', height, actionColumn
                 0,
                 originalGridData.length > pageSize ? pageSize : originalGridData.length
               )
-              setGridData({
-                ...gridData,
+              setGridData(prev => ({
+                ...prev,
                 list: slicedGridData
-              })
-              setPage(1)
+              }))
               setStartAt(0)
             }
           }
@@ -219,160 +276,271 @@ const Table = ({ pagination = true, paginationType = 'api', height, actionColumn
                 ...gridData,
                 list: slicedGridData
               })
-              setPage(pageCount)
-              setStartAt(originalGridData.length - pageSize)
+              const pageNumber = parseInt(originalGridData.length / pageSize)
+              const start = pageSize * pageNumber
+              setStartAt(start)
             }
           }
 
           return (
-            <PaginationContainer>
-              <IconButton onClick={goToFirstPage} disabled={page === 1}>
+            <Box
+              sx={{
+                width: '100%',
+                backgroundColor: '#fff',
+                borderTop: '1px solid #ccc',
+                fontSize: '0.9rem',
+                bottom: 0
+              }}
+            >
+              {' '}
+              <IconButton
+                onClick={goToFirstPage}
+                disabled={page === 1}
+                sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+              >
                 <FirstPageIcon />
               </IconButton>
-              <IconButton onClick={decrementPage} disabled={page === 1}>
+              <IconButton
+                onClick={decrementPage}
+                disabled={page === 1}
+                sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+              >
                 <NavigateBeforeIcon />
               </IconButton>
-              Page: {page} of {pageCount}
-              <IconButton onClick={incrementPage} disabled={page === pageCount}>
+              {platformLabels.Page} <TextInput value={page} pageCount={pageCount} /> {platformLabels.Of} {pageCount}
+              <IconButton
+                onClick={incrementPage}
+                disabled={page === pageCount}
+                sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+              >
                 <NavigateNextIcon />
               </IconButton>
-              <IconButton onClick={goToLastPage} disabled={page === pageCount}>
+              <IconButton
+                onClick={goToLastPage}
+                disabled={page === pageCount}
+                sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }}
+              >
                 <LastPageIcon />
               </IconButton>
-              {api && (
-                <IconButton onClick={goToFirstPage}>
-                  <RefreshIcon />
-                </IconButton>
-              )}
-              Displaying Records {startAt === 0 ? 1 : startAt} -{' '}
-              {totalRecords < pageSize ? totalRecords : page === pageCount ? totalRecords : startAt + pageSize} of{' '}
-              {totalRecords}
-            </PaginationContainer>
+              <IconButton onClick={refetch}>
+                <RefreshIcon />
+              </IconButton>
+              {platformLabels.DisplayingRecords} {startAt === 0 ? 1 : startAt} -{' '}
+              {totalRecords < pageSize ? totalRecords : page === pageCount ? totalRecords : startAt + pageSize}{' '}
+              {platformLabels.Of} {totalRecords}
+            </Box>
           )
         }
       }
-    } else {
-      return <div></div>
     }
   }
 
-  const columns = props.columns
-
-  const shouldRemoveColumn = column => {
-    const match = columnsAccess && columnsAccess.find(item => item.controlId === column.id)
-
-    return match && match.accessLevel === ControlAccessLevel.Hidden
+  const getRowClass = params => {
+    return params?.rowIndex % 2 === 0 ? 'even-row' : ''
   }
 
-  const filteredColumns = columns.filter(column => !shouldRemoveColumn(column))
+  const selectAll = (params, e) => {
+    const gridApi = params.api
+    const allNodes = []
+    gridApi.forEachNode(node => allNodes.push(node))
 
-  if (props.onEdit || props.onDelete) {
-    const deleteBtnVisible = maxAccess ? props.onDelete && maxAccess > TrxType.EDIT : props.onDelete ? true : false
+    allNodes.forEach(node => {
+      node.data.checked = e.target.checked
+      node.setDataValue('checked', e.target.checked)
+    })
 
-    filteredColumns.push({
-      field: actionColumnHeader,
-      headerName: actionColumnHeader,
-      width: 100,
-      sortable: false,
-      renderCell: params => {
-        return (
-          <>
-            {props.onEdit && (
-              <IconButton size='small' onClick={() => props.onEdit(params.row)}>
-                <Icon icon='mdi:application-edit-outline' fontSize={18} />
-              </IconButton>
-            )}
-            {deleteBtnVisible && (
-              <IconButton size='small' onClick={() => setDeleteDialogOpen([true, params.row])} color='error'>
-                <Icon icon='mdi:delete-forever' fontSize={18} />
-              </IconButton>
-            )}
-          </>
-        )
+    setChecked(e.target.checked)
+
+    if (typeof setData === 'function') onSelectionChanged
+  }
+
+  const onSelectionChanged = params => {
+    const gridApi = params.api
+    const selectedNodes = gridApi.getSelectedNodes()
+    const selectedData = selectedNodes.map(node => node.data)
+    setData(selectedData)
+  }
+
+  function openDelete(obj) {
+    stack({
+      Component: DeleteDialog,
+      props: {
+        open: [true, {}],
+        fullScreen: false,
+        onConfirm: () => props?.onDelete(obj)
+      },
+      width: 450,
+      height: 170,
+      title: platformLabels.Delete
+    })
+  }
+  function openDeleteConfirmation(obj) {
+    stack({
+      Component: StrictDeleteConfirmation,
+      props: {
+        action() {
+          props?.onDelete(obj)
+        }
+      },
+      width: 500,
+      height: 300,
+      title: platformLabels.DeleteConfirmation
+    })
+  }
+
+  if (props?.onEdit || props?.onDelete) {
+    const deleteBtnVisible = maxAccess ? props?.onDelete && maxAccess > TrxType.EDIT : props?.onDelete ? true : false
+
+    if (!filteredColumns?.some(column => column.field === 'actions'))
+      filteredColumns?.push({
+        field: 'actions',
+        headerName: '',
+        width: 100,
+        cellRenderer: params => {
+          const { data } = params
+          const isStatus3 = data.status === 3
+          const isStatusCanceled = data.status === -1
+          const isWIP = data.wip === 2
+
+          return (
+            <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
+              {props?.onEdit && (
+                <IconButton
+                  size='small'
+                  onClick={e => {
+                    props?.onEdit(data)
+                  }}
+                >
+                  <Image src={editIcon} alt='Edit' width={18} height={18} />
+                </IconButton>
+              )}
+
+              {!globalStatus && deleteBtnVisible && (
+                <IconButton
+                  size='small'
+                  onClick={e => {
+                    if (props.deleteConfirmationType == 'strict') {
+                      openDeleteConfirmation(data)
+                    } else {
+                      openDelete(data)
+                    }
+                  }}
+                  color='error'
+                >
+                  <Image src={deleteIcon} alt={platformLabels.Delete} width={18} height={18} />
+                </IconButton>
+              )}
+              {globalStatus && !isStatus3 && !isStatusCanceled && deleteBtnVisible && !isWIP && (
+                <IconButton
+                  size='small'
+                  onClick={e => {
+                    if (props?.deleteConfirmationType == 'strict') {
+                      openDeleteConfirmation(data)
+                    } else {
+                      openDelete(data)
+                    }
+                  }}
+                  color='error'
+                >
+                  <Image src={deleteIcon} alt={platformLabels.Delete} width={18} height={18} />
+                </IconButton>
+              )}
+            </Box>
+          )
+        }
+      })
+  }
+
+  const checkboxCellRenderer = params => {
+    return (
+      <Checkbox
+        checked={params.value}
+        onChange={e => {
+          const checked = e.target.checked
+          if (rowSelection !== 'single') {
+            params.node.setDataValue(params.colDef.field, checked)
+          } else {
+            params.api.forEachNode(node => {
+              if (node.id === params.node.id) {
+                node.setDataValue(params.colDef.field, checked)
+              } else if (checked) {
+                node.setDataValue(params.colDef.field, false)
+              }
+            })
+          }
+        }}
+      />
+    )
+  }
+
+  const onFirstDataRendered = async params => {
+    params.api.sizeColumnsToFit()
+    await params.api.forEachNode(node => {
+      if (rowSelection === 'single') {
+        const checked = node.data?.checked || false
+        node.setDataValue('checked', checked)
       }
     })
   }
 
-  const paginationHeight = pagination ? '41px' : '10px'
-  const tableHeight = height ? `${height}px` : `calc(100vh - 48px - 48px - ${paginationHeight})`
-
-  useEffect(() => {
-    console.log('enter useEffect')
-    if (props.gridData && props.gridData.list) setGridData(props.gridData)
-    if (pagination && paginationType != 'api' && props.gridData && props.gridData.list && page != 1) {
-      console.log('enter if')
-      setPage(1)
-    }
-  }, [props.gridData])
+  const columnDefs = [
+    ...(showCheckboxColumn
+      ? [
+          {
+            headerName: '',
+            field: 'checked',
+            cellRenderer: checkboxCellRenderer,
+            headerComponent: params =>
+              rowSelection !== 'single' && <Checkbox checked={checked} onChange={e => selectAll(params, e)} />,
+            suppressMenu: true // if i want to remove menu from header
+          }
+        ]
+      : []),
+    ...filteredColumns
+  ]
 
   return (
-    <>
-      {maxAccess && maxAccess > TrxType.NOACCESS ? (
-        <>
-          <TableContainer
-            sx={
-              props.style
-                ? props.style
-                : {
-                    zIndex: 0
-
-                    // marginBottom: 0,
-                    // pb: 0,
-                    // maxHeight: tableHeight, overflow: 'auto', position: 'relative',
-                  }
+    <VertLayout>
+      <Grow>
+        <Box
+          className='ag-theme-alpine'
+          style={{ flex: 1, width: '1000px !important', height: props?.height || 'auto' }}
+          sx={{
+            '.ag-header': {
+              height: '40px !important',
+              minHeight: '40px !important'
+            },
+            '.ag-header-cell': {
+              height: '40px !important',
+              minHeight: '40px !important'
+            },
+            '.ag-cell': {
+              borderRight: '1px solid #d0d0d0 !important'
             }
-          >
-            {/* <ScrollableTable> */}
-            <StripedDataGrid
-              rows={gridData?.list || []}
-              sx={{ minHeight: tableHeight, overflow: 'auto', position: 'relative', pb: 2 }}
-              density='compact'
-              components={{
-                LoadingOverlay: LinearProgress,
-
-                // Pagination: pagination ? CustomPagination : null,
-                Footer: CustomPagination,
-                NoRowsOverlay: () => (
-                  <Stack height='100%' alignItems='center' justifyContent='center'>
-                    This Screen Has No Data
-                  </Stack>
-                )
-              }}
-              loading={props.isLoading}
-              getRowId={getRowId}
-              disableRowSelectionOnClick
-              disableColumnMenu
-              getRowClassName={params => (params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd')}
-              {...props}
-              columns={filteredColumns}
-            />
-            {/* </ScrollableTable> */}
-            {/* <PaginationContainer>
-                    <CustomPagination />
-                </PaginationContainer> */}
-          </TableContainer>
-          <DeleteDialog
-            open={deleteDialogOpen}
-            onClose={() => setDeleteDialogOpen([false, {}])}
-            onConfirm={obj => {
-              setDeleteDialogOpen([false, {}])
-              props.onDelete(obj)
-            }}
+          }}
+        >
+          <AgGridReact
+            rowData={(paginationType === 'api' ? props?.gridData?.list : gridData?.list) || []}
+            enableClipboard={true}
+            enableRangeSelection={true}
+            columnDefs={columnDefs}
+            pagination={false}
+            paginationPageSize={pageSize}
+            rowSelection={'single'}
+            suppressAggFuncInHeader={true}
+            getRowClass={getRowClass}
+            rowHeight={35}
+            onFirstDataRendered={onFirstDataRendered}
           />
-        </>
-      ) : (
-        'NO ACCESS'
+        </Box>
+      </Grow>
+      {pagination && (
+        <Fixed>
+          <CustomPagination />
+        </Fixed>
       )}
-    </>
+    </VertLayout>
   )
 }
 
 export default Table
-
-Table.propTypes = {
-  isLoading: PropTypes.bool,
-  columns: PropTypes.array,
-  selectedRow: PropTypes.array,
-  setselectedRow: PropTypes.func,
-  onSelectionChange: PropTypes.func
-}

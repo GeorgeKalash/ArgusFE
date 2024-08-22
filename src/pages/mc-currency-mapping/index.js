@@ -1,64 +1,48 @@
-// ** React Imports
 import { useState, useContext } from 'react'
-
-// ** MUI Imports
-import {Box } from '@mui/material'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
-
-// ** Windows
-import MultiCurrencyWindow from './Windows/MultiCurrencyWindow'
-
-// ** Helpers
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
-
-// ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
-
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { useWindow } from 'src/windows'
+import MultiCurrencyForm from './forms/MultiCurrencyForm'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const MultiCurrencyMapping = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
- 
-  const [selectedRecordId, setSelectedRecordId] = useState(null)
-
-  //states
-  const [windowOpen, setWindowOpen] = useState(false)
-  const [errorMessage, setErrorMessage] = useState(null)
-
-  const [selectedCurrencyId, setSelectedCurrencyId] = useState(null)
-  const [selectedRateTypeId, setSelectedRateTypeId] = useState(null)
-  
+  const { stack } = useWindow()
+  const { platformLabels } = useContext(ControlContext)
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    return await getRequest({
+    const response = await getRequest({
       extension: MultiCurrencyRepository.McExchangeMap.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
+
+    return { ...response, _startAt: _startAt }
   }
+
+  const invalidate = useInvalidate({
+    endpointId: MultiCurrencyRepository.McExchangeMap.page
+  })
 
   const {
     query: { data },
     labels: _labels,
+    paginationParameters,
+    refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: MultiCurrencyRepository.McExchangeMap.page,
     datasetId: ResourceIds.MultiCurrencyMapping
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: MultiCurrencyRepository.McExchangeMap.page
   })
 
   const columns = [
@@ -74,26 +58,17 @@ const MultiCurrencyMapping = () => {
     },
     {
       field: 'exName',
-      headerName: _labels.exchange,
+      headerName: _labels.exchangeTable,
       flex: 1
     }
   ]
 
-
   const add = () => {
-    setWindowOpen(true)
-    setSelectedCurrencyId(null)
-    setSelectedRateTypeId(null)
+    openForm()
   }
 
-  const edit = obj => {
-    // setSelectedRecordId(obj.recordId)
-    setWindowOpen(true)
-    
-    setSelectedCurrencyId(obj.currencyId)
-    setSelectedRateTypeId(obj.rateTypeId)
-   
-
+  const popup = obj => {
+    openForm(obj?.currencyId, obj?.rateTypeId)
   }
 
   const del = async obj => {
@@ -102,49 +77,47 @@ const MultiCurrencyMapping = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
   }
-  
+
+  function openForm(currencyId, rateTypeId) {
+    stack({
+      Component: MultiCurrencyForm,
+      props: {
+        labels: _labels,
+        currencyId: currencyId ? currencyId : null,
+        rateTypeId: rateTypeId ? rateTypeId : null,
+        maxAccess: access,
+        invalidate: invalidate
+      },
+      width: 600,
+      height: 300,
+      title: _labels.mc_mapping
+    })
+  }
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar onAdd={add} maxAccess={access} />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
-          rowId={['currencyId','rateTypeId']}
-          onEdit={edit}
+          rowId={['currencyId', 'rateTypeId']}
+          onEdit={popup}
           onDelete={del}
           isLoading={false}
           pageSize={50}
-          paginationType='client'
+          paginationType='api'
           maxAccess={access}
+          refetch={refetch}
+          paginationParameters={paginationParameters}
         />
-      </Box>
-      {windowOpen && (
-        <MultiCurrencyWindow
-          onClose={() => {
-            setWindowOpen(false)
-            setSelectedRecordId(null)
-          }}
-          labels={_labels}
-          maxAccess={access}
-          recordId={selectedRecordId}
-          setSelectedRecordId={setSelectedRecordId}
-          
-          currencyId={selectedCurrencyId}
-          rateTypeId={selectedRateTypeId}
-        />
-      )}
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+      </Grow>
+    </VertLayout>
   )
 }
 
-
-
-
 export default MultiCurrencyMapping
-
-

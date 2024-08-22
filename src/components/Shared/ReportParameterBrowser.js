@@ -1,40 +1,251 @@
-// ** React Imports
 import { useEffect, useState, useContext } from 'react'
-
-// ** MUI Imports
-import { Checkbox, FormControlLabel, Grid } from '@mui/material'
-
-// ** Third Party Imports
-import { useFormik } from 'formik'
-import * as yup from 'yup'
-
-// ** Custom Imports
-import Window from 'src/components/Shared/Window'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
-import CustomComboBox from 'src/components/Inputs/CustomComboBox'
-import CustomTextField from 'src/components/Inputs/CustomTextField'
+import { Grid } from '@mui/material'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
-import { SaleRepository } from 'src/repositories/SaleRepository'
+import { FinancialRepository } from 'src/repositories/FinancialRepository'
+import { useForm } from 'src/hooks/form'
+import FormShell from './FormShell'
+import { apiMappings, COMBOBOX, LOOKUP } from './apiMappings'
+import ResourceComboBox from './ResourceComboBox'
+import { ResourceLookup } from './ResourceLookup'
+import { formatDateDefault } from 'src/lib/date-helper'
+import CustomTextField from '../Inputs/CustomTextField'
+import { useError } from 'src/error'
 
-const ReportParameterBrowser = ({ open, onClose, height = 200, reportName, paramsArray, setParamsArray, disabled }) => {
+const formatDateTo = value => {
+  const date = new Date(value)
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+
+  return `${year}${month}${day}`
+}
+
+const formatDateFrom = value => {
+  let timestamp
+
+  if (value.indexOf('-') > -1 || value.indexOf('/') > -1) {
+    timestamp = new Date(value.toString()).getTime()
+  } else {
+    const year = value.slice(0, 4)
+    const month = value.slice(4, 6)
+    const day = value.slice(6, 8)
+    const parsedDate = new Date(year, month - 1, day)
+    timestamp = parsedDate.getTime()
+  }
+
+  return timestamp
+}
+
+const GetLookup = ({ field, formik }) => {
+  const apiDetails = field.apiDetails
+
+  return (
+    <Grid item xs={12} key={field.id}>
+      <ResourceLookup
+        endpointId={apiDetails.endpoint}
+        parameters={apiDetails.parameters}
+        firstFieldWidth={apiDetails.firstFieldWidth}
+        valueField={apiDetails.firstField}
+        displayField={apiDetails.secondField}
+        secondDisplayField={apiDetails.secondDisplayField}
+        columnsInDropDown={apiDetails.columnsInDropDown}
+        name={field.key}
+        displayFieldWidth={apiDetails.displayFieldWidth}
+        required={field.mandatory}
+        label={field.caption}
+        form={formik}
+        firstValue={formik.values.parameters?.[field.id]?.display}
+        secondValue={formik.values.parameters?.[field.id]?.display2}
+        onChange={(event, newValue) => {
+          const display = Array.isArray(apiDetails?.firstField)
+            ? apiDetails?.firstField
+                ?.map(header => newValue?.[header] && newValue?.[header]?.toString())
+                ?.filter(item => item)
+                ?.join(' ')
+            : newValue?.[apiDetails.firstField]
+
+          formik.setFieldValue(
+            `parameters[${field.id}]`,
+            newValue?.[apiDetails.valueOnSelection]
+              ? {
+                  fieldId: field.id,
+                  fieldKey: field.key,
+                  value: newValue?.[apiDetails.valueOnSelection] || '',
+                  caption: field.caption,
+                  display: display ? display : newValue?.[apiDetails.firstField],
+                  display2: newValue?.[apiDetails.secondField]
+                }
+              : ''
+          )
+        }}
+        error={Boolean(formik.errors?.parameters?.[field?.id])}
+      />
+    </Grid>
+  )
+}
+
+const GetComboBox = ({ field, formik, rpbParams }) => {
+  const apiDetails = field?.apiDetails
+  let newParams = apiDetails?.parameters
+
+  useEffect(() => {
+    if (!formik.values?.parameters?.[field.id]?.value && field.value && rpbParams?.length < 1) {
+      formik.setFieldValue(`parameters[${field.id}]`, {
+        fieldId: field.id,
+        fieldKey: field.key,
+        value: Number(field.value),
+        caption: field.caption,
+        display: field.value
+      })
+    }
+  }, [])
+
+  if (apiDetails?.endpoint === SystemRepository.DocumentType.qry) {
+    newParams += `&_dgId=${field?.data}`
+  } else if (apiDetails?.endpoint === InventoryRepository.Dimension.qry) {
+    newParams = `_dimension=${field?.data}`
+  } else if (apiDetails?.endpoint === FinancialRepository.FIDimension.qry) {
+    newParams = `_dimension=${field?.data}`
+  }
+
+  return (
+    <Grid item xs={12} key={field.id}>
+      {field?.classId ? (
+        <ResourceComboBox
+          endpointId={apiDetails.endpoint}
+          parameters={newParams}
+          name={`parameters[${field.id}]`}
+          label={field.caption}
+          valueField={apiDetails.valueField}
+          displayField={apiDetails.displayField}
+          columnsInDropDown={apiDetails?.columnsInDropDown}
+          required={field.mandatory}
+          values={formik.values?.parameters?.[field.id]?.value}
+          onChange={(event, newValue) => {
+            const textValue = Array.isArray(apiDetails?.displayField)
+              ? apiDetails?.displayField?.map(header => newValue?.[header]?.toString())?.join(' ')
+              : newValue?.[apiDetails?.displayField]
+
+            formik.setFieldValue(
+              `parameters[${field.id}]`,
+              newValue?.[apiDetails?.valueField]
+                ? {
+                    fieldId: field.id,
+                    fieldKey: field.key,
+                    value: Number(newValue?.[apiDetails?.valueField]),
+                    caption: field.caption,
+                    display: textValue
+                  }
+                : ''
+            )
+          }}
+          error={formik.touched?.parameters?.[field?.id] && Boolean(formik.errors?.parameters?.[field?.id])}
+        />
+      ) : (
+        <>
+          <ResourceComboBox
+            datasetId={field?.data}
+            name={`parameters[${field.id}]`}
+            label={field.caption}
+            valueField={'key'}
+            displayField={'value'}
+            required={field.mandatory}
+            value={formik.values?.parameters?.[field.id]?.value}
+            onChange={(event, newValue) => {
+              formik.setFieldValue(
+                `parameters[${field.id}]`,
+                newValue
+                  ? {
+                      fieldId: field.id,
+                      fieldKey: field.key,
+                      value: newValue?.key,
+                      caption: field.caption,
+                      display: newValue?.value
+                    }
+                  : ''
+              )
+            }}
+            error={formik.touched?.parameters?.[field?.id] && Boolean(formik.errors?.parameters?.[field?.id])}
+          />
+        </>
+      )}
+    </Grid>
+  )
+}
+
+const GetDate = ({ field, formik, rpbParams }) => {
+  useEffect(() => {
+    if (!formik.values?.parameters?.[field.id]?.value && field.value && rpbParams?.length < 1) {
+      formik.setFieldValue(`parameters[${field.id}]`, {
+        fieldId: field.id,
+        fieldKey: field.key,
+        value: new Date(field.value.toString())?.getTime() || '',
+        caption: field.caption,
+        display: formatDateDefault(new Date(field?.value?.toString()))
+      })
+    }
+  }, [])
+
+  return (
+    <Grid item xs={12} key={field.id}>
+      <CustomDatePicker
+        name={`parameters[${field.id}]`}
+        label={field.caption}
+        value={formik.values?.parameters?.[field.id]?.value}
+        required={field.mandatory}
+        onChange={(name, newValue) => {
+          formik.setFieldValue(`parameters[${field.id}]`, {
+            fieldId: field.id,
+            fieldKey: field.key,
+            value: newValue,
+            caption: field.caption,
+            display: formatDateDefault(newValue)
+          })
+        }}
+        error={formik.errors?.parameters?.[field?.id] && Boolean(formik.errors?.parameters?.[field?.id])}
+        onClear={() => formik.setFieldValue(`parameters[${field.id}]`, undefined)}
+      />
+    </Grid>
+  )
+}
+
+const GetTextField = ({ field, formik }) => {
+  return (
+    <Grid item xs={12} key={field.id}>
+      <CustomTextField
+        name={`parameters[${field.id}`}
+        label={field.caption}
+        value={formik.values?.parameters?.[field.id]?.value || null}
+        required={field.mandatory}
+        onChange={e => {
+          e.target.value != ''
+            ? formik.setFieldValue(`parameters[${field.id}]`, {
+                fieldId: field.id,
+                fieldKey: field.key,
+                value: e.target.value,
+                caption: field.caption,
+                display: e.target.value
+              })
+            : formik.setFieldValue(`parameters[${field.id}]`, '')
+        }}
+        error={Boolean(formik.errors?.parameters?.[field.id])}
+        onClear={() => formik.setFieldValue(`parameters[${field.id}]`, '')}
+      />
+    </Grid>
+  )
+}
+
+const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window }) => {
   const { getRequest } = useContext(RequestsContext)
+  const [items, setItems] = useState([])
+  const [parameters, setParameters] = useState([])
+  const { stack: stackError } = useError()
 
-  const [parameters, setParameters] = useState(null)
-  const [fields, setFields] = useState([])
-  const [errorMessage, setErrorMessage] = useState(null)
-
-  //snaphot stores
-  const [itemSnapshotStore, setItemSnapshotStore] = useState([null])
-
-  const initialParams = paramsArray
-
-  const getParameterDefinition = () => {
-    var parameters = '_reportName=' + reportName
+  const getParameterDefinition = reportName => {
+    const parameters = `_reportName=${reportName}`
 
     getRequest({
       extension: SystemRepository.ParameterDefinition,
@@ -43,451 +254,121 @@ const ReportParameterBrowser = ({ open, onClose, height = 200, reportName, param
       .then(res => {
         setParameters(res.list)
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch(e => {})
   }
 
-  // const getFieldKey = key => {
-  //   switch (key) {
-  //     case 'toFunctionId':
-  //       return parametersValidation.values?.toFunctionId
-  //     case 'fromFunctionId':
-  //       return parametersValidation.values?.fromFunctionId
+  const fetchData = async field => {
+    const mapping = apiMappings[field.classId]
+    if (!mapping) {
+      console.warn(`No API mapping found for classId ${field.classId}`)
 
-  //     default:
-  //       break
-  //   }
-  // }
+      return null
+    }
 
-  const getFieldValue = key => {
-    switch (key) {
-      case 'toFunctionId':
-        return {
-          toFunctionId: parametersValidation?.values?.toFunctionId ? parametersValidation.values.toFunctionId : null
-        }
-      case 'fromFunctionId':
-        return {
-          fromFunctionId: parametersValidation?.values?.fromFunctionId
-            ? parametersValidation.values.fromFunctionId
-            : null
-        }
-
-      default:
-        break
+    return {
+      ...mapping
     }
   }
 
-  const getCombo = ({ field, valueField, displayField, store, onChange }) => {
-    return (
-      <Grid item xs={12}>
-        <CustomComboBox
-          name={field.key}
-          label={field.caption}
-          valueField={valueField}
-          displayField={displayField}
-          store={store}
-          value={
-            parametersValidation?.values &&
-            parametersValidation?.values[field.key] &&
-            store.filter(item => item.key === parametersValidation?.values[field.key])[0]
+  const { formik } = useForm({
+    initialValues: {
+      parameters: []
+    },
+    validate: values => {
+      const errors = { parameters: [] }
+      items.forEach(item => {
+        if (item?.mandatory && item?.id) {
+          if (!values?.parameters?.[item?.id]) {
+            errors.parameters[item?.id] = 'This field is required'
           }
-          required={field.mandatory}
-          onChange={(event, newValue) => {
-            onChange && onChange(newValue)
-            handleFieldChange({
-              fieldId: field.id,
-              fieldKey: field.key,
-              value: newValue?.key,
-              caption: field.caption,
-              display: newValue?.value
-            })
-            parametersValidation.setFieldValue([field.key], newValue?.key)
-          }}
-          sx={{ pt: 2 }}
-        />
-      </Grid>
-    )
-  }
-
-  const itemSnapshot = newValue => {
-    var parameters = '_categoryId=0&_msId=0&_filter=&_startAt=0&_size=30'
-    getRequest({
-      extension: InventoryRepository.Item.snapshot,
-      parameters
-    })
-      .then(res => {
-        return res.list
+        }
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
 
-  const getComboBoxByClassId = field => {
-    switch (field.classId) {
-      case 0:
-        var parameters = `_database=${field.data}`
-        getRequest({
-          extension: SystemRepository.KeyValueStore,
-          parameters: parameters
-        })
-          .then(res => {
-            var _fieldValue = getFieldValue(field.key)
-            parametersValidation.setValues(pre => {
-              return {
-                ...pre,
-                ..._fieldValue
-              }
-            })
-
-            fields.push(
-              <Grid item xs={12} key={field.classId}>
-                <CustomComboBox
-                  name={field.key}
-                  label={field.caption}
-                  valueField='key'
-                  displayField='value'
-                  store={res.list}
-                  value={
-                    parametersValidation?.values &&
-                    parametersValidation?.values[field.key] &&
-                    res.list.filter(item => item.key === parametersValidation?.values[field.key])[0]
-                  }
-                  required={field.mandatory}
-                  onChange={(event, newValue) => {
-                    handleFieldChange({
-                      fieldId: field.id,
-                      fieldKey: field.key,
-                      value: newValue?.key,
-                      caption: field.caption,
-                      display: newValue?.value
-                    })
-                    parametersValidation.setFieldValue([field.key], newValue?.key)
-                  }}
-                  sx={{ pt: 2 }}
-                />
-              </Grid>
-            )
-          })
-          .catch(error => {
-            setErrorMessage(error)
-          })
-        break
-
-      case 41101:
-        var parameters = '_filter='
-
-        getRequest({
-          extension: InventoryRepository.Site.qry,
-          parameters
-        })
-          .then(res => {
-            var _fieldValue = getFieldValue(field.key)
-
-            parametersValidation.setValues(pre => {
-              return {
-                ...pre,
-                ..._fieldValue
-              }
-            })
-
-            fields.push(getCombo({ field, valueField: 'siteId', displayField: 'reference', store: res.list }))
-          })
-          .catch(error => {
-            setErrorMessage(error)
-          })
-        break
-
-      case 41201:
-        fields.push(
-          getCombo({
-            field,
-            valueField: 'recordId',
-            displayField: 'reference',
-            itemSnapshotStore,
-            onChange: setItemSnapshotStore(itemSnapshot())
-          })
-        )
-        break
-
-      // case 41103:
-      //   var parameters = '_filter='
-
-      //   getRequest({
-      //     extension: InventoryRepository.Category.qry,
-      //     parameters
-      //   })
-      //     .then(res => {
-      //       var _fieldValue = getFieldValue(field.key)
-
-      //       parametersValidation.setValues(pre => {
-      //         return {
-      //           ...pre,
-      //           ..._fieldValue
-      //         }
-      //       })
-
-      //       fields.push(getCombo({ field, valueField: 'recordId', displayField: 'reference', store: res.list }))
-      //     })
-      //     .catch(error => {
-      //       setErrorMessage(error)
-      //     })
-      //   break
-
-      // case 41102:
-      //   var parameters = '_filter='
-
-      //   getRequest({
-      //     extension: InventoryRepository.Measurement.qry,
-      //     parameters
-      //   })
-      //     .then(res => {
-      //       var _fieldValue = getFieldValue(field.key)
-
-      //       parametersValidation.setValues(pre => {
-      //         return {
-      //           ...pre,
-      //           ..._fieldValue
-      //         }
-      //       })
-
-      //       fields.push(getCombo({ field, valueField: 'recordId', displayField: 'reference', store: res.list }))
-      //     })
-      //     .catch(error => {
-      //       setErrorMessage(error)
-      //     })
-      //   break
-
-      // case 51101:
-      //   var parameters = '_filter='
-
-      //   getRequest({
-      //     extension: SaleRepository.PriceLevel.qry,
-      //     parameters
-      //   })
-      //     .then(res => {
-      //       var _fieldValue = getFieldValue(field.key)
-
-      //       parametersValidation.setValues(pre => {
-      //         return {
-      //           ...pre,
-      //           ..._fieldValue
-      //         }
-      //       })
-
-      //       fields.push(getCombo({ field, valueField: 'siteId', displayField: 'reference', store: res.list }))
-      //     })
-      //     .catch(error => {
-      //       setErrorMessage(error)
-      //     })
-      //   break
-
-      default:
-        break
-    }
-  }
-
-  const getFieldsByClassId = () => {
-    parameters.map(field => {
-      switch (field.controlType) {
-        case 1:
-          fields.push(
-            <Grid item xs={12}>
-              <CustomTextField
-                name={field.key}
-                label={field.caption}
-                value={parametersValidation.values[field.key]} //??
-                required={field.mandatory}
-                onChange={(event, newValue) => {
-                  handleFieldChange({
-                    fieldId: field.id,
-                    fieldKey: field.key,
-                    value: newValue,
-                    caption: field.caption,
-                    display: newValue
-                  })
-                  parametersValidation.setFieldValue(field.key, newValue)
-                }}
-                onClear={() => parametersValidation.setFieldValue(field.key, '')}
-              />
-            </Grid>
-          )
-          break
-        case 2:
-          fields.push(
-            <Grid item xs={12}>
-              <CustomTextField
-                numberField
-                name={field.key}
-                label={field.caption}
-                value={parametersValidation.values[field.key]} //??
-                required={field.mandatory}
-                onChange={(event, newValue) => {
-                  handleFieldChange({
-                    fieldId: field.id,
-                    fieldKey: field.key,
-                    value: newValue,
-                    caption: field.caption,
-                    display: newValue
-                  })
-                  parametersValidation.setFieldValue(field.key, newValue)
-                }}
-                onClear={() => parametersValidation.setFieldValue(field.key, '')}
-              />
-            </Grid>
-          )
-          break
-        case 4:
-          fields.push(
-            <Grid item xs={12}>
-              <CustomDatePicker
-                name={field.key}
-                label={field.caption}
-                value={parametersValidation.values[field.key]}
-                required={field.mandatory}
-                onChange={(event, newValue) => {
-                  handleFieldChange({
-                    fieldId: field.id,
-                    fieldKey: field.key,
-                    value: newValue,
-                    caption: field.caption,
-                    display: newValue
-                  })
-                  parametersValidation.setFieldValue(field.key, newValue)
-                }}
-                onClear={() => parametersValidation.setFieldValue(field.key, '')}
-              />
-            </Grid>
-          )
-          break
-        case 5:
-          getComboBoxByClassId(field)
-          break
-        case 6:
-          fields.push(
-            <Grid item xs={12}>
-              <FormControlLabel
-                label={field.caption}
-                control={
-                  <Checkbox
-                    id={cellId}
-                    name={field.key}
-                    checked={parametersValidation.values[field.key]}
-                    value={[field.key]}
-                    onChange={(event, newValue) => {
-                      handleFieldChange({
-                        fieldId: field.id,
-                        fieldKey: field.key,
-                        value: newValue,
-                        caption: field.caption,
-                        display: newValue
-                      })
-                      parametersValidation.setFieldValue(field.key, newValue)
-                    }}
-                  />
-                }
-              />
-            </Grid>
-          )
-          break
-        default:
-          break
-      }
-    })
-  }
-
-  const handleFieldChange = object => {
-    const existingIndex = paramsArray.findIndex(item => item.fieldId === object.fieldId)
-
-    if (existingIndex !== -1) {
-      paramsArray[existingIndex] = {
-        fieldId: object.fieldId,
-        fieldKey: object.fieldKey,
-        value: object.value,
-        caption: object.caption,
-        display: object.display
-      }
-    } else {
-      paramsArray.push({
-        fieldId: object.fieldId,
-        fieldKey: object.fieldKey,
-        value: object.value,
-        caption: object.caption,
-        display: object.display
-      })
-    }
-
-    setFields(fields)
-  }
-
-  const parametersValidation = useFormik({
-    enableReinitialize: false,
+      return errors.parameters.length > 0 ? errors : {}
+    },
+    enableReinitialize: true,
     validateOnChange: true,
-    validationSchema: yup.object({
-      // fromFunctionId: yup.string().required('This field is required'),
-      // toFunctionId: yup.string().required('This field is required')
-    }),
     onSubmit: values => {
-      onClose()
+      setRpbParams([])
+
+      const processedArray = values?.parameters
+        ?.filter((item, index) => item?.fieldId && item?.value != null)
+        ?.reduce((acc, item) => {
+          if (item?.fieldId) {
+            acc[item.fieldId] = {
+              ...item,
+              value:
+                item.fieldKey === 'date' || item.fieldKey?.indexOf('Date') > -1 ? formatDateTo(item.value) : item.value
+            }
+          }
+
+          return acc
+        }, [])
+
+      setRpbParams(processedArray)
+      window.close()
     }
   })
 
-  const clearValues = () => {
-    setParamsArray([])
+  const mergeFieldWithApiDetails = async () => {
+    const fieldComponentArray = []
+    let list = ''
+    await Promise.all(
+      parameters.map(async field => {
+        const detailedApiDetails = (await fetchData(field)) || ''
+        if (!detailedApiDetails) {
+          list += list ? ', ' + field.caption : field.caption
+        }
+        if (field.controlType) {
+          fieldComponentArray.push({ ...field, apiDetails: detailedApiDetails })
+        }
+      })
+    )
+    if (list) {
+      stackError({ message: `${list} - has not in apiMappings` })
+    }
+    setItems(fieldComponentArray.filter(field => field !== null))
   }
 
-  // const clearValues = () => {
-  //   setParamsArray([])
-  //   // parametersValidation.resetForm()
-
-  //   console.log({ parameters })
-  //   console.log({ fields })
-  //   parameters.map(param => {
-  //     console.log({ param })
-  //     parametersValidation.setFieldValue(`${param.key}`, null)
-  //   })
-  //   // console.log({ fields })
-  //   setFields([])
-  //   // getFieldsByClassId()
-  // }
-
-  // useEffect(() => {
-  //   console.log({ parametersValidation: parametersValidation.values })
-  // }, [parametersValidation])
-
-  // useEffect(() => {
-  //   if (parameters && fields.length === 0) getFieldsByClassId()
-  // }, [fields])
+  useEffect(() => {
+    if (parameters.length > 0) {
+      mergeFieldWithApiDetails()
+    }
+  }, [parameters])
 
   useEffect(() => {
-    if (!parameters && fields.length === 0 && !disabled) getParameterDefinition()
-  }, [parameters, disabled])
+    const mappedData = rpbParams.reduce((acc, item) => {
+      acc[item?.fieldId] = {
+        ...item,
+        value: item.fieldKey === 'date' || item.fieldKey?.indexOf('Date') > -1 ? formatDateFrom(item.value) : item.value
+      }
+
+      return acc
+    }, [])
+
+    formik.setFieldValue('parameters', mappedData)
+  }, [])
 
   useEffect(() => {
-    if (!open) setFields([])
-    if (parameters && open) getFieldsByClassId()
-  }, [open])
+    getParameterDefinition(reportName)
+  }, [reportName])
 
   return (
-    <>
-      {open && (
-        <Window
-          id='RPBWindow'
-          onClose={onClose}
-          width={600}
-          height={height}
-          onSave={parametersValidation.handleSubmit}
-          onClear={clearValues}
-        >
-          <Grid container spacing={2} sx={{ px: 4, pt: 2 }}>
-            {fields && fields}
-          </Grid>
-        </Window>
-      )}
-
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+    <FormShell form={formik} infoVisible={false} isSavedClear={false}>
+      <Grid container spacing={2} sx={{ px: 4, pt: 2 }}>
+        {items?.map(item => {
+          if (item.controlType === 5 && item.apiDetails?.type === LOOKUP) {
+            return <GetLookup key={item.fieldId} formik={formik} field={item} />
+          } else if (item.controlType === 5 && item.apiDetails?.type === COMBOBOX) {
+            return <GetComboBox key={item.fieldId} formik={formik} field={item} rpbParams={rpbParams} />
+          } else if (item.controlType === 4) {
+            return <GetDate key={item.fieldId} formik={formik} field={item} rpbParams={rpbParams} />
+          } else if (item.controlType === 1) {
+            return <GetTextField key={item.fieldId} formik={formik} field={item} apiDetails={item.apiDetails} />
+          }
+        })}
+      </Grid>
+    </FormShell>
   )
 }
 

@@ -22,7 +22,7 @@ const themeConfig = {
   verticalNavToggleType: 'accordion' /* accordion | collapse /*! Note: This is for Vertical navigation menu only */,
   navCollapsed: false /* true | false /*! Note: This is for Vertical navigation menu only */,
   navigationSize: 300 /* Number in px(Pixels) /*! Note: This is for Vertical navigation menu only */,
-  collapsedNavigationSize: 68 /* Number in px(Pixels) /*! Note: This is for Vertical navigation menu only */,
+  collapsedNavigationSize: 0 /* Number in px(Pixels) /*! Note: This is for Vertical navigation menu only */,
   afterVerticalNavMenuContentPosition: 'fixed' /* fixed | static */,
   beforeVerticalNavMenuContentPosition: 'fixed' /* fixed | static */,
   horizontalMenuToggle: 'hover' /* click | hover /*! Note: This is for Horizontal navigation menu only */,
