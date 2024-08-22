@@ -83,6 +83,7 @@ export const SaleRepository = {
     del: service + 'delRPO'
   },
   PriceGroups: {
+    page: service + 'pagePG',
     qry: service + 'qryPG',
     get: service + 'getPG',
     set: service + 'setPG',
