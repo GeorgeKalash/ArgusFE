@@ -8,7 +8,7 @@ import { useForm } from 'src/hooks/form'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import { DataSets } from 'src/resources/DataSets'
 
-export default function MoreDetails({ labels, editMode, maxAccess, clientFormik, window }) {
+export default function MoreDetails({ labels, editMode, maxAccess, readOnly, clientFormik, window }) {
   const { formik } = useForm({
     initialValues: {
       trxCountPerYear: '',
@@ -47,11 +47,12 @@ export default function MoreDetails({ labels, editMode, maxAccess, clientFormik,
   }, [])
 
   return (
-    <FormShell form={formik} infoVisible={false}>
+    <FormShell form={formik} infoVisible={false} isCleared={false}>
       <Grid container xs={12} spacing={2} sx={{ p: 5 }}>
         <Grid item xs={12}>
           <CustomNumberField
             name='trxCountPerYear'
+            readOnly={editMode || readOnly}
             onChange={formik.handleChange}
             label={labels.trxCountPerYear}
             value={formik.values.trxCountPerYear}
@@ -61,6 +62,7 @@ export default function MoreDetails({ labels, editMode, maxAccess, clientFormik,
         <Grid item xs={12}>
           <CustomNumberField
             name='trxAmountPerYear'
+            readOnly={editMode || readOnly}
             label={labels.trxAmountPerYear}
             onChange={formik.handleChange}
             value={formik.values.trxAmountPerYear}
@@ -73,7 +75,7 @@ export default function MoreDetails({ labels, editMode, maxAccess, clientFormik,
             endpointId={CurrencyTradingSettingsRepository.RiskLevel.qry}
             name='riskLevel'
             label={labels.riskLevel}
-            readOnly={editMode && !allowEdit}
+            readOnly={(editMode && !allowEdit) || readOnly}
             valueField='recordId'
             displayField={['reference', 'name']}
             columnsInDropDown={[
@@ -101,7 +103,7 @@ export default function MoreDetails({ labels, editMode, maxAccess, clientFormik,
             valueField='key'
             displayField='value'
             values={formik.values}
-            readOnly={editMode && !allowEdit}
+            readOnly={(editMode && !allowEdit) || readOnly}
             onChange={(event, newValue) => {
               if (newValue) {
                 formik.setFieldValue('civilStatus', newValue?.key)
@@ -119,7 +121,7 @@ export default function MoreDetails({ labels, editMode, maxAccess, clientFormik,
             name='oldReference'
             label={labels.oldReference}
             value={formik.values?.oldReference}
-            readOnly={editMode && true}
+            readOnly={editMode || readOnly}
             onChange={formik.handleChange}
             maxLength='10'
             onClear={() => formik.setFieldValue('oldReference', '')}
@@ -135,7 +137,7 @@ export default function MoreDetails({ labels, editMode, maxAccess, clientFormik,
             label={labels.title}
             valueField='key'
             displayField='value'
-            readOnly={editMode && !allowEdit}
+            readOnly={(editMode && !allowEdit) || readOnly}
             values={formik.values}
             onChange={(event, newValue) => {
               if (newValue) {

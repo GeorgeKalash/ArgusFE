@@ -36,6 +36,7 @@ import CustomDatePickerHijri from 'src/components/Inputs/CustomDatePickerHijri'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import MoreDetails from './MoreDetails'
+import ExtraIncome from './ExtraIncome'
 
 const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = false }) => {
   const { stack } = useWindow()
@@ -272,7 +273,6 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
           fl_middleName: obj.clientIndividual?.fl_middleName,
           fl_familyName: obj.clientIndividual?.fl_familyName,
           isResident: obj.clientIndividual?.isResident,
-          professionId: obj.clientIndividual?.professionId,
           incomeSourceId: obj.clientIndividual?.incomeSourceId,
           sponsorName: obj.clientIndividual?.sponsorName,
 
@@ -295,6 +295,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
           name: obj.clientMaster?.name,
           oldReference: obj.clientMaster?.oldReference,
           status: obj.clientMaster?.status,
+          professionId: obj.clientMaster?.professionId,
 
           // //clientRemittance
           recordId: recordId,
@@ -397,31 +398,29 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       return errors
     },
     validationSchema: yup.object({
-      reference: referenceRequired && yup.string().required(' '),
-      isResident: yup.string().required(' '),
-      birthDate: yup.string().required(' '),
-      idtId: yup.string().required(' '),
-      idNo: yup.string().required(' '),
-      expiryDate: yup.date().required(' '),
-      countryId: yup.string().required(' '),
-      cityId: yup.string().required(' '),
-      idCountry: yup.string().required(' '),
-      name: yup.string().required(' '),
-      firstName: yup.string().required(' '),
-      lastName: yup.string().required(' '),
-      nationalityId: yup.string().required(' '),
-      professionId: yup.string().required(' '),
-      cellPhone: yup.string().required(' '),
+      reference: referenceRequired && yup.string().required(),
+      isResident: yup.string().required(),
+      birthDate: yup.string().required(),
+      idtId: yup.string().required(),
+      idNo: yup.string().required(),
+      expiryDate: yup.date().required(),
+      countryId: yup.string().required(),
+      cityId: yup.string().required(),
+      idCountry: yup.string().required(),
+      name: yup.string().required(),
+      firstName: yup.string().required(),
+      lastName: yup.string().required(),
+      nationalityId: yup.string().required(),
+      professionId: yup.string().required(),
+      cellPhone: yup.string().required(),
       cellPhoneRepeat: yup
         .string()
         .required('Repeat Password is required')
         .oneOf([yup.ref('cellPhone'), null], 'Cell phone must match'),
-      smsLanguage: yup.string().required(' '),
-      incomeSourceId: yup.string().required(' '),
-      gender: yup.string().required(' '),
-      street1: yup.string().required(' ')
-
-      //phone: yup.string().required(' ')
+      smsLanguage: yup.string().required(),
+      incomeSourceId: yup.string().required(),
+      gender: yup.string().required(),
+      street1: yup.string().required()
     }),
     onSubmit: values => {
       postRtDefault(values)
@@ -448,7 +447,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       createdDate: formatDateToApiFunction(date.toISOString()),
       expiryDate: formatDateToApiFunction(obj.expiryDate),
       issueDate: obj.issueDate && formatDateToApiFunction(obj.issueDate), // test
-
+      professionId: obj.professionId,
       otpVerified: obj.otpVerified,
       govCellVerified: obj.govCellVerified,
       plantName: obj.plantName,
@@ -456,7 +455,9 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       status: obj.status,
       categoryName: obj.categoryName,
       oldReference: obj.oldReference,
-      status: obj.status
+      status: obj.status,
+      extraIncome: obj.extraIncome,
+      extraIncomeId: obj.extraIncomeId
     }
 
     //CCTD
@@ -482,7 +483,6 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       fl_lastName: obj.fl_lastName,
       fl_middleName: obj.fl_middleName,
       fl_familyName: obj.fl_familyName,
-      professionId: obj.professionId,
       birthDate: formatDateToApiFunction(obj.birthDate),
       isResident: obj.isResident,
       incomeSourceId: obj.incomeSourceId,
@@ -1518,6 +1518,26 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                           width: 500,
                           height: 400,
                           title: labels.moreDetails
+                        })
+                      }
+                    >
+                      {labels.moreDetails}
+                    </Button>
+                    <Button
+                      sx={{ ml: 2 }}
+                      variant='contained'
+                      onClick={() =>
+                        stack({
+                          Component: ExtraIncome,
+                          props: {
+                            readOnly: editMode && !allowEdit,
+                            labels: labels,
+                            clientFormik: clientIndividualFormik,
+                            maxAccess: maxAccess
+                          },
+                          width: 500,
+                          height: 200,
+                          title: labels.extraIncome
                         })
                       }
                     >
