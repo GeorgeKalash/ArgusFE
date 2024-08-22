@@ -26,6 +26,7 @@ const WindowToolbar = ({
   onClickIT,
   onGenerateReport,
   disabledSubmit,
+  disabledSavedClear,
   disabledApply,
   editMode = false,
   infoVisible = true,
@@ -87,6 +88,7 @@ const WindowToolbar = ({
     isInfo,
     isCleared,
     disabledSubmit,
+    disabledSavedClear,
     disabledApply,
     infoVisible,
     onRecordRemarks,
@@ -128,9 +130,9 @@ const WindowToolbar = ({
             opacity: 0;
             transition: opacity 0.3s, top 0.3s;
             z-index: 1 !important;
-            white-space: nowrap; 
-            overflow: hidden; 
-            text-overflow: ellipsis; 
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
             display: none;
             }
           .button-container:hover .toast {

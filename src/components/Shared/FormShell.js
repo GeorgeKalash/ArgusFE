@@ -24,6 +24,7 @@ export default function FormShell({
   children,
   editMode,
   disabledSubmit,
+  disabledSavedClear,
   infoVisible = true,
   postVisible = false,
   resourceId,
@@ -237,6 +238,7 @@ export default function FormShell({
           transactionClicked={transactionClicked}
           editMode={editMode}
           disabledSubmit={disabledSubmit}
+          disabledSavedClear={disabledSavedClear}
           infoVisible={infoVisible}
           postVisible={postVisible}
           isPosted={isPosted}
