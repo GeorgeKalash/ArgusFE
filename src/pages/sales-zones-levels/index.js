@@ -90,16 +90,27 @@ const SalesZonesLevels = () => {
     },
     onSubmit: async values => {
       try {
-        const data = {
-          items: values.items
+        const levelIds = values.items.map(item => item.levelId)
+
+        const uniqueLevelIds = new Set()
+        for (const id of levelIds) {
+          if (uniqueLevelIds.has(id)) {
+            toast.error('Duplicate Level ID found: ' + id)
+
+            return
+          }
+          uniqueLevelIds.add(id)
         }
 
+        const data = { items: values.items }
         await postRequest({
           extension: SaleRepository.SaleZoneLevel.set2,
           record: JSON.stringify(data)
         })
         toast.success(platformLabels.Saved)
-      } catch (error) {}
+      } catch (error) {
+        toast.error(`Save failed: ${error.message}`)
+      }
     }
   })
 
