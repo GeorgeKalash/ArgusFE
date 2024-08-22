@@ -30,6 +30,7 @@ const ScrapForm = ({ store, setStore, maxAccess, labels }) => {
               .nullable()
               .test('is-valid-reportingPurity', function (value) {
                 if (!value) return true
+
                 return value >= 0.001 && value <= 1
               }),
             purity: yup
@@ -37,6 +38,7 @@ const ScrapForm = ({ store, setStore, maxAccess, labels }) => {
               .nullable()
               .test('is-valid-reportingPurity', function (value) {
                 if (!value) return true
+
                 return value >= 0.001 && value <= 1
               })
           })
@@ -49,7 +51,7 @@ const ScrapForm = ({ store, setStore, maxAccess, labels }) => {
       scrap: [
         {
           id: 1,
-          metalId: recordId || null,
+          metalId: recordId,
           seqNo: '',
           itemId: '',
           itemName: '',
@@ -71,13 +73,12 @@ const ScrapForm = ({ store, setStore, maxAccess, labels }) => {
     }))
 
     const data = {
-      taxCodeId: recordId,
       metalId: recordId,
       items: items
     }
 
     postRequest({
-      extension: InventoryRepository.Scrap.set,
+      extension: InventoryRepository.Scrap.set2,
       record: JSON.stringify(data)
     })
       .then(res => {

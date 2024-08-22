@@ -22,7 +22,6 @@ const TaxCodes = () => {
   async function fetchGridData() {
     const response = await getRequest({
       extension: InventoryRepository.Metals.qry,
-
       parameters: `_filter=`
     })
 

@@ -23,13 +23,13 @@ export default function MetalsForm({ labels, maxAccess, setStore, store }) {
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: InventoryRepository.Metals.qry
+    endpointId: InventoryRepository.Metals.page
   })
 
   const { formik } = useForm({
     initialValues: { recordId: store.recordId, name: '', reference: '', purity: '', reportingPurity: '' },
     maxAccess,
-    enableReinitialize: true,
+    enableReinitialize: false,
     validateOnChange: true,
     validateOnBlur: true,
     validationSchema: yup.object({
@@ -40,31 +40,31 @@ export default function MetalsForm({ labels, maxAccess, setStore, store }) {
         .nullable()
         .test('is-valid-reportingPurity', function (value) {
           if (!value) return true
+
           return value >= 0.001 && value <= 1
         })
     }),
 
     onSubmit: async obj => {
-      const recordId = obj.recordId
-
-      const response = await postRequest({
-        extension: InventoryRepository.Metals.set,
-        record: JSON.stringify(obj)
-      })
-
-      if (!recordId) {
-        setStore(prevStore => ({
-          ...prevStore,
-          recordId: response.recordId
-        }))
-        toast.success(platformLabels.Added)
-        formik.setValues({
-          ...obj,
-          recordId: response.recordId
+      try {
+        const response = await postRequest({
+          extension: InventoryRepository.Metals.set,
+          record: JSON.stringify(obj)
         })
-      } else toast.success(platformLabels.Edited)
+        if (!obj.recordId) {
+          setStore(prevStore => ({
+            ...prevStore,
+            recordId: response.recordId
+          }))
+          toast.success(platformLabels.Added)
+          formik.setValues({
+            ...obj,
+            recordId: response.recordId
+          })
+        } else toast.success(platformLabels.Edited)
 
-      invalidate()
+        invalidate()
+      } catch (e) {}
     }
   })
 
