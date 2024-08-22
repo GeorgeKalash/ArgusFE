@@ -13,10 +13,12 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { ControlContext } from 'src/providers/ControlContext'
 import { useForm } from 'src/hooks/form'
 import { SaleRepository } from 'src/repositories/SaleRepository'
+import { useError } from 'src/error'
 
 const SalesZonesLevels = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const { stack: stackError } = useError()
 
   const { labels: labels, access } = useResourceQuery({
     datasetId: ResourceIds.SalesZoneLevels
@@ -95,7 +97,7 @@ const SalesZonesLevels = () => {
         const uniqueLevelIds = new Set()
         for (const id of levelIds) {
           if (uniqueLevelIds.has(id)) {
-            toast.error('Duplicate Level ID found: ' + id)
+            stackError({ message: `Duplicate Level ID found: ${id}` })
 
             return
           }
@@ -109,7 +111,7 @@ const SalesZonesLevels = () => {
         })
         toast.success(platformLabels.Saved)
       } catch (error) {
-        toast.error(`Save failed: ${error.message}`)
+        stackError({ message: `Save failed: ${error.message}` })
       }
     }
   })
