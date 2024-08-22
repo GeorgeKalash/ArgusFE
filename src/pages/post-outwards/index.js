@@ -16,12 +16,19 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { DataSets } from 'src/resources/DataSets'
 import FormShell from 'src/components/Shared/FormShell'
+import { ControlContext } from 'src/providers/ControlContext'
+import toast from 'react-hot-toast'
 
 const Postoutwards = () => {
   const [data, setData] = useState([])
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
-  const { labels: _labels, access } = useResourceQuery({
+  const {
+    labels: _labels,
+    access,
+    refetch
+  } = useResourceQuery({
     endpointId: RemittanceOutwardsRepository.Postoutwards.qry,
     datasetId: ResourceIds.PostOutwards
   })
@@ -56,19 +63,9 @@ const Postoutwards = () => {
         formik.values.corId,
         formik.values.dispersalType
       )
+      toast.success(platformLabels.Posted)
     }
   })
-
-  // useEffect(() => {
-  //   getRequest({
-  //     extension: RemittanceOutwardsRepository.Postoutwards.q,
-  //     parameters: ` _recordId=`
-  //   })
-  //     .then(response => {
-  //       console.log(response)
-  //     })
-  //     .catch(error => {})
-  // }, [])
 
   const rowColumns = [
     {
@@ -150,11 +147,12 @@ const Postoutwards = () => {
                     label={_labels.country}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
+                      { key: 'name', value: 'Name' },
+                      { key: 'flName', value: 'Foreign Language Name' }
                     ]}
                     values={formik.values}
                     valueField='recordId'
-                    displayField='name'
+                    displayField={['reference', 'name', 'flName']}
                     required
                     maxAccess={access}
                     onChange={(event, newValue) => {
@@ -204,7 +202,6 @@ const Postoutwards = () => {
                       { key: 'name', value: 'Name' },
                       { key: 'flName', value: 'Foreign Language Name' }
                     ]}
-                    displayFieldWidth={0.8}
                     values={formik.values}
                     maxAccess={access}
                     onChange={(event, newValue) => {
@@ -236,9 +233,11 @@ const Postoutwards = () => {
             gridData={{ list: data }}
             setData={setData}
             rowId={['recordId']}
+            pageSize={50}
+            paginationType='client'
+            refetch={refetch}
             isLoading={false}
             maxAccess={access}
-            pagination={false}
             checkTitle={_labels.active}
             showCheckboxColumn={true}
             viewCheckButtons={true}
