@@ -93,8 +93,8 @@ const OutwardsCorrespondent = () => {
         outwardsList: data?.list?.filter(item => item.checked),
         refetch: fetchWithFilter
       },
-      width: 600,
-      height: 500,
+      width: 500,
+      height: 250,
       title: labels.correspondent
     })
   }
