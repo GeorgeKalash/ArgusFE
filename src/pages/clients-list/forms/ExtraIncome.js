@@ -38,6 +38,8 @@ export default function ExtraIncome({ labels, editMode, maxAccess, clientFormik,
         <Grid item xs={12}>
           <CustomNumberField
             name='extraIncome'
+            maxLength={12}
+            decimalScale={0}
             readOnly={editMode || readOnly}
             onChange={formik.handleChange}
             label={labels.extraIncome}
@@ -49,7 +51,7 @@ export default function ExtraIncome({ labels, editMode, maxAccess, clientFormik,
           <ResourceComboBox
             endpointId={RemittanceSettingsRepository.ExtraIncome.qry}
             name='extraIncomeId'
-            label={labels.extraIncome}
+            label={labels.extraIncomeType}
             readOnly={editMode || readOnly}
             valueField='recordId'
             displayField={['reference', 'name']}

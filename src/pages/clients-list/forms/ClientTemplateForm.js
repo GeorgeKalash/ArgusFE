@@ -1541,7 +1541,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         })
                       }
                     >
-                      {labels.moreDetails}
+                      {labels.extraIncome}
                     </Button>
                   </Grid>
 
