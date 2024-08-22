@@ -43,6 +43,7 @@
     "@popperjs/core": "2.11.7",
     "@reduxjs/toolkit": "1.9.5",
     "@tanstack/react-query": "^5.17.15",
+    "@tippyjs/react": "^4.2.6",
     "ag-grid-community": "^31.3.2",
     "ag-grid-enterprise": "^31.3.2",
     "ag-grid-react": "^31.3.2",

@@ -5,7 +5,8 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { getButtons } from './Buttons'
 import CustomComboBox from '../Inputs/CustomComboBox'
 import { ControlContext } from 'src/providers/ControlContext'
-import ButtonTooltip from './ButtonTooltip'
+import Tippy from '@tippyjs/react'
+import 'tippy.js/dist/tippy.css'
 
 const WindowToolbar = ({
   onSave,
@@ -126,22 +127,15 @@ const WindowToolbar = ({
               sx={{ width: 250 }}
               disableClearable
             />
-            <Button
-              sx={{ width: '20px', height: '35px', ml: 1 }}
-              variant='contained'
-              disabled={!selectedReport}
-              onClick={onGenerateReport}
-              size='small'
-            >
-              <div
-                className='button-container'
-                onMouseEnter={() => handleButtonMouseEnter(platformLabels.Preview)}
-                onMouseLeave={handleButtonMouseLeave}
-              >
-                <img src='/images/buttonsIcons/preview.png' alt='Preview' />
-                {tooltip && <ButtonTooltip tooltip={tooltip} />}
-              </div>
-            </Button>
+            <Tippy content={tooltip} placement='top'>
+              <Button
+                sx={{ width: '20px', height: '35px', ml: 1 }}
+                variant='contained'
+                disabled={!selectedReport}
+                onClick={onGenerateReport}
+                size='small'
+              />
+            </Tippy>
           </Box>
         ) : (
           <Box></Box>
@@ -163,27 +157,28 @@ const WindowToolbar = ({
                     onMouseLeave={handleButtonMouseLeave}
                     key={index}
                   >
-                    <Button
-                      onClick={handleClick}
-                      variant='contained'
-                      sx={{
-                        mr: 1,
-                        backgroundColor: button.color,
-                        '&:hover': {
+                    <Tippy content={tooltip} placement='top'>
+                      <Button
+                        onClick={handleClick}
+                        variant='contained'
+                        sx={{
+                          mr: 1,
                           backgroundColor: button.color,
-                          opacity: 0.8
-                        },
-                        border: button.border,
-                        width: '50px !important',
-                        height: '35px',
-                        objectFit: 'contain',
-                        minWidth: '30px !important'
-                      }}
-                      disabled={isDisabled}
-                    >
-                      <img src={`/images/buttonsIcons/${button.image}`} alt={button.key} />
-                    </Button>
-                    {tooltip && <ButtonTooltip tooltip={tooltip} />}
+                          '&:hover': {
+                            backgroundColor: button.color,
+                            opacity: 0.8
+                          },
+                          border: button.border,
+                          width: '50px !important',
+                          height: '35px',
+                          objectFit: 'contain',
+                          minWidth: '30px !important'
+                        }}
+                        disabled={isDisabled}
+                      >
+                        <img src={`/images/buttonsIcons/${button.image}`} alt={button.key} />
+                      </Button>
+                    </Tippy>
                   </div>
                 )
               )
@@ -205,27 +200,28 @@ const WindowToolbar = ({
                   onMouseLeave={handleButtonMouseLeave}
                   key={index}
                 >
-                  <Button
-                    onClick={handleClick}
-                    variant='contained'
-                    sx={{
-                      mr: 1,
-                      backgroundColor: button.color,
-                      '&:hover': {
+                  <Tippy content={tooltip} placement='top'>
+                    <Button
+                      onClick={handleClick}
+                      variant='contained'
+                      sx={{
+                        mr: 1,
                         backgroundColor: button.color,
-                        opacity: 0.8
-                      },
-                      border: button.border,
-                      width: '50px !important',
-                      height: '35px',
-                      objectFit: 'contain',
-                      minWidth: '30px !important'
-                    }}
-                    disabled={isDisabled}
-                  >
-                    <img src={`/images/buttonsIcons/${button.image}`} alt={button.key} />
-                  </Button>
-                  {tooltip && <ButtonTooltip tooltip={tooltip} />}
+                        '&:hover': {
+                          backgroundColor: button.color,
+                          opacity: 0.8
+                        },
+                        border: button.border,
+                        width: '50px !important',
+                        height: '35px',
+                        objectFit: 'contain',
+                        minWidth: '30px !important'
+                      }}
+                      disabled={isDisabled}
+                    >
+                      <img src={`/images/buttonsIcons/${button.image}`} alt={button.key} />
+                    </Button>
+                  </Tippy>
                 </div>
               )
             )
