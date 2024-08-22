@@ -41,8 +41,6 @@ const ClassesForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store
     }
   })
 
-  console.log(formik)
-
   const postClass = obj => {
     const recordId = obj.recordId
     postRequest({
