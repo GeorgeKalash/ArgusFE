@@ -1,10 +1,10 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate } from 'src/hooks/resource'
+import { ControlContext } from 'src/providers/ControlContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
@@ -19,7 +19,7 @@ import { useForm } from 'src/hooks/form'
 
 export default function AccountGroupsForm({ labels, maxAccess, recordId, invalidate }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const editMode = !!recordId
+  const { platformLabels } = useContext(ControlContext)
 
   const { formik } = useForm({
     initialValues: {
@@ -35,26 +35,29 @@ export default function AccountGroupsForm({ labels, maxAccess, recordId, invalid
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      reference: yup.string().required('This field is required'),
-      name: yup.string().required('This field is required'),
-      type: yup.string().required('This field is required')
+      reference: yup.string().required(),
+      name: yup.string().required(),
+      type: yup.string().required()
     }),
     onSubmit: async obj => {
-      const response = await postRequest({
-        extension: FinancialRepository.Group.set,
-        record: JSON.stringify(obj)
-      })
-
-      if (!obj.recordId) {
-        toast.success('Record Added Successfully')
-        formik.setValues({
-          ...obj,
-          recordId: response.recordId
+      try {
+        const response = await postRequest({
+          extension: FinancialRepository.Group.set,
+          record: JSON.stringify(obj)
         })
-      } else toast.success('Record Edited Successfully')
-      invalidate()
+  
+        
+        if (!obj.recordId) {
+          toast.success(platformLabels.Added)
+          formik.setFieldValue('recordId', response.recordId)
+        } else toast.success(platformLabels.Edited)
+
+        invalidate()
+      } catch (error) {}
     }
   })
+
+  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
