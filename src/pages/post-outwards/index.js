@@ -24,7 +24,27 @@ const Postoutwards = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
-  const { labels: _labels, access } = useResourceQuery({
+  const fetchRemittanceData = () => {
+    if (!formik.values.countryId) return
+
+    getRequest({
+      extension: RemittanceOutwardsRepository.Postoutwards.qry,
+      parameters: `_countryId=${formik.values.countryId}&_currencyId=${formik.values.currencyId || 0}&_corId=${
+        formik.values.corId || 0
+      }&_dispersalType=${formik.values.dispersalType || 0}`
+    })
+      .then(response => {
+        setData(response.list || [])
+      })
+      .catch(error => {})
+  }
+
+  const {
+    labels: _labels,
+    access,
+    refetch
+  } = useResourceQuery({
+    queryFn: fetchRemittanceData,
     endpointId: RemittanceOutwardsRepository.Postoutwards.qry,
     datasetId: ResourceIds.PostOutwards
   })
@@ -93,21 +113,6 @@ const Postoutwards = () => {
       type: 'number'
     }
   ]
-
-  const fetchRemittanceData = () => {
-    if (!formik.values.countryId) return
-
-    getRequest({
-      extension: RemittanceOutwardsRepository.Postoutwards.qry,
-      parameters: `_countryId=${formik.values.countryId}&_currencyId=${formik.values.currencyId || 0}&_corId=${
-        formik.values.corId || 0
-      }&_dispersalType=${formik.values.dispersalType || 0}`
-    })
-      .then(response => {
-        setData(response.list || [])
-      })
-      .catch(error => {})
-  }
 
   useEffect(() => {
     fetchRemittanceData()
@@ -222,7 +227,7 @@ const Postoutwards = () => {
             pageSize={50}
             pagination={!!formik.values.countryId}
             paginationType='client'
-            refetch={fetchRemittanceData}
+            refetch={refetch}
             isLoading={false}
             maxAccess={access}
             showCheckboxColumn={true}
