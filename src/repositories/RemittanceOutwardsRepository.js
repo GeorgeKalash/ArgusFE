@@ -97,7 +97,6 @@ export const RemittanceOutwardsRepository = {
   },
   Postoutwards: {
     qry: service + 'qryOW3',
-    post2: service + 'post2OW',
-    get2: service + 'get2OW'
+    post2: service + 'post2OW'
   }
 }

@@ -57,12 +57,7 @@ const Postoutwards = () => {
           })
         } catch (error) {}
       }
-      fetchRemittanceData(
-        formik.values.countryId,
-        formik.values.currencyId,
-        formik.values.corId,
-        formik.values.dispersalType
-      )
+      fetchRemittanceData()
       toast.success(platformLabels.Posted)
     }
   })
@@ -119,13 +114,8 @@ const Postoutwards = () => {
   }
 
   useEffect(() => {
-    const { countryId, currencyId, corId, dispersalType } = formik.values
-    if (!!countryId) {
-      fetchRemittanceData(countryId, currencyId, corId, dispersalType)
-    }
+    fetchRemittanceData()
   }, [formik.values.countryId, formik.values.currencyId, formik.values.corId, formik.values.dispersalType])
-
-  console.log(formik.values)
 
   return (
     <FormShell
@@ -238,9 +228,7 @@ const Postoutwards = () => {
             refetch={refetch}
             isLoading={false}
             maxAccess={access}
-            checkTitle={_labels.active}
             showCheckboxColumn={true}
-            viewCheckButtons={true}
           />
         </Grow>
       </VertLayout>
