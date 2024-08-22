@@ -86,6 +86,13 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'Correspondent',
+    label: platformLabels.Correspondent,
+    image: 'person.png',
+    color: '#CECECE',
+    main: false
+  },
+  {
     key: 'Print',
     label: platformLabels.Print,
     color: '#231f20',
