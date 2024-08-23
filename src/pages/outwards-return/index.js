@@ -99,7 +99,7 @@ const OutwardsReturn = () => {
     }
   }
 
-  async function openOutWardsWindow(plantId, recordId) {
+  async function openOutwardsForm(plantId, recordId) {
     const dtId = await getDefaultDT()
 
     stack({
@@ -121,7 +121,7 @@ const OutwardsReturn = () => {
     const plantId = await getPlantId()
 
     plantId !== ''
-      ? openOutWardsWindow(plantId, recordId)
+      ? openOutwardsForm(plantId, recordId)
       : stackError({
           message: platformLabels.noDefaultPlant
         })
