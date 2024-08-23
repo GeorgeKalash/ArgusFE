@@ -36,7 +36,6 @@ import CustomDatePickerHijri from 'src/components/Inputs/CustomDatePickerHijri'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import MoreDetails from './MoreDetails'
-import ExtraIncome from './ExtraIncome'
 
 const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = false }) => {
   const { stack } = useWindow()
@@ -296,6 +295,8 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
           oldReference: obj.clientMaster?.oldReference,
           status: obj.clientMaster?.status,
           professionId: obj.clientMaster?.professionId,
+          extraIncome: obj.clientMaster?.extraIncome,
+          extraIncomeId: obj.clientMaster?.extraIncomeId,
 
           // //clientRemittance
           recordId: recordId,

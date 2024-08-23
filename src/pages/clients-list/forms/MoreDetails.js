@@ -172,7 +172,7 @@ export default function MoreDetails({ labels, editMode, maxAccess, readOnly, cli
         </Grid>
         <Grid item xs={12}>
           <ResourceComboBox
-            endpointId={CTCLRepository.ExtraIncome.qry}
+            endpointId={RemittanceSettingsRepository.ExtraIncome.qry}
             name='extraIncomeId'
             label={labels.extraIncomeType}
             readOnly={editMode || readOnly}
