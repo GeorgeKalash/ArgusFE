@@ -40,6 +40,11 @@ const CustomLookup = ({
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
   const [freeSolo, setFreeSolo] = useState(false)
 
+  const handleBlur = () => {
+    setFreeSolo(false)
+    onChange(name, '')
+  }
+
   useEffect(() => {
     store.length < 1 && setFreeSolo(false)
     firstValue && setFreeSolo(true)
@@ -156,6 +161,7 @@ const CustomLookup = ({
                 setFreeSolo(true)
               }}
               autoFocus={autoFocus}
+              onBlur={handleBlur} // Clear on blur
               error={error}
               helperText={helperText}
               InputProps={{
