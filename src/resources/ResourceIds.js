@@ -226,5 +226,6 @@ export const ResourceIds = {
   ConsignmentSites: 51110,
   PUOrderStatus: 50105,
   AutoPostExclusion: 36124,
-  CorrespondentOutwards: 36318
+  CorrespondentOutwards: 36318,
+  ExtraIncome: 36129
 }
