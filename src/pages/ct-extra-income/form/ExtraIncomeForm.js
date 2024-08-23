@@ -11,14 +11,14 @@ import { useForm } from 'src/hooks/form'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { ControlContext } from 'src/providers/ControlContext'
-import { CTCLRepository } from 'src/repositories/CTCLRepository'
+import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 
 export default function ExtraIncomeForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: CTCLRepository.ExtraIncome.qry
+    endpointId: RemittanceSettingsRepository.ExtraIncome.qry
   })
 
   const { formik } = useForm({
@@ -36,7 +36,7 @@ export default function ExtraIncomeForm({ labels, maxAccess, recordId }) {
     onSubmit: async obj => {
       try {
         const response = await postRequest({
-          extension: CTCLRepository.ExtraIncome.set,
+          extension: RemittanceSettingsRepository.ExtraIncome.set,
           record: JSON.stringify(obj)
         })
 
@@ -55,7 +55,7 @@ export default function ExtraIncomeForm({ labels, maxAccess, recordId }) {
       try {
         if (recordId) {
           const res = await getRequest({
-            extension: CTCLRepository.ExtraIncome.get,
+            extension: RemittanceSettingsRepository.ExtraIncome.get,
             parameters: `_recordId=${recordId}`
           })
 

@@ -10,8 +10,8 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
-import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import ExtraIncomeForm from './form/ExtraIncomeForm'
+import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 
 const ExtraIncome = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -23,7 +23,7 @@ const ExtraIncome = () => {
 
     try {
       const response = await getRequest({
-        extension: CTCLRepository.ExtraIncome.qry,
+        extension: RemittanceSettingsRepository.ExtraIncome.qry,
         parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=`
       })
 
@@ -40,7 +40,7 @@ const ExtraIncome = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: CTCLRepository.ExtraIncome.qry,
+    endpointId: RemittanceSettingsRepository.ExtraIncome.qry,
     datasetId: ResourceIds.ExtraIncome
   })
 
@@ -64,7 +64,7 @@ const ExtraIncome = () => {
   const del = async obj => {
     try {
       await postRequest({
-        extension: CTCLRepository.ExtraIncome.del,
+        extension: RemittanceSettingsRepository.ExtraIncome.del,
         record: JSON.stringify(obj)
       })
       invalidate()
