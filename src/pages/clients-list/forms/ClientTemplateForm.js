@@ -1513,7 +1513,9 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                             readOnly: editMode && !allowEdit,
                             labels: labels,
                             clientFormik: clientIndividualFormik,
-                            maxAccess: maxAccess
+                            maxAccess: maxAccess,
+                            editMode: editMode,
+                            allowEdit
                           },
                           width: 500,
                           height: 400,

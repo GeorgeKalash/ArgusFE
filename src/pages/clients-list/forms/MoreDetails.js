@@ -9,7 +9,7 @@ import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTrad
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { DataSets } from 'src/resources/DataSets'
 
-export default function MoreDetails({ labels, editMode, maxAccess, readOnly, clientFormik, window }) {
+export default function MoreDetails({ labels, editMode, maxAccess, readOnly, clientFormik, allowEdit, window }) {
   const { formik } = useForm({
     initialValues: {
       trxCountPerYear: '',
@@ -54,7 +54,7 @@ export default function MoreDetails({ labels, editMode, maxAccess, readOnly, cli
   }, [])
 
   return (
-    <FormShell form={formik} infoVisible={false} isCleared={false}>
+    <FormShell form={formik} infoVisible={false} isCleared={false} disabledSubmit={editMode}>
       <Grid container xs={12} spacing={2} sx={{ p: 5 }}>
         <Grid item xs={12}>
           <CustomNumberField
