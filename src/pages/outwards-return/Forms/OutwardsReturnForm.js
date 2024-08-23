@@ -97,10 +97,9 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
 
         if (response.recordId) {
           toast.success(platformLabels.Added)
-          formik.setFieldValue('recordId', response.recordId)
           const res2 = await getOutwardsReturn(response.recordId)
 
-          formik.setFieldValue('reference', res2.record.reference)
+          formik.setValues(res2.record)
         } else toast.success(platformLabels.Edited)
 
         invalidate()
