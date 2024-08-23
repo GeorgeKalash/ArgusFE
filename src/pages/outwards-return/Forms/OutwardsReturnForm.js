@@ -160,7 +160,6 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
                 onChange={formik.setFieldValue}
                 onClear={() => formik.setFieldValue('date', '')}
                 error={formik.touched.date && Boolean(formik.errors.date)}
-                helperText={formik.touched.date && formik.errors.date}
                 maxAccess={maxAccess}
               />
             </Grid>
