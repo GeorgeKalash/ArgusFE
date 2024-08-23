@@ -14,6 +14,7 @@ import AccountBalance from './AccountBalance'
 import CashTransaction from './CashTransaction'
 import FinancialTransaction from './FinancialTransaction'
 import { ControlContext } from 'src/providers/ControlContext'
+import toast from 'react-hot-toast'
 
 export default function FormShell({
   form,
@@ -110,6 +111,20 @@ export default function FormShell({
     })
   }
 
+  async function handleSaveAndClear() {
+    const errors = await form.validateForm()
+
+    if (Object.keys(errors).length === 0) {
+      try {
+        await form.submitForm()
+
+        form.resetForm()
+      } catch (error) {}
+    } else {
+      form.submitForm()
+    }
+  }
+
   return (
     <>
       <DialogContent
@@ -131,7 +146,7 @@ export default function FormShell({
           print={print}
           onSave={() => form?.handleSubmit()}
           onSaveClear={() => {
-            form?.handleSubmit(), handleReset()
+            handleSaveAndClear()
           }}
           onClear={() => handleReset()}
           onPost={() => {
