@@ -16,7 +16,8 @@ import { useForm } from 'src/hooks/form'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { ControlContext } from 'src/providers/ControlContext'
 
-export default function CbBanksForms({ labels, maxAccess, recordId, setStore }) {
+export default function CbBanksForms({ labels, maxAccess, store, setStore, setEditMode }) {
+  const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const editMode = !!recordId
@@ -38,9 +39,9 @@ export default function CbBanksForms({ labels, maxAccess, recordId, setStore }) 
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required(' '),
-      reference: yup.string().required(' '),
-      swiftCode: yup.string().required(' ')
+      name: yup.string().required(),
+      reference: yup.string().required(),
+      swiftCode: yup.string().required()
     }),
     onSubmit: async obj => {
       const response = await postRequest({
@@ -48,19 +49,20 @@ export default function CbBanksForms({ labels, maxAccess, recordId, setStore }) 
         record: JSON.stringify(obj)
       })
 
-      if (!obj.recordId) {
+      if (!formik.values.recordId) {
         toast.success(platformLabels.Added)
         formik.setValues({
           ...obj,
           recordId: response.recordId
         })
+        setStore({
+          recordId: response.recordId,
+          name: obj.name
+        })
+        setEditMode(true)
       } else {
         toast.success(platformLabels.Edited)
       }
-      setStore({
-        recordId: response.recordId,
-        name: obj.name
-      })
       invalidate()
     }
   })
@@ -120,6 +122,7 @@ export default function CbBanksForms({ labels, maxAccess, recordId, setStore }) 
                 label={labels.swiftCode}
                 value={formik.values.swiftCode}
                 maxLength='20'
+                required
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('swiftCode', '')}
