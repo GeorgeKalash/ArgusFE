@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
 import PopperComponent from '../Shared/Popper/PopperComponent'
 import CircularProgress from '@mui/material/CircularProgress' // Import CircularProgress from MUI or use any other spinner component
+import { set } from 'react-hook-form'
 
 const CustomLookup = ({
   type = 'text',
@@ -35,6 +36,7 @@ const CustomLookup = ({
   hasBorder = true,
   hidden = false,
   isLoading,
+  minChars,
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
@@ -49,8 +51,7 @@ const CustomLookup = ({
   }, [firstValue])
 
   useEffect(() => {
-    store.length < 1 && setFreeSolo(false)
-    firstValue && setFreeSolo(true)
+    store.length >= minChars && setFreeSolo(true)
   }, [store, firstValue])
 
   const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
@@ -160,10 +161,19 @@ const CustomLookup = ({
                 }
               }}
               onBlur={e => {
-                setFreeSolo(true)
-                store && setStore([])
-                if (e.target.value !== firstValue) onChange('')
+                if (!store.some(item => item[valueField] === inputValue)) {
+                  setInputValue('') // Clear input if no valid option is selected
+                  setStore([])
+                  onChange(name, '')
+                  setFreeSolo(true)
+                }
               }}
+              onFocus={setFreeSolo(true)}
+              // onBlur={e => {
+              //   setFreeSolo(true)
+              //   store && setStore([])
+              //   if (e.target.value !== firstValue) onChange('')
+              // }}
               type={type}
               variant={variant}
               label={label}
