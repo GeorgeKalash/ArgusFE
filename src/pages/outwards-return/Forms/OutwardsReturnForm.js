@@ -55,8 +55,7 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
       requestedBy: null,
       date: new Date(),
       currencyId: null,
-      fcAmount: null,
-      corId: '',
+      corId: null,
       clientId: null,
       cashAccountId: null,
       wip: 1,
@@ -70,7 +69,8 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
       corRef: null,
       plantId: plantId,
       cashAccountName: null,
-      cashAccountRef: null
+      cashAccountRef: null,
+      fcAmount: ''
     },
     maxAccess,
     enableReinitialize: false,
@@ -81,8 +81,9 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
       outwardRef: yup.string().required(),
       requestedBy: yup.string().required(),
       currencyId: yup.string().required(),
-      fcAmount: yup.string().required(),
-      clientId: yup.number().required()
+      clientId: yup.number().required(),
+      corId: yup.number().required(),
+      fcAmount: yup.string().required()
     }),
     onSubmit: async obj => {
       try {
@@ -187,9 +188,9 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
                   formik.setFieldValue('corName', newValue ? newValue.corName : '')
                   formik.setFieldValue('corRef', newValue ? newValue.corRef : '')
                   formik.setFieldValue('corReplyStatus', newValue ? newValue.corReplyStatus : '')
-                  formik.setFieldValue('cashAccountId', newValue ? newValue.cashAccountId  : '')
-                  formik.setFieldValue('cashAccountName', newValue ? newValue.cashAccountName  : '')
-                  formik.setFieldValue('cashAccountRef', newValue ? newValue.cashAccountRef  : '')
+                  formik.setFieldValue('cashAccountId', newValue ? newValue.cashAccountId : '')
+                  formik.setFieldValue('cashAccountName', newValue ? newValue.cashAccountName : '')
+                  formik.setFieldValue('cashAccountRef', newValue ? newValue.cashAccountRef : '')
                 }}
                 error={formik.touched.outwardRef && Boolean(formik.errors.outwardRef)}
                 maxAccess={maxAccess}
@@ -220,6 +221,7 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
                 displayField={['reference', 'name']}
                 values={formik.values}
                 readOnly
+                required
                 maxAccess={maxAccess}
                 error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
               />
@@ -228,12 +230,13 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
               <CustomNumberField
                 name='fcAmount'
                 label={labels.fcAmount}
-                value={formik.values.fcAmount}
+                value={formik?.values?.fcAmount}
                 required
                 readOnly
                 maxAccess={maxAccess}
-                onChange={e => formik.setFieldValue('fcAmount', e.target.value)}
-                error={formik.touched.lcAmount && Boolean(formik.errors.lcAmount)}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('fcAmount', '')}
+                error={formik.touched.fcAmount && Boolean(formik.errors.fcAmount)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -248,7 +251,7 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
                 secondValueShow='corName'
                 readOnly
                 maxAccess={maxAccess}
-                errorCheck={'corId'}
+                error={formik.touched.corId && Boolean(formik.errors.corId)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -264,7 +267,7 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
                 valueShow='clientRef'
                 secondValueShow='clientName'
                 maxAccess={maxAccess}
-                errorCheck={'clientId'}
+                error={formik.touched.clientId && Boolean(formik.errors.clientId)}
               />
             </Grid>
           </Grid>
