@@ -1,53 +1,50 @@
-import { useState, useContext } from 'react'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useWindow } from 'src/windows'
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import InterfaceForm from './forms/InterfaceForm'
-import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
+import ExtraIncomeForm from './form/ExtraIncomeForm'
+import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 
-const Interface = () => {
+const ExtraIncome = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
+  const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    return await getRequest({
-      extension: RemittanceSettingsRepository.Interface.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
-    })
+    try {
+      const response = await getRequest({
+        extension: RemittanceSettingsRepository.ExtraIncome.qry,
+        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=`
+      })
+
+      return { ...response, _startAt: _startAt }
+    } catch (error) {}
   }
 
   const {
     query: { data },
     labels: _labels,
+    invalidate,
+    paginationParameters,
     refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: RemittanceSettingsRepository.Interface.page,
-    datasetId: ResourceIds.Interface
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: RemittanceSettingsRepository.Interface.page
+    endpointId: RemittanceSettingsRepository.ExtraIncome.qry,
+    datasetId: ResourceIds.ExtraIncome
   })
 
   const columns = [
-    {
-      field: 'recordId',
-      headerName: _labels.id,
-      flex: 1
-    },
     {
       field: 'reference',
       headerName: _labels.reference,
@@ -57,17 +54,6 @@ const Interface = () => {
       field: 'name',
       headerName: _labels.name,
       flex: 1
-    },
-    ,
-    {
-      field: 'path',
-      headerName: _labels.path,
-      flex: 1
-    },
-    {
-      field: 'description',
-      headerName: _labels.description,
-      flex: 1
     }
   ]
 
@@ -75,31 +61,33 @@ const Interface = () => {
     openForm()
   }
 
-  const edit = obj => {
-    openForm(obj?.recordId)
+  const del = async obj => {
+    try {
+      await postRequest({
+        extension: RemittanceSettingsRepository.ExtraIncome.del,
+        record: JSON.stringify(obj)
+      })
+      invalidate()
+      toast.success(platformLabels.Deleted)
+    } catch (error) {}
   }
 
   function openForm(recordId) {
     stack({
-      Component: InterfaceForm,
+      Component: ExtraIncomeForm,
       props: {
         labels: _labels,
-        recordId: recordId,
+        recordId,
         maxAccess: access
       },
       width: 600,
-      height: 430,
-      title: _labels.interface
+      height: 300,
+      title: _labels.extraIncome
     })
   }
 
-  const del = async obj => {
-    await postRequest({
-      extension: RemittanceSettingsRepository.Interface.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success(platformLabels.Deleted)
+  const edit = obj => {
+    openForm(obj?.recordId)
   }
 
   return (
@@ -117,7 +105,8 @@ const Interface = () => {
           isLoading={false}
           pageSize={50}
           refetch={refetch}
-          paginationType='client'
+          paginationParameters={paginationParameters}
+          paginationType='api'
           maxAccess={access}
         />
       </Grow>
@@ -125,4 +114,4 @@ const Interface = () => {
   )
 }
 
-export default Interface
+export default ExtraIncome

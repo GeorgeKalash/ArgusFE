@@ -1,3 +1,5 @@
+import Correspondent from 'src/pages/correspondent'
+
 export const ResourceIds = {
   GeneralLedger: 30303,
   JournalVoucher: 30302,
@@ -223,5 +225,7 @@ export const ResourceIds = {
   CorrespondentGroup: 36125,
   ConsignmentSites: 51110,
   PUOrderStatus: 50105,
-  AutoPostExclusion: 36124
+  AutoPostExclusion: 36124,
+  CorrespondentOutwards: 36318,
+  ExtraIncome: 36129
 }
