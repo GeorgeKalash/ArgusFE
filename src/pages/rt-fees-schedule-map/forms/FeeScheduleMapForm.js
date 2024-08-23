@@ -66,7 +66,6 @@ export default function FeeScheduleMapForm({ labels, maxAccess, recordId, record
         toast.success(platformLabels.Added)
       } else toast.success(platformLabels.Edited)
 
-      console.log(obj)
       formik.setFieldValue(
         'recordId',
 
