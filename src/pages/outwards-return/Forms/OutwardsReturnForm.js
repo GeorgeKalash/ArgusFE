@@ -156,7 +156,7 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
                 name='date'
                 label={labels.date}
                 value={formik.values?.date}
-                required={true}
+                required
                 onChange={formik.setFieldValue}
                 onClear={() => formik.setFieldValue('date', '')}
                 error={formik.touched.date && Boolean(formik.errors.date)}
