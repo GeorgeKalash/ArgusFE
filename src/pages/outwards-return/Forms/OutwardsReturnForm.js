@@ -95,7 +95,7 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
           record: JSON.stringify(copy)
         })
 
-        if (response.recordId) {
+        if (!recordId) {
           toast.success(platformLabels.Added)
           const res2 = await getOutwardsReturn(response.recordId)
 
