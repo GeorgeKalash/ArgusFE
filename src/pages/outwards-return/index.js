@@ -94,7 +94,9 @@ const OutwardsReturn = () => {
       })
 
       return res.record.value
-    } catch (e) {}
+    } catch (e) {
+      return ''
+    }
   }
 
   async function openOutWardsWindow(plantId, recordId) {
@@ -126,12 +128,16 @@ const OutwardsReturn = () => {
   }
 
   const getDefaultDT = async () => {
-    const res = await getRequest({
-      extension: SystemRepository.UserFunction.get,
-      parameters: `_userId=${userId}&_functionId=${SystemFunction.OutwardsReturn}`
-    })
-
-    return res?.record?.dtId
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.UserFunction.get,
+        parameters: `_userId=${userId}&_functionId=${SystemFunction.OutwardsReturn}`
+      })
+  
+      return res?.record?.dtId
+    } catch (error) {
+      return ''
+    }
   }
 
   return (
