@@ -29,7 +29,7 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
   const { maxAccess } = useDocumentType({
     functionId: SystemFunction.OutwardsReturn,
     access,
-    enabled: !recordId
+    hasDT: false
   })
 
   const invalidate = useInvalidate({

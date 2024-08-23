@@ -15,6 +15,7 @@ import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutward
 import OutwardsReturnForm from './Forms/OutwardsReturnForm'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { SystemFunction } from 'src/resources/SystemFunction'
+import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 
 const OutwardsReturn = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -69,8 +70,14 @@ const OutwardsReturn = () => {
     }
   ]
 
-  const add = () => {
-    openForm()
+  const { proxyAction } = useDocumentTypeProxy({
+    functionId: SystemFunction.OutwardsReturn,
+    action: openForm,
+    hasDT: false
+  })
+
+  const add = async () => {
+    await proxyAction()
   }
 
   const edit = obj => {
