@@ -50,7 +50,7 @@ export default function CbBanksForms({ labels, maxAccess, store, setStore, setEd
           record: JSON.stringify(obj)
         })
 
-        if (!formik.values.recordId) {
+        if (!obj.recordId) {
           toast.success(platformLabels.Added)
           formik.setValues({
             ...obj,
