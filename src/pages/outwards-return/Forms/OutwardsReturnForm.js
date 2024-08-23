@@ -33,7 +33,7 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
   })
 
   const invalidate = useInvalidate({
-    endpointId: RemittanceOutwardsRepository.OutwardsReturn.qry
+    endpointId: RemittanceOutwardsRepository.OutwardsReturn.page
   })
 
   async function getOutwardsReturn(recordId) {

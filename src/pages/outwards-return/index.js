@@ -27,7 +27,7 @@ const OutwardsReturn = () => {
     const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
-      extension: RemittanceOutwardsRepository.OutwardsReturn.qry,
+      extension: RemittanceOutwardsRepository.OutwardsReturn.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}&filter=`
     })
 
@@ -42,7 +42,7 @@ const OutwardsReturn = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: RemittanceOutwardsRepository.OutwardsReturn.qry,
+    endpointId: RemittanceOutwardsRepository.OutwardsReturn.page,
     datasetId: ResourceIds.OutwardsReturn,
   })
 
