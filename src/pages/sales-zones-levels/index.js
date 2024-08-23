@@ -29,16 +29,6 @@ const SalesZonesLevels = () => {
   }, [])
 
   function getGridData() {
-    formik.setValues({
-      items: [
-        {
-          id: 1,
-          levelId: null,
-          name: ''
-        }
-      ]
-    })
-
     getRequest({
       extension: SaleRepository.SaleZoneLevel.qry
     })
@@ -50,7 +40,7 @@ const SalesZonesLevels = () => {
           levelId: item?.levelId,
           name: item?.name
         }))
-        res.list.length > 0 && formik.setValues({ items: processedData })
+        if (res.list.length > 0) formik.setValues({ items: processedData })
       })
       .catch(error => {
         setErrorMessage(error)
