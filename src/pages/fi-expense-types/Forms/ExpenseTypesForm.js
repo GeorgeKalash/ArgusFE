@@ -12,6 +12,7 @@ import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
+import { MasterSource } from 'src/resources/MasterSource'
 
 export default function ExpenseTypesForms({ labels, maxAccess, recordId, invalidate }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -70,8 +71,24 @@ export default function ExpenseTypesForms({ labels, maxAccess, recordId, invalid
     })()
   }, [])
 
+  const actions = [
+    {
+      key: 'Integration Account',
+      condition: true,
+      onClick: 'onClickGIA',
+      disabled: !editMode
+    }
+  ]
+
   return (
-    <FormShell resourceId={ResourceIds.Expense_Types} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell
+      resourceId={ResourceIds.Expense_Types}
+      form={formik}
+      maxAccess={maxAccess}
+      actions={actions}
+      editMode={editMode}
+      masterSource={MasterSource.ExpenseType}
+    >
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
