@@ -8,6 +8,7 @@ export const DeliveryRepository = {
     del: service + 'delDRV'
   },
   Vehicle: {
+    page: service + 'pageVEH',
     set: service + 'setVEH',
     get: service + 'getVEH',
     qry: service + 'qryVEH',
