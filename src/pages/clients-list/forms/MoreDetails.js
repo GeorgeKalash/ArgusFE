@@ -62,6 +62,7 @@ export default function MoreDetails({ labels, editMode, maxAccess, readOnly, cli
             readOnly={editMode || readOnly}
             onChange={formik.handleChange}
             label={labels.trxCountPerYear}
+            onClear={() => formik.setFieldValue('trxCountPerYear', '')}
             value={formik.values.trxCountPerYear}
             error={formik.touched.trxCountPerYear && Boolean(formik.errors.trxCountPerYear)}
           />
@@ -73,6 +74,7 @@ export default function MoreDetails({ labels, editMode, maxAccess, readOnly, cli
             label={labels.trxAmountPerYear}
             onChange={formik.handleChange}
             value={formik.values.trxAmountPerYear}
+            onClear={() => formik.setFieldValue('trxAmountPerYear', '')}
             error={formik.touched.trxAmountPerYear && Boolean(formik.errors.trxAmountPerYear)}
           />
         </Grid>
