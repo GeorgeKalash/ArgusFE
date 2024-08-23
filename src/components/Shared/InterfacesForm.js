@@ -39,27 +39,32 @@ export const InterfacesForm = ({ recordId, expanded, height, resourceId, name })
     enableReinitialize: true,
     validateOnChange: true,
     onSubmit: async values => {
-      const rows = formik.values.rows.map(rest => ({
-        recordId: recordId,
-        resourceId: resourceId,
-        ...rest
-      }))
+      try {
+        const rows = formik.values.rows.map(rest => ({
+          recordId: recordId,
+          resourceId: resourceId,
+          ...rest
+        }))
 
-      const hasEmptyRows = rows.every(row => row.interfaceId === '')
+        const hasEmptyRows = rows.every(row => row.interfaceId === '')
 
-      const resultRows = hasEmptyRows ? [] : rows
+        const resultRows = hasEmptyRows ? [] : rows
 
-      const data = {
-        recordId: recordId,
-        resourceId: resourceId,
-        items: resultRows
-      }
+        const data = {
+          recordId: recordId,
+          resourceId: resourceId,
+          items: resultRows
+        }
 
-      const res = await postRequest({
-        extension: RemittanceSettingsRepository.InterfaceMaps.set2,
-        record: JSON.stringify(data)
-      })
-      if (res.recordId) toast.success('Record Successfully')
+        const res = await postRequest({
+          extension: RemittanceSettingsRepository.InterfaceMaps.set2,
+          record: JSON.stringify(data)
+        })
+
+        if (res.recordId) {
+          toast.success('Record Successfully')
+        }
+      } catch (error) {}
     }
   })
   async function getAllInterfaces() {

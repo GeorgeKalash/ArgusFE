@@ -28,7 +28,7 @@ export default function CbBanksForms({ labels, maxAccess, store, setStore, setEd
 
   const { formik } = useForm({
     initialValues: {
-      recordId: recordId || null,
+      recordId: recordId,
       reference: '',
       name: '',
       swiftCode: '',
@@ -44,26 +44,29 @@ export default function CbBanksForms({ labels, maxAccess, store, setStore, setEd
       swiftCode: yup.string().required()
     }),
     onSubmit: async obj => {
-      const response = await postRequest({
-        extension: CashBankRepository.CbBank.set,
-        record: JSON.stringify(obj)
-      })
+      try {
+        const response = await postRequest({
+          extension: CashBankRepository.CbBank.set,
+          record: JSON.stringify(obj)
+        })
 
-      if (!formik.values.recordId) {
-        toast.success(platformLabels.Added)
-        formik.setValues({
-          ...obj,
-          recordId: response.recordId
-        })
-        setStore({
-          recordId: response.recordId,
-          name: obj.name
-        })
-        setEditMode(true)
-      } else {
-        toast.success(platformLabels.Edited)
-      }
-      invalidate()
+        if (!formik.values.recordId) {
+          toast.success(platformLabels.Added)
+          formik.setValues({
+            ...obj,
+            recordId: response.recordId
+          })
+          setStore({
+            recordId: response.recordId,
+            name: obj.name
+          })
+          setEditMode(true)
+        } else {
+          toast.success(platformLabels.Edited)
+        }
+
+        invalidate()
+      } catch (error) {}
     }
   })
 
@@ -83,7 +86,7 @@ export default function CbBanksForms({ labels, maxAccess, store, setStore, setEd
         }
       } catch (exception) {}
     })()
-  }, [])
+  }, [recordId])
 
   return (
     <FormShell resourceId={ResourceIds.CbBanks} form={formik} maxAccess={maxAccess} editMode={editMode}>
