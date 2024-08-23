@@ -11,41 +11,32 @@ import { useForm } from 'src/hooks/form'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { ControlContext } from 'src/providers/ControlContext'
-import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
-import CustomNumberField from 'src/components/Inputs/CustomNumberField'
-import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import { DataSets } from 'src/resources/DataSets'
+import { CTCLRepository } from 'src/repositories/CTCLRepository'
 
-export default function PaymentTermsForm({ labels, maxAccess, recordId }) {
+export default function ExtraIncomeForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: PurchaseRepository.PaymentTerms.qry
+    endpointId: CTCLRepository.ExtraIncome.qry
   })
 
   const { formik } = useForm({
     initialValues: {
-      recordId: recordId || null,
+      recordId: null,
       name: '',
-      reference: '',
-      type: '',
-      discount: '',
-      discountDays: '',
-      days: 0
+      reference: ''
     },
-    maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),
-      reference: yup.string().required(),
-      type: yup.string().required()
+      reference: yup.string().required()
     }),
     onSubmit: async obj => {
       try {
         const response = await postRequest({
-          extension: PurchaseRepository.PaymentTerms.set,
+          extension: CTCLRepository.ExtraIncome.set,
           record: JSON.stringify(obj)
         })
 
@@ -64,7 +55,7 @@ export default function PaymentTermsForm({ labels, maxAccess, recordId }) {
       try {
         if (recordId) {
           const res = await getRequest({
-            extension: PurchaseRepository.PaymentTerms.get,
+            extension: CTCLRepository.ExtraIncome.get,
             parameters: `_recordId=${recordId}`
           })
 
@@ -75,10 +66,10 @@ export default function PaymentTermsForm({ labels, maxAccess, recordId }) {
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.PaymentTerm} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell resourceId={ResourceIds.ExtraIncome} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={2}>
+          <Grid container spacing={4}>
             <Grid item xs={12}>
               <CustomTextField
                 name='reference'
@@ -86,6 +77,7 @@ export default function PaymentTermsForm({ labels, maxAccess, recordId }) {
                 value={formik.values.reference}
                 required
                 maxAccess={maxAccess}
+                maxLength='15'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('reference', '')}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
@@ -98,53 +90,10 @@ export default function PaymentTermsForm({ labels, maxAccess, recordId }) {
                 value={formik.values.name}
                 required
                 maxAccess={maxAccess}
-                maxLength='30'
+                maxLength='50'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
                 error={formik.touched.name && Boolean(formik.errors.name)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <ResourceComboBox
-                datasetId={DataSets.PAYMENT_TERM_TYPE}
-                name='type'
-                label={labels.type}
-                required
-                valueField='key'
-                displayField='value'
-                values={formik.values}
-                maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('type', newValue?.key)
-                }}
-                error={formik.touched.type && Boolean(formik.errors.type)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomNumberField
-                name='discountDays'
-                label={labels.discountDays}
-                value={formik.values.discountDays}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('discountDays', '')}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomNumberField
-                name='days'
-                label={labels.days}
-                value={formik.values.days}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('days', 0)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomNumberField
-                name='discount'
-                label={labels.discount}
-                value={formik.values.discount}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('discount', '')}
               />
             </Grid>
           </Grid>
