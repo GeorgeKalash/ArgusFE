@@ -80,13 +80,13 @@ const OutwardsReturn = () => {
     await proxyAction()
   }
 
+  const userId = getStorageData('userData').userId
+
   const edit = obj => {
     openForm(obj?.recordId)
   }
 
   const getPlantId = async () => {
-    const userId = getStorageData('userData').userId
-
     try {
       const res = await getRequest({
         extension: SystemRepository.UserDefaults.get,
@@ -125,12 +125,10 @@ const OutwardsReturn = () => {
         })
   }
 
-  const userData = getStorageData('userData')
-
   const getDefaultDT = async () => {
     const res = await getRequest({
       extension: SystemRepository.UserFunction.get,
-      parameters: `_userId=${userData.userId}&_functionId=${SystemFunction.OutwardsReturn}`
+      parameters: `_userId=${userId}&_functionId=${SystemFunction.OutwardsReturn}`
     })
 
     return res?.record?.dtId
