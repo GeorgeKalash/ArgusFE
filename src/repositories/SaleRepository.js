@@ -131,5 +131,8 @@ export const SaleRepository = {
     set: service + 'setORD',
     del: service + 'delORD',
     snapshot: service + 'snapshotORD'
+  },
+  SalesOrderItem: {
+    qry: service + 'qryORI'
   }
 }
