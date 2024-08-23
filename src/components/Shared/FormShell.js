@@ -1,5 +1,5 @@
 import { DialogContent } from '@mui/material'
-import { useContext, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import WindowToolbar from './WindowToolbar'
 import TransactionLog from './TransactionLog'
 import { TrxType } from 'src/resources/AccessLevels'
@@ -15,6 +15,7 @@ import CashTransaction from './CashTransaction'
 import FinancialTransaction from './FinancialTransaction'
 import { ControlContext } from 'src/providers/ControlContext'
 import toast from 'react-hot-toast'
+import { RequestsContext } from 'src/providers/RequestsContext'
 
 export default function FormShell({
   form,
@@ -46,6 +47,7 @@ export default function FormShell({
   const { clear } = useGlobalRecord()
   const { platformLabels } = useContext(ControlContext)
   const isSavedClearVisible = isSavedClear && isSaved && isCleared
+  const { errored } = useContext(RequestsContext)
 
   const windowToolbarVisible = editMode
     ? maxAccess < TrxType.EDIT
@@ -111,19 +113,19 @@ export default function FormShell({
     })
   }
 
+  const [saveAndClearSubmitted, setSaveAndClearSubmitted] = useState(false)
+
   async function handleSaveAndClear() {
-    const errors = await form.validateForm()
-
-    if (Object.keys(errors).length === 0) {
-      try {
-        await form.submitForm()
-
-        form.resetForm()
-      } catch (error) {}
-    } else {
-      form.submitForm()
-    }
+    setSaveAndClearSubmitted(true)
+    form.submitForm()
   }
+
+  useEffect(() => {
+    if (!errored && saveAndClearSubmitted && !form.isSubmitting && Object.keys(form.errors).length == 0) {
+      form.resetForm()
+      setSaveAndClearSubmitted(false)
+    }
+  }, [errored, form, saveAndClearSubmitted])
 
   return (
     <>
@@ -144,7 +146,10 @@ export default function FormShell({
       {windowToolbarVisible && (
         <WindowToolbar
           print={print}
-          onSave={() => form?.handleSubmit()}
+          onSave={() => {
+            setSaveAndClearSubmitted(false)
+            form?.handleSubmit()
+          }}
           onSaveClear={() => {
             handleSaveAndClear()
           }}

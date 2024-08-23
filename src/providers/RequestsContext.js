@@ -1,5 +1,5 @@
 // ** React Imports
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
 
 // ** 3rd Party Imports
 import axios from 'axios'
@@ -35,6 +35,7 @@ function LoadingOverlay() {
 const RequestsProvider = ({ showLoading = false, children }) => {
   const { user, setUser, apiUrl } = useContext(AuthContext)
 
+  const [errored, setErrored] = useState(false)
   const errorModel = useError()
   const [loading, setLoading] = useState(false)
 
@@ -118,6 +119,7 @@ const RequestsProvider = ({ showLoading = false, children }) => {
   const postRequest = async body => {
     !loading && setLoading(true)
 
+    setErrored(false)
     const accessToken = await getAccessToken()
     const url = body.url ? body.url : apiUrl
 
@@ -141,6 +143,7 @@ const RequestsProvider = ({ showLoading = false, children }) => {
         return res.data
       })
       .catch(error => {
+        setErrored(true)
         debouncedCloseLoading()
         showError({
           message: error,
@@ -238,7 +241,9 @@ const RequestsProvider = ({ showLoading = false, children }) => {
     getRequest,
     postRequest,
     getIdentityRequest,
-    getMicroRequest
+    getMicroRequest,
+    errored,
+    setErrored
   }
 
   return (
