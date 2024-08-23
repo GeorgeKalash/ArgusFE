@@ -161,7 +161,7 @@ const CustomLookup = ({
                 }
               }}
               onBlur={e => {
-                if (!store.some(item => item[valueField] === inputValue)) {
+                if (!store.some(item => item[valueField] === inputValue) && e.target.value !== inputValue) {
                   setInputValue('') // Clear input if no valid option is selected
                   setStore([])
                   onChange(name, '')
