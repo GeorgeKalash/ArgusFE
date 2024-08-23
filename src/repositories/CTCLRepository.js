@@ -18,5 +18,11 @@ export const CTCLRepository = {
   IDNumber: {
     get: service + 'getID',
     get2: service + 'getID2'
+  },
+  ExtraIncome: {
+    qry: service + 'qryEI',
+    get: service + 'getEI',
+    del: service + 'delEI',
+    set: service + 'setEI'
   }
 }

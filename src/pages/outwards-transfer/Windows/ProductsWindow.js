@@ -35,9 +35,14 @@ const ProductsWindow = ({ labels, maxAccess, onProductSubmit, products, editMode
       flex: 1
     }
   ]
+
   useEffect(() => {
-    setGridData({ list: products })
-  }, [products])
+    ;(async function () {
+      try {
+        setGridData({ list: products })
+      } catch (error) {}
+    })()
+  }, [])
 
   return (
     <VertLayout>
