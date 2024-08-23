@@ -169,11 +169,6 @@ const CustomLookup = ({
                 }
               }}
               onFocus={setFreeSolo(true)}
-              // onBlur={e => {
-              //   setFreeSolo(true)
-              //   store && setStore([])
-              //   if (e.target.value !== firstValue) onChange('')
-              // }}
               type={type}
               variant={variant}
               label={label}
