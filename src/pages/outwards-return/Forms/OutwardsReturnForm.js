@@ -114,10 +114,7 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
     ;(async function () {
       try {
         if (recordId) {
-          const res = await getRequest({
-            extension: RemittanceOutwardsRepository.OutwardsReturn.get,
-            parameters: `_recordId=${recordId}`
-          })
+          const res = await getOutwardsReturn(recordId)
 
           formik.setValues({
             ...res.record,
