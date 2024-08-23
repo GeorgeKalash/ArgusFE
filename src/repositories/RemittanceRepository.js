@@ -153,8 +153,5 @@ export const RemittanceSettingsRepository = {
     get: service + 'getCGP',
     set: service + 'setCGP',
     del: service + 'delCGP'
-  },
-  ExtraIncome: {
-    qry: service + 'qryEI'
   }
 }

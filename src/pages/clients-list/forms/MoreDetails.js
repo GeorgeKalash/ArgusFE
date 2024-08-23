@@ -5,7 +5,9 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FormShell from 'src/components/Shared/FormShell'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useForm } from 'src/hooks/form'
+import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
+import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { DataSets } from 'src/resources/DataSets'
 
 export default function MoreDetails({ labels, editMode, maxAccess, readOnly, clientFormik, window }) {
@@ -16,7 +18,9 @@ export default function MoreDetails({ labels, editMode, maxAccess, readOnly, cli
       riskLevel: '',
       civilStatus: '',
       title: '',
-      oldReference: ''
+      oldReference: '',
+      extraIncome: '',
+      extraIncomeId: ''
     },
     enableReinitialize: true,
     maxAccess,
@@ -29,6 +33,8 @@ export default function MoreDetails({ labels, editMode, maxAccess, readOnly, cli
         riskLevel: obj.riskLevel,
         civilStatus: obj.civilStatus,
         oldReference: obj.oldReference,
+        extraIncome: obj.extraIncome,
+        extraIncomeId: obj.extraIncomeId,
         title: obj.title
       })
       window.close()
@@ -42,7 +48,9 @@ export default function MoreDetails({ labels, editMode, maxAccess, readOnly, cli
       riskLevel: clientFormik.values.riskLevel,
       civilStatus: clientFormik.values.civilStatus,
       oldReference: clientFormik.values.oldReference,
-      title: clientFormik.values.title
+      title: clientFormik.values.title,
+      extraIncome: clientFormik.values.extraIncome,
+      extraIncomeId: clientFormik.values.extraIncomeId
     })
   }, [])
 
@@ -147,6 +155,38 @@ export default function MoreDetails({ labels, editMode, maxAccess, readOnly, cli
               }
             }}
             error={formik.touched.title && Boolean(formik.errors.title)}
+            maxAccess={maxAccess}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <CustomNumberField
+            name='extraIncome'
+            maxLength={12}
+            decimalScale={0}
+            readOnly={editMode || readOnly}
+            onChange={formik.handleChange}
+            label={labels.extraIncome}
+            value={formik.values.extraIncome}
+            error={formik.touched.extraIncome && Boolean(formik.errors.extraIncome)}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <ResourceComboBox
+            endpointId={CTCLRepository.ExtraIncome.qry}
+            name='extraIncomeId'
+            label={labels.extraIncomeType}
+            readOnly={editMode || readOnly}
+            valueField='recordId'
+            displayField={['reference', 'name']}
+            columnsInDropDown={[
+              { key: 'reference', value: 'Reference' },
+              { key: 'name', value: 'Name' }
+            ]}
+            values={formik.values}
+            onChange={(event, newValue) => {
+              formik.setFieldValue('extraIncomeId', newValue?.recordId || '')
+            }}
+            error={formik.touched.extraIncomeId && Boolean(formik.errors.extraIncomeId)}
             maxAccess={maxAccess}
           />
         </Grid>

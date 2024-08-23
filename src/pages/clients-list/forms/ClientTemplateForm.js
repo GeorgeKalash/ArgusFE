@@ -1523,26 +1523,6 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                     >
                       {labels.moreDetails}
                     </Button>
-                    <Button
-                      sx={{ ml: 2 }}
-                      variant='contained'
-                      onClick={() =>
-                        stack({
-                          Component: ExtraIncome,
-                          props: {
-                            readOnly: editMode && !allowEdit,
-                            labels: labels,
-                            clientFormik: clientIndividualFormik,
-                            maxAccess: maxAccess
-                          },
-                          width: 500,
-                          height: 200,
-                          title: labels.extraIncome
-                        })
-                      }
-                    >
-                      {labels.extraIncome}
-                    </Button>
                   </Grid>
 
                   <Grid container xs={12} sx={{ pt: 5 }}>
