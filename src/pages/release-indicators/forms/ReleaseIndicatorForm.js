@@ -11,11 +11,13 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { DataSets } from 'src/resources/DataSets'
 import { useForm } from 'src/hooks/form'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function ReleaseIndicatorForm({ labels, maxAccess, recordId, window }) {
-  const [editMode, setEditMode] = useState(!!recordId)
-
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: DocumentReleaseRepository.ReleaseIndicator.page
@@ -33,31 +35,34 @@ export default function ReleaseIndicatorForm({ labels, maxAccess, recordId, wind
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required(''),
-      reference: yup.string().required(''),
-      recordId: yup.string().required(''),
-      changeability: yup.string().required('')
+      name: yup.string().required(),
+      reference: yup.string().required(),
+      recordId: yup.string().required(),
+      changeability: yup.string().required()
     }),
     onSubmit: async obj => {
-      const recordId = obj.recordId
+      try {
+        const recordId = obj.recordId
 
-      const response = await postRequest({
-        extension: DocumentReleaseRepository.ReleaseIndicator.set,
-        record: JSON.stringify(obj)
-      })
-
-      if (!recordId) {
-        toast.success('Record Added Successfully')
-        formik.setValues({
-          ...obj,
-          recordId: response.recordId
+        const response = await postRequest({
+          extension: DocumentReleaseRepository.ReleaseIndicator.set,
+          record: JSON.stringify(obj)
         })
-      } else toast.success('Record Edited Successfully')
-      setEditMode(true)
-      window.close()
-      invalidate()
+
+        if (!recordId) {
+          toast.success(platformLabels.Added)
+          formik.setValues({
+            ...obj,
+            recordId: response.recordId
+          })
+        } else toast.success(platformLabels.Edited)
+        window.close()
+        invalidate()
+      } catch (error) {}
     }
   })
+
+  const editMode = !!formik.values.recordId || !!recordId
 
   useEffect(() => {
     ;(async function () {
@@ -78,81 +83,85 @@ export default function ReleaseIndicatorForm({ labels, maxAccess, recordId, wind
 
   return (
     <FormShell resourceId={ResourceIds.ReleaseIndicators} form={formik} maxAccess={maxAccess} editMode={editMode}>
-      <Grid container spacing={4}>
-        <Grid item xs={12}>
-          <CustomTextField
-            name='reference'
-            label={labels.reference}
-            readOnly={editMode}
-            value={formik.values.reference}
-            required
-            maxAccess={maxAccess}
-            maxLength='1'
-            onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('reference', '')}
-            error={formik.touched.reference && Boolean(formik.errors.reference)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <CustomTextField
-            name='name'
-            label={labels.name}
-            readOnly={editMode}
-            value={formik.values.name}
-            required
-            maxAccess={maxAccess}
-            maxLength='30'
-            onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('name', '')}
-            error={formik.touched.name && Boolean(formik.errors.name)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <CustomTextField
-            name='recordId'
-            label={labels.id}
-            readOnly={editMode}
-            value={formik.values.recordId}
-            required
-            maxAccess={maxAccess}
-            maxLength='30'
-            onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('recordId', '')}
-            error={formik.touched.recordId && Boolean(formik.errors.recordId)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <ResourceComboBox
-            readOnly={false}
-            datasetId={DataSets.DR_CHANGEABILITY}
-            name='changeability'
-            label={labels.changeability}
-            valueField='key'
-            displayField='value'
-            values={formik.values}
-            required
-            maxAccess={maxAccess}
-            onChange={(event, newValue) => {
-              formik && formik.setFieldValue('changeability', newValue?.key)
-            }}
-            error={formik.touched.changeability && Boolean(formik.errors.changeability)}
-          />
-        </Grid>
-
-        <Grid item xs={12}>
-          <FormControlLabel
-            control={
-              <Checkbox
-                name='isReleased'
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={4}>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='reference'
+                label={labels.reference}
+                readOnly={editMode}
+                value={formik.values.reference}
+                required
                 maxAccess={maxAccess}
-                checked={formik.values?.isReleased}
+                maxLength='1'
                 onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('reference', '')}
+                error={formik.touched.reference && Boolean(formik.errors.reference)}
               />
-            }
-            label={labels.isReleased}
-          />
-        </Grid>
-      </Grid>
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='name'
+                label={labels.name}
+                readOnly={editMode}
+                value={formik.values.name}
+                required
+                maxAccess={maxAccess}
+                maxLength='30'
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('name', '')}
+                error={formik.touched.name && Boolean(formik.errors.name)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='recordId'
+                label={labels.id}
+                readOnly={editMode}
+                value={formik.values.recordId}
+                required
+                maxAccess={maxAccess}
+                maxLength='30'
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('recordId', '')}
+                error={formik.touched.recordId && Boolean(formik.errors.recordId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                readOnly={false}
+                datasetId={DataSets.DR_CHANGEABILITY}
+                name='changeability'
+                label={labels.changeability}
+                valueField='key'
+                displayField='value'
+                values={formik.values}
+                required
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik && formik.setFieldValue('changeability', newValue?.key)
+                }}
+                error={formik.touched.changeability && Boolean(formik.errors.changeability)}
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name='isReleased'
+                    maxAccess={maxAccess}
+                    checked={formik.values?.isReleased}
+                    onChange={formik.handleChange}
+                  />
+                }
+                label={labels.isReleased}
+              />
+            </Grid>
+          </Grid>
+        </Grow>
+      </VertLayout>
     </FormShell>
   )
 }
