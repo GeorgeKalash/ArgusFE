@@ -155,6 +155,10 @@ const CustomLookup = ({
                 onKeyUp
                 setFreeSolo(true)
               }}
+              inputProps={{
+                ...params.inputProps,
+                tabIndex: _readOnly ? -1 : 0 // Prevent focus if readOnly
+              }}
               autoFocus={autoFocus}
               error={error}
               helperText={helperText}
@@ -200,7 +204,8 @@ const CustomLookup = ({
                       </InputAdornment>
                     )}
                   </div>
-                )
+                ),
+                tabIndex: _readOnly ? -1 : 0 // Prevent focus if readOnly
               }}
               sx={{
                 ...(secondDisplayField && {
@@ -220,7 +225,7 @@ const CustomLookup = ({
           )}
           readOnly={_readOnly}
           freeSolo={_readOnly || freeSolo}
-          disabled={disabled || _readOnly}
+          disabled={disabled}
         />
       </Grid>
       {secondDisplayField && (
@@ -233,6 +238,9 @@ const CustomLookup = ({
             required={isRequired}
             disabled={disabled}
             InputProps={{
+              inputProps: {
+                tabIndex: -1 // Prevent focus on the input field
+              },
               readOnly: true
             }}
             error={error}

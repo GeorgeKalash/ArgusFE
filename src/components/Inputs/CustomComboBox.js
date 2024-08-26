@@ -93,7 +93,7 @@ const CustomComboBox = ({
       fullWidth={fullWidth}
       readOnly={_readOnly}
       freeSolo={_readOnly}
-      disabled={_disabled || _readOnly}
+      disabled={_disabled}
       required={_required}
       sx={{ ...sx, display: _hidden ? 'none' : 'unset' }}
       renderOption={(props, option) => {
@@ -135,7 +135,7 @@ const CustomComboBox = ({
       renderInput={params => (
         <TextField
           {...params}
-          inputProps={{ ...params.inputProps, ...(neverPopulate && { value: '' }) }}
+          inputProps={{ ...params.inputProps, tabIndex: _readOnly ? -1 : 0, ...(neverPopulate && { value: '' }) }}
           type={type}
           variant={variant}
           label={label}

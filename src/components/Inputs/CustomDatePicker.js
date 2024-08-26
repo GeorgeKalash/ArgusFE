@@ -76,7 +76,7 @@ const CustomDatePicker = ({
   return _hidden ? (
     <></>
   ) : (
-    <LocalizationProvider dateAdapter={AdapterDateFns}>
+    <LocalizationProvider tabIndex={-1} dateAdapter={AdapterDateFns}>
       <DatePicker
         variant={variant}
         size={size}
@@ -97,7 +97,7 @@ const CustomDatePicker = ({
         onChange={newValue => onChange(name, newValue)}
         onClose={() => setOpenDatePicker(false)}
         open={openDatePicker}
-        disabled={disabled || _readOnly}
+        disabled={disabled}
         readOnly={_readOnly}
         clearable //bug from mui not working for now
         shouldDisableDate={disabledDate && shouldDisableDate} // Enable this prop for date disabling
@@ -110,6 +110,9 @@ const CustomDatePicker = ({
             error: error,
             helperText: helperText,
             InputProps: {
+              inputProps: {
+                tabIndex: _readOnly ? -1 : 0 // Prevent focus on the input field
+              },
               endAdornment: !(_readOnly || disabled) && (
                 <InputAdornment position='end'>
                   {value && (
