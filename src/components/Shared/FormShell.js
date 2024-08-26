@@ -117,14 +117,9 @@ export default function FormShell({
   async function handleSaveAndClear() {
     setSaveAndClearSubmitted(true)
     form.submitForm()
-    console.log(form.values)
   }
 
-  useEffect(() => {
-    console.log(form)
-  }, [form])
-
-  console.log(form.isSubmitting)
+  useEffect(() => {}, [form])
 
   useEffect(() => {
     if (!errored && saveAndClearSubmitted && !form.isSubmitting && Object.keys(form.errors).length == 0) {
