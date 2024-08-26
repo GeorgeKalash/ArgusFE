@@ -59,7 +59,7 @@ export default function MultiCurrencyForm({ labels, maxAccess, record, recordId,
     }
   })
 
-  const editMode = !!formik.values.recordId || !!recordId
+  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
