@@ -220,7 +220,7 @@ const CustomLookup = ({
           )}
           readOnly={_readOnly}
           freeSolo={_readOnly || freeSolo}
-          disabled={disabled}
+          disabled={disabled || _readOnly}
         />
       </Grid>
       {secondDisplayField && (

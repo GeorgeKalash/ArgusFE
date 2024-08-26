@@ -93,7 +93,7 @@ const CustomComboBox = ({
       fullWidth={fullWidth}
       readOnly={_readOnly}
       freeSolo={_readOnly}
-      disabled={_disabled}
+      disabled={_disabled || _readOnly}
       required={_required}
       sx={{ ...sx, display: _hidden ? 'none' : 'unset' }}
       renderOption={(props, option) => {

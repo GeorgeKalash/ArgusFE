@@ -106,6 +106,7 @@ const CustomTextField = ({
       inputProps={{
         autoComplete: 'off',
         readOnly: _readOnly,
+        disabled: _readOnly,
         maxLength: maxLength,
         dir: dir, // Set direction to right-to-left
         inputMode: 'numeric',

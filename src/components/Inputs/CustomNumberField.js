@@ -85,6 +85,7 @@ const CustomNumberField = ({
       InputProps={{
         autoComplete: 'off',
         readOnly: _readOnly,
+        disabled: _readOnly,
         endAdornment: (!readOnly || allowClear) && !props.disabled && (value || value === 0) && (
           <InputAdornment position='end'>
             <IconButton tabIndex={-1} edge='end' onClick={onClear} aria-label='clear input'>

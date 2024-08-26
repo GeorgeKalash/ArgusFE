@@ -97,7 +97,7 @@ const CustomDatePicker = ({
         onChange={newValue => onChange(name, newValue)}
         onClose={() => setOpenDatePicker(false)}
         open={openDatePicker}
-        disabled={disabled}
+        disabled={disabled || _readOnly}
         readOnly={_readOnly}
         clearable //bug from mui not working for now
         shouldDisableDate={disabledDate && shouldDisableDate} // Enable this prop for date disabling
@@ -129,7 +129,7 @@ const CustomDatePicker = ({
           }
         }}
         slots={{
-          actionBar: (props) => (<PickersActionBar {...props} actions={['accept', 'today']} />)
+          actionBar: props => <PickersActionBar {...props} actions={['accept', 'today']} />
         }}
       />
     </LocalizationProvider>
