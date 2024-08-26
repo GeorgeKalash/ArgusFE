@@ -58,6 +58,7 @@ export const GeneralLedgerRepository = {
     qry: service + 'qryJV',
     get: service + 'getJV',
     set: service + 'setJV',
+    post: service + 'postJV',
     del: service + 'delJV'
   },
   GeneralLedger: {
@@ -83,4 +84,8 @@ export const GeneralLedgerRepository = {
     set2: service + 'set2ID',
     del: service + 'delID'
   },
+  IntegrationSystemFunction: {
+    qry: service + 'qryISF',
+    set2: service + 'set2ISF'
+  }
 }

@@ -17,6 +17,7 @@ import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import MemosForm from './MemosForm'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { ControlContext } from 'src/providers/ControlContext'
+import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
 const Financial = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -28,12 +29,14 @@ const Financial = () => {
   const { functionId } = router.query
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 50, params } = options
     console.log('fetching')
 
     const response = await getRequest({
-      extension: FinancialRepository.FiMemo.qry,
-      parameters: `_startAt=${_startAt}&_params=&_pageSize=${_pageSize}&_sortBy=reference&_functionId=${functionId}`
+      extension: FinancialRepository.FiMemo.page,
+      parameters: `_startAt=${_startAt}&_params=${
+        params || ''
+      }&_pageSize=${_pageSize}&_sortBy=reference&_functionId=${functionId}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -46,25 +49,27 @@ const Financial = () => {
     filterBy,
     clearFilter,
     paginationParameters,
-    access
+    access,
+    invalidate
   } = useResourceQuery({
-    endpointId: FinancialRepository.FiMemo.qry,
+    endpointId: FinancialRepository.FiMemo.page,
     datasetId: ResourceIds.CreditNote,
 
     filter: {
-      endpointId: FinancialRepository.FiMemo.snapshot,
       filterFn: fetchWithSearch,
       default: { functionId }
     }
   })
 
   async function fetchWithSearch({ filters, pagination }) {
-    return filters.qry
-      ? await getRequest({
-          extension: FinancialRepository.FiMemo.snapshot,
-          parameters: `_filter=${filters.qry}&_functionId=${functionId}`
-        })
-      : await fetchGridData(pagination)
+    if (filters?.qry) {
+      return await getRequest({
+        extension: FinancialRepository.FiMemo.snapshot,
+        parameters: `_filter=${filters.qry}&_functionId=${functionId}`
+      })
+    } else {
+      return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+    }
   }
 
   const columns = [
@@ -172,7 +177,7 @@ const Financial = () => {
         functionId: functionId,
         getEndpoint
       },
-      width: 800,
+      width: 860,
       height: 670,
       title: getcorrectLabel(parseInt(functionId))
     })
@@ -198,19 +203,35 @@ const Financial = () => {
     } catch (error) {}
   }
 
+  const onApply = ({ search, rpbParams }) => {
+    if (!search && rpbParams.length === 0) {
+      clearFilter('params')
+    } else if (!search) {
+      filterBy('params', rpbParams)
+    } else {
+      filterBy('qry', search)
+    }
+    refetch()
+  }
+
+  const onSearch = value => {
+    filterBy('qry', value)
+  }
+
+  const onClear = () => {
+    clearFilter('qry')
+  }
+
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar
+        <RPBGridToolbar
           onAdd={add}
           maxAccess={access}
-          onSearch={value => {
-            filterBy('qry', value)
-          }}
-          onSearchClear={() => {
-            clearFilter('qry')
-          }}
-          inputSearch={true}
+          onApply={onApply}
+          onSearch={onSearch}
+          onClear={onClear}
+          reportName={'FIMEM'}
         />
       </Fixed>
       <Grow>

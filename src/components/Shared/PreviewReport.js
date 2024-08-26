@@ -1,9 +1,10 @@
-import React, {useState, useEffect, useContext} from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { DevExpressRepository } from 'src/repositories/DevExpressRepository'
+import { ResourceIds } from 'src/resources/ResourceIds'
 
-export default function PreviewReport({recordId , selectedReport}) {
-  const {  postRequest } = useContext(RequestsContext)
+export default function PreviewReport({ recordId, selectedReport, functionId, resourceId }) {
+  const { postRequest } = useContext(RequestsContext)
   const [pdfURL, setPdfUrl] = useState(null)
 
   useEffect(() => {
@@ -11,11 +12,17 @@ export default function PreviewReport({recordId , selectedReport}) {
   }, [selectedReport])
 
   const generateReport = () => {
+    const parameters =
+      resourceId == ResourceIds.JournalVoucher
+        ? `?_recordId=${recordId}&_functionId=${functionId}`
+        : `?_recordId=${recordId}`
+
     const obj = {
-      api_url: selectedReport.api_url + `?_recordId=${recordId}`,
+      api_url: selectedReport.api_url + parameters,
       assembly: selectedReport.assembly,
       format: 1,
-      reportClass: selectedReport.reportClass
+      reportClass: selectedReport.reportClass,
+      functionId: functionId
     }
     postRequest({
       url: process.env.NEXT_PUBLIC_REPORT_URL,
@@ -30,9 +37,5 @@ export default function PreviewReport({recordId , selectedReport}) {
       })
   }
 
-  return (
-      <>
-       {pdfURL && <iframe title={'Preview'} src={pdfURL} width='100%' height='100%' allowFullScreen />}
-      </>
-  )
+  return <>{pdfURL && <iframe title={'Preview'} src={pdfURL} width='100%' height='100%' allowFullScreen />}</>
 }

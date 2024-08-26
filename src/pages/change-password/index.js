@@ -4,7 +4,7 @@ import ChangePassword from 'src/components/Shared/ChangePassword'
 
 const ChangePass = () => {
   return (
-    <ImmediateWindow datasetId={ResourceIds.ChangePassword} titleName={'ChangePassword'} Component={ChangePassword} />
+    <ImmediateWindow datasetId={ResourceIds.ChangePassword} labelKey={'ChangePassword'} Component={ChangePassword} />
   )
 }
 

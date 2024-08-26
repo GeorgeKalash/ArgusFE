@@ -1,6 +1,5 @@
 import { Checkbox, FormControlLabel, Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
-import { useFormik } from 'formik'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -29,6 +28,7 @@ export default function CityDistrictForm({ labels, recordId, maxAccess }) {
     initialValues: {
       recordId: null,
       name: '',
+      flName: '',
       reference: '',
       countryId: null,
       cityId: null,
@@ -41,10 +41,10 @@ export default function CityDistrictForm({ labels, recordId, maxAccess }) {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required(' '),
-      reference: yup.string().required(' '),
-      countryId: yup.string().required(' '),
-      cityId: yup.string().required(' ')
+      name: yup.string().required(),
+      reference: yup.string().required(),
+      countryId: yup.string().required(),
+      cityId: yup.string().required()
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
@@ -115,6 +115,18 @@ export default function CityDistrictForm({ labels, recordId, maxAccess }) {
                 error={formik.touched.name && Boolean(formik.errors.name)}
                 maxLength='40'
                 maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='flName'
+                label={labels.flName}
+                value={formik.values.flName}
+                maxAccess={maxAccess}
+                maxLength='40'
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('flName', '')}
+                error={formik.touched.flName && Boolean(formik.errors.flName)}
               />
             </Grid>
             <Grid item xs={12}>

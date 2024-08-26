@@ -1,5 +1,4 @@
 import { useContext, useEffect, useState } from 'react'
-import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import Table from 'src/components/Shared/Table'
@@ -10,18 +9,14 @@ import { useWindow } from 'src/windows'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
-const CharacteristicsForm = (
- { 
-  labels,
-  store,
-  maxAccess,
-  height
-}) => {
+const CharacteristicsForm = ({ labels, store, maxAccess, height }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const [CharacteristicGridData , setCharacteristicGridData] = useState()
+  const [CharacteristicGridData, setCharacteristicGridData] = useState()
   const { stack } = useWindow()
   const { recordId } = store
+  const { platformLabels } = useContext(ControlContext)
 
   const columns = [
     {
@@ -33,10 +28,15 @@ const CharacteristicsForm = (
       field: 'value',
       headerName: labels.value,
       flex: 1
+    },
+    {
+      field: 'oper',
+      headerName: labels.operator,
+      flex: 1
     }
   ]
 
-  function openForm (){
+  function openForm() {
     stack({
       Component: CharacteristicForm,
       props: {
@@ -58,8 +58,9 @@ const CharacteristicsForm = (
     })
       .then(res => {
         getCharacteristicGridData(recordId)
-        toast.success('Record Deleted Successfully')
+        toast.success(platformLabels.Deleted)
       })
+      .catch(error => {})
   }
 
   const addCharacteristic = () => {
@@ -77,14 +78,12 @@ const CharacteristicsForm = (
       .then(res => {
         setCharacteristicGridData(res)
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch(error => {})
   }
 
-  useEffect(()=>{
+  useEffect(() => {
     recordId && getCharacteristicGridData(recordId)
-  },[recordId])
+  }, [recordId])
 
   return (
     <VertLayout>
@@ -100,7 +99,7 @@ const CharacteristicsForm = (
           isLoading={false}
           maxAccess={maxAccess}
           pagination={false}
-          height={height-100}
+          height={height - 100}
         />
       </Grow>
     </VertLayout>

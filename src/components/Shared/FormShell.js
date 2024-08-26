@@ -19,10 +19,12 @@ export default function FormShell({
   form,
   isSaved = true,
   isInfo = true,
+  isSavedClear = true,
   isCleared = true,
   children,
   editMode,
   disabledSubmit,
+  disabledSavedClear,
   infoVisible = true,
   postVisible = false,
   resourceId,
@@ -42,6 +44,7 @@ export default function FormShell({
   const [selectedReport, setSelectedReport] = useState(null)
   const { clear } = useGlobalRecord()
   const { platformLabels } = useContext(ControlContext)
+  const isSavedClearVisible = isSavedClear && isSaved && isCleared
 
   const windowToolbarVisible = editMode
     ? maxAccess < TrxType.EDIT
@@ -61,6 +64,7 @@ export default function FormShell({
         clear()
       }
     }
+
     if (setIDInfoAutoFilled) {
       setIDInfoAutoFilled(false)
     }
@@ -126,14 +130,15 @@ export default function FormShell({
         <WindowToolbar
           print={print}
           onSave={() => form?.handleSubmit()}
+          onSaveClear={() => {
+            form?.handleSubmit(), handleReset()
+          }}
           onClear={() => handleReset()}
           onPost={() => {
-            // Set a flag in thexpt Formik state before calling handleSubmit
             form.setFieldValue('isOnPostClicked', true)
             form.handleSubmit()
           }}
           onTFR={() => {
-            // Set  flag in the Formik state before calling handleSubmit
             form.setFieldValue('isTFRClicked', true)
             form.handleSubmit()
           }}
@@ -161,6 +166,18 @@ export default function FormShell({
               width: 1000,
               height: 620,
               title: platformLabels.GeneralLedger
+            })
+          }
+          onClickIT={() =>
+            stack({
+              Component: FinancialTransaction,
+              props: {
+                formValues: form.values,
+                functionId
+              },
+              width: 1000,
+              height: 620,
+              title: platformLabels.financialTransaction
             })
           }
           onClickGIA={() =>
@@ -202,7 +219,9 @@ export default function FormShell({
               Component: PreviewReport,
               props: {
                 selectedReport: selectedReport,
-                recordId: form.values?.recordId
+                recordId: form.values?.recordId,
+                functionId: form.values?.functionId,
+                resourceId: resourceId
               },
               width: 1150,
               height: 700,
@@ -210,6 +229,7 @@ export default function FormShell({
             })
           }
           isSaved={isSaved}
+          isSavedClear={isSavedClearVisible}
           isInfo={isInfo}
           isCleared={isCleared}
           actions={actions}
@@ -218,6 +238,7 @@ export default function FormShell({
           transactionClicked={transactionClicked}
           editMode={editMode}
           disabledSubmit={disabledSubmit}
+          disabledSavedClear={disabledSavedClear || disabledSubmit}
           infoVisible={infoVisible}
           postVisible={postVisible}
           isPosted={isPosted}

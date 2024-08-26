@@ -23,13 +23,28 @@ const ProductMaster = () => {
     labels: _labels,
     paginationParameters,
     invalidate,
+    filterBy,
+    clearFilter,
     refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: RemittanceSettingsRepository.ProductMaster.qry,
-    datasetId: ResourceIds.ProductMaster
+    datasetId: ResourceIds.ProductMaster,
+    filter: {
+      endpointId: RemittanceSettingsRepository.ProductMaster.snapshot,
+      filterFn: fetchWithSearch
+    }
   })
+
+  async function fetchWithSearch({ filters, pagination }) {
+    return filters.qry
+      ? await getRequest({
+          extension: RemittanceSettingsRepository.ProductMaster.snapshot,
+          parameters: `_filter=${filters.qry}`
+        })
+      : await fetchGridData(pagination)
+  }
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -99,7 +114,17 @@ const ProductMaster = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <GridToolbar
+          onAdd={add}
+          maxAccess={access}
+          onSearch={value => {
+            filterBy('qry', value)
+          }}
+          onSearchClear={() => {
+            clearFilter('qry')
+          }}
+          inputSearch={true}
+        />
       </Fixed>
       <Grow>
         <Table

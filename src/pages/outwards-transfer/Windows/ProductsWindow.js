@@ -5,7 +5,7 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import { useEffect, useState } from 'react'
 
-const ProductsWindow = ({ labels, maxAccess, onProductSubmit, products, window }) => {
+const ProductsWindow = ({ labels, maxAccess, onProductSubmit, products, editMode, window }) => {
   const [gridData, setGridData] = useState([])
 
   const columns = [
@@ -35,9 +35,14 @@ const ProductsWindow = ({ labels, maxAccess, onProductSubmit, products, window }
       flex: 1
     }
   ]
+
   useEffect(() => {
-    setGridData({ list: products })
-  }, [products])
+    ;(async function () {
+      try {
+        setGridData({ list: products })
+      } catch (error) {}
+    })()
+  }, [])
 
   return (
     <VertLayout>
@@ -62,6 +67,7 @@ const ProductsWindow = ({ labels, maxAccess, onProductSubmit, products, window }
           }}
           isSaved={true}
           smallBox={true}
+          disabledSubmit={editMode}
         />
       </Fixed>
     </VertLayout>
