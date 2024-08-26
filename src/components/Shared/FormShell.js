@@ -119,8 +119,6 @@ export default function FormShell({
     form.submitForm()
   }
 
-  useEffect(() => {}, [form])
-
   useEffect(() => {
     if (!errored && saveAndClearSubmitted && !form.isSubmitting && Object.keys(form.errors).length == 0) {
       handleReset()

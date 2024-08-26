@@ -19,6 +19,7 @@ import { defaultParams } from 'src/lib/defaults'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const Batches = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -34,6 +35,7 @@ const Batches = () => {
   const [windowOpen, setWindowOpen] = useState(false)
   const [editMode, setEditMode] = useState(false)
   const [activeTab, setActiveTab] = useState(0)
+  const { platformLabels } = useContext(ControlContext)
 
   const columns = [
     {
@@ -75,10 +77,10 @@ const Batches = () => {
     validateOnChange: false,
 
     validationSchema: yup.object({
-      reference: yup.string().required('This field is required'),
-      name: yup.string().required('This field is required'),
-      dgName: yup.string().required('This field is required'),
-      activeStatusName: yup.string().required('This field is required')
+      reference: yup.string().required(),
+      name: yup.string().required(),
+      dgName: yup.string().required(),
+      activeStatusName: yup.string().required()
     }),
     onSubmit: async values => {
       await postDocumentType(values)
@@ -99,9 +101,7 @@ const Batches = () => {
       .then(res => {
         setGridData({ ...res, _startAt })
       })
-      .catch(error => {
-        console.log({ error: error.response.data })
-      })
+      .catch(error => {})
   }
 
   const fillIntegrationLogicStore = () => {
@@ -117,7 +117,7 @@ const Batches = () => {
   }
 
   const fillSysFunctionsStore = () => {
-    var parameters = '_database=25' //add 'xml'.json and get _database values from there
+    var parameters = '_database=25'
     getRequest({
       extension: SystemRepository.KeyValueStore,
       parameters: parameters
@@ -125,13 +125,11 @@ const Batches = () => {
       .then(res => {
         setSysFunctionsStore(res.list)
       })
-      .catch(error => {
-        console.log({ error: error.response.data })
-      })
+      .catch(error => {})
   }
 
   const fillActiveStatusStore = () => {
-    var parameters = '_database=11' //add 'xml'.json and get _database values from there
+    var parameters = '_database=11'
     getRequest({
       extension: SystemRepository.KeyValueStore,
       parameters: parameters
@@ -151,9 +149,7 @@ const Batches = () => {
       .then(res => {
         setNumberRangeStore(res.list)
       })
-      .catch(error => {
-        console.log({ error: error })
-      })
+      .catch(error => {})
   }
 
   const postDocumentType = async obj => {
@@ -165,8 +161,8 @@ const Batches = () => {
       .then(res => {
         getGridData()
         setWindowOpen(false)
-        if (!recordId) toast.success('Record Added Successfully')
-        else toast.success('Record Editted Successfully')
+        if (!recordId) toast.success(platformLabels.Added)
+        else toast.success(platformLabels.Edited)
       })
       .catch(error => {
         console.log({ error: error })
@@ -181,7 +177,7 @@ const Batches = () => {
       .then(res => {
         console.log({ res })
         getGridData()
-        toast.success('Record Deleted Successfully')
+        toast.success(platformLabels.Deleted)
       })
       .catch(error => {
         console.log({ error: error })
