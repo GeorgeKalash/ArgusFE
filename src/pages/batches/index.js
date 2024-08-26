@@ -244,8 +244,6 @@ const Batches = () => {
                   value={documentTypesValidation.values.reference}
                   required
                   onChange={documentTypesValidation.handleChange}
-                  // numberField
-                  // onChange={(e) => documentTypesValidation.setFieldValue('reference', getFormattedNumber(e.target.value, 4))}
                   onClear={() => documentTypesValidation.setFieldValue('reference', '')}
                   error={documentTypesValidation.touched.reference && Boolean(documentTypesValidation.errors.reference)}
                   helperText={documentTypesValidation.touched.reference && documentTypesValidation.errors.reference}
