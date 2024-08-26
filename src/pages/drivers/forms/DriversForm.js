@@ -93,6 +93,7 @@ export default function DriversForm({ labels, maxAccess, recordId }) {
                 label={labels.cellPhone}
                 value={formik.values.cellPhone}
                 required
+                type='numeric'
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('cellPhone', '')}
