@@ -36,10 +36,12 @@ const CustomLookup = ({
   hidden = false,
   isLoading,
   minChars,
+  userTypes = true,
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
   const [freeSolo, setFreeSolo] = useState(false)
+  const [focus, setAutoFocus] = useState(autoFocus)
 
   const [inputValue, setInputValue] = useState(firstValue || '')
 
@@ -69,7 +71,7 @@ const CustomLookup = ({
           name={name}
           key={firstValue}
           value={firstValue}
-          inputValue={inputValue}
+          {...(userTypes && { inputValue: inputValue })}
           size={size}
           options={store}
           filterOptions={options => {
@@ -92,6 +94,7 @@ const CustomLookup = ({
           onChange={(event, newValue) => {
             setInputValue(newValue ? newValue[valueField] : '')
             onChange(name, newValue)
+            setAutoFocus(true)
           }}
           PopperComponent={PopperComponent}
           PaperComponent={({ children }) =>
@@ -173,7 +176,7 @@ const CustomLookup = ({
                 onKeyUp
                 e.target.value >= minChars ? setFreeSolo(true) : setFreeSolo(false)
               }}
-              autoFocus={autoFocus}
+              autoFocus={focus}
               error={error}
               helperText={helperText}
               InputProps={{
