@@ -76,7 +76,7 @@ const CustomDatePicker = ({
   return _hidden ? (
     <></>
   ) : (
-    <LocalizationProvider tabIndex={-1} dateAdapter={AdapterDateFns}>
+    <LocalizationProvider dateAdapter={AdapterDateFns}>
       <DatePicker
         variant={variant}
         size={size}
