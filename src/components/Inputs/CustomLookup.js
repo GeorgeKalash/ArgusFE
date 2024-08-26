@@ -5,7 +5,6 @@ import { useEffect, useState } from 'react'
 import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
 import PopperComponent from '../Shared/Popper/PopperComponent'
 import CircularProgress from '@mui/material/CircularProgress' // Import CircularProgress from MUI or use any other spinner component
-import { set } from 'react-hook-form'
 
 const CustomLookup = ({
   type = 'text',
@@ -50,10 +49,6 @@ const CustomLookup = ({
     }
   }, [firstValue])
 
-  useEffect(() => {
-    store.length >= minChars && setFreeSolo(true)
-  }, [store, firstValue])
-
   const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
 
   const _readOnly =
@@ -73,7 +68,7 @@ const CustomLookup = ({
         <Autocomplete
           name={name}
           key={firstValue}
-          value={firstValue || null}
+          value={firstValue}
           inputValue={inputValue}
           size={size}
           options={store}
@@ -161,20 +156,22 @@ const CustomLookup = ({
                 }
               }}
               onBlur={e => {
-                if (!store.some(item => item[valueField] === inputValue) && e.target.value !== inputValue) {
+                if (!store.some(item => item[valueField] === inputValue) && e.target.value !== firstValue) {
                   setInputValue('')
                   onChange(name, '')
                   setFreeSolo(true)
                 }
               }}
-              onFocus={setFreeSolo(true)}
+              onFocus={() => {
+                setStore([]), setFreeSolo(true)
+              }}
               type={type}
               variant={variant}
               label={label}
               required={isRequired}
-              onKeyUp={() => {
+              onKeyUp={e => {
                 onKeyUp
-                setFreeSolo(true)
+                e.target.value >= minChars ? setFreeSolo(true) : setFreeSolo(false)
               }}
               autoFocus={autoFocus}
               error={error}
@@ -201,6 +198,7 @@ const CustomLookup = ({
                             setInputValue('')
                             onChange(name, '')
                             setStore([])
+                            setFreeSolo(true)
                           }}
                           aria-label='clear input'
                         >
