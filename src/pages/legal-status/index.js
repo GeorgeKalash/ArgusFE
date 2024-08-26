@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
@@ -11,9 +11,11 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import LegalStatusForm from './forms/LegalStatusForm'
 import { useWindow } from 'src/windows'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const LegalStatus = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
@@ -32,15 +34,12 @@ const LegalStatus = () => {
     labels: _labels,
     paginationParameters,
     refetch,
-    access
+    access,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: BusinessPartnerRepository.LegalStatus.page,
     datasetId: ResourceIds.LegalStatus
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: BusinessPartnerRepository.LegalStatus.page
   })
 
   const columns = [
@@ -60,12 +59,16 @@ const LegalStatus = () => {
     openForm()
   }
 
+  const edit = obj => {
+    openForm(obj?.recordId)
+  }
+
   function openForm(recordId) {
     stack({
       Component: LegalStatusForm,
       props: {
         labels: _labels,
-        recordId: recordId,
+        recordId,
         maxAccess: access
       },
       width: 500,
@@ -73,6 +76,18 @@ const LegalStatus = () => {
       title: _labels.legalStatus
     })
   }
+
+  const del = async obj => {
+    try {
+      await postRequest({
+        extension: BusinessPartnerRepository.LegalStatus.del,
+        record: JSON.stringify(obj)
+      })
+      invalidate()
+      toast.success(platformLabels.Deleted)
+    } catch (error) {}
+  }
+
 
   return (
     <VertLayout>
@@ -85,6 +100,8 @@ const LegalStatus = () => {
           gridData={data}
           rowId={['recordId']}
           isLoading={false}
+          onEdit={edit}
+          onDelete={del}
           pageSize={50}
           paginationType='api'
           paginationParameters={paginationParameters}
