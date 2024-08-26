@@ -21,8 +21,8 @@ const IDNumberForm = ({ store, maxAccess, labels }) => {
     initialValues: {
       rows: []
     },
-    onSubmit: values => {
-      postIdNumber(values.rows)
+    onSubmit: async values => {
+      await postIdNumber(values.rows)
     }
   })
 

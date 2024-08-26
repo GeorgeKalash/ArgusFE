@@ -59,12 +59,12 @@ const IndicatorForm = ({
         )
         .required()
     }),
-    onSubmit: values => {
-      submitIndicators(values.indicatorData)
+    onSubmit: async values => {
+      await submitIndicators(values.indicatorData)
     }
   })
 
-  const submitIndicators = obj => {
+  const submitIndicators = async obj => {
     if (obj.length === 0) {
       return
     }

@@ -14,7 +14,6 @@ import AccountBalance from './AccountBalance'
 import CashTransaction from './CashTransaction'
 import FinancialTransaction from './FinancialTransaction'
 import { ControlContext } from 'src/providers/ControlContext'
-import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 
 export default function FormShell({
@@ -118,11 +117,22 @@ export default function FormShell({
   async function handleSaveAndClear() {
     setSaveAndClearSubmitted(true)
     form.submitForm()
+    console.log(form.values)
   }
 
   useEffect(() => {
+    console.log(form)
+  }, [form])
+
+  console.log(form.isSubmitting)
+
+  useEffect(() => {
     if (!errored && saveAndClearSubmitted && !form.isSubmitting && Object.keys(form.errors).length == 0) {
-      form.resetForm()
+      handleReset()
+      setSaveAndClearSubmitted(false)
+    }
+
+    if (Object.keys(form.errors).length > 0) {
       setSaveAndClearSubmitted(false)
     }
   }, [errored, form, saveAndClearSubmitted])

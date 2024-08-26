@@ -62,8 +62,8 @@ const CompanyInfo = () => {
       logoUrl: '',
       flName: ''
     },
-    onSubmit: values => {
-      post(values)
+    onSubmit: async values => {
+      await post(values)
     }
   })
 

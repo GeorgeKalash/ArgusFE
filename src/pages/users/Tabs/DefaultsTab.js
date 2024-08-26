@@ -30,9 +30,7 @@ const DefaultsTab = ({ labels, maxAccess, storeRecordId }) => {
       cashAccountRef: '',
       cashAccountName: ''
     },
-    onSubmit: obj => {
-      const fields = ['cashAccountId', 'plantId', 'siteId', 'spId']
-
+    onSubmit: async obj => {
       const postField = async field => {
         const request = {
           key: field,
@@ -44,7 +42,11 @@ const DefaultsTab = ({ labels, maxAccess, storeRecordId }) => {
           record: JSON.stringify(request)
         })
       }
-      fields.forEach(postField)
+
+      const fields = ['cashAccountId', 'plantId', 'siteId', 'spId'].map(postField)
+
+      await Promise.all(fields)
+
       toast.success(platformLabels.Updated)
     }
   })

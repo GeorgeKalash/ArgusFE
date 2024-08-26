@@ -47,18 +47,18 @@ const CharacteristicsForm = ({ labels, editMode, maxAccess, setEditMode, setStor
       propertyName: yup.string().required(' '),
       validFrom: yup.string().required(' ')
     }),
-    onSubmit: values => {
-      postCharacteristics(values)
+    onSubmit: async values => {
+      await postCharacteristics(values)
     }
   })
 
-  const postCharacteristics = obj => {
+  const postCharacteristics = async obj => {
     console.log(obj.validFrom)
     const recordId = obj?.recordId || ''
     const date = obj?.validFrom && formatDateToApi(obj?.validFrom)
     const data = { ...obj, validFrom: date }
     console.log(obj.validFrom)
-    postRequest({
+    await postRequest({
       extension: DocumentReleaseRepository.CharacteristicsGeneral.set,
       record: JSON.stringify(data)
     }).then(res => {

@@ -17,7 +17,7 @@ import { Grow } from './Layouts/Grow'
 import { Fixed } from './Layouts/Fixed'
 import { VertLayout } from './Layouts/VertLayout'
 
-export const ClientRelationForm = ({ recordId, name, reference, setErrorMessage}) => {
+export const ClientRelationForm = ({ recordId, name, reference, setErrorMessage }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const { labels: _labels, access } = useResourceParams({
@@ -166,12 +166,12 @@ export const ClientRelationForm = ({ recordId, name, reference, setErrorMessage}
         }
       ]
     },
-    onSubmit: values => {
-      post(values)
+    onSubmit: async values => {
+      await post(values)
     }
   })
 
-  const post = obj => {
+  const post = async obj => {
     const res = obj.relations.map(({ parentId, activationDate, expiryDate, ...rest }, index) => ({
       parentId: recordId,
       seqNo: index + 1,
@@ -185,7 +185,7 @@ export const ClientRelationForm = ({ recordId, name, reference, setErrorMessage}
       items: res
     }
 
-    postRequest({
+    await postRequest({
       extension: RTCLRepository.ClientRelation.set2,
       record: JSON.stringify(data)
     })
@@ -198,25 +198,25 @@ export const ClientRelationForm = ({ recordId, name, reference, setErrorMessage}
   return (
     <FormShell form={formik} infoVisible={false}>
       <VertLayout>
-      <Fixed>
-      <Grid container xs={9} spacing={4} sx={{ p: 5 }}>
-        <Grid item xs={4}>
-          <CustomTextField value={reference} label={_labels.reference} readOnly={true} />
-        </Grid>{' '}
-        <Grid item xs={5}></Grid>
-        <Grid item xs={6}>
-          <CustomTextField value={name} label={_labels.client} readOnly={true} />
-        </Grid>
-      </Grid>
-      </Fixed>
-      <Grow>
-        <DataGrid
-          onChange={value => formik.setFieldValue('relations', value)}
-          value={formik.values.relations}
-          error={formik.errors.relations}
-          columns={columns}
-        />
-      </Grow>
+        <Fixed>
+          <Grid container xs={9} spacing={4} sx={{ p: 5 }}>
+            <Grid item xs={4}>
+              <CustomTextField value={reference} label={_labels.reference} readOnly={true} />
+            </Grid>{' '}
+            <Grid item xs={5}></Grid>
+            <Grid item xs={6}>
+              <CustomTextField value={name} label={_labels.client} readOnly={true} />
+            </Grid>
+          </Grid>
+        </Fixed>
+        <Grow>
+          <DataGrid
+            onChange={value => formik.setFieldValue('relations', value)}
+            value={formik.values.relations}
+            error={formik.errors.relations}
+            columns={columns}
+          />
+        </Grow>
       </VertLayout>
     </FormShell>
   )

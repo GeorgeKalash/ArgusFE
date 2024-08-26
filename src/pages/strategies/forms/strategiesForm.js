@@ -40,8 +40,8 @@ const StrategiesForm = ({ labels, editMode, maxAccess, setStore, store, onChange
       groupId: yup.string().required(' '),
       type: yup.string().required(' ')
     }),
-    onSubmit: values => {
-      postGroups(values)
+    onSubmit: async values => {
+      await postGroups(values)
     }
   })
 

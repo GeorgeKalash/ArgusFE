@@ -63,8 +63,8 @@ const PeriodsForm = ({ labels, maxAccess, store }) => {
         )
         .required()
     }),
-    onSubmit: values => {
-      post(values.periods)
+    onSubmit: async values => {
+      await post(values.periods)
     }
   })
 

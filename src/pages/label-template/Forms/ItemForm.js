@@ -45,13 +45,13 @@ const ItemForm = ({ tlId, labels, seqNo, getGridData, maxAccess, window }) => {
       displayAreaWidth: yup.string().required(),
       displayAreaHeight: yup.string().required()
     }),
-    onSubmit: values => {
-      post(values)
+    onSubmit: async values => {
+      await post(values)
     }
   })
 
-  const post = obj => {
-    postRequest({
+  const post = async obj => {
+    await postRequest({
       extension: SCRepository.Item.set,
       record: JSON.stringify(obj)
     })

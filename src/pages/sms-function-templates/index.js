@@ -19,8 +19,8 @@ const SmsFunctionTemplate = () => {
     enableReinitialize: true,
     validateOnChange: true,
     initialValues,
-    onSubmit: values => {
-      postSmsFunctionTemplates(values.rows)
+    onSubmit: async values => {
+      await postSmsFunctionTemplates(values.rows)
     }
   })
 
@@ -111,7 +111,7 @@ const SmsFunctionTemplate = () => {
     }
   ]
 
-  const postSmsFunctionTemplates = values => {
+  const postSmsFunctionTemplates = async values => {
     const obj = {
       smsFunctionTemplates: values
         .map(({ functionId, template }) => ({
@@ -121,7 +121,7 @@ const SmsFunctionTemplate = () => {
         }))
         .filter(row => row.templateId != null)
     }
-    postRequest({
+    await postRequest({
       extension: SystemRepository.SMSFunctionTemplate.set,
       record: JSON.stringify(obj)
     })

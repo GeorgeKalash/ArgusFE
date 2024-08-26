@@ -36,8 +36,8 @@ const RelationForm = ({ bpId, recordId, labels, maxAccess, getRelationGridData, 
       toBPId: yup.string().required(),
       relationId: yup.string().required()
     }),
-    onSubmit: values => {
-      postRelation(values)
+    onSubmit: async values => {
+      await postRelation(values)
     }
   })
 

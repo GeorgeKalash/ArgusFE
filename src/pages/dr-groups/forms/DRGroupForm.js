@@ -39,8 +39,8 @@ const DRGroupForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store
       reference: yup.string().required('This field is required'),
       name: yup.string().required('This field is required')
     }),
-    onSubmit: values => {
-      postGroups(values)
+    onSubmit: async values => {
+      await postGroups(values)
     }
   })
 

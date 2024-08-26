@@ -422,15 +422,15 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
 
       //phone: yup.string().required(' ')
     }),
-    onSubmit: values => {
-      postRtDefault(values)
+    onSubmit: async values => {
+      await postRtDefault(values)
     }
   })
 
   const isClosed = clientIndividualFormik.values.status === 1
   const wip = clientIndividualFormik.values.wip === 2
 
-  const postRtDefault = obj => {
+  const postRtDefault = async obj => {
     const date = new Date()
 
     //CTCL
@@ -570,7 +570,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
         workAddress: obj6.name && obj6.countryId && obj6.cityId && obj6.phone && obj6.street1 ? obj6 : null
       }
 
-      postRequest({
+      await postRequest({
         extension: RTCLRepository.CtClientIndividual.update,
         record: JSON.stringify(updateData)
       })
