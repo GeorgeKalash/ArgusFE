@@ -2,7 +2,7 @@ import { Grid } from '@mui/material'
 import toast from 'react-hot-toast'
 import * as yup from 'yup'
 import { useFormik } from 'formik'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useState } from 'react'
 import FormShell from 'src/components/Shared/FormShell'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
@@ -10,13 +10,17 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { DataSets } from 'src/resources/DataSets'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const CharacteristicForm = ({ labels, maxAccess, getCharacteristicGridData, recordId, window }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const [initialValues, setInitialData] = useState({
     chId: null,
-    seqNo: null
+    seqNo: null,
+    oper: null
   })
 
   const formik = useFormik({
@@ -24,8 +28,9 @@ const CharacteristicForm = ({ labels, maxAccess, getCharacteristicGridData, reco
     validateOnChange: true,
     initialValues,
     validationSchema: yup.object({
-      chId: yup.string().required(' '),
-      seqNo: yup.string().required(' ')
+      chId: yup.string().required(),
+      seqNo: yup.string().required(),
+      oper: yup.string().required()
     }),
     onSubmit: async values => {
       await postCharacteristic(values)
@@ -40,13 +45,11 @@ const CharacteristicForm = ({ labels, maxAccess, getCharacteristicGridData, reco
       record: JSON.stringify(obj)
     })
       .then(res => {
-        toast.success('Record Added Successfully')
+        toast.success(platformLabels.Added)
         getCharacteristicGridData(classId)
         window.close()
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch(error => {})
   }
 
   return (
@@ -70,6 +73,23 @@ const CharacteristicForm = ({ labels, maxAccess, getCharacteristicGridData, reco
                   formik && formik.setFieldValue('chId', newValue?.recordId || '')
                 }}
                 error={formik.touched.chId && Boolean(formik.errors.chId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.DR_OPERATOR}
+                name='oper'
+                label={labels.operator}
+                valueField='key'
+                displayField='value'
+                values={formik.values}
+                required
+                maxAccess={maxAccess}
+                onClear={() => formik.setFieldValue('oper', '')}
+                onChange={(event, newValue) => {
+                  formik && formik.setFieldValue('oper', newValue?.key || '')
+                }}
+                error={formik.touched.oper && Boolean(formik.errors.oper)}
               />
             </Grid>
             <Grid item xs={12}>
