@@ -288,15 +288,19 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
     return Math.floor(functionId / 100)
   }
 
-  function getCurrencyApi(_currencyId) {
-    const _rateDivision = getRateDivision(functionId)
+  async function getCurrencyApi(_currencyId) {
+    try {
+      const _rateDivision = getRateDivision(functionId)
 
-    return getRequest({
-      extension: MultiCurrencyRepository.Currency.get,
-      parameters: `_currencyId=${_currencyId}&_date=${formatDateToApiFunction(
-        formValues.date
-      )}&_rateDivision=${_rateDivision}`
-    })
+      const response = await getRequest({
+        extension: MultiCurrencyRepository.Currency.get,
+        parameters: `_currencyId=${_currencyId}&_date=${formatDateToApiFunction(
+          formValues.date
+        )}&_rateDivision=${_rateDivision}`
+      })
+
+      return response
+    } catch (error) {}
   }
 
   return (
@@ -369,9 +373,9 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
                   if (newRow.currencyId) {
                     const result = await getCurrencyApi(newRow?.currencyId)
 
-                    const result2 = result.record
+                    const result2 = result?.record
                     const exRate = exRateValue
-                    const rateCalcMethod = result2.rateCalcMethod
+                    const rateCalcMethod = result2?.rateCalcMethod
 
                     const updatedRateRow = getRate({
                       amount: newRow?.amount,
@@ -477,9 +481,9 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
                 }
                 if (newRow.currencyId) {
                   const result = await getCurrencyApi(newRow?.currencyId)
-                  const result2 = result.record
-                  const exRate = result2.exRate
-                  const rateCalcMethod = result2.rateCalcMethod
+                  const result2 = result?.record
+                  const exRate = result2?.exRate
+                  const rateCalcMethod = result2?.rateCalcMethod
 
                   if (newRow?.amount) {
                     const amount =
