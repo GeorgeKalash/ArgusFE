@@ -54,28 +54,31 @@ const RequestsProvider = ({ showLoading = false, children }) => {
     const disableLoading = body.disableLoading || false
     !disableLoading && !loading && setLoading(true)
 
-    return axios({
-      method: 'GET',
-      url: apiUrl + body.extension + '?' + body.parameters,
-      headers: {
-        Authorization: 'Bearer ' + accessToken,
-        'Content-Type': 'multipart/form-data',
-        LanguageId: user.languageId
-      }
-    })
-      .then(res => {
-        !disableLoading && debouncedCloseLoading()
+    const throwError = body.throwError || false
 
-        return res.data
+    return new Promise(async (resolve, reject) => {
+      axios({
+        method: 'GET',
+        url: apiUrl + body.extension + '?' + body.parameters,
+        headers: {
+          Authorization: 'Bearer ' + accessToken,
+          'Content-Type': 'multipart/form-data',
+          LanguageId: user.languageId
+        }
       })
-      .catch(error => {
-        debouncedCloseLoading()
-        showError({
-          message: error,
-          height: error.response?.status === 404 || error.response?.status === 500 ? 400 : ''
+        .then(response => {
+          if (!disableLoading) debouncedCloseLoading()
+          resolve(response.data)
         })
-        throw error
-      })
+        .catch(error => {
+          debouncedCloseLoading()
+          showError({
+            message: error,
+            height: error.response?.status === 404 || error.response?.status === 500 ? 400 : ''
+          })
+          if (throwError) reject(error)
+        })
+    })
   }
 
   const getMicroRequest = async body => {
