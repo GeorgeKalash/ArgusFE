@@ -10,14 +10,13 @@ import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { MasterSource } from 'src/resources/MasterSource'
 import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 
 export default function ExpenseTypesForms({ labels, maxAccess, recordId, invalidate }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const editMode = !!recordId
   const { platformLabels } = useContext(ControlContext)
-  const [isLoading, setIsLoading] = useState(false)
 
   const { formik } = useForm({
     initialValues: {
@@ -52,12 +51,12 @@ export default function ExpenseTypesForms({ labels, maxAccess, recordId, invalid
     }
   })
 
+  const editMode = !!formik.values.recordId
+
   useEffect(() => {
     ;(async function () {
       try {
         if (recordId) {
-          setIsLoading(true)
-
           const res = await getRequest({
             extension: FinancialRepository.ExpenseTypes.get,
             parameters: `_recordId=${recordId}`
@@ -66,7 +65,6 @@ export default function ExpenseTypesForms({ labels, maxAccess, recordId, invalid
           formik.setValues(res.record)
         }
       } catch (exception) {}
-      setIsLoading(false)
     })()
   }, [])
 
@@ -87,6 +85,7 @@ export default function ExpenseTypesForms({ labels, maxAccess, recordId, invalid
       maxAccess={maxAccess}
       editMode={editMode}
       actions={actions}
+      masterSource={MasterSource.ExpenseType}
     >
       <VertLayout>
         <Grow>
