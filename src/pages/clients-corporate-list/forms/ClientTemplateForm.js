@@ -176,7 +176,7 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
       bldgNo: obj.bldgNo,
       unitNo: obj.unitNo,
       subNo: obj.subNo,
-      poBox: obj.poBox,
+      poBox: obj.poBox
     }
 
     const data = {
@@ -270,6 +270,12 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
       key: 'Client Relation',
       condition: true,
       onClick: 'onClientRelation',
+      disabled: !editMode
+    },
+    {
+      key: 'Add Client Relation',
+      condition: true,
+      onClick: 'onAddClientRelation',
       disabled: !editMode
     }
   ]

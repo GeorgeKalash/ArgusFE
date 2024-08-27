@@ -208,7 +208,8 @@ export default function FormShell({
               props: {
                 recordId: form.values?.recordId ?? form.values.clientId,
                 name: form.values.firstName ? form.values.firstName + ' ' + form.values.lastName : form.values.name,
-                reference: form.values.reference
+                reference: form.values.reference,
+                category: form.values.category
               },
               width: 900,
               height: 600,

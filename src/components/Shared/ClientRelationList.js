@@ -12,7 +12,7 @@ import { useResourceQuery } from 'src/hooks/resource'
 import { ClientRelationForm } from './ClientRelationForm'
 import { useWindow } from 'src/windows'
 
-export const ClientRelationList = ({ recordId, name, reference }) => {
+export const ClientRelationList = ({ recordId, name, reference, category }) => {
   const { getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
 
@@ -33,7 +33,11 @@ export const ClientRelationList = ({ recordId, name, reference }) => {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: RTCLRepository.ClientRelation.qry,
-    datasetId: ResourceIds.ClientRelation
+    datasetId: ResourceIds.ClientRelation,
+    filter: {
+      filterFn: fetchGridData,
+      default: { category }
+    }
   })
 
   const columns = [
