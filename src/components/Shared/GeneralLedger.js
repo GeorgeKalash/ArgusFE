@@ -114,8 +114,6 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
           reference: values.reference
         }
 
-        console.log(data)
-
         const response = await postRequest({
           extension: GeneralLedgerRepository.GeneralLedger.set2,
           record: JSON.stringify(data)
@@ -370,11 +368,11 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
                     exRate: exRateValue
                   })
 
-                  if (newRow.currencyId) {
-                    const result = await getCurrencyApi(newRow?.currencyId)
+                  if (formValues.currencyId) {
+                    const result = await getCurrencyApi(formValues.currencyId)
 
                     const result2 = result?.record
-                    const exRate = exRateValue
+                    const exRate = result2?.exRate
                     const rateCalcMethod = result2?.rateCalcMethod
 
                     const updatedRateRow = getRate({
