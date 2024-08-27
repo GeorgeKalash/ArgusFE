@@ -14,6 +14,7 @@ import { useEffect } from 'react'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
+import CustomTextField from 'src/components/Inputs/CustomTextField'
 
 export default function MobileSystem() {
   const { platformLabels } = useContext(ControlContext)
@@ -26,7 +27,11 @@ export default function MobileSystem() {
   const { formik } = useForm({
     enableReinitialize: false,
     initialValues: {
-      rt_mob_plantId: ''
+      rt_mob_plantId: '',
+      rt_mob_whatsapp: '',
+      rt_mob_email1: '',
+      rt_mob_email2: '',
+      rt_mob_call_us: ''
     },
     onSubmit: async obj => {
       try {
@@ -50,12 +55,14 @@ export default function MobileSystem() {
     getDataResult()
   }, [])
 
+  console.log(formik.values)
+
   const handleSubmit = () => {
     formik.handleSubmit()
   }
 
   const getDataResult = () => {
-    const myObject = {}
+    const fetchedValues = {}
     var parameters = `_filter=`
     getRequest({
       extension: SystemRepository.Defaults.qry,
@@ -63,10 +70,22 @@ export default function MobileSystem() {
     })
       .then(res => {
         const filteredList = res.list.filter(obj => {
-          return obj.key === 'rt_mob_plantId'
+          return (
+            obj.key === 'rt_mob_plantId' ||
+            obj.key === 'rt_mob_whatsapp' ||
+            obj.key === 'rt_mob_email1' ||
+            obj.key === 'rt_mob_call_us' ||
+            obj.key === 'rt_mob_email2'
+          )
         })
-        filteredList.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
-        formik.setValues(myObject)
+        filteredList.forEach(obj => {
+          if (obj.value && !isNaN(obj.value) && obj.value.trim() !== '') {
+            fetchedValues[obj.key] = parseInt(obj.value)
+          } else {
+            fetchedValues[obj.key] = obj.value
+          }
+        })
+        formik.setValues(fetchedValues)
       })
       .catch(error => {})
   }
@@ -92,6 +111,46 @@ export default function MobileSystem() {
               }}
               error={formik.touched.rt_mob_plantId && Boolean(formik.errors.rt_mob_plantId)}
               maxAccess={access}
+            />
+          </Grid>
+          <Grid item xs={12} sx={{ marginLeft: '0.5rem', marginRight: '0.5rem' }}>
+            <CustomTextField
+              name='rt_mob_whatsapp'
+              label={labels.whatsapp}
+              value={formik.values.rt_mob_whatsapp}
+              maxAccess={access}
+              onChange={formik.handleChange}
+              onClear={() => formik.setFieldValue('rt_mob_whatsapp', '')}
+            />
+          </Grid>
+          <Grid item xs={12} sx={{ marginLeft: '0.5rem', marginRight: '0.5rem' }}>
+            <CustomTextField
+              name='rt_mob_call_us'
+              label={labels.callUs}
+              value={formik.values.rt_mob_call_us}
+              maxAccess={access}
+              onChange={formik.handleChange}
+              onClear={() => formik.setFieldValue('rt_mob_call_us', '')}
+            />
+          </Grid>
+          <Grid item xs={12} sx={{ marginLeft: '0.5rem', marginRight: '0.5rem' }}>
+            <CustomTextField
+              name='rt_mob_email1'
+              label={labels.email1}
+              value={formik.values.rt_mob_email1}
+              maxAccess={access}
+              onChange={formik.handleChange}
+              onClear={() => formik.setFieldValue('rt_mob_email1', '')}
+            />
+          </Grid>
+          <Grid item xs={12} sx={{ marginLeft: '0.5rem', marginRight: '0.5rem' }}>
+            <CustomTextField
+              name='rt_mob_email2'
+              label={labels.email2}
+              value={formik.values.rt_mob_email2}
+              maxAccess={access}
+              onChange={formik.handleChange}
+              onClear={() => formik.setFieldValue('rt_mob_email2', '')}
             />
           </Grid>
         </Grid>
