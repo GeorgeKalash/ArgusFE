@@ -174,19 +174,21 @@ const SalesOrder = () => {
         access,
         recordId
       },
-      width: 950,
+      width: 1200,
       height: 600,
       title: labels.salesOrder
     })
   }
 
   const delSO = async obj => {
-    await postRequest({
-      extension: SaleRepository.SalesOrder.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success(platformLabels.Deleted)
+    try {
+      await postRequest({
+        extension: SaleRepository.SalesOrder.del,
+        record: JSON.stringify(obj)
+      })
+      invalidate()
+      toast.success(platformLabels.Deleted)
+    } catch (error) {}
   }
 
   return (
