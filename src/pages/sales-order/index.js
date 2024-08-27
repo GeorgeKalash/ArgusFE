@@ -175,7 +175,7 @@ const SalesOrder = () => {
         recordId
       },
       width: 1200,
-      height: 600,
+      height: 730,
       title: labels.salesOrder
     })
   }
