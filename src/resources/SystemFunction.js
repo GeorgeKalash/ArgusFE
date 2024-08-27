@@ -100,6 +100,7 @@ export const SystemFunction = {
   OutwardsModification: Module.Remittance * 100 + 4,
   CashCountTransaction: Module.CashCount * 100 + 1,
   InwardTransfer: Module.Remittance * 100 + 3,
+  OutwardsReturn: Module.Remittance * 100 + 6,
   ClientRelation: Module.Remittance * 100 + 1
 }
 
