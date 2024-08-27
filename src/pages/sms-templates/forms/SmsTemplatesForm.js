@@ -96,6 +96,7 @@ export default function SmsTemplatesForms({ labels, maxAccess, recordId }) {
                 value={formik.values.smsBody}
                 required
                 rows={2}
+                maxLength={30}
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('smsBody', '')}

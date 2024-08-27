@@ -69,5 +69,15 @@ export const AccessControlRepository = {
     get: service + 'getNLB',
     set: service + 'setNLB',
     del: service + 'delNLB'
+  },
+  SGReleaseCode: {
+    qry: service + 'qryRCO',
+    set: service + 'setRCO',
+    del: service + 'delRCO'
+  },
+  DataAccessItem: {
+    qry: service + 'qryROW',
+    set: service + 'setROW',
+    del: service + 'delROW'
   }
 }

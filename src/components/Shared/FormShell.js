@@ -25,6 +25,7 @@ export default function FormShell({
   children,
   editMode,
   disabledSubmit,
+  disabledSavedClear,
   infoVisible = true,
   postVisible = false,
   resourceId,
@@ -45,6 +46,7 @@ export default function FormShell({
   const [selectedReport, setSelectedReport] = useState(null)
   const { clear } = useGlobalRecord()
   const { platformLabels } = useContext(ControlContext)
+  const isSavedClearVisible = isSavedClear && isSaved && isCleared
 
   const windowToolbarVisible = editMode
     ? maxAccess < TrxType.EDIT
@@ -242,7 +244,7 @@ export default function FormShell({
             })
           }
           isSaved={isSaved}
-          isSavedClear={isSavedClear}
+          isSavedClear={isSavedClearVisible}
           isInfo={isInfo}
           isCleared={isCleared}
           actions={actions}
@@ -251,6 +253,7 @@ export default function FormShell({
           transactionClicked={transactionClicked}
           editMode={editMode}
           disabledSubmit={disabledSubmit}
+          disabledSavedClear={disabledSavedClear || disabledSubmit}
           infoVisible={infoVisible}
           postVisible={postVisible}
           isPosted={isPosted}
