@@ -13,6 +13,7 @@ import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import BankBranchesForm from './forms/BankBranchesForm'
 import { ControlContext } from 'src/providers/ControlContext'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
+import { error } from '@babel/eslint-parser/lib/convert/index.cjs'
 
 const BankBranches = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -33,11 +34,9 @@ const BankBranches = () => {
     query: { data },
     labels: _labels,
     paginationParameters,
-
     filterBy,
     clearFilter,
     refetch,
-
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -49,14 +48,16 @@ const BankBranches = () => {
   })
 
   async function fetchWithFilter({ filters, pagination }) {
-    if (filters?.qry) {
-      return await getRequest({
-        extension: CashBankRepository.BankBranches.snapshot,
-        parameters: `_filter=${filters.qry}`
-      })
-    } else {
-      return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
-    }
+    try {
+      if (filters?.qry) {
+        return await getRequest({
+          extension: CashBankRepository.BankBranches.snapshot,
+          parameters: `_filter=${filters.qry}`
+        })
+      } else {
+        return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+      }
+    } catch (error) {}
   }
 
   const invalidate = useInvalidate({

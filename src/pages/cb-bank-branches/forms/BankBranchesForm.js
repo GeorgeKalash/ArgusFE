@@ -55,22 +55,26 @@ const BankBranchesForm = ({ labels, maxAccess, recordId }) => {
       countryId: yup.string().required()
     }),
     onSubmit: async obj => {
-      const recordId = obj.recordId
+      try {
+        const recordId = obj.recordId
 
-      const response = await postRequest({
-        extension: CashBankRepository.BankBranches.set,
-        record: JSON.stringify(obj)
-      })
-
-      if (!recordId) {
-        toast.success(platformLabels.Added)
-        formik.setValues({
-          ...obj,
-          recordId: response.recordId
+        const response = await postRequest({
+          extension: CashBankRepository.BankBranches.set,
+          record: JSON.stringify(obj)
         })
-      } else toast.success(platformLabels.Edited)
 
-      invalidate()
+        if (!recordId) {
+          toast.success(platformLabels.Added)
+          formik.setValues({
+            ...obj,
+            recordId: response.recordId
+          })
+        } else {
+          toast.success(platformLabels.Edited)
+        }
+
+        invalidate()
+      } catch (error) {}
     }
   })
 
@@ -209,7 +213,7 @@ const BankBranchesForm = ({ labels, maxAccess, recordId }) => {
                   valueField='recordId'
                   displayField='name'
                   required
-                  readOnly
+                  readOnly={editMode}
                   maxAccess={maxAccess}
                   onChange={(event, newValue) => {
                     formik.setFieldValue('stateId', null)
@@ -269,7 +273,6 @@ const BankBranchesForm = ({ labels, maxAccess, recordId }) => {
                     formik.setValues({
                       ...formik.values,
                       cityId: newValue?.recordId || '',
-
                       cityName: newValue?.name || '',
                       districtId: '',
                       districtName: ''
