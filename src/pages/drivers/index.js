@@ -10,10 +10,10 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
+import DriversForm from './forms/DriversForm'
 import { DeliveryRepository } from 'src/repositories/DeliveryRepository'
-import VehiclesForm from './forms/VehiclesForm'
 
-const Vehicles = () => {
+const Drivers = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -22,7 +22,7 @@ const Vehicles = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: DeliveryRepository.Vehicle.page,
+      extension: DeliveryRepository.Driver.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
 
@@ -38,8 +38,8 @@ const Vehicles = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: DeliveryRepository.Vehicle.page,
-    datasetId: ResourceIds.Vehicle
+    endpointId: DeliveryRepository.Driver.page,
+    datasetId: ResourceIds.Drivers
   })
 
   const columns = [
@@ -49,18 +49,8 @@ const Vehicles = () => {
       flex: 1
     },
     {
-      field: 'plateNo',
-      headerName: _labels.plateNo,
-      flex: 1
-    },
-    {
-      field: 'capacityVolume',
-      headerName: _labels.capacityVolume,
-      flex: 1
-    },
-    {
-      field: 'capacityWeight',
-      headerName: _labels.capacityWeight,
+      field: 'cellPhone',
+      headerName: _labels.cellPhone,
       flex: 1
     }
   ]
@@ -75,22 +65,22 @@ const Vehicles = () => {
 
   function openForm(recordId) {
     stack({
-      Component: VehiclesForm,
+      Component: DriversForm,
       props: {
         labels: _labels,
         recordId,
         maxAccess: access
       },
       width: 600,
-      height: 500,
-      title: _labels.vehicles
+      height: 350,
+      title: _labels.drivers
     })
   }
 
   const del = async obj => {
     try {
       await postRequest({
-        extension: DeliveryRepository.Vehicle.del,
+        extension: DeliveryRepository.Driver.del,
         record: JSON.stringify(obj)
       })
       invalidate()
@@ -122,4 +112,4 @@ const Vehicles = () => {
   )
 }
 
-export default Vehicles
+export default Drivers
