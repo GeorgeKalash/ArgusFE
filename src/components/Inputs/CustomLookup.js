@@ -69,9 +69,9 @@ const CustomLookup = ({
       <Grid item xs={secondDisplayField ? 6 : 12}>
         <Autocomplete
           name={name}
-          key={firstValue}
+          key={firstValue || null}
           value={firstValue}
-          {...(userTypes && { inputValue: inputValue })}
+          {...(userTypes && !firstValue && { inputValue: inputValue })}
           size={size}
           options={store}
           filterOptions={options => {
