@@ -13,7 +13,6 @@ import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import BankBranchesForm from './forms/BankBranchesForm'
 import { ControlContext } from 'src/providers/ControlContext'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
-import { error } from '@babel/eslint-parser/lib/convert/index.cjs'
 
 const BankBranches = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
