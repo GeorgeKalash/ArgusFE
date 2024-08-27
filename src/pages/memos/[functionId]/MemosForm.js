@@ -36,7 +36,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
-    endpointId: FinancialRepository.FiMemo.qry
+    endpointId: FinancialRepository.FiMemo.page
   })
 
   const { formik } = useForm({

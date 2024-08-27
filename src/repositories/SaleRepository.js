@@ -115,7 +115,8 @@ export const SaleRepository = {
   },
   SaleZoneLevel: {
     qry: service + 'qryZOL',
-    set2: service + 'set2ZOL'
+    set2: service + 'set2ZOL',
+    get: service + 'getZOL'
   },
   SaleTransaction: {
     qry: service + 'qryTR',

@@ -230,5 +230,7 @@ export const ResourceIds = {
   OutwardsReturn: 36317,
   AutoPostExclusion: 36124,
   CorrespondentOutwards: 36318,
-  ExtraIncome: 36129
+  ExtraIncome: 36129,
+  PurposeExchangeGroup: 35115,
+  Drivers: 52201
 }
