@@ -57,7 +57,7 @@ export default function ReleaseIndicatorForm({ labels, maxAccess, recordId, wind
     }
   })
 
-  const editMode = !!formik.values.recordId
+  const editMode = !!recordId
 
   useEffect(() => {
     ;(async function () {
