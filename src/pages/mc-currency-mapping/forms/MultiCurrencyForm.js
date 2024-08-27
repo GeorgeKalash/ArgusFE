@@ -14,7 +14,7 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useInvalidate } from 'src/hooks/resource'
 import { ControlContext } from 'src/providers/ControlContext'
 
-export default function MultiCurrencyForm({ labels, maxAccess, record, recordId, window }) {
+export default function MultiCurrencyForm({ labels, maxAccess, record, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
