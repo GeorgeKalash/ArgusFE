@@ -113,6 +113,7 @@ export default function VehiclesForm({ labels, maxAccess, recordId }) {
                 label={labels.capacityVolume}
                 value={formik.values.capacityVolume}
                 maxAccess={maxAccess}
+                decimalScale={0}
                 onChange={e => formik.setFieldValue('capacityVolume', e.target.value)}
                 onClear={() => formik.setFieldValue('capacityVolume', '')}
                 error={formik.touched.capacityVolume && Boolean(formik.errors.capacityVolume)}
@@ -125,6 +126,7 @@ export default function VehiclesForm({ labels, maxAccess, recordId }) {
                 label={labels.capacityWeight}
                 value={formik.values.capacityWeight}
                 maxAccess={maxAccess}
+                decimalScale={0}
                 onChange={e => formik.setFieldValue('capacityWeight', e.target.value)}
                 onClear={() => formik.setFieldValue('capacityWeight', '')}
                 error={formik.touched.capacityWeight && Boolean(formik.errors.capacityWeight)}
