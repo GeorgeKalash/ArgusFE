@@ -110,6 +110,7 @@ export default function VehiclesForm({ labels, maxAccess, recordId }) {
               <CustomNumberField
                 name='capacityVolume'
                 required
+                decimalScale={0}
                 label={labels.capacityVolume}
                 value={formik.values.capacityVolume}
                 maxAccess={maxAccess}
@@ -122,6 +123,7 @@ export default function VehiclesForm({ labels, maxAccess, recordId }) {
               <CustomNumberField
                 name='capacityWeight'
                 required
+                decimalScale={0}
                 label={labels.capacityWeight}
                 value={formik.values.capacityWeight}
                 maxAccess={maxAccess}
