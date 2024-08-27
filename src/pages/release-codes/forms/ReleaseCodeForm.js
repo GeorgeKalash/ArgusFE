@@ -1,4 +1,3 @@
-// ** MUI Imports
 import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import { useForm } from 'src/hooks/form'
@@ -17,8 +16,6 @@ import { ControlContext } from 'src/providers/ControlContext'
 export default function ReleaseCodeForm({ labels, maxAccess, recordId }) {
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
-
-  const editMode = !!recordId
 
   const invalidate = useInvalidate({
     endpointId: DocumentReleaseRepository.ReleaseCode.page
@@ -52,6 +49,8 @@ export default function ReleaseCodeForm({ labels, maxAccess, recordId }) {
         .catch(error => {})
     }
   })
+
+  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {

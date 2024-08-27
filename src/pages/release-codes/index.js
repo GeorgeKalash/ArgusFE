@@ -34,6 +34,7 @@ const ReleaseCodes = () => {
     labels: _labels,
     invalidate,
     refetch,
+    paginationParameters,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -102,7 +103,8 @@ const ReleaseCodes = () => {
           isLoading={false}
           pageSize={50}
           refetch={refetch}
-          paginationType='client'
+          paginationType='api'
+          paginationParameters={paginationParameters}
           maxAccess={access}
         />
       </Grow>
