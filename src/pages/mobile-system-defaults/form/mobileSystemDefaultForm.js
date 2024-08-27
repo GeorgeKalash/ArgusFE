@@ -44,9 +44,7 @@ export default function MobileSystem() {
           extension: SystemRepository.Defaults.set,
           record: JSON.stringify({ sysDefaults: data })
         })
-        if (!obj.recordId) {
-          toast.success(platformLabels.Added)
-        } else toast.success(platformLabels.Edited)
+        toast.success(platformLabels.Edited)
       } catch (e) {}
     }
   })
