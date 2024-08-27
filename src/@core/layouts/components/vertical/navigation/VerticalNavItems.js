@@ -16,13 +16,13 @@ const VerticalNavItems = props => {
   const { handleBookmark, setLastOpenedPage } = useContext(MenuContext)
   const { platformLabels } = useContext(ControlContext)
   const { verticalNavItems, settings, openFolders, setOpenFolders, navCollapsed, isArabic } = props
+  const { menu } = useContext(MenuContext)
 
   const [selectedNode, setSelectedNode] = useState(false)
 
   let theme = createTheme(themeOptions(settings, 'light'))
 
   const closeDialog = () => {
-    // setOpenFolders([])
     setSelectedNode(false)
   }
 
@@ -37,6 +37,25 @@ const VerticalNavItems = props => {
     } else {
       setOpenFolders([...openFolders, folderId])
     }
+  }
+
+  const findNode = (nodes, targetRouter) => {
+    for (const node of nodes) {
+      if (node.children) {
+        const result = findNode(node.children, targetRouter)
+        if (result) {
+          return result
+        }
+      } else if (node.path && node.path === targetRouter) {
+        return node.path
+      }
+    }
+
+    return null
+  }
+
+  const refreshPage = () => {
+    router.replace(router.asPath)
   }
 
   const renderNode = node => {
@@ -59,7 +78,12 @@ const VerticalNavItems = props => {
             if (node.children) {
               toggleFolder(node.id)
             } else {
-              router.push(node.path)
+              if (findNode(menu, node.path.replace(/\/$/, '')) + '/' === router.asPath) {
+                closeTab(router.asPath)
+                refreshPage()
+              } else {
+                router.push(node.path)
+              }
               setLastOpenedPage(node)
             }
           }}
@@ -77,12 +101,7 @@ const VerticalNavItems = props => {
                   paddingLeft: '8px'
                 }}
               >
-                <Image
-                  src={imgName} // Assuming the images are in the public/icons folder
-                  alt={node.title}
-                  width={22} // Set the width as needed
-                  height={22} // Set the height as needed
-                />
+                <Image src={imgName} alt={node.title} width={22} height={22} />
               </div>
             ) : (
               <div style={{ width: '30px', height: '22px' }}>{/* placeHolder */}</div>
@@ -96,7 +115,6 @@ const VerticalNavItems = props => {
               >
                 <div className='text'>
                   {' '}
-                  {/* Added a container div for text */}
                   <span>{node.title}</span>
                 </div>
                 {isFolder && (
@@ -146,14 +164,6 @@ const VerticalNavItems = props => {
       </ThemeProvider>
     </>
   )
-
-  // const RenderMenuItems = verticalNavItems?.map((item, index) => {
-  //   const TagName = resolveNavItemComponent(item)
-
-  //   return <TagName {...props} key={index} item={item} />
-  // })
-
-  // return <>{RenderMenuItems}</>
 }
 
 export default VerticalNavItems
