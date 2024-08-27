@@ -57,7 +57,7 @@ export default function ReleaseIndicatorForm({ labels, maxAccess, recordId, wind
     }
   })
 
-  const editMode = !!recordId
+  const editMode = !!recordId || (recordId === 0)
 
   useEffect(() => {
     ;(async function () {
