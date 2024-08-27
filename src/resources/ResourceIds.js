@@ -228,7 +228,7 @@ export const ResourceIds = {
   PUPaymentTerms: 50106,
   AutoPostExclusion: 36124,
   OutwardsReturn: 36317,
-  AutoPostExclusion: 36124,
+  BankBranches: 33109,
   CorrespondentOutwards: 36318,
   ExtraIncome: 36129,
   PurposeExchangeGroup: 35115,
