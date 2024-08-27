@@ -19,7 +19,6 @@ export const ResourceLookup = ({
   ...rest
 }) => {
   const { getRequest } = useContext(RequestsContext)
-  const [errorMessage, setErrorMessage] = useState()
   const [store, setStore] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [renderOption, setRenderOption] = useState(false)
@@ -84,10 +83,10 @@ export const ResourceLookup = ({
           name,
           isLoading,
           renderOption,
+          minChars,
           ...rest
         }}
       />
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )
 }

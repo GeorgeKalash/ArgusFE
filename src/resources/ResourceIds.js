@@ -1,3 +1,5 @@
+import Correspondent from 'src/pages/correspondent'
+
 export const ResourceIds = {
   GeneralLedger: 30303,
   JournalVoucher: 30302,
@@ -187,8 +189,8 @@ export const ResourceIds = {
   VendorGroups: 50101,
   ConsignmentSites: 51110,
   LabelTemplates: 44102,
-  FeeSchedule: 36314,
-  FeeScheduleMap: 36315,
+  FeeSchedule: 36126,
+  FeeScheduleMap: 36127,
   IntegrationLogics: 30101,
   DeliveryMethods: 50104,
   SystemFunctionIntegrations: 30105,
@@ -224,5 +226,8 @@ export const ResourceIds = {
   ConsignmentSites: 51110,
   PUOrderStatus: 50105,
   AutoPostExclusion: 36124,
-  PostOutwards: 36319
+  PostOutwards: 36319,
+  CorrespondentOutwards: 36318,
+  ExtraIncome: 36129,
+  Drivers: 52201
 }

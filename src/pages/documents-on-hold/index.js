@@ -195,6 +195,10 @@ const DocumentsOnHold = () => {
     }
   }
 
+  const openPopup = async obj => {
+    await popupComponent(obj)
+  }
+
   const columns = [
     {
       field: 'reference',
@@ -226,7 +230,7 @@ const DocumentsOnHold = () => {
       width: 100,
       cellRenderer: row => (
         <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
-          <IconButton size='small' onClick={() => popupComponent(row)}>
+          <IconButton size='small' onClick={() => edit(row.data)}>
             <Icon icon='mdi:application-edit-outline' fontSize={18} />
           </IconButton>
         </Box>
@@ -279,7 +283,7 @@ const DocumentsOnHold = () => {
           columns={columns}
           gridData={data}
           rowId={['functionId', 'seqNo', 'recordId']}
-          onEdit={edit}
+          onEdit={openPopup}
           isLoading={false}
           pageSize={50}
           refetch={refetch}
