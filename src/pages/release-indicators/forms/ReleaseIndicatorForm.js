@@ -42,19 +42,14 @@ export default function ReleaseIndicatorForm({ labels, maxAccess, recordId, wind
     }),
     onSubmit: async obj => {
       try {
-        const recordId = obj.recordId
-
         const response = await postRequest({
           extension: DocumentReleaseRepository.ReleaseIndicator.set,
           record: JSON.stringify(obj)
         })
 
-        if (!recordId) {
+        if (!obj.recordId) {
           toast.success(platformLabels.Added)
-          formik.setValues({
-            ...obj,
-            recordId: response.recordId
-          })
+          formik.setFieldValue('recordId', response.recordId)
         } else toast.success(platformLabels.Edited)
         window.close()
         invalidate()
@@ -62,7 +57,7 @@ export default function ReleaseIndicatorForm({ labels, maxAccess, recordId, wind
     }
   })
 
-  const editMode = !!formik.values.recordId || (formik.values.recordId === 0)
+  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
