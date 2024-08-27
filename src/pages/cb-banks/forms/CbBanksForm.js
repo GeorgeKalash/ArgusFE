@@ -20,7 +20,6 @@ export default function CbBanksForms({ labels, maxAccess, store, setStore, setEd
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const editMode = !!recordId
 
   const invalidate = useInvalidate({
     endpointId: CashBankRepository.CbBank.page
@@ -69,6 +68,8 @@ export default function CbBanksForms({ labels, maxAccess, store, setStore, setEd
       } catch (error) {}
     }
   })
+
+  const editMode = !!formik.values.recordId;
 
   useEffect(() => {
     ;(async function () {
