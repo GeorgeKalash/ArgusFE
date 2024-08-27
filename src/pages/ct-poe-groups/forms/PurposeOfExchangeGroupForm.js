@@ -90,7 +90,6 @@ export default function PurposeOfExchangeGroupForm({ labels, recordId, maxAccess
                 label={labels.flName}
                 value={formik.values.flName}
                 maxAccess={maxAccess}
-                maxLength='40'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('flName', '')}
                 error={formik.touched.flName && Boolean(formik.errors.flName)}
