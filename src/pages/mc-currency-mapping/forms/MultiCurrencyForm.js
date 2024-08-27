@@ -24,7 +24,7 @@ export default function MultiCurrencyForm({ labels, maxAccess, record, recordId,
 
   const { formik } = useForm({
     initialValues: {
-      recordId: recordId || null,
+      recordId,
       currencyId: null,
       rateTypeId: null,
       exId: null
@@ -101,7 +101,7 @@ export default function MultiCurrencyForm({ labels, maxAccess, record, recordId,
                 required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik && formik.setFieldValue('currencyId', newValue?.recordId || null)
+                  formik && formik.setFieldValue('currencyId', newValue?.recordId || '')
                 }}
                 error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
               />
@@ -122,7 +122,7 @@ export default function MultiCurrencyForm({ labels, maxAccess, record, recordId,
                 maxAccess={maxAccess}
                 readOnly={editMode}
                 onChange={(event, newValue) => {
-                  formik && formik.setFieldValue('rateTypeId', newValue?.recordId || null)
+                  formik && formik.setFieldValue('rateTypeId', newValue?.recordId || '')
                 }}
                 error={formik.touched.rateTypeId && Boolean(formik.errors.rateTypeId)}
               />
@@ -142,7 +142,7 @@ export default function MultiCurrencyForm({ labels, maxAccess, record, recordId,
                 required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('exId', newValue?.recordId || null)
+                  formik.setFieldValue('exId', newValue?.recordId || '')
                 }}
                 error={formik.touched.exId && Boolean(formik.errors.exId)}
               />

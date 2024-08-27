@@ -29,16 +29,13 @@ const MultiCurrencyMapping = () => {
     return { ...response, _startAt: _startAt }
   }
 
-  const invalidate = useInvalidate({
-    endpointId: MultiCurrencyRepository.McExchangeMap.page
-  })
-
   const {
     query: { data },
     labels: _labels,
     paginationParameters,
     refetch,
-    access
+    access,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: MultiCurrencyRepository.McExchangeMap.page,
@@ -91,8 +88,7 @@ const MultiCurrencyMapping = () => {
         maxAccess: access,
         recordId: record
           ? String(record.currencyId * 1000 + record.rateTypeId)
-          : null,
-        invalidate: invalidate
+          : null
       },
       width: 600,
       height: 300,
