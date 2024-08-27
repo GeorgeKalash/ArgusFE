@@ -41,12 +41,14 @@ import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
 import { useInvalidate } from 'src/hooks/resource'
 import { ControlContext } from 'src/providers/ControlContext'
 import InfoForm from './InfoForm'
+import { RemittanceBankInterface } from 'src/repositories/RemittanceBankInterface'
 
 export default function OutwardsForm({ labels, access, recordId, cashAccountId, plantId, userId, dtId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
+  const DEFAULT_DELIVERYMODE = 7
 
   const { maxAccess } = useDocumentType({
     functionId: SystemFunction.Outwards,
@@ -67,9 +69,11 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
     productId: '',
     dispersalId: '',
     countryId: '',
+    countryref: '',
     dispersalType: '',
     dispersalTypeName: '',
     currencyId: '',
+    currencyRef: '',
     idNo: '',
     beneficiaryId: '',
     beneficiarySeqNo: '',
@@ -78,6 +82,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
     clientRef: '',
     clientName: '',
     nationalityId: '',
+    category: '',
     fcAmount: null,
     corId: '',
     corRef: '',
@@ -141,7 +146,8 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       }
     ],
     instantCashDetails: {},
-    products: [{}]
+    products: [{}],
+    ICRates: [{}]
   }
 
   const { formik } = useForm({
@@ -170,8 +176,20 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
         .array()
         .of(
           yup.object().shape({
-            type: yup.string().required('Type is required'),
-            amount: yup.string().nullable().required('amount is required')
+            type: yup
+              .string()
+              .required('Type is required')
+
+              .test('unique', 'Type must be unique', function (value) {
+                const { path, parent, options } = this
+                if (!parent.outwardId) {
+                  const arrayOfTypes = options.context.amountRows.map(row => row.type)
+                  const isUnique = arrayOfTypes.filter(item => item === value).length === 1
+
+                  return isUnique
+                } else return true
+              }),
+            amount: yup.string().nullable().required('Amount is required')
           })
         )
         .required('Cash array is required')
@@ -425,36 +443,53 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
     formik.setFieldValue('beneficiarySeqNo', seqNo)
   }
 
-  const chooseClient = async clientId => {
+  const chooseClient = async (clientId, category) => {
     try {
       if (clientId) {
-        const res = await getRequest({
-          extension: RTCLRepository.CtClientIndividual.get2,
-          parameters: `_clientId=${clientId}`
-        })
-        if (!res.record?.clientRemittance) {
-          stackError({
-            message: `Chosen Client Has No KYC.`
+        if (category == 1) {
+          //client individual
+          const res = await getRequest({
+            extension: RTCLRepository.CtClientIndividual.get2,
+            parameters: `_clientId=${clientId}`
           })
+          if (!res.record?.clientRemittance) {
+            stackError({
+              message: `Chosen Client Has No KYC.`
+            })
 
-          return
+            return
+          }
+          formik.setFieldValue('idNo', res?.record?.clientIDView?.idNo)
+          formik.setFieldValue('expiryDate', formatDateFromApi(res?.record?.clientIDView?.idExpiryDate))
+          formik.setFieldValue('firstName', res?.record?.clientIndividual?.firstName)
+          formik.setFieldValue('middleName', res?.record?.clientIndividual?.middleName)
+          formik.setFieldValue('lastName', res?.record?.clientIndividual?.lastName)
+          formik.setFieldValue('familyName', res?.record?.clientIndividual?.familyName)
+          formik.setFieldValue('fl_firstName', res?.record?.clientIndividual?.fl_firstName)
+          formik.setFieldValue('fl_middleName', res?.record?.clientIndividual?.fl_middleName)
+          formik.setFieldValue('fl_lastName', res?.record?.clientIndividual?.fl_lastName)
+          formik.setFieldValue('fl_familyName', res?.record?.clientIndividual?.fl_familyName)
+          formik.setFieldValue('professionId', res?.record?.clientIndividual?.professionId)
+          formik.setFieldValue('cellPhone', res?.record?.clientMaster?.cellPhone)
+          formik.setFieldValue('nationalityId', res?.record?.clientMaster?.nationalityId)
+          formik.setFieldValue('hiddenTrxCount', res?.record?.clientRemittance?.trxCountPerYear)
+          formik.setFieldValue('hiddenTrxAmount', res?.record?.clientRemittance?.trxAmountPerYear)
+          formik.setFieldValue('hiddenSponserName', res?.record?.clientIndividual?.sponsorName)
+        } else if (category == 2) {
+          //client corporate
+          const res = await getRequest({
+            extension: CTCLRepository.ClientCorporate.get,
+            parameters: `_clientId=${clientId}`
+          })
+          if (!res) {
+            return
+          }
+          formik.setFieldValue('nationalityId', res?.record?.clientMaster?.nationalityId)
+          formik.setFieldValue('cellPhone', res?.record?.clientMaster?.cellPhone)
+          formik.setFieldValue('expiryDate', formatDateFromApi(res?.record?.clientMaster?.expiryDate))
+
+          //formik.setFieldValue('idNo', res?.record?.clientIDView?.idNo)
         }
-        formik.setFieldValue('idNo', res?.record?.clientIDView?.idNo)
-        formik.setFieldValue('expiryDate', formatDateFromApi(res?.record?.clientIDView?.idExpiryDate))
-        formik.setFieldValue('firstName', res?.record?.clientIndividual?.firstName)
-        formik.setFieldValue('middleName', res?.record?.clientIndividual?.middleName)
-        formik.setFieldValue('lastName', res?.record?.clientIndividual?.lastName)
-        formik.setFieldValue('familyName', res?.record?.clientIndividual?.familyName)
-        formik.setFieldValue('fl_firstName', res?.record?.clientIndividual?.fl_firstName)
-        formik.setFieldValue('fl_middleName', res?.record?.clientIndividual?.fl_middleName)
-        formik.setFieldValue('fl_lastName', res?.record?.clientIndividual?.fl_lastName)
-        formik.setFieldValue('fl_familyName', res?.record?.clientIndividual?.fl_familyName)
-        formik.setFieldValue('professionId', res?.record?.clientIndividual?.professionId)
-        formik.setFieldValue('cellPhone', res?.record?.clientMaster?.cellPhone)
-        formik.setFieldValue('nationalityId', res?.record?.clientMaster?.nationalityId)
-        formik.setFieldValue('hiddenTrxCount', res?.record?.clientRemittance?.trxCountPerYear)
-        formik.setFieldValue('hiddenTrxAmount', res?.record?.clientRemittance?.trxAmountPerYear)
-        formik.setFieldValue('hiddenSponserName', res?.record?.clientIndividual?.sponsorName)
       }
     } catch (error) {}
   }
@@ -539,7 +574,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
           cashData: formik.values.instantCashDetails,
           outwardsData: {
             countryId: formik.values.countryId,
-            amount: formik.values.amount
+            amount: formik.values.amount || amount
           },
           clientData: {
             hiddenTrxAmount: formik.values.hiddenTrxAmount,
@@ -572,6 +607,48 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       formik.setFieldValue('taxPercent', parseFloat(res.record.value))
     } catch (error) {}
   }
+  async function getDefaultCountry() {
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.Defaults.get,
+        parameters: `_filter=&_key=countryId`
+      })
+
+      const countryRef = await getRequest({
+        extension: SystemRepository.Country.get,
+        parameters: `_recordId=${res?.record?.value}`
+      })
+
+      return countryRef.record.reference
+    } catch (error) {}
+  }
+  async function getDefaultCurrency() {
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.Defaults.get,
+        parameters: `_filter=&_key=baseCurrencyId`
+      })
+
+      const currencyRef = await getRequest({
+        extension: SystemRepository.Currency.get,
+        parameters: `_recordId=${res?.record?.value}`
+      })
+
+      return currencyRef.record.reference
+    } catch (error) {}
+  }
+
+  const getDefaultDT = async () => {
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.UserFunction.get,
+        parameters: `_userId=${userId}&_functionId=${SystemFunction.Outwards}`
+      })
+      res.record ? formik.setFieldValue('dtId', res.record.dtId) : formik.setFieldValue('dtId', '')
+    } catch (error) {
+      formik.setFieldValue('dtId', '')
+    }
+  }
 
   function onInstantCashSubmit(obj) {
     formik.setFieldValue('instantCashDetails', obj)
@@ -586,7 +663,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
   async function refetchForm(recordId) {
     const res = await getOutwards(recordId)
     await fillOutwardsData(res.record)
-    await chooseClient(res.record.headerView.clientId)
+    await chooseClient(res.record.headerView.clientId, res.record.headerView.category)
 
     return res
   }
@@ -597,29 +674,109 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
         return
       }
       if (plantId && data.countryId && data.currencyId && data.dispersalType) {
+        formik.setFieldValue('products', [])
         var parameters = `_plantId=${plantId}&_countryId=${data.countryId}&_dispersalType=${data.dispersalType}&_currencyId=${data.currencyId}&_fcAmount=${data.fcAmount}&_lcAmount=${data.lcAmount}`
 
         const res = await getRequest({
           extension: RemittanceOutwardsRepository.ProductDispersalEngine.qry,
           parameters: parameters
         })
+
         if (res.list.length > 0) {
           formik.setFieldValue('products', res.list)
-          if (res.list.length == 1) {
-            formik.setFieldValue('products[0].checked', true)
-            !editMode && handleSelectedProduct(res.list[0])
-            if (formik.values.lcAmount) formik.setFieldValue('fcAmount', res.list[0].originAmount)
-            if (formik.values.fcAmount) formik.setFieldValue('lcAmount', res.list[0].baseAmount)
-          } else {
-            const matchedProduct = res.list.find(product => product.productId === data.productId)
-            if (matchedProduct) {
-              const matchedIndex = res.list.findIndex(product => product.productId === data.productId)
-              formik.setFieldValue(`products[${matchedIndex}].checked`, true)
-            }
-          }
-        } else handleSelectedProduct()
+          const InstantCashProduct = res.list.find(item => item.interfaceId === 1)
+          InstantCashProduct ? await mergeICRates(res.list, data) : await displayProduct(res.list, data.productId)
+        } else {
+          formik.setFieldValue('products', [])
+          handleSelectedProduct()
+        }
       }
-    } catch (error) {}
+    } catch (error) {
+      formik.setFieldValue('products', [])
+      handleSelectedProduct()
+    }
+  }
+  async function mergeICRates(data, outwardsList) {
+    const syCountryId = await getDefaultCountry()
+    const srcCurrency = await getDefaultCurrency()
+    const targetCurrency = formik.values.currencyRef || outwardsList.currencyRef
+    const srcAmount = outwardsList?.lcAmount || formik.values.lcAmount || 0
+    const trgtAmount = outwardsList?.fcAmount || formik.values.fcAmount || 0
+    const countryRef = formik.values.countryRef || outwardsList.countryRef
+
+    try {
+      const getRates = await getRequest({
+        extension: RemittanceBankInterface.InstantCashRates.qry,
+        parameters: `_deliveryMode=${DEFAULT_DELIVERYMODE}&_sourceCurrency=${srcCurrency}&_targetCurrency=${targetCurrency}&_sourceAmount=${srcAmount}&_targetAmount=${trgtAmount}&_originatingCountry=${syCountryId}&_destinationCountry=${countryRef}`
+      })
+
+      const updateICProduct = (product, matchingRate) => {
+        if (matchingRate) {
+          return {
+            ...product,
+            fees: matchingRate.charge,
+            exRate: matchingRate.settlementRate
+          }
+        }
+
+        return product
+      }
+
+      if (getRates?.list) {
+        if (data.length === 1) {
+          const matchingRate = getRates.list.find(
+            rate => data[0].originAmount >= rate.amountRangeFrom && data[0].originAmount <= rate.amountRangeTo
+          )
+
+          const updatedProduct = updateICProduct(data[0], matchingRate)
+
+          if (matchingRate) {
+            if (formik.values.lcAmount) formik.setFieldValue('fcAmount', matchingRate.originAmount)
+            if (formik.values.fcAmount) formik.setFieldValue('lcAmount', matchingRate.baseAmount)
+          }
+
+          !editMode && handleSelectedProduct(updatedProduct)
+          formik.setFieldValue('products', [updatedProduct])
+          formik.setFieldValue('products[0].checked', true)
+        } else {
+          !editMode && handleSelectedProduct()
+
+          const updatedData = data.map(item =>
+            item.interfaceId === 1
+              ? updateICProduct(
+                  item,
+                  getRates.list.find(
+                    rate => item.originAmount >= rate.amountRangeFrom && item.originAmount <= rate.amountRangeTo
+                  )
+                )
+              : item
+          )
+
+          formik.setFieldValue('products', updatedData)
+          const matchedIndex = updatedData.findIndex(product => product.productId === data.productId)
+          if (matchedIndex) {
+            formik.setFieldValue(`products[${matchedIndex}].checked`, true)
+          }
+        }
+      } else {
+        displayProduct(data, data.productId)
+      }
+    } catch (error) {
+      await displayProduct(data, data.productId)
+    }
+  }
+
+  async function displayProduct(data, productId) {
+    if (data.length === 1) {
+      formik.setFieldValue('products[0].checked', true)
+      !editMode && handleSelectedProduct(data[0])
+    } else {
+      !editMode && handleSelectedProduct()
+      if (productId) {
+        const matchedIndex = data.findIndex(product => product.productId === productId)
+        if (matchedIndex) formik.setFieldValue(`products[${matchedIndex}].checked`, true)
+      }
+    }
   }
 
   useEffect(() => {
@@ -742,9 +899,11 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                     values={formik.values}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('countryId', newValue ? newValue?.countryId : '')
+                      formik.setFieldValue('countryRef', newValue ? newValue?.countryRef : '')
                       formik.setFieldValue('fcAmount', '')
                       formik.setFieldValue('lcAmount', '')
                       handleSelectedProduct(null, true)
+                      formik.setFieldValue('products', [])
                       if (!newValue) {
                         formik.setFieldValue('dispersalType', '')
                         formik.setFieldValue('currencyId', '')
@@ -795,6 +954,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                     readOnly={!formik.values.dispersalType || isClosed || isPosted || editMode}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('currencyId', newValue?.currencyId)
+                      formik.setFieldValue('currencyRef', newValue?.currencyRef)
                     }}
                     error={formik.touched.dispersalType && Boolean(formik.errors.dispersalType)}
                   />
@@ -1033,7 +1193,8 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                       formik.setFieldValue('clientId', newValue ? newValue.recordId : '')
                       formik.setFieldValue('clientName', newValue ? newValue.name : '')
                       formik.setFieldValue('clientRef', newValue ? newValue.reference : '')
-                      await chooseClient(newValue?.recordId)
+                      formik.setFieldValue('category', newValue ? newValue.category : 1)
+                      await chooseClient(newValue?.recordId, newValue?.category)
                       formik.setFieldValue('beneficiaryId', '')
                       formik.setFieldValue('beneficiaryName', '')
                     }}

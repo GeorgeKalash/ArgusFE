@@ -1,44 +1,45 @@
-import { useState, useContext } from 'react'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import ReleaseCodeWindow from './Windows/ReleaseCodeWindow'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
+import { useWindow } from 'src/windows'
+import ReleaseCodeForm from './forms/ReleaseCodeForm'
 
 const ReleaseCodes = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const [selectedRecordId, setSelectedRecordId] = useState(null)
-  const [windowOpen, setWindowOpen] = useState(false)
-  const [errorMessage, setErrorMessage] = useState(null)
+  const { platformLabels } = useContext(ControlContext)
+  const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    try {
+      const { _startAt = 0, _pageSize = 50 } = options
 
-    return await getRequest({
-      extension: DocumentReleaseRepository.ReleaseCode.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
-    })
+      return await getRequest({
+        extension: DocumentReleaseRepository.ReleaseCode.page,
+        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      })
+    } catch (error) {}
   }
 
   const {
     query: { data },
     labels: _labels,
+    invalidate,
+    refetch,
+    paginationParameters,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: DocumentReleaseRepository.ReleaseCode.page,
     datasetId: ResourceIds.ReleaseCodes
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: DocumentReleaseRepository.ReleaseCode.page
   })
 
   const columns = [
@@ -55,27 +56,42 @@ const ReleaseCodes = () => {
   ]
 
   const add = () => {
-    setWindowOpen(true)
+    openForm()
+  }
+
+  function openForm(recordId) {
+    stack({
+      Component: ReleaseCodeForm,
+      props: {
+        labels: _labels,
+        recordId: recordId,
+        maxAccess: access
+      },
+      width: 500,
+      height: 300,
+      title: _labels.releaseCode
+    })
   }
 
   const edit = obj => {
-    setSelectedRecordId(obj.recordId)
-    setWindowOpen(true)
+    openForm(obj?.recordId)
   }
 
   const del = async obj => {
-    await postRequest({
-      extension: DocumentReleaseRepository.ReleaseCode.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success('Record Deleted Successfully')
+    try {
+      await postRequest({
+        extension: DocumentReleaseRepository.ReleaseCode.del,
+        record: JSON.stringify(obj)
+      })
+      invalidate()
+      toast.success(platformLabels.Deleted)
+    } catch (error) {}
   }
 
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />{' '}
+        <GridToolbar onAdd={add} maxAccess={access} />
       </Fixed>
       <Grow>
         <Table
@@ -86,24 +102,12 @@ const ReleaseCodes = () => {
           onDelete={del}
           isLoading={false}
           pageSize={50}
-          paginationType='client'
+          refetch={refetch}
+          paginationType='api'
+          paginationParameters={paginationParameters}
           maxAccess={access}
         />
       </Grow>
-
-      {windowOpen && (
-        <ReleaseCodeWindow
-          onClose={() => {
-            setWindowOpen(false)
-            setSelectedRecordId(null)
-          }}
-          labels={_labels}
-          maxAccess={access}
-          recordId={selectedRecordId}
-          setSelectedRecordId={setSelectedRecordId}
-        />
-      )}
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </VertLayout>
   )
 }

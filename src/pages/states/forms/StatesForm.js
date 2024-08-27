@@ -133,6 +133,7 @@ export default function StatesForm({ labels, maxAccess, recordId }) {
                 onChange={(event, newValue) => {
                   formik.setFieldValue('countryId', newValue?.recordId)
                 }}
+                error={formik.touched.countryId && Boolean(formik.errors.countryId)}
               />
             </Grid>
 

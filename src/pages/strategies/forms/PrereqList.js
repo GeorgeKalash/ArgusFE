@@ -87,7 +87,8 @@ const PreReqsList = ({ store, labels, maxAccess }) => {
         maxAccess,
         store
       },
-
+      width: 500,
+      height: 300,
       title: labels.prere
     })
   }
@@ -107,7 +108,6 @@ const PreReqsList = ({ store, labels, maxAccess }) => {
           pagination={false}
           onDelete={delCode}
           maxAccess={maxAccess}
-          height={200}
         />
       </Grow>
     </VertLayout>
