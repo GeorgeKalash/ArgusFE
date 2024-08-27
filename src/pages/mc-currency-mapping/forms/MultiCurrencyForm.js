@@ -24,7 +24,7 @@ export default function MultiCurrencyForm({ labels, maxAccess, record, recordId,
 
   const { formik } = useForm({
     initialValues: {
-      recordId,
+      recordId: recordId || null,
       currencyId: null,
       rateTypeId: null,
       exId: null
@@ -69,10 +69,12 @@ export default function MultiCurrencyForm({ labels, maxAccess, record, recordId,
             extension: MultiCurrencyRepository.McExchangeMap.get,
             parameters: `_currencyId=${record.currencyId}&_rateTypeId=${record.rateTypeId}`
           })
-          formik.setFieldValue(
-            'recordId',
-            String(res.record.currencyId * 1000 + res.record.rateTypeId)
-          )
+          formik.setValues({
+            ...res.record,
+
+            recordId:
+              String(res.record.currencyId * 1000 + res.record.rateTypeId)
+          })
         }
       } catch (e) {}
     })()
