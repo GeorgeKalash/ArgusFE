@@ -55,8 +55,6 @@ export default function MobileSystem() {
     getDataResult()
   }, [])
 
-  console.log(formik.values)
-
   const handleSubmit = () => {
     formik.handleSubmit()
   }
