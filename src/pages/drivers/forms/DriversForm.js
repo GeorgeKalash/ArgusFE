@@ -7,37 +7,39 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { DeliveryRepository } from 'src/repositories/DeliveryRepository'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import { SystemRepository } from 'src/repositories/SystemRepository'
 
-export default function LegalStatusForm({ labels, maxAccess, recordId }) {
-  const { platformLabels } = useContext(ControlContext)
+export default function DriversForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: BusinessPartnerRepository.LegalStatus.page
+    endpointId: DeliveryRepository.Driver.page
   })
 
   const { formik } = useForm({
     initialValues: {
       recordId: null,
-      reference: '',
+      cellPhone: '',
       name: ''
     },
     maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      reference: yup.string().required(),
-      name: yup.string().required()
+      name: yup.string().required(),
+      cellPhone: yup.string().required()
     }),
     onSubmit: async obj => {
       try {
         const response = await postRequest({
-          extension: BusinessPartnerRepository.LegalStatus.set,
+          extension: DeliveryRepository.Driver.set,
           record: JSON.stringify(obj)
         })
 
@@ -58,7 +60,7 @@ export default function LegalStatusForm({ labels, maxAccess, recordId }) {
       try {
         if (recordId) {
           const res = await getRequest({
-            extension: BusinessPartnerRepository.LegalStatus.get,
+            extension: DeliveryRepository.Driver.get,
             parameters: `_recordId=${recordId}`
           })
 
@@ -69,29 +71,10 @@ export default function LegalStatusForm({ labels, maxAccess, recordId }) {
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.LegalStatus}
-      form={formik}
-      height={300}
-      maxAccess={maxAccess}
-      editMode={editMode}
-    >
+    <FormShell resourceId={ResourceIds.Drivers} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
-            <Grid item xs={12}>
-              <CustomTextField
-                name='reference'
-                label={labels.reference}
-                value={formik.values.reference}
-                required
-                maxAccess={maxAccess}
-                maxLength='30'
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('reference', '')}
-                error={formik.touched.reference && Boolean(formik.errors.reference)}
-              />
-            </Grid>
             <Grid item xs={12}>
               <CustomTextField
                 name='name'
@@ -102,6 +85,38 @@ export default function LegalStatusForm({ labels, maxAccess, recordId }) {
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
                 error={formik.touched.name && Boolean(formik.errors.name)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='cellPhone'
+                label={labels.cellPhone}
+                value={formik.values.cellPhone}
+                required
+                phone={true}
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('cellPhone', '')}
+                error={formik.touched.cellPhone && Boolean(formik.errors.cellPhone)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={SystemRepository.Plant.qry}
+                name='plantId'
+                label={labels.plant}
+                valueField='recordId'
+                displayField='name'
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('plantId', newValue ? newValue?.recordId : '')
+                }}
+                error={formik.touched.plantId && Boolean(formik.errors.recordId)}
               />
             </Grid>
           </Grid>
