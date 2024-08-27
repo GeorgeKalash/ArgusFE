@@ -36,14 +36,12 @@ export default function LegalStatusForm({ labels, maxAccess, recordId }) {
     }),
     onSubmit: async obj => {
       try {
-        const recordId = obj.recordId
-
         const response = await postRequest({
           extension: BusinessPartnerRepository.LegalStatus.set,
           record: JSON.stringify(obj)
         })
 
-        if (!recordId) {
+        if (!obj.recordId) {
           toast.success(platformLabels.Added)
           formik.setValues({
             ...obj,
