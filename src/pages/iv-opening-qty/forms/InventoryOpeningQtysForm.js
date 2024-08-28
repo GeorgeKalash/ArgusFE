@@ -1,4 +1,4 @@
-import { Checkbox, FormControlLabel, Grid } from '@mui/material'
+import { Checkbox, fabClasses, FormControlLabel, Grid } from '@mui/material'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
@@ -33,7 +33,14 @@ const InventoryOpeningQtysForm = ({ labels, maxAccess, recordId, record }) => {
       year: '',
       siteId: '',
       sku: '',
-      itemId: ''
+      itemId: '',
+      itemName: '',
+      qty: '',
+      pieces: '',
+      avgWeight: '',
+      lotCategoryId: '',
+      trackBy: '',
+      pieces: ''
     },
     enableReinitialize: true,
     validateOnChange: true,
@@ -41,7 +48,9 @@ const InventoryOpeningQtysForm = ({ labels, maxAccess, recordId, record }) => {
       year: yup.string().required(),
       siteId: yup.string().required(),
       sku: yup.string().required(),
-      itemId: yup.string().required()
+      itemId: yup.string().required(),
+      qty: yup.number().required().min(0.01, 'Quantity must be greater than 0'),
+      avgWeight: yup.number().nullable().max(999999, 'Quantity must be less than 999999')
     }),
     onSubmit: async obj => {
       const year = formik.values.year
@@ -115,6 +124,7 @@ const InventoryOpeningQtysForm = ({ labels, maxAccess, recordId, record }) => {
               <ResourceComboBox
                 endpointId={InventoryRepository.Site.qry}
                 name='siteId'
+                readOnly={editMode}
                 required
                 refresh={editMode}
                 label={labels.site}
@@ -128,38 +138,79 @@ const InventoryOpeningQtysForm = ({ labels, maxAccess, recordId, record }) => {
               />
             </Grid>
             <Grid item xs={12}>
-              <CustomTextField
-                name='sku'
-                refresh={editMode}
-                label={labels.sku}
-                value={formik.values.sku}
-                required
-                maxLength='50'
-                maxAccess={maxAccess}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('sku', '')}
-                error={formik.touched.sku && Boolean(formik.errors.sku)}
-              />
-            </Grid>
-            <Grid item xs={12}>
               <ResourceLookup
                 endpointId={InventoryRepository.Item.snapshot}
-                name='itemId'
+                name='sku'
                 refresh={editMode}
-                label={labels.item}
+                readOnly={editMode}
+                secondDisplayField={false}
+                label={labels.sku}
                 valueField='sku'
-                displayField='name'
-                valueShow='itemRef'
+                displayField='sku'
+                valueShow='sku'
                 required
-                secondValueShow='itemName'
                 form={formik}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('itemId', newValue ? newValue.recordId : '')
                   formik.setFieldValue('itemName', newValue ? newValue.name : '')
-                  formik.setFieldValue('itemRef', newValue ? newValue.sku : '')
+                  formik.setFieldValue('sku', newValue ? newValue.sku : '')
+                  formik.setFieldValue('trackBy', newValue ? newValue.trackBy : '')
+                  formik.setFieldValue('lotCategory', newValue ? newValue.lotCategory : '')
                 }}
-                errorCheck={'itemId'}
+                errorCheck={'sku'}
                 maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                endpointId={InventoryRepository.Item.snapshot}
+                name='itemName'
+                value={formik.values.itemName}
+                readOnly
+                label={labels.item}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomNumberField
+                name='qty'
+                required
+                label={labels.qty}
+                value={formik?.values?.qty}
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('qty', '')}
+                error={formik.touched.qty && Boolean(formik.errors.qty)}
+                decimalScale={3}
+                allowNegative={false}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomNumberField
+                name='pieces'
+                label={labels.pieces}
+                readOnly
+                value={formik?.values?.pieces}
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('pieces', '')}
+                decimalScale={2}
+                error={formik.touched.pieces && Boolean(formik.errors.pieces)}
+                allowNegative={false}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomNumberField
+                name='avgWeight'
+                label={labels.avgWeight}
+                value={formik?.values?.avgWeight}
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('avgWeight', '')}
+                decimalScale={2}
+                error={formik.touched.avgWeight && Boolean(formik.errors.avgWeight)}
+                maxLength={8}
+                allowNegative={false}
               />
             </Grid>
           </Grid>
