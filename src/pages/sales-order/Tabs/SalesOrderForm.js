@@ -28,14 +28,55 @@ export default function SalesOrderForm({ labels, maxAccess, recordId, window }) 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const initialValues = {
-    recordId: null,
+    recordId: recordId || null,
     dtId: '',
     reference: '',
+    date: new Date(),
     plantId: '',
+    clientId: '',
+    currencyId: '',
+    szId: '',
+    spId: '',
     siteId: '',
     description: '',
-    date: null,
-    itemRows: [{ id: 1 }]
+    status: '',
+    releaseStatus: '',
+    wip: '',
+    deliveryStatus: '',
+    printStatusName: '',
+    isVattable: false,
+    exWorks: false,
+    taxId: '',
+    shipAddress: '',
+    billAddress: '',
+    subtotal: '',
+    tdValue: '',
+    miscAmount: '',
+    amount: '',
+    vatAmount: '',
+    overdraft: false,
+    itemRows: [
+      {
+        id: 1,
+        itemId: '',
+        sku: '',
+        itemName: '',
+        seqNo: '',
+        siteId: '',
+        muId: '',
+        qty: '',
+        volume: '',
+        weight: '',
+        basePrice: '',
+        unitPrice: '',
+        overheadId: '',
+        vatAmount: '',
+        mdAmount: '',
+        upo: '',
+        extendedPrice: '',
+        notes: ''
+      }
+    ]
   }
 
   const invalidate = useInvalidate({
@@ -49,29 +90,30 @@ export default function SalesOrderForm({ labels, maxAccess, recordId, window }) 
     validationSchema: yup.object({
       siteId: yup.string().required('This field is required')
     }),
-    onSubmit: async obj => {}
+    onSubmit: async obj => {
+      window.close()
+    }
   })
   const isPosted = formik.values.status == 3
   const editMode = !formik.values.recordId
 
   const totalQty = formik.values.itemRows.reduce((qtySum, row) => {
-    // Parse qty as a number, assuming it's a numeric value
     const qtyValue = parseFloat(row.qty) || 0
 
     return qtySum + qtyValue
   }, 0)
 
-  //   const handlePost = async () => {
-  //     const values = { ...formik.values }
-  //     values.date = formatDateToApi(values.date)
+  const totalVolume = formik.values.itemRows.reduce((volumeSum, row) => {
+    const volumeValue = parseFloat(row.volume) || 0
 
-  //     await postRequest({
-  //       extension: InventoryRepository.MaterialsAdjustment.post,
-  //       record: JSON.stringify(values)
-  //     })
-  //     invalidate()
-  //     setIsPosted(true)
-  //   }
+    return volumeSum + volumeValue
+  }, 0)
+
+  const totalWeight = formik.values.itemRows.reduce((weightSum, row) => {
+    const weightValue = parseFloat(row.weight) || 0
+
+    return weightSum + weightValue
+  }, 0)
 
   const columns = [
     {
@@ -155,6 +197,11 @@ export default function SalesOrderForm({ labels, maxAccess, recordId, window }) 
     },
     {
       component: 'numberfield',
+      label: labels.upo,
+      name: 'upo'
+    },
+    {
+      component: 'numberfield',
       label: labels.VAT,
       name: 'vatAmount'
     },
@@ -185,53 +232,47 @@ export default function SalesOrderForm({ labels, maxAccess, recordId, window }) 
     }
   ]
 
-  //   const fillDetailsGrid = async adjId => {
-  //     var parameters = `_filter=&_adjustmentId=${adjId}`
+  const fillForm = async (soHeader, soItems) => {
+    const modifiedList = soItems.list.map((item, index) => ({
+      ...item,
+      id: index + 1
+    }))
+    console.log('check data ', soHeader.record, modifiedList)
+    formik.setValues({
+      ...formik.values,
+      ...soHeader.record,
+      itemRows: modifiedList
+    })
+  }
 
-  //     const res = await getRequest({
-  //       extension: InventoryRepository.MaterialsAdjustmentDetail.qry,
-  //       parameters: parameters
-  //     })
+  const getSalesOrder = async soId => {
+    const res = await getRequest({
+      extension: SaleRepository.SalesOrder.get,
+      parameters: `_recordId=${soId}`
+    })
+    res.record.date = formatDateFromApi(res.record.date)
 
-  //     // Create a new list by modifying each object in res.list
-  //     const modifiedList = res.list.map(item => ({
-  //       ...item,
-  //       totalCost: item.unitCost * item.qty // Modify this based on your calculation
-  //     }))
-  //     formik.setValues({
-  //       ...formik.values,
-  //       itemRows: modifiedList
-  //     })
-  //   }
+    return res
+  }
 
-  //   useEffect(() => {}, [height])
+  const getSalesOrderItems = async (soId, trxId) => {
+    const res = await getRequest({
+      extension: SaleRepository.SalesOrderItem.qry,
+      parameters: `_recordId=${soId}&_params=1|${trxId}`
+    })
 
-  //   useEffect(() => {
-  //     ;(async function () {
-  //       if (recordId) {
-  //         setIsLoading(true)
-  //         fillDetailsGrid(recordId)
+    return res
+  }
 
-  //         const res = await getRequest({
-  //           extension: InventoryRepository.MaterialsAdjustment.get,
-  //           parameters: `_recordId=${recordId}`
-  //         })
-  //         setIsPosted(res.record.status === 3 ? true : false)
-  //         res.record.date = formatDateFromApi(res.record.date)
-  //         setInitialData(res.record)
-  //       }
-  //     })()
-  //     // eslint-disable-next-line react-hooks/exhaustive-deps
-  //   }, [])
-
-  //   const actions = [
-  //     {
-  //       key: 'RecordRemarks',
-  //       condition: true,
-  //       onClick: 'onRecordRemarks',
-  //       disabled: !editMode
-  //     }
-  //   ]
+  useEffect(() => {
+    ;(async function () {
+      if (recordId) {
+        const soHeader = await getSalesOrder(recordId)
+        const soItems = await getSalesOrderItems(recordId, soHeader.record.status)
+        fillForm(soHeader, soItems)
+      }
+    })()
+  }, [])
 
   return (
     <FormShell resourceId={ResourceIds.SalesOrder} form={formik} maxAccess={maxAccess}>
@@ -386,7 +427,7 @@ export default function SalesOrderForm({ labels, maxAccess, recordId, window }) 
                   <CustomTextArea
                     name='BillAddress'
                     label='bill to'
-                    value={formik.values.BillAddress}
+                    value={formik.values.billAddress}
                     rows={3}
                     maxLength='100'
                     maxAccess={maxAccess}
@@ -542,14 +583,14 @@ export default function SalesOrderForm({ labels, maxAccess, recordId, window }) 
               {/* First Column */}
               <Grid container item xs={6} direction='column' spacing={2} sx={{ px: 2, mt: 1 }}>
                 <Grid item>
-                  <CustomNumberField name='totalQTY' label={labels.totQty} value='' readOnly />
+                  <CustomNumberField name='totalQTY' label={labels.totQty} value={totalQty} readOnly />
                 </Grid>
                 <Grid item>
                   <CustomNumberField
                     name='totVolume'
                     maxAccess={maxAccess}
                     label={labels.totVolume}
-                    value=''
+                    value={totalVolume}
                     readOnly
                   />
                 </Grid>
@@ -558,7 +599,7 @@ export default function SalesOrderForm({ labels, maxAccess, recordId, window }) 
                     name='totWeight'
                     maxAccess={maxAccess}
                     label={labels.totWeight}
-                    value=''
+                    value={totalWeight}
                     readOnly
                   />
                 </Grid>
@@ -567,19 +608,49 @@ export default function SalesOrderForm({ labels, maxAccess, recordId, window }) 
               {/* Second Column */}
               <Grid container item xs={6} direction='column' spacing={2} sx={{ px: 2, mt: 1 }}>
                 <Grid item>
-                  <CustomNumberField name='subTotal' maxAccess={maxAccess} label={labels.subtotal} value='' readOnly />
+                  <CustomNumberField
+                    name='subTotal'
+                    maxAccess={maxAccess}
+                    label={labels.subtotal}
+                    value={formik.values.subtotal}
+                    readOnly
+                  />
                 </Grid>
                 <Grid item>
-                  <CustomNumberField name='discount' maxAccess={maxAccess} label={labels.discount} value='' readOnly />
+                  <CustomNumberField
+                    name='discount'
+                    maxAccess={maxAccess}
+                    label={labels.discount}
+                    value={formik.values.tdValue}
+                    readOnly
+                  />
                 </Grid>
                 <Grid item>
-                  <CustomNumberField name='misc' maxAccess={maxAccess} label={labels.misc} value='' readOnly />
+                  <CustomNumberField
+                    name='misc'
+                    maxAccess={maxAccess}
+                    label={labels.misc}
+                    value={formik.values.miscAmount}
+                    readOnly
+                  />
                 </Grid>
                 <Grid item>
-                  <CustomNumberField name='vat' maxAccess={maxAccess} label={labels.VAT} value='' readOnly />
+                  <CustomNumberField
+                    name='vat'
+                    maxAccess={maxAccess}
+                    label={labels.VAT}
+                    value={formik.values.vatAmount}
+                    readOnly
+                  />
                 </Grid>
                 <Grid item>
-                  <CustomNumberField name='net' maxAccess={maxAccess} label={labels.net} value='' readOnly />
+                  <CustomNumberField
+                    name='net'
+                    maxAccess={maxAccess}
+                    label={labels.net}
+                    value={formik.values.amount}
+                    readOnly
+                  />
                 </Grid>
               </Grid>
             </Grid>
