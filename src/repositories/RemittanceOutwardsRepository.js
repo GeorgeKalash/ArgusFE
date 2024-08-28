@@ -18,6 +18,7 @@ export const RemittanceOutwardsRepository = {
   },
   OutwardsTransfer: {
     qry: service + 'qryOW',
+    qry2: service + 'qryOW2',
     page: service + 'pageOW',
     get: service + 'getOW',
     get2: service + 'get2OW',
@@ -94,5 +95,14 @@ export const RemittanceOutwardsRepository = {
     post: service + 'postOWM',
     reopen: service + 'reopenOWM',
     close: service + 'closeOWM'
+  },
+  OutwardsReturn: {
+    page: service + 'pageOWR',
+    get: service + 'getOWR',
+    set: service + 'setOWR',
+  },
+  CorrespondentOutwards: {
+    qry: service + 'qryACE',
+    set: service + 'setACE'
   }
 }

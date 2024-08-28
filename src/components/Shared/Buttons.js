@@ -86,6 +86,13 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'Correspondent',
+    label: platformLabels.Correspondent,
+    image: 'person.png',
+    color: '#CECECE',
+    main: false
+  },
+  {
     key: 'Print',
     label: platformLabels.Print,
     color: '#231f20',
@@ -124,6 +131,13 @@ export const getButtons = platformLabels => [
     key: 'Client Relation',
     label: platformLabels.ClientRelation,
     color: '#AC48AE',
+    image: 'clientRelations.png',
+    main: false
+  },
+  {
+    key: 'Add Client Relation',
+    label: platformLabels.addClientRelation,
+    color: '#4eb558',
     image: 'clientRelations.png',
     main: false
   },

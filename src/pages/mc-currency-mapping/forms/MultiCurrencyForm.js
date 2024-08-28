@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -14,11 +14,9 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useInvalidate } from 'src/hooks/resource'
 import { ControlContext } from 'src/providers/ControlContext'
 
-export default function MultiCurrencyForm({ labels, maxAccess, currencyId, rateTypeId, window }) {
+export default function MultiCurrencyForm({ labels, maxAccess, record, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-
-  const editMode = !!currencyId && !!rateTypeId
 
   const invalidate = useInvalidate({
     endpointId: MultiCurrencyRepository.McExchangeMap.page
@@ -26,43 +24,56 @@ export default function MultiCurrencyForm({ labels, maxAccess, currencyId, rateT
 
   const { formik } = useForm({
     initialValues: {
-      currencyId: currencyId || null,
-      rateTypeId: rateTypeId || null,
+      recordId: recordId || null,
+      currencyId: null,
+      rateTypeId: null,
       exId: null
     },
     maxAccess: maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      currencyId: yup.string().required(' '),
-      rateTypeId: yup.string().required(' '),
-      exId: yup.string().required(' ')
+      currencyId: yup.string().required(),
+      rateTypeId: yup.string().required(),
+      exId: yup.string().required()
     }),
     onSubmit: async obj => {
-      const response = await postRequest({
-        extension: MultiCurrencyRepository.McExchangeMap.set,
-        record: JSON.stringify(obj)
-      })
+      try {
+        const currencyId = formik.values.currencyId
+        const rateTypeId = formik.values.rateTypeId
 
-      if (!currencyId && !rateTypeId) {
-        toast.success(platformLabels.Added)
-      } else {
-        toast.success(platformLabels.Edited)
-      }
-
-      invalidate()
+        await postRequest({
+          extension: MultiCurrencyRepository.McExchangeMap.set,
+          record: JSON.stringify(obj)
+        })
+  
+        if (!currencyId && !rateTypeId) {
+          toast.success(platformLabels.Added)
+        } else toast.success(platformLabels.Edited)
+        formik.setFieldValue(
+          'recordId',
+          String(obj.currencyId * 1000 + obj.rateTypeId)
+        )
+        invalidate()
+      } catch (error) {}
     }
   })
+
+  const editMode = !!formik.values.recordId
+
   useEffect(() => {
     ;(async function () {
       try {
-        if (rateTypeId && currencyId) {
+        if (record.rateTypeId && record.currencyId && recordId) {
           const res = await getRequest({
             extension: MultiCurrencyRepository.McExchangeMap.get,
-            parameters: `_currencyId=${currencyId}&_rateTypeId=${rateTypeId}`
+            parameters: `_currencyId=${record.currencyId}&_rateTypeId=${record.rateTypeId}`
           })
           formik.setValues({
-            ...res.record
+            ...res.record,
+
+            recordId:
+              String(res.record.currencyId * 1000 + res.record.rateTypeId)
           })
         }
       } catch (e) {}
@@ -90,7 +101,7 @@ export default function MultiCurrencyForm({ labels, maxAccess, currencyId, rateT
                 required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik && formik.setFieldValue('currencyId', newValue?.recordId)
+                  formik && formik.setFieldValue('currencyId', newValue?.recordId || '')
                 }}
                 error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
               />
@@ -111,7 +122,7 @@ export default function MultiCurrencyForm({ labels, maxAccess, currencyId, rateT
                 maxAccess={maxAccess}
                 readOnly={editMode}
                 onChange={(event, newValue) => {
-                  formik && formik.setFieldValue('rateTypeId', newValue?.recordId)
+                  formik && formik.setFieldValue('rateTypeId', newValue?.recordId || '')
                 }}
                 error={formik.touched.rateTypeId && Boolean(formik.errors.rateTypeId)}
               />
@@ -131,7 +142,7 @@ export default function MultiCurrencyForm({ labels, maxAccess, currencyId, rateT
                 required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('exId', newValue?.recordId || null)
+                  formik.setFieldValue('exId', newValue?.recordId || '')
                 }}
                 error={formik.touched.exId && Boolean(formik.errors.exId)}
               />
