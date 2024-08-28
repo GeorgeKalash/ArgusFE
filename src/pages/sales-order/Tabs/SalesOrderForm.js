@@ -1,7 +1,6 @@
-import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
-import { Grid, Box, FormControlLabel, Checkbox } from '@mui/material'
+import { Grid, FormControlLabel, Checkbox } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
@@ -10,7 +9,6 @@ import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { useWindowDimensions } from 'src/lib/useWindowDimensions'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
@@ -18,7 +16,6 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
-import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -27,19 +24,10 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 
-export default function SalesOrderForm({ labels, maxAccess, recordId, expanded, window }) {
-  //   const { height } = useWindowDimensions()
-  //   const [isLoading, setIsLoading] = useState(false)
-  //   const [isPosted, setIsPosted] = useState(false)
-  const [itemStore, setItemStore] = useState([])
+export default function SalesOrderForm({ labels, maxAccess, recordId, window }) {
+  const { getRequest, postRequest } = useContext(RequestsContext)
 
-  const isPosted = false
-  const editMode = true
-
-  //   const [editMode, setEditMode] = useState(!!recordId)
-  //   const { getRequest, postRequest } = useContext(RequestsContext)
-
-  const [initialValues, setInitialData] = useState({
+  const initialValues = {
     recordId: null,
     dtId: '',
     reference: '',
@@ -48,11 +36,11 @@ export default function SalesOrderForm({ labels, maxAccess, recordId, expanded, 
     description: '',
     date: null,
     itemRows: [{ id: 1 }]
-  })
+  }
 
-  //   const invalidate = useInvalidate({
-  //     endpointId: InventoryRepository.MaterialsAdjustment.qry
-  //   })
+  const invalidate = useInvalidate({
+    endpointId: SaleRepository.SalesOrder.qry
+  })
 
   const formik = useFormik({
     initialValues,
@@ -61,51 +49,10 @@ export default function SalesOrderForm({ labels, maxAccess, recordId, expanded, 
     validationSchema: yup.object({
       siteId: yup.string().required('This field is required')
     }),
-    onSubmit: async obj => {
-      const copy = { ...obj }
-      copy.date = formatDateToApi(copy.date)
-
-      const updatedRows = formik.values.itemRows.map((adjDetail, index) => {
-        const seqNo = index + 1
-        if (adjDetail.muQty === null) {
-          return {
-            ...adjDetail,
-            qtyInBase: 0,
-            seqNo: seqNo
-          }
-        } else {
-          return {
-            ...adjDetail,
-            qtyInBase: adjDetail.muQty * adjDetail.qty,
-            seqNo: seqNo
-          }
-        }
-      })
-
-      if (updatedRows.length == 1 && updatedRows[0].itemId == '') {
-        throw new Error('Grid not filled. Please fill the grid before saving.')
-      }
-
-      const resultObject = {
-        header: obj,
-        items: updatedRows,
-        serials: [],
-        lots: []
-      }
-
-      const res = await postRequest({
-        extension: InventoryRepository.MaterialsAdjustment.set2,
-        record: JSON.stringify(resultObject)
-      })
-      toast.success('Record Updated Successfully')
-
-      //invalidate()
-      setEditMode(true)
-      formik.setFieldValue('recordId', res.recordId)
-      handlePost()
-      window.close()
-    }
+    onSubmit: async obj => {}
   })
+  const isPosted = formik.values.status == 3
+  const editMode = !formik.values.recordId
 
   const totalQty = formik.values.itemRows.reduce((qtySum, row) => {
     // Parse qty as a number, assuming it's a numeric value

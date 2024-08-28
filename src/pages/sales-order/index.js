@@ -130,15 +130,7 @@ const SalesOrder = () => {
   const { proxyAction } = useDocumentTypeProxy({
     functionId: SystemFunction.SalesOrder,
     action: async () => {
-      //   const plantId = await getPlantId()
-      //   if (plantId !== '') {
-      //     openFormWindow(null, plantId)
-      //   } else {
-      //     stackError({
-      //       message: `The user does not have a default plant`
-      //     })
-      //     return
-      //   }
+      openForm()
     },
     hasDT: false
   })
@@ -148,24 +140,9 @@ const SalesOrder = () => {
   }
 
   const editSO = obj => {
-    openFormWindow(obj.recordId)
+    openForm(obj.recordId)
   }
 
-  async function openFormWindow(recordId) {
-    if (!recordId) {
-      //   const plantId = await getPlantId()
-      //   if (plantId !== '') {
-      //     openForm('')
-      //   } else {
-      //     stackError({
-      //       message: `The user does not have a default plant`
-      //     })
-      //     return
-      //   }
-    } else {
-      openForm(recordId)
-    }
-  }
   function openForm(recordId) {
     stack({
       Component: SalesOrderForm,
