@@ -219,10 +219,15 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
       getRequest({
         extension: RemittanceSettingsRepository.Correspondent.get,
         parameters: parameters
-      }).then(res => {
+      }).then(async res => {
         setToCurrency(res.record.currencyId)
         setToCurrencyRef(res.record.currencyRef)
-        getEXMBase(plant, res.record.currencyId, baseCurrency, 150)
+
+        const evalRate = await getRequest({
+          extension: CurrencyTradingSettingsRepository.Defaults.get,
+          parameters: '_key=ct_credit_eval_ratetype_id'
+        })
+        if (evalRate.record) getEXMBase(plant, res.record.currencyId, baseCurrency, evalRate.record.value)
       })
     } else {
       setToCurrency(null)
