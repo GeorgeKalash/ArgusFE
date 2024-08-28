@@ -1,11 +1,10 @@
 import { useContext } from 'react'
-import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import PurposeOfExchangeWindow from './windows/PurposeOfExchangeWindow'
 import { useWindow } from 'src/windows'
@@ -36,15 +35,12 @@ const PurposeExchange = () => {
     paginationParameters,
     refetch,
     labels: _labels,
-    access
+    access,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: CurrencyTradingSettingsRepository.PurposeExchange.page,
     datasetId: ResourceIds.PurposeOfExchange
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: CurrencyTradingSettingsRepository.PurposeExchange.page
   })
 
   const columns = [
@@ -56,6 +52,11 @@ const PurposeExchange = () => {
     {
       field: 'name',
       headerName: _labels.name,
+      flex: 1
+    },
+    {
+      field: 'groupName',
+      headerName: _labels.group,
       flex: 1
     }
   ]
@@ -83,12 +84,14 @@ const PurposeExchange = () => {
   }
 
   const del = async obj => {
-    await postRequest({
-      extension: CurrencyTradingSettingsRepository.PurposeExchange.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success(platformLabels.Deleted)
+    try {
+      await postRequest({
+        extension: CurrencyTradingSettingsRepository.PurposeExchange.del,
+        record: JSON.stringify(obj)
+      })
+      invalidate()
+      toast.success(platformLabels.Deleted)
+    } catch (error) {}
   }
 
   return (

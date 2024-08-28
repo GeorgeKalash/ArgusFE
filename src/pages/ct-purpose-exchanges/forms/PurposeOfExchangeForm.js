@@ -11,11 +11,14 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import { useForm } from 'src/hooks/form'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function PurposeOfExchangeForm({ labels, maxAccess, recordId, setStore }) {
   const [editMode, setEditMode] = useState(!!recordId)
 
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: CurrencyTradingSettingsRepository.PurposeExchange.page
@@ -25,14 +28,15 @@ export default function PurposeOfExchangeForm({ labels, maxAccess, recordId, set
     initialValues: {
       recordId: null,
       name: '',
-      reference: ''
+      reference: '',
+      groupId: ''
     },
     maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required(' '),
-      reference: yup.string().required(' ')
+      name: yup.string().required(),
+      reference: yup.string().required()
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
@@ -47,14 +51,11 @@ export default function PurposeOfExchangeForm({ labels, maxAccess, recordId, set
           recordId: response.recordId,
           name: obj.name
         })
-        toast.success('Record Added Successfully')
-        formik.setValues({
-          ...obj,
-          recordId: response.recordId
-        })
+        toast.success(platformLabels.Added)
+        formik.setFieldValue('recordId', response.recordId)
       } else {
         setStore(prev => ({ ...prev, name: obj.name }))
-        toast.success('Record Edited Successfully')
+        toast.success(platformLabels.Edited)
       }
       setEditMode(true)
       invalidate()
@@ -109,6 +110,23 @@ export default function PurposeOfExchangeForm({ labels, maxAccess, recordId, set
                 error={formik.touched.name && Boolean(formik.errors.name)}
               />
             </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={CurrencyTradingSettingsRepository.PurposeExchangeGroup.qry}
+                name='groupId'
+                label={labels.group}
+                valueField='recordId'
+                displayField='name'
+                values={formik.values}
+                required
+                readOnly={editMode}
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('groupId', newValue?.recordId)
+                }}
+                error={formik.touched.groupId && Boolean(formik.errors.groupId)}
+              />
+              </Grid>
           </Grid>
         </Grow>
       </VertLayout>
