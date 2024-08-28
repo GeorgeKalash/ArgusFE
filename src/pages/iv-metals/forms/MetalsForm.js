@@ -34,7 +34,14 @@ export default function MetalsForm({ labels, maxAccess, setStore, store }) {
     validateOnBlur: true,
     validationSchema: yup.object({
       reference: yup.string().required(),
-      purity: yup.number().required().min(0.001).max(1),
+      purity: yup
+        .number()
+        .nullable()
+        .test('is-valid-reportingPurity', function (value) {
+          if (value >= 0.001 && value <= 1) return true
+
+          return false
+        }),
       reportingPurity: yup
         .number()
         .nullable()
@@ -87,7 +94,7 @@ export default function MetalsForm({ labels, maxAccess, setStore, store }) {
 
   return (
     <FormShell
-      resourceId={ResourceIds.TaxCodes}
+      resourceId={ResourceIds.Metals}
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}
@@ -116,6 +123,7 @@ export default function MetalsForm({ labels, maxAccess, setStore, store }) {
                 value={formik.values.purity}
                 required
                 maxAccess={maxAccess}
+                readOnly={editMode}
                 maxLength={6}
                 decimalScale={5}
                 onChange={formik.handleChange}

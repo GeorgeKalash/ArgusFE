@@ -30,7 +30,7 @@ const ScrapForm = ({ store, setStore, maxAccess, labels }) => {
               .number()
               .nullable()
               .test('is-valid-reportingPurity', function (value) {
-                return value >= 0.001 && value <= 1 ? true : false
+                return !value || (value < 0.001 && value > 1) ? true : false
               })
           })
         )
