@@ -1,5 +1,6 @@
-import React, { useContext } from 'react'
-import { TabsContext, useTabs } from './TabsContext'
+import React, { useContext, useCallback } from 'react'
+import { useRouter } from 'next/router'
+import { TabsContext } from './TabsContext'
 import { Tabs, Tab, Box, IconButton, Menu, MenuItem } from '@mui/material'
 import PropTypes from 'prop-types'
 import CloseIcon from '@mui/icons-material/Close'
@@ -36,9 +37,12 @@ CustomTabPanel.propTypes = {
 }
 
 const TabBar = () => {
+  const router = useRouter()
+
   const {
     handleCloseOtherTab,
     handleClose,
+    handleCloseAllTabs,
     OpenItems,
     handleChange,
     currentTabIndex,
@@ -47,7 +51,9 @@ const TabBar = () => {
     openTabs,
     tabsIndex
   } = useContext(TabsContext)
-  const { dashboardId } = JSON.parse(window.sessionStorage.getItem('userData'))
+
+  const dashboardId = JSON.parse(window.sessionStorage.getItem('userData'))?.dashboardId // Assuming dashboardId is stored like this
+
   const open = Boolean(anchorEl)
 
   return (

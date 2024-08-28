@@ -157,15 +157,15 @@ const TabsProvider = ({ children }) => {
   }, [router.asPath, menu, gear, children, lastOpenedPage, initialLoadDone])
 
   const value = {
-    handleCloseOtherTab,
-    handleClose,
-    OpenItems,
-    handleChange,
-    currentTabIndex,
-    anchorEl,
-    closeTab,
-    openTabs,
-    tabsIndex
+    handleCloseOtherTab: () => {},
+    handleClose: () => {},
+    OpenItems: () => {},
+    handleChange: () => {},
+    currentTabIndex: 0,
+    anchorEl: null,
+    closeTab: () => {},
+    openTabs: [],
+    tabsIndex: null
   }
 
   return <TabsContext.Provider value={value}>{children}</TabsContext.Provider>
