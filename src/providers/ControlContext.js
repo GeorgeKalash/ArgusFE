@@ -42,7 +42,6 @@ const ControlProvider = ({ children }) => {
   }
 
   const getLabels = (resourceId, callback) => {
-    console.log('2')
     var parameters = '_dataset=' + resourceId
     getRequest({
       extension: KVSRepository.getLabels,
@@ -58,7 +57,6 @@ const ControlProvider = ({ children }) => {
   }
 
   const getAccess = (resourceId, callback) => {
-    console.log('1')
     var parameters = '_resourceId=' + resourceId
     getRequest({
       extension: AccessControlRepository.maxAccess,
