@@ -385,13 +385,15 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
             parameters: `_recordId=${recordId}`
           })
           res.record.date = formatDateFromApi(res.record.date)
-          setOperationType(res.record.functionId)
+          await setOperationType(res.record.functionId)
           formik.setValues(res.record)
           const baseCurrency = await getBaseCurrency()
           getCorrespondentById(res.record.corId ?? '', baseCurrency, res.record.plantId)
           setIsPosted(res.record.status === 3 ? true : false)
           setIsCancelled(res.record.status === -1 ? true : false)
           setVisible(res.record.status == 1 ? false : true)
+        } else {
+          await setOperationType(SystemFunction.CreditInvoicePurchase)
         }
       } catch (error) {
       } finally {
@@ -902,8 +904,8 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
               row
               value={formik.values.functionId}
               defaultValue={SystemFunction.CreditInvoicePurchase}
-              onChange={e => {
-                setOperationType(e.target.value)
+              onChange={async e => {
+                await setOperationType(e.target.value)
                 setFunctionId(e.target.value)
                 formik.setFieldValue('reference', '')
               }}
