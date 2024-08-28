@@ -91,6 +91,7 @@ export default function StockCountControllerForm({ labels, maxAccess, recordId }
               <ResourceComboBox
                 endpointId={SystemRepository.Plant.qry}
                 name='plantId'
+                required
                 label={labels.plant}
                 valueField='recordId'
                 displayField='name'
@@ -103,7 +104,7 @@ export default function StockCountControllerForm({ labels, maxAccess, recordId }
                 onChange={(event, newValue) => {
                   formik.setFieldValue('plantId', newValue ? newValue?.recordId : '')
                 }}
-                error={formik.touched.plantId && Boolean(formik.errors.recordId)}
+                error={formik.touched.plantId && Boolean(formik.errors.plantId)}
               />
             </Grid>
           </Grid>
