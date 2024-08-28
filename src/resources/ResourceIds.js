@@ -136,7 +136,7 @@ export const ResourceIds = {
   CbBankAccounts: 33105,
   CashNote: 37101,
   OutwardsModification: 36308,
-  POSUsers: 54101,
+  POSUsers: 54104,
   TaxCodes: 31109,
   TaxSchedules: 31107,
   LOShipments: 40301,
