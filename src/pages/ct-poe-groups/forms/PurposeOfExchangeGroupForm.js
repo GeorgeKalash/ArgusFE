@@ -6,50 +6,49 @@ import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { useForm } from 'src/hooks/form'
+import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
-import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
+import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 
-export default function CorrespondentGroupForm({ labels, maxAccess, recordId }) {
-  const { getRequest, postRequest } = useContext(RequestsContext)
+export default function PurposeOfExchangeGroupForm({ labels, recordId, maxAccess }) {
   const { platformLabels } = useContext(ControlContext)
+  const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
-    endpointId: RemittanceSettingsRepository.CorrespondentGroup.page
+    endpointId: CurrencyTradingSettingsRepository.PurposeExchangeGroup.page
   })
 
   const { formik } = useForm({
     initialValues: {
-      recordId: recordId || null,
-      reference: '',
+      recordId: null,
       name: '',
-      flName: ''
+      flName: '',
     },
+    maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      reference: yup.string().required(),
-      name: yup.string().required()
+      name: yup.string().required(),
     }),
     onSubmit: async obj => {
       try {
         const response = await postRequest({
-          extension: RemittanceSettingsRepository.CorrespondentGroup.set,
+          extension: CurrencyTradingSettingsRepository.PurposeExchangeGroup.set,
           record: JSON.stringify(obj)
         })
 
         if (!obj.recordId) {
           toast.success(platformLabels.Added)
-          formik.setFieldValue('recordId', response?.recordId)
+          formik.setFieldValue('recordId', response.recordId)
         } else toast.success(platformLabels.Edited)
-
         invalidate()
       } catch (error) {}
     }
   })
+
   const editMode = !!formik.values.recordId
 
   useEffect(() => {
@@ -57,45 +56,32 @@ export default function CorrespondentGroupForm({ labels, maxAccess, recordId }) 
       try {
         if (recordId) {
           const res = await getRequest({
-            extension: RemittanceSettingsRepository.CorrespondentGroup.get,
+            extension: CurrencyTradingSettingsRepository.PurposeExchangeGroup.get,
             parameters: `_recordId=${recordId}`
           })
 
           formik.setValues(res.record)
         }
-      } catch (e) {}
+      } catch (error) {}
     })()
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.CorrespondentGroup} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell resourceId={ResourceIds.PurposeExchangeGroup} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
             <Grid item xs={12}>
               <CustomTextField
-                name='reference'
-                label={labels.reference}
-                value={formik.values.reference}
-                required
-                maxAccess={maxAccess}
-                maxLength='10'
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('reference', '')}
-                error={formik.touched.reference && Boolean(formik.errors.reference)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomTextField
                 name='name'
                 label={labels.name}
                 value={formik.values.name}
-                maxLength='50'
                 required
+                maxLength='30'
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
-                error={formik.touched.name && Boolean(formik.errors.name)}
+                error={formik.touched.name && formik.errors.name}
               />
             </Grid>
             <Grid item xs={12}>
@@ -103,10 +89,10 @@ export default function CorrespondentGroupForm({ labels, maxAccess, recordId }) 
                 name='flName'
                 label={labels.flName}
                 value={formik.values.flName}
-                maxLength='30'
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('flName', '')}
+                error={formik.touched.flName && Boolean(formik.errors.flName)}
               />
             </Grid>
           </Grid>
