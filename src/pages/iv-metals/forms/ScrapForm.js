@@ -25,21 +25,12 @@ const ScrapForm = ({ store, setStore, maxAccess, labels }) => {
         .array()
         .of(
           yup.object().shape({
-            laborValuePerGram: yup
-              .number()
-              .nullable()
-              .test('is-valid-reportingPurity', function (value) {
-                if (!value) return true
-
-                return value >= 0.001 && value <= 1
-              }),
+            sku: yup.string().required(),
             purity: yup
               .number()
               .nullable()
               .test('is-valid-reportingPurity', function (value) {
-                if (!value) return true
-
-                return value >= 0.001 && value <= 1
+                return value >= 0.001 && value <= 1 ? true : false
               })
           })
         )
@@ -54,6 +45,7 @@ const ScrapForm = ({ store, setStore, maxAccess, labels }) => {
           metalId: recordId,
           seqNo: '',
           itemId: '',
+          sku: '',
           itemName: '',
           laborValuePerGram: '',
           purity: ''
@@ -129,9 +121,9 @@ const ScrapForm = ({ store, setStore, maxAccess, labels }) => {
               error={formik.errors.scrap}
               columns={[
                 {
-                  component: 'resourcecombobox',
+                  component: 'resourcelookup',
                   label: labels.sku,
-                  name: 'itemId',
+                  name: 'sku',
                   props: {
                     endpointId: InventoryRepository.Item.snapshot,
                     valueField: 'recordId',
@@ -145,7 +137,7 @@ const ScrapForm = ({ store, setStore, maxAccess, labels }) => {
                       { key: 'sku', value: 'SKU' },
                       { key: 'name', value: 'Name' }
                     ],
-                    displayFieldWidth: 2
+                    displayFieldWidth: 1
                   }
                 },
                 {
@@ -162,7 +154,7 @@ const ScrapForm = ({ store, setStore, maxAccess, labels }) => {
                   name: 'laborValuePerGram',
                   props: {
                     maxLength: 6,
-                    decimalScale: 5
+                    decimalScale: 2
                   }
                 },
                 {
