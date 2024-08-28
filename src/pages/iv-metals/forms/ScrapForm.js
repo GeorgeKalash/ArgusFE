@@ -75,10 +75,6 @@ const ScrapForm = ({ store, setStore, maxAccess, labels }) => {
     })
       .then(res => {
         toast.success(platformLabels.Added)
-        setStore(prevStore => ({
-          ...prevStore,
-          scrap: items
-        }))
       })
       .catch(error => {})
   }
