@@ -70,15 +70,12 @@ export const InventoryRepository = {
   },
   Metals: {
     page: service + 'pageMTL',
-    qry: service + 'qryMTL',
     get: service + 'getMTL',
     set: service + 'setMTL',
-    del: service + 'delMTL',
-    snapshot: service + 'snapshotMTL'
+    del: service + 'delMTL'
   },
   Scrap: {
     qry: service + 'qryMTS',
-    get: service + 'getMTS',
     set2: service + 'set2MTS'
   }
 }
