@@ -88,9 +88,9 @@ const PopperComponent = ({ children, anchorEl, open }) => {
       style={{
         position: 'absolute',
         minWidth: anchorEl ? anchorEl.clientWidth : 'auto',
-        top: rect?.bottom,
-        left: rect?.left,
-        transform: !canRenderBelow ? `translateY(calc(-100% - 10px - ${rect?.height}px))` : 'none'
+        top: `calc(${rect?.bottom}px / var(--zoom))`,
+        left: `calc(${rect?.left}px / var(--zoom))`,
+        transform: !canRenderBelow ? `translateY(calc(-100% - 20px - ${rect?.height}px))` : 'none'
       }}
     >
       {children}
