@@ -70,6 +70,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { WindowProvider } from 'src/windows'
 import { ErrorProvider } from 'src/error'
 import { useContext } from 'react'
+import TabBar from 'src/providers/TabBar'
 
 const clientSideEmotionCache = createEmotionCache()
 
@@ -112,7 +113,9 @@ const App = props => {
     (page => (
       <MenuProvider>
         <UserLayout contentHeightFixed={contentHeightFixed}>
-          <TabsProvider pageTitle={Component.pageTitle ?? pageProps.pageTitle}>{page}</TabsProvider>
+          <TabsProvider pageTitle={Component.pageTitle ?? pageProps.pageTitle}>
+            <TabBar>{page}</TabBar>
+          </TabsProvider>
         </UserLayout>
       </MenuProvider>
     ))

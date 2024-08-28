@@ -1,12 +1,52 @@
-import React from 'react'
-import { useTabs } from './TabsContext'
-import { Tabs, Tab, IconButton, MenuItem, Menu, Box } from '@mui/material'
+import React, { useContext } from 'react'
+import { TabsContext, useTabs } from './TabsContext'
+import { Tabs, Tab, Box, IconButton, Menu, MenuItem } from '@mui/material'
+import PropTypes from 'prop-types'
 import CloseIcon from '@mui/icons-material/Close'
-import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
+
+function CustomTabPanel(props) {
+  const { children, value, index, ...other } = props
+
+  return (
+    <Box
+      role='tabpanel'
+      id={`simple-tabpanel-${index}`}
+      aria-labelledby={`simple-tab-${index}`}
+      sx={{
+        display: value !== index ? 'none !important' : 'flex !important',
+        flexDirection: 'column',
+        width: '100%',
+        flex: '1 !important',
+        overflow: 'auto',
+        paddingTop: '5px',
+        position: 'relative',
+        backgroundColor: 'white'
+      }}
+      {...other}
+    >
+      {children}
+    </Box>
+  )
+}
+
+CustomTabPanel.propTypes = {
+  children: PropTypes.node,
+  index: PropTypes.number.isRequired,
+  value: PropTypes.number.isRequired
+}
 
 const TabBar = () => {
-  const { handleCloseOtherTab, handleClose, OpenItems, handleChange, currentTabIndex, anchorEl, closeTab, switchTab } =
-    useTabs()
+  const {
+    handleCloseOtherTab,
+    handleClose,
+    OpenItems,
+    handleChange,
+    currentTabIndex,
+    anchorEl,
+    closeTab,
+    openTabs,
+    tabsIndex
+  } = useContext(TabsContext)
   const { dashboardId } = JSON.parse(window.sessionStorage.getItem('userData'))
   const open = Boolean(anchorEl)
 

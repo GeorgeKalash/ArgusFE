@@ -1,42 +1,8 @@
 import React, { createContext, useEffect, useState, useContext } from 'react'
 import { useRouter } from 'next/router'
-import { Tabs, Tab, Box, IconButton, Menu, MenuItem } from '@mui/material'
-import PropTypes from 'prop-types'
 import { MenuContext } from 'src/providers/MenuContext'
-import { RequestsContext } from './RequestsContext'
 
 const TabsContext = createContext()
-
-function CustomTabPanel(props) {
-  const { children, value, index, ...other } = props
-
-  return (
-    <Box
-      role='tabpanel'
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      sx={{
-        display: value !== index ? 'none !important' : 'flex !important',
-        flexDirection: 'column',
-        width: '100%',
-        flex: '1 !important',
-        overflow: 'auto',
-        paddingTop: '5px',
-        position: 'relative',
-        backgroundColor: 'white'
-      }}
-      {...other}
-    >
-      {children}
-    </Box>
-  )
-}
-
-CustomTabPanel.propTypes = {
-  children: PropTypes.node,
-  index: PropTypes.number.isRequired,
-  value: PropTypes.number.isRequired
-}
 
 const TabsProvider = ({ children }) => {
   const router = useRouter()
@@ -198,7 +164,8 @@ const TabsProvider = ({ children }) => {
     currentTabIndex,
     anchorEl,
     closeTab,
-    switchTab
+    openTabs,
+    tabsIndex
   }
 
   return <TabsContext.Provider value={value}>{children}</TabsContext.Provider>
