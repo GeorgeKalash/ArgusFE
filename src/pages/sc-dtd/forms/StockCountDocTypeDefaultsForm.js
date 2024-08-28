@@ -33,7 +33,7 @@ export default function StockCountDocumentTypeDefaultForm({ labels, maxAccess: a
   const { formik } = useForm({
     initialValues: {
       recordId: recordId || null,
-      dtId: documentType?.dtId,
+      dtId: '',
       disableSKULookup: false
     },
     maxAccess,
