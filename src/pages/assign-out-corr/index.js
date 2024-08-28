@@ -39,7 +39,8 @@ const OutwardsCorrespondent = () => {
     },
     {
       field: 'date',
-      headerName: labels.date
+      headerName: labels.date,
+      type: 'date'
     },
     {
       field: 'currencyRef',

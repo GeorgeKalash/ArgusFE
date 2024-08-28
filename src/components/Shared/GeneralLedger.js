@@ -475,7 +475,8 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
                 if (!newRow?.currencyId) {
                   return
                 }
-                if (newRow.currencyId) {
+
+                try {
                   const result = await getCurrencyApi(newRow?.currencyId)
                   const result2 = result.record
                   const exRate = result2.exRate
@@ -498,7 +499,7 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
                     exRate: exRate,
                     rateCalcMethod: rateCalcMethod
                   })
-                }
+                } catch (error) {}
               }
             },
             {

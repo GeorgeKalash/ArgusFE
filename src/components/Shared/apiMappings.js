@@ -139,6 +139,17 @@ export const apiMappings = {
     valueField: 'recordId',
     displayField: 'name'
   },
+  [ResourceIds.Countries]: {
+    type: COMBOBOX,
+    endpoint: SystemRepository.Country.qry, //filterNationality
+    parameters: '_filter=',
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
   [ResourceIds.Cities]: {
     type: LOOKUP,
     endpoint: SystemRepository.City.snapshot,
