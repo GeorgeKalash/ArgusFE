@@ -10,7 +10,6 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
-import { MasterSource } from 'src/resources/MasterSource'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
@@ -23,11 +22,11 @@ export default function MetalsForm({ labels, maxAccess, setStore, store }) {
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: InventoryRepository.Metals.page
+    endpointId: InventoryRepository.Metals.qry
   })
 
   const { formik } = useForm({
-    initialValues: { recordId: store.recordId, name: '', reference: '', purity: '', reportingPurity: '' },
+    initialValues: { recordId: store.recordId, reference: '', purity: '', reportingPurity: '', currencyId: '' },
     maxAccess,
     enableReinitialize: false,
     validateOnChange: true,
@@ -64,10 +63,7 @@ export default function MetalsForm({ labels, maxAccess, setStore, store }) {
             recordId: response.recordId
           }))
           toast.success(platformLabels.Added)
-          formik.setValues({
-            ...obj,
-            recordId: response.recordId
-          })
+          formik.setFieldValue('recordId', response.recordId)
         } else toast.success(platformLabels.Edited)
 
         invalidate()

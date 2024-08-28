@@ -20,12 +20,10 @@ const TaxCodes = () => {
   const { stack } = useWindow()
 
   async function fetchGridData() {
-    const response = await getRequest({
+    return await getRequest({
       extension: InventoryRepository.Metals.qry,
       parameters: `_filter=`
     })
-
-    return response
   }
 
   const {
@@ -36,7 +34,7 @@ const TaxCodes = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: InventoryRepository.Metals.page,
+    endpointId: InventoryRepository.Metals.qry,
     datasetId: ResourceIds.Metals
   })
 
