@@ -157,9 +157,29 @@ export default function SalesOrderForm({ labels, maxAccess, recordId, expanded, 
       }
     },
     {
-      component: 'numberfield',
+      component: 'resourcecombobox',
+      label: labels.site,
+      name: 'siteRef',
+      props: {
+        endpointId: InventoryRepository.Site.qry,
+        displayField: 'reference',
+        valueField: 'recordId',
+        mapping: [
+          { from: 'recordId', to: 'siteId' },
+          { from: 'reference', to: 'siteRef' },
+          { from: 'name', to: 'siteName' }
+        ],
+        columnsInDropDown: [
+          { key: 'reference', value: 'Reference' },
+          { key: 'name', value: 'Name' }
+        ],
+        displayFieldWidth: 3
+      }
+    },
+    {
+      component: 'textfield',
       label: labels.measurementUnit,
-      name: 'mu'
+      name: 'muRef'
     },
     {
       component: 'numberfield',
@@ -189,12 +209,12 @@ export default function SalesOrderForm({ labels, maxAccess, recordId, expanded, 
     {
       component: 'numberfield',
       label: labels.VAT,
-      name: 'VAT'
+      name: 'vatAmount'
     },
     {
       component: 'numberfield',
       label: labels.tax,
-      name: 'tax'
+      name: 'taxId'
     },
     {
       component: 'numberfield',
@@ -204,12 +224,17 @@ export default function SalesOrderForm({ labels, maxAccess, recordId, expanded, 
     {
       component: 'numberfield',
       label: labels.sales,
-      name: 'sales'
+      name: 'salesTrx'
     },
     {
       component: 'numberfield',
       label: labels.extendedPrice,
       name: 'extendedPrice'
+    },
+    {
+      component: 'textfield',
+      label: labels.notes,
+      name: 'notes'
     }
   ]
 
