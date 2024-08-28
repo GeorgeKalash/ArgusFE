@@ -118,7 +118,6 @@ export default function PurposeOfExchangeForm({ labels, maxAccess, recordId, set
                 valueField='recordId'
                 displayField='name'
                 values={formik.values}
-                required
                 readOnly={editMode}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
