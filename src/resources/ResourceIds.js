@@ -227,5 +227,6 @@ export const ResourceIds = {
   PUOrderStatus: 50105,
   AutoPostExclusion: 36124,
   CorrespondentOutwards: 36318,
-  ExtraIncome: 36129
+  ExtraIncome: 36129,
+  StockCountControllers: 44101,
 }

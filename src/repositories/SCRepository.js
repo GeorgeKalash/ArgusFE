@@ -18,5 +18,11 @@ export const SCRepository = {
     get: service + 'getHDR',
     set: service + 'setHDR',
     del: service + 'delHDR'
-  }
+  },
+  StockCountController: {
+    page: service + 'pageCRL',
+    set: service + 'setCRL',
+    get: service + 'getCRL',
+    del: service + 'delCRL'
+  },
 }
