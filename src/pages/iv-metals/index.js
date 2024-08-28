@@ -19,11 +19,15 @@ const TaxCodes = () => {
 
   const { stack } = useWindow()
 
-  async function fetchGridData() {
-    return await getRequest({
-      extension: InventoryRepository.Metals.qry,
-      parameters: `_filter=`
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50 } = options
+
+    const response = await getRequest({
+      extension: InventoryRepository.Metals.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
+
+    return { ...response, _startAt: _startAt }
   }
 
   const {
@@ -31,10 +35,11 @@ const TaxCodes = () => {
     labels: _labels,
     invalidate,
     refetch,
+    paginationParameters,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: InventoryRepository.Metals.qry,
+    endpointId: InventoryRepository.Metals.page,
     datasetId: ResourceIds.Metals
   })
 
@@ -104,7 +109,8 @@ const TaxCodes = () => {
           isLoading={false}
           pageSize={50}
           refetch={refetch}
-          paginationType='client'
+          paginationParameters={paginationParameters}
+          paginationType='api'
           maxAccess={access}
         />
       </Grow>

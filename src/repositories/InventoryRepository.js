@@ -69,6 +69,7 @@ export const InventoryRepository = {
     del: service + 'delDI'
   },
   Metals: {
+    page: service + 'pageMTL',
     qry: service + 'qryMTL',
     get: service + 'getMTL',
     set: service + 'setMTL',

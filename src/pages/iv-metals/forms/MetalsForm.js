@@ -22,7 +22,7 @@ export default function MetalsForm({ labels, maxAccess, setStore, store }) {
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: InventoryRepository.Metals.qry
+    endpointId: InventoryRepository.Metals.page
   })
 
   const { formik } = useForm({

@@ -20,7 +20,7 @@ const MetalsWindows = ({ recordId, labels, maxAccess }) => {
         <MetalsForm labels={labels} setStore={setStore} store={store} maxAccess={maxAccess} />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
-        <ScrapForm labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} />
+        <ScrapForm labels={labels} maxAccess={maxAccess} store={store} />
       </CustomTabPanel>
     </>
   )

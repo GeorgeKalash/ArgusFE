@@ -11,7 +11,7 @@ import { useForm } from 'src/hooks/form'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { ControlContext } from 'src/providers/ControlContext'
 
-const ScrapForm = ({ store, setStore, maxAccess, labels }) => {
+const ScrapForm = ({ store, maxAccess, labels }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -103,7 +103,7 @@ const ScrapForm = ({ store, setStore, maxAccess, labels }) => {
     <>
       <FormShell
         form={formik}
-        resourceId={ResourceIds.TaxCodes}
+        resourceId={ResourceIds.Metals}
         maxAccess={maxAccess}
         infoVisible={true}
         editMode={!!recordId}
