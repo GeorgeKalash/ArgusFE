@@ -40,6 +40,7 @@ export default function MetalsForm({ labels, maxAccess, setStore, store }) {
         .nullable()
         .test('is-valid-reportingPurity', function (value) {
           if (value >= 0.001 && value <= 1) return true
+
           return false
         })
     }),
