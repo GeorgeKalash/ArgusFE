@@ -256,9 +256,7 @@ const Home = () => {
           aging: res.record.aging || []
         })
       })
-      .catch(error => {
-        console.log(error.message)
-      })
+      .catch(error => {})
   }
 
   const list1 = [
