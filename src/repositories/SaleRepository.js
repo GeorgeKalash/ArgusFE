@@ -49,6 +49,7 @@ export const SaleRepository = {
     set2: service + 'set2TGM'
   },
   Client: {
+    get: service + 'getCL',
     snapshot: service + 'snapshotCL'
   },
   WorkFlow: {

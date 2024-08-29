@@ -67,5 +67,8 @@ export const InventoryRepository = {
     get: service + 'getDI',
     set: service + 'setDI',
     del: service + 'delDI'
+  },
+  ItemPhysProp: {
+    get: service + 'getPP'
   }
 }

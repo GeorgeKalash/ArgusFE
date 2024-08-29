@@ -14,11 +14,14 @@ import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import SalesOrderForm from './Tabs/SalesOrderForm'
+import { SystemRepository } from 'src/repositories/SystemRepository'
+import { getStorageData } from 'src/storage/storage'
 
 const SalesOrder = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
+  const userId = getStorageData('userData').userId
 
   const {
     query: { data },
@@ -143,12 +146,36 @@ const SalesOrder = () => {
     openForm(obj.recordId)
   }
 
-  function openForm(recordId) {
+  async function getDefaultUserSite() {
+    const res = await getRequest({
+      extension: SystemRepository.UserDefaults.get,
+      parameters: `_userId=${userId}&_key=siteId`
+    })
+
+    return res?.record?.value
+  }
+
+  async function getDefaultPUSite() {
+    const res = await getRequest({
+      extension: SystemRepository.Defaults.get,
+      parameters: `_filter=&_key=PUSiteId`
+    })
+
+    return res?.record?.value
+  }
+
+  async function openForm(recordId) {
+    const userDefaultSite = await getDefaultUserSite()
+    const userDefaultPUSite = await getDefaultPUSite()
+
+    const siteId = userDefaultSite ? userDefaultSite : userDefaultPUSite
+
     stack({
       Component: SalesOrderForm,
       props: {
         labels,
         access,
+        siteId,
         recordId
       },
       width: 1200,
