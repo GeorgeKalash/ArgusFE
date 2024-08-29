@@ -111,7 +111,6 @@ const ClientsList = () => {
     stack({
       Component: ClientTemplateForm,
       props: {
-        setErrorMessage: setErrorMessage,
         labels: labels,
         maxAccess: access,
         recordId: recordId ? recordId : null,
@@ -127,7 +126,7 @@ const ClientsList = () => {
 
   const editClient = obj => {
     const _recordId = obj.recordId
-    openForm(_recordId, '')
+    openForm(_recordId)
   }
 
   return (
@@ -160,9 +159,6 @@ const ClientsList = () => {
           pageSize={50}
           paginationType='client'
         />
-        {errorMessage?.error && (
-          <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-        )}{' '}
       </Box>
     </>
   )
