@@ -24,7 +24,7 @@ export default function StockCountDocumentTypeDefaultForm({ labels, maxAccess: a
     endpointId: SCRepository.DocumentTypeDefaults.qry
   })
 
-  const { documentType, maxAccess, changeDT } = useDocumentType({
+  const { maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.StockCount,
     access,
     enabled: !recordId

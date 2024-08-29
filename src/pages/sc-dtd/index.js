@@ -19,16 +19,14 @@ const StockCountDocTypeDefaults = () => {
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
-  async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
-
+  async function fetchGridData() {
     try {
       const response = await getRequest({
         extension: SCRepository.DocumentTypeDefaults.qry,
         parameters: `_filter=&_functionId=${SystemFunction.StockCount}`
       })
 
-      return { ...response, _startAt: _startAt }
+      return response
     } catch (error) {}
   }
 
