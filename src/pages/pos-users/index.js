@@ -66,7 +66,7 @@ const PosUsers = () => {
   }
 
   const popup = obj => {
-    openForm(obj?.userId)
+    openForm(obj)
   }
 
   const del = async obj => {
@@ -80,12 +80,13 @@ const PosUsers = () => {
     } catch (error) {}
   }
 
-  function openForm(userId) {
+  function openForm(record) {
     stack({
       Component: PosUsersForm,
       props: {
         labels: labels,
-        userId: userId ? userId : null,
+        record,
+        recordId: record?.userId,
         maxAccess: access
       },
       width: 600,

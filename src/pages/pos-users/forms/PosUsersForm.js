@@ -15,7 +15,7 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import { ControlContext } from 'src/providers/ControlContext'
 
-export default function PosUsersForm({ labels, maxAccess, userId, window }) {
+export default function PosUsersForm({ labels, maxAccess, recordId, record, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -23,11 +23,11 @@ export default function PosUsersForm({ labels, maxAccess, userId, window }) {
     endpointId: PointofSaleRepository.PosUsers.qry
   })
 
-  const editMode = !!userId
+
 
   const { formik } = useForm({
     initialValues: {
-      recordId: null,
+      recordId: recordId || null,
       userId: null,
       posId: null,
       spId: null
@@ -53,15 +53,18 @@ export default function PosUsersForm({ labels, maxAccess, userId, window }) {
       } catch (error) {}
     }
   })
+
+  const editMode = !!formik.values.recordId && !!recordId;
+
   useEffect(() => {
     ;(async function () {
       try {
-        if (userId) {
+        if (record && record.userId && recordId) {
           const res = await getRequest({
             extension: PointofSaleRepository.PosUsers.get,
-            parameters: `_userId=${userId}`
+            parameters: `_userId=${record.userId}`
           })
-          formik.setValues({ ...res.record, recordId: res?.record?.userId })
+          formik.setValues({ ...res.record, recordId: res.record.userId })
         }
       } catch (e) {}
     })()
