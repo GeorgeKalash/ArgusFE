@@ -14,7 +14,7 @@ import { DataSets } from 'src/resources/DataSets'
 import { ControlContext } from 'src/providers/ControlContext'
 
 const CharacteristicForm = ({ labels, maxAccess, getCharacteristicGridData, recordId, window }) => {
-  const { postRequest, getRequest } = useContext(RequestsContext)
+  const { postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
   const [initialValues, setInitialData] = useState({
