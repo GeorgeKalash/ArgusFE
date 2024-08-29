@@ -1,5 +1,5 @@
 // ** React Imports
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 // ** MUI Imports
 import { InputAdornment, IconButton, Box } from '@mui/material'
@@ -73,11 +73,62 @@ const CustomDatePicker = ({
 
   const isRequired = required || accessLevel === MANDATORY
 
+  const datePickerRef = useRef(null)
+
+  const zoom = parseFloat(getComputedStyle(document.body).getPropertyValue('--zoom'))
+  const datePickerRect = datePickerRef.current?.getBoundingClientRect()
+
+  const thresholdPercentage = 0.35
+
+  const canRenderBelow =
+    window.innerHeight / zoom - (datePickerRect && datePickerRect.bottom) > window.innerHeight * thresholdPercentage
+
+  const style = document.createElement('style')
+  useEffect(() => {
+    function updatePopperComponentPosition() {
+      if (datePickerRef.current != null && openDatePicker) {
+        if (canRenderBelow) {
+          style.innerHTML = `
+
+            .MuiPickersPopper-root {
+              transform: translate( ${datePickerRect.left / zoom}px, ${datePickerRect.bottom / zoom}px) !important;
+            }
+          
+          `
+        } else {
+          style.innerHTML = `
+
+            .MuiPickersPopper-root {
+              top: ${datePickerRect?.bottom / zoom}px !important;
+              bottom: auto !important;
+              transform: translate( ${datePickerRect.left / zoom}px, calc(-100% - 10px - ${
+            datePickerRect?.height
+          }px)) !important;
+            }
+          
+          `
+        }
+
+        document.body.appendChild(style)
+      } else {
+      }
+    }
+
+    window.addEventListener('resize', updatePopperComponentPosition)
+
+    updatePopperComponentPosition()
+
+    return () => {
+      window.removeEventListener('resize', updatePopperComponentPosition)
+    }
+  }, [openDatePicker, datePickerRect, canRenderBelow, zoom])
+
   return _hidden ? (
     <></>
   ) : (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
       <DatePicker
+        ref={datePickerRef}
         variant={variant}
         size={size}
         value={value}
@@ -129,7 +180,7 @@ const CustomDatePicker = ({
           }
         }}
         slots={{
-          actionBar: (props) => (<PickersActionBar {...props} actions={['accept', 'today']} />)
+          actionBar: props => <PickersActionBar {...props} actions={['accept', 'today']} />
         }}
       />
     </LocalizationProvider>
