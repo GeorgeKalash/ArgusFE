@@ -70,7 +70,7 @@ export default function StockCountDocumentTypeDefaultForm({ labels, maxAccess: a
             parameters: `_dtId=${recordId}`
           })
 
-          formik.setValues({ ...res.record, recordId: recordId })
+          formik.setValues(res.record)
         }
       } catch (error) {}
     })()
