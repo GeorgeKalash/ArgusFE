@@ -39,14 +39,12 @@ export default function PurposeOfExchangeForm({ labels, maxAccess, recordId, set
       reference: yup.string().required()
     }),
     onSubmit: async obj => {
-      const recordId = obj.recordId
-
       const response = await postRequest({
         extension: CurrencyTradingSettingsRepository.PurposeExchange.set,
         record: JSON.stringify(obj)
       })
 
-      if (!recordId) {
+      if (!obj.recordId) {
         setStore({
           recordId: response.recordId,
           name: obj.name

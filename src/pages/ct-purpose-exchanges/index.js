@@ -66,7 +66,7 @@ const PurposeExchange = () => {
       Component: PurposeOfExchangeWindow,
       props: {
         labels: _labels,
-        recordId: recordId ? recordId : null,
+        recordId,
         maxAccess: access
       },
       width: 600,
