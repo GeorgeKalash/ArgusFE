@@ -123,7 +123,7 @@ export default function PosUsersForm({ labels, maxAccess, recordId, record, wind
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('spId', newValue ? newValue.recordId : '')
+                  formik.setFieldValue('spId', newValue?.recordId)
                 }}
                 error={formik.touched.spId && Boolean(formik.errors.spId)}
               />
