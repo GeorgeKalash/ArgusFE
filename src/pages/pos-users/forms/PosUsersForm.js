@@ -107,7 +107,7 @@ export default function PosUsersForm({ labels, maxAccess, recordId, record, wind
                 required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('posId', newValue?.recordId)
+                  formik.setFieldValue('posId', newValue ? newValue?.recordId : '')
                 }}
                 error={formik.touched.posId && Boolean(formik.errors.posId)}
               />
