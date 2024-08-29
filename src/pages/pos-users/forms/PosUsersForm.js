@@ -27,7 +27,7 @@ export default function PosUsersForm({ labels, maxAccess, recordId, record, wind
 
   const { formik } = useForm({
     initialValues: {
-      recordId: recordId || null,
+      recordId,
       userId: null,
       posId: null,
       spId: null
