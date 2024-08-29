@@ -16,10 +16,12 @@ import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepos
 import { useInvalidate } from 'src/hooks/resource'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const DRGroupForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { recordId } = store
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: DocumentReleaseRepository.DRGroup.qry
@@ -52,30 +54,19 @@ const DRGroupForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store
         record: JSON.stringify(obj)
       })
 
+      const message = isNewRecord ? platformLabels.Added : platformLabels.Edited
+      toast.success(message)
+
       if (isNewRecord) {
-        toast.success('Record Added Successfully')
+        formik.setFieldValue('recordId', res.recordId)
         setStore(prevStore => ({
           ...prevStore,
           recordId: res.recordId
         }))
-        setInitialData(prevData => ({
-          ...prevData,
-          ...obj,
-          recordId: res.recordId
-        }))
-        setEditMode(true)
-        invalidate()
-      } else {
-        toast.success('Record Edited Successfully')
-        setInitialData(prevData => ({
-          ...prevData,
-          ...obj
-        }))
-        invalidate()
       }
-    } catch (error) {
-      toast.error('An error occurred')
-    }
+
+      invalidate()
+    } catch {}
   }
   useEffect(() => {
     recordId && getGroupId(recordId)
