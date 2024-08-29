@@ -34,6 +34,7 @@ const InventoryOpeningQtys = () => {
     paginationParameters,
     filterBy,
     clearFilter,
+    invalidate,
     refetch,
     access
   } = useResourceQuery({
@@ -57,10 +58,6 @@ const InventoryOpeningQtys = () => {
       }
     } catch (error) {}
   }
-
-  const invalidate = useInvalidate({
-    endpointId: InventoryRepository.InventoryOpeningQtys.qry
-  })
 
   const columns = [
     {

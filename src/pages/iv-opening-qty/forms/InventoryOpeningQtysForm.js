@@ -53,26 +53,28 @@ const InventoryOpeningQtysForm = ({ labels, maxAccess, recordId, record }) => {
       avgWeight: yup.number().nullable().max(999999, 'Quantity must be less than 999999')
     }),
     onSubmit: async obj => {
-      const year = formik.values.year
-      const itemId = formik.values.itemId
-      const siteId = formik.values.siteId
+      try {
+        const year = formik.values.year
+        const itemId = formik.values.itemId
+        const siteId = formik.values.siteId
 
-      await postRequest({
-        extension: InventoryRepository.InventoryOpeningQtys.set,
-        record: JSON.stringify(obj)
-      })
+        await postRequest({
+          extension: InventoryRepository.InventoryOpeningQtys.set,
+          record: JSON.stringify(obj)
+        })
 
-      if (!year && !siteId && !itemId) {
-        toast.success(platformLabels.Added)
-      } else toast.success(platformLabels.Edited)
+        if (!year && !siteId && !itemId) {
+          toast.success(platformLabels.Added)
+        } else toast.success(platformLabels.Edited)
 
-      formik.setFieldValue(
-        'recordId',
+        formik.setFieldValue(
+          'recordId',
 
-        String(obj.year) + String(obj.itemId) + String(obj.siteId)
-      )
+          String(obj.year) + String(obj.itemId) + String(obj.siteId)
+        )
 
-      invalidate()
+        invalidate()
+      } catch (error) {}
     }
   })
 
