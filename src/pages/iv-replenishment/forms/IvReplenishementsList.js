@@ -1,5 +1,4 @@
 import { useContext } from 'react'
-
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -15,9 +14,8 @@ const IvReplenishementsList = ({ store, labels, maxAccess }) => {
   const { recordId } = store
 
   async function fetchGridData() {
-    const response = await getRequest({
+    return await getRequest({
       extension: IVReplenishementRepository.IvReplenishementsList.qry,
-
       parameters: `&_replenishmentId=${recordId}`
     })
 

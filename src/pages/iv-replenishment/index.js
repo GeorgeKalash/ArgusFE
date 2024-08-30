@@ -1,7 +1,6 @@
 import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
-import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useWindow } from 'src/windows'
 import { useResourceQuery } from 'src/hooks/resource'
@@ -12,6 +11,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { IVReplenishementRepository } from 'src/repositories/IVReplenishementRepository'
 import IvReplenishementsWindow from './windows/IvReplenishementsWindow'
+import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
 const IvReplenishements = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -23,7 +23,7 @@ const IvReplenishements = () => {
 
     try {
       const response = await getRequest({
-        extension: IVReplenishementRepository.IvReplenishements.qry,
+        extension: IVReplenishementRepository.IvReplenishements.page,
         parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=&_params=`
       })
 
@@ -36,11 +36,12 @@ const IvReplenishements = () => {
     labels: _labels,
     invalidate,
     paginationParameters,
+    filterBy,
     refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: IVReplenishementRepository.IvReplenishements.qry,
+    endpointId: IVReplenishementRepository.IvReplenishements.page,
     datasetId: ResourceIds.IvReplenishements
   })
 
@@ -109,10 +110,21 @@ const IvReplenishements = () => {
     openForm(obj?.recordId)
   }
 
+  const onApply = ({ search, rpbParams }) => {
+    if (!search && rpbParams.length === 0) {
+      clearFilter('params')
+    } else if (!search) {
+      filterBy('params', rpbParams)
+    } else {
+      filterBy('qry', search)
+    }
+    refetch()
+  }
+
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'IRHDR'} onApply={onApply} />
       </Fixed>
       <Grow>
         <Table

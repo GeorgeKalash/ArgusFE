@@ -1,12 +1,7 @@
-// ** MUI Imports
 import { Grid } from '@mui/material'
-import { DataSets } from 'src/resources/DataSets'
-
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
-
 import FormShell from 'src/components/Shared/FormShell'
-
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useContext, useEffect, useState, useRef } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -26,7 +21,7 @@ const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
   const { recordId } = store
 
   const invalidate = useInvalidate({
-    endpointId: IVReplenishementRepository.IvReplenishements.qry
+    endpointId: IVReplenishementRepository.IvReplenishements.page
   })
 
   const { formik } = useForm({
@@ -48,19 +43,15 @@ const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
       date: yup.string().required()
     }),
     onSubmit: async obj => {
-      const recordId = obj.recordId
-
       const response = await postRequest({
         extension: IVReplenishementRepository.IvReplenishements.set,
         record: JSON.stringify(obj)
       })
 
-      if (!recordId) {
+      if (!obj.recordId) {
         toast.success(platformLabels.Added)
-        formik.setValues({
-          ...obj,
-          recordId: response.recordId
-        })
+
+        formik.setFieldValue('recordId', response.recordId)
         setStore(prevStore => ({
           ...prevStore,
           recordId: response.recordId
@@ -80,8 +71,6 @@ const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
             parameters: `_recordId=${recordId}`
           })
 
-          console.log(res, 'res')
-
           formik.setValues({
             ...res.record,
 
@@ -96,7 +85,7 @@ const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
 
   const onGenerate = async () => {
     try {
-      const response = await postRequest({
+      await postRequest({
         extension: IVReplenishementRepository.GenerateIvReplenishements.generate,
         record: JSON.stringify(formik.values)
       })
