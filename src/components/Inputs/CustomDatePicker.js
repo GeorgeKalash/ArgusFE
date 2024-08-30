@@ -75,13 +75,6 @@ const CustomDatePicker = ({
 
   const isRequired = required || accessLevel === MANDATORY
 
-  const datePickerRef = useRef(null)
-
-  const zoom = parseFloat(getComputedStyle(document.body).getPropertyValue('--zoom'))
-  const datePickerRect = datePickerRef.current?.getBoundingClientRect()
-
-  const thresholdPercentage = 0.35
-
   return _hidden ? (
     <></>
   ) : (
