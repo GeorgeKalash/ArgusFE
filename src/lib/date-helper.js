@@ -58,6 +58,21 @@ function formatDateDefault(date) {
   return formattedDate
 }
 
+function formatDateTimeDefault(date) {
+  if (!date) return
+
+  const formats = JSON.parse(window.localStorage.getItem('default') && window.localStorage.getItem('default'))[
+    'dateFormat'
+  ]
+
+  const timestamp = date instanceof Date ? date.getTime() : parseInt(date?.match(/\d+/)[0], 10)
+
+  const fullFormat = `${formats} hh:mm a`
+  const formattedDate = format(new Date(timestamp), fullFormat)
+
+  return formattedDate
+}
+
 function formatTimestampToDate(timestamp) {
   if (!timestamp) return
 
@@ -84,13 +99,12 @@ function getTimeInTimeZone(dateString, timeZone = 0) {
   return `${newHours}:${newMinutes}:${newSeconds}`
 }
 
-const formatDate = (dateString) => {
-  const date = new Date(dateString);
-  const timestamp = date.getTime();
+const formatDate = dateString => {
+  const date = new Date(dateString)
+  const timestamp = date.getTime()
 
-  return `/Date(${timestamp})/`;
-};
-
+  return `/Date(${timestamp})/`
+}
 
 export {
   formatDateFromApi,
@@ -100,5 +114,6 @@ export {
   formatTimestampToDate,
   formatDateFromApiInline,
   getTimeInTimeZone,
-  formatDate
+  formatDate,
+  formatDateTimeDefault
 }
