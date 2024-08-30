@@ -131,9 +131,16 @@ export const SaleRepository = {
     get: service + 'getORD',
     set: service + 'setORD',
     del: service + 'delORD',
+    close: service + 'closeORD',
+    reopen: service + 'reopenORD',
+    cancel: service + 'terminateORD',
+    postToInvoice: service + 'transfer2ORD',
     snapshot: service + 'snapshotORD'
   },
   SalesOrderItem: {
     qry: service + 'qryORI'
+  },
+  ItemConvertPrice: {
+    get: service + 'getICP'
   }
 }

@@ -248,7 +248,7 @@ export const getButtons = platformLabels => [
     color: '#231f20',
     image: 'saveclear.png',
     main: true,
-    disabled: 'disabledSavedClear'
+    disabled: 'disabledSavedClear || isPosted || isClosed'
   },
   {
     key: 'Submit',
