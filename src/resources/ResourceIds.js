@@ -232,5 +232,6 @@ export const ResourceIds = {
   CorrespondentOutwards: 36318,
   ExtraIncome: 36129,
   PurposeExchangeGroup: 35115,
-  Drivers: 52201
+  Drivers: 52201,
+  PointOfSales: 54101
 }

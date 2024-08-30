@@ -10,5 +10,11 @@ export const PointofSaleRepository = {
   },
   PosUsersPOS: {
     qry: service + 'qryPOS'
+  },
+  PointOfSales: {
+    qry: service + 'qryPOS',
+    get: service + 'getPOS',
+    set: service + 'setPOS',
+    del: service + 'delPOS'
   }
 }
