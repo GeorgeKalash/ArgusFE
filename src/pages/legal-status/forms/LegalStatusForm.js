@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -14,9 +14,8 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 export default function LegalStatusForm({ labels, maxAccess, recordId }) {
-  const [editMode, setEditMode] = useState(!!recordId)
-  const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
     endpointId: BusinessPartnerRepository.LegalStatus.page
@@ -36,25 +35,23 @@ export default function LegalStatusForm({ labels, maxAccess, recordId }) {
       name: yup.string().required()
     }),
     onSubmit: async obj => {
-      const recordId = obj.recordId
-
-      const response = await postRequest({
-        extension: BusinessPartnerRepository.LegalStatus.set,
-        record: JSON.stringify(obj)
-      })
-
-      if (!recordId) {
-        toast.success(platformLabels.Added)
-        formik.setValues({
-          ...obj,
-          recordId: response.recordId
+      try {
+        const response = await postRequest({
+          extension: BusinessPartnerRepository.LegalStatus.set,
+          record: JSON.stringify(obj)
         })
-      } else toast.success(platformLabels.Edited)
-      setEditMode(true)
 
-      invalidate()
+        if (!obj.recordId) {
+          toast.success(platformLabels.Added)
+          formik.setFieldValue('recordId', response.recordId)
+        } else toast.success(platformLabels.Edited)
+
+        invalidate()
+      } catch (error) {}
     }
   })
+
+  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
@@ -72,7 +69,13 @@ export default function LegalStatusForm({ labels, maxAccess, recordId }) {
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.LegalStatus} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell
+      resourceId={ResourceIds.LegalStatus}
+      form={formik}
+      height={300}
+      maxAccess={maxAccess}
+      editMode={editMode}
+    >
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -95,7 +98,6 @@ export default function LegalStatusForm({ labels, maxAccess, recordId }) {
                 label={labels.name}
                 value={formik.values.name}
                 required
-                rows={2}
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}

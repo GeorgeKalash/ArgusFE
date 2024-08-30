@@ -35,15 +35,21 @@ const CustomLookup = ({
   hasBorder = true,
   hidden = false,
   isLoading,
+  minChars,
+  userTypes = true,
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
   const [freeSolo, setFreeSolo] = useState(false)
+  const [focus, setAutoFocus] = useState(autoFocus)
+
+  const [inputValue, setInputValue] = useState(firstValue || '')
 
   useEffect(() => {
-    store.length < 1 && setFreeSolo(false)
-    firstValue && setFreeSolo(true)
-  }, [store, firstValue])
+    if (!firstValue) {
+      setInputValue('')
+    }
+  }, [firstValue])
 
   const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
 
@@ -63,9 +69,9 @@ const CustomLookup = ({
       <Grid item xs={secondDisplayField ? 6 : 12}>
         <Autocomplete
           name={name}
-          key={firstValue}
-          defaultValue={firstValue}
+          key={firstValue || null}
           value={firstValue}
+          {...(userTypes && !firstValue && { inputValue: inputValue })}
           size={size}
           options={store}
           filterOptions={options => {
@@ -85,7 +91,11 @@ const CustomLookup = ({
 
             return typeof option === 'object' ? `${option[valueField] ? option[valueField] : ''}` : option
           }}
-          onChange={(event, newValue) => onChange(name, newValue)}
+          onChange={(event, newValue) => {
+            setInputValue(newValue ? newValue[valueField] : '')
+            onChange(name, newValue)
+            setAutoFocus(true)
+          }}
           PopperComponent={PopperComponent}
           PaperComponent={({ children }) =>
             props.renderOption && <Paper style={{ width: `${displayFieldWidth * 100}%` }}>{children}</Paper>
@@ -138,6 +148,8 @@ const CustomLookup = ({
             <TextField
               {...params}
               onChange={e => {
+                setInputValue(e.target.value)
+
                 if (e.target.value) {
                   onLookup(e.target.value)
                   setFreeSolo(true)
@@ -146,16 +158,25 @@ const CustomLookup = ({
                   setFreeSolo(false)
                 }
               }}
-              onBlur={() => setFreeSolo(true)}
+              onBlur={e => {
+                if (!store.some(item => item[valueField] === inputValue) && e.target.value !== firstValue) {
+                  setInputValue('')
+                  onChange(name, '')
+                  setFreeSolo(true)
+                }
+              }}
+              onFocus={() => {
+                setStore([]), setFreeSolo(true)
+              }}
               type={type}
               variant={variant}
               label={label}
               required={isRequired}
-              onKeyUp={() => {
+              onKeyUp={e => {
                 onKeyUp
-                setFreeSolo(true)
+                e.target.value >= minChars ? setFreeSolo(true) : setFreeSolo(false)
               }}
-              autoFocus={autoFocus}
+              autoFocus={focus}
               error={error}
               helperText={helperText}
               InputProps={{
@@ -176,7 +197,12 @@ const CustomLookup = ({
                           sx={{ margin: '0px !important', padding: '0px !important' }}
                           tabIndex={-1}
                           edge='end'
-                          onClick={e => onChange('')}
+                          onClick={() => {
+                            setInputValue('')
+                            onChange(name, '')
+                            setStore([])
+                            setFreeSolo(true)
+                          }}
                           aria-label='clear input'
                         >
                           <ClearIcon sx={{ border: '0px', fontSize: 20 }} />

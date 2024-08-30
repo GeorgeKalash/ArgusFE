@@ -3,26 +3,26 @@ import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
-import MultiCurrencyForm from './forms/MultiCurrencyForm'
 import { ControlContext } from 'src/providers/ControlContext'
+import { DeliveryRepository } from 'src/repositories/DeliveryRepository'
+import VehiclesForm from './forms/VehiclesForm'
 
-const MultiCurrencyMapping = () => {
+const Vehicles = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
+  const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: MultiCurrencyRepository.McExchangeMap.page,
+      extension: DeliveryRepository.Vehicle.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
 
@@ -38,24 +38,29 @@ const MultiCurrencyMapping = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: MultiCurrencyRepository.McExchangeMap.page,
-    datasetId: ResourceIds.MultiCurrencyMapping
+    endpointId: DeliveryRepository.Vehicle.page,
+    datasetId: ResourceIds.Vehicle
   })
 
   const columns = [
     {
-      field: 'currencyName',
-      headerName: _labels.currency,
+      field: 'name',
+      headerName: _labels.name,
       flex: 1
     },
     {
-      field: 'rateTypeName',
-      headerName: _labels.rateType,
+      field: 'plateNo',
+      headerName: _labels.plateNo,
       flex: 1
     },
     {
-      field: 'exName',
-      headerName: _labels.exchangeTable,
+      field: 'capacityVolume',
+      headerName: _labels.capacityVolume,
+      flex: 1
+    },
+    {
+      field: 'capacityWeight',
+      headerName: _labels.capacityWeight,
       flex: 1
     }
   ]
@@ -65,35 +70,32 @@ const MultiCurrencyMapping = () => {
   }
 
   const edit = obj => {
-    openForm(obj)
+    openForm(obj?.recordId)
+  }
+
+  function openForm(recordId) {
+    stack({
+      Component: VehiclesForm,
+      props: {
+        labels: _labels,
+        recordId,
+        maxAccess: access
+      },
+      width: 600,
+      height: 500,
+      title: _labels.vehicles
+    })
   }
 
   const del = async obj => {
     try {
       await postRequest({
-        extension: MultiCurrencyRepository.McExchangeMap.del,
+        extension: DeliveryRepository.Vehicle.del,
         record: JSON.stringify(obj)
       })
       invalidate()
       toast.success(platformLabels.Deleted)
     } catch (error) {}
-  }
-
-  function openForm(record) {
-    stack({
-      Component: MultiCurrencyForm,
-      props: {
-        labels: _labels,
-        record,
-        maxAccess: access,
-        recordId: record
-          ? String(record.currencyId * 1000 + record.rateTypeId)
-          : null
-      },
-      width: 600,
-      height: 300,
-      title: _labels.mc_mapping
-    })
   }
 
   return (
@@ -105,19 +107,19 @@ const MultiCurrencyMapping = () => {
         <Table
           columns={columns}
           gridData={data}
-          rowId={['currencyId', 'rateTypeId']}
+          rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
           isLoading={false}
           pageSize={50}
           paginationType='api'
-          maxAccess={access}
-          refetch={refetch}
           paginationParameters={paginationParameters}
+          refetch={refetch}
+          maxAccess={access}
         />
       </Grow>
     </VertLayout>
   )
 }
 
-export default MultiCurrencyMapping
+export default Vehicles

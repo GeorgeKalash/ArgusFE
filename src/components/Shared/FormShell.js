@@ -3,7 +3,7 @@ import { useContext, useEffect, useState } from 'react'
 import WindowToolbar from './WindowToolbar'
 import TransactionLog from './TransactionLog'
 import { TrxType } from 'src/resources/AccessLevels'
-import { ClientRelationForm } from './ClientRelationForm'
+import { ClientRelationList } from './ClientRelationList'
 import { useGlobalRecord, useWindow } from 'src/windows'
 import PreviewReport from './PreviewReport'
 import GeneralLedger from 'src/components/Shared/GeneralLedger'
@@ -15,6 +15,7 @@ import CashTransaction from './CashTransaction'
 import FinancialTransaction from './FinancialTransaction'
 import { ControlContext } from 'src/providers/ControlContext'
 import { RequestsContext } from 'src/providers/RequestsContext'
+import { ClientRelationForm } from './ClientRelationForm'
 
 export default function FormShell({
   form,
@@ -35,6 +36,7 @@ export default function FormShell({
   isPosted = false,
   isClosed = false,
   clientRelation = false,
+  addClientRelation = false,
   setErrorMessage,
   previewReport = false,
   setIDInfoAutoFilled,
@@ -217,16 +219,30 @@ export default function FormShell({
           }
           onClientRelation={() =>
             stack({
-              Component: ClientRelationForm,
+              Component: ClientRelationList,
               props: {
                 recordId: form.values?.recordId ?? form.values.clientId,
                 name: form.values.firstName ? form.values.firstName + ' ' + form.values.lastName : form.values.name,
                 reference: form.values.reference,
-                setErrorMessage: setErrorMessage
+                category: form.values.category
               },
               width: 900,
               height: 600,
               title: platformLabels.ClientRelation
+            })
+          }
+          onAddClientRelation={() =>
+            stack({
+              Component: ClientRelationForm,
+              props: {
+                clientId: form.values?.recordId ?? form.values.clientId,
+                name: form.values.firstName ? form.values.firstName + ' ' + form.values.lastName : form.values.name,
+                reference: form.values.reference,
+                formValidation: form
+              },
+              width: 500,
+              height: 420,
+              title: platformLabels.addClientRelation
             })
           }
           onGenerateReport={() =>
@@ -259,6 +275,7 @@ export default function FormShell({
           isPosted={isPosted}
           isClosed={isClosed}
           clientRelation={clientRelation}
+          addClientRelation={addClientRelation}
           resourceId={resourceId}
           masterSource={masterSource}
           recordId={form.values?.recordId}
