@@ -80,7 +80,6 @@ const CustomDatePicker = ({
   ) : (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
       <DatePicker
-        ref={datePickerRef}
         variant={variant}
         size={size}
         value={value}
