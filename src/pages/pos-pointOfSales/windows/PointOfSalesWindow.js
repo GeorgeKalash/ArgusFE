@@ -12,7 +12,7 @@ const PointOfSalesWindow = ({ recordId, labels, maxAccess }) => {
     recordId: recordId || null
   })
 
-  const tabs = [{ label: labels.pointOfSales }, { label: 'test', disabled: !store.recordId }]
+  const tabs = [{ label: labels.pos }, { label: 'test', disabled: !store.recordId }]
 
   return (
     <>

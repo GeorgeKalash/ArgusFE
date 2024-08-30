@@ -54,28 +54,28 @@ const PointOfSales = () => {
     },
     {
       field: 'currencyName',
-      headerName: _labels.currencyName,
+      headerName: _labels.salesCurrency,
       flex: 1
     },
     {
       field: 'siteName',
-      headerName: _labels.siteName,
+      headerName: _labels.invSite,
       flex: 1
     },
     {
       field: 'plantName',
-      headerName: _labels.plantName,
+      headerName: _labels.plant,
       flex: 1
     },
     ,
     {
       field: 'dtName',
-      headerName: _labels.dtName,
+      headerName: _labels.docType,
       flex: 1
     },
     {
       field: 'plName',
-      headerName: _labels.plName,
+      headerName: _labels.pL,
       flex: 1
     }
   ]
@@ -103,25 +103,14 @@ const PointOfSales = () => {
         recordId: recordId,
         maxAccess: access
       },
-      width: 600,
-      height: 500,
-      title: _labels.pointOfSales
+      width: 800,
+      height: 600,
+      title: _labels.pos
     })
   }
 
   const edit = obj => {
     openForm(obj?.recordId)
-  }
-
-  const onApply = ({ search, rpbParams }) => {
-    if (!search && rpbParams.length === 0) {
-      clearFilter('params')
-    } else if (!search) {
-      filterBy('params', rpbParams)
-    } else {
-      filterBy('qry', search)
-    }
-    refetch()
   }
 
   return (

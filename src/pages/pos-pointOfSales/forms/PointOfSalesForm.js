@@ -1,4 +1,4 @@
-import { Grid } from '@mui/material'
+import { Checkbox, FormControlLabel, Grid } from '@mui/material'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import FormShell from 'src/components/Shared/FormShell'
@@ -18,6 +18,8 @@ import { SystemFunction } from 'src/resources/SystemFunction'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
+import { DataSets } from 'src/resources/DataSets'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 const PointOfSalesForm = ({ labels, maxAccess, setStore, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -49,9 +51,25 @@ const PointOfSalesForm = ({ labels, maxAccess, setStore, store }) => {
       maxEndTime: '',
       status: ''
     },
-    enableReinitialize: false,
+    enableReinitialize: true,
     validateOnChange: true,
-    validationSchema: yup.object({}),
+    validationSchema: yup.object({
+      currencyId: yup.string().required(),
+      reference: yup.string().required(),
+      plantId: yup.string().required(),
+      maxEndTime: yup.string().required(),
+      status: yup.string().required(),
+      plId: yup.string().required(),
+      siteId: yup
+        .string()
+        .nullable()
+        .test('siteId-required', 'Site ID is required when not an online store', function (value) {
+          const { onlineStore } = this.parent
+          console.log(onlineStore, 'onnn')
+
+          return !!onlineStore || (!!value && value !== '')
+        })
+    }),
     onSubmit: async obj => {
       const response = await postRequest({
         extension: PointofSaleRepository.PointOfSales.set,
@@ -81,11 +99,14 @@ const PointOfSalesForm = ({ labels, maxAccess, setStore, store }) => {
             parameters: `_recordId=${recordId}`
           })
 
-          formik.setValues(res.record)
+          formik.setValues({ ...res.record, onlineStore: Boolean(res.record.onlineStore) })
         }
       } catch (error) {}
     })()
   }, [])
+
+  console.log(formik.values.onlineStore, 'boolean')
+  console.log(formik.errors, 'errors')
 
   return (
     <FormShell form={formik} resourceId={ResourceIds.PointOfSales} maxAccess={maxAccess} editMode={editMode}>
@@ -136,12 +157,9 @@ const PointOfSalesForm = ({ labels, maxAccess, setStore, store }) => {
               { key: 'name', value: 'Name' }
             ]}
             values={formik.values}
+            required
             onChange={(event, newValue) => {
-              if (newValue?.recordId) {
-                formik.setFieldValue('plantId', newValue?.recordId)
-              } else {
-                delete formik?.values?.plantId
-              }
+              formik.setFieldValue('plantId', newValue?.recordId || '')
             }}
             error={formik.touched.plantId && Boolean(formik.errors.plantId)}
           />
@@ -150,15 +168,16 @@ const PointOfSalesForm = ({ labels, maxAccess, setStore, store }) => {
           <ResourceComboBox
             endpointId={InventoryRepository.Site.qry}
             name='siteId'
-            readOnly={editMode}
+            readOnly={!!formik.values.onlineStore}
+            required={!formik.values.onlineStore}
             label={labels.site}
             values={formik.values}
             displayField='name'
             maxAccess={maxAccess}
             onChange={(event, newValue) => {
-              formik.setFieldValue('siteId', newValue?.recordId)
+              formik.setFieldValue('siteId', newValue?.recordId || '')
             }}
-            error={formik.touched.siteId && Boolean(formik.errors.siteId)}
+            error={formik.touched.siteId && Boolean(formik.errors.siteId) && Boolean(!formik.values.onlineStore)}
           />
         </Grid>
 
@@ -167,7 +186,7 @@ const PointOfSalesForm = ({ labels, maxAccess, setStore, store }) => {
             endpointId={SystemRepository.DocumentType.qry}
             parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.RetailInvoice}`}
             name='dtId'
-            label={labels[2]}
+            label={labels.docType}
             columnsInDropDown={[
               { key: 'reference', value: 'Reference' },
               { key: 'name', value: 'Name' }
@@ -180,15 +199,15 @@ const PointOfSalesForm = ({ labels, maxAccess, setStore, store }) => {
               formik && formik.setFieldValue('dtId', newValue?.recordId)
             }}
             error={formik.touched.dtId && Boolean(formik.errors.dtId)}
-            helperText={formik.touched.dtId && formik.errors.dtId}
           />
         </Grid>
         <Grid item xs={12}>
           <ResourceComboBox
             endpointId={SaleRepository.PriceLevel.qry}
             name='plId'
-            label={labels.priceLevel}
+            label={labels.pL}
             valueField='recordId'
+            required
             displayField={'name'}
             displayFieldWidth={1}
             columnsInDropDown={[
@@ -200,6 +219,7 @@ const PointOfSalesForm = ({ labels, maxAccess, setStore, store }) => {
             onChange={(event, newValue) => {
               formik.setFieldValue('plId', newValue?.recordId || '')
             }}
+            error={formik.touched.plId && Boolean(formik.errors.plId)}
           />
         </Grid>
         <Grid item xs={12}>
@@ -238,6 +258,118 @@ const PointOfSalesForm = ({ labels, maxAccess, setStore, store }) => {
             }}
             error={formik.touched.taxId && Boolean(formik.errors.taxId)}
             maxAccess={maxAccess}
+          />
+        </Grid>
+        <Grid item xs={6}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                name='applyTaxIVC'
+                maxAccess={maxAccess}
+                checked={formik.values?.applyTaxIVC}
+                onChange={formik.handleChange}
+              />
+            }
+            label={labels.tOi}
+          />
+        </Grid>
+        <Grid item xs={6}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                name='nextDayExtend'
+                maxAccess={maxAccess}
+                checked={formik.values?.nextDayExtend}
+                onChange={formik.handleChange}
+              />
+            }
+            label={labels.nDe}
+          />
+        </Grid>
+        <Grid item xs={6}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                name='applyTaxPUR'
+                maxAccess={maxAccess}
+                checked={formik.values?.applyTaxPUR}
+                onChange={formik.handleChange}
+              />
+            }
+            label={labels.tOp}
+          />
+        </Grid>
+        <Grid item xs={6}>
+          <CustomNumberField
+            name='maxEndTime'
+            label={labels.maxEndTime}
+            value={formik.values.maxEndTime}
+            required
+            maxAccess={maxAccess}
+            onChange={formik.handleChange}
+            onClear={() => formik.setFieldValue('maxEndTime', '')}
+            error={formik.touched.maxEndTime && Boolean(formik.errors.maxEndTime)}
+          />
+        </Grid>
+        <Grid item xs={6}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                name='applyTaxRET'
+                maxAccess={maxAccess}
+                checked={formik.values?.applyTaxRET}
+                onChange={formik.handleChange}
+              />
+            }
+            label={labels.tOr}
+          />
+        </Grid>
+        <Grid item xs={6}>
+          <ResourceComboBox
+            name='status'
+            label={labels.status}
+            datasetId={DataSets.POS_STATUS}
+            values={formik.values}
+            required
+            valueField='key'
+            displayField='value'
+            onChange={(event, newValue) => {
+              if (newValue) {
+                formik.setFieldValue('status', newValue?.key)
+              } else {
+                formik.setFieldValue('status', newValue?.key)
+              }
+            }}
+            error={formik.touched.status && Boolean(formik.errors.status)}
+            maxAccess={maxAccess}
+          />
+        </Grid>
+        <Grid item xs={6.01}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                name='isInactive'
+                maxAccess={maxAccess}
+                checked={formik.values?.isInactive}
+                onChange={formik.handleChange}
+              />
+            }
+            label={labels.isInactive}
+          />
+        </Grid>
+        <Grid item xs={6.01}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                name='onlineStore'
+                maxAccess={maxAccess}
+                checked={formik.values?.onlineStore}
+                onChange={formik.handleChange}
+                disabled={!!formik.values.siteId}
+                readOnly={!!formik.values.siteId}
+              />
+            }
+            label={labels.onlineStore}
           />
         </Grid>
       </Grid>
