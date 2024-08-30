@@ -1,11 +1,12 @@
 import * as React from 'react'
+import { useEffect, useRef, useState } from 'react'
+
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { DatePicker } from '@mui/x-date-pickers'
 import { InputAdornment, IconButton, TextField } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
 import EventIcon from '@mui/icons-material/Event'
 import { AdapterMomentHijri } from '@mui/x-date-pickers/AdapterMomentHijri'
-import { useState } from 'react'
 import moment from 'moment-hijri'
 
 export default function CustomDatePickerHijri({
@@ -26,10 +27,61 @@ export default function CustomDatePickerHijri({
     onChange(name, timestamp)
   }
 
+  const datePickerRef = React.useRef(null)
+
+  const zoom = parseFloat(getComputedStyle(document.body).getPropertyValue('--zoom'))
+  const datePickerRect = datePickerRef.current?.getBoundingClientRect()
+
+  const thresholdPercentage = 0.35
+
+  const canRenderBelow =
+    window.innerHeight / zoom - (datePickerRect && datePickerRect.bottom) > window.innerHeight * thresholdPercentage
+
+  const style = document.createElement('style')
+  useEffect(() => {
+    function updatePopperComponentPosition() {
+      if (datePickerRef.current != null && openDatePicker) {
+        if (canRenderBelow) {
+          style.innerHTML = `
+
+            .MuiPickersPopper-root {
+              transform: translate( ${datePickerRect.left / zoom}px, ${datePickerRect.bottom / zoom}px) !important;
+            }
+          
+          `
+        } else {
+          style.innerHTML = `
+
+            .MuiPickersPopper-root {
+              top: ${datePickerRect?.bottom / zoom}px !important;
+              bottom: auto !important;
+              transform: translate( ${datePickerRect.left / zoom}px, calc(-100% - 10px - ${
+            datePickerRect?.height
+          }px)) !important;
+            }
+          
+          `
+        }
+
+        document.body.appendChild(style)
+      } else {
+      }
+    }
+
+    window.addEventListener('resize', updatePopperComponentPosition)
+
+    updatePopperComponentPosition()
+
+    return () => {
+      window.removeEventListener('resize', updatePopperComponentPosition)
+    }
+  }, [openDatePicker, datePickerRect, canRenderBelow, zoom])
+
   return (
     <LocalizationProvider dateAdapter={AdapterMomentHijri}>
       <DatePicker
         variant={variant}
+        ref={datePickerRef}
         size={size}
         label={label}
         fullWidth={fullWidth}
