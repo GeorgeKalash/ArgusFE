@@ -73,7 +73,7 @@ const PopperComponent = ({ children, anchorEl, open }) => {
     }
   }, [open, anchorEl])
 
-  const zoom = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--zoom'))
+  const zoom = parseFloat(getComputedStyle(document.body).getPropertyValue('--zoom'))
   const thresholdPercentage = 0.35
 
   const canRenderBelow = window.innerHeight / zoom - (rect && rect.bottom) > window.innerHeight * thresholdPercentage
@@ -88,9 +88,9 @@ const PopperComponent = ({ children, anchorEl, open }) => {
       style={{
         position: 'absolute',
         minWidth: anchorEl ? anchorEl.clientWidth : 'auto',
-        top: rect?.bottom,
-        left: rect?.left,
-        transform: !canRenderBelow ? `translateY(calc(-100% - 10px - ${rect?.height}px))` : 'none'
+        top: rect?.bottom / zoom,
+        left: rect?.left / zoom,
+        transform: !canRenderBelow ? `translateY(calc(-100% - 20px - ${rect?.height}px))` : 'none'
       }}
     >
       {children}
