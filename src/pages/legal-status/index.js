@@ -1,5 +1,4 @@
-import { useState, useContext } from 'react'
-import toast from 'react-hot-toast'
+import { useContext } from 'react'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'

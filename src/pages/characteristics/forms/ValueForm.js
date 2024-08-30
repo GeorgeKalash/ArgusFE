@@ -66,7 +66,14 @@ const ValueForm = ({ labels, maxAccess, getValueGridData, recordId, seqNo, windo
   }
 
   return (
-    <FormShell form={formik} resourceId={ResourceIds.Characteristics} maxAccess={maxAccess} isInfo={false}>
+    <FormShell
+      form={formik}
+      resourceId={ResourceIds.Characteristics}
+      maxAccess={maxAccess}
+      isInfo={false}
+      isSavedClear={false}
+      isCleared={false}
+    >
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
