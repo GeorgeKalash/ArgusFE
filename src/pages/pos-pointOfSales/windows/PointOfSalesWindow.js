@@ -1,7 +1,7 @@
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import { CustomTabs } from 'src/components/Shared/CustomTabs'
 import { useState } from 'react'
-import PointOfSalesForm from '../forms/pointOfSalesForm'
+import PointOfSalesForm from '../forms/PointOfSalesForm'
 
 const PointOfSalesWindow = ({ recordId, labels, maxAccess }) => {
   const [activeTab, setActiveTab] = useState(0)

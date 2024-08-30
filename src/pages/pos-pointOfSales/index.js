@@ -48,32 +48,34 @@ const PointOfSales = () => {
 
   const columns = [
     {
-      field: 'siteName',
-      headerName: _labels.site,
+      field: 'reference',
+      headerName: _labels.reference,
       flex: 1
     },
     {
-      field: 'dateFrom',
-      headerName: _labels.dateFrom,
-      flex: 1,
-      type: 'date'
+      field: 'currencyName',
+      headerName: _labels.currencyName,
+      flex: 1
     },
     {
-      field: 'dateTo',
-      headerName: _labels.dateTo,
-      flex: 1,
-      type: 'date'
+      field: 'siteName',
+      headerName: _labels.siteName,
+      flex: 1
     },
     {
-      field: 'date',
-      headerName: _labels.date,
-      flex: 1,
-      type: 'date'
+      field: 'plantName',
+      headerName: _labels.plantName,
+      flex: 1
     },
     ,
     {
-      field: 'notes',
-      headerName: _labels.notes,
+      field: 'dtName',
+      headerName: _labels.dtName,
+      flex: 1
+    },
+    {
+      field: 'plName',
+      headerName: _labels.plName,
       flex: 1
     }
   ]
@@ -125,11 +127,12 @@ const PointOfSales = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar actions={actions} onAdd={add} maxAccess={access} />
+        <GridToolbar onAdd={add} maxAccess={access} />
       </Fixed>
       <Grow>
         <Table
           columns={columns}
+          globalStatus={false}
           gridData={data}
           rowId={['recordId']}
           onEdit={edit}
