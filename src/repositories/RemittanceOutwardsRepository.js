@@ -100,6 +100,11 @@ export const RemittanceOutwardsRepository = {
     qry: service + 'qryOW3',
     post2: service + 'post2OW'
   },
+  OutwardsReturn: {
+    page: service + 'pageOWR',
+    get: service + 'getOWR',
+    set: service + 'setOWR',
+  },
   CorrespondentOutwards: {
     qry: service + 'qryACE',
     set: service + 'setACE'

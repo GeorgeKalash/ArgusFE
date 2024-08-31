@@ -11,7 +11,9 @@ export const RTCLRepository = {
   },
   ClientRelation: {
     qry: service + 'qryREL',
-    set2: service + 'set2REL'
+    get: service + 'getREL',
+    set2: service + 'set2REL',
+    set3: service + 'set3REL'
   },
   Client: {
     get: service + 'getCLI'

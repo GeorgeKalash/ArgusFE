@@ -3,18 +3,17 @@ import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
-import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
-import CorrespondentGroupForm from './forms/CorrespondentGroupForm'
+import PurposeOfExchangeGroupForm from './forms/PurposeOfExchangeGroupForm'
+import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 
-const CorrespondentGroup = () => {
+const PurposeOfExchangeGroup = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -23,7 +22,7 @@ const CorrespondentGroup = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: RemittanceSettingsRepository.CorrespondentGroup.page,
+      extension: CurrencyTradingSettingsRepository.PurposeExchangeGroup.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
 
@@ -39,16 +38,11 @@ const CorrespondentGroup = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: RemittanceSettingsRepository.CorrespondentGroup.page,
-    datasetId: ResourceIds.CorrespondentGroup
+    endpointId: CurrencyTradingSettingsRepository.PurposeExchangeGroup.page,
+    datasetId: ResourceIds.PurposeExchangeGroup
   })
 
   const columns = [
-    {
-      field: 'reference',
-      headerName: _labels.reference,
-      flex: 1
-    },
     {
       field: 'name',
       headerName: _labels.name,
@@ -69,29 +63,29 @@ const CorrespondentGroup = () => {
     openForm(obj?.recordId)
   }
 
-  const del = async obj => {
-    try {
-      await postRequest({
-        extension: RemittanceSettingsRepository.CorrespondentGroup.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
-  }
-
   function openForm(recordId) {
     stack({
-      Component: CorrespondentGroupForm,
+      Component: PurposeOfExchangeGroupForm,
       props: {
         labels: _labels,
         recordId,
         maxAccess: access
       },
-      width: 500,
+      width: 600,
       height: 300,
-      title: _labels.correspondentGroup
+      title: _labels.purposeOfExchangeGroup
     })
+  }
+
+  const del = async obj => {
+    try {
+      await postRequest({
+        extension: CurrencyTradingSettingsRepository.PurposeExchangeGroup.del,
+        record: JSON.stringify(obj)
+      })
+      invalidate()
+      toast.success(platformLabels.Deleted)
+    } catch (error) {}
   }
 
   return (
@@ -118,4 +112,4 @@ const CorrespondentGroup = () => {
   )
 }
 
-export default CorrespondentGroup
+export default PurposeOfExchangeGroup
