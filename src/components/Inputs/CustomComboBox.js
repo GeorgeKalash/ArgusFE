@@ -135,7 +135,7 @@ const CustomComboBox = ({
       renderInput={params => (
         <TextField
           {...params}
-          inputProps={{ ...params.inputProps, ...(neverPopulate && { value: '' }) }}
+          inputProps={{ ...params.inputProps, tabIndex: _readOnly ? -1 : 0, ...(neverPopulate && { value: '' }) }}
           type={type}
           variant={variant}
           label={label}

@@ -62,6 +62,7 @@ const CustomTextArea = ({
         fullWidth={fullWidth}
         autoFocus={autoFocus}
         inputProps={{
+          tabIndex: _readOnly ? -1 : 0, // Add tabIndex here
           readOnly: _readOnly,
           maxLength: maxLength,
           inputMode: 'numeric',
