@@ -108,7 +108,7 @@ const SalesZonesLevels = () => {
 
   const columns = [
     {
-      component: 'textfield',
+      component: 'numberfield',
       label: labels.levelId,
       name: 'levelId'
     },

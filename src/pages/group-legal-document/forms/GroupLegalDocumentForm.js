@@ -31,14 +31,14 @@ export default function GroupLegalDocumentForm({ labels, maxAccess, recordId, re
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      groupId: yup.string().required(' '),
-      incId: yup.string().required(' ')
+      groupId: yup.string().required(),
+      incId: yup.string().required()
     }),
     onSubmit: async obj => {
       const groupId = formik.values.groupId
       const incId = formik.values.incId
 
-      const response = await postRequest({
+      await postRequest({
         extension: BusinessPartnerRepository.GroupLegalDocument.set,
         record: JSON.stringify(obj)
       })
@@ -60,7 +60,7 @@ export default function GroupLegalDocumentForm({ labels, maxAccess, recordId, re
         if (record && record.incId && record.groupId && recordId) {
           const res = await getRequest({
             extension: BusinessPartnerRepository.GroupLegalDocument.get,
-            parameters: `_groupId=${record.groupId}&_incId=${record.incId}`
+            parameters: `_groupId=${record?.groupId}&_incId=${record?.incId}`
           })
 
           formik.setValues({
@@ -80,6 +80,82 @@ export default function GroupLegalDocumentForm({ labels, maxAccess, recordId, re
       maxAccess={maxAccess}
       editMode={editMode}
     >
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={4}>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                readOnly={editMode}
+                endpointId={BusinessPartnerRepository.Group.qry}
+                name='groupId'
+                label={labels.group}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: ' Ref' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                required
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik && formik.setFieldValue('groupId', newValue?.recordId)
+                }}
+                error={formik.touched.groupId && Boolean(formik.errors.groupId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                readOnly={editMode}
+                endpointId={BusinessPartnerRepository.CategoryID.qry}
+                name='incId'
+                label={labels.categoryId}
+                valueField='recordId'
+                displayField={'name'}
+                values={formik.values}
+                required
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik && formik.setFieldValue('incId', newValue?.recordId)
+                }}
+                error={formik.touched.incId && Boolean(formik.errors.incId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name='required'
+                    valueField='recordId'
+                    maxAccess={maxAccess}
+                    checked={formik.values.required}
+                    onChange={event => {
+                      formik && formik.setFieldValue('required', event.target.checked)
+                    }}
+                  />
+                }
+                label={labels.required}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name='mandatory'
+                    valueField='recordId'
+                    maxAccess={maxAccess}
+                    checked={formik.values.mandatory}
+                    onChange={event => {
+                      formik && formik.setFieldValue('mandatory', event.target.checked)
+                    }}
+                  />
+                }
+                label={labels.mandatory}
+              />
+            </Grid>
+          </Grid>
+        </Grow>
+      </VertLayout>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>

@@ -25,7 +25,8 @@ export default function CorrespondentGroupForm({ labels, maxAccess, recordId }) 
     initialValues: {
       recordId: recordId || null,
       reference: '',
-      name: ''
+      name: '',
+      flName: ''
     },
     enableReinitialize: true,
     validateOnChange: true,
@@ -67,12 +68,7 @@ export default function CorrespondentGroupForm({ labels, maxAccess, recordId }) 
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.CorrespondentGroup}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={editMode}
-    >
+    <FormShell resourceId={ResourceIds.CorrespondentGroup} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -100,6 +96,17 @@ export default function CorrespondentGroupForm({ labels, maxAccess, recordId }) 
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
                 error={formik.touched.name && Boolean(formik.errors.name)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='flName'
+                label={labels.flName}
+                value={formik.values.flName}
+                maxLength='30'
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('flName', '')}
               />
             </Grid>
           </Grid>
