@@ -1,12 +1,14 @@
 import * as React from 'react'
+import { useState } from 'react'
+
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
-import { DatePicker } from '@mui/x-date-pickers'
-import { InputAdornment, IconButton, TextField } from '@mui/material'
+import { DatePicker, PickersActionBar } from '@mui/x-date-pickers'
+import { InputAdornment, IconButton } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
 import EventIcon from '@mui/icons-material/Event'
 import { AdapterMomentHijri } from '@mui/x-date-pickers/AdapterMomentHijri'
-import { useState } from 'react'
 import moment from 'moment-hijri'
+import PopperComponent from '../Shared/Popper/PopperComponent'
 
 export default function CustomDatePickerHijri({
   variant = 'outlined',
@@ -40,6 +42,10 @@ export default function CustomDatePickerHijri({
         open={openDatePicker}
         minDate={moment(new Date(1938, 0, 1))}
         maxDate={moment(new Date(2075, 11, 31))}
+        slots={{
+          actionBar: props => <PickersActionBar {...props} actions={['accept', 'today']} />,
+          popper: PopperComponent
+        }}
         slotProps={{
           textField: {
             readOnly: true,
