@@ -4,6 +4,7 @@ import { useState } from 'react'
 import PointOfSalesForm from '../forms/PointOfSalesForm'
 import UsersForm from '../forms/UsersForm'
 import SalesPersonForm from '../forms/SalesPersonForm'
+import CashAccountForm from '../forms/CashAccountForm'
 
 const PointOfSalesWindow = ({ recordId, labels, maxAccess }) => {
   const [activeTab, setActiveTab] = useState(0)
@@ -17,7 +18,8 @@ const PointOfSalesWindow = ({ recordId, labels, maxAccess }) => {
   const tabs = [
     { label: labels.pos },
     { label: labels.user, disabled: !store.recordId },
-    { label: labels.salePerson, disabled: !store.recordId }
+    { label: labels.salePerson, disabled: !store.recordId },
+    { label: labels.caAcc, disabled: !store.recordId }
   ]
 
   return (
@@ -31,6 +33,9 @@ const PointOfSalesWindow = ({ recordId, labels, maxAccess }) => {
       </CustomTabPanel>
       <CustomTabPanel index={2} value={activeTab}>
         <SalesPersonForm labels={labels} maxAccess={maxAccess} store={store} />
+      </CustomTabPanel>
+      <CustomTabPanel index={3} value={activeTab}>
+        <CashAccountForm labels={labels} maxAccess={maxAccess} store={store} />
       </CustomTabPanel>
     </>
   )

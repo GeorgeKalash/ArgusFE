@@ -12,8 +12,9 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { PointofSaleRepository } from 'src/repositories/PointofSaleRepository'
 import { SaleRepository } from 'src/repositories/SaleRepository'
+import { CashBankRepository } from 'src/repositories/CashBankRepository'
 
-const SalesPersonForm = ({ store, labels, maxAccess, editMode }) => {
+const CashAccountForm = ({ store, labels, maxAccess, editMode }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -26,7 +27,7 @@ const SalesPersonForm = ({ store, labels, maxAccess, editMode }) => {
         .array()
         .of(
           yup.object().shape({
-            spId: yup.string().required('spId  is required')
+            cashAccountId: yup.string().required('spId  is required')
           })
         )
         .required('userId array is required')
@@ -36,9 +37,11 @@ const SalesPersonForm = ({ store, labels, maxAccess, editMode }) => {
         {
           id: 1,
           posId: recordId,
-          spId: '',
-          isInactive: false,
-          spName: ''
+          cashAccountId: '',
+
+          name: '',
+          type: '',
+          isInactive: false
         }
       ]
     },
@@ -60,7 +63,7 @@ const SalesPersonForm = ({ store, labels, maxAccess, editMode }) => {
       users: pOSUser
     }
     postRequest({
-      extension: PointofSaleRepository.SalesPerson.set2,
+      extension: PointofSaleRepository.CashAccount.set2,
       record: JSON.stringify(data)
     })
       .then(res => {
@@ -73,18 +76,30 @@ const SalesPersonForm = ({ store, labels, maxAccess, editMode }) => {
   const columns = [
     {
       component: 'resourcecombobox',
-      label: labels.salePerson,
-      name: 'spId',
+      label: labels.caAcc,
+      name: 'cashAccountId',
       props: {
-        endpointId: SaleRepository.SalesPerson.qry,
-        parameters: `_filter=`,
+        endpointId: CashBankRepository.CbBankAccounts.qry,
+        parameters: `_type=0`,
         displayField: 'name',
         valueField: 'recordId',
         mapping: [
-          { from: 'recordId', to: 'spId' },
-          { from: 'name', to: 'spName' }
+          { from: 'recordId', to: 'cashAccountId' },
+          { from: 'name', to: 'cashAccountName' },
+          { from: 'reference', to: 'cashAccountRef' },
+          { from: 'typeName', to: 'typeName' }
         ],
+
         columnsInDropDown: [{ key: 'name', value: 'Name' }]
+      }
+    },
+
+    {
+      component: 'textfield',
+      label: labels.type,
+      name: 'typeName',
+      props: {
+        readOnly: true
       }
     },
     {
@@ -99,7 +114,7 @@ const SalesPersonForm = ({ store, labels, maxAccess, editMode }) => {
     var parameters = defaultParams
     recordId &&
       getRequest({
-        extension: PointofSaleRepository.SalesPerson.qry,
+        extension: PointofSaleRepository.CashAccount.qry,
         parameters: parameters
       })
         .then(res => {
@@ -116,9 +131,9 @@ const SalesPersonForm = ({ store, labels, maxAccess, editMode }) => {
                 {
                   id: 1,
                   posId: recordId,
-                  spId: '',
-                  isInactive: false,
-                  spName: ''
+                  cashAccountId: '',
+                  type: '',
+                  isInactive: false
                 }
               ]
             })
@@ -155,4 +170,4 @@ const SalesPersonForm = ({ store, labels, maxAccess, editMode }) => {
   )
 }
 
-export default SalesPersonForm
+export default CashAccountForm

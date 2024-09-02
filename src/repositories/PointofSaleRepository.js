@@ -21,5 +21,9 @@ export const PointofSaleRepository = {
   SalesPerson: {
     qry: service + 'qrySP',
     set2: service + 'set2SP'
+  },
+  CashAccount: {
+    qry: service + 'qryCA',
+    set2: service + 'set2CA'
   }
 }
