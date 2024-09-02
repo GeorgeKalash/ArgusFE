@@ -15,7 +15,7 @@ import { Fixed } from './Layouts/Fixed'
 import { Grow } from './Layouts/Grow'
 import { VertLayout } from './Layouts/VertLayout'
 
-export const InterfacesForm = ({ recordId, expanded, height, resourceId, name }) => {
+export const InterfacesForm = ({ recordId, resourceId, name }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getAllKvsByDataset } = useContext(CommonContext)
 
