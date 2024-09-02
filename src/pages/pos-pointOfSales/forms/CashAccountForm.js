@@ -1,9 +1,8 @@
 import { useFormik } from 'formik'
 import { DataGrid } from 'src/components/Shared/DataGrid'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
@@ -11,7 +10,6 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { PointofSaleRepository } from 'src/repositories/PointofSaleRepository'
-import { SaleRepository } from 'src/repositories/SaleRepository'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 
 const CashAccountForm = ({ store, labels, maxAccess, editMode }) => {
