@@ -26,11 +26,22 @@ import { useForm } from 'src/hooks/form'
 import WorkFlow from 'src/components/Shared/WorkFlow'
 import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
+import {
+  getIPR,
+  DIRTYFIELD_QTY,
+  DIRTYFIELD_BASE_PRICE,
+  DIRTYFIELD_UNIT_PRICE,
+  DIRTYFIELD_MDAMOUNT,
+  DIRTYFIELD_UPO,
+  DIRTYFIELD_EXTENDED_PRICE
+} from 'src/utils/ItemPriceCalculator'
+import { getVatCalc } from 'src/utils/VatCalculator'
 
-export default function SalesOrderForm({ labels, access: maxAccess, siteId, recordId, window }) {
+export default function SalesOrderForm({ labels, access: maxAccess, siteId, recordId, defaultSalesTD, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
+  const [cycleButtonState, setCycleButtonState] = useState({ text: '%', value: 2 })
 
   const [initialValues, setInitialData] = useState({
     recordId: recordId || null,
@@ -56,10 +67,10 @@ export default function SalesOrderForm({ labels, access: maxAccess, siteId, reco
     shipAddress: '',
     billAddress: '',
     subtotal: '',
-    miscAmount: '',
+    miscAmount: 0,
     amount: '',
     vatAmount: '',
-    tdAmount: '',
+    tdAmount: 0,
     overdraft: false,
     plId: '',
     ptId: '',
@@ -69,12 +80,15 @@ export default function SalesOrderForm({ labels, access: maxAccess, siteId, reco
     currentDiscount: '',
     exRate: 1,
     rateCalcMethod: '',
-    tdType: 2,
+    tdType: '',
     tdPct: 0,
     baseAmount: 0,
     volume: '',
     weight: '',
     qty: 0,
+    totQty: 0,
+    totWeight: 0,
+    totVolume: 0,
     items: [
       {
         id: 1,
@@ -127,24 +141,6 @@ export default function SalesOrderForm({ labels, access: maxAccess, siteId, reco
   const editMode = !!formik.values.recordId
   const isClosed = formik.values.wip === 2
 
-  const totalQty = formik.values.items.reduce((qtySum, row) => {
-    const qtyValue = parseFloat(row.qty) || 0
-
-    return qtySum + qtyValue
-  }, 0)
-
-  const totalVolume = formik.values.items.reduce((volumeSum, row) => {
-    const volumeValue = parseFloat(row.volume) || 0
-
-    return volumeSum + volumeValue
-  }, 0)
-
-  const totalWeight = formik.values.items.reduce((weightSum, row) => {
-    const weightValue = parseFloat(row.weight) || 0
-
-    return weightSum + weightValue
-  }, 0)
-
   const columns = [
     {
       component: 'resourcelookup',
@@ -167,7 +163,6 @@ export default function SalesOrderForm({ labels, access: maxAccess, siteId, reco
         displayFieldWidth: 2
       },
       async onChange({ row: { update, oldRow, newRow } }) {
-        console.log('check new row ', newRow)
         if (!newRow.itemId) return
         const itemPhysProp = await getItemPhysProp(newRow.itemId)
         if (itemPhysProp) {
@@ -233,7 +228,12 @@ export default function SalesOrderForm({ labels, access: maxAccess, siteId, reco
     {
       component: 'numberfield',
       label: labels.quantity,
-      name: 'qty'
+      name: 'qty',
+      updateOn: 'blur',
+      async onChange({ row: { update, newRow } }) {
+        getItemPriceRow(update, newRow, DIRTYFIELD_QTY)
+        calcTotals()
+      }
     },
     {
       component: 'numberfield',
@@ -248,17 +248,32 @@ export default function SalesOrderForm({ labels, access: maxAccess, siteId, reco
     {
       component: 'numberfield',
       label: labels.basePrice,
-      name: 'basePrice'
+      name: 'basePrice',
+      updateOn: 'blur',
+      async onChange({ row: { update, newRow } }) {
+        getItemPriceRow(update, newRow, DIRTYFIELD_BASE_PRICE)
+        calcTotals()
+      }
     },
     {
       component: 'numberfield',
       label: labels.unitPrice,
-      name: 'unitPrice'
+      name: 'unitPrice',
+      updateOn: 'blur',
+      async onChange({ row: { update, newRow } }) {
+        getItemPriceRow(update, newRow, DIRTYFIELD_UNIT_PRICE)
+        calcTotals()
+      }
     },
     {
       component: 'numberfield',
       label: labels.upo,
-      name: 'upo'
+      name: 'upo',
+      updateOn: 'blur',
+      async onChange({ row: { update, newRow } }) {
+        getItemPriceRow(update, newRow, DIRTYFIELD_UPO)
+        calcTotals()
+      }
     },
     {
       component: 'numberfield',
@@ -273,7 +288,13 @@ export default function SalesOrderForm({ labels, access: maxAccess, siteId, reco
     {
       component: 'numberfield',
       label: labels.mdAmount,
-      name: 'mdAmount'
+      name: 'mdAmount',
+      updateOn: 'blur',
+      async onChange({ row: { update, newRow } }) {
+        getItemPriceRow(update, newRow, DIRTYFIELD_MDAMOUNT)
+        checkMdAmountPct(newRow, update)
+        calcTotals()
+      }
     },
     {
       component: 'numberfield',
@@ -283,7 +304,11 @@ export default function SalesOrderForm({ labels, access: maxAccess, siteId, reco
     {
       component: 'numberfield',
       label: labels.extendedPrice,
-      name: 'extendedPrice'
+      name: 'extendedPrice',
+      updateOn: 'blur',
+      async onChange({ row: { update, newRow } }) {
+        getItemPriceRow(update, newRow, DIRTYFIELD_EXTENDED_PRICE)
+      }
     },
     {
       component: 'textfield',
@@ -425,6 +450,10 @@ export default function SalesOrderForm({ labels, access: maxAccess, siteId, reco
     const shipAdd = await getAddress(soHeader?.record?.shipToAddressId)
     const billAdd = await getAddress(soHeader?.record?.billToAddressId)
 
+    soHeader?.record?.tdType == 1 || soHeader?.record?.tdType == null
+      ? setCycleButtonState({ text: '123', value: 1 })
+      : setCycleButtonState({ text: '%', value: 2 })
+
     const modifiedList = soItems.list.map((item, index) => ({
       ...item,
       id: index + 1
@@ -434,10 +463,13 @@ export default function SalesOrderForm({ labels, access: maxAccess, siteId, reco
       ...soHeader.record,
       shipToAddressId: soHeader?.record?.shipAddressId,
       billToAddressId: soHeader?.record?.shipAddressId,
+      tdAmount:
+        soHeader?.record?.tdType == 1 || soHeader?.record?.tdType == null
+          ? soHeader?.record?.tdAmount
+          : soHeader?.record?.tdPct,
       shipAddress: shipAdd,
       billAddress: billAdd,
-
-      //currentDiscount: soHeader?.record?.tdAmount,
+      currentDiscount: soHeader?.record?.tdAmount,
       items: modifiedList
     })
   }
@@ -515,12 +547,127 @@ export default function SalesOrderForm({ labels, access: maxAccess, siteId, reco
     return res?.record
   }
 
+  const handleCycleButtonClick = () => {
+    setCycleButtonState(prevState => {
+      const newState = prevState.text === '%' ? { text: '123', value: 1 } : { text: '%', value: 2 }
+      formik.setFieldValue('tdType', newState.value)
+
+      return newState
+    })
+
+    //getItemPriceRow(update, newRow, DIRTYFIELD_UNIT_PRICE)
+  }
+
+  function getItemPriceRow(update, newRow, dirtyField) {
+    const itemPriceRow = getIPR({
+      priceType: newRow?.priceType,
+      basePrice: newRow?.basePrice,
+      volume: newRow?.volume,
+      weight: newRow?.weight,
+      unitPrice: newRow?.unitPrice,
+      upo: newRow?.upo,
+      qty: newRow?.qty,
+      extendedPrice: newRow?.extendedPrice,
+      mdAmount: newRow?.mdAmount,
+      mdType: newRow?.mdType,
+      baseLaborPrice: 0,
+      totalWeightPerG: 0,
+      mdValue: newRow?.mdValue,
+      tdPct: formik?.values?.tdPct,
+      dirtyField: dirtyField
+    })
+
+    const vatCalcRow = getVatCalc({
+      basePrice: itemPriceRow?.basePrice,
+      qty: itemPriceRow?.qty,
+      extendedPrice: itemPriceRow?.extendedPrice,
+      baseLaborPrice: itemPriceRow?.baseLaborPrice,
+      vatAmount: itemPriceRow?.vatAmount,
+      tdPct: formik?.values?.tdPct,
+      taxDetails: null
+    })
+
+    update({
+      basePrice: itemPriceRow?.basePrice,
+      unitPrice: itemPriceRow?.unitPrice,
+      extendedPrice: itemPriceRow?.extendedPrice,
+      upo: itemPriceRow?.upo,
+      mdValue: itemPriceRow?.mdValue,
+      mdType: itemPriceRow?.mdType,
+      mdAmount: itemPriceRow?.mdAmount,
+      vatAmount: vatCalcRow?.vatAmount
+    })
+
+    // recalcGridVat(0)
+  }
+
+  function calcTotals() {
+    const _footerSummary = getFooterTotals(formik.values.items, {
+      totalQty: 0,
+      totalWeight: 0,
+      totalVolume: 0,
+      totalUpo: 0,
+      sumVat: 0,
+      sumExtended: formik.values.subtotal,
+      tdAmount: formik.values.tdAmount,
+      net: 0,
+      miscAmount: formik.values.miscAmount
+    })
+    formik.setFieldValue('totVolume', _footerSummar.totalVolume)
+    formik.setFieldValue('totWeight', _footerSummary.totalWeight)
+    formik.setFieldValue('totQty', _footerSummary.totalQty)
+    formik.setFieldValue('amount', _footerSummary.net)
+    formik.setFieldValue('vatAmount', _footerSummary.sumVat)
+  }
+
+  function ShowMdAmountErrorMessage(actualDiscountAmount, clientMaxDiscountValue, rowData, update) {
+    if (actualDiscountAmount > clientMaxDiscountValue) {
+      formik.setFieldValue('mdType', 2)
+      formik.setFieldValue('mdAmount', clientMaxDiscountValue)
+      rowData.mdType = 2
+      rowData.mdAmount = clientMaxDiscountValue
+      getItemPriceRow(update, rowData, DIRTYFIELD_MDAMOUNT)
+      stackError({
+        message: labels.clientMaxDiscount + ' ' + clientMaxDiscountValue
+      })
+    }
+  }
+
+  function checkMdAmountPct(rowData, update) {
+    const maxClientAmountDiscount = rowData.unitPrice * (formik.values.maxDiscount / 100)
+    if (!formik.values.maxDiscount) return
+    if (rowData.mdType == 1) {
+      if (rowData.mdAmount > formik.values.maxDiscount) {
+        ShowMdAmountErrorMessage(value, clientMax, rowData, update)
+
+        return false
+      } else {
+        return true
+      }
+    } else {
+      if (rowData.mdAmount > maxClientAmountDiscount) {
+        ShowMdAmountErrorMessage(value, maxClientAmountDiscount, rowData, update)
+
+        return false
+      } else {
+        return true
+      }
+    }
+  }
   useEffect(() => {
     ;(async function () {
       if (recordId) {
         const soHeader = await getSalesOrder(recordId)
         const soItems = await getSalesOrderItems(recordId)
         fillForm(soHeader, soItems)
+      } else {
+        if (defaultSalesTD) {
+          setCycleButtonState({ text: '%', value: 2 })
+          formik.setFieldValue('tdType', 2)
+        } else {
+          setCycleButtonState({ text: '123', value: 1 })
+          formik.setFieldValue('tdType', 1)
+        }
       }
     })()
   }, [])
@@ -864,14 +1011,14 @@ export default function SalesOrderForm({ labels, access: maxAccess, siteId, reco
             >
               <Grid container item xs={6} direction='column' spacing={2} sx={{ px: 2, mt: 1 }}>
                 <Grid item>
-                  <CustomNumberField name='totalQTY' label={labels.totQty} value={totalQty} readOnly />
+                  <CustomNumberField name='totalQTY' label={labels.totQty} value={totQty} readOnly />
                 </Grid>
                 <Grid item>
                   <CustomNumberField
                     name='totVolume'
                     maxAccess={maxAccess}
                     label={labels.totVolume}
-                    value={totalVolume}
+                    value={totVolume}
                     readOnly
                   />
                 </Grid>
@@ -880,7 +1027,7 @@ export default function SalesOrderForm({ labels, access: maxAccess, siteId, reco
                     name='totWeight'
                     maxAccess={maxAccess}
                     label={labels.totWeight}
-                    value={totalWeight}
+                    value={totWeight}
                     readOnly
                   />
                 </Grid>
@@ -902,7 +1049,9 @@ export default function SalesOrderForm({ labels, access: maxAccess, siteId, reco
                     maxAccess={maxAccess}
                     label={labels.discount}
                     value={formik.values.tdAmount}
-                    readOnly
+                    displayCycleButton={true}
+                    cycleButtonLabel={cycleButtonState.text}
+                    handleCycleButtonClick={handleCycleButtonClick}
                   />
                 </Grid>
                 <Grid item>
@@ -911,7 +1060,9 @@ export default function SalesOrderForm({ labels, access: maxAccess, siteId, reco
                     maxAccess={maxAccess}
                     label={labels.misc}
                     value={formik.values.miscAmount}
-                    readOnly
+                    onBlur={async () => {
+                      calcTotals()
+                    }}
                   />
                 </Grid>
                 <Grid item>

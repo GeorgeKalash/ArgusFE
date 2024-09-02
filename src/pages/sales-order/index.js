@@ -16,11 +16,13 @@ import { SaleRepository } from 'src/repositories/SaleRepository'
 import SalesOrderForm from './Tabs/SalesOrderForm'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { getStorageData } from 'src/storage/storage'
+import { useError } from 'src/error'
 
 const SalesOrder = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
+  const { stack: stackError } = useError()
   const userId = getStorageData('userData').userId
 
   const {
@@ -133,7 +135,12 @@ const SalesOrder = () => {
   const { proxyAction } = useDocumentTypeProxy({
     functionId: SystemFunction.SalesOrder,
     action: async () => {
-      openForm()
+      const currency = await getDefaultSalesCurrency()
+      currency
+        ? openForm()
+        : stackError({
+            message: labels.noSelectedCurrency
+          })
     },
     hasDT: false
   })
@@ -164,9 +171,28 @@ const SalesOrder = () => {
     return res?.record?.value
   }
 
+  async function getDefaultSalesTD() {
+    const res = await getRequest({
+      extension: SystemRepository.Defaults.get,
+      parameters: `_filter=&_key=salesTD`
+    })
+
+    return res?.record?.value
+  }
+
+  async function getDefaultSalesCurrency() {
+    const res = await getRequest({
+      extension: SystemRepository.Defaults.get,
+      parameters: `_filter=&_key=currencyId`
+    })
+
+    return res?.record?.value
+  }
+
   async function openForm(recordId) {
     const userDefaultSite = await getDefaultUserSite()
     const userDefaultPUSite = await getDefaultPUSite()
+    const defaultSalesTD = await getDefaultSalesTD()
 
     const siteId = userDefaultSite ? userDefaultSite : userDefaultPUSite
 
@@ -176,6 +202,7 @@ const SalesOrder = () => {
         labels,
         access,
         siteId,
+        defaultSalesTD,
         recordId
       },
       width: 1200,
