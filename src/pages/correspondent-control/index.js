@@ -241,6 +241,8 @@ const BeneficiaryFields = () => {
         isInfo={false}
         initialValues={initialValues}
         resourceId={ResourceIds.CorrespondentControl}
+        isCleared={false}
+        isSavedClear={false}
       >
         <Grow>
           <DataGrid

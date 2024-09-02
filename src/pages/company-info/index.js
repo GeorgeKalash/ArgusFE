@@ -86,6 +86,7 @@ const CompanyInfo = () => {
       form={formik}
       infoVisible={false}
       isCleared={false}
+      isSavedClear={false}
       maxAccess={maxAccess}
     >
       <VertLayout>

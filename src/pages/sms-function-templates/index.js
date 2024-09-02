@@ -132,7 +132,13 @@ const SmsFunctionTemplate = () => {
   }
 
   return (
-    <FormShell resourceId={ResourceIds.SmsFunctionTemplates} form={formik} isInfo={false} isCleared={false}>
+    <FormShell
+      resourceId={ResourceIds.SmsFunctionTemplates}
+      form={formik}
+      isInfo={false}
+      isCleared={false}
+      isSavedClear={false}
+    >
       <VertLayout>
         <Grow>
           <DataGrid
