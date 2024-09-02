@@ -225,7 +225,14 @@ export const ResourceIds = {
   CorrespondentGroup: 36125,
   ConsignmentSites: 51110,
   PUOrderStatus: 50105,
+  PUPaymentTerms: 50106,
   AutoPostExclusion: 36124,
+  PostOutwards: 36319,
+  OutwardsReturn: 36317,
+  BankBranches: 33109,
   CorrespondentOutwards: 36318,
-  ExtraIncome: 36129
+  ExtraIncome: 36129,
+  StockCountDTD: 44103,
+  PurposeExchangeGroup: 35115,
+  Drivers: 52201
 }
