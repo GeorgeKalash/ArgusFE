@@ -53,10 +53,6 @@ const VerticalNavItems = props => {
     return null
   }
 
-  const refreshPage = () => {
-    return router.asPath + '/2'
-  }
-
   const renderNode = node => {
     const isOpen = openFolders.includes(node.id)
     const isRoot = node.parentId === 0
