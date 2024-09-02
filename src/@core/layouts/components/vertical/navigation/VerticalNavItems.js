@@ -13,11 +13,10 @@ import { ControlContext } from 'src/providers/ControlContext'
 
 const VerticalNavItems = props => {
   const router = useRouter()
-  const { handleBookmark, setLastOpenedPage } = useContext(MenuContext)
+  const { handleBookmark, setLastOpenedPage, setReloadOpenedPage } = useContext(MenuContext)
   const { platformLabels } = useContext(ControlContext)
   const { verticalNavItems, settings, openFolders, setOpenFolders, navCollapsed, isArabic } = props
   const { menu } = useContext(MenuContext)
-
   const [selectedNode, setSelectedNode] = useState(false)
 
   let theme = createTheme(themeOptions(settings, 'light'))
@@ -55,7 +54,7 @@ const VerticalNavItems = props => {
   }
 
   const refreshPage = () => {
-    router.replace(router.asPath)
+    return router.asPath + '/2'
   }
 
   const renderNode = node => {
@@ -75,12 +74,12 @@ const VerticalNavItems = props => {
           className={`node ${isFolder ? 'folder' : 'file'} ${isOpen ? 'open' : ''}`}
           style={{ display: !isFolder && navCollapsed ? 'none' : 'flex' }}
           onClick={() => {
+            setReloadOpenedPage([])
             if (node.children) {
               toggleFolder(node.id)
             } else {
               if (findNode(menu, node.path.replace(/\/$/, '')) + '/' === router.asPath) {
-                closeTab(router.asPath)
-                refreshPage()
+                setReloadOpenedPage(node)
               } else {
                 router.push(node.path)
               }
