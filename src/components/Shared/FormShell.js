@@ -45,7 +45,7 @@ export default function FormShell({
 }) {
   const { stack } = useWindow()
   const [selectedReport, setSelectedReport] = useState(null)
-  const { clear, open } = useGlobalRecord()
+  const { clear, open } = useGlobalRecord() || {}
   const { platformLabels } = useContext(ControlContext)
   const isSavedClearVisible = isSavedClear && isSaved && isCleared
   const { errored } = useContext(RequestsContext)
@@ -66,6 +66,10 @@ export default function FormShell({
     } else {
       if (typeof clear === 'function') {
         clear()
+      } else {
+        form.resetForm({
+          values: form.initialValues
+        })
       }
     }
     if (setIDInfoAutoFilled) {
@@ -119,7 +123,9 @@ export default function FormShell({
   }
 
   const performPostSubmissionTasks = async () => {
-    await open()
+    if (typeof open === 'function') {
+      await open()
+    }
     if (!errored && !form.isSubmitting && Object.keys(form.errors).length === 0) {
       handleReset()
     }
