@@ -221,5 +221,8 @@ export const SystemRepository = {
     set: service + 'setGO',
     get: service + 'getGO',
     del: service + 'delGO'
+  },
+  SalePerson: {
+    qry: service + 'qrySP'
   }
 }

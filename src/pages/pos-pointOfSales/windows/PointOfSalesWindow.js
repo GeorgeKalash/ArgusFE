@@ -2,6 +2,8 @@ import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import { CustomTabs } from 'src/components/Shared/CustomTabs'
 import { useState } from 'react'
 import PointOfSalesForm from '../forms/PointOfSalesForm'
+import UsersForm from '../forms/UsersForm'
+import SalesPersonForm from '../forms/SalesPersonForm'
 
 const PointOfSalesWindow = ({ recordId, labels, maxAccess }) => {
   const [activeTab, setActiveTab] = useState(0)
@@ -12,7 +14,11 @@ const PointOfSalesWindow = ({ recordId, labels, maxAccess }) => {
     recordId: recordId || null
   })
 
-  const tabs = [{ label: labels.pos }, { label: 'test', disabled: !store.recordId }]
+  const tabs = [
+    { label: labels.pos },
+    { label: labels.user, disabled: !store.recordId },
+    { label: labels.salePerson, disabled: !store.recordId }
+  ]
 
   return (
     <>
@@ -20,9 +26,12 @@ const PointOfSalesWindow = ({ recordId, labels, maxAccess }) => {
       <CustomTabPanel index={0} value={activeTab} disabledApply={!editMode && true}>
         <PointOfSalesForm labels={labels} setStore={setStore} store={store} maxAccess={maxAccess} />
       </CustomTabPanel>
-      {/* <CustomTabPanel index={1} value={activeTab}>
-        <IvReplenishementsList labels={labels} maxAccess={maxAccess} store={store} />
-      </CustomTabPanel> */}
+      <CustomTabPanel index={1} value={activeTab}>
+        <UsersForm labels={labels} maxAccess={maxAccess} store={store} />
+      </CustomTabPanel>
+      <CustomTabPanel index={2} value={activeTab}>
+        <SalesPersonForm labels={labels} maxAccess={maxAccess} store={store} />
+      </CustomTabPanel>
     </>
   )
 }

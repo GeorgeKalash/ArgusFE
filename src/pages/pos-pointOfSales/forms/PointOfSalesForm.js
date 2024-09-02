@@ -3,7 +3,7 @@ import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
@@ -105,8 +105,7 @@ const PointOfSalesForm = ({ labels, maxAccess, setStore, store }) => {
     })()
   }, [])
 
-  console.log(formik.values.onlineStore, 'boolean')
-  console.log(formik.errors, 'errors')
+  console.log(!!!formik.values.plantId, 'plantId')
 
   return (
     <FormShell form={formik} resourceId={ResourceIds.PointOfSales} maxAccess={maxAccess} editMode={editMode}>
@@ -168,7 +167,8 @@ const PointOfSalesForm = ({ labels, maxAccess, setStore, store }) => {
           <ResourceComboBox
             endpointId={InventoryRepository.Site.qry}
             name='siteId'
-            readOnly={!!formik.values.onlineStore}
+            filter={item => item.plantId === formik.values.plantId}
+            readOnly={!!formik.values.onlineStore || !!!formik.values.plantId}
             required={!formik.values.onlineStore}
             label={labels.site}
             values={formik.values}
