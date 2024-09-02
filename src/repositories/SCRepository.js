@@ -18,5 +18,11 @@ export const SCRepository = {
     get: service + 'getHDR',
     set: service + 'setHDR',
     del: service + 'delHDR'
-  }
+  },
+  DocumentTypeDefaults: {
+    qry: service + 'qryDTD',
+    set: service + 'setDTD',
+    get: service + 'getDTD',
+    del: service + 'delDTD'
+  },
 }

@@ -13,7 +13,6 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 export default function GroupLegalDocumentForm({ labels, maxAccess, recordId, record }) {
-  const [editMode, setEditMode] = useState(!!recordId)
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
@@ -23,8 +22,8 @@ export default function GroupLegalDocumentForm({ labels, maxAccess, recordId, re
   const { formik } = useForm({
     initialValues: {
       recordId: recordId || null,
-      groupId: null,
-      incId: null,
+      groupId: '',
+      incId: '',
       required: false,
       mandatory: false
     },
@@ -46,24 +45,19 @@ export default function GroupLegalDocumentForm({ labels, maxAccess, recordId, re
 
       if (!groupId && !incId) {
         toast.success('Record Added Successfully')
-        setEditMode(false)
       } else toast.success('Record Edited Successfully')
-      setEditMode(true)
-      formik.setValues({
-        ...obj,
-        recordId: obj.groupId * 10000 + obj.incId
-      })
+      formik.setFieldValue('recordId', obj.groupId * 10000 + obj.incId)
 
       invalidate()
     }
   })
 
+  const editMode = !!formik.values.recordId || !!recordId
+
   useEffect(() => {
     ;(async function () {
       try {
-        if (recordId) {
-          setEditMode(true)
-
+        if (record && record.incId && record.groupId && recordId) {
           const res = await getRequest({
             extension: BusinessPartnerRepository.GroupLegalDocument.get,
             parameters: `_groupId=${record?.groupId}&_incId=${record?.incId}`

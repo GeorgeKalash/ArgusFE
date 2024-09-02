@@ -3,95 +3,84 @@ import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
+import { useWindow } from 'src/windows'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import PurposeOfExchangeWindow from './windows/PurposeOfExchangeWindow'
-import { useWindow } from 'src/windows'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
+import StockCountDocumentTypeDefaultForm from './forms/StockCountDocTypeDefaultsForm'
+import { SCRepository } from 'src/repositories/SCRepository'
+import { SystemFunction } from 'src/resources/SystemFunction'
 
-const PurposeExchange = () => {
+const StockCountDocTypeDefaults = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-
   const { stack } = useWindow()
 
-  async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+  async function fetchGridData() {
+    try {
+      const response = await getRequest({
+        extension: SCRepository.DocumentTypeDefaults.qry,
+        parameters: `_filter=&_functionId=${SystemFunction.StockCount}`
+      })
 
-    const response = await getRequest({
-      extension: CurrencyTradingSettingsRepository.PurposeExchange.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
-    })
-
-    return { ...response, _startAt: _startAt }
+      return response
+    } catch (error) {}
   }
 
   const {
     query: { data },
-    paginationParameters,
-    refetch,
     labels: _labels,
-    access,
-    invalidate
+    invalidate,
+    refetch,
+    access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: CurrencyTradingSettingsRepository.PurposeExchange.page,
-    datasetId: ResourceIds.PurposeOfExchange
+    endpointId: SCRepository.DocumentTypeDefaults.qry,
+    datasetId: ResourceIds.StockCountDTD
   })
 
   const columns = [
     {
-      field: 'reference',
-      headerName: _labels.reference,
-      flex: 1
-    },
-    {
-      field: 'name',
-      headerName: _labels.name,
-      flex: 1
-    },
-    {
-      field: 'groupName',
-      headerName: _labels.group,
+      field: 'dtName',
+      headerName: _labels.documentType,
       flex: 1
     }
   ]
-
-  function openForm(recordId) {
-    stack({
-      Component: PurposeOfExchangeWindow,
-      props: {
-        labels: _labels,
-        recordId,
-        maxAccess: access
-      },
-      width: 600,
-      height: 500,
-      title: _labels.purposeOfExchange
-    })
-  }
 
   const add = () => {
     openForm()
   }
 
-  const edit = obj => {
-    openForm(obj.recordId)
-  }
-
   const del = async obj => {
     try {
       await postRequest({
-        extension: CurrencyTradingSettingsRepository.PurposeExchange.del,
+        extension: SCRepository.DocumentTypeDefaults.del,
         record: JSON.stringify(obj)
       })
       invalidate()
       toast.success(platformLabels.Deleted)
     } catch (error) {}
+  }
+
+  function openForm(record) {
+    stack({
+      Component: StockCountDocumentTypeDefaultForm,
+      props: {
+        labels: _labels,
+        recordId: record?.dtId,
+        maxAccess: access
+      },
+      width: 600,
+      height: 300,
+      title: _labels.stockCountDTD
+    })
+  }
+
+  const edit = obj => {
+    openForm(obj)
   }
 
   return (
@@ -103,14 +92,13 @@ const PurposeExchange = () => {
         <Table
           columns={columns}
           gridData={data}
-          rowId={['recordId']}
+          rowId={['dtId']}
           onEdit={edit}
           onDelete={del}
           isLoading={false}
           pageSize={50}
-          paginationParameters={paginationParameters}
           refetch={refetch}
-          paginationType='api'
+          paginationType='client'
           maxAccess={access}
         />
       </Grow>
@@ -118,4 +106,4 @@ const PurposeExchange = () => {
   )
 }
 
-export default PurposeExchange
+export default StockCountDocTypeDefaults

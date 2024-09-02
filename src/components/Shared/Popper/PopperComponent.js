@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react'
 import ReactDOM from 'react-dom'
 import { Box } from '@mui/material'
 
-const PopperComponent = ({ children, anchorEl, open }) => {
+const PopperComponent = ({ children, anchorEl, open, ...props }) => {
   const [isVisible, setIsVisible] = useState(true)
   const [rect, setRect] = useState(anchorEl?.getBoundingClientRect())
   const popperRef = useRef(null)
@@ -87,13 +87,21 @@ const PopperComponent = ({ children, anchorEl, open }) => {
       }}
       style={{
         position: 'absolute',
-        minWidth: anchorEl ? anchorEl.clientWidth : 'auto',
         top: rect?.bottom / zoom,
         left: rect?.left / zoom,
-        transform: !canRenderBelow ? `translateY(calc(-100% - 20px - ${rect?.height}px))` : 'none'
+        transform: !canRenderBelow ? `translateY(calc(-100% - 10px - ${rect?.height}px))` : 'none',
+        ...props?.style
       }}
+      className={props.className}
     >
-      {children}
+      {typeof children === 'function'
+        ? children({
+            placement: 'top-start',
+            TransitionProps: {
+              in: true
+            }
+          })
+        : children}
     </Box>,
     document.body
   )
