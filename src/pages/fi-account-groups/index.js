@@ -4,16 +4,19 @@ import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import AccountGroupsForm from './forms/AccountGroupsForm'
 import { useWindow } from 'src/windows'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const AccountGroups = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
+
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
@@ -30,15 +33,12 @@ const AccountGroups = () => {
     labels: _labels,
     paginationParameters,
     refetch,
-    access
+    access,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: FinancialRepository.Group.qry,
     datasetId: ResourceIds.FlAccountGroups
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: FinancialRepository.Group.qry
   })
 
   const columns = [
@@ -68,12 +68,14 @@ const AccountGroups = () => {
   }
 
   const del = async obj => {
-    await postRequest({
-      extension: FinancialRepository.Group.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success('Record Deleted Successfully')
+    try {
+      await postRequest({
+        extension: FinancialRepository.Group.del,
+        record: JSON.stringify(obj)
+      })
+      invalidate()
+      toast.success(platformLabels.Deleted)
+    } catch (error) {}
   }
 
   function openForm(recordId) {
@@ -81,9 +83,8 @@ const AccountGroups = () => {
       Component: AccountGroupsForm,
       props: {
         labels: _labels,
-        recordId: recordId ? recordId : null,
-        maxAccess: access,
-        invalidate: invalidate
+        recordId,
+        maxAccess: access
       },
       width: 600,
       height: 600,
