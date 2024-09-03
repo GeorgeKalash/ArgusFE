@@ -1,4 +1,5 @@
 import { Grid } from '@mui/material'
+import { FormControlLabel, Checkbox } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
@@ -55,7 +56,8 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
       currencyId: null,
       genVar: 1,
       wip: 1,
-      status: 1
+      status: 1,
+      disableItemDuplicate: false
     },
     maxAccess,
     enableReinitialize: false,
@@ -134,7 +136,7 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
         extension: SCRepository.StockCount.reopen,
         record: JSON.stringify(formik.values)
       })
-    
+
       if (res.recordId) {
         toast.success(platformLabels.Reopened)
         invalidate()
@@ -189,7 +191,7 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
       condition: true,
       onClick: onPost,
       disabled: !isPosted || formik.values.status === 3
-    },
+    }
   ]
 
   useEffect(() => {
@@ -210,7 +212,7 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
     })()
   }, [])
 
-  const disable = formik.values.status === 3;
+  const disable = formik.values.status === 3
 
   return (
     <FormShell
@@ -389,6 +391,19 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
                   formik && formik.setFieldValue('genVar', newValue ? newValue.key : '')
                 }}
                 error={formik.touched.genVar && Boolean(formik.errors.genVar)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name='disableItemDuplicate'
+                    maxAccess={maxAccess}
+                    checked={formik.values?.disableItemDuplicate}
+                    onChange={formik.handleChange}
+                  />
+                }
+                label={labels.disableItemDuplicate}
               />
             </Grid>
           </Grid>
