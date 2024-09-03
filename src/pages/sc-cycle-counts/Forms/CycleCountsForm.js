@@ -49,7 +49,7 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
       recordId: recordId || null,
       dtId: documentType?.dtId,
       date: new Date(),
-      plantId: plantId,
+      plantId: parseInt(plantId),
       notes: '',
       type: 1,
       clientId: null,
