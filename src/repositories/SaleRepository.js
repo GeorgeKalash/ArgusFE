@@ -130,6 +130,7 @@ export const SaleRepository = {
     qry: service + 'qryORD',
     get: service + 'getORD',
     set: service + 'setORD',
+    set2: service + 'set2ORD',
     del: service + 'delORD',
     close: service + 'closeORD',
     reopen: service + 'reopenORD',
@@ -142,5 +143,8 @@ export const SaleRepository = {
   },
   ItemConvertPrice: {
     get: service + 'getICP'
+  },
+  Address: {
+    qry: service + 'qryAD'
   }
 }

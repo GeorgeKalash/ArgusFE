@@ -106,11 +106,11 @@ const getDiscValues = _discountObj => {
 // Function to recalculate the footer
 const recalcFooter = (_array, _footerSummary) => {
   _array.forEach(item => {
-    _footerSummary.totalQty += item.data.qty
-    _footerSummary.totalWeight += item.data.qty * item.data.weight
-    _footerSummary.totalVolume += item.data.qty * item.data.volume
-    _footerSummary.totalUpo += item.data.upo
-    _footerSummary.sumVat += item.data.vatAmount
+    _footerSummary.totalQty += item.qty
+    _footerSummary.totalWeight += item.qty * item.weight
+    _footerSummary.totalVolume += item.qty * item.volume
+    _footerSummary.totalUpo += item.upo
+    _footerSummary.sumVat += item.vatAmount
   })
 
   _footerSummary.net =
@@ -120,7 +120,7 @@ const recalcFooter = (_array, _footerSummary) => {
 }
 
 const getSubtotal = _array => {
-  return _array.reduce((sum, item) => sum + item.data.extendedPrice, 0)
+  return _array.reduce((sum, item) => sum + item.extendedPrice, 0)
 }
 
 const getFooterTotals = (_array, _footerSummary) => {
