@@ -69,7 +69,7 @@ export default function CbBanksForms({ labels, maxAccess, store, setStore, setEd
     }
   })
 
-  const editMode = !!formik.values.recordId;
+  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
