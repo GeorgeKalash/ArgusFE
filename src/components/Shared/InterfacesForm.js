@@ -11,7 +11,6 @@ import { DataSets } from 'src/resources/DataSets'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { CommonContext } from 'src/providers/CommonContext'
 import CustomTextField from '../Inputs/CustomTextField'
-import { Fixed } from './Layouts/Fixed'
 import { Grow } from './Layouts/Grow'
 import { VertLayout } from './Layouts/VertLayout'
 
