@@ -131,5 +131,12 @@ export const SaleRepository = {
     set: service + 'setORD',
     del: service + 'delORD',
     snapshot: service + 'snapshotORD'
+  },
+  Cycle: {
+    qry: service + 'qryCL',
+    get: service + 'getCL',
+    set: service + 'setCL',
+    del: service + 'delCL',
+    snapshot: service + 'snapshotCL'
   }
 }

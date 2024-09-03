@@ -13,10 +13,29 @@ export const SCRepository = {
     get: service + 'getLBI',
     del: service + 'delLBI'
   },
+  Sites: {
+    qry: service + 'qrySIT',
+    set: service + 'setSIT',
+    set2: service + 'set2SIT',
+    get: service + 'getSIT',
+    del: service + 'delSIT'
+  },
+  Controller: {
+    qry: service + 'qryCRL',
+  },
+  PHY: {
+    qry: service + 'qryPHY',
+    set2: service + 'set2PHY',
+  },
   StockCount: {
+    page: service + 'pageHDR',
+    post: service + 'postHDR',
     qry: service + 'qryHDR',
     get: service + 'getHDR',
     set: service + 'setHDR',
-    del: service + 'delHDR'
+    del: service + 'delHDR',
+    close: service + 'closeHDR',
+    reopen: service + 'reopenHDR',
+    snapshot: service + 'snapshotHDR',
   }
 }
