@@ -234,5 +234,6 @@ export const ResourceIds = {
   ExtraIncome: 36129,
   StockCountDTD: 44103,
   PurposeExchangeGroup: 35115,
-  Drivers: 52201
+  Drivers: 52201,
+  RebuildCOGS: 51602
 }
