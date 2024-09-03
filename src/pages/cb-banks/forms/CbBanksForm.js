@@ -16,7 +16,7 @@ import { useForm } from 'src/hooks/form'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { ControlContext } from 'src/providers/ControlContext'
 
-export default function CbBanksForms({ labels, maxAccess, store, setStore, setEditMode }) {
+export default function CbBanksForms({ labels, maxAccess, store, setStore }) {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -40,7 +40,8 @@ export default function CbBanksForms({ labels, maxAccess, store, setStore, setEd
     validationSchema: yup.object({
       name: yup.string().required(),
       reference: yup.string().required(),
-      swiftCode: yup.string().required()
+      swiftCode: yup.string().required(),
+      countryId: yup.string().required()
     }),
     onSubmit: async obj => {
       try {
@@ -59,7 +60,6 @@ export default function CbBanksForms({ labels, maxAccess, store, setStore, setEd
             recordId: response.recordId,
             name: obj.name
           })
-          setEditMode(true)
         } else {
           toast.success(platformLabels.Edited)
         }
@@ -147,6 +147,7 @@ export default function CbBanksForms({ labels, maxAccess, store, setStore, setEd
               <ResourceComboBox
                 endpointId={SystemRepository.Country.qry}
                 name='countryId'
+                required
                 label={labels.Country}
                 valueField='recordId'
                 displayField={['reference', 'name', 'flName']}

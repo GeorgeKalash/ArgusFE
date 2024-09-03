@@ -12,7 +12,6 @@ const CbBanksWindow = ({ labels, maxAccess, recordId, height }) => {
     recordId: recordId || null,
     name: null
   })
-  const [editMode, setEditMode] = useState(!!recordId)
 
   const tabs = [{ label: labels?.bank }, { label: labels?.interface, disabled: !store.recordId }]
 
@@ -20,13 +19,7 @@ const CbBanksWindow = ({ labels, maxAccess, recordId, height }) => {
     <>
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
       <CustomTabPanel height={height} index={0} value={activeTab}>
-        <CbBanksForm
-          labels={labels}
-          maxAccess={maxAccess}
-          store={store}
-          setStore={setStore}
-          setEditMode={setEditMode}
-        />
+        <CbBanksForm labels={labels} maxAccess={maxAccess} store={store} setStore={setStore} />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
         <InterfacesForm
