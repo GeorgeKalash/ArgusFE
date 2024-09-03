@@ -25,10 +25,10 @@ const CashAccountForm = ({ store, labels, maxAccess, editMode }) => {
         .array()
         .of(
           yup.object().shape({
-            cashAccountId: yup.string().required('spId  is required')
+            cashAccountId: yup.string().required()
           })
         )
-        .required('userId array is required')
+        .required()
     }),
     initialValues: {
       pOSUser: [
@@ -36,7 +36,6 @@ const CashAccountForm = ({ store, labels, maxAccess, editMode }) => {
           id: 1,
           posId: recordId,
           cashAccountId: '',
-
           name: '',
           type: '',
           isInactive: false
@@ -140,7 +139,9 @@ const CashAccountForm = ({ store, labels, maxAccess, editMode }) => {
         .catch(error => {})
   }
   useEffect(() => {
-    getData()
+    if (recordId) {
+      getData()
+    }
   }, [recordId])
 
   console.log('DataGrid value:', formik.values.pOSUser)

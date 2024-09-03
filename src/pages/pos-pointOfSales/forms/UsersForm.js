@@ -3,7 +3,7 @@ import { DataGrid } from 'src/components/Shared/DataGrid'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
@@ -26,10 +26,10 @@ const UsersForm = ({ store, labels, maxAccess, editMode }) => {
         .array()
         .of(
           yup.object().shape({
-            userId: yup.string().required('userId  is required')
+            userId: yup.string().required()
           })
         )
-        .required('userId array is required')
+        .required()
     }),
     initialValues: {
       pOSUser: [
@@ -47,7 +47,6 @@ const UsersForm = ({ store, labels, maxAccess, editMode }) => {
       postPOSUser(values)
     }
   })
-  console.log(formik.values.pOSUser)
 
   const postPOSUser = obj => {
     const pOSUser = obj?.pOSUser?.map(({ posId, ...rest }) => ({
@@ -143,8 +142,6 @@ const UsersForm = ({ store, labels, maxAccess, editMode }) => {
   useEffect(() => {
     getData()
   }, [recordId])
-
-  console.log('DataGrid value:', formik.values.pOSUser)
 
   return (
     <FormShell

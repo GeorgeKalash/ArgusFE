@@ -12,7 +12,7 @@ const PointOfSalesWindow = ({ recordId, labels, maxAccess }) => {
   const editMode = !!recordId
 
   const [store, setStore] = useState({
-    recordId: recordId || null
+    recordId: recordId
   })
 
   const tabs = [

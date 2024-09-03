@@ -45,7 +45,6 @@ const SalesPersonForm = ({ store, labels, maxAccess, editMode }) => {
       postPOSUser(values)
     }
   })
-  console.log(formik.values.pOSUser)
 
   const postPOSUser = obj => {
     const pOSUser = obj?.pOSUser?.map(({ posId, ...rest }) => ({
@@ -128,8 +127,6 @@ const SalesPersonForm = ({ store, labels, maxAccess, editMode }) => {
   useEffect(() => {
     getData()
   }, [recordId])
-
-  console.log('DataGrid value:', formik.values.pOSUser)
 
   return (
     <FormShell

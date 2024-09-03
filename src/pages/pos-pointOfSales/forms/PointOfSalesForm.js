@@ -65,7 +65,6 @@ const PointOfSalesForm = ({ labels, maxAccess, setStore, store }) => {
         .nullable()
         .test('siteId-required', 'Site ID is required when not an online store', function (value) {
           const { onlineStore } = this.parent
-          console.log(onlineStore, 'onnn')
 
           return !!onlineStore || (!!value && value !== '')
         })
@@ -104,8 +103,6 @@ const PointOfSalesForm = ({ labels, maxAccess, setStore, store }) => {
       } catch (error) {}
     })()
   }, [])
-
-  console.log(!!!formik.values.plantId, 'plantId')
 
   return (
     <FormShell form={formik} resourceId={ResourceIds.PointOfSales} maxAccess={maxAccess} editMode={editMode}>
@@ -335,9 +332,7 @@ const PointOfSalesForm = ({ labels, maxAccess, setStore, store }) => {
             displayField='value'
             onChange={(event, newValue) => {
               if (newValue) {
-                formik.setFieldValue('status', newValue?.key)
-              } else {
-                formik.setFieldValue('status', newValue?.key)
+                formik.setFieldValue('status', newValue?.key || '')
               }
             }}
             error={formik.touched.status && Boolean(formik.errors.status)}
