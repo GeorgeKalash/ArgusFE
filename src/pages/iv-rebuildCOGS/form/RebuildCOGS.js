@@ -89,7 +89,7 @@ export default function RebuildAccountBalances({ _labels, access }) {
             {/* <Grid item xs={12}>
               <ResourceLookup
                 endpointId={FinancialRepository.Account.snapshot}
-                name='accountId'
+                name='itemId'
                 label={_labels.account}
                 valueField='reference'
                 displayField='name'
