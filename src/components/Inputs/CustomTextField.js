@@ -113,7 +113,8 @@ const CustomTextField = ({
         style: {
           textAlign: numberField && 'right',
           '-moz-appearance': 'textfield' // Firefox
-        }
+        },
+        tabIndex: _readOnly ? -1 : 0 // Prevent focus if readOnly
       }}
       autoComplete={autoComplete}
       onInput={handleInput}

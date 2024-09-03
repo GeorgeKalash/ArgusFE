@@ -25,4 +25,10 @@ export const SCRepository = {
     get: service + 'getCRL',
     del: service + 'delCRL'
   },
+  DocumentTypeDefaults: {
+    qry: service + 'qryDTD',
+    set: service + 'setDTD',
+    get: service + 'getDTD',
+    del: service + 'delDTD'
+  },
 }
