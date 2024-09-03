@@ -5,7 +5,7 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import CbBanksWindow from './Windows/CbBanksWindow'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useWindow } from 'src/windows'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
@@ -21,24 +21,23 @@ const CbBank = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    return await getRequest({
+    const response = await getRequest({
       extension: CashBankRepository.CbBank.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
+
+    return { ...response, _startAt: _startAt }
   }
 
   const {
     query: { data },
     labels: _labels,
+    invalidate,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: CashBankRepository.CbBank.page,
     datasetId: ResourceIds.CbBanks
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: CashBankRepository.CbBank.page
   })
 
   const columns = [
@@ -69,7 +68,7 @@ const CbBank = () => {
       Component: CbBanksWindow,
       props: {
         labels: _labels,
-        recordId: recordId ? recordId : null,
+        recordId: recordId,
         maxAccess: access
       },
       width: 600,
@@ -109,7 +108,7 @@ const CbBank = () => {
           onDelete={del}
           isLoading={false}
           pageSize={50}
-          paginationType='client'
+          paginationType='api'
           maxAccess={access}
         />
       </Grow>
