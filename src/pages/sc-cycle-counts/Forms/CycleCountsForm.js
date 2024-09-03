@@ -322,7 +322,7 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
             </Grid>
             <Grid item xs={12}>
               <ResourceLookup
-                endpointId={SaleRepository.Cycle.snapshot}
+                endpointId={SaleRepository.Client.snapshot}
                 parameters={{
                   _category: 0
                 }}
