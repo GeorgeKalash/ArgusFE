@@ -14,6 +14,8 @@ import { ControlContext } from 'src/providers/ControlContext'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { MasterSource } from 'src/resources/MasterSource'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import { DataSets } from 'src/resources/DataSets'
 
 export default function IvItemGroupsForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -28,8 +30,9 @@ export default function IvItemGroupsForm({ labels, maxAccess, recordId }) {
       recordId: recordId || null,
       reference: '',
       name: '',
-      minUnitPrice: '',
-      maxUnitPrice: ''
+      valuationMethod: '',
+      procurementMethod: '',
+      msId: ''
     },
     enableReinitialize: true,
     validateOnChange: true,
@@ -107,30 +110,55 @@ export default function IvItemGroupsForm({ labels, maxAccess, recordId }) {
               />
             </Grid>
             <Grid item xs={12}>
-              <CustomNumberField
-                name='minUnitPrice'
-                required
-                label={labels.minUnitPrice}
-                value={formik.values.minUnitPrice}
+              <ResourceComboBox
+                datasetId={DataSets.PROCUREMENT_METHOD}
+                name='procurementMethod'
+                label={labels.procurement}
+                valueField='key'
+                displayField='value'
+                values={formik.values}
                 maxAccess={maxAccess}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('minUnitPrice', '')}
-                error={formik.touched.minUnitPrice && Boolean(formik.errors.minUnitPrice)}
-                allowNegative={false}
-                decimalScale={3}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('procurementMethod', newValue?.key || '')
+                  formik.setFieldValue('procurementName', newValue?.value || '')
+                }}
+                error={formik.touched.procurementMethod && formik.errors.procurementMethod}
               />
             </Grid>
             <Grid item xs={12}>
-              <CustomNumberField
-                name='maxUnitPrice'
-                label={labels.maxUnitPrice}
-                value={formik.values.maxUnitPrice}
+              <ResourceComboBox
+                datasetId={DataSets.VALUATION_METHOD}
+                values={formik.values}
+                name='valuationMethod'
+                label={labels.valuation}
+                valueField='key'
+                displayField='value'
+                displayFieldWidth={1}
                 maxAccess={maxAccess}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('maxUnitPrice', '')}
-                error={formik.touched.maxUnitPrice && Boolean(formik.errors.maxUnitPrice)}
-                allowNegative={false}
-                decimalScale={3}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('valuationMethod', newValue?.key || '')
+                }}
+                error={formik.touched.valuationMethod && formik.errors.valuationMethod}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={InventoryRepository.Measurement.qry}
+                parameters='_name='
+                name='msId'
+                label={labels.measurement}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('msId', newValue ? newValue.recordId : '')
+                }}
+                error={formik.touched.msId && Boolean(formik.errors.msId)}
               />
             </Grid>
           </Grid>

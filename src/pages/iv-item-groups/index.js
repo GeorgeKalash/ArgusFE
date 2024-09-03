@@ -82,7 +82,7 @@ const IvItemGroups = () => {
       },
       width: 600,
       height: 500,
-      title: _labels.itemGroups
+      title: _labels.itemGroup
     })
   }
 
