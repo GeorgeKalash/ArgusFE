@@ -27,7 +27,7 @@ export default function IvItemGroupsForm({ labels, maxAccess, recordId }) {
 
   const { formik } = useForm({
     initialValues: {
-      recordId: recordId || null,
+      recordId: recordId,
       reference: '',
       name: '',
       valuationMethod: '',
@@ -156,7 +156,7 @@ export default function IvItemGroupsForm({ labels, maxAccess, recordId }) {
                 displayField={['reference', 'name']}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('msId', newValue ? newValue.recordId : '')
+                  formik.setFieldValue('msId', newValue?.key || '')
                 }}
                 error={formik.touched.msId && Boolean(formik.errors.msId)}
               />
