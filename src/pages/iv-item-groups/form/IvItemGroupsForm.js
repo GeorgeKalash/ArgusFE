@@ -156,7 +156,7 @@ export default function IvItemGroupsForm({ labels, maxAccess, recordId }) {
                 displayField={['reference', 'name']}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('msId', newValue?.key || '')
+                  formik.setFieldValue('msId', newValue.recordId || '')
                 }}
                 error={formik.touched.msId && Boolean(formik.errors.msId)}
               />
