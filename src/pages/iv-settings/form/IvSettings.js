@@ -67,7 +67,6 @@ const IvSettings = ({ _labels }) => {
       postIvSettings(values)
     }
   })
-  console.log(formik.values)
 
   const postIvSettings = obj => {
     var data = []
@@ -92,7 +91,7 @@ const IvSettings = ({ _labels }) => {
   return (
     <VertLayout>
       <Grow>
-        <Grid container spacing={1} sx={{ pl: '10px', pt: '10px' }} xs={12}>
+        <Grid container spacing={4} sx={{ pl: '10px', pt: '10px', pr: '10px' }}>
           <Grid item xs={12}>
             <ResourceComboBox
               datasetId={DataSets.ITEM_SEARCH_STYLE}
@@ -102,11 +101,7 @@ const IvSettings = ({ _labels }) => {
               displayField='value'
               values={formik.values}
               onChange={(event, newValue) => {
-                if (newValue) {
-                  formik.setFieldValue('itemSearchStyle', newValue?.key)
-                } else {
-                  formik.setFieldValue('itemSearchStyle', '')
-                }
+                formik.setFieldValue('itemSearchStyle', newValue?.key || '')
               }}
               error={formik.touched.itemSearchStyle && Boolean(formik.errors.itemSearchStyle)}
             />
@@ -120,11 +115,7 @@ const IvSettings = ({ _labels }) => {
               displayField='value'
               values={formik.values}
               onChange={(event, newValue) => {
-                if (newValue) {
-                  formik.setFieldValue('itemSearchFields', newValue?.key)
-                } else {
-                  formik.setFieldValue('itemSearchFields', '')
-                }
+                formik.setFieldValue('itemSearchFields', newValue?.key || '')
               }}
               error={formik.touched.itemSearchFields && Boolean(formik.errors.itemSearchFields)}
             />
