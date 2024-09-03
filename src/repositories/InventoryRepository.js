@@ -6,7 +6,10 @@ export const InventoryRepository = {
     get: service + 'getIT'
   },
   Group: {
-    qry: service + 'qryGRP'
+    qry: service + 'qryGRP',
+    get: service + 'getGRP',
+    set: service + 'setGRP',
+    del: service + 'delGRP'
   },
   Category: {
     qry: service + 'qryCA',
