@@ -58,10 +58,7 @@ const IvSettings = ({ _labels }) => {
     validateOnChange: true,
     initialValues,
     validationSchema: yup.object({
-      iv_minSerialSize: yup
-        .number()
-        .min(1, 'Minimum serial size must be at least 1')
-        .max(20, 'Maximum serial size cannot exceed 20')
+      iv_minSerialSize: yup.number().min(1).max(20)
     }),
     onSubmit: values => {
       postIvSettings(values)
