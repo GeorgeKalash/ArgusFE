@@ -23,7 +23,7 @@ const IvItemGroups = () => {
 
     try {
       const response = await getRequest({
-        extension: InventoryRepository.Group.qry,
+        extension: InventoryRepository.Group.page,
         parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=`
       })
 
@@ -40,7 +40,7 @@ const IvItemGroups = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: InventoryRepository.Group.qry,
+    endpointId: InventoryRepository.Group.page,
     datasetId: ResourceIds.InventoryGroup
   })
 

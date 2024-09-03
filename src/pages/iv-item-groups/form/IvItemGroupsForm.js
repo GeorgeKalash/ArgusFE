@@ -22,7 +22,7 @@ export default function IvItemGroupsForm({ labels, maxAccess, recordId }) {
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: InventoryRepository.Group.qry
+    endpointId: InventoryRepository.Group.page
   })
 
   const { formik } = useForm({

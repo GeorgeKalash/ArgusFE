@@ -7,6 +7,7 @@ export const InventoryRepository = {
   },
   Group: {
     qry: service + 'qryGRP',
+    page: service + 'pageGRP',
     get: service + 'getGRP',
     set: service + 'setGRP',
     del: service + 'delGRP'
