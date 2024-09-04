@@ -58,8 +58,6 @@ export default function RebuildForm({ _labels, access }) {
     }
   ]
 
-  console.log(formik.values)
-
   return (
     <FormShell
       resourceId={ResourceIds.RebuildInventory}
