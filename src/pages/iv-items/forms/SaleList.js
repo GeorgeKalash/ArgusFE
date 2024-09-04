@@ -46,19 +46,21 @@ const SalesList = ({ store, labels, maxAccess }) => {
   })
 
   useEffect(() => {
-    ;(async () => {
-      const response = await getRequest({
-        extension: InventoryRepository.Currency.qry,
-        parameters: `&_itemId=${recordId}`
-      })
-      if (response.list && response.list.length > 0) {
-        const firstCurrency = response.list[0]
-        setInitialValues({
-          currencyId: firstCurrency.currencyId
+    if (recordId) {
+      ;(async () => {
+        const response = await getRequest({
+          extension: InventoryRepository.Currency.qry,
+          parameters: `&_itemId=${recordId}`
         })
-        formik.setFieldValue('currencyId', firstCurrency.currencyId)
-      }
-    })()
+        if (response.list && response.list.length > 0) {
+          const firstCurrency = response.list[0]
+          setInitialValues({
+            currencyId: firstCurrency.currencyId
+          })
+          formik.setFieldValue('currencyId', firstCurrency.currencyId)
+        }
+      })()
+    }
   }, [recordId])
 
   async function fetchGridData() {
@@ -174,7 +176,7 @@ const SalesList = ({ store, labels, maxAccess }) => {
           <Grid item xs={3} ml={40}>
             <ResourceComboBox
               endpointId={InventoryRepository.Currency.qry}
-              parameters={`_itemId=${recordId}`}
+              parameters={recordId ? `_itemId=${recordId}` : ''}
               name='currencyId'
               label={labels.currency}
               valueField='currencyId'

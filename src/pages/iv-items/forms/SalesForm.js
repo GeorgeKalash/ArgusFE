@@ -156,7 +156,7 @@ const SalesForm = ({ labels, maxAccess, store, record, cId }) => {
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={InventoryRepository.Currency.qry}
-                parameters={`_itemId=${itemId}`}
+                parameters={itemId ? `_itemId=${itemId}` : ''}
                 name='currencyId'
                 label={labels.currency}
                 valueField='currencyId'
