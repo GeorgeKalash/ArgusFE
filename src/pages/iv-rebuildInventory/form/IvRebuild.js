@@ -12,11 +12,10 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
-import { RGSaleRepository } from 'src/repositories/RGSaleRepository'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 
-export default function RebuildAccountBalances({ _labels, access }) {
+export default function RebuildForm({ _labels, access }) {
   const { postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -35,7 +34,7 @@ export default function RebuildAccountBalances({ _labels, access }) {
         const { recordId, ...rest } = obj
 
         await postRequest({
-          extension: RGSaleRepository.RebuildCOGS.rebuild,
+          extension: InventoryRepository.RebuildInventory.rebuild,
           record: JSON.stringify(rest)
         })
 
@@ -59,9 +58,11 @@ export default function RebuildAccountBalances({ _labels, access }) {
     }
   ]
 
+  console.log(formik.values)
+
   return (
     <FormShell
-      resourceId={ResourceIds.RebuildCOGS}
+      resourceId={ResourceIds.RebuildInventory}
       form={formik}
       actions={actions}
       maxAccess={access}
@@ -76,7 +77,7 @@ export default function RebuildAccountBalances({ _labels, access }) {
               <ResourceComboBox
                 endpointId={SystemRepository.FiscalYears.qry}
                 name='year'
-                label={_labels.fiscalYear}
+                label={_labels.year}
                 valueField='fiscalYear'
                 displayField='fiscalYear'
                 values={formik.values}
