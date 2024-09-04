@@ -25,4 +25,9 @@ export const SCRepository = {
     get: service + 'getDTD',
     del: service + 'delDTD'
   },
+  Sites: {
+    qry: service + 'qrySIT',
+    reopen: service + 'reopenSIT',
+    end: service + 'endSIT',
+  }
 }
