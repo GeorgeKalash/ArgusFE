@@ -2,15 +2,15 @@ import edit from './edit'
 
 export default {
   view: props => {
-    let changes = props?.column?.props.mapping
-      ? props?.column?.props.mapping
+    let changes = props?.colDef?.props?.mapping
+      ? props?.colDef.props.mapping
           ?.map(({ from, to }) => ({
-            [from]: props.row && props.row.hasOwnProperty(to) ? props.row[to] : ''
+            [from]: props.data && props.data.hasOwnProperty(to) ? props.data[to] : ''
           }))
           .reduce((acc, obj) => ({ ...acc, ...obj }), {})
       : props?.value
 
-    const displayFields = props?.column?.props?.displayField
+    const displayFields = props?.colDef?.props?.displayField
     if (Array.isArray(displayFields) && displayFields.length > 1) {
       const text = displayFields
         .filter(item => changes?.[item])
@@ -19,7 +19,7 @@ export default {
 
       return text ?? ''
     } else {
-      return changes?.[props.column.props.displayField]
+      return changes?.[props.colDef.props.displayField]
     }
   },
   edit

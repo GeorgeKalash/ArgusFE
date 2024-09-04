@@ -8,7 +8,7 @@ export default {
     ) : (
       <Icon
         icon='mdi:checkbox-blank-outline'
-        style={{ fontSize: 24, opacity: ((!row.saved && field === 'select') || props?.disabled) && 0.2 }}
+        // style={{ fontSize: 24, opacity: ((!row.saved && field === 'select') || props?.disabled) && 0.2 }}
       />
     )
   },

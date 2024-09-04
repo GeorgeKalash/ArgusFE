@@ -7,14 +7,14 @@ export default function ResourceComboBoxEdit({
   value,
   updateRow,
   update,
-  row,
+  data,
   store,
   setStore
 }) {
   let changes = props?.mapping
     ? props.mapping
         ?.map(({ from, to }) => ({
-          [from]: row[to] || ''
+          [from]: data[to] || ''
         }))
         .reduce((acc, obj) => ({ ...acc, ...obj }), {})
     : value
