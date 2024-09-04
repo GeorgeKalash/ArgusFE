@@ -73,7 +73,11 @@ const Table = ({
             data?.[col.field] &&
             formatDateDefault(data?.[col.field]) +
               ' ' +
-              getTimeInTimeZone(data?.[col.field], col?.props?.suffix, col?.props?.secondVisible || false) // ineed time zonee??
+              getTimeInTimeZone({
+                dateString: data?.[col.field],
+                suffixAmPm: col?.props?.suffix,
+                secondVisible: col?.props?.secondVisible || false
+              })
         }
       }
       if (col.type === 'number' || col?.type?.field === 'number') {

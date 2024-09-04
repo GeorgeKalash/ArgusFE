@@ -68,14 +68,30 @@ function formatTimestampToDate(timestamp) {
 
   return formattedDate
 }
+// function getTimeInTimeZone(dateString, timeZone = 0) {
+//   const timestamp = parseInt(dateString?.match(/\/Date\((\d+)\)\//)[1], 10)
+//   const currentDate = new Date(timestamp)
 
-function getTimeInTimeZone(dateString, suffixAmPm = '', secondVisible = true) {
-  const timestamp = parseInt(dateString?.match(/\/Date\((\d+)\)\//)[1], 10)
+//   currentDate.setHours(currentDate.getHours() + timeZone)
+//   function padNumber(num) {
+//     return num < 10 ? '0' + num : num
+//   }
+
+//   let newHours = padNumber(currentDate.getHours())
+//   let newMinutes = padNumber(currentDate.getMinutes())
+//   let newSeconds = padNumber(currentDate.getSeconds())
+
+//   return `${newHours}:${newMinutes}:${newSeconds}`
+// }
+
+function getTimeInTimeZone({ date, suffixAmPm = false, secondVisible = true, timeZoneValue = '' }) {
+  const timestamp = parseInt(date?.match(/\/Date\((\d+)\)\//)[1], 10)
   const currentDate = new Date(timestamp)
 
-  const timeZone = JSON.parse(window.localStorage.getItem('default') && window.localStorage.getItem('default'))[
-    'timeZone'
-  ]
+  console.log('dateString', suffixAmPm, date)
+  const timeZone =
+    timeZoneValue ||
+    JSON.parse(window.localStorage.getItem('default') && window.localStorage.getItem('default'))['timeZone']
 
   currentDate.setHours(currentDate.getHours() - timeZone)
   function padNumber(num) {
@@ -95,9 +111,8 @@ function getTimeInTimeZone(dateString, suffixAmPm = '', secondVisible = true) {
     newSeconds = String(newSeconds).padStart(2, '0')
   }
 
-  return `${newHours}:${newMinutes}${(secondVisible && ':' + newSeconds) || ''}${suffixAmPm && ' ' + suffix}`
+  return `${newHours}:${newMinutes}${(secondVisible && ':' + newSeconds) || ''}${(suffixAmPm && ' ' + suffix) || ''}`
 }
-
 const formatDate = dateString => {
   const date = new Date(dateString)
   const timestamp = date.getTime()
