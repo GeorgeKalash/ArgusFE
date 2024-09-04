@@ -10,6 +10,8 @@ const formatDateFromApi = date => {
   return timestamp ? new Date(timestamp) : null
 }
 
+//formatTimeFromApi deleted by mistake
+
 const formatDateFromApiInline = date => {
   const [day, month, year] = date.split('/')
   const parsedDate = new Date(year, month - 1, day)

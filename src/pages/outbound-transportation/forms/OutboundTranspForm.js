@@ -18,13 +18,15 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
-import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
+import { formatDateFromApi, formatDateToApi, formatTimeFromApi, getTimeInTimeZone } from 'src/lib/date-helper'
 import { useWindow } from 'src/windows'
 import { DeliveryRepository } from 'src/repositories/DeliveryRepository'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Box } from '@mui/system'
 import CustomTimePicker from 'src/components/Inputs/CustomTimePicker'
+import dayjs from 'dayjs'
+import { CopyAll } from '@mui/icons-material'
 
 export default function OutboundTranspForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -64,8 +66,9 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
       capacityVolume: null,
       wip: 1,
       wipName: '',
-      orders: [
-        {
+      orders: []
+
+      /*  {
           id: 1,
           tripId: recordId || 0,
           soId: null,
@@ -77,43 +80,42 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
           clientRef: '',
           soDate: null
         }
-      ]
+      ]*/
     },
     maxAccess,
     enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
+      departureTime: yup.string().required(),
       plantId: yup.number().required(),
       vehicleId: yup.string().required(),
-      driverId: yup.string().required(),
-      orders: yup
-        .array()
-        .of(
-          yup.object().shape({
-            soId: yup.number().required()
-          })
-        )
-        .required()
+      driverId: yup.string().required()
     }),
     onSubmit: async obj => {
       try {
         const copy = { ...obj }
         delete copy.orders
-        copy.date = formatDateToApi(copy.date)
-        copy.departureTime = formatDateToApi(copy.departureTime) //we should add time of selected timefield
-        copy.arrivalTime = formatDateToApi(copy.arrivalTime)
+        console.log('copyyy', copy)
+
+        //copy.date = formatDateToApi(copy.date)
+
+        /* const combinedDateTime = getShiftetDate(copy.departureTime, copy.departureTimeField)
+        copy.departureTime = formatDateToApi(combinedDateTime)
+
+        if (copy.arrivalTime) {
+          const arrCombinedDateTime = getShiftetDate(copy.arrivalTime, copy.arrivalTimeField)
+          copy.arrivalTime = formatDateToApi(arrCombinedDateTime)
+        }
 
         const headerResponse = await postRequest({
           extension: DeliveryRepository.Trip.set,
           record: JSON.stringify(copy)
         })
-        formik.setFieldValue('recordId', headerResponse.recordId) //fix and fix ref
-        console.log('first save')
-        console.log(headerResponse.recordId)
-        console.log(formik.values.recordId)
 
-        let filteredOrders = formik.values.orders.filter(order => order.soId !== null)
+        formik.setFieldValue('recordId', headerResponse.recordId)
 
+        let filteredOrders = formik.values.orders.filter(order => order.soId !== '')
+        console.log(filteredOrders)
         const soIdSet = new Set()
         let hasDuplicates = false
 
@@ -127,6 +129,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
 
         if (hasDuplicates) {
           console.log('Duplicate soId found. Operation aborted.')
+
           return
         }
 
@@ -135,9 +138,6 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
           tripId: headerResponse.recordId || 0,
           id: index + 1
         }))
-
-        console.log('lines saved')
-        console.log(filteredOrders)
 
         const data = {
           tripId: headerResponse.recordId || 0,
@@ -149,16 +149,25 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
           record: JSON.stringify(data)
         })
 
-        console.log(recordId)
-        console.log(formik.values.recordId)
-
-        !recordId ? toast.success(platformLabels.Added) : toast.success(platformLabels.Edited) //fix condition
         await refetchForm(headerResponse.recordId)
+        !formik.values.recordId ? toast.success(platformLabels.Added) : toast.success(platformLabels.Edited)
 
-        invalidate()
+        invalidate() */
       } catch (error) {}
     }
   })
+
+  function getShiftetDate(date, time) {
+    //add time field to date after modifying time by timezone
+    const originalDate = dayjs(date).startOf('day')
+    const selectedTime = formatDateToApi(time)
+    const adjustedTimeString = getTimeInTimeZone(selectedTime, +3)
+    const adjustedTime = dayjs(adjustedTimeString, 'HH:mm:ss')
+
+    const combinedDateTime = originalDate.set('hour', adjustedTime.hour()).set('minute', adjustedTime.minute())
+
+    return combinedDateTime
+  }
 
   const totalVol = formik.values.orders.reduce((volSum, row) => {
     // Parse qty as a number, assuming it's a numeric value
@@ -181,9 +190,15 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
   async function refetchForm(recordId) {
     const res = await getOutboundTransp(recordId)
     console.log(res)
-    res.record.date = formatDateFromApi(res.record.date) //fix time fields
+
+    //if (res.record.departureTime) res.record.departureTimeField = formatTimeFromApi(res.record.departureTime, -3)
+
+    //if (res.record.arrivalTime) res.record.arrivalTimeField = formatTimeFromApi(res.record.arrivalTime, -3)
+    res.record.date = formatDateFromApi(res.record.date)
     res.record.departureTime = formatDateFromApi(res.record.departureTime)
+    console.log(res.record.departureTime)
     res.record.arrivalTime = formatDateFromApi(res.record.arrivalTime)
+
     await getOrders(res.record)
   }
 
@@ -211,7 +226,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
         }
       })
     )
-
+    console.log(data)
     formik.setValues({
       ...data,
       orders: ordersList
@@ -382,6 +397,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
                     readOnly={isPosted || isClosed}
                     error={formik.touched.departureTime && Boolean(formik.errors.departureTime)}
                     maxAccess={maxAccess}
+                    required
                   />
                 </Grid>
                 <Grid item xs={4}>
@@ -412,7 +428,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
                     name='reference'
                     label={labels.reference}
                     value={formik.values.reference}
-                    readOnly={isPosted || isClosed}
+                    readOnly={editMode}
                     maxAccess={maxAccess}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('reference', '')}
@@ -430,6 +446,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
                     readOnly={isPosted || isClosed}
                     error={formik.touched.departureTimeField && Boolean(formik.errors.departureTimeField)}
                     maxAccess={maxAccess}
+
                     //renderInput={params => <CustomTextField {...params} />}
                   />
                 </Grid>
@@ -469,11 +486,17 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
                     name='arrivalTime'
                     label={labels.arrivalDate}
                     value={formik.values?.arrivalTime}
-                    onChange={formik.setFieldValue}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('arrivalTime', newValue)
+                      if (!newValue) {
+                        formik.setFieldValue('arrivalTimeField', '')
+                      }
+                    }}
                     onClear={() => formik.setFieldValue('arrivalTime', '')}
                     readOnly={isPosted || isClosed}
                     error={formik.touched.arrivalTime && Boolean(formik.errors.arrivalTime)}
                     maxAccess={maxAccess}
+
                     //affect time picker function //time picker
                   />
                 </Grid>
@@ -507,9 +530,10 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
                     value={formik.values?.arrivalTimeField}
                     onChange={formik.setFieldValue}
                     onClear={() => formik.setFieldValue('arrivalTimeField', '')}
-                    readOnly={isPosted || isClosed}
-                    error={formik.touched.arrivalTimeField && Boolean(formik.errors.departureTimeField)}
+                    readOnly={isPosted || isClosed || !formik.values?.arrivalTime}
+                    error={formik.touched.arrivalTimeField && Boolean(formik.errors.arrivalTimeField)}
                     maxAccess={maxAccess}
+
                     //renderInput={params => <CustomTextField {...params} />}
                   />
                 </Grid>
