@@ -69,7 +69,11 @@ const Table = ({
       if (col.type === 'dateTime') {
         return {
           ...col,
-          valueGetter: ({ data }) => formatDateTimeDefault(data?.[col.field]) // ineed time zonee??
+          valueGetter: ({ data }) =>
+            data?.[col.field] &&
+            formatDateDefault(data?.[col.field]) +
+              ' ' +
+              getTimeInTimeZone(data?.[col.field], col?.props?.suffix, col?.props?.secondVisible || false) // ineed time zonee??
         }
       }
       if (col.type === 'number' || col?.type?.field === 'number') {

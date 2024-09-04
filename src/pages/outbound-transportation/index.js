@@ -83,7 +83,10 @@ const OutboundTransp = () => {
       field: 'departureTime',
       headerName: _labels.departureDate,
       flex: 1,
-      type: 'dateTime'
+      type: 'dateTime',
+      props: {
+        suffix: true
+      }
     },
     {
       field: 'arrivalTime',
@@ -130,7 +133,6 @@ const OutboundTransp = () => {
   const edit = obj => {
     openForm(obj?.recordId)
   }
-
 
   async function openForm(recordId) {
     stack({

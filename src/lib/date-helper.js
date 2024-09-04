@@ -10,8 +10,6 @@ const formatDateFromApi = date => {
   return timestamp ? new Date(timestamp) : null
 }
 
-//formatTimeFromApi deleted by mistake
-
 const formatDateFromApiInline = date => {
   const [day, month, year] = date.split('/')
   const parsedDate = new Date(year, month - 1, day)
@@ -60,21 +58,6 @@ function formatDateDefault(date) {
   return formattedDate
 }
 
-function formatDateTimeDefault(date) {
-  if (!date) return
-
-  const formats = JSON.parse(window.localStorage.getItem('default') && window.localStorage.getItem('default'))[
-    'dateFormat'
-  ]
-
-  const timestamp = date instanceof Date ? date.getTime() : parseInt(date?.match(/\d+/)[0], 10)
-
-  const fullFormat = `${formats} hh:mm a`
-  const formattedDate = format(new Date(timestamp), fullFormat)
-
-  return formattedDate
-}
-
 function formatTimestampToDate(timestamp) {
   if (!timestamp) return
 
@@ -85,11 +68,16 @@ function formatTimestampToDate(timestamp) {
 
   return formattedDate
 }
-function getTimeInTimeZone(dateString, timeZone = 0) {
+
+function getTimeInTimeZone(dateString, suffixAmPm = '', secondVisible = true) {
   const timestamp = parseInt(dateString?.match(/\/Date\((\d+)\)\//)[1], 10)
   const currentDate = new Date(timestamp)
 
-  currentDate.setHours(currentDate.getHours() + timeZone)
+  const timeZone = JSON.parse(window.localStorage.getItem('default') && window.localStorage.getItem('default'))[
+    'timeZone'
+  ]
+
+  currentDate.setHours(currentDate.getHours() - timeZone)
   function padNumber(num) {
     return num < 10 ? '0' + num : num
   }
@@ -97,8 +85,17 @@ function getTimeInTimeZone(dateString, timeZone = 0) {
   let newHours = padNumber(currentDate.getHours())
   let newMinutes = padNumber(currentDate.getMinutes())
   let newSeconds = padNumber(currentDate.getSeconds())
+  const suffix = newHours >= 12 ? 'pm' : 'am'
 
-  return `${newHours}:${newMinutes}:${newSeconds}`
+  if (suffixAmPm) {
+    const adjustedHours = newHours % 12 || 12
+
+    newHours = String(adjustedHours).padStart(2, '0')
+    newMinutes = String(newMinutes).padStart(2, '0')
+    newSeconds = String(newSeconds).padStart(2, '0')
+  }
+
+  return `${newHours}:${newMinutes}${(secondVisible && ':' + newSeconds) || ''}${suffixAmPm && ' ' + suffix}`
 }
 
 const formatDate = dateString => {
@@ -116,6 +113,5 @@ export {
   formatTimestampToDate,
   formatDateFromApiInline,
   getTimeInTimeZone,
-  formatDate,
-  formatDateTimeDefault
+  formatDate
 }
