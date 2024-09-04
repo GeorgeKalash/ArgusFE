@@ -11,9 +11,11 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import IdCategoryForm from './forms/IdCategoryForm'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const IdCategories = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
@@ -68,7 +70,7 @@ const IdCategories = () => {
         maxAccess: access
       },
       width: 600,
-      height: 330,
+      height: 400,
       title: _labels.idCategory
     })
   }
@@ -79,7 +81,7 @@ const IdCategories = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
   }
 
   return (

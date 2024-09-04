@@ -51,8 +51,8 @@ const RequestsProvider = ({ showLoading = false, children }) => {
 
   const getRequest = async body => {
     const accessToken = await getAccessToken()
-
-    !loading && setLoading(true)
+    const disableLoading = body.disableLoading || false
+    !disableLoading && !loading && setLoading(true)
 
     return axios({
       method: 'GET',
@@ -64,7 +64,7 @@ const RequestsProvider = ({ showLoading = false, children }) => {
       }
     })
       .then(res => {
-        debouncedCloseLoading()
+        !disableLoading && debouncedCloseLoading()
 
         return res.data
       })
@@ -123,6 +123,7 @@ const RequestsProvider = ({ showLoading = false, children }) => {
 
     var bodyFormData = new FormData()
     bodyFormData.append('record', body.record)
+    body?.file && bodyFormData.append('file', body.file)
 
     return axios({
       method: 'POST',

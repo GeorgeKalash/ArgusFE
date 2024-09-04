@@ -15,6 +15,7 @@ import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { Checkbox } from '@mui/material'
 import toast from 'react-hot-toast'
+import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
 export default function CurrencyTrading() {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -29,7 +30,7 @@ export default function CurrencyTrading() {
         recordId: recordId || null
       },
       width: 1000,
-      height: 780,
+      height: 700,
       title: labels.receiptVoucher
     })
   }
@@ -45,26 +46,30 @@ export default function CurrencyTrading() {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: FinancialRepository.ReceiptVouchers.qry,
+    endpointId: FinancialRepository.ReceiptVouchers.page,
     datasetId: ResourceIds.ReceiptVoucher,
     filter: {
-      filterFn: fetchWithSearch
+      filterFn: fetchWithFilter
     }
   })
-  async function fetchWithSearch({ filters }) {
-    try {
+
+  async function fetchWithFilter({ filters, pagination }) {
+    if (filters?.qry) {
       return await getRequest({
         extension: FinancialRepository.ReceiptVouchers.snapshot,
         parameters: `_filter=${filters.qry}`
       })
-    } catch (e) {}
+    } else {
+      return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+    }
   }
+
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 50, params } = options
     try {
       const response = await getRequest({
-        extension: FinancialRepository.ReceiptVouchers.qry,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=&_sortBy=recordId desc`
+        extension: FinancialRepository.ReceiptVouchers.page,
+        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}&_sortBy=recordId desc`
       })
 
       return { ...response, _startAt: _startAt }
@@ -95,9 +100,28 @@ export default function CurrencyTrading() {
     } catch (e) {}
   }
 
+  const onApply = ({ search, rpbParams }) => {
+    if (!search && rpbParams.length === 0) {
+      clearFilter('params')
+    } else if (!search) {
+      filterBy('params', rpbParams)
+    } else {
+      filterBy('qry', search)
+    }
+    refetch()
+  }
+
+  const onSearch = value => {
+    filterBy('qry', value)
+  }
+
+  const onClear = () => {
+    clearFilter('qry')
+  }
+
   const columns = [
     {
-      field: 'Date',
+      field: 'date',
       headerName: labels.date,
       flex: 1,
       type: 'date'
@@ -145,17 +169,13 @@ export default function CurrencyTrading() {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar
-          maxAccess={access}
+        <RPBGridToolbar
           onAdd={add}
-          onSearch={value => {
-            filterBy('qry', value)
-          }}
-          onSearchClear={() => {
-            clearFilter('qry')
-          }}
-          labels={labels}
-          inputSearch={true}
+          maxAccess={access}
+          onApply={onApply}
+          onSearch={onSearch}
+          onClear={onClear}
+          reportName={'FIRV'}
         />
       </Fixed>
       <Grow>

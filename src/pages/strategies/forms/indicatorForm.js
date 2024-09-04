@@ -18,9 +18,7 @@ const IndicatorForm = ({
   editMode,
   height,
   maxAccess,
-  store,
-  onApply,
-  setStore
+  store
 }) => {
   const [valueGridData, setValueGridData] = useState([])
   const { postRequest } = useContext(RequestsContext)

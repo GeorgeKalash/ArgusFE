@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
@@ -47,8 +47,18 @@ const States = () => {
 
   const columns = [
     {
+      field: 'reference',
+      headerName: _labels.reference,
+      flex: 1
+    },
+    {
       field: 'name',
       headerName: _labels.name,
+      flex: 1
+    },
+    {
+      field: 'flName',
+      headerName: _labels.flName,
       flex: 1
     },
     {
@@ -75,7 +85,7 @@ const States = () => {
         maxAccess: access
       },
       width: 500,
-      height: 300,
+      height: 400,
       title: _labels.State
     })
   }

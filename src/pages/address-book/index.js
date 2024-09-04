@@ -4,12 +4,12 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
-import AddressForm from 'src/components/Shared/AddressForm'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import AddressBookForm from './forms/AddressBookForm'
 
 const AddressBook = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -31,7 +31,8 @@ const AddressBook = () => {
     refetch,
     labels: _labels,
     paginationParameters,
-    access
+    access,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: SystemRepository.Address.qry,
@@ -93,31 +94,23 @@ const AddressBook = () => {
     }
   ]
 
-  const invalidate = useInvalidate({
-    endpointId: SystemRepository.Address.qry
-  })
-
   const editAddress = obj => {
-    openForm(obj)
+    openForm(obj?.recordId)
   }
 
-  function openForm(obj) {
+  function openForm(id) {
     stack({
-      Component: AddressForm,
+      Component: AddressBookForm,
       props: {
-        labels: _labels,
-        address: obj,
-        recordId: obj.recordId,
-        onSubmit: onSubmitFunction
+        _labels: _labels,
+        access,
+        recordId: id,
+        invalidate
       },
       width: 600,
       height: 600,
       title: _labels.address
     })
-  }
-
-  const onSubmitFunction = async obj => {
-    invalidate()
   }
 
   return (

@@ -16,11 +16,13 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { useError } from 'src/error'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const CashTransfer = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
+  const { platformLabels } = useContext(ControlContext)
 
   const {
     query: { data },
@@ -99,14 +101,14 @@ const CashTransfer = () => {
     } else {
       if (plantId === '') {
         stackError({
-          message: `This user does not have a default plant.`
+          message: platformLabels.mustHaveDefaultPlant
         })
 
         return
       }
       if (cashAccountId === '') {
         stackError({
-          message: `This user does not have a default cash account.`
+          message: platformLabels.mustHaveDefaultCashAcc
         })
 
         return
@@ -176,7 +178,7 @@ const CashTransfer = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
   }
 
   const addCashTFR = () => {

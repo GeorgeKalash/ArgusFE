@@ -1,9 +1,10 @@
 import { useEffect, useState, useContext } from 'react'
 import { Grid } from '@mui/material'
-import * as yup from 'yup'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import { InventoryRepository } from 'src/repositories/InventoryRepository'
+import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { useForm } from 'src/hooks/form'
 import FormShell from './FormShell'
 import { apiMappings, COMBOBOX, LOOKUP } from './apiMappings'
@@ -15,15 +16,17 @@ import { useError } from 'src/error'
 
 const formatDateTo = value => {
   const date = new Date(value)
-  const formattedDate = date.toISOString().slice(0, 10).replace(/-/g, '')
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
 
-  return formattedDate
+  return `${year}${month}${day}`
 }
 
 const formatDateFrom = value => {
   let timestamp
 
-  if (value.indexOf('-') > -1) {
+  if (value.indexOf('-') > -1 || value.indexOf('/') > -1) {
     timestamp = new Date(value.toString()).getTime()
   } else {
     const year = value.slice(0, 4)
@@ -45,8 +48,10 @@ const GetLookup = ({ field, formik }) => {
         endpointId={apiDetails.endpoint}
         parameters={apiDetails.parameters}
         firstFieldWidth={apiDetails.firstFieldWidth}
-        valueField={apiDetails.displayField}
-        displayField={apiDetails.valueField}
+        valueField={apiDetails.firstField}
+        displayField={apiDetails.secondField}
+        secondDisplayField={apiDetails.secondDisplayField}
+        columnsInDropDown={apiDetails.columnsInDropDown}
         name={field.key}
         displayFieldWidth={apiDetails.displayFieldWidth}
         required={field.mandatory}
@@ -55,6 +60,13 @@ const GetLookup = ({ field, formik }) => {
         firstValue={formik.values.parameters?.[field.id]?.display}
         secondValue={formik.values.parameters?.[field.id]?.display2}
         onChange={(event, newValue) => {
+          const display = Array.isArray(apiDetails?.firstField)
+            ? apiDetails?.firstField
+                ?.map(header => newValue?.[header] && newValue?.[header]?.toString())
+                ?.filter(item => item)
+                ?.join(' ')
+            : newValue?.[apiDetails.firstField]
+
           formik.setFieldValue(
             `parameters[${field.id}]`,
             newValue?.[apiDetails.valueOnSelection]
@@ -63,8 +75,8 @@ const GetLookup = ({ field, formik }) => {
                   fieldKey: field.key,
                   value: newValue?.[apiDetails.valueOnSelection] || '',
                   caption: field.caption,
-                  display: newValue?.[apiDetails.displayField],
-                  display2: newValue?.[apiDetails.valueField]
+                  display: display ? display : newValue?.[apiDetails.firstField],
+                  display2: newValue?.[apiDetails.secondField]
                 }
               : ''
           )
@@ -75,10 +87,12 @@ const GetLookup = ({ field, formik }) => {
   )
 }
 
-const GetComboBox = ({ field, formik, paramsArray }) => {
+const GetComboBox = ({ field, formik, rpbParams }) => {
   const apiDetails = field?.apiDetails
+  let newParams = apiDetails?.parameters
+
   useEffect(() => {
-    if (!formik.values?.parameters?.[field.id]?.value && field.value && paramsArray?.length < 1) {
+    if (!formik.values?.parameters?.[field.id]?.value && field.value && rpbParams?.length < 1) {
       formik.setFieldValue(`parameters[${field.id}]`, {
         fieldId: field.id,
         fieldKey: field.key,
@@ -89,12 +103,20 @@ const GetComboBox = ({ field, formik, paramsArray }) => {
     }
   }, [])
 
+  if (apiDetails?.endpoint === SystemRepository.DocumentType.qry) {
+    newParams += `&_dgId=${field?.data}`
+  } else if (apiDetails?.endpoint === InventoryRepository.Dimension.qry) {
+    newParams = `_dimension=${field?.data}`
+  } else if (apiDetails?.endpoint === FinancialRepository.FIDimension.qry) {
+    newParams = `_dimension=${field?.data}`
+  }
+
   return (
     <Grid item xs={12} key={field.id}>
       {field?.classId ? (
         <ResourceComboBox
           endpointId={apiDetails.endpoint}
-          parameters={apiDetails?.parameters}
+          parameters={newParams}
           name={`parameters[${field.id}]`}
           label={field.caption}
           valueField={apiDetails.valueField}
@@ -154,15 +176,15 @@ const GetComboBox = ({ field, formik, paramsArray }) => {
   )
 }
 
-const GetDate = ({ field, formik, paramsArray }) => {
+const GetDate = ({ field, formik, rpbParams }) => {
   useEffect(() => {
-    if (!formik.values?.parameters?.[field.id]?.value && field.value && paramsArray?.length < 1) {
+    if (!formik.values?.parameters?.[field.id]?.value && field.value && rpbParams?.length < 1) {
       formik.setFieldValue(`parameters[${field.id}]`, {
         fieldId: field.id,
         fieldKey: field.key,
-        value: new Date(field.value.toString())?.getTime(),
+        value: new Date(field.value.toString())?.getTime() || '',
         caption: field.caption,
-        display: field.value
+        display: formatDateDefault(new Date(field?.value?.toString()))
       })
     }
   }, [])
@@ -173,7 +195,7 @@ const GetDate = ({ field, formik, paramsArray }) => {
         name={`parameters[${field.id}]`}
         label={field.caption}
         value={formik.values?.parameters?.[field.id]?.value}
-        required={true}
+        required={field.mandatory}
         onChange={(name, newValue) => {
           formik.setFieldValue(`parameters[${field.id}]`, {
             fieldId: field.id,
@@ -183,7 +205,7 @@ const GetDate = ({ field, formik, paramsArray }) => {
             display: formatDateDefault(newValue)
           })
         }}
-        error={formik.touched?.parameters?.[field?.id] && Boolean(formik.errors?.parameters?.[field?.id])}
+        error={formik.errors?.parameters?.[field?.id] && Boolean(formik.errors?.parameters?.[field?.id])}
         onClear={() => formik.setFieldValue(`parameters[${field.id}]`, undefined)}
       />
     </Grid>
@@ -199,13 +221,15 @@ const GetTextField = ({ field, formik }) => {
         value={formik.values?.parameters?.[field.id]?.value || null}
         required={field.mandatory}
         onChange={e => {
-          formik.setFieldValue(`parameters[${field.id}]`, {
-            fieldId: field.id,
-            fieldKey: field.key,
-            value: e.target.value,
-            caption: field.caption,
-            display: e.target.value
-          })
+          e.target.value != ''
+            ? formik.setFieldValue(`parameters[${field.id}]`, {
+                fieldId: field.id,
+                fieldKey: field.key,
+                value: e.target.value,
+                caption: field.caption,
+                display: e.target.value
+              })
+            : formik.setFieldValue(`parameters[${field.id}]`, '')
         }}
         error={Boolean(formik.errors?.parameters?.[field.id])}
         onClear={() => formik.setFieldValue(`parameters[${field.id}]`, '')}
@@ -214,7 +238,7 @@ const GetTextField = ({ field, formik }) => {
   )
 }
 
-const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, window }) => {
+const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window }) => {
   const { getRequest } = useContext(RequestsContext)
   const [items, setItems] = useState([])
   const [parameters, setParameters] = useState([])
@@ -265,20 +289,23 @@ const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, windo
     enableReinitialize: true,
     validateOnChange: true,
     onSubmit: values => {
+      setRpbParams([])
+
       const processedArray = values?.parameters
         ?.filter((item, index) => item?.fieldId && item?.value != null)
         ?.reduce((acc, item) => {
           if (item?.fieldId) {
             acc[item.fieldId] = {
               ...item,
-              value: item.fieldKey === 'date' ? formatDateTo(item.value) : item.value
+              value:
+                item.fieldKey === 'date' || item.fieldKey?.indexOf('Date') > -1 ? formatDateTo(item.value) : item.value
             }
           }
 
           return acc
         }, [])
 
-      setParamsArray(processedArray)
+      setRpbParams(processedArray)
       window.close()
     }
   })
@@ -310,10 +337,10 @@ const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, windo
   }, [parameters])
 
   useEffect(() => {
-    const mappedData = paramsArray.reduce((acc, item) => {
+    const mappedData = rpbParams.reduce((acc, item) => {
       acc[item?.fieldId] = {
         ...item,
-        value: item.fieldKey === 'date' ? formatDateFrom(item.value) : item.value
+        value: item.fieldKey === 'date' || item.fieldKey?.indexOf('Date') > -1 ? formatDateFrom(item.value) : item.value
       }
 
       return acc
@@ -327,15 +354,15 @@ const ReportParameterBrowser = ({ reportName, setParamsArray, paramsArray, windo
   }, [reportName])
 
   return (
-    <FormShell form={formik} infoVisible={false}>
+    <FormShell form={formik} infoVisible={false} isSavedClear={false}>
       <Grid container spacing={2} sx={{ px: 4, pt: 2 }}>
         {items?.map(item => {
           if (item.controlType === 5 && item.apiDetails?.type === LOOKUP) {
             return <GetLookup key={item.fieldId} formik={formik} field={item} />
           } else if (item.controlType === 5 && item.apiDetails?.type === COMBOBOX) {
-            return <GetComboBox key={item.fieldId} formik={formik} field={item} paramsArray={paramsArray} />
+            return <GetComboBox key={item.fieldId} formik={formik} field={item} rpbParams={rpbParams} />
           } else if (item.controlType === 4) {
-            return <GetDate key={item.fieldId} formik={formik} field={item} paramsArray={paramsArray} />
+            return <GetDate key={item.fieldId} formik={formik} field={item} rpbParams={rpbParams} />
           } else if (item.controlType === 1) {
             return <GetTextField key={item.fieldId} formik={formik} field={item} apiDetails={item.apiDetails} />
           }

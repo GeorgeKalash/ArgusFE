@@ -86,6 +86,13 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'Correspondent',
+    label: platformLabels.Correspondent,
+    image: 'person.png',
+    color: '#CECECE',
+    main: false
+  },
+  {
     key: 'Print',
     label: platformLabels.Print,
     color: '#231f20',
@@ -128,10 +135,24 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'Add Client Relation',
+    label: platformLabels.addClientRelation,
+    color: '#4eb558',
+    image: 'clientRelations.png',
+    main: false
+  },
+  {
     key: 'GL',
     label: platformLabels.GL,
     color: '#231f20',
     image: 'gl.png',
+    main: false
+  },
+  {
+    key: 'FI Trx',
+    label: platformLabels.FinTrx,
+    color: '#3E048C',
+    image: 'popup-window.png',
     main: false
   },
   {
@@ -176,6 +197,24 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'OpenRPB',
+    label: platformLabels.OpenRPB,
+    color: '#231F20',
+    main: false
+  },
+  {
+    key: 'Refresh',
+    label: platformLabels.Refresh,
+    color: '#231F20',
+    main: false
+  },
+  {
+    key: 'GO',
+    label: platformLabels.Apply,
+    color: '#231F20',
+    main: false
+  },
+  {
     key: 'Clear',
     label: platformLabels.Clear,
     condition: 'isCleared',
@@ -183,6 +222,13 @@ export const getButtons = platformLabels => [
     color: '#f44336',
     image: 'clear.png',
     main: true
+  },
+  {
+    key: 'Audit',
+    label: platformLabels.Audit,
+    color: '#231f20',
+    image: 'info.png',
+    main: false
   },
   {
     key: 'Info',
@@ -195,6 +241,16 @@ export const getButtons = platformLabels => [
     main: true
   },
   {
+    key: 'saveClear',
+    label: platformLabels.saveClear,
+    condition: 'isSavedClear',
+    onClick: 'onSaveClear',
+    color: '#231f20',
+    image: 'saveclear.png',
+    main: true,
+    disabled: 'disabledSavedClear'
+  },
+  {
     key: 'Submit',
     label: platformLabels.Submit,
     condition: 'isSaved',
@@ -203,5 +259,12 @@ export const getButtons = platformLabels => [
     disabled: 'disabledSubmit || isPosted || isClosed',
     image: 'save.png',
     main: true
+  },
+  {
+    key: 'Import',
+    label: platformLabels.Import,
+    color: '#000',
+    image: 'import.png',
+    main: false
   }
 ]

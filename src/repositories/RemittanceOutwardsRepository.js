@@ -18,6 +18,7 @@ export const RemittanceOutwardsRepository = {
   },
   OutwardsTransfer: {
     qry: service + 'qryOW',
+    qry2: service + 'qryOW2',
     page: service + 'pageOW',
     get: service + 'getOW',
     get2: service + 'get2OW',
@@ -29,11 +30,21 @@ export const RemittanceOutwardsRepository = {
     post: service + 'postOW',
     snapshot: service + 'snapshotOW'
   },
+  InwardsTransfer: {
+    get: service + 'getIW',
+    set: service + 'setIW',
+    del: service + 'delIW',
+    snapshot: service + 'snapshotIW',
+    close: service + 'closeIW',
+    reopen: service + 'reopenIW'
+  },
   Beneficiary: {
     qry: service + 'qryBEN',
+    qry2: service + 'qryBEN2',
     get: service + 'getBEN',
     del: service + 'delBEN',
-    snapshot: service + 'snapshotBEN'
+    snapshot: service + 'snapshotBEN',
+    snapshot2: service + 'snapshotBEN2 '
   },
   BeneficiaryBank: {
     qry: service + 'qryBEB',
@@ -46,5 +57,56 @@ export const RemittanceOutwardsRepository = {
     get: service + 'getBEC',
     set: service + 'set2BEC',
     del: service + 'delBEC'
+  },
+  FeeSchedule: {
+    qry: service + 'qryFSC',
+    get: service + 'getFSC',
+    set: service + 'setFSC',
+    del: service + 'delFSC'
+  },
+  FeeScheduleDetail: {
+    qry: service + 'qryFSD',
+    get: service + 'getFSD',
+    set2: service + 'set2FSD',
+    del: service + 'delFSD'
+  },
+  FeeScheduleMap: {
+    qry: service + 'qryFSM',
+    get: service + 'getFSM',
+    set: service + 'setFSM',
+    del: service + 'delFSM'
+  },
+  OutwardGLInformation: {
+    get: service + 'getOWI'
+  },
+  AutoPostExclusion: {
+    qry: service + 'qryAPX',
+    get: service + 'getAPX',
+    set: service + 'setAPX',
+    del: service + 'delAPX'
+  },
+  OutwardsModification: {
+    qry: service + 'qryOWM',
+    page: service + 'pageOWM',
+    snapshot: service + 'snapshotOWM',
+    get: service + 'getOWM',
+    set2: service + 'set2OWM',
+    del: service + 'delOWM',
+    post: service + 'postOWM',
+    reopen: service + 'reopenOWM',
+    close: service + 'closeOWM'
+  },
+  Postoutwards: {
+    qry: service + 'qryOW3',
+    post2: service + 'post2OW'
+  },
+  OutwardsReturn: {
+    page: service + 'pageOWR',
+    get: service + 'getOWR',
+    set: service + 'setOWR',
+  },
+  CorrespondentOutwards: {
+    qry: service + 'qryACE',
+    set: service + 'setACE'
   }
 }

@@ -1,22 +1,10 @@
-// ** React Imports
 import { useState, useContext } from 'react'
-
 import { useWindow } from 'src/windows'
-
-// ** MUI Imports
-import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
-
-import { useEffect } from 'react'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-
 import CodeForm from './CodeForm'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useResourceQuery } from 'src/hooks/resource'

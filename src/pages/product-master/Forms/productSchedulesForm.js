@@ -30,8 +30,7 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
           yup.object().shape({
             countryId: yup.string().required('currency  is required'),
             currencyId: yup.string().required('Country  is required'),
-            dispersalId: yup.string().required('Dispersal Type  is required'),
-            plantId: yup.string().required('plantId Type  is required')
+            dispersalId: yup.string().required('Dispersal Type  is required')
           })
         )
         .required('schedules array is required')
@@ -42,7 +41,7 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
           id: 1,
           productId: pId,
           seqNo: 1,
-          plantId: '',
+          plantId: 0,
           plantRef: '',
           plantName: '',
           countryId: '',
@@ -139,7 +138,7 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
         endpointId: SystemRepository.Plant.qry,
         valueField: 'recordId',
         displayField: 'reference',
-        displayFieldWidth: 4,
+        displayFieldWidth: 2,
         mapping: [
           { from: 'recordId', to: 'plantId' },
           { from: 'name', to: 'plantName' },
@@ -227,6 +226,8 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
         valueField: 'key',
         displayField: 'value',
         displayFieldWidth: 2,
+        readOnly: true,
+        refresh: false,
         mapping: [
           { from: 'key', to: 'dispersalType' },
           { from: 'value', to: 'dispersalTypeName' },

@@ -1,14 +1,14 @@
 import { useContext } from 'react'
-
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
-import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import FiOpeningBalancesForm from './forms/FiOpeningBalancesForm'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useWindow } from 'src/windows'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
 const FiOpeningBalance = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -120,16 +120,14 @@ const FiOpeningBalance = () => {
     })
   }
 
+  const onApply = ({ rpbParams }) => {
+    filterBy('params', rpbParams)
+    refetch()
+  }
+
   return (
-    <>
-      <GridToolbar
-        onAdd={add}
-        maxAccess={access}
-        reportName='FIOBA'
-        onGo={({ params }) => {
-          filterBy('params', params), refetch()
-        }}
-      />
+    <VertLayout>
+      <RPBGridToolbar hasSearch={false} onAdd={add} maxAccess={access} onApply={onApply} reportName={'FIOBA'} />
       <Table
         columns={columns}
         gridData={data}
@@ -143,7 +141,7 @@ const FiOpeningBalance = () => {
         maxAccess={access}
         refetch={refetch}
       />
-    </>
+    </VertLayout>
   )
 }
 

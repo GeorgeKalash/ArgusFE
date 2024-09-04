@@ -15,7 +15,7 @@ import { Fixed } from './Layouts/Fixed'
 import { Grow } from './Layouts/Grow'
 import { VertLayout } from './Layouts/VertLayout'
 
-export const InterfacesForm = ({ recordId, expanded, height, resourceId, name }) => {
+export const InterfacesForm = ({ recordId, resourceId, name }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getAllKvsByDataset } = useContext(CommonContext)
 
@@ -45,10 +45,14 @@ export const InterfacesForm = ({ recordId, expanded, height, resourceId, name })
         ...rest
       }))
 
+      const hasEmptyRows = rows.every(row => row.interfaceId === '')
+
+      const resultRows = hasEmptyRows ? [] : rows
+
       const data = {
         recordId: recordId,
         resourceId: resourceId,
-        items: rows
+        items: resultRows
       }
 
       const res = await postRequest({
@@ -134,18 +138,18 @@ export const InterfacesForm = ({ recordId, expanded, height, resourceId, name })
   return (
     <FormShell form={formik} resourceId={resourceId} maxAccess={access} infoVisible={false} editMode={true}>
       <VertLayout>
-      <Grow>
-        <Grid sx={{width:'50%'}}>
-          <CustomTextField label={_labels.name} value={name} readOnly />
-        </Grid>
-        <DataGrid
-          onChange={value => formik.setFieldValue('rows', value)}
-          value={formik.values.rows}
-          error={formik.errors.rows}
-          columns={columns}
-          allowDelete={false}
-        />
-      </Grow>
+        <Grow>
+          <Grid sx={{ width: '50%' }}>
+            <CustomTextField label={_labels.name} value={name} readOnly />
+          </Grid>
+          <DataGrid
+            onChange={value => formik.setFieldValue('rows', value)}
+            value={formik.values.rows}
+            error={formik.errors.rows}
+            columns={columns}
+            allowDelete={false}
+          />
+        </Grow>
       </VertLayout>
     </FormShell>
   )

@@ -2,6 +2,7 @@ import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import { useContext, useEffect, useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { CommonContext } from 'src/providers/CommonContext'
+import { useCacheDataContext } from 'src/providers/CacheDataContext'
 
 export default function ResourceComboBox({
   endpointId,
@@ -11,53 +12,93 @@ export default function ResourceComboBox({
   values = {},
   parameters = '_filter=',
   filter = () => true,
+  dataGrid,
   value,
   reducer,
+  refresh,
   ...rest
 }) {
   const { store: data } = rest
-  const { getRequest } = useContext(RequestsContext)
 
+  const { getRequest } = useContext(RequestsContext)
+  const { cacheStore = {}, updateStore = () => {} } = useCacheDataContext() || {}
   const { getAllKvsByDataset } = useContext(CommonContext)
 
   const [store, setStore] = useState([])
+  const [isLoading, setIsLoading] = useState(false)
+
+  const apiUrl = endpointId || datasetId
 
   useEffect(() => {
-    if (parameters)
-      if (datasetId)
+    if (!cacheStore[apiUrl]) fetchData()
+  }, [parameters])
+
+  const fetchData = () => {
+    if (parameters && !data && (datasetId || endpointId)) {
+      setIsLoading(true)
+      if (datasetId) {
         getAllKvsByDataset({
           _dataset: datasetId,
-          callback: setStore
+          callback: list => {
+            if (dataGrid) {
+              updateStore(datasetId, list)
+            } else {
+              setStore(list)
+            }
+          }
         })
-      else
-        endpointId &&
-          getRequest({
-            extension: endpointId,
-            parameters
+        setIsLoading(false)
+      } else if (endpointId) {
+        getRequest({
+          extension: endpointId,
+          parameters,
+          disableLoading: true
+        })
+          .then(res => {
+            let data = []
+            if (typeof reducer === 'function') {
+              data = reducer(res)
+            } else {
+              data = res.list
+            }
+
+            setIsLoading(false)
+            if (dataGrid) updateStore(endpointId, data)
+            else setStore(data)
           })
-            .then(res => {
-              let data = []
-              if (typeof reducer === 'function') {
-                data = reducer(res)
-              } else {
-                data = res.list
-              }
-              setStore(data)
-            })
-            .catch(error => {})
-  }, [parameters])
+          .catch(error => {})
+      }
+    }
+  }
 
   let filteredStore = []
   try {
-    filteredStore = data ? data : store.filter(filter)
-  } catch (error) {}
+    filteredStore = data ? data : dataGrid ? cacheStore[apiUrl]?.filter?.(filter) : store?.filter?.(filter)
+  } catch (error) {
+    console.error(error)
+  }
 
   const _value =
     (typeof values[name] === 'object'
       ? values[name]
-      : (datasetId
-          ? filteredStore.find(item => item[valueField] === values[name]?.toString())
-          : filteredStore.find(item => item[valueField] === (values[name] || values))) ?? '') || value
+      : datasetId
+      ? filteredStore?.find(item => item[valueField] === values[name]?.toString())
+      : filteredStore?.find(item => item[valueField] === (values[name] || values))) ||
+    value ||
+    ''
 
-  return <CustomComboBox {...{ ...rest, name, store: filteredStore, valueField, value: _value, name }} />
+  return (
+    <CustomComboBox
+      {...{
+        ...rest,
+        refresh,
+        fetchData,
+        name,
+        store: (dataGrid ? cacheStore[apiUrl] : filteredStore) || data,
+        valueField,
+        value: _value,
+        isLoading
+      }}
+    />
+  )
 }

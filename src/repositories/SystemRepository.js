@@ -45,7 +45,8 @@ export const SystemRepository = {
     page: service + 'pageCU',
     get: service + 'getCU',
     set: service + 'setCU',
-    del: service + 'delCU'
+    del: service + 'delCU',
+    snapshot: service + 'snapshotCU'
   },
   City: {
     qry: service + 'qryCIT',
@@ -60,7 +61,8 @@ export const SystemRepository = {
     page: service + 'pageCO',
     get: service + 'getCO',
     set: service + 'setCO',
-    del: service + 'delCO'
+    del: service + 'delCO',
+    snapshot: service + 'snapshotCO'
   },
   State: {
     qry: service + 'qryST',
@@ -147,9 +149,6 @@ export const SystemRepository = {
     get: service + 'getDE',
     set: service + 'set2DE'
   },
-  FiscalYears: {
-    qry: service + 'qryFY'
-  },
   ModuleClassRES: {
     qry: service + 'qryRES'
   },
@@ -167,6 +166,15 @@ export const SystemRepository = {
     get: service + 'getRMK',
     del: service + 'delRMK'
   },
+  CompanyInfo: {
+    get: service + 'getCOM',
+    set: service + 'setCOM'
+  },
+  Attachment: {
+    get: service + 'getAT',
+    set: service + 'setAT',
+    del: service + 'delAT'
+  },
   SystemChecks: {
     qry: service + 'qryCHK',
     set: service + 'set2CHK'
@@ -176,5 +184,42 @@ export const SystemRepository = {
   },
   TimeZone: {
     get: service + 'getTZN'
+  },
+  Batch: {
+    snapshot: service + 'snapshotBAT'
+  },
+  ETL: {
+    get: service + 'getETL'
+  },
+  THD: {
+    get: service + 'getTHD'
+  },
+  SMSRequest: {
+    qry: service + 'qrySMS'
+  },
+  FiscalYears: {
+    page: service + 'pageFY',
+    qry: service + 'qryFY',
+    set: service + 'setFY',
+    get: service + 'getFY',
+    del: service + 'delFY'
+  },
+  Period: {
+    qry: service + 'qryFPE'
+  },
+  FiscalPeriodPack: {
+    set2: service + 'set2FPE'
+  },
+  FiscalModulePack: {
+    set2: service + 'set2FMO'
+  },
+  FiscalModule: {
+    qry: service + 'qryFMO'
+  },
+  GovernmentOrganization: {
+    qry: service + 'qryGO',
+    set: service + 'setGO',
+    get: service + 'getGO',
+    del: service + 'delGO'
   }
 }

@@ -2,14 +2,17 @@
 import { useRef, useState } from 'react'
 
 // ** MUI Imports
-import { InputAdornment, IconButton, Box } from '@mui/material'
+import { InputAdornment, IconButton } from '@mui/material'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import ClearIcon from '@mui/icons-material/Clear'
 import EventIcon from '@mui/icons-material/Event'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
+import { PickersActionBar } from '@mui/x-date-pickers/PickersActionBar'
 
 import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
+
+import PopperComponent from '../Shared/Popper/PopperComponent'
 
 const CustomDatePicker = ({
   name,
@@ -109,6 +112,9 @@ const CustomDatePicker = ({
             error: error,
             helperText: helperText,
             InputProps: {
+              inputProps: {
+                tabIndex: _readOnly ? -1 : 0 // Prevent focus on the input field
+              },
               endAdornment: !(_readOnly || disabled) && (
                 <InputAdornment position='end'>
                   {value && (
@@ -122,7 +128,14 @@ const CustomDatePicker = ({
                 </InputAdornment>
               )
             }
+          },
+          actionBar: {
+            actions: ['accept', 'today']
           }
+        }}
+        slots={{
+          actionBar: props => <PickersActionBar {...props} actions={['accept', 'today']} />,
+          popper: PopperComponent
         }}
       />
     </LocalizationProvider>
