@@ -154,7 +154,7 @@ const CycleCounts = () => {
         plantId,
         maxAccess: access
       },
-      width: 600,
+      width: 650,
       height: 750,
       title: _labels.cycleCounts
     })
