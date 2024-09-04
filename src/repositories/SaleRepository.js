@@ -128,6 +128,7 @@ export const SaleRepository = {
   },
   SalesOrder: {
     qry: service + 'qryORD',
+    page: service + 'pageORD',
     get: service + 'getORD',
     set: service + 'setORD',
     set2: service + 'set2ORD',

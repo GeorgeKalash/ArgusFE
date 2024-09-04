@@ -36,7 +36,7 @@ const SalesOrder = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SaleRepository.SalesOrder.qry,
+    endpointId: SaleRepository.SalesOrder.page,
     datasetId: ResourceIds.SalesOrder,
     search: {
       endpointId: SaleRepository.SalesOrder.snapshot,
@@ -119,12 +119,13 @@ const SalesOrder = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: SaleRepository.SalesOrder.qry,
+      extension: SaleRepository.SalesOrder.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_sortBy=recordId desc&_params=&filter=`
     })
 
     return { ...response, _startAt: _startAt }
   }
+
   async function fetchWithSearch({ qry }) {
     return await getRequest({
       extension: SaleRepository.SalesOrder.snapshot,
@@ -154,47 +155,63 @@ const SalesOrder = () => {
   }
 
   async function getDefaultUserSite() {
-    const res = await getRequest({
-      extension: SystemRepository.UserDefaults.get,
-      parameters: `_userId=${userId}&_key=siteId`
-    })
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.UserDefaults.get,
+        parameters: `_userId=${userId}&_key=siteId`
+      })
 
-    return res?.record?.value
+      return res?.record?.value
+    } catch (error) {
+      return ''
+    }
   }
 
   async function getDefaultPUSite() {
-    const res = await getRequest({
-      extension: SystemRepository.Defaults.get,
-      parameters: `_filter=&_key=PUSiteId`
-    })
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.Defaults.get,
+        parameters: `_filter=&_key=PUSiteId`
+      })
 
-    return res?.record?.value
+      return res?.record?.value
+    } catch (error) {
+      return ''
+    }
   }
 
   async function getDefaultSalesTD() {
-    const res = await getRequest({
-      extension: SystemRepository.Defaults.get,
-      parameters: `_filter=&_key=salesTD`
-    })
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.Defaults.get,
+        parameters: `_filter=&_key=salesTD`
+      })
 
-    return res?.record?.value
+      return res?.record?.value
+    } catch (error) {
+      return ''
+    }
   }
 
   async function getDefaultSalesCurrency() {
-    const res = await getRequest({
-      extension: SystemRepository.Defaults.get,
-      parameters: `_filter=&_key=currencyId`
-    })
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.Defaults.get,
+        parameters: `_filter=&_key=currencyId`
+      })
 
-    return res?.record?.value
+      return res?.record?.value
+    } catch (error) {
+      return ''
+    }
   }
 
   async function openForm(recordId) {
     const userDefaultSite = await getDefaultUserSite()
     const userDefaultPUSite = await getDefaultPUSite()
     const defaultSalesTD = await getDefaultSalesTD()
-
     const siteId = userDefaultSite ? userDefaultSite : userDefaultPUSite
+    const currency = await getDefaultSalesCurrency()
 
     stack({
       Component: SalesOrderForm,
@@ -203,6 +220,7 @@ const SalesOrder = () => {
         access,
         siteId,
         defaultSalesTD,
+        currency,
         recordId
       },
       width: 1200,

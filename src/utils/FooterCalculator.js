@@ -103,7 +103,6 @@ const getDiscValues = _discountObj => {
   return _discountObj
 }
 
-// Function to recalculate the footer
 const recalcFooter = (_array, _footerSummary) => {
   _array.forEach(item => {
     _footerSummary.totalQty += item.qty
