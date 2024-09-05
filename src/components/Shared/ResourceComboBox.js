@@ -14,17 +14,20 @@ export default function ResourceComboBox({
   filter = () => true,
   dataGrid,
   value,
-  reducer,
+  reducer = res => res?.list,
   refresh,
   ...rest
 }) {
   const { store: data } = rest
 
   const { getRequest } = useContext(RequestsContext)
-  const { cacheStore = {}, updateStore = () => {} } = useCacheDataContext() || {}
+  const { cacheStore = {}, updateStore } = useCacheDataContext() || {}
+  const cacheAvailable = !!updateStore
   const { getAllKvsByDataset } = useContext(CommonContext)
 
-  const [store, setStore] = useState([])
+  console.log(cacheAvailable)
+
+  const [apiResponse, setStore] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
 
   const apiUrl = endpointId || datasetId
@@ -40,10 +43,10 @@ export default function ResourceComboBox({
         getAllKvsByDataset({
           _dataset: datasetId,
           callback: list => {
-            if (dataGrid) {
-              updateStore(datasetId, list)
+            if (cacheAvailable) {
+              updateStore(datasetId, { list })
             } else {
-              setStore(list)
+              setStore({ list })
             }
           }
         })
@@ -55,25 +58,24 @@ export default function ResourceComboBox({
           disableLoading: true
         })
           .then(res => {
-            let data = []
-            if (typeof reducer === 'function') {
-              data = reducer(res)
-            } else {
-              data = res.list
-            }
+            let data = res
 
             setIsLoading(false)
-            if (dataGrid) updateStore(endpointId, data)
+            if (cacheAvailable) updateStore(endpointId, data)
             else setStore(data)
           })
           .catch(error => {})
       }
     }
   }
-
+  const store = apiResponse ? reducer(apiResponse) : null
   let filteredStore = []
   try {
-    filteredStore = data ? data : dataGrid ? cacheStore[apiUrl]?.filter?.(filter) : store?.filter?.(filter)
+    filteredStore = data
+      ? data
+      : cacheAvailable
+      ? reducer(cacheStore[apiUrl])?.filter?.(filter)
+      : store?.filter?.(filter)
   } catch (error) {
     console.error(error)
   }
@@ -94,7 +96,7 @@ export default function ResourceComboBox({
         refresh,
         fetchData,
         name,
-        store: (dataGrid ? cacheStore[apiUrl] : filteredStore) || data,
+        store: (cacheAvailable ? reducer(cacheStore[apiUrl]) : filteredStore) || data,
         valueField,
         value: _value,
         isLoading

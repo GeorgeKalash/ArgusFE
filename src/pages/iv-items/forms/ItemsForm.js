@@ -150,9 +150,12 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store }
               <Grid container spacing={2}>
                 <Grid item xs={5.9}>
                   <ResourceComboBox
+                    dataGrid
                     endpointId={InventoryRepository.Items.pack}
                     reducer={response => {
-                      return response.record.categories
+                      console.log(response, 'resssss')
+
+                      return response?.record?.categories
                     }}
                     values={formik.values}
                     name='categoryId'
@@ -176,9 +179,10 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store }
                 </Grid>
                 <Grid item xs={6}>
                   <ResourceComboBox
+                    dataGrid
                     endpointId={InventoryRepository.Items.pack}
                     reducer={response => {
-                      const formattedPriceTypes = response.record.priceTypes.map(priceTypes => ({
+                      const formattedPriceTypes = response?.record?.priceTypes?.map(priceTypes => ({
                         key: parseInt(priceTypes.key),
                         value: priceTypes.value
                       }))
@@ -215,10 +219,12 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store }
                   <ResourceComboBox
                     endpointId={InventoryRepository.Items.pack}
                     reducer={response => {
-                      const formattedprocurementMethod = response.record.procurementMethods.map(procurementMethods => ({
-                        key: parseInt(procurementMethods.key),
-                        value: procurementMethods.value
-                      }))
+                      const formattedprocurementMethod = response?.record?.procurementMethods.map(
+                        procurementMethods => ({
+                          key: parseInt(procurementMethods.key),
+                          value: procurementMethods.value
+                        })
+                      )
 
                       return formattedprocurementMethod
                     }}
@@ -275,7 +281,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store }
                   <ResourceComboBox
                     endpointId={InventoryRepository.Items.pack}
                     reducer={response => {
-                      return response.record.itemGroups
+                      return response?.record?.itemGroups
                     }}
                     values={formik.values}
                     name='groupId'
@@ -299,7 +305,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store }
                   <ResourceComboBox
                     endpointId={InventoryRepository.Items.pack}
                     reducer={response => {
-                      return response.record.measurementSchedules
+                      return response?.record?.measurementSchedules
                     }}
                     values={formik.values}
                     name='msId'
@@ -324,7 +330,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store }
                   <ResourceComboBox
                     endpointId={InventoryRepository.Items.pack}
                     reducer={response => {
-                      const formattedvaluationMethod = response.record.valuations.map(valuations => ({
+                      const formattedvaluationMethod = response?.record?.valuations.map(valuations => ({
                         key: parseInt(valuations.key),
                         value: valuations.value
                       }))
@@ -429,7 +435,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store }
                   <ResourceComboBox
                     endpointId={InventoryRepository.Items.pack}
                     reducer={response => {
-                      return response.record.taxSchedules
+                      return response?.record?.taxSchedules
                     }}
                     values={formik.values}
                     name='taxId'
@@ -449,7 +455,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store }
                   <ResourceComboBox
                     endpointId={InventoryRepository.Items.pack}
                     reducer={response => {
-                      const formattedtrackByList = response.record.trackByList.map(trackByList => ({
+                      const formattedtrackByList = response?.record?.trackByList.map(trackByList => ({
                         key: parseInt(trackByList.key),
                         value: trackByList.value
                       }))
@@ -479,7 +485,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store }
                     <ResourceComboBox
                       endpointId={InventoryRepository.Items.pack}
                       reducer={response => {
-                        return response.record.lotCategories
+                        return response?.record?.lotCategories
                       }}
                       values={formik.values}
                       name='lotCategoryId'
@@ -508,7 +514,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store }
                     <ResourceComboBox
                       endpointId={InventoryRepository.Items.pack}
                       reducer={response => {
-                        return response.record.serialProfiles
+                        return response?.record?.serialProfiles
                       }}
                       required
                       values={formik.values}
