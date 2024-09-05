@@ -266,5 +266,19 @@ export const getButtons = platformLabels => [
     color: '#000',
     image: 'import.png',
     main: false
-  }
+  },
+  {
+    key: 'Lock',
+    label: platformLabels.Lock,
+    color: '#231f20',
+    image: 'lock.png',
+    main: false
+  },
+  {
+    key: 'Unlock',
+    label: platformLabels.Unlock,
+    color: '#231f20',
+    image: 'unlock.png',
+    main: false
+  },
 ]
