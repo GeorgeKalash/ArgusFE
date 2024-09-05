@@ -52,11 +52,12 @@ export function DataGrid({ columns, value, height, onChange, disabled = false })
         ? components[column.colDef.component].view
         : column.colDef.component.view
 
-    async function updateRow({ changes }) {
-      console.log('changes-1', changes)
-      stageRowUpdate({ changes })
-    }
+    // async function updateRow({ changes }) {
+    //   console.log('changes-1', changes)
+    //   stageRowUpdate({ changes })
+    // }
 
+    console.log(params, 'paramsssss', column)
     return (
       <Box
         sx={{
@@ -67,13 +68,13 @@ export function DataGrid({ columns, value, height, onChange, disabled = false })
           alignItems: 'center'
         }}
       >
-        <Component {...params} updateRow={updateRow} column={column} />
+        <Component {...params} column={column} />
       </Box>
     )
   }
 
   const CustomCellEditor = params => {
-    const { column, data, maxAccess, isUpdatingField } = params
+    const { column, data, maxAccess } = params
     const Component =
       typeof column?.colDef?.component === 'string'
         ? components[column?.colDef?.component]?.edit
@@ -81,35 +82,22 @@ export function DataGrid({ columns, value, height, onChange, disabled = false })
 
     const maxAccessName = `${params.node.id}.${column.name}`
 
-    // const handleUpdate = async (field, newValue) => {
-    //   stageRowUpdate({
-    //     changes: {
-    //       id: params.node.id,
-    //       [field]: newValue
-    //     }
-    //   })
+    async function updateRow({ changes }) {
+      console.log('params inside updateRow:', params.colDef.field, changes)
+      if (!params || !params.node) {
+        console.error('Params or node is undefined.')
+        return
+      }
 
-    //   if (column.updateOn !== 'blur') {
-    //     await commitRowUpdate(params.node.id)
-    //   }
-    // }
-
-    async function updateRow({ changes, params }) {
-      console.log(changes, params)
       params.node.setDataValue(params.colDef.field, changes)
-
-      // console.log('changes---1', changes)
-      // stageRowUpdate({
-      //   changes
-      // })
-      // if (column.updateOn !== 'blur') await commitRowUpdate()
     }
+
     const props = {
       ...column.colDef.props,
       name: maxAccessName,
       maxAccess
     }
-
+    console.log(data?.[params?.colDef?.field], data)
     return (
       <Box
         sx={{
@@ -125,12 +113,13 @@ export function DataGrid({ columns, value, height, onChange, disabled = false })
       >
         <Component
           {...params}
+          data={data?.[params?.colDef?.field] || data}
           column={{
             ...column.colDef,
             props: column.propsReducer ? column?.propsReducer({ data, props }) : props
           }}
-          // update={handleUpdate}
-          updateRow={changes => updateRow(changes, params)}
+          update={({ value }) => updateRow({ changes: value })}
+          updateRow={changes => updateRow(changes)}
           // isLoading={isUpdatingField}
         />
       </Box>
@@ -163,18 +152,18 @@ export function DataGrid({ columns, value, height, onChange, disabled = false })
             onGridReady={params => {
               gridApiRef.current = params.api
             }}
-            onCellValueChanged={params => {
-              const changes = {
-                [params.column.colId]: params.newValue
-              }
+            // onCellValueChanged={params => {
+            //   const changes = {
+            //     [params.column.colId]: params.newValue
+            //   }
 
-              stageRowUpdate({
-                changes: {
-                  id: params.node.id,
-                  ...changes
-                }
-              })
-            }}
+            //   stageRowUpdate({
+            //     changes: {
+            //       id: params.node.id,
+            //       ...changes
+            //     }
+            //   })
+            // }}
           />
         </div>
       </CacheDataProvider>
