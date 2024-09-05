@@ -111,10 +111,10 @@ const CustomDatePicker = ({
             fullWidth: fullWidth,
             error: error,
             helperText: helperText,
+            inputProps: {
+              tabIndex: _readOnly ? -1 : 0
+            },
             InputProps: {
-              inputProps: {
-                tabIndex: _readOnly ? -1 : 0 // Prevent focus on the input field
-              },
               endAdornment: !(_readOnly || disabled) && (
                 <InputAdornment position='end'>
                   {value && (
