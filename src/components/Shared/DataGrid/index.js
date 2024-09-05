@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import React, { useRef } from 'react'
 import { AgGridReact } from 'ag-grid-react'
 import { Box } from '@mui/material'
 import components from './components'
@@ -8,12 +8,14 @@ import 'ag-grid-community/styles/ag-theme-alpine.css'
 
 export function DataGrid({ columns, value, height, onChange, disabled = false }) {
   const gridApiRef = useRef(null)
-  const stagedChanges = useRef({}) // Staging changes here to apply later
+  const stagedChanges = useRef({})
 
   const stageRowUpdate = ({ changes }) => {
+    console.log('changes')
     if (!gridApiRef.current || !changes) return
 
-    const rowId = changes.id
+    console.log('changes', gridApiRef.current, changes)
+    const rowId = 1
 
     console.log('Row ID:', rowId)
     console.log('Row:', gridApiRef.current.getRowNode(rowId))
@@ -51,7 +53,8 @@ export function DataGrid({ columns, value, height, onChange, disabled = false })
         : column.colDef.component.view
 
     async function updateRow({ changes }) {
-      // stageRowUpdate({ changes })
+      console.log('changes-1', changes)
+      stageRowUpdate({ changes })
     }
 
     return (
@@ -78,25 +81,28 @@ export function DataGrid({ columns, value, height, onChange, disabled = false })
 
     const maxAccessName = `${params.node.id}.${column.name}`
 
-    const handleUpdate = async (field, newValue) => {
-      stageRowUpdate({
-        changes: {
-          id: params.node.id,
-          [field]: newValue
-        }
-      })
+    // const handleUpdate = async (field, newValue) => {
+    //   stageRowUpdate({
+    //     changes: {
+    //       id: params.node.id,
+    //       [field]: newValue
+    //     }
+    //   })
 
-      if (column.updateOn !== 'blur') {
-        await commitRowUpdate(params.node.id)
-      }
-    }
+    //   if (column.updateOn !== 'blur') {
+    //     await commitRowUpdate(params.node.id)
+    //   }
+    // }
 
-    async function updateRow({ changes }) {
-      stageRowUpdate({
-        changes
-      })
+    async function updateRow({ changes, params }) {
+      console.log(changes, params)
+      params.node.setDataValue(params.colDef.field, changes)
 
-      if (column.updateOn !== 'blur') await commitRowUpdate()
+      // console.log('changes---1', changes)
+      // stageRowUpdate({
+      //   changes
+      // })
+      // if (column.updateOn !== 'blur') await commitRowUpdate()
     }
     const props = {
       ...column.colDef.props,
@@ -123,9 +129,9 @@ export function DataGrid({ columns, value, height, onChange, disabled = false })
             ...column.colDef,
             props: column.propsReducer ? column?.propsReducer({ data, props }) : props
           }}
-          update={handleUpdate}
-          updateRow={updateRow}
-          isLoading={isUpdatingField}
+          // update={handleUpdate}
+          updateRow={changes => updateRow(changes, params)}
+          // isLoading={isUpdatingField}
         />
       </Box>
     )
@@ -147,6 +153,7 @@ export function DataGrid({ columns, value, height, onChange, disabled = false })
       <CacheDataProvider>
         <div className='ag-theme-alpine' style={{ height: '100%', width: '100%' }}>
           <AgGridReact
+            apiRef={gridApiRef}
             rowData={value}
             columnDefs={columnDefs}
             domLayout='autoHeight'
