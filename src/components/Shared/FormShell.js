@@ -120,7 +120,7 @@ export default function FormShell({
   async function handleSaveAndClear() {
     const errors = await form.validateForm()
     await form.submitForm()
-    if (!!errored && Object.keys(errors).length === 0) {
+    if (Object.keys(errors).length == 0) {
       await performPostSubmissionTasks()
     }
   }

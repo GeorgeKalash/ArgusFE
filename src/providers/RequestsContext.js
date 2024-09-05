@@ -34,8 +34,6 @@ function LoadingOverlay() {
 
 const RequestsProvider = ({ showLoading = false, children }) => {
   const { user, setUser, apiUrl } = useContext(AuthContext)
-
-  const [errored, setErrored] = useState(false)
   const errorModel = useError()
   const [loading, setLoading] = useState(false)
 
@@ -119,38 +117,43 @@ const RequestsProvider = ({ showLoading = false, children }) => {
   const postRequest = async body => {
     !loading && setLoading(true)
 
-    setErrored(false)
     const accessToken = await getAccessToken()
     const url = body.url ? body.url : apiUrl
 
     var bodyFormData = new FormData()
     bodyFormData.append('record', body.record)
     body?.file && bodyFormData.append('file', body.file)
+    const disableLoading = body.disableLoading || false
+    !disableLoading && !loading && setLoading(true)
 
-    return axios({
-      method: 'POST',
-      url: url + body.extension,
-      headers: {
-        Authorization: 'Bearer ' + accessToken,
-        'Content-Type': 'multipart/form-data',
-        LanguageId: user.languageId
-      },
-      data: bodyFormData
-    })
-      .then(res => {
-        debouncedCloseLoading()
+    const throwError = body.throwError || false
 
-        return res.data
+    return new Promise(async (resolve, reject) => {
+      axios({
+        method: 'POST',
+        url: url + body.extension,
+        headers: {
+          Authorization: 'Bearer ' + accessToken,
+          'Content-Type': 'multipart/form-data',
+          LanguageId: user.languageId
+        },
+        data: bodyFormData
       })
-      .catch(error => {
-        setErrored(true)
-        debouncedCloseLoading()
-        showError({
-          message: error,
-          height: error.response?.status === 404 || error.response?.status === 500 ? 400 : ''
+        .then(response => {
+          if (!disableLoading) {
+            debouncedCloseLoading()
+          }
+          resolve(response.data)
         })
-        throw error
-      })
+        .catch(error => {
+          debouncedCloseLoading()
+          showError({
+            message: error,
+            height: error.response?.status === 404 || error.response?.status === 500 ? 400 : ''
+          })
+          if (throwError) reject(error)
+        })
+    })
   }
 
   const getAccessToken = async () => {
@@ -241,9 +244,7 @@ const RequestsProvider = ({ showLoading = false, children }) => {
     getRequest,
     postRequest,
     getIdentityRequest,
-    getMicroRequest,
-    errored,
-    setErrored
+    getMicroRequest
   }
 
   return (
