@@ -33,36 +33,42 @@ export default function EndSiteCountForm({ _labels, access }) {
     }),
     onSubmit: async obj => {
       try {
-        if (obj.status === 1) {
-            await postRequest({
-                extension: SCRepository.Sites.reopen,
-                record: JSON.stringify(obj)
+        const copy = { ...obj }
+        delete copy.statusName
+
+        if (copy.status === 1) {
+          await postRequest({
+            extension: SCRepository.Sites.end,
+            record: JSON.stringify({
+              ...copy,
+              status: 1
             })
-        } else if (obj.status === 3) {
-            await postRequest({
-                extension: SCRepository.Sites.end,
-                record: JSON.stringify(obj)
-            })
+          })
+        } else if (copy.status === 3) {
+          await postRequest({
+            extension: SCRepository.Sites.reopen,
+            record: JSON.stringify(copy)
+          })
         }
 
         toast.success(platformLabels.Saved)
-        formik.resetForm();
+        formik.resetForm()
       } catch (error) {}
     }
   })
 
   const actions = [
     {
-      key: 'Post',
+      key: 'Lock',
       condition: formik.values.statusName === 'Processed',
       onClick: () => formik.handleSubmit(),
       disabled: false
     },
     {
-        key: 'Reopen',
-        condition: formik.values.statusName !== 'Processed',
-        onClick: () => formik.handleSubmit(),
-        disabled: false
+      key: 'Unlock',
+      condition: formik.values.statusName !== 'Processed',
+      onClick: () => formik.handleSubmit(),
+      disabled: false
     }
   ]
 
@@ -96,7 +102,11 @@ export default function EndSiteCountForm({ _labels, access }) {
                 label={_labels.site}
                 filter={item => item.isChecked}
                 valueField='siteId'
-                displayField='siteName'
+                displayField={['siteRef', 'siteName']}
+                columnsInDropDown={[
+                  { key: 'siteRef', value: 'Reference' },
+                  { key: 'siteName', value: 'Name' }
+                ]}
                 values={formik.values}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('siteId', newValue ? newValue?.siteId : '')
