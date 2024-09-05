@@ -239,7 +239,7 @@ export default function SalesOrderForm({
     },
     {
       component: 'textfield',
-      label: labels.name,
+      label: labels.itemName,
       name: 'itemName',
       props: {
         readOnly: true
@@ -291,7 +291,7 @@ export default function SalesOrderForm({
     },
     {
       component: 'numberfield',
-      label: labels.basePrice,
+      label: labels.baseprice,
       name: 'basePrice',
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
@@ -343,7 +343,7 @@ export default function SalesOrderForm({
     },
     {
       component: 'numberfield',
-      label: labels.extendedPrice,
+      label: labels.extendedprice,
       name: 'extendedPrice',
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {

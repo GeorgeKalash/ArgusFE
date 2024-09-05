@@ -17,6 +17,7 @@ import SalesOrderForm from './Tabs/SalesOrderForm'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { getStorageData } from 'src/storage/storage'
 import { useError } from 'src/error'
+import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
 const SalesOrder = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -27,20 +28,19 @@ const SalesOrder = () => {
 
   const {
     query: { data },
-    labels: labels,
-    paginationParameters,
-    search,
+    filterBy,
     refetch,
-    clear,
+    clearFilter,
+    labels: labels,
     access,
+    paginationParameters,
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SaleRepository.SalesOrder.page,
+    endpointId: SaleRepository.SalesOrder.snapshot,
     datasetId: ResourceIds.SalesOrder,
-    search: {
-      endpointId: SaleRepository.SalesOrder.snapshot,
-      searchFn: fetchWithSearch
+    filter: {
+      filterFn: fetchWithFilter
     }
   })
 
@@ -51,7 +51,7 @@ const SalesOrder = () => {
       flex: 1
     },
     {
-      field: 'statusName',
+      field: 'status',
       headerName: labels.status,
       flex: 1
     },
@@ -73,7 +73,7 @@ const SalesOrder = () => {
     },
     {
       field: 'szName',
-      headerName: labels.salesZone,
+      headerName: labels.saleZone,
       flex: 1
     },
     {
@@ -84,7 +84,7 @@ const SalesOrder = () => {
     },
     {
       field: 'amount',
-      headerName: labels.amount,
+      headerName: labels.net,
       flex: 1,
       type: 'number'
     },
@@ -116,21 +116,23 @@ const SalesOrder = () => {
   ]
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 50, params = [] } = options
 
     const response = await getRequest({
       extension: SaleRepository.SalesOrder.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_sortBy=recordId desc&_params=&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_sortBy=recordId desc&_params=${params}&filter=`
     })
 
     return { ...response, _startAt: _startAt }
   }
 
-  async function fetchWithSearch({ qry }) {
-    return await getRequest({
-      extension: SaleRepository.SalesOrder.snapshot,
-      parameters: `_filter=${qry}`
-    })
+  async function fetchWithFilter({ filters, pagination }) {
+    if (filters.qry)
+      return await getRequest({
+        extension: SaleRepository.SalesOrder.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+    else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
   const { proxyAction } = useDocumentTypeProxy({
@@ -240,16 +242,35 @@ const SalesOrder = () => {
     } catch (error) {}
   }
 
+  const onSearch = value => {
+    filterBy('qry', value)
+  }
+
+  const onClear = () => {
+    clearFilter('qry')
+  }
+
+  const onApply = ({ search, rpbParams }) => {
+    if (!search && rpbParams.length === 0) {
+      clearFilter('params')
+    } else if (!search) {
+      filterBy('params', rpbParams)
+    } else {
+      filterBy('qry', search)
+    }
+    refetch()
+  }
+
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar
-          maxAccess={access}
+        <RPBGridToolbar
           onAdd={add}
-          onSearch={search}
-          onSearchClear={clear}
-          labels={labels}
-          inputSearch={true}
+          maxAccess={access}
+          onApply={onApply}
+          onSearch={onSearch}
+          onClear={onClear}
+          reportName={'SAORD'}
         />
       </Fixed>
       <Grow>
