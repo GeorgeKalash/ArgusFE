@@ -51,10 +51,10 @@ export default function CustomDatePickerHijri({
             readOnly: true,
             size: size,
             fullWidth: fullWidth,
+            inputProps: {
+              tabIndex: readOnly ? -1 : 0 // Prevent focus on the input field
+            },
             InputProps: {
-              inputProps: {
-                tabIndex: readOnly ? -1 : 0 // Prevent focus on the input field
-              },
               endAdornment: !(readOnly || disabled) && (
                 <InputAdornment position='end'>
                   {Boolean(value) && (
