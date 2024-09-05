@@ -67,5 +67,14 @@ export const InventoryRepository = {
     get: service + 'getDI',
     set: service + 'setDI',
     del: service + 'delDI'
+  },
+  LotCategory: {
+    qry: service + 'qryLCA'
+  },
+  SerialNumber: {
+    qry: service + 'qrySPF'
+  },
+  Metal: {
+    qry: service + 'qryMTL'
   }
 }
