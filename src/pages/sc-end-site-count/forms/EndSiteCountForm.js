@@ -90,6 +90,7 @@ export default function EndSiteCountForm({ _labels, access }) {
                 maxAccess={access}
                 onChange={(event, newValue) => {
                   formik && formik.setFieldValue('stockCountId', newValue?.recordId)
+                  formik.setFieldValue('notes', '')
                 }}
                 error={formik.touched.stockCountId && Boolean(formik.errors.stockCountId)}
               />
