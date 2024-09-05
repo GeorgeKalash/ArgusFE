@@ -118,17 +118,18 @@ export default function FormShell({
   }
 
   async function handleSaveAndClear() {
+    const errors = await form.validateForm()
     await form.submitForm()
-    await performPostSubmissionTasks()
+    if (!!errored && Object.keys(errors).length === 0) {
+      await performPostSubmissionTasks()
+    }
   }
 
   const performPostSubmissionTasks = async () => {
     if (typeof open === 'function') {
       await open()
     }
-    if (!errored && !form.isSubmitting && Object.keys(form.errors).length === 0) {
-      handleReset()
-    }
+    handleReset()
   }
 
   return (

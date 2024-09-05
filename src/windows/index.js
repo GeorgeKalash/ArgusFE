@@ -24,8 +24,12 @@ export function WindowProvider({ children }) {
   }
 
   function openWindow(id) {
-    if (closedWindow.current && closedWindow.current.id === id) {
-      addToStack(closedWindow.current)
+    if (closedWindow.current) {
+      if (closedWindow?.current?.id === id) {
+        addToStack(closedWindow.current)
+      }
+    } else {
+      return
     }
   }
 
