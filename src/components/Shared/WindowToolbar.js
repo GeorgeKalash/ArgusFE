@@ -47,27 +47,27 @@ const WindowToolbar = ({
   const [tooltip, setTooltip] = useState('')
 
   const getReportLayout = () => {
-    setReportStore([])
-    if (resourceId) {
-      getRequest({
-        extension: SystemRepository.ReportLayout,
-        parameters: `_resourceId=${resourceId}`
-      })
-        .then(res => {
-          if (res?.list) {
-            setReportStore(
-              res.list.map(item => ({
-                api_url: item.api,
-                reportClass: item.instanceName,
-                parameters: item.parameters,
-                layoutName: item.layoutName,
-                assembly: 'ArgusRPT.dll'
-              }))
-            )
+    getRequest({
+      extension: SystemRepository.ReportLayout,
+      parameters: `_resourceId=${resourceId}`
+    })
+      .then(res => {
+        if (res?.list) {
+          const newStore = res.list.map(item => ({
+            api_url: item.api,
+            reportClass: item.instanceName,
+            parameters: item.parameters,
+            layoutName: item.layoutName,
+            assembly: 'ArgusRPT.dll'
+          }))
+          setReportStore(newStore)
+
+          if (newStore.length > 0) {
+            setSelectedReport(newStore[0])
           }
-        })
-        .catch(error => {})
-    }
+        }
+      })
+      .catch(error => console.log(error))
   }
 
   useEffect(() => {
@@ -114,6 +114,12 @@ const WindowToolbar = ({
   }
 
   const buttons = getButtons(platformLabels)
+
+  useEffect(() => {
+    if (previewReport && reportStore.length > 0) {
+      setSelectedReport(reportStore[0])
+    }
+  }, [previewReport, reportStore])
 
   return (
     <Box sx={{ padding: '8px !important' }}>
