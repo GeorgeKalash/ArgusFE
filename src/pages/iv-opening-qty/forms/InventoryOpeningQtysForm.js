@@ -1,4 +1,4 @@
-import { Checkbox, fabClasses, FormControlLabel, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
@@ -11,7 +11,6 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useForm } from 'src/hooks/form'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
@@ -49,8 +48,8 @@ const InventoryOpeningQtysForm = ({ labels, maxAccess, recordId, record }) => {
       siteId: yup.string().required(),
       sku: yup.string().required(),
       itemId: yup.string().required(),
-      qty: yup.number().required().min(0.01, 'Quantity must be greater than 0'),
-      avgWeight: yup.number().nullable().max(999999, 'Quantity must be less than 999999')
+      qty: yup.number().required().min(0.01),
+      avgWeight: yup.string().nullable().max(999999)
     }),
     onSubmit: async obj => {
       try {
