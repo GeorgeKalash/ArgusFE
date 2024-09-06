@@ -46,8 +46,8 @@ const BeneficiaryFields = () => {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      countryId: yup.string().required('This field is required'),
-      dispersalType: yup.string().required('This field is required')
+      countryId: yup.string().required(),
+      dispersalType: yup.string().required()
     }),
     onSubmit: async obj => {
       const headerObj = {
@@ -241,6 +241,8 @@ const BeneficiaryFields = () => {
         isInfo={false}
         initialValues={initialValues}
         resourceId={ResourceIds.CorrespondentControl}
+        isCleared={false}
+        isSavedClear={false}
       >
         <Grow>
           <DataGrid

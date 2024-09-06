@@ -45,7 +45,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, e
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      siteId: yup.string().required('This field is required')
+      siteId: yup.string().required()
     }),
     onSubmit: async obj => {
       const copy = { ...obj }
@@ -112,7 +112,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, e
       ]
     },
     validationSchema: yup.object({
-      itemId: yup.string().required('This field is required')
+      itemId: yup.string().required()
     })
   })
 
