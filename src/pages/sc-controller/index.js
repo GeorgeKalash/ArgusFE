@@ -3,28 +3,27 @@ import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { PointofSaleRepository } from 'src/repositories/PointofSaleRepository'
-import PosUsersForm from './forms/PosUsersForm'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { useWindow } from 'src/windows'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
+import { SCRepository } from 'src/repositories/SCRepository'
+import StockCountControllerForm from './forms/StockCountControllerForm'
 
-const PosUsers = () => {
+const StockCountController = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: PointofSaleRepository.PosUsers.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_posId=0&_params=`
+      extension: SCRepository.StockCountController.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
 
     return { ...response, _startAt: _startAt }
@@ -32,67 +31,61 @@ const PosUsers = () => {
 
   const {
     query: { data },
-    labels: labels,
+    labels: _labels,
     paginationParameters,
     refetch,
     access,
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: PointofSaleRepository.PosUsers.qry,
-    datasetId: ResourceIds.POSUsers
+    endpointId: SCRepository.StockCountController.page,
+    datasetId: ResourceIds.StockCountControllers
   })
 
   const columns = [
     {
-      field: 'email',
-      headerName: labels.email,
+      field: 'name',
+      headerName: _labels.name,
       flex: 1
     },
     {
-      field: 'posRef',
-      headerName: labels.posRef,
+      field: 'plantName',
+      headerName: _labels.plant,
       flex: 1
     },
-    {
-      field: 'spName',
-      headerName: labels.spName,
-      flex: 1
-    }
   ]
 
   const add = () => {
     openForm()
   }
 
-  const popup = obj => {
-    openForm(obj)
+  const edit = obj => {
+    openForm(obj?.recordId)
+  }
+
+  function openForm(recordId) {
+    stack({
+      Component: StockCountControllerForm,
+      props: {
+        labels: _labels,
+        recordId,
+        maxAccess: access
+      },
+      width: 600,
+      height: 300,
+      title: _labels.stockCountController
+    })
   }
 
   const del = async obj => {
     try {
       await postRequest({
-        extension: PointofSaleRepository.PosUsers.del,
+        extension: SCRepository.StockCountController.del,
         record: JSON.stringify(obj)
       })
       invalidate()
       toast.success(platformLabels.Deleted)
     } catch (error) {}
-  }
-
-  function openForm(record) {
-    stack({
-      Component: PosUsersForm,
-      props: {
-        labels: labels,
-        record,
-        recordId: record?.userId,
-        maxAccess: access
-      },
-      width: 600,
-      height: 300,
-      title: labels.PosUsers
-    })
   }
 
   return (
@@ -104,19 +97,19 @@ const PosUsers = () => {
         <Table
           columns={columns}
           gridData={data}
-          rowId={['userId']}
-          onEdit={popup}
+          rowId={['recordId']}
+          onEdit={edit}
           onDelete={del}
           isLoading={false}
           pageSize={50}
           paginationType='api'
-          maxAccess={access}
-          refetch={refetch}
           paginationParameters={paginationParameters}
+          refetch={refetch}
+          maxAccess={access}
         />
       </Grow>
     </VertLayout>
   )
 }
 
-export default PosUsers
+export default StockCountController
