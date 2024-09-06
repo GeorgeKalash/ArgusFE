@@ -57,8 +57,8 @@ const CurrencyRateExchangeMap = () => {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      currencyId: yup.string().required('This field is required'),
-      rateTypeId: yup.string().required('This field is required')
+      currencyId: yup.string().required(),
+      rateTypeId: yup.string().required()
     }),
     onSubmit: values => {}
   })

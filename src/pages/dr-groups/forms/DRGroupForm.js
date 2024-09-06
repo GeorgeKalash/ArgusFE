@@ -38,8 +38,8 @@ const DRGroupForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store
     validateOnChange: true,
     initialValues,
     validationSchema: yup.object({
-      reference: yup.string().required('This field is required'),
-      name: yup.string().required('This field is required')
+      reference: yup.string().required(),
+      name: yup.string().required()
     }),
     onSubmit: async values => {
       await postGroups(values)

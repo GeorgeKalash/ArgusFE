@@ -11,9 +11,11 @@ import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepos
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const ValueForm = ({ labels, maxAccess, getValueGridData, recordId, seqNo, window, chId }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const [initialValues, setInitialData] = useState({
     value: null
@@ -24,7 +26,7 @@ const ValueForm = ({ labels, maxAccess, getValueGridData, recordId, seqNo, windo
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      value: yup.string().required(' ')
+      value: yup.string().required()
     }),
     onSubmit: async values => {
       await postValue(values)
@@ -40,8 +42,8 @@ const ValueForm = ({ labels, maxAccess, getValueGridData, recordId, seqNo, windo
     }).then(res => {
       getValueGridData(chId)
       if (recordId) {
-        toast.success('Record Editted Successfully')
-      } else toast.success('Record Added Successfully')
+        toast.success(platformLabels.Edited)
+      } else toast.success(platformLabels.Added)
       window.close()
     })
   }
@@ -51,6 +53,7 @@ const ValueForm = ({ labels, maxAccess, getValueGridData, recordId, seqNo, windo
   }, [recordId])
 
   const getCharacteristicsById = recordId => {
+    console.log(recordId)
     const defaultParams = `_chId=${recordId}&_seqNo=${seqNo}`
     var parameters = defaultParams
     getRequest({
@@ -63,7 +66,14 @@ const ValueForm = ({ labels, maxAccess, getValueGridData, recordId, seqNo, windo
   }
 
   return (
-    <FormShell form={formik} resourceId={ResourceIds.Characteristics} maxAccess={maxAccess} isInfo={false}>
+    <FormShell
+      form={formik}
+      resourceId={ResourceIds.Characteristics}
+      maxAccess={maxAccess}
+      isInfo={false}
+      isSavedClear={false}
+      isCleared={false}
+    >
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>

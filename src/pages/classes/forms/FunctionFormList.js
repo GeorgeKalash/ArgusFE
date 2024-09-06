@@ -10,16 +10,12 @@ import { useWindow } from 'src/windows'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
-const FunctionFormList = (
- { 
-  labels,
-  store,
-  maxAccess,
-  height
-}) => {
+const FunctionFormList = ({ labels, store, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const [FunctionGridData , setFunctionGridData] = useState()
+  const { platformLabels } = useContext(ControlContext)
+  const [FunctionGridData, setFunctionGridData] = useState()
   const { stack } = useWindow()
   const { recordId } = store
 
@@ -36,7 +32,7 @@ const FunctionFormList = (
     }
   ]
 
-  function openForm (functionId, editMode){
+  function openForm(functionId, editMode) {
     stack({
       Component: FunctionForm,
       props: {
@@ -48,7 +44,7 @@ const FunctionFormList = (
         functionId: functionId
       },
       width: 400,
-      height:350,
+      height: 350,
       title: labels.functions
     })
   }
@@ -57,11 +53,10 @@ const FunctionFormList = (
     postRequest({
       extension: DocumentReleaseRepository.ClassFunction.del,
       record: JSON.stringify(obj)
+    }).then(res => {
+      getFunctionGridData(recordId)
+      toast.success(platformLabels.Deleted)
     })
-      .then(res => {
-        getFunctionGridData(recordId)
-        toast.success('Record Deleted Successfully')
-      })
   }
 
   const addFunction = () => {
@@ -80,7 +75,7 @@ const FunctionFormList = (
       extension: DocumentReleaseRepository.ClassFunction.qry,
       parameters: parameters
     })
-      .then(res => {console.log(res)
+      .then(res => {
         setFunctionGridData(res)
       })
       .catch(error => {
@@ -88,9 +83,9 @@ const FunctionFormList = (
       })
   }
 
-  useEffect(()=>{
+  useEffect(() => {
     recordId && getFunctionGridData(recordId)
-  },[recordId])
+  }, [recordId])
 
   return (
     <VertLayout>

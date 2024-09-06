@@ -83,7 +83,7 @@ const ItemForm = ({ tlId, labels, seqNo, getGridData, maxAccess, window }) => {
   }, [seqNo])
 
   return (
-    <FormShell form={formik} maxAccess={maxAccess} infoVisible={false}>
+    <FormShell form={formik} maxAccess={maxAccess} infoVisible={false} isSavedClear={false} isCleared={false}>
       <VertLayout>
         <Grow>
           <Grid container gap={2}>
