@@ -208,12 +208,54 @@ const SalesOrder = () => {
     }
   }
 
+  async function getDefaultUserPlant() {
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.UserDefaults.get,
+        parameters: `_userId=${userId}&_key=plantId`
+      })
+
+      return res?.record?.value
+    } catch (error) {
+      return ''
+    }
+  }
+
+  async function getDefaultUserSP() {
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.UserDefaults.get,
+        parameters: `_userId=${userId}&_key=spId`
+      })
+
+      return res?.record?.value
+    } catch (error) {
+      return ''
+    }
+  }
+
+  async function getDefaultDT() {
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.UserFunction.get,
+        parameters: `_userId=${userId}&_functionId=${SystemFunction.SalesOrder}`
+      })
+
+      return res?.record?.dtId
+    } catch (error) {
+      return ''
+    }
+  }
+
   async function openForm(recordId) {
     const userDefaultSite = await getDefaultUserSite()
     const userDefaultPUSite = await getDefaultPUSite()
     const defaultSalesTD = await getDefaultSalesTD()
     const siteId = userDefaultSite ? userDefaultSite : userDefaultPUSite
     const currency = await getDefaultSalesCurrency()
+    const plant = await getDefaultUserPlant()
+    const salesPerson = await getDefaultUserSP()
+    const dtId = await getDefaultDT()
 
     stack({
       Component: SalesOrderForm,
@@ -223,6 +265,9 @@ const SalesOrder = () => {
         siteId,
         defaultSalesTD,
         currency,
+        plant,
+        salesPerson,
+        dtId,
         recordId
       },
       width: 1200,

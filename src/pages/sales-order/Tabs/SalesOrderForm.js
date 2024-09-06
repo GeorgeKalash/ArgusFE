@@ -45,6 +45,9 @@ export default function SalesOrderForm({
   recordId,
   defaultSalesTD,
   currency,
+  plant,
+  salesPerson,
+  dtId,
   window
 }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -54,15 +57,15 @@ export default function SalesOrderForm({
 
   const [initialValues, setInitialData] = useState({
     recordId: recordId || null,
-    dtId: '',
+    dtId: dtId ? parseInt(dtId) : null,
     reference: '',
     date: new Date(),
     dueDate: new Date(),
-    plantId: '',
+    plantId: plant ? parseInt(plant) : null,
     clientId: '',
     currencyId: currency ? parseInt(currency) : null,
     szId: '',
-    spId: '',
+    spId: salesPerson ? parseInt(salesPerson) : null,
     siteId: siteId ? parseInt(siteId) : null,
     description: '',
     status: 1,
@@ -212,7 +215,7 @@ export default function SalesOrderForm({
           { key: 'sku', value: 'SKU' },
           { key: 'name', value: 'Item Name' }
         ],
-        displayFieldWidth: 2
+        displayFieldWidth: 5
       },
       async onChange({ row: { update, newRow } }) {
         if (!newRow.itemId) return
@@ -994,7 +997,7 @@ export default function SalesOrderForm({
                 <Grid item xs={12}>
                   <CustomTextArea
                     name='BillAddress'
-                    label='bill to'
+                    label={labels.billTo}
                     value={formik.values.billAddress}
                     rows={3}
                     maxLength='100'
@@ -1028,11 +1031,16 @@ export default function SalesOrderForm({
                   secondValueShow='clientName'
                   maxAccess={maxAccess}
                   editMode={editMode}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' },
+                    { key: 'szName', value: 'Sales Zone' }
+                  ]}
                   onChange={async (event, newValue) => {
                     formik.setFieldValue('clientId', newValue?.recordId)
                     formik.setFieldValue('clientName', newValue?.name)
                     formik.setFieldValue('clientRef', newValue?.reference)
-                    formik.setFieldValue('isVattable', newValue?.IsSubjectToVat || false)
+                    formik.setFieldValue('isVattable', newValue?.isSubjectToVAT || false)
                     formik.setFieldValue('maxDiscount', newValue?.maxDiscount)
                     formik.setFieldValue('currentDiscount', newValue?.tdPct)
                     formik.setFieldValue('taxId', newValue?.taxId)
@@ -1046,7 +1054,7 @@ export default function SalesOrderForm({
                   control={
                     <Checkbox name='vat' checked={formik.values?.isVattable} readOnly onChange={formik.handleChange} />
                   }
-                  label='VAT'
+                  label={labels.VAT}
                 />
               </Grid>
               <Grid item xs={6}>
@@ -1152,7 +1160,7 @@ export default function SalesOrderForm({
               <Grid item xs={12} sx={{ pr: '5px' }}>
                 <CustomTextArea
                   name='description'
-                  label='notes'
+                  label={labels.description}
                   value={formik.values.description}
                   rows={3}
                   editMode={editMode}
@@ -1221,10 +1229,18 @@ export default function SalesOrderForm({
                     displayCycleButton={true}
                     readOnly={isClosed}
                     cycleButtonLabel={cycleButtonState.text}
-                    maxLength={formik.values.tdType === 2 ? 4 : 100}
                     decimalScale={2}
                     handleCycleButtonClick={handleCycleButtonClick}
-                    onChange={e => formik.setFieldValue('tdAmount', e.target.value)}
+                    onChange={e => {
+                      let tdAmount = Number(e.target.value)
+                      if (tdAmount < 0) tdAmount = 0
+                      if (formik.values.tdType == 1) {
+                        if (tdAmount > formik.values.subtotal) tdAmount = 0
+                      } else {
+                        if (tdAmount > 100) tdAmount = 0
+                      }
+                      formik.setFieldValue('tdAmount', tdAmount)
+                    }}
                     onBlur={async () => {
                       calcTotals(formik.values.items)
                       recalcGridVat(1)
