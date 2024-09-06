@@ -63,7 +63,7 @@ const WindowToolbar = ({
         parameters: `_resourceId=${resourceId}`
       })
 
-      const firstStore = reportLayoutRes?.list?.map(item => ({
+      let firstStore = reportLayoutRes?.list?.map(item => ({
         id: item.id,
         api_url: item.api,
         reportClass: item.instanceName,
@@ -80,15 +80,14 @@ const WindowToolbar = ({
         layoutName: item.caption,
         assembly: 'ArgusRPT.dll'
       }))
-      let combinedStore = [...firstStore, ...secondStore]
 
-      const filteringIds = reportLayoutFilteringObject?.list?.map(item => item.id)
-      console.log(filteringIds, 'filteringIds')
+      const filteringItems = reportLayoutFilteringObject?.list
 
-      combinedStore = combinedStore.filter(item => !filteringIds.includes(item.id))
+      firstStore = firstStore.filter(
+        item => !filteringItems.some(filterItem => filterItem.id === item.id && filterItem.isInactive)
+      )
 
-      console.log(reportLayoutFilteringObject.list, 'reportLayoutObject')
-      console.log(combinedStore, 'combinedStore')
+      const combinedStore = [...firstStore, ...secondStore]
 
       setReportStore(combinedStore)
 
@@ -97,7 +96,6 @@ const WindowToolbar = ({
       }
     } catch (error) {}
   }
-
   useEffect(() => {
     if (resourceId) {
       getReportLayout()
@@ -193,7 +191,6 @@ const WindowToolbar = ({
               value={selectedReport}
               onChange={(e, newValue) => {
                 setSelectedReport(newValue)
-                console.log(newValue, 'new')
               }}
               sx={{ width: 250 }}
               disableClearable
