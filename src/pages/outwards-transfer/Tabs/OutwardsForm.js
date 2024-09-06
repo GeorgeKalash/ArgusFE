@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Grid, Button } from '@mui/material'
 import { getFormattedNumber } from 'src/lib/numberField-helper'
 import * as yup from 'yup'
@@ -49,6 +49,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
   const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
   const DEFAULT_DELIVERYMODE = 7
+  const [mobilePlantExists, setMobilePlant] = useState(false)
 
   const { maxAccess } = useDocumentType({
     functionId: SystemFunction.Outwards,
@@ -64,6 +65,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
     recordId: recordId || null,
     dtId: dtId || null,
     plantId: plantId,
+    collectionPlantId: plantId,
     cashAccountId: cashAccountId,
     userId: userId,
     productId: '',
@@ -141,6 +143,8 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
         ccName: '',
         type: '',
         amount: '',
+        paidAmount: '',
+        returnedAmount: '',
         bankFees: '',
         receiptRef: ''
       }
@@ -179,19 +183,24 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
             type: yup
               .string()
               .required('Type is required')
-
               .test('unique', 'Type must be unique', function (value) {
-                const { path, parent, options } = this
-                if (!parent.outwardId) {
+                const { options } = this
+                if (!this.parent.outwardId) {
                   const arrayOfTypes = options.context.amountRows.map(row => row.type)
-                  const isUnique = arrayOfTypes.filter(item => item === value).length === 1
+                  if (value == 2) {
+                    const countOfType1 = arrayOfTypes.filter(item => item === '2').length
+                    if (countOfType1 > 1) {
+                      return false
+                    }
+                  }
+                }
 
-                  return isUnique
-                } else return true
+                return true
               }),
             amount: yup.string().nullable().required('Amount is required')
           })
         )
+
         .required('Cash array is required')
     }),
     onSubmit: async values => {
@@ -236,6 +245,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
           const res2 = await getOutwards(amountRes.recordId)
           formik.setFieldValue('reference', res2.record.headerView.reference)
           invalidate()
+          setMobilePlant(false)
           !recordId && viewOTP(amountRes.recordId)
         }
       } catch (error) {}
@@ -245,6 +255,115 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
   const isClosed = formik.values.wip === 2
   const isPosted = formik.values.status === 4
 
+  const columns = [
+    {
+      component: 'resourcecombobox',
+      label: labels.type,
+      name: 'type',
+      props: {
+        datasetId: DataSets.CA_CASH_ACCOUNT_TYPE,
+        displayField: 'value',
+        valueField: 'key',
+        mapping: [
+          { from: 'key', to: 'type' },
+          { from: 'value', to: 'typeName' }
+        ]
+      }
+    },
+    {
+      component: 'numberfield',
+      name: 'paidAmount',
+      label: labels.paidAmount,
+      defaultValue: '',
+      propsReducer({ row, props }) {
+        return { ...props, readOnly: row.type == 1 || !row.type }
+      },
+      async onChange({ row: { update, newRow } }) {
+        if (formik.values.amountRows.length == 1) {
+          let rowReturned = 0
+          let rowAmount = 0
+          if (newRow.paidAmount > parseFloat(amount)) {
+            rowReturned = (parseFloat(newRow.paidAmount) - parseFloat(amount)).toFixed(2)
+            rowAmount = (parseFloat(newRow.paidAmount) - rowReturned).toFixed(2)
+          } else {
+            rowReturned = 0
+            rowAmount = (parseFloat(amount) - parseFloat(newRow.paidAmount)).toFixed(2)
+          }
+          update({
+            returnedAmount: rowReturned,
+            amount: rowAmount
+          })
+        } else {
+          const sumAmount = formik.values.amountRows.slice(0, -1).reduce((sum, row) => {
+            const curValue = parseFloat(row.amount.toString().replace(/,/g, '')) || 0
+
+            return sum + curValue
+          }, 0)
+          const returned = (parseFloat(amount) - parseFloat(sumAmount)).toFixed(2)
+          let rowReturned = 0
+          let rowAmount = 0
+          if (newRow.paidAmount > returned) {
+            rowReturned = (parseFloat(newRow.paidAmount) - returned).toFixed(2)
+            rowAmount = (parseFloat(newRow.paidAmount) - rowReturned).toFixed(2)
+          } else {
+            rowReturned = 0
+            rowAmount = (parseFloat(sumAmount) + parseFloat(newRow.paidAmount)).toFixed(2)
+          }
+          update({
+            returnedAmount: rowReturned,
+            amount: rowAmount
+          })
+        }
+      }
+    },
+    {
+      component: 'numberfield',
+      name: 'returnedAmount',
+      label: labels.returnedAmount,
+      defaultValue: '',
+      propsReducer({ row, props }) {
+        return { ...props, readOnly: row.type == 1 || !row.type }
+      }
+    },
+    {
+      component: 'numberfield',
+      name: 'amount',
+      label: labels.Amount,
+      defaultValue: ''
+    },
+    {
+      component: 'resourcecombobox',
+      name: 'ccName',
+      editable: false,
+      label: labels.creditCard,
+      props: {
+        endpointId: CashBankRepository.CreditCard.qry,
+        valueField: 'recordId',
+        displayField: 'name',
+        mapping: [
+          { from: 'recordId', to: 'ccId' },
+          { from: 'name', to: 'ccName' }
+        ],
+        columnsInDropDown: [
+          { key: 'reference', value: 'Reference' },
+          { key: 'name', value: 'Name' }
+        ],
+        displayFieldWidth: 2
+      }
+    },
+    {
+      component: 'numberfield',
+      header: labels.bankFees,
+      name: 'bankFees',
+      label: labels.bankFees
+    },
+    {
+      component: 'textfield',
+      header: labels.receiptRef,
+      name: 'receiptRef',
+      label: labels.receiptRef
+    }
+  ]
   function viewOTP(recId) {
     stack({
       Component: OTPPhoneVerification,
@@ -341,8 +460,6 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
 
     return sumAmount + curValue
   }, 0)
-
-  const Balance = amount - receivedTotal
 
   const onProductSubmit = productData => {
     formik.setFieldValue('products', productData?.list)
@@ -638,18 +755,6 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
     } catch (error) {}
   }
 
-  const getDefaultDT = async () => {
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.UserFunction.get,
-        parameters: `_userId=${userId}&_functionId=${SystemFunction.Outwards}`
-      })
-      res.record ? formik.setFieldValue('dtId', res.record.dtId) : formik.setFieldValue('dtId', '')
-    } catch (error) {
-      formik.setFieldValue('dtId', '')
-    }
-  }
-
   function onInstantCashSubmit(obj) {
     formik.setFieldValue('instantCashDetails', obj)
   }
@@ -779,6 +884,25 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
     }
   }
 
+  async function checkMobilePlant() {
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.Defaults.get,
+        parameters: `_filter=&_key=rt_mob_plantId`
+      })
+
+      return res?.record?.value
+    } catch (error) {
+      return ''
+    }
+  }
+
+  async function fillMissingFields(plantId) {
+    setMobilePlant(true)
+    formik.setFieldValue('collectionPlantId', parseFloat(plantId))
+    formik.setFieldValue('cashAccountId', parseFloat(cashAccountId))
+  }
+
   useEffect(() => {
     ;(async function () {
       try {
@@ -787,6 +911,9 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
           const copy = { ...res.record.headerView }
           copy.lcAmount = 0
           await fillProducts(copy)
+          const mobilePlant = await checkMobilePlant()
+          if (mobilePlant && mobilePlant == copy.plantId && !res.record.cash.length > 0)
+            await fillMissingFields(copy.plantId)
         }
         await getDefaultVAT()
       } catch (error) {}
@@ -805,7 +932,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       actions={actions}
       previewReport={editMode}
       functionId={SystemFunction.Outwards}
-      disabledSubmit={isClosed || editMode}
+      disabledSubmit={(isClosed || editMode) && !mobilePlantExists}
     >
       <VertLayout>
         <Grow>
@@ -1145,9 +1272,6 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                 </Grid>
                 <Grid item xs={12}>
                   <CustomNumberField label='Amount Recieved' value={getFormattedNumber(receivedTotal)} readOnly />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomNumberField label='Balance To Pay' value={getFormattedNumber(Balance) ?? '0'} readOnly />
                 </Grid>
               </FieldSet>
             </Grid>
@@ -1498,66 +1622,13 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                       onChange={value => formik.setFieldValue('amountRows', value)}
                       value={formik.values.amountRows}
                       error={formik.errors.amountRows}
-                      disabled={isClosed || editMode}
+                      disabled={(isClosed || editMode) && !mobilePlantExists}
                       allowAddNewLine={!isClosed || !editMode}
                       allowDelete={!isClosed || editMode}
                       maxAccess={maxAccess}
                       name='amountRows'
                       height={170}
-                      columns={[
-                        {
-                          component: 'resourcecombobox',
-                          label: labels.type,
-                          name: 'type',
-                          props: {
-                            datasetId: DataSets.CA_CASH_ACCOUNT_TYPE,
-                            displayField: 'value',
-                            valueField: 'key',
-                            mapping: [
-                              { from: 'key', to: 'type' },
-                              { from: 'value', to: 'typeName' }
-                            ]
-                          }
-                        },
-                        {
-                          component: 'numberfield',
-                          name: 'amount',
-                          label: labels.Amount,
-                          defaultValue: ''
-                        },
-                        {
-                          component: 'resourcecombobox',
-                          name: 'ccName',
-                          editable: false,
-                          label: labels.creditCard,
-                          props: {
-                            endpointId: CashBankRepository.CreditCard.qry,
-                            valueField: 'recordId',
-                            displayField: 'name',
-                            mapping: [
-                              { from: 'recordId', to: 'ccId' },
-                              { from: 'name', to: 'ccName' }
-                            ],
-                            columnsInDropDown: [
-                              { key: 'reference', value: 'Reference' },
-                              { key: 'name', value: 'Name' }
-                            ],
-                            displayFieldWidth: 2
-                          }
-                        },
-                        {
-                          component: 'numberfield',
-                          header: labels.bankFees,
-                          name: 'bankFees',
-                          label: labels.bankFees
-                        },
-                        {
-                          component: 'textfield',
-                          header: labels.receiptRef,
-                          name: 'receiptRef',
-                          label: labels.receiptRef
-                        }
-                      ]}
+                      columns={columns}
                     />
                   </Grid>
                 </FieldSet>
