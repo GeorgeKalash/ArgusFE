@@ -62,8 +62,8 @@ const CompanyInfo = () => {
       logoUrl: '',
       flName: ''
     },
-    onSubmit: values => {
-      post(values)
+    onSubmit: async values => {
+      await post(values)
     }
   })
 
@@ -86,6 +86,7 @@ const CompanyInfo = () => {
       form={formik}
       infoVisible={false}
       isCleared={false}
+      isSavedClear={false}
       maxAccess={maxAccess}
     >
       <VertLayout>

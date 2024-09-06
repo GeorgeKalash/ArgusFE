@@ -3,9 +3,11 @@ import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
 import { useContext, useEffect } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import toast from 'react-hot-toast'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const AddressForm = ({ recordId, address, setAddress = () => {}, editMode, onSubmit }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   function onAddressSubmit(post) {
     const data = { ...post, recordId: recordId }
@@ -15,7 +17,7 @@ const AddressForm = ({ recordId, address, setAddress = () => {}, editMode, onSub
     }).then(res => {
       data.addressId = res.recordId
       if (recordId) {
-        toast.success('Record Edit Successfully')
+        toast.success(platformLabels.Edited)
         onSubmit()
       } else onSubmit(data)
     })

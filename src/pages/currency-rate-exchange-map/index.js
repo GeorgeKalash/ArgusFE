@@ -57,8 +57,8 @@ const CurrencyRateExchangeMap = () => {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      currencyId: yup.string().required('This field is required'),
-      rateTypeId: yup.string().required('This field is required')
+      currencyId: yup.string().required(),
+      rateTypeId: yup.string().required()
     }),
     onSubmit: values => {}
   })
@@ -100,18 +100,18 @@ const CurrencyRateExchangeMap = () => {
         }
       ]
     },
-    onSubmit: values => {
-      postExchangeMaps(values)
+    onSubmit: async values => {
+      await postExchangeMaps(values)
     }
   })
 
-  const postExchangeMaps = obj => {
+  const postExchangeMaps = async obj => {
     const data = {
       currencyId: formik.values.currencyId,
       rateTypeId: formik.values.rateTypeId,
       exchangeMaps: obj.rows
     }
-    postRequest({
+    await postRequest({
       extension: CurrencyTradingSettingsRepository.ExchangeMap.set2,
       record: JSON.stringify(data)
     })

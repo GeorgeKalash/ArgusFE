@@ -56,7 +56,6 @@ export default function FiOpeningBalancesForms({ labels, maxAccess, recordId }) 
           recordId: response.recordId
         })
       } else toast.success('Record Edited Successfully')
-      setEditMode(true)
       invalidate()
     }
   })

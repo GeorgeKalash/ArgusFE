@@ -232,8 +232,10 @@ export const ResourceIds = {
   BankBranches: 33109,
   CorrespondentOutwards: 36318,
   ExtraIncome: 36129,
+  StockCountControllers: 44101,
   StockCountDTD: 44103,
   PurposeExchangeGroup: 35115,
   Drivers: 52201,
-  RebuildUndeliveredItems: 52504
+  RebuildUndeliveredItems: 52504,
+  IvSettings: 41115
 }

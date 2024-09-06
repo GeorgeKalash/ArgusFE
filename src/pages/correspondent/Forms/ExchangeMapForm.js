@@ -38,8 +38,8 @@ const ExchangeMapForm = ({ maxAccess, editMode, currency, store, expanded, heigh
       countryId: '',
       plants: []
     },
-    onSubmit: values => {
-      postExchangeMaps(values)
+    onSubmit: async values => {
+      await postExchangeMaps(values)
     }
   })
 
@@ -133,14 +133,14 @@ const ExchangeMapForm = ({ maxAccess, editMode, currency, store, expanded, heigh
     //step 3: merge both
   }
 
-  const postExchangeMaps = obj => {
+  const postExchangeMaps = async obj => {
     const data = {
       corId: recordId,
       countryId: formik.values.countryId,
       currencyId: currencyId,
       correspondentExchangeMaps: obj.plants
     }
-    postRequest({
+    await postRequest({
       extension: RemittanceSettingsRepository.CorrespondentExchangeMap.set2,
       record: JSON.stringify(data)
     })

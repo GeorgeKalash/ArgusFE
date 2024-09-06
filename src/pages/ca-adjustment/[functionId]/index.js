@@ -116,7 +116,7 @@ const CAadjustment = () => {
         access,
         functionId
       },
-      width: 800,
+      width: 900,
       height: 600,
       title: functionId == 3301 ? _labels.increaseAdj : _labels.decreaseAdj
     })

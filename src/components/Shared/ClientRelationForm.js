@@ -18,6 +18,8 @@ import { useForm } from 'src/hooks/form'
 import OTPPhoneVerification from './OTPPhoneVerification'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { useWindow } from 'src/windows'
+import { VertLayout } from './Layouts/VertLayout'
+import { Grow } from './Layouts/Grow'
 
 export const ClientRelationForm = ({ seqNo, clientId, formValidation }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -70,14 +72,14 @@ export const ClientRelationForm = ({ seqNo, clientId, formValidation }) => {
       otp: 0,
       otpVerified: false
     },
-    onSubmit: values => {
+    onSubmit: async values => {
       const data = {
         ...values,
         activationDate: formatDateToApi(values.activationDate),
         expiryDate: formatDateToApi(values.expiryDate)
       }
 
-      postRequest({
+      await postRequest({
         extension: RTCLRepository.ClientRelation.set3,
         record: JSON.stringify(data)
       })
@@ -109,92 +111,96 @@ export const ClientRelationForm = ({ seqNo, clientId, formValidation }) => {
 
   return (
     <FormShell form={formik} infoVisible={false} isSaved={!editMode} isCleared={!editMode}>
-      <Grid container spacing={4} sx={{ p: 5 }}>
-        <Grid item xs={12}>
-          <ResourceLookup
-            endpointId={CTCLRepository.CtClientIndividual.snapshot}
-            parameters={{ _category: 1, _size: 30 }}
-            name='parentId'
-            label={_labels.clientRef}
-            valueField='reference'
-            displayField='name'
-            displayFieldWidth={2}
-            valueShow='parentRef'
-            secondValueShow='parentName'
-            form={formik}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('parentId', newValue ? newValue.recordId : 0)
-              formik.setFieldValue('parentRef', newValue ? newValue.reference : '')
-              formik.setFieldValue('parentName', newValue ? newValue.name : '')
-            }}
-            maxAccess={access}
-            readOnly={editMode}
-            required
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <ResourceComboBox
-            endpointId={CurrencyTradingSettingsRepository.RelationType.qry}
-            name='rtId'
-            label={_labels.relation}
-            valueField='recordId'
-            displayField={['reference', 'name']}
-            columnsInDropDown={[
-              { key: 'reference', value: 'Reference' },
-              { key: 'name', value: 'Name' }
-            ]}
-            maxAccess={access}
-            required
-            values={formik.values}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('rtId', newValue ? newValue.recordId : '')
-            }}
-            error={formik.touched.rtId && Boolean(formik.errors.rtId)}
-            readOnly={editMode}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          {Boolean(formik.errors.expiryDate)}
-          <CustomDatePicker
-            name='expiryDate'
-            label={_labels.expiryDate}
-            value={formik.values?.expiryDate}
-            onChange={formik.setFieldValue}
-            onClear={() => formik.setFieldValue('expiryDate', '')}
-            error={formik.touched.expiryDate && Boolean(formik.errors.expiryDate)}
-            maxAccess={access}
-            readOnly={editMode}
-            required
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <CustomDatePicker
-            name='activationDate'
-            label={_labels.activationDate}
-            value={formik.values?.activationDate}
-            onChange={formik.setFieldValue}
-            onClear={() => formik.setFieldValue('activationDate', '')}
-            error={formik.touched.activationDate && Boolean(formik.errors.activationDate)}
-            maxAccess={access}
-            readOnly={editMode}
-            required
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <FormControlLabel
-            control={
-              <Checkbox
-                name='otp'
-                checked={formik.values?.otp}
-                disabled={true}
-                onChange={formik.handleChange}
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={4}>
+            <Grid item xs={12}>
+              <ResourceLookup
+                endpointId={CTCLRepository.CtClientIndividual.snapshot}
+                parameters={{ _category: 1, _size: 30 }}
+                name='parentId'
+                label={_labels.clientRef}
+                valueField='reference'
+                displayField='name'
+                displayFieldWidth={2}
+                valueShow='parentRef'
+                secondValueShow='parentName'
+                form={formik}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('parentId', newValue ? newValue.recordId : 0)
+                  formik.setFieldValue('parentRef', newValue ? newValue.reference : '')
+                  formik.setFieldValue('parentName', newValue ? newValue.name : '')
+                }}
                 maxAccess={access}
+                readOnly={editMode}
+                required
               />
-            }
-            label={_labels.otp}
-          />
-        </Grid>
-      </Grid>
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={CurrencyTradingSettingsRepository.RelationType.qry}
+                name='rtId'
+                label={_labels.relation}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                maxAccess={access}
+                required
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('rtId', newValue ? newValue.recordId : '')
+                }}
+                error={formik.touched.rtId && Boolean(formik.errors.rtId)}
+                readOnly={editMode}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              {Boolean(formik.errors.expiryDate)}
+              <CustomDatePicker
+                name='expiryDate'
+                label={_labels.expiryDate}
+                value={formik.values?.expiryDate}
+                onChange={formik.setFieldValue}
+                onClear={() => formik.setFieldValue('expiryDate', '')}
+                error={formik.touched.expiryDate && Boolean(formik.errors.expiryDate)}
+                maxAccess={access}
+                readOnly={editMode}
+                required
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomDatePicker
+                name='activationDate'
+                label={_labels.activationDate}
+                value={formik.values?.activationDate}
+                onChange={formik.setFieldValue}
+                onClear={() => formik.setFieldValue('activationDate', '')}
+                error={formik.touched.activationDate && Boolean(formik.errors.activationDate)}
+                maxAccess={access}
+                readOnly={editMode}
+                required
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name='otp'
+                    checked={formik.values?.otp}
+                    disabled={true}
+                    onChange={formik.handleChange}
+                    maxAccess={access}
+                  />
+                }
+                label={_labels.otp}
+              />
+            </Grid>
+          </Grid>
+        </Grow>
+      </VertLayout>
     </FormShell>
   )
 }
