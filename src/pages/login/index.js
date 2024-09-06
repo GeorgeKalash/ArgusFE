@@ -4,7 +4,6 @@ import { AuthContext } from 'src/providers/AuthContext'
 import { useState, useContext } from 'react'
 import Link from 'next/link'
 import { useAuth } from 'src/hooks/useAuth'
-
 import { Card, CardContent, Button, Grid, IconButton, Box, InputAdornment, CardMedia } from '@mui/material'
 import { styled, useTheme } from '@mui/material/styles'
 import Icon from 'src/@core/components/icon'
@@ -209,7 +208,7 @@ const LoginPage = () => {
                   justifyContent: 'space-between'
                 }}
               >
-                <LinkStyled href='/pages/auth/forgot-password-v1'>{platformLabels.ForgotPass}</LinkStyled>
+                <LinkStyled href='/forget-password/reset'>{platformLabels.ForgotPass}</LinkStyled>
               </Box>
               <Button
                 fullWidth

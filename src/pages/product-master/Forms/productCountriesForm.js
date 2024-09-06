@@ -46,7 +46,7 @@ const ProductCountriesForm = ({ store, setStore, labels, editMode, height, expan
         }
       ]
     },
-    onSubmit: values => {
+    onSubmit: async values => {
       const transformedValues = {
         ...values,
         countries: values.countries.map(country => ({
@@ -55,11 +55,11 @@ const ProductCountriesForm = ({ store, setStore, labels, editMode, height, expan
           saleRateTypeId: country.saleRateTypeId === '' ? null : country.saleRateTypeId
         }))
       }
-      postProductCountries(transformedValues.countries)
+      await postProductCountries(transformedValues.countries)
     }
   })
 
-  const postProductCountries = obj => {
+  const postProductCountries = async obj => {
     const data = {
       productId: pId,
       productCountries: obj.map(({ productId, ...rest }) => ({
@@ -67,7 +67,7 @@ const ProductCountriesForm = ({ store, setStore, labels, editMode, height, expan
         ...rest
       }))
     }
-    postRequest({
+    await postRequest({
       extension: RemittanceSettingsRepository.ProductCountries.set2,
       record: JSON.stringify(data)
     })
@@ -94,7 +94,8 @@ const ProductCountriesForm = ({ store, setStore, labels, editMode, height, expan
         ],
         columnsInDropDown: [
           { key: 'reference', value: 'Reference' },
-          { key: 'name', value: 'Name' }
+          { key: 'name', value: 'Name' },
+          { key: 'flName', value: 'FlName' }
         ]
       }
     },

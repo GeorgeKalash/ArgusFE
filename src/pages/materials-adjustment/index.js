@@ -8,20 +8,30 @@ import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import MaterialsAdjustmentForm from './Forms/MaterialsAdjustmentForm'
+import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const MaterialsAdjustment = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
-      extension: InventoryRepository.MaterialsAdjustment.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_size=50&_params=&_dgId=0&_sortBy=recordId&_trxType=1`
+      extension: InventoryRepository.MaterialsAdjustment.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_size=50&_params=${
+        params || ''
+      }&_dgId=0&_sortBy=recordId&_trxType=1`
     })
 
     return { ...response, _startAt: _startAt }
+  }
+
+  async function fetchWithFilter({ filters, pagination }) {
+    return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
   const {
@@ -29,15 +39,16 @@ const MaterialsAdjustment = () => {
     labels: _labels,
     paginationParameters,
     refetch,
-    access
+    access,
+    filterBy,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: InventoryRepository.MaterialsAdjustment.qry,
-    datasetId: ResourceIds.MaterialsAdjustment
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: InventoryRepository.MaterialsAdjustment.qry
+    endpointId: InventoryRepository.MaterialsAdjustment.page,
+    datasetId: ResourceIds.MaterialsAdjustment,
+    filter: {
+      filterFn: fetchWithFilter
+    }
   })
 
   const columns = [
@@ -117,9 +128,17 @@ const MaterialsAdjustment = () => {
     toast.success('Record Deleted Successfully')
   }
 
+  const onApply = ({ rpbParams }) => {
+    filterBy('params', rpbParams)
+    refetch()
+  }
+
   return (
-    <>
-      <Box sx={{ mt: 10 }}>
+    <VertLayout>
+      <Fixed>
+        <RPBGridToolbar hasSearch={false} maxAccess={access} onApply={onApply} reportName={'IVADJ'} />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
@@ -134,8 +153,8 @@ const MaterialsAdjustment = () => {
           paginationType='api'
           maxAccess={access}
         />
-      </Box>
-    </>
+      </Grow>
+    </VertLayout>
   )
 }
 

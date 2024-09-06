@@ -93,10 +93,10 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      date: yup.string().required('This field is required'),
-      plantId: yup.string().required('This field is required'),
-      corId: yup.string().required('This field is required'),
-      cashAccountId: yup.string().required('This field is required')
+      date: yup.string().required(),
+      plantId: yup.string().required(),
+      corId: yup.string().required(),
+      cashAccountId: yup.string().required()
     }),
     onSubmit: async obj => {
       try {
@@ -175,10 +175,10 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
     validationSchema: yup.object({
       rows: yup.array().of(
         yup.object({
-          currencyId: yup.string().required('This field is required'),
-          qty: yup.string().required('This field is required'),
-          exRate: yup.string().required('This field is required'),
-          amount: yup.string().required('This field is required')
+          currencyId: yup.string().required(),
+          qty: yup.string().required(),
+          exRate: yup.string().required(),
+          amount: yup.string().required()
         })
       )
     })
@@ -219,10 +219,15 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
       getRequest({
         extension: RemittanceSettingsRepository.Correspondent.get,
         parameters: parameters
-      }).then(res => {
+      }).then(async res => {
         setToCurrency(res.record.currencyId)
         setToCurrencyRef(res.record.currencyRef)
-        getEXMBase(plant, res.record.currencyId, baseCurrency, 150)
+
+        const evalRate = await getRequest({
+          extension: CurrencyTradingSettingsRepository.Defaults.get,
+          parameters: '_key=ct_credit_eval_ratetype_id'
+        })
+        if (evalRate.record) getEXMBase(plant, res.record.currencyId, baseCurrency, evalRate.record.value)
       })
     } else {
       setToCurrency(null)
@@ -385,13 +390,15 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
             parameters: `_recordId=${recordId}`
           })
           res.record.date = formatDateFromApi(res.record.date)
-          setOperationType(res.record.functionId)
+          await setOperationType(res.record.functionId)
           formik.setValues(res.record)
           const baseCurrency = await getBaseCurrency()
           getCorrespondentById(res.record.corId ?? '', baseCurrency, res.record.plantId)
           setIsPosted(res.record.status === 3 ? true : false)
           setIsCancelled(res.record.status === -1 ? true : false)
           setVisible(res.record.status == 1 ? false : true)
+        } else {
+          await setOperationType(SystemFunction.CreditInvoicePurchase)
         }
       } catch (error) {
       } finally {
@@ -902,8 +909,8 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
               row
               value={formik.values.functionId}
               defaultValue={SystemFunction.CreditInvoicePurchase}
-              onChange={e => {
-                setOperationType(e.target.value)
+              onChange={async e => {
+                await setOperationType(e.target.value)
                 setFunctionId(e.target.value)
                 formik.setFieldValue('reference', '')
               }}
