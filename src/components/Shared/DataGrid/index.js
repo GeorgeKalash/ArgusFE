@@ -8,43 +8,26 @@ import 'ag-grid-community/styles/ag-theme-alpine.css'
 
 export function DataGrid({ columns, value, height, onChange, disabled = false }) {
   const gridApiRef = useRef(null)
-  const stagedChanges = useRef({})
 
-  const stageRowUpdate = ({ changes }) => {
-    console.log('changes')
-    if (!gridApiRef.current || !changes) return
-
-    console.log('changes', gridApiRef.current, changes)
-    const rowId = 1
-
-    console.log('Row ID:', rowId)
-    console.log('Row:', gridApiRef.current.getRowNode(rowId))
-
-    const updatedRow = {
-      ...gridApiRef.current.getRowNode(rowId),
-      ...changes
-    }
-
-    gridApiRef.current.applyTransaction({ update: [updatedRow] })
-    stagedChanges.current[rowId] = changes
+  const addNewRow = () => {
+    const newRow = {}
+    gridApiRef.current.applyTransaction({ add: [newRow] })
   }
 
-  const commitRowUpdate = async id => {
-    const changes = stagedChanges.current[id]
-    if (!changes) return
+  const onCellKeyDown = params => {
+    const { event, columnApi, api, node } = params
+    const allColumns = columnApi.getAllColumns()
+    const currentColumnIndex = allColumns.findIndex(col => col.getColId() === params.column.getColId())
 
-    const rowNode = gridApiRef.current.getRowNode(id)
-    if (rowNode) {
-      Object.assign(rowNode.data, changes)
-
-      gridApiRef.current.applyTransaction({ update: [rowNode.data] })
-
-      onChange && onChange(rowNode.data)
-
-      delete stagedChanges.current[id] // Clear staged changes
+    if (
+      event.key === 'Tab' &&
+      currentColumnIndex === allColumns.length - 1 &&
+      node.rowIndex === api.getDisplayedRowCount() - 1
+    ) {
+      event.preventDefault()
+      addNewRow()
     }
   }
-
   const CustomCellRenderer = params => {
     const { column } = params
     const Component =
@@ -52,12 +35,6 @@ export function DataGrid({ columns, value, height, onChange, disabled = false })
         ? components[column.colDef.component].view
         : column.colDef.component.view
 
-    // async function updateRow({ changes }) {
-    //   console.log('changes-1', changes)
-    //   stageRowUpdate({ changes })
-    // }
-
-    console.log(params, 'paramsssss', column)
     return (
       <Box
         sx={{
@@ -75,6 +52,8 @@ export function DataGrid({ columns, value, height, onChange, disabled = false })
 
   const CustomCellEditor = params => {
     const { column, data, maxAccess } = params
+
+    console.log('data-edit', data)
     const Component =
       typeof column?.colDef?.component === 'string'
         ? components[column?.colDef?.component]?.edit
@@ -82,22 +61,34 @@ export function DataGrid({ columns, value, height, onChange, disabled = false })
 
     const maxAccessName = `${params.node.id}.${column.name}`
 
-    async function updateRow({ changes }) {
-      console.log('params inside updateRow:', params.colDef.field, changes)
-      if (!params || !params.node) {
-        console.error('Params or node is undefined.')
-        return
-      }
+    // async function updateRow({ changes }) {
+    //   if (!params || !params.node) {
+    //     return
+    //   }
 
-      params.node.setDataValue(params.colDef.field, changes)
-    }
+    //   params.node.setDataValue(params.colDef.field, changes)
+    // }
 
     const props = {
       ...column.colDef.props,
       name: maxAccessName,
       maxAccess
     }
-    console.log(data?.[params?.colDef?.field], data)
+
+    const updateMultipleCellsInRow = ({ changes }) => {
+      console.log(changes)
+      const id = params.node?.id
+      const rowNode = gridApiRef.current.getDisplayedRowAtIndex(id)
+
+      if (rowNode) {
+        const currentData = rowNode.data
+        const newData = { ...currentData, ...changes }
+        rowNode.setData(newData)
+      }
+
+      params.api.stopEditing()
+    }
+
     return (
       <Box
         sx={{
@@ -113,14 +104,12 @@ export function DataGrid({ columns, value, height, onChange, disabled = false })
       >
         <Component
           {...params}
-          data={data?.[params?.colDef?.field] || data}
           column={{
             ...column.colDef,
             props: column.propsReducer ? column?.propsReducer({ data, props }) : props
           }}
-          update={({ value }) => updateRow({ changes: value })}
-          updateRow={changes => updateRow(changes)}
-          // isLoading={isUpdatingField}
+          updateRow={updateMultipleCellsInRow}
+          update={updateMultipleCellsInRow}
         />
       </Box>
     )
@@ -149,9 +138,11 @@ export function DataGrid({ columns, value, height, onChange, disabled = false })
             suppressRowClickSelection
             rowSelection='single'
             editType='cell'
+            singleClickEdit={true}
             onGridReady={params => {
               gridApiRef.current = params.api
             }}
+            onCellKeyDown={onCellKeyDown}
             // onCellValueChanged={params => {
             //   const changes = {
             //     [params.column.colId]: params.newValue

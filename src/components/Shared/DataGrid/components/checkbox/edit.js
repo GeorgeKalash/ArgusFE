@@ -10,6 +10,11 @@ export default function checkBoxEdit({ id, field, value, update, row, column: { 
       checked={value}
       disabled={(!row?.saved && field === 'select') || props?.disabled}
       onChange={e => {
+        console.log({
+          id,
+          field,
+          value: e.target.checked
+        })
         update({
           id,
           field,
