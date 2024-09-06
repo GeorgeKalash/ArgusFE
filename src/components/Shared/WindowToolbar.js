@@ -46,32 +46,62 @@ const WindowToolbar = ({
   const [reportStore, setReportStore] = useState([])
   const [tooltip, setTooltip] = useState('')
 
-  const getReportLayout = () => {
-    getRequest({
-      extension: SystemRepository.ReportLayout,
-      parameters: `_resourceId=${resourceId}`
-    })
-      .then(res => {
-        if (res?.list) {
-          const newStore = res.list.map(item => ({
-            api_url: item.api,
-            reportClass: item.instanceName,
-            parameters: item.parameters,
-            layoutName: item.layoutName,
-            assembly: 'ArgusRPT.dll'
-          }))
-          setReportStore(newStore)
-
-          if (newStore.length > 0) {
-            setSelectedReport(newStore[0])
-          }
-        }
+  const getReportLayout = async () => {
+    try {
+      const reportLayoutRes = await getRequest({
+        extension: SystemRepository.ReportLayout,
+        parameters: `_resourceId=${resourceId}`
       })
-      .catch(error => console.log(error))
+
+      const reportTemplateRes = await getRequest({
+        extension: SystemRepository.ReportTemplate,
+        parameters: `_resourceId=${resourceId}`
+      })
+
+      const reportLayoutFilteringObject = await getRequest({
+        extension: SystemRepository.ReportLayoutObject,
+        parameters: `_resourceId=${resourceId}`
+      })
+
+      const firstStore = reportLayoutRes?.list?.map(item => ({
+        id: item.id,
+        api_url: item.api,
+        reportClass: item.instanceName,
+        parameters: item.parameters,
+        layoutName: item.layoutName,
+        assembly: 'ArgusRPT.dll'
+      }))
+
+      const secondStore = reportTemplateRes?.list?.map(item => ({
+        id: item.id,
+        api_url: item.wsName,
+        reportClass: item.reportName,
+        parameters: item.parameters,
+        layoutName: item.caption,
+        assembly: 'ArgusRPT.dll'
+      }))
+      let combinedStore = [...firstStore, ...secondStore]
+
+      const filteringIds = reportLayoutFilteringObject?.list?.map(item => item.id)
+      console.log(filteringIds, 'filteringIds')
+
+      combinedStore = combinedStore.filter(item => !filteringIds.includes(item.id))
+
+      console.log(reportLayoutFilteringObject.list, 'reportLayoutObject')
+      console.log(combinedStore, 'combinedStore')
+
+      setReportStore(combinedStore)
+
+      if (combinedStore.length > 0) {
+        setSelectedReport(combinedStore[0])
+      }
+    } catch (error) {}
   }
 
   useEffect(() => {
-    getReportLayout()
+    if (resourceId) {
+      getReportLayout()
+    }
   }, [resourceId])
 
   const handleButtonMouseEnter = text => {
@@ -157,11 +187,14 @@ const WindowToolbar = ({
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <CustomComboBox
               label={'Select a report template'}
-              valueField='caption'
+              valueField='layoutName'
               displayField='layoutName'
               store={reportStore}
               value={selectedReport}
-              onChange={(e, newValue) => setSelectedReport(newValue)}
+              onChange={(e, newValue) => {
+                setSelectedReport(newValue)
+                console.log(newValue, 'new')
+              }}
               sx={{ width: 250 }}
               disableClearable
             />
