@@ -12,7 +12,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { PointofSaleRepository } from 'src/repositories/PointofSaleRepository'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 
-const CashAccountForm = ({ store, labels, maxAccess, editMode }) => {
+const CashAccountForm = ({ store, labels, maxAccess }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -46,7 +46,6 @@ const CashAccountForm = ({ store, labels, maxAccess, editMode }) => {
       postPOSUser(values)
     }
   })
-  console.log(formik.values.pOSUser)
 
   const postPOSUser = obj => {
     const pOSUser = obj?.pOSUser?.map(({ posId, ...rest }) => ({
@@ -107,44 +106,24 @@ const CashAccountForm = ({ store, labels, maxAccess, editMode }) => {
   ]
 
   function getData() {
-    const defaultParams = `_posId=${recordId}`
-    var parameters = defaultParams
-    recordId &&
-      getRequest({
-        extension: PointofSaleRepository.CashAccount.qry,
-        parameters: parameters
+    getRequest({
+      extension: PointofSaleRepository.CashAccount.qry,
+      parameters: `_posId=${recordId}`
+    })
+      .then(res => {
+        const modifiedList = res.list?.map((user, index) => ({
+          ...user,
+          id: index + 1
+        }))
+        formik.setValues({ pOSUser: modifiedList })
       })
-        .then(res => {
-          if (Array.isArray(res?.list) && res.list.length > 0) {
-            formik.setValues({
-              pOSUser: res.list.map(({ ...rest }, index) => ({
-                id: index,
-                ...rest
-              }))
-            })
-          } else {
-            formik.setValues({
-              posId: [
-                {
-                  id: 1,
-                  posId: recordId,
-                  cashAccountId: '',
-                  type: '',
-                  isInactive: false
-                }
-              ]
-            })
-          }
-        })
-        .catch(error => {})
+      .catch(error => {})
   }
   useEffect(() => {
     if (recordId) {
       getData()
     }
   }, [recordId])
-
-  console.log('DataGrid value:', formik.values.pOSUser)
 
   return (
     <FormShell
@@ -153,7 +132,6 @@ const CashAccountForm = ({ store, labels, maxAccess, editMode }) => {
       isCleared={false}
       infoVisible={false}
       maxAccess={maxAccess}
-      editMode={editMode}
     >
       <VertLayout>
         <Grow>
@@ -161,6 +139,7 @@ const CashAccountForm = ({ store, labels, maxAccess, editMode }) => {
             onChange={value => formik.setFieldValue('pOSUser', value)}
             value={formik.values.pOSUser || []}
             error={formik.errors.pOSUser}
+            allowDelete
             columns={columns}
           />
         </Grow>

@@ -13,7 +13,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { PointofSaleRepository } from 'src/repositories/PointofSaleRepository'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 
-const UsersForm = ({ store, labels, maxAccess, editMode }) => {
+const UsersForm = ({ store, labels, maxAccess }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -107,40 +107,23 @@ const UsersForm = ({ store, labels, maxAccess, editMode }) => {
   ]
 
   function getData() {
-    const defaultParams = `_posId=${recordId}`
-    var parameters = defaultParams
-    recordId &&
-      getRequest({
-        extension: PointofSaleRepository.PosUsers.qry,
-        parameters: parameters
+    getRequest({
+      extension: PointofSaleRepository.PosUsers.qry,
+      parameters: `_posId=${recordId}`
+    })
+      .then(res => {
+        const modifiedList = res.list?.map((user, index) => ({
+          ...user,
+          id: index + 1
+        }))
+        formik.setValues({ pOSUser: modifiedList })
       })
-        .then(res => {
-          if (Array.isArray(res?.list) && res.list.length > 0) {
-            formik.setValues({
-              pOSUser: res.list.map(({ ...rest }, index) => ({
-                id: index,
-                ...rest
-              }))
-            })
-          } else {
-            formik.setValues({
-              posId: [
-                {
-                  id: 1,
-                  posId: recordId,
-                  userId: '',
-                  spId: '',
-                  email: '',
-                  spName: ''
-                }
-              ]
-            })
-          }
-        })
-        .catch(error => {})
+      .catch(error => {})
   }
   useEffect(() => {
-    getData()
+    if (recordId) {
+      getData()
+    }
   }, [recordId])
 
   return (
@@ -150,7 +133,6 @@ const UsersForm = ({ store, labels, maxAccess, editMode }) => {
       isCleared={false}
       infoVisible={false}
       maxAccess={maxAccess}
-      editMode={editMode}
     >
       <VertLayout>
         <Grow>

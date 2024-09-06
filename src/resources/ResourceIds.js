@@ -208,7 +208,7 @@ export const ResourceIds = {
   SalesZoneLevels: 51111,
   Client: 51202,
   SalesOrder: 51302,
-  Driver: 52201,
+  Drivers: 52201,
   Vehicle: 52202,
   SecurityGroupsFilter: 90101,
   AssetClass: 43101,
@@ -232,6 +232,5 @@ export const ResourceIds = {
   CorrespondentOutwards: 36318,
   ExtraIncome: 36129,
   PurposeExchangeGroup: 35115,
-  Drivers: 52201,
   PointOfSales: 54101
 }

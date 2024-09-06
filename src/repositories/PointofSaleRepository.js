@@ -9,9 +9,7 @@ export const PointofSaleRepository = {
     page: service + 'pageUSR',
     set2: service + 'set2USR'
   },
-  PosUsersPOS: {
-    qry: service + 'qryPOS'
-  },
+
   PointOfSales: {
     page: service + 'pagePOS',
     qry: service + 'qryPOS',

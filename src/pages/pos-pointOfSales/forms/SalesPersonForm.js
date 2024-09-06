@@ -2,7 +2,7 @@ import { useFormik } from 'formik'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
@@ -12,7 +12,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { PointofSaleRepository } from 'src/repositories/PointofSaleRepository'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 
-const SalesPersonForm = ({ store, labels, maxAccess, editMode }) => {
+const SalesPersonForm = ({ store, labels, maxAccess }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -93,39 +93,38 @@ const SalesPersonForm = ({ store, labels, maxAccess, editMode }) => {
   ]
 
   function getData() {
-    const defaultParams = `_posId=${recordId}`
-    var parameters = defaultParams
-    recordId &&
-      getRequest({
-        extension: PointofSaleRepository.SalesPerson.qry,
-        parameters: parameters
+    getRequest({
+      extension: PointofSaleRepository.SalesPerson.qry,
+      parameters: `_posId=${recordId}`
+    })
+      .then(res => {
+        if (Array.isArray(res?.list) && res.list.length > 0) {
+          formik.setValues({
+            pOSUser: res.list.map(({ ...rest }, index) => ({
+              id: index,
+              ...rest
+            }))
+          })
+        } else {
+          formik.setValues({
+            posId: [
+              {
+                id: 1,
+                posId: recordId,
+                spId: '',
+                isInactive: false,
+                spName: ''
+              }
+            ]
+          })
+        }
       })
-        .then(res => {
-          if (Array.isArray(res?.list) && res.list.length > 0) {
-            formik.setValues({
-              pOSUser: res.list.map(({ ...rest }, index) => ({
-                id: index,
-                ...rest
-              }))
-            })
-          } else {
-            formik.setValues({
-              posId: [
-                {
-                  id: 1,
-                  posId: recordId,
-                  spId: '',
-                  isInactive: false,
-                  spName: ''
-                }
-              ]
-            })
-          }
-        })
-        .catch(error => {})
+      .catch(error => {})
   }
   useEffect(() => {
-    getData()
+    if (recordId) {
+      getData()
+    }
   }, [recordId])
 
   return (
@@ -135,7 +134,6 @@ const SalesPersonForm = ({ store, labels, maxAccess, editMode }) => {
       isCleared={false}
       infoVisible={false}
       maxAccess={maxAccess}
-      editMode={editMode}
     >
       <VertLayout>
         <Grow>
