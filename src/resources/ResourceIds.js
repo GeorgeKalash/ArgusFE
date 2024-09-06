@@ -227,10 +227,14 @@ export const ResourceIds = {
   PUOrderStatus: 50105,
   PUPaymentTerms: 50106,
   AutoPostExclusion: 36124,
+  PostOutwards: 36319,
   OutwardsReturn: 36317,
   BankBranches: 33109,
   CorrespondentOutwards: 36318,
   ExtraIncome: 36129,
+  StockCountControllers: 44101,
+  StockCountDTD: 44103,
   PurposeExchangeGroup: 35115,
-  PointOfSales: 54101
+  PointOfSales: 54101,
+  IvSettings: 41115
 }

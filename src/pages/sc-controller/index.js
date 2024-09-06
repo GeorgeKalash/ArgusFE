@@ -3,27 +3,26 @@ import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import PurposeOfExchangeWindow from './windows/PurposeOfExchangeWindow'
-import { useWindow } from 'src/windows'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
+import { SCRepository } from 'src/repositories/SCRepository'
+import StockCountControllerForm from './forms/StockCountControllerForm'
 
-const PurposeExchange = () => {
+const StockCountController = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: CurrencyTradingSettingsRepository.PurposeExchange.page,
+      extension: SCRepository.StockCountController.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
 
@@ -32,61 +31,56 @@ const PurposeExchange = () => {
 
   const {
     query: { data },
+    labels: _labels,
     paginationParameters,
     refetch,
-    labels: _labels,
     access,
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: CurrencyTradingSettingsRepository.PurposeExchange.page,
-    datasetId: ResourceIds.PurposeOfExchange
+    endpointId: SCRepository.StockCountController.page,
+    datasetId: ResourceIds.StockCountControllers
   })
 
   const columns = [
-    {
-      field: 'reference',
-      headerName: _labels.reference,
-      flex: 1
-    },
     {
       field: 'name',
       headerName: _labels.name,
       flex: 1
     },
     {
-      field: 'groupName',
-      headerName: _labels.group,
+      field: 'plantName',
+      headerName: _labels.plant,
       flex: 1
-    }
+    },
   ]
-
-  function openForm(recordId) {
-    stack({
-      Component: PurposeOfExchangeWindow,
-      props: {
-        labels: _labels,
-        recordId,
-        maxAccess: access
-      },
-      width: 600,
-      height: 500,
-      title: _labels.purposeOfExchange
-    })
-  }
 
   const add = () => {
     openForm()
   }
 
   const edit = obj => {
-    openForm(obj.recordId)
+    openForm(obj?.recordId)
+  }
+
+  function openForm(recordId) {
+    stack({
+      Component: StockCountControllerForm,
+      props: {
+        labels: _labels,
+        recordId,
+        maxAccess: access
+      },
+      width: 600,
+      height: 300,
+      title: _labels.stockCountController
+    })
   }
 
   const del = async obj => {
     try {
       await postRequest({
-        extension: CurrencyTradingSettingsRepository.PurposeExchange.del,
+        extension: SCRepository.StockCountController.del,
         record: JSON.stringify(obj)
       })
       invalidate()
@@ -108,9 +102,9 @@ const PurposeExchange = () => {
           onDelete={del}
           isLoading={false}
           pageSize={50}
+          paginationType='api'
           paginationParameters={paginationParameters}
           refetch={refetch}
-          paginationType='api'
           maxAccess={access}
         />
       </Grow>
@@ -118,4 +112,4 @@ const PurposeExchange = () => {
   )
 }
 
-export default PurposeExchange
+export default StockCountController
