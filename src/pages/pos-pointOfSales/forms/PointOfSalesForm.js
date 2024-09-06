@@ -167,7 +167,7 @@ const PointOfSalesForm = ({ labels, maxAccess, setStore, store }) => {
             filter={item => item.plantId === formik.values.plantId}
             readOnly={!!formik.values.onlineStore || !!!formik.values.plantId}
             required={!formik.values.onlineStore}
-            label={labels.site}
+            label={labels.invSite}
             values={formik.values}
             displayField='name'
             maxAccess={maxAccess}

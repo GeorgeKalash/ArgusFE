@@ -24,7 +24,7 @@ const PointOfSales = () => {
 
     try {
       const response = await getRequest({
-        extension: PointofSaleRepository.PointOfSales.qry,
+        extension: PointofSaleRepository.PointOfSales.page,
         parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=&_params=`
       })
 
@@ -37,12 +37,12 @@ const PointOfSales = () => {
     labels: _labels,
     invalidate,
     paginationParameters,
-    filterBy,
+
     refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: PointofSaleRepository.PointOfSales.qry,
+    endpointId: PointofSaleRepository.PointOfSales.page,
     datasetId: ResourceIds.PointOfSales
   })
 
