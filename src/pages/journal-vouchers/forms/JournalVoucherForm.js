@@ -186,7 +186,7 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
                 error={formik.touched.date && Boolean(formik.errors.date)}
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={12}>
               <CustomTextField
                 name='sourceReference'
                 label={labels.sourceReference}
