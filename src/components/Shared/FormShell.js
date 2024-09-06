@@ -1,5 +1,5 @@
 import { DialogContent } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useState } from 'react'
 import WindowToolbar from './WindowToolbar'
 import TransactionLog from './TransactionLog'
 import { TrxType } from 'src/resources/AccessLevels'
@@ -14,7 +14,6 @@ import AccountBalance from './AccountBalance'
 import CashTransaction from './CashTransaction'
 import FinancialTransaction from './FinancialTransaction'
 import { ControlContext } from 'src/providers/ControlContext'
-import { RequestsContext } from 'src/providers/RequestsContext'
 import { ClientRelationForm } from './ClientRelationForm'
 
 export default function FormShell({
@@ -48,7 +47,6 @@ export default function FormShell({
   const { clear, open } = useGlobalRecord() || {}
   const { platformLabels } = useContext(ControlContext)
   const isSavedClearVisible = isSavedClear && isSaved && isCleared
-  const { errored } = useContext(RequestsContext)
 
   const windowToolbarVisible = editMode
     ? maxAccess < TrxType.EDIT

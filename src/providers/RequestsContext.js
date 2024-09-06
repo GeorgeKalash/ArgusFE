@@ -1,7 +1,4 @@
-// ** React Imports
 import { createContext, useContext, useEffect, useState } from 'react'
-
-// ** 3rd Party Imports
 import axios from 'axios'
 import jwt from 'jwt-decode'
 import { AuthContext } from 'src/providers/AuthContext'

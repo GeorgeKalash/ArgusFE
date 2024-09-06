@@ -34,8 +34,8 @@ export default function PosUsersForm({ labels, maxAccess, userId, window }) {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      userId: yup.string().required(' '),
-      posId: yup.string().required(' ')
+      userId: yup.string().required(),
+      posId: yup.string().required()
     }),
     onSubmit: async obj => {
       const userId = obj.userId
