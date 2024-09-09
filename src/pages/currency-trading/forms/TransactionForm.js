@@ -1104,7 +1104,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                         onChange={(name, value) => {
                           formik.setFieldValue('birth_date', value)
                         }}
-                        readOnly={editMode || isClosed}
+                        readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                         onClear={() => formik.setFieldValue('birth_date', '')}
                       />
                     </Grid>

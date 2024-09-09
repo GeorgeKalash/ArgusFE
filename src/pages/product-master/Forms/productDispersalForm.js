@@ -38,15 +38,15 @@ const ProductDispersalForm = ({ pId, labels, recordId, getGridData, maxAccess, w
       isDefault: yup.string().required(),
       isInactive: yup.string().required()
     }),
-    onSubmit: values => {
-      post(values)
+    onSubmit: async values => {
+      await post(values)
     }
   })
 
-  const post = obj => {
+  const post = async obj => {
     const recordId = obj.recordId
     const productId = obj.productId ? obj.productId : pId
-    postRequest({
+    await postRequest({
       extension: RemittanceSettingsRepository.ProductDispersal.set,
       record: JSON.stringify(obj)
     })

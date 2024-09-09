@@ -59,14 +59,14 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
       commissionBase: yup.string().required(),
       isInactive: yup.string().required()
     }),
-    onSubmit: values => {
-      postProductMaster(values)
+    onSubmit: async values => {
+      await postProductMaster(values)
     }
   })
 
-  const postProductMaster = obj => {
+  const postProductMaster = async obj => {
     const recordId = obj.recordId
-    postRequest({
+    await postRequest({
       extension: RemittanceSettingsRepository.ProductMaster.set,
       record: JSON.stringify(obj)
     })

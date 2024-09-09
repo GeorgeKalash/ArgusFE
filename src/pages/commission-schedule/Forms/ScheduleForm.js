@@ -38,8 +38,8 @@ export default function ScheduleForm({ labels, maxAccess, recordId, editMode, se
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required('This field is required'),
-      type: yup.string().required('This field is required')
+      name: yup.string().required(),
+      type: yup.string().required()
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
