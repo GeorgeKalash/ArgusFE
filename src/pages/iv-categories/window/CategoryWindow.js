@@ -3,6 +3,7 @@ import { CustomTabs } from 'src/components/Shared/CustomTabs'
 import { useState } from 'react'
 
 import CategoryForm from '../forms/CategoryForm'
+import CurrencyForm from '../forms/CurrencyForm'
 
 const CategoryWindow = ({ recordId, labels, maxAccess }) => {
   const [activeTab, setActiveTab] = useState(0)
@@ -14,9 +15,10 @@ const CategoryWindow = ({ recordId, labels, maxAccess }) => {
   })
 
   const tabs = [
-    { label: labels.categories }
+    { label: labels.categories },
 
-    // { label: labels.user, disabled: !store.recordId },
+    { label: labels.currency, disabled: !store.recordId }
+
     // { label: labels.salePerson, disabled: !store.recordId },
     // { label: labels.caAcc, disabled: !store.recordId }
   ]
@@ -27,9 +29,9 @@ const CategoryWindow = ({ recordId, labels, maxAccess }) => {
       <CustomTabPanel index={0} value={activeTab} disabledApply={!editMode && true}>
         <CategoryForm labels={labels} setStore={setStore} store={store} maxAccess={maxAccess} />
       </CustomTabPanel>
-      {/* <CustomTabPanel index={1} value={activeTab}>
+      <CustomTabPanel index={1} value={activeTab}>
         <CurrencyForm labels={labels} maxAccess={maxAccess} store={store} />
-      </CustomTabPanel> */}
+      </CustomTabPanel>
       {/*  <CustomTabPanel index={2} value={activeTab}>
         <SalesPersonForm labels={labels} maxAccess={maxAccess} store={store} />
       </CustomTabPanel>
