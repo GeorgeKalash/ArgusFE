@@ -15,9 +15,11 @@ import { formatDateDefault } from 'src/lib/date-helper'
 import { getFormattedNumber } from 'src/lib/numberField-helper'
 import { useRouter } from 'next/router'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const CAadjustment = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const { stack } = useWindow()
 
@@ -114,7 +116,7 @@ const CAadjustment = () => {
         access,
         functionId
       },
-      width: 800,
+      width: 900,
       height: 600,
       title: functionId == 3301 ? _labels.increaseAdj : _labels.decreaseAdj
     })
@@ -135,7 +137,7 @@ const CAadjustment = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
   }
 
   return (

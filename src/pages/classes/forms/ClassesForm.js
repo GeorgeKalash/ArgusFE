@@ -36,14 +36,14 @@ const ClassesForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store
       name: yup.string().required(' '),
       characteristicOperator: yup.string().required(' ')
     }),
-    onSubmit: values => {
-      postClass(values)
+    onSubmit: async values => {
+      await postClass(values)
     }
   })
 
-  const postClass = obj => {
+  const postClass = async obj => {
     const recordId = obj.recordId
-    postRequest({
+    await postRequest({
       extension: DocumentReleaseRepository.Class.set,
       record: JSON.stringify(obj)
     })
@@ -59,9 +59,7 @@ const ClassesForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store
         } else toast.success('Record Edited Successfully')
         invalidate()
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch(error => {})
   }
 
   useEffect(() => {

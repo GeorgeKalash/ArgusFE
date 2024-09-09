@@ -50,8 +50,8 @@ const PeriodsModuleForm = ({ recordId, labels, maxAccess, row, window }) => {
     enableReinitialize: false,
     validateOnChange: true,
 
-    onSubmit: values => {
-      post(values.modules)
+    onSubmit: async values => {
+      await post(values.modules)
     }
   })
 

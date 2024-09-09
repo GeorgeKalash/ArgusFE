@@ -6,26 +6,19 @@ import ClassesForm from '../forms/ClassesForm'
 import CharacteristicsFormList from '../forms/CharacteristicsFormList'
 import FunctionsFormList from '../forms/FunctionFormList'
 
-
-const ClassesWindow = ({
-  height,
-  recordId,
-  labels,
-  maxAccess,
-  expanded
-}) => {
-  const [activeTab , setActiveTab] = useState(0)
+const ClassesWindow = ({ height, recordId, labels, maxAccess, expanded }) => {
+  const [activeTab, setActiveTab] = useState(0)
   const [editMode, setEditMode] = useState(recordId)
 
-  const [store , setStore] = useState({
-    recordId : recordId || null,
+  const [store, setStore] = useState({
+    recordId: recordId || null,
     countries: []
   })
 
   const tabs = [
     { label: labels.class },
     { label: labels.characteristics, disabled: !store.recordId },
-    { label: labels.function, disabled: !store.recordId },
+    { label: labels.function, disabled: !store.recordId }
   ]
 
   return (

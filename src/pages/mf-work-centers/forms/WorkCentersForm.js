@@ -132,7 +132,7 @@ export default function WorkCentersForm({ labels, maxAccess, recordId, onSubmit 
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={ManufacturingRepository.Labor.qry}
-                parameters={`_startAt=0&_pageSize=100`}
+                parameters={`_startAt=0&_pageSize=100&_params=`}
                 name='supervisorId'
                 label={labels.supervisor}
                 columnsInDropDown={[

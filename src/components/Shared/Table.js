@@ -49,6 +49,7 @@ const Table = ({
   const columnsAccess = props?.maxAccess && props?.maxAccess.record.controls
   const { stack } = useWindow()
   const [checked, setChecked] = useState(false)
+  const [focus, setFocus] = useState(false)
 
   const columns = props?.columns
     .filter(
@@ -65,10 +66,10 @@ const Table = ({
           valueGetter: ({ data }) => formatDateDefault(data?.[col.field])
         }
       }
-      if (col.type === 'number') {
+      if (col.type === 'number' || col?.type?.field === 'number') {
         return {
           ...col,
-          valueGetter: ({ data }) => getFormattedNumber(data?.[col.field])
+          valueGetter: ({ data }) => getFormattedNumber(data?.[col.field], col.type?.decimal)
         }
       }
       if (col.type === 'timeZone') {
@@ -89,6 +90,7 @@ const Table = ({
   const filteredColumns = columns.filter(column => !shouldRemoveColumn(column))
 
   useEffect(() => {
+    // console.log('props?.gridData?.list ', props?.gridData?.list)
     const areAllValuesTrue = props?.gridData?.list?.every(item => item?.checked === true)
     setChecked(areAllValuesTrue)
     if (typeof setData === 'function') onSelectionChanged
@@ -103,6 +105,7 @@ const Table = ({
     if (pagination) {
       const TextInput = ({ value, pageCount }) => {
         const jumpToPage = e => {
+          setFocus(false)
           const newPage = e.target.value
 
           if ((e.key === 'Enter' || e.keyCode === 13) && newPage > 0)
@@ -116,6 +119,7 @@ const Table = ({
               })
               setStartAt((newPage - 2) * pageSize + pageSize)
             }
+          setFocus(true)
         }
 
         const handleInput = e => {
@@ -134,10 +138,11 @@ const Table = ({
                 height: '30px'
               }
             }}
-            autoFocus={true}
+            autoFocus={focus}
             onInput={handleInput}
             defaultValue={value}
             onKeyUp={jumpToPage}
+            onBlur={() => setFocus(false)}
           />
         )
       }
@@ -384,7 +389,7 @@ const Table = ({
     })
   }
 
-  if (props?.onEdit || props?.onDelete || props?.popupComponent) {
+  if (props?.onEdit || props?.onDelete) {
     const deleteBtnVisible = maxAccess ? props?.onDelete && maxAccess > TrxType.EDIT : props?.onDelete ? true : false
 
     if (!filteredColumns?.some(column => column.field === 'actions'))
@@ -410,16 +415,7 @@ const Table = ({
                   <Image src={editIcon} alt='Edit' width={18} height={18} />
                 </IconButton>
               )}
-              {props?.popupComponent && (
-                <IconButton
-                  size='small'
-                  onClick={e => {
-                    props?.popupComponent(data)
-                  }}
-                >
-                  <Image src={editIcon} alt='Edit' width={18} height={18} />
-                </IconButton>
-              )}
+
               {!globalStatus && deleteBtnVisible && (
                 <IconButton
                   size='small'

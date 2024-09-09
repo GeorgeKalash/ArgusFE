@@ -1,4 +1,7 @@
 import { useState, useContext } from 'react'
+import { Box, Button, Grid, IconButton } from '@mui/material'
+import Icon from 'src/@core/components/icon'
+
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -76,55 +79,6 @@ const DocumentsOnHold = () => {
         parameters: `_filter=${filters.qry}&_functionId=0&_reference=${filters.qry}&_sortBy=reference desc&_response=0&_status=1&_pageSize=${_pageSize}&_startAt=${_startAt}`
       }))
     )
-  }
-
-  const columns = [
-    {
-      field: 'reference',
-      headerName: _labels.reference,
-      flex: 1
-    },
-    {
-      field: 'functionName',
-      headerName: _labels.functionName,
-      flex: 1
-    },
-    {
-      field: 'thirdParty',
-      headerName: _labels.thirdParty,
-      flex: 1
-    },
-    {
-      field: 'date',
-      headerName: _labels.date,
-      flex: 1,
-      type: 'date'
-    }
-  ]
-
-  const edit = obj => {
-    setSelectedSeqNo(obj.seqNo)
-    setSelectedRecordId(obj.recordId)
-    setSelectedFunctioId(obj.functionId)
-    setWindowOpen(true)
-  }
-
-  async function getLabels(datasetId) {
-    const res = await getRequest({
-      extension: KVSRepository.getLabels,
-      parameters: `_dataset=${datasetId}`
-    })
-
-    return res.list ? Object.fromEntries(res.list.map(({ key, value }) => [key, value])) : {}
-  }
-
-  async function getAccess(resourceId) {
-    const res = await getRequest({
-      extension: AccessControlRepository.maxAccess,
-      parameters: `_resourceId=${resourceId}`
-    })
-
-    return res
   }
 
   const popupComponent = async obj => {
@@ -241,6 +195,74 @@ const DocumentsOnHold = () => {
     }
   }
 
+  const openPopup = async obj => {
+    await popupComponent(obj)
+  }
+
+  const columns = [
+    {
+      field: 'reference',
+      headerName: _labels.reference,
+      flex: 1
+    },
+    {
+      field: 'functionName',
+      headerName: _labels.functionName,
+      flex: 1
+    },
+    {
+      field: 'thirdParty',
+      headerName: _labels.thirdParty,
+      flex: 1
+    },
+    {
+      field: 'strategyName',
+      headerName: _labels.strategy,
+      flex: 1
+    },
+    {
+      field: 'date',
+      headerName: _labels.date,
+      flex: 1,
+      type: 'date'
+    },
+    {
+      width: 100,
+      cellRenderer: row => (
+        <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
+          <IconButton size='small' onClick={() => edit(row.data)}>
+            <Icon icon='mdi:application-edit-outline' fontSize={18} />
+          </IconButton>
+        </Box>
+      )
+    }
+  ]
+
+  const edit = obj => {
+    setSelectedSeqNo(obj.seqNo)
+    setSelectedRecordId(obj.recordId)
+    setSelectedFunctioId(obj.functionId)
+    setWindowOpen(true)
+  }
+
+  async function getLabels(datasetId) {
+    const res = await getRequest({
+      extension: KVSRepository.getLabels,
+      parameters: `_dataset=${datasetId}`
+    })
+
+    return res.list ? Object.fromEntries(res.list.map(({ key, value }) => [key, value])) : {}
+  }
+
+  async function getAccess(resourceId) {
+    const res = await getRequest({
+      extension: AccessControlRepository.maxAccess,
+      parameters: `_resourceId=${resourceId}`
+    })
+
+    return res
+  }
+
   return (
     <VertLayout>
       <Fixed>
@@ -261,8 +283,7 @@ const DocumentsOnHold = () => {
           columns={columns}
           gridData={data}
           rowId={['functionId', 'seqNo', 'recordId']}
-          onEdit={edit}
-          popupComponent={popupComponent}
+          onEdit={openPopup}
           isLoading={false}
           pageSize={50}
           refetch={refetch}

@@ -13,9 +13,11 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const RelationForm = ({ bpId, recordId, labels, maxAccess, getRelationGridData, window, editMode }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const { formik } = useForm({
     maxAccess,
@@ -36,8 +38,8 @@ const RelationForm = ({ bpId, recordId, labels, maxAccess, getRelationGridData, 
       toBPId: yup.string().required(),
       relationId: yup.string().required()
     }),
-    onSubmit: values => {
-      postRelation(values)
+    onSubmit: async values => {
+      await postRelation(values)
     }
   })
 
@@ -51,9 +53,9 @@ const RelationForm = ({ bpId, recordId, labels, maxAccess, getRelationGridData, 
         record: JSON.stringify(obj)
       })
       if (!recordId) {
-        toast.success('Record Added Successfully')
+        toast.success(platformLabels.Added)
       } else {
-        toast.success('Record Edited Successfully')
+        toast.success(platformLabels.Edited)
       }
 
       await getRelationGridData(bpId)

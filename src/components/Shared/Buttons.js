@@ -86,6 +86,13 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'Correspondent',
+    label: platformLabels.Correspondent,
+    image: 'person.png',
+    color: '#CECECE',
+    main: false
+  },
+  {
     key: 'Print',
     label: platformLabels.Print,
     color: '#231f20',
@@ -128,10 +135,24 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'Add Client Relation',
+    label: platformLabels.addClientRelation,
+    color: '#4eb558',
+    image: 'clientRelations.png',
+    main: false
+  },
+  {
     key: 'GL',
     label: platformLabels.GL,
     color: '#231f20',
     image: 'gl.png',
+    main: false
+  },
+  {
+    key: 'FI Trx',
+    label: platformLabels.FinTrx,
+    color: '#3E048C',
+    image: 'popup-window.png',
     main: false
   },
   {
@@ -203,6 +224,13 @@ export const getButtons = platformLabels => [
     main: true
   },
   {
+    key: 'Audit',
+    label: platformLabels.Audit,
+    color: '#231f20',
+    image: 'info.png',
+    main: false
+  },
+  {
     key: 'Info',
     label: platformLabels.Info,
     condition: 'isInfo && infoVisible',
@@ -211,6 +239,16 @@ export const getButtons = platformLabels => [
     disabled: '!editMode',
     image: 'info.png',
     main: true
+  },
+  {
+    key: 'saveClear',
+    label: platformLabels.saveClear,
+    condition: 'isSavedClear',
+    onClick: 'onSaveClear',
+    color: '#231f20',
+    image: 'saveclear.png',
+    main: true,
+    disabled: 'disabledSavedClear'
   },
   {
     key: 'Submit',
@@ -228,5 +266,5 @@ export const getButtons = platformLabels => [
     color: '#000',
     image: 'import.png',
     main: false
-  },
+  }
 ]

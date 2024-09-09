@@ -5,7 +5,7 @@ import { useContext, useEffect } from 'react'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FormShell from 'src/components/Shared/FormShell'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useInvalidate } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { SaleRepository } from 'src/repositories/SaleRepository'
@@ -15,13 +15,15 @@ import { useForm } from 'src/hooks/form'
 import { MasterSource } from 'src/resources/MasterSource'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
-const AccountsForms = ({ labels, editMode, maxAccess, setStore, store }) => {
+const AccountsForms = ({ labels, maxAccess, setStore, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const { recordId } = store
 
   const invalidate = useInvalidate({
-    endpointId: FinancialRepository.Account.qry
+    endpointId: FinancialRepository.Account.page
   })
 
   const { formik } = useForm({
@@ -47,14 +49,14 @@ const AccountsForms = ({ labels, editMode, maxAccess, setStore, store }) => {
       groupId: yup.string().required(),
       reference: yup.string().required()
     }),
-    onSubmit: values => {
-      postAccount(values)
+    onSubmit: async values => {
+      await postAccount(values)
     }
   })
 
-  const postAccount = obj => {
+  const postAccount = async obj => {
     const recordId = obj.recordId
-    postRequest({
+    await postRequest({
       extension: FinancialRepository.Account.set,
       record: JSON.stringify(obj)
     })
@@ -65,9 +67,9 @@ const AccountsForms = ({ labels, editMode, maxAccess, setStore, store }) => {
             recordId: res.recordId
           }))
           formik.setFieldValue('recordId', res.recordId)
-          toast.success('Record Added Successfully')
+          toast.success(platformLabels.Added)
           invalidate()
-        } else toast.success('Record Edited Successfully')
+        } else toast.success(platformLabels.Edited)
       })
       .catch(error => {})
   }
@@ -86,6 +88,8 @@ const AccountsForms = ({ labels, editMode, maxAccess, setStore, store }) => {
       formik.setValues(res.record)
     })
   }
+
+  const editMode = !!formik.values.recordId
 
   const actions = [
     {

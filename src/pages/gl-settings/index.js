@@ -156,12 +156,12 @@ const GLSettings = () => {
         })
     }),
 
-    onSubmit: values => {
-      postGLSettings(values)
+    onSubmit: async values => {
+      await postGLSettings(values)
     }
   })
 
-  const postGLSettings = obj => {
+  const postGLSettings = async obj => {
     var dataToPost = []
 
     dataToPost.push({ key: 'GLACSegments', value: obj.GLACSegments })
@@ -176,7 +176,7 @@ const GLSettings = () => {
         dataToPost.push({ key: nameKey, value: obj[nameKey] })
       }
     }
-    postRequest({
+    await postRequest({
       extension: SystemRepository.Defaults.set,
       record: JSON.stringify({ sysDefaults: dataToPost })
     })
