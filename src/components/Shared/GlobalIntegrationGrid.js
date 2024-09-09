@@ -36,12 +36,12 @@ const GlobalIntegrationGrid = ({ masterSource, masterId }) => {
         }
       ]
     },
-    onSubmit: values => {
-      postIntegrations(values)
+    onSubmit: async values => {
+      await postIntegrations(values)
     }
   })
 
-  const postIntegrations = values => {
+  const postIntegrations = async values => {
     const filteredIntegrations = values.Integrations.filter(
       integration => integration.accountId !== null && integration.accountId !== ''
     )
@@ -56,7 +56,7 @@ const GlobalIntegrationGrid = ({ masterSource, masterId }) => {
       }))
     }
 
-    postRequest({
+    await postRequest({
       extension: GeneralLedgerRepository.IntegrationAccounts.set2,
       record: JSON.stringify(data)
     })

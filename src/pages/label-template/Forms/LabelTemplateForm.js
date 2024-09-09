@@ -43,8 +43,8 @@ const LabelTemplateForm = ({ labels, maxAccess, store, setStore }) => {
       labelHomeX: yup.number().nullable().min(0),
       labelHomeY: yup.number().nullable().min(0)
     }),
-    onSubmit: values => {
-      postLabelTemplate(values)
+    onSubmit: async values => {
+      await postLabelTemplate(values)
     }
   })
 
