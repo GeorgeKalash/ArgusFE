@@ -10,7 +10,8 @@ export const InventoryRepository = {
     page: service + 'pageGRP',
     get: service + 'getGRP',
     set: service + 'setGRP',
-    del: service + 'delGRP'
+    del: service + 'delGRP',
+    snapshot: service + 'snapshotGRP'
   },
   Category: {
     qry: service + 'qryCA',
