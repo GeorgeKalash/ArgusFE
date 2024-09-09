@@ -238,5 +238,6 @@ export const ResourceIds = {
   Drivers: 52201,
   RebuildInventory: 41501,
   RebuildUndeliveredItems: 52504,
-  IvSettings: 41115
+  IvSettings: 41115,
+  FeeScheduleInwardsMap: 36130
 }

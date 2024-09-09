@@ -76,6 +76,12 @@ export const RemittanceOutwardsRepository = {
     set: service + 'setFSO',
     del: service + 'delFSO'
   },
+  FeeScheduleInwards: {
+    qry: service + 'qryFSI',
+    get: service + 'getFSI',
+    set: service + 'setFSI',
+    del: service + 'delFSI'
+  },
   OutwardGLInformation: {
     get: service + 'getOWI'
   },
