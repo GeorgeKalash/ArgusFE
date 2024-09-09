@@ -93,7 +93,7 @@ const FeeScheduleInwardsMap = () => {
           : null
       },
       width: 700,
-      height: 560,
+      height: 400,
       title: _labels.fsim
     })
   }
