@@ -13,7 +13,7 @@ const CycleCountsWindow = ({ recordId, labels, maxAccess, plantId }) => {
   })
   const editMode = !!store.recordId
 
-  const tabs = [{ label: labels.cycleCounts }, { label: labels.sites, disabled: !editMode }, , { label: labels.controller, disabled: !editMode }]
+  const tabs = [{ label: labels.cycleCounts }, { label: labels.sites, disabled: !editMode }, { label: labels.controller, disabled: !editMode }]
 
   return (
     <>

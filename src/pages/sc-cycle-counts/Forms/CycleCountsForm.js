@@ -79,6 +79,12 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
           }))
           toast.success(platformLabels.Added)
           formik.setFieldValue('recordId', response.recordId)
+          const res2 = await getData(response.recordId);
+
+          formik.setValues({
+            ...res2.record,
+            date: formatDateFromApi(res2.record.date)
+          })
         } else toast.success(platformLabels.Edited)
 
         invalidate()
@@ -194,14 +200,20 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
     }
   ]
 
+  async function getData(recordId) {
+    try {
+      return await getRequest({
+        extension: SCRepository.StockCount.get,
+        parameters: `_recordId=${recordId}`
+      })
+    } catch (error) {}
+  }
+
   useEffect(() => {
     ;(async function () {
       try {
         if (recordId) {
-          const res = await getRequest({
-            extension: SCRepository.StockCount.get,
-            parameters: `_recordId=${recordId}`
-          })
+          const res = await getData(recordId);
 
           formik.setValues({
             ...res.record,
