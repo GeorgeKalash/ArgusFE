@@ -45,10 +45,7 @@ export default function EndSiteCountForm({ _labels, access }) {
         } else {
           await postRequest({
             extension: SCRepository.Sites.end,
-            record: JSON.stringify({
-              ...copy,
-              status: 1
-            })
+            record: JSON.stringify(copy)
           })
           
           toast.success(platformLabels.Saved)
