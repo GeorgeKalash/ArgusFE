@@ -143,8 +143,8 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
         ccName: '',
         type: '',
         amount: '',
-        paidAmount: '',
-        returnedAmount: '',
+        paidAmount: 0,
+        returnedAmount: 0,
         bankFees: '',
         receiptRef: ''
       }
@@ -222,6 +222,8 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
             ...amountDetails,
             seqNo: seqNo,
             cashAccountId: cashAccountId,
+            paidAmount: amountDetails.paidAmount || 0,
+            returnedAmount: amountDetails.returnedAmount || 0,
             outwardId: formik.values.recordId || 0
           }
         })
@@ -286,7 +288,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
             rowReturned = (parseFloat(newRow.paidAmount) - parseFloat(amount)).toFixed(2)
             rowAmount = (parseFloat(newRow.paidAmount) - rowReturned).toFixed(2)
           } else {
-            rowReturned = 0
+            rowReturned = (parseFloat(newRow.paidAmount) - parseFloat(amount)).toFixed(2)
             rowAmount = (parseFloat(amount) - parseFloat(newRow.paidAmount)).toFixed(2)
           }
           update({
@@ -306,8 +308,8 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
             rowReturned = (parseFloat(newRow.paidAmount) - returned).toFixed(2)
             rowAmount = (parseFloat(newRow.paidAmount) - rowReturned).toFixed(2)
           } else {
-            rowReturned = 0
-            rowAmount = (parseFloat(sumAmount) + parseFloat(newRow.paidAmount)).toFixed(2)
+            rowReturned = (parseFloat(newRow.paidAmount) - (parseFloat(amount) - parseFloat(sumAmount))).toFixed(2)
+            rowAmount = parseFloat(newRow.paidAmount).toFixed(2)
           }
           update({
             returnedAmount: rowReturned,
