@@ -12,7 +12,7 @@ import FormShell from 'src/components/Shared/FormShell'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 
 const Controller = ({ store, maxAccess, labels }) => {
-  const { recordId } = store
+  const { recordId, isPosted, isClosed } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -115,7 +115,9 @@ const Controller = ({ store, maxAccess, labels }) => {
       label: ' ',
       name: 'isChecked',
       flex: .2,
-      editable: true
+      props: {
+        disabled: isPosted || isClosed
+      },
     },
     {
       component: 'textfield',
@@ -158,6 +160,7 @@ const Controller = ({ store, maxAccess, labels }) => {
               parameters={recordId ? `_stockCountId=${recordId}` : ''}
               label={labels.sites}
               filter={item => item.isChecked}
+              readOnly={isPosted || isClosed}
               valueField='siteId'
               displayField='siteName'
               values={formik.values}

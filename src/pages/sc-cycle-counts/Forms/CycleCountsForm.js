@@ -131,7 +131,15 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
       if (res.recordId) {
         toast.success(platformLabels.Closed)
         invalidate()
-        await refetchForm(res.recordId)
+        const res2 = await refetchForm(res.recordId)
+        formik.setValues({
+          ...res2.record,
+          date: formatDateFromApi(res2.record.date)
+        })
+        setStore(prevStore => ({
+          ...prevStore,
+          isClosed: res2.record.wip === 2,
+        }))
       }
     } catch (error) {}
   }
@@ -146,7 +154,15 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
       if (res.recordId) {
         toast.success(platformLabels.Reopened)
         invalidate()
-        await refetchForm(res.recordId)
+        const res2 = await refetchForm(res.recordId)
+        formik.setValues({
+          ...res2.record,
+          date: formatDateFromApi(res2.record.date)
+        })
+        setStore(prevStore => ({
+          ...prevStore,
+          isClosed: res2.record.wip === 2,
+        }))
       }
     } catch (error) {}
   }
@@ -166,7 +182,10 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
 
       const res2 = await refetchForm(res.recordId)
       formik.setValues(res2.record)
-
+      setStore(prevStore => ({
+        ...prevStore,
+        isPosted: res2.record.status === 3,
+      }))
       window.close()
     } catch (error) {}
   }
@@ -214,6 +233,12 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
       try {
         if (recordId) {
           const res = await getData(recordId);
+
+          setStore(prevStore => ({
+            ...prevStore,
+            isPosted: res.record.status === 3,
+            isClosed: res.record.wip === 2
+          }))
 
           formik.setValues({
             ...res.record,

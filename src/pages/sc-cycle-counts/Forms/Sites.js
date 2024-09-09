@@ -12,7 +12,7 @@ import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 
 const Sites = ({ store, maxAccess, labels }) => {
-  const { recordId } = store
+  const { recordId, isPosted, isClosed } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -97,7 +97,9 @@ const Sites = ({ store, maxAccess, labels }) => {
       label: ' ',
       name: 'isChecked',
       flex: 1,
-      editable: true
+      props: {
+        disabled: isPosted || isClosed
+      },
     },
     {
       component: 'textfield',
@@ -135,7 +137,7 @@ const Sites = ({ store, maxAccess, labels }) => {
         readOnly: false
       },
       propsReducer({ row, props }) {
-        return { ...props, readOnly: row.statusName === 'Processed' }
+        return { ...props, readOnly: (row.statusName === 'Processed') || !isPosted || !isClosed }
       }
     }
   ]
@@ -177,6 +179,7 @@ const Sites = ({ store, maxAccess, labels }) => {
               name='search'
               value={formik.values.search}
               label={labels.search}
+              readOnly={isPosted || isClosed}
               onClear={() => {
                 formik.setFieldValue('search', '')
                 fetchGridData()

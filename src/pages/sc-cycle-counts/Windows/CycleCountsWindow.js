@@ -9,7 +9,9 @@ const CycleCountsWindow = ({ recordId, labels, maxAccess, plantId }) => {
   const [activeTab, setActiveTab] = useState(0)
 
   const [store, setStore] = useState({
-    recordId: recordId || null
+    recordId: recordId || null,
+    isPosted: false,
+    isClosed: false
   })
   const editMode = !!store.recordId
 
