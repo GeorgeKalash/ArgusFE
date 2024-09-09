@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import { useForm } from 'src/hooks/form'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -7,15 +7,14 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { SCRepository } from 'src/repositories/SCRepository'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import toast from 'react-hot-toast'
-import Table from 'src/components/Shared/Table'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import FormShell from 'src/components/Shared/FormShell'
+import { DataGrid } from 'src/components/Shared/DataGrid'
 
 const Controller = ({ store, maxAccess, labels }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const [gridData, setGridData] = useState([])
 
   const { formik } = useForm({
     maxAccess,
@@ -36,15 +35,15 @@ const Controller = ({ store, maxAccess, labels }) => {
     onSubmit: async () => {
       try {
         const itemsList = formik.values.rows
-          .filter(item => {
-            return item.isChecked
-          })
-          .map(item => ({
-            controllerId: item.recordId,
-            siteId: formik.values.siteId,
-            stockCountId: recordId,
-            status: item.status
-          }))
+        .map((item, index) => ({
+          ...item,
+          id: index + 1,
+          status: item.status || 1,
+          controllerId: item.recordId,
+          siteId: formik.values.siteId,
+          stockCountId: recordId,
+        }))
+        .filter(item => item.isChecked); 
 
         const data = {
           stockCountId: recordId,
@@ -89,12 +88,11 @@ const Controller = ({ store, maxAccess, labels }) => {
       })
 
       if (response && response?.list) {
-        response.list = response?.list?.map(item => ({
+        response.list = response?.list?.map((item, index) => ({
           ...item,
+          id: index,
           isChecked: item?.isChecked === undefined ? false : item?.isChecked
         }))
-
-        setGridData(response)
       }
 
       formik.setFieldValue('stockCountId', recordId)
@@ -113,21 +111,41 @@ const Controller = ({ store, maxAccess, labels }) => {
 
   const columns = [
     {
-      field: 'isChecked',
-      headerName: '',
-      flex: 0.2
+      component: 'checkbox',
+      label: ' ',
+      name: 'isChecked',
+      flex: .2,
+      editable: true
     },
     {
-      field: 'name',
-      headerName: labels.name,
-      flex: 1
+      component: 'textfield',
+      name: 'name',
+      label: labels.name,
+      flex: 1,
+      props: {
+        readOnly: true
+      }
     },
     {
-      field: 'statusName',
-      headerName: labels.statusName,
-      flex: 1
+      component: 'textfield',
+      name: 'statusName',
+      label: labels.statusName,
+      flex: 1,
+      props: {
+        readOnly: true
+      }
     }
   ]
+
+  function handleRowsChange(newValues) {
+    const updatedRows = formik.values.rows.map(row => {
+      const newValue = newValues.find(newRow => newRow.id === row.id)
+
+      return newValue ? newValue : row
+    })
+
+    formik.setFieldValue('rows', updatedRows)
+  }
 
   return (
     <FormShell form={formik} infoVisible={false} isCleared={false}>
@@ -150,13 +168,13 @@ const Controller = ({ store, maxAccess, labels }) => {
               maxAccess={maxAccess}
             />
           </Fixed>
-          <Table
+          <DataGrid
+            onChange={value => handleRowsChange(value)}
+            value={formik.values.rows}
+            error={formik.errors.rows}
             columns={columns}
-            gridData={gridData}
-            rowId={['recordId']}
-            isLoading={false}
-            maxAccess={maxAccess}
-            pagination={false}
+            allowAddNewLine={false}
+            allowDelete={false}
           />
         </Grow>
       </VertLayout>
