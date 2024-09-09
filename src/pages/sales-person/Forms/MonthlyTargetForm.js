@@ -54,7 +54,7 @@ export default function MonthlyTargetForm({ labels, maxAccess, recordId, setErro
       balance: ''
     },
     validationSchema: yup.object({
-      fiscalYear: yup.string().required('This field is required')
+      fiscalYear: yup.string().required()
     }),
     onSubmit: async obj => {
       const updatedRows = detailsFormik.values.rows.map(monthDetail => {
@@ -242,22 +242,22 @@ export default function MonthlyTargetForm({ labels, maxAccess, recordId, setErro
                 />
               </Box>
             </Grid>
-              <Grid item xs={9}></Grid>
-              <Grid item xs={3}>
-                <CustomTextField
-                  name='balance'
-                  label={labels[14]}
-                  value={getFormattedNumber(totalAmount - formik.values.targetAmount)}
-                  maxAccess={maxAccess}
-                  readOnly={true}
-                  onChange={formik.handleChange}
-                  onClear={() => formik.setFieldValue('balance', '')}
-                  error={formik.touched.balance && Boolean(formik.errors.balance)}
-                  helperText={formik.touched.balance && formik.errors.balance}
-                  numberField={true}
-                />
-              </Grid>
+            <Grid item xs={9}></Grid>
+            <Grid item xs={3}>
+              <CustomTextField
+                name='balance'
+                label={labels[14]}
+                value={getFormattedNumber(totalAmount - formik.values.targetAmount)}
+                maxAccess={maxAccess}
+                readOnly={true}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('balance', '')}
+                error={formik.touched.balance && Boolean(formik.errors.balance)}
+                helperText={formik.touched.balance && formik.errors.balance}
+                numberField={true}
+              />
             </Grid>
+          </Grid>
         </Grow>
       </VertLayout>
     </FormShell>

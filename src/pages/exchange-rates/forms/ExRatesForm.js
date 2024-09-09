@@ -17,7 +17,6 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 
 export default function ExRatesForm({ labels, recordId, maxAccess, record, window }) {
-  const [editMode, setEditMode] = useState(!!recordId || !!record)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -31,11 +30,11 @@ export default function ExRatesForm({ labels, recordId, maxAccess, record, windo
 
   const { formik } = useForm({
     initialValues: {
-      recordId: editMode ? recordId : '',
-      exId: record?.exId || '',
-      seqNo: record?.seqNo || 0,
-      rate: record?.rate || '',
-      dayId: record?.dayId ? new Date(formatDate(record.dayId)) : new Date()
+      recordId: recordId || null,
+      exId: '',
+      seqNo: 0,
+      rate: '',
+      dayId: new Date()
     },
     maxAccess,
     validateOnChange: true,
@@ -46,43 +45,43 @@ export default function ExRatesForm({ labels, recordId, maxAccess, record, windo
     }),
 
     onSubmit: async obj => {
-      const moment = require('moment')
+      const exId = formik.values.exId
+      const dayId = formik.values.exId
+      const seqNo = formik.values.seqNo
 
-      let dayId = ''
-      if (obj.dayId) {
-        const date = moment(obj.dayId).format('YYYYMMDD')
-        dayId = date
-      }
+      // const moment = require('moment')
+
+      // let dayId = ''
+      // if (obj.dayId) {
+      //   const date = moment(obj.dayId).format('YYYYMMDD')
+      //   dayId = date
+      // }
 
       const { ...dataToSend } = obj
 
-      const response = await postRequest({
-        extension: MultiCurrencyRepository.ExchangeRates.set,
-        record: JSON.stringify({ ...dataToSend, dayId })
-      })
-
-      const newRecordId = `${dataToSend.exId}${dayId}${dataToSend.seqNo}`
-      if (!editMode) {
-        toast.success(platformLabels.Added)
-        formik.setValues({
-          ...dataToSend,
-          seqNo: response.seqNo,
-          recordId: newRecordId
+      try {
+        // Send data to the server
+        await postRequest({
+          extension: MultiCurrencyRepository.ExchangeRates.set,
+          record: JSON.stringify(obj)
         })
-      } else {
-        toast.success(platformLabels.Edited)
-        formik.setValues({
-          ...dataToSend,
-          seqNo: response.seqNo,
-          recordId
-        })
-      }
 
-      setEditMode(true)
-      window.close()
-      invalidate()
+        if (!exId && !dayId && !seqNo) {
+          toast.success(platformLabels.Added)
+        } else toast.success(platformLabels.Edited)
+
+        formik.setFieldValue(
+          'recordId',
+
+          String(obj.exId) + String(obj.dayId) + String(obj.seqNo)
+        )
+        window.close()
+        invalidate()
+      } catch (error) {}
     }
   })
+
+  const editMode = !!formik.values.recordId || !!recordId
 
   useEffect(() => {
     if (editMode && record) {
@@ -107,6 +106,25 @@ export default function ExRatesForm({ labels, recordId, maxAccess, record, windo
         } catch (error) {}
       })()
     }
+  }, [])
+
+  useEffect(() => {
+    ;(async function () {
+      try {
+        if (record && record.exId && record.dayId && record.seqNo && recordId) {
+          const res = await getRequest({
+            extension: MultiCurrencyRepository.ExchangeRates.get,
+            parameters: `_exId=${record.exId}&_dayId=${record.dayId}&_seqNo=${record.seqNo}`
+          })
+
+          formik.setValues({
+            ...res.record,
+
+            recordId: String(res.record.exId) + String(res.record.dayId) + String(res.record.seqNo)
+          })
+        }
+      } catch (exception) {}
+    })()
   }, [])
 
   return (

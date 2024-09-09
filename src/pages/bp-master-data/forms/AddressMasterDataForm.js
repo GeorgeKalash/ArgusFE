@@ -10,7 +10,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 const AddressMasterDataForm = ({ store, maxAccess, labels, editMode, ...props }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const [addressGridData, setAddressGridData] = useState([]) //for address tab
+  const [addressGridData, setAddressGridData] = useState([])
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
 
@@ -23,7 +23,7 @@ const AddressMasterDataForm = ({ store, maxAccess, labels, editMode, ...props })
       parameters: parameters
     })
       .then(res => {
-        res.list = res.list.map(row => (row = row.address)) //sol
+        res.list = res.list.map(row => (row = row.address))
         setAddressGridData(res)
       })
       .catch(error => {})
@@ -46,17 +46,17 @@ const AddressMasterDataForm = ({ store, maxAccess, labels, editMode, ...props })
   }
 
   function addAddress() {
-    openForm('')
+    openForm()
   }
 
-  function openForm(id) {
+  function openForm(recordId) {
     stack({
       Component: BPAddressForm,
       props: {
         _labels: labels,
         maxAccess: maxAccess,
         editMode: editMode,
-        recordId: id,
+        recordId: recordId,
         bpId: recordId,
         getAddressGridData: getAddressGridData
       },

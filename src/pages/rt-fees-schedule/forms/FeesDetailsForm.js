@@ -120,12 +120,12 @@ const FeesDetailsForm = ({ store, labels }) => {
         }
       ]
     },
-    onSubmit: values => {
-      post(values)
+    onSubmit: async values => {
+      await post(values)
     }
   })
 
-  const post = obj => {
+  const post = async obj => {
     const res = obj.FeeScheduleDetail.map(({ seqNo, scheduleId, ...rest }, index) => ({
       seqNo: index + 1,
       scheduleId: pId,
@@ -137,7 +137,7 @@ const FeesDetailsForm = ({ store, labels }) => {
       items: res
     }
 
-    postRequest({
+    await postRequest({
       extension: RemittanceOutwardsRepository.FeeScheduleDetail.set2,
       record: JSON.stringify(data)
     })

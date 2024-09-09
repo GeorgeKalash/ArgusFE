@@ -3,7 +3,6 @@ import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
-import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
@@ -13,10 +12,13 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useForm } from 'src/hooks/form'
+import { ControlContext } from 'src/providers/ControlContext'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 
 export default function GroupsForm({ labels, maxAccess, recordId }) {
   const [editMode, setEditMode] = useState(!!recordId)
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: BusinessPartnerRepository.Groups.page
@@ -35,8 +37,8 @@ export default function GroupsForm({ labels, maxAccess, recordId }) {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      reference: yup.string().required(' '),
-      name: yup.string().required(' ')
+      reference: yup.string().required(),
+      name: yup.string().required()
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
@@ -47,12 +49,12 @@ export default function GroupsForm({ labels, maxAccess, recordId }) {
       })
 
       if (!recordId) {
-        toast.success('Record Added Successfully')
+        toast.success(platformLabels.Added)
         formik.setValues({
           ...obj,
           recordId: response.recordId
         })
-      } else toast.success('Record Edited Successfully')
+      } else toast.success(platformLabels.Edited)
       setEditMode(true)
       invalidate()
     }

@@ -142,11 +142,12 @@ export const InterfacesForm = ({ recordId, resourceId, name }) => {
   return (
     <FormShell
       form={formik}
-      isSavedClear={false}
       resourceId={resourceId}
       maxAccess={access}
       infoVisible={false}
       editMode={true}
+      isSavedClear={false}
+      isCleared={false}
     >
       <VertLayout>
         <Grow>
