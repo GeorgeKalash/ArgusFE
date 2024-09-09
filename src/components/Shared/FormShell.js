@@ -44,7 +44,7 @@ export default function FormShell({
 }) {
   const { stack } = useWindow()
   const [selectedReport, setSelectedReport] = useState(null)
-  const { clear } = useGlobalRecord()
+  const { clear, open } = useGlobalRecord() || {}
   const { platformLabels } = useContext(ControlContext)
   const isSavedClearVisible = isSavedClear && isSaved && isCleared
 
@@ -57,16 +57,19 @@ export default function FormShell({
     : true
 
   function handleReset() {
-    if (!form.values?.recordId) {
+    if (typeof form.values?.recordId === 'undefined') {
       form.resetForm({
         values: form.initialValues
       })
     } else {
       if (typeof clear === 'function') {
         clear()
+      } else {
+        form.resetForm({
+          values: form.initialValues
+        })
       }
     }
-
     if (setIDInfoAutoFilled) {
       setIDInfoAutoFilled(false)
     }
@@ -112,6 +115,21 @@ export default function FormShell({
     })
   }
 
+  async function handleSaveAndClear() {
+    const errors = await form.validateForm()
+    await form.submitForm()
+    if (Object.keys(errors).length == 0) {
+      await performPostSubmissionTasks()
+    }
+  }
+
+  const performPostSubmissionTasks = async () => {
+    if (typeof open === 'function') {
+      await open()
+    }
+    handleReset()
+  }
+
   return (
     <>
       <DialogContent
@@ -131,9 +149,11 @@ export default function FormShell({
       {windowToolbarVisible && (
         <WindowToolbar
           print={print}
-          onSave={() => form?.handleSubmit()}
+          onSave={() => {
+            form?.handleSubmit()
+          }}
           onSaveClear={() => {
-            form?.handleSubmit(), handleReset()
+            handleSaveAndClear()
           }}
           onClear={() => handleReset()}
           onPost={() => {

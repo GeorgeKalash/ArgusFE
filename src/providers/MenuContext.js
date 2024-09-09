@@ -18,6 +18,7 @@ const MenuProvider = ({ children }) => {
   const [menu, setMenu] = useState([])
   const [gear, setGear] = useState([])
   const [lastOpenedPage, setLastOpenedPage] = useState(null)
+  const [reloadOpenedPage, setReloadOpenedPage] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
 
   const getMenu = async () => {
@@ -75,26 +76,26 @@ const MenuProvider = ({ children }) => {
     return menu
   }
 
-  const buildGear = (commandLines) => {
+  const buildGear = commandLines => {
     const Gear = []
     commandLines
-          .filter(commandLine => commandLine.folderId === 0)
-          .forEach(commandLine => {
-            if (commandLine.nextAPI){
-              const GearItem={
-                id: commandLine.id,
-                title: commandLine.name,
-                path: `/${commandLine.nextAPI}`,
-                name: commandLine.name,
-                folderId:commandLine.folderId,
-                iconName: commandLine.addToBookmarks && 'FavIcon'
-              }
-        Gear.push(GearItem)}
-          })
-          
-          return Gear
-      }
-  
+      .filter(commandLine => commandLine.folderId === 0)
+      .forEach(commandLine => {
+        if (commandLine.nextAPI) {
+          const GearItem = {
+            id: commandLine.id,
+            title: commandLine.name,
+            path: `/${commandLine.nextAPI}`,
+            name: commandLine.name,
+            folderId: commandLine.folderId,
+            iconName: commandLine.addToBookmarks && 'FavIcon'
+          }
+          Gear.push(GearItem)
+        }
+      })
+
+    return Gear
+  }
 
   const handleBookmark = (item, isBookmarked, callBack = undefined) => {
     //TEMP userData later replace with userProvider
@@ -150,7 +151,9 @@ const MenuProvider = ({ children }) => {
     gear,
     handleBookmark,
     lastOpenedPage,
-    setLastOpenedPage
+    setLastOpenedPage,
+    reloadOpenedPage,
+    setReloadOpenedPage
   }
 
   return (
