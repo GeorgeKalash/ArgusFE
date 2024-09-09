@@ -26,7 +26,7 @@ export default function FeeScheduleInwardsMapForm({ labels, maxAccess, recordId,
 
   const { formik } = useForm({
     initialValues: {
-      recordId: recordId || null,
+      recordId: recordId,
       corId: '',
       dispersalMode: '',
       scheduleId: ''
@@ -77,7 +77,8 @@ export default function FeeScheduleInwardsMapForm({ labels, maxAccess, recordId,
 
             recordId:
               String(res.record.corId) +
-              String(res.record.dispersalMode)
+              String(res.record.dispersalMode) +
+              String(res.record.functionId)
           })
         }
       } catch (exception) {}
