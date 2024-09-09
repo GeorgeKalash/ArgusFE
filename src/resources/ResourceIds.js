@@ -235,6 +235,5 @@ export const ResourceIds = {
   StockCountControllers: 44101,
   StockCountDTD: 44103,
   PurposeExchangeGroup: 35115,
-  PointOfSales: 54101,
   IvSettings: 41115
 }

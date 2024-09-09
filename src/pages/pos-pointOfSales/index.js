@@ -43,7 +43,7 @@ const PointOfSales = () => {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: PointofSaleRepository.PointOfSales.page,
-    datasetId: ResourceIds.PointOfSales
+    datasetId: ResourceIds.PointOfSale
   })
 
   const columns = [

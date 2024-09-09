@@ -3,7 +3,7 @@ import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
@@ -111,7 +111,7 @@ const PointOfSalesForm = ({ labels, maxAccess, setStore, store }) => {
   }, [])
 
   return (
-    <FormShell form={formik} resourceId={ResourceIds.PointOfSales} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell form={formik} resourceId={ResourceIds.PointOfSale} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>

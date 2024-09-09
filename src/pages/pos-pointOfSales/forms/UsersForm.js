@@ -65,7 +65,7 @@ const UsersForm = ({ store, labels, maxAccess }) => {
     })
       .then(res => {
         toast.success(platformLabels.Edited)
-        if (res) getData()
+        getData()
       })
       .catch(error => {})
   }
@@ -129,7 +129,7 @@ const UsersForm = ({ store, labels, maxAccess }) => {
   return (
     <FormShell
       form={formik}
-      resourceId={ResourceIds.PointOfSales}
+      resourceId={ResourceIds.PointOfSale}
       isCleared={false}
       infoVisible={false}
       maxAccess={maxAccess}

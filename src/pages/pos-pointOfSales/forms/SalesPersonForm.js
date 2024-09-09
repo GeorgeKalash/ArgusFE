@@ -63,7 +63,7 @@ const SalesPersonForm = ({ store, labels, maxAccess }) => {
     })
       .then(res => {
         toast.success(platformLabels.Edited)
-        if (res) getData()
+        getData()
       })
       .catch(error => {})
   }
@@ -98,29 +98,15 @@ const SalesPersonForm = ({ store, labels, maxAccess }) => {
       parameters: `_posId=${recordId}`
     })
       .then(res => {
-        if (Array.isArray(res?.list) && res.list.length > 0) {
-          formik.setValues({
-            pOSUser: res.list.map(({ ...rest }, index) => ({
-              id: index,
-              ...rest
-            }))
-          })
-        } else {
-          formik.setValues({
-            posId: [
-              {
-                id: 1,
-                posId: recordId,
-                spId: '',
-                isInactive: false,
-                spName: ''
-              }
-            ]
-          })
-        }
+        const modifiedList = res.list?.map((user, index) => ({
+          ...user,
+          id: index + 1
+        }))
+        formik.setValues({ pOSUser: modifiedList })
       })
       .catch(error => {})
   }
+
   useEffect(() => {
     if (recordId) {
       getData()
@@ -130,7 +116,7 @@ const SalesPersonForm = ({ store, labels, maxAccess }) => {
   return (
     <FormShell
       form={formik}
-      resourceId={ResourceIds.PointOfSales}
+      resourceId={ResourceIds.PointOfSale}
       isCleared={false}
       infoVisible={false}
       maxAccess={maxAccess}
