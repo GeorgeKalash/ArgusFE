@@ -28,9 +28,9 @@ const CategoryWindow = ({ recordId, labels, maxAccess }) => {
         <CategoryForm labels={labels} setStore={setStore} store={store} maxAccess={maxAccess} />
       </CustomTabPanel>
       {/* <CustomTabPanel index={1} value={activeTab}>
-        <UsersForm labels={labels} maxAccess={maxAccess} store={store} />
-      </CustomTabPanel>
-      <CustomTabPanel index={2} value={activeTab}>
+        <CurrencyForm labels={labels} maxAccess={maxAccess} store={store} />
+      </CustomTabPanel> */}
+      {/*  <CustomTabPanel index={2} value={activeTab}>
         <SalesPersonForm labels={labels} maxAccess={maxAccess} store={store} />
       </CustomTabPanel>
       <CustomTabPanel index={3} value={activeTab}>
