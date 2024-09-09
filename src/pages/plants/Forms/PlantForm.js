@@ -49,8 +49,8 @@ const PlantForm = ({ _labels, maxAccess, store, setStore, editMode }) => {
       reference: yup.string().required(' '),
       name: yup.string().required(' ')
     }),
-    onSubmit: values => {
-      postPlant(values)
+    onSubmit: async values => {
+      await postPlant(values)
     }
   })
 

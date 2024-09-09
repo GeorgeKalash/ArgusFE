@@ -61,12 +61,12 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
         }
       ]
     },
-    onSubmit: values => {
-      post(values.schedules)
+    onSubmit: async values => {
+      await post(values.schedules)
     }
   })
 
-  const post = obj => {
+  const post = async obj => {
     const lastObject = obj[obj.length - 1]
 
     const data = {
@@ -77,7 +77,7 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
         ...rest
       }))
     }
-    postRequest({
+    await postRequest({
       extension: RemittanceSettingsRepository.ProductSchedules.set2,
       record: JSON.stringify(data)
     })
