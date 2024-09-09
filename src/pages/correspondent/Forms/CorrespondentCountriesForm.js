@@ -52,12 +52,12 @@ const CorrespondentCountriesForm = ({ store, setStore, maxAccess, labels, expand
         }
       ]
     },
-    onSubmit: values => {
-      postCorrespondentCountries(values)
+    onSubmit: async values => {
+      await postCorrespondentCountries(values)
     }
   })
 
-  const postCorrespondentCountries = obj => {
+  const postCorrespondentCountries = async obj => {
     const correspondentCountries = obj?.countries
 
     const data = {
@@ -68,7 +68,7 @@ const CorrespondentCountriesForm = ({ store, setStore, maxAccess, labels, expand
       }))
     }
 
-    postRequest({
+    await postRequest({
       extension: RemittanceSettingsRepository.CorrespondentCountry.set2,
       record: JSON.stringify(data)
     })

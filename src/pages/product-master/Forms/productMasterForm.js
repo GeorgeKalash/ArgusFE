@@ -39,6 +39,7 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
     languages: null,
     valueDays: null,
     commissionBase: null,
+    accessLevel: null,
     interfaceId: null,
     posMsg: null,
     posMsgIsActive: false,
@@ -57,16 +58,17 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
     validationSchema: yup.object({
       name: yup.string().required(),
       commissionBase: yup.string().required(),
-      isInactive: yup.string().required()
+      isInactive: yup.string().required(),
+      accessLevel: yup.string().required()
     }),
-    onSubmit: values => {
-      postProductMaster(values)
+    onSubmit: async values => {
+      await postProductMaster(values)
     }
   })
 
-  const postProductMaster = obj => {
+  const postProductMaster = async obj => {
     const recordId = obj.recordId
-    postRequest({
+    await postRequest({
       extension: RemittanceSettingsRepository.ProductMaster.set,
       record: JSON.stringify(obj)
     })
@@ -245,6 +247,21 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
                   onChange={formik.handleChange}
                   onClear={() => formik.setFieldValue('posMsg', '')}
                   error={formik.errors && Boolean(formik.errors.posMsg)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  datasetId={DataSets.RT_PROD_ACCESS_LEVEL}
+                  name='accessLevel'
+                  label={labels.accessLevel}
+                  required
+                  valueField='key'
+                  displayField='value'
+                  values={formik.values}
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('accessLevel', newValue?.key)
+                  }}
+                  error={formik.touched.accessLevel && Boolean(formik.errors.accessLevel)}
                 />
               </Grid>
               <Grid item xs={12}>

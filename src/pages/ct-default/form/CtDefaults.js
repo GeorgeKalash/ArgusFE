@@ -64,8 +64,8 @@ const CtDefaults = ({ _labels, access }) => {
       ct_credit_eval_ratetype_id: null,
       ct_minOtp_CIVAmount: null
     },
-    onSubmit: values => {
-      postRtDefault(values)
+    onSubmit: async values => {
+      await postRtDefault(values)
     }
   })
 
@@ -120,7 +120,7 @@ const CtDefaults = ({ _labels, access }) => {
       })
   }
 
-  const postRtDefault = obj => {
+  const postRtDefault = async obj => {
     var data = []
     Object.entries(obj).forEach(([key, value], i) => {
       if (arrayAllow.includes(key)) {
@@ -129,7 +129,7 @@ const CtDefaults = ({ _labels, access }) => {
       }
     })
 
-    postRequest({
+    await postRequest({
       extension: CurrencyTradingSettingsRepository.Defaults.set2,
       record: JSON.stringify({ sysDefaults: data })
     })

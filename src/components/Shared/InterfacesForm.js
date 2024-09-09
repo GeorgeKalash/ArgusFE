@@ -136,7 +136,15 @@ export const InterfacesForm = ({ recordId, resourceId, name }) => {
   ]
 
   return (
-    <FormShell form={formik} resourceId={resourceId} maxAccess={access} infoVisible={false} editMode={true}>
+    <FormShell
+      form={formik}
+      resourceId={resourceId}
+      maxAccess={access}
+      infoVisible={false}
+      editMode={true}
+      isSavedClear={false}
+      isCleared={false}
+    >
       <VertLayout>
         <Grow>
           <Grid sx={{ width: '50%' }}>
