@@ -212,7 +212,7 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
     })()
   }, [])
 
-  const disable = formik.values.status === 3 || isClosed
+  const disable = isPosted || isClosed
 
   return (
     <FormShell
