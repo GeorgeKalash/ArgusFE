@@ -150,7 +150,7 @@ const Controller = ({ store, maxAccess, labels }) => {
   }
 
   return (
-    <FormShell form={formik} infoVisible={false} isCleared={false}>
+    <FormShell form={formik} infoVisible={false} isCleared={false} disabledSubmit={isPosted || isClosed}>
       <VertLayout>
         <Grow>
           <Fixed>

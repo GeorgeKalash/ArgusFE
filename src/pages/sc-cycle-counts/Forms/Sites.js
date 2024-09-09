@@ -171,6 +171,7 @@ const Sites = ({ store, maxAccess, labels }) => {
       infoVisible={false}
       isSavedClear={false}
       isCleared={false}
+      disabledSubmit={isPosted || isClosed}
     >
       <VertLayout>
         <Grow>
