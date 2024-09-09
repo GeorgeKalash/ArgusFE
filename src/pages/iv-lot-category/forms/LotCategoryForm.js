@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -21,7 +21,7 @@ export default function LotCategoryForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
-    endpointId: InventoryRepository.LotCategory.qry
+    endpointId: InventoryRepository.LotCategory.page
   })
 
   const { formik } = useForm({
@@ -40,8 +40,8 @@ export default function LotCategoryForm({ labels, maxAccess, recordId }) {
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
-      reference: yup.string().required(' '),
-      name: yup.string().required(' ')
+      reference: yup.string().required(),
+      name: yup.string().required()
     }),
     onSubmit: async obj => {
       const response = await postRequest({
@@ -51,10 +51,7 @@ export default function LotCategoryForm({ labels, maxAccess, recordId }) {
 
       if (!obj.recordId) {
         toast.success(platformLabels.Added)
-        formik.setValues({
-          ...obj,
-          recordId: response.recordId
-        })
+        formik.setFieldValue('recordId', response.recordId)
       } else {
         toast.success(platformLabels.Edited)
       }
@@ -80,7 +77,13 @@ export default function LotCategoryForm({ labels, maxAccess, recordId }) {
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.LotCategories} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell
+      resourceId={ResourceIds.LotCategories}
+      form={formik}
+      maxAccess={maxAccess}
+      editMode={editMode}
+      isCleared={false}
+    >
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -140,7 +143,6 @@ export default function LotCategoryForm({ labels, maxAccess, recordId }) {
                 name='udd1'
                 label={labels.userDefinedDate1}
                 value={formik.values.udd1}
-                required
                 maxAccess={maxAccess}
                 maxLength='20'
                 onChange={formik.handleChange}
@@ -152,7 +154,6 @@ export default function LotCategoryForm({ labels, maxAccess, recordId }) {
                 name='udd2'
                 label={labels.userDefinedDate2}
                 value={formik.values.udd2}
-                required
                 maxAccess={maxAccess}
                 maxLength='20'
                 onChange={formik.handleChange}
@@ -164,7 +165,6 @@ export default function LotCategoryForm({ labels, maxAccess, recordId }) {
                 name='udt1'
                 label={labels.userDefinedText1}
                 value={formik.values.udt1}
-                required
                 maxAccess={maxAccess}
                 maxLength='20'
                 onChange={formik.handleChange}
@@ -176,7 +176,6 @@ export default function LotCategoryForm({ labels, maxAccess, recordId }) {
                 name='udt2'
                 label={labels.userDefinedText2}
                 value={formik.values.udt2}
-                required
                 maxAccess={maxAccess}
                 maxLength='20'
                 onChange={formik.handleChange}
@@ -188,7 +187,6 @@ export default function LotCategoryForm({ labels, maxAccess, recordId }) {
                 name='udn1'
                 label={labels.userDefinedNumeric1}
                 value={formik.values.udn1}
-                required
                 maxAccess={maxAccess}
                 maxLength='20'
                 onChange={formik.handleChange}
@@ -200,7 +198,6 @@ export default function LotCategoryForm({ labels, maxAccess, recordId }) {
                 name='udn2'
                 label={labels.userDefinedNumeric2}
                 value={formik.values.udn2}
-                required
                 maxAccess={maxAccess}
                 maxLength='20'
                 onChange={formik.handleChange}

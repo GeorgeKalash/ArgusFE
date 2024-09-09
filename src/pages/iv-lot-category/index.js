@@ -18,13 +18,15 @@ const IvLotCategory = () => {
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
 
-  async function fetchGridData() {
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50 } = options
+
     const response = await getRequest({
-      extension: InventoryRepository.LotCategory.qry,
-      parameters: ``
+      extension: InventoryRepository.LotCategory.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
 
-    return response
+    return { ...response, _startAt: _startAt }
   }
 
   const {
@@ -32,27 +34,28 @@ const IvLotCategory = () => {
     labels: _labels,
     refetch,
     invalidate,
+    paginationParameters,
     access
   } = useResourceQuery({
-    endpointId: InventoryRepository.LotCategory.qry,
+    endpointId: InventoryRepository.LotCategory.page,
     queryFn: fetchGridData,
     datasetId: ResourceIds.LotCategories
   })
 
   const columns = [
     {
+      field: 'reference',
+      headerName: _labels.reference,
+      flex: 1
+    },
+    {
       field: 'name',
       headerName: _labels.name,
       flex: 1
     },
     {
-      field: 'caRef',
-      headerName: _labels.reference,
-      flex: 1
-    },
-    {
       field: 'naraRef',
-      headerName: _labels.NumericRange,
+      headerName: _labels.numberRange,
       flex: 1
     },
     {
@@ -136,7 +139,8 @@ const IvLotCategory = () => {
           refetch={refetch}
           pageSize={50}
           maxAccess={access}
-          paginationType='client'
+          paginationParameters={paginationParameters}
+          paginationType='api'
         />
       </Grow>
     </VertLayout>
