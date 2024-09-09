@@ -42,6 +42,7 @@ import { useInvalidate } from 'src/hooks/resource'
 import { ControlContext } from 'src/providers/ControlContext'
 import InfoForm from './InfoForm'
 import { RemittanceBankInterface } from 'src/repositories/RemittanceBankInterface'
+import BeneficiaryListWindow from '../Windows/BeneficiaryListWindow'
 
 export default function OutwardsForm({ labels, access, recordId, cashAccountId, plantId, userId, dtId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -633,6 +634,12 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       disabled: !isClosed
     },
     {
+      key: 'BeneficiaryList',
+      condition: true,
+      onClick: openBeneficiaryWindow,
+      disabled: editMode
+    },
+    {
       key: 'Beneficiary',
       condition: true,
       onClick: () => openRelevantWindow(formik.values),
@@ -657,6 +664,17 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       disabled: (editMode && !formik.values.corId) || !editMode
     }
   ]
+  function openBeneficiaryWindow() {
+    stack({
+      Component: BeneficiaryListWindow,
+      props: {
+        form: formik
+      },
+      width: 1300,
+      height: 500,
+      title: labels.beneficiaries
+    })
+  }
 
   function openProductWindow() {
     stack({
