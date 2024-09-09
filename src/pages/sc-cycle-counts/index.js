@@ -199,7 +199,7 @@ const CycleCounts = () => {
           onAdd={add}
           maxAccess={access} 
           onApply={onApply}
-          reportName={'CABNB'}
+          reportName={'SCHDR'}
         />
       </Fixed>
       <Grow>
