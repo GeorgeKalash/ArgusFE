@@ -139,6 +139,7 @@ const Controller = ({ store, maxAccess, labels }) => {
               endpointId={SCRepository.Sites.qry}
               parameters={recordId ? `_stockCountId=${recordId}` : ''}
               label={labels.sites}
+              filter={item => item.isChecked}
               valueField='siteId'
               displayField='siteName'
               values={formik.values}
