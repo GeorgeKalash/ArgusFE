@@ -17,7 +17,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 
-const AccountsForms = ({ labels, editMode, maxAccess, setStore, store }) => {
+const AccountsForms = ({ labels, maxAccess, setStore, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { recordId } = store
@@ -49,14 +49,14 @@ const AccountsForms = ({ labels, editMode, maxAccess, setStore, store }) => {
       groupId: yup.string().required(),
       reference: yup.string().required()
     }),
-    onSubmit: values => {
-      postAccount(values)
+    onSubmit: async values => {
+      await postAccount(values)
     }
   })
 
-  const postAccount = obj => {
+  const postAccount = async obj => {
     const recordId = obj.recordId
-    postRequest({
+    await postRequest({
       extension: FinancialRepository.Account.set,
       record: JSON.stringify(obj)
     })
@@ -88,6 +88,8 @@ const AccountsForms = ({ labels, editMode, maxAccess, setStore, store }) => {
       formik.setValues(res.record)
     })
   }
+
+  const editMode = !!formik.values.recordId
 
   const actions = [
     {

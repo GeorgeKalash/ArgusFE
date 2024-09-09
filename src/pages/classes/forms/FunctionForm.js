@@ -12,21 +12,12 @@ import { DataSets } from 'src/resources/DataSets'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-const FunctionForm = ({
-  labels,
-  maxAccess,
-  getFunctionGridData,
-  recordId,
-  functionId,
-  window,
-  editMode
-}) => {
+const FunctionForm = ({ labels, maxAccess, getFunctionGridData, recordId, functionId, window, editMode }) => {
+  const { postRequest, getRequest } = useContext(RequestsContext)
 
-  const { postRequest, getRequest} = useContext(RequestsContext)
-
-  const [initialValues , setInitialData] = useState({
+  const [initialValues, setInitialData] = useState({
     functionId: null,
-    strategyId: null,
+    strategyId: null
   })
 
   const formik = useFormik({
@@ -37,15 +28,15 @@ const FunctionForm = ({
       functionId: yup.string().required(' '),
       strategyId: yup.string().required(' ')
     }),
-    onSubmit: values => {
-      postFunction(values)
+    onSubmit: async values => {
+      await postFunction(values)
     }
   })
-  
-  const postFunction = obj => {
+
+  const postFunction = async obj => {
     const classId = obj.classId ? obj.classId : recordId
     obj.classId = classId
-    postRequest({
+    await postRequest({
       extension: DocumentReleaseRepository.ClassFunction.set,
       record: JSON.stringify(obj)
     })
@@ -56,76 +47,69 @@ const FunctionForm = ({
         } else toast.success('Record Editted Successfully')
         window.close()
       })
-      .catch(error => {
-      })
+      .catch(error => {})
   }
 
-  useEffect(()=>{
-    editMode  && getFunctionsById(recordId, functionId)
-  },[recordId])
+  useEffect(() => {
+    editMode && getFunctionsById(recordId, functionId)
+  }, [recordId])
 
-  const getFunctionsById =  (recordId, functionId) => {
-     const defaultParams = `_classId=${recordId}&&_functionId=${functionId}`
+  const getFunctionsById = (recordId, functionId) => {
+    const defaultParams = `_classId=${recordId}&&_functionId=${functionId}`
     var parameters = defaultParams
-     getRequest({
+    getRequest({
       extension: DocumentReleaseRepository.ClassFunction.get,
       parameters: parameters
+    }).then(res => {
+      console.log(res.record)
+      formik.setValues(res.record)
     })
-      .then(res => {
-        console.log(res.record)
-        formik.setValues(res.record)
-      })
   }
 
   return (
-    <FormShell
-      form={formik}
-      resourceId={ResourceIds.Functions}
-      maxAccess={maxAccess}
-      isInfo={false}
-    >
+    <FormShell form={formik} resourceId={ResourceIds.Functions} maxAccess={maxAccess} isInfo={false}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
-              <Grid item xs={12}>
-                <ResourceComboBox
-                  datasetId={DataSets.SYSTEM_FUNCTION}
-                  name='functionId'
-                  label={labels.function}
-                  required
-                  valueField='key'
-                  displayField='value'
-                  readOnly={editMode}
-                  values={formik.values}
-                  maxAccess={maxAccess}
-                  onClear={() => formik.setFieldValue('functionId', '')}
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('functionId', newValue?.key || '')
-                  }}
-                  error={formik.touched.functionId && Boolean(formik.errors.functionId)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <ResourceComboBox
-                  endpointId={DocumentReleaseRepository.Strategy.qry}
-                  parameters={`_startAt=0&_pageSize=50`}
-                  name='strategyId'
-                  label={labels.strategy}
-                  valueField='recordId'
-                  displayField='name'
-                  values={formik.values}
-                  required      
-                  maxAccess={maxAccess}
-                  onClear={() => formik.setFieldValue('strategyId', '')}
-                  onChange={(event, newValue) => {
-                      formik && formik.setFieldValue('strategyId', newValue?.recordId || '')
-                  }}
-                  error={formik.touched.strategyId && Boolean(formik.errors.strategyId)}
-                />
-              </Grid>
-            </Grid> 
-          </Grow>
-        </VertLayout>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.SYSTEM_FUNCTION}
+                name='functionId'
+                label={labels.function}
+                required
+                valueField='key'
+                displayField='value'
+                readOnly={editMode}
+                values={formik.values}
+                maxAccess={maxAccess}
+                onClear={() => formik.setFieldValue('functionId', '')}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('functionId', newValue?.key || '')
+                }}
+                error={formik.touched.functionId && Boolean(formik.errors.functionId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={DocumentReleaseRepository.Strategy.qry}
+                parameters={`_startAt=0&_pageSize=50`}
+                name='strategyId'
+                label={labels.strategy}
+                valueField='recordId'
+                displayField='name'
+                values={formik.values}
+                required
+                maxAccess={maxAccess}
+                onClear={() => formik.setFieldValue('strategyId', '')}
+                onChange={(event, newValue) => {
+                  formik && formik.setFieldValue('strategyId', newValue?.recordId || '')
+                }}
+                error={formik.touched.strategyId && Boolean(formik.errors.strategyId)}
+              />
+            </Grid>
+          </Grid>
+        </Grow>
+      </VertLayout>
     </FormShell>
   )
 }

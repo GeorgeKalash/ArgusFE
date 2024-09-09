@@ -103,11 +103,11 @@ const FeeScheduleMap = () => {
         record,
         maxAccess: access,
         recordId: record
-          ? String(record.currencyId * 1000) +
-            String(record.corId * 10000) +
-            String(record.dispersalMode * 10) +
-            String(record.functionId) +
-            String(record.countryId * 100)
+          ? String(record.corId) +
+            String(record.currencyId) +
+            String(record.countryId) +
+            String(record.dispersalMode) +
+            String(record.functionId)
           : null
       },
       width: 700,

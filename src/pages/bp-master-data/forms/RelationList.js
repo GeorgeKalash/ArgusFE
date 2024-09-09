@@ -6,15 +6,16 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import { useWindow } from 'src/windows'
 import RelationForm from './RelationForm'
-import { formatDateDefault } from 'src/lib/date-helper'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const RelationList = ({ store, labels, maxAccess }) => {
   const { recordId } = store
   const [relationGridData, setRelationGridData] = useState([])
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
   const editMode = !!store.recordId
 
@@ -36,7 +37,7 @@ const RelationList = ({ store, labels, maxAccess }) => {
         record: JSON.stringify(obj)
       })
 
-      toast.success('Record Deleted Successfully')
+      toast.success(platformLabels.Deleted)
       await getRelationGridData(recordId)
     } catch (error) {}
   }

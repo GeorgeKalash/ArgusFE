@@ -12,6 +12,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import CostCenterForm from './forms/CostCenterForm'
 import { ControlContext } from 'src/providers/ControlContext'
+import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
 const CostCenter = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -19,44 +20,42 @@ const CostCenter = () => {
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
       extension: GeneralLedgerRepository.CostCenter.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
     })
 
     return { ...response, _startAt: _startAt }
   }
 
-  async function fetchWithSearch({ options = {}, qry }) {
-    const { _startAt = 0, _pageSize = 50 } = options
-
-    return await getRequest({
-      extension: GeneralLedgerRepository.CostCenter.snapshot,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=${qry}`
-    })
+  async function fetchWithFilter({ filters, pagination }) {
+    if (filters?.qry) {
+      return await getRequest({
+        extension: GeneralLedgerRepository.CostCenter.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+    } else {
+      return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+    }
   }
-
-  const invalidate = useInvalidate({
-    endpointId: GeneralLedgerRepository.CostCenter.page
-  })
 
   const {
     query: { data },
-    search,
-    clear,
     labels: _labels,
     paginationParameters,
     refetch,
-    access
+    access,
+    filterBy,
+    invalidate,
+    clearFilter
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: GeneralLedgerRepository.CostCenter.page,
     datasetId: ResourceIds.CostCenter,
-    search: {
-      endpointId: GeneralLedgerRepository.CostCenter.snapshot,
-      searchFn: fetchWithSearch
+    filter: {
+      filterFn: fetchWithFilter
     }
   })
 
@@ -110,16 +109,35 @@ const CostCenter = () => {
     })
   }
 
+  const onApply = ({ search, rpbParams }) => {
+    if (!search && rpbParams.length === 0) {
+      clearFilter('params')
+    } else if (!search) {
+      filterBy('params', rpbParams)
+    } else {
+      filterBy('qry', search)
+    }
+    refetch()
+  }
+
+  const onSearch = value => {
+    filterBy('qry', value)
+  }
+
+  const onClear = () => {
+    clearFilter('qry')
+  }
+
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar
+        <RPBGridToolbar
           onAdd={add}
           maxAccess={access}
-          onSearch={search}
-          onSearchClear={clear}
-          labels={_labels}
-          inputSearch={true}
+          onSearch={onSearch}
+          onApply={onApply}
+          onClear={onClear}
+          reportName={'GLCC'}
         />
       </Fixed>
       <Grow>

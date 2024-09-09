@@ -74,7 +74,7 @@ const Financial = () => {
   }
 
   const edit = obj => {
-    openForm(obj?.dtId)
+    openForm(obj)
   }
 
   const del = async obj => {
@@ -86,13 +86,13 @@ const Financial = () => {
     toast.success(platformLabels.Deleted)
   }
 
-  function openForm(dtId) {
+  function openForm(record) {
     stack({
       Component: MemosDtdForm,
       props: {
         labels: _labels,
         functionId,
-        dtId,
+        recordId: record?.dtId,
         maxAccess: access
       },
       width: 500,

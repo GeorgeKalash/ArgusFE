@@ -12,9 +12,6 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
 
 export default function AccountGroupsForm({ labels, maxAccess, recordId, invalidate }) {
-  const [isLoading, setIsLoading] = useState(false)
-  const editMode = !!recordId
-
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const { formik } = useForm({
@@ -27,8 +24,8 @@ export default function AccountGroupsForm({ labels, maxAccess, recordId, invalid
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      reference: yup.string().required('This field is required'),
-      name: yup.string().required('This field is required')
+      reference: yup.string().required(),
+      name: yup.string().required()
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
@@ -49,12 +46,12 @@ export default function AccountGroupsForm({ labels, maxAccess, recordId, invalid
     }
   })
 
+  const editMode = !!formik.values.recordId
+
   useEffect(() => {
     ;(async function () {
       try {
         if (recordId) {
-          setIsLoading(true)
-
           const res = await getRequest({
             extension: GeneralLedgerRepository.GLAccountGroups.get,
             parameters: `_recordId=${recordId}`
@@ -63,7 +60,6 @@ export default function AccountGroupsForm({ labels, maxAccess, recordId, invalid
           formik.setValues(res.record)
         }
       } catch (e) {}
-      setIsLoading(false)
     })()
   }, [])
 

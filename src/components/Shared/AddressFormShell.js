@@ -36,7 +36,8 @@ export const AddressFormShell = ({
     cityDistrict: address?.cityDistrict || '',
     bldgNo: address?.bldgNo || '',
     unitNo: address?.unitNo || '',
-    subNo: address?.subNo || ''
+    subNo: address?.subNo || '',
+    poBox: address?.poBox || ''
   }
 
   const { formik } = useForm({
@@ -102,7 +103,7 @@ export const AddressFormShell = ({
   }, [formik.values])
 
   return (
-    <FormShell form={formik} maxAccess={maxAccess} infoVisible={false} readOnly={readOnly} editMode={editMode}>
+    <FormShell form={formik} maxAccess={maxAccess} infoVisible={false} disabledSubmit={readOnly} editMode={editMode}>
       <AddressTab addressValidation={formik} readOnly={readOnly} required={required} />
     </FormShell>
   )

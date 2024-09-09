@@ -1,6 +1,6 @@
 import { Checkbox, FormControlLabel, Grid } from '@mui/material'
 import * as yup from 'yup'
-import { useEffect, useContext, useState } from 'react'
+import { useEffect, useContext, useState, useRef } from 'react'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FormShell from 'src/components/Shared/FormShell'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
@@ -24,6 +24,7 @@ import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import { useError } from 'src/error'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { HIDDEN } from 'src/services/api/maxAccess'
 
 export default function BenificiaryBankForm({
   viewBtns = true,
@@ -47,6 +48,8 @@ export default function BenificiaryBankForm({
   const [maxAccess, setMaxAccess] = useState({ record: [] })
   const { stack: stackError } = useError()
   const [editMode, setEditMode] = useState(beneficiary?.beneficiaryId && !editable)
+  const hiddenIsInActive = useRef(false)
+  const hiddenIsBlocked = useRef(false)
 
   const initialValues = {
     //RTBEN
@@ -57,6 +60,7 @@ export default function BenificiaryBankForm({
     dispersalType: dispersalType || '',
     nationalityId: null,
     isBlocked: false,
+    isInactive: false,
     stoppedDate: null,
     stoppedReason: '',
     gender: null,
@@ -133,6 +137,7 @@ export default function BenificiaryBankForm({
           name: values.name,
           dispersalType: values.dispersalType,
           isBlocked: values.isBlocked,
+          isInactive: values.isInactive,
           stoppedDate: values.stoppedDate ? formatDateToApi(values.stoppedDate) : null,
           stoppedReason: values.stoppedReason,
           nationalityId: values.nationalityId,
@@ -190,7 +195,19 @@ export default function BenificiaryBankForm({
         const controls = { controls: qryCCL.list }
         const maxAccess = { record: controls }
         setMaxAccess(maxAccess)
+
+        const isInActiveAccessLevel = (maxAccess?.record?.controls ?? []).find(
+          ({ controlId }) => controlId === 'isInactive'
+        )
+
+        const isBlockedAccessLevel = (maxAccess?.record?.controls ?? []).find(
+          ({ controlId }) => controlId === 'isBlocked'
+        )
+
+        hiddenIsInActive.current = isInActiveAccessLevel?.accessLevel === HIDDEN
+        hiddenIsBlocked.current = isBlockedAccessLevel?.accessLevel === HIDDEN
       }
+
       if (beneficiary?.beneficiaryId && client?.clientId) {
         const RTBEB = await getRequest({
           extension: RemittanceOutwardsRepository.BeneficiaryBank.get,
@@ -211,6 +228,7 @@ export default function BenificiaryBankForm({
           dispersalType: dispersalType,
           nationalityId: RTBEN?.record?.nationalityId,
           isBlocked: RTBEN?.record?.isBlocked,
+          isInactive: RTBEN?.record?.isInactive,
           stoppedDate: RTBEN?.record?.stoppedDate && formatDateFromApi(RTBEN.record.stoppedDate),
           stoppedReason: RTBEN?.record?.stoppedReason,
           gender: RTBEN?.record?.gender,
@@ -272,6 +290,7 @@ export default function BenificiaryBankForm({
       name: values.name,
       dispersalType: values.dispersalType,
       isBlocked: values.isBlocked,
+      isInactive: values.isInactive,
       stoppedDate: values.stoppedDate ? formatDateToApi(values.stoppedDate) : null,
       stoppedReason: values.stoppedReason,
       nationalityId: values.nationalityId,
@@ -802,21 +821,40 @@ export default function BenificiaryBankForm({
                   required={formik.values.IBAN}
                 />
               </FormGrid>
-              <FormGrid hideonempty xs={12}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      name='isBlocked'
-                      readOnly
-                      disabled={true}
-                      checked={formik.values?.isBlocked}
-                      onChange={formik.handleChange}
-                      maxAccess={maxAccess}
-                    />
-                  }
-                  label={_labels.isBlocked}
-                />
-              </FormGrid>
+              {!hiddenIsInActive.current && (
+                <FormGrid hideonempty xs={12}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        name='isInactive'
+                        readOnly
+                        disabled={true}
+                        checked={formik.values?.isInactive}
+                        onChange={formik.handleChange}
+                        maxAccess={maxAccess}
+                      />
+                    }
+                    label={_labels.isInactive}
+                  />
+                </FormGrid>
+              )}
+              {!hiddenIsBlocked.current && (
+                <FormGrid hideonempty xs={12}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        name='isBlocked'
+                        readOnly
+                        disabled={true}
+                        checked={formik.values?.isBlocked}
+                        onChange={formik.handleChange}
+                        maxAccess={maxAccess}
+                      />
+                    }
+                    label={_labels.isBlocked}
+                  />
+                </FormGrid>
+              )}
               <FormGrid hideonempty xs={12}>
                 <CustomTextArea
                   name='remarks'

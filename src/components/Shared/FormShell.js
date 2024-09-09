@@ -3,7 +3,7 @@ import { useContext, useState } from 'react'
 import WindowToolbar from './WindowToolbar'
 import TransactionLog from './TransactionLog'
 import { TrxType } from 'src/resources/AccessLevels'
-import { ClientRelationForm } from './ClientRelationForm'
+import { ClientRelationList } from './ClientRelationList'
 import { useGlobalRecord, useWindow } from 'src/windows'
 import PreviewReport from './PreviewReport'
 import GeneralLedger from 'src/components/Shared/GeneralLedger'
@@ -14,15 +14,18 @@ import AccountBalance from './AccountBalance'
 import CashTransaction from './CashTransaction'
 import FinancialTransaction from './FinancialTransaction'
 import { ControlContext } from 'src/providers/ControlContext'
+import { ClientRelationForm } from './ClientRelationForm'
 
 export default function FormShell({
   form,
   isSaved = true,
   isInfo = true,
+  isSavedClear = true,
   isCleared = true,
   children,
   editMode,
   disabledSubmit,
+  disabledSavedClear,
   infoVisible = true,
   postVisible = false,
   resourceId,
@@ -32,6 +35,7 @@ export default function FormShell({
   isPosted = false,
   isClosed = false,
   clientRelation = false,
+  addClientRelation = false,
   setErrorMessage,
   previewReport = false,
   setIDInfoAutoFilled,
@@ -40,8 +44,9 @@ export default function FormShell({
 }) {
   const { stack } = useWindow()
   const [selectedReport, setSelectedReport] = useState(null)
-  const { clear } = useGlobalRecord()
+  const { clear, open } = useGlobalRecord() || {}
   const { platformLabels } = useContext(ControlContext)
+  const isSavedClearVisible = isSavedClear && isSaved && isCleared
 
   const windowToolbarVisible = editMode
     ? maxAccess < TrxType.EDIT
@@ -52,13 +57,17 @@ export default function FormShell({
     : true
 
   function handleReset() {
-    if (!form.values?.recordId) {
+    if (typeof form.values?.recordId === 'undefined') {
       form.resetForm({
         values: form.initialValues
       })
     } else {
       if (typeof clear === 'function') {
         clear()
+      } else {
+        form.resetForm({
+          values: form.initialValues
+        })
       }
     }
     if (setIDInfoAutoFilled) {
@@ -106,6 +115,21 @@ export default function FormShell({
     })
   }
 
+  async function handleSaveAndClear() {
+    const errors = await form.validateForm()
+    await form.submitForm()
+    if (Object.keys(errors).length == 0) {
+      await performPostSubmissionTasks()
+    }
+  }
+
+  const performPostSubmissionTasks = async () => {
+    if (typeof open === 'function') {
+      await open()
+    }
+    handleReset()
+  }
+
   return (
     <>
       <DialogContent
@@ -125,15 +149,18 @@ export default function FormShell({
       {windowToolbarVisible && (
         <WindowToolbar
           print={print}
-          onSave={() => form?.handleSubmit()}
+          onSave={() => {
+            form?.handleSubmit()
+          }}
+          onSaveClear={() => {
+            handleSaveAndClear()
+          }}
           onClear={() => handleReset()}
           onPost={() => {
-            // Set a flag in thexpt Formik state before calling handleSubmit
             form.setFieldValue('isOnPostClicked', true)
             form.handleSubmit()
           }}
           onTFR={() => {
-            // Set  flag in the Formik state before calling handleSubmit
             form.setFieldValue('isTFRClicked', true)
             form.handleSubmit()
           }}
@@ -167,7 +194,8 @@ export default function FormShell({
             stack({
               Component: FinancialTransaction,
               props: {
-                formValues: form.values
+                formValues: form.values,
+                functionId
               },
               width: 1000,
               height: 620,
@@ -196,16 +224,30 @@ export default function FormShell({
           }
           onClientRelation={() =>
             stack({
-              Component: ClientRelationForm,
+              Component: ClientRelationList,
               props: {
                 recordId: form.values?.recordId ?? form.values.clientId,
                 name: form.values.firstName ? form.values.firstName + ' ' + form.values.lastName : form.values.name,
                 reference: form.values.reference,
-                setErrorMessage: setErrorMessage
+                category: form.values.category
               },
               width: 900,
               height: 600,
               title: platformLabels.ClientRelation
+            })
+          }
+          onAddClientRelation={() =>
+            stack({
+              Component: ClientRelationForm,
+              props: {
+                clientId: form.values?.recordId ?? form.values.clientId,
+                name: form.values.firstName ? form.values.firstName + ' ' + form.values.lastName : form.values.name,
+                reference: form.values.reference,
+                formValidation: form
+              },
+              width: 500,
+              height: 420,
+              title: platformLabels.addClientRelation
             })
           }
           onGenerateReport={() =>
@@ -213,7 +255,9 @@ export default function FormShell({
               Component: PreviewReport,
               props: {
                 selectedReport: selectedReport,
-                recordId: form.values?.recordId
+                recordId: form.values?.recordId,
+                functionId: form.values?.functionId,
+                resourceId: resourceId
               },
               width: 1150,
               height: 700,
@@ -221,6 +265,7 @@ export default function FormShell({
             })
           }
           isSaved={isSaved}
+          isSavedClear={isSavedClearVisible}
           isInfo={isInfo}
           isCleared={isCleared}
           actions={actions}
@@ -229,11 +274,13 @@ export default function FormShell({
           transactionClicked={transactionClicked}
           editMode={editMode}
           disabledSubmit={disabledSubmit}
+          disabledSavedClear={disabledSavedClear || disabledSubmit}
           infoVisible={infoVisible}
           postVisible={postVisible}
           isPosted={isPosted}
           isClosed={isClosed}
           clientRelation={clientRelation}
+          addClientRelation={addClientRelation}
           resourceId={resourceId}
           masterSource={masterSource}
           recordId={form.values?.recordId}

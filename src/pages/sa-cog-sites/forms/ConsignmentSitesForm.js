@@ -16,7 +16,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 
-export default function ConsignmentSitesForm({ labels, maxAccess, clientId }) {
+export default function ConsignmentSitesForm({ labels, maxAccess, recordId }) {
   const { platformLabels } = useContext(ControlContext)
 
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -27,7 +27,7 @@ export default function ConsignmentSitesForm({ labels, maxAccess, clientId }) {
 
   const { formik } = useForm({
     initialValues: {
-      recordId: clientId || null,
+      recordId: recordId || null,
       clientId: '',
       siteId: '',
       clientRef: ''
@@ -59,10 +59,10 @@ export default function ConsignmentSitesForm({ labels, maxAccess, clientId }) {
   useEffect(() => {
     ;(async function () {
       try {
-        if (clientId) {
+        if (recordId) {
           const res = await getRequest({
             extension: SaleRepository.ConsignmentSites.get,
-            parameters: `_clientId=${clientId}`
+            parameters: `_clientId=${recordId}`
           })
 
           formik.setValues({ ...res.record, recordId: res.record.clientId })

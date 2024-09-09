@@ -31,22 +31,22 @@ const ProductDispersalForm = ({ pId, labels, recordId, getGridData, maxAccess, w
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      productId: yup.string().required('This field is required'),
-      reference: yup.string().required('This field is required'),
-      name: yup.string().required('This field is required'),
-      dispersalType: yup.string().required('This field is required'),
-      isDefault: yup.string().required('This field is required'),
-      isInactive: yup.string().required('This field is required')
+      productId: yup.string().required(),
+      reference: yup.string().required(),
+      name: yup.string().required(),
+      dispersalType: yup.string().required(),
+      isDefault: yup.string().required(),
+      isInactive: yup.string().required()
     }),
-    onSubmit: values => {
-      post(values)
+    onSubmit: async values => {
+      await post(values)
     }
   })
 
-  const post = obj => {
+  const post = async obj => {
     const recordId = obj.recordId
     const productId = obj.productId ? obj.productId : pId
-    postRequest({
+    await postRequest({
       extension: RemittanceSettingsRepository.ProductDispersal.set,
       record: JSON.stringify(obj)
     })
