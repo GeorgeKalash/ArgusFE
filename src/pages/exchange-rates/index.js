@@ -111,7 +111,7 @@ const ExchangeRates = () => {
         labels: _labels,
         record: record,
         maxAccess: access,
-        recordId: record?.recordId || undefined
+        recordId: record ? String(record.exId) + String(record.dayId) + String(record.seqNo) : null
       },
       width: 500,
       height: 400,

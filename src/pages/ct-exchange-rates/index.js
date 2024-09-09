@@ -130,8 +130,8 @@ const CTExchangeRates = () => {
         }
       ]
     },
-    onSubmit: values => {
-      postExchangeMaps(values, formik.values.currencyId, formik.values.raCurrencyId, formik.values.puRateTypeId)
+    onSubmit: async values => {
+      await postExchangeMaps(values, formik.values.currencyId, formik.values.raCurrencyId, formik.values.puRateTypeId)
     }
   })
 
@@ -169,8 +169,8 @@ const CTExchangeRates = () => {
         }
       ]
     },
-    onSubmit: values => {
-      postExchangeMaps(values, formik.values.currencyId, formik.values.raCurrencyId, formik.values.saRateTypeId)
+    onSubmit: async values => {
+      await postExchangeMaps(values, formik.values.currencyId, formik.values.raCurrencyId, formik.values.saRateTypeId)
     }
   })
 

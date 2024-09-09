@@ -13,6 +13,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { useContext, useEffect } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ControlContext } from 'src/providers/ControlContext'
+import toast from 'react-hot-toast'
 
 const DefaultsTab = ({ labels, maxAccess, storeRecordId }) => {
   const editMode = !!storeRecordId
@@ -30,9 +31,7 @@ const DefaultsTab = ({ labels, maxAccess, storeRecordId }) => {
       cashAccountRef: '',
       cashAccountName: ''
     },
-    onSubmit: obj => {
-      const fields = ['cashAccountId', 'plantId', 'siteId', 'spId']
-
+    onSubmit: async obj => {
       const postField = async field => {
         const request = {
           key: field,
@@ -44,7 +43,11 @@ const DefaultsTab = ({ labels, maxAccess, storeRecordId }) => {
           record: JSON.stringify(request)
         })
       }
-      fields.forEach(postField)
+
+      const fields = ['cashAccountId', 'plantId', 'siteId', 'spId'].map(postField)
+
+      await Promise.all(fields)
+
       toast.success(platformLabels.Updated)
     }
   })
@@ -105,7 +108,14 @@ const DefaultsTab = ({ labels, maxAccess, storeRecordId }) => {
   }, [storeRecordId])
 
   return (
-    <FormShell resourceId={ResourceIds.Users} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell
+      resourceId={ResourceIds.Users}
+      form={formik}
+      maxAccess={maxAccess}
+      editMode={editMode}
+      isSavedClear={false}
+      isCleared={false}
+    >
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>

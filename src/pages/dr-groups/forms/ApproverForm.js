@@ -29,8 +29,8 @@ const ApproverForm = ({ labels, editMode, maxAccess, setEditMode, recordId, stor
     validationSchema: yup.object({
       codeId: yup.string().required()
     }),
-    onSubmit: values => {
-      postGroups(values)
+    onSubmit: async values => {
+      await postGroups(values)
     },
     validateOnChange: true,
     enableReinitialize: true,
