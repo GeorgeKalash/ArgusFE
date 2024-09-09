@@ -53,8 +53,8 @@ const PersonalSettings = ({ _labels }) => {
       fullName: yup.string().required(' '),
       languageId: yup.string().required(' ')
     }),
-    onSubmit: values => {
-      postPersonalSettings(values)
+    onSubmit: async values => {
+      await postPersonalSettings(values)
     }
   })
 

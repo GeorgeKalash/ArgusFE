@@ -23,7 +23,7 @@ const GroupInfoTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required('This field is required')
+      name: yup.string().required()
     }),
     onSubmit: async values => {
       const res = await postRequest({

@@ -3,17 +3,17 @@ import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
-import RoleCategoriesForm from './forms/RoleCategoriesForm'
 import { ControlContext } from 'src/providers/ControlContext'
+import { SCRepository } from 'src/repositories/SCRepository'
+import StockCountControllerForm from './forms/StockCountControllerForm'
 
-const RoleCategories = () => {
+const StockCountController = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -22,7 +22,7 @@ const RoleCategories = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: BusinessPartnerRepository.RoleCategory.page,
+      extension: SCRepository.StockCountController.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
 
@@ -34,28 +34,25 @@ const RoleCategories = () => {
     labels: _labels,
     paginationParameters,
     refetch,
-    access
+    access,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: BusinessPartnerRepository.RoleCategory.page,
-    datasetId: ResourceIds.RoleCategories
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: BusinessPartnerRepository.RoleCategory.page
+    endpointId: SCRepository.StockCountController.page,
+    datasetId: ResourceIds.StockCountControllers
   })
 
   const columns = [
     {
-      field: 'reference',
-      headerName: _labels.reference,
-      flex: 1
-    },
-    {
       field: 'name',
       headerName: _labels.name,
       flex: 1
-    }
+    },
+    {
+      field: 'plantName',
+      headerName: _labels.plant,
+      flex: 1
+    },
   ]
 
   const add = () => {
@@ -68,25 +65,27 @@ const RoleCategories = () => {
 
   function openForm(recordId) {
     stack({
-      Component: RoleCategoriesForm,
+      Component: StockCountControllerForm,
       props: {
         labels: _labels,
-        recordId: recordId,
+        recordId,
         maxAccess: access
       },
       width: 600,
-      height: 400,
-      title: _labels.roleCategories
+      height: 300,
+      title: _labels.stockCountController
     })
   }
 
   const del = async obj => {
-    await postRequest({
-      extension: BusinessPartnerRepository.RoleCategory.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success(platformLabels.Deleted)
+    try {
+      await postRequest({
+        extension: SCRepository.StockCountController.del,
+        record: JSON.stringify(obj)
+      })
+      invalidate()
+      toast.success(platformLabels.Deleted)
+    } catch (error) {}
   }
 
   return (
@@ -108,9 +107,9 @@ const RoleCategories = () => {
           refetch={refetch}
           maxAccess={access}
         />
-      </Grow>{' '}
+      </Grow>
     </VertLayout>
   )
 }
 
-export default RoleCategories
+export default StockCountController

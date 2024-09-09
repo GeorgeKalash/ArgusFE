@@ -9,15 +9,14 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
-import { formatDateDefault } from 'src/lib/date-helper'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const Characteristics = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
-
-  //control
 
   const {
     query: { data },
@@ -70,13 +69,13 @@ const Characteristics = () => {
       extension: DocumentReleaseRepository.CharacteristicsGeneral.del,
       record: JSON.stringify(obj)
     }).then(res => {
-      toast.success('Record Deleted Successfully')
+      toast.success(platformLabels.Deleted)
       invalidate()
     })
   }
 
   const addCharacteristics = () => {
-    openForm('')
+    openForm()
   }
 
   function openForm(recordId) {
