@@ -61,7 +61,7 @@ export default function FeeScheduleInwardsMapForm({ labels, maxAccess, recordId,
     }
   })
 
-  const editMode = !!formik.values.recordId || !!recordId
+  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
