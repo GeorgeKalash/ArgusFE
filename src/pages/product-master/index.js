@@ -74,6 +74,11 @@ const ProductMaster = () => {
       field: 'commissionBaseName',
       headerName: _labels.commissionBase,
       flex: 1
+    },
+    {
+      field: 'accessLevelName',
+      headerName: _labels.accessLevel,
+      flex: 1
     }
   ]
 
