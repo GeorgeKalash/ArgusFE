@@ -17,7 +17,6 @@ import { useWindow } from 'src/windows'
 import AssignCorrespondentForm from './AssignCorrespondentForm'
 import { useForm } from 'src/hooks/form'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
-import { getFormattedNumber } from 'src/lib/numberField-helper'
 
 const OutwardsCorrespondent = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -65,7 +64,8 @@ const OutwardsCorrespondent = () => {
   const initialValues = {
     countryId: '',
     dispersalType: '',
-    currencyId: ''
+    currencyId: '',
+    totalFc: ''
   }
 
   const { formik } = useForm({
@@ -115,17 +115,17 @@ const OutwardsCorrespondent = () => {
     }
   ]
 
-  const totalFc = calcFc()
-
   function calcFc() {
-    return formik.values.countryId && formik.values.currencyId
-      ? data.list?.reduce((sumAmount, row) => {
-          let curValue = 0
-          if (row.checked) curValue = parseFloat(row.fcAmount.toString().replace(/,/g, '')) || 0
+    const totalFc =
+      formik.values.countryId && formik.values.currencyId
+        ? data.list?.reduce((sumAmount, row) => {
+            let curValue = 0
+            if (row.checked) curValue = parseFloat(row.fcAmount.toString().replace(/,/g, '')) || 0
 
-          return sumAmount + curValue
-        }, 0)
-      : 0
+            return sumAmount + curValue
+          }, 0)
+        : 0
+    formik.setFieldValue('totalFc', totalFc)
   }
 
   useEffect(() => {
@@ -222,6 +222,7 @@ const OutwardsCorrespondent = () => {
             pageSize={50}
             paginationType='client'
             showCheckboxColumn={true}
+            handleCheckboxChange={calcFc}
           />
         </Grow>
         <Fixed>
@@ -230,7 +231,7 @@ const OutwardsCorrespondent = () => {
               <CustomNumberField
                 name='totalFc'
                 label={labels.totalFc}
-                value={getFormattedNumber(totalFc?.toFixed(2))}
+                value={formik.values.totalFc}
                 readOnly={true}
                 hidden={!(formik.values.countryId && formik.values.currencyId)}
               />
