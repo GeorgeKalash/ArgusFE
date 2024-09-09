@@ -58,6 +58,7 @@ const Sites = ({ store, maxAccess, labels }) => {
         await fetchGridData(recordId)
 
         toast.success(platformLabels.Updated)
+        formik.setFieldValue('search', '')
       } catch (error) {}
     }
   })
