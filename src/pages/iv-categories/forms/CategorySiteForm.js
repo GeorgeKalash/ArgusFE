@@ -26,6 +26,7 @@ const CategorySiteForm = ({ store, labels, maxAccess }) => {
         {
           id: 1,
           categoryId: recordId,
+          siteId: '',
           name: '',
           reference: '',
           isLocked: false,
@@ -94,8 +95,26 @@ const CategorySiteForm = ({ store, labels, maxAccess }) => {
           siteId: user.recordId,
           id: index + 1
         }))
-        console.log(modifiedList)
-        formik.setValues({ sites: modifiedList })
+
+        getRequest({
+          extension: InventoryRepository.CategorySites.qry,
+          parameters: `_categoryId=${recordId}`
+        })
+          .then(lockRes => {
+            const lockList = lockRes.list
+
+            const mergedList = modifiedList.map(site => {
+              const lockInfo = lockList.find(lockItem => lockItem.siteId === site.siteId)
+
+              return {
+                ...site,
+                isLocked: lockInfo ? lockInfo.isLocked : false
+              }
+            })
+
+            formik.setValues({ sites: mergedList })
+          })
+          .catch(error => {})
       })
       .catch(error => {})
   }
@@ -128,6 +147,8 @@ const CategorySiteForm = ({ store, labels, maxAccess }) => {
             value={formik.values.sites || []}
             error={formik.errors.sites}
             columns={columns}
+            allowAddNewLine={false}
+            allowDelete={false}
           />
         </Grow>
       </VertLayout>
