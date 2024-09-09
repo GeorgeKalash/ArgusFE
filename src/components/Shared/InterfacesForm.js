@@ -15,7 +15,7 @@ import { Fixed } from './Layouts/Fixed'
 import { Grow } from './Layouts/Grow'
 import { VertLayout } from './Layouts/VertLayout'
 
-export const InterfacesForm = ({ recordId, expanded, height, resourceId, name }) => {
+export const InterfacesForm = ({ recordId, resourceId, name }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getAllKvsByDataset } = useContext(CommonContext)
 
@@ -136,7 +136,15 @@ export const InterfacesForm = ({ recordId, expanded, height, resourceId, name })
   ]
 
   return (
-    <FormShell form={formik} resourceId={resourceId} maxAccess={access} infoVisible={false} editMode={true}>
+    <FormShell
+      form={formik}
+      resourceId={resourceId}
+      maxAccess={access}
+      infoVisible={false}
+      editMode={true}
+      isSavedClear={false}
+      isCleared={false}
+    >
       <VertLayout>
         <Grow>
           <Grid sx={{ width: '50%' }}>

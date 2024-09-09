@@ -24,7 +24,6 @@ export default function ScheduleForm({ labels, maxAccess, recordId, editMode, se
     name: '',
     cellPhone: '',
     commissionPct: '',
-
     plantId: '',
     sptId: '',
     targetType: ''
@@ -50,8 +49,8 @@ export default function ScheduleForm({ labels, maxAccess, recordId, editMode, se
         toast.success('Record Added Successfully')
         setSelectedRecordId(response.recordId)
         setInitialData({
-          ...obj, // Spread the existing properties
-          recordId: response.recordId // Update only the recordId field
+          ...obj,
+          recordId: response.recordId
         })
       } else toast.success('Record Edited Successfully')
       setEditMode(true)
