@@ -1,18 +1,18 @@
 import { useFormik } from 'formik'
 import { DataGrid } from 'src/components/Shared/DataGrid'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useContext, useEffect } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
+import CustomTextField from 'src/components/Inputs/CustomTextField'
+import { Grid } from '@mui/material'
 
-const CurrencyForm = ({ store, labels, maxAccess }) => {
+const CategorySiteForm = ({ store, labels, maxAccess }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -20,24 +20,16 @@ const CurrencyForm = ({ store, labels, maxAccess }) => {
   const formik = useFormik({
     enableReinitialize: true,
     validateOnChange: true,
-    validationSchema: yup.object({
-      data: yup
-        .array()
-        .of(
-          yup.object().shape({
-            currencyId: yup.string().required()
-          })
-        )
-        .required()
-    }),
+
     initialValues: {
-      data: [
+      sites: [
         {
           id: 1,
           categoryId: recordId,
-          decimals: 0,
-          currencyId: '',
-          currencyName: ''
+          name: '',
+          reference: '',
+          isLocked: false,
+          siteId: ''
         }
       ]
     },
@@ -47,7 +39,7 @@ const CurrencyForm = ({ store, labels, maxAccess }) => {
   })
 
   const postdata = obj => {
-    const data = obj?.data?.map(({ categoryId, ...rest }) => ({
+    const sites = obj?.sites?.map(({ categoryId, ...rest }) => ({
       categoryId: recordId,
 
       ...rest
@@ -55,10 +47,10 @@ const CurrencyForm = ({ store, labels, maxAccess }) => {
 
     const list = {
       categoryId: recordId,
-      data: data
+      sites: sites
     }
     postRequest({
-      extension: InventoryRepository.CategoryCurrency.set2,
+      extension: InventoryRepository.CategorySites.set2,
       record: JSON.stringify(list)
     })
       .then(res => {
@@ -70,55 +62,40 @@ const CurrencyForm = ({ store, labels, maxAccess }) => {
 
   const columns = [
     {
-      component: 'resourcecombobox',
-      name: 'currencyId',
-      label: labels.currency,
+      component: 'textfield',
+      name: 'reference',
+      label: labels.siteRef,
       props: {
-        endpointId: SystemRepository.Currency.qry,
-        valueField: 'recordId',
-        displayField: 'name',
-        mapping: [
-          { from: 'recordId', to: 'currencyId' },
-          { from: 'name', to: 'currencyName' }
-        ]
+        readOnly: true
       }
     },
     {
-      component: 'numberfield',
-      name: 'decimals',
-      label: labels.decimals,
+      component: 'textfield',
+      name: 'name',
+      label: labels.siteName,
       props: {
-        allowNegative: false
-      },
-
-      defaultValue: 0,
-      onChange: ({ row: { update, newRow, ...rest } }) => {
-        if (newRow.decimals == '' || newRow.decimals == null) {
-          update({
-            decimals: 0
-          })
-        } else {
-          const newValue = parseInt(newRow.decimals)
-          if (newValue > 5) {
-            update({ decimals: 5 })
-          } else {
-            update({ decimals: newValue })
-          }
-        }
+        readOnly: true
       }
+    },
+    {
+      component: 'checkbox',
+      label: labels.isLocked,
+      name: 'isLocked'
     }
   ]
   function getData() {
     getRequest({
-      extension: InventoryRepository.CategoryCurrency.qry,
-      parameters: `_categoryId=${recordId}`
+      extension: InventoryRepository.Site.qry,
+      parameters: `_filter=`
     })
       .then(res => {
         const modifiedList = res.list?.map((user, index) => ({
           ...user,
+          siteId: user.recordId,
           id: index + 1
         }))
-        formik.setValues({ data: modifiedList })
+        console.log(modifiedList)
+        formik.setValues({ sites: modifiedList })
       })
       .catch(error => {})
   }
@@ -138,10 +115,18 @@ const CurrencyForm = ({ store, labels, maxAccess }) => {
     >
       <VertLayout>
         <Grow>
+          <Grid container spacing={4}>
+            <Grid item xs={6.01}>
+              <CustomTextField name='reference' label={labels.reference} value={store.ref} readOnly={true} />
+            </Grid>
+            <Grid item xs={6.01}>
+              <CustomTextField name='name' label={labels.name} value={store.name} readOnly={true} />
+            </Grid>
+          </Grid>
           <DataGrid
-            onChange={value => formik.setFieldValue('data', value)}
-            value={formik.values.data || []}
-            error={formik.errors.data}
+            onChange={value => formik.setFieldValue('sites', value)}
+            value={formik.values.sites || []}
+            error={formik.errors.sites}
             columns={columns}
           />
         </Grow>
@@ -150,4 +135,4 @@ const CurrencyForm = ({ store, labels, maxAccess }) => {
   )
 }
 
-export default CurrencyForm
+export default CategorySiteForm

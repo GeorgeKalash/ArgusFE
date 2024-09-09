@@ -4,6 +4,7 @@ import { useState } from 'react'
 
 import CategoryForm from '../forms/CategoryForm'
 import CurrencyForm from '../forms/CurrencyForm'
+import CategorySiteForm from '../forms/CategorySiteForm'
 
 const CategoryWindow = ({ recordId, labels, maxAccess }) => {
   const [activeTab, setActiveTab] = useState(0)
@@ -11,16 +12,18 @@ const CategoryWindow = ({ recordId, labels, maxAccess }) => {
   const editMode = !!recordId
 
   const [store, setStore] = useState({
-    recordId: recordId
+    recordId: recordId,
+    ref: null,
+    name: null
   })
+  console.log(store)
 
   const tabs = [
     { label: labels.categories },
 
-    { label: labels.currency, disabled: !store.recordId }
+    { label: labels.currency, disabled: !store.recordId },
 
-    // { label: labels.salePerson, disabled: !store.recordId },
-    // { label: labels.caAcc, disabled: !store.recordId }
+    { label: labels.categorySite, disabled: !store.recordId }
   ]
 
   return (
@@ -32,12 +35,9 @@ const CategoryWindow = ({ recordId, labels, maxAccess }) => {
       <CustomTabPanel index={1} value={activeTab}>
         <CurrencyForm labels={labels} maxAccess={maxAccess} store={store} />
       </CustomTabPanel>
-      {/*  <CustomTabPanel index={2} value={activeTab}>
-        <SalesPersonForm labels={labels} maxAccess={maxAccess} store={store} />
+      <CustomTabPanel index={2} value={activeTab}>
+        <CategorySiteForm labels={labels} maxAccess={maxAccess} store={store} />
       </CustomTabPanel>
-      <CustomTabPanel index={3} value={activeTab}>
-        <CashAccountForm labels={labels} maxAccess={maxAccess} store={store} />
-      </CustomTabPanel> */}
     </>
   )
 }

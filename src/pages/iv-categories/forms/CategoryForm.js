@@ -20,7 +20,7 @@ import { IVReplenishementRepository } from 'src/repositories/IVReplenishementRep
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-const CategoryForm = ({ labels, maxAccess, setStore, store }) => {
+const CategoryForm = ({ labels, maxAccess, setStore, store, setRef }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { recordId } = store
@@ -129,6 +129,12 @@ const CategoryForm = ({ labels, maxAccess, setStore, store }) => {
             extension: InventoryRepository.Category.get,
             parameters: `_recordId=${recordId}`
           })
+
+          setStore(prevStore => ({
+            ...prevStore,
+            ref: res.record.caRef,
+            name: res.record.name
+          }))
 
           formik.setValues(res.record)
         }

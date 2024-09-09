@@ -76,5 +76,17 @@ export const InventoryRepository = {
   },
   Metal: {
     qry: service + 'qryMTL'
+  },
+  CategoryCurrency: {
+    get: service + 'getCAC',
+    qry: service + 'qryCAC',
+    set2: service + 'set2CAC',
+    del: service + 'delCAC'
+  },
+  CategorySites: {
+    get: service + 'getCAS',
+    qry: service + 'qryCAS',
+    set2: service + 'set2CAS',
+    del: service + 'delCAS'
   }
 }
