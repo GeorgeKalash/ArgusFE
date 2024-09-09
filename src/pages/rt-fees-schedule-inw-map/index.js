@@ -13,7 +13,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import FeeScheduleInwardsMapForm from './Forms/FeeScheduleInwardsMapForm'
 
-const FeeScheduleMap = () => {
+const FeeScheduleInwardsMap = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -121,4 +121,4 @@ const FeeScheduleMap = () => {
   )
 }
 
-export default FeeScheduleMap
+export default FeeScheduleInwardsMap
