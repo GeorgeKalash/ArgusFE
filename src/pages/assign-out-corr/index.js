@@ -16,6 +16,8 @@ import Table from 'src/components/Shared/Table'
 import { useWindow } from 'src/windows'
 import AssignCorrespondentForm from './AssignCorrespondentForm'
 import { useForm } from 'src/hooks/form'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import { getFormattedNumber } from 'src/lib/numberField-helper'
 
 const OutwardsCorrespondent = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -49,6 +51,10 @@ const OutwardsCorrespondent = () => {
     {
       field: 'clientName',
       headerName: labels.client
+    },
+    {
+      field: 'lcAmount',
+      headerName: labels.lcAmount
     },
     {
       field: 'amount',
@@ -108,6 +114,19 @@ const OutwardsCorrespondent = () => {
       disabled: !formik.values.countryId
     }
   ]
+
+  const totalFc = calcFc()
+
+  function calcFc() {
+    return formik.values.countryId && formik.values.currencyId
+      ? data.list?.reduce((sumAmount, row) => {
+          let curValue = 0
+          if (row.checked) curValue = parseFloat(row.fcAmount.toString().replace(/,/g, '')) || 0
+
+          return sumAmount + curValue
+        }, 0)
+      : 0
+  }
 
   useEffect(() => {
     ;(async function () {
@@ -205,6 +224,19 @@ const OutwardsCorrespondent = () => {
             showCheckboxColumn={true}
           />
         </Grow>
+        <Fixed>
+          <Grid container justifyContent='flex-end' sx={{ px: 2 }}>
+            <Grid item xs={2}>
+              <CustomNumberField
+                name='totalFc'
+                label={labels.totalFc}
+                value={getFormattedNumber(totalFc?.toFixed(2))}
+                readOnly={true}
+                hidden={!(formik.values.countryId && formik.values.currencyId)}
+              />
+            </Grid>
+          </Grid>
+        </Fixed>
       </VertLayout>
     </FormShell>
   )
