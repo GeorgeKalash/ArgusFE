@@ -29,6 +29,7 @@ const Sites = ({ store, maxAccess, labels }) => {
           siteName: '',
           siteRef: '',
           statusName: '',
+          status: '',
           notes: '',
           isChecked: false
         }
