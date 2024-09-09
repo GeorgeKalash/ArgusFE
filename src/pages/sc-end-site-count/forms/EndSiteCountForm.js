@@ -35,7 +35,7 @@ export default function EndSiteCountForm({ _labels, access }) {
       try {
         const copy = { ...obj }
         delete copy.statusName
-        
+
         if (copy.status === 3) {
           await postRequest({
             extension: SCRepository.Sites.reopen,
@@ -50,9 +50,10 @@ export default function EndSiteCountForm({ _labels, access }) {
               status: 1
             })
           })
+          
+          toast.success(platformLabels.Saved)
         }
 
-        toast.success(platformLabels.Saved)
         formik.resetForm()
       } catch (error) {}
     }
