@@ -11,9 +11,11 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const BPMasterData = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
@@ -119,7 +121,7 @@ const BPMasterData = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
   }
 
   const onApply = ({ search, rpbParams }) => {

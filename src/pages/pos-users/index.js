@@ -5,15 +5,18 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { PointofSaleRepository } from 'src/repositories/PointofSaleRepository'
 import PosUsersForm from './forms/PosUsersForm'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useWindow } from 'src/windows'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const PosUsers = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
+
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
@@ -27,16 +30,13 @@ const PosUsers = () => {
     return { ...response, _startAt: _startAt }
   }
 
-  const invalidate = useInvalidate({
-    endpointId: PointofSaleRepository.PosUsers.qry
-  })
-
   const {
     query: { data },
     labels: labels,
     paginationParameters,
     refetch,
-    access
+    access,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: PointofSaleRepository.PosUsers.qry,
@@ -66,24 +66,27 @@ const PosUsers = () => {
   }
 
   const popup = obj => {
-    openForm(obj?.userId)
+    openForm(obj)
   }
 
   const del = async obj => {
-    await postRequest({
-      extension: PointofSaleRepository.PosUsers.del,
-      record: JSON.stringify(obj)
-    })
-    refetch()
-    toast.success('Record Deleted Successfully')
+    try {
+      await postRequest({
+        extension: PointofSaleRepository.PosUsers.del,
+        record: JSON.stringify(obj)
+      })
+      invalidate()
+      toast.success(platformLabels.Deleted)
+    } catch (error) {}
   }
 
-  function openForm(userId) {
+  function openForm(record) {
     stack({
       Component: PosUsersForm,
       props: {
         labels: labels,
-        userId: userId ? userId : null,
+        record,
+        recordId: record?.userId,
         maxAccess: access
       },
       width: 600,

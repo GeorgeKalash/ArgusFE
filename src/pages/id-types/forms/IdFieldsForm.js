@@ -33,12 +33,12 @@ const IdFieldsForm = ({ store, setStore, labels, editMode, height, expanded, max
     initialValues: {
       IdField: [{ id: 1, idtId: idtId, accessLevel: null, accessLevel: null, accessLevelName: '', controlId: '' }]
     },
-    onSubmit: values => {
-      postIdFields(values.IdField)
+    onSubmit: async values => {
+      await postIdFields(values.IdField)
     }
   })
 
-  const postIdFields = obj => {
+  const postIdFields = async obj => {
     const data = {
       idtId: idtId,
       items: obj.map(({ accessLevel, controlId }) => ({
@@ -47,7 +47,7 @@ const IdFieldsForm = ({ store, setStore, labels, editMode, height, expanded, max
         controlId: controlId
       }))
     }
-    postRequest({
+    await postRequest({
       extension: CurrencyTradingSettingsRepository.IdFields.set2,
       record: JSON.stringify(data)
     })
