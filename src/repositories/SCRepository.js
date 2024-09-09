@@ -36,8 +36,7 @@ export const SCRepository = {
     del: service + 'delHDR',
     close: service + 'closeHDR',
     reopen: service + 'reopenHDR',
-    snapshot: service + 'snapshotHDR',
-    del: service + 'delHDR'
+    snapshot: service + 'snapshotHDR'
   },
   DocumentTypeDefaults: {
     qry: service + 'qryDTD',
