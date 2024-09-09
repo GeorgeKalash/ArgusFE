@@ -20,7 +20,7 @@ export default function RebuildForm({ _labels, access }) {
   const { platformLabels } = useContext(ControlContext)
 
   const { formik } = useForm({
-    initialValues: { year: '', itemId: 0, itemName: '', date: new Date(), recordId: 'N/A' },
+    initialValues: { year: '', itemId: 0, date: new Date(), recordId: 'N/A' },
     enableReinitialize: false,
     maxAccess: access,
     validateOnChange: true,
