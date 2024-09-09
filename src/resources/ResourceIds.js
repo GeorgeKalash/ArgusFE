@@ -237,5 +237,6 @@ export const ResourceIds = {
   PurposeExchangeGroup: 35115,
   Drivers: 52201,
   RebuildInventory: 41501,
+  RebuildUndeliveredItems: 52504,
   IvSettings: 41115
 }
