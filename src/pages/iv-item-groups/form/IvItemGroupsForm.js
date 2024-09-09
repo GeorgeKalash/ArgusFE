@@ -11,7 +11,6 @@ import { useForm } from 'src/hooks/form'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { ControlContext } from 'src/providers/ControlContext'
-import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { MasterSource } from 'src/resources/MasterSource'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
@@ -120,7 +119,6 @@ export default function IvItemGroupsForm({ labels, maxAccess, recordId }) {
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('procurementMethod', newValue?.key || '')
-                  formik.setFieldValue('procurementName', newValue?.value || '')
                 }}
                 error={formik.touched.procurementMethod && formik.errors.procurementMethod}
               />
