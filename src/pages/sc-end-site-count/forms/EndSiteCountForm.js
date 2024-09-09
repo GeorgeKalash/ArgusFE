@@ -35,19 +35,20 @@ export default function EndSiteCountForm({ _labels, access }) {
       try {
         const copy = { ...obj }
         delete copy.statusName
-
-        if (copy.status === 1) {
+        
+        if (copy.status === 3) {
+          await postRequest({
+            extension: SCRepository.Sites.reopen,
+            record: JSON.stringify(copy)
+          })
+          toast.success(platformLabels.Saved)
+        } else {
           await postRequest({
             extension: SCRepository.Sites.end,
             record: JSON.stringify({
               ...copy,
               status: 1
             })
-          })
-        } else if (copy.status === 3) {
-          await postRequest({
-            extension: SCRepository.Sites.reopen,
-            record: JSON.stringify(copy)
           })
         }
 
