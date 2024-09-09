@@ -113,7 +113,7 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
   }
 
   const isClosed = formik.values.wip === 2
-  const isPosted = formik.values.wip === 2
+  const isPosted = formik.values.status === 3
 
   const onClose = async recId => {
     try {
@@ -184,13 +184,13 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
       key: 'Reopen',
       condition: isClosed,
       onClick: onReopen,
-      disabled: !isClosed || !editMode || formik.values.status === 3
+      disabled: !isClosed || !editMode
     },
     {
       key: 'Post',
       condition: true,
       onClick: onPost,
-      disabled: !isPosted || formik.values.status === 3
+      disabled: !isPosted
     }
   ]
 
