@@ -97,9 +97,9 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
         delete copy.orders
         console.log('copyyy', copy)
 
-        //copy.date = formatDateToApi(copy.date)
+        copy.date = formatDateToApi(copy.date)
 
-        /* const combinedDateTime = getShiftetDate(copy.departureTime, copy.departureTimeField)
+        const combinedDateTime = getShiftetDate(copy.departureTime, copy.departureTimeField)
         copy.departureTime = formatDateToApi(combinedDateTime)
 
         if (copy.arrivalTime) {
@@ -114,7 +114,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
 
         formik.setFieldValue('recordId', headerResponse.recordId)
 
-        let filteredOrders = formik.values.orders.filter(order => order.soId !== '')
+        let filteredOrders = formik.values.orders.filter(order => order.soId !== '' && order.soId !== undefined)
         console.log(filteredOrders)
         const soIdSet = new Set()
         let hasDuplicates = false
@@ -152,7 +152,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
         await refetchForm(headerResponse.recordId)
         !formik.values.recordId ? toast.success(platformLabels.Added) : toast.success(platformLabels.Edited)
 
-        invalidate() */
+        invalidate()
       } catch (error) {}
     }
   })
@@ -160,11 +160,13 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
   function getShiftetDate(date, time) {
     //add time field to date after modifying time by timezone
     const originalDate = dayjs(date).startOf('day')
-    const selectedTime = formatDateToApi(time)
-    const adjustedTimeString = getTimeInTimeZone(selectedTime, +3)
-    const adjustedTime = dayjs(adjustedTimeString, 'HH:mm:ss')
+    console.log('time', time)
 
-    const combinedDateTime = originalDate.set('hour', adjustedTime.hour()).set('minute', adjustedTime.minute())
+    //const selectedTime = formatDateToApi(time)
+    //const adjustedTimeString = getTimeInTimeZone(selectedTime, +3)
+    //const adjustedTime = dayjs(time, 'HH:mm:ss')
+    //console.log('time', adjustedTime)
+    const combinedDateTime = originalDate.set('hour', time.hour()).set('minute', time.minute())
 
     return combinedDateTime
   }
@@ -189,15 +191,15 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
 
   async function refetchForm(recordId) {
     const res = await getOutboundTransp(recordId)
-    console.log(res)
+    console.log('res', res)
+    const formattedDepDate = formatDateFromApi(res.record.departureTime)
+    const formattedArrDate = formatDateFromApi(res.record.arrivalTime)
 
-    //if (res.record.departureTime) res.record.departureTimeField = formatTimeFromApi(res.record.departureTime, -3)
-
-    //if (res.record.arrivalTime) res.record.arrivalTimeField = formatTimeFromApi(res.record.arrivalTime, -3)
     res.record.date = formatDateFromApi(res.record.date)
-    res.record.departureTime = formatDateFromApi(res.record.departureTime)
-    console.log(res.record.departureTime)
-    res.record.arrivalTime = formatDateFromApi(res.record.arrivalTime)
+    res.record.departureTime = formattedDepDate
+    if (formattedDepDate) res.record.departureTimeField = dayjs(dayjs(formattedDepDate).format('hh:mm A'), 'hh:mm A')
+    res.record.arrivalTime = formattedArrDate
+    if (formattedArrDate) res.record.arrivalTimeField = dayjs(dayjs(formattedArrDate).format('hh:mm A'), 'hh:mm A')
 
     await getOrders(res.record)
   }
