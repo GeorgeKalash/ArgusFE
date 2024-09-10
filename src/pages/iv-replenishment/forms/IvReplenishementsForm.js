@@ -14,6 +14,8 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi } from 'src/lib/date-helper'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -114,75 +116,79 @@ const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
       onGenerate={onGenerate}
       isGenerated={true}
     >
-      <Grid container spacing={4}>
-        <Grid item xs={12}>
-          <ResourceComboBox
-            endpointId={InventoryRepository.Site.qry}
-            name='siteId'
-            readOnly={editMode}
-            label={labels.site}
-            values={formik.values}
-            displayField='name'
-            maxAccess={maxAccess}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('siteId', newValue?.recordId)
-            }}
-            error={formik.touched.siteId && Boolean(formik.errors.siteId)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <CustomDatePicker
-            name='dateFrom'
-            readOnly={editMode}
-            label={labels.dateFrom}
-            value={formik.values.dateFrom}
-            onChange={formik.setFieldValue}
-            required
-            maxAccess={maxAccess}
-            onClear={() => formik.setFieldValue('dateFrom', '')}
-            error={formik.touched.dateFrom && Boolean(formik.errors.dateFrom)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <CustomDatePicker
-            name='dateTo'
-            readOnly={editMode}
-            label={labels.dateTo}
-            value={formik.values.dateTo}
-            onChange={formik.setFieldValue}
-            required
-            maxAccess={maxAccess}
-            onClear={() => formik.setFieldValue('dateTo', '')}
-            error={formik.touched.dateTo && Boolean(formik.errors.dateTo)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <CustomDatePicker
-            name='date'
-            readOnly={editMode}
-            label={labels.date}
-            value={formik.values.date}
-            onChange={formik.setFieldValue}
-            required
-            maxAccess={maxAccess}
-            onClear={() => formik.setFieldValue('date', '')}
-            error={formik.touched.date && Boolean(formik.errors.date)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <CustomTextArea
-            name='notes'
-            label={labels.notes}
-            value={formik.values.notes}
-            maxLength='100'
-            rows={2}
-            maxAccess={maxAccess}
-            onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('notes', '')}
-            error={formik.touched.notes && Boolean(formik.errors.notes)}
-          />
-        </Grid>
-      </Grid>
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={4}>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={InventoryRepository.Site.qry}
+                name='siteId'
+                readOnly={editMode}
+                label={labels.site}
+                values={formik.values}
+                displayField='name'
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('siteId', newValue?.recordId)
+                }}
+                error={formik.touched.siteId && Boolean(formik.errors.siteId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomDatePicker
+                name='dateFrom'
+                readOnly={editMode}
+                label={labels.dateFrom}
+                value={formik.values.dateFrom}
+                onChange={formik.setFieldValue}
+                required
+                maxAccess={maxAccess}
+                onClear={() => formik.setFieldValue('dateFrom', '')}
+                error={formik.touched.dateFrom && Boolean(formik.errors.dateFrom)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomDatePicker
+                name='dateTo'
+                readOnly={editMode}
+                label={labels.dateTo}
+                value={formik.values.dateTo}
+                onChange={formik.setFieldValue}
+                required
+                maxAccess={maxAccess}
+                onClear={() => formik.setFieldValue('dateTo', '')}
+                error={formik.touched.dateTo && Boolean(formik.errors.dateTo)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomDatePicker
+                name='date'
+                readOnly={editMode}
+                label={labels.date}
+                value={formik.values.date}
+                onChange={formik.setFieldValue}
+                required
+                maxAccess={maxAccess}
+                onClear={() => formik.setFieldValue('date', '')}
+                error={formik.touched.date && Boolean(formik.errors.date)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextArea
+                name='notes'
+                label={labels.notes}
+                value={formik.values.notes}
+                maxLength='100'
+                rows={2}
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('notes', '')}
+                error={formik.touched.notes && Boolean(formik.errors.notes)}
+              />
+            </Grid>
+          </Grid>
+        </Grow>
+      </VertLayout>
     </FormShell>
   )
 }

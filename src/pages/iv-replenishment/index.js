@@ -31,18 +31,33 @@ const IvReplenishements = () => {
     } catch (error) {}
   }
 
+  async function fetchWithFilter({ filters, pagination }) {
+    if (filters?.qry) {
+      return await getRequest({
+        extension: IVReplenishementRepository.IvReplenishements.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+    } else {
+      return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+    }
+  }
+
   const {
     query: { data },
     labels: _labels,
     invalidate,
     paginationParameters,
     filterBy,
+    clearFilter,
     refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: IVReplenishementRepository.IvReplenishements.page,
-    datasetId: ResourceIds.IvReplenishements
+    datasetId: ResourceIds.IvReplenishements,
+    filter: {
+      filterFn: fetchWithFilter
+    }
   })
 
   const columns = [
@@ -121,10 +136,25 @@ const IvReplenishements = () => {
     refetch()
   }
 
+  const onSearch = value => {
+    filterBy('qry', value)
+  }
+
+  const onClear = () => {
+    clearFilter('qry')
+  }
+
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'IRHDR'} onApply={onApply} />
+        <RPBGridToolbar
+          onSearch={onSearch}
+          onClear={onClear}
+          onAdd={add}
+          maxAccess={access}
+          reportName={'IRHDR'}
+          onApply={onApply}
+        />
       </Fixed>
       <Grow>
         <Table

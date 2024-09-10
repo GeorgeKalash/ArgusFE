@@ -13,6 +13,7 @@ export const IVReplenishementRepository = {
     page: service + 'pageHDR',
     get: service + 'getHDR',
     set: service + 'setHDR',
+    snapshot: service + 'snapshotHDR',
     del: service + 'delHDR'
   },
   IvReplenishementsList: {
