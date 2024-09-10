@@ -10,6 +10,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import PreviewReport from 'src/components/Shared/PreviewReport'
+import Tree from 'src/components/Shared/Tree'
 import { ControlContext } from 'src/providers/ControlContext'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
@@ -24,31 +25,45 @@ const Category = () => {
   const [selectedReport, setSelectedReport] = useState(null)
   const [reportStore, setReportStore] = useState([])
 
-  async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
-
-    try {
-      const response = await getRequest({
-        extension: InventoryRepository.Category.qry,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_name=&_params=`
-      })
-
-      return { ...response, _startAt: _startAt }
-    } catch (error) {}
-  }
-
   const {
     query: { data },
     labels: _labels,
-    invalidate,
     paginationParameters,
+    invalidate,
+    filterBy,
+    clearFilter,
     refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: InventoryRepository.Category.qry,
-    datasetId: ResourceIds.IvCategories
+    endpointId: InventoryRepository.Category.page,
+    datasetId: ResourceIds.IvCategories,
+
+    filter: {
+      endpointId: InventoryRepository.Category.snapshot,
+      filterFn: fetchWithSearch
+    }
   })
+
+  async function fetchWithSearch({ filters, pagination }) {
+    return filters.qry
+      ? await getRequest({
+          extension: InventoryRepository.Category.snapshot,
+          parameters: `_filter=${filters.qry}`
+        })
+      : await fetchGridData(pagination)
+  }
+
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50 } = options
+
+    const response = await getRequest({
+      extension: InventoryRepository.Category.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_name=`
+    })
+
+    return { ...response, _startAt: _startAt }
+  }
 
   const columns = [
     {
@@ -156,10 +171,40 @@ const Category = () => {
     }
   }
 
+  function onTreeClick() {
+    stack({
+      Component: Tree,
+      props: {
+        data: data
+      },
+      width: 500,
+      height: 400,
+      title: _labels.tree
+    })
+  }
+
+  const actions = [
+    {
+      key: 'Tree',
+      condition: true,
+      onClick: onTreeClick,
+      disabled: false
+    }
+  ]
+
   return (
     <VertLayout>
       <Fixed>
         <GridToolbar
+          onSearch={value => {
+            filterBy('qry', value)
+          }}
+          onSearchClear={() => {
+            clearFilter('qry')
+          }}
+          inputSearch={true}
+          actions={actions}
+          onTree={onTreeClick}
           onAdd={add}
           maxAccess={access}
           rightSection={
@@ -181,7 +226,8 @@ const Category = () => {
                   stack({
                     Component: PreviewReport,
                     props: {
-                      selectedReport: selectedReport
+                      selectedReport: selectedReport,
+                      outerGrid: true
                     },
                     width: 1000,
                     height: 500,

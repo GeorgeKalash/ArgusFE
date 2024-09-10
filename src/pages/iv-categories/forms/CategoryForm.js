@@ -26,7 +26,7 @@ const CategoryForm = ({ labels, maxAccess, setStore, store, setRef }) => {
   const { recordId } = store
 
   const invalidate = useInvalidate({
-    endpointId: InventoryRepository.Category.qry
+    endpointId: InventoryRepository.Category.page
   })
 
   const { formik } = useForm({

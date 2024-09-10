@@ -14,10 +14,12 @@ export const InventoryRepository = {
     snapshot: service + 'snapshotGRP'
   },
   Category: {
+    page: service + 'pageCA',
     qry: service + 'qryCA',
     get: service + 'getCA',
     set: service + 'setCA',
-    del: service + 'delCA'
+    del: service + 'delCA',
+    snapshot: service + 'snapshotCA'
   },
   Measurement: {
     page: service + 'pageMS',
