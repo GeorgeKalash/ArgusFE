@@ -28,7 +28,7 @@ const InventoryOpeningQtysForm = ({ labels, maxAccess, recordId, record }) => {
   const { formik } = useForm({
     maxAccess,
     initialValues: {
-      recordId: recordId || null,
+      recordId: recordId,
       year: '',
       siteId: '',
       sku: '',
@@ -152,7 +152,7 @@ const InventoryOpeningQtysForm = ({ labels, maxAccess, recordId, record }) => {
                 required
                 form={formik}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('itemId', newValue ? newValue.recordId : '')
+                  formik.setFieldValue('itemId', newValue?.recordId)
                   formik.setFieldValue('itemName', newValue ? newValue.name : '')
                   formik.setFieldValue('sku', newValue ? newValue.sku : '')
                   formik.setFieldValue('trackBy', newValue ? newValue.trackBy : '')
