@@ -160,7 +160,6 @@ export default function FeeScheduleInwardsMapForm({ labels, maxAccess, recordId,
                 required
                 maxAccess={maxAccess}
                 error={formik.touched.feePayer && Boolean(formik.errors.feePayer)}
-                readOnly={editMode}
               />
             </Grid>
           </Grid>
