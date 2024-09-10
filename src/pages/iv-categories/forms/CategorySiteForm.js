@@ -19,6 +19,7 @@ const CategorySiteForm = ({ store, labels, maxAccess }) => {
   const { platformLabels } = useContext(ControlContext)
 
   const { formik } = useForm({
+    maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
 
