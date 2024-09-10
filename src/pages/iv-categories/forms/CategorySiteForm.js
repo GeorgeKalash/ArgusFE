@@ -144,7 +144,7 @@ const CategorySiteForm = ({ store, labels, maxAccess }) => {
           </Grid>
           <DataGrid
             onChange={value => formik.setFieldValue('sites', value)}
-            value={formik.values.sites || []}
+            value={formik.values.sites}
             error={formik.errors.sites}
             columns={columns}
             allowAddNewLine={false}

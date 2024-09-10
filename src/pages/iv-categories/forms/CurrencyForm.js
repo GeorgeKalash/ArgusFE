@@ -98,12 +98,8 @@ const CurrencyForm = ({ store, labels, maxAccess }) => {
             decimals: 0
           })
         } else {
-          const newValue = parseInt(newRow.decimals)
-          if (newValue > 5) {
-            update({ decimals: 5 })
-          } else {
-            update({ decimals: newValue })
-          }
+          const newValue = Math.min(parseInt(newRow.decimals), 5)
+          update({ decimals: newValue })
         }
       }
     }

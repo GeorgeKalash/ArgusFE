@@ -16,7 +16,6 @@ const CategoryWindow = ({ recordId, labels, maxAccess }) => {
     ref: null,
     name: null
   })
-  console.log(store)
 
   const tabs = [
     { label: labels.categories },
