@@ -43,7 +43,7 @@ const Controller = ({ store, maxAccess, labels }) => {
           items: itemsList
         }
 
-        const res = await postRequest({
+        await postRequest({
           extension: SCRepository.PHY.set2,
           record: JSON.stringify(data)
         })
