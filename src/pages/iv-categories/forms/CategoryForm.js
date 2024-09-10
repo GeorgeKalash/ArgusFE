@@ -125,7 +125,7 @@ const CategoryForm = ({ labels, maxAccess, setStore, store, setRef }) => {
       } catch (error) {}
     }
   })
-  const editMode = !!recordId
+  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
