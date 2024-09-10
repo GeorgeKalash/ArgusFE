@@ -18,21 +18,19 @@ const VendorsAddressForm = ({ getAddressGridData, recordId, vendorId, window, pr
           address: obj,
           addressId: obj.recordId
         }
-
         await postRequest({
           extension: PurchaseRepository.Address.set,
           record: JSON.stringify(data)
+        }).then(res => {
+          if (!obj.recordId) {
+            toast.success(platformLabels.Added)
+          } else {
+            toast.success(platformLabels.Edited)
+          }
+          getAddressGridData(vendorId)
         })
-
-        if (!obj.recordId) {
-          toast.success(platformLabels.Added)
-        } else {
-          toast.success(platformLabels.Edited)
-        }
+        window.close()
       }
-
-      getAddressGridData(vendorId)
-      window.close()
     } catch (error) {}
   }
 

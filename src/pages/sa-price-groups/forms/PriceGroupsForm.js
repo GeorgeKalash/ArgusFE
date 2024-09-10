@@ -131,7 +131,6 @@ export default function PriceGroupsForm({ labels, maxAccess, recordId }) {
             <Grid item xs={12}>
               <CustomNumberField
                 name='minUnitPrice'
-                required
                 label={labels.minUnitPrice}
                 value={formik.values.minUnitPrice}
                 maxAccess={maxAccess}

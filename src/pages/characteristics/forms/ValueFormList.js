@@ -6,16 +6,13 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import ValueForm from '../forms/ValueForm'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 import { useWindow } from 'src/windows'
+import { ControlContext } from 'src/providers/ControlContext'
 
-const ValueFormList = (
- { 
-  labels,
-  store,
-  maxAccess
-}) => {
+const ValueFormList = ({ labels, store, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const [maxSeqNo, setMaxSeqNo] = useState(0);
-  const [valueGridData , setValueGridData] = useState()
+  const { platformLabels } = useContext(ControlContext)
+  const [maxSeqNo, setMaxSeqNo] = useState(0)
+  const [valueGridData, setValueGridData] = useState()
   const { stack } = useWindow()
   const { recordId } = store
 
@@ -27,16 +24,16 @@ const ValueFormList = (
     }
   ]
 
-  function openForm (recordId , seqNo){
+  function openForm(recordId, seqNo) {
     stack({
       Component: ValueForm,
       props: {
         labels: labels,
-        chId: store.recordId ,
+        chId: store.recordId,
         recordId: recordId,
         seqNo: seqNo,
         maxAccess: maxAccess,
-        getValueGridData: getValueGridData,
+        getValueGridData: getValueGridData
       },
       width: 400,
       height: 400,
@@ -48,11 +45,10 @@ const ValueFormList = (
     postRequest({
       extension: DocumentReleaseRepository.CharacteristicsValues.del,
       record: JSON.stringify(obj)
+    }).then(res => {
+      getValueGridData(recordId)
+      toast.success(platformLabels.Deleted)
     })
-      .then(res => {
-        getValueGridData(recordId)
-        toast.success('Record Deleted Successfully')
-      })
   }
 
   const addValue = () => {
@@ -60,7 +56,7 @@ const ValueFormList = (
   }
 
   const editValue = obj => {
-    openForm(obj?.chId , obj?.seqNo)
+    openForm(obj?.chId, obj?.seqNo)
   }
 
   const getValueGridData = chId => {
@@ -70,19 +66,17 @@ const ValueFormList = (
       extension: DocumentReleaseRepository.CharacteristicsValues.qry,
       parameters: parameters
     })
-      .then(res => {console.log(res)
+      .then(res => {
         setValueGridData(res)
         const maxSeq = Math.max(...res.list.map(item => item.seqNo), 0)
         setMaxSeqNo(maxSeq)
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch(error => {})
   }
 
-  useEffect(()=>{
+  useEffect(() => {
     recordId && getValueGridData(recordId)
-  },[recordId])
+  }, [recordId])
 
   return (
     <>

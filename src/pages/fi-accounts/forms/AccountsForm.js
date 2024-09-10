@@ -49,14 +49,14 @@ const AccountsForms = ({ labels, maxAccess, setStore, store }) => {
       groupId: yup.string().required(),
       reference: yup.string().required()
     }),
-    onSubmit: values => {
-      postAccount(values)
+    onSubmit: async values => {
+      await postAccount(values)
     }
   })
 
-  const postAccount = obj => {
+  const postAccount = async obj => {
     const recordId = obj.recordId
-    postRequest({
+    await postRequest({
       extension: FinancialRepository.Account.set,
       record: JSON.stringify(obj)
     })
