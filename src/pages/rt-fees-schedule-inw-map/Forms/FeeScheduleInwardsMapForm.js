@@ -77,8 +77,7 @@ export default function FeeScheduleInwardsMapForm({ labels, maxAccess, recordId,
 
             recordId:
               String(res.record.corId) +
-              String(res.record.dispersalMode) +
-              String(res.record.functionId)
+              String(res.record.dispersalMode)
           })
         }
       } catch (exception) {}

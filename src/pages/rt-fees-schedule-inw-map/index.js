@@ -88,8 +88,7 @@ const FeeScheduleInwardsMap = () => {
         maxAccess: access,
         recordId: record
           ? String(record.corId) +
-            String(record.dispersalMode) +
-            String(record.functionId)
+            String(record.dispersalMode)
           : null
       },
       width: 700,
