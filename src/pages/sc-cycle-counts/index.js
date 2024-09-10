@@ -163,11 +163,7 @@ const CycleCounts = () => {
   async function openForm(recordId) {
     const plantId = await getPlantId()
 
-    plantId !== ''
-      ? openCycleCountsWindow(plantId, recordId)
-      : stackError({
-          message: platformLabels.noDefaultPlant
-        })
+    openCycleCountsWindow(plantId, recordId)
   }
 
   const onApply = ({ search, rpbParams }) => {
