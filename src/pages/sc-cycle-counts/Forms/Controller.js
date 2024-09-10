@@ -43,11 +43,13 @@ const Controller = ({ store, maxAccess, labels }) => {
           items: itemsList
         }
 
-        await postRequest({
+        const res = await postRequest({
           extension: SCRepository.PHY.set2,
           record: JSON.stringify(data)
         })
         toast.success(platformLabels.Updated)
+        const res2 = await fetchGridData(recordId, formik.values.siteId)
+        formik.setValues({ rows: res2.list })
       } catch (error) {}
     }
   })
