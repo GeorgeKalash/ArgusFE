@@ -11,13 +11,14 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
+import { useForm } from 'src/hooks/form'
 
 const CurrencyForm = ({ store, labels, maxAccess }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
-  const formik = useFormik({
+  const { formik } = useForm({
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({

@@ -11,13 +11,14 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { Grid } from '@mui/material'
+import { useForm } from 'src/hooks/form'
 
 const CategorySiteForm = ({ store, labels, maxAccess }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
-  const formik = useFormik({
+  const { formik } = useForm({
     enableReinitialize: true,
     validateOnChange: true,
 
