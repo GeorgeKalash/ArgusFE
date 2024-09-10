@@ -77,7 +77,7 @@ const InventoryOpeningQtysForm = ({ labels, maxAccess, recordId, record }) => {
     }
   })
 
-  const editMode = !!formik.values.recordId || !!recordId
+  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
