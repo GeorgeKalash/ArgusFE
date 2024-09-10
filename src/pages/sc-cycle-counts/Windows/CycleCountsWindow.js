@@ -1,6 +1,6 @@
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import { CustomTabs } from 'src/components/Shared/CustomTabs'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import CycleCountsForm from '../Forms/CycleCountsForm'
 import Sites from '../Forms/Sites'
 import Controller from '../Forms/Controller'
@@ -13,9 +13,15 @@ const CycleCountsWindow = ({ recordId, labels, maxAccess, plantId }) => {
     isPosted: false,
     isClosed: false
   })
+
+  const [refreshController, setRefreshController] = useState(false);
   const editMode = !!store.recordId
 
   const tabs = [{ label: labels.cycleCounts }, { label: labels.sites, disabled: !editMode }, { label: labels.controller, disabled: !editMode }]
+
+  const handleSitesSave = useCallback(() => {
+    setRefreshController(prev => !prev); 
+  }, []);
 
   return (
     <>
@@ -25,10 +31,10 @@ const CycleCountsWindow = ({ recordId, labels, maxAccess, plantId }) => {
         <CycleCountsForm labels={labels} setStore={setStore} store={store} maxAccess={maxAccess} plantId={plantId}/>
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
-        <Sites labels={labels} maxAccess={maxAccess} store={store} />
+        <Sites labels={labels} maxAccess={maxAccess} store={store} onSave={handleSitesSave}/>
       </CustomTabPanel>
       <CustomTabPanel index={2} value={activeTab}>
-        <Controller labels={labels} maxAccess={maxAccess} store={store} />
+        <Controller labels={labels} maxAccess={maxAccess} store={store} refreshController={refreshController} />
       </CustomTabPanel>
     </>
   )
