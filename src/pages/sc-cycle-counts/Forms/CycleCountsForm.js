@@ -243,8 +243,6 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
     })()
   }, [])
 
-  const disable = isPosted || isClosed
-
   return (
     <FormShell
       resourceId={ResourceIds.StockCounts}
@@ -252,8 +250,8 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
       maxAccess={maxAccess}
       editMode={editMode}
       actions={actions}
-      disabledSubmit={disable}
-      disableSubmitAndClear={disable}
+      disabledSubmit={isPosted || isClosed}
+      disableSubmitAndClear={isPosted || isClosed}
     >
       <VertLayout>
         <Grow>
@@ -263,7 +261,7 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
                 endpointId={SystemRepository.DocumentType.qry}
                 parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.StockCount}`}
                 name='dtId'
-                readOnly={editMode || disable}
+                readOnly={editMode || isPosted || isClosed}
                 label={labels.documentType}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
@@ -287,7 +285,7 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
                 value={formik?.values?.reference}
                 maxAccess={!editMode && maxAccess}
                 maxLength='30'
-                readOnly={editMode || disable}
+                readOnly={editMode || isPosted || isClosed}
                 onChange={formik.handleChange}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
               />
@@ -299,7 +297,7 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
                 value={formik.values?.date}
                 onChange={formik.setFieldValue}
                 onClear={() => formik.setFieldValue('date', '')}
-                readOnly={editMode || disable}
+                readOnly={editMode || isPosted || isClosed}
                 error={formik.touched.date && Boolean(formik.errors.date)}
                 maxAccess={maxAccess}
               />
@@ -310,7 +308,7 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
                 name='plantId'
                 label={labels.plant}
                 valueField='recordId'
-                readOnly={editMode || disable}
+                readOnly={editMode || isPosted || isClosed}
                 displayField={['reference', 'name']}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
@@ -330,7 +328,7 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
                 label={labels.notes}
                 value={formik.values?.notes}
                 rows={3}
-                readOnly={disable}
+                readOnly={isPosted || isClosed}
                 maxAccess={maxAccess}
                 onChange={e => formik.setFieldValue('notes', e.target.value)}
                 onClear={() => formik.setFieldValue('notes', '')}
@@ -345,7 +343,7 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
                 values={formik.values}
                 valueField='key'
                 displayField='value'
-                readOnly={editMode || disable}
+                readOnly={editMode || isPosted || isClosed}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik && formik.setFieldValue('type', newValue ? newValue.key : '')
@@ -364,7 +362,7 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
                 name='clientId'
                 label={labels.client}
                 form={formik}
-                readOnly={editMode || disable}
+                readOnly={editMode || isPosted || isClosed}
                 displayFieldWidth={2}
                 valueShow='clientRef'
                 secondValueShow='clientName'
@@ -400,7 +398,7 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
                   { key: 'name', value: 'Name' }
                 ]}
                 values={formik.values}
-                readOnly={editMode || disable}
+                readOnly={editMode || isPosted || isClosed}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('currencyId', newValue?.recordId || 0)
@@ -416,7 +414,7 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
                 values={formik.values}
                 valueField='key'
                 displayField='value'
-                readOnly={editMode || disable}
+                readOnly={editMode || isPosted || isClosed}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik && formik.setFieldValue('genVar', newValue ? newValue.key : '')
