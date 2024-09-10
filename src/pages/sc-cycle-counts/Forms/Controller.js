@@ -22,15 +22,7 @@ const Controller = ({ store, maxAccess, labels }) => {
     validateOnChange: true,
     initialValues: {
       stockCountId: '',
-      rows: [
-        {
-          id: 1,
-          controllerId: '',
-          siteId: '',
-          stockCountId: '',
-          status: ''
-        }
-      ]
+      rows: []
     },
     onSubmit: async () => {
       try {
