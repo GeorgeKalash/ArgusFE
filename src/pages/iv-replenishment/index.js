@@ -34,7 +34,7 @@ const IvReplenishements = () => {
   const {
     query: { data },
     labels: _labels,
-    invalidate,
+
     paginationParameters,
     filterBy,
     clearFilter,
@@ -82,17 +82,6 @@ const IvReplenishements = () => {
     openForm()
   }
 
-  const del = async obj => {
-    try {
-      await postRequest({
-        extension: IVReplenishementRepository.IvReplenishements.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
-  }
-
   function openForm(recordId) {
     stack({
       Component: IvReplenishementsWindow,
@@ -127,7 +116,6 @@ const IvReplenishements = () => {
           gridData={data}
           rowId={['recordId']}
           onEdit={edit}
-          onDelete={del}
           isLoading={false}
           pageSize={50}
           refetch={refetch}

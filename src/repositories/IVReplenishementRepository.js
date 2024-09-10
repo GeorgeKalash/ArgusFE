@@ -12,8 +12,7 @@ export const IVReplenishementRepository = {
     qry: service + 'qryHDR',
     page: service + 'pageHDR',
     get: service + 'getHDR',
-    set: service + 'setHDR',
-    del: service + 'delHDR'
+    set: service + 'setHDR'
   },
   IvReplenishementsList: {
     qry: service + 'qryTRX'

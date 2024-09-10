@@ -40,9 +40,30 @@ const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
     validateOnChange: true,
     validationSchema: yup.object({
       siteId: yup.string().required(),
-      dateFrom: yup.string().required(),
-      dateTo: yup.string().required(),
-      date: yup.string().required()
+      dateFrom: yup
+        .date()
+        .required()
+        .test(function (value) {
+          const { dateTo } = this.parent
+
+          return value.getTime() <= dateTo?.getTime()
+        }),
+      dateTo: yup
+        .date()
+        .required()
+        .test(function (value) {
+          const { date, dateFrom } = this.parent
+
+          return value.getTime() <= date?.getTime() && value.getTime() >= dateFrom?.getTime()
+        }),
+      date: yup
+        .date()
+        .required()
+        .test(function (value) {
+          const { dateTo } = this.parent
+
+          return value.getTime() >= dateTo?.getTime()
+        })
     }),
     onSubmit: async obj => {
       const response = await postRequest({
@@ -137,6 +158,7 @@ const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
             <Grid item xs={12}>
               <CustomDatePicker
                 name='dateFrom'
+                max={formik.values.dateTo}
                 readOnly={editMode}
                 label={labels.dateFrom}
                 value={formik.values.dateFrom}
@@ -151,6 +173,8 @@ const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
               <CustomDatePicker
                 name='dateTo'
                 readOnly={editMode}
+                min={formik.values.dateFrom}
+                max={formik.values.date}
                 label={labels.dateTo}
                 value={formik.values.dateTo}
                 onChange={formik.setFieldValue}
@@ -163,6 +187,7 @@ const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
             <Grid item xs={12}>
               <CustomDatePicker
                 name='date'
+                min={formik.values.dateTo}
                 readOnly={editMode}
                 label={labels.date}
                 value={formik.values.date}
