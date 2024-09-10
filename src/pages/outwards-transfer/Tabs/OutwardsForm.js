@@ -638,6 +638,8 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       condition: true,
       onClick: openBeneficiaryWindow,
       disabled: editMode
+        ? editMode
+        : !(formik.values.countryId && formik.values.dispersalType && formik.values.clientId)
     },
     {
       key: 'Beneficiary',
@@ -668,7 +670,9 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
     stack({
       Component: BeneficiaryListWindow,
       props: {
-        form: formik
+        form: formik,
+        labels,
+        maxAccess
       },
       width: 1300,
       height: 500,
