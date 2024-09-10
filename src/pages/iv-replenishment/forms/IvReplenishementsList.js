@@ -18,8 +18,6 @@ const IvReplenishementsList = ({ store, labels, maxAccess }) => {
       extension: IVReplenishementRepository.IvReplenishementsList.qry,
       parameters: `&_replenishmentId=${recordId}`
     })
-
-    return response
   }
 
   const {

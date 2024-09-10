@@ -18,7 +18,7 @@ const IvReplenishementsWindow = ({ recordId, labels, maxAccess }) => {
   return (
     <>
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-      <CustomTabPanel index={0} value={activeTab} disabledApply={!editMode && true}>
+      <CustomTabPanel index={0} value={activeTab}>
         <IvReplenishementsForm labels={labels} setStore={setStore} store={store} maxAccess={maxAccess} />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
