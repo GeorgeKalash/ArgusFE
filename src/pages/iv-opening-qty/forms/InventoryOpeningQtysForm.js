@@ -69,7 +69,7 @@ const InventoryOpeningQtysForm = ({ labels, maxAccess, recordId, record }) => {
         formik.setFieldValue(
           'recordId',
 
-          String(obj.year) + String(obj.itemId) + String(obj.siteId)
+          String(obj.year * 100) + String(obj.itemId * 10) + String(obj.siteId)
         )
 
         invalidate()
@@ -91,7 +91,7 @@ const InventoryOpeningQtysForm = ({ labels, maxAccess, recordId, record }) => {
           formik.setValues({
             ...res.record,
 
-            recordId: String(res.record.year) + String(res.record.itemId) + String(res.record.siteId)
+            recordId: String(res.record.year * 100) + String(res.record.itemId * 10) + String(res.record.siteId)
           })
         }
       } catch (exception) {}

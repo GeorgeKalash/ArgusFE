@@ -40,24 +40,8 @@ const InventoryOpeningQtys = () => {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: InventoryRepository.InventoryOpeningQtys.qry,
-    datasetId: ResourceIds.InventoryOpeningQtys,
-    filter: {
-      filterFn: fetchWithFilter
-    }
+    datasetId: ResourceIds.InventoryOpeningQtys
   })
-
-  async function fetchWithFilter({ filters, pagination }) {
-    try {
-      if (filters?.qry) {
-        return await getRequest({
-          extension: InventoryRepository.InventoryOpeningQtys.snapshot,
-          parameters: `_filter=${filters.qry}`
-        })
-      } else {
-        return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
-      }
-    } catch (error) {}
-  }
 
   const columns = [
     {
@@ -108,7 +92,7 @@ const InventoryOpeningQtys = () => {
         labels: _labels,
         record,
         maxAccess: access,
-        recordId: record ? String(record.year) + String(record.itemId) + String(record.siteId) : null
+        recordId: record ? String(record.year * 100) + String(record.itemId * 10) + String(record.siteId) : null
       },
       width: 780,
       height: 550,
@@ -142,25 +126,10 @@ const InventoryOpeningQtys = () => {
     refetch()
   }
 
-  const onSearch = value => {
-    filterBy('qry', value)
-  }
-
-  const onClear = () => {
-    clearFilter('qry')
-  }
-
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar
-          onAdd={add}
-          maxAccess={access}
-          onApply={onApply}
-          onSearch={onSearch}
-          onClear={onClear}
-          reportName={'IVOQ'}
-        />
+        <RPBGridToolbar onAdd={add} maxAccess={access} onApply={onApply} reportName={'IVOQ'} hasSearch={false} />
       </Fixed>
       <Grow>
         <Table
