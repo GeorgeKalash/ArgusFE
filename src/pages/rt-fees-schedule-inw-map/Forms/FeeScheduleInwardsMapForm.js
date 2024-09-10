@@ -29,7 +29,8 @@ export default function FeeScheduleInwardsMapForm({ labels, maxAccess, recordId,
       recordId: recordId,
       corId: '',
       dispersalMode: '',
-      scheduleId: ''
+      scheduleId: '',
+      feePayer: ''
     },
     maxAccess,
     enableReinitialize: true,
@@ -37,7 +38,8 @@ export default function FeeScheduleInwardsMapForm({ labels, maxAccess, recordId,
     validationSchema: yup.object({
       corId: yup.string().required(),
       scheduleId: yup.string().required(),
-      dispersalMode: yup.string().required()
+      dispersalMode: yup.string().required(),
+      feePayer: yup.number().required()
     }),
     onSubmit: async obj => {
       const corId = formik.values.corId
@@ -52,10 +54,7 @@ export default function FeeScheduleInwardsMapForm({ labels, maxAccess, recordId,
         toast.success(platformLabels.Added)
       } else toast.success(platformLabels.Edited)
 
-      formik.setFieldValue(
-        'recordId',
-        String(obj.corId) + String(obj.dispersalMode)
-      )
+      formik.setFieldValue('recordId', String(obj.corId) + String(obj.dispersalMode))
 
       invalidate()
     }
@@ -75,9 +74,7 @@ export default function FeeScheduleInwardsMapForm({ labels, maxAccess, recordId,
           formik.setValues({
             ...res.record,
 
-            recordId:
-              String(res.record.corId) +
-              String(res.record.dispersalMode)
+            recordId: String(res.record.corId) + String(res.record.dispersalMode)
           })
         }
       } catch (exception) {}
@@ -147,6 +144,23 @@ export default function FeeScheduleInwardsMapForm({ labels, maxAccess, recordId,
                   formik.setFieldValue('scheduleId', newValue?.recordId || null)
                 }}
                 error={formik.touched.scheduleId && Boolean(formik.errors.scheduleId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.FEE_PAYER}
+                name='feePayer'
+                label={labels.feePayer}
+                valueField='key'
+                displayField='value'
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('feePayer', newValue ? newValue?.key : '')
+                }}
+                required
+                maxAccess={maxAccess}
+                error={formik.touched.feePayer && Boolean(formik.errors.feePayer)}
+                readOnly={editMode}
               />
             </Grid>
           </Grid>

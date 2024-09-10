@@ -57,7 +57,12 @@ const FeeScheduleInwardsMap = () => {
       field: 'scheduleName',
       headerName: _labels.schedule,
       flex: 1
-    }
+    },
+    {
+      field: 'feePayerName',
+      headerName: _labels.feePayer,
+      flex: 1
+    },
   ]
 
   const add = () => {
