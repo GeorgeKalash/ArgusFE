@@ -31,17 +31,6 @@ const IvReplenishements = () => {
     } catch (error) {}
   }
 
-  async function fetchWithFilter({ filters, pagination }) {
-    if (filters?.qry) {
-      return await getRequest({
-        extension: IVReplenishementRepository.IvReplenishements.snapshot,
-        parameters: `_filter=${filters.qry}`
-      })
-    } else {
-      return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
-    }
-  }
-
   const {
     query: { data },
     labels: _labels,
@@ -54,10 +43,7 @@ const IvReplenishements = () => {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: IVReplenishementRepository.IvReplenishements.page,
-    datasetId: ResourceIds.IvReplenishements,
-    filter: {
-      filterFn: fetchWithFilter
-    }
+    datasetId: ResourceIds.IvReplenishements
   })
 
   const columns = [
@@ -125,36 +111,15 @@ const IvReplenishements = () => {
     openForm(obj?.recordId)
   }
 
-  const onApply = ({ search, rpbParams }) => {
-    if (!search && rpbParams.length === 0) {
-      clearFilter('params')
-    } else if (!search) {
-      filterBy('params', rpbParams)
-    } else {
-      filterBy('qry', search)
-    }
+  const onApply = ({ rpbParams }) => {
+    filterBy('params', rpbParams)
     refetch()
-  }
-
-  const onSearch = value => {
-    filterBy('qry', value)
-  }
-
-  const onClear = () => {
-    clearFilter('qry')
   }
 
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar
-          onSearch={onSearch}
-          onClear={onClear}
-          onAdd={add}
-          maxAccess={access}
-          reportName={'IRHDR'}
-          onApply={onApply}
-        />
+        <RPBGridToolbar onAdd={add} hasSearch={false} maxAccess={access} reportName={'IRHDR'} onApply={onApply} />
       </Fixed>
       <Grow>
         <Table
