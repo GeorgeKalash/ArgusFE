@@ -80,15 +80,15 @@ export const getButtons = platformLabels => [
   },
   {
     key: 'BeneficiaryList',
-    label: platformLabels.Beneficiary,
-    color: '#0A4164',
+    label: platformLabels.BeneficiaryList,
+    color: '#231f20',
     image: 'beneficiary.png',
     main: false
   },
   {
     key: 'Beneficiary',
     label: platformLabels.Beneficiary,
-    color: '#231f20',
+    color: '#0A4164',
     image: 'beneficiary.png',
     main: false
   },

@@ -198,6 +198,20 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
 
                 return true
               }),
+            paidAmount: yup.string().test('Paid Amount', 'Paid Amount is required', function (value) {
+              if (this.parent.type == '2') {
+                return !!value
+              }
+
+              return true
+            }),
+            returnedAmount: yup.string().test('Returned Amount', 'Returned Amount is required', function (value) {
+              if (this.parent.type == '2') {
+                return !!value
+              }
+
+              return true
+            }),
             amount: yup.string().nullable().required('Amount is required')
           })
         )
@@ -271,6 +285,18 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
           { from: 'key', to: 'type' },
           { from: 'value', to: 'typeName' }
         ]
+      },
+      async onChange({ row: { update, newRow } }) {
+        if (newRow.type != 2) return
+
+        const sumAmount = formik.values.amountRows.slice(0, -1).reduce((sum, row) => {
+          const curValue = parseFloat(row.amount.toString().replace(/,/g, '')) || 0
+
+          return sum + curValue
+        }, 0)
+
+        const currentAmount = (parseFloat(amount) - parseFloat(sumAmount)).toFixed(2)
+        update({ amount: currentAmount })
       }
     },
     {
@@ -282,41 +308,28 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
         return { ...props, readOnly: row.type == 1 || !row.type }
       },
       async onChange({ row: { update, newRow } }) {
-        if (formik.values.amountRows.length == 1) {
-          let rowReturned = 0
-          let rowAmount = 0
-          if (newRow.paidAmount > parseFloat(amount)) {
-            rowReturned = (parseFloat(newRow.paidAmount) - parseFloat(amount)).toFixed(2)
-            rowAmount = (parseFloat(newRow.paidAmount) - rowReturned).toFixed(2)
-          } else {
-            rowReturned = (parseFloat(newRow.paidAmount) - parseFloat(amount)).toFixed(2)
-            rowAmount = (parseFloat(amount) - parseFloat(newRow.paidAmount)).toFixed(2)
-          }
-          update({
-            returnedAmount: rowReturned,
-            amount: rowAmount
-          })
-        } else {
-          const sumAmount = formik.values.amountRows.slice(0, -1).reduce((sum, row) => {
-            const curValue = parseFloat(row.amount.toString().replace(/,/g, '')) || 0
+        const sumAmount = formik.values.amountRows.slice(0, -1).reduce((sum, row) => {
+          const curValue = parseFloat(row.amount.toString().replace(/,/g, '')) || 0
 
-            return sum + curValue
-          }, 0)
-          const returned = (parseFloat(amount) - parseFloat(sumAmount)).toFixed(2)
-          let rowReturned = 0
-          let rowAmount = 0
-          if (newRow.paidAmount > returned) {
-            rowReturned = (parseFloat(newRow.paidAmount) - returned).toFixed(2)
-            rowAmount = (parseFloat(newRow.paidAmount) - rowReturned).toFixed(2)
-          } else {
-            rowReturned = (parseFloat(newRow.paidAmount) - (parseFloat(amount) - parseFloat(sumAmount))).toFixed(2)
-            rowAmount = parseFloat(newRow.paidAmount).toFixed(2)
-          }
-          update({
-            returnedAmount: rowReturned,
-            amount: rowAmount
-          })
+          return sum + curValue
+        }, 0)
+
+        let rowAmount
+        let returnedAmount
+
+        if (formik.values.amountRows.length === 1) {
+          rowAmount = newRow.paidAmount > sumAmount ? newRow.paidAmount : sumAmount - newRow.paidAmount
+          returnedAmount = (parseFloat(newRow.paidAmount) - parseFloat(amount)).toFixed(2)
+        } else {
+          const remainingAmount = (parseFloat(amount) - parseFloat(sumAmount)).toFixed(2)
+          returnedAmount = (parseFloat(newRow.paidAmount) - parseFloat(remainingAmount)).toFixed(2)
+          rowAmount = returnedAmount > 0 ? newRow.paidAmount - returnedAmount : newRow.paidAmount
         }
+
+        update({
+          returnedAmount: returnedAmount,
+          amount: parseFloat(rowAmount).toFixed(2)
+        })
       }
     },
     {
@@ -324,8 +337,8 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       name: 'returnedAmount',
       label: labels.returnedAmount,
       defaultValue: '',
-      propsReducer({ row, props }) {
-        return { ...props, readOnly: row.type == 1 || !row.type }
+      props: {
+        readOnly: true
       }
     },
     {
@@ -676,7 +689,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       },
       width: 1300,
       height: 500,
-      title: labels.beneficiaries
+      title: labels.beneficiaryList
     })
   }
 

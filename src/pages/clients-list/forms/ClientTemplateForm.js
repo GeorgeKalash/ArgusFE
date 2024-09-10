@@ -673,7 +673,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       disabled: !editMode
     },
     {
-      key: 'Beneficiary',
+      key: 'BeneficiaryList',
       condition: true,
       onClick: () => openBeneficiaryWindow(),
       disabled: !editMode
