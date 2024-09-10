@@ -52,12 +52,12 @@ const ProductCurrenciesForm = ({ store, setStore, labels, editMode, maxAccess })
     },
     enableReinitialize: false,
     validateOnChange: true,
-    onSubmit: values => {
-      post(values.currencies)
+    onSubmit: async values => {
+      await post(values.currencies)
     }
   })
 
-  const post = obj => {
+  const post = async obj => {
     const data = {
       productId: pId,
       productMonetaries: obj.map(({ id, productId, ...rest }) => ({
@@ -65,7 +65,7 @@ const ProductCurrenciesForm = ({ store, setStore, labels, editMode, maxAccess })
         ...rest
       }))
     }
-    postRequest({
+    await postRequest({
       extension: RemittanceSettingsRepository.ProductMonetaries.set2,
       record: JSON.stringify(data)
     })

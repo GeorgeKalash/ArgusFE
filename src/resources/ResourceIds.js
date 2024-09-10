@@ -227,11 +227,18 @@ export const ResourceIds = {
   PUOrderStatus: 50105,
   PUPaymentTerms: 50106,
   AutoPostExclusion: 36124,
+  PostOutwards: 36319,
   OutwardsReturn: 36317,
   BankBranches: 33109,
   CorrespondentOutwards: 36318,
   ExtraIncome: 36129,
+  StockCountControllers: 44101,
+  StockCountDTD: 44103,
   PurposeExchangeGroup: 35115,
   Drivers: 52201,
-  IvReplenishements: 46302
+  IvReplenishements: 46302,
+  RebuildInventory: 41501,
+  RebuildUndeliveredItems: 52504,
+  IvSettings: 41115,
+  FeeScheduleInwardsMap: 36130
 }

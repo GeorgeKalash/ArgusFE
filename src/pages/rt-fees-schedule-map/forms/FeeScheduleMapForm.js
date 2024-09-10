@@ -23,7 +23,7 @@ export default function FeeScheduleMapForm({ labels, maxAccess, recordId, record
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: RemittanceOutwardsRepository.FeeScheduleMap.qry
+    endpointId: RemittanceOutwardsRepository.FeeScheduleOutwards.qry
   })
 
   const { formik } = useForm({
@@ -34,9 +34,7 @@ export default function FeeScheduleMapForm({ labels, maxAccess, recordId, record
       currencyId: '',
       countryId: '',
       dispersalMode: '',
-      functionId: '',
-      scheduleId: '',
-      functionName: ''
+      scheduleId: ''
     },
     maxAccess,
     enableReinitialize: true,
@@ -44,7 +42,6 @@ export default function FeeScheduleMapForm({ labels, maxAccess, recordId, record
     validationSchema: yup.object({
       corId: yup.string().required(),
       currencyId: yup.string().required(),
-      functionId: yup.string().required(),
       scheduleId: yup.string().required(),
       dispersalMode: yup.string().required(),
       countryId: yup.string().required()
@@ -54,26 +51,21 @@ export default function FeeScheduleMapForm({ labels, maxAccess, recordId, record
       const currencyId = formik.values.currencyId
       const corId = formik.values.corId
       const dispersalMode = formik.values.dispersalMode
-      const functionId = formik.values.functionId
       const countryId = formik.values.countryId
 
       await postRequest({
-        extension: RemittanceOutwardsRepository.FeeScheduleMap.set,
+        extension: RemittanceOutwardsRepository.FeeScheduleOutwards.set,
         record: JSON.stringify(obj)
       })
 
-      if (!currencyId && !corId && !dispersalMode && !functionId && !countryId) {
+      if (!currencyId && !corId && !dispersalMode && !countryId) {
         toast.success(platformLabels.Added)
       } else toast.success(platformLabels.Edited)
 
       formik.setFieldValue(
         'recordId',
 
-        String(obj.corId) +
-          String(obj.currencyId) +
-          String(obj.countryId) +
-          String(obj.dispersalMode) +
-          String(obj.functionId)
+        String(obj.corId) + String(obj.currencyId) + String(obj.countryId) + String(obj.dispersalMode)
       )
 
       invalidate()
@@ -85,18 +77,10 @@ export default function FeeScheduleMapForm({ labels, maxAccess, recordId, record
   useEffect(() => {
     ;(async function () {
       try {
-        if (
-          record &&
-          record.currencyId &&
-          record.corId &&
-          record.functionId &&
-          record.scheduleId &&
-          record.countryId &&
-          recordId
-        ) {
+        if (record && record.currencyId && record.corId && record.scheduleId && record.countryId && recordId) {
           const res = await getRequest({
-            extension: RemittanceOutwardsRepository.FeeScheduleMap.get,
-            parameters: `_currencyId=${record.currencyId}&_corId=${record.corId}&_functionId=${record.functionId}&_dispersalMode=${record.dispersalMode}&_countryId=${record.countryId}`
+            extension: RemittanceOutwardsRepository.FeeScheduleOutwards.get,
+            parameters: `_currencyId=${record.currencyId}&_corId=${record.corId}&_dispersalMode=${record.dispersalMode}&_countryId=${record.countryId}`
           })
 
           formik.setValues({
@@ -106,8 +90,7 @@ export default function FeeScheduleMapForm({ labels, maxAccess, recordId, record
               String(res.record.corId) +
               String(res.record.currencyId) +
               String(res.record.countryId) +
-              String(res.record.dispersalMode) +
-              String(res.record.functionId)
+              String(res.record.dispersalMode)
           })
         }
       } catch (exception) {}
@@ -182,27 +165,6 @@ export default function FeeScheduleMapForm({ labels, maxAccess, recordId, record
                 }}
                 error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
               />
-            </Grid>
-            <Grid item xs={12}>
-              <Grid item xs={12}>
-                <ResourceComboBox
-                  datasetId={DataSets.RT_Function}
-                  name='functionId'
-                  label={labels.function}
-                  required
-                  readOnly={editMode}
-                  valueField='key'
-                  displayField='value'
-                  values={formik.values}
-                  maxAccess={maxAccess}
-                  onClear={() => formik.setFieldValue('functionId', '')}
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('functionId', newValue?.key || '')
-                    formik.setFieldValue('functionName', newValue?.value || '')
-                  }}
-                  error={formik.touched.functionId && Boolean(formik.errors.functionId)}
-                />
-              </Grid>
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox

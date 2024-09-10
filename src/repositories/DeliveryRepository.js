@@ -14,5 +14,8 @@ export const DeliveryRepository = {
     get: service + 'getVEH',
     qry: service + 'qryVEH',
     del: service + 'delVEH'
+  },
+  Reduild: {
+    rebuild: service + 'rebuildMW'
   }
 }

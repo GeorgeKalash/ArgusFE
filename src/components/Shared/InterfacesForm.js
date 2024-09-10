@@ -11,11 +11,10 @@ import { DataSets } from 'src/resources/DataSets'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { CommonContext } from 'src/providers/CommonContext'
 import CustomTextField from '../Inputs/CustomTextField'
-import { Fixed } from './Layouts/Fixed'
 import { Grow } from './Layouts/Grow'
 import { VertLayout } from './Layouts/VertLayout'
 
-export const InterfacesForm = ({ recordId, expanded, height, resourceId, name }) => {
+export const InterfacesForm = ({ recordId, resourceId, name }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getAllKvsByDataset } = useContext(CommonContext)
 
@@ -39,27 +38,32 @@ export const InterfacesForm = ({ recordId, expanded, height, resourceId, name })
     enableReinitialize: true,
     validateOnChange: true,
     onSubmit: async values => {
-      const rows = formik.values.rows.map(rest => ({
-        recordId: recordId,
-        resourceId: resourceId,
-        ...rest
-      }))
+      try {
+        const rows = formik.values.rows.map(rest => ({
+          recordId: recordId,
+          resourceId: resourceId,
+          ...rest
+        }))
 
-      const hasEmptyRows = rows.every(row => row.interfaceId === '')
+        const hasEmptyRows = rows.every(row => row.interfaceId === '')
 
-      const resultRows = hasEmptyRows ? [] : rows
+        const resultRows = hasEmptyRows ? [] : rows
 
-      const data = {
-        recordId: recordId,
-        resourceId: resourceId,
-        items: resultRows
-      }
+        const data = {
+          recordId: recordId,
+          resourceId: resourceId,
+          items: resultRows
+        }
 
-      const res = await postRequest({
-        extension: RemittanceSettingsRepository.InterfaceMaps.set2,
-        record: JSON.stringify(data)
-      })
-      if (res.recordId) toast.success('Record Successfully')
+        const res = await postRequest({
+          extension: RemittanceSettingsRepository.InterfaceMaps.set2,
+          record: JSON.stringify(data)
+        })
+
+        if (res.recordId) {
+          toast.success('Record Successfully')
+        }
+      } catch (error) {}
     }
   })
   async function getAllInterfaces() {
@@ -136,7 +140,15 @@ export const InterfacesForm = ({ recordId, expanded, height, resourceId, name })
   ]
 
   return (
-    <FormShell form={formik} resourceId={resourceId} maxAccess={access} infoVisible={false} editMode={true}>
+    <FormShell
+      form={formik}
+      resourceId={resourceId}
+      maxAccess={access}
+      infoVisible={false}
+      editMode={true}
+      isSavedClear={false}
+      isCleared={false}
+    >
       <VertLayout>
         <Grow>
           <Grid sx={{ width: '50%' }}>

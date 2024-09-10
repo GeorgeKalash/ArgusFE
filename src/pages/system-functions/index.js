@@ -120,7 +120,7 @@ const SystemFunction = () => {
   ]
 
   return (
-    <FormShell form={formik} infoVisible={false} visibleClear={false} isCleared={false}>
+    <FormShell form={formik} infoVisible={false} visibleClear={false} isCleared={false} isSavedClear={false}>
       <VertLayout>
         <Grow>
           <DataGrid

@@ -5,11 +5,11 @@ import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import { InterfacesForm } from 'src/components/Shared/InterfacesForm'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-const CbBanksWindow = ({ height, labels, maxAccess, recordId }) => {
+const CbBanksWindow = ({ labels, maxAccess, recordId }) => {
   const [activeTab, setActiveTab] = useState(0)
 
   const [store, setStore] = useState({
-    recordId: recordId || null,
+    recordId: recordId,
     name: null
   })
 
@@ -18,12 +18,11 @@ const CbBanksWindow = ({ height, labels, maxAccess, recordId }) => {
   return (
     <>
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-      <CustomTabPanel height={height} index={0} value={activeTab}>
-        <CbBanksForm labels={labels} maxAccess={maxAccess} recordId={recordId} setStore={setStore} />
+      <CustomTabPanel index={0} value={activeTab}>
+        <CbBanksForm labels={labels} maxAccess={maxAccess} store={store} setStore={setStore} />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
         <InterfacesForm
-          height={height}
           labels={labels}
           resourceId={ResourceIds.CbBanks}
           recordId={store.recordId}

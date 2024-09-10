@@ -79,9 +79,9 @@ const GroupLegalDocument = () => {
       Component: GroupLegalDocumentForm,
       props: {
         labels: _labels,
-        record: record,
+        record,
         maxAccess: access,
-        recordId: record ? record.groupId * 10000 + record.incId : undefined
+        recordId: record ? record.groupId * 10000 + record.incId : null
       },
       width: 600,
       height: 370,
