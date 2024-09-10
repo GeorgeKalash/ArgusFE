@@ -106,7 +106,7 @@ const FeeScheduleInwardsMap = () => {
         <Table
           columns={columns}
           gridData={data}
-          rowId={['corId, functionId, dispersalMode']}
+          rowId={['corId, dispersalMode']}
           onEdit={edit}
           onDelete={del}
           isLoading={false}
