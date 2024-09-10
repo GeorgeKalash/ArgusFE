@@ -1181,7 +1181,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                       }
 
                       const today = new Date()
-                      const expiryDate = new Date(parseInt(newValue?.expiryDate.replace(/\/Date\((\d+)\)\//, '$1')))
+                      const expiryDate = new Date(parseInt(newValue?.expiryDate?.replace(/\/Date\((\d+)\)\//, '$1')))
                       if (expiryDate < today) {
                         stackError({
                           message: `Expired Client.`

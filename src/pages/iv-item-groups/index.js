@@ -1,71 +1,68 @@
-import { useState, useContext, useEffect } from 'react'
-import { Button, Grid, Tooltip } from '@mui/material'
+import { useContext, useState, useEffect } from 'react'
 import toast from 'react-hot-toast'
+import { Button, Grid, Tooltip } from '@mui/material'
+import CustomComboBox from 'src/components/Inputs/CustomComboBox'
+import PreviewReport from 'src/components/Shared/PreviewReport'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { useWindow } from 'src/windows'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
-import { InventoryRepository } from 'src/repositories/InventoryRepository'
-import SitesForm from './forms/SitesForm'
+import { useResourceQuery } from 'src/hooks/resource'
+import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
-import CustomComboBox from 'src/components/Inputs/CustomComboBox'
+import IvItemGroupsForm from './form/IvItemGroupsForm'
+import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import PreviewReport from 'src/components/Shared/PreviewReport'
 
-const Sites = () => {
+const IvItemGroups = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
+  const { stack } = useWindow()
   const [selectedReport, setSelectedReport] = useState(null)
   const [reportStore, setReportStore] = useState([])
+
+  const {
+    query: { data },
+    labels: _labels,
+    paginationParameters,
+    invalidate,
+    filterBy,
+    clearFilter,
+    refetch,
+    access
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: InventoryRepository.Group.page,
+    datasetId: ResourceIds.InventoryGroup,
+
+    filter: {
+      endpointId: InventoryRepository.Group.snapshot,
+      filterFn: fetchWithSearch
+    }
+  })
+
+  async function fetchWithSearch({ filters, pagination }) {
+    return filters.qry
+      ? await getRequest({
+          extension: InventoryRepository.Group.snapshot,
+          parameters: `_filter=${filters.qry}`
+        })
+      : await fetchGridData(pagination)
+  }
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: InventoryRepository.Site.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
+      extension: InventoryRepository.Group.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
     return { ...response, _startAt: _startAt }
   }
-
-  const {
-    query: { data },
-    labels: _labels,
-    access,
-    search,
-    clear,
-    refetch,
-    paginationParameters
-  } = useResourceQuery({
-    queryFn: fetchGridData,
-    endpointId: InventoryRepository.Site.page,
-    datasetId: ResourceIds.Sites,
-
-    search: {
-      endpointId: InventoryRepository.Site.snapshot,
-      searchFn: fetchWithSearch
-    }
-  })
-
-  async function fetchWithSearch({ qry }) {
-    const response = await getRequest({
-      extension: InventoryRepository.Site.snapshot,
-      parameters: `_filter=${qry}`
-    })
-
-    return response
-  }
-
-  const invalidate = useInvalidate({
-    endpointId: InventoryRepository.Site.page
-  })
 
   const columns = [
     {
@@ -77,54 +74,45 @@ const Sites = () => {
       field: 'name',
       headerName: _labels.name,
       flex: 1
-    },
-    ,
-    {
-      field: 'plantName',
-      headerName: _labels.plant,
-      flex: 1
-    },
-    {
-      field: 'costCenterName',
-      headerName: _labels.costCenter,
-      flex: 1
     }
   ]
 
+  const add = () => {
+    openForm()
+  }
+
   const del = async obj => {
-    await postRequest({
-      extension: InventoryRepository.Site.del,
-      record: JSON.stringify(obj)
+    try {
+      await postRequest({
+        extension: InventoryRepository.Group.del,
+        record: JSON.stringify(obj)
+      })
+      invalidate()
+      toast.success(platformLabels.Deleted)
+    } catch (error) {}
+  }
+
+  function openForm(recordId) {
+    stack({
+      Component: IvItemGroupsForm,
+      props: {
+        labels: _labels,
+        recordId: recordId,
+        maxAccess: access
+      },
+      width: 600,
+      height: 500,
+      title: _labels.itemGroup
     })
-    invalidate()
-    toast.success('Record Deleted Successfully')
   }
 
   const edit = obj => {
     openForm(obj?.recordId)
   }
 
-  const add = () => {
-    openForm()
-  }
-
-  function openForm(recordId) {
-    stack({
-      Component: SitesForm,
-      props: {
-        labels: _labels,
-        recordId: recordId ? recordId : null,
-        maxAccess: access
-      },
-      width: 500,
-      height: 580,
-      title: _labels.sites
-    })
-  }
-
   useEffect(() => {
     getReportLayout()
-  }, [ResourceIds.Sites])
+  }, [ResourceIds.InventoryGroup])
 
   useEffect(() => {
     if (reportStore.length > 0) {
@@ -136,8 +124,8 @@ const Sites = () => {
 
   const getReportLayout = () => {
     setReportStore([])
-    if (ResourceIds.Sites) {
-      var parameters = `_resourceId=${ResourceIds.Sites}`
+    if (ResourceIds.InventoryGroup) {
+      var parameters = `_resourceId=${ResourceIds.InventoryGroup}`
       getRequest({
         extension: SystemRepository.ReportLayout,
         parameters: parameters
@@ -165,13 +153,15 @@ const Sites = () => {
     <VertLayout>
       <Fixed>
         <GridToolbar
+          onSearch={value => {
+            filterBy('qry', value)
+          }}
+          onSearchClear={() => {
+            clearFilter('qry')
+          }}
+          inputSearch={true}
           onAdd={add}
           maxAccess={access}
-          onSearch={search}
-          onSearchClear={clear}
-          labels={_labels}
-          inputSearch={true}
-          previewReport={ResourceIds.Sites}
           rightSection={
             <Grid item sx={{ display: 'flex', mr: 2 }}>
               <CustomComboBox
@@ -227,15 +217,16 @@ const Sites = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          refetch={refetch}
-          maxAccess={access}
+          isLoading={false}
           pageSize={50}
+          refetch={refetch}
           paginationParameters={paginationParameters}
           paginationType='api'
+          maxAccess={access}
         />
       </Grow>
     </VertLayout>
   )
 }
 
-export default Sites
+export default IvItemGroups

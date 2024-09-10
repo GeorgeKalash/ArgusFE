@@ -36,6 +36,7 @@ const Table = ({
   rowSelection = '',
   pagination = true,
   setData,
+  handleCheckboxChange = '',
   ...props
 }) => {
   const pageSize = props?.pageSize || 10000
@@ -352,6 +353,10 @@ const Table = ({
 
     setChecked(e.target.checked)
 
+    if (handleCheckboxChange) {
+      handleCheckboxChange()
+    }
+
     if (typeof setData === 'function') onSelectionChanged
   }
 
@@ -468,6 +473,10 @@ const Table = ({
                 node.setDataValue(params.colDef.field, false)
               }
             })
+          }
+
+          if (handleCheckboxChange) {
+            handleCheckboxChange()
           }
         }}
       />
