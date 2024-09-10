@@ -65,7 +65,7 @@ const CategorySiteForm = ({ store, labels, maxAccess }) => {
     {
       component: 'textfield',
       name: 'reference',
-      label: labels.siteRef,
+      label: labels.reference,
       props: {
         readOnly: true
       }
@@ -73,7 +73,7 @@ const CategorySiteForm = ({ store, labels, maxAccess }) => {
     {
       component: 'textfield',
       name: 'name',
-      label: labels.siteName,
+      label: labels.name,
       props: {
         readOnly: true
       }
