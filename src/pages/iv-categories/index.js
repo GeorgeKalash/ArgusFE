@@ -146,28 +146,27 @@ const Category = () => {
 
   const getReportLayout = () => {
     setReportStore([])
-    if (ResourceIds.Category) {
-      getRequest({
-        extension: SystemRepository.ReportLayout,
-        parameters: `_resourceId=${ResourceIds.Category}`
-      })
-        .then(res => {
-          if (res?.list) {
-            const formattedReports = res.list.map(item => ({
-              api_url: item.api,
-              reportClass: item.instanceName,
-              parameters: item.parameters,
-              layoutName: item.layoutName,
-              assembly: 'ArgusRPT.dll'
-            }))
-            setReportStore(formattedReports)
-            if (formattedReports.length > 0) {
-              setSelectedReport(formattedReports[0])
-            }
+
+    getRequest({
+      extension: SystemRepository.ReportLayout,
+      parameters: `_resourceId=${ResourceIds.Category}`
+    })
+      .then(res => {
+        if (res?.list) {
+          const formattedReports = res.list.map(item => ({
+            api_url: item.api,
+            reportClass: item.instanceName,
+            parameters: item.parameters,
+            layoutName: item.layoutName,
+            assembly: 'ArgusRPT.dll'
+          }))
+          setReportStore(formattedReports)
+          if (formattedReports.length > 0) {
+            setSelectedReport(formattedReports[0])
           }
-        })
-        .catch(error => {})
-    }
+        }
+      })
+      .catch(error => {})
   }
 
   function onTreeClick() {
