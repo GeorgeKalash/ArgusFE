@@ -19,16 +19,20 @@ const IvReplenishements = () => {
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 50, params } = options
 
     try {
       const response = await getRequest({
         extension: IVReplenishementRepository.IvReplenishements.page,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=&_params=`
+        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=&_params=${params || ''}`
       })
 
       return { ...response, _startAt: _startAt }
     } catch (error) {}
+  }
+
+  async function fetchWithFilter({ filters, pagination }) {
+    return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
   const {
@@ -43,7 +47,10 @@ const IvReplenishements = () => {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: IVReplenishementRepository.IvReplenishements.page,
-    datasetId: ResourceIds.IvReplenishements
+    datasetId: ResourceIds.IvReplenishements,
+    filter: {
+      filterFn: fetchWithFilter
+    }
   })
 
   const columns = [
@@ -101,6 +108,7 @@ const IvReplenishements = () => {
   }
 
   const onApply = ({ rpbParams }) => {
+    console.log(rpbParams, 'rpbParams')
     filterBy('params', rpbParams)
     refetch()
   }
