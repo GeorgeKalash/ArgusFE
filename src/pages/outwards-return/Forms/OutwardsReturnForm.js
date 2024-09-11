@@ -46,9 +46,7 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
         extension: RemittanceOutwardsRepository.OutwardsReturn.get,
         parameters: `_recordId=${recordId}`
       })
-    } catch (error) {
-      console.log(error)
-    }
+    } catch (error) {}
   }
 
   const { formik } = useForm({
@@ -114,9 +112,6 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
       lcAmount: yup.string().required(),
       exRate: yup.string().required(),
       commission: yup.string().required(),
-
-      // vatAmount: yup.number().required(),
-      // tdAmount: yup.number().required(),
       amount: yup.string().required()
     }),
     onSubmit: async obj => {
