@@ -63,7 +63,30 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
     enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
-      genVar: yup.string().required()
+      genVar: yup.string().required(),
+      plantId: yup.string().required(),
+      clientId: yup
+        .string()
+        .nullable()
+        .test('', function (value) {
+          const { type } = this.parent
+          if (type === 2 || type === '2') {
+            return !!value
+          }
+
+          return true
+        }),
+      currencyId: yup
+        .string()
+        .nullable()
+        .test('', function (value) {
+          const { type } = this.parent
+          if (type === 2 || type === '2') {
+            return !!value
+          }
+
+          return true
+        }),
     }),
     onSubmit: async obj => {
       try {
@@ -307,6 +330,7 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
                 endpointId={SystemRepository.Plant.qry}
                 name='plantId'
                 label={labels.plant}
+                required
                 valueField='recordId'
                 readOnly={editMode || isPosted || isClosed}
                 displayField={['reference', 'name']}
@@ -362,7 +386,8 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
                 name='clientId'
                 label={labels.client}
                 form={formik}
-                readOnly={editMode || isPosted || isClosed}
+                readOnly={editMode || isPosted || isClosed || formik.values.type === '1' || formik.values.type === 1}
+                required={formik.values.type === '2' || formik.values.type === 2}
                 displayFieldWidth={2}
                 valueShow='clientRef'
                 secondValueShow='clientName'
@@ -398,7 +423,8 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
                   { key: 'name', value: 'Name' }
                 ]}
                 values={formik.values}
-                readOnly={editMode || isPosted || isClosed}
+                readOnly={editMode || isPosted || isClosed || formik.values.type === '1' || formik.values.type === 1}
+                required={formik.values.type === '2' || formik.values.type === 2}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('currencyId', newValue?.recordId || 0)
