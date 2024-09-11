@@ -45,13 +45,13 @@ const Category = () => {
     }
   })
 
-  async function fetchWithSearch({ filters, pagination }) {
+  async function fetchWithSearch({ filters }) {
     return filters.qry
       ? await getRequest({
           extension: InventoryRepository.Category.snapshot,
           parameters: `_filter=${filters.qry}`
         })
-      : await fetchGridData(pagination)
+      : await fetchGridData()
   }
 
   async function fetchGridData(options = {}) {
