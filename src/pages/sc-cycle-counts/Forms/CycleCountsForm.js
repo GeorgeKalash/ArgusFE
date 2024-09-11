@@ -445,6 +445,7 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
                 onChange={(event, newValue) => {
                   formik && formik.setFieldValue('genVar', newValue ? newValue.key : '')
                 }}
+                required
                 error={formik.touched.genVar && Boolean(formik.errors.genVar)}
               />
             </Grid>
