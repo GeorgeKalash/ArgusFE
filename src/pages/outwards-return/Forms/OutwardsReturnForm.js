@@ -325,7 +325,6 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
                   formik.setFieldValue('currencyName', newValue ? newValue.currencyName : '')
                   formik.setFieldValue('currencyRef', newValue ? newValue.currencyRef : '')
                   formik.setFieldValue('fcAmount', newValue ? newValue.fcAmount : '')
-                  formik.setFieldValue('lcAmount', newValue ? newValue.lcAmount : '')
                   formik.setFieldValue('corId', newValue ? newValue.corId : '')
                   formik.setFieldValue('corName', newValue ? newValue.corName : '')
                   formik.setFieldValue('corRef', newValue ? newValue.corRef : '')
