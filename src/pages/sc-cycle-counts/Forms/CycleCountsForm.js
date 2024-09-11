@@ -232,7 +232,7 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
       key: 'Post',
       condition: true,
       onClick: onPost,
-      disabled: isPosted || !editMode
+      disabled: isPosted || !editMode || !isClosed
     }
   ]
 
