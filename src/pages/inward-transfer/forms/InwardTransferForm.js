@@ -184,7 +184,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
       props: {
         form: formik,
         labels,
-        maxAccess,
+        access,
         recordId: formik.values.recordId,
         window2: window
       },
@@ -192,7 +192,6 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
       title: platformLabels.ApproveFields
     })
   }
-
   useEffect(() => {
     const fetchRecord = async () => {
       getDefaultVAT()
@@ -276,7 +275,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       name='reference'
                       label={labels.reference}
                       value={formik?.values?.reference}
-                      maxAccess={maxAccess}
+                      maxAccess={!editMode && maxAccess}
                       maxLength='15'
                       readOnly={editMode}
                       onChange={e => formik.setFieldValue('reference', e.target.value)}
@@ -1105,7 +1104,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       endpointId={RemittanceSettingsRepository.SourceOfIncome.qry}
                       name='sourceOfIncome'
                       label={labels.sourceOfIncome}
-                      valueField='sourceOfIncome'
+                      valueField='recordId'
                       displayField={['reference', 'name']}
                       columnsInDropDown={[
                         { key: 'reference', value: 'Reference' },
@@ -1125,7 +1124,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       endpointId={CurrencyTradingSettingsRepository.PurposeExchange.qry}
                       name='purposeOfTransfer'
                       label={labels.purposeOfTransfer}
-                      valueField='purposeOfTransfer'
+                      valueField='recordId'
                       displayField={['reference', 'name']}
                       columnsInDropDown={[
                         { key: 'reference', value: 'Reference' },

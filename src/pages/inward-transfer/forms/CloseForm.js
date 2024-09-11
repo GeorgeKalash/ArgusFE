@@ -19,7 +19,7 @@ import { RemittanceSettingsRepository } from 'src/repositories/RemittanceReposit
 import { ResourceIds } from 'src/resources/ResourceIds'
 import * as yup from 'yup'
 
-export default function CloseForm({ form, labels, maxAccess, window, recordId, window2 }) {
+export default function CloseForm({ form, labels, access, window, recordId, window2 }) {
   const { stack: stackError } = useError()
   const { postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -40,7 +40,7 @@ export default function CloseForm({ form, labels, maxAccess, window, recordId, w
       receiver_lastName: '',
       receiver_ttNo: ''
     },
-    maxAccess,
+    access,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -51,15 +51,14 @@ export default function CloseForm({ form, labels, maxAccess, window, recordId, w
       receiver_ttNo: yup.string().required()
     }),
     onSubmit: () => {
-      console.log('hy')
-
       setMismatchedFields([])
       const mismatches = Object.keys(formik.values).filter(key => formik.values[key] != form.values[key])
+      console.log('mismatches ', mismatches)
       if (mismatches.length === 0) {
         onClose()
       } else {
         setMismatchedFields(mismatches)
-        toast.error(platformLabels.fieldsDoNotMatch)
+        stackError({ message: platformLabels.fieldsDoNotMatch })
       }
     }
   })
@@ -92,7 +91,13 @@ export default function CloseForm({ form, labels, maxAccess, window, recordId, w
   const getFieldError = fieldName => mismatchedFields.includes(fieldName)
 
   return (
-    <FormShell resourceId={ResourceIds.InwardTransfer} form={formik} isInfo={false}>
+    <FormShell
+      resourceId={ResourceIds.InwardTransfer}
+      form={formik}
+      isInfo={false}
+      isSavedClear={false}
+      isCleared={false}
+    >
       <VertLayout>
         <Fixed>
           <FieldSet title={labels.header} sx={{ flex: 0 }}>
@@ -109,7 +114,7 @@ export default function CloseForm({ form, labels, maxAccess, window, recordId, w
                   displayFieldWidth={2}
                   valueShow='corRef'
                   secondValueShow='corName'
-                  maxAccess={maxAccess}
+                  access={access}
                   onChange={(event, newValue) => {
                     formik.setFieldValue('corId', newValue ? newValue.recordId : '')
                     formik.setFieldValue('corName', newValue ? newValue.name : '')
