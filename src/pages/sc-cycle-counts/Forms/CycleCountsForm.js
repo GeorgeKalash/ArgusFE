@@ -220,7 +220,7 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
       onClick: () => {
         onClose(formik.values.recordId)
       },
-      disabled: isClosed || !editMode
+      disabled: isClosed || !editMode || isPosted
     },
     {
       key: 'Reopen',
