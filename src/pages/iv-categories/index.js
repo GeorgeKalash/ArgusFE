@@ -23,7 +23,9 @@ const Category = () => {
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
   const [selectedReport, setSelectedReport] = useState(null)
+
   const [reportStore, setReportStore] = useState([])
+  const [dataTree, setDataTree] = useState([])
 
   const {
     query: { data },
@@ -61,6 +63,7 @@ const Category = () => {
       extension: InventoryRepository.Category.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_name=`
     })
+    setDataTree(response)
 
     return { ...response, _startAt: _startAt }
   }
@@ -173,7 +176,7 @@ const Category = () => {
     stack({
       Component: Tree,
       props: {
-        data: data
+        data: dataTree
       },
       width: 500,
       height: 400,
