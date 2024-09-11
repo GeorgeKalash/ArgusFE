@@ -11,7 +11,7 @@ import { DataGrid } from 'src/components/Shared/DataGrid'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 
-const Sites = ({ store, maxAccess, labels, onSave }) => {
+const Sites = ({ store, maxAccess, labels, setRefreshController }) => {
   const { recordId, isPosted, isClosed } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -57,7 +57,7 @@ const Sites = ({ store, maxAccess, labels, onSave }) => {
         })
 
         await fetchGridData(recordId)
-        onSave();
+        setRefreshController(true);
         toast.success(platformLabels.Updated)
         formik.setFieldValue('search', '')
       } catch (error) {}

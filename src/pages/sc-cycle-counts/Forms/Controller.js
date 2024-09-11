@@ -11,7 +11,7 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import FormShell from 'src/components/Shared/FormShell'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 
-const Controller = ({ store, maxAccess, labels, refreshController }) => {
+const Controller = ({ store, maxAccess, labels, refreshController,setRefreshController }) => {
   const { recordId, isPosted, isClosed } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -164,6 +164,7 @@ const Controller = ({ store, maxAccess, labels, refreshController }) => {
               values={formik.values}
               onChange={(event, newValue) => {
                 formik.setFieldValue('siteId', newValue ? newValue?.siteId : '')
+                setRefreshController(false)
               }}
               refresh={refreshController}
               error={formik.touched.siteId && Boolean(formik.errors.siteId)}
