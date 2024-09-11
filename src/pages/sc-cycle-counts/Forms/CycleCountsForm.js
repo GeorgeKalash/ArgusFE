@@ -457,6 +457,7 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
                     maxAccess={maxAccess}
                     checked={formik.values?.disableItemDuplicate}
                     onChange={formik.handleChange}
+                    disabled={isClosed}
                   />
                 }
                 label={labels.disableItemDuplicate}
