@@ -67,7 +67,22 @@ const OutwardsReturn = () => {
       field: 'requestedByName',
       headerName: _labels.requestedBy,
       flex: 1
-    }
+    },
+    {
+      field: 'rsName',
+      headerName: _labels.rsName,
+      flex: 1
+    },
+    {
+      field: 'statusName',
+      headerName: _labels.statusName,
+      flex: 1
+    },
+    {
+      field: 'wipName',
+      headerName: _labels.wip,
+      flex: 1
+    },
   ]
 
   const { proxyAction } = useDocumentTypeProxy({
