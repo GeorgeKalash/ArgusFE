@@ -111,8 +111,8 @@ const OutwardsReturn = () => {
         maxAccess: access,
         dtId
       },
-      width: 600,
-      height: 600,
+      width: 800,
+      height: 630,
       title: _labels.outwardsReturn
     })
   }

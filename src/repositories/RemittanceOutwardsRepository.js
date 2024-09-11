@@ -104,6 +104,9 @@ export const RemittanceOutwardsRepository = {
     page: service + 'pageOWR',
     get: service + 'getOWR',
     set: service + 'setOWR',
+    close: service + 'closeOWR',
+    reopen: service + 'reopenOWR',
+    post: service + 'postOWR',
   },
   CorrespondentOutwards: {
     qry: service + 'qryACE',

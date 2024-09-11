@@ -15,6 +15,7 @@ export default function ResourceComboBox({
   dataGrid,
   value,
   refresh,
+  defaultIndex,
   ...rest
 }) {
   const { store: data } = rest
@@ -78,6 +79,7 @@ export default function ResourceComboBox({
         ...rest,
         refresh,
         fetchData,
+        defaultIndex,
         name,
         store: (dataGrid ? cacheStore[apiUrl] : filteredStore) || data,
         valueField,
