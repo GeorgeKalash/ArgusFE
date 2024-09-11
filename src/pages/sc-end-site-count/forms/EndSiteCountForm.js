@@ -21,8 +21,7 @@ export default function EndSiteCountForm({ _labels, access }) {
       stockCountId: '',
       siteId: '',
       notes: '',
-      status: '',
-      statusName: ''
+      status: ''
     },
     enableReinitialize: true,
     maxAccess: access,
@@ -33,19 +32,16 @@ export default function EndSiteCountForm({ _labels, access }) {
     }),
     onSubmit: async obj => {
       try {
-        const copy = { ...obj }
-        delete copy.statusName
-
-        if (copy.status === 3) {
+        if (obj.status === 3) {
           await postRequest({
             extension: SCRepository.Sites.reopen,
-            record: JSON.stringify(copy)
+            record: JSON.stringify(obj)
           })
           toast.success(platformLabels.Saved)
         } else {
           await postRequest({
             extension: SCRepository.Sites.end,
-            record: JSON.stringify(copy)
+            record: JSON.stringify(obj)
           })
           
           toast.success(platformLabels.Saved)
@@ -59,13 +55,13 @@ export default function EndSiteCountForm({ _labels, access }) {
   const actions = [
     {
       key: 'Lock',
-      condition: formik.values.statusName === 'Processed',
+      condition: formik.values.status === 3,
       onClick: () => formik.handleSubmit(),
       disabled: false
     },
     {
       key: 'Unlock',
-      condition: formik.values.statusName !== 'Processed',
+      condition: formik.values.status !== 3,
       onClick: () => formik.handleSubmit(),
       disabled: false
     }
@@ -112,7 +108,6 @@ export default function EndSiteCountForm({ _labels, access }) {
                   formik.setFieldValue('siteId', newValue ? newValue?.siteId : '')
                   formik.setFieldValue('notes', newValue ? newValue?.notes : '')
                   formik.setFieldValue('status', newValue ? newValue?.status : '')
-                  formik.setFieldValue('statusName', newValue ? newValue?.statusName : '')
                 }}
                 error={formik.touched.siteId && Boolean(formik.errors.siteId)}
                 maxAccess={access}
