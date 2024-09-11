@@ -98,7 +98,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
     receiver_bank: '',
     receiver_bankBranch: '',
     receiver_ttNo: '',
-    paymentMode: '',
+    dispersalMode: '',
     paymentBank: '',
     commissionType: '',
     commissionAgent: '',
@@ -1015,14 +1015,14 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                 <Grid container spacing={2}>
                   <Grid item xs={3}>
                     <CustomNumberField
-                      name='paymentMode'
-                      label={labels.paymentMode}
-                      value={formik.values.paymentMode}
+                      name='dispersalMode'
+                      label={labels.dispersalMode}
+                      value={formik.values.dispersalMode}
                       maxAccess={maxAccess}
                       readOnly={editMode}
-                      onChange={e => formik.setFieldValue('paymentMode', e.target.value)}
-                      onClear={() => formik.setFieldValue('paymentMode', '')}
-                      error={formik.touched.paymentMode && Boolean(formik.errors.paymentMode)}
+                      onChange={e => formik.setFieldValue('dispersalMode', e.target.value)}
+                      onClear={() => formik.setFieldValue('dispersalMode', '')}
+                      error={formik.touched.dispersalMode && Boolean(formik.errors.dispersalMode)}
                       maxLength={5}
                     />
                   </Grid>
