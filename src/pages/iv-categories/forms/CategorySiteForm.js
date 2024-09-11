@@ -1,4 +1,3 @@
-import { useFormik } from 'formik'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -31,8 +30,7 @@ const CategorySiteForm = ({ store, labels, maxAccess }) => {
           siteId: '',
           name: '',
           reference: '',
-          isLocked: false,
-          siteId: ''
+          isLocked: false
         }
       ]
     },
@@ -86,39 +84,37 @@ const CategorySiteForm = ({ store, labels, maxAccess }) => {
       name: 'isLocked'
     }
   ]
-  function getData() {
-    getRequest({
-      extension: InventoryRepository.Site.qry,
-      parameters: `_filter=`
-    })
-      .then(res => {
-        const modifiedList = res.list?.map((user, index) => ({
-          ...user,
-          siteId: user.recordId,
-          id: index + 1
-        }))
+  async function getData() {
+    try {
+      const res = await getRequest({
+        extension: InventoryRepository.Site.qry,
+        parameters: `_filter=`
+      })
 
-        getRequest({
+      const modifiedList = res.list?.map((category, index) => ({
+        ...category,
+        siteId: category.recordId,
+        id: index + 1
+      }))
+
+      try {
+        const lockRes = await getRequest({
           extension: InventoryRepository.CategorySites.qry,
           parameters: `_categoryId=${recordId}`
         })
-          .then(lockRes => {
-            const lockList = lockRes.list
 
-            const mergedList = modifiedList.map(site => {
-              const lockInfo = lockList.find(lockItem => lockItem.siteId === site.siteId)
+        const mergedList = modifiedList.map(site => {
+          const lockInfo = lockRes.list.find(lockItem => lockItem.siteId === site.siteId)
 
-              return {
-                ...site,
-                isLocked: lockInfo ? lockInfo.isLocked : false
-              }
-            })
+          return {
+            ...site,
+            isLocked: lockInfo ? lockInfo.isLocked : false
+          }
+        })
 
-            formik.setValues({ sites: mergedList })
-          })
-          .catch(error => {})
-      })
-      .catch(error => {})
+        formik.setValues({ sites: mergedList })
+      } catch (error) {}
+    } catch (error) {}
   }
   useEffect(() => {
     if (recordId) {
@@ -129,7 +125,7 @@ const CategorySiteForm = ({ store, labels, maxAccess }) => {
   return (
     <FormShell
       form={formik}
-      resourceId={ResourceIds.IvCategories}
+      resourceId={ResourceIds.Category}
       isCleared={false}
       infoVisible={false}
       maxAccess={maxAccess}

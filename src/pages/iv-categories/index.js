@@ -37,7 +37,7 @@ const Category = () => {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: InventoryRepository.Category.page,
-    datasetId: ResourceIds.IvCategories,
+    datasetId: ResourceIds.Category,
 
     filter: {
       endpointId: InventoryRepository.Category.snapshot,
@@ -133,8 +133,10 @@ const Category = () => {
   }
 
   useEffect(() => {
-    getReportLayout()
-  }, [ResourceIds.IvCategories])
+    if (ResourceIds.Category) {
+      getReportLayout()
+    }
+  }, [])
 
   useEffect(() => {
     if (reportStore.length > 0) {
@@ -146,11 +148,10 @@ const Category = () => {
 
   const getReportLayout = () => {
     setReportStore([])
-    if (ResourceIds.IvCategories) {
-      var parameters = `_resourceId=${ResourceIds.IvCategories}`
+    if (ResourceIds.Category) {
       getRequest({
         extension: SystemRepository.ReportLayout,
-        parameters: parameters
+        parameters: `_resourceId=${ResourceIds.Category}`
       })
         .then(res => {
           if (res?.list) {

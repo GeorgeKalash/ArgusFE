@@ -20,7 +20,7 @@ import { IVReplenishementRepository } from 'src/repositories/IVReplenishementRep
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-const CategoryForm = ({ labels, maxAccess, setStore, store, setRef }) => {
+const CategoryForm = ({ labels, maxAccess, setStore, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { recordId } = store
@@ -147,16 +147,6 @@ const CategoryForm = ({ labels, maxAccess, setStore, store, setRef }) => {
       } catch (error) {}
     })()
   }, [])
-
-  useEffect(() => {
-    if (formik.values.isMetal == false) {
-      formik.setFieldValue('metalId', '')
-      formik.setFieldValue('metalPurity', '')
-    }
-    if (formik.values.applyVAT == false) {
-      formik.setFieldValue('taxId', '')
-    }
-  }, [formik.values.isMetal, formik.values.applyVAT])
 
   return (
     <FormShell form={formik} resourceId={ResourceIds.Category} maxAccess={maxAccess} editMode={editMode}>
@@ -337,7 +327,12 @@ const CategoryForm = ({ labels, maxAccess, setStore, store, setRef }) => {
                         name='applyVAT'
                         maxAccess={maxAccess}
                         checked={formik.values?.applyVAT}
-                        onChange={formik.handleChange}
+                        onChange={e => {
+                          formik.setFieldValue('applyVAT', e.target.checked)
+                          if (e.target.checked == false) {
+                            formik.setFieldValue('taxId', '')
+                          }
+                        }}
                       />
                     }
                     label={labels.applyVat}
@@ -442,7 +437,13 @@ const CategoryForm = ({ labels, maxAccess, setStore, store, setRef }) => {
                         name='isMetal'
                         maxAccess={maxAccess}
                         checked={formik.values?.isMetal}
-                        onChange={formik.handleChange}
+                        onChange={e => {
+                          formik.setFieldValue('isMetal', e.target.checked)
+                          if (e.target.checked == false) {
+                            formik.setFieldValue('metalId', '')
+                            formik.setFieldValue('metalPurity', '')
+                          }
+                        }}
                       />
                     }
                     label={labels.isMetal}

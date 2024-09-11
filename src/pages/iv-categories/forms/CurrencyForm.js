@@ -93,7 +93,7 @@ const CurrencyForm = ({ store, labels, maxAccess }) => {
       },
 
       defaultValue: 0,
-      onChange: ({ row: { update, newRow, ...rest } }) => {
+      onChange: ({ row: { update, newRow } }) => {
         if (newRow.decimals == '' || newRow.decimals == null) {
           update({
             decimals: 0
@@ -111,8 +111,8 @@ const CurrencyForm = ({ store, labels, maxAccess }) => {
       parameters: `_categoryId=${recordId}`
     })
       .then(res => {
-        const modifiedList = res.list?.map((user, index) => ({
-          ...user,
+        const modifiedList = res.list?.map((category, index) => ({
+          ...category,
           id: index + 1
         }))
         formik.setValues({ data: modifiedList })
@@ -128,7 +128,7 @@ const CurrencyForm = ({ store, labels, maxAccess }) => {
   return (
     <FormShell
       form={formik}
-      resourceId={ResourceIds.IvCategories}
+      resourceId={ResourceIds.Category}
       isCleared={false}
       infoVisible={false}
       maxAccess={maxAccess}
