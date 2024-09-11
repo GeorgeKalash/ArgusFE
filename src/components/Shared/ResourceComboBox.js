@@ -54,13 +54,11 @@ export default function ResourceComboBox({
             extension: endpointId,
             parameters,
             disableLoading: true
+          }).then(res => {
+            setIsLoading(false)
+            if (dataGrid) updateStore(endpointId, res.list)
+            else setStore(res.list)
           })
-            .then(res => {
-              setIsLoading(false)
-              if (dataGrid) updateStore(endpointId, res.list)
-              else setStore(res.list)
-            })
-            .catch(error => {})
     }
   }
 

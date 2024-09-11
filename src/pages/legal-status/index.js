@@ -1,5 +1,4 @@
 import { useContext } from 'react'
-import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -87,7 +86,6 @@ const LegalStatus = () => {
       toast.success(platformLabels.Deleted)
     } catch (error) {}
   }
-
 
   return (
     <VertLayout>

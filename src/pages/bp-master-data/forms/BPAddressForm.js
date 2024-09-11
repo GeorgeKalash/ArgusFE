@@ -17,16 +17,17 @@ const BPAddressForm = ({ getAddressGridData, recordId, bpId, window, props }) =>
         await postRequest({
           extension: BusinessPartnerRepository.BPAddress.set,
           record: JSON.stringify(obj)
-        })
+        }).then(res => {
+          if (!recordId) {
+            toast.success(platformLabels.Added)
+          } else {
+            toast.success(platformLabels.Edited)
+          }
 
-        if (!recordId) {
-          toast.success(platformLabels.Added)
-        } else {
-          toast.success(platformLabels.Edited)
-        }
+          getAddressGridData(bpId)
+        })
+        window.close()
       }
-      await getAddressGridData(bpId)
-      window.close()
     } catch (error) {}
   }
 

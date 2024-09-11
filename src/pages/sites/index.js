@@ -191,7 +191,8 @@ const Sites = () => {
                   stack({
                     Component: PreviewReport,
                     props: {
-                      selectedReport: selectedReport
+                      selectedReport: selectedReport,
+                      outerGrid: true
                     },
                     width: 1000,
                     height: 500,

@@ -236,5 +236,8 @@ export const ResourceIds = {
   StockCountDTD: 44103,
   PurposeExchangeGroup: 35115,
   Drivers: 52201,
-  IvSettings: 41115
+  RebuildInventory: 41501,
+  RebuildUndeliveredItems: 52504,
+  IvSettings: 41115,
+  FeeScheduleInwardsMap: 36130
 }

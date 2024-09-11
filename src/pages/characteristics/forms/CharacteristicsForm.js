@@ -15,9 +15,11 @@ import { DataSets } from 'src/resources/DataSets'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const CharacteristicsForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const { recordId } = store
 
   const invalidate = useInvalidate({
@@ -42,23 +44,21 @@ const CharacteristicsForm = ({ labels, editMode, maxAccess, setEditMode, setStor
     validateOnChange: true,
     initialValues,
     validationSchema: yup.object({
-      name: yup.string().required(' '),
-      dataType: yup.string().required(' '),
-      propertyName: yup.string().required(' '),
-      validFrom: yup.string().required(' ')
+      name: yup.string().required(),
+      dataType: yup.string().required(),
+      propertyName: yup.string().required(),
+      validFrom: yup.string().required()
     }),
-    onSubmit: values => {
-      postCharacteristics(values)
+    onSubmit: async values => {
+      await postCharacteristics(values)
     }
   })
 
-  const postCharacteristics = obj => {
-    console.log(obj.validFrom)
+  const postCharacteristics = async obj => {
     const recordId = obj?.recordId || ''
     const date = obj?.validFrom && formatDateToApi(obj?.validFrom)
     const data = { ...obj, validFrom: date }
-    console.log(obj.validFrom)
-    postRequest({
+    await postRequest({
       extension: DocumentReleaseRepository.CharacteristicsGeneral.set,
       record: JSON.stringify(data)
     }).then(res => {
@@ -68,14 +68,13 @@ const CharacteristicsForm = ({ labels, editMode, maxAccess, setEditMode, setStor
           ...prevStore,
           recordId: res.recordId
         }))
-        toast.success('Record Added Successfully')
-
         formik.setFieldValue('recordId', res.recordId)
         formik.setFieldValue('validFrom', formatDateFromApi(res.validFrom))
+        toast.success(platformLabels.Added)
         invalidate()
       } else {
         invalidate()
-        toast.success('Record Editted Successfully')
+        toast.success(platformLabels.Edited)
       }
     })
   }
@@ -212,6 +211,7 @@ const CharacteristicsForm = ({ labels, editMode, maxAccess, setEditMode, setStor
               <CustomDatePicker
                 name='validFrom'
                 label={labels.validFrom}
+                required
                 value={formik.values.validFrom}
                 onChange={formik.setFieldValue}
                 maxAccess={maxAccess}
