@@ -108,7 +108,6 @@ const IvReplenishements = () => {
   }
 
   const onApply = ({ rpbParams }) => {
-    console.log(rpbParams, 'rpbParams')
     filterBy('params', rpbParams)
     refetch()
   }
