@@ -25,7 +25,7 @@ import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
 import { useWindow } from 'src/windows'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 
-export default function OutwardsReturnForm({ labels, maxAccess: access, recordId, plantId, dtId }) {
+export default function OutwardsReturnForm({ labels, maxAccess: access, recordId, plantId, dtId, isOpenOutwards = false, refetch }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -133,6 +133,9 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
             date: formatDateFromApi(res2.record.date)
           })
           !recordId && viewOTP(response.recordId)
+          if (isOpenOutwards) {
+            refetch()
+          }
         } else toast.success(platformLabels.Edited)
 
         invalidate()
@@ -273,8 +276,7 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
       actions={actions}
       editMode={editMode}
       functionId={SystemFunction.OutwardsReturn}
-      disabledSubmit={isPosted || isClosed}
-      disabledSavedClear={isPosted || isClosed}
+      disabledSubmit={isOpenOutwards ? false : (isPosted || isClosed)}
     >
       <VertLayout>
         <Grow>
@@ -523,7 +525,7 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
                 }}
                 defaultIndex={formik.values.interfaceId ? 0 : null}
                 required
-                readOnly={isPosted || isClosed || formik.values.interfaceId !== null}
+                readOnly={isOpenOutwards ? formik.values.interfaceId !== null : isPosted || isClosed || formik.values.interfaceId !== null}
                 maxAccess={maxAccess}
                 error={formik.touched.settlementStatus && Boolean(formik.errors.settlementStatus)}
               />

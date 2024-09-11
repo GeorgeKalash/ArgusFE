@@ -8,16 +8,20 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
+import { useWindow } from 'src/windows'
+import OutwardsReturnForm from '../outwards-return/Forms/OutwardsReturnForm'
+import { KVSRepository } from 'src/repositories/KVSRepository'
 
 const OpenOutwardsReturn = () => {
   const { getRequest } = useContext(RequestsContext)
+  const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, params } = options
 
     const response = await getRequest({
       extension: RemittanceOutwardsRepository.OutwardsReturn.qry2,
-      parameters: `_params=${params || ''}&filter=`
+      parameters: `_params=${params || ''}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -95,6 +99,36 @@ const OpenOutwardsReturn = () => {
     },
   ]
 
+  async function getLabels(datasetId) {
+    const res = await getRequest({
+      extension: KVSRepository.getLabels,
+      parameters: `_dataset=${datasetId}`
+    })
+
+    return res.list ? Object.fromEntries(res.list.map(({ key, value }) => [key, value])) : {}
+  }
+
+  async function openForm(recordId) {
+    const labels = await getLabels(ResourceIds.OutwardsReturn)
+    stack({
+      Component: OutwardsReturnForm,
+      props: {
+        labels,
+        recordId,
+        maxAccess: access,
+        isOpenOutwards: true,
+        refetch
+      },
+      width: 800,
+      height: 630,
+      title: labels.outwardsReturn
+    })
+  }
+
+  const edit = obj => {
+    openForm(obj?.recordId)
+  }
+
   const onApply = ({ search, rpbParams }) => {
     if (!search && rpbParams.length === 0) {
       clearFilter('params')
@@ -132,6 +166,7 @@ const OpenOutwardsReturn = () => {
           rowId={['recordId']}
           isLoading={false}
           pageSize={50}
+          onEdit={edit}
           paginationType='api'
           paginationParameters={paginationParameters}
           refetch={refetch}
