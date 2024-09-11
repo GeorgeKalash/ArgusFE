@@ -133,9 +133,7 @@ const Category = () => {
   }
 
   useEffect(() => {
-    if (ResourceIds.Category) {
-      getReportLayout()
-    }
+    getReportLayout()
   }, [])
 
   useEffect(() => {
