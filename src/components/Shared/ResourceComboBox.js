@@ -21,9 +21,25 @@ export default function ResourceComboBox({
   const { store: data } = rest
 
   const { getRequest } = useContext(RequestsContext)
-  const { cacheStore = {}, updateStore } = useCacheDataContext() || {}
+  const { cacheStore = {}, updateStore, fetchWithCache } = useCacheDataContext() || {}
   const cacheAvailable = !!updateStore
   const { getAllKvsByDataset } = useContext(CommonContext)
+  function fetch({ datasetId, endpointId, parameters }) {
+    if (endpointId) {
+      return getRequest({
+        extension: endpointId,
+        parameters,
+        disableLoading: true
+      })
+    } else if (datasetId) {
+      return new Promise(resolve => {
+        getAllKvsByDataset({
+          _dataset: datasetId,
+          callback: resolve
+        })
+      })
+    }
+  }
 
   console.log(cacheAvailable)
 
@@ -36,36 +52,19 @@ export default function ResourceComboBox({
     if (!cacheStore[apiUrl]) fetchData()
   }, [parameters])
 
-  const fetchData = () => {
+  const fetchData = async () => {
     if (parameters && !data && (datasetId || endpointId)) {
       setIsLoading(true)
-      if (datasetId) {
-        getAllKvsByDataset({
-          _dataset: datasetId,
-          callback: list => {
-            if (cacheAvailable) {
-              updateStore(datasetId, { list })
-            } else {
-              setStore({ list })
-            }
-          }
+      if (cacheAvailable) {
+        await fetchWithCache({
+          queryKey: [datasetId || endpointId, parameters],
+          queryFn: () => fetch({ datasetId, endpointId, parameters })
         })
-        setIsLoading(false)
-      } else if (endpointId) {
-        getRequest({
-          extension: endpointId,
-          parameters,
-          disableLoading: true
-        })
-          .then(res => {
-            let data = res
-
-            setIsLoading(false)
-            if (cacheAvailable) updateStore(endpointId, data)
-            else setStore(data)
-          })
-          .catch(error => {})
+      } else {
+        const newRes = await fetch({ datasetId, endpointId, parameters })
+        setStore(!!datasetId ? { list: newRes } : newRes)
       }
+      setIsLoading(false)
     }
   }
   const store = apiResponse ? reducer(apiResponse) : null

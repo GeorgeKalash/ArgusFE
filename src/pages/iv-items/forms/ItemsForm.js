@@ -217,6 +217,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store }
                 </Grid>
                 <Grid item xs={6}>
                   <ResourceComboBox
+                    dataGrid
                     endpointId={InventoryRepository.Items.pack}
                     reducer={response => {
                       const formattedprocurementMethod = response?.record?.procurementMethods.map(
@@ -280,6 +281,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store }
                 <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={InventoryRepository.Items.pack}
+                    dataGrid
                     reducer={response => {
                       return response?.record?.itemGroups
                     }}
