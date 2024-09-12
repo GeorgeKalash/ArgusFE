@@ -183,7 +183,7 @@ const DocumentsOnHold = () => {
 
         windowWidth = 800
         windowWidth = 630
-        title = labels[1]
+        title = labels.outwardsReturn
         break
 
       default:
