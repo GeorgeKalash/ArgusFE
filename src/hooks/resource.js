@@ -21,7 +21,6 @@ export function useResourceQuery({ endpointId, filter, datasetId, queryFn, searc
 
   const query = useQuery({
     retry: false,
-    refetchOnWindowFocus: false,
     queryKey: [endpointId, searchValue, JSON.stringify(filters), apiOption],
     queryFn: isSearchMode
       ? ({ queryKey: [_, qry] }) =>
