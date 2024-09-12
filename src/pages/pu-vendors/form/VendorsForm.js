@@ -17,8 +17,7 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { DataSets } from 'src/resources/DataSets'
 import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
-import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
-import { SystemFunction } from 'src/resources/SystemFunction'
+import { useFieldBehavior } from 'src/hooks/useFieldBehaviors'
 
 export default function VendorsForm({ labels, maxAccess: access, recordId, setStore }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -28,15 +27,14 @@ export default function VendorsForm({ labels, maxAccess: access, recordId, setSt
     endpointId: PurchaseRepository.Vendor.page
   })
 
-  const { maxAccess, changeDT } = useDocumentType({
-    functionId: SystemFunction.Vendor,
+  const { maxAccess, changeDT } = useFieldBehavior({
     access: access,
-    enabled: !recordId
+    editMode: !!recordId
   })
 
   const { formik } = useForm({
     initialValues: {
-      recordId: recordId || null,
+      recordId: recordId,
       reference: '',
       name: '',
       flName: '',
@@ -78,15 +76,16 @@ export default function VendorsForm({ labels, maxAccess: access, recordId, setSt
             recordId: response.recordId,
             name: obj.name
           })
-
-          toast.success(platformLabels.Added)
           formik.setFieldValue('recordId', response.recordId)
+          getData(response.recordId)
+          toast.success(platformLabels.Added)
         } else toast.success(platformLabels.Edited)
 
         invalidate()
       } catch (e) {}
     }
   })
+
   const editMode = !!formik.values.recordId
 
   const actions = [
@@ -100,21 +99,25 @@ export default function VendorsForm({ labels, maxAccess: access, recordId, setSt
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: PurchaseRepository.Vendor.get,
-            parameters: `_recordId=${recordId}`
-          })
-          setStore({
-            recordId: res.record.recordId,
-            name: res.record.name
-          })
-          formik.setValues(res.record)
-        }
-      } catch (exception) {}
+      await getData(recordId)
     })()
   }, [])
+
+  const getData = async recordId => {
+    try {
+      if (recordId) {
+        const res = await getRequest({
+          extension: PurchaseRepository.Vendor.get,
+          parameters: `_recordId=${recordId}`
+        })
+        setStore({
+          recordId: res.record.recordId,
+          name: res.record.name
+        })
+        formik.setValues(res.record)
+      }
+    } catch (exception) {}
+  }
 
   return (
     <FormShell
@@ -134,6 +137,7 @@ export default function VendorsForm({ labels, maxAccess: access, recordId, setSt
                 label={labels.vendorGroup}
                 valueField='recordId'
                 displayField={['reference', 'name']}
+                readOnly={!!editMode}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
