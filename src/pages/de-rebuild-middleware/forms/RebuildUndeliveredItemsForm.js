@@ -20,8 +20,8 @@ export default function RebuildUndeliveredItemsForm({ _labels, access }) {
 
   const { formik } = useForm({
     initialValues: {
-      startDate: new Date(),
-      endDate: new Date(),
+      startDate: null,
+      endDate: null,
     },
     enableReinitialize: false,
     maxAccess: access,
@@ -96,7 +96,7 @@ export default function RebuildUndeliveredItemsForm({ _labels, access }) {
                 required
                 onChange={formik.setFieldValue}
                 onClear={() => formik.setFieldValue('endDate', '')}
-                disabledRangeDate={{ date: formik.values.startDate, day: 30 }}
+                disabledRangeDate={{ date: formik.values.startDate }}
                 error={formik.touched.endDate && Boolean(formik.errors.endDate)}
               />
             </Grid>
