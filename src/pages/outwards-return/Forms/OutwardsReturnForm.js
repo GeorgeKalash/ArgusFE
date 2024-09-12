@@ -510,7 +510,6 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
                 name='vatAmount'
                 label={labels.vatAmount}
                 value={formik?.values?.vatAmount}
-                required
                 readOnly
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
@@ -529,7 +528,7 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
                 onChange={(event, newValue) => {
                   formik.setFieldValue('settlementStatus', newValue ? newValue?.key : '')
                 }}
-                defaultIndex={formik.values.interfaceId ? 0 : null}
+                defaultIndex={formik?.values?.interfaceId ? 0 : null}
                 required
                 readOnly={isOpenOutwards ? formik.values.interfaceId !== null : isPosted || isClosed || formik.values.interfaceId !== null}
                 maxAccess={maxAccess}
@@ -541,7 +540,6 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
                 name='tdAmount'
                 label={labels.tdAmount}
                 value={formik?.values?.tdAmount}
-                required
                 readOnly
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
