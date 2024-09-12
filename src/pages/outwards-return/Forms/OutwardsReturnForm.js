@@ -320,6 +320,7 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
                 valueField='reference'
                 displayField='reference'
                 name='outwardRef'
+                filter={item => item.status === 3}
                 secondDisplayField={false}
                 required
                 label={labels.outwards}
@@ -360,9 +361,9 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
                   if (newValue?.corId) {
                     const res = await getRequest({
                       extension: RemittanceSettingsRepository.Correspondent.get,
-                      parameters: `_recordId=${newValue.corId}`
+                      parameters: `_recordId=${newValue?.corId}`
                     })
-                    formik.setFieldValue('interfaceId', res.record.interfaceId)
+                    formik.setFieldValue('interfaceId', res?.record?.interfaceId)
                   }
                 }}
                 error={formik.touched.outwardRef && Boolean(formik.errors.outwardRef)}
