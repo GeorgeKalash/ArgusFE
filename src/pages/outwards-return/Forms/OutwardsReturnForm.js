@@ -107,6 +107,8 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
       corId: yup.number().required(),
       fcAmount: yup.string().required(),
       dispersalName: yup.string().required(),
+      vatAmount: yup.string().required(),
+      tdAmount: yup.string().required(),
       productName: yup.string().required(),
       settlementStatus: yup.number().required(),
       lcAmount: yup.string().required(),
@@ -511,6 +513,7 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
                 label={labels.vatAmount}
                 value={formik?.values?.vatAmount}
                 readOnly
+                required
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('vatAmount', '')}
@@ -541,6 +544,7 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
                 label={labels.tdAmount}
                 value={formik?.values?.tdAmount}
                 readOnly
+                required
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('tdAmount', '')}

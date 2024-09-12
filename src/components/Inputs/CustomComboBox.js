@@ -53,7 +53,7 @@ const CustomComboBox = ({
       value={store[defaultIndex] || value}
       size={size}
       options={store}
-      key={store[defaultIndex] || value}
+      key={value}
       PopperComponent={PopperComponent}
       PaperComponent={({ children }) => <Paper style={{ width: `${displayFieldWidth * 100}%` }}>{children}</Paper>}
       getOptionLabel={(option, value) => {
