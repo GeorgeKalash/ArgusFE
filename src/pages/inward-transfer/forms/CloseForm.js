@@ -53,7 +53,6 @@ export default function CloseForm({ form, labels, access, window, recordId, wind
     onSubmit: () => {
       setMismatchedFields([])
       const mismatches = Object.keys(formik.values).filter(key => formik.values[key] != form.values[key])
-      console.log('mismatches ', mismatches)
       if (mismatches.length === 0) {
         onClose()
       } else {
