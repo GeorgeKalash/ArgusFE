@@ -92,7 +92,10 @@ const OutboundTransp = () => {
       field: 'arrivalTime',
       headerName: _labels.arrivalDate,
       flex: 1,
-      type: 'dateTime'
+      type: 'dateTime',
+      props: {
+        suffix: true
+      }
     },
     {
       field: 'plantName',

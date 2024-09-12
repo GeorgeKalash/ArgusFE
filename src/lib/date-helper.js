@@ -4,20 +4,59 @@ import dayjs from 'dayjs'
 // import moment from 'moment';
 import { compareAsc, format } from 'date-fns'
 
+function addLocaleTimezoneToTimestamp(timestamp) {
+  const date = new Date()
+  const timezoneOffset = -date.getTimezoneOffset()
+  const sign = timezoneOffset >= 0 ? '+' : '-'
+
+  const hours = Math.floor(Math.abs(timezoneOffset) / 60)
+    .toString()
+    .padStart(2, '0')
+  const minutes = (Math.abs(timezoneOffset) % 60).toString().padStart(2, '0')
+  const formattedOffset = `${sign}${hours}:${minutes}`
+  const timestampWithTimezone = `${new Date(timestamp).toUTCString()}${formattedOffset}`
+  const dateWithTimezone = new Date(timestampWithTimezone)
+
+  return dateWithTimezone
+}
+
+function subLocaleTimezoneToTimestamp(initDate) {
+  const date = new Date()
+  let timezoneOffset = date.getTimezoneOffset()
+
+  timezoneOffset = 2 * timezoneOffset
+  const sign = timezoneOffset >= 0 ? '+' : '-'
+
+  const hours = Math.floor(Math.abs(timezoneOffset) / 60)
+    .toString()
+    .padStart(2, '0')
+  const minutes = (Math.abs(timezoneOffset) % 60).toString().padStart(2, '0')
+  const formattedOffset = `${sign}${hours}:${minutes}`
+
+  console.log('formattedOffset', formattedOffset) //formattedOffset -06:00
+  const timestampWithTimezone = `${initDate.toUTCString()}${formattedOffset}`
+  const dateWithTimezone = new Date(timestampWithTimezone)
+
+  return dateWithTimezone
+}
+
+function stripTimezoneFromDate(date) {
+  const isoStringWithoutTimezone = date.toISOString().slice(0, 19)
+  console.log('isoStringWithoutTimezone', isoStringWithoutTimezone)
+  console.log(date)
+
+  return isoStringWithoutTimezone
+}
+
 const formatDateFromApi = date => {
   const timestamp = date && parseInt(date.match(/\d+/)[0], 10)
 
-  const timeZone = JSON.parse(window.localStorage.getItem('default') && window.localStorage.getItem('default'))[
-    'timeZone'
-  ]
-
-  const currentDate = new Date(timestamp)
-  const newDate = new Date(currentDate)
-  newDate.setHours(newDate.getHours() - timeZone)
-
-  return timestamp ? newDate : null
+  return timestamp ? addLocaleTimezoneToTimestamp(timestamp) : null
 }
 
+/**
+ * @deprecated this was removed because inline component is removed
+ */
 const formatDateFromApiInline = date => {
   const [day, month, year] = date.split('/')
   const parsedDate = new Date(year, month - 1, day)
@@ -27,27 +66,13 @@ const formatDateFromApiInline = date => {
 }
 
 const formatDateToApi = date => {
-  const timestamp = date && date.valueOf()
+  console.log('inDate', date)
+  const timestamp = date && subLocaleTimezoneToTimestamp(new Date(stripTimezoneFromDate(date))).valueOf()
 
   return `/Date(${timestamp})/`
 }
 
-/* const formatDateToApi = date => {
-  const initTimestamp = date && parseInt(date.match(/\d+/)[0], 10)
-
-  const timeZone = JSON.parse(window.localStorage.getItem('default') && window.localStorage.getItem('default'))[
-    'timeZone'
-  ]
-
-  const currentDate = new Date(initTimestamp)
-  const newDate = new Date(currentDate)
-  newDate.setHours(newDate.getHours() + timeZone)
-
-  const timestamp = newDate && newDate.valueOf()
-
-  return `/Date(${timestamp})/`
-} */
-
+//should be edited??
 const formatDateToApiFunction = value => {
   var date = value
   date = new Date(date)
@@ -77,7 +102,22 @@ function formatDateDefault(date) {
     'dateFormat'
   ]
   const timestamp = date instanceof Date ? date.getTime() : parseInt(date?.match(/\d+/)[0], 10)
-  const formattedDate = format(new Date(timestamp), formats)
+  const formattedDate = format(addLocaleTimezoneToTimestamp(timestamp), formats)
+
+  return formattedDate
+}
+
+function formatDateTimeDefault(date) {
+  if (!date) return
+
+  const formats = JSON.parse(window.localStorage.getItem('default') && window.localStorage.getItem('default'))[
+    'dateFormat'
+  ]
+
+  const timestamp = date instanceof Date ? date.getTime() : parseInt(date?.match(/\d+/)[0], 10)
+
+  const fullFormat = `${formats} hh:mm a`
+  const formattedDate = format(addLocaleTimezoneToTimestamp(timestamp), fullFormat)
 
   return formattedDate
 }
@@ -92,16 +132,11 @@ function formatTimestampToDate(timestamp) {
 
   return formattedDate
 }
-
-function getTimeInTimeZone({ date, suffixAmPm = false, secondVisible = true, timeZoneValue = '' }) {
-  const timestamp = parseInt(date?.match(/\/Date\((\d+)\)\//)[1], 10)
+function getTimeInTimeZone(dateString, timeZone = 0) {
+  const timestamp = parseInt(dateString?.match(/\/Date\((\d+)\)\//)[1], 10)
   const currentDate = new Date(timestamp)
 
-  const timeZone =
-    timeZoneValue ||
-    JSON.parse(window.localStorage.getItem('default') && window.localStorage.getItem('default'))['timeZone']
-
-  currentDate.setHours(currentDate.getHours() - timeZone)
+  currentDate.setHours(currentDate.getHours() + timeZone)
   function padNumber(num) {
     return num < 10 ? '0' + num : num
   }
@@ -109,17 +144,8 @@ function getTimeInTimeZone({ date, suffixAmPm = false, secondVisible = true, tim
   let newHours = padNumber(currentDate.getHours())
   let newMinutes = padNumber(currentDate.getMinutes())
   let newSeconds = padNumber(currentDate.getSeconds())
-  const suffix = newHours >= 12 ? 'pm' : 'am'
 
-  if (suffixAmPm) {
-    const adjustedHours = newHours % 12 || 12
-
-    newHours = String(adjustedHours).padStart(2, '0')
-    newMinutes = String(newMinutes).padStart(2, '0')
-    newSeconds = String(newSeconds).padStart(2, '0')
-  }
-
-  return `${newHours}:${newMinutes}${(secondVisible && ':' + newSeconds) || ''}${(suffixAmPm && ' ' + suffix) || ''}`
+  return `${newHours}:${newMinutes}:${newSeconds}`
 }
 
 const formatDate = dateString => {
@@ -137,5 +163,6 @@ export {
   formatTimestampToDate,
   formatDateFromApiInline,
   getTimeInTimeZone,
-  formatDate
+  formatDate,
+  formatDateTimeDefault
 }

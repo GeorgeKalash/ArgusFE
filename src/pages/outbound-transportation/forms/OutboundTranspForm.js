@@ -99,11 +99,11 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
 
         copy.date = formatDateToApi(copy.date)
 
-        const combinedDateTime = getShiftetDate(copy.departureTime, copy.departureTimeField)
+        const combinedDateTime = getShiftedDate(copy.departureTime, copy.departureTimeField)
         copy.departureTime = formatDateToApi(combinedDateTime)
 
         if (copy.arrivalTime) {
-          const arrCombinedDateTime = getShiftetDate(copy.arrivalTime, copy.arrivalTimeField)
+          const arrCombinedDateTime = getShiftedDate(copy.arrivalTime, copy.arrivalTimeField)
           copy.arrivalTime = formatDateToApi(arrCombinedDateTime)
         }
 
@@ -157,16 +157,11 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
     }
   })
 
-  function getShiftetDate(date, time) {
-    //add time field to date after modifying time by timezone
+  function getShiftedDate(date, time) {
     const originalDate = dayjs(date).startOf('day')
-    console.log('time', time)
+    const parsedTime = dayjs(time, 'hh:mm A')
 
-    //const selectedTime = formatDateToApi(time)
-    //const adjustedTimeString = getTimeInTimeZone(selectedTime, +3)
-    //const adjustedTime = dayjs(time, 'HH:mm:ss')
-    //console.log('time', adjustedTime)
-    const combinedDateTime = originalDate.set('hour', time.hour()).set('minute', time.minute())
+    const combinedDateTime = originalDate.set('hour', parsedTime.hour()).set('minute', parsedTime.minute())
 
     return combinedDateTime
   }
@@ -197,9 +192,9 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
 
     res.record.date = formatDateFromApi(res.record.date)
     res.record.departureTime = formattedDepDate
-    if (formattedDepDate) res.record.departureTimeField = dayjs(dayjs(formattedDepDate).format('hh:mm A'), 'hh:mm A')
+    if (formattedDepDate) res.record.departureTimeField = dayjs(dayjs(formattedDepDate), 'hh:mm A')
     res.record.arrivalTime = formattedArrDate
-    if (formattedArrDate) res.record.arrivalTimeField = dayjs(dayjs(formattedArrDate).format('hh:mm A'), 'hh:mm A')
+    if (formattedArrDate) res.record.arrivalTimeField = dayjs(dayjs(formattedArrDate), 'hh:mm A')
 
     await getOrders(res.record)
   }
@@ -212,23 +207,29 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
   }
 
   const getOrders = async data => {
+    console.log(data)
+
     const res = await getRequest({
       extension: DeliveryRepository.TripOrder.qry,
       parameters: `_tripId=${data.recordId}`
     })
 
-    console.log(res.list)
+    console.log('res.list', res.list)
 
-    const ordersList = await Promise.all(
-      res.list.map((item, index) => {
-        return {
-          ...item,
-          id: index + 1, //correct?
-          soDate: formatDateFromApi(item.soDate)
-        }
-      })
-    )
-    console.log(data)
+    let ordersList = []
+
+    if (res.list != []) {
+      ordersList = await Promise.all(
+        res.list.map((item, index) => {
+          return {
+            ...item,
+            id: index + 1,
+            soDate: formatDateFromApi(item.soDate)
+          }
+        })
+      )
+    }
+
     formik.setValues({
       ...data,
       orders: ordersList
@@ -245,7 +246,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
       toast.success(platformLabels.Posted)
       invalidate()
 
-      await refetchForm(res.recordId)
+      await refetchForm(formik.values.recordId)
     } catch (exception) {}
   }
 

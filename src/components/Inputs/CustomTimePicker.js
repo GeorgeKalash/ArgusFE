@@ -11,7 +11,7 @@ import { PickersActionBar } from '@mui/x-date-pickers/PickersActionBar'
 
 import { TimePicker } from '@mui/x-date-pickers/TimePicker'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
-import dayjs from 'dayjs';
+import dayjs from 'dayjs'
 
 import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
 
@@ -25,6 +25,7 @@ const CustomTimePicker = ({
   disabledRangeTime = {},
   variant = 'outlined',
   size = 'small',
+
   //views = ['hours', 'minutes', 'AM/PM'],
   fullWidth = true,
   required = false,
@@ -50,7 +51,7 @@ const CustomTimePicker = ({
 
   const _hidden = accessLevel ? accessLevel === HIDDEN : hidden
 
- /*  const shouldDisableDate = dates => {
+  /*  const shouldDisableDate = dates => {
     const date = new Date(dates)
 
     const today = new Date()
@@ -68,7 +69,7 @@ const CustomTimePicker = ({
     }
   } */
 
- /*  const newDate = new Date(disabledRangeDate.date)
+  /*  const newDate = new Date(disabledRangeDate.date)
   newDate.setDate(newDate.getDate() + disabledRangeDate.day) */
 
   const isRequired = required || accessLevel === MANDATORY
@@ -82,8 +83,9 @@ const CustomTimePicker = ({
         size={size}
         value={value}
         label={label}
+
         //minTime={dayjs().set('hour', 8).set('minute', 0)}
-        maxTime={dayjs()}
+        //maxTime={dayjs()}
         //maxTime={dayjs().set('hour', 18).set('minute', 0)}
         //minutesStep={30}
         //minDate={disabledRangeDate.date}
@@ -96,6 +98,7 @@ const CustomTimePicker = ({
           }
         }}
         autoFocus={autoFocus}
+        
         //format='HH:MM' //check if specific format needed
         onChange={newValue => onChange(name, newValue)}
         onClose={() => setOpenTimePicker(false)}

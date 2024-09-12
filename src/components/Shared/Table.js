@@ -69,15 +69,13 @@ const Table = ({
       if (col.type === 'dateTime') {
         return {
           ...col,
-          valueGetter: ({ data }) =>
-            data?.[col.field] &&
-            formatDateDefault(data?.[col.field]) +
+          valueGetter: ({ data }) => data?.[col.field] && formatDateTimeDefault(data?.[col.field]) /* +
               ' ' +
               getTimeInTimeZone({
-                dateString: data?.[col.field],
+                date: data?.[col.field],
                 suffixAmPm: col?.props?.suffix,
                 secondVisible: col?.props?.secondVisible || false
-              })
+              }) */
         }
       }
       if (col.type === 'number' || col?.type?.field === 'number') {
@@ -89,7 +87,7 @@ const Table = ({
       if (col.type === 'timeZone') {
         return {
           ...col,
-          valueGetter: ({ data }) => data?.[col.field] && getTimeInTimeZone(data?.[col.field])
+          valueGetter: ({ data }) => data?.[col.field] && getTimeInTimeZone({ date: data?.[col.field] })
         }
       }
 
