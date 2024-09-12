@@ -307,7 +307,7 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
                 label={labels.date}
                 value={formik.values?.date}
                 required
-                readOnly={isPosted || isClosed}
+                readOnly={isPosted || isClosed || isOpenOutwards}
                 onChange={formik.setFieldValue}
                 onClear={() => formik.setFieldValue('date', '')}
                 error={formik.touched.date && Boolean(formik.errors.date)}
@@ -324,7 +324,7 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
                 required
                 label={labels.outwards}
                 form={formik}
-                readOnly={isPosted || isClosed}
+                readOnly={isPosted || isClosed || isOpenOutwards}
                 onChange={async (event, newValue) => {
                   formik.setFieldValue('outwardId', newValue ? newValue.recordId : '')
                   formik.setFieldValue('outwardRef', newValue ? newValue.reference : '')
@@ -378,7 +378,7 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
                 displayField='value'
                 values={formik.values}
                 required
-                readOnly={isPosted || isClosed}
+                readOnly={isPosted || isClosed || isOpenOutwards}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('requestedBy', newValue?.key)
