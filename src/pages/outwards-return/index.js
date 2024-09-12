@@ -69,6 +69,11 @@ const OutwardsReturn = () => {
       flex: 1
     },
     {
+      field: 'settlementStatusName',
+      headerName: _labels.settlementStatus,
+      flex: 1
+    },
+    {
       field: 'rsName',
       headerName: _labels.rsName,
       flex: 1
