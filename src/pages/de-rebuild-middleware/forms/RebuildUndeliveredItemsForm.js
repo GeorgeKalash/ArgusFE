@@ -27,8 +27,22 @@ export default function RebuildUndeliveredItemsForm({ _labels, access }) {
     maxAccess: access,
     validateOnChange: true,
     validationSchema: yup.object({
-      startDate: yup.string().required(),
-      endDate: yup.string().required()
+      startDate: yup
+        .date()
+        .required()
+        .test(function (value) {
+          const { dateTo } = this.parent
+
+          return value.getTime() <= dateTo?.getTime()
+        }),
+      endDate: yup
+        .date()
+        .required()
+        .test(function (value) {
+          const { startDate } = this.parent
+
+          return value.getTime() >= startDate?.getTime()
+        }),
     }),
     onSubmit: async obj => {
       try {
