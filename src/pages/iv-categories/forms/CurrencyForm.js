@@ -42,16 +42,32 @@ const CurrencyForm = ({ store, labels, maxAccess }) => {
       ]
     },
     onSubmit: values => {
-      postdata(values)
+      const { data } = values
+      if (data.length === 1 && isRowEmpty(data[0])) {
+        formik.setValues({ data: [] })
+        postdata([])
+      } else {
+        postdata(values)
+      }
     }
   })
+
+  const isRowEmpty = row => {
+    return !row.currencyId && !row.decimals
+  }
 
   const postdata = obj => {
     const data = obj?.data?.map(({ categoryId, ...rest }) => ({
       categoryId: recordId,
-
       ...rest
     }))
+
+    // const postdata = obj => {
+    //   const data = obj?.data?.map(({ categoryId, ...rest }) => ({
+    //     categoryId: recordId,
+
+    //     ...rest
+    //   }))
 
     const list = {
       categoryId: recordId,
