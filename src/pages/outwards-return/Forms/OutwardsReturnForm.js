@@ -250,7 +250,13 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
       condition: true,
       onClick: onPost,
       disabled: isPosted || !editMode || !isClosed
-    }
+    },
+    {
+      key: 'Approval',
+      condition: true,
+      onClick: 'onApproval',
+      disabled: !isClosed
+    },
   ]
 
   useEffect(() => {
