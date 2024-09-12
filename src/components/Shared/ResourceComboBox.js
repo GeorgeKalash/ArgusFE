@@ -15,7 +15,6 @@ export default function ResourceComboBox({
   dataGrid,
   value,
   refresh,
-  defaultIndex,
   ...rest
 }) {
   const { store: data } = rest
