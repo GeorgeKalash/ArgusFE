@@ -16,6 +16,7 @@ import Table from 'src/components/Shared/Table'
 import { useWindow } from 'src/windows'
 import AssignCorrespondentForm from './AssignCorrespondentForm'
 import { useForm } from 'src/hooks/form'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 const OutwardsCorrespondent = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -51,6 +52,10 @@ const OutwardsCorrespondent = () => {
       headerName: labels.client
     },
     {
+      field: 'lcAmount',
+      headerName: labels.lcAmount
+    },
+    {
       field: 'amount',
       headerName: labels.amount
     }
@@ -59,7 +64,8 @@ const OutwardsCorrespondent = () => {
   const initialValues = {
     countryId: '',
     dispersalType: '',
-    currencyId: ''
+    currencyId: '',
+    totalFc: ''
   }
 
   const { formik } = useForm({
@@ -108,6 +114,19 @@ const OutwardsCorrespondent = () => {
       disabled: !formik.values.countryId
     }
   ]
+
+  function calcFc() {
+    const totalFc =
+      formik.values.countryId && formik.values.currencyId
+        ? data.list?.reduce((sumAmount, row) => {
+            let curValue = 0
+            if (row.checked) curValue = parseFloat(row.fcAmount.toString().replace(/,/g, '')) || 0
+
+            return sumAmount + curValue
+          }, 0)
+        : 0
+    formik.setFieldValue('totalFc', totalFc)
+  }
 
   useEffect(() => {
     ;(async function () {
@@ -203,8 +222,22 @@ const OutwardsCorrespondent = () => {
             pageSize={50}
             paginationType='client'
             showCheckboxColumn={true}
+            handleCheckboxChange={calcFc}
           />
         </Grow>
+        <Fixed>
+          <Grid container justifyContent='flex-end' sx={{ px: 2 }}>
+            <Grid item xs={2}>
+              <CustomNumberField
+                name='totalFc'
+                label={labels.totalFc}
+                value={formik.values.totalFc}
+                readOnly={true}
+                hidden={!(formik.values.countryId && formik.values.currencyId)}
+              />
+            </Grid>
+          </Grid>
+        </Fixed>
       </VertLayout>
     </FormShell>
   )

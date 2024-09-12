@@ -53,14 +53,14 @@ const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore,
       bpRef: yup.string().required(),
       bpName: yup.string().required()
     }),
-    onSubmit: values => {
-      postCorrespondent(values)
+    onSubmit: async values => {
+      await postCorrespondent(values)
     }
   })
 
-  const postCorrespondent = obj => {
+  const postCorrespondent = async obj => {
     const recordId = obj?.recordId || ''
-    postRequest({
+    await postRequest({
       extension: RemittanceSettingsRepository.Correspondent.set,
       record: JSON.stringify(obj)
     })

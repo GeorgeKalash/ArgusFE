@@ -14,7 +14,7 @@ import { DataSets } from 'src/resources/DataSets'
 import { ControlContext } from 'src/providers/ControlContext'
 
 const CharacteristicForm = ({ labels, maxAccess, getCharacteristicGridData, recordId, window }) => {
-  const { postRequest, getRequest } = useContext(RequestsContext)
+  const { postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
   const [initialValues, setInitialData] = useState({
@@ -32,15 +32,15 @@ const CharacteristicForm = ({ labels, maxAccess, getCharacteristicGridData, reco
       seqNo: yup.string().required(),
       oper: yup.string().required()
     }),
-    onSubmit: values => {
-      postCharacteristic(values)
+    onSubmit: async values => {
+      await postCharacteristic(values)
     }
   })
 
-  const postCharacteristic = obj => {
+  const postCharacteristic = async obj => {
     const classId = obj.classId ? obj.classId : recordId
     obj.classId = classId
-    postRequest({
+    await postRequest({
       extension: DocumentReleaseRepository.ClassCharacteristics.set,
       record: JSON.stringify(obj)
     })

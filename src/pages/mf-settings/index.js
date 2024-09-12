@@ -58,18 +58,18 @@ const MFSettings = () => {
     enableReinitialize: true,
     validateOnChange: true,
     initialValues,
-    onSubmit: values => {
-      postMFSettings(values)
+    onSubmit: async values => {
+      await postMFSettings(values)
     }
   })
 
-  const postMFSettings = obj => {
+  const postMFSettings = async obj => {
     var data = []
     Object.entries(obj).forEach(([key, value]) => {
       const newObj = { key: key, value: value }
       data.push(newObj)
     })
-    postRequest({
+    await postRequest({
       extension: SystemRepository.Defaults.set,
       record: JSON.stringify({ sysDefaults: data })
     })

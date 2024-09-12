@@ -357,6 +357,9 @@ export function DataGrid({
             },
             '& .MuiDataGrid-columnHeaderTitle': {
               fontWeight: '900'
+            },
+            '& .MuiDataGrid-virtualScroller': {
+              zIndex: 0
             }
           }}
           onRowClick={handleRowClick} // Handle row click event

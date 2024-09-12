@@ -36,6 +36,7 @@ const Table = ({
   rowSelection = '',
   pagination = true,
   setData,
+  handleCheckboxChange = '',
   ...props
 }) => {
   const pageSize = props?.pageSize || 10000
@@ -90,7 +91,7 @@ const Table = ({
   const filteredColumns = columns.filter(column => !shouldRemoveColumn(column))
 
   useEffect(() => {
-    console.log('props?.gridData?.list ', props?.gridData?.list)
+    // console.log('props?.gridData?.list ', props?.gridData?.list)
     const areAllValuesTrue = props?.gridData?.list?.every(item => item?.checked === true)
     setChecked(areAllValuesTrue)
     if (typeof setData === 'function') onSelectionChanged
@@ -352,6 +353,10 @@ const Table = ({
 
     setChecked(e.target.checked)
 
+    if (handleCheckboxChange) {
+      handleCheckboxChange()
+    }
+
     if (typeof setData === 'function') onSelectionChanged
   }
 
@@ -468,6 +473,10 @@ const Table = ({
                 node.setDataValue(params.colDef.field, false)
               }
             })
+          }
+
+          if (handleCheckboxChange) {
+            handleCheckboxChange()
           }
         }}
       />
