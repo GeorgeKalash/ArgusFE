@@ -30,7 +30,7 @@ export default function ResourceComboBox({
 
   useEffect(() => {
     if (!cacheStore[apiUrl]) fetchData()
-  }, [parameters, refresh])
+  }, [parameters])
 
   const fetchData = () => {
     if (parameters && !data && (datasetId || endpointId)) {

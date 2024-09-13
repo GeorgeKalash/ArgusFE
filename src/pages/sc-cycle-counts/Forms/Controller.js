@@ -11,7 +11,7 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import FormShell from 'src/components/Shared/FormShell'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 
-const Controller = ({ store, maxAccess, labels, refreshController,setRefreshController }) => {
+const Controller = ({ store, maxAccess, labels }) => {
   const { recordId, isPosted, isClosed } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -95,18 +95,6 @@ const Controller = ({ store, maxAccess, labels, refreshController,setRefreshCont
     } catch (error) {}
   }
 
-  useEffect(() => {
-    ;(async function () {
-      if (formik.values.siteId) {
-        await fetchGridData(recordId, formik.values.siteId)
-      }
-      if (refreshController) {
-        formik.setFieldValue('siteId', '')
-        formik.setValues({ rows: [] })
-      }
-    })()
-  }, [refreshController, formik.values.siteId])
-
   const columns = [
     {
       component: 'checkbox',
@@ -162,11 +150,12 @@ const Controller = ({ store, maxAccess, labels, refreshController,setRefreshCont
               valueField='siteId'
               displayField='siteName'
               values={formik.values}
-              onChange={(event, newValue) => {
-                formik.setFieldValue('siteId', newValue ? newValue?.siteId : '')
-                setRefreshController(false)
+              onChange={async (event, newValue) => {
+                if (newValue?.siteId) {
+                  formik.setFieldValue('siteId', newValue ? newValue?.siteId : '')
+                  await fetchGridData(recordId, newValue?.siteId)
+                }
               }}
-              refresh={refreshController}
               error={formik.touched.siteId && Boolean(formik.errors.siteId)}
               maxAccess={maxAccess}
             />

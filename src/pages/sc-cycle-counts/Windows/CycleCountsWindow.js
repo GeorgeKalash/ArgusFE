@@ -27,10 +27,10 @@ const CycleCountsWindow = ({ recordId, labels, maxAccess, plantId }) => {
         <CycleCountsForm labels={labels} setStore={setStore} store={store} maxAccess={maxAccess} plantId={plantId}/>
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
-        <Sites labels={labels} maxAccess={maxAccess} store={store} setRefreshController={setRefreshController}/>
+        <Sites labels={labels} maxAccess={maxAccess} store={store} setRefreshController={setRefreshController} refreshController={refreshController}/>
       </CustomTabPanel>
       <CustomTabPanel index={2} value={activeTab}>
-        <Controller labels={labels} maxAccess={maxAccess} store={store} refreshController={refreshController} setRefreshController={setRefreshController}/>
+        <Controller labels={labels} maxAccess={maxAccess} store={store} key={refreshController}/>
       </CustomTabPanel>
     </>
   )
