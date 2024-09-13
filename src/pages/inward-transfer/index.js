@@ -9,7 +9,6 @@ import { useWindow } from 'src/windows'
 import toast from 'react-hot-toast'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
-import { formatDateDefault } from 'src/lib/date-helper'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -45,16 +44,23 @@ const InwardTransfer = () => {
 
   async function fetchWithSearch({ filters }) {
     try {
-      return (
-        filters.qry &&
-        (await getRequest({
-          extension: RemittanceOutwardsRepository.InwardsTransfer.snapshot,
-          parameters: `_filter=${filters.qry}`
-        }))
-      )
-    } catch (error) {
-      stackError(error)
-    }
+      if (!filters.qry) return { list: [] }
+
+      const res = await getRequest({
+        extension: RemittanceOutwardsRepository.InwardsTransfer.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+
+      res.list = res.list.map(item => {
+        if (item.status === 4) {
+          item.wip = 2
+        }
+
+        return item
+      })
+
+      return res
+    } catch (error) {}
   }
 
   const getPlantId = async () => {
@@ -146,7 +152,7 @@ const InwardTransfer = () => {
       field: 'date',
       headerName: _labels.date,
       flex: 1,
-      valueGetter: ({ row }) => formatDateDefault(row?.date)
+      type: 'date'
     },
     {
       field: 'currencyRef',

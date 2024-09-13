@@ -98,7 +98,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
     receiver_bank: '',
     receiver_bankBranch: '',
     receiver_ttNo: '',
-    paymentMode: '',
+    dispersalMode: '',
     paymentBank: '',
     commissionType: '',
     commissionAgent: '',
@@ -184,7 +184,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
       props: {
         form: formik,
         labels,
-        maxAccess,
+        access,
         recordId: formik.values.recordId,
         window2: window
       },
@@ -192,7 +192,6 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
       title: platformLabels.ApproveFields
     })
   }
-
   useEffect(() => {
     const fetchRecord = async () => {
       getDefaultVAT()
@@ -276,7 +275,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       name='reference'
                       label={labels.reference}
                       value={formik?.values?.reference}
-                      maxAccess={maxAccess}
+                      maxAccess={!editMode && maxAccess}
                       maxLength='15'
                       readOnly={editMode}
                       onChange={e => formik.setFieldValue('reference', e.target.value)}
@@ -1015,14 +1014,14 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                 <Grid container spacing={2}>
                   <Grid item xs={3}>
                     <CustomNumberField
-                      name='paymentMode'
-                      label={labels.paymentMode}
-                      value={formik.values.paymentMode}
+                      name='dispersalMode'
+                      label={labels.dispersalMode}
+                      value={formik.values.dispersalMode}
                       maxAccess={maxAccess}
                       readOnly={editMode}
-                      onChange={e => formik.setFieldValue('paymentMode', e.target.value)}
-                      onClear={() => formik.setFieldValue('paymentMode', '')}
-                      error={formik.touched.paymentMode && Boolean(formik.errors.paymentMode)}
+                      onChange={e => formik.setFieldValue('dispersalMode', e.target.value)}
+                      onClear={() => formik.setFieldValue('dispersalMode', '')}
+                      error={formik.touched.dispersalMode && Boolean(formik.errors.dispersalMode)}
                       maxLength={5}
                     />
                   </Grid>
@@ -1105,7 +1104,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       endpointId={RemittanceSettingsRepository.SourceOfIncome.qry}
                       name='sourceOfIncome'
                       label={labels.sourceOfIncome}
-                      valueField='sourceOfIncome'
+                      valueField='recordId'
                       displayField={['reference', 'name']}
                       columnsInDropDown={[
                         { key: 'reference', value: 'Reference' },
@@ -1125,7 +1124,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       endpointId={CurrencyTradingSettingsRepository.PurposeExchange.qry}
                       name='purposeOfTransfer'
                       label={labels.purposeOfTransfer}
-                      valueField='purposeOfTransfer'
+                      valueField='recordId'
                       displayField={['reference', 'name']}
                       columnsInDropDown={[
                         { key: 'reference', value: 'Reference' },
