@@ -6,6 +6,7 @@ import ItemsForm from '../forms/ItemsForm.js'
 import PhysicalForm from '../forms/PhysicalForm.js'
 import VendorList from '../forms/VendorList.js'
 import SalesList from '../forms/SaleList.js'
+import { CacheDataProvider } from 'src/providers/CacheDataContext.js'
 
 const ItemWindow = ({ recordId, labels, maxAccess }) => {
   const [activeTab, setActiveTab] = useState(0)
@@ -23,7 +24,7 @@ const ItemWindow = ({ recordId, labels, maxAccess }) => {
   ]
 
   return (
-    <>
+    <CacheDataProvider>
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
       <CustomTabPanel height={660} index={0} value={activeTab}>
         <ItemsForm labels={labels} setStore={setStore} store={store} editMode={editMode} maxAccess={maxAccess} />
@@ -37,7 +38,7 @@ const ItemWindow = ({ recordId, labels, maxAccess }) => {
       <CustomTabPanel height={660} index={3} value={activeTab}>
         <SalesList labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} />
       </CustomTabPanel>
-    </>
+    </CacheDataProvider>
   )
 }
 
