@@ -160,13 +160,9 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
           extension: RemittanceOutwardsRepository.InwardsTransfer.set,
           record: JSON.stringify(copy)
         })
-        formik.setFieldValue('recordId', res.recordId)
-        invalidate()
 
-        const res2 = await getRequest({
-          extension: RemittanceOutwardsRepository.InwardsTransfer.get,
-          parameters: `_recordId=${res.recordId}`
-        })
+        invalidate()
+        const res2 = await getInwards(res.recordId)
         res2.record.date = formatDateFromApi(res2.record.date)
         formik.setValues(res2.record)
         toast.success(platformLabels.Added)
@@ -192,35 +188,31 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
       title: platformLabels.ApproveFields
     })
   }
+  async function getInwards(recordId) {
+    try {
+      return await getRequest({
+        extension: RemittanceOutwardsRepository.InwardsTransfer.get,
+        parameters: `_recordId=${recordId}`
+      })
+    } catch (error) {}
+  }
   useEffect(() => {
-    const fetchRecord = async () => {
+    ;(async function () {
       getDefaultVAT()
-
       if (recordId) {
-        try {
-          const res = await getRequest({
-            extension: RemittanceOutwardsRepository.InwardsTransfer.get,
-            parameters: `_recordId=${recordId}`
-          })
+        const res = await getInwards(recordId)
 
-          if (res.record) {
-            const record = {
-              ...res.record,
-              date: formatDateFromApi(res.record.date),
-              sender_idIssueDate: formatDateFromApi(res.record.sender_idIssueDate),
-              sender_idExpiryDate: formatDateFromApi(res.record.sender_idExpiryDate),
-              receiver_idIssueDate: formatDateFromApi(res.record.receiver_idIssueDate),
-              receiver_idExpiryDate: formatDateFromApi(res.record.receiver_idExpiryDate),
-              expiryDate: formatDateFromApi(res.record.expiryDate)
-            }
-            formik.setValues(record)
-          }
-        } catch (error) {
-          stackError(error)
-        }
+        formik.setValues({
+          ...res.record,
+          date: formatDateFromApi(res.record.date),
+          sender_idIssueDate: formatDateFromApi(res.record.sender_idIssueDate),
+          sender_idExpiryDate: formatDateFromApi(res.record.sender_idExpiryDate),
+          receiver_idIssueDate: formatDateFromApi(res.record.receiver_idIssueDate),
+          receiver_idExpiryDate: formatDateFromApi(res.record.receiver_idExpiryDate),
+          expiryDate: formatDateFromApi(res.record.expiryDate)
+        })
       }
-    }
-    fetchRecord()
+    })()
   }, [])
 
   async function getDefaultVAT() {
@@ -229,7 +221,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
         extension: SystemRepository.Defaults.get,
         parameters: `_filter=&_key=vatPct`
       })
-      formik.setFieldValue('vatPct', parseInt(res.record.value))
+      formik.setFieldValue('vatPct', parseInt(res?.record?.value))
     } catch (error) {}
   }
 

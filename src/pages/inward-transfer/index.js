@@ -70,13 +70,11 @@ const InwardTransfer = () => {
         parameters: `_userId=${userId}&_key=plantId`
       })
 
-      if (res.record?.value) {
-        return res.record.value
-      }
-
-      return ''
+      return res?.record?.value
     } catch (error) {
       stackError(error)
+
+      return ''
     }
   }
 
@@ -87,13 +85,11 @@ const InwardTransfer = () => {
         parameters: `_userId=${userId}&_key=cashAccountId`
       })
 
-      if (res.record?.value) {
-        return res.record.value
-      }
-
-      return ''
+      return res?.record?.value
     } catch (error) {
       stackError(error)
+
+      return ''
     }
   }
 
@@ -103,13 +99,12 @@ const InwardTransfer = () => {
         extension: SystemRepository.UserFunction.get,
         parameters: `_userId=${userId}&_functionId=${SystemFunction.InwardTransfer}`
       })
-      if (res.record) {
-        return res.record.dtId
-      }
 
-      return ''
+      return res?.record?.dtId
     } catch (error) {
       stackError(error)
+
+      return ''
     }
   }
 
@@ -119,17 +114,17 @@ const InwardTransfer = () => {
       const cashAccountId = await getCashAccountId()
       const dtId = await getDefaultDT()
 
-      if (plantId !== '' && cashAccountId !== '') {
+      if (plantId && cashAccountId) {
         openInwardTransferWindow(plantId, cashAccountId, recordId, dtId)
       } else {
-        if (plantId === '') {
+        if (!plantId) {
           stackError({
             message: platformLabels.mustHaveDefaultPlant
           })
 
           return
         }
-        if (cashAccountId === '') {
+        if (!cashAccountId) {
           stackError({
             message: platformLabels.mustHaveDefaultCashAcc
           })
