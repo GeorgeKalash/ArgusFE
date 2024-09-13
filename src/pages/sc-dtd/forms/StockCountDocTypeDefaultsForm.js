@@ -16,18 +16,12 @@ import { SCRepository } from 'src/repositories/SCRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 
-export default function StockCountDocumentTypeDefaultForm({ labels, maxAccess: access, recordId }) {
+export default function StockCountDocumentTypeDefaultForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: SCRepository.DocumentTypeDefaults.qry
-  })
-
-  const { maxAccess, changeDT } = useDocumentType({
-    functionId: SystemFunction.StockCount,
-    access,
-    enabled: !recordId
   })
 
   const { formik } = useForm({
@@ -98,12 +92,11 @@ export default function StockCountDocumentTypeDefaultForm({ labels, maxAccess: a
                 valueField='recordId'
                 displayField='name'
                 values={formik.values}
-                onChange={async (event, newValue) => {
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
                   formik.setFieldValue('dtId', newValue?.recordId || '')
-                  changeDT(newValue)
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
-                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
