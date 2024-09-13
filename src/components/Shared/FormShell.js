@@ -21,6 +21,7 @@ export default function FormShell({
   isSaved = true,
   isInfo = true,
   isSavedClear = true,
+  isGenerated = false,
   isCleared = true,
   children,
   editMode,
@@ -30,6 +31,7 @@ export default function FormShell({
   postVisible = false,
   resourceId,
   masterSource,
+  onGenerate,
   functionId,
   maxAccess,
   isPosted = false,
@@ -266,8 +268,10 @@ export default function FormShell({
           }
           isSaved={isSaved}
           isSavedClear={isSavedClearVisible}
+          onGenerate={onGenerate}
           isInfo={isInfo}
           isCleared={isCleared}
+          isGenerated={isGenerated}
           actions={actions}
           onApproval={onApproval}
           onRecordRemarks={onRecordRemarks}
