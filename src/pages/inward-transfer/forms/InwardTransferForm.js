@@ -143,7 +143,8 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
       receiver_ttNo: yup.string().required(),
       commissionAgent: yup.number().required(),
       commissionReceiver: yup.number().required(),
-      charges: yup.number().required()
+      charges: yup.number().required(),
+      dispersalMode: yup.number().required()
     }),
     onSubmit: async () => {
       try {
@@ -1005,16 +1006,20 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
               <Grid item xs={12}>
                 <Grid container spacing={2}>
                   <Grid item xs={3}>
-                    <CustomNumberField
+                    <ResourceComboBox
+                      values={formik.values}
+                      datasetId={DataSets.CA_CASH_ACCOUNT_TYPE}
                       name='dispersalMode'
                       label={labels.dispersalMode}
-                      value={formik.values.dispersalMode}
-                      maxAccess={maxAccess}
+                      valueField='key'
+                      displayField='value'
                       readOnly={editMode}
-                      onChange={e => formik.setFieldValue('dispersalMode', e.target.value)}
-                      onClear={() => formik.setFieldValue('dispersalMode', '')}
+                      maxAccess={maxAccess}
+                      required
+                      onChange={(event, newValue) => {
+                        formik.setFieldValue('dispersalMode', newValue?.key)
+                      }}
                       error={formik.touched.dispersalMode && Boolean(formik.errors.dispersalMode)}
-                      maxLength={5}
                     />
                   </Grid>
                   <Grid item xs={3}>
