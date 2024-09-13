@@ -99,7 +99,8 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store }
           })
           setStore(prevStore => ({
             ...prevStore,
-            recordId: response.recordId
+            recordId: response.recordId,
+            _msId: formik.values.msId
           }))
         } else {
           toast.success(platformLabels.Edited)
