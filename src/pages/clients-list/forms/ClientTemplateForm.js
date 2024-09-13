@@ -490,7 +490,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     }
 
     const obj4 = {
-      reference: obj.cltRemReference,
+      reference: '',
       salaryRangeId: obj.salaryRangeId,
       riskLevel: obj.riskLevel,
       smsLanguage: obj.smsLanguage,
@@ -673,7 +673,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       disabled: !editMode
     },
     {
-      key: 'Beneficiary',
+      key: 'BeneficiaryList',
       condition: true,
       onClick: () => openBeneficiaryWindow(),
       disabled: !editMode

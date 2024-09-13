@@ -169,15 +169,8 @@ const FiPaymentVouchers = () => {
   async function openForm(recordId) {
     try {
       const plantId = await getPlantId()
-      if (plantId !== '') {
-        openOutWardsWindow(plantId, recordId)
-      } else {
-        if (plantId === '') {
-          stackError({
-            message: `The user does not have a default plant.`
-          })
-        }
-      }
+      openOutWardsWindow(plantId, recordId)
+      
     } catch (error) {}
   }
 
