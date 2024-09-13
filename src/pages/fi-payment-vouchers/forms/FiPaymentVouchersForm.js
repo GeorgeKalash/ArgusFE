@@ -63,7 +63,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
       dtId: documentType?.dtId,
       status: 1,
       releaseStatus: null,
-      plantId: plantId,
+      plantId: parseInt(plantId),
       contactId: null,
       isVerified: false,
       sourceReference: ''
