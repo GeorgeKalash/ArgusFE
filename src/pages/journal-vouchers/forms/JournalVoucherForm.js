@@ -63,6 +63,10 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
 
         if (!recordId) {
           toast.success(platformLabels.Added)
+          formik.setValues({
+            ...obj,
+            recordId: response.recordId
+          })
           getData(response.recordId)
         } else toast.success(platformLabels.Edited)
 
@@ -71,7 +75,8 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
     }
   })
 
-  const editMode = !!formik.values.recordId || !!recordId
+  console.log(formik.values)
+
   const isRaw = formik.values.status == 1
 
   useEffect(() => {
