@@ -187,7 +187,7 @@ const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
             <Grid item xs={12}>
               <CustomDatePicker
                 name='date'
-                min={formik.values.dateTo}
+                min={formik.values.dateTo || new Date()}
                 readOnly={editMode}
                 label={labels.date}
                 value={formik.values.date}
