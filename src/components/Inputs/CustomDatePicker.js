@@ -22,6 +22,8 @@ const CustomDatePicker = ({
   error,
   helperText,
   disabledRangeDate = {},
+  max = null,
+  min = null,
   variant = 'outlined',
   size = 'small',
   views = ['year', 'month', 'day'],
@@ -84,8 +86,8 @@ const CustomDatePicker = ({
         size={size}
         value={value}
         label={label}
-        minDate={disabledRangeDate.date}
-        maxDate={newDate}
+        minDate={!!min ? min : disabledRangeDate.date}
+        maxDate={!!max ? max : newDate}
         fullWidth={fullWidth}
         sx={{
           '& .MuiOutlinedInput-root': {
