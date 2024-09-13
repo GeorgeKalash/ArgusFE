@@ -16,7 +16,7 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { useRefBehavior } from 'src/hooks/useReferenceProxy'
 
-export default function ItemsForm({ labels, maxAccess: access, setStore, store }) {
+export default function ItemsForm({ labels, maxAccess: access, setStore, store, setFormikInitial }) {
   const { platformLabels } = useContext(ControlContext)
   const [showLotCategories, setShowLotCategories] = useState(false)
   const [showSerialProfiles, setShowSerialProfiles] = useState(false)
@@ -54,7 +54,8 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store }
       taxId: null,
       lotCategoryId: null,
       spfId: '',
-      categoryName: ''
+      categoryName: '',
+      defSaleMUId: ''
     },
     access,
     enableReinitialize: true,
@@ -105,6 +106,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store }
         } else {
           toast.success(platformLabels.Edited)
         }
+        setFormikInitial(formik.values)
 
         const res = await getRequest({
           extension: InventoryRepository.Items.get,
@@ -133,10 +135,15 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store }
             extension: InventoryRepository.Items.get,
             parameters: `_recordId=${recordId}`
           })
-
+          setFormikInitial(res.record)
           formik.setValues({ ...res.record, kitItem: !!res.record.kitItem })
           setShowLotCategories(res.record.trackBy === '2' || res.record.trackBy === 2)
           setShowSerialProfiles(res.record.trackBy === '1' || res.record.trackBy === 1)
+          setStore(prevStore => ({
+            ...prevStore,
+            _msId: res.record.msId,
+            measurementId: res.record.defSaleMUId
+          }))
         }
       } catch {}
     })()
@@ -154,8 +161,6 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store }
                     dataGrid
                     endpointId={InventoryRepository.Items.pack}
                     reducer={response => {
-                      console.log(response, 'resssss')
-
                       return response?.record?.categories
                     }}
                     values={formik.values}

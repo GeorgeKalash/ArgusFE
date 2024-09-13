@@ -18,48 +18,61 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { Grid } from '@mui/material'
 import SalesForm from './SalesForm'
+import FormShell from 'src/components/Shared/FormShell'
 
-const SalesList = ({ store, labels, maxAccess }) => {
+const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId } = store
+  const { _msId } = store
+  const { measurementId } = store
+  console.log(formikInitial)
+
   const { platformLabels } = useContext(ControlContext)
 
   const { stack } = useWindow()
 
-  const [initialValues, setInitialValues] = useState({
-    currencyId: ''
-  })
-
-  console.log(recordId, 'recordId')
-
   const [check, setCheck] = useState(false)
-
-  const { formik } = useForm({
-    initialValues,
-    validationSchema: yup.object({
-      currencyId: yup.string().required(' ')
-    }),
-    enableReinitialize: true,
-    validateOnChange: true
-  })
-
+  const [firstCurr, setFirstCurr] = useState(false)
   useEffect(() => {
-    if (recordId) {
-      ;(async () => {
+    const fetchCurrency = async () => {
+      try {
         const response = await getRequest({
           extension: InventoryRepository.Currency.qry,
           parameters: `&_itemId=${recordId}`
         })
         if (response.list && response.list.length > 0) {
-          const firstCurrency = response.list[0]
-          setInitialValues({
-            currencyId: firstCurrency.currencyId
-          })
-          formik.setFieldValue('currencyId', firstCurrency.currencyId)
+          setFirstCurr(response.list[0].currencyId)
         }
-      })()
+      } catch (error) {}
     }
-  }, [recordId])
+
+    fetchCurrency()
+  }, [])
+
+  const { formik } = useForm({
+    initialValues: {
+      currencyId: firstCurr || '',
+      defSaleMUId: measurementId || '',
+      pgId: '',
+      returnPolicyId: ''
+    },
+    validationSchema: yup.object({
+      currencyId: yup.string().required(' ')
+    }),
+    enableReinitialize: true,
+    validateOnChange: true,
+    onSubmit: async obj => {
+      const submissionData = {
+        ...formikInitial,
+        defSaleMUId: formik.values.defSaleMUId
+      }
+
+      const response = await postRequest({
+        extension: InventoryRepository.Items.set,
+        record: JSON.stringify(submissionData)
+      })
+    }
+  })
 
   async function fetchGridData() {
     if (formik.values.currencyId) {
@@ -71,8 +84,6 @@ const SalesList = ({ store, labels, maxAccess }) => {
       return response
     }
   }
-
-  console.log(formik, 'formik')
 
   const {
     query: { data },
@@ -165,74 +176,113 @@ const SalesList = ({ store, labels, maxAccess }) => {
       toast.success(platformLabels.Deleted)
     } catch (exception) {}
   }
-  console.log(store._msId, '_msid sale')
 
   return (
-    <VertLayout>
-      <Fixed>
-        <GridToolbar
-          onAdd={add}
-          maxAccess={maxAccess}
-          rightSection={
-            <Grid container sx={{ display: 'flex', mr: 180, mt: 2 }} width={300} gap={2}>
-              <Grid item xs={12}>
-                <ResourceComboBox
-                  endpointId={InventoryRepository.MeasurementUnit.qry}
-                  parameters={`_msId=${store._msId}`}
-                  name='msId'
-                  label={labels.measure}
-                  columnsInDropDown={[
-                    { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
-                  ]}
-                  values={formik.values}
-                  valueField='recordId'
-                  displayField={['reference', 'name']}
-                  maxAccess={maxAccess}
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('msId', newValue.recordId || '')
-                  }}
-                  error={formik.touched.msId && Boolean(formik.errors.msId)}
-                />
+    <FormShell form={formik} resourceId={ResourceIds.Items} maxAccess={maxAccess} infoVisible={false}>
+      <VertLayout>
+        <Fixed>
+          <GridToolbar
+            onAdd={add}
+            maxAccess={maxAccess}
+            rightSection={
+              <Grid container spacing={2} sx={{ mt: 2 }}>
+                <Grid item xs={6}>
+                  <ResourceComboBox
+                    endpointId={InventoryRepository.Currency.qry}
+                    parameters={recordId ? `_itemId=${recordId}` : ''}
+                    name='currencyId'
+                    label={labels.currency}
+                    valueField='currencyId'
+                    displayField={['currencyName']}
+                    columnsInDropDown={[{ key: 'currencyName', value: 'Name' }]}
+                    values={formik.values}
+                    required
+                    maxAccess={maxAccess}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('currencyId', newValue?.currencyId || '')
+                    }}
+                    onClear={() => formik.setFieldValue('currencyId', '')}
+                    error={!formik.values.currencyId && check}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <ResourceComboBox
+                    endpointId={store._msId ? InventoryRepository.MeasurementUnit.qry : ''}
+                    parameters={`_msId=${_msId}`}
+                    name='defSaleMUId'
+                    label={labels.measure}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    values={formik.values}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    maxAccess={maxAccess}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('defSaleMUId', newValue?.recordId || '')
+                    }}
+                  />
+                </Grid>
+
+                <Grid item xs={6}>
+                  <ResourceComboBox
+                    endpointId={InventoryRepository.Currency.qry}
+                    parameters={recordId ? `_itemId=${recordId}` : ''}
+                    name='currencyId3'
+                    label={labels.currency}
+                    valueField='currencyId'
+                    displayField={['currencyName']}
+                    columnsInDropDown={[{ key: 'currencyName', value: 'Name' }]}
+                    values={formik.values}
+                    required
+                    maxAccess={maxAccess}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('currencyId', newValue?.currencyId || '')
+                    }}
+                    onClear={() => formik.setFieldValue('currencyId', '')}
+                    error={!formik.values.currencyId && check}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <ResourceComboBox
+                    endpointId={InventoryRepository.Currency.qry}
+                    parameters={recordId ? `_itemId=${recordId}` : ''}
+                    name='currencyId2'
+                    label={labels.currency}
+                    valueField='currencyId'
+                    displayField={['currencyName']}
+                    columnsInDropDown={[{ key: 'currencyName', value: 'Name' }]}
+                    values={formik.values}
+                    required
+                    maxAccess={maxAccess}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('currencyId2', newValue?.currencyId || '')
+                    }}
+                    onClear={() => formik.setFieldValue('currencyId2', '')}
+                    error={!formik.values.currencyId2 && check}
+                  />
+                </Grid>
               </Grid>
-              <Grid item xs={12}>
-                <ResourceComboBox
-                  endpointId={InventoryRepository.Currency.qry}
-                  parameters={recordId ? `_itemId=${recordId}` : ''}
-                  name='currencyId'
-                  label={labels.currency}
-                  valueField='currencyId'
-                  displayField={['currencyName']}
-                  columnsInDropDown={[{ key: 'currencyName', value: 'Name' }]}
-                  values={formik.values}
-                  required
-                  maxAccess={maxAccess}
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('currencyId', newValue?.currencyId || '')
-                  }}
-                  onClear={() => formik.setFieldValue('currencyId', '')}
-                  error={!formik.values.currencyId && check}
-                />
-              </Grid>
-            </Grid>
-          }
-        />
-      </Fixed>
-      <Grow>
-        <Table
-          columns={columns}
-          gridData={data}
-          rowId={['plId', 'currencyId']}
-          isLoading={false}
-          pageSize={50}
-          onEdit={edit}
-          onDelete={del}
-          pagination={false}
-          maxAccess={maxAccess}
-          height={200}
-        />
-      </Grow>
-    </VertLayout>
+            }
+          />
+        </Fixed>
+        <Grow>
+          <Table
+            columns={columns}
+            gridData={data}
+            rowId={['plId', 'currencyId']}
+            isLoading={false}
+            pageSize={50}
+            onEdit={edit}
+            onDelete={del}
+            pagination={false}
+            maxAccess={maxAccess}
+            height={200}
+          />
+        </Grow>
+      </VertLayout>
+    </FormShell>
   )
 }
 

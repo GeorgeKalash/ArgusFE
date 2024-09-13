@@ -25,8 +25,6 @@ const SalesForm = ({ labels, maxAccess, store, record, cId }) => {
     endpointId: SaleRepository.Sales.qry
   })
 
-  console.log(record, 'recc')
-
   const { recordId: itemId } = store
 
   const validationSchema = yup.object({})
@@ -80,7 +78,6 @@ const SalesForm = ({ labels, maxAccess, store, record, cId }) => {
             extension: SaleRepository.Sales.get,
             parameters: `_itemId=${itemId}&_plId=${formik.values.plId}&_currencyId=${formik.values.currencyId}`
           })
-          console.log(res, 'res')
 
           if (res.record) {
             formik.setValues(res.record)

@@ -9,12 +9,16 @@ import SalesList from '../forms/SaleList.js'
 
 const ItemWindow = ({ recordId, labels, maxAccess }) => {
   const [activeTab, setActiveTab] = useState(0)
+  const [formikInitial, setFormikInitial] = useState([])
   const editMode = !!recordId
 
   const [store, setStore] = useState({
     recordId: recordId || null,
-    _msId: null
+    _msId: null,
+    measurementId: null
   })
+
+  console.log(store.measurementId, 'meeeeeeee')
 
   console.log(store._msId, '_msid window')
 
@@ -25,11 +29,20 @@ const ItemWindow = ({ recordId, labels, maxAccess }) => {
     { label: labels.sales, disabled: !store.recordId }
   ]
 
+  console.log(formikInitial, 'initial')
+
   return (
     <>
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
       <CustomTabPanel height={660} index={0} value={activeTab}>
-        <ItemsForm labels={labels} setStore={setStore} store={store} editMode={editMode} maxAccess={maxAccess} />
+        <ItemsForm
+          labels={labels}
+          setStore={setStore}
+          store={store}
+          editMode={editMode}
+          maxAccess={maxAccess}
+          setFormikInitial={setFormikInitial}
+        />
       </CustomTabPanel>
       <CustomTabPanel height={660} index={1} value={activeTab}>
         <PhysicalForm labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} editMode={editMode} />
@@ -38,7 +51,13 @@ const ItemWindow = ({ recordId, labels, maxAccess }) => {
         <VendorList labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} />
       </CustomTabPanel>
       <CustomTabPanel height={660} index={3} value={activeTab}>
-        <SalesList labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} />
+        <SalesList
+          labels={labels}
+          setStore={setStore}
+          maxAccess={maxAccess}
+          store={store}
+          formikInitial={formikInitial}
+        />
       </CustomTabPanel>
     </>
   )
