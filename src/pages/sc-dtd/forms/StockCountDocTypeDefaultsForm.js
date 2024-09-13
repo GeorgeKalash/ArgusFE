@@ -91,6 +91,7 @@ export default function StockCountDocumentTypeDefaultForm({ labels, maxAccess, r
                 readOnly={editMode}
                 valueField='recordId'
                 displayField='name'
+                required
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
