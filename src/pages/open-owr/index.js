@@ -156,7 +156,7 @@ const OpenOutwardsReturn = () => {
           onClear={onClear}
           labels={_labels}
           onApply={onApply}
-          reportName={'RTOWR'}
+          reportName={'RTOWR2'}
         />
       </Fixed>
       <Grow>
