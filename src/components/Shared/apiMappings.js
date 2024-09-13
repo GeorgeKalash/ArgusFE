@@ -17,6 +17,7 @@ import { FixedAssetsRepository } from 'src/repositories/FixedAssetsRepository'
 import { SCRepository } from 'src/repositories/SCRepository'
 import { IVReplenishementRepository } from 'src/repositories/IVReplenishementRepository'
 import { POSRepository } from 'src/repositories/POSRepository'
+import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 
 export const COMBOBOX = 1
 
@@ -664,7 +665,40 @@ export const apiMappings = {
       { key: 'reference', value: 'Reference' },
       { key: 'name', value: 'Name' }
     ]
-  }
+  },
+  [ResourceIds.CorrespondentGroup]: {
+    type: COMBOBOX,
+    endpoint: RemittanceSettingsRepository.CorrespondentGroup.qry,
+    parameters: `_params=&_startAt=0&_pageSize=1000`,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+  [ResourceIds.Currencies]: {
+    type: COMBOBOX,
+    endpoint: SystemRepository.Currency.qry,
+    parameters: `_params=&_startAt=0&_pageSize=1000&_filter=`,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+  [ResourceIds.Interface]: {
+    type: COMBOBOX,
+    endpoint: RemittanceSettingsRepository.Interface.qry,
+    parameters: `_params=&_startAt=0&_pageSize=1000`,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
 
   //HR filters not migrated
 }
