@@ -13,9 +13,9 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { getStorageData } from 'src/storage/storage'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import OutwardsReturnForm from './Forms/OutwardsReturnForm'
-import GridToolbar from 'src/components/Shared/GridToolbar'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
+import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
 const OutwardsReturn = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -34,16 +34,32 @@ const OutwardsReturn = () => {
     return { ...response, _startAt: _startAt }
   }
 
+  async function fetchWithFilter({ filters, pagination }) {
+    if (filters?.qry) {
+      return await getRequest({
+        extension: RemittanceOutwardsRepository.OutwardsReturn.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+    } else {
+      return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+    }
+  }
+
   const {
     query: { data },
     labels: _labels,
     paginationParameters,
+    filterBy,
+    clearFilter,
     refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: RemittanceOutwardsRepository.OutwardsReturn.page,
     datasetId: ResourceIds.OutwardsReturn,
+    filter: {
+      filterFn: fetchWithFilter
+    }
   })
 
   const columns = [
@@ -160,10 +176,37 @@ const OutwardsReturn = () => {
     }
   }
 
+  const onApply = ({ search, rpbParams }) => {
+    if (!search && rpbParams.length === 0) {
+      clearFilter('params')
+    } else if (!search) {
+      filterBy('params', rpbParams)
+    } else {
+      filterBy('qry', search)
+    }
+    refetch()
+  }
+
+  const onSearch = value => {
+    filterBy('qry', value)
+  }
+
+  const onClear = () => {
+    clearFilter('qry')
+  }
+
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar hasSearch={false} onAdd={add} maxAccess={access} />
+        <RPBGridToolbar
+          onAdd={add}
+          maxAccess={access}
+          onSearch={onSearch}
+          onClear={onClear}
+          labels={_labels}
+          onApply={onApply}
+          reportName={'RTOWR'}
+        />
       </Fixed>
       <Grow>
         <Table
