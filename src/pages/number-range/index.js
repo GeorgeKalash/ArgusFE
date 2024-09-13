@@ -110,7 +110,7 @@ const NumberRange = () => {
         maxAccess: access
       },
       width: 700,
-      height: 500,
+      height: 620,
       title: _labels.numberRange
     })
   }

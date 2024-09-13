@@ -48,12 +48,12 @@ export default function CountryForm({ labels, maxAccess, recordId }) {
     validationSchema: yup.object({
       ibanLength: yup
         .number()
+        .nullable()
         .transform((value, originalValue) => validateNumberField(value, originalValue))
         .min(0, 'Value must be greater than or equal to 0')
         .max(32767, 'Value must be less than or equal to 32,767'),
       name: yup.string().required(' '),
-      reference: yup.string().required(' '),
-      flName: yup.string().required(' ')
+      reference: yup.string().required(' ')
     }),
     onSubmit: async obj => {
       obj.ibanLength = getNumberWithoutCommas(obj.ibanLength)
@@ -93,7 +93,7 @@ export default function CountryForm({ labels, maxAccess, recordId }) {
   }, [])
 
   return (
-    <FormShell reso urceId={ResourceIds.Countries} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell resourceId={ResourceIds.Countries} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -127,7 +127,6 @@ export default function CountryForm({ labels, maxAccess, recordId }) {
                 name='flName'
                 label={labels.fLang}
                 value={formik.values.flName}
-                required
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('flName', '')}
                 error={formik.touched.flName && Boolean(formik.errors.flName)}

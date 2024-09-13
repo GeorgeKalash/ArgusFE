@@ -65,8 +65,8 @@ const NumberRange = () => {
         }
       ]
     },
-    onSubmit: values => {
-      postExchangeMaps(values)
+    onSubmit: async values => {
+      await postExchangeMaps(values)
     }
   })
 
@@ -78,7 +78,7 @@ const NumberRange = () => {
     name: labels && labels.find(item => item.key === '5') && labels.find(item => item.key === '5').value
   }
 
-  const postExchangeMaps = obj => {
+  const postExchangeMaps = async obj => {
     const data = {
       currencyId: formik.values.currencyId,
       countryId: formik.values.countryId,
@@ -88,7 +88,7 @@ const NumberRange = () => {
         ...rest
       }))
     }
-    postRequest({
+    await postRequest({
       extension: RemittanceSettingsRepository.CurrencyExchangeMap.set2,
       record: JSON.stringify(data)
     })

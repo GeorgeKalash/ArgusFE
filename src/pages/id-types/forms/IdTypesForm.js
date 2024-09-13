@@ -54,17 +54,17 @@ const IdTypesForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store
       clientFileExpiryType: yup.string().required(' '),
       isDiplomat: yup.string().required(' ')
     }),
-    onSubmit: values => {
-      postIdTypes(values)
+    onSubmit: async values => {
+      await postIdTypes(values)
     }
   })
 
-  const postIdTypes = obj => {
+  const postIdTypes = async obj => {
     const recordId = obj?.recordId || ''
     const date = obj?.validFrom && formatDateToApi(obj?.validFrom)
     const data = { ...obj, validFrom: date }
 
-    postRequest({
+    await postRequest({
       extension: CurrencyTradingSettingsRepository.IdTypes.set,
       record: JSON.stringify(data)
     }).then(res => {

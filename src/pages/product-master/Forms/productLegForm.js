@@ -185,7 +185,6 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess }) => {
   }
 
   return (
-    store.plantId &&
     store.currencyId && (
       <FormShell form={formik} resourceId={ResourceIds.ProductMaster} maxAccess={maxAccess} editMode={editMode}>
         <VertLayout>

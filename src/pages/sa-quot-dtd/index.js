@@ -23,7 +23,7 @@ const DocumentTypeDefault = () => {
 
     try {
       const response = await getRequest({
-        extension: SaleRepository.DocumentTypeDefault.qry,
+        extension: SaleRepository.DocumentTypeDefault.page,
         parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_functionId=5100`
       })
 
@@ -40,7 +40,7 @@ const DocumentTypeDefault = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SaleRepository.DocumentTypeDefault.qry,
+    endpointId: SaleRepository.DocumentTypeDefault.page,
     datasetId: ResourceIds.DocumentTypeDefault
   })
 
@@ -82,12 +82,12 @@ const DocumentTypeDefault = () => {
     } catch (error) {}
   }
 
-  function openForm(dtId) {
+  function openForm(record) {
     stack({
       Component: DocumentTypeDefaultForm,
       props: {
         labels: _labels,
-        dtId,
+        recordId: record?.dtId,
         maxAccess: access
       },
       width: 600,
@@ -97,7 +97,7 @@ const DocumentTypeDefault = () => {
   }
 
   const edit = obj => {
-    openForm(obj?.dtId)
+    openForm(obj)
   }
 
   return (

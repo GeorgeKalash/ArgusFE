@@ -4,7 +4,7 @@ import { Tabs, Tab, Box, IconButton, Menu, MenuItem } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import PropTypes from 'prop-types'
 import { MenuContext } from 'src/providers/MenuContext'
-import { RequestsContext } from './RequestsContext'
+import { v4 as uuidv4 } from 'uuid'
 
 const TabsContext = createContext()
 
@@ -41,9 +41,7 @@ CustomTabPanel.propTypes = {
 
 const TabsProvider = ({ children }) => {
   const router = useRouter()
-  const { menu, gear, lastOpenedPage } = useContext(MenuContext)
-  const { getRequest } = useContext(RequestsContext)
-  const { userId } = JSON.parse(window.sessionStorage.getItem('userData'))
+  const { menu, gear, lastOpenedPage, reloadOpenedPage, setReloadOpenedPage } = useContext(MenuContext)
   const [anchorEl, setAnchorEl] = useState(null)
 
   const [openTabs, setOpenTabs] = useState([
@@ -131,6 +129,12 @@ const TabsProvider = ({ children }) => {
     }
   }
 
+  const reopenTab = tabRoute => {
+    setOpenTabs(openTabs => openTabs.map(tab => (tab.route === tabRoute ? { ...tab, id: uuidv4() } : tab)))
+    router.push(tabRoute)
+    setReloadOpenedPage([])
+  }
+
   useEffect(() => {
     if (initialLoadDone) {
       const isTabOpen = openTabs.some((activeTab, index) => {
@@ -149,6 +153,7 @@ const TabsProvider = ({ children }) => {
           ...prevState,
           {
             page: children,
+            id: uuidv4(),
             route: router.asPath,
             label: lastOpenedPage
               ? lastOpenedPage.name
@@ -171,10 +176,12 @@ const TabsProvider = ({ children }) => {
   }, [children, router.asPath, initialLoadDone, lastOpenedPage, menu, gear])
 
   useEffect(() => {
+    if (router.asPath === reloadOpenedPage?.path + '/') reopenTab(reloadOpenedPage?.path + '/')
     if (!initialLoadDone && router.asPath && menu.length > 0) {
       const newTabs = [
         {
           page: router.asPath === '/default/' ? children : null,
+          id: uuidv4(),
           route: '/default/',
           label: 'Home'
         }
@@ -183,6 +190,7 @@ const TabsProvider = ({ children }) => {
       if (router.asPath !== '/default/') {
         newTabs.push({
           page: children,
+          id: uuidv4(),
           route: router.asPath,
           label: lastOpenedPage
             ? lastOpenedPage.name
@@ -194,7 +202,7 @@ const TabsProvider = ({ children }) => {
       setOpenTabs(newTabs)
       setInitialLoadDone(true)
     }
-  }, [router.asPath, menu, gear, children, lastOpenedPage, initialLoadDone])
+  }, [router.asPath, menu, gear, children, lastOpenedPage, initialLoadDone, reloadOpenedPage])
 
   return (
     <>
@@ -242,7 +250,7 @@ const TabsProvider = ({ children }) => {
             {openTabs.length > 0 &&
               openTabs.map((activeTab, i) => (
                 <Tab
-                  key={i}
+                  key={activeTab?.id}
                   label={activeTab?.label}
                   onClick={() => {
                     setCurrentTabIndex(i)
@@ -282,7 +290,7 @@ const TabsProvider = ({ children }) => {
         </Box>
         {openTabs.length > 0 &&
           openTabs.map((activeTab, i) => (
-            <CustomTabPanel key={activeTab.route} index={i} value={currentTabIndex}>
+            <CustomTabPanel key={activeTab.id} index={i} value={currentTabIndex}>
               {activeTab.page}
             </CustomTabPanel>
           ))}

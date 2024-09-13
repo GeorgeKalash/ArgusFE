@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -13,10 +13,13 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useForm } from 'src/hooks/form'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import { ControlContext } from 'src/providers/ControlContext'
 
-export default function CbBanksForms({ labels, maxAccess, recordId, setStore }) {
+export default function CbBanksForms({ labels, maxAccess, store, setStore }) {
+  const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const editMode = !!recordId
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: CashBankRepository.CbBank.page
@@ -24,42 +27,49 @@ export default function CbBanksForms({ labels, maxAccess, recordId, setStore }) 
 
   const { formik } = useForm({
     initialValues: {
-      recordId: recordId || null,
+      recordId: recordId,
       reference: '',
       name: '',
       swiftCode: '',
+      accNoLength: '',
       countryId: ''
     },
     maxAccess: maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required(' '),
-      reference: yup.string().required(' '),
-      swiftCode: yup.number()
+      name: yup.string().required(),
+      reference: yup.string().required(),
+      swiftCode: yup.string().required(),
+      countryId: yup.string().required()
     }),
     onSubmit: async obj => {
-      const response = await postRequest({
-        extension: CashBankRepository.CbBank.set,
-        record: JSON.stringify(obj)
-      })
-
-      if (!obj.recordId) {
-        toast.success('Record Added Successfully')
-        formik.setValues({
-          ...obj,
-          recordId: response.recordId
+      try {
+        const response = await postRequest({
+          extension: CashBankRepository.CbBank.set,
+          record: JSON.stringify(obj)
         })
-      } else {
-        toast.success('Record Edited Successfully')
-      }
-      setStore({
-        recordId: response.recordId,
-        name: obj.name
-      })
-      invalidate()
+
+        if (!obj.recordId) {
+          toast.success(platformLabels.Added)
+          formik.setValues({
+            ...obj,
+            recordId: response.recordId
+          })
+          setStore({
+            recordId: response.recordId,
+            name: obj.name
+          })
+        } else {
+          toast.success(platformLabels.Edited)
+        }
+
+        invalidate()
+      } catch (error) {}
     }
   })
+
+  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
@@ -77,7 +87,7 @@ export default function CbBanksForms({ labels, maxAccess, recordId, setStore }) 
         }
       } catch (exception) {}
     })()
-  }, [])
+  }, [recordId])
 
   return (
     <FormShell resourceId={ResourceIds.CbBanks} form={formik} maxAccess={maxAccess} editMode={editMode}>
@@ -115,9 +125,8 @@ export default function CbBanksForms({ labels, maxAccess, recordId, setStore }) 
                 name='swiftCode'
                 label={labels.swiftCode}
                 value={formik.values.swiftCode}
-                type='numeric'
-                rows={2}
                 maxLength='20'
+                required
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('swiftCode', '')}
@@ -125,9 +134,20 @@ export default function CbBanksForms({ labels, maxAccess, recordId, setStore }) 
               />
             </Grid>
             <Grid item xs={12}>
+              <CustomNumberField
+                name='accNoLength'
+                label={labels.accNoLength}
+                value={formik.values.accNoLength}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('accNoLength', '')}
+                error={formik.touched.accNoLength && Boolean(formik.errors.accNoLength)}
+              />
+            </Grid>
+            <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={SystemRepository.Country.qry}
                 name='countryId'
+                required
                 label={labels.Country}
                 valueField='recordId'
                 displayField={['reference', 'name', 'flName']}

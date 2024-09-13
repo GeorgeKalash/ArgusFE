@@ -734,6 +734,8 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
           formik.setValues(res.record)
           const baseCurrency = await getBaseCurrency()
           getCorrespondentById(res.record.corId ?? '', baseCurrency, res.record.plantId)
+        } else {
+          await setOperationType(SystemFunction.CurrencyCreditOrderPurchase)
         }
       } catch (error) {
       } finally {

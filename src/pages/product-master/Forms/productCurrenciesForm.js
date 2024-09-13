@@ -26,12 +26,12 @@ const ProductCurrenciesForm = ({ store, setStore, labels, editMode, maxAccess })
         .array()
         .of(
           yup.object().shape({
-            countryId: yup.string().required('currency  is required'),
-            countryId: yup.string().required('Country  is required'),
-            dispersalType: yup.string().required('Dispersal Type  is required')
+            countryId: yup.string().required(),
+            countryId: yup.string().required(),
+            dispersalType: yup.string().required()
           })
         )
-        .required('Operations array is required')
+        .required()
     }),
     initialValues: {
       currencies: [
@@ -52,12 +52,12 @@ const ProductCurrenciesForm = ({ store, setStore, labels, editMode, maxAccess })
     },
     enableReinitialize: false,
     validateOnChange: true,
-    onSubmit: values => {
-      post(values.currencies)
+    onSubmit: async values => {
+      await post(values.currencies)
     }
   })
 
-  const post = obj => {
+  const post = async obj => {
     const data = {
       productId: pId,
       productMonetaries: obj.map(({ id, productId, ...rest }) => ({
@@ -65,7 +65,7 @@ const ProductCurrenciesForm = ({ store, setStore, labels, editMode, maxAccess })
         ...rest
       }))
     }
-    postRequest({
+    await postRequest({
       extension: RemittanceSettingsRepository.ProductMonetaries.set2,
       record: JSON.stringify(data)
     })
@@ -91,7 +91,6 @@ const ProductCurrenciesForm = ({ store, setStore, labels, editMode, maxAccess })
         mapping: [
           { from: 'countryId', to: 'countryId' },
           { from: 'countryName', to: 'countryName' },
-          ,
           { from: 'countryRef', to: 'countryRef' }
         ],
         columnsInDropDown: [
@@ -123,9 +122,10 @@ const ProductCurrenciesForm = ({ store, setStore, labels, editMode, maxAccess })
         ],
         columnsInDropDown: [
           { key: 'reference', value: 'Reference' },
-          { key: 'name', value: 'Name' }
+          { key: 'name', value: 'Name' },
+          { key: 'flName', value: 'FlName' }
         ],
-        displayFieldWidth: 2
+        displayFieldWidth: 1
       }
     },
     {
@@ -146,6 +146,7 @@ const ProductCurrenciesForm = ({ store, setStore, labels, editMode, maxAccess })
         valueField: 'key',
         displayField: 'value',
         displayFieldWidth: 2,
+        refresh: false,
         mapping: [
           { from: 'key', to: 'dispersalType' },
           { from: 'value', to: 'dispersalTypeName' }
