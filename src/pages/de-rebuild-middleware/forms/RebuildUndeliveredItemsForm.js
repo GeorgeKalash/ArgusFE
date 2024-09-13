@@ -95,6 +95,7 @@ export default function RebuildUndeliveredItemsForm({ _labels, access }) {
               <CustomDatePicker
                 name='startDate'
                 label={_labels.startDate}
+                max={formik.values.endDate}
                 value={formik.values?.startDate}
                 required
                 onChange={formik.setFieldValue}
@@ -107,10 +108,10 @@ export default function RebuildUndeliveredItemsForm({ _labels, access }) {
                 name='endDate'
                 label={_labels.endDate}
                 value={formik.values?.endDate}
+                min={formik.values.startDate}
                 required
                 onChange={formik.setFieldValue}
                 onClear={() => formik.setFieldValue('endDate', '')}
-                disabledRangeDate={{ date: formik.values.startDate }}
                 error={formik.touched.endDate && Boolean(formik.errors.endDate)}
               />
             </Grid>
