@@ -14,7 +14,6 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { SCRepository } from 'src/repositories/SCRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
-import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 
 export default function StockCountDocumentTypeDefaultForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -64,7 +63,7 @@ export default function StockCountDocumentTypeDefaultForm({ labels, maxAccess, r
             parameters: `_dtId=${recordId}`
           })
 
-          formik.setValues(res.record)
+          formik.setValues({ ...res.record, recordId: recordId })
         }
       } catch (error) {}
     })()
