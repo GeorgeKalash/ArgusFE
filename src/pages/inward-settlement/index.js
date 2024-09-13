@@ -45,13 +45,12 @@ const InwardSettlement = () => {
 
   async function fetchWithSearch({ filters }) {
     try {
-      return (
-        filters.qry &&
-        (await getRequest({
-          extension: RemittanceOutwardsRepository.InwardSettlement.snapshot,
-          parameters: `_filter=${filters.qry}`
-        }))
-      )
+      if (!filters.qry) return { list: [] }
+
+      return await getRequest({
+        extension: RemittanceOutwardsRepository.InwardSettlement.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
     } catch (error) {
       stackError(error)
     }
@@ -64,13 +63,11 @@ const InwardSettlement = () => {
         parameters: `_userId=${userId}&_key=plantId`
       })
 
-      if (res.record?.value) {
-        return res.record.value
-      }
-
-      return ''
+      return res?.record?.value
     } catch (error) {
       stackError(error)
+
+      return ''
     }
   }
 
@@ -81,13 +78,11 @@ const InwardSettlement = () => {
         parameters: `_userId=${userId}&_key=cashAccountId`
       })
 
-      if (res.record?.value) {
-        return res.record.value
-      }
-
-      return ''
+      return res?.record?.value
     } catch (error) {
       stackError(error)
+
+      return ''
     }
   }
 
@@ -97,13 +92,12 @@ const InwardSettlement = () => {
         extension: SystemRepository.UserFunction.get,
         parameters: `_userId=${userId}&_functionId=${SystemFunction.InwardSettlement}`
       })
-      if (res.record) {
-        return res.record.dtId
-      }
 
-      return ''
+      return res?.record?.dtId
     } catch (error) {
       stackError(error)
+
+      return ''
     }
   }
 
@@ -113,17 +107,17 @@ const InwardSettlement = () => {
       const cashAccountId = await getCashAccountId()
       const dtId = await getDefaultDT()
 
-      if (plantId !== '' && cashAccountId !== '') {
+      if (plantId && cashAccountId) {
         openInwardSettlementWindow(plantId, cashAccountId, recordId, dtId)
       } else {
-        if (plantId === '') {
+        if (!plantId) {
           stackError({
             message: `This user does not have a default plant.`
           })
 
           return
         }
-        if (cashAccountId === '') {
+        if (!cashAccountId) {
           stackError({
             message: `This user does not have a default cash account.`
           })
@@ -146,7 +140,7 @@ const InwardSettlement = () => {
       field: 'date',
       headerName: _labels.date,
       flex: 1,
-      valueGetter: ({ row }) => formatDateDefault(row?.date)
+      type: 'date'
     },
     {
       field: 'corName',
@@ -200,7 +194,6 @@ const InwardSettlement = () => {
         cashAccountId,
         dtId,
         access,
-        userId,
         labels: _labels,
         recordId
       },

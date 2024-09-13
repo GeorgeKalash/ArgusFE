@@ -31,7 +31,7 @@ import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import { RTCLRepository } from 'src/repositories/RTCLRepository'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 
-export default function InwardSettlementForm({ labels, recordId, access, plantId, window, userId, dtId }) {
+export default function InwardSettlementForm({ labels, recordId, access, plantId, cashAccountId, dtId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
   const { stack } = useWindow()
@@ -43,27 +43,26 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
 
   const initialValues = {
     recordId: recordId || null,
+    dtId: parseInt(dtId),
+    date: new Date(),
+    reference: null,
     plantId: parseInt(plantId),
-    cashAccountId: null,
-    cashAccountName: '',
+    cashAccountId: parseInt(cashAccountId),
     inwardId: null,
+    inwardRef: null,
     corId: null,
-    corRef: '',
-    corName: '',
+    corRef: null,
+    corName: null,
     clientId: null,
-    clientRef: '',
+    clientRef: null,
     clientName: '',
-    clientId: null,
     kycId: null,
-    notes: '',
-    wip: 1,
+    notes: null,
     paymentType: null,
-    token: '',
-    plantName: '',
-    plantRef: '',
-    inwardRef: '',
-    dtName: '',
-    statusName: ''
+    token: null,
+    wip: 1,
+    status: 1,
+    releaseStatus: null
   }
 
   const { maxAccess } = useDocumentType({
@@ -96,13 +95,9 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
           extension: RemittanceOutwardsRepository.InwardSettlement.set,
           record: JSON.stringify(copy)
         })
-        formik.setFieldValue('recordId', res.recordId)
-        invalidate()
 
-        const res2 = await getRequest({
-          extension: RemittanceOutwardsRepository.InwardSettlement.get,
-          parameters: `_recordId=${res.recordId}`
-        })
+        invalidate()
+        const res2 = await getInwardSettlement(res.recordId)
         formik.setValues(res2.record)
         toast.success(platformLabels.Added)
       } catch (error) {
@@ -110,150 +105,129 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
       }
     }
   })
+
   const editMode = !!formik.values.recordId
   const isClosed = formik.values.wip === 2
 
   const chooseClient = async clientId => {
-    if (clientId) {
-      try {
-        if (clientId) {
-          const res = await getRequest({
-            extension: RTCLRepository.CtClientIndividual.get2,
-            parameters: `_clientId=${clientId}`
-          })
-          formik.setFieldValue('cl_category', res?.record?.clientMaster?.category)
-          formik.setFieldValue('cl_isResident', res?.record?.clientIndividual?.isResident)
-          formik.setFieldValue('cl_firstName', res?.record?.clientIndividual?.firstName)
-          formik.setFieldValue('cl_middleName', res?.record?.clientIndividual?.middleName)
-          formik.setFieldValue('cl_lastName', res?.record?.clientIndividual?.lastName)
-          formik.setFieldValue('cl_fl_firstName', res?.record?.clientIndividual?.fl_firstName)
-          formik.setFieldValue('cl_fl_middleName', res?.record?.clientIndividual?.fl_middleName)
-          formik.setFieldValue('cl_fl_lastName', res?.record?.clientIndividual?.fl_lastName)
-          formik.setFieldValue('cl_countryId', res?.record?.clientIDView?.idCountryId)
-          formik.setFieldValue('cl_idtId', res?.record?.clientIDView?.idtId)
-          formik.setFieldValue('cl_state', res?.record?.addressView?.stateName)
-          formik.setFieldValue('cl_idNo', res?.record?.clientIDView?.idNo)
-          formik.setFieldValue('cl_city', res?.record?.addressView?.city)
-          formik.setFieldValue('cl_idIssueDate', formatDateFromApi(res?.record?.clientIDView?.idIssueDate))
-          formik.setFieldValue('cl_cityDistrict', res?.record?.addressView?.cityDistrict)
-          formik.setFieldValue('cl_idExpiryDate', formatDateFromApi(res?.record?.clientIDView?.idExpiryDate))
-          formik.setFieldValue('cl_professionId', res?.record?.clientIndividual?.professionId)
-          formik.setFieldValue('cl_sponsor', res?.record?.clientIndividual?.sponsorName)
-          formik.setFieldValue('cl_idIssueCountry', res?.record?.clientIDView?.idCountryId)
-          formik.setFieldValue('cl_nationalityId', res?.record?.clientMaster?.nationalityId)
-          formik.setFieldValue('cl_birthDate', formatDateFromApi(res?.record?.clientIndividual?.birthDate))
-
-          formik.setFieldValue('cl_relationId', res?.record?.clientRemittance?.trxCountPerYear)
-        }
-      } catch (error) {}
-    } else {
-      formik.setFieldValue('cl_category', '')
-      formik.setFieldValue('cl_isResident', '')
-      formik.setFieldValue('cl_firstName', '')
-      formik.setFieldValue('cl_middleName', '')
-      formik.setFieldValue('cl_lastName', '')
-      formik.setFieldValue('cl_fl_firstName', '')
-      formik.setFieldValue('cl_fl_middleName', '')
-      formik.setFieldValue('cl_fl_lastName', '')
-      formik.setFieldValue('cl_countryId', '')
-      formik.setFieldValue('cl_idtId', '')
-      formik.setFieldValue('cl_state', '')
-      formik.setFieldValue('cl_idNo', '')
-      formik.setFieldValue('cl_city', '')
-      formik.setFieldValue('cl_idIssueDate', '')
-      formik.setFieldValue('cl_cityDistrict', '')
-      formik.setFieldValue('cl_idExpiryDate', '')
-      formik.setFieldValue('cl_professionId', '')
-      formik.setFieldValue('cl_sponsor', '')
-      formik.setFieldValue('cl_idIssueCountry', '')
-      formik.setFieldValue('cl_nationalityId', '')
-      formik.setFieldValue('cl_birthDate', '')
-
-      formik.setFieldValue('cl_relationId', '')
-    }
-  }
-
-  const chooseInward = async recordId => {
-    if (recordId) {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: RemittanceOutwardsRepository.InwardsTransfer.get,
-            parameters: `_recordId=${recordId}`
-          })
-          formik.setFieldValue('inwardDate', formatDateFromApi(res?.record?.date))
-          formik.setFieldValue('corName', res?.record?.corName)
-          formik.setFieldValue('corRef', res?.record?.corRef)
-          formik.setFieldValue('currencyId', res?.record?.currencyId)
-          formik.setFieldValue('firstName', res?.record?.sender_firstName)
-          formik.setFieldValue('lastName', res?.record?.sender_lastName)
-          formik.setFieldValue('middleName', res?.record?.sender_middleName)
-          formik.setFieldValue('nationalityId', res?.record?.sender_nationalityId)
-          formik.setFieldValue('sourceOfIncome', res?.record?.sourceOfIncome)
-          formik.setFieldValue('charges', res?.record?.charges)
-          formik.setFieldValue('netAmount', res?.record?.netAmount)
-          formik.setFieldValue('amount', res?.record?.amount)
-          formik.setFieldValue('netAmount', res?.record?.netAmount)
-          formik.setFieldValue('vatAmount', res?.record?.taxAmount)
-        }
-      } catch (error) {}
-    } else {
-      formik.setFieldValue('inwardDate', '')
-      formik.setFieldValue('corName', '')
-      formik.setFieldValue('corRef', '')
-      formik.setFieldValue('currencyId', '')
-      formik.setFieldValue('firstName', '')
-      formik.setFieldValue('lastName', '')
-      formik.setFieldValue('middleName', '')
-      formik.setFieldValue('nationalityId', '')
-      formik.setFieldValue('sourceOfIncome', '')
-      formik.setFieldValue('charges', '')
-      formik.setFieldValue('netAmount', '')
-      formik.setFieldValue('amount', '')
-      formik.setFieldValue('vatAmount', '')
-    }
-  }
-
-  const fetchRecord = async () => {
-    if (recordId) {
-      try {
+    try {
+      if (clientId) {
         const res = await getRequest({
-          extension: RemittanceOutwardsRepository.InwardSettlement.get,
-          parameters: `_recordId=${recordId}`
+          extension: RTCLRepository.CtClientIndividual.get2,
+          parameters: `_clientId=${clientId}`
         })
-
-        if (res.record) {
-          const record = {
-            ...res.record,
-            date: formatDateFromApi(res.record.date)
-          }
-          formik.setValues(record)
-          if (res.record.inwardId) chooseInward(res.record.inwardId)
-          if (res.record.clientId) chooseClient(res.record.clientId)
-        }
-      } catch (error) {
-        stackError(error)
+        formik.setFieldValue('cl_category', res?.record?.clientMaster?.category)
+        formik.setFieldValue('cl_isResident', res?.record?.clientIndividual?.isResident)
+        formik.setFieldValue('cl_firstName', res?.record?.clientIndividual?.firstName)
+        formik.setFieldValue('cl_middleName', res?.record?.clientIndividual?.middleName)
+        formik.setFieldValue('cl_lastName', res?.record?.clientIndividual?.lastName)
+        formik.setFieldValue('cl_fl_firstName', res?.record?.clientIndividual?.fl_firstName)
+        formik.setFieldValue('cl_fl_middleName', res?.record?.clientIndividual?.fl_middleName)
+        formik.setFieldValue('cl_fl_lastName', res?.record?.clientIndividual?.fl_lastName)
+        formik.setFieldValue('cl_countryId', res?.record?.clientIDView?.idCountryId)
+        formik.setFieldValue('cl_idtId', res?.record?.clientIDView?.idtId)
+        formik.setFieldValue('cl_state', res?.record?.addressView?.stateName)
+        formik.setFieldValue('cl_idNo', res?.record?.clientIDView?.idNo)
+        formik.setFieldValue('cl_city', res?.record?.addressView?.city)
+        formik.setFieldValue('cl_idIssueDate', formatDateFromApi(res?.record?.clientIDView?.idIssueDate))
+        formik.setFieldValue('cl_cityDistrict', res?.record?.addressView?.cityDistrict)
+        formik.setFieldValue('cl_idExpiryDate', formatDateFromApi(res?.record?.clientIDView?.idExpiryDate))
+        formik.setFieldValue('cl_professionId', res?.record?.clientIndividual?.professionId)
+        formik.setFieldValue('cl_sponsor', res?.record?.clientIndividual?.sponsorName)
+        formik.setFieldValue('cl_idIssueCountry', res?.record?.clientIDView?.idCountryId)
+        formik.setFieldValue('cl_nationalityId', res?.record?.clientMaster?.nationalityId)
+        formik.setFieldValue('cl_birthDate', formatDateFromApi(res?.record?.clientIndividual?.birthDate))
+        formik.setFieldValue('cl_relationId', res?.record?.clientRemittance?.trxCountPerYear)
+      } else {
+        formik.setFieldValue('cl_category', '')
+        formik.setFieldValue('cl_isResident', '')
+        formik.setFieldValue('cl_firstName', '')
+        formik.setFieldValue('cl_middleName', '')
+        formik.setFieldValue('cl_lastName', '')
+        formik.setFieldValue('cl_fl_firstName', '')
+        formik.setFieldValue('cl_fl_middleName', '')
+        formik.setFieldValue('cl_fl_lastName', '')
+        formik.setFieldValue('cl_countryId', '')
+        formik.setFieldValue('cl_idtId', '')
+        formik.setFieldValue('cl_state', '')
+        formik.setFieldValue('cl_idNo', '')
+        formik.setFieldValue('cl_city', '')
+        formik.setFieldValue('cl_idIssueDate', '')
+        formik.setFieldValue('cl_cityDistrict', '')
+        formik.setFieldValue('cl_idExpiryDate', '')
+        formik.setFieldValue('cl_professionId', '')
+        formik.setFieldValue('cl_sponsor', '')
+        formik.setFieldValue('cl_idIssueCountry', '')
+        formik.setFieldValue('cl_nationalityId', '')
+        formik.setFieldValue('cl_birthDate', '')
+        formik.setFieldValue('cl_relationId', '')
       }
-    }
+    } catch (error) {}
   }
 
-  useEffect(() => {
-    fetchRecord()
-  }, [])
+  const chooseInward = async inwardId => {
+    try {
+      if (inwardId) {
+        const res = await getRequest({
+          extension: RemittanceOutwardsRepository.InwardsTransfer.get,
+          parameters: `_recordId=${inwardId}`
+        })
+        formik.setFieldValue('inwardDate', formatDateFromApi(res?.record?.date))
+        formik.setFieldValue('corName', res?.record?.corName)
+        formik.setFieldValue('corRef', res?.record?.corRef)
+        formik.setFieldValue('currencyId', res?.record?.currencyId)
+        formik.setFieldValue('firstName', res?.record?.sender_firstName)
+        formik.setFieldValue('lastName', res?.record?.sender_lastName)
+        formik.setFieldValue('middleName', res?.record?.sender_middleName)
+        formik.setFieldValue('nationalityId', res?.record?.sender_nationalityId)
+        formik.setFieldValue('sourceOfIncome', res?.record?.sourceOfIncome)
+        formik.setFieldValue('charges', res?.record?.charges)
+        formik.setFieldValue('netAmount', res?.record?.netAmount)
+        formik.setFieldValue('amount', res?.record?.amount)
+        formik.setFieldValue('netAmount', res?.record?.netAmount)
+        formik.setFieldValue('vatAmount', res?.record?.taxAmount)
+      } else {
+        formik.setFieldValue('inwardDate', '')
+        formik.setFieldValue('corName', '')
+        formik.setFieldValue('corRef', '')
+        formik.setFieldValue('currencyId', '')
+        formik.setFieldValue('firstName', '')
+        formik.setFieldValue('lastName', '')
+        formik.setFieldValue('middleName', '')
+        formik.setFieldValue('nationalityId', '')
+        formik.setFieldValue('sourceOfIncome', '')
+        formik.setFieldValue('charges', '')
+        formik.setFieldValue('netAmount', '')
+        formik.setFieldValue('amount', '')
+        formik.setFieldValue('vatAmount', '')
+      }
+    } catch (error) {}
+  }
 
-  const onClose = async recId => {
+  async function getInwardSettlement(recordId) {
+    try {
+      return await getRequest({
+        extension: RemittanceOutwardsRepository.InwardSettlement.get,
+        parameters: `_recordId=${recordId}`
+      })
+    } catch (error) {}
+  }
+
+  const onClose = async () => {
     try {
       const res = await postRequest({
         extension: RemittanceOutwardsRepository.InwardSettlement.close,
         record: JSON.stringify({
-          recordId: formik.values.recordId ?? recId
+          recordId: formik.values.recordId
         })
       })
-
-      if (res.recordId) {
-        if (recordId) toast.success(platformLabels.Closed)
-        invalidate()
-      }
+      const res2 = await getInwardSettlement(res.recordId)
+      formik.setValues({
+        ...res2.record,
+        date: formatDateFromApi(res.record.date)
+      })
+      toast.success(platformLabels.Closed)
+      invalidate()
     } catch (error) {}
   }
 
@@ -265,6 +239,20 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
       disabled: isClosed || !editMode
     }
   ]
+
+  useEffect(() => {
+    ;(async function () {
+      if (recordId) {
+        const res = await getInwardSettlement(recordId)
+        formik.setValues({
+          ...res.record,
+          date: formatDateFromApi(res.record.date)
+        })
+        await chooseInward(res?.record?.inwardId)
+        await chooseClient(res?.record?.clientId)
+      }
+    })()
+  }, [])
 
   return (
     <FormShell
@@ -936,8 +924,6 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                       error={formik.touched.remarks && Boolean(formik.errors.remarks)}
                     />
                   </Grid>
-                  <Grid item xs={4}></Grid>
-                  <Grid item xs={4}></Grid>
                 </Grid>
               </Grid>
             </Grid>
