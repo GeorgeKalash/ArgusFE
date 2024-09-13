@@ -75,9 +75,8 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
     }
   })
 
-  console.log(formik.values)
-
   const isRaw = formik.values.status == 1
+  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
