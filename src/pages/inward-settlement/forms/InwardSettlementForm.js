@@ -31,8 +31,6 @@ import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import { RTCLRepository } from 'src/repositories/RTCLRepository'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 
-// import CloseForm from './CloseForm'
-
 export default function InwardSettlementForm({ labels, recordId, access, plantId, window, userId, dtId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
@@ -193,6 +191,10 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
           formik.setFieldValue('nationalityId', res?.record?.sender_nationalityId)
           formik.setFieldValue('sourceOfIncome', res?.record?.sourceOfIncome)
           formik.setFieldValue('charges', res?.record?.charges)
+          formik.setFieldValue('netAmount', res?.record?.netAmount)
+          formik.setFieldValue('amount', res?.record?.amount)
+          formik.setFieldValue('netAmount', res?.record?.netAmount)
+          formik.setFieldValue('vatAmount', res?.record?.taxAmount)
         }
       } catch (error) {}
     } else {
@@ -206,6 +208,9 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
       formik.setFieldValue('nationalityId', '')
       formik.setFieldValue('sourceOfIncome', '')
       formik.setFieldValue('charges', '')
+      formik.setFieldValue('netAmount', '')
+      formik.setFieldValue('amount', '')
+      formik.setFieldValue('vatAmount', '')
     }
   }
 
@@ -223,6 +228,8 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
             date: formatDateFromApi(res.record.date)
           }
           formik.setValues(record)
+          if (res.record.inwardId) chooseInward(res.record.inwardId)
+          if (res.record.clientId) chooseClient(res.record.clientId)
         }
       } catch (error) {
         stackError(error)
@@ -775,7 +782,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                     <ResourceComboBox
                       endpointId={BusinessPartnerRepository.RelationTypes.qry}
                       name='relationId'
-                      label={labels.relation}
+                      label={labels.relationId}
                       columnsInDropDown={[
                         { key: 'reference', value: 'Reference' },
                         { key: 'name', value: 'Name' }
@@ -816,6 +823,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                       endpointId={SystemRepository.Currency.qry}
                       name='currencyId'
                       label={labels.currency}
+                      displayField={['reference', 'name']}
                       valueField='recordId'
                       values={formik.values}
                       maxAccess={maxAccess}
@@ -871,14 +879,9 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                       name='netAmount'
                       required
                       label={labels.netAmount}
-                      value={formik.values.netAmount}
+                      value={formik?.values?.netAmount}
                       maxAccess={maxAccess}
-                      readOnly={editMode}
-                      onChange={e => formik.setFieldValue('netAmount', e.target.value)}
-                      onClear={() => formik.setFieldValue('netAmount', '')}
-                      error={formik.touched.netAmount && Boolean(formik.errors.netAmount)}
-                      maxLength={15}
-                      decimalScale={2}
+                      readOnly
                     />
                   </Grid>
                 </Grid>
