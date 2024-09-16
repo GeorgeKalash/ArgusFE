@@ -1,11 +1,12 @@
 import { Checkbox, FormControlLabel, Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useState, useRef } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import ImageUpload from 'src/components/Inputs/ImageUpload'
 import { useForm } from 'src/hooks/form'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
@@ -27,6 +28,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
   const invalidate = useInvalidate({
     endpointId: InventoryRepository.Items.qry
   })
+  const imageUploadRef = useRef(null)
 
   const { formik } = useForm({
     initialValues: {
@@ -90,7 +92,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       try {
         const response = await postRequest({
           extension: InventoryRepository.Items.set,
-          record: JSON.stringify(obj)
+          record: JSON.stringify({ ...obj, attachment: null })
         })
 
         if (!recordId) {
@@ -108,6 +110,11 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
           toast.success(platformLabels.Edited)
         }
         setFormikInitial(formik.values)
+
+        if (imageUploadRef.current) {
+          console.log(imageUploadRef.current, 'reffff')
+          await imageUploadRef.current.submit()
+        }
 
         const res = await getRequest({
           extension: InventoryRepository.Items.get,
@@ -152,6 +159,8 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       } catch {}
     })()
   }, [])
+
+  console.log(recordId, 'itemsrecordId')
 
   return (
     <FormShell resourceId={ResourceIds.Items} form={formik} maxAccess={maxAccess} editMode={editMode}>
@@ -213,6 +222,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     error={formik.touched.priceType && formik.errors.priceType}
                   />
                 </Grid>
+
                 <Grid item xs={5.9}>
                   <CustomTextField
                     name='sku'
@@ -377,6 +387,9 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
 
             <Grid item xs={6}>
               <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <ImageUpload ref={imageUploadRef} resourceId={ResourceIds.Items} seqNo={0} recordId={recordId} />
+                </Grid>
                 <Grid item xs={4}>
                   <FormControlLabel
                     control={

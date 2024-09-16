@@ -27,6 +27,7 @@ const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId }, ref) => 
         extension: SystemRepository.Attachment.get,
         parameters: `_resourceId=${resourceId}&_seqNo=${seqNo}&_recordId=${recordId}`
       })
+
       setInitialData(result?.record)
     } catch (e) {}
   }
@@ -45,7 +46,7 @@ const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId }, ref) => 
 
       let data = {
         resourceId: resourceId,
-        recordId: 1,
+        recordId: recordId,
         seqNo: 0,
         fileName: file.name,
         folderId: null,
@@ -78,8 +79,6 @@ const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId }, ref) => 
   }
 
   const submit = () => {
-    console.log(formik.values)
-
     if (formik.values?.file) {
       return postRequest({
         extension: SystemRepository.Attachment.set,

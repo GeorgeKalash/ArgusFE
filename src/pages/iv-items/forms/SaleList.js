@@ -35,19 +35,21 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
   const [check, setCheck] = useState(false)
   const [firstCurr, setFirstCurr] = useState(false)
   useEffect(() => {
-    const fetchCurrency = async () => {
-      try {
-        const response = await getRequest({
-          extension: InventoryRepository.Currency.qry,
-          parameters: `&_itemId=${recordId}`
-        })
-        if (response.list && response.list.length > 0) {
-          setFirstCurr(response.list[0].currencyId)
-        }
-      } catch (error) {}
-    }
+    if (recordId) {
+      const fetchCurrency = async () => {
+        try {
+          const response = await getRequest({
+            extension: InventoryRepository.Currency.qry,
+            parameters: `&_itemId=${recordId}`
+          })
+          if (response.list && response.list.length > 0) {
+            setFirstCurr(response.list[0].currencyId)
+          }
+        } catch (error) {}
+      }
 
-    fetchCurrency()
+      fetchCurrency()
+    }
   }, [])
 
   const { formik } = useForm({
