@@ -20,15 +20,29 @@ export default function RebuildUndeliveredItemsForm({ _labels, access }) {
 
   const { formik } = useForm({
     initialValues: {
-      startDate: new Date(),
-      endDate: new Date(),
+      startDate: null,
+      endDate: null,
     },
     enableReinitialize: false,
     maxAccess: access,
     validateOnChange: true,
     validationSchema: yup.object({
-      startDate: yup.string().required(),
-      endDate: yup.string().required()
+      startDate: yup
+        .date()
+        .required()
+        .test(function (value) {
+          const { dateTo } = this.parent
+
+          return value.getTime() <= dateTo?.getTime()
+        }),
+      endDate: yup
+        .date()
+        .required()
+        .test(function (value) {
+          const { startDate } = this.parent
+
+          return value.getTime() >= startDate?.getTime()
+        }),
     }),
     onSubmit: async obj => {
       try {
@@ -81,6 +95,7 @@ export default function RebuildUndeliveredItemsForm({ _labels, access }) {
               <CustomDatePicker
                 name='startDate'
                 label={_labels.startDate}
+                max={formik.values.endDate}
                 value={formik.values?.startDate}
                 required
                 onChange={formik.setFieldValue}
@@ -93,10 +108,10 @@ export default function RebuildUndeliveredItemsForm({ _labels, access }) {
                 name='endDate'
                 label={_labels.endDate}
                 value={formik.values?.endDate}
+                min={formik.values.startDate}
                 required
                 onChange={formik.setFieldValue}
                 onClear={() => formik.setFieldValue('endDate', '')}
-                disabledRangeDate={{ date: formik.values.startDate, day: 30 }}
                 error={formik.touched.endDate && Boolean(formik.errors.endDate)}
               />
             </Grid>
