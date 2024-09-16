@@ -41,12 +41,12 @@ const Correspondent = () => {
   })
 
   async function fetchWithSearch({ filters, pagination }) {
-    return filters.qry
-      ? await getRequest({
-          extension: RemittanceSettingsRepository.Correspondent.snapshot,
-          parameters: `_filter=${filters.qry}`
-        })
-      : await fetchGridData(pagination)
+    if (filters.qry)
+      return await getRequest({
+        extension: RemittanceSettingsRepository.Correspondent.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+    else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
   async function fetchGridData(options = {}) {
