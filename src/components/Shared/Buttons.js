@@ -231,6 +231,16 @@ export const getButtons = platformLabels => [
     main: true
   },
   {
+    key: 'generate',
+    label: platformLabels.Generate,
+    condition: 'isGenerated',
+    onClick: 'onGenerate',
+    disabled: '!editMode',
+    color: 'black',
+    image: 'generate.png',
+    main: true
+  },
+  {
     key: 'Audit',
     label: platformLabels.Audit,
     color: '#231f20',

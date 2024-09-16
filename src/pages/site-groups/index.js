@@ -1,22 +1,21 @@
-import { useState, useContext } from 'react'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
-
 import { ResourceIds } from 'src/resources/ResourceIds'
-
 import { useWindow } from 'src/windows'
-
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import SiteGroupsForm from './forms/SiteGroupsForm'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const SiteGroups = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const { stack } = useWindow()
 
@@ -41,7 +40,6 @@ const SiteGroups = () => {
     queryFn: fetchGridData,
     endpointId: InventoryRepository.SiteGroups.qry,
     datasetId: ResourceIds.SiteGroups,
-
     search: {
       endpointId: InventoryRepository.SiteGroups.qry,
       searchFn: fetchWithSearch
@@ -81,12 +79,14 @@ const SiteGroups = () => {
   ]
 
   const del = async obj => {
-    await postRequest({
-      extension: InventoryRepository.SiteGroups.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success('Record Deleted Successfully')
+    try {
+      await postRequest({
+        extension: InventoryRepository.SiteGroups.del,
+        record: JSON.stringify(obj)
+      })
+      invalidate()
+      toast.success(platformLabels.Deleted)
+    } catch (error) {}
   }
 
   const edit = obj => {
@@ -102,7 +102,7 @@ const SiteGroups = () => {
       Component: SiteGroupsForm,
       props: {
         labels: _labels,
-        recordId: recordId,
+        recordId,
         maxAccess: access
       },
       width: 500,
@@ -110,8 +110,6 @@ const SiteGroups = () => {
       title: _labels.siteGroup
     })
   }
-
-  console.log('data', data)
 
   return (
     <VertLayout>
