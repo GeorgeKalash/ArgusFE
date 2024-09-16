@@ -1,5 +1,3 @@
-import Correspondent from 'src/pages/correspondent'
-
 export const ResourceIds = {
   GeneralLedger: 30303,
   JournalVoucher: 30302,
