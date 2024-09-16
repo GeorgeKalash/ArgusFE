@@ -24,7 +24,7 @@ export default function ReplineshmentForm({ labels, maxAccess, recordId }) {
 
   const { formik } = useForm({
     initialValues: {
-      recordId: recordId || null,
+      recordId: recordId,
       reference: '',
       name: '',
       defaultMaxQty: '',
@@ -120,6 +120,7 @@ export default function ReplineshmentForm({ labels, maxAccess, recordId }) {
                 maxLength='30'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('reference', '')}
+                error={formik.touched.reference && Boolean(formik.errors.reference)}
               />
             </Grid>
             <Grid item xs={12}>
