@@ -15,12 +15,12 @@ const ItemWindow = ({ recordId, labels, maxAccess }) => {
   const [store, setStore] = useState({
     recordId: recordId || null,
     _msId: null,
-    measurementId: null
+    measurementId: null,
+    priceGroupId: null,
+    returnPolicy: null
   })
 
-  console.log(store.measurementId, 'meeeeeeee')
-
-  console.log(store._msId, '_msid window')
+  console.log(store, 'store')
 
   const tabs = [
     { label: labels.items },

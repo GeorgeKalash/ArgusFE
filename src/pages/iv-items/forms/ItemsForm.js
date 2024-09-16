@@ -55,7 +55,8 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       lotCategoryId: null,
       spfId: '',
       categoryName: '',
-      defSaleMUId: ''
+      defSaleMUId: '',
+      pgId: ''
     },
     access,
     enableReinitialize: true,
@@ -136,13 +137,16 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
             parameters: `_recordId=${recordId}`
           })
           setFormikInitial(res.record)
+          console.log(res.record.pgId, 'res.record.pgId')
           formik.setValues({ ...res.record, kitItem: !!res.record.kitItem })
           setShowLotCategories(res.record.trackBy === '2' || res.record.trackBy === 2)
           setShowSerialProfiles(res.record.trackBy === '1' || res.record.trackBy === 1)
           setStore(prevStore => ({
             ...prevStore,
             _msId: res.record.msId,
-            measurementId: res.record.defSaleMUId
+            measurementId: res.record.defSaleMUId,
+            priceGroupId: res.record.pgId,
+            returnPolicy: res.record.returnPolicyId
           }))
         }
       } catch {}
