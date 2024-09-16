@@ -171,6 +171,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
   })
   const editMode = !!formik.values.recordId
   const isClosed = formik.values.status === 4
+  const isPosted = formik.values.status === 3
 
   function openCloseWindow() {
     stack({
@@ -256,7 +257,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
       key: 'Post',
       condition: true,
       onClick: onPost,
-      disabled: !isClosed
+      disabled: isPosted
     }
   ]
 

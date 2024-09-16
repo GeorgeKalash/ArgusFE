@@ -43,7 +43,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
 
   const initialValues = {
     recordId: recordId || null,
-    dtId: parseInt(dtId),
+    dtId: dtId ? parseInt(dtId) : null,
     date: new Date(),
     reference: '',
     plantId: parseInt(plantId),
@@ -61,7 +61,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
     paymentType: null,
     token: null,
     amount: '',
-    charges: '',
+    charges: null,
     transferType: null,
     sender_nationalityId: null,
     sender_firstName: null,
@@ -72,6 +72,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
     commissionReceiver: null,
     purposeOfTransfer: null,
     currencyId: null,
+    faxNo: null,
     commissionAgent: null,
     sourceOfIncome: null,
     receiver_relationId: null,
@@ -112,6 +113,11 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
         const { inwardId } = this.parent
 
         return !(inwardId == null || inwardId === '' || inwardId === undefined)
+      }),
+      faxNo: yup.string().test('is-fax-mandatory', 'Fax number is required', function () {
+        const { transferType } = this.parent
+
+        return transferType != 1
       })
     }),
     onSubmit: async () => {
@@ -127,6 +133,14 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
         if (copy.inwardId) {
           await submitIWS(copy)
         } else {
+          if (!dtId) {
+            stackError({
+              message: labels.assignDefaultDocType
+            })
+
+            return
+          }
+
           const data = {
             recordId: null,
             reference: null,
@@ -135,6 +149,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
             amount: formik.values.amount,
             baseAmount: formik.values.baseAmount,
             transferType: formik.values.transferType,
+            faxNo: formik.values.faxNo,
             sender_firstName: formik.values.sender_firstName,
             sender_middleName: formik.values.sender_middleName,
             sender_lastName: formik.values.sender_lastName,
@@ -159,7 +174,8 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
 
           formik.setFieldValue('inwardId', res.recordId)
           await closeInwardTransfer(res.recordId, data)
-          await postInwardTransfer(res.recordId, data)
+          const resIW = await getInwardsTransfer(inwardId)
+          await postInwardTransfer(res.recordId, data, resIW?.record?.reference)
           await submitIWS(copy)
         }
         invalidate()
@@ -286,7 +302,6 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
       return res
     } catch (error) {}
   }
-
   async function getCorCurrency(corId) {
     try {
       if (corId) {
@@ -334,9 +349,10 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
     }
   }
 
-  const postInwardTransfer = async (recordId, data) => {
+  const postInwardTransfer = async (recordId, data, reference) => {
     try {
       data.recordId = recordId
+      data.reference = reference
       await postRequest({
         extension: RemittanceOutwardsRepository.InwardsTransfer.post,
         record: JSON.stringify(data)
@@ -361,7 +377,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
       disabled: isClosed || !editMode
     }
   ]
-
+  console.log('check formik ', formik, dtId)
   useEffect(() => {
     ;(async function () {
       if (recordId) {
@@ -558,6 +574,21 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                       error={formik.touched.transferType && Boolean(formik.errors.transferType)}
                     />
                   </Grid>
+                  <Grid item xs={3}>
+                    <CustomTextField
+                      name='faxNo'
+                      label={labels.faxNo}
+                      value={formik?.values?.faxNo}
+                      maxAccess={maxAccess}
+                      maxLength='30'
+                      error={formik.touched.faxNo && Boolean(formik.errors.faxNo)}
+                      readOnly={formik.values.inwardId}
+                      required
+                      hidden={formik.values.transferType != 1}
+                      onChange={formik.handleChange}
+                      onClear={() => formik.setFieldValue('faxNo', '')}
+                    />
+                  </Grid>
                 </Grid>
               </Grid>
             </Grid>
@@ -572,7 +603,9 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                       label={labels.firstName}
                       value={formik?.values?.sender_firstName}
                       maxAccess={maxAccess}
-                      readOnly
+                      required={!formik.values.inwardRef}
+                      readOnly={formik.values.inwardRef}
+                      onChange={formik.handleChange}
                     />
                   </Grid>
                   <Grid item xs={4}>
@@ -581,7 +614,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                       label={labels.middleName}
                       value={formik?.values?.sender_middleName}
                       maxAccess={maxAccess}
-                      readOnly
+                      onChange={formik.handleChange}
                     />
                   </Grid>
                   <Grid item xs={4}>
@@ -590,7 +623,9 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                       label={labels.lastName}
                       value={formik?.values?.sender_lastName}
                       maxAccess={maxAccess}
-                      readOnly
+                      required={!formik.values.inwardRef}
+                      readOnly={formik.values.inwardRef}
+                      onChange={formik.handleChange}
                     />
                   </Grid>
                 </Grid>
@@ -633,7 +668,6 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                       error={formik.touched.category && Boolean(formik.errors.category)}
                     />
                   </Grid>
-                  <Grid item xs={4}></Grid>
                 </Grid>
               </Grid>
             </Grid>
@@ -975,8 +1009,8 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                       label={labels.dispersalMode}
                       valueField='key'
                       displayField='value'
-                      readOnly
-                      required
+                      required={!formik.values.inwardRef}
+                      readOnly={formik.values.inwardRef}
                       maxAccess={maxAccess}
                       onChange={(event, newValue) => {
                         formik.setFieldValue('paymentType', newValue?.key)
@@ -993,7 +1027,8 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                       valueField='recordId'
                       values={formik.values}
                       maxAccess={maxAccess}
-                      readOnly
+                      required={!formik.values.inwardRef}
+                      readOnly={formik.values.inwardRef}
                     />
                   </Grid>
                   <Grid item xs={4}>
