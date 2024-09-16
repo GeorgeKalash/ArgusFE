@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -14,8 +14,6 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 
 export default function SiteGroupsForm({ labels, recordId, maxAccess }) {
-  const [editMode, setEditMode] = useState(!!recordId)
-
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -48,12 +46,13 @@ export default function SiteGroupsForm({ labels, recordId, maxAccess }) {
           toast.success(platformLabels.Added)
           formik.setFieldValue('recordId', response.recordId)
         } else toast.success(platformLabels.Edited)
-        setEditMode(true)
   
         invalidate()
       } catch (error) {}
     }
   })
+
+  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
