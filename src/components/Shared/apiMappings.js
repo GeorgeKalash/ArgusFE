@@ -17,6 +17,7 @@ import { FixedAssetsRepository } from 'src/repositories/FixedAssetsRepository'
 import { SCRepository } from 'src/repositories/SCRepository'
 import { IVReplenishementRepository } from 'src/repositories/IVReplenishementRepository'
 import { POSRepository } from 'src/repositories/POSRepository'
+import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 
 export const COMBOBOX = 1
 
@@ -658,6 +659,17 @@ export const apiMappings = {
   [ResourceIds.CostCenterGroup]: {
     type: COMBOBOX,
     endpoint: GeneralLedgerRepository.CostCenterGroup.qry,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+  [ResourceIds.Correspondent]: {
+    type: COMBOBOX,
+    endpoint: RemittanceSettingsRepository.Correspondent.qry,
+    parameters: '_startAt=0&_pageSize=1000&_params=',
     valueField: 'recordId',
     displayField: ['reference', 'name'],
     columnsInDropDown: [
