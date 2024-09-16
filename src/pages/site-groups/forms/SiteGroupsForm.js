@@ -11,10 +11,12 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function SiteGroupsForm({ labels, recordId, maxAccess }) {
   const [editMode, setEditMode] = useState(!!recordId)
 
+  const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
@@ -36,23 +38,20 @@ export default function SiteGroupsForm({ labels, recordId, maxAccess }) {
       reference: yup.string().required()
     }),
     onSubmit: async obj => {
-      const recordId = obj.recordId
-
-      const response = await postRequest({
-        extension: InventoryRepository.SiteGroups.set,
-        record: JSON.stringify(obj)
-      })
-
-      if (!recordId) {
-        toast.success('Record Added Successfully')
-        formik.setValues({
-          ...obj,
-          recordId: response.recordId
+      try {
+        const response = await postRequest({
+          extension: InventoryRepository.SiteGroups.set,
+          record: JSON.stringify(obj)
         })
-      } else toast.success('Record Edited Successfully')
-      setEditMode(true)
-
-      invalidate()
+  
+        if (!obj.recordId) {
+          toast.success(platformLabels.Added)
+          formik.setFieldValue('recordId', response.recordId)
+        } else toast.success(platformLabels.Edited)
+        setEditMode(true)
+  
+        invalidate()
+      } catch (error) {}
     }
   })
 
@@ -72,7 +71,7 @@ export default function SiteGroupsForm({ labels, recordId, maxAccess }) {
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.Cities} form={formik} height={400} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell resourceId={ResourceIds.SiteGroups} form={formik} height={400} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
