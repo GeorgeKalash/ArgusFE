@@ -667,11 +667,13 @@ export const apiMappings = {
     ]
   },
   [ResourceIds.Correspondent]: {
-    type: COMBOBOX,
-    endpoint: RemittanceSettingsRepository.Correspondent.qry,
-    parameters: '_startAt=0&_pageSize=1000&_params=',
-    valueField: 'recordId',
-    displayField: ['reference', 'name'],
+    type: LOOKUP,
+    endpoint: RemittanceSettingsRepository.Correspondent.snapshot,
+    firstField: 'reference',
+    secondField: 'name',
+    valueOnSelection: 'recordId',
+    displayFieldWidth: 1,
+    firstFieldWidth: '40%',
     columnsInDropDown: [
       { key: 'reference', value: 'Reference' },
       { key: 'name', value: 'Name' }
