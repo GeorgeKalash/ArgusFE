@@ -6,10 +6,8 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
-import toast from 'react-hot-toast'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
-import { formatDateDefault } from 'src/lib/date-helper'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -17,14 +15,12 @@ import { useError } from 'src/error'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import InwardSettlementForm from './forms/InwardSettlementForm'
 import { getStorageData } from 'src/storage/storage'
-import { ControlContext } from 'src/providers/ControlContext'
 
 const InwardSettlement = () => {
-  const { postRequest, getRequest } = useContext(RequestsContext)
+  const { getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
   const userId = getStorageData('userData').userId
-  const { platformLabels } = useContext(ControlContext)
 
   const {
     query: { data },
@@ -165,24 +161,11 @@ const InwardSettlement = () => {
     hasDT: false
   })
 
-  const delTransfer = async obj => {
-    try {
-      await postRequest({
-        extension: RemittanceOutwardsRepository.InwardSettlement.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {
-      stackError(error)
-    }
-  }
-
-  const addTransfer = () => {
+  const addInward = () => {
     proxyAction()
   }
 
-  const editTransfer = obj => {
+  const editInward = obj => {
     openForm(obj.recordId)
   }
 
@@ -206,7 +189,7 @@ const InwardSettlement = () => {
     <VertLayout>
       <Fixed>
         <GridToolbar
-          onAdd={addTransfer}
+          onAdd={addInward}
           maxAccess={access}
           onSearch={value => {
             filterBy('qry', value)
@@ -223,8 +206,7 @@ const InwardSettlement = () => {
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          onEdit={editTransfer}
-          onDelete={delTransfer}
+          onEdit={editInward}
           isLoading={false}
           pageSize={50}
           refetch={refetch}

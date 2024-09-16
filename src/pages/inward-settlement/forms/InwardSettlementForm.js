@@ -58,16 +58,21 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
     clientName: '',
     kycId: null,
     notes: null,
-    dispersalMode: null,
+    paymentType: null,
     token: null,
     amount: '',
+    charges: '',
+    transferType: null,
     sender_nationalityId: null,
     sender_firstName: null,
     sender_middleName: null,
     sender_lastName: null,
     receiver_nationalityId: null,
+    receiver_payoutType: null,
+    commissionReceiver: null,
     purposeOfTransfer: null,
     currencyId: null,
+    commissionAgent: null,
     sourceOfIncome: null,
     receiver_relationId: null,
     interfaceId: null,
@@ -97,7 +102,17 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
       corRef: yup.string().required(),
       clientId: yup.string().required(),
       amount: yup.number().required(),
-      dispersalMode: yup.number().required()
+      paymentType: yup.number().required(),
+      currencyId: yup.string().required(),
+      transferType: yup.string().required(),
+      receiver_payoutType: yup.string().required(),
+      commissionAgent: yup.string().required(),
+      commissionReceiver: yup.string().required(),
+      charges: yup.string().test('is-charges-mandatory', 'Charges is required', function () {
+        const { inwardId } = this.parent
+
+        return !(inwardId == null || inwardId === '' || inwardId === undefined)
+      })
     }),
     onSubmit: async () => {
       try {
@@ -109,23 +124,61 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
         copy.idExpiryDate = copy.idExpiryDate ? formatDateToApi(copy?.idExpiryDate) : null
         copy.expiryDate = copy.expiryDate ? formatDateToApi(copy?.expiryDate) : null
 
-        const res = await postRequest({
-          extension: RemittanceOutwardsRepository.InwardSettlement.set,
-          record: JSON.stringify(copy)
-        })
+        if (copy.inwardId) {
+          await submitIWS(copy)
+        } else {
+          const data = {
+            recordId: null,
+            reference: null,
+            corId: formik.values.corId,
+            currencyId: formik.values.currencyId,
+            amount: formik.values.amount,
+            baseAmount: formik.values.baseAmount,
+            transferType: formik.values.transferType,
+            sender_firstName: formik.values.sender_firstName,
+            sender_middleName: formik.values.sender_middleName,
+            sender_lastName: formik.values.sender_lastName,
+            sender_nationalityId: formik.values.sender_nationalityId,
+            receiver_type: formik.values.receiver_type,
+            receiver_payoutType: formik.values.receiver_payoutType,
+            receiver_firstName: formik.values.receiver_firstName,
+            receiver_middleName: formik.values.receiver_middleName,
+            receiver_lastName: formik.values.receiver_lastName,
+            paymentMode: formik.values.dispersalMode,
+            commissionReceiver: formik.values.commissionReceiver,
+            commissionAgent: formik.values.commissionAgent,
+            charges: formik.values.charges,
+            wip: 1,
+            status: 1
+          }
 
+          const res = await postRequest({
+            extension: RemittanceOutwardsRepository.InwardsTransfer.set,
+            record: JSON.stringify(data)
+          })
+
+          formik.setFieldValue('inwardId', res.recordId)
+          await closeInwardTransfer(res.recordId, data)
+          await postInwardTransfer(res.recordId, data)
+          await submitIWS(copy)
+        }
         invalidate()
-        const res2 = await getInwardSettlement(res.recordId)
-        formik.setValues(res2.record)
         toast.success(platformLabels.Added)
       } catch (error) {
         stackError(error)
       }
     }
   })
-
   const editMode = !!formik.values.recordId
   const isClosed = formik.values.wip === 2
+
+  async function submitIWS(data) {
+    const res = await postRequest({
+      extension: RemittanceOutwardsRepository.InwardSettlement.set,
+      record: JSON.stringify(data)
+    })
+    await refetchForm(res.recordId)
+  }
 
   const chooseClient = async clientId => {
     try {
@@ -184,10 +237,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
   const chooseInward = async inwardId => {
     try {
       if (inwardId) {
-        const res = await getRequest({
-          extension: RemittanceOutwardsRepository.InwardsTransfer.get,
-          parameters: `_recordId=${inwardId}`
-        })
+        const res = getInwardsTransfer(inwardId)
         formik.setFieldValue('inwardDate', formatDateFromApi(res?.record?.date))
         formik.setFieldValue('corId', res?.record?.corId)
         formik.setFieldValue('corRef', res?.record?.corRef)
@@ -196,10 +246,14 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
         formik.setFieldValue('sender_lastName', res?.record?.sender_lastName)
         formik.setFieldValue('sender_middleName', res?.record?.sender_middleName)
         formik.setFieldValue('sender_nationalityId', res?.record?.sender_nationalityId)
-        formik.setFieldValue('dispersalMode', res?.record?.dispersalMode)
+        formik.setFieldValue('paymentType', res?.record?.dispersalMode)
         formik.setFieldValue('currencyId', res?.record?.currencyId)
         formik.setFieldValue('purposeOfTransfer', res?.record?.purposeOfTransfer)
-        formik.setFieldValue('sourceOfIncome', res?.record?.sourceOfIncome)
+        formik.setFieldValue('currencyId', res?.record?.currencyId)
+        formik.setFieldValue('transferType', res?.record?.transferType)
+        formik.setFieldValue('receiver_payoutType', res?.record?.receiver_payoutType)
+        formik.setFieldValue('commissionReceiver', res?.record?.commissionReceiver)
+        formik.setFieldValue('commissionAgent', res?.record?.commissionAgent)
       } else {
         formik.setFieldValue('inwardDate', null)
         formik.setFieldValue('corId', null)
@@ -209,7 +263,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
         formik.setFieldValue('sender_lastName', null)
         formik.setFieldValue('sender_middleName', null)
         formik.setFieldValue('sender_nationalityId', null)
-        formik.setFieldValue('dispersalMode', null)
+        formik.setFieldValue('paymentType', null)
         formik.setFieldValue('currencyId', null)
         formik.setFieldValue('purposeOfTransfer', null)
         formik.setFieldValue('sourceOfIncome', null)
@@ -220,10 +274,16 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
 
   async function getInwardSettlement(recordId) {
     try {
-      return await getRequest({
+      const res = await getRequest({
         extension: RemittanceOutwardsRepository.InwardSettlement.get,
         parameters: `_recordId=${recordId}`
       })
+      formik.setValues({
+        ...res.record,
+        date: formatDateFromApi(res.record.date)
+      })
+
+      return res
     } catch (error) {}
   }
 
@@ -248,14 +308,49 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
           recordId: formik.values.recordId
         })
       })
-      const res2 = await getInwardSettlement(res.recordId)
-      formik.setValues({
-        ...res2.record,
-        date: formatDateFromApi(res.record.date)
-      })
+      await getInwardSettlement(res.recordId)
       toast.success(platformLabels.Closed)
       invalidate()
     } catch (error) {}
+  }
+  async function getInwardsTransfer(recordId) {
+    try {
+      return await getRequest({
+        extension: RemittanceOutwardsRepository.InwardsTransfer.get,
+        parameters: `_recordId=${recordId}`
+      })
+    } catch (error) {}
+  }
+
+  const closeInwardTransfer = async (recordId, data) => {
+    try {
+      data.recordId = recordId
+      await postRequest({
+        extension: RemittanceOutwardsRepository.InwardsTransfer.close,
+        record: JSON.stringify(data)
+      })
+    } catch (error) {
+      stackError(error)
+    }
+  }
+
+  const postInwardTransfer = async (recordId, data) => {
+    try {
+      data.recordId = recordId
+      await postRequest({
+        extension: RemittanceOutwardsRepository.InwardsTransfer.post,
+        record: JSON.stringify(data)
+      })
+    } catch (error) {
+      stackError(error)
+    }
+  }
+
+  async function refetchForm(recordId) {
+    const res = await getInwardSettlement(recordId)
+    await chooseInward(res?.record?.inwardId)
+    await chooseClient(res?.record?.clientId)
+    await getCorCurrency(res?.record?.corId)
   }
 
   const actions = [
@@ -270,13 +365,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
   useEffect(() => {
     ;(async function () {
       if (recordId) {
-        const res = await getInwardSettlement(recordId)
-        formik.setValues({
-          ...res.record,
-          date: formatDateFromApi(res.record.date)
-        })
-        await chooseInward(res?.record?.inwardId)
-        await chooseClient(res?.record?.clientId)
+        await refetchForm(recordId)
       }
     })()
   }, [])
@@ -357,7 +446,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
               </Grid>
             </Grid>
           </FieldSet>
-          <FieldSet sx={{ flex: 0 }}>
+          <FieldSet title={labels.inwardDetails} sx={{ flex: 0 }}>
             <Grid container spacing={2}>
               <Grid item xs={12}>
                 <Grid container spacing={2}>
@@ -431,11 +520,49 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                       error={formik.touched.correspondantCurrency && Boolean(formik.errors.correspondantCurrency)}
                     />
                   </Grid>
+                  <Grid item xs={3}>
+                    <ResourceComboBox
+                      values={formik.values}
+                      endpointId={SystemRepository.Currency.qry}
+                      name='currencyId'
+                      label={labels.currency}
+                      valueField='recordId'
+                      displayField={['reference', 'name']}
+                      columnsInDropDown={[
+                        { key: 'reference', value: 'Reference' },
+                        { key: 'name', value: 'Name' }
+                      ]}
+                      onChange={(event, newValue) => {
+                        formik.setFieldValue('currencyId', newValue ? newValue.recordId : '')
+                      }}
+                      error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
+                      maxAccess={maxAccess}
+                      required
+                      readOnly={formik.values.inwardId}
+                    />
+                  </Grid>
+                  <Grid item xs={3}>
+                    <ResourceComboBox
+                      values={formik.values}
+                      datasetId={DataSets.transferType}
+                      name='transferType'
+                      label={labels.transferType}
+                      valueField='key'
+                      displayField='value'
+                      required
+                      readOnly={formik.values.inwardId}
+                      maxAccess={maxAccess}
+                      onChange={(event, newValue) => {
+                        formik.setFieldValue('transferType', newValue?.key)
+                      }}
+                      error={formik.touched.transferType && Boolean(formik.errors.transferType)}
+                    />
+                  </Grid>
                 </Grid>
               </Grid>
             </Grid>
           </FieldSet>
-          <FieldSet sx={{ flex: 0 }}>
+          <FieldSet title={labels.senderDetails} sx={{ flex: 0 }}>
             <Grid container spacing={2}>
               <Grid item xs={12}>
                 <Grid container spacing={2}>
@@ -511,7 +638,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
               </Grid>
             </Grid>
           </FieldSet>
-          <FieldSet sx={{ flex: 0 }}>
+          <FieldSet title={labels.receiverDetails} sx={{ flex: 0 }}>
             {/*CLIENT*/}
             <Grid container spacing={2}>
               <Grid item xs={12}>
@@ -800,11 +927,43 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                       error={formik.touched.relationId && Boolean(formik.errors.relationId)}
                     />
                   </Grid>
+                  <Grid item xs={4}>
+                    <ResourceComboBox
+                      values={formik.values}
+                      datasetId={DataSets.receiverPayoutType}
+                      name='receiver_payoutType'
+                      label={labels.payoutType}
+                      valueField='key'
+                      displayField='value'
+                      maxAccess={maxAccess}
+                      required
+                      readOnly={formik.values.inwardId}
+                      onChange={(event, newValue) => {
+                        formik.setFieldValue('receiver_payoutType', newValue?.key)
+                      }}
+                      error={formik.touched.receiver_payoutType && Boolean(formik.errors.receiver_payoutType)}
+                    />
+                  </Grid>
+                  <Grid item xs={4}>
+                    <CustomNumberField
+                      name='commissionReceiver'
+                      label={labels.commissionReceiver}
+                      value={formik.values.commissionReceiver}
+                      maxAccess={maxAccess}
+                      required
+                      readOnly={formik.values.inwardId}
+                      onChange={e => formik.setFieldValue('commissionReceiver', e.target.value)}
+                      onClear={() => formik.setFieldValue('commissionReceiver', '')}
+                      error={formik.touched.commissionReceiver && Boolean(formik.errors.commissionReceiver)}
+                      maxLength={12}
+                      decimalScale={2}
+                    />
+                  </Grid>
                 </Grid>
               </Grid>
             </Grid>
           </FieldSet>
-          <FieldSet sx={{ flex: 0 }}>
+          <FieldSet title={labels.paymentDetails} sx={{ flex: 0 }}>
             <Grid container spacing={2}>
               <Grid item xs={12}>
                 <Grid container spacing={2}>
@@ -812,7 +971,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                     <ResourceComboBox
                       values={formik.values}
                       datasetId={DataSets.CA_CASH_ACCOUNT_TYPE}
-                      name='dispersalMode'
+                      name='paymentType'
                       label={labels.dispersalMode}
                       valueField='key'
                       displayField='value'
@@ -820,9 +979,9 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                       required
                       maxAccess={maxAccess}
                       onChange={(event, newValue) => {
-                        formik.setFieldValue('dispersalMode', newValue?.key)
+                        formik.setFieldValue('paymentType', newValue?.key)
                       }}
-                      error={formik.touched.dispersalMode && Boolean(formik.errors.dispersalMode)}
+                      error={formik.touched.paymentType && Boolean(formik.errors.paymentType)}
                     />
                   </Grid>
                   <Grid item xs={4}>
@@ -876,9 +1035,11 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                       label={labels.charges}
                       value={formik.values.charges}
                       maxAccess={maxAccess}
-                      readOnly={editMode}
+                      required={!formik.values.inwardId}
+                      readOnly={formik.values.inwardId}
                       onChange={e => formik.setFieldValue('charges', e.target.value)}
                       onClear={() => formik.setFieldValue('charges', '')}
+                      error={formik.touched.charges && Boolean(formik.errors.charges)}
                     />
                   </Grid>
                   <Grid item xs={4}>
@@ -925,7 +1086,21 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                       maxAccess={maxAccess}
                     />
                   </Grid>
-                  <Grid item xs={4}></Grid>
+                  <Grid item xs={4}>
+                    <CustomNumberField
+                      name='commissionAgent'
+                      label={labels.commissionAgent}
+                      value={formik.values.commissionAgent}
+                      maxAccess={maxAccess}
+                      required
+                      readOnly={formik.values.inwardId}
+                      onChange={e => formik.setFieldValue('commissionAgent', e.target.value)}
+                      onClear={() => formik.setFieldValue('commissionAgent', '')}
+                      error={formik.touched.commissionAgent && Boolean(formik.errors.commissionAgent)}
+                      maxLength={12}
+                      decimalScale={2}
+                    />
+                  </Grid>
                 </Grid>
               </Grid>
               <Grid item xs={12}>

@@ -131,16 +131,13 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
 
         return transferType !== '1' || (transferType === '1' && value !== undefined && value !== null)
       }),
-      trackingNo: yup.string().required(),
       sender_firstName: yup.string().required(),
       sender_lastName: yup.string().required(),
       sender_nationalityId: yup.string().required(),
-      sender_countryId: yup.string().required(),
       receiver_type: yup.string().required(),
       receiver_firstName: yup.string().required(),
       receiver_lastName: yup.string().required(),
       receiver_payoutType: yup.string().required(),
-      receiver_ttNo: yup.string().required(),
       commissionAgent: yup.number().required(),
       commissionReceiver: yup.number().required(),
       charges: yup.number().required(),
@@ -197,6 +194,22 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
       })
     } catch (error) {}
   }
+
+  const onPost = async () => {
+    try {
+      const res = await postRequest({
+        extension: RemittanceOutwardsRepository.InwardsTransfer.post,
+        record: JSON.stringify(formik.values)
+      })
+
+      toast.success(platformLabels.Posted)
+      invalidate()
+      const res2 = await getInwards(res.recordId)
+      res2.record.date = formatDateFromApi(res2.record.date)
+      formik.setValues(res2.record)
+    } catch (exception) {}
+  }
+
   useEffect(() => {
     ;(async function () {
       getDefaultVAT()
@@ -232,6 +245,18 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
       condition: !isClosed,
       onClick: openCloseWindow,
       disabled: isClosed || !editMode
+    },
+    {
+      key: 'GL',
+      condition: true,
+      onClick: 'onClickGL',
+      disabled: !editMode
+    },
+    {
+      key: 'Post',
+      condition: true,
+      onClick: onPost,
+      disabled: !isClosed
     }
   ]
 
@@ -423,7 +448,6 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       <Grid item xs={4}>
                         <CustomTextField
                           name='trackingNo'
-                          required
                           label={labels.trackingNo}
                           value={formik?.values?.trackingNo}
                           maxAccess={maxAccess}
@@ -558,7 +582,6 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       error={formik.touched.sender_countryId && Boolean(formik.errors.sender_countryId)}
                       maxAccess={maxAccess}
                       readOnly={editMode}
-                      required
                     />
                   </Grid>
                   <Grid item xs={4}>
@@ -989,7 +1012,6 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       value={formik?.values?.receiver_ttNo}
                       maxAccess={maxAccess}
                       readOnly={editMode}
-                      required
                       maxLength='20'
                       error={formik.touched.receiver_ttNo && Boolean(formik.errors.receiver_ttNo)}
                       onChange={formik.handleChange}
