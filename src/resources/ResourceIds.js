@@ -240,5 +240,6 @@ export const ResourceIds = {
   RebuildUndeliveredItems: 52504,
   IvSettings: 41115,
   FeeScheduleInwardsMap: 36130,
-  OpenOutwardsReturn: 36320
+  OpenOutwardsReturn: 36320,
+  AgingButton: 31419
 }

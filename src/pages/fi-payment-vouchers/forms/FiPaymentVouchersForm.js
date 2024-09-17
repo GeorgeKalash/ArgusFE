@@ -201,6 +201,12 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
       disabled: !editMode
     },
     {
+      key: 'Aging',
+      condition: true,
+      onClick: 'onClickAging',
+      disabled: !editMode
+    },
+    {
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
