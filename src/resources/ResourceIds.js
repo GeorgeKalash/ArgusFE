@@ -240,5 +240,6 @@ export const ResourceIds = {
   RebuildInventory: 41501,
   RebuildUndeliveredItems: 52504,
   IvSettings: 41115,
-  FeeScheduleInwardsMap: 36130
+  FeeScheduleInwardsMap: 36130,
+  OpenOutwardsReturn: 36320
 }
