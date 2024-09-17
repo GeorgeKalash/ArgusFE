@@ -31,9 +31,9 @@ export default function RebuildUndeliveredItemsForm({ _labels, access }) {
         .date()
         .required()
         .test(function (value) {
-          const { dateTo } = this.parent
+          const { endDate } = this.parent
 
-          return value.getTime() <= dateTo?.getTime()
+          return value.getTime() <= endDate?.getTime()
         }),
       endDate: yup
         .date()
