@@ -172,6 +172,7 @@ export default function ExRatesForm({ labels, recordId, maxAccess, record, windo
                 decimalScale={5}
                 value={formik.values?.rate}
                 required
+                maxLength='18'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('rate', '')}
                 maxAccess={maxAccess}
