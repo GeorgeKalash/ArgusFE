@@ -11,7 +11,6 @@ import { useWindow } from 'src/windows'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { getFormattedNumber } from 'src/lib/numberField-helper'
 import { ControlContext } from 'src/providers/ControlContext'
 
 const CcCashNotes = () => {

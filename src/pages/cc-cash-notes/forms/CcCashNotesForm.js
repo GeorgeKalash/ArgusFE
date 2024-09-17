@@ -37,24 +37,22 @@ export default function CcCashNotesForm({ labels, maxAccess, record, recordId, w
       note: yup.string().required()
     }),
     onSubmit: async obj => {
-      const currencyId = formik.values.currencyId
-      const note = formik.values.note
-
-      await postRequest({
-        extension: CashCountRepository.CcCashNotes.set,
-        record: JSON.stringify(obj)
-      })
-
-      if (!currencyId && !note) {
-        toast.success(platformLabels.Added)
-      } else toast.success(platformLabels.Edited)
-      formik.setValues({
-        ...obj,
-        recordId: String(obj.currencyId * 10) + obj.note
-      })
-
-      window.close()
-      invalidate()
+      try {
+        const currencyId = formik.values.currencyId
+        const note = formik.values.note
+  
+        await postRequest({
+          extension: CashCountRepository.CcCashNotes.set,
+          record: JSON.stringify(obj)
+        })
+  
+        if (!currencyId && !note) {
+          toast.success(platformLabels.Added)
+        } else toast.success(platformLabels.Edited)
+        formik.setFieldValue('recordId',  String(obj.currencyId * 10) + obj.note)
+        window.close()
+        invalidate()
+      } catch (error) {}
     }
   })
 
