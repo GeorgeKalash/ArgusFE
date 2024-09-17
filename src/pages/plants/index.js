@@ -107,7 +107,7 @@ const Plants = () => {
         editMode: recordId && true
       },
       width: 800,
-      height: 740,
+      height: 640,
       title: _labels.plant
     })
   }
