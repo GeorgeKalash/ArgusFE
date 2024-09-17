@@ -129,10 +129,12 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
   }
 
   async function getCycleCounts(recordId) {
-    return await getRequest({
-      extension: SCRepository.StockCount.get,
-      parameters: `_recordId=${recordId}`
-    })
+    try {
+      return await getRequest({
+        extension: SCRepository.StockCount.get,
+        parameters: `_recordId=${recordId}`
+      })
+    } catch (error) {}
   }
 
   async function refetchForm(recordId) {
