@@ -6,29 +6,22 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { useWindow } from 'src/windows'
-import { ControlContext } from 'src/providers/ControlContext'
-import { useError } from 'src/error'
-import { SystemRepository } from 'src/repositories/SystemRepository'
-import { getStorageData } from 'src/storage/storage'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
-import OutwardsReturnForm from './Forms/OutwardsReturnForm'
-import { SystemFunction } from 'src/resources/SystemFunction'
-import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
+import { useWindow } from 'src/windows'
+import OutwardsReturnForm from '../outwards-return/Forms/OutwardsReturnForm'
+import { KVSRepository } from 'src/repositories/KVSRepository'
 
-const OutwardsReturn = () => {
+const OpenOutwardsReturn = () => {
   const { getRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
-  const { stack: stackError } = useError()
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50, params } = options
+    const { _startAt = 0, params } = options
 
     const response = await getRequest({
-      extension: RemittanceOutwardsRepository.OutwardsReturn.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}&filter=`
+      extension: RemittanceOutwardsRepository.OutwardsReturn.qry2,
+      parameters: `_params=${params || ''}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -48,15 +41,15 @@ const OutwardsReturn = () => {
   const {
     query: { data },
     labels: _labels,
-    paginationParameters,
     filterBy,
     clearFilter,
+    paginationParameters,
     refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: RemittanceOutwardsRepository.OutwardsReturn.page,
-    datasetId: ResourceIds.OutwardsReturn,
+    endpointId: RemittanceOutwardsRepository.OutwardsReturn.qry2,
+    datasetId: ResourceIds.OpenOutwardsReturn,
     filter: {
       filterFn: fetchWithFilter
     }
@@ -75,8 +68,8 @@ const OutwardsReturn = () => {
       type: 'date'
     },
     {
-      field: 'outwardRef',
-      headerName: _labels.outwardRef,
+      field: 'currencyName',
+      headerName: _labels.currency,
       flex: 1
     },
     {
@@ -85,95 +78,55 @@ const OutwardsReturn = () => {
       flex: 1
     },
     {
+      field: 'clientName',
+      headerName: _labels.client,
+      flex: 1
+    },
+    {
+      field: 'corName',
+      headerName: _labels.corName,
+      flex: 1
+    },
+    {
+      field: 'amount',
+      headerName: _labels.amount,
+      flex: 1
+    },
+    {
       field: 'settlementStatusName',
       headerName: _labels.settlementStatus,
       flex: 1
     },
-    {
-      field: 'rsName',
-      headerName: _labels.rsName,
-      flex: 1
-    },
-    {
-      field: 'statusName',
-      headerName: _labels.statusName,
-      flex: 1
-    },
-    {
-      field: 'wipName',
-      headerName: _labels.wip,
-      flex: 1
-    },
   ]
 
-  const { proxyAction } = useDocumentTypeProxy({
-    functionId: SystemFunction.OutwardsReturn,
-    action: openForm,
-    hasDT: false
-  })
-
-  const add = async () => {
-    await proxyAction()
-  }
-
-  const userId = getStorageData('userData').userId
-
-  const edit = obj => {
-    openForm(obj?.recordId)
-  }
-
-  const getPlantId = async () => {
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.UserDefaults.get,
-        parameters: `_userId=${userId}&_key=plantId`
-      })
-
-      return res.record.value
-    } catch (e) {
-      return ''
-    }
-  }
-
-  async function openOutwardsForm(plantId, recordId) {
-    const dtId = await getDefaultDT()
-
-    stack({
-      Component: OutwardsReturnForm,
-      props: {
-        labels: _labels,
-        recordId,
-        plantId,
-        maxAccess: access,
-        dtId
-      },
-      width: 800,
-      height: 630,
-      title: _labels.outwardsReturn
+  async function getLabels(datasetId) {
+    const res = await getRequest({
+      extension: KVSRepository.getLabels,
+      parameters: `_dataset=${datasetId}`
     })
+
+    return res.list ? Object.fromEntries(res.list.map(({ key, value }) => [key, value])) : {}
   }
 
   async function openForm(recordId) {
-    const plantId = await getPlantId()
-
-    plantId !== ''
-      ? openOutwardsForm(plantId, recordId)
-      : stackError({
-          message: platformLabels.noDefaultPlant
-        })
+    const labels = await getLabels(ResourceIds.OutwardsReturn)
+    stack({
+      Component: OutwardsReturnForm,
+      props: {
+        labels,
+        recordId,
+        maxAccess: access,
+        isOpenOutwards: true,
+        refetch
+      },
+      width: 800,
+      height: 630,
+      title: labels.outwardsReturn
+    })
   }
 
-  const getDefaultDT = async () => {
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.UserFunction.get,
-        parameters: `_userId=${userId}&_functionId=${SystemFunction.OutwardsReturn}`
-      })
-  
-      return res?.record?.dtId
-    } catch (error) {
-      return ''
-    }
+  const edit = obj => {
+    openForm(obj?.recordId)
   }
 
   const onApply = ({ search, rpbParams }) => {
@@ -199,13 +152,11 @@ const OutwardsReturn = () => {
     <VertLayout>
       <Fixed>
         <RPBGridToolbar
-          onAdd={add}
-          maxAccess={access}
           onSearch={onSearch}
           onClear={onClear}
           labels={_labels}
           onApply={onApply}
-          reportName={'RTOWR'}
+          reportName={'RTOWR2'}
         />
       </Fixed>
       <Grow>
@@ -213,9 +164,9 @@ const OutwardsReturn = () => {
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          onEdit={edit}
           isLoading={false}
           pageSize={50}
+          onEdit={edit}
           paginationType='api'
           paginationParameters={paginationParameters}
           refetch={refetch}
@@ -226,4 +177,4 @@ const OutwardsReturn = () => {
   )
 }
 
-export default OutwardsReturn
+export default OpenOutwardsReturn
