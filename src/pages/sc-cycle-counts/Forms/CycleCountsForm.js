@@ -128,7 +128,7 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
     })
   }
 
-  async function getCycleCounts(recordId) {
+  async function getData(recordId) {
     try {
       return await getRequest({
         extension: SCRepository.StockCount.get,
@@ -138,7 +138,7 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
   }
 
   async function refetchForm(recordId) {
-    const res2 = await getCycleCounts(recordId)
+    const res2 = await getData(recordId)
     res2.record.date = formatDateFromApi(res2.record.date)
 
     return res2;
@@ -237,14 +237,7 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
     }
   ]
 
-  async function getData(recordId) {
-    try {
-      return await getRequest({
-        extension: SCRepository.StockCount.get,
-        parameters: `_recordId=${recordId}`
-      })
-    } catch (error) {}
-  }
+
 
   useEffect(() => {
     ;(async function () {
