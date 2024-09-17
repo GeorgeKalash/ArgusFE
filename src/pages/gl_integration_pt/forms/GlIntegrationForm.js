@@ -30,20 +30,21 @@ export default function GlIntegrationForm({ labels, maxAccess, recordId, invalid
       name: yup.string().required()
     }),
     onSubmit: async obj => {
-      const response = await postRequest({
-        extension: GeneralLedgerRepository.IntegrationPostTypes.set,
-        record: JSON.stringify(obj)
-      })
-
-      if (!obj.recordId) {
-        toast.success(platformLabels.Added)
-        formik.setValues({
-          ...obj,
-          recordId: response.recordId
+      try {
+        const response = await postRequest({
+          extension: GeneralLedgerRepository.IntegrationPostTypes.set,
+          record: JSON.stringify(obj)
         })
-      } else toast.success(platformLabels.Edited)
 
-      invalidate()
+        if (!obj.recordId) {
+          toast.success(platformLabels.Added)
+          formik.setFieldValue('recordId', response.recordId)
+        } else {
+          toast.success(platformLabels.Edited)
+        }
+
+        invalidate()
+      } catch (error) {}
     }
   })
   const editMode = !!formik.values.recordId
