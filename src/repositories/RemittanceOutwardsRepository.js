@@ -44,6 +44,7 @@ export const RemittanceOutwardsRepository = {
     set: service + 'setIW',
     del: service + 'delIW',
     snapshot: service + 'snapshotIW',
+    snapshot2: service + 'snapshotIW2',
     close: service + 'closeIW',
     reopen: service + 'reopenIW',
     post: service + 'postIW'
@@ -125,7 +126,7 @@ export const RemittanceOutwardsRepository = {
     close: service + 'closeOWR',
     reopen: service + 'reopenOWR',
     post: service + 'postOWR',
-    snapshot: service + 'snapshotOWR',
+    snapshot: service + 'snapshotOWR'
   },
   CorrespondentOutwards: {
     qry: service + 'qryACE',

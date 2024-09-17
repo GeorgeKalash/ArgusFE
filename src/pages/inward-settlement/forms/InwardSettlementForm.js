@@ -30,12 +30,14 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import { RTCLRepository } from 'src/repositories/RTCLRepository'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
+import { getStorageData } from 'src/storage/storage'
 
 export default function InwardSettlementForm({ labels, recordId, access, plantId, cashAccountId, dtId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
+  const userId = getStorageData('userData').userId
 
   const invalidate = useInvalidate({
     endpointId: RemittanceOutwardsRepository.InwardSettlement.snapshot
@@ -77,6 +79,8 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
     sourceOfIncome: null,
     receiver_relationId: null,
     interfaceId: null,
+    category: null,
+    sender_category: null,
     wip: 1,
     status: 1,
     releaseStatus: null
@@ -109,15 +113,56 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
       receiver_payoutType: yup.string().required(),
       commissionAgent: yup.string().required(),
       commissionReceiver: yup.string().required(),
+
+      inwardId: yup.string().test('is-inward-mandatory', 'Inward reference is required', function () {
+        const { interfaceId } = this.parent
+
+        return interfaceId == null || interfaceId === '' || interfaceId === undefined
+      }),
+
       charges: yup.string().test('is-charges-mandatory', 'Charges is required', function () {
         const { inwardId } = this.parent
 
-        return !(inwardId == null || inwardId === '' || inwardId === undefined)
+        // Skip validation if inwardId is null
+        if (inwardId == null || inwardId === '') return true
+
+        return inwardId !== null && inwardId !== ''
       }),
+
       faxNo: yup.string().test('is-fax-mandatory', 'Fax number is required', function () {
         const { transferType } = this.parent
 
         return transferType != 1
+      }),
+
+      sender_firstName: yup.string().test('is-first-mandatory', 'Sender first name is required', function () {
+        const { inwardId } = this.parent
+        if (inwardId == null || inwardId === '') return true // Skip validation
+
+        return inwardId !== null && inwardId !== ''
+      }),
+
+      sender_lastName: yup.string().test('is-lastName-mandatory', 'Sender last name is required', function () {
+        const { inwardId } = this.parent
+        if (inwardId == null || inwardId === '') return true // Skip validation
+
+        return inwardId !== null && inwardId !== ''
+      }),
+
+      sender_nationalityId: yup
+        .string()
+        .test('is-nationality-mandatory', 'Sender Nationality is required', function () {
+          const { inwardId } = this.parent
+          if (inwardId == null || inwardId === '') return true // Skip validation
+
+          return inwardId !== null && inwardId !== ''
+        }),
+
+      category: yup.string().test('is-category-mandatory', 'Category is required', function () {
+        const { inwardId } = this.parent
+        if (inwardId == null || inwardId === '') return true // Skip validation
+
+        return inwardId !== null && inwardId !== ''
       })
     }),
     onSubmit: async () => {
@@ -133,7 +178,8 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
         if (copy.inwardId) {
           await submitIWS(copy)
         } else {
-          if (!dtId) {
+          const checkDT = await getDefaultDT()
+          if (!checkDT) {
             stackError({
               message: labels.assignDefaultDocType
             })
@@ -154,7 +200,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
             sender_middleName: formik.values.sender_middleName,
             sender_lastName: formik.values.sender_lastName,
             sender_nationalityId: formik.values.sender_nationalityId,
-            receiver_type: formik.values.receiver_type,
+            receiver_type: formik.values.category,
             receiver_payoutType: formik.values.receiver_payoutType,
             receiver_firstName: formik.values.receiver_firstName,
             receiver_middleName: formik.values.receiver_middleName,
@@ -196,6 +242,21 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
     await refetchForm(res.recordId)
   }
 
+  const getDefaultDT = async () => {
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.UserFunction.get,
+        parameters: `_userId=${userId}&_functionId=${SystemFunction.InwardSettlement}`
+      })
+
+      return res?.record?.dtId
+    } catch (error) {
+      stackError(error)
+
+      return ''
+    }
+  }
+
   const chooseClient = async clientId => {
     try {
       if (clientId) {
@@ -203,7 +264,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
           extension: RTCLRepository.CtClientIndividual.get2,
           parameters: `_clientId=${clientId}`
         })
-        formik.setFieldValue('category', res?.record?.clientMaster?.category)
+        formik.setFieldValue('sender_category', res?.record?.clientMaster?.category)
         formik.setFieldValue('isResident', res?.record?.clientIndividual?.isResident)
         formik.setFieldValue('receiver_firstName', res?.record?.clientIndividual?.firstName)
         formik.setFieldValue('receiver_middleName', res?.record?.clientIndividual?.middleName)
@@ -225,7 +286,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
         formik.setFieldValue('receiver_idIssueCountry', res?.record?.clientIDView?.idCountryId)
         formik.setFieldValue('receiver_birthDate', formatDateFromApi(res?.record?.clientIndividual?.birthDate))
       } else {
-        formik.setFieldValue('category', null)
+        formik.setFieldValue('sender_category', null)
         formik.setFieldValue('isResident', null)
         formik.setFieldValue('receiver_firstName', null)
         formik.setFieldValue('receiver_middleName', null)
@@ -265,7 +326,6 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
         formik.setFieldValue('paymentType', res?.record?.dispersalMode)
         formik.setFieldValue('currencyId', res?.record?.currencyId)
         formik.setFieldValue('purposeOfTransfer', res?.record?.purposeOfTransfer)
-        formik.setFieldValue('currencyId', res?.record?.currencyId)
         formik.setFieldValue('transferType', res?.record?.transferType)
         formik.setFieldValue('receiver_payoutType', res?.record?.receiver_payoutType)
         formik.setFieldValue('commissionReceiver', res?.record?.commissionReceiver)
@@ -311,7 +371,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
         })
 
         formik.setFieldValue('correspondantCurrency', res?.record?.currencyId)
-      }
+      } else formik.setFieldValue('correspondantCurrency', null)
     } catch (error) {}
   }
 
@@ -468,7 +528,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                 <Grid container spacing={2}>
                   <Grid item xs={6}>
                     <ResourceLookup
-                      endpointId={RemittanceOutwardsRepository.InwardsTransfer.snapshot}
+                      endpointId={RemittanceOutwardsRepository.InwardsTransfer.snapshot2}
                       valueField='reference'
                       displayField='reference'
                       name='inwardRef'
@@ -539,27 +599,6 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                   <Grid item xs={3}>
                     <ResourceComboBox
                       values={formik.values}
-                      endpointId={SystemRepository.Currency.qry}
-                      name='currencyId'
-                      label={labels.currency}
-                      valueField='recordId'
-                      displayField={['reference', 'name']}
-                      columnsInDropDown={[
-                        { key: 'reference', value: 'Reference' },
-                        { key: 'name', value: 'Name' }
-                      ]}
-                      onChange={(event, newValue) => {
-                        formik.setFieldValue('currencyId', newValue ? newValue.recordId : '')
-                      }}
-                      error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
-                      maxAccess={maxAccess}
-                      required
-                      readOnly={formik.values.inwardId}
-                    />
-                  </Grid>
-                  <Grid item xs={3}>
-                    <ResourceComboBox
-                      values={formik.values}
                       datasetId={DataSets.transferType}
                       name='transferType'
                       label={labels.transferType}
@@ -606,6 +645,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                       required={!formik.values.inwardRef}
                       readOnly={formik.values.inwardRef}
                       onChange={formik.handleChange}
+                      error={formik.touched.sender_firstName && Boolean(formik.errors.sender_firstName)}
                     />
                   </Grid>
                   <Grid item xs={4}>
@@ -626,6 +666,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                       required={!formik.values.inwardRef}
                       readOnly={formik.values.inwardRef}
                       onChange={formik.handleChange}
+                      error={formik.touched.sender_lastName && Boolean(formik.errors.sender_lastName)}
                     />
                   </Grid>
                 </Grid>
@@ -649,23 +690,22 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                       }}
                       error={formik.touched.sender_nationalityId && Boolean(formik.errors.sender_nationalityId)}
                       maxAccess={maxAccess}
-                      readOnly
+                      required={!formik.values.inwardRef}
+                      readOnly={formik.values.inwardRef}
                     />
                   </Grid>
                   <Grid item xs={4}>
                     <ResourceComboBox
                       datasetId={DataSets.ID_CATEGORY}
-                      name='category'
+                      name='sender_category'
                       label={labels.category}
                       valueField='key'
                       displayField='value'
                       values={formik.values}
-                      readOnly={editMode}
                       onChange={(event, newValue) => {
                         formik.setFieldValue('type', '')
-                        formik && formik.setFieldValue('category', parseInt(newValue?.key))
+                        formik && formik.setFieldValue('sender_category', parseInt(newValue?.key))
                       }}
-                      error={formik.touched.category && Boolean(formik.errors.category)}
                     />
                   </Grid>
                 </Grid>
@@ -708,11 +748,16 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                     <ResourceComboBox
                       datasetId={DataSets.ID_CATEGORY}
                       name='category'
-                      readOnly
                       label={labels.category}
                       valueField='key'
                       displayField='value'
                       values={formik.values}
+                      required={!formik.values.inwardRef}
+                      readOnly={formik.values.inwardRef}
+                      onChange={(event, newValue) => {
+                        formik && formik.setFieldValue('category', parseInt(newValue?.key))
+                      }}
+                      error={formik.touched.category && Boolean(formik.errors.category)}
                     />
                   </Grid>
                   <Grid item xs={4}>
@@ -1020,17 +1065,26 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                   </Grid>
                   <Grid item xs={4}>
                     <ResourceComboBox
+                      values={formik.values}
                       endpointId={SystemRepository.Currency.qry}
                       name='currencyId'
                       label={labels.currency}
-                      displayField={['reference', 'name']}
                       valueField='recordId'
-                      values={formik.values}
+                      displayField={['reference', 'name']}
+                      columnsInDropDown={[
+                        { key: 'reference', value: 'Reference' },
+                        { key: 'name', value: 'Name' }
+                      ]}
+                      onChange={(event, newValue) => {
+                        formik.setFieldValue('currencyId', newValue ? newValue.recordId : '')
+                      }}
+                      error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
                       maxAccess={maxAccess}
-                      required={!formik.values.inwardRef}
-                      readOnly={formik.values.inwardRef}
+                      required
+                      readOnly={formik.values.inwardId}
                     />
                   </Grid>
+
                   <Grid item xs={4}>
                     <CustomNumberField
                       name='vatAmount'
@@ -1072,7 +1126,9 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                       maxAccess={maxAccess}
                       required={!formik.values.inwardId}
                       readOnly={formik.values.inwardId}
-                      onChange={e => formik.setFieldValue('charges', e.target.value)}
+                      onChange={e => {
+                        formik.setFieldValue('charges', e.target.value)
+                      }}
                       onClear={() => formik.setFieldValue('charges', '')}
                       error={formik.touched.charges && Boolean(formik.errors.charges)}
                     />
