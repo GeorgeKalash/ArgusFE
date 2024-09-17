@@ -51,7 +51,7 @@ const Aging = ({ recordId, functionId }) => {
   }, [recordId])
 
   const { labels: labels, access } = useResourceQuery({
-    datasetId: ResourceIds.Aging
+    datasetId: ResourceIds.AgingButton
   })
 
   const columns = [
