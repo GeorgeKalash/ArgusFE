@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -7,7 +7,6 @@ import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
 import * as yup from 'yup'
-
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
@@ -30,7 +29,7 @@ export default function ExRatesForm({ labels, recordId, maxAccess, record, windo
 
   const { formik } = useForm({
     initialValues: {
-      recordId: recordId || null,
+      recordId: recordId,
       exId: '',
       seqNo: 0,
       rate: '',
@@ -39,9 +38,9 @@ export default function ExRatesForm({ labels, recordId, maxAccess, record, windo
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
-      exId: yup.string().required(' '),
-      dayId: yup.string().required(' '),
-      rate: yup.string().required(' ')
+      exId: yup.string().required(),
+      dayId: yup.string().required(),
+      rate: yup.string().required()
     }),
 
     onSubmit: async obj => {

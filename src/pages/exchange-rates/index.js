@@ -1,12 +1,11 @@
-import { useState, useContext, useEffect } from 'react'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
-import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useWindow } from 'src/windows'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import ExRatesForm from './forms/ExRatesForm'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -88,12 +87,14 @@ const ExchangeRates = () => {
   ]
 
   const del = async obj => {
-    await postRequest({
-      extension: MultiCurrencyRepository.ExchangeRates.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success(platformLabels.Deleted)
+    try {
+      await postRequest({
+        extension: MultiCurrencyRepository.ExchangeRates.del,
+        record: JSON.stringify(obj)
+      })
+      invalidate()
+      toast.success(platformLabels.Deleted)
+    } catch (error) {}
   }
 
   const edit = obj => {
