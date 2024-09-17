@@ -1,4 +1,4 @@
-import { useContext, useEffect } from 'react'
+import { useContext } from 'react'
 import { useForm } from 'src/hooks/form'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -81,13 +81,11 @@ const Controller = ({ store, maxAccess, labels }) => {
         }
       })
 
-      if (response && response?.list) {
-        response.list = response?.list?.map((item, index) => ({
-          ...item,
-          id: index,
-          isChecked: item?.isChecked === undefined ? false : item?.isChecked
-        }))
-      }
+      response.list = response?.list?.map((item, index) => ({
+        ...item,
+        id: index,
+        isChecked: item?.isChecked === undefined ? false : item?.isChecked
+      }))
 
       formik.setFieldValue('stockCountId', recordId)
       formik.setValues({ rows: response.list })
