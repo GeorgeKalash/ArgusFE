@@ -18,7 +18,9 @@ export const SCRepository = {
     set: service + 'setSIT',
     set2: service + 'set2SIT',
     get: service + 'getSIT',
-    del: service + 'delSIT'
+    del: service + 'delSIT',
+    reopen: service + 'reopenSIT',
+    end: service + 'endSIT',
   },
   Controller: {
     qry: service + 'qryCRL',
@@ -50,9 +52,4 @@ export const SCRepository = {
     get: service + 'getDTD',
     del: service + 'delDTD'
   },
-  Sites: {
-    qry: service + 'qrySIT',
-    reopen: service + 'reopenSIT',
-    end: service + 'endSIT',
-  }
 }
