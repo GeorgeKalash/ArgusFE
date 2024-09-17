@@ -113,7 +113,7 @@ const documentType = async (getRequest, functionId = undefined, maxAccess, selec
         errorMessage = 'Assign the document type to a number range'
       }
     }
-    if ((!dtId || !activeStatus) && hasDT) {
+    if ((!dtId || !activeStatus) && hasDT && functionId) {
       const documentType = await fetchData(getRequest, functionId, 'DocumentType') //qryDT
       dcTypeRequired = documentType?.list?.filter(item => item?.activeStatus === 1).length > 0
     }
