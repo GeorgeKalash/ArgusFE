@@ -210,8 +210,8 @@ export default function CashCountForm({ labels, maxAccess: access, recordId }) {
           status: header.status,
           releaseStatus: header.releaseStatus,
           date: formatDateFromApi(header.date),
-          startTime: header.startTime && getTimeInTimeZone({ date: header.startTime }),
-          endTime: header.endTime && getTimeInTimeZone({ date: header.endTime }),
+          startTime: header.startTime && getTimeInTimeZone(header.startTime),
+          endTime: header.endTime && getTimeInTimeZone(header.endTime),
           items: items.map(({ seqNo, variation, ...rest }, index) => ({
             id: seqNo,
             seqNo,
@@ -364,8 +364,7 @@ export default function CashCountForm({ labels, maxAccess: access, recordId }) {
       parameters: ``
     })
     if (record) {
-      !editMode &&
-        formik.setFieldValue('startTime', getTimeInTimeZone({ date: record?.utcDate, timeZoneValue: record?.timeZone }))
+      !editMode && formik.setFieldValue('startTime', getTimeInTimeZone(record?.utcDate, record?.timeZone))
     }
   }
 

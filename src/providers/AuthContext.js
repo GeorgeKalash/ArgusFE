@@ -105,17 +105,10 @@ const AuthProvider = ({ children }) => {
         }
       })
 
-      const defaultTZSettings = await axios.get(`${getAC.data.record.api}/SY.asmx/getDE?_key=timeZone`, {
-        headers: {
-          Authorization: 'Bearer ' + signIn3.data.record.accessToken,
-          'Content-Type': 'multipart/form-data'
-        }
-      })
-
       const defaultSet = {
-        dateFormat: defaultSettings.data.record.value ? defaultSettings.data.record.value : 'dd/MM/yyyy',
-        timeZone: defaultTZSettings.data.record.value || 0
+        dateFormat: defaultSettings.data.record.value ? defaultSettings.data.record.value : 'dd/MM/yyyy'
       }
+
       window.localStorage.setItem('default', JSON.stringify(defaultSet))
 
       const loggedUser = {

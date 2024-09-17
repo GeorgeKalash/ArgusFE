@@ -18,15 +18,12 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
-import { formatDateFromApi, formatDateToApi, formatTimeFromApi, getTimeInTimeZone } from 'src/lib/date-helper'
-import { useWindow } from 'src/windows'
+import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { DeliveryRepository } from 'src/repositories/DeliveryRepository'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
-import { Box } from '@mui/system'
 import CustomTimePicker from 'src/components/Inputs/CustomTimePicker'
 import dayjs from 'dayjs'
-import { CopyAll } from '@mui/icons-material'
 
 export default function OutboundTranspForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -52,7 +49,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
       date: new Date(),
       departureTime: new Date(),
       departureTimeField: null,
-      arrivalTime: null, //case of empty??
+      arrivalTime: null,
       arrivalTimeField: null,
       notes: '',
       dtId: documentType?.dtId,
@@ -67,20 +64,6 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
       wip: 1,
       wipName: '',
       orders: []
-
-      /*  {
-          id: 1,
-          tripId: recordId || 0,
-          soId: null,
-          soRef: '',
-          soWeight: null,
-          soVolume: null,
-          soWipStatusName: '',
-          clientName: '',
-          clientRef: '',
-          soDate: null
-        }
-      ]*/
     },
     maxAccess,
     enableReinitialize: false,
@@ -159,22 +142,23 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
 
   function getShiftedDate(date, time) {
     const originalDate = dayjs(date).startOf('day')
-    const parsedTime = dayjs(time, 'hh:mm A')
+    let combinedDateTime = originalDate
 
-    const combinedDateTime = originalDate.set('hour', parsedTime.hour()).set('minute', parsedTime.minute())
+    if (time != null) {
+      const parsedTime = dayjs(time, 'hh:mm A')
+      combinedDateTime = originalDate.set('hour', parsedTime.hour()).set('minute', parsedTime.minute())
+    }
 
     return combinedDateTime
   }
 
   const totalVol = formik.values.orders.reduce((volSum, row) => {
-    // Parse qty as a number, assuming it's a numeric value
     const volValue = parseFloat(row.soVolume) || 0
 
     return volSum + volValue
   }, 0)
 
   const totalWeight = formik.values.orders.reduce((weightSum, row) => {
-    // Parse qty as a number, assuming it's a numeric value
     const weightValue = parseFloat(row.soWeight) || 0
 
     return weightSum + weightValue
@@ -297,7 +281,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
       props: {
         valueField: 'reference',
         displayField: 'reference',
-        displayFieldWidth: 4,
+        displayFieldWidth: 1,
         endpointId: SaleRepository.SalesOrder.snapshot,
         mapping: [
           { from: 'recordId', to: 'soId' },
@@ -309,10 +293,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
           { from: 'volume', to: 'soVolume' },
           { from: 'wipName', to: 'soWipStatusName' }
         ],
-        columnsInDropDown: [
-          { key: 'reference', value: 'Reference' },
-          { key: 'name', value: 'Name' }
-        ],
+        columnsInDropDown: [{ key: 'reference', value: 'Reference' }],
         readOnly: isPosted || isClosed
       },
       onChange({ row: { update, newRow } }) {
@@ -449,8 +430,6 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
                     readOnly={isPosted || isClosed}
                     error={formik.touched.departureTimeField && Boolean(formik.errors.departureTimeField)}
                     maxAccess={maxAccess}
-
-                    //renderInput={params => <CustomTextField {...params} />}
                   />
                 </Grid>
                 <Grid item xs={4}>
@@ -499,8 +478,6 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
                     readOnly={isPosted || isClosed}
                     error={formik.touched.arrivalTime && Boolean(formik.errors.arrivalTime)}
                     maxAccess={maxAccess}
-
-                    //affect time picker function //time picker
                   />
                 </Grid>
 
@@ -517,8 +494,6 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
                       formik.setFieldValue('vehicleId', newValue ? newValue?.recordId : '')
                     }}
                     error={formik.touched.vehicleId && Boolean(formik.errors.vehicleId)}
-
-                    //set cap volume hidden, calculate footer
                   />
                 </Grid>
               </Grid>
@@ -536,8 +511,6 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
                     readOnly={isPosted || isClosed || !formik.values?.arrivalTime}
                     error={formik.touched.arrivalTimeField && Boolean(formik.errors.arrivalTimeField)}
                     maxAccess={maxAccess}
-
-                    //renderInput={params => <CustomTextField {...params} />}
                   />
                 </Grid>
                 <Grid item xs={4}>

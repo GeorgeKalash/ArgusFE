@@ -4,54 +4,42 @@ import dayjs from 'dayjs'
 // import moment from 'moment';
 import { compareAsc, format } from 'date-fns'
 
-function addLocaleTimezoneToTimestamp(timestamp) {
-  const date = new Date()
-  const timezoneOffset = -date.getTimezoneOffset()
+function timeStamptoDate(timestamp) {
+  const timezoneOffset = -new Date().getTimezoneOffset()
   const sign = timezoneOffset >= 0 ? '+' : '-'
 
-  const hours = Math.floor(Math.abs(timezoneOffset) / 60)
+  const timeZoneHours = Math.floor(Math.abs(timezoneOffset) / 60)
     .toString()
     .padStart(2, '0')
-  const minutes = (Math.abs(timezoneOffset) % 60).toString().padStart(2, '0')
-  const formattedOffset = `${sign}${hours}:${minutes}`
-  const timestampWithTimezone = `${new Date(timestamp).toUTCString()}${formattedOffset}`
+  const timeZoneMin = (Math.abs(timezoneOffset) % 60).toString().padStart(2, '0')
+  const isoTimeZone = `${sign}${timeZoneHours}:${timeZoneMin}`
+  const timestampWithTimezone = `${new Date(timestamp).toUTCString()}${isoTimeZone}`
   const dateWithTimezone = new Date(timestampWithTimezone)
 
   return dateWithTimezone
 }
 
-function subLocaleTimezoneToTimestamp(initDate) {
-  const date = new Date()
-  let timezoneOffset = date.getTimezoneOffset()
+function dateToTimeStamp(date) {
+  let timezoneOffset = new Date().getTimezoneOffset()
 
-  timezoneOffset = 2 * timezoneOffset
   const sign = timezoneOffset >= 0 ? '+' : '-'
 
-  const hours = Math.floor(Math.abs(timezoneOffset) / 60)
+  const timeZoneHours = Math.floor(Math.abs(timezoneOffset) / 60)
     .toString()
     .padStart(2, '0')
-  const minutes = (Math.abs(timezoneOffset) % 60).toString().padStart(2, '0')
-  const formattedOffset = `${sign}${hours}:${minutes}`
+  const timeZoneMin = (Math.abs(timezoneOffset) % 60).toString().padStart(2, '0')
+  const isoTimeZone = `${sign}${timeZoneHours}:${timeZoneMin}`
 
-  console.log('formattedOffset', formattedOffset) //formattedOffset -06:00
-  const timestampWithTimezone = `${initDate.toUTCString()}${formattedOffset}`
+  const timestampWithTimezone = `${date.toUTCString()}${isoTimeZone}`
   const dateWithTimezone = new Date(timestampWithTimezone)
 
   return dateWithTimezone
-}
-
-function stripTimezoneFromDate(date) {
-  const isoStringWithoutTimezone = date.toISOString().slice(0, 19)
-  console.log('isoStringWithoutTimezone', isoStringWithoutTimezone)
-  console.log(date)
-
-  return isoStringWithoutTimezone
 }
 
 const formatDateFromApi = date => {
   const timestamp = date && parseInt(date.match(/\d+/)[0], 10)
 
-  return timestamp ? addLocaleTimezoneToTimestamp(timestamp) : null
+  return timestamp ? timeStamptoDate(timestamp) : null
 }
 
 /**
@@ -66,8 +54,7 @@ const formatDateFromApiInline = date => {
 }
 
 const formatDateToApi = date => {
-  console.log('inDate', date)
-  const timestamp = date && subLocaleTimezoneToTimestamp(new Date(stripTimezoneFromDate(date))).valueOf()
+  const timestamp = date && dateToTimeStamp(new Date(date)).valueOf()
 
   return `/Date(${timestamp})/`
 }
@@ -102,7 +89,7 @@ function formatDateDefault(date) {
     'dateFormat'
   ]
   const timestamp = date instanceof Date ? date.getTime() : parseInt(date?.match(/\d+/)[0], 10)
-  const formattedDate = format(addLocaleTimezoneToTimestamp(timestamp), formats)
+  const formattedDate = format(timeStamptoDate(timestamp), formats)
 
   return formattedDate
 }
@@ -117,7 +104,7 @@ function formatDateTimeDefault(date) {
   const timestamp = date instanceof Date ? date.getTime() : parseInt(date?.match(/\d+/)[0], 10)
 
   const fullFormat = `${formats} hh:mm a`
-  const formattedDate = format(addLocaleTimezoneToTimestamp(timestamp), fullFormat)
+  const formattedDate = format(timeStamptoDate(timestamp), fullFormat)
 
   return formattedDate
 }

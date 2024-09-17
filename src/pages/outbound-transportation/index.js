@@ -11,15 +11,12 @@ import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
 import { DeliveryRepository } from 'src/repositories/DeliveryRepository'
 import { useError } from 'src/error'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 import OutboundTranspForm from './forms/OutboundTranspForm'
-import { getStorageData } from 'src/storage/storage'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 
 const OutboundTransp = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const { stack: stackError } = useError()
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
@@ -83,19 +80,13 @@ const OutboundTransp = () => {
       field: 'departureTime',
       headerName: _labels.departureDate,
       flex: 1,
-      type: 'dateTime',
-      props: {
-        suffix: true
-      }
+      type: 'dateTime'
     },
     {
       field: 'arrivalTime',
       headerName: _labels.arrivalDate,
       flex: 1,
-      type: 'dateTime',
-      props: {
-        suffix: true
-      }
+      type: 'dateTime'
     },
     {
       field: 'plantName',
