@@ -154,16 +154,15 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
         record: JSON.stringify({ recordId: recId })
       })
 
-      if (res.recordId) {
-        toast.success(platformLabels.Closed)
-        invalidate()
-        const res2 = await refetchForm(res.recordId)
-        formik.setValues(res2.record)
-        setStore(prevStore => ({
-          ...prevStore,
-          isClosed: res2.record.wip === 2,
-        }))
-      }
+      toast.success(platformLabels.Closed)
+      invalidate()
+      const res2 = await refetchForm(res.recordId)
+      formik.setValues(res2.record)
+      setStore(prevStore => ({
+        ...prevStore,
+        isClosed: res2.record.wip === 2,
+      }))
+      
     } catch (error) {}
   }
 
