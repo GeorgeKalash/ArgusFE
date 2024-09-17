@@ -15,13 +15,11 @@ import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { getStorageData } from 'src/storage/storage'
-import { useError } from 'src/error'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
 const CycleCounts = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const { stack: stackError } = useError()
 
   const { stack } = useWindow()
 
