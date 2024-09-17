@@ -853,7 +853,6 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       error={formik.touched.receiver_nationalityId && Boolean(formik.errors.receiver_nationalityId)}
                       maxAccess={maxAccess}
                       readOnly={editMode}
-                      required
                     />
                   </Grid>
                   <Grid item xs={3}>

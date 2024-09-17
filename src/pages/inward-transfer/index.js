@@ -78,21 +78,6 @@ const InwardTransfer = () => {
     }
   }
 
-  const getCashAccountId = async () => {
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.UserDefaults.get,
-        parameters: `_userId=${userId}&_key=cashAccountId`
-      })
-
-      return res?.record?.value
-    } catch (error) {
-      stackError(error)
-
-      return ''
-    }
-  }
-
   const getDefaultDT = async () => {
     try {
       const res = await getRequest({
@@ -111,26 +96,16 @@ const InwardTransfer = () => {
   async function openForm(recordId) {
     try {
       const plantId = await getPlantId()
-      const cashAccountId = await getCashAccountId()
       const dtId = await getDefaultDT()
 
-      if (plantId && cashAccountId) {
-        openInwardTransferWindow(plantId, cashAccountId, recordId, dtId)
+      if (plantId) {
+        openInwardTransferWindow(plantId, recordId, dtId)
       } else {
-        if (!plantId) {
-          stackError({
-            message: platformLabels.mustHaveDefaultPlant
-          })
+        stackError({
+          message: platformLabels.mustHaveDefaultPlant
+        })
 
-          return
-        }
-        if (!cashAccountId) {
-          stackError({
-            message: platformLabels.mustHaveDefaultCashAcc
-          })
-
-          return
-        }
+        return
       }
     } catch (error) {
       stackError(error)
@@ -193,12 +168,11 @@ const InwardTransfer = () => {
     openForm(obj.recordId)
   }
 
-  function openInwardTransferWindow(plantId, cashAccountId, recordId, dtId) {
+  function openInwardTransferWindow(plantId, recordId, dtId) {
     stack({
       Component: InwardTransferForm,
       props: {
         plantId,
-        cashAccountId,
         dtId,
         access,
         userId,

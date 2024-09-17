@@ -47,10 +47,11 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
     recordId: recordId || null,
     dtId: dtId ? parseInt(dtId) : null,
     date: new Date(),
+    inwardDate: new Date(),
     reference: '',
     plantId: parseInt(plantId),
     cashAccountId: parseInt(cashAccountId),
-    inwardId: null,
+    inwardId: '',
     inwardRef: null,
     corId: null,
     corRef: null,
@@ -122,29 +123,26 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
 
       charges: yup.string().test('is-charges-mandatory', 'Charges is required', function () {
         const { inwardId } = this.parent
-
-        // Skip validation if inwardId is null
         if (inwardId == null || inwardId === '') return true
 
         return inwardId !== null && inwardId !== ''
       }),
-
-      faxNo: yup.string().test('is-fax-mandatory', 'Fax number is required', function () {
+      faxNo: yup.number().test('isTransferTypeEqual1', 'Error', function (value) {
         const { transferType } = this.parent
+        console.log('check transfer ', transferType)
 
-        return transferType != 1
+        return transferType !== '1' || (transferType === '1' && value !== undefined && value !== null)
       }),
-
       sender_firstName: yup.string().test('is-first-mandatory', 'Sender first name is required', function () {
         const { inwardId } = this.parent
-        if (inwardId == null || inwardId === '') return true // Skip validation
+        if (inwardId == null || inwardId === '') return true
 
         return inwardId !== null && inwardId !== ''
       }),
 
       sender_lastName: yup.string().test('is-lastName-mandatory', 'Sender last name is required', function () {
         const { inwardId } = this.parent
-        if (inwardId == null || inwardId === '') return true // Skip validation
+        if (inwardId == null || inwardId === '') return true
 
         return inwardId !== null && inwardId !== ''
       }),
@@ -153,14 +151,14 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
         .string()
         .test('is-nationality-mandatory', 'Sender Nationality is required', function () {
           const { inwardId } = this.parent
-          if (inwardId == null || inwardId === '') return true // Skip validation
+          if (inwardId == null || inwardId === '') return true
 
           return inwardId !== null && inwardId !== ''
         }),
 
       category: yup.string().test('is-category-mandatory', 'Category is required', function () {
         const { inwardId } = this.parent
-        if (inwardId == null || inwardId === '') return true // Skip validation
+        if (inwardId == null || inwardId === '') return true
 
         return inwardId !== null && inwardId !== ''
       })
@@ -179,6 +177,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
           await submitIWS(copy)
         } else {
           const checkDT = await getDefaultDT()
+          const vatPct = await getDefaultVAT()
           if (!checkDT) {
             stackError({
               message: labels.assignDefaultDocType
@@ -190,10 +189,17 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
           const data = {
             recordId: null,
             reference: null,
+            date: formatDateToApi(new Date()),
+            plantId: parseInt(plantId),
+            userId: parseInt(userId),
+            exRate: 1,
+            rateCalcMethod: 1,
+            taxAmount: (formik.values.charges * vatPct) / 100,
+            netAmount: formik.values.amount - formik.values.charges - (formik.values.charges * vatPct) / 100,
             corId: formik.values.corId,
             currencyId: formik.values.currencyId,
             amount: formik.values.amount,
-            baseAmount: formik.values.baseAmount,
+            baseAmount: formik.values.amount,
             transferType: formik.values.transferType,
             faxNo: formik.values.faxNo,
             sender_firstName: formik.values.sender_firstName,
@@ -205,7 +211,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
             receiver_firstName: formik.values.receiver_firstName,
             receiver_middleName: formik.values.receiver_middleName,
             receiver_lastName: formik.values.receiver_lastName,
-            paymentMode: formik.values.dispersalMode,
+            dispersalMode: formik.values.paymentType,
             commissionReceiver: formik.values.commissionReceiver,
             commissionAgent: formik.values.commissionAgent,
             charges: formik.values.charges,
@@ -219,9 +225,10 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
           })
 
           formik.setFieldValue('inwardId', res.recordId)
+          const resIW = await getInwardsTransfer(res.recordId)
+          formik.setFieldValue('inwardRef', resIW?.record?.reference)
           await closeInwardTransfer(res.recordId, data)
-          const resIW = await getInwardsTransfer(inwardId)
-          await postInwardTransfer(res.recordId, data, resIW?.record?.reference)
+          await postInwardTransfer(res.recordId, data)
           await submitIWS(copy)
         }
         invalidate()
@@ -240,6 +247,18 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
       record: JSON.stringify(data)
     })
     await refetchForm(res.recordId)
+  }
+
+  console.log('check formik ', formik)
+  async function getDefaultVAT() {
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.Defaults.get,
+        parameters: `_filter=&_key=vatPct`
+      })
+
+      return parseInt(res?.record?.value)
+    } catch (error) {}
   }
 
   const getDefaultDT = async () => {
@@ -264,7 +283,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
           extension: RTCLRepository.CtClientIndividual.get2,
           parameters: `_clientId=${clientId}`
         })
-        formik.setFieldValue('sender_category', res?.record?.clientMaster?.category)
+        formik.setFieldValue('category', res?.record?.clientMaster?.category)
         formik.setFieldValue('isResident', res?.record?.clientIndividual?.isResident)
         formik.setFieldValue('receiver_firstName', res?.record?.clientIndividual?.firstName)
         formik.setFieldValue('receiver_middleName', res?.record?.clientIndividual?.middleName)
@@ -286,7 +305,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
         formik.setFieldValue('receiver_idIssueCountry', res?.record?.clientIDView?.idCountryId)
         formik.setFieldValue('receiver_birthDate', formatDateFromApi(res?.record?.clientIndividual?.birthDate))
       } else {
-        formik.setFieldValue('sender_category', null)
+        formik.setFieldValue('category', null)
         formik.setFieldValue('isResident', null)
         formik.setFieldValue('receiver_firstName', null)
         formik.setFieldValue('receiver_middleName', null)
@@ -314,7 +333,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
   const chooseInward = async inwardId => {
     try {
       if (inwardId) {
-        const res = getInwardsTransfer(inwardId)
+        const res = await getInwardsTransfer(inwardId)
         formik.setFieldValue('inwardDate', formatDateFromApi(res?.record?.date))
         formik.setFieldValue('corId', res?.record?.corId)
         formik.setFieldValue('corRef', res?.record?.corRef)
@@ -330,6 +349,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
         formik.setFieldValue('receiver_payoutType', res?.record?.receiver_payoutType)
         formik.setFieldValue('commissionReceiver', res?.record?.commissionReceiver)
         formik.setFieldValue('commissionAgent', res?.record?.commissionAgent)
+        formik.setFieldValue('charges', res?.record?.charges)
       } else {
         formik.setFieldValue('inwardDate', null)
         formik.setFieldValue('corId', null)
@@ -344,6 +364,11 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
         formik.setFieldValue('purposeOfTransfer', null)
         formik.setFieldValue('sourceOfIncome', null)
         formik.setFieldValue('correspondantCurrency', null)
+        formik.setFieldValue('transferType', null)
+        formik.setFieldValue('receiver_payoutType', null)
+        formik.setFieldValue('commissionReceiver', '')
+        formik.setFieldValue('commissionAgent', '')
+        formik.setFieldValue('charges', '')
       }
     } catch (error) {}
   }
@@ -409,10 +434,10 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
     }
   }
 
-  const postInwardTransfer = async (recordId, data, reference) => {
+  const postInwardTransfer = async (recordId, data) => {
     try {
       data.recordId = recordId
-      data.reference = reference
+      data.reference = formik.values.inwardRef
       await postRequest({
         extension: RemittanceOutwardsRepository.InwardsTransfer.post,
         record: JSON.stringify(data)
@@ -437,7 +462,6 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
       disabled: isClosed || !editMode
     }
   ]
-  console.log('check formik ', formik, dtId)
   useEffect(() => {
     ;(async function () {
       if (recordId) {
@@ -655,6 +679,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                       value={formik?.values?.sender_middleName}
                       maxAccess={maxAccess}
                       onChange={formik.handleChange}
+                      readOnly={formik.values.inwardRef}
                     />
                   </Grid>
                   <Grid item xs={4}>
@@ -686,7 +711,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                         { key: 'name', value: 'Name' }
                       ]}
                       onChange={(event, newValue) => {
-                        formik.setFieldValue('sender_nationalityId', newValue ? newValue.record : '')
+                        formik.setFieldValue('sender_nationalityId', newValue ? newValue.recordId : '')
                       }}
                       error={formik.touched.sender_nationalityId && Boolean(formik.errors.sender_nationalityId)}
                       maxAccess={maxAccess}
@@ -752,7 +777,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                       valueField='key'
                       displayField='value'
                       values={formik.values}
-                      required={!formik.values.inwardRef}
+                      required
                       readOnly={formik.values.inwardRef}
                       onChange={(event, newValue) => {
                         formik && formik.setFieldValue('category', parseInt(newValue?.key))
