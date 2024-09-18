@@ -80,6 +80,11 @@ export const ThreadProgress = ({ recordId, access, window }) => {
 
     return res.record
   }
+
+  const tasksCompleted = data.currentPhase === data.phases && data.completed === data.iterations;
+
+  const hasLogError = !!data.logInfo;
+
   useEffect(() => {
     const fetchDataAndSet = async () => {
       const data = await fetchData()
@@ -92,7 +97,7 @@ export const ThreadProgress = ({ recordId, access, window }) => {
       const data = await fetchData()
       setData(data)
   
-      if (data.status < 0 || data.status === null) {
+      if (data.status < 0 || data.status === null || tasksCompleted || hasLogError) {
         clearInterval(interval)
       }
     }, 2000)
@@ -103,9 +108,6 @@ export const ThreadProgress = ({ recordId, access, window }) => {
   const currentPhaseProgress = data.phases ? (data.currentPhase / data.phases) * 100 : 0
   const completedProgress = data.iterations ? (data.completed / data.iterations) * 100 : 0
 
-  const tasksCompleted = data.currentPhase === data.phases && data.completed === data.iterations
-
-  const hasLogError = !!data.logInfo
 
   const actions = [
     {

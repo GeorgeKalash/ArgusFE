@@ -160,7 +160,7 @@ const FiPaymentVouchers = () => {
         plantId: plantId,
         maxAccess: access
       },
-      width: 900,
+      width: 950,
       height: 700,
       title: _labels.paymentVoucher
     })
@@ -170,7 +170,6 @@ const FiPaymentVouchers = () => {
     try {
       const plantId = await getPlantId()
       openOutWardsWindow(plantId, recordId)
-      
     } catch (error) {}
   }
 

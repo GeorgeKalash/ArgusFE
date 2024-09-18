@@ -13,6 +13,7 @@ import GlobalIntegrationGrid from './GlobalIntegrationGrid'
 import AccountBalance from './AccountBalance'
 import CashTransaction from './CashTransaction'
 import FinancialTransaction from './FinancialTransaction'
+import Aging from './Aging'
 import { ControlContext } from 'src/providers/ControlContext'
 import { ClientRelationForm } from './ClientRelationForm'
 
@@ -264,6 +265,18 @@ export default function FormShell({
               width: 1150,
               height: 700,
               title: platformLabels.PreviewReport
+            })
+          }
+          onClickAging={() =>
+            stack({
+              Component: Aging,
+              props: {
+                recordId: form.values?.recordId,
+                functionId
+              },
+              width: 1000,
+              height: 620,
+              title: platformLabels.Aging
             })
           }
           isSaved={isSaved}
