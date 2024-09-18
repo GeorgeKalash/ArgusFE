@@ -15,9 +15,11 @@ import { useError } from 'src/error'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import InwardSettlementForm from './forms/InwardSettlementForm'
 import { getStorageData } from 'src/storage/storage'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const InwardSettlement = () => {
   const { getRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
   const userId = getStorageData('userData').userId
@@ -25,11 +27,11 @@ const InwardSettlement = () => {
   const {
     query: { data },
     filterBy,
+    paginationParameters,
     clearFilter,
     labels: _labels,
     refetch,
-    access,
-    invalidate
+    access
   } = useResourceQuery({
     endpointId: RemittanceOutwardsRepository.InwardSettlement.snapshot,
     datasetId: ResourceIds.InwardSettlement,
@@ -98,31 +100,39 @@ const InwardSettlement = () => {
   }
 
   async function openForm(recordId) {
-    try {
-      const plantId = await getPlantId()
-      const cashAccountId = await getCashAccountId()
-      const dtId = await getDefaultDT()
+    const plantId = await getPlantId()
+    const cashAccountId = await getCashAccountId()
+    const dtId = await getDefaultDT()
 
-      if (plantId && cashAccountId) {
-        openInwardSettlementWindow(plantId, cashAccountId, recordId, dtId)
-      } else {
-        if (!plantId) {
-          stackError({
-            message: `This user does not have a default plant.`
-          })
+    if (plantId && cashAccountId) {
+      stack({
+        Component: InwardSettlementForm,
+        props: {
+          plantId,
+          cashAccountId,
+          dtId,
+          access,
+          labels: _labels,
+          recordId
+        },
+        width: 1200,
+        title: _labels.InwardSettlement
+      })
+    } else {
+      if (!plantId) {
+        stackError({
+          message: platformLabels.defaultPlant
+        })
 
-          return
-        }
-        if (!cashAccountId) {
-          stackError({
-            message: `This user does not have a default cash account.`
-          })
-
-          return
-        }
+        return
       }
-    } catch (error) {
-      stackError(error)
+      if (!cashAccountId) {
+        stackError({
+          message: platformLabels.defaultCashAcc
+        })
+
+        return
+      }
     }
   }
 
@@ -169,22 +179,6 @@ const InwardSettlement = () => {
     openForm(obj.recordId)
   }
 
-  function openInwardSettlementWindow(plantId, cashAccountId, recordId, dtId) {
-    stack({
-      Component: InwardSettlementForm,
-      props: {
-        plantId,
-        cashAccountId,
-        dtId,
-        access,
-        labels: _labels,
-        recordId
-      },
-      width: 1200,
-      title: _labels.InwardSettlement
-    })
-  }
-
   return (
     <VertLayout>
       <Fixed>
@@ -210,7 +204,8 @@ const InwardSettlement = () => {
           isLoading={false}
           pageSize={50}
           refetch={refetch}
-          paginationType='client'
+          paginationParameters={paginationParameters}
+          paginationType='api'
           maxAccess={access}
         />
       </Grow>

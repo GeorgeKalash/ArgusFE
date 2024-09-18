@@ -141,7 +141,8 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
       commissionAgent: yup.number().required(),
       commissionReceiver: yup.number().required(),
       charges: yup.number().required(),
-      dispersalMode: yup.number().required()
+      dispersalMode: yup.number().required(),
+      receiver_ttNo: yup.number().required()
     }),
     onSubmit: async () => {
       try {
@@ -243,9 +244,9 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
   const actions = [
     {
       key: 'Close',
-      condition: !isClosed,
+      condition: true,
       onClick: openCloseWindow,
-      disabled: isClosed || !editMode
+      disabled: isClosed || !editMode || isPosted
     },
     {
       key: 'GL',
@@ -257,7 +258,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
       key: 'Post',
       condition: true,
       onClick: onPost,
-      disabled: isPosted
+      disabled: formik.values.status == 1 || !isClosed
     }
   ]
 
@@ -281,6 +282,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
       maxAccess={maxAccess}
       functionId={SystemFunction.InwardTransfer}
       actions={actions}
+      isClosed={isClosed || isPosted}
       disabledSubmit={editMode}
     >
       <VertLayout>
@@ -1015,6 +1017,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                       maxLength='20'
                       error={formik.touched.receiver_ttNo && Boolean(formik.errors.receiver_ttNo)}
                       onChange={formik.handleChange}
+                      required
                       onClear={() => formik.setFieldValue('receiver_ttNo', '')}
                     />
                   </Grid>

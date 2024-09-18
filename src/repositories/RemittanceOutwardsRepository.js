@@ -37,6 +37,8 @@ export const RemittanceOutwardsRepository = {
     set: service + 'setIWS',
     del: service + 'delIWS',
     close: service + 'closeIWS',
+    reopen: service + 'reopenIWS',
+    post: service + 'postIWS',
     snapshot: service + 'snapshotIWS'
   },
   InwardsTransfer: {
