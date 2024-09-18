@@ -100,11 +100,6 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.string().required(),
-      inwardId: yup.string().test('is-inward-mandatory', 'Inward reference is required', function () {
-        const { interfaceId } = this.parent
-
-        return interfaceId == null || interfaceId === '' || interfaceId === undefined
-      }),
       corRef: yup.string().required(),
       clientId: yup.string().required(),
       amount: yup.number().required(),
@@ -127,12 +122,26 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
 
         return inwardId !== null && inwardId !== ''
       }),
+      transferType: yup.string().test('is-transferType-mandatory', 'Transfer Type is required', function () {
+        const { inwardId } = this.parent
+        if (inwardId == null || inwardId === '') return true
+
+        return inwardId !== null && inwardId !== ''
+      }),
+
       faxNo: yup.number().test('isTransferTypeEqual1', 'Error', function (value) {
         const { transferType } = this.parent
-        console.log('check transfer ', transferType)
 
-        return transferType !== '1' || (transferType === '1' && value !== undefined && value !== null)
+        return transferType !== 1 || (transferType === 1 && value !== undefined && value !== null)
       }),
+
+      // faxNo: yup
+      // .number()
+      // .when('transferType', {
+      //   is: (val) => val === '1', // Only run this validation when transferType is '1'
+      //   then: yup.number().required('Fax No is required when Transfer Type is 1'),
+      //   otherwise: yup.number().notRequired(),
+      // }),
       sender_firstName: yup.string().test('is-first-mandatory', 'Sender first name is required', function () {
         const { inwardId } = this.parent
         if (inwardId == null || inwardId === '') return true

@@ -969,7 +969,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       actions={actions}
       previewReport={editMode}
       functionId={SystemFunction.Outwards}
-      disabledSubmit={(isClosed || editMode) && !mobilePlantExists}
+      disabledSubmit={false}
     >
       <VertLayout>
         <Grow>
