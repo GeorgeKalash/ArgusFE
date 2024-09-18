@@ -36,7 +36,7 @@ export default function MetalsForm({ labels, maxAccess, setStore, store }) {
       purity: yup
         .number()
         .nullable()
-        .test('is-valid-reportingPurity', function (value) {
+        .test('is-valid-purity', function (value) {
           if (value >= 0.001 && value <= 1) return true
 
           return false

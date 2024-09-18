@@ -29,8 +29,8 @@ const ScrapForm = ({ store, maxAccess, labels }) => {
             purity: yup
               .number()
               .nullable()
-              .test('is-valid-reportingPurity', function (value) {
-                return !value || (value < 0.001 && value > 1) ? true : false
+              .test('is-valid-purity', function (value) {
+                return !value || (value >= 0.001 && value <= 1) ? true : false
               })
           })
         )
@@ -155,7 +155,7 @@ const ScrapForm = ({ store, maxAccess, labels }) => {
                 },
                 {
                   component: 'numberfield',
-                  label: labels.amount,
+                  label: labels.purity,
                   name: 'purity',
                   props: {
                     maxLength: 6,
