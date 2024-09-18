@@ -493,6 +493,48 @@ const Table = ({
     })
   }
 
+  const CustomField = params => {
+    const [tooltipOpen, setTooltipOpen] = useState(false)
+
+    const handleClick = event => {
+      const range = document.createRange()
+      range.selectNodeContents(event.currentTarget)
+      const selection = window.getSelection()
+      selection.removeAllRanges()
+      selection.addRange(range)
+    }
+
+    const handleDoubleClick = params => {
+      navigator.clipboard.writeText(params.target.innerText).then(() => {
+        setTooltipOpen(true)
+        setTimeout(() => setTooltipOpen(false), 1000)
+      })
+    }
+
+    return (
+      <Tooltip title='Copied!' open={tooltipOpen} placement='top' arrow leaveDelay={0}>
+        <Box
+          onClick={handleClick}
+          onDoubleClick={handleDoubleClick}
+          sx={{
+            userSelect: 'text',
+            cursor: 'pointer',
+            width: '100%',
+            '&::selection': {
+              backgroundColor: 'none !important', // Ensures that selected text has no additional background color
+              color: 'inherit' // Keep the text color unchanged
+            },
+            '&:focus': {
+              outline: 'none'
+            }
+          }}
+        >
+          {params.value}
+        </Box>
+      </Tooltip>
+    )
+  }
+
   const columnDefs = [
     ...(showCheckboxColumn
       ? [
@@ -508,47 +550,7 @@ const Table = ({
       : []),
     ...filteredColumns.map(column => ({
       ...column,
-      cellRenderer: params => {
-        const [tooltipOpen, setTooltipOpen] = useState(false)
-
-        const handleClick = event => {
-          const range = document.createRange()
-          range.selectNodeContents(event.currentTarget)
-          const selection = window.getSelection()
-          selection.removeAllRanges()
-          selection.addRange(range)
-        }
-
-        const handleDoubleClick = params => {
-          navigator.clipboard.writeText(params.target.innerText).then(() => {
-            setTooltipOpen(true)
-            setTimeout(() => setTooltipOpen(false), 1000)
-          })
-        }
-
-        return (
-          <Tooltip title='Copied!' open={tooltipOpen} placement='top' arrow leaveDelay={0}>
-            <Box
-              onClick={handleClick}
-              onDoubleClick={handleDoubleClick}
-              sx={{
-                userSelect: 'text',
-                cursor: 'pointer',
-                width: '100%',
-                '&::selection': {
-                  backgroundColor: 'none !important', // Ensures that selected text has no additional background color
-                  color: 'inherit' // Keep the text color unchanged
-                },
-                '&:focus': {
-                  outline: 'none'
-                }
-              }}
-            >
-              {params.value}
-            </Box>
-          </Tooltip>
-        )
-      }
+      cellRenderer: CustomField
     }))
   ]
 
