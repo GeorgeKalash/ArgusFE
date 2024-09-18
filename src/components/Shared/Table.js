@@ -2,13 +2,13 @@ import React, { useContext, useRef } from 'react'
 import { AgGridReact } from 'ag-grid-react'
 import 'ag-grid-community/styles/ag-grid.css'
 import 'ag-grid-community/styles/ag-theme-alpine.css'
-import { Box, IconButton, TextField } from '@mui/material'
+import { Box, IconButton, TextField, Tooltip } from '@mui/material'
 import Checkbox from '@mui/material/Checkbox'
 import Image from 'next/image'
 import editIcon from '../../../public/images/TableIcons/edit.png'
 import { useState } from 'react'
 import { useEffect } from 'react'
-import 'ag-grid-enterprise'
+import 'ag-grid-community'
 import FirstPageIcon from '@mui/icons-material/FirstPage'
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore'
 import NavigateNextIcon from '@mui/icons-material/NavigateNext'
@@ -506,7 +506,50 @@ const Table = ({
           }
         ]
       : []),
-    ...filteredColumns
+    ...filteredColumns.map(column => ({
+      ...column,
+      cellRenderer: params => {
+        const [tooltipOpen, setTooltipOpen] = useState(false)
+
+        const handleClick = event => {
+          const range = document.createRange()
+          range.selectNodeContents(event.currentTarget)
+          const selection = window.getSelection()
+          selection.removeAllRanges()
+          selection.addRange(range)
+        }
+
+        const handleDoubleClick = params => {
+          navigator.clipboard.writeText(params.target.innerText).then(() => {
+            setTooltipOpen(true)
+            setTimeout(() => setTooltipOpen(false), 1000)
+          })
+        }
+
+        return (
+          <Tooltip title='Copied!' open={tooltipOpen} placement='top' arrow leaveDelay={0}>
+            <Box
+              onClick={handleClick}
+              onDoubleClick={handleDoubleClick}
+              sx={{
+                userSelect: 'text',
+                cursor: 'pointer',
+                width: '100%',
+                '&::selection': {
+                  backgroundColor: 'none !important', // Ensures that selected text has no additional background color
+                  color: 'inherit' // Keep the text color unchanged
+                },
+                '&:focus': {
+                  outline: 'none'
+                }
+              }}
+            >
+              {params.value}
+            </Box>
+          </Tooltip>
+        )
+      }
+    }))
   ]
 
   return (
