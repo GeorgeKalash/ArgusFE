@@ -19,46 +19,45 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { Grid } from '@mui/material'
 import FormShell from 'src/components/Shared/FormShell'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
+import { SystemRepository } from 'src/repositories/SystemRepository'
+import { DataSets } from 'src/resources/DataSets'
 
 const PropertiesForm = ({ store, labels, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId } = store
-  const { _msId } = store
-  const { measurementId } = store
-  const { priceGroupId } = store
-  const { returnPolicy } = store
 
   const { platformLabels } = useContext(ControlContext)
 
-  const { stack } = useWindow()
+  const [dimensions, setDimensions] = useState([])
 
-  const [check, setCheck] = useState(false)
-  const [firstCurr, setFirstCurr] = useState(false)
   useEffect(() => {
     if (recordId) {
-      const fetchCurrency = async () => {
+      const fetchDimension = async () => {
         try {
           const response = await getRequest({
-            extension: InventoryRepository.Currency.qry,
-            parameters: `&_itemId=${recordId}`
+            extension: SystemRepository.Defaults.qry,
+            parameters: `_filter=`
           })
-          if (response.list && response.list.length > 0) {
-            setFirstCurr(response.list[0].currencyId)
-          }
-        } catch (error) {}
+          const ivcount = response.list.find(item => item.key === 'ivtDimCount')
+          console.log(ivcount?.value, 'ivcount')
+
+          const filteredDimensions = response.list.filter(
+            item => item.key.includes('ivtDimension') && item.value.length > 0
+          )
+          setDimensions(filteredDimensions)
+
+          console.log(filteredDimensions, 'ivtDimensions')
+        } catch (error) {
+          console.error('Error fetching dimensions:', error)
+        }
       }
 
-      fetchCurrency()
+      fetchDimension()
     }
   }, [])
 
   const { formik } = useForm({
-    initialValues: {
-      currencyId: firstCurr || '',
-      defSaleMUId: measurementId || '',
-      pgId: priceGroupId || '',
-      returnPolicyId: returnPolicy || ''
-    },
+    initialValues: {},
 
     enableReinitialize: true,
     validateOnChange: true,
@@ -104,34 +103,33 @@ const PropertiesForm = ({ store, labels, maxAccess }) => {
       <VertLayout>
         <Grow>
           <Grid container>
-            <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
-              <Grid item xs={12}>
-                <CustomTextField
-                  name='posMsg'
-                  label={labels.messageToOperator}
-                  value={formik.values.posMsg}
-                  readOnly={false}
-                  onChange={formik.handleChange}
-                  onClear={() => formik.setFieldValue('posMsg', '')}
-                  error={formik.errors && Boolean(formik.errors.posMsg)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <ResourceComboBox
-                  datasetId={DataSets.RT_PROD_ACCESS_LEVEL}
-                  name='accessLevel'
-                  label={labels.accessLevel}
-                  required
-                  valueField='key'
-                  displayField='value'
-                  values={formik.values}
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('accessLevel', newValue?.key)
-                  }}
-                  error={formik.touched.accessLevel && Boolean(formik.errors.accessLevel)}
-                />
-              </Grid>
-            </Grid>
+            {dimensions.map((dimension, index) => {
+              const dimensionNumber = dimension.key.match(/\d+$/)?.[0] || ''
+
+              return (
+                <Grid container rowGap={2} sx={{ px: 2 }} key={index}>
+                  <Grid item xs={12}>
+                    <ResourceComboBox
+                      endpointId={InventoryRepository.Dimension.qry}
+                      parameters={`_dimension=${dimensionNumber}`}
+                      name={`dimensions.${dimension.key}`}
+                      label={dimension.value || `Dimension ${index + 1}`}
+                      required
+                      valueField='recordId'
+                      displayField='name'
+                      values={formik.values[`${dimension.key}`] || ''}
+                      onChange={(event, newValue) => {
+                        formik.setFieldValue(`${dimension.key}`, newValue?.name)
+                      }}
+                      error={
+                        formik.touched[`dimensions.${dimension.key}`] &&
+                        Boolean(formik.errors[`dimensions.${dimension.key}`])
+                      }
+                    />
+                  </Grid>
+                </Grid>
+              )
+            })}
           </Grid>
         </Grow>
       </VertLayout>

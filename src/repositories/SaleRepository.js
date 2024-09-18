@@ -60,6 +60,13 @@ export const SaleRepository = {
     set: service + 'setPR',
     del: service + 'delPR'
   },
+  PosUsers: {
+    qry: service + 'qrySP',
+    get: service + 'getSP',
+    set: service + 'setSP',
+    del: service + 'delSP',
+    page: service + 'pageSP'
+  },
   ReturnReasons: {
     qry: service + 'qryRR',
     page: service + 'pageRR',
