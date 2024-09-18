@@ -44,18 +44,20 @@ export default function LotCategoryForm({ labels, maxAccess, recordId }) {
       name: yup.string().required()
     }),
     onSubmit: async obj => {
-      const response = await postRequest({
-        extension: InventoryRepository.LotCategory.set,
-        record: JSON.stringify(obj)
-      })
+      try {
+        const response = await postRequest({
+          extension: InventoryRepository.LotCategory.set,
+          record: JSON.stringify(obj)
+        })
 
-      if (!obj.recordId) {
-        toast.success(platformLabels.Added)
-        formik.setFieldValue('recordId', response.recordId)
-      } else {
-        toast.success(platformLabels.Edited)
-      }
-      invalidate()
+        if (!obj.recordId) {
+          toast.success(platformLabels.Added)
+          formik.setFieldValue('recordId', response.recordId)
+        } else {
+          toast.success(platformLabels.Edited)
+        }
+        invalidate()
+      } catch (e) {}
     }
   })
 
@@ -123,7 +125,6 @@ export default function LotCategoryForm({ labels, maxAccess, recordId }) {
                 displayFieldWidth='2'
                 label={labels.numberRange}
                 secondDisplayField={true}
-                display
                 secondValue={formik.values.nraDescription}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('nraId', newValue?.recordId || null)
