@@ -6,6 +6,7 @@ import ItemsForm from '../forms/ItemsForm.js'
 import PhysicalForm from '../forms/PhysicalForm.js'
 import VendorList from '../forms/VendorList.js'
 import SalesList from '../forms/SaleList.js'
+import PropertiesForm from '../forms/PropertiesForm.js'
 
 const ItemWindow = ({ recordId, labels, maxAccess }) => {
   const [activeTab, setActiveTab] = useState(0)
@@ -26,7 +27,8 @@ const ItemWindow = ({ recordId, labels, maxAccess }) => {
     { label: labels.items },
     { label: labels.physical, disabled: !store.recordId },
     { label: labels.vendor, disabled: !store.recordId },
-    { label: labels.sales, disabled: !store.recordId }
+    { label: labels.sales, disabled: !store.recordId },
+    { label: labels.properties, disabled: !store.recordId }
   ]
 
   console.log(formikInitial, 'initial')
@@ -58,6 +60,9 @@ const ItemWindow = ({ recordId, labels, maxAccess }) => {
           store={store}
           formikInitial={formikInitial}
         />
+      </CustomTabPanel>
+      <CustomTabPanel height={660} index={4} value={activeTab}>
+        <PropertiesForm labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} />
       </CustomTabPanel>
     </>
   )
