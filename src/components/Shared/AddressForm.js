@@ -5,7 +5,7 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import toast from 'react-hot-toast'
 import { ControlContext } from 'src/providers/ControlContext'
 
-const AddressForm = ({ recordId, address, setAddress = () => {}, editMode, onSubmit }) => {
+const AddressForm = ({ recordId, address, setAddress = () => {}, editMode, onSubmit, ...props }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -44,6 +44,7 @@ const AddressForm = ({ recordId, address, setAddress = () => {}, editMode, onSub
       address={address}
       allowPost={true}
       onSubmit={onAddressSubmit}
+      {...props}
     />
   )
 }

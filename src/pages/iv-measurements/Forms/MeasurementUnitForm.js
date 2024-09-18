@@ -79,7 +79,6 @@ export default function MeasurementUnitForm({ msId, recordId, labels, maxAccess,
       form={formik} 
       maxAccess={maxAccess} 
       editMode={editMode}
-      isCleared={false}
       isInfo={false}
     >
       <VertLayout>

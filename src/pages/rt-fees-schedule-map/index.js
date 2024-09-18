@@ -22,7 +22,7 @@ const FeeScheduleMap = () => {
 
   async function fetchGridData() {
     return await getRequest({
-      extension: RemittanceOutwardsRepository.FeeScheduleMap.qry
+      extension: RemittanceOutwardsRepository.FeeScheduleOutwards.qry
     })
   }
 
@@ -34,7 +34,7 @@ const FeeScheduleMap = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: RemittanceOutwardsRepository.FeeScheduleMap.qry,
+    endpointId: RemittanceOutwardsRepository.FeeScheduleOutwards.qry,
     datasetId: ResourceIds.FeeScheduleMap
   })
 
@@ -60,11 +60,6 @@ const FeeScheduleMap = () => {
       flex: 1
     },
     {
-      field: 'functionName',
-      headerName: _labels.function,
-      flex: 1
-    },
-    {
       field: 'dispersalModeName',
       headerName: _labels.dispersalMode,
       flex: 1
@@ -87,7 +82,7 @@ const FeeScheduleMap = () => {
   const del = async obj => {
     try {
       await postRequest({
-        extension: RemittanceOutwardsRepository.FeeScheduleMap.del,
+        extension: RemittanceOutwardsRepository.FeeScheduleOutwards.del,
         record: JSON.stringify(obj)
       })
       invalidate()

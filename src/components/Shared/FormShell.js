@@ -13,6 +13,7 @@ import GlobalIntegrationGrid from './GlobalIntegrationGrid'
 import AccountBalance from './AccountBalance'
 import CashTransaction from './CashTransaction'
 import FinancialTransaction from './FinancialTransaction'
+import Aging from './Aging'
 import { ControlContext } from 'src/providers/ControlContext'
 import { ClientRelationForm } from './ClientRelationForm'
 
@@ -21,6 +22,7 @@ export default function FormShell({
   isSaved = true,
   isInfo = true,
   isSavedClear = true,
+  isGenerated = false,
   isCleared = true,
   children,
   editMode,
@@ -30,6 +32,7 @@ export default function FormShell({
   postVisible = false,
   resourceId,
   masterSource,
+  onGenerate,
   functionId,
   maxAccess,
   isPosted = false,
@@ -264,10 +267,24 @@ export default function FormShell({
               title: platformLabels.PreviewReport
             })
           }
+          onClickAging={() =>
+            stack({
+              Component: Aging,
+              props: {
+                recordId: form.values?.recordId,
+                functionId
+              },
+              width: 1000,
+              height: 620,
+              title: platformLabels.Aging
+            })
+          }
           isSaved={isSaved}
           isSavedClear={isSavedClearVisible}
+          onGenerate={onGenerate}
           isInfo={isInfo}
           isCleared={isCleared}
+          isGenerated={isGenerated}
           actions={actions}
           onApproval={onApproval}
           onRecordRemarks={onRecordRemarks}

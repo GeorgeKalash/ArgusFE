@@ -68,6 +68,7 @@ const AgentBranchWindow = ({ labels, maxAccess, recordId, height }) => {
           address={store.address}
           setAddress={setAddress}
           onSubmit={onSubmit}
+          isCleared={false}
         />
       </CustomTabPanel>
     </>

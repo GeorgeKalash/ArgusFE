@@ -231,6 +231,12 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
       disabled: !editMode
     },
     {
+      key: 'Aging',
+      condition: true,
+      onClick: 'onClickAging',
+      disabled: !editMode
+    },
+    {
       key: 'Post',
       condition: true,
       onClick: onPost,

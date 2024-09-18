@@ -12,7 +12,8 @@ export const AddressFormShell = ({
   readOnly,
   allowPost,
   optional = false,
-  onSubmit
+  onSubmit,
+  ...props
 }) => {
   const [required, setRequired] = useState(!optional)
 
@@ -103,7 +104,14 @@ export const AddressFormShell = ({
   }, [formik.values])
 
   return (
-    <FormShell form={formik} maxAccess={maxAccess} infoVisible={false} disabledSubmit={readOnly} editMode={editMode}>
+    <FormShell
+      form={formik}
+      maxAccess={maxAccess}
+      infoVisible={false}
+      disabledSubmit={readOnly}
+      editMode={editMode}
+      {...props}
+    >
       <AddressTab addressValidation={formik} readOnly={readOnly} required={required} />
     </FormShell>
   )
