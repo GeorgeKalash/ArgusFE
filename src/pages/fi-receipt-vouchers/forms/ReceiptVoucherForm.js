@@ -209,6 +209,12 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       disabled: !editMode
     },
     {
+      key: 'Aging',
+      condition: true,
+      onClick: 'onClickAging',
+      disabled: !editMode
+    },
+    {
       key: 'RecordRemarks',
       condition: true,
       onClick: 'onRecordRemarks',

@@ -298,4 +298,11 @@ export const getButtons = platformLabels => [
     image: 'unlock.png',
     main: false
   },
+  {
+    key: 'Aging',
+    label: platformLabels.Aging,
+    color: '#A95C68',
+    image: 'popup-window.png',
+    main: false
+  }
 ]
