@@ -80,7 +80,6 @@ export default function MeasurementForm({ labels, maxAccess, setStore, store }) 
       form={formik} 
       maxAccess={maxAccess} 
       editMode={editMode}
-      isCleared={false}
     >
       <VertLayout>
         <Grow>

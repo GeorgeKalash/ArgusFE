@@ -10,16 +10,15 @@ import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepositor
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function GlIntegrationForm({ labels, maxAccess, recordId, invalidate }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const editMode = !!recordId
-
-  const [isLoading, setIsLoading] = useState(false)
+  const { platformLabels } = useContext(ControlContext)
 
   const { formik } = useForm({
     initialValues: {
-      recordId: recordId || null,
+      recordId: recordId,
       reference: '',
       name: ''
     },
@@ -31,29 +30,29 @@ export default function GlIntegrationForm({ labels, maxAccess, recordId, invalid
       name: yup.string().required()
     }),
     onSubmit: async obj => {
-      const response = await postRequest({
-        extension: GeneralLedgerRepository.IntegrationPostTypes.set,
-        record: JSON.stringify(obj)
-      })
-
-      if (!obj.recordId) {
-        toast.success('Record Added Successfully')
-        formik.setValues({
-          ...obj,
-          recordId: response.recordId
+      try {
+        const response = await postRequest({
+          extension: GeneralLedgerRepository.IntegrationPostTypes.set,
+          record: JSON.stringify(obj)
         })
-      } else toast.success('Record Edited Successfully')
 
-      invalidate()
+        if (!obj.recordId) {
+          toast.success(platformLabels.Added)
+          formik.setFieldValue('recordId', response.recordId)
+        } else {
+          toast.success(platformLabels.Edited)
+        }
+
+        invalidate()
+      } catch (error) {}
     }
   })
+  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
       try {
         if (recordId) {
-          setIsLoading(true)
-
           const res = await getRequest({
             extension: GeneralLedgerRepository.IntegrationPostTypes.get,
             parameters: `_recordId=${recordId}`
@@ -62,7 +61,6 @@ export default function GlIntegrationForm({ labels, maxAccess, recordId, invalid
           formik.setValues(res.record)
         }
       } catch (e) {}
-      setIsLoading(false)
     })()
   }, [])
 
@@ -82,7 +80,6 @@ export default function GlIntegrationForm({ labels, maxAccess, recordId, invalid
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('reference', '')}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
-                helperText={formik.touched.reference && formik.errors.reference}
               />
             </Grid>
             <Grid item xs={12}>
@@ -96,7 +93,6 @@ export default function GlIntegrationForm({ labels, maxAccess, recordId, invalid
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
                 error={formik.touched.name && Boolean(formik.errors.name)}
-                helperText={formik.touched.name && formik.errors.name}
               />
             </Grid>
           </Grid>

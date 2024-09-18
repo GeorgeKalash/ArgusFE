@@ -63,7 +63,7 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
       dtId: documentType?.dtId,
       status: 1,
       releaseStatus: null,
-      plantId: plantId,
+      plantId: parseInt(plantId),
       contactId: null,
       isVerified: false,
       sourceReference: ''
@@ -198,6 +198,12 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
       key: 'FI Trx',
       condition: true,
       onClick: 'onClickIT',
+      disabled: !editMode
+    },
+    {
+      key: 'Aging',
+      condition: true,
+      onClick: 'onClickAging',
       disabled: !editMode
     },
     {
