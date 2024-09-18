@@ -18,7 +18,9 @@ const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId }, ref) => 
   })
 
   useEffect(() => {
-    getData()
+    if (recordId) {
+      getData()
+    }
   }, [])
 
   async function getData() {

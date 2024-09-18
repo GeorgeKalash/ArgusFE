@@ -65,14 +65,15 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
     validateOnChange: true,
 
     validationSchema: yup.object({
-      categoryId: yup.string().required(' '),
-      name: yup.string().required(' '),
-      priceType: yup.string().required(' '),
-      msId: yup.string().required(' '),
+      categoryId: yup.string().required(),
+      sku: yup.string().required(),
+      name: yup.string().required(),
+      priceType: yup.string().required(),
+      msId: yup.string().required(),
       lotCategoryId: yup
         .string()
         .nullable()
-        .test('is-lotcategory-required', 'Lot Category is required', function (value) {
+        .test(function (value) {
           const { trackBy } = this.parent
 
           return trackBy === '2' || trackBy === 2 ? value != null && value.trim() !== '' : true
@@ -80,7 +81,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       spfId: yup
         .string()
         .nullable()
-        .test('is-spfId-required', 'spfId is required', function (value) {
+        .test(function (value) {
           const { trackBy } = this.parent
 
           return trackBy === '1' || trackBy === 1 ? value != null && value.trim() !== '' : true
@@ -112,7 +113,6 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
         setFormikInitial(formik.values)
 
         if (imageUploadRef.current) {
-          console.log(imageUploadRef.current, 'reffff')
           await imageUploadRef.current.submit()
         }
 
@@ -144,7 +144,6 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
             parameters: `_recordId=${recordId}`
           })
           setFormikInitial(res.record)
-          console.log(res.record.pgId, 'res.record.pgId')
           formik.setValues({ ...res.record, kitItem: !!res.record.kitItem })
           setShowLotCategories(res.record.trackBy === '2' || res.record.trackBy === 2)
           setShowSerialProfiles(res.record.trackBy === '1' || res.record.trackBy === 1)
@@ -159,8 +158,6 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       } catch {}
     })()
   }, [])
-
-  console.log(recordId, 'itemsrecordId')
 
   return (
     <FormShell resourceId={ResourceIds.Items} form={formik} maxAccess={maxAccess} editMode={editMode}>
