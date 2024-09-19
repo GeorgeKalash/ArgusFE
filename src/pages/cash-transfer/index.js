@@ -98,6 +98,8 @@ const CashTransfer = () => {
 
     if (plantId !== '' && cashAccountId !== '') {
       openCashTransferWindow(plantId, cashAccountId, recordId, dtId)
+    } else if (recordId) {
+      openCashTransferWindow(plantId, cashAccountId, recordId, dtId)
     } else {
       if (plantId === '') {
         stackError({
