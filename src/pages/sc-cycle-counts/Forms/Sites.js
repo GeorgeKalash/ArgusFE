@@ -22,18 +22,7 @@ const Sites = ({ store, maxAccess, labels, setRefreshController, refreshControll
     validateOnChange: true,
     initialValues: {
       search: '',
-      rows: [
-        {
-          id: 1,
-          siteId: '',
-          siteName: '',
-          siteRef: '',
-          statusName: '',
-          status: 1,
-          notes: '',
-          isChecked: false
-        }
-      ]
+      rows: []
     },
     onSubmit: async () => {
       try {
