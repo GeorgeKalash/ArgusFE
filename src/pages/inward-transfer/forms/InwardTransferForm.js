@@ -249,6 +249,12 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
       disabled: isClosed || !editMode
     },
     {
+      key: 'Approval',
+      condition: true,
+      onClick: 'onApproval',
+      disabled: !isClosed
+    },
+    {
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',

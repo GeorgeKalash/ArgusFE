@@ -185,6 +185,15 @@ const DocumentsOnHold = () => {
         title = labels.outwardsReturn
         break
 
+      case SystemFunction.InwardTransfer:
+        relevantComponent = InwardTransferForm
+        labels = await getLabels(ResourceIds.InwardTransfer)
+        relevantAccess = await getAccess(ResourceIds.InwardTransfer)
+
+        windowWidth = 1200
+        title = labels.InwardTransfer
+        break
+
       case SystemFunction.InwardSettlement:
         relevantComponent = InwardSettlementForm
         labels = await getLabels(ResourceIds.InwardSettlement)

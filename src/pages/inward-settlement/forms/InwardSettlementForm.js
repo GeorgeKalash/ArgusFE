@@ -433,14 +433,14 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
       copy.date = formatDateToApi(copy.date)
       copy.inwardDate = formatDateToApi(copy.inwardDate)
 
-      await postRequest({
+      const res = await postRequest({
         extension: RemittanceOutwardsRepository.InwardSettlement.reopen,
         record: JSON.stringify(copy)
       })
 
       toast.success(platformLabels.Reopened)
       invalidate()
-      refetchForm(res.recordId)
+      await refetchForm(res.recordId)
     } catch (error) {}
   }
 
@@ -552,7 +552,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                   value={formik?.values?.reference}
                   maxAccess={!editMode && maxAccess}
                   maxLength='30'
-                  readOnly={editMode}
+                  readOnly={isClosed}
                   onChange={formik.handleChange}
                   error={formik.touched.reference && Boolean(formik.errors.reference)}
                 />
@@ -563,7 +563,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                   required
                   label={labels.date}
                   value={formik?.values?.date}
-                  readOnly={editMode}
+                  readOnly={isClosed}
                   onChange={formik.setFieldValue}
                   editMode={editMode}
                   maxAccess={maxAccess}
@@ -611,7 +611,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                   name='inwardRef'
                   secondDisplayField={false}
                   required={formik.values.interfaceId}
-                  readOnly={editMode && !formik.values.interfaceId}
+                  readOnly={isClosed && !formik.values.interfaceId}
                   label={labels.inwardRef}
                   form={formik}
                   onChange={async (event, newValue) => {
@@ -642,7 +642,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                   displayField='name'
                   name='corName'
                   required={!formik.values.inwardRef}
-                  readOnly={formik.values.inwardRef}
+                  readOnly={formik.values.inwardRef || isClosed}
                   valueShow='corRef'
                   label={labels.Correspondant}
                   form={formik}
@@ -679,7 +679,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                   valueField='key'
                   displayField='value'
                   required
-                  readOnly={formik.values.inwardId}
+                  readOnly={formik.values.inwardId || isClosed}
                   maxAccess={maxAccess}
                   onChange={(event, newValue) => {
                     formik.setFieldValue('transferType', newValue?.key)
@@ -695,7 +695,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                   maxAccess={maxAccess}
                   maxLength='30'
                   error={formik.touched.faxNo && Boolean(formik.errors.faxNo)}
-                  readOnly={formik.values.inwardId}
+                  readOnly={formik.values.inwardId || isClosed}
                   required
                   hidden={formik.values.transferType != 1}
                   onChange={formik.handleChange}
@@ -713,7 +713,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                   value={formik?.values?.sender_firstName}
                   maxAccess={maxAccess}
                   required={!formik.values.inwardRef}
-                  readOnly={formik.values.inwardRef}
+                  readOnly={formik.values.inwardRef || isClosed}
                   onChange={formik.handleChange}
                   error={formik.touched.sender_firstName && Boolean(formik.errors.sender_firstName)}
                 />
@@ -725,7 +725,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                   value={formik?.values?.sender_middleName}
                   maxAccess={maxAccess}
                   onChange={formik.handleChange}
-                  readOnly={formik.values.inwardRef}
+                  readOnly={formik.values.inwardRef || isClosed}
                 />
               </Grid>
               <Grid item xs={4}>
@@ -735,7 +735,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                   value={formik?.values?.sender_lastName}
                   maxAccess={maxAccess}
                   required={!formik.values.inwardRef}
-                  readOnly={formik.values.inwardRef}
+                  readOnly={formik.values.inwardRef || isClosed}
                   onChange={formik.handleChange}
                   error={formik.touched.sender_lastName && Boolean(formik.errors.sender_lastName)}
                 />
@@ -758,7 +758,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                   error={formik.touched.sender_nationalityId && Boolean(formik.errors.sender_nationalityId)}
                   maxAccess={maxAccess}
                   required={!formik.values.inwardRef}
-                  readOnly={formik.values.inwardRef}
+                  readOnly={formik.values.inwardRef || isClosed}
                 />
               </Grid>
               <Grid item xs={4}>
@@ -769,6 +769,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                   valueField='key'
                   displayField='value'
                   values={formik.values}
+                  readOnly={isClosed}
                   onChange={(event, newValue) => {
                     formik.setFieldValue('type', '')
                     formik && formik.setFieldValue('sender_category', parseInt(newValue?.key))
@@ -790,7 +791,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                 label={labels.Client}
                 form={formik}
                 required
-                readOnly={editMode}
+                readOnly={isClosed}
                 displayFieldWidth={2}
                 valueShow='clientRef'
                 secondValueShow='clientName'
@@ -814,7 +815,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                 displayField='value'
                 values={formik.values}
                 required
-                readOnly={formik.values.inwardRef}
+                readOnly={formik.values.inwardRef || isClosed}
                 onChange={(event, newValue) => {
                   formik && formik.setFieldValue('category', parseInt(newValue?.key))
                 }}
@@ -1031,6 +1032,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                 ]}
                 valueField='recordId'
                 displayField='name'
+                readOnly={isClosed}
                 values={formik.values}
                 onChange={(event, newValue) => {
                   formik && formik.setFieldValue('relationId', newValue?.recordId || '')
@@ -1048,7 +1050,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                 displayField='value'
                 maxAccess={maxAccess}
                 required
-                readOnly={formik.values.inwardId}
+                readOnly={formik.values.inwardId || isClosed}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('receiver_payoutType', newValue?.key)
                 }}
@@ -1062,7 +1064,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                 value={formik.values.commissionReceiver}
                 maxAccess={maxAccess}
                 required
-                readOnly={formik.values.inwardId}
+                readOnly={formik.values.inwardId || isClosed}
                 onChange={e => formik.setFieldValue('commissionReceiver', e.target.value)}
                 onClear={() => formik.setFieldValue('commissionReceiver', '')}
                 error={formik.touched.commissionReceiver && Boolean(formik.errors.commissionReceiver)}
@@ -1082,7 +1084,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                   valueField='key'
                   displayField='value'
                   required={!formik.values.inwardRef}
-                  readOnly={formik.values.inwardRef}
+                  readOnly={formik.values.inwardRef || isClosed}
                   maxAccess={maxAccess}
                   onChange={(event, newValue) => {
                     formik.setFieldValue('dispersalMode', newValue?.key)
@@ -1108,7 +1110,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                   error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
                   maxAccess={maxAccess}
                   required
-                  readOnly={formik.values.inwardId}
+                  readOnly={formik.values.inwardId || isClosed}
                 />
               </Grid>
               <Grid item xs={4}>
@@ -1117,7 +1119,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                   label={labels.vatAmount}
                   value={formik.values.taxAmount}
                   maxAccess={maxAccess}
-                  readOnly={formik.values.inwardId}
+                  readOnly={formik.values.inwardId || isClosed}
                   onChange={e => formik.setFieldValue('taxAmount', e.target.value)}
                   onClear={() => formik.setFieldValue('taxAmount', '')}
                   error={formik.touched.taxAmount && Boolean(formik.errors.taxAmount)}
@@ -1132,7 +1134,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                   value={formik.values.amount}
                   maxAccess={maxAccess}
                   required={!formik.values.inwardId}
-                  readOnly={formik.values.inwardId}
+                  readOnly={formik.values.inwardId || isClosed}
                   onChange={e => formik.setFieldValue('amount', e.target.value)}
                   onClear={() => formik.setFieldValue('amount', '')}
                   error={formik.touched.amount && Boolean(formik.errors.amount)}
@@ -1147,7 +1149,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                   value={formik.values.charges}
                   maxAccess={maxAccess}
                   required={!formik.values.inwardId}
-                  readOnly={formik.values.inwardId}
+                  readOnly={formik.values.inwardId || isClosed}
                   onChange={e => {
                     formik.setFieldValue('charges', e.target.value)
                   }}
@@ -1202,7 +1204,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                   value={formik.values.commissionAgent}
                   maxAccess={maxAccess}
                   required
-                  readOnly={formik.values.inwardId}
+                  readOnly={formik.values.inwardId || isClosed}
                   onChange={e => formik.setFieldValue('commissionAgent', e.target.value)}
                   onClear={() => formik.setFieldValue('commissionAgent', '')}
                   error={formik.touched.commissionAgent && Boolean(formik.errors.commissionAgent)}
@@ -1216,7 +1218,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                   label={labels.remarks}
                   value={formik.values.remarks}
                   maxLength='200'
-                  readOnly={editMode}
+                  readOnly={isClosed}
                   maxAccess={maxAccess}
                   onChange={formik.handleChange}
                   onClear={() => formik.setFieldValue('remarks', '')}
