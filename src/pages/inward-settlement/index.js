@@ -143,14 +143,39 @@ const InwardSettlement = () => {
       flex: 1
     },
     {
+      field: 'inwardRef',
+      headerName: _labels.inwardReference,
+      flex: 1
+    },
+    {
       field: 'date',
       headerName: _labels.date,
       flex: 1,
       type: 'date'
     },
     {
+      field: 'clientRef',
+      headerName: _labels.clientRef,
+      flex: 1
+    },
+    {
+      field: 'clientName',
+      headerName: _labels.clientName,
+      flex: 1
+    },
+    {
       field: 'corName',
-      headerName: _labels.corName,
+      headerName: _labels.Correspondant,
+      flex: 1
+    },
+    {
+      field: 'token',
+      headerName: _labels.token,
+      flex: 1
+    },
+    {
+      field: 'rsName',
+      headerName: _labels.rsName,
       flex: 1
     },
     {
@@ -159,8 +184,8 @@ const InwardSettlement = () => {
       flex: 1
     },
     {
-      field: 'token',
-      headerName: _labels.token,
+      field: 'wipName',
+      headerName: _labels.wip,
       flex: 1
     }
   ]

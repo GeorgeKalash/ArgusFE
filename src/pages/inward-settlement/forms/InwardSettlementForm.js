@@ -54,6 +54,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
     clientId: null,
     dispersalMode: null,
     amount: '',
+    baseAmount: '',
     charges: null,
     transferType: null,
     sender_nationalityId: null,
@@ -159,7 +160,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
         copy.date = formatDateToApi(copy?.date)
 
         if (copy.inwardId) {
-          await submitIWS(copy)
+          await submitIWS(copy, copy.inwardId)
         } else {
           const checkDT = await getDefaultDT()
           const vatPct = await getDefaultVAT()

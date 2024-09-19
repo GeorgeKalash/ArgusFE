@@ -130,13 +130,23 @@ const InwardTransfer = () => {
       flex: 1
     },
     {
+      field: 'amount',
+      headerName: _labels.amount,
+      flex: 1
+    },
+    {
+      field: 'rsName',
+      headerName: _labels.releaseStatus,
+      flex: 1
+    },
+    {
       field: 'statusName',
       headerName: _labels.status,
       flex: 1
     },
     {
-      field: 'amount',
-      headerName: _labels.amount,
+      field: 'wipName',
+      headerName: _labels.wip,
       flex: 1
     }
   ]

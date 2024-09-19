@@ -171,7 +171,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
     }
   })
   const editMode = !!formik.values.recordId
-  const isClosed = formik.values.status === 4
+  const isClosed = formik.values.wip === 2
   const isPosted = formik.values.status === 3
 
   function openCloseWindow() {
@@ -246,7 +246,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
       key: 'Close',
       condition: true,
       onClick: openCloseWindow,
-      disabled: isClosed || !editMode || isPosted
+      disabled: isClosed || !editMode
     },
     {
       key: 'GL',
@@ -258,7 +258,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
       key: 'Post',
       condition: true,
       onClick: onPost,
-      disabled: formik.values.status == 1 || !isClosed
+      disabled: !isPosted
     }
   ]
 
@@ -282,7 +282,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
       maxAccess={maxAccess}
       functionId={SystemFunction.InwardTransfer}
       actions={actions}
-      isClosed={isClosed || isPosted}
+      isClosed={isClosed}
       disabledSubmit={editMode}
     >
       <VertLayout>
