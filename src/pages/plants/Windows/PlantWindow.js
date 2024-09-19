@@ -66,6 +66,7 @@ const PlantWindow = ({ labels, editMode, maxAccess, recordId, height }) => {
           address={store.address}
           setAddress={setAddress}
           onSubmit={onSubmit}
+          isCleared={false}
         />
       </CustomTabPanel>
     </>

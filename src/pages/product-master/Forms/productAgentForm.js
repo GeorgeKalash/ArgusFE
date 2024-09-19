@@ -58,12 +58,12 @@ const ProductAgentForm = ({
     initialValues: {
       agents: [{ id: 1, dispersalId: '', agentId: '', agentName: '' }]
     },
-    onSubmit: values => {
-      postProductAgents(values.agents)
+    onSubmit: async values => {
+      await postProductAgents(values.agents)
     }
   })
 
-  const postProductAgents = obj => {
+  const postProductAgents = async obj => {
     const data = {
       dispersalId: pId,
       productDispersalAgents: obj.map(({ dispersalId, ...rest }, index) => ({
@@ -74,7 +74,7 @@ const ProductAgentForm = ({
         ...rest
       }))
     }
-    postRequest({
+    await postRequest({
       extension: RemittanceSettingsRepository.ProductDispersalAgents.set2,
       record: JSON.stringify(data)
     }).then(res => {

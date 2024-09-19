@@ -18,11 +18,13 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function BPMasterDataForm({ labels, maxAccess, setEditMode, store, setStore }) {
   const [isLoading, setIsLoading] = useState(false)
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const editMode = !!recordId
 
   const { formik } = useForm({
@@ -72,7 +74,7 @@ export default function BPMasterDataForm({ labels, maxAccess, setEditMode, store
       })
 
       if (!recordId) {
-        toast.success('Record Added Successfully')
+        toast.success(platformLabels.Added)
         setEditMode(true)
         formik.setFieldValue('recordId', res.recordId)
         if (obj.defaultId) {
@@ -94,7 +96,7 @@ export default function BPMasterDataForm({ labels, maxAccess, setEditMode, store
           recordId: res.recordId
         }))
       } else {
-        toast.success('Record Edited Successfully')
+        toast.success(platformLabels.Edited)
       }
       setEditMode(true)
       invalidate()

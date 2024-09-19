@@ -124,6 +124,7 @@ const Postoutwards = () => {
       form={formik}
       maxAccess={access}
       isCleared={false}
+      isSavedClear={false}
       infoVisible={false}
     >
       <VertLayout>

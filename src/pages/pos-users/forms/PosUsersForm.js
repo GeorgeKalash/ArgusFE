@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -13,19 +13,21 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { SaleRepository } from 'src/repositories/SaleRepository'
+import { ControlContext } from 'src/providers/ControlContext'
 
-export default function PosUsersForm({ labels, maxAccess, userId, window }) {
+export default function PosUsersForm({ labels, maxAccess, recordId, record, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: PointofSaleRepository.PosUsers.qry
   })
 
-  const editMode = !!userId
+
 
   const { formik } = useForm({
     initialValues: {
-      recordId: null,
+      recordId,
       userId: null,
       posId: null,
       spId: null
@@ -34,32 +36,35 @@ export default function PosUsersForm({ labels, maxAccess, userId, window }) {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      userId: yup.string().required(' '),
-      posId: yup.string().required(' ')
+      userId: yup.string().required(),
+      posId: yup.string().required()
     }),
     onSubmit: async obj => {
-      const userId = obj.userId
-
-      const response = await postRequest({
-        extension: PointofSaleRepository.PosUsers.set,
-        record: JSON.stringify(obj)
-      })
-      toast.success('Record Saved Successfully')
-
-      window.close()
-
-      invalidate()
+      try {
+        await postRequest({
+          extension: PointofSaleRepository.PosUsers.set,
+          record: JSON.stringify(obj)
+        })
+        toast.success(platformLabels.Saved)
+  
+        window.close()
+  
+        invalidate()
+      } catch (error) {}
     }
   })
+
+  const editMode = !!formik.values.recordId && !!recordId;
+
   useEffect(() => {
     ;(async function () {
       try {
-        if (userId) {
+        if (record && record.userId && recordId) {
           const res = await getRequest({
             extension: PointofSaleRepository.PosUsers.get,
-            parameters: `_userId=${userId}`
+            parameters: `_userId=${record.userId}`
           })
-          formik.setValues({ ...res.record, recordId: res?.record?.userId })
+          formik.setValues({ ...res.record, recordId: res.record.userId })
         }
       } catch (e) {}
     })()
@@ -102,7 +107,7 @@ export default function PosUsersForm({ labels, maxAccess, userId, window }) {
                 required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('posId', newValue?.recordId)
+                  formik.setFieldValue('posId', newValue?.recordId || '')
                 }}
                 error={formik.touched.posId && Boolean(formik.errors.posId)}
               />
@@ -118,7 +123,7 @@ export default function PosUsersForm({ labels, maxAccess, userId, window }) {
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('spId', newValue ? newValue.recordId : '')
+                  formik.setFieldValue('spId', newValue?.recordId)
                 }}
                 error={formik.touched.spId && Boolean(formik.errors.spId)}
               />

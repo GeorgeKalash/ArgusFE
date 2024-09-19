@@ -31,9 +31,9 @@ const Confirmation = ({ labels, formik, editMode, idTypeStore, maxAccess }) => {
     },
 
     validationSchema: yup.object({
-      birthDate: yup.string().required('This field is required'),
-      idtId: yup.string().required('This field is required'),
-      idNo: yup.string().required('This field is required'),
+      birthDate: yup.string().required(),
+      idtId: yup.string().required(),
+      idNo: yup.string().required(),
       idNoRepeat: yup
         .string()
         .required('Repeat Password is required')

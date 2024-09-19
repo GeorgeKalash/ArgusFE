@@ -22,6 +22,8 @@ const CustomDatePicker = ({
   error,
   helperText,
   disabledRangeDate = {},
+  max = null,
+  min = null,
   variant = 'outlined',
   size = 'small',
   views = ['year', 'month', 'day'],
@@ -84,8 +86,8 @@ const CustomDatePicker = ({
         size={size}
         value={value}
         label={label}
-        minDate={disabledRangeDate.date}
-        maxDate={newDate}
+        minDate={!!min ? min : disabledRangeDate.date}
+        maxDate={!!max ? max : newDate}
         fullWidth={fullWidth}
         sx={{
           '& .MuiOutlinedInput-root': {
@@ -111,10 +113,10 @@ const CustomDatePicker = ({
             fullWidth: fullWidth,
             error: error,
             helperText: helperText,
+            inputProps: {
+              tabIndex: _readOnly ? -1 : 0
+            },
             InputProps: {
-              inputProps: {
-                tabIndex: _readOnly ? -1 : 0 // Prevent focus on the input field
-              },
               endAdornment: !(_readOnly || disabled) && (
                 <InputAdornment position='end'>
                   {value && (
