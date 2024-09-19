@@ -242,5 +242,6 @@ export const ResourceIds = {
   IvSettings: 41115,
   FeeScheduleInwardsMap: 36130,
   OpenOutwardsReturn: 36320,
-  AgingButton: 31419
+  AgingButton: 31419,
+  LotCategories: 41108
 }
