@@ -21,12 +21,14 @@ const ExpenseTypes = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    await getRequest({
-      extension: FinancialRepository.ExpenseTypes.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
-    })
+    try {
+      const response = await getRequest({
+        extension: FinancialRepository.ExpenseTypes.page,
+        parameters: `_pageSize=${_pageSize}&_startAt=${_startAt}&_filter=`
+      })
 
-    return { ...response, _startAt: _startAt }
+      return { ...response, _startAt: _startAt }
+    } catch (error) {}
   }
 
   const invalidate = useInvalidate({
