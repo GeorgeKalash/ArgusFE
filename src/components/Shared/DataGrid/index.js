@@ -16,18 +16,28 @@ export function DataGrid({ columns, value, height, onChange, disabled = false })
 
   const onCellKeyDown = params => {
     const { event, columnApi, api, node } = params
-    const allColumns = columnApi.getAllColumns()
-    const currentColumnIndex = allColumns.findIndex(col => col.getColId() === params.column.getColId())
 
-    if (
-      event.key === 'Tab' &&
-      currentColumnIndex === allColumns.length - 1 &&
-      node.rowIndex === api.getDisplayedRowCount() - 1
-    ) {
-      event.preventDefault()
-      addNewRow()
+    // If 'Enter' is pressed, update the cell value and stop editing
+    if (event.key === 'Enter') {
+      event.stopPropagation()
+      params.api.stopEditing()
+      return
+    }
+
+    // If 'Tab' is pressed, update the cell value and navigate to the next cell
+    if (event.key === 'Tab') {
+      const allColumns = api.getColumnDefs()
+      const currentColumnIndex = allColumns?.findIndex(col => col.colId === params.column.getColId())
+
+      if (currentColumnIndex === allColumns.length - 1 && node.rowIndex === api.getDisplayedRowCount() - 1) {
+        event.preventDefault()
+        addNewRow()
+      }
+
+      params.api.stopEditing()
     }
   }
+
   const CustomCellRenderer = params => {
     const { column } = params
     const Component =
@@ -52,8 +62,6 @@ export function DataGrid({ columns, value, height, onChange, disabled = false })
 
   const CustomCellEditor = params => {
     const { column, data, maxAccess } = params
-
-    console.log('data-edit', data)
     const Component =
       typeof column?.colDef?.component === 'string'
         ? components[column?.colDef?.component]?.edit
@@ -61,6 +69,7 @@ export function DataGrid({ columns, value, height, onChange, disabled = false })
 
     const maxAccessName = `${params.node.id}.${column.name}`
 
+    console.log(params, 'test')
     // async function updateRow({ changes }) {
     //   if (!params || !params.node) {
     //     return
@@ -76,7 +85,7 @@ export function DataGrid({ columns, value, height, onChange, disabled = false })
     }
 
     const updateMultipleCellsInRow = ({ changes }) => {
-      console.log(changes)
+      console.log('changes', changes)
       const id = params.node?.id
       const rowNode = gridApiRef.current.getDisplayedRowAtIndex(id)
 
@@ -85,7 +94,7 @@ export function DataGrid({ columns, value, height, onChange, disabled = false })
         const newData = { ...currentData, ...changes }
         rowNode.setData(newData)
       }
-
+      // onChange({ id, changes })
       params.api.stopEditing()
     }
 

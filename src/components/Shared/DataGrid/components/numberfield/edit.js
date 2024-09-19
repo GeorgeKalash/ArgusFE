@@ -1,6 +1,8 @@
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
-export default function NumberfieldEdit({ column: { props }, id, field, value, update }) {
+export default function NumberfieldEdit({ column: { props }, value, update, node, colDef }) {
+  const { id } = node.data
+  const { field } = colDef
   return (
     <CustomNumberField
       value={value}
@@ -10,6 +12,7 @@ export default function NumberfieldEdit({ column: { props }, id, field, value, u
       autoFocus
       hasBorder={false}
       onChange={e => {
+        console.log({ colDef, node, id, field, value: e.target.value ? Number(e.target.value) : '' })
         update({
           id,
           field,
