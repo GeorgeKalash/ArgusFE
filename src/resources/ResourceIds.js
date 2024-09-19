@@ -183,6 +183,7 @@ export const ResourceIds = {
   SalesTeam: 51117,
   PriceGroups: 51107,
   PaymentTerm: 51102,
+  InwardSettlement: 36313,
   DocumentTypeDefault: 51106,
   VendorGroups: 50101,
   ConsignmentSites: 51110,
