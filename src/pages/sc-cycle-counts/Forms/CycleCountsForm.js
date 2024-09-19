@@ -197,13 +197,6 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
 
       toast.success(platformLabels.Posted)
       invalidate()
-
-      const res2 = await refetchForm(res.recordId)
-      formik.setValues(res2.record)
-      setStore(prevStore => ({
-        ...prevStore,
-        isPosted: res2.record.status === 3,
-      }))
       window.close()
     } catch (error) {}
   }
