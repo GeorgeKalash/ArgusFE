@@ -14,6 +14,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 const RemittanceDefaults = ({ _labels }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -58,6 +59,14 @@ const RemittanceDefaults = ({ _labels }) => {
           getNumberRange(myObject['rt-nra-product'])
         }
 
+        if (myObject['rt_min_monthly_amount']) {
+          rtDefaultValidation.setFieldValue('rt_min_monthly_amount', myObject['rt_min_monthly_amount'])
+        }
+
+        if (myObject['rt_min_yearly_amount']) {
+          rtDefaultValidation.setFieldValue('rt_min_yearly_amount', myObject['rt_min_yearly_amount'])
+        }
+
         rtDefaultFormValidation.setValues(myObject)
       })
       .catch(error => {})
@@ -96,7 +105,9 @@ const RemittanceDefaults = ({ _labels }) => {
     validateOnChange: true,
     initialValues: {
       'rt-nra-product': null,
-      'rt_fii_accountGroupId': ''
+      'rt_fii_accountGroupId': '',
+      'rt_min_monthly_amount': '',
+      'rt_min_yearly_amount': ''
     },
 
     onSubmit: values => {
@@ -167,6 +178,32 @@ const RemittanceDefaults = ({ _labels }) => {
               onChange={(event, newValue) => {
                 rtDefaultValidation.setFieldValue('rt_fii_accountGroupId', newValue?.recordId || '')
               }}
+            />
+          </Grid>
+          <Grid item xs={12} sx={{ marginLeft: '0.5rem', marginRight: '0.5rem' }}>
+            <CustomNumberField
+              name='rt_min_monthly_amount'
+              label={_labels.maxInwardsSettlementPerMonth}
+              value={rtDefaultValidation.values.rt_min_monthly_amount}
+              onChange={rtDefaultValidation.handleChange}
+              onClear={() => rtDefaultValidation.setFieldValue('rt_min_monthly_amount', '')}
+              error={
+                rtDefaultValidation.touched.rt_min_monthly_amount &&
+                Boolean(rtDefaultValidation.errors.rt_min_monthly_amount)
+              }
+            />
+          </Grid>
+          <Grid item xs={12} sx={{ marginLeft: '0.5rem', marginRight: '0.5rem' }}>
+            <CustomNumberField
+              name='rt_min_yearly_amount'
+              label={_labels.maxInwardsSettlementPerYear}
+              value={rtDefaultValidation.values.rt_min_yearly_amount}
+              onChange={rtDefaultValidation.handleChange}
+              onClear={() => rtDefaultValidation.setFieldValue('rt_min_yearly_amount', '')}
+              error={
+                rtDefaultValidation.touched.rt_min_yearly_amount &&
+                Boolean(rtDefaultValidation.errors.rt_min_yearly_amount)
+              }
             />
           </Grid>
         </Grid>
