@@ -208,6 +208,7 @@ const CorrespondentCurrenciesForm = ({ store, labels, maxAccess, expanded, editM
       infoVisible={false}
       maxAccess={maxAccess}
       editMode={editMode}
+      isSavedClear={false}
     >
       <VertLayout>
         <Grow>
