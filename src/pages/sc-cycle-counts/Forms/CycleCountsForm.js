@@ -384,13 +384,6 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
                   { key: 'name', value: 'Name' }
                 ]}
                 onChange={async (event, newValue) => {
-                  if (newValue?.status == -1) {
-                    stackError({
-                      message: `Chosen Client Must Be Active.`
-                    })
-
-                    return
-                  }
                   formik.setFieldValue('clientId', newValue ? newValue.recordId : '')
                   formik.setFieldValue('clientName', newValue ? newValue.name : '')
                   formik.setFieldValue('clientRef', newValue ? newValue.reference : '')
