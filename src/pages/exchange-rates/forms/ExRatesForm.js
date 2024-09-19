@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -7,7 +7,6 @@ import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
 import * as yup from 'yup'
-
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
@@ -28,9 +27,19 @@ export default function ExRatesForm({ labels, recordId, maxAccess, record, windo
     return `${dateStr.substring(0, 4)}/${dateStr.substring(4, 6)}/${dateStr.substring(6, 8)}`
   }
 
+  const formatDateToYYYYMMDD = dateValue => {
+    const date = new Date(dateValue)
+
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+
+    return `${year}${month}${day}`
+  }
+
   const { formik } = useForm({
     initialValues: {
-      recordId: recordId || null,
+      recordId: recordId,
       exId: '',
       seqNo: 0,
       rate: '',
@@ -39,31 +48,22 @@ export default function ExRatesForm({ labels, recordId, maxAccess, record, windo
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
-      exId: yup.string().required(' '),
-      dayId: yup.string().required(' '),
-      rate: yup.string().required(' ')
+      exId: yup.string().required(),
+      dayId: yup.string().required(),
+      rate: yup.string().required()
     }),
-
     onSubmit: async obj => {
       const exId = formik.values.exId
-      const dayId = formik.values.exId
+      const dayId = formik.values.dayId
       const seqNo = formik.values.seqNo
 
-      // const moment = require('moment')
-
-      // let dayId = ''
-      // if (obj.dayId) {
-      //   const date = moment(obj.dayId).format('YYYYMMDD')
-      //   dayId = date
-      // }
-
-      const { ...dataToSend } = obj
-
       try {
-        // Send data to the server
         await postRequest({
           extension: MultiCurrencyRepository.ExchangeRates.set,
-          record: JSON.stringify(obj)
+          record: JSON.stringify({
+            ...obj,
+            dayId: formatDateToYYYYMMDD(obj.dayId)
+          })
         })
 
         if (!exId && !dayId && !seqNo) {
@@ -116,10 +116,12 @@ export default function ExRatesForm({ labels, recordId, maxAccess, record, windo
             extension: MultiCurrencyRepository.ExchangeRates.get,
             parameters: `_exId=${record.exId}&_dayId=${record.dayId}&_seqNo=${record.seqNo}`
           })
+          const formattedDate = formatDate(res.record.dayId)
+          const newDayId = new Date(formattedDate)
 
           formik.setValues({
             ...res.record,
-
+            dayId: newDayId,
             recordId: String(res.record.exId) + String(res.record.dayId) + String(res.record.seqNo)
           })
         }
@@ -169,9 +171,10 @@ export default function ExRatesForm({ labels, recordId, maxAccess, record, windo
               <CustomNumberField
                 name='rate'
                 label={labels.rate}
-                decimalScale={5}
+                decimalScale={7}
                 value={formik.values?.rate}
                 required
+                maxLength='18'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('rate', '')}
                 maxAccess={maxAccess}

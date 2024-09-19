@@ -73,6 +73,13 @@ export const InventoryRepository = {
     set: service + 'setDI',
     del: service + 'delDI'
   },
+  InventoryOpeningQtys: {
+    qry: service + 'qryOQ',
+    snapshot: service + 'snapshotOQ',
+    get: service + 'getOQ',
+    set: service + 'setOQ',
+    del: service + 'delOQ'
+  },
   RebuildInventory: {
     rebuild: service + 'rebuildFIS'
   }

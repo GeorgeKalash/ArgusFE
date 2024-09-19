@@ -20,7 +20,7 @@ export default function ExpenseTypesForms({ labels, maxAccess, recordId, invalid
 
   const { formik } = useForm({
     initialValues: {
-      recordId: recordId || null,
+      recordId: recordId,
       name: '',
       reference: '',
       description: ''
@@ -29,25 +29,21 @@ export default function ExpenseTypesForms({ labels, maxAccess, recordId, invalid
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),
-      reference: yup.string().required(),
-      description: yup.string().required()
+      reference: yup.string().required()
     }),
     onSubmit: async obj => {
-      const recordId = obj.recordId
-
-      const response = await postRequest({
-        extension: FinancialRepository.ExpenseTypes.set,
-        record: JSON.stringify(obj)
-      })
-
-      if (!obj.recordId) {
-        toast.success(platformLabels.Added)
-        formik.setValues({
-          ...obj,
-          recordId: response.recordId
+      try {
+        const response = await postRequest({
+          extension: FinancialRepository.ExpenseTypes.set,
+          record: JSON.stringify(obj)
         })
-      } else toast.success(platformLabels.Edited)
-      invalidate()
+  
+        if (!obj.recordId) {
+          toast.success(platformLabels.Added)
+          formik.setFieldValue('recordId', response.recordId)
+        } else toast.success(platformLabels.Edited)
+        invalidate()
+      } catch (error) {}
     }
   })
 
@@ -121,7 +117,6 @@ export default function ExpenseTypesForms({ labels, maxAccess, recordId, invalid
                 name='description'
                 label={labels.description}
                 value={formik.values.description}
-                required
                 maxLength='100'
                 rows={2}
                 maxAccess={maxAccess}
