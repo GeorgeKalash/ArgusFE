@@ -91,7 +91,6 @@ const Table = ({
   const filteredColumns = columns.filter(column => !shouldRemoveColumn(column))
 
   useEffect(() => {
-    // console.log('props?.gridData?.list ', props?.gridData?.list)
     const areAllValuesTrue = props?.gridData?.list?.every(item => item?.checked === true)
     setChecked(areAllValuesTrue)
     if (typeof setData === 'function') onSelectionChanged
@@ -521,8 +520,8 @@ const Table = ({
             cursor: 'pointer',
             width: '100%',
             '&::selection': {
-              backgroundColor: 'none !important', // Ensures that selected text has no additional background color
-              color: 'inherit' // Keep the text color unchanged
+              backgroundColor: 'none !important',
+              color: 'inherit'
             },
             '&:focus': {
               outline: 'none'
@@ -544,7 +543,7 @@ const Table = ({
             cellRenderer: checkboxCellRenderer,
             headerComponent: params =>
               rowSelection !== 'single' && <Checkbox checked={checked} onChange={e => selectAll(params, e)} />,
-            suppressMenu: true // if i want to remove menu from header
+            suppressMenu: true
           }
         ]
       : []),
