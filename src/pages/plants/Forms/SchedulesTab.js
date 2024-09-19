@@ -20,18 +20,6 @@ const SchedulesTab = ({ store, setStore, _labels, editMode, maxAccess }) => {
   const { getAllKvsByDataset } = useContext(CommonContext)
 
   const { formik } = useForm({
-    validationSchema: yup.object({
-      schedules: yup
-        .array()
-        .of(
-          yup.object().shape({
-            startTime: yup.string().required(),
-            endTime: yup.string().required(),
-            description: yup.string().required()
-          })
-        )
-        .required()
-    }),
     initialValues: {
       plantId: recordId,
       schedules: [
@@ -44,6 +32,18 @@ const SchedulesTab = ({ store, setStore, _labels, editMode, maxAccess }) => {
         }
       ]
     },
+    validationSchema: yup.object({
+      schedules: yup
+        .array()
+        .of(
+          yup.object().shape({
+            startTime: yup.string().required(),
+            endTime: yup.string().required(),
+            description: yup.string().required()
+          })
+        )
+        .required()
+    }),
     enableReinitialize: false,
     validateOnChange: true,
     maxAccess,
@@ -62,24 +62,23 @@ const SchedulesTab = ({ store, setStore, _labels, editMode, maxAccess }) => {
         dow: schedule.dow
       }))
     }
-
-    await postRequest({
-      extension: SystemRepository.PlantsSchedule.set2,
-      record: JSON.stringify(data)
-    })
-      .then(res => {
-        if (res) toast.success(platformLabels.Edited)
-        setStore(prevStore => ({
-          ...prevStore,
-          schedules: obj.map((item, index) => ({
-            ...item,
-            id: index + 1,
-            plantId: recordId,
-            dow: item.dow
-          }))
-        }))
+    try {
+      const res = await postRequest({
+        extension: SystemRepository.PlantsSchedule.set2,
+        record: JSON.stringify(data)
       })
-      .catch(error => {})
+  
+      if (res) toast.success(platformLabels.Edited)
+      setStore(prevStore => ({
+        ...prevStore,
+        schedules: obj.map((item, index) => ({
+          ...item,
+          id: index + 1,
+          plantId: recordId,
+          dow: item.dow
+        }))
+      }))
+    } catch (error) {}
   }
 
   const columns = [
@@ -102,14 +101,12 @@ const SchedulesTab = ({ store, setStore, _labels, editMode, maxAccess }) => {
     {
       component: 'textfield',
       label: _labels.startTime,
-      name: 'startTime',
-      type: 'timeZone'
+      name: 'startTime'
     },
     {
       component: 'textfield',
       label: _labels.endTime,
-      name: 'endTime',
-      type: 'timeZone'
+      name: 'endTime'
     },
     {
       component: 'textfield',
