@@ -113,8 +113,7 @@ export default function FormShell({
       },
       width: 1200,
       height: 670,
-      title: platformLabels,
-      CashTransaction
+      title: platformLabels.CashTransaction
     })
   }
 

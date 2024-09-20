@@ -3,17 +3,17 @@ import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { FinancialRepository } from 'src/repositories/FinancialRepository'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import LotCategoryForm from './forms/LotCategoryForm'
 import { useWindow } from 'src/windows'
-import ExpenseTypesForms from './Forms/ExpenseTypesForm'
 import { ControlContext } from 'src/providers/ControlContext'
+import { InventoryRepository } from 'src/repositories/InventoryRepository'
 
-const ExpenseTypes = () => {
+const IvLotCategory = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
@@ -21,45 +21,26 @@ const ExpenseTypes = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    try {
-      const response = await getRequest({
-        extension: FinancialRepository.ExpenseTypes.page,
-        parameters: `_pageSize=${_pageSize}&_startAt=${_startAt}&_filter=`
-      })
+    const response = await getRequest({
+      extension: InventoryRepository.LotCategory.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+    })
 
-      return { ...response, _startAt: _startAt }
-    } catch (error) {}
+    return { ...response, _startAt: _startAt }
   }
-
-  const invalidate = useInvalidate({
-    endpointId: FinancialRepository.ExpenseTypes.page
-  })
 
   const {
     query: { data },
     labels: _labels,
-    access,
-    search,
-    clear,
+    refetch,
+    invalidate,
     paginationParameters,
-    refetch
+    access
   } = useResourceQuery({
+    endpointId: InventoryRepository.LotCategory.page,
     queryFn: fetchGridData,
-    endpointId: FinancialRepository.ExpenseTypes.page,
-    datasetId: ResourceIds.Expense_Types,
-    search: {
-      endpointId: FinancialRepository.ExpenseTypes.snapshot,
-      searchFn: fetchWithSearch
-    }
+    datasetId: ResourceIds.LotCategories
   })
-  async function fetchWithSearch({ qry }) {
-    const response = await getRequest({
-      extension: FinancialRepository.ExpenseTypes.snapshot,
-      parameters: `_filter=${qry}`
-    })
-
-    return response
-  }
 
   const columns = [
     {
@@ -73,8 +54,38 @@ const ExpenseTypes = () => {
       flex: 1
     },
     {
-      field: 'description',
-      headerName: _labels.description,
+      field: 'naraRef',
+      headerName: _labels.numberRange,
+      flex: 1
+    },
+    {
+      field: 'udd1',
+      headerName: _labels.userDefinedDate1,
+      flex: 1
+    },
+    {
+      field: 'udd2',
+      headerName: _labels.userDefinedDate2,
+      flex: 1
+    },
+    {
+      field: 'udt1',
+      headerName: _labels.userDefinedText1,
+      flex: 1
+    },
+    {
+      field: 'udt2',
+      headerName: _labels.userDefinedText2,
+      flex: 1
+    },
+    {
+      field: 'udn1',
+      headerName: _labels.userDefinedNumeric1,
+      flex: 1
+    },
+    {
+      field: 'udn2',
+      headerName: _labels.userDefinedNumeric2,
       flex: 1
     }
   ]
@@ -90,58 +101,50 @@ const ExpenseTypes = () => {
   const del = async obj => {
     try {
       await postRequest({
-        extension: FinancialRepository.ExpenseTypes.del,
+        extension: InventoryRepository.LotCategory.del,
         record: JSON.stringify(obj)
       })
       invalidate()
       toast.success(platformLabels.Deleted)
-    } catch (error) {}
+    } catch (e) {}
   }
 
   function openForm(recordId) {
     stack({
-      Component: ExpenseTypesForms,
+      Component: LotCategoryForm,
       props: {
         labels: _labels,
-        recordId,
-        maxAccess: access,
-        invalidate: invalidate
+        recordId: recordId,
+        maxAccess: access
       },
-      width: 600,
-      height: 600,
-      title: _labels.expenseType
+      width: 500,
+      height: 650,
+      title: _labels.lotCategory
     })
   }
 
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar
-          onAdd={add}
-          maxAccess={access}
-          onSearch={search}
-          onSearchClear={clear}
-          labels={_labels}
-          inputSearch={true}
-        />
+        <GridToolbar onAdd={add} maxAccess={access} />
       </Fixed>
       <Grow>
         <Table
           columns={columns}
           gridData={data}
-          paginationParameters={paginationParameters}
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
           isLoading={false}
-          pageSize={50}
-          paginationType='api'
           refetch={refetch}
+          pageSize={50}
           maxAccess={access}
+          paginationParameters={paginationParameters}
+          paginationType='api'
         />
       </Grow>
     </VertLayout>
   )
 }
 
-export default ExpenseTypes
+export default IvLotCategory
