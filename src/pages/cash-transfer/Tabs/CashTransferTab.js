@@ -40,7 +40,7 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
   const [isPosted, setIsPosted] = useState(true)
 
   const invalidate = useInvalidate({
-    endpointId: CashBankRepository.CashTransfer.snapshot
+    endpointId: CashBankRepository.CashTransfer.page
   })
 
   const [initialValues, setInitialData] = useState({
