@@ -7,7 +7,7 @@ import 'ag-grid-community/styles/ag-grid.css'
 import 'ag-grid-community/styles/ag-theme-alpine.css'
 import { GridDeleteIcon } from '@mui/x-data-grid'
 
-export function DataGrid({ columns, value, height, onChange, disabled = false }) {
+export function DataGrid({ columns, value, height, onChange, disabled = false, allowDelete = true }) {
   const gridApiRef = useRef(null)
 
   const addNewRow = () => {
@@ -34,26 +34,44 @@ export function DataGrid({ columns, value, height, onChange, disabled = false })
           rowIndex: newRowNode.rowIndex,
           colKey: columns[0].name
         })
-      }, 50)
+      }, 0)
     }
   }
 
   const onCellKeyDown = params => {
     const { event, api, node } = params
-    if (event.key === 'Enter') {
-      event.stopPropagation()
-      return
-    }
+
+    // if (event.key === 'Enter') {
+    //   event.stopPropagation()
+    //   return
+    // }
     if (event.key !== 'Tab') {
       return
     }
     const allColumns = api.getColumnDefs()
     const currentColumnIndex = allColumns?.findIndex(col => col.colId === params.column.getColId())
 
-    console.log(currentColumnIndex, allColumns.length - 2, node.rowIndex, api.getDisplayedRowCount() - 1)
     if (currentColumnIndex === allColumns.length - 2 && node.rowIndex === api.getDisplayedRowCount() - 1) {
-      event.preventDefault()
+      event.stopPropagation()
       addNewRow()
+    } else {
+      const currentRowIndex = node.rowIndex
+      const currentColId = params.column.getColId()
+      const allColumns = api.getColumnDefs()
+      const currentColumnIndex = allColumns.findIndex(col => col.colId === currentColId)
+      if (currentColumnIndex < allColumns.length - 2) {
+        const nextColumnId = allColumns[currentColumnIndex + 1].colId // Get next column ID
+        api.startEditingCell({
+          rowIndex: currentRowIndex,
+          colKey: nextColumnId
+        })
+      } else {
+        const nextColumnId = allColumns[0].colId
+        api.startEditingCell({
+          rowIndex: currentRowIndex + 1,
+          colKey: nextColumnId
+        })
+      }
     }
   }
 
@@ -114,7 +132,17 @@ export function DataGrid({ columns, value, height, onChange, disabled = false })
 
     const updateRow = ({ changes }) => {
       setData(changes)
+      console.log('changes', changes)
       params.api.stopEditing()
+      // handleRowChange()
+    }
+
+    const handleKeyDown = event => {
+      if (event.key === 'Enter') {
+        setTimeout(() => {
+          params.api.stopEditing()
+        }, 50)
+      }
     }
 
     return (
@@ -129,6 +157,7 @@ export function DataGrid({ columns, value, height, onChange, disabled = false })
             (column.component === 'checkbox' || column.component === 'button' || column.component === 'icon') &&
             'center'
         }}
+        onKeyDown={handleKeyDown} // Attach the key down handler
       >
         <Component
           id={params.node.data.id}
@@ -180,6 +209,9 @@ export function DataGrid({ columns, value, height, onChange, disabled = false })
       cellRenderer: ActionCellRenderer
     }
   ]
+  const tabToNextCell = () => {
+    return true
+  }
 
   return (
     <Box sx={{ height: height || 'auto', flex: 1 }}>
@@ -189,7 +221,6 @@ export function DataGrid({ columns, value, height, onChange, disabled = false })
             apiRef={gridApiRef}
             rowData={value}
             columnDefs={columnDefs}
-            domLayout='autoHeight'
             suppressRowClickSelection
             rowSelection='single'
             editType='cell'
@@ -198,6 +229,7 @@ export function DataGrid({ columns, value, height, onChange, disabled = false })
               gridApiRef.current = params.api
             }}
             onCellKeyDown={onCellKeyDown}
+            tabToNextCell={tabToNextCell} // Set custom tab behavior
             // onCellValueChanged={params => {
             //   const changes = {
             //     [params.column.colId]: params.newValue
