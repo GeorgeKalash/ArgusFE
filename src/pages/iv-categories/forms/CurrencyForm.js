@@ -2,7 +2,7 @@ import { DataGrid } from 'src/components/Shared/DataGrid'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
@@ -16,6 +16,8 @@ const CurrencyForm = ({ store, labels, maxAccess }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const [numRows, setNumRows] = useState(0)
+  console.log(numRows, 'aaaaaa')
 
   const { formik } = useForm({
     enableReinitialize: true,
@@ -25,7 +27,15 @@ const CurrencyForm = ({ store, labels, maxAccess }) => {
         .array()
         .of(
           yup.object().shape({
-            currencyId: yup.string().required()
+            currencyId: yup.string().test(function (value) {
+              const { decimals } = this.parent
+
+              if (numRows > 1 || decimals !== 0) {
+                return !!value
+              }
+
+              return true
+            })
           })
         )
         .required()
@@ -62,17 +72,11 @@ const CurrencyForm = ({ store, labels, maxAccess }) => {
       ...rest
     }))
 
-    // const postdata = obj => {
-    //   const data = obj?.data?.map(({ categoryId, ...rest }) => ({
-    //     categoryId: recordId,
-
-    //     ...rest
-    //   }))
-
     const list = {
       categoryId: recordId,
-      data: data
+      data: data || []
     }
+
     postRequest({
       extension: InventoryRepository.CategoryCurrency.set2,
       record: JSON.stringify(list)
@@ -139,6 +143,10 @@ const CurrencyForm = ({ store, labels, maxAccess }) => {
       getData()
     }
   }, [recordId])
+
+  useEffect(() => {
+    setNumRows(formik.values.data.length)
+  }, [formik.values.data])
 
   return (
     <FormShell
