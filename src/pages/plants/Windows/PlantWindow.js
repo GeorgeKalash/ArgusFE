@@ -12,7 +12,7 @@ import SchedulesTab from '../Forms/SchedulesTab'
 
 const PlantWindow = ({ labels, editMode, maxAccess, recordId, height }) => {
   const [store, setStore] = useState({
-    recordId: recordId || null,
+    recordId: recordId,
     plant: null,
     address: null,
     schedules: null
