@@ -51,6 +51,9 @@ export const RemittanceOutwardsRepository = {
     reopen: service + 'reopenIW',
     post: service + 'postIW'
   },
+  InwardGLInformation: {
+    get: service + 'getIWI'
+  },
   Beneficiary: {
     qry: service + 'qryBEN',
     qry2: service + 'qryBEN2',
