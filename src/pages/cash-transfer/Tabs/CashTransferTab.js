@@ -587,13 +587,6 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
               },
               {
                 component: 'numberfield',
-                label: labels.baseAmount,
-                name: 'baseAmount',
-                defaultValue: '',
-                props: { readOnly: true },
-              },
-              {
-                component: 'numberfield',
                 name: 'balance',
                 label: labels.balance,
                 defaultValue: '0',
