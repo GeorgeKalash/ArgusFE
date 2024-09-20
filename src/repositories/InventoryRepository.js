@@ -19,6 +19,12 @@ export const InventoryRepository = {
     set: service + 'setCA',
     del: service + 'delCA'
   },
+  LotCategory: {
+    page: service + 'pageLCA',
+    get: service + 'getLCA',
+    set: service + 'setLCA',
+    del: service + 'delLCA'
+  },
   Measurement: {
     page: service + 'pageMS',
     qry: service + 'qryMS',
@@ -82,6 +88,13 @@ export const InventoryRepository = {
   Scrap: {
     qry: service + 'qryMTS',
     set2: service + 'set2MTS'
+  },
+  InventoryOpeningQtys: {
+    qry: service + 'qryOQ',
+    snapshot: service + 'snapshotOQ',
+    get: service + 'getOQ',
+    set: service + 'setOQ',
+    del: service + 'delOQ'
   },
   RebuildInventory: {
     rebuild: service + 'rebuildFIS'

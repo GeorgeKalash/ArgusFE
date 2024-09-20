@@ -6,7 +6,6 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
-import toast from 'react-hot-toast'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
@@ -14,30 +13,30 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { useError } from 'src/error'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
-import InwardTransferForm from './forms/InwardTransferForm'
+import InwardSettlementForm from './forms/InwardSettlementForm'
 import { getStorageData } from 'src/storage/storage'
 import { ControlContext } from 'src/providers/ControlContext'
 
-const InwardTransfer = () => {
-  const { postRequest, getRequest } = useContext(RequestsContext)
+const InwardSettlement = () => {
+  const { getRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
   const userId = getStorageData('userData').userId
-  const { platformLabels } = useContext(ControlContext)
 
   const {
     query: { data },
     filterBy,
+    paginationParameters,
     clearFilter,
     labels: _labels,
     refetch,
-    access,
-    invalidate
+    access
   } = useResourceQuery({
-    endpointId: RemittanceOutwardsRepository.InwardsTransfer.snapshot,
-    datasetId: ResourceIds.InwardTransfer,
+    endpointId: RemittanceOutwardsRepository.InwardSettlement.snapshot,
+    datasetId: ResourceIds.InwardSettlement,
     filter: {
-      endpointId: RemittanceOutwardsRepository.InwardsTransfer.snapshot,
+      endpointId: RemittanceOutwardsRepository.InwardSettlement.snapshot,
       filterFn: fetchWithSearch
     }
   })
@@ -46,21 +45,13 @@ const InwardTransfer = () => {
     try {
       if (!filters.qry) return { list: [] }
 
-      const res = await getRequest({
-        extension: RemittanceOutwardsRepository.InwardsTransfer.snapshot,
+      return await getRequest({
+        extension: RemittanceOutwardsRepository.InwardSettlement.snapshot,
         parameters: `_filter=${filters.qry}`
       })
-
-      res.list = res.list.map(item => {
-        if (item.status === 4) {
-          item.wip = 2
-        }
-
-        return item
-      })
-
-      return res
-    } catch (error) {}
+    } catch (error) {
+      stackError(error)
+    }
   }
 
   const getPlantId = async () => {
@@ -78,11 +69,26 @@ const InwardTransfer = () => {
     }
   }
 
+  const getCashAccountId = async () => {
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.UserDefaults.get,
+        parameters: `_userId=${userId}&_key=cashAccountId`
+      })
+
+      return res?.record?.value
+    } catch (error) {
+      stackError(error)
+
+      return ''
+    }
+  }
+
   const getDefaultDT = async () => {
     try {
       const res = await getRequest({
         extension: SystemRepository.UserFunction.get,
-        parameters: `_userId=${userId}&_functionId=${SystemFunction.InwardTransfer}`
+        parameters: `_userId=${userId}&_functionId=${SystemFunction.InwardSettlement}`
       })
 
       return res?.record?.dtId
@@ -94,21 +100,39 @@ const InwardTransfer = () => {
   }
 
   async function openForm(recordId) {
-    try {
-      const plantId = await getPlantId()
-      const dtId = await getDefaultDT()
+    const plantId = await getPlantId()
+    const cashAccountId = await getCashAccountId()
+    const dtId = await getDefaultDT()
 
-      if (plantId) {
-        openInwardTransferWindow(plantId, recordId, dtId)
-      } else {
+    if (plantId && cashAccountId) {
+      stack({
+        Component: InwardSettlementForm,
+        props: {
+          plantId,
+          cashAccountId,
+          dtId,
+          access,
+          labels: _labels,
+          recordId
+        },
+        width: 1200,
+        title: _labels.InwardSettlement
+      })
+    } else {
+      if (!plantId) {
         stackError({
-          message: platformLabels.mustHaveDefaultPlant
+          message: platformLabels.defaultPlant
         })
 
         return
       }
-    } catch (error) {
-      stackError(error)
+      if (!cashAccountId) {
+        stackError({
+          message: platformLabels.defaultCashAcc
+        })
+
+        return
+      }
     }
   }
 
@@ -119,24 +143,39 @@ const InwardTransfer = () => {
       flex: 1
     },
     {
+      field: 'inwardRef',
+      headerName: _labels.inwardReference,
+      flex: 1
+    },
+    {
       field: 'date',
       headerName: _labels.date,
       flex: 1,
       type: 'date'
     },
     {
-      field: 'currencyRef',
-      headerName: _labels.currency,
+      field: 'clientRef',
+      headerName: _labels.clientRef,
       flex: 1
     },
     {
-      field: 'amount',
-      headerName: _labels.amount,
+      field: 'clientName',
+      headerName: _labels.clientName,
+      flex: 1
+    },
+    {
+      field: 'corName',
+      headerName: _labels.Correspondant,
+      flex: 1
+    },
+    {
+      field: 'token',
+      headerName: _labels.token,
       flex: 1
     },
     {
       field: 'rsName',
-      headerName: _labels.releaseStatus,
+      headerName: _labels.rsName,
       flex: 1
     },
     {
@@ -152,53 +191,24 @@ const InwardTransfer = () => {
   ]
 
   const { proxyAction } = useDocumentTypeProxy({
-    functionId: SystemFunction.InwardTransfer,
+    functionId: SystemFunction.InwardSettlement,
     action: openForm,
     hasDT: false
   })
 
-  const delTransfer = async obj => {
-    try {
-      await postRequest({
-        extension: RemittanceOutwardsRepository.InwardsTransfer.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {
-      stackError(error)
-    }
-  }
-
-  const addTransfer = () => {
+  const addInward = () => {
     proxyAction()
   }
 
-  const editTransfer = obj => {
+  const editInward = obj => {
     openForm(obj.recordId)
-  }
-
-  function openInwardTransferWindow(plantId, recordId, dtId) {
-    stack({
-      Component: InwardTransferForm,
-      props: {
-        plantId,
-        dtId,
-        access,
-        userId,
-        labels: _labels,
-        recordId
-      },
-      width: 1200,
-      title: _labels.InwardTransfer
-    })
   }
 
   return (
     <VertLayout>
       <Fixed>
         <GridToolbar
-          onAdd={addTransfer}
+          onAdd={addInward}
           maxAccess={access}
           onSearch={value => {
             filterBy('qry', value)
@@ -215,12 +225,12 @@ const InwardTransfer = () => {
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          onEdit={editTransfer}
-          onDelete={delTransfer}
+          onEdit={editInward}
           isLoading={false}
           pageSize={50}
           refetch={refetch}
-          paginationType='client'
+          paginationParameters={paginationParameters}
+          paginationType='api'
           maxAccess={access}
         />
       </Grow>
@@ -228,4 +238,4 @@ const InwardTransfer = () => {
   )
 }
 
-export default InwardTransfer
+export default InwardSettlement
