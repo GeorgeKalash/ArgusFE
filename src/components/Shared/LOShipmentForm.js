@@ -47,7 +47,6 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
     validateOnChange: true,
 
     validationSchema: yup.object({
-      policyNo: yup.string().required(),
       carrierId: yup.string().required(),
       packages: yup
         .array()
@@ -200,7 +199,6 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
                 maxAccess={maxAccess}
                 maxLength='30'
                 readOnly={editMode}
-                required
                 error={formik.touched.policyNo && Boolean(formik.errors.policyNo)}
               />
             </Grid>
@@ -296,7 +294,9 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
                         ]
                       }
                       maxAccess={maxAccess}
-                      allowAddNewLine={!editMode}
+                      allowAddNewLine={
+                        !editMode && formik?.values?.packages[index]?.packageReferences?.length < parseInt(formik?.values?.packages[index]?.qty, 10)
+                      }
                       allowDelete={false}
                       columns={[
                         {
