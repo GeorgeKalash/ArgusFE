@@ -144,7 +144,6 @@ const Controller = ({ store, maxAccess, labels }) => {
               parameters={recordId ? `_stockCountId=${recordId}` : ''}
               label={labels.sites}
               filter={item => item.isChecked}
-              readOnly={isPosted || isClosed}
               valueField='siteId'
               displayField='siteName'
               values={formik.values}
