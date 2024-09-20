@@ -74,7 +74,6 @@ const SchedulesTab = ({ store, setStore, _labels, editMode, maxAccess }) => {
           }))
         }))
       } catch (error) {}
-      await postSchedules(values.schedules)
     }
   })
 
