@@ -534,7 +534,7 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
                 }}
                 defaultIndex={formik?.values?.interfaceId ? 0 : null}
                 required
-                readOnly={isOpenOutwards ? formik.values.interfaceId !== null : isPosted || isClosed || formik.values.interfaceId !== null}
+                readOnly={isOpenOutwards ? !!formik.values.interfaceId : isPosted || isClosed || !!formik.values.interfaceId}
                 maxAccess={maxAccess}
                 error={formik.touched.settlementStatus && Boolean(formik.errors.settlementStatus)}
               />
