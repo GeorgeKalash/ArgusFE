@@ -99,6 +99,7 @@ export const InventoryRepository = {
     set: service + 'setDI',
     del: service + 'delDI'
   },
+  DimensionId: { set: service + 'set2ID', get: service + 'getID' },
   InventoryOpeningQtys: {
     qry: service + 'qryOQ',
     snapshot: service + 'snapshotOQ',
@@ -108,5 +109,6 @@ export const InventoryRepository = {
   },
   RebuildInventory: {
     rebuild: service + 'rebuildFIS'
-  }
+  },
+  DimensionUDT: { set: service + 'set2UDT', get: service + 'getUDT' }
 }

@@ -1,26 +1,18 @@
 import { useState, useContext, useEffect } from 'react'
-import { useWindow } from 'src/windows'
-import toast from 'react-hot-toast'
-import Table from 'src/components/Shared/Table'
-import GridToolbar from 'src/components/Shared/GridToolbar'
+
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useResourceQuery } from 'src/hooks/resource'
-import * as yup from 'yup'
 
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
-import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
-import { SaleRepository } from 'src/repositories/SaleRepository'
 import { useForm } from 'src/hooks/form.js'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { Grid } from '@mui/material'
 import FormShell from 'src/components/Shared/FormShell'
-import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { DataSets } from 'src/resources/DataSets'
+import CustomTextField from 'src/components/Inputs/CustomTextField'
 
 const PropertiesForm = ({ store, labels, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -29,6 +21,7 @@ const PropertiesForm = ({ store, labels, maxAccess }) => {
   const { platformLabels } = useContext(ControlContext)
 
   const [dimensions, setDimensions] = useState([])
+  const [dimensionsUDT, setDimensionsUDT] = useState([])
 
   useEffect(() => {
     if (recordId) {
@@ -38,18 +31,18 @@ const PropertiesForm = ({ store, labels, maxAccess }) => {
             extension: SystemRepository.Defaults.qry,
             parameters: `_filter=`
           })
-          const ivcount = response.list.find(item => item.key === 'ivtDimCount')
-          console.log(ivcount?.value, 'ivcount')
 
           const filteredDimensions = response.list.filter(
             item => item.key.includes('ivtDimension') && item.value.length > 0
           )
           setDimensions(filteredDimensions)
 
-          console.log(filteredDimensions, 'ivtDimensions')
-        } catch (error) {
-          console.error('Error fetching dimensions:', error)
-        }
+          const filteredDimensions2 = response.list.filter(
+            item => item.key.includes('ivtUDT') && item.key !== 'ivtUDTCount' && item.value.length > 0
+          )
+          setDimensionsUDT(filteredDimensions2)
+          console.log(filteredDimensions2, 'ivtUDT')
+        } catch (error) {}
       }
 
       fetchDimension()
@@ -61,42 +54,91 @@ const PropertiesForm = ({ store, labels, maxAccess }) => {
 
     enableReinitialize: true,
     validateOnChange: true,
-    onSubmit: async obj => {
-      const submissionData = {
-        ...formikInitial,
-        defSaleMUId: formik.values.defSaleMUId,
-        pgId: formik.values.pgId,
-        returnPolicyId: formik.values.returnPolicyId
-      }
-      console.log(formik.values.returnPolicyId, 'policy')
+    onSubmit: async () => {
+      const submissionData = dimensions.map(dimension => {
+        const dimensionNumber = dimension.key.match(/\d+$/)?.[0]
 
-      const response = await postRequest({
-        extension: InventoryRepository.Items.set,
-        record: JSON.stringify(submissionData)
+        return {
+          dimension: dimensionNumber,
+          id: formik.values[dimension.key],
+          itemId: recordId
+        }
       })
+
+      const filteredData = submissionData.filter(item => item.id !== '' && item.id !== undefined && item.id !== null)
+
+      const udtData = dimensionsUDT.map(udt => {
+        const udtNumber = udt.key.match(/\d+$/)?.[0]
+
+        return {
+          dimension: udtNumber,
+          itemId: recordId,
+          value: formik.values[udt.key]
+        }
+      })
+
+      const filteredUdtData = udtData.filter(
+        item => item.value !== '' && item.value !== undefined && item.value !== null
+      )
+
+      try {
+        if (filteredData.length > 0) {
+          await postRequest({
+            extension: InventoryRepository.DimensionId.set,
+            record: JSON.stringify({
+              itemId: recordId,
+              data: filteredData
+            })
+          })
+        }
+
+        if (filteredUdtData.length > 0) {
+          await postRequest({
+            extension: InventoryRepository.DimensionUDT.set,
+            record: JSON.stringify({
+              itemId: recordId,
+              data: filteredUdtData
+            })
+          })
+        }
+      } catch (error) {}
     }
   })
 
-  async function fetchGridData() {
-    if (formik.values.currencyId) {
-      const response = await getRequest({
-        extension: SaleRepository.Sales.qry,
-        parameters: `&_itemId=${recordId}&_currencyId=${formik.values.currencyId}`
-      })
-
-      return response
-    }
-  }
-
   useEffect(() => {
-    if (formik.values.currencyId) {
-      ;(async () => {
-        const data = await fetchGridData(formik.values.currencyId)
+    const fetchDimensionsData = async () => {
+      if (recordId && dimensions.length > 0) {
+        try {
+          const requests = dimensions.map(dimension => {
+            const dimensionNumber = dimension.key.match(/\d+$/)?.[0]
 
-        refetch()
-      })()
+            return getRequest({
+              extension: InventoryRepository.DimensionId.get,
+              parameters: `_itemId=${recordId}&_dimension=${dimensionNumber}`
+            })
+          })
+
+          const responses = await Promise.all(requests)
+
+          const newValues = responses.reduce((acc, res, index) => {
+            const dimensionKey = dimensions[index].key
+            acc[dimensionKey] = res.record?.id || ''
+
+            return acc
+          }, {})
+
+          formik.setValues(prevValues => ({
+            ...prevValues,
+            ...newValues
+          }))
+        } catch (error) {}
+      }
     }
-  }, [formik.values.currencyId])
+
+    fetchDimensionsData()
+  }, [recordId, dimensions])
+
+  console.log(formik.values, 'formik')
 
   return (
     <FormShell form={formik} resourceId={ResourceIds.Items} maxAccess={maxAccess} infoVisible={false}>
@@ -107,24 +149,36 @@ const PropertiesForm = ({ store, labels, maxAccess }) => {
               const dimensionNumber = dimension.key.match(/\d+$/)?.[0] || ''
 
               return (
-                <Grid container rowGap={2} sx={{ px: 2 }} key={index}>
-                  <Grid item xs={12}>
+                <Grid container mt={0.2} spacing={2} key={index}>
+                  <Grid item xs={6}>
                     <ResourceComboBox
                       endpointId={InventoryRepository.Dimension.qry}
                       parameters={`_dimension=${dimensionNumber}`}
-                      name={`dimensions.${dimension.key}`}
-                      label={dimension.value || `Dimension ${index + 1}`}
-                      required
-                      valueField='recordId'
+                      name={dimension.key}
+                      label={dimension.value}
+                      valueField='id'
                       displayField='name'
-                      values={formik.values[`${dimension.key}`] || ''}
+                      values={formik.values}
                       onChange={(event, newValue) => {
-                        formik.setFieldValue(`${dimension.key}`, newValue?.name)
+                        formik.setFieldValue(`${dimension.key}`, newValue?.id)
                       }}
-                      error={
-                        formik.touched[`dimensions.${dimension.key}`] &&
-                        Boolean(formik.errors[`dimensions.${dimension.key}`])
-                      }
+                    />
+                  </Grid>
+                </Grid>
+              )
+            })}
+
+            {dimensionsUDT.map((dimension, index) => {
+              return (
+                <Grid container mt={0.2} spacing={2} key={index}>
+                  <Grid item xs={6}>
+                    <CustomTextField
+                      name={dimension.key}
+                      label={dimension.value}
+                      value={formik.values[dimension.key]}
+                      onChange={formik.handleChange}
+                      maxAccess={maxAccess}
+                      onClear={() => formik.setFieldValue([dimension.key], '')}
                     />
                   </Grid>
                 </Grid>
