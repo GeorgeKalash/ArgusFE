@@ -48,38 +48,35 @@ const SchedulesTab = ({ store, setStore, _labels, editMode, maxAccess }) => {
     validateOnChange: true,
     maxAccess,
     onSubmit: async values => {
+      const data = {
+        plantId: recordId,
+        items: values.schedules.map((schedule, index) => ({
+          ...schedule,
+          id: index + 1,
+          plantId: recordId,
+          dow: schedule.dow
+        }))
+      }
+      try {
+        const res = await postRequest({
+          extension: SystemRepository.PlantsSchedule.set2,
+          record: JSON.stringify(data)
+        })
+    
+        if (res) toast.success(platformLabels.Edited)
+        setStore(prevStore => ({
+          ...prevStore,
+          schedules: values.schedules.map((item, index) => ({
+            ...item,
+            id: index + 1,
+            plantId: recordId,
+            dow: item.dow
+          }))
+        }))
+      } catch (error) {}
       await postSchedules(values.schedules)
     }
   })
-
-  const postSchedules = async obj => {
-    const data = {
-      plantId: recordId,
-      items: obj.map((schedule, index) => ({
-        ...schedule,
-        id: index + 1,
-        plantId: recordId,
-        dow: schedule.dow
-      }))
-    }
-    try {
-      const res = await postRequest({
-        extension: SystemRepository.PlantsSchedule.set2,
-        record: JSON.stringify(data)
-      })
-  
-      if (res) toast.success(platformLabels.Edited)
-      setStore(prevStore => ({
-        ...prevStore,
-        schedules: obj.map((item, index) => ({
-          ...item,
-          id: index + 1,
-          plantId: recordId,
-          dow: item.dow
-        }))
-      }))
-    } catch (error) {}
-  }
 
   const columns = [
     {
