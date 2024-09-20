@@ -272,7 +272,8 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
       props: {
         recordId: formik.values.recordId,
         functionId: SystemFunction.CashTransfer,
-        editMode: isClosed
+        editMode: isClosed,
+        totalBaseAmount: totalLoc
       },
       width: 1200,
       height: 670,
@@ -583,6 +584,13 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
                     })
                   }
                 }
+              },
+              {
+                component: 'numberfield',
+                label: labels.baseAmount,
+                name: 'baseAmount',
+                defaultValue: '',
+                props: { readOnly: true },
               },
               {
                 component: 'numberfield',
