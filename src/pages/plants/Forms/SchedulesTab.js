@@ -48,11 +48,11 @@ const SchedulesTab = ({ store, setStore, _labels, editMode, maxAccess }) => {
     validateOnChange: true,
     maxAccess,
     onSubmit: async values => {
-      await post(values.schedules)
+      await postSchedules(values.schedules)
     }
   })
 
-  const post = async obj => {
+  const postSchedules = async obj => {
     const data = {
       plantId: recordId,
       items: obj.map((schedule, index) => ({
