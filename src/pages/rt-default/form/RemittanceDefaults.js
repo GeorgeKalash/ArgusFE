@@ -59,12 +59,16 @@ const RemittanceDefaults = ({ _labels }) => {
           getNumberRange(myObject['rt-nra-product'])
         }
 
-        if (myObject['rt_min_monthly_amount']) {
-          rtDefaultValidation.setFieldValue('rt_min_monthly_amount', myObject['rt_min_monthly_amount'])
+        if (myObject['rt_max_monthly_amount']) {
+          rtDefaultValidation.setFieldValue('rt_max_monthly_amount', myObject['rt_max_monthly_amount'])
         }
 
-        if (myObject['rt_min_yearly_amount']) {
-          rtDefaultValidation.setFieldValue('rt_min_yearly_amount', myObject['rt_min_yearly_amount'])
+        if (myObject['rt_max_yearly_ind_amount']) {
+          rtDefaultValidation.setFieldValue('rt_max_yearly_ind_amount', myObject['rt_max_yearly_ind_amount'])
+        }
+
+        if (myObject['rt_max_yearly_cor_amount']) {
+          rtDefaultValidation.setFieldValue('rt_max_yearly_cor_amount', myObject['rt_max_yearly_cor_amount'])
         }
 
         rtDefaultFormValidation.setValues(myObject)
@@ -106,8 +110,9 @@ const RemittanceDefaults = ({ _labels }) => {
     initialValues: {
       'rt-nra-product': null,
       'rt_fii_accountGroupId': '',
-      'rt_min_monthly_amount': '',
-      'rt_min_yearly_amount': ''
+      'rt_max_monthly_amount': '',
+      'rt_max_yearly_ind_amount': '',
+      'rt_max_yearly_cor_amount': ''
     },
 
     onSubmit: values => {
@@ -182,27 +187,40 @@ const RemittanceDefaults = ({ _labels }) => {
           </Grid>
           <Grid item xs={12} sx={{ marginLeft: '0.5rem', marginRight: '0.5rem' }}>
             <CustomNumberField
-              name='rt_min_monthly_amount'
+              name='rt_max_monthly_amount'
               label={_labels.maxInwardsSettlementPerMonth}
-              value={rtDefaultValidation.values.rt_min_monthly_amount}
+              value={rtDefaultValidation.values.rt_max_monthly_amount}
               onChange={rtDefaultValidation.handleChange}
-              onClear={() => rtDefaultValidation.setFieldValue('rt_min_monthly_amount', '')}
+              onClear={() => rtDefaultValidation.setFieldValue('rt_max_monthly_amount', '')}
               error={
-                rtDefaultValidation.touched.rt_min_monthly_amount &&
-                Boolean(rtDefaultValidation.errors.rt_min_monthly_amount)
+                rtDefaultValidation.touched.rt_max_monthly_amount &&
+                Boolean(rtDefaultValidation.errors.rt_max_monthly_amount)
               }
             />
           </Grid>
           <Grid item xs={12} sx={{ marginLeft: '0.5rem', marginRight: '0.5rem' }}>
             <CustomNumberField
-              name='rt_min_yearly_amount'
+              name='rt_max_yearly_ind_amount'
               label={_labels.maxInwardsSettlementPerYear}
-              value={rtDefaultValidation.values.rt_min_yearly_amount}
+              value={rtDefaultValidation.values.rt_max_yearly_ind_amount}
               onChange={rtDefaultValidation.handleChange}
-              onClear={() => rtDefaultValidation.setFieldValue('rt_min_yearly_amount', '')}
+              onClear={() => rtDefaultValidation.setFieldValue('rt_max_yearly_ind_amount', '')}
               error={
-                rtDefaultValidation.touched.rt_min_yearly_amount &&
-                Boolean(rtDefaultValidation.errors.rt_min_yearly_amount)
+                rtDefaultValidation.touched.rt_max_yearly_ind_amount &&
+                Boolean(rtDefaultValidation.errors.rt_max_yearly_ind_amount)
+              }
+            />
+          </Grid>
+          <Grid item xs={12} sx={{ marginLeft: '0.5rem', marginRight: '0.5rem' }}>
+            <CustomNumberField
+              name='rt_max_yearly_cor_amount'
+              label={_labels.maxYearlyCorAmount}
+              value={rtDefaultValidation.values.rt_max_yearly_cor_amount}
+              onChange={rtDefaultValidation.handleChange}
+              onClear={() => rtDefaultValidation.setFieldValue('rt_max_yearly_cor_amount', '')}
+              error={
+                rtDefaultValidation.touched.rt_max_yearly_cor_amount &&
+                Boolean(rtDefaultValidation.errors.rt_max_yearly_cor_amount)
               }
             />
           </Grid>
