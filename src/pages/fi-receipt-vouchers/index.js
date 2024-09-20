@@ -158,11 +158,8 @@ export default function CurrencyTrading() {
     },
     {
       field: 'isVerified',
-      headerName: labels.isVerified,
-      flex: 1,
-      cellRenderer: ({ row }) => {
-        return <Checkbox checked={row.isVerified} style={{ pointerEvents: 'none' }} />
-      }
+      headerName: _labels.isVerified,
+      flex: 1
     }
   ]
 
