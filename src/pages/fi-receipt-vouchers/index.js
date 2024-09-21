@@ -158,7 +158,7 @@ export default function CurrencyTrading() {
     },
     {
       field: 'isVerified',
-      headerName: _labels.isVerified,
+      headerName: labels.isVerified,
       flex: 1
     }
   ]
