@@ -187,6 +187,7 @@ export const ResourceIds = {
   DocumentTypeDefault: 51106,
   VendorGroups: 50101,
   ConsignmentSites: 51110,
+  Metals: 41107,
   LabelTemplates: 44102,
   FeeSchedule: 36126,
   FeeScheduleMap: 36127,
