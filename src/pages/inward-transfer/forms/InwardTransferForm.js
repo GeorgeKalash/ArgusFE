@@ -50,8 +50,8 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
     releaseStatus: '',
     exRate: 1,
     rateCalcMethod: 1,
-    taxAmount: null,
-    netAmount: null,
+    taxAmount: 0,
+    netAmount: 0,
     baseAmount: '',
     reference: '',
     date: new Date(),
@@ -100,7 +100,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
     sourceOfIncome: '',
     countryId: '',
     purposeOfTransfer: '',
-    charges: null
+    charges: 0
   }
 
   const { maxAccess } = useDocumentType({
@@ -118,7 +118,6 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
       const errors = {}
       if (values.dispersalMode == 1) {
         if (!values.receiver_bank) errors.receiver_bank = 'Receiver bank is required'
-        if (!values.receiver_bankBranch) errors.receiver_bankBranch = 'Receiver Bank Branch is required'
       }
 
       return errors
@@ -134,7 +133,6 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
       receiver_category: yup.string().required(),
       receiver_firstName: yup.string().required(),
       receiver_lastName: yup.string().required(),
-      charges: yup.number().required(),
       dispersalMode: yup.string().required()
     }),
     onSubmit: async () => {
@@ -830,7 +828,6 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                   valueField='recordId'
                   displayField='name'
                   maxAccess={maxAccess}
-                  required={formik.values.dispersalMode == 1}
                   values={formik.values}
                   onChange={(event, newValue) => {
                     formik.setFieldValue('receiver_bankBranch', newValue ? newValue.recordId : '')
@@ -1021,11 +1018,10 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
               <Grid item xs={4}>
                 <CustomNumberField
                   name='charges'
-                  required
                   label={labels.charges}
                   value={formik.values.charges}
                   maxAccess={maxAccess}
-                  readOnly={editMode}
+                  readOnly
                   onChange={e => {
                     formik.setFieldValue('charges', e.target.value)
                     formik.values.amount && calculateAmounts(e.target.value)
