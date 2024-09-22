@@ -55,7 +55,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
     dispersalMode: null,
     amount: '',
     baseAmount: '',
-    charges: null,
+    charges: 0,
     sender_nationalityId: null,
     sender_firstName: null,
     sender_middleName: null,
@@ -488,11 +488,22 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
 
   useEffect(() => {
     ;(async function () {
+      getDefaultCurrency()
       if (recordId) {
         await refetchForm(recordId)
       }
     })()
   }, [])
+
+  async function getDefaultCurrency() {
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.Defaults.get,
+        parameters: `_filter=&_key=baseCurrencyId`
+      })
+      formik.setFieldValue('currencyId', parseInt(res?.record?.value))
+    } catch (error) {}
+  }
 
   return (
     <FormShell
@@ -1001,17 +1012,10 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                   label={labels.currency}
                   valueField='recordId'
                   displayField={['reference', 'name']}
-                  columnsInDropDown={[
-                    { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
-                  ]}
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('currencyId', newValue ? newValue.recordId : '')
-                  }}
                   error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
                   maxAccess={maxAccess}
                   required
-                  readOnly={formik.values.inwardId || isClosed}
+                  readOnly
                 />
               </Grid>
               <Grid item xs={4}>
@@ -1080,8 +1084,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                   label={labels.charges}
                   value={formik.values.charges}
                   maxAccess={maxAccess}
-                  required={!formik.values.inwardId}
-                  readOnly={formik.values.inwardId || isClosed}
+                  readOnly
                   onChange={e => {
                     formik.setFieldValue('charges', e.target.value)
                   }}
