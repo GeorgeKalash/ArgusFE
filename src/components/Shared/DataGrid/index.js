@@ -237,8 +237,9 @@ export function DataGrid({ columns, value, height, onChange, disabled = false, a
             }}
             onCellKeyDown={onCellKeyDown}
             tabToNextCell={tabToNextCell}
-            onCellClicked={params => (gridApiRef.current = params.api)}
-            onCellEditingStopped={onCellEditingStopped}
+
+            // onCellClicked={params => (gridApiRef.current = params.api)}
+            // onCellEditingStopped={onCellEditingStopped}
           />
         </div>
       </CacheDataProvider>
