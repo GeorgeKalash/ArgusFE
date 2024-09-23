@@ -41,10 +41,11 @@ export function DataGrid({ columns, value, height, onChange, disabled = false, a
   const onCellKeyDown = params => {
     const { event, api, node } = params
 
-    // if (event.key === 'Enter') {
-    //   event.stopPropagation()
-    //   return
-    // }
+    if (event.key === 'Enter') {
+      event.preventDefault()
+      event.stopPropagation()
+      return
+    }
     if (event.key !== 'Tab') {
       return
     }
@@ -132,17 +133,14 @@ export function DataGrid({ columns, value, height, onChange, disabled = false, a
 
     const updateRow = ({ changes }) => {
       setData(changes)
-      console.log('changes', changes)
-      params.api.stopEditing()
-      // handleRowChange()
-    }
+      const { data } = params
+      // console.log(
+      //   'onChange',
+      //   value.map(row => (row.id === data.id ? data : row))
+      // )
 
-    const handleKeyDown = event => {
-      if (event.key === 'Enter') {
-        setTimeout(() => {
-          params.api.stopEditing()
-        }, 50)
-      }
+      params.api.stopEditing()
+      // onChange(value.map(row => (row.id === data.id ? data : row)))
     }
 
     return (
@@ -157,7 +155,7 @@ export function DataGrid({ columns, value, height, onChange, disabled = false, a
             (column.component === 'checkbox' || column.component === 'button' || column.component === 'icon') &&
             'center'
         }}
-        onKeyDown={handleKeyDown} // Attach the key down handler
+        onBlur={() => params.api.stopEditing()}
       >
         <Component
           id={params.node.data.id}
@@ -200,15 +198,17 @@ export function DataGrid({ columns, value, height, onChange, disabled = false, a
       cellRenderer: CustomCellRenderer,
       cellEditor: CustomCellEditor
     })),
-    {
-      field: 'actions',
-      headerName: '',
-      flex: 0.5,
-      editable: false,
-      sortable: false,
-      cellRenderer: ActionCellRenderer
-    }
-  ]
+    allowDelete
+      ? {
+          field: 'actions',
+          headerName: '',
+          flex: 0.5,
+          editable: false,
+          sortable: false,
+          cellRenderer: ActionCellRenderer
+        }
+      : null
+  ].filter(Boolean)
   const tabToNextCell = () => {
     return true
   }
@@ -221,7 +221,7 @@ export function DataGrid({ columns, value, height, onChange, disabled = false, a
             apiRef={gridApiRef}
             rowData={value}
             columnDefs={columnDefs}
-            suppressRowClickSelection
+            suppressRowClickSelection={false}
             rowSelection='single'
             editType='cell'
             singleClickEdit={true}
@@ -229,19 +229,8 @@ export function DataGrid({ columns, value, height, onChange, disabled = false, a
               gridApiRef.current = params.api
             }}
             onCellKeyDown={onCellKeyDown}
-            tabToNextCell={tabToNextCell} // Set custom tab behavior
-            // onCellValueChanged={params => {
-            //   const changes = {
-            //     [params.column.colId]: params.newValue
-            //   }
-
-            //   stageRowUpdate({
-            //     changes: {
-            //       id: params.node.id,
-            //       ...changes
-            //     }
-            //   })
-            // }}
+            tabToNextCell={tabToNextCell}
+            onCellEditingStopped={({ data }) => onChange(value.map(row => (row.id === data.id ? data : row)))}
           />
         </div>
       </CacheDataProvider>

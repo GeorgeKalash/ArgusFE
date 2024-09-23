@@ -1,8 +1,6 @@
 import { Button } from '@mui/material'
 
-function DataGridButton({ row, column: { props, ...column }, update, updateRow, colDef }) {
-  const { field } = colDef
-
+function DataGridButton({ row, column: { props, ...column }, update, updateRow, field }) {
   return (
     <Button
       sx={{
