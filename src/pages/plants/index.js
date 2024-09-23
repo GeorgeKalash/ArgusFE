@@ -103,11 +103,11 @@ const Plants = () => {
       Component: PlantWindow,
       props: {
         labels: _labels,
-        recordId: recordId ? recordId : null,
+        recordId,
         editMode: recordId && true
       },
       width: 800,
-      height: 550,
+      height: 640,
       title: _labels.plant
     })
   }

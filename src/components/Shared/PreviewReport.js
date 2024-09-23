@@ -3,7 +3,7 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { DevExpressRepository } from 'src/repositories/DevExpressRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-export default function PreviewReport({ recordId, selectedReport, functionId, resourceId }) {
+export default function PreviewReport({ recordId, selectedReport, functionId, resourceId, outerGrid = false }) {
   const { postRequest } = useContext(RequestsContext)
   const [pdfURL, setPdfUrl] = useState(null)
 
@@ -12,10 +12,13 @@ export default function PreviewReport({ recordId, selectedReport, functionId, re
   }, [selectedReport])
 
   const generateReport = () => {
-    const parameters =
-      resourceId == ResourceIds.JournalVoucher
-        ? `?_recordId=${recordId}&_functionId=${functionId}`
-        : `?_recordId=${recordId}`
+    let parameters = ''
+    if (!outerGrid) {
+      parameters =
+        resourceId == ResourceIds.JournalVoucher
+          ? `?_recordId=${recordId}&_functionId=${functionId}`
+          : `?_recordId=${recordId}`
+    }
 
     const obj = {
       api_url: selectedReport.api_url + parameters,
@@ -24,6 +27,7 @@ export default function PreviewReport({ recordId, selectedReport, functionId, re
       reportClass: selectedReport.reportClass,
       functionId: functionId
     }
+
     postRequest({
       url: process.env.NEXT_PUBLIC_REPORT_URL,
       extension: DevExpressRepository.generate,

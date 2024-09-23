@@ -177,7 +177,7 @@ const Financial = () => {
         functionId: functionId,
         getEndpoint
       },
-      width: 860,
+      width: 900,
       height: 670,
       title: getcorrectLabel(parseInt(functionId))
     })

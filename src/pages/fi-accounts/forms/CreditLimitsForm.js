@@ -20,12 +20,12 @@ const CreditLimitsForm = ({ setStore, labels, editMode, height, store, expanded,
     initialValues: {
       currencies: [{ id: 1, accountId: accountId, currencyName: '', currencyId: '', limit: '' }]
     },
-    onSubmit: values => {
-      postCurrencies(values.currencies)
+    onSubmit: async values => {
+      await postCurrencies(values.currencies)
     }
   })
 
-  const postCurrencies = obj => {
+  const postCurrencies = async obj => {
     const filteredObj = obj.filter(({ limit }) => limit > 0)
 
     const saveCurrency = filteredObj.map(currency => {
@@ -98,6 +98,8 @@ const CreditLimitsForm = ({ setStore, labels, editMode, height, store, expanded,
       maxAccess={maxAccess}
       infoVisible={false}
       editMode={editMode}
+      isSavedClear={false}
+      isCleared={false}
     >
       <VertLayout>
         <Grow>

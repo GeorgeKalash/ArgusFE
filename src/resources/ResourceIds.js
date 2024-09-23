@@ -1,5 +1,3 @@
-import Correspondent from 'src/pages/correspondent'
-
 export const ResourceIds = {
   GeneralLedger: 30303,
   JournalVoucher: 30302,
@@ -232,8 +230,17 @@ export const ResourceIds = {
   BankBranches: 33109,
   CorrespondentOutwards: 36318,
   ExtraIncome: 36129,
+  StockCountControllers: 44101,
   StockCountDTD: 44103,
   PurposeExchangeGroup: 35115,
   Drivers: 52201,
-  Trip: 52303 //outbound transportation
+  Trip: 52303, //outbound transportation,
+  IvReplenishements: 46302,
+  EndSiteCount: 44204,
+  RebuildInventory: 41501,
+  RebuildUndeliveredItems: 52504,
+  IvSettings: 41115,
+  FeeScheduleInwardsMap: 36130,
+  OpenOutwardsReturn: 36320,
+  AgingButton: 31419
 }

@@ -31,5 +31,8 @@ export const DeliveryRepository = {
   },
   TripOrder: {
     qry: service + 'qryTRO'
+  },
+  Reduild: {
+    rebuild: service + 'rebuildMW'
   }
 }
