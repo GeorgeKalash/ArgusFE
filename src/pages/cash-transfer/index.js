@@ -28,7 +28,7 @@ const CashTransfer = () => {
 
     const response = await getRequest({
       extension: CashBankRepository.CashTransfer.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_type=1&_params=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=`
     })
 
     return { ...response, _startAt: _startAt }
