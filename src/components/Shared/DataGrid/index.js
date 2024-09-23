@@ -63,7 +63,7 @@ export function DataGrid({ columns, value, error, height, onChange, disabled = f
       const allColumns = api.getColumnDefs()
       const currentColumnIndex = allColumns.findIndex(col => col.colId === currentColId)
       if (currentColumnIndex < allColumns.length - 2) {
-        const nextColumnId = allColumns[currentColumnIndex + 1].colId // Get next column ID
+        const nextColumnId = allColumns[currentColumnIndex + 1].colId
         api.startEditingCell({
           rowIndex: currentRowIndex,
           colKey: nextColumnId
@@ -242,6 +242,7 @@ export function DataGrid({ columns, value, error, height, onChange, disabled = f
             }}
             onCellKeyDown={onCellKeyDown}
             tabToNextCell={tabToNextCell}
+
             // onCellClicked={params => (gridApiRef.current = params.api)}
             // onCellEditingStopped={onCellEditingStopped}
           />
