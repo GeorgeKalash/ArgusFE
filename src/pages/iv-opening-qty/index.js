@@ -20,12 +20,16 @@ const InventoryOpeningQtys = () => {
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 50, params } = options
 
     return await getRequest({
       extension: InventoryRepository.InventoryOpeningQtys.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_params=&_sortBy=year desc`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_params=${params || ''}&_sortBy=year desc`
     })
+  }
+
+  async function fetchWithFilter({ filters, pagination }) {
+    return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
   const {
@@ -40,7 +44,10 @@ const InventoryOpeningQtys = () => {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: InventoryRepository.InventoryOpeningQtys.qry,
-    datasetId: ResourceIds.InventoryOpeningQtys
+    datasetId: ResourceIds.InventoryOpeningQtys,
+    filter: {
+      filterFn: fetchWithFilter
+    }
   })
 
   const columns = [

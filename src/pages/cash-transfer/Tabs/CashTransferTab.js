@@ -40,7 +40,7 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
   const [isPosted, setIsPosted] = useState(true)
 
   const invalidate = useInvalidate({
-    endpointId: CashBankRepository.CashTransfer.snapshot
+    endpointId: CashBankRepository.CashTransfer.page
   })
 
   const [initialValues, setInitialData] = useState({
@@ -272,7 +272,8 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
       props: {
         recordId: formik.values.recordId,
         functionId: SystemFunction.CashTransfer,
-        editMode: isClosed
+        editMode: isClosed,
+        totalBaseAmount: totalLoc
       },
       width: 1200,
       height: 670,
