@@ -30,7 +30,6 @@ export const ClientBalance = ({ recordId }) => {
     validateOnChange: true
   })
 
-  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
@@ -52,7 +51,6 @@ export const ClientBalance = ({ recordId }) => {
         resourceId={ResourceIds.ClientBalance} 
         form={formik} 
         maxAccess={access} 
-        editMode={editMode}
         isSavedClear={false}
         isCleared={false}
         isSaved={false}
