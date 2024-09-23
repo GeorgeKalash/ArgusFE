@@ -51,9 +51,7 @@ const CurrencyForm = ({ store, labels, maxAccess }) => {
     onSubmit: values => {
       const { data } = values
 
-      // Check if there's only one row, no currencyId, and decimals is not 0
       if (data.length === 1 && !data[0].currencyId && data[0].decimals !== 0) {
-        // Set decimals to 0
         data[0].decimals = 0
       }
 
