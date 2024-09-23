@@ -14,17 +14,19 @@ import { ControlContext } from 'src/providers/ControlContext'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
+import { useWindow } from 'src/windows'
+import { ThreadProgress } from 'src/components/Shared/ThreadProgress'
 
 export default function RebuildForm({ _labels, access }) {
   const { postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const { stack } = useWindow()
 
   const { formik } = useForm({
     initialValues: { year: '', itemId: 0, date: new Date(), recordId: 'N/A' },
     enableReinitialize: false,
     maxAccess: access,
     validateOnChange: true,
-
     validationSchema: yup.object({
       year: yup.string().required(),
       date: yup.string().required()
@@ -33,12 +35,23 @@ export default function RebuildForm({ _labels, access }) {
       try {
         const { recordId, ...rest } = obj
 
-        await postRequest({
+        const res = await postRequest({
           extension: InventoryRepository.RebuildInventory.rebuild,
           record: JSON.stringify(rest)
         })
 
         toast.success(platformLabels.rebuild)
+
+        stack({
+          Component: ThreadProgress,
+          props: {
+            recordId: res.recordId
+          },
+          width: 500,
+          height: 450,
+          closable: false,
+          title: platformLabels.Progress
+        })
       } catch (error) {}
     }
   })

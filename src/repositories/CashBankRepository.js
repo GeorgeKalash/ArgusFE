@@ -86,6 +86,7 @@ export const CashBankRepository = {
   },
   BankBranches: {
     qry: service + 'qryBNB',
+    qry2: service + 'qryBNB2',
     get: service + 'getBNB',
     set: service + 'setBNB',
     del: service + 'delBNB',

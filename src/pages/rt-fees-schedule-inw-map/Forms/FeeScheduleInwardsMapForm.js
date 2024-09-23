@@ -112,7 +112,7 @@ export default function FeeScheduleInwardsMapForm({ labels, maxAccess, recordId,
               <ResourceComboBox
                 name='dispersalMode'
                 label={labels.dispersalMode}
-                datasetId={DataSets.RT_Dispersal_Type}
+                datasetId={DataSets.CA_CASH_ACCOUNT_TYPE}
                 valueField='key'
                 readOnly={editMode}
                 displayField='value'
