@@ -41,7 +41,6 @@ const PropertiesForm = ({ store, labels, maxAccess }) => {
             item => item.key.includes('ivtUDT') && item.key !== 'ivtUDTCount' && item.value.length > 0
           )
           setDimensionsUDT(filteredDimensions2)
-          console.log(filteredDimensions2, 'ivtUDT')
         } catch (error) {}
       }
 
@@ -109,7 +108,7 @@ const PropertiesForm = ({ store, labels, maxAccess }) => {
     const fetchDimensionsData = async () => {
       if (recordId && dimensions.length > 0) {
         try {
-          const requests = dimensions.map(dimension => {
+          const dimensionRequests = dimensions.map(dimension => {
             const dimensionNumber = dimension.key.match(/\d+$/)?.[0]
 
             return getRequest({
@@ -118,72 +117,93 @@ const PropertiesForm = ({ store, labels, maxAccess }) => {
             })
           })
 
-          const responses = await Promise.all(requests)
+          const dimensionResponses = await Promise.all(dimensionRequests)
 
-          const newValues = responses.reduce((acc, res, index) => {
+          const newDimensionValues = dimensionResponses.reduce((acc, res, index) => {
             const dimensionKey = dimensions[index].key
             acc[dimensionKey] = res.record?.id || ''
 
             return acc
           }, {})
 
+          const udtRequests = dimensionsUDT.map(dimension => {
+            const dimensionNumber = dimension.key.match(/\d+$/)?.[0]
+
+            return getRequest({
+              extension: InventoryRepository.DimensionUDT.get,
+              parameters: `_itemId=${recordId}&_dimension=${dimensionNumber}`
+            })
+          })
+
+          const udtResponses = await Promise.all(udtRequests)
+
+          const newUDTValues = udtResponses.reduce((acc, res, index) => {
+            const udtKey = dimensionsUDT[index].key
+            acc[udtKey] = res.record?.value || ''
+
+            return acc
+          }, {})
+
           formik.setValues(prevValues => ({
             ...prevValues,
-            ...newValues
+            ...newDimensionValues,
+            ...newUDTValues
           }))
         } catch (error) {}
       }
     }
 
     fetchDimensionsData()
-  }, [recordId, dimensions])
-
-  console.log(formik.values, 'formik')
+  }, [recordId, dimensions, dimensionsUDT])
 
   return (
     <FormShell form={formik} resourceId={ResourceIds.Items} maxAccess={maxAccess} infoVisible={false}>
       <VertLayout>
         <Grow>
-          <Grid container>
-            {dimensions.map((dimension, index) => {
-              const dimensionNumber = dimension.key.match(/\d+$/)?.[0] || ''
+          <Grid container spacing={2}>
+            <Grid item xs={6}>
+              {dimensions.map((dimension, index) => {
+                const dimensionNumber = dimension.key.match(/\d+$/)?.[0] || ''
 
-              return (
-                <Grid container mt={0.2} spacing={2} key={index}>
-                  <Grid item xs={6}>
-                    <ResourceComboBox
-                      endpointId={InventoryRepository.Dimension.qry}
-                      parameters={`_dimension=${dimensionNumber}`}
-                      name={dimension.key}
-                      label={dimension.value}
-                      valueField='id'
-                      displayField='name'
-                      values={formik.values}
-                      onChange={(event, newValue) => {
-                        formik.setFieldValue(`${dimension.key}`, newValue?.id)
-                      }}
-                    />
+                return (
+                  <Grid container mt={0.2} spacing={2} key={index}>
+                    <Grid item xs={12}>
+                      <ResourceComboBox
+                        endpointId={InventoryRepository.Dimension.qry}
+                        parameters={`_dimension=${dimensionNumber}`}
+                        name={dimension.key}
+                        label={dimension.value}
+                        valueField='id'
+                        displayField='name'
+                        values={formik.values}
+                        onChange={(event, newValue) => {
+                          formik.setFieldValue(`${dimension.key}`, newValue?.id)
+                        }}
+                      />
+                    </Grid>
                   </Grid>
-                </Grid>
-              )
-            })}
+                )
+              })}
+            </Grid>
 
-            {dimensionsUDT.map((dimension, index) => {
-              return (
-                <Grid container mt={0.2} spacing={2} key={index}>
-                  <Grid item xs={6}>
-                    <CustomTextField
-                      name={dimension.key}
-                      label={dimension.value}
-                      value={formik.values[dimension.key]}
-                      onChange={formik.handleChange}
-                      maxAccess={maxAccess}
-                      onClear={() => formik.setFieldValue([dimension.key], '')}
-                    />
+            <Grid item xs={6}>
+              {dimensionsUDT.map((dimension, index) => {
+                return (
+                  <Grid container mt={0.2} spacing={2} key={index}>
+                    <Grid item xs={12}>
+                      <CustomTextField
+                        name={dimension.key}
+                        label={dimension.value}
+                        value={formik.values[dimension.key]}
+                        onChange={formik.handleChange}
+                        maxAccess={maxAccess}
+                        onClear={() => formik.setFieldValue([dimension.key], '')}
+                      />
+                    </Grid>
                   </Grid>
-                </Grid>
-              )
-            })}
+                )
+              })}
+            </Grid>
           </Grid>
         </Grow>
       </VertLayout>

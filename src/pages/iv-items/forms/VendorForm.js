@@ -92,8 +92,6 @@ const VendorForm = ({ labels, editMode, maxAccess, store, record }) => {
     fetchData()
   }, [record])
 
-  console.log(formik.values)
-
   return (
     <FormShell
       form={formik}
@@ -125,7 +123,6 @@ const VendorForm = ({ labels, editMode, maxAccess, store, record }) => {
                   formik.setFieldValue('vendorId', newValue ? newValue.recordId : '')
                   formik.setFieldValue('vendorName', newValue ? newValue.name : '')
                   formik.setFieldValue('vendorRef', newValue ? newValue.reference : '')
-                  console.log(newValue.name, 'name')
                 }}
                 maxAccess={maxAccess}
               />
