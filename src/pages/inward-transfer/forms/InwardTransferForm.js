@@ -100,7 +100,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
     sourceOfIncome: '',
     countryId: '',
     purposeOfTransfer: '',
-    charges: 0
+    commission: ''
   }
 
   const { maxAccess } = useDocumentType({
@@ -277,17 +277,17 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
     })
   }
 
-  function calculateAmounts(charges) {
-    const amount = formik.values.amount
-    const vatPct = formik.values.vatPct
+  // function calculateAmounts(charges) {
+  //   const amount = formik.values.amount
+  //   const vatPct = formik.values.vatPct
 
-    const taxAmount = (charges * vatPct) / 100
+  //   const taxAmount = (charges * vatPct) / 100
 
-    const netAmount = amount - charges - taxAmount
+  //   const netAmount = amount - charges - taxAmount
 
-    formik.setFieldValue('taxAmount', taxAmount.toFixed(2))
-    formik.setFieldValue('netAmount', netAmount.toFixed(2))
-  }
+  //   formik.setFieldValue('taxAmount', taxAmount.toFixed(2))
+  //   formik.setFieldValue('netAmount', netAmount.toFixed(2))
+  // }
 
   useEffect(() => {
     ;(async function () {
@@ -432,7 +432,8 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                   readOnly={editMode}
                   onChange={e => {
                     formik.setFieldValue('amount', e.target.value)
-                    formik.values.charges && calculateAmounts(formik.values.charges)
+
+                    //formik.values.commission && calculateAmounts(formik.values.commission)
                   }}
                   onClear={() => formik.setFieldValue('amount', '')}
                   error={formik.touched.amount && Boolean(formik.errors.amount)}
@@ -1017,19 +1018,31 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
               </Grid>
               <Grid item xs={4}>
                 <CustomNumberField
-                  name='charges'
-                  label={labels.charges}
-                  value={formik.values.charges}
+                  name='commission'
+                  label={labels.commission}
+                  value={formik.values.commission}
                   maxAccess={maxAccess}
                   readOnly
                   onChange={e => {
-                    formik.setFieldValue('charges', e.target.value)
-                    formik.values.amount && calculateAmounts(e.target.value)
+                    formik.setFieldValue('commission', e.target.value)
+
+                    // formik.values.amount && calculateAmounts(e.target.value)
                   }}
-                  onClear={() => formik.setFieldValue('charges', '')}
-                  error={formik.touched.charges && Boolean(formik.errors.charges)}
+                  onClear={() => formik.setFieldValue('commission', '')}
+                  error={formik.touched.commission && Boolean(formik.errors.commission)}
                   maxLength={12}
                   decimalScale={2}
+                />
+              </Grid>
+              <Grid item xs={4}>
+                <ResourceComboBox
+                  datasetId={DataSets.FEE_PAYER}
+                  name='feePayer'
+                  label={labels.feePayer}
+                  valueField='key'
+                  displayField='value'
+                  values={formik.values}
+                  readOnly
                 />
               </Grid>
               <Grid item xs={4}>
