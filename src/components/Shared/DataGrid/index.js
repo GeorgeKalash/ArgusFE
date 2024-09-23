@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { AgGridReact } from 'ag-grid-react'
 import { Box, IconButton } from '@mui/material'
 import components from './components'
@@ -44,11 +44,13 @@ export function DataGrid({ columns, value, height, onChange, disabled = false, a
     if (event.key === 'Enter') {
       event.preventDefault()
       event.stopPropagation()
+
       return
     }
     if (event.key !== 'Tab') {
       return
     }
+
     const allColumns = api.getColumnDefs()
     const currentColumnIndex = allColumns?.findIndex(col => col.colId === params.column.getColId())
 
@@ -78,6 +80,7 @@ export function DataGrid({ columns, value, height, onChange, disabled = false, a
 
   const CustomCellRenderer = params => {
     const { column } = params
+
     const Component =
       typeof column.colDef.component === 'string'
         ? components[column.colDef.component].view
@@ -100,6 +103,7 @@ export function DataGrid({ columns, value, height, onChange, disabled = false, a
 
   const CustomCellEditor = params => {
     const { column, data, maxAccess } = params
+
     const Component =
       typeof column?.colDef?.component === 'string'
         ? components[column?.colDef?.component]?.edit
@@ -121,6 +125,7 @@ export function DataGrid({ columns, value, height, onChange, disabled = false, a
         const currentData = rowNode.data
         const newData = { ...currentData, ...changes }
         rowNode.setData(newData)
+        params.node.setData(newData)
       }
     }
 
@@ -128,6 +133,7 @@ export function DataGrid({ columns, value, height, onChange, disabled = false, a
       const changes = {
         [field]: value
       }
+
       setData(changes)
     }
 
@@ -148,6 +154,7 @@ export function DataGrid({ columns, value, height, onChange, disabled = false, a
             (column.component === 'checkbox' || column.component === 'button' || column.component === 'icon') &&
             'center'
         }}
+
         // onBlur={() => params.api.stopEditing()}
       >
         <Component
@@ -167,8 +174,9 @@ export function DataGrid({ columns, value, height, onChange, disabled = false, a
 
   const ActionCellRenderer = params => {
     const handleDelete = () => {
-      console.log('Delete clicked', params)
       gridApiRef.current.applyTransaction({ remove: [params.data] })
+      const newRows = value.filter(({ id }) => id !== data.id)
+      onChange(newRows)
     }
 
     return (
@@ -202,8 +210,14 @@ export function DataGrid({ columns, value, height, onChange, disabled = false, a
         }
       : null
   ].filter(Boolean)
+
   const tabToNextCell = () => {
     return true
+  }
+
+  const onCellEditingStopped = params => {
+    const { data } = params
+    console.log('onCellValueChanged', data)
   }
 
   return (
@@ -223,15 +237,8 @@ export function DataGrid({ columns, value, height, onChange, disabled = false, a
             }}
             onCellKeyDown={onCellKeyDown}
             tabToNextCell={tabToNextCell}
-            onCellEditingStarted={params => {
-              const rowIndex = params.rowIndex
-              const fieldName = params.colDef.field
-              gridApiRef.current.startEditingCell({
-                rowIndex: rowIndex,
-                colKey: fieldName
-              })
-            }}
-            // onCellEditingStopped={({ data }) => onChange(value.map(row => (row.id === data.id ? data : row)))}
+            onCellClicked={params => (gridApiRef.current = params.api)}
+            onCellEditingStopped={onCellEditingStopped}
           />
         </div>
       </CacheDataProvider>
