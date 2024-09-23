@@ -7,7 +7,7 @@ import 'ag-grid-community/styles/ag-grid.css'
 import 'ag-grid-community/styles/ag-theme-alpine.css'
 import { GridDeleteIcon } from '@mui/x-data-grid'
 
-export function DataGrid({ columns, value, height, onChange, disabled = false, allowDelete = true }) {
+export function DataGrid({ columns, value, error, height, onChange, disabled = false, allowDelete = true }) {
   const gridApiRef = useRef(null)
 
   const addNewRow = () => {
@@ -175,7 +175,8 @@ export function DataGrid({ columns, value, height, onChange, disabled = false, a
   const ActionCellRenderer = params => {
     const handleDelete = () => {
       gridApiRef.current.applyTransaction({ remove: [params.data] })
-      const newRows = value.filter(({ id }) => id !== data.id)
+      const newRows = value?.filter(({ id }) => id !== params.data.id)
+      console.log(newRows)
       onChange(newRows)
     }
 
@@ -218,7 +219,11 @@ export function DataGrid({ columns, value, height, onChange, disabled = false, a
   const onCellEditingStopped = params => {
     const { data } = params
     console.log('onCellValueChanged', data)
+
+    onChange(data)
   }
+
+  console.log(error)
 
   return (
     <Box sx={{ height: height || 'auto', flex: 1 }}>
@@ -237,7 +242,6 @@ export function DataGrid({ columns, value, height, onChange, disabled = false, a
             }}
             onCellKeyDown={onCellKeyDown}
             tabToNextCell={tabToNextCell}
-
             // onCellClicked={params => (gridApiRef.current = params.api)}
             // onCellEditingStopped={onCellEditingStopped}
           />
