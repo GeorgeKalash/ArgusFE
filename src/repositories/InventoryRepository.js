@@ -100,6 +100,16 @@ export const InventoryRepository = {
     del: service + 'delDI'
   },
   DimensionId: { set: service + 'set2ID', get: service + 'getID' },
+  Metals: {
+    page: service + 'pageMTL',
+    get: service + 'getMTL',
+    set: service + 'setMTL',
+    del: service + 'delMTL'
+  },
+  Scrap: {
+    qry: service + 'qryMTS',
+    set2: service + 'set2MTS'
+  },
   InventoryOpeningQtys: {
     qry: service + 'qryOQ',
     snapshot: service + 'snapshotOQ',

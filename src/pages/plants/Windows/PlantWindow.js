@@ -8,17 +8,19 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import toast from 'react-hot-toast'
 import AddressForm from 'src/components/Shared/AddressForm'
 import { ControlContext } from 'src/providers/ControlContext'
+import SchedulesTab from '../Forms/SchedulesTab'
 
 const PlantWindow = ({ labels, editMode, maxAccess, recordId, height }) => {
   const [store, setStore] = useState({
-    recordId: recordId || null,
+    recordId: recordId,
     plant: null,
-    address: null
+    address: null,
+    schedules: null
   })
 
   const [activeTab, setActiveTab] = useState(0)
   const { platformLabels } = useContext(ControlContext)
-  const tabs = [{ label: labels.plant }, { label: labels.address, disabled: !store.recordId }]
+  const tabs = [{ label: labels.plant }, { label: labels.address, disabled: !store.recordId }, { label: labels.schedules, disabled: !store.recordId }]
   const { postRequest } = useContext(RequestsContext)
 
   async function onSubmit(address) {
@@ -68,6 +70,9 @@ const PlantWindow = ({ labels, editMode, maxAccess, recordId, height }) => {
           onSubmit={onSubmit}
           isCleared={false}
         />
+      </CustomTabPanel>
+      <CustomTabPanel height={height} index={2} value={activeTab}>
+        <SchedulesTab _labels={labels} maxAccess={maxAccess} store={store} setStore={setStore} editMode={store.recordId} />
       </CustomTabPanel>
     </>
   )
