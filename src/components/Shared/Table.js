@@ -492,7 +492,7 @@ const Table = ({
     })
   }
 
-  const CustomField = params => {
+  const FieldWrapper = params => {
     const [tooltipOpen, setTooltipOpen] = useState(false)
 
     const handleClick = event => {
@@ -549,7 +549,7 @@ const Table = ({
       : []),
     ...filteredColumns.map(column => ({
       ...column,
-      cellRenderer: CustomField
+      cellRenderer: FieldWrapper
     }))
   ]
 
