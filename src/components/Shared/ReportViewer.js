@@ -7,6 +7,7 @@ import { ExportFormat } from 'src/statics/ExportFormat'
 import { VertLayout } from './Layouts/VertLayout'
 import { Fixed } from './Layouts/Fixed'
 import RPBGridToolbar from './RPBGridToolbar'
+import PopperComponent from './Popper/PopperComponent'
 
 const ReportViewer = ({ resourceId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -112,6 +113,7 @@ const ReportViewer = ({ resourceId }) => {
                 size='small'
                 options={reportStore}
                 value={selectedReport}
+                PopperComponent={PopperComponent}
                 getOptionLabel={option => option.layoutName || option.caption || ''}
                 onChange={(e, newValue) => setSelectedReport(newValue)}
                 renderInput={params => (
@@ -124,6 +126,7 @@ const ReportViewer = ({ resourceId }) => {
                 size='small'
                 options={ExportFormat}
                 value={selectedFormat}
+                PopperComponent={PopperComponent}
                 getOptionLabel={option => option.value}
                 onChange={(e, newValue) => setSelectedFormat(newValue)}
                 renderInput={params => <TextField {...params} label='Select Format' variant='outlined' fullWidth />}

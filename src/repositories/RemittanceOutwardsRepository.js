@@ -30,13 +30,29 @@ export const RemittanceOutwardsRepository = {
     post: service + 'postOW',
     snapshot: service + 'snapshotOW'
   },
+  InwardSettlement: {
+    qry: service + 'qryIWS',
+    page: service + 'pageIWS',
+    get: service + 'getIWS',
+    set: service + 'setIWS',
+    del: service + 'delIWS',
+    close: service + 'closeIWS',
+    reopen: service + 'reopenIWS',
+    post: service + 'postIWS',
+    snapshot: service + 'snapshotIWS'
+  },
   InwardsTransfer: {
     get: service + 'getIW',
     set: service + 'setIW',
     del: service + 'delIW',
     snapshot: service + 'snapshotIW',
+    snapshot2: service + 'snapshotIW2',
     close: service + 'closeIW',
-    reopen: service + 'reopenIW'
+    reopen: service + 'reopenIW',
+    post: service + 'postIW'
+  },
+  InwardGLInformation: {
+    get: service + 'getIWI'
   },
   Beneficiary: {
     qry: service + 'qryBEN',
@@ -115,7 +131,7 @@ export const RemittanceOutwardsRepository = {
     close: service + 'closeOWR',
     reopen: service + 'reopenOWR',
     post: service + 'postOWR',
-    snapshot: service + 'snapshotOWR',
+    snapshot: service + 'snapshotOWR'
   },
   CorrespondentOutwards: {
     qry: service + 'qryACE',

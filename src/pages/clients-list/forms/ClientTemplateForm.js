@@ -1654,6 +1654,16 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                   </Grid>
                 </Grid>
               </Grid>
+              <Grid
+                sx={{
+                  position: 'fixed',
+                  bottom: 0,
+                  left: 0,
+                  width: '100%',
+                  padding: 3,
+                  textAlign: 'center'
+                }}
+              ></Grid>
             </Grid>
           </Grid>
         </Grow>
