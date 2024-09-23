@@ -63,48 +63,36 @@ export const ClientBalance = ({ recordId }) => {
               <CustomNumberField
                 name='owYTD'
                 label={_labels.owYTD}
-                value={formik.values.owYTD}
+                value={formik?.values?.owYTD}
                 maxAccess={access}
                 readOnly
-                onChange={e => formik.setFieldValue('owYTD', e.target.value)}
-                onClear={() => formik.setFieldValue('owYTD', '')}
-                error={formik.touched.owYTD && Boolean(formik.errors.owYTD)}
               />
             </Grid>
             <Grid item xs={12}>
               <CustomNumberField
                 name='owMTD'
                 label={_labels.owMTD}
-                value={formik.values.owMTD}
+                value={formik?.values?.owMTD}
                 maxAccess={access}
                 readOnly
-                onChange={e => formik.setFieldValue('owMTD', e.target.value)}
-                onClear={() => formik.setFieldValue('owMTD', '')}
-                error={formik.touched.owMTD && Boolean(formik.errors.owMTD)}
               />
             </Grid>
             <Grid item xs={12}>
               <CustomNumberField
                 name='iwYTD'
                 label={_labels.iwYTD}
-                value={formik.values.iwYTD}
+                value={formik?.values?.iwYTD}
                 maxAccess={access}
                 readOnly
-                onChange={e => formik.setFieldValue('iwYTD', e.target.value)}
-                onClear={() => formik.setFieldValue('iwYTD', '')}
-                error={formik.touched.iwYTD && Boolean(formik.errors.iwYTD)}
               />
             </Grid>
             <Grid item xs={12}>
               <CustomNumberField
                 name='iwMTD'
                 label={_labels.iwMTD}
-                value={formik.values.iwMTD}
+                value={formik?.values?.iwMTD}
                 maxAccess={access}
                 readOnly
-                onChange={e => formik.setFieldValue('iwMTD', e.target.value)}
-                onClear={() => formik.setFieldValue('iwMTD', '')}
-                error={formik.touched.iwMTD && Boolean(formik.errors.iwMTD)}
               />
             </Grid>
           </Grid>
