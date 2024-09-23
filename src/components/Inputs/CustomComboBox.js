@@ -91,7 +91,6 @@ const CustomComboBox = ({
       }}
       isOptionEqualToValue={(option, value) => option[valueField] === value[valueField]}
       onChange={onChange}
-      onKeyDown={onchange}
       fullWidth={fullWidth}
       readOnly={_readOnly}
       freeSolo={_readOnly}

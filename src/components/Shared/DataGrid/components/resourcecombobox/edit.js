@@ -1,8 +1,6 @@
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 
 export default function ResourceComboBoxEdit({ column: { props }, id, field, value, updateRow, update, data }) {
-  console.log(id, field)
-
   let changes = props?.mapping
     ? props.mapping
         ?.map(({ from, to }) => ({
@@ -20,8 +18,6 @@ export default function ResourceComboBoxEdit({ column: { props }, id, field, val
       label={''}
       hasBorder={false}
       onChange={(e, value) => {
-        console.log(id, field, value)
-
         if (props?.mapping) {
           let changes = props.mapping
             .map(({ from, to }) => ({

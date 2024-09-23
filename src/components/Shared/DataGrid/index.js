@@ -133,14 +133,7 @@ export function DataGrid({ columns, value, height, onChange, disabled = false, a
 
     const updateRow = ({ changes }) => {
       setData(changes)
-      const { data } = params
-      // console.log(
-      //   'onChange',
-      //   value.map(row => (row.id === data.id ? data : row))
-      // )
-
       params.api.stopEditing()
-      // onChange(value.map(row => (row.id === data.id ? data : row)))
     }
 
     return (
@@ -155,7 +148,7 @@ export function DataGrid({ columns, value, height, onChange, disabled = false, a
             (column.component === 'checkbox' || column.component === 'button' || column.component === 'icon') &&
             'center'
         }}
-        onBlur={() => params.api.stopEditing()}
+        // onBlur={() => params.api.stopEditing()}
       >
         <Component
           id={params.node.data.id}
@@ -230,7 +223,15 @@ export function DataGrid({ columns, value, height, onChange, disabled = false, a
             }}
             onCellKeyDown={onCellKeyDown}
             tabToNextCell={tabToNextCell}
-            onCellEditingStopped={({ data }) => onChange(value.map(row => (row.id === data.id ? data : row)))}
+            onCellEditingStarted={params => {
+              const rowIndex = params.rowIndex
+              const fieldName = params.colDef.field
+              gridApiRef.current.startEditingCell({
+                rowIndex: rowIndex,
+                colKey: fieldName
+              })
+            }}
+            // onCellEditingStopped={({ data }) => onChange(value.map(row => (row.id === data.id ? data : row)))}
           />
         </div>
       </CacheDataProvider>
