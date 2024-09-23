@@ -17,7 +17,6 @@ const CurrencyForm = ({ store, labels, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const [numRows, setNumRows] = useState(0)
-  console.log(numRows, 'aaaaaa')
 
   const { formik } = useForm({
     enableReinitialize: true,
@@ -28,9 +27,7 @@ const CurrencyForm = ({ store, labels, maxAccess }) => {
         .of(
           yup.object().shape({
             currencyId: yup.string().test(function (value) {
-              const { decimals } = this.parent
-
-              if (numRows > 1 || decimals !== 0) {
+              if (numRows > 1) {
                 return !!value
               }
 
@@ -53,6 +50,13 @@ const CurrencyForm = ({ store, labels, maxAccess }) => {
     },
     onSubmit: values => {
       const { data } = values
+
+      // Check if there's only one row, no currencyId, and decimals is not 0
+      if (data.length === 1 && !data[0].currencyId && data[0].decimals !== 0) {
+        // Set decimals to 0
+        data[0].decimals = 0
+      }
+
       if (data.length === 1 && isRowEmpty(data[0])) {
         formik.setValues({ data: [] })
         postdata([])
