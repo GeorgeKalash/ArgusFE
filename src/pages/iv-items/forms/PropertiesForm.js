@@ -41,6 +41,7 @@ const PropertiesForm = ({ store, labels, maxAccess }) => {
             item => item.key.includes('ivtUDT') && item.key !== 'ivtUDTCount' && item.value.length > 0
           )
           setDimensionsUDT(filteredDimensions2)
+          toast.succes(platformLabels.Edited)
         } catch (error) {}
       }
 
