@@ -28,6 +28,7 @@ export function DataGrid({ columns, value, error, height, onChange, disabled = f
 
     if (res.add.length > 0) {
       const newRowNode = res.add[0]
+      commit(newRowNode.data)
 
       setTimeout(() => {
         gridApiRef.current.startEditingCell({
@@ -47,6 +48,7 @@ export function DataGrid({ columns, value, error, height, onChange, disabled = f
 
       return
     }
+
     if (event.key !== 'Tab') {
       return
     }
@@ -77,7 +79,6 @@ export function DataGrid({ columns, value, error, height, onChange, disabled = f
       }
     }
   }
-
   const CustomCellRenderer = params => {
     const { column } = params
 
@@ -91,9 +92,8 @@ export function DataGrid({ columns, value, error, height, onChange, disabled = f
         sx={{
           width: '100%',
           height: '100%',
-          padding: '0 20px',
-          display: 'flex',
-          alignItems: 'center'
+          padding: '0 1000px',
+          display: 'flex'
         }}
       >
         <Component {...params} column={column} />
@@ -133,8 +133,12 @@ export function DataGrid({ columns, value, error, height, onChange, disabled = f
       const changes = {
         [field]: value
       }
-
       setData(changes)
+      !value && params.api.stopEditing()
+      gridApiRef.current.startEditingCell({
+        rowIndex: params.node.rowIndex,
+        colKey: field
+      })
     }
 
     const updateRow = ({ changes }) => {
@@ -154,8 +158,6 @@ export function DataGrid({ columns, value, error, height, onChange, disabled = f
             (column.component === 'checkbox' || column.component === 'button' || column.component === 'icon') &&
             'center'
         }}
-
-        // onBlur={() => params.api.stopEditing()}
       >
         <Component
           id={params.node.data.id}
@@ -172,11 +174,20 @@ export function DataGrid({ columns, value, error, height, onChange, disabled = f
     )
   }
 
+  const getCellStyle = params => {
+    const hasError = error && error[params.node.rowIndex]?.[params.colDef.field]
+
+    return {
+      color: hasError ? '#ff0000' : '#000000',
+      border: hasError ? '1px solid #ff0000' : '1px solid transparent'
+    }
+  }
+
   const ActionCellRenderer = params => {
     const handleDelete = () => {
       gridApiRef.current.applyTransaction({ remove: [params.data] })
-      const newRows = value?.filter(({ id }) => id !== params.data.id)
-      console.log(newRows)
+
+      const newRows = gridApiRef.current?.data?.filter(({ id }) => id !== params.data.id)
       onChange(newRows)
     }
 
@@ -198,7 +209,8 @@ export function DataGrid({ columns, value, error, height, onChange, disabled = f
       flex: column.flex || 1,
       sortable: false,
       cellRenderer: CustomCellRenderer,
-      cellEditor: CustomCellEditor
+      cellEditor: CustomCellEditor,
+      cellStyle: getCellStyle
     })),
     allowDelete
       ? {
@@ -218,22 +230,29 @@ export function DataGrid({ columns, value, error, height, onChange, disabled = f
 
   const onCellEditingStopped = params => {
     const { data } = params
-    console.log('onCellValueChanged', data)
-
-    onChange(data)
+    gridApiRef.current.applyTransaction({ update: [data] })
+    commit(data)
   }
 
-  console.log(error)
+  const commit = data => {
+    const allRowNodes = []
+    gridApiRef.current.forEachNode(node => allRowNodes.push(node.data))
+    const updatedGridData = allRowNodes.map(row => (row.id === data.id ? data : row))
+
+    onChange(updatedGridData)
+  }
 
   return (
-    <Box sx={{ height: height || 'auto', flex: 1 }}>
+    <Box sx={{ height: height || 'auto', flex: 1 }} onblur={() => gridApiRef.current.stopEditing()}>
       <CacheDataProvider>
         <div className='ag-theme-alpine' style={{ height: '100%', width: '100%' }}>
           <AgGridReact
             apiRef={gridApiRef}
+            defaultColDef={{ width: 200, editable: true }}
             rowData={value}
             columnDefs={columnDefs}
             suppressRowClickSelection={false}
+            stopEditingWhenCellsLoseFocus={true}
             rowSelection='single'
             editType='cell'
             singleClickEdit={true}
@@ -242,9 +261,9 @@ export function DataGrid({ columns, value, error, height, onChange, disabled = f
             }}
             onCellKeyDown={onCellKeyDown}
             tabToNextCell={tabToNextCell}
-
-            // onCellClicked={params => (gridApiRef.current = params.api)}
-            // onCellEditingStopped={onCellEditingStopped}
+            onCellEditingStopped={onCellEditingStopped}
+            deltaRowDataMode={true} // Enable delta mode
+            getRowId={params => params.data.id} // Provide unique ID for each row
           />
         </div>
       </CacheDataProvider>
