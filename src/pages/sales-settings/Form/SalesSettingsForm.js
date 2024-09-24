@@ -77,7 +77,7 @@ export default function SalesSettingsForm({ _labels, access }) {
         })
 
         if (response) {
-          toast.success(platformLabels.Added)
+          toast.success(platformLabels.Edited)
         }
       } catch (error) {}
     }
