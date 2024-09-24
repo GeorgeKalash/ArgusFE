@@ -69,7 +69,6 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
         pgId: formik.values.pgId,
         returnPolicyId: formik.values.returnPolicyId
       }
-      console.log(formik.values.returnPolicyId, 'policy')
 
       const response = await postRequest({
         extension: InventoryRepository.Items.set,
@@ -121,6 +120,11 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
     {
       field: 'ptName',
       headerName: labels.priceType,
+      flex: 1
+    },
+    {
+      field: 'vtName',
+      headerName: labels.valueType,
       flex: 1
     },
     {

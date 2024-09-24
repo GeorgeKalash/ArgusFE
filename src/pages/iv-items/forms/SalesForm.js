@@ -16,6 +16,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
+import { DataSets } from 'src/resources/DataSets'
 
 const SalesForm = ({ labels, maxAccess, store, record, cId }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -36,6 +37,7 @@ const SalesForm = ({ labels, maxAccess, store, record, cId }) => {
       currencyId: cId,
       plId: '',
       priceType: '',
+      valueType: '',
       value: '',
       priceWithVat: '',
       minPrice: '',
@@ -45,10 +47,11 @@ const SalesForm = ({ labels, maxAccess, store, record, cId }) => {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      currencyId: yup.string().required(' '),
-      plId: yup.string().required(' '),
-      priceType: yup.string().required(' '),
-      value: yup.string().required(' ')
+      currencyId: yup.string().required(),
+      plId: yup.string().required(),
+      priceType: yup.string().required(),
+      value: yup.string().required(),
+      valueType: yup.string().required()
     }),
     onSubmit: async obj => {
       const plId = formik.values.plId
@@ -189,6 +192,22 @@ const SalesForm = ({ labels, maxAccess, store, record, cId }) => {
                   formik.setFieldValue('priceType', newValue?.key || '')
                 }}
                 error={formik.touched.priceType && formik.errors.priceType}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.VALUE_TYPE}
+                name='valueType'
+                label={labels.valueType}
+                required
+                valueField='key'
+                displayField='value'
+                values={formik.values}
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('valueType', newValue?.key || '')
+                }}
+                error={formik.touched.valueType && Boolean(formik.errors.valueType)}
               />
             </Grid>
             <Grid item xs={12}>
