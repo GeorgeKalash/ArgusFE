@@ -131,5 +131,9 @@ export const SaleRepository = {
     set: service + 'setORD',
     del: service + 'delORD',
     snapshot: service + 'snapshotORD'
-  }
+  },
+  FinancialIntegrators: {
+    qry: service + 'qryFII',
+    set: service + 'setFII',
+  },
 }
