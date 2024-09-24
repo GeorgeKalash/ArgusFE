@@ -85,7 +85,7 @@ const PopperComponent = ({ children, anchorEl, open, ...props }) => {
 
   const zoom = parseFloat(getComputedStyle(document.body).getPropertyValue('--zoom'))
 
-  const canRenderBelow = window.innerHeight - rect.bottom > popperRect?.height
+  const canRenderBelow = window.innerHeight - rect?.bottom > popperRect?.height
 
   return ReactDOM.createPortal(
     <Box
