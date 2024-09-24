@@ -1,6 +1,6 @@
 import { Grid } from '@mui/material'
 import * as yup from 'yup'
-import { useContext } from 'react'
+import { useContext, useEffect } from 'react'
 import { FormControlLabel, Checkbox } from '@mui/material'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -17,7 +17,7 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { DataSets } from 'src/resources/DataSets'
 
 export default function SalesSettingsForm({ _labels, access }) {
-  const { postRequest } = useContext(RequestsContext)
+  const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
   const arrayAllow = [
@@ -31,7 +31,7 @@ export default function SalesSettingsForm({ _labels, access }) {
     'sdpItemName',
     'sdpUnitPrice',
     'allowSalesNoLinesTrx',
-    'salesTD',
+    'salesTD'
   ]
 
   const { formik } = useForm({
@@ -52,7 +52,7 @@ export default function SalesSettingsForm({ _labels, access }) {
     maxAccess: access,
     validateOnChange: true,
     validationSchema: yup.object({
-        maxReturnDays: yup.number().min(0, 'min').max(9999, 'max'),
+      maxReturnDays: yup.number().min(0, 'min').max(9999, 'max')
     }),
     onSubmit: async obj => {
       try {
@@ -60,10 +60,16 @@ export default function SalesSettingsForm({ _labels, access }) {
 
         Object.entries(obj).forEach(([key, value]) => {
           if (arrayAllow.includes(key)) {
-            const newObj = { key: key, value: value }
-            data.push(newObj)
+            let processedValue = value;
+    
+            if (Array.isArray(value)) {
+              processedValue = value.includes('on');
+            }
+    
+            const newObj = { key: key, value: processedValue };
+            data.push(newObj);
           }
-        })
+        });
 
         const response = await postRequest({
           extension: SystemRepository.Defaults.set,
@@ -76,6 +82,34 @@ export default function SalesSettingsForm({ _labels, access }) {
       } catch (error) {}
     }
   })
+
+  useEffect(() => {
+    ;(async function () {
+      try {
+        const response = await getRequest({
+          extension: SystemRepository.Defaults.qry,
+          parameters: `_filter=`
+        })
+
+        response.list.forEach((obj) => {
+          if (arrayAllow.includes(obj.key)) {
+            let value = obj.value;
+  
+            if (value === 'true') {
+              value = true;
+            } else if (value === 'false' || value === null) {
+              value = false;
+            } else {
+              value = parseInt(value);
+            }
+  
+            formik.setFieldValue(obj.key, value);
+          }
+        });
+
+      } catch (error) {}
+    })()
+  }, [])
 
   return (
     <FormShell form={formik} isInfo={false} isCleared={false}>
@@ -132,7 +166,7 @@ export default function SalesSettingsForm({ _labels, access }) {
                   { key: 'name', value: 'Name' },
                   { key: 'flName', value: 'FL Name' }
                 ]}
-                values={formik.values}
+                values={formik?.values}
                 maxAccess={access}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('currencyId', newValue?.recordId)
@@ -145,7 +179,7 @@ export default function SalesSettingsForm({ _labels, access }) {
                 endpointId={InventoryRepository.Site.qry}
                 name='siteId'
                 label={_labels.site}
-                values={formik.values}
+                values={formik?.values}
                 displayField='name'
                 maxAccess={access}
                 onChange={(event, newValue) => {
@@ -158,7 +192,7 @@ export default function SalesSettingsForm({ _labels, access }) {
               <CustomNumberField
                 name='maxReturnDays'
                 label={_labels.maxReturnDays}
-                value={formik.values.maxReturnDays}
+                value={formik?.values?.maxReturnDays}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('maxReturnDays', '')}
                 error={formik.touched.maxReturnDays && Boolean(formik.errors.maxReturnDays)}
@@ -169,7 +203,7 @@ export default function SalesSettingsForm({ _labels, access }) {
                 datasetId={DataSets.SA_FI_INTEGRATION}
                 name='SAFIIntegration'
                 label={_labels.SAFIIntegration}
-                values={formik.values}
+                values={formik?.values}
                 valueField='key'
                 displayField='value'
                 maxAccess={access}
@@ -184,7 +218,7 @@ export default function SalesSettingsForm({ _labels, access }) {
                 control={
                   <Checkbox
                     name='sdpClientName'
-                    checked={formik.values.sdpClientName}
+                    checked={formik?.values?.sdpClientName}
                     onChange={formik.handleChange}
                     maxAccess={access}
                   />
@@ -197,7 +231,7 @@ export default function SalesSettingsForm({ _labels, access }) {
                 control={
                   <Checkbox
                     name='sdpItemName'
-                    checked={formik.values.sdpItemName}
+                    checked={formik?.values?.sdpItemName}
                     onChange={formik.handleChange}
                     maxAccess={access}
                   />
@@ -210,7 +244,7 @@ export default function SalesSettingsForm({ _labels, access }) {
                 control={
                   <Checkbox
                     name='sdpUnitPrice'
-                    checked={formik.values.sdpUnitPrice}
+                    checked={formik?.values?.sdpUnitPrice}
                     onChange={formik.handleChange}
                     maxAccess={access}
                   />
@@ -223,7 +257,7 @@ export default function SalesSettingsForm({ _labels, access }) {
                 control={
                   <Checkbox
                     name='allowSalesNoLinesTrx'
-                    checked={formik.values.allowSalesNoLinesTrx}
+                    checked={formik?.values?.allowSalesNoLinesTrx}
                     onChange={formik.handleChange}
                     maxAccess={access}
                   />
@@ -236,7 +270,7 @@ export default function SalesSettingsForm({ _labels, access }) {
                 control={
                   <Checkbox
                     name='salesTD'
-                    checked={formik.values.salesTD}
+                    checked={formik?.values?.salesTD}
                     onChange={formik.handleChange}
                     maxAccess={access}
                   />
