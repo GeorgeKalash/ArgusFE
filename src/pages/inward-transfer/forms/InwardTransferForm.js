@@ -413,7 +413,7 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                     />
                   </Grid>
                 </Grid>
-                <Grid container spacing={2} marginTop={.5}>
+                <Grid container spacing={2} marginTop={0.5}>
                   <Grid item xs={6}>
                     <CustomNumberField
                       name='amount'
@@ -512,9 +512,10 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                   name='sender_nationalityId'
                   label={labels.sender_nationalityId}
                   valueField='recordId'
-                  displayField={['reference', 'name']}
+                  displayField={['reference', 'flName', 'name']}
                   columnsInDropDown={[
                     { key: 'reference', value: 'Reference' },
+                    { key: 'flName', value: 'FL Name' },
                     { key: 'name', value: 'Name' }
                   ]}
                   onChange={(event, newValue) => {
@@ -560,9 +561,10 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                   name='sender_countryId'
                   label={labels.sender_countryId}
                   valueField='recordId'
-                  displayField={['reference', 'name']}
+                  displayField={['reference', 'flName', 'name']}
                   columnsInDropDown={[
                     { key: 'reference', value: 'Reference' },
+                    { key: 'flName', value: 'FL Name' },
                     { key: 'name', value: 'Name' }
                   ]}
                   onChange={(event, newValue) => {
@@ -747,9 +749,10 @@ export default function InwardTransferForm({ labels, recordId, access, plantId, 
                   name='receiver_nationalityId'
                   label={labels.receiver_nationalityId}
                   valueField='recordId'
-                  displayField={['reference', 'name']}
+                  displayField={['reference', 'flName', 'name']}
                   columnsInDropDown={[
                     { key: 'reference', value: 'Reference' },
+                    { key: 'flName', value: 'FL Name' },
                     { key: 'name', value: 'Name' }
                   ]}
                   onChange={(event, newValue) => {

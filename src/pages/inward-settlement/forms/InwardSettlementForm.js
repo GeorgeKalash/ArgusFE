@@ -133,12 +133,11 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
       try {
         const copy = { ...formik.values }
         copy.date = formatDateToApi(copy?.date)
-
+        copy.baseAmount = copy?.amount
         if (copy.inwardId) {
           await submitIWS(copy, copy.inwardId)
         } else {
           const checkDT = await getDefaultDT()
-          const vatPct = await getDefaultVAT()
           if (!checkDT) {
             stackError({
               message: labels.assignDefaultDocType
@@ -155,8 +154,9 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
             userId: parseInt(userId),
             exRate: 1,
             rateCalcMethod: 1,
-            taxAmount: (formik.values.charges * vatPct) / 100,
-            netAmount: formik.values.amount - formik.values.charges - (formik.values.charges * vatPct) / 100,
+
+            // taxAmount: 0,
+            // netAmount: 0,
             corId: formik.values.corId,
             currencyId: formik.values.currencyId,
             amount: formik.values.amount,
@@ -184,6 +184,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
           const resIW = await getInwardsTransfer(res.recordId)
           await closeInwardTransfer(res.recordId, resIW?.record?.reference, data)
           await postInwardTransfer(res.recordId, resIW?.record?.reference, data)
+          copy.date = await formatDateToApi(resIW?.record?.date)
           await submitIWS(copy, res.recordId)
         }
       } catch (error) {
@@ -191,7 +192,6 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
       }
     }
   })
-  console.log(formik)
 
   const editMode = !!formik.values.recordId
   const isClosed = formik.values.wip === 2
@@ -691,9 +691,10 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                   name='sender_nationalityId'
                   label={labels.nationality}
                   valueField='recordId'
-                  displayField={['reference', 'name']}
+                  displayField={['reference', 'flName', 'name']}
                   columnsInDropDown={[
                     { key: 'reference', value: 'Reference' },
+                    { key: 'flName', value: 'FL Name' },
                     { key: 'name', value: 'Name' }
                   ]}
                   onChange={(event, newValue) => {
@@ -799,7 +800,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                 name='receiver_countryId'
                 label={labels.country}
                 valueField='recordId'
-                displayField={['reference', 'name']}
+                displayField={['reference', 'flName', 'name']}
                 maxAccess={maxAccess}
                 readOnly
               />
@@ -922,7 +923,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                 endpointId={SystemRepository.Country.qry}
                 label={labels.nationality}
                 name='receiver_nationalityId'
-                displayField={['reference', 'name']}
+                displayField={['reference', 'flName', 'name']}
                 valueField='recordId'
                 values={formik.values}
                 readOnly
@@ -944,7 +945,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
                 name='receiver_idIssueCountry'
                 label={labels.idIssueCountry}
                 valueField='recordId'
-                displayField={['reference', 'name']}
+                displayField={['reference', 'flName', 'name']}
                 maxAccess={maxAccess}
                 readOnly
               />
