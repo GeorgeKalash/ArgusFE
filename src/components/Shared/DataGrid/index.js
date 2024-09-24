@@ -79,6 +79,7 @@ export function DataGrid({ columns, value, error, height, onChange, disabled = f
       }
     }
   }
+
   const CustomCellRenderer = params => {
     const { column } = params
 
@@ -133,6 +134,7 @@ export function DataGrid({ columns, value, error, height, onChange, disabled = f
       const changes = {
         [field]: value
       }
+
       setData(changes)
       !value && params.api.stopEditing()
       gridApiRef.current.startEditingCell({
