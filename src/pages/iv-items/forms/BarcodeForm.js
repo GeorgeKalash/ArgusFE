@@ -26,7 +26,7 @@ const BarcodeForm = ({ store, labels, maxAccess }) => {
         .array()
         .of(
           yup.object().shape({
-            currencyId: yup.string().test(function (value) {
+            barcode: yup.string().test(function (value) {
               if (numRows > 1) {
                 return !!value
               }
@@ -41,19 +41,15 @@ const BarcodeForm = ({ store, labels, maxAccess }) => {
       barcodes: [
         {
           id: 1,
-          categoryId: recordId,
-          decimals: 0,
-          currencyId: '',
-          currencyName: ''
+          itemId: recordId,
+          barcode: '',
+          muId: '',
+          defaultQty: ''
         }
       ]
     },
     onSubmit: values => {
       const { barcodes } = values
-
-      if (barcodes.length === 1 && !barcodes[0].currencyId && data[0].decimals !== 0) {
-        barcodes[0].decimals = 0
-      }
 
       if (barcodes.length === 1 && isRowEmpty(barcodes[0])) {
         formik.setValues({ barcodes: [] })
@@ -65,11 +61,11 @@ const BarcodeForm = ({ store, labels, maxAccess }) => {
   })
 
   const isRowEmpty = row => {
-    return !row.currencyId && !row.decimals
+    return !row.barcode
   }
 
   const postdata = obj => {
-    const data = obj?.data?.map(({ categoryId, ...rest }) => ({
+    const data = obj?.barcodes?.map(({ itemId, ...rest }) => ({
       categoryId: recordId,
       ...rest
     }))
@@ -80,7 +76,7 @@ const BarcodeForm = ({ store, labels, maxAccess }) => {
     }
 
     postRequest({
-      extension: InventoryRepository.CategoryCurrency.set2,
+      extension: InventoryRepository.Barcode.set2,
       record: JSON.stringify(list)
     })
       .then(res => {
@@ -92,44 +88,40 @@ const BarcodeForm = ({ store, labels, maxAccess }) => {
 
   const columns = [
     {
+      component: 'textfield',
+      label: labels.barcode,
+      name: 'barcode'
+    },
+
+    {
       component: 'resourcecombobox',
-      name: 'currencyId',
-      label: labels.currency,
+      name: 'muId',
+      label: labels.msUnit,
       props: {
-        endpointId: SystemRepository.Currency.qry,
+        endpointId: store._msId ? InventoryRepository.MeasurementUnit.qry : '',
+        parameters: `_msId=${store._msId}`,
         valueField: 'recordId',
-        displayField: 'name',
-        mapping: [
-          { from: 'recordId', to: 'currencyId' },
-          { from: 'name', to: 'currencyName' }
+        displayField: ['reference', 'name'],
+        columnsInDropDown: [
+          { key: 'reference', value: 'Reference' },
+          { key: 'name', value: 'Name' }
         ]
       }
     },
+
     {
       component: 'numberfield',
-      name: 'decimals',
-      label: labels.decimals,
+      name: 'defaultQty',
+      label: labels.defaultQty,
       props: {
         allowNegative: false
-      },
-
-      defaultValue: 0,
-      onChange: ({ row: { update, newRow } }) => {
-        if (newRow.decimals == '' || newRow.decimals == null) {
-          update({
-            decimals: 0
-          })
-        } else {
-          const newValue = Math.min(parseInt(newRow.decimals), 5)
-          update({ decimals: newValue })
-        }
       }
     }
   ]
   function getData() {
     getRequest({
-      extension: InventoryRepository.CategoryCurrency.qry,
-      parameters: `_categoryId=${recordId}`
+      extension: InventoryRepository.Barcode.qry,
+      parameters: `_itemId=${recordId}&_pageSize=50&_startAt=0`
     })
       .then(res => {
         const modifiedList = res.list?.map((category, index) => ({
