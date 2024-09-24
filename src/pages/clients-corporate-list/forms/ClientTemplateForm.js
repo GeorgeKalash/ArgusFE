@@ -277,6 +277,12 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
       condition: true,
       onClick: 'onAddClientRelation',
       disabled: !editMode
+    },
+    {
+      key: 'Client Balance',
+      condition: true,
+      onClick: 'onClientBalance',
+      disabled: !editMode
     }
   ]
 

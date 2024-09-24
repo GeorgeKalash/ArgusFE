@@ -9,7 +9,6 @@ import { useWindow } from 'src/windows'
 import toast from 'react-hot-toast'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
-import { formatDateDefault } from 'src/lib/date-helper'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -45,16 +44,23 @@ const InwardTransfer = () => {
 
   async function fetchWithSearch({ filters }) {
     try {
-      return (
-        filters.qry &&
-        (await getRequest({
-          extension: RemittanceOutwardsRepository.InwardsTransfer.snapshot,
-          parameters: `_filter=${filters.qry}`
-        }))
-      )
-    } catch (error) {
-      stackError(error)
-    }
+      if (!filters.qry) return { list: [] }
+
+      const res = await getRequest({
+        extension: RemittanceOutwardsRepository.InwardsTransfer.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+
+      res.list = res.list.map(item => {
+        if (item.status === 4) {
+          item.wip = 2
+        }
+
+        return item
+      })
+
+      return res
+    } catch (error) {}
   }
 
   const getPlantId = async () => {
@@ -64,30 +70,11 @@ const InwardTransfer = () => {
         parameters: `_userId=${userId}&_key=plantId`
       })
 
-      if (res.record?.value) {
-        return res.record.value
-      }
-
-      return ''
+      return res?.record?.value
     } catch (error) {
       stackError(error)
-    }
-  }
-
-  const getCashAccountId = async () => {
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.UserDefaults.get,
-        parameters: `_userId=${userId}&_key=cashAccountId`
-      })
-
-      if (res.record?.value) {
-        return res.record.value
-      }
 
       return ''
-    } catch (error) {
-      stackError(error)
     }
   }
 
@@ -97,39 +84,28 @@ const InwardTransfer = () => {
         extension: SystemRepository.UserFunction.get,
         parameters: `_userId=${userId}&_functionId=${SystemFunction.InwardTransfer}`
       })
-      if (res.record) {
-        return res.record.dtId
-      }
 
-      return ''
+      return res?.record?.dtId
     } catch (error) {
       stackError(error)
+
+      return ''
     }
   }
 
   async function openForm(recordId) {
     try {
       const plantId = await getPlantId()
-      const cashAccountId = await getCashAccountId()
       const dtId = await getDefaultDT()
 
-      if (plantId !== '' && cashAccountId !== '') {
-        openInwardTransferWindow(plantId, cashAccountId, recordId, dtId)
+      if (plantId) {
+        openInwardTransferWindow(plantId, recordId, dtId)
       } else {
-        if (plantId === '') {
-          stackError({
-            message: platformLabels.mustHaveDefaultPlant
-          })
+        stackError({
+          message: platformLabels.mustHaveDefaultPlant
+        })
 
-          return
-        }
-        if (cashAccountId === '') {
-          stackError({
-            message: platformLabels.mustHaveDefaultCashAcc
-          })
-
-          return
-        }
+        return
       }
     } catch (error) {
       stackError(error)
@@ -146,11 +122,21 @@ const InwardTransfer = () => {
       field: 'date',
       headerName: _labels.date,
       flex: 1,
-      valueGetter: ({ row }) => formatDateDefault(row?.date)
+      type: 'date'
     },
     {
       field: 'currencyRef',
       headerName: _labels.currency,
+      flex: 1
+    },
+    {
+      field: 'amount',
+      headerName: _labels.amount,
+      flex: 1
+    },
+    {
+      field: 'rsName',
+      headerName: _labels.releaseStatus,
       flex: 1
     },
     {
@@ -159,8 +145,8 @@ const InwardTransfer = () => {
       flex: 1
     },
     {
-      field: 'amount',
-      headerName: _labels.amount,
+      field: 'wipName',
+      headerName: _labels.wip,
       flex: 1
     }
   ]
@@ -192,12 +178,11 @@ const InwardTransfer = () => {
     openForm(obj.recordId)
   }
 
-  function openInwardTransferWindow(plantId, cashAccountId, recordId, dtId) {
+  function openInwardTransferWindow(plantId, recordId, dtId) {
     stack({
       Component: InwardTransferForm,
       props: {
         plantId,
-        cashAccountId,
         dtId,
         access,
         userId,

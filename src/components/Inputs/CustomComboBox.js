@@ -26,6 +26,7 @@ const CustomComboBox = ({
   readOnly = false,
   neverPopulate = false,
   displayFieldWidth = 1,
+  defaultIndex,
   sx,
   columnsInDropDown,
   editMode = false,
@@ -49,7 +50,7 @@ const CustomComboBox = ({
   return (
     <Autocomplete
       name={name}
-      value={value}
+      value={store[defaultIndex] || value}
       size={size}
       options={store}
       key={value}

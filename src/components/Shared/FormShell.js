@@ -13,14 +13,17 @@ import GlobalIntegrationGrid from './GlobalIntegrationGrid'
 import AccountBalance from './AccountBalance'
 import CashTransaction from './CashTransaction'
 import FinancialTransaction from './FinancialTransaction'
+import Aging from './Aging'
 import { ControlContext } from 'src/providers/ControlContext'
 import { ClientRelationForm } from './ClientRelationForm'
+import { ClientBalance } from './ClientBalance'
 
 export default function FormShell({
   form,
   isSaved = true,
   isInfo = true,
   isSavedClear = true,
+  isGenerated = false,
   isCleared = true,
   children,
   editMode,
@@ -30,6 +33,7 @@ export default function FormShell({
   postVisible = false,
   resourceId,
   masterSource,
+  onGenerate,
   functionId,
   maxAccess,
   isPosted = false,
@@ -110,8 +114,7 @@ export default function FormShell({
       },
       width: 1200,
       height: 670,
-      title: platformLabels,
-      CashTransaction
+      title: platformLabels.CashTransaction
     })
   }
 
@@ -236,6 +239,17 @@ export default function FormShell({
               title: platformLabels.ClientRelation
             })
           }
+          onClientBalance={() =>
+            stack({
+              Component: ClientBalance,
+              props: {
+                recordId: form.values?.recordId,
+              },
+              width: 500,
+              height: 350,
+              title: platformLabels.ClientBalance
+            })
+          }
           onAddClientRelation={() =>
             stack({
               Component: ClientRelationForm,
@@ -264,10 +278,24 @@ export default function FormShell({
               title: platformLabels.PreviewReport
             })
           }
+          onClickAging={() =>
+            stack({
+              Component: Aging,
+              props: {
+                recordId: form.values?.recordId,
+                functionId
+              },
+              width: 1000,
+              height: 620,
+              title: platformLabels.Aging
+            })
+          }
           isSaved={isSaved}
           isSavedClear={isSavedClearVisible}
+          onGenerate={onGenerate}
           isInfo={isInfo}
           isCleared={isCleared}
+          isGenerated={isGenerated}
           actions={actions}
           onApproval={onApproval}
           onRecordRemarks={onRecordRemarks}

@@ -3,6 +3,7 @@ import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
+import { useInvalidate } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
@@ -11,11 +12,15 @@ import { useForm } from 'src/hooks/form'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
+import { MasterSource } from 'src/resources/MasterSource'
 
-export default function CbCashGroupsForms({ labels, maxAccess, recordId, invalidate }) {
+export default function CbCashGroupsForms({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const editMode = !!recordId
+
+  const invalidate = useInvalidate({
+    endpointId: CashBankRepository.CbCashGroup.page
+  })
 
   const { formik } = useForm({
     initialValues: {
@@ -46,6 +51,7 @@ export default function CbCashGroupsForms({ labels, maxAccess, recordId, invalid
       invalidate()
     }
   })
+  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
@@ -61,8 +67,24 @@ export default function CbCashGroupsForms({ labels, maxAccess, recordId, invalid
     })()
   }, [])
 
+  const actions = [
+    {
+      key: 'Integration Account',
+      condition: true,
+      onClick: 'onClickGIA',
+      disabled: !editMode
+    }
+  ]
+
   return (
-    <FormShell resourceId={ResourceIds.CbCashGroups} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell
+      resourceId={ResourceIds.CbCashGroups}
+      actions={actions}
+      masterSource={MasterSource.CashAccountGroup}
+      form={formik}
+      maxAccess={maxAccess}
+      editMode={editMode}
+    >
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>

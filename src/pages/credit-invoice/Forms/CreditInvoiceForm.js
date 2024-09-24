@@ -478,7 +478,8 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
       props: {
         recordId: formik.values.recordId,
         functionId: formik.values.functionId,
-        editMode: formik.values.status != 1
+        editMode: formik.values.status != 1,
+        totalBaseAmount: totalLoc
       },
       width: 1200,
       height: 670,

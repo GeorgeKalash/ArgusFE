@@ -133,6 +133,7 @@ const CorrespondentCountriesForm = ({ store, setStore, maxAccess, labels, expand
         maxAccess={maxAccess}
         infoVisible={false}
         editMode={editMode}
+        isSavedClear={false}
       >
         <VertLayout>
           <Grow>
