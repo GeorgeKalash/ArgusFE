@@ -46,12 +46,12 @@ const DetailsForm = ({ store, setStore, maxAccess, labels, editMode }) => {
         .required(' ')
     }),
 
-    onSubmit: values => {
-      postHistory(values)
+    onSubmit: async values => {
+      await postHistory(values)
     }
   })
 
-  const postHistory = obj => {
+  const postHistory = async obj => {
     const items = obj?.TaxDetail.map((item, index) => ({
       ...item,
 
@@ -64,7 +64,7 @@ const DetailsForm = ({ store, setStore, maxAccess, labels, editMode }) => {
       items: items
     }
 
-    postRequest({
+    await postRequest({
       extension: FinancialRepository.TaxDetailPack.set2,
       record: JSON.stringify(data)
     })

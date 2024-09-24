@@ -6,6 +6,7 @@ export const SystemRepository = {
   KeyValueStore: service + 'qryKVS',
   ParameterDefinition: service + 'qryRP',
   ReportLayout: service + 'qryRL',
+  ReportLayoutObject: service + 'qryRLO',
   ReportTemplate: service + 'qryRT',
   DocumentType: {
     qry: service + 'qryDT',
@@ -221,6 +222,10 @@ export const SystemRepository = {
     set: service + 'setGO',
     get: service + 'getGO',
     del: service + 'delGO'
+  },
+  PlantsSchedule: {
+    set2: service + 'set2PLS',
+    qry: service + 'qryPLS'
   },
   FormattedAddress: {
     get: service + 'formattedADD'

@@ -161,6 +161,7 @@ export const DataSets = {
   RT_Language: 3606,
   TITLE: 3607,
   ID_TYPE: 3608,
+  FEE_PAYER: 3617,
   CURRENCY_DECIMALS: 153,
   DateFormat: 155,
   TimeZone: 154,
@@ -170,5 +171,7 @@ export const DataSets = {
   receiverPayoutType: 3611,
   Category: 3612,
   PRODUCTION_ORDER_LEVEL: 164,
-  REQUESTED_BY: 3614
+  REQUESTED_BY: 3614,
+  RT_PROD_ACCESS_LEVEL: 3616,
+  SETTLEMENT_STATUS: 3618
 }

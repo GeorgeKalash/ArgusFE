@@ -67,6 +67,8 @@ export default function CARebuildAccountBalance({ _labels, access }) {
       maxAccess={access}
       isSaved={false}
       editMode={true}
+      isSavedClear={false}
+      isCleared={false}
     >
       <VertLayout>
         <Grow>

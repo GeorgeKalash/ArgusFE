@@ -37,11 +37,12 @@ export default function MemosDtdForm({ labels, maxAccess, recordId, functionId }
       dtId: yup.string().required(' ')
     }),
     onSubmit: async obj => {
+      const recordId = obj.recordId
       await postRequest({
         extension: FinancialRepository.FIDocTypeDefaults.set,
         record: JSON.stringify(obj)
       })
-      if (!dtId) {
+      if (!recordId) {
         formik.setFieldValue('recordId', obj.dtId)
       }
 

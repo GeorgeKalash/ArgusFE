@@ -93,10 +93,10 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      date: yup.string().required('This field is required'),
-      plantId: yup.string().required('This field is required'),
-      corId: yup.string().required('This field is required'),
-      cashAccountId: yup.string().required('This field is required')
+      date: yup.string().required(),
+      plantId: yup.string().required(),
+      corId: yup.string().required(),
+      cashAccountId: yup.string().required()
     }),
     onSubmit: async obj => {
       try {
@@ -175,10 +175,10 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
     validationSchema: yup.object({
       rows: yup.array().of(
         yup.object({
-          currencyId: yup.string().required('This field is required'),
-          qty: yup.string().required('This field is required'),
-          exRate: yup.string().required('This field is required'),
-          amount: yup.string().required('This field is required')
+          currencyId: yup.string().required(),
+          qty: yup.string().required(),
+          exRate: yup.string().required(),
+          amount: yup.string().required()
         })
       )
     })
@@ -478,7 +478,8 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
       props: {
         recordId: formik.values.recordId,
         functionId: formik.values.functionId,
-        editMode: formik.values.status != 1
+        editMode: formik.values.status != 1,
+        totalBaseAmount: totalLoc
       },
       width: 1200,
       height: 670,

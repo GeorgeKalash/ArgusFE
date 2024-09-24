@@ -93,7 +93,7 @@ export default function CountryForm({ labels, maxAccess, recordId }) {
   }, [])
 
   return (
-    <FormShell reso urceId={ResourceIds.Countries} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell resourceId={ResourceIds.Countries} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>

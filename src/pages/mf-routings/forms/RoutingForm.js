@@ -42,8 +42,8 @@ export default function RoutingForm({
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      reference: yup.string().required('This field is required'),
-      name: yup.string().required('This field is required')
+      reference: yup.string().required(),
+      name: yup.string().required()
     }),
     onSubmit: async obj => {
       console.log(obj)

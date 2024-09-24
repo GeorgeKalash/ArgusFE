@@ -79,9 +79,16 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'BeneficiaryList',
+    label: platformLabels.BeneficiaryList,
+    color: '#231f20',
+    image: 'beneficiary.png',
+    main: false
+  },
+  {
     key: 'Beneficiary',
     label: platformLabels.Beneficiary,
-    color: '#231f20',
+    color: '#0A4164',
     image: 'beneficiary.png',
     main: false
   },
@@ -224,6 +231,16 @@ export const getButtons = platformLabels => [
     main: true
   },
   {
+    key: 'generate',
+    label: platformLabels.Generate,
+    condition: 'isGenerated',
+    onClick: 'onGenerate',
+    disabled: '!editMode',
+    color: 'black',
+    image: 'generate.png',
+    main: true
+  },
+  {
     key: 'Audit',
     label: platformLabels.Audit,
     color: '#231f20',
@@ -265,6 +282,34 @@ export const getButtons = platformLabels => [
     label: platformLabels.Import,
     color: '#000',
     image: 'import.png',
+    main: false
+  },
+  {
+    key: 'Lock',
+    label: platformLabels.Lock,
+    color: '#231f20',
+    image: 'lock.png',
+    main: false
+  },
+  {
+    key: 'Unlock',
+    label: platformLabels.Unlock,
+    color: '#231f20',
+    image: 'unlock.png',
+    main: false
+  },
+  {
+    key: 'Aging',
+    label: platformLabels.Aging,
+    color: '#A95C68',
+    image: 'popup-window.png',
+    main: false
+  },
+  {
+    key: 'Client Balance',
+    label: platformLabels.ClientBalance,
+    color: '#231f20',
+    image: 'wallet-to-bank-icon.png',
     main: false
   }
 ]
