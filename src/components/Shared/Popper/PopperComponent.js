@@ -34,7 +34,6 @@ const PopperComponent = ({ children, anchorEl, open, ...props }) => {
         setRect(anchorEl.getBoundingClientRect())
         const popperRect = popperRef.current.getBoundingClientRect()
         if (popperRect.height && popperRect.width) {
-          console.log('change')
           setPopperRect(popperRef.current.getBoundingClientRect())
         }
       }
