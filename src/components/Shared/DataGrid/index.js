@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useRef } from 'react'
 import { AgGridReact } from 'ag-grid-react'
 import { Box, IconButton } from '@mui/material'
 import components from './components'
