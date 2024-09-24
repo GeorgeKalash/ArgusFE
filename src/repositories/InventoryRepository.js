@@ -21,6 +21,12 @@ export const InventoryRepository = {
     del: service + 'delCA',
     snapshot: service + 'snapshotCA'
   },
+  LotCategory: {
+    page: service + 'pageLCA',
+    get: service + 'getLCA',
+    set: service + 'setLCA',
+    del: service + 'delLCA'
+  },
   Measurement: {
     page: service + 'pageMS',
     qry: service + 'qryMS',
@@ -41,12 +47,6 @@ export const InventoryRepository = {
     qry: service + 'qrySGP',
     get: service + 'getSGP',
     set: service + 'setSGP',
-    del: service + 'delSGP'
-  },
-  SiteGroups: {
-    qry: service + 'qrySGP',
-    get: service + 'getSGP',
-    set: service + 'setSGP',
     del: service + 'delSGP',
     snapshot: service + 'snapshotSGP'
   },
@@ -60,9 +60,7 @@ export const InventoryRepository = {
     del: service + 'delADJ',
     page: service + 'pageADJ'
   },
-  MaterialsAdjustmentDetail: {
-    qry: service + 'qryADI'
-  },
+
   MeasurementUnit: {
     qry: service + 'qryMU',
     get: service + 'getMU',
@@ -75,26 +73,43 @@ export const InventoryRepository = {
     set: service + 'setDI',
     del: service + 'delDI'
   },
-  LotCategory: {
-    qry: service + 'qryLCA'
-  },
+
   SerialNumber: {
     qry: service + 'qrySPF'
   },
-  Metal: {
-    qry: service + 'qryMTL'
-  },
+
   CategoryCurrency: {
     get: service + 'getCAC',
     qry: service + 'qryCAC',
     set2: service + 'set2CAC',
     del: service + 'delCAC'
   },
+  MaterialsAdjustmentDetail: {
+    qry: service + 'qryADI'
+  },
   CategorySites: {
     get: service + 'getCAS',
     qry: service + 'qryCAS',
     set2: service + 'set2CAS',
     del: service + 'delCAS'
+  },
+  Metals: {
+    qry: service + 'qryMTL',
+    page: service + 'pageMTL',
+    get: service + 'getMTL',
+    set: service + 'setMTL',
+    del: service + 'delMTL'
+  },
+  Scrap: {
+    qry: service + 'qryMTS',
+    set2: service + 'set2MTS'
+  },
+  InventoryOpeningQtys: {
+    qry: service + 'qryOQ',
+    snapshot: service + 'snapshotOQ',
+    get: service + 'getOQ',
+    set: service + 'setOQ',
+    del: service + 'delOQ'
   },
   RebuildInventory: {
     rebuild: service + 'rebuildFIS'

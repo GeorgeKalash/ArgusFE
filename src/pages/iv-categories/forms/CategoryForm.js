@@ -451,7 +451,7 @@ const CategoryForm = ({ labels, maxAccess, setStore, store }) => {
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={InventoryRepository.Metal.qry}
+                    endpointId={InventoryRepository.Metals.qry}
                     name='metalId'
                     label={labels.metal}
                     valueField='recordId'
