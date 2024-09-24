@@ -147,5 +147,8 @@ export const SaleRepository = {
   },
   Address: {
     qry: service + 'qryAD'
+  },
+  FilterAddress: {
+    snapshot: service + 'snapshotADD'
   }
 }

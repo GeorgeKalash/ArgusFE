@@ -37,6 +37,7 @@ import {
 } from 'src/utils/ItemPriceCalculator'
 import { getVatCalc } from 'src/utils/VatCalculator'
 import { getDiscValues, getFooterTotals, getSubtotal } from 'src/utils/FooterCalculator'
+import AddressFilterForm from './AddressFilterForm'
 
 export default function SalesOrderForm({
   labels,
@@ -804,6 +805,22 @@ export default function SalesOrderForm({
     await fillForm(soHeader, soItems)
   }
 
+  function openAddressFilterForm(clickShip, clickBill) {
+    stack({
+      Component: AddressFilterForm,
+      props: {
+        maxAccess,
+        labels,
+        shipment: clickShip,
+        bill: clickBill,
+        form: formik
+      },
+      width: 950,
+      height: 600,
+      title: labels.AddressFilter
+    })
+  }
+
   useEffect(() => {
     ;(async function () {
       if (recordId) {
@@ -990,8 +1007,10 @@ export default function SalesOrderForm({
                     maxLength='100'
                     readOnly={formik.values.exWorks || isClosed}
                     maxAccess={maxAccess}
+                    viewDropDown={true}
                     onChange={e => formik.setFieldValue('shipAddress', e.target.value)}
                     onClear={() => formik.setFieldValue('shipAddress', '')}
+                    onDropDown={() => openAddressFilterForm(true, false)}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -1003,8 +1022,10 @@ export default function SalesOrderForm({
                     maxLength='100'
                     readOnly={isClosed}
                     maxAccess={maxAccess}
+                    viewDropDown={true}
                     onChange={e => formik.setFieldValue('BillAddress', e.target.value)}
                     onClear={() => formik.setFieldValue('BillAddress', '')}
+                    onDropDown={() => openAddressFilterForm(false, true)}
                   />
                 </Grid>
               </Grid>
