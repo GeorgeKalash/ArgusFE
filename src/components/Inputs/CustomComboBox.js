@@ -50,7 +50,7 @@ const CustomComboBox = ({
   return (
     <Autocomplete
       name={name}
-      value={store[defaultIndex] || value}
+      value={store?.[defaultIndex] || value}
       size={size}
       options={store}
       key={value}
