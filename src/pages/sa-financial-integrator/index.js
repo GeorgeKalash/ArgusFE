@@ -48,19 +48,17 @@ const FinancialIntegrators = () => {
       rows: []
     },
     onSubmit: async values => {
-      try {
-        await Promise.all(
-          values.rows.map(row =>
-            postRequest({
-              extension: SaleRepository.FinancialIntegrators.set,
-              record: JSON.stringify(row)
-            })
-          )
+      await Promise.all(
+        values.rows.map(row =>
+          postRequest({
+            extension: SaleRepository.FinancialIntegrators.set,
+            record: JSON.stringify(row)
+          })
         )
+      )
 
-        toast.success(platformLabels.Updated)
-        await getGridData()
-      } catch (error) {}
+      toast.success(platformLabels.Updated)
+      await getGridData()
     }
   })
 
