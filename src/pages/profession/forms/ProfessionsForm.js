@@ -218,7 +218,6 @@ export default function ProfessionsForm({ labels, maxAccess, recordId, setStore 
                 valueField='key'
                 displayField='value'
                 values={formik.values}
-                readOnly={editMode}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('approvalLevel', newValue?.key)
