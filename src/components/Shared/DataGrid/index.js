@@ -16,10 +16,11 @@ export function DataGrid({ columns, value, error, height, onChange, disabled = f
   //   }
   // }, [value])
 
-  const addNewRow = () => {
-    const highestIndex = value?.length
-      ? value.reduce((max, current) => (max['id'] > current['id'] ? max : current))['id'] + 1
-      : 1
+  const addNewRow = params => {
+    console.log(params)
+    const highestIndex = params.node.data.id + 1
+
+    console.log('highestIndex', highestIndex)
 
     const defaultValues = Object.fromEntries(
       columns.filter(({ name }) => name !== 'id').map(({ name, defaultValue }) => [name, defaultValue])
@@ -72,7 +73,7 @@ export function DataGrid({ columns, value, error, height, onChange, disabled = f
 
     if (currentColumnIndex === allColumns.length - 2 && node.rowIndex === api.getDisplayedRowCount() - 1) {
       event.stopPropagation()
-      addNewRow()
+      addNewRow(params)
     } else {
       const currentRowIndex = node.rowIndex
       const currentColId = params.column.getColId()
