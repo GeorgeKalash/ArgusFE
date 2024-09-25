@@ -32,6 +32,7 @@ export default function CountryForm({ labels, maxAccess, recordId }) {
       name: '',
       reference: '',
       flName: '',
+      language: '',
       currencyId: null,
       regionId: null,
       ibanLength: '',
