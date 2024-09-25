@@ -247,5 +247,6 @@ export const ResourceIds = {
   AgingButton: 31419,
   LotCategories: 41108,
   ClientBalance: 36131,
-  FinancialIntegrators: 51105
+  FinancialIntegrators: 51105,
+  SalesDefaults: 51114
 }
