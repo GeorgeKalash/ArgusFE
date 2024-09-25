@@ -5,6 +5,7 @@ import { useEffect, useRef } from 'react'
 import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
 import Image from 'next/image'
 import DropDownArrow from '/public/images/buttonsIcons/bottom-arrow.png'
+import AddAction from '/public/images/buttonsIcons/add.png'
 
 const CustomTextArea = ({
   type = 'text', //any valid HTML5 input type
@@ -15,6 +16,8 @@ const CustomTextArea = ({
   onClear,
   onDropDown,
   viewDropDown = false,
+  handleAddAction,
+  viewAdd = false,
   size = 'small', //small, medium
   fullWidth = true,
   autoFocus = false,
@@ -84,6 +87,11 @@ const CustomTextArea = ({
                 {!readOnly && value && (
                   <IconButton tabIndex={-1} edge='end' onClick={onClear} aria-label='clear input'>
                     <ClearIcon sx={{ border: '0px', fontSize: 20 }} />
+                  </IconButton>
+                )}
+                {viewAdd && (
+                  <IconButton tabIndex={-1} edge='end' onClick={handleAddAction} aria-label='Add'>
+                    <Image src={AddAction} alt='Add' width={18} height={18} />
                   </IconButton>
                 )}
                 {viewDropDown && (

@@ -102,6 +102,8 @@ export default function SalesOrderForm({
     totQty: 0,
     totWeight: 0,
     totVolume: 0,
+    countryId: null,
+    cityId: null,
     items: [
       {
         id: 1,
@@ -1005,9 +1007,10 @@ export default function SalesOrderForm({
                     value={formik.values.shipAddress}
                     rows={3}
                     maxLength='100'
-                    readOnly={formik.values.exWorks || isClosed}
+                    readOnly
                     maxAccess={maxAccess}
-                    viewDropDown={true}
+                    viewDropDown={formik.values.clientId}
+                    viewAdd={formik.values.clientId}
                     onChange={e => formik.setFieldValue('shipAddress', e.target.value)}
                     onClear={() => formik.setFieldValue('shipAddress', '')}
                     onDropDown={() => openAddressFilterForm(true, false)}
@@ -1022,7 +1025,7 @@ export default function SalesOrderForm({
                     maxLength='100'
                     readOnly={isClosed}
                     maxAccess={maxAccess}
-                    viewDropDown={true}
+                    viewDropDown={formik.values.clientId}
                     onChange={e => formik.setFieldValue('BillAddress', e.target.value)}
                     onClear={() => formik.setFieldValue('BillAddress', '')}
                     onDropDown={() => openAddressFilterForm(false, true)}

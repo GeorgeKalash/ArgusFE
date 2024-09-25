@@ -7,13 +7,9 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useContext, useEffect, useState } from 'react'
-import { DataSets } from 'src/resources/DataSets'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { SaleRepository } from 'src/repositories/SaleRepository'
-import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
-import { POSRepository } from 'src/repositories/POSRepository'
 import toast from 'react-hot-toast'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { ControlContext } from 'src/providers/ControlContext'
@@ -21,36 +17,55 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import * as yup from 'yup'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 
-export default function AddressFilterForm({ maxAccess, labels, shipment, bill, form, window }) {
+export default function AddressFilterForm({ labels, shipment, bill, form, window }) {
   const [data, setData] = useState([])
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
   const { formik } = useForm({
-    maxAccess,
-    initialValues: { search: '', cityId: null, countryId: null, filter: null },
+    initialValues: { search: '', cityId: null, countryId: null },
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       cityId: yup.string().required(),
-      countryId: yup.string().required(),
-      filter: yup.string().required()
+      countryId: yup.string().required()
     }),
     onSubmit: async obj => {
-      console.log('check data 1', data)
       const checkedADD = data?.list?.filter(obj => obj.checked)
-      console.log('check data ', data)
-      if (shipment) form.setFieldValue('shipAddress', checkedADD.recordId)
-      if (bill) form.setFieldValue('BillAddress', checkedADD.recordId)
+      if (!checkedADD[0].addressId) {
+        form.setFieldValue('shipAddress', '')
+        form.setFieldValue('BillAddress', '')
+        window.close()
+
+        return
+      }
+
+      if (shipment || bill) {
+        const address = await getAddress(checkedADD[0].addressId)
+        if (shipment) form.setFieldValue('shipAddress', address)
+        if (bill) form.setFieldValue('BillAddress', address)
+      }
+
       window.close()
     }
   })
+  async function getAddress(addressId) {
+    if (!addressId) return null
+
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.FormattedAddress.get,
+        parameters: `_addressId=${addressId}`
+      })
+
+      return res?.record?.formattedAddress.replace(/(\r\n|\r|\n)+/g, '\r\n')
+    } catch (error) {}
+  }
 
   const rowColumns = [
     {
       field: 'address',
-      headerName: '',
-      flex: 2
+      headerName: ''
     }
   ]
 
@@ -101,14 +116,7 @@ export default function AddressFilterForm({ maxAccess, labels, shipment, bill, f
   }, [formik.values.search, formik.values.cityId, formik.values.countryId])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.SalesOrder}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={true}
-      isSavedClear={false}
-      isCleared={false}
-    >
+    <FormShell resourceId={ResourceIds.SalesOrder} form={formik} editMode={true} isSavedClear={false} isCleared={false}>
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
@@ -120,7 +128,6 @@ export default function AddressFilterForm({ maxAccess, labels, shipment, bill, f
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 required
-                maxAccess={maxAccess}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
@@ -152,7 +159,6 @@ export default function AddressFilterForm({ maxAccess, labels, shipment, bill, f
                   formik.setFieldValue('city', newValue?.name || null)
                 }}
                 errorCheck={'cityId'}
-                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
@@ -176,7 +182,6 @@ export default function AddressFilterForm({ maxAccess, labels, shipment, bill, f
             setData={setData}
             rowId={['recordId']}
             isLoading={false}
-            maxAccess={maxAccess}
             pagination={false}
             checkTitle={''}
             showCheckboxColumn={true}
