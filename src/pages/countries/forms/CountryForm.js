@@ -14,6 +14,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
+import { DataSets } from 'src/resources/DataSets'
 
 export default function CountryForm({ labels, maxAccess, recordId }) {
   const [editMode, setEditMode] = useState(!!recordId)
@@ -198,6 +199,20 @@ export default function CountryForm({ labels, maxAccess, recordId }) {
                 onClear={() => formik.setFieldValue('isoCode1', '')}
                 error={formik.touched.isoCode2 && Boolean(formik.errors.isoCode2)}
                 maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.LANGUAGE}
+                name='language'
+                label={labels.language}
+                valueField='key'
+                displayField='value'
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('language', newValue?.key ?? '')
+                }}
+                error={formik.touched.language && Boolean(formik.errors.language)}
               />
             </Grid>
             <Grid item xs={12}>
