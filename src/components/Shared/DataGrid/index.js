@@ -204,7 +204,7 @@ export function DataGrid({ columns, value, error, height, onChange, disabled = f
       gridApiRef.current.applyTransaction({ remove: [params.data] })
 
       const newRows = gridApiRef.current?.data?.filter(({ id }) => id !== params.data.id)
-      // onChange(newRows)
+      onChange(newRows)
     }
 
     return (
