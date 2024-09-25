@@ -38,6 +38,7 @@ import {
 import { getVatCalc } from 'src/utils/VatCalculator'
 import { getDiscValues, getFooterTotals, getSubtotal } from 'src/utils/FooterCalculator'
 import AddressFilterForm from './AddressFilterForm'
+import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
 
 export default function SalesOrderForm({
   labels,
@@ -55,6 +56,7 @@ export default function SalesOrderForm({
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
   const [cycleButtonState, setCycleButtonState] = useState({ text: '%', value: 2 })
+  const [address, setAddress] = useState({})
 
   const [initialValues, setInitialData] = useState({
     recordId: recordId || null,
@@ -102,8 +104,6 @@ export default function SalesOrderForm({
     totQty: 0,
     totWeight: 0,
     totVolume: 0,
-    countryId: null,
-    cityId: null,
     items: [
       {
         id: 1,
@@ -823,6 +823,27 @@ export default function SalesOrderForm({
     })
   }
 
+  function openAddressForm() {
+    stack({
+      Component: AddressFormShell,
+      props: {
+        address: address,
+        setAddress: setAddress,
+        isCleared: false,
+        isSavedClear: false
+      },
+      width: 850,
+      height: 620,
+      title: labels.address
+    })
+  }
+
+  useEffect(() => {
+    const shipAdd =
+      address.countryName + ',' + address.stateName + ',' + address.city + ',' + address.street1 + ',' + address.phone
+    formik.setFieldValue('shipAddress', shipAdd)
+  }, [address])
+
   useEffect(() => {
     ;(async function () {
       if (recordId) {
@@ -1014,6 +1035,7 @@ export default function SalesOrderForm({
                     onChange={e => formik.setFieldValue('shipAddress', e.target.value)}
                     onClear={() => formik.setFieldValue('shipAddress', '')}
                     onDropDown={() => openAddressFilterForm(true, false)}
+                    handleAddAction={() => openAddressForm()}
                   />
                 </Grid>
                 <Grid item xs={12}>
