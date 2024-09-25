@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { AgGridReact } from 'ag-grid-react'
 import { Box, IconButton } from '@mui/material'
 import components from './components'
@@ -9,6 +9,12 @@ import { GridDeleteIcon } from '@mui/x-data-grid'
 
 export function DataGrid({ columns, value, error, height, onChange, disabled = false, allowDelete = true }) {
   const gridApiRef = useRef(null)
+
+  // useEffect(() => {
+  //   if (!value?.length && allowAddNewLine) {
+  //     addNewRow()
+  //   }
+  // }, [value])
 
   const addNewRow = () => {
     const highestIndex = value?.length
@@ -31,10 +37,18 @@ export function DataGrid({ columns, value, error, height, onChange, disabled = f
       commit(newRowNode.data)
 
       setTimeout(() => {
-        gridApiRef.current.startEditingCell({
-          rowIndex: newRowNode.rowIndex,
-          colKey: columns[0].name
-        })
+        // Get the newly added row node by ID
+        const rowNode = gridApiRef.current.getRowNode(newRowNode.data.id)
+
+        if (rowNode) {
+          const rowIndex = rowNode.rowIndex
+
+          // Start editing the first column in the newly added row
+          gridApiRef.current.startEditingCell({
+            rowIndex: rowIndex,
+            colKey: columns[0].name
+          })
+        }
       }, 0)
     }
   }
@@ -120,13 +134,12 @@ export function DataGrid({ columns, value, error, height, onChange, disabled = f
 
     const setData = changes => {
       const id = params.node?.id
-      const rowNode = gridApiRef.current.getDisplayedRowAtIndex(id)
-
+      const rowNode = params.api.getRowNode(id)
       if (rowNode) {
         const currentData = rowNode.data
+        console.log('currentData', currentData)
         const newData = { ...currentData, ...changes }
         rowNode.setData(newData)
-        params.node.setData(newData)
       }
     }
 
@@ -137,10 +150,11 @@ export function DataGrid({ columns, value, error, height, onChange, disabled = f
 
       setData(changes)
       !value && params.api.stopEditing()
-      gridApiRef.current.startEditingCell({
-        rowIndex: params.node.rowIndex,
-        colKey: field
-      })
+      !value &&
+        gridApiRef.current.startEditingCell({
+          rowIndex: params.node.rowIndex,
+          colKey: field
+        })
     }
 
     const updateRow = ({ changes }) => {
@@ -190,7 +204,7 @@ export function DataGrid({ columns, value, error, height, onChange, disabled = f
       gridApiRef.current.applyTransaction({ remove: [params.data] })
 
       const newRows = gridApiRef.current?.data?.filter(({ id }) => id !== params.data.id)
-      onChange(newRows)
+      // onChange(newRows)
     }
 
     return (
@@ -241,16 +255,15 @@ export function DataGrid({ columns, value, error, height, onChange, disabled = f
     gridApiRef.current.forEachNode(node => allRowNodes.push(node.data))
     const updatedGridData = allRowNodes.map(row => (row.id === data.id ? data : row))
 
-    onChange(updatedGridData)
+    // onChange(updatedGridData)
   }
 
   return (
-    <Box sx={{ height: height || 'auto', flex: 1 }} onblur={() => gridApiRef.current.stopEditing()}>
+    <Box sx={{ height: height || 'auto', flex: 1 }}>
       <CacheDataProvider>
         <div className='ag-theme-alpine' style={{ height: '100%', width: '100%' }}>
           <AgGridReact
             apiRef={gridApiRef}
-            defaultColDef={{ width: 200, editable: true }}
             rowData={value}
             columnDefs={columnDefs}
             suppressRowClickSelection={false}
@@ -264,7 +277,6 @@ export function DataGrid({ columns, value, error, height, onChange, disabled = f
             onCellKeyDown={onCellKeyDown}
             tabToNextCell={tabToNextCell}
             onCellEditingStopped={onCellEditingStopped}
-            deltaRowDataMode={true} // Enable delta mode
             getRowId={params => params.data.id} // Provide unique ID for each row
           />
         </div>
