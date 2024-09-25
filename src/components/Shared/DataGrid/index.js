@@ -10,11 +10,13 @@ import { GridDeleteIcon } from '@mui/x-data-grid'
 export function DataGrid({ columns, value, error, height, onChange, disabled = false, allowDelete = true }) {
   const gridApiRef = useRef(null)
 
-  // useEffect(() => {
-  //   if (!value?.length && allowAddNewLine) {
-  //     addNewRow()
-  //   }
-  // }, [value])
+  useEffect(() => {
+    // if (!value?.length && allowAddNewLine) {
+    //   addNewRow()
+    // }
+
+    console.log('gridApiRef', gridApiRef)
+  }, [value])
 
   const addNewRow = params => {
     console.log(params)
@@ -140,7 +142,7 @@ export function DataGrid({ columns, value, error, height, onChange, disabled = f
         const currentData = rowNode.data
         console.log('currentData', currentData)
         const newData = { ...currentData, ...changes }
-        rowNode.setData(newData)
+        rowNode.updateData(newData)
       }
     }
 
@@ -241,10 +243,6 @@ export function DataGrid({ columns, value, error, height, onChange, disabled = f
       : null
   ].filter(Boolean)
 
-  const tabToNextCell = () => {
-    return true
-  }
-
   const onCellEditingStopped = params => {
     const { data } = params
     gridApiRef.current.applyTransaction({ update: [data] })
@@ -256,7 +254,7 @@ export function DataGrid({ columns, value, error, height, onChange, disabled = f
     gridApiRef.current.forEachNode(node => allRowNodes.push(node.data))
     const updatedGridData = allRowNodes.map(row => (row.id === data.id ? data : row))
 
-    // onChange(updatedGridData)
+    onChange(updatedGridData)
   }
 
   return (
@@ -264,7 +262,7 @@ export function DataGrid({ columns, value, error, height, onChange, disabled = f
       <CacheDataProvider>
         <div className='ag-theme-alpine' style={{ height: '100%', width: '100%' }}>
           <AgGridReact
-            apiRef={gridApiRef}
+            gridApiRef={gridApiRef}
             rowData={value}
             columnDefs={columnDefs}
             suppressRowClickSelection={false}
@@ -276,9 +274,8 @@ export function DataGrid({ columns, value, error, height, onChange, disabled = f
               gridApiRef.current = params.api
             }}
             onCellKeyDown={onCellKeyDown}
-            tabToNextCell={tabToNextCell}
             onCellEditingStopped={onCellEditingStopped}
-            getRowId={params => params.data.id} // Provide unique ID for each row
+            getRowId={params => params.data.id}
           />
         </div>
       </CacheDataProvider>
