@@ -45,14 +45,7 @@ const FinancialIntegrators = () => {
     enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
-      rows: [
-        {
-          id: 1,
-          cgId: '',
-          fgId: '',
-          sameNumber: ''
-        }
-      ]
+      rows: []
     },
     onSubmit: async values => {
       try {
