@@ -197,7 +197,6 @@ export function DataGrid({ columns, value, error, height, onChange, disabled = f
     const hasError = error && error[params.node.rowIndex]?.[params.colDef.field]
 
     return {
-      color: hasError ? '#ff0000' : '#000000',
       border: hasError ? '1px solid #ff0000' : '1px solid transparent'
     }
   }
