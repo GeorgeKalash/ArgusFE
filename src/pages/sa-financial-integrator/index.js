@@ -81,8 +81,7 @@ const FinancialIntegrators = () => {
         displayField: 'name',
         mapping: [
           { from: 'recordId', to: 'cgId' },
-          { from: 'name', to: 'cgName' },
-          { from: 'reference', to: 'cgRef' }
+          { from: 'name', to: 'cgName' }
         ],
         readOnly: true
       }
