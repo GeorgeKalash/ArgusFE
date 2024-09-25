@@ -7,15 +7,22 @@ import 'ag-grid-community/styles/ag-grid.css'
 import 'ag-grid-community/styles/ag-theme-alpine.css'
 import { GridDeleteIcon } from '@mui/x-data-grid'
 
-export function DataGrid({ columns, value, error, height, onChange, disabled = false, allowDelete = true }) {
+export function DataGrid({
+  columns,
+  value,
+  error,
+  height,
+  onChange,
+  disabled = false,
+  allowDelete = true,
+  allowAddNewLine = true
+}) {
   const gridApiRef = useRef(null)
 
   useEffect(() => {
-    // if (!value?.length && allowAddNewLine) {
-    //   addNewRow()
-    // }
-
-    console.log('gridApiRef', gridApiRef)
+    if (!value?.length && allowAddNewLine) {
+      addNewRow()
+    }
   }, [value])
 
   const addNewRow = params => {
@@ -73,7 +80,11 @@ export function DataGrid({ columns, value, error, height, onChange, disabled = f
     const allColumns = api.getColumnDefs()
     const currentColumnIndex = allColumns?.findIndex(col => col.colId === params.column.getColId())
 
-    if (currentColumnIndex === allColumns.length - 2 && node.rowIndex === api.getDisplayedRowCount() - 1) {
+    if (
+      currentColumnIndex === allColumns.length - 2 &&
+      node.rowIndex === api.getDisplayedRowCount() - 1 &&
+      allowAddNewLine
+    ) {
       event.stopPropagation()
       addNewRow(params)
     } else {
@@ -256,26 +267,30 @@ export function DataGrid({ columns, value, error, height, onChange, disabled = f
     onChange(updatedGridData)
   }
 
+  console.log(value)
   return (
     <Box sx={{ height: height || 'auto', flex: 1 }}>
       <CacheDataProvider>
         <div className='ag-theme-alpine' style={{ height: '100%', width: '100%' }}>
-          <AgGridReact
-            gridApiRef={gridApiRef}
-            rowData={value}
-            columnDefs={columnDefs}
-            suppressRowClickSelection={false}
-            stopEditingWhenCellsLoseFocus={true}
-            rowSelection='single'
-            editType='cell'
-            singleClickEdit={true}
-            onGridReady={params => {
-              gridApiRef.current = params.api
-            }}
-            onCellKeyDown={onCellKeyDown}
-            onCellEditingStopped={onCellEditingStopped}
-            getRowId={params => params.data.id}
-          />
+          {value && (
+            <AgGridReact
+              gridApiRef={gridApiRef}
+              rowData={value}
+              columnDefs={columnDefs}
+              suppressRowClickSelection={false}
+              stopEditingWhenCellsLoseFocus={true}
+              rowSelection='single'
+              editType='cell'
+              singleClickEdit={true}
+              onGridReady={params => {
+                gridApiRef.current = params.api
+                onChange(value)
+              }}
+              onCellKeyDown={onCellKeyDown}
+              onCellEditingStopped={onCellEditingStopped}
+              getRowId={params => params.data.id}
+            />
+          )}
         </div>
       </CacheDataProvider>
     </Box>
