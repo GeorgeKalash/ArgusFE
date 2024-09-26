@@ -1,10 +1,6 @@
-// ** MUI Imports
-import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
-
-// ** MUI Imports
-import { Grid, Box, FormControlLabel, Checkbox, RadioGroup, Radio } from '@mui/material'
+import { Grid, FormControlLabel, RadioGroup, Radio } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import { useError } from 'src/error'
 import { useFormik } from 'formik'
@@ -15,9 +11,6 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { getFormattedNumber } from 'src/lib/numberField-helper'
-import { useWindowDimensions } from 'src/lib/useWindowDimensions'
-
-// ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
@@ -43,11 +36,9 @@ import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 
 export default function CreditOrderForm({ labels, access, recordId, plantId, userData, window }) {
   const { platformLabels } = useContext(ControlContext)
-  const { height } = useWindowDimensions()
-  const [isLoading, setIsLoading] = useState(false)
+  const { getRequest, postRequest } = useContext(RequestsContext)
   const [isClosed, setIsClosed] = useState(false)
   const [isTFR, setIsTFR] = useState(false)
-  const [currencyStore, setCurrencyStore] = useState([])
   const [rateType, setRateType] = useState(148)
   const [editMode, setEditMode] = useState(!!recordId)
   const { stack: stackError } = useError()
@@ -70,16 +61,14 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
     corId: '',
     corRef: '',
     corName: '',
-    wip: '',
-    status: '',
+    wip: 1,
+    status: 1,
     releaseStatus: '',
     notes: '',
     currencyId: '',
     amount: '',
     baseAmount: '',
     exRate: '',
-    minRate: '',
-    maxRate: '',
     rateCalcMethod: '',
     isTFRClicked: false
   })
@@ -89,7 +78,6 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
     access: access,
     enabled: !recordId
   })
-  const { getRequest, postRequest } = useContext(RequestsContext)
 
   const { labels: _labelsINV, access: accessINV } = useResourceParams({
     datasetId: ResourceIds.CreditInvoice
@@ -105,9 +93,9 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      date: yup.string().required(' '),
-      plantId: yup.string().required(' '),
-      corId: yup.string().required(' ')
+      date: yup.string().required(),
+      plantId: yup.string().required(),
+      corId: yup.string().required()
     }),
     onSubmit: async obj => {
       try {
@@ -115,15 +103,11 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
         delete copy.rows
         copy.date = formatDateToApi(copy.date)
         copy.deliveryDate = formatDateToApi(copy.deliveryDate)
-
-        // Default values for properties if they are empty
-        copy.wip = copy.wip === '' ? 1 : copy.wip
-        copy.status = copy.status === '' ? 1 : copy.status
         copy.amount = totalCUR
         copy.baseAmount = totalLoc
         if (!formik.values.isTFRClicked) {
           const updatedRows = detailsFormik.values.rows.map((orderDetail, index) => {
-            const seqNo = index + 1 // Adding 1 to make it 1-based index
+            const seqNo = index + 1
 
             return {
               ...orderDetail,
@@ -190,10 +174,10 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
     validationSchema: yup.object({
       rows: yup.array().of(
         yup.object({
-          currencyId: yup.string().required(' '),
-          qty: yup.string().required(' '),
-          exRate: yup.string().required(' '),
-          amount: yup.string().required(' ')
+          currencyId: yup.string().required(),
+          qty: yup.string().required(),
+          exRate: yup.string().required(),
+          amount: yup.string().required()
         })
       )
     })
@@ -206,8 +190,6 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
 
       copy.date = formatDateToApi(copy.date)
       copy.deliveryDate = formatDateToApi(copy.deliveryDate)
-      copy.wip = copy.wip === '' ? 1 : copy.wip
-      copy.status = copy.status === '' ? 1 : copy.status
       copy.amount = totalCUR
       copy.baseAmount = totalLoc
 
@@ -230,8 +212,6 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
 
       copy.date = formatDateToApi(copy.date)
       copy.deliveryDate = formatDateToApi(copy.deliveryDate)
-      copy.wip = copy.wip === '' ? 1 : copy.wip
-      copy.status = copy.status === '' ? 1 : copy.status
       copy.amount = totalCUR
       copy.baseAmount = totalLoc
 
@@ -254,8 +234,6 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
 
       copy.date = formatDateToApi(copy.date)
       copy.deliveryDate = formatDateToApi(copy.deliveryDate)
-      copy.wip = copy.wip === '' ? 1 : copy.wip
-      copy.status = copy.status === '' ? 1 : copy.status
       copy.amount = totalCUR
       copy.baseAmount = totalLoc
 
@@ -285,40 +263,22 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
   }
 
   const totalCUR = detailsFormik.values.rows.reduce((curSum, row) => {
-    // Parse amount as a number
     const curValue = parseFloat(row.amount?.toString().replace(/,/g, '')) || 0
 
     return curSum + curValue
   }, 0)
 
   const totalLoc = detailsFormik.values.rows.reduce((locSum, row) => {
-    // Parse amount as a number
     const locValue = parseFloat(row.baseAmount?.toString().replace(/,/g, '')) || 0
 
     return locSum + locValue
   }, 0)
 
-  const fillCurrencyStore = () => {
-    try {
-      var parameters = `_filter=`
-      getRequest({
-        extension: SystemRepository.Currency.qry,
-        parameters: parameters
-      }).then(res => {
-        setCurrencyStore(res)
-      })
-    } catch (error) {}
-  }
-
-  const getCorrespondentById = async (recordId, baseCurrency, plant) => {
-    if (recordId) {
-      const _recordId = recordId
-      const defaultParams = `_recordId=${_recordId}`
-      var parameters = defaultParams
-
+  const getCorrespondentById = async (corId, baseCurrency, plant) => {
+    if (corId) {
       getRequest({
         extension: RemittanceSettingsRepository.Correspondent.get,
-        parameters: parameters
+        parameters: `_recordId=${corId}`
       }).then(async res => {
         setToCurrency(res.record.currencyId)
         setToCurrencyRef(res.record.currencyRef)
@@ -336,22 +296,17 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
   }
 
   const getDefaultDT = async functionId => {
-    const parameters = `_userId=${userData && userData.userId}&_functionId=${functionId}`
-
     try {
       const res = await getRequest({
         extension: SystemRepository.UserFunction.get,
-        parameters: parameters
+        parameters: `_userId=${userData && userData.userId}&_functionId=${functionId}`
       })
-      if (res.record) {
-        formik.setFieldValue('dtId', res.record.dtId)
-      } else {
-        formik.setFieldValue('dtId', '')
-      }
+      formik.setFieldValue('dtId', res?.record?.dtId)
     } catch (error) {
       formik.setFieldValue('dtId', '')
     }
   }
+
   async function getEXMBase(plantId, currencyId, baseCurrency, rateType) {
     if (!plantId || !currencyId || !rateType || !baseCurrency) {
       if (!plantId) {
@@ -377,18 +332,16 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
 
       return
     }
-    var parameters = `_plantId=${plantId}&_currencyId=${currencyId}&_raCurrencyId=${baseCurrency}&_rateTypeId=${rateType}`
 
     const res = await getRequest({
       extension: CurrencyTradingSettingsRepository.ExchangeMap.get,
-      parameters: parameters
+      parameters: `_plantId=${plantId}&_currencyId=${currencyId}&_raCurrencyId=${baseCurrency}&_rateTypeId=${rateType}`
     })
+
     if (res) {
       formik.setFieldValue('currencyId', currencyId)
       formik.setFieldValue('exRate', res.record?.rate)
       formik.setFieldValue('rateCalcMethod', res.record?.rateCalcMethod)
-      formik.setFieldValue('minRate', res.record?.minRate)
-      formik.setFieldValue('maxRate', res.record?.maxRate)
     }
   }
 
@@ -402,14 +355,13 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
         return
       }
     }
-    var parameters = `_plantId=${obj.plantId}&_currencyId=${obj.fromCurrency}&_raCurrencyId=${obj.toCurrency}&_rateTypeId=${obj.rateType}`
 
     const res = await getRequest({
       extension: CurrencyTradingSettingsRepository.ExchangeMap.get,
-      parameters: parameters
+      parameters: `_plantId=${obj.plantId}&_currencyId=${obj.fromCurrency}&_raCurrencyId=${obj.toCurrency}&_rateTypeId=${obj.rateType}`
     })
 
-    return res.record
+    return res?.record
   }
 
   const columns = [
@@ -650,14 +602,12 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
     }
   ]
 
-  const fillItemsGrid = orderId => {
+  const fillItemsGrid = async orderId => {
     try {
-      var parameters = `_orderId=${orderId}`
       getRequest({
         extension: CTTRXrepository.CreditOrderItem.qry,
-        parameters: parameters
+        parameters: `_orderId=${orderId}`
       }).then(res => {
-        // Create a new list by modifying each object in res.list
         const modifiedList = res.list.map((item, index) => ({
           ...item,
           id: index + 1,
@@ -688,7 +638,6 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
       })
       setRateType(res.record.value)
       formik.setFieldValue('functionId', type)
-      getDefaultDT(type)
     }
   }
   async function getBaseCurrency() {
@@ -696,54 +645,49 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
       extension: SystemRepository.Defaults.get,
       parameters: '_key=baseCurrencyId'
     })
-    if (res.record.value) {
-      getBaseCurrencyRef(res.record.value)
-    }
+    await getBaseCurrencyRef(res?.record?.value)
 
-    return res.record.value ?? ''
+    return res?.record?.value
   }
 
-  const getBaseCurrencyRef = currencyId => {
+  const getBaseCurrencyRef = async currencyId => {
     try {
-      var parameters = `_recordId=${currencyId}`
       getRequest({
         extension: SystemRepository.Currency.get,
-        parameters: parameters
+        parameters: `_recordId=${currencyId}`
       }).then(res => {
-        setBaseCurrencyRef(res.record.reference)
+        setBaseCurrencyRef(res?.record?.reference)
       })
     } catch (error) {}
   }
+
   useEffect(() => {
     ;(async function () {
       try {
-        fillCurrencyStore()
         if (recordId) {
-          setIsLoading(true)
-          fillItemsGrid(recordId)
-
           const res = await getRequest({
             extension: CTTRXrepository.CreditOrder.get,
             parameters: `_recordId=${recordId}`
           })
           setIsClosed(res.record.wip === 2 ? true : false)
           setIsTFR(res.record.releaseStatus === 3 && res.record.status !== 3 ? true : false)
-          res.record.date = formatDateFromApi(res.record.date)
-          res.record.deliveryDate = formatDateFromApi(res.record.deliveryDate)
+          setToCurrency(res.record.currencyId)
+          setToCurrencyRef(res.record.currencyRef)
           await setOperationType(res.record.functionId)
-          formik.setValues(res.record)
-          const baseCurrency = await getBaseCurrency()
-          getCorrespondentById(res.record.corId ?? '', baseCurrency, res.record.plantId)
+          await getBaseCurrency()
+          formik.setValues({
+            ...res.record,
+            date: formatDateFromApi(res.record.date),
+            deliveryDate: formatDateFromApi(res.record.deliveryDate)
+          })
+          await fillItemsGrid(recordId)
         } else {
           await setOperationType(SystemFunction.CurrencyCreditOrderPurchase)
+          await getDefaultDT(SystemFunction.CurrencyCreditOrderPurchase)
         }
-      } catch (error) {
-      } finally {
-        setIsLoading(false)
-      }
+      } catch (error) {}
     })()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [height])
+  }, [])
 
   const onWorkFlowClick = async () => {
     stack({
@@ -814,7 +758,6 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
       >
         <Fixed>
           <Grid container xs={12} style={{ display: 'flex', marginTop: '10px' }}>
-            {/* First Column */}
             <FormGrid hideonempty item style={{ marginRight: '10px', width: '205px' }}>
               <CustomDatePicker
                 name='date'
@@ -831,7 +774,6 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
               />
             </FormGrid>
 
-            {/* Second Column */}
             <Grid item style={{ marginRight: '10px', width: '465px' }}>
               <ResourceComboBox
                 endpointId={SystemRepository.Plant.qry}
@@ -850,7 +792,6 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
               />
             </Grid>
 
-            {/* Third Column */}
             <Grid item style={{ marginRight: '10px', width: '210px' }}>
               <CustomTextField
                 name='reference'
@@ -868,7 +809,6 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
           </Grid>
 
           <Grid container xs={12}>
-            {/* First Column */}
             <Grid container rowGap={1} xs={9} style={{ marginTop: '10px' }}>
               <Grid item xs={12}>
                 <ResourceLookup
@@ -905,7 +845,6 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
                 />
               </Grid>
             </Grid>
-            {/* Third Column */}
             <Grid container rowGap={1} xs={3} sx={{ px: 2 }} style={{ marginTop: '10px' }}>
               <Grid item xs={12}>
                 <CustomDatePicker
@@ -931,6 +870,7 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
               defaultValue={SystemFunction.CurrencyCreditOrderPurchase}
               onChange={async e => {
                 await setOperationType(e.target.value)
+                await getDefaultDT(e.target.value)
                 setFunctionId(e.target.value)
                 formik.setFieldValue('reference', '')
               }}
@@ -968,7 +908,6 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
         </Grow>
         <Fixed>
           <Grid container rowGap={1} xs={12}>
-            {/* First Column (moved to the left) */}
             <FormGrid container rowGap={1} xs={8} style={{ marginTop: '10px' }}>
               <CustomTextArea
                 name='notes'
@@ -984,7 +923,6 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
                 helperText={formik.touched.notes && formik.errors.notes}
               />
             </FormGrid>
-            {/* Second Column  */}
             <Grid container rowGap={1} xs={4} sx={{ px: 2 }} style={{ marginTop: '10px' }}>
               <Grid item xs={12}>
                 <CustomTextField
