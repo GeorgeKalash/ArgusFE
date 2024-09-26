@@ -65,7 +65,6 @@ const Confirmation = ({ labels, formik, editMode, idTypeStore, maxAccess }) => {
         const dateObj = new Date(res?.idExpirationDate)
         const convertedTimestamp = dateObj.getTime() || ''
 
-        console.log(convertedTimestamp)
         formik.setValues({
           ...formik.values,
           expiryDate: convertedTimestamp,
