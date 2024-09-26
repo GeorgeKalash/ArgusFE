@@ -15,9 +15,7 @@ export default function useIdType() {
       .then(res => {
         setStore(res.list)
       })
-      .catch(error => {
-        // setErrorMessage(error);
-      })
+      .catch(error => {})
   }
 
   useEffect(() => {
@@ -27,11 +25,11 @@ export default function useIdType() {
   const getTypeValue = value => {
     function isValidRegex(pattern) {
       try {
-        new RegExp(pattern) // Try to create a new RegExp object
+        new RegExp(pattern)
 
-        return true // If no error, the pattern is valid
+        return true
       } catch (e) {
-        return false // If an error is thrown, the pattern is invalid
+        return false
       }
     }
     var formatted = store?.find(item => item.format === value)
