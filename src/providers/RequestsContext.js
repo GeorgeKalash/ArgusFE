@@ -85,7 +85,10 @@ const RequestsProvider = ({ showLoading = false, children }) => {
       method: 'GET',
       url: process.env.NEXT_PUBLIC_YAKEEN_URL + body.extension + '?' + body.parameters
     })
-      .then(res => res.data)
+      .then(response => {
+        if (!disableLoading) debouncedCloseLoading()
+        resolve(response.data)
+      })
       .catch(error => {
         debouncedCloseLoading()
         showError({
@@ -108,10 +111,7 @@ const RequestsProvider = ({ showLoading = false, children }) => {
         LanguageId: user.languageId
       }
     })
-      .then(response => {
-        if (!disableLoading) debouncedCloseLoading()
-        resolve(response.data)
-      })
+      .then(res => res.data)
       .catch(error => {
         showError({
           message: error,
