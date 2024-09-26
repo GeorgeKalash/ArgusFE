@@ -267,9 +267,9 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
     },
     {
       key: 'Close',
-      condition: !isClosed,
+      condition: true,
       onClick: () => onClose(formik.values.recordId),
-      disabled: isPosted || !editMode
+      disabled: isPosted || isClosed || !editMode
     }
   ]
 
