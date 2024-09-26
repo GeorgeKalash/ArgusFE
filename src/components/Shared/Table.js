@@ -506,29 +506,28 @@ const Table = ({
     const handleDoubleClick = params => {
       navigator.clipboard.writeText(params.target.innerText).then(() => {
         setTooltipOpen(true)
-        setTimeout(() => setTooltipOpen(false), 15000)
+        setTimeout(() => setTooltipOpen(false), 500)
       })
     }
 
     return (
-      <Tooltip
-        title='Copied!'
-        open={tooltipOpen}
-        placement='top'
-        arrow
-        leaveDelay={0}
-        disablePortal
-        PopperProps={{
-          modifiers: [
-            {
-              name: 'preventOverflow',
-              options: {
-                boundary: 'window' // or 'viewport'
-              }
-            }
-          ]
-        }}
-      >
+      <Box>
+        {tooltipOpen && (
+          <Box
+            sx={{
+              zIndex: 1000,
+              position: 'fixed',
+              top: '-40px',
+              backgroundColor: 'black',
+              color: 'white',
+              paddingY: '1px',
+              paddingX: '3px',
+              borderRadius: '5px'
+            }}
+          >
+            Copied!
+          </Box>
+        )}
         <Box
           onClick={handleClick}
           onDoubleClick={handleDoubleClick}
@@ -548,7 +547,7 @@ const Table = ({
         >
           {params.value}
         </Box>
-      </Tooltip>
+      </Box>
     )
   }
 
