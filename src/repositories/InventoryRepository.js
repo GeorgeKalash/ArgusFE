@@ -1,6 +1,10 @@
 const service = 'IV.asmx/'
 
 export const InventoryRepository = {
+  Barcode: {
+    qry: service + 'qryBCD',
+    set2: service + 'set2BCD'
+  },
   Item: {
     snapshot: service + 'snapshotIT',
     get: service + 'getIT'
@@ -117,12 +121,15 @@ export const InventoryRepository = {
     set: service + 'setOQ',
     del: service + 'delOQ'
   },
+  SerialProfile: {
+    qry: service + 'qrySFP'
+  },
+  ItemProduction: {
+    get: service + 'getMFR',
+    set: service + 'setMFR'
+  },
   RebuildInventory: {
     rebuild: service + 'rebuildFIS'
   },
-  DimensionUDT: { set: service + 'set2UDT', get: service + 'getUDT' },
-  Barcode: {
-    qry: 'qryBCD',
-    set2: 'set2BCD'
-  }
+  DimensionUDT: { set: service + 'set2UDT', get: service + 'getUDT' }
 }

@@ -8,6 +8,7 @@ import VendorList from '../forms/VendorList.js'
 import SalesList from '../forms/SaleList.js'
 import PropertiesForm from '../forms/PropertiesForm.js'
 import BarcodeForm from '../forms/BarcodeForm.js'
+import ItemProductionForm from '../forms/ItemProductionForm.js'
 
 const ItemWindow = ({ recordId, labels, maxAccess }) => {
   const [activeTab, setActiveTab] = useState(0)
@@ -26,11 +27,12 @@ const ItemWindow = ({ recordId, labels, maxAccess }) => {
 
   const tabs = [
     { label: labels.items },
-    { label: labels.physical, disabled: !store.recordId },
-    { label: labels.vendor, disabled: !store.recordId },
+    { label: labels.barcode, disabled: !store.recordId },
     { label: labels.sales, disabled: !store.recordId },
     { label: labels.properties, disabled: !store.recordId },
-    { label: labels.barcode, disabled: !store.recordId }
+    { label: labels.physical, disabled: !store.recordId },
+    { label: labels.vendor, disabled: !store.recordId },
+    { label: 'ItemProductionForm', disabled: !store.recordId }
   ]
 
   console.log(formikInitial, 'initial')
@@ -49,12 +51,9 @@ const ItemWindow = ({ recordId, labels, maxAccess }) => {
         />
       </CustomTabPanel>
       <CustomTabPanel height={660} index={1} value={activeTab}>
-        <PhysicalForm labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} editMode={editMode} />
+        <BarcodeForm labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} />
       </CustomTabPanel>
       <CustomTabPanel height={660} index={2} value={activeTab}>
-        <VendorList labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} />
-      </CustomTabPanel>
-      <CustomTabPanel height={660} index={3} value={activeTab}>
         <SalesList
           labels={labels}
           setStore={setStore}
@@ -63,11 +62,17 @@ const ItemWindow = ({ recordId, labels, maxAccess }) => {
           formikInitial={formikInitial}
         />
       </CustomTabPanel>
-      <CustomTabPanel height={660} index={4} value={activeTab}>
+      <CustomTabPanel height={660} index={3} value={activeTab}>
         <PropertiesForm labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} />
       </CustomTabPanel>
+      <CustomTabPanel height={660} index={4} value={activeTab}>
+        <PhysicalForm labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} editMode={editMode} />
+      </CustomTabPanel>
       <CustomTabPanel height={660} index={5} value={activeTab}>
-        <BarcodeForm labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} />
+        <VendorList labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} />
+      </CustomTabPanel>
+      <CustomTabPanel height={660} index={6} value={activeTab}>
+        <ItemProductionForm labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} />
       </CustomTabPanel>
     </>
   )

@@ -44,12 +44,17 @@ const BarcodeForm = ({ store, labels, maxAccess }) => {
           itemId: recordId,
           barcode: '',
           muId: '',
-          defaultQty: ''
+          defaultQty: '',
+          muRef: ''
         }
       ]
     },
     onSubmit: values => {
       const { barcodes } = values
+
+      const isRowEmpty = row => {
+        return !row.barcode
+      }
 
       if (barcodes.length === 1 && isRowEmpty(barcodes[0])) {
         formik.setValues({ barcodes: [] })
@@ -60,18 +65,14 @@ const BarcodeForm = ({ store, labels, maxAccess }) => {
     }
   })
 
-  const isRowEmpty = row => {
-    return !row.barcode
-  }
-
   const postdata = obj => {
     const data = obj?.barcodes?.map(({ itemId, ...rest }) => ({
-      categoryId: recordId,
+      itemId: recordId,
       ...rest
     }))
 
     const list = {
-      categoryId: recordId,
+      itemId: recordId,
       barcodes: data || []
     }
 
@@ -85,6 +86,8 @@ const BarcodeForm = ({ store, labels, maxAccess }) => {
       })
       .catch(error => {})
   }
+
+  console.log(formik.values)
 
   const columns = [
     {
@@ -101,10 +104,14 @@ const BarcodeForm = ({ store, labels, maxAccess }) => {
         endpointId: store._msId ? InventoryRepository.MeasurementUnit.qry : '',
         parameters: `_msId=${store._msId}`,
         valueField: 'recordId',
-        displayField: ['reference', 'name'],
+        displayField: 'reference',
         columnsInDropDown: [
           { key: 'reference', value: 'Reference' },
           { key: 'name', value: 'Name' }
+        ],
+        mapping: [
+          { from: 'recordId', to: 'muId' },
+          { from: 'reference', to: 'muRef' }
         ]
       }
     },
