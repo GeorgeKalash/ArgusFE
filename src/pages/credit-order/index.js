@@ -1,15 +1,12 @@
-import { useContext, useState } from 'react'
+import { useContext } from 'react'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import Table from 'src/components/Shared/Table'
 import toast from 'react-hot-toast'
-import { formatDateDefault } from 'src/lib/date-helper'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { CTTRXrepository } from 'src/repositories/CTTRXRepository'
 import { useWindow } from 'src/windows'
-import { getFormattedNumber } from 'src/lib/numberField-helper'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CreditOrderForm from './Forms/CreditOrderForm'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -23,8 +20,6 @@ import { useError } from 'src/error'
 const CreditOrder = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const [errorMessage, setErrorMessage] = useState(null)
-  const [plantId, setPlantId] = useState(null)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
 
@@ -33,27 +28,14 @@ const CreditOrder = () => {
     : null
 
   const getPlantId = async () => {
-    const parameters = `_userId=${userData && userData.userId}&_key=plantId`
-
     try {
       const res = await getRequest({
         extension: SystemRepository.UserDefaults.get,
-        parameters: parameters
+        parameters: `_userId=${userData && userData.userId}&_key=plantId`
       })
 
-      if (res.record.value) {
-        setPlantId(res.record.value)
-
-        return res.record.value
-      }
-
-      setPlantId('')
-
-      return ''
+      return res?.record?.value
     } catch (error) {
-      throw new Error(error)
-      setPlantId('')
-
       return ''
     }
   }
@@ -120,18 +102,16 @@ const CreditOrder = () => {
 
   async function openFormWindow(recordId) {
     if (!recordId) {
-      try {
-        const plantId = await getPlantId()
-        if (plantId !== '') {
-          openForm('', plantId)
-        } else {
-          stackError({
-            message: `The user does not have a default plant`
-          })
+      const plantId = await getPlantId()
+      if (plantId !== '') {
+        openForm('', plantId)
+      } else {
+        stackError({
+          message: `The user does not have a default plant`
+        })
 
-          return
-        }
-      } catch (error) {}
+        return
+      }
     } else {
       openForm(recordId)
     }
@@ -150,6 +130,10 @@ const CreditOrder = () => {
       height: 600,
       title: labels.creditOrder
     })
+  }
+
+  const edit = obj => {
+    openFormWindow(obj.recordId)
   }
 
   const del = async obj => {
@@ -225,9 +209,7 @@ const CreditOrder = () => {
           ]}
           gridData={data ?? { list: [] }}
           rowId={['recordId']}
-          onEdit={obj => {
-            openFormWindow(obj.recordId, plantId)
-          }}
+          onEdit={edit}
           refetch={refetch}
           onDelete={del}
           isLoading={false}
@@ -237,7 +219,6 @@ const CreditOrder = () => {
           paginationType='api'
         />
       </Grow>
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </VertLayout>
   )
 }
