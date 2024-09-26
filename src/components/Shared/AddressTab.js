@@ -8,11 +8,29 @@ import useResourceParams from 'src/hooks/useResourceParams'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from './Layouts/VertLayout'
 import { Grow } from './Layouts/Grow'
+import { useContext, useEffect } from 'react'
+import { RequestsContext } from 'src/providers/RequestsContext'
 
-const AddressTab = ({ addressValidation, readOnly = false, required = true }) => {
+const AddressTab = ({ addressValidation, readOnly = false, required = true, defaultReadOnly = {} }) => {
   const { labels: labels, access: maxAccess } = useResourceParams({
     datasetId: ResourceIds.Address
   })
+  const { getRequest } = useContext(RequestsContext)
+
+  useEffect(() => {
+    async function getCountry() {
+      var parameters = `_filter=&_key=countryId`
+
+      const res = await getRequest({
+        extension: SystemRepository.Defaults.get,
+        parameters: parameters
+      })
+      const countryId = res.record.value
+
+      addressValidation.setFieldValue('countryId', parseInt(countryId))
+    }
+    getCountry()
+  }, [])
 
   return (
     <VertLayout>
@@ -26,7 +44,7 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true }) =>
                 label={labels.country}
                 valueField='recordId'
                 displayField={['reference', 'name']}
-                readOnly={readOnly}
+                readOnly={readOnly || defaultReadOnly?.countryId}
                 required={required}
                 displayFieldWidth={1.5}
                 columnsInDropDown={[

@@ -78,12 +78,16 @@ const RequestsProvider = ({ showLoading = false, children }) => {
   }
 
   const getMicroRequest = async body => {
+    const disableLoading = body.disableLoading || false
+    !disableLoading && !loading && setLoading(true)
+
     return axios({
       method: 'GET',
       url: process.env.NEXT_PUBLIC_YAKEEN_URL + body.extension + '?' + body.parameters
     })
       .then(res => res.data)
       .catch(error => {
+        debouncedCloseLoading()
         showError({
           message: error,
           height: error.response?.status === 404 || error.response?.status === 500 ? 400 : ''

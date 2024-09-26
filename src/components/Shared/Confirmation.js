@@ -53,10 +53,7 @@ const Confirmation = ({ labels, formik, editMode, idTypeStore, maxAccess }) => {
       type = 2
     }
 
-    const hijriDate =
-      type === 1
-        ? moment(formatDateToApiFunction(obj.birthDate), 'YYYY-MM-DD').format('iYYYY-iMM-iDD')
-        : formatDateToApiFunction(obj.birthDate)
+    const hijriDate = moment(formatDateToApiFunction(obj.birthDate), 'YYYY-MM-DD').format('iYYYY-iMM-iDD')
 
     const defaultParams = `_number=${obj.idNo}&_dateTime=${hijriDate}&_type=${type}`
     var parameters = defaultParams

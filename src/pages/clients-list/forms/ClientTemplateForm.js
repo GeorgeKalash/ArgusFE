@@ -1016,7 +1016,11 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         readOnly={editMode && true}
                         required
                         phone={true}
-                        onChange={clientIndividualFormik.handleChange}
+                        onChange={e => {
+                          clientIndividualFormik.handleChange(e)
+                          clientIndividualFormik.values?.cellPhone === e.target.value &&
+                            clientIndividualFormik.setFieldValue('whatsAppNo', e.target.value)
+                        }}
                         maxLength='15'
                         autoComplete='off'
                         onCopy={handleCopy}
@@ -1052,6 +1056,8 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         phone={true}
                         onChange={e => {
                           clientIndividualFormik.handleChange(e)
+                          clientIndividualFormik.values?.cellPhone === e.target.value &&
+                            clientIndividualFormik.setFieldValue('whatsAppNo', e.target.value)
                         }}
                         onBlur={e => {
                           setShowAsPasswordPhoneRepeat(true), clientIndividualFormik.handleBlur(e)
@@ -1080,7 +1086,13 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                           label={labels.first}
                           value={clientIndividualFormik.values?.firstName}
                           required
-                          onChange={clientIndividualFormik.handleChange}
+                          onChange={e => {
+                            clientIndividualFormik.handleChange(e)
+                            setAddress(prev => ({
+                              ...prev, // Parentheses wrap the object to be returned
+                              name: e.target.value + ' ' + clientIndividualFormik.values?.lastName
+                            }))
+                          }}
                           language='english'
                           maxLength='10'
                           readOnly={editMode}
@@ -1114,7 +1126,13 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                           label={labels.last}
                           value={clientIndividualFormik.values?.lastName}
                           required
-                          onChange={clientIndividualFormik.handleChange}
+                          onChange={e => {
+                            clientIndividualFormik.handleChange(e),
+                              setAddress(prev => ({
+                                ...prev, // Parentheses wrap the object to be returned
+                                name: clientIndividualFormik.values?.firstName + ' ' + e.target.value
+                              }))
+                          }}
                           language='english'
                           maxLength='10'
                           readOnly={editMode && !allowEdit}
@@ -1504,6 +1522,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                             optional: true,
                             labels: labels,
                             setAddress: setAddress,
+                            defaultReadOnly: { countryId: true },
                             address: address,
                             maxAccess: maxAccess,
                             isCleared: false
