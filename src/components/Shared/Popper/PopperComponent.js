@@ -6,8 +6,17 @@ const PopperComponent = ({ children, anchorEl, open, ...props }) => {
   const [isVisible, setIsVisible] = useState(true)
   const [rect, setRect] = useState(anchorEl?.getBoundingClientRect())
   const [popperRect, setPopperRect] = useState(null)
+  const [canRenderBelow, setCanRenderBelow] = useState(false)
 
   const popperRef = useRef(null)
+
+  useEffect(() => {
+    if (open && anchorEl && popperRef.current) {
+      const newPopperRect = popperRef.current.getBoundingClientRect()
+      setPopperRect(newPopperRect)
+      setCanRenderBelow(window.innerHeight - rect?.bottom > newPopperRect.height)
+    }
+  }, [open, rect, anchorEl])
 
   useEffect(() => {
     const handleIntersection = entries => {
@@ -84,8 +93,6 @@ const PopperComponent = ({ children, anchorEl, open, ...props }) => {
   }, [open, anchorEl])
 
   const zoom = parseFloat(getComputedStyle(document.body).getPropertyValue('--zoom'))
-
-  const canRenderBelow = window.innerHeight - rect?.bottom > popperRect?.height
 
   return ReactDOM.createPortal(
     <Box
