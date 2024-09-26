@@ -15,6 +15,7 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true, defa
   const { labels: labels, access: maxAccess } = useResourceParams({
     datasetId: ResourceIds.Address
   })
+
   const { getRequest } = useContext(RequestsContext)
 
   useEffect(() => {
@@ -29,6 +30,7 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true, defa
 
       addressValidation.setFieldValue('countryId', parseInt(countryId))
     }
+
     getCountry()
   }, [])
 

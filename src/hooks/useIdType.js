@@ -31,12 +31,14 @@ export default function useIdType() {
         store?.find(item => {
           if (item && item.format) {
             const regex = new RegExp(item.format)
+
             return regex.test(value)
           }
 
           return false
         }) ?? ''
     }
+
     return formatted?.recordId
   }
 
