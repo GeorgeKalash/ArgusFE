@@ -25,12 +25,22 @@ export default function useIdType() {
   }, [store])
 
   const getTypeValue = value => {
+    function isValidRegex(pattern) {
+      try {
+        new RegExp(pattern) // Try to create a new RegExp object
+
+        return true // If no error, the pattern is valid
+      } catch (e) {
+        return false // If an error is thrown, the pattern is invalid
+      }
+    }
     var formatted = store?.find(item => item.format === value)
     if (!formatted?.recordId) {
       formatted =
         store?.find(item => {
-          if (item && item.format) {
+          if (item && item.format && isValidRegex(item.format)) {
             const regex = new RegExp(item.format)
+            console.log(regex, value, regex.test(parseInt(value)))
 
             return regex.test(value)
           }

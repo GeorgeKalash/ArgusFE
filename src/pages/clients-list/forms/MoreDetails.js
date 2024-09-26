@@ -5,11 +5,14 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FormShell from 'src/components/Shared/FormShell'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useForm } from 'src/hooks/form'
+import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { DataSets } from 'src/resources/DataSets'
 
 export default function MoreDetails({ labels, editMode, maxAccess, readOnly, clientFormik, allowEdit, window }) {
+  console.log('clientFormik', clientFormik)
+
   const { formik } = useForm({
     initialValues: {
       trxCountPerYear: '',
@@ -19,6 +22,8 @@ export default function MoreDetails({ labels, editMode, maxAccess, readOnly, cli
       title: '',
       oldReference: '',
       extraIncome: '',
+      bankId: '',
+      iban: '',
       extraIncomeId: ''
     },
     enableReinitialize: true,
@@ -34,6 +39,8 @@ export default function MoreDetails({ labels, editMode, maxAccess, readOnly, cli
         oldReference: obj.oldReference,
         extraIncome: obj.extraIncome,
         extraIncomeId: obj.extraIncomeId,
+        bankId: obj.bankId,
+        iban: obj.iban,
         title: obj.title
       })
       window.close()
@@ -49,7 +56,9 @@ export default function MoreDetails({ labels, editMode, maxAccess, readOnly, cli
       oldReference: clientFormik.values.oldReference,
       title: clientFormik.values.title,
       extraIncome: clientFormik.values.extraIncome,
-      extraIncomeId: clientFormik.values.extraIncomeId
+      extraIncomeId: clientFormik.values.extraIncomeId,
+      bankId: clientFormik.values.bankId,
+      iban: clientFormik.values.iban
     })
   }, [])
 
@@ -188,6 +197,40 @@ export default function MoreDetails({ labels, editMode, maxAccess, readOnly, cli
               formik.setFieldValue('extraIncomeId', newValue?.recordId || '')
             }}
             error={formik.touched.extraIncomeId && Boolean(formik.errors.extraIncomeId)}
+            maxAccess={maxAccess}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <ResourceComboBox
+            endpointId={CashBankRepository.CbBank.qry2}
+            parameters={`_countryId=${clientFormik.values.idCountry}`}
+            name='bankId'
+            label={labels.bank}
+            readOnly={editMode || readOnly}
+            valueField='recordId'
+            displayField={['reference', 'name']}
+            columnsInDropDown={[
+              { key: 'reference', value: 'Reference' },
+              { key: 'name', value: 'Name' }
+            ]}
+            values={formik.values}
+            onChange={(event, newValue) => {
+              formik.setFieldValue('bankId', newValue?.recordId || '')
+            }}
+            error={formik.touched.bankId && Boolean(formik.errors.bankId)}
+            maxAccess={maxAccess}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <CustomTextField
+            name='iban'
+            label={labels.iban}
+            value={formik.values?.iban}
+            readOnly={editMode || readOnly}
+            onChange={formik.handleChange}
+            maxLength='10'
+            onClear={() => formik.setFieldValue('iban', '')}
+            error={formik.touched.iban && Boolean(formik.errors.iban)}
             maxAccess={maxAccess}
           />
         </Grid>

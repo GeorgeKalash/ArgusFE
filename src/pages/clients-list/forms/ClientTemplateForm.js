@@ -123,6 +123,8 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     plantId: plantId || '',
     name: '',
     oldReference: '',
+    bankId: '',
+    iban: '',
 
     //clientRemittance
     trxCountPerYear: '',
@@ -296,6 +298,8 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
           professionId: obj.clientMaster?.professionId,
           extraIncome: obj.clientMaster?.extraIncome,
           extraIncomeId: obj.clientMaster?.extraIncomeId,
+          bankId: obj.clientMaster?.bankId,
+          iban: obj.clientMaster?.iban,
 
           // //clientRemittance
           recordId: recordId,
@@ -457,7 +461,9 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       oldReference: obj.oldReference,
       status: obj.status,
       extraIncome: obj.extraIncome,
-      extraIncomeId: obj.extraIncomeId
+      extraIncomeId: obj.extraIncomeId,
+      bankId: obj.bankId,
+      iban: obj.iban
     }
 
     //CCTD
