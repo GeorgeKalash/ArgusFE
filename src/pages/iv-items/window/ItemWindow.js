@@ -32,7 +32,7 @@ const ItemWindow = ({ recordId, labels, maxAccess }) => {
     { label: labels.properties, disabled: !store.recordId },
     { label: labels.physical, disabled: !store.recordId },
     { label: labels.vendor, disabled: !store.recordId },
-    { label: 'ItemProductionForm', disabled: !store.recordId }
+    { label: labels.production, disabled: !store.recordId }
   ]
 
   console.log(formikInitial, 'initial')

@@ -35,7 +35,6 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
     maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
-    validationSchema: yup.object({}),
     onSubmit: async obj => {
       const recordId = obj.recordId
 
@@ -78,7 +77,7 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
               <ResourceComboBox
                 endpointId={ManufacturingRepository.ProductionLine.qry}
                 name='lineId'
-                label={labels.lineId}
+                label={labels.productionLine}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
@@ -101,7 +100,7 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
                 endpointId={ManufacturingRepository.ProductionClass.qry}
                 values={formik.values}
                 name='classId'
-                label={'labels.classId'}
+                label={labels.productionClass}
                 valueField='recordId'
                 displayField='name'
                 maxAccess={maxAccess}
@@ -116,7 +115,7 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
                 endpointId={ManufacturingRepository.ProductionStandard.qry}
                 values={formik.values}
                 name='standardId'
-                label={'labels.standardId'}
+                label={labels.productionStandard}
                 valueField='recordId'
                 displayField='name'
                 maxAccess={maxAccess}
@@ -131,7 +130,7 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
                 endpointId={InventoryRepository.SerialProfile.qry}
                 values={formik.values}
                 name='spfId'
-                label={'labels.sprofile'}
+                label={labels.sprofile}
                 valueField='recordId'
                 displayField='name'
                 maxAccess={maxAccess}
@@ -147,7 +146,7 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
                 valueField='reference'
                 displayField='name'
                 name='designId'
-                label={'labels.designId'}
+                label={labels.design}
                 form={formik}
                 secondDisplayField={true}
                 firstValue={formik.values.designRef}
@@ -164,7 +163,7 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
             <Grid item xs={12}>
               <CustomNumberField
                 name='standardCost'
-                label={'labels.standardCost'}
+                label={labels.standardCost}
                 value={formik.values.standardCost}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('standardCost', '')}
@@ -176,7 +175,7 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
               <ResourceComboBox
                 endpointId={ManufacturingRepository.CostGroup.qry}
                 name='cgId'
-                label={'labels.cgId'}
+                label={labels.cg}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
@@ -195,7 +194,7 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
                 endpointId={SCRepository.LabelTemplate.qry}
                 values={formik.values}
                 name='ltId'
-                label={'labels.ltId'}
+                label={labels.template}
                 valueField='recordId'
                 displayField='name'
                 maxAccess={maxAccess}
