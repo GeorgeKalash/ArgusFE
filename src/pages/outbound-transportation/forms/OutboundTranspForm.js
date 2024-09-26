@@ -78,7 +78,6 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
       try {
         const copy = { ...obj }
         delete copy.orders
-        console.log('copyyy', copy)
 
         copy.date = formatDateToApi(copy.date)
 
@@ -98,7 +97,6 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
         formik.setFieldValue('recordId', headerResponse.recordId)
 
         let filteredOrders = formik.values.orders.filter(order => order.soId !== '' && order.soId !== undefined)
-        console.log(filteredOrders)
         const soIdSet = new Set()
         let hasDuplicates = false
 
@@ -170,7 +168,6 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
 
   async function refetchForm(recordId) {
     const res = await getOutboundTransp(recordId)
-    console.log('res', res)
     const formattedDepDate = formatDateFromApi(res.record.departureTime)
     const formattedArrDate = formatDateFromApi(res.record.arrivalTime)
 
@@ -191,14 +188,10 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
   }
 
   const getOrders = async data => {
-    console.log(data)
-
     const res = await getRequest({
       extension: DeliveryRepository.TripOrder.qry,
       parameters: `_tripId=${data.recordId}`
     })
-
-    console.log('res.list', res.list)
 
     let ordersList = []
 
