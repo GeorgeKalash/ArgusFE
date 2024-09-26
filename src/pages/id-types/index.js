@@ -53,6 +53,11 @@ const IdTypes = () => {
       flex: 1
     },
     {
+      field: 'flName',
+      headerName: _labels.flName,
+      flex: 1
+    },
+    {
       field: 'format',
       headerName: _labels.format,
       flex: 1
