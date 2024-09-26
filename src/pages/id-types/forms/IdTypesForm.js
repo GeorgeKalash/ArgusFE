@@ -144,7 +144,7 @@ const IdTypesForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store
             label={labels.format}
             value={formik.values.format}
             required
-            maxLength='11'
+            maxLength='20'
             maxAccess={maxAccess}
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('format', '')}

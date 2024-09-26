@@ -38,7 +38,6 @@ export default function useIdType() {
         store?.find(item => {
           if (item && item.format && isValidRegex(item.format)) {
             const regex = new RegExp(item.format)
-            console.log(regex, value, regex.test(parseInt(value)))
 
             return regex.test(value)
           }
