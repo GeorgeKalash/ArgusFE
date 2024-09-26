@@ -11,8 +11,6 @@ import { RemittanceSettingsRepository } from 'src/repositories/RemittanceReposit
 import { DataSets } from 'src/resources/DataSets'
 
 export default function MoreDetails({ labels, editMode, maxAccess, readOnly, clientFormik, allowEdit, window }) {
-  console.log('clientFormik', clientFormik)
-
   const { formik } = useForm({
     initialValues: {
       trxCountPerYear: '',
@@ -202,8 +200,8 @@ export default function MoreDetails({ labels, editMode, maxAccess, readOnly, cli
         </Grid>
         <Grid item xs={12}>
           <ResourceComboBox
-            endpointId={CashBankRepository.CbBank.qry2}
-            parameters={`_countryId=${clientFormik.values.idCountry}`}
+            endpointId={clientFormik.values.idCountry && CashBankRepository.CbBank.qry2}
+            parameters={clientFormik.values.idCountry && `_countryId=${clientFormik.values.idCountry}`}
             name='bankId'
             label={labels.bank}
             readOnly={editMode || readOnly}

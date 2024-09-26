@@ -999,6 +999,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                     <FieldSet title={labels.address}>
                       <AddressTab
                         labels={labels}
+                        defaultReadOnly={{ countryId: true }}
                         addressValidation={clientIndividualFormik}
                         readOnly={editMode && !allowEdit && true}
                         access={maxAccess}
@@ -1024,7 +1025,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         phone={true}
                         onChange={e => {
                           clientIndividualFormik.handleChange(e)
-                          clientIndividualFormik.values?.cellPhone === e.target.value &&
+                          clientIndividualFormik.values?.cellPhoneRepeat === e.target.value &&
                             clientIndividualFormik.setFieldValue('whatsAppNo', e.target.value)
                         }}
                         maxLength='15'
@@ -1094,10 +1095,10 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                           required
                           onChange={e => {
                             clientIndividualFormik.handleChange(e)
-                            setAddress(prev => ({
-                              ...prev,
-                              name: e.target.value + ' ' + clientIndividualFormik.values?.lastName
-                            }))
+                            clientIndividualFormik.setFieldValue(
+                              'name',
+                              e.target.value + ' ' + clientIndividualFormik.values?.lastName
+                            )
                           }}
                           language='english'
                           maxLength='10'
@@ -1134,10 +1135,10 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                           required
                           onChange={e => {
                             clientIndividualFormik.handleChange(e),
-                              setAddress(prev => ({
-                                ...prev,
-                                name: clientIndividualFormik.values?.firstName + ' ' + e.target.value
-                              }))
+                              clientIndividualFormik.setFieldValue(
+                                'name',
+                                clientIndividualFormik.values?.firstName + ' ' + e.target.value
+                              )
                           }}
                           language='english'
                           maxLength='10'
@@ -1531,7 +1532,6 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                             optional: true,
                             labels: labels,
                             setAddress: setAddress,
-                            defaultReadOnly: { countryId: true },
                             address: address,
                             maxAccess: maxAccess,
                             isCleared: false

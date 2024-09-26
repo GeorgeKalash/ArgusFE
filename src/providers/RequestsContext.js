@@ -108,7 +108,10 @@ const RequestsProvider = ({ showLoading = false, children }) => {
         LanguageId: user.languageId
       }
     })
-      .then(res => res.data)
+      .then(response => {
+        if (!disableLoading) debouncedCloseLoading()
+        resolve(response.data)
+      })
       .catch(error => {
         showError({
           message: error,
