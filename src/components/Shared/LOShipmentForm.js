@@ -18,7 +18,7 @@ import { getFormattedNumber } from 'src/lib/numberField-helper'
 import toast from 'react-hot-toast'
 import FieldSet from './FieldSet'
 
-export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
+export const LOShipmentForm = ({ recordId, functionId, editMode, totalBaseAmount }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const [selectedRowId, setSelectedRowId] = useState(null)
 
@@ -47,7 +47,6 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
     validateOnChange: true,
 
     validationSchema: yup.object({
-      policyNo: yup.string().required(),
       carrierId: yup.string().required(),
       packages: yup
         .array()
@@ -128,12 +127,20 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
   }
 
   const handlePackageGridChange = newRows => {
-    newRows.map(row => {
-      if (!!row.seqNo) {
-        formik.setFieldValue('packages[0].packageReferences', [{ id: 1, seqNo: 1 }])
+    const updatedRows = newRows.map(row => {
+      const qty = parseInt(row.qty, 10) || 0
+      let packageReferences = row.packageReferences || []
+
+      if (qty > 0 && packageReferences.length < qty) {
+        row.packageReferences = packageReferences
+      } else if (packageReferences.length > qty) {
+        row.packageReferences = packageReferences.slice(0, qty)
       }
+
+      return row
     })
-    formik.setFieldValue('packages', newRows)
+
+    formik.setFieldValue('packages', updatedRows)
   }
 
   useEffect(() => {
@@ -200,7 +207,6 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
                 maxAccess={maxAccess}
                 maxLength='30'
                 readOnly={editMode}
-                required
                 error={formik.touched.policyNo && Boolean(formik.errors.policyNo)}
               />
             </Grid>
@@ -262,6 +268,15 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
                     <Grid container direction='row' wrap='nowrap' sx={{ pt: 5, justifyContent: 'flex-end' }}>
                       <Grid item xs={3}>
                         <CustomTextField
+                          name='totalBaseAmount'
+                          maxAccess={maxAccess}
+                          value={getFormattedNumber(totalBaseAmount)}
+                          label={labels.totalBaseAmount}
+                          readOnly={true}
+                        />
+                      </Grid>
+                      <Grid item xs={3} sx={{ pl: 3 }}>
+                        <CustomTextField
                           name='totalQty'
                           maxAccess={maxAccess}
                           value={getFormattedNumber(totalQty)}
@@ -296,7 +311,11 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
                         ]
                       }
                       maxAccess={maxAccess}
-                      allowAddNewLine={!editMode}
+                      allowAddNewLine={
+                        !editMode &&
+                        formik?.values?.packages[index]?.packageReferences?.length <
+                          parseInt(formik?.values?.packages[index]?.qty, 10)
+                      }
                       allowDelete={false}
                       columns={[
                         {

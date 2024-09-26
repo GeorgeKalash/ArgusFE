@@ -47,6 +47,8 @@ const IDNumberForm = ({ store, maxAccess, labels }) => {
   const postIdNumber = async obj => {
     try {
       const postBody = Object.entries(obj).map(async ([key, value]) => {
+        if (value?.idNum === '') value.idNum = null
+
         return await postRequest({
           extension: BusinessPartnerRepository.MasterIDNum.set,
           record: JSON.stringify(value)

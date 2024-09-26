@@ -38,6 +38,7 @@ const WindowToolbar = ({
   isClosed = false,
   onClientRelation = false,
   onAddClientRelation = false,
+  onClientBalance = false,
   isPosted = false,
   resourceId,
   setSelectedReport,
@@ -142,6 +143,7 @@ const WindowToolbar = ({
     onApproval,
     onClientRelation,
     onAddClientRelation,
+    onClientBalance,
 
     onClickGL: () => onClickGL(recordId),
     onClickAC: () => onClickAC(recordId),

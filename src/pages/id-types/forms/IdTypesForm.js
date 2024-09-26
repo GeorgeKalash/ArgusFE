@@ -30,6 +30,7 @@ const IdTypesForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store
     initialValues: {
       recordId: null,
       name: null,
+      flName: null,
       format: null,
       length: null,
       category: null,
@@ -47,12 +48,12 @@ const IdTypesForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store
       return errors
     },
     validationSchema: yup.object({
-      name: yup.string().required(' '),
-      format: yup.string().required(' '),
-      length: yup.string().required(' '),
-      category: yup.string().required(' '),
-      clientFileExpiryType: yup.string().required(' '),
-      isDiplomat: yup.string().required(' ')
+      name: yup.string().required(),
+      format: yup.string().required(),
+      length: yup.string().required(),
+      category: yup.string().required(),
+      clientFileExpiryType: yup.string().required(),
+      isDiplomat: yup.string().required()
     }),
     onSubmit: async values => {
       await postIdTypes(values)
@@ -124,6 +125,17 @@ const IdTypesForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('name', '')}
             error={formik.touched.name && Boolean(formik.errors.name)}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <CustomTextField
+            name='flName'
+            label={labels.flName}
+            value={formik.values.flName}
+            maxAccess={maxAccess}
+            onChange={formik.handleChange}
+            onClear={() => formik.setFieldValue('flName', '')}
+            error={formik.touched.flName && Boolean(formik.errors.flName)}
           />
         </Grid>
         <Grid item xs={12}>
