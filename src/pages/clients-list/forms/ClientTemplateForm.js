@@ -1089,7 +1089,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                           onChange={e => {
                             clientIndividualFormik.handleChange(e)
                             setAddress(prev => ({
-                              ...prev, // Parentheses wrap the object to be returned
+                              ...prev,
                               name: e.target.value + ' ' + clientIndividualFormik.values?.lastName
                             }))
                           }}
@@ -1129,7 +1129,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                           onChange={e => {
                             clientIndividualFormik.handleChange(e),
                               setAddress(prev => ({
-                                ...prev, // Parentheses wrap the object to be returned
+                                ...prev,
                                 name: clientIndividualFormik.values?.firstName + ' ' + e.target.value
                               }))
                           }}
@@ -1282,10 +1282,13 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         values={clientIndividualFormik.values}
                         required
                         onChange={(event, newValue) => {
+                          console.log('newValue', newValue)
                           if (newValue) {
                             clientIndividualFormik.setFieldValue('nationalityId', newValue?.recordId)
+                            clientIndividualFormik.setFieldValue('smsLanguage', newValue?.language)
                           } else {
                             clientIndividualFormik.setFieldValue('nationalityId', '')
+                            clientIndividualFormik.setFieldValue('smsLanguage', '')
                           }
                         }}
                         error={
