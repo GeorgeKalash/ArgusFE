@@ -549,7 +549,7 @@ const Table = ({
       : []),
     ...filteredColumns.map(column => ({
       ...column,
-      cellRenderer: FieldWrapper
+      cellRenderer: column.field !== 'actions' ? FieldWrapper : column.cellRenderer
     }))
   ]
 
