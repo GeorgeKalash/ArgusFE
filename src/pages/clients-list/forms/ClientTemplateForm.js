@@ -696,6 +696,12 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
 
       // onClick: onReopen,
       disabled: true
+    },
+    {
+      key: 'Client Balance',
+      condition: true,
+      onClick: 'onClientBalance',
+      disabled: !editMode
     }
   ]
   function openBeneficiaryWindow() {
@@ -1654,6 +1660,16 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                   </Grid>
                 </Grid>
               </Grid>
+              <Grid
+                sx={{
+                  position: 'fixed',
+                  bottom: 0,
+                  left: 0,
+                  width: '100%',
+                  padding: 3,
+                  textAlign: 'center'
+                }}
+              ></Grid>
             </Grid>
           </Grid>
         </Grow>

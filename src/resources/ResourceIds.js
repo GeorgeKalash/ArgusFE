@@ -183,9 +183,11 @@ export const ResourceIds = {
   SalesTeam: 51117,
   PriceGroups: 51107,
   PaymentTerm: 51102,
+  InwardSettlement: 36313,
   DocumentTypeDefault: 51106,
   VendorGroups: 50101,
   ConsignmentSites: 51110,
+  Metals: 41107,
   LabelTemplates: 44102,
   FeeSchedule: 36126,
   FeeScheduleMap: 36127,
@@ -235,6 +237,7 @@ export const ResourceIds = {
   PurposeExchangeGroup: 35115,
   Drivers: 52201,
   Trip: 52303, //outbound transportation,
+  InventoryOpeningQtys: 41202,
   IvReplenishements: 46302,
   EndSiteCount: 44204,
   RebuildInventory: 41501,
@@ -242,5 +245,8 @@ export const ResourceIds = {
   IvSettings: 41115,
   FeeScheduleInwardsMap: 36130,
   OpenOutwardsReturn: 36320,
-  AgingButton: 31419
+  AgingButton: 31419,
+  LotCategories: 41108,
+  ClientBalance: 36131,
+  SalesDefaults: 51114
 }

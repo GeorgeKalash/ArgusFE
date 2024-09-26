@@ -16,6 +16,7 @@ import FinancialTransaction from './FinancialTransaction'
 import Aging from './Aging'
 import { ControlContext } from 'src/providers/ControlContext'
 import { ClientRelationForm } from './ClientRelationForm'
+import { ClientBalance } from './ClientBalance'
 
 export default function FormShell({
   form,
@@ -113,8 +114,7 @@ export default function FormShell({
       },
       width: 1200,
       height: 670,
-      title: platformLabels,
-      CashTransaction
+      title: platformLabels.CashTransaction
     })
   }
 
@@ -237,6 +237,17 @@ export default function FormShell({
               width: 900,
               height: 600,
               title: platformLabels.ClientRelation
+            })
+          }
+          onClientBalance={() =>
+            stack({
+              Component: ClientBalance,
+              props: {
+                recordId: form.values?.recordId,
+              },
+              width: 500,
+              height: 350,
+              title: platformLabels.ClientBalance
             })
           }
           onAddClientRelation={() =>
