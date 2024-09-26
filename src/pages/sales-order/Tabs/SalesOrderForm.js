@@ -104,6 +104,7 @@ export default function SalesOrderForm({
     totQty: 0,
     totWeight: 0,
     totVolume: 0,
+    serializedAddress: '',
     items: [
       {
         id: 1,
@@ -166,6 +167,19 @@ export default function SalesOrderForm({
         copy.dueDate = formatDateToApi(copy.dueDate)
 
         if (!obj.rateCalcMethod) delete copy.rateCalcMethod
+
+        if (copy.serializedAddress) {
+          const addressData = {
+            clientId: copy.clientId,
+            address: address
+          }
+
+          const addressRes = await postRequest({
+            extension: SaleRepository.Address.set,
+            record: JSON.stringify(addressData)
+          })
+          copy.shipToAddressId = addressRes.recordId
+        }
 
         const updatedRows = formik.values.items.map((itemDetails, index) => {
           const { physicalProperty, ...rest } = itemDetails
@@ -822,7 +836,6 @@ export default function SalesOrderForm({
       title: labels.AddressFilter
     })
   }
-
   function openAddressForm() {
     stack({
       Component: AddressFormShell,
@@ -839,9 +852,15 @@ export default function SalesOrderForm({
   }
 
   useEffect(() => {
-    const shipAdd =
-      address.countryName + ',' + address.stateName + ',' + address.city + ',' + address.street1 + ',' + address.phone
+    let shipAdd = ''
+    const { name, street1, street2, city, phone, phone2, email1 } = address
+    if (name || street1 || street2 || city || phone || phone2 || email1) {
+      shipAdd = `${name || ''}\n${street1 || ''}\n${street2 || ''}\n${city || ''}\n${phone || ''}\n${phone2 || ''}\n${
+        email1 || ''
+      }`
+    }
     formik.setFieldValue('shipAddress', shipAdd)
+    formik.setFieldValue('serializedAddress', shipAdd)
   }, [address])
 
   useEffect(() => {
@@ -1031,7 +1050,7 @@ export default function SalesOrderForm({
                     readOnly
                     maxAccess={maxAccess}
                     viewDropDown={formik.values.clientId}
-                    viewAdd={formik.values.clientId}
+                    viewAdd={formik.values.clientId && !editMode}
                     onChange={e => formik.setFieldValue('shipAddress', e.target.value)}
                     onClear={() => formik.setFieldValue('shipAddress', '')}
                     onDropDown={() => openAddressFilterForm(true, false)}

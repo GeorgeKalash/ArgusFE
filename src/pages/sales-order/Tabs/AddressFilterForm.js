@@ -10,17 +10,14 @@ import { useContext, useEffect, useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { SaleRepository } from 'src/repositories/SaleRepository'
-import toast from 'react-hot-toast'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
-import { ControlContext } from 'src/providers/ControlContext'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import * as yup from 'yup'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 
 export default function AddressFilterForm({ labels, shipment, bill, form, window }) {
   const [data, setData] = useState([])
-  const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
+  const { getRequest } = useContext(RequestsContext)
 
   const { formik } = useForm({
     initialValues: { search: '', cityId: null, countryId: null },
@@ -31,8 +28,8 @@ export default function AddressFilterForm({ labels, shipment, bill, form, window
       countryId: yup.string().required()
     }),
     onSubmit: async obj => {
-      const checkedADD = data?.list?.filter(obj => obj.checked)
-      if (!checkedADD[0].addressId) {
+      const checkedADD = data?.list?.find(obj => obj.checked)
+      if (!checkedADD.addressId) {
         form.setFieldValue('shipAddress', '')
         form.setFieldValue('BillAddress', '')
         window.close()
@@ -41,9 +38,17 @@ export default function AddressFilterForm({ labels, shipment, bill, form, window
       }
 
       if (shipment || bill) {
-        const address = await getAddress(checkedADD[0].addressId)
-        if (shipment) form.setFieldValue('shipAddress', address)
-        if (bill) form.setFieldValue('BillAddress', address)
+        const address = await getAddress(checkedADD.addressId)
+        if (shipment) {
+          form.setFieldValue('shipAddress', address)
+          form.setFieldValue('shipAddressId', checkedADD.addressId)
+          form.setFieldValue('shipToAddressId', checkedADD.addressId)
+        }
+        if (bill) {
+          form.setFieldValue('BillAddress', address)
+          form.setFieldValue('billAddressId', checkedADD.addressId)
+          form.setFieldValue('billToAddressId', checkedADD.addressId)
+        }
       }
 
       window.close()
@@ -80,15 +85,11 @@ export default function AddressFilterForm({ labels, shipment, bill, form, window
       if (res?.list?.length > 0) {
         const formattedAddressList = await Promise.all(
           res.list.map(async item => {
-            //     const res2 = await getRequest({
-            //       extension: SystemRepository.FormattedAddress.get,
-            //       parameters: `_addressId=${item.addressId}`
-            //     })
-            //     const formattedAddress = res2.record.formattedAddress.replace(/[\r\n]+/g, ',').replace(/,$/, '')
-            // return { address: formattedAddress }
             return {
               addressId: item.recordId,
-              address: item.name + '' + item.city + '' + item.street1 + '' + item.email1 + '' + item.phone1,
+              address: `${item.name || ''}, ${item.street1 || ''}, ${item.street2 || ''}, ${item.city || ''}, ${
+                item.phone || ''
+              },${item.phone2 || ''},${item.email1 || ''}`,
               checked: false
             }
           })
@@ -99,12 +100,11 @@ export default function AddressFilterForm({ labels, shipment, bill, form, window
   }
 
   const filteredData = formik.values.search
-    ? data.list.filter(
-        item =>
-          (item.name && item.name.toString().includes(formik.values.search.toLowerCase())) ||
-          (item.street1 && item.street1.toString().includes(formik.values.search)) ||
-          (item.email1 && item.email1.toString().includes(formik.values.search.toLowerCase()))
-      )
+    ? {
+        list: data.list.filter(
+          item => item.address && item.address.toString().includes(formik.values.search.toLowerCase())
+        )
+      }
     : data
 
   const handleSearchChange = event => {

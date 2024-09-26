@@ -146,7 +146,8 @@ export const SaleRepository = {
     get: service + 'getICP'
   },
   Address: {
-    qry: service + 'qryAD'
+    qry: service + 'qryAD',
+    set: service + 'setAD'
   },
   FilterAddress: {
     snapshot: service + 'snapshotADD'
