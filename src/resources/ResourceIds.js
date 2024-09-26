@@ -246,5 +246,6 @@ export const ResourceIds = {
   OpenOutwardsReturn: 36320,
   AgingButton: 31419,
   LotCategories: 41108,
-  ClientBalance: 36131
+  ClientBalance: 36131,
+  SalesDefaults: 51114
 }
