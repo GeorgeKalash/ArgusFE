@@ -32,7 +32,7 @@ export default function CountryForm({ labels, maxAccess, recordId }) {
       name: '',
       reference: '',
       flName: '',
-      language: '',
+      languageId: '',
       currencyId: null,
       regionId: null,
       ibanLength: '',
@@ -205,15 +205,15 @@ export default function CountryForm({ labels, maxAccess, recordId }) {
             <Grid item xs={12}>
               <ResourceComboBox
                 datasetId={DataSets.LANGUAGE}
-                name='language'
+                name='languageId'
                 label={labels.language}
                 valueField='key'
                 displayField='value'
                 values={formik.values}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('language', newValue?.key ?? '')
+                  formik.setFieldValue('languageId', newValue?.key ?? '')
                 }}
-                error={formik.touched.language && Boolean(formik.errors.language)}
+                error={formik.touched.languageId && Boolean(formik.errors.languageId)}
               />
             </Grid>
             <Grid item xs={12}>
