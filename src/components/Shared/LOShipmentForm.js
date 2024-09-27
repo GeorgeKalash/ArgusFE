@@ -127,20 +127,24 @@ export const LOShipmentForm = ({ recordId, functionId, editMode, totalBaseAmount
   }
 
   const handlePackageGridChange = newRows => {
-    const updatedRows = newRows.map(row => {
-      const qty = parseInt(row.qty, 10) || 0
-      let packageReferences = row.packageReferences || []
-
-      if (qty > 0 && packageReferences.length < qty) {
-        row.packageReferences = packageReferences
-      } else if (packageReferences.length > qty) {
-        row.packageReferences = packageReferences.slice(0, qty)
+    const updatedRows = newRows?.map(row => {
+      const qty = parseInt(row?.qty, 10);
+      let packageReferences = row?.packageReferences;
+  
+      if (packageReferences?.length === 0) {
+        packageReferences = [{ seqNo: 1, id: 1, reference: '' }];
       }
+  
+      if (qty < packageReferences?.length) {
+        packageReferences = packageReferences.slice(0, qty);
+      }
+  
+      row.packageReferences = packageReferences;
 
-      return row
-    })
-
-    formik.setFieldValue('packages', updatedRows)
+      return row;
+    });
+  
+    formik.setFieldValue('packages', updatedRows);
   }
 
   useEffect(() => {

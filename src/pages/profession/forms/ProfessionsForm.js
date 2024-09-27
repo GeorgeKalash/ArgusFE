@@ -36,17 +36,18 @@ export default function ProfessionsForm({ labels, maxAccess, recordId, setStore 
       diplomatStatus: '',
       sraId: '',
       pfgId: '',
+      approvalLevel: '',
       isInactive: false
     },
     maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object().shape({
-      name: yup.string().required(' '),
-      reference: yup.string().required(' '),
-      flName: yup.string().required(' '),
-      sraId: yup.string().required(' '),
-      diplomatStatus: yup.string().required(' ')
+      name: yup.string().required(),
+      reference: yup.string().required(),
+      flName: yup.string().required(),
+      sraId: yup.string().required(),
+      diplomatStatus: yup.string().required()
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
@@ -207,6 +208,21 @@ export default function ProfessionsForm({ labels, maxAccess, recordId, setStore 
                   formik.setFieldValue('diplomatStatus', newValue?.key)
                 }}
                 error={formik.touched.diplomatStatus && Boolean(formik.errors.diplomatStatus)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.APPROVAL_LEVEL}
+                name='approvalLevel'
+                label={labels.approvalLevel}
+                valueField='key'
+                displayField='value'
+                values={formik.values}
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('approvalLevel', newValue?.key)
+                }}
+                error={formik.touched.approvalLevel && Boolean(formik.errors.approvalLevel)}
               />
             </Grid>
             <Grid item xs={12}>
