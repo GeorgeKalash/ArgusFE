@@ -1,5 +1,4 @@
 import { DataGrid } from 'src/components/Shared/DataGrid'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useContext, useEffect, useState } from 'react'
@@ -86,8 +85,6 @@ const BarcodeForm = ({ store, labels, maxAccess }) => {
       })
       .catch(error => {})
   }
-
-  console.log(formik.values)
 
   const columns = [
     {

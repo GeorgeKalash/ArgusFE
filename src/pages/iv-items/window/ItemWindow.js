@@ -23,8 +23,6 @@ const ItemWindow = ({ recordId, labels, maxAccess }) => {
     returnPolicy: null
   })
 
-  console.log(store, 'store')
-
   const tabs = [
     { label: labels.items },
     { label: labels.barcode, disabled: !store.recordId },
@@ -34,8 +32,6 @@ const ItemWindow = ({ recordId, labels, maxAccess }) => {
     { label: labels.vendor, disabled: !store.recordId },
     { label: labels.production, disabled: !store.recordId }
   ]
-
-  console.log(formikInitial, 'initial')
 
   return (
     <>
