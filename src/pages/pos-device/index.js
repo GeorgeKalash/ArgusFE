@@ -11,9 +11,7 @@ const PosDeviceWindow = () => {
   const checkDevice = async () => {
     setLoading(true)
     try {
-      const { data } = await axios.get(
-        `http://localhost:5000/api/Ingenico/checkDevice?_port=${process.env.NEXT_PUBLIC_DEVICE_PORT}`
-      )
+      const { data } = await axios.get(`http://localhost:5000/api/Ingenico/checkDevice?_port=1`)
       setDeviceStatus(data.data.toString())
     } catch (error) {
       console.error('Error checking device:', error)
