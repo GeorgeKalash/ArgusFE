@@ -393,69 +393,6 @@ const Table = ({
     })
   }
 
-  // if (props?.onEdit || props?.onDelete) {
-  //   const deleteBtnVisible = maxAccess ? props?.onDelete && maxAccess > TrxType.EDIT : props?.onDelete ? true : false
-
-  //   if (!filteredColumns?.some(column => column.field === 'actions'))
-  //     filteredColumns?.push({
-  //       field: 'actions',
-  //       headerName: '',
-  //       width: 100,
-  //       cellRenderer: params => {
-  //         const { data } = params
-  //         const isStatus3 = data.status === 3
-  //         const isStatusCanceled = data.status === -1
-  //         const isWIP = data.wip === 2
-
-  //         return (
-  //           <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
-  //             {props?.onEdit && (
-  //               <IconButton
-  //                 size='small'
-  //                 onClick={e => {
-  //                   props?.onEdit(data)
-  //                 }}
-  //               >
-  //                 <Image src={editIcon} alt='Edit' width={18} height={18} />
-  //               </IconButton>
-  //             )}
-
-  //             {!globalStatus && deleteBtnVisible && (
-  //               <IconButton
-  //                 size='small'
-  //                 onClick={e => {
-  //                   if (props.deleteConfirmationType == 'strict') {
-  //                     openDeleteConfirmation(data)
-  //                   } else {
-  //                     openDelete(data)
-  //                   }
-  //                 }}
-  //                 color='error'
-  //               >
-  //                 <Image src={deleteIcon} alt={platformLabels.Delete} width={18} height={18} />
-  //               </IconButton>
-  //             )}
-  //             {globalStatus && !isStatus3 && !isStatusCanceled && deleteBtnVisible && !isWIP && (
-  //               <IconButton
-  //                 size='small'
-  //                 onClick={e => {
-  //                   if (props?.deleteConfirmationType == 'strict') {
-  //                     openDeleteConfirmation(data)
-  //                   } else {
-  //                     openDelete(data)
-  //                   }
-  //                 }}
-  //                 color='error'
-  //               >
-  //                 <Image src={deleteIcon} alt={platformLabels.Delete} width={18} height={18} />
-  //               </IconButton>
-  //             )}
-  //           </Box>
-  //         )
-  //       }
-  //     })
-  // }
-
   const checkboxCellRenderer = params => {
     return (
       <Checkbox
