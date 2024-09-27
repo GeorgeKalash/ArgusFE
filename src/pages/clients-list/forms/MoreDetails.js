@@ -1,16 +1,37 @@
 import { Grid } from '@mui/material'
-import React, { useEffect } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FormShell from 'src/components/Shared/FormShell'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useForm } from 'src/hooks/form'
+import { RequestsContext } from 'src/providers/RequestsContext'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
+import { SystemRepository } from 'src/repositories/SystemRepository'
 import { DataSets } from 'src/resources/DataSets'
 
 export default function MoreDetails({ labels, editMode, maxAccess, readOnly, clientFormik, allowEdit, window }) {
+  const [countryId, setCountryId] = useState()
+  const { getRequest } = useContext(RequestsContext)
+
+  useEffect(() => {
+    async function getCountry() {
+      var parameters = `_filter=&_key=countryId`
+
+      const res = await getRequest({
+        extension: SystemRepository.Defaults.get,
+        parameters: parameters
+      })
+      const countryId = res.record.value
+
+      setCountryId(parseInt(countryId))
+    }
+
+    getCountry()
+  }, [])
+
   const { formik } = useForm({
     initialValues: {
       trxCountPerYear: '',
@@ -200,8 +221,8 @@ export default function MoreDetails({ labels, editMode, maxAccess, readOnly, cli
         </Grid>
         <Grid item xs={12}>
           <ResourceComboBox
-            endpointId={clientFormik.values.idCountry && CashBankRepository.CbBank.qry2}
-            parameters={clientFormik.values.idCountry && `_countryId=${clientFormik.values.idCountry}`}
+            endpointId={countryId && CashBankRepository.CbBank.qry2}
+            parameters={countryId && `_countryId=${countryId}`}
             name='bankId'
             label={labels.bank}
             readOnly={editMode || readOnly}
