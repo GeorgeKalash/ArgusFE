@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react'
+import { useContext } from 'react'
 import { useWindow } from 'src/windows'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
@@ -32,7 +32,6 @@ const VendorList = ({ store, labels, maxAccess }) => {
   const {
     query: { data },
     labels: _labels,
-
     refetch
   } = useResourceQuery({
     enabled: !!recordId,

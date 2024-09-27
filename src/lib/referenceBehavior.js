@@ -119,5 +119,3 @@ const refBehavior = async (getRequest, maxAccess, selectNraId = undefined, readO
 }
 
 export default refBehavior
-
-// if nraId : get request

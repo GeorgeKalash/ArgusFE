@@ -1,5 +1,4 @@
-import { useState, useContext } from 'react'
-import { Form, useFormik } from 'formik'
+import { useContext } from 'react'
 import { Grid, FormControlLabel, Checkbox } from '@mui/material'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -30,8 +29,6 @@ const VendorForm = ({ labels, editMode, maxAccess, store, record }) => {
 
   const { recordId: itemId } = store
 
-  const validationSchema = yup.object({})
-
   const { formik } = useForm({
     maxAccess,
     initialValues: {
@@ -49,10 +46,10 @@ const VendorForm = ({ labels, editMode, maxAccess, store, record }) => {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      vendorId: yup.string().required(' '),
-      currencyId: yup.string().required(' '),
-      baseLaborPrice: yup.string().required(' '),
-      priceList: yup.string().required(' ')
+      vendorId: yup.string().required(),
+      currencyId: yup.string().required(),
+      baseLaborPrice: yup.string().required(),
+      priceList: yup.string().required()
     }),
     onSubmit: async obj => {
       const vendorId = formik.values.vendorId
@@ -120,9 +117,9 @@ const VendorForm = ({ labels, editMode, maxAccess, store, record }) => {
                 valueShow='vendorRef'
                 secondValueShow='vendorName'
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('vendorId', newValue ? newValue.recordId : '')
-                  formik.setFieldValue('vendorName', newValue ? newValue.name : '')
-                  formik.setFieldValue('vendorRef', newValue ? newValue.reference : '')
+                  formik.setFieldValue('vendorId', newValue.recordId || '')
+                  formik.setFieldValue('vendorName', newValue.name || '')
+                  formik.setFieldValue('vendorRef', newValue.reference || '')
                 }}
                 maxAccess={maxAccess}
               />
