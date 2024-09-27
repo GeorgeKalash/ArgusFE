@@ -306,8 +306,8 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
-    key: 'Client Balance',
-    label: platformLabels.ClientBalance,
+    key: 'Check Device',
+    label: platformLabels.CheckDevice,
     color: '#231f20',
     image: 'wallet-to-bank-icon.png',
     main: false
