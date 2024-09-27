@@ -122,7 +122,7 @@ export const InventoryRepository = {
     del: service + 'delOQ'
   },
   SerialProfile: {
-    qry: service + 'qrySFP'
+    qry: service + 'qrySPF'
   },
   ItemProduction: {
     get: service + 'getMFR',

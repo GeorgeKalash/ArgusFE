@@ -87,9 +87,8 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
                 values={formik.values}
                 onChange={(event, newValue) => {
                   if (newValue) {
-                    formik.setFieldValue('lineId', newValue?.recordId)
-                  } else {
-                    formik.setFieldValue('lineId', '')
+                    formik.setFieldValue('lineId', newValue?.recordId || '')
+                    formik.setFieldValue('ltId', '')
                   }
                 }}
                 error={formik.touched.lineId && Boolean(formik.errors.lineId)}
@@ -117,7 +116,7 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
                 name='standardId'
                 label={labels.productionStandard}
                 valueField='recordId'
-                displayField='name'
+                displayField='reference'
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('standardId', newValue?.recordId || '')
@@ -125,7 +124,7 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
                 error={formik.touched.standardId && Boolean(formik.errors.standardId)}
               />
             </Grid>
-            {/* <Grid item xs={12}>
+            <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={InventoryRepository.SerialProfile.qry}
                 values={formik.values}
@@ -139,7 +138,7 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
                 }}
                 error={formik.touched.spfId && Boolean(formik.errors.spfId)}
               />
-            </Grid> */}
+            </Grid>
             <Grid item xs={12}>
               <ResourceLookup
                 endpointId={ManufacturingRepository.ProductionClass.snapshot}
