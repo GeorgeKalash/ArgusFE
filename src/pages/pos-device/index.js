@@ -5,7 +5,7 @@ import { Button, Typography, Box, Card, CardContent, CircularProgress, Grid } fr
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
 
 const PosDeviceWindow = () => {
-  const [deviceStatus, setDeviceStatus] = useState('undefined')
+  const [deviceStatus, setDeviceStatus] = useState('connecting...')
   const [loading, setLoading] = useState(false)
 
   const checkDevice = async () => {
@@ -14,6 +14,7 @@ const PosDeviceWindow = () => {
       const { data } = await axios.get(`http://localhost:5000/api/Ingenico/checkDevice?_port=1`)
       setDeviceStatus(data.data.toString())
     } catch (error) {
+      setDeviceStatus(error.response.data)
       console.error('Error checking device:', error)
     }
     setLoading(false)
