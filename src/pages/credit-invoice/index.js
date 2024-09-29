@@ -152,12 +152,14 @@ const CreditInvoice = () => {
   }
 
   const del = async obj => {
-    await postRequest({
-      extension: CTTRXrepository.CreditInvoice.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success(platformLabels.labels)
+    try {
+      await postRequest({
+        extension: CTTRXrepository.CreditInvoice.del,
+        record: JSON.stringify(obj)
+      })
+      invalidate()
+      toast.success(platformLabels.Deleted)
+    } catch (error) {}
   }
 
   return (
