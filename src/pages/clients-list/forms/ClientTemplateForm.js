@@ -359,7 +359,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
         parameters: parameters
       })
         .then(res => {
-          if (res.record) {
+          if (!res.record) {
             stackError({ message: 'the ID number exists.' })
           }
         })
