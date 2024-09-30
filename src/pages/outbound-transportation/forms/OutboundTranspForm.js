@@ -109,7 +109,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
         }
 
         if (hasDuplicates) {
-          console.log('Duplicate soId found. Operation aborted.')
+          //console.log('Duplicate soId found. Operation aborted.')
 
           return
         }
@@ -358,7 +358,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
                     values={formik.values}
                     onChange={async (event, newValue) => {
                       formik.setFieldValue('dtId', newValue?.recordId || '')
-                      changeDT(newValue) //change REF??
+                      changeDT(newValue)
                     }}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}
                     maxAccess={maxAccess}
@@ -394,6 +394,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
                       formik.setFieldValue('plantId', newValue ? newValue?.recordId : '')
                     }}
                     error={formik.touched.plantId && Boolean(formik.errors.plantId)}
+                    required
                   />
                 </Grid>
               </Grid>
@@ -438,6 +439,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
                       formik.setFieldValue('driverId', newValue ? newValue?.recordId : '')
                     }}
                     error={formik.touched.driverId && Boolean(formik.errors.driverId)}
+                    required
                   />
                 </Grid>
               </Grid>
@@ -487,6 +489,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
                       formik.setFieldValue('vehicleId', newValue ? newValue?.recordId : '')
                     }}
                     error={formik.touched.vehicleId && Boolean(formik.errors.vehicleId)}
+                    required
                   />
                 </Grid>
               </Grid>
@@ -546,7 +549,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
                 maxAccess={maxAccess}
                 value={totalVol}
                 maxLength='30'
-                readOnly={true}
+                readOnly
                 error={formik.touched.totalVolume && Boolean(formik.errors.totalVolume)}
                 helperText={formik.touched.totalVolume && formik.errors.totalVolume}
               />
@@ -558,7 +561,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
                 maxAccess={maxAccess}
                 value={totalWeight}
                 maxLength='30'
-                readOnly={true}
+                readOnly
                 error={formik.touched.totalWeight && Boolean(formik.errors.totalWeight)}
                 helperText={formik.touched.totalWeight && formik.errors.totalWeight}
               />
