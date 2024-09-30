@@ -57,7 +57,6 @@ const calcVatAmount = vatCalcRow => {
 }
 
 const getVatCalc = _vatCalcRow => {
-  console.log('check vat ', _vatCalcRow)
   _vatCalcRow.vatAmount = calcVatAmount(_vatCalcRow)
 
   return _vatCalcRow

@@ -1367,6 +1367,17 @@ export default function SalesOrderForm({
                     onBlur={async () => {
                       calcTotals(formik.values.items)
                       recalcGridVat(1)
+                      if (formik.values.tdType == 1) {
+                        const tdPct = (parseFloat(formik.values.tdAmount) / parseFloat(formik.values.subtotal)) * 100
+                        console.log('check tdPct ', tdPct)
+                        formik.setFieldValue('tdPct', tdPct)
+                      }
+
+                      // if (formik.values.tdType == 2) {
+                      //   const tdAmount = (parseFloat(formik.values.tdPct) * parseFloat(formik.values.subtotal)) / 100
+                      //   console.log('check tdAmount ', tdAmount)
+                      //   formik.setFieldValue('tdAmount', tdAmount)
+                      // }
                     }}
                     onClear={() => {
                       formik.setFieldValue('tdAmount', 0)
