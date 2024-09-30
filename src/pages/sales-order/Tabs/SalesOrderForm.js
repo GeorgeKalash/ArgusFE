@@ -133,6 +133,8 @@ export default function SalesOrderForm({
         extendedPrice: 0,
         priceType: 1,
         applyVat: false,
+        taxId: '',
+        taxDetails: null,
         notes: ''
       }
     ]
@@ -237,13 +239,41 @@ export default function SalesOrderForm({
       async onChange({ row: { update, newRow } }) {
         if (!newRow.itemId) return
         const itemPhysProp = await getItemPhysProp(newRow.itemId)
-        const itemVat = await getItemVat(newRow.itemId)
+        const itemInfo = await getItem(newRow.itemId)
         const ItemConvertPrice = await getItemConvertPrice(newRow.itemId)
+        let rowTax = null
+        let rowTaxDetails = null
+
+        if (!formik.values.taxId) {
+          if (itemInfo.taxId) {
+            const taxDetailsResponse = await getTaxDetails(itemInfo.taxId)
+
+            const details = taxDetailsResponse.map(item => ({
+              taxId: itemInfo.taxId,
+              taxCodeId: item.taxCodeId,
+              taxBase: item.taxBase,
+              amount: item.amount
+            }))
+            rowTax = itemInfo.taxId
+            rowTaxDetails = details
+          }
+        } else {
+          const taxDetailsResponse = await getTaxDetails(formik.values.taxId)
+
+          const details = taxDetailsResponse.map(item => ({
+            taxId: formik.values.taxId,
+            taxCodeId: item.taxCodeId,
+            taxBase: item.taxBase,
+            amount: item.amount
+          }))
+          rowTax = formik.values.taxId
+          rowTaxDetails = details
+        }
 
         update({
           volume: parseFloat(itemPhysProp?.volume) || 0,
           weight: parseFloat(itemPhysProp?.weight || 0).toFixed(2),
-          vatAmount: parseFloat(itemVat?.vatPct || 0).toFixed(2),
+          vatAmount: parseFloat(itemInfo?.vatPct || 0).toFixed(2),
           basePrice: parseFloat(ItemConvertPrice?.basePrice || 0).toFixed(5),
           unitPrice: parseFloat(ItemConvertPrice?.unitPrice || 0).toFixed(3),
           upo: parseFloat(ItemConvertPrice?.upo || 0).toFixed(2),
@@ -251,7 +281,9 @@ export default function SalesOrderForm({
           mdAmount: 0,
           qty: 0,
           extendedPrice: parseFloat('0').toFixed(2),
-          mdValue: 0
+          mdValue: 0,
+          taxId: rowTax,
+          taxDetails: rowTaxDetails
         })
 
         formik.setFieldValue('mdAmount', formik.values.currentDiscount ? formik.values.currentDiscount : 0)
@@ -599,7 +631,7 @@ export default function SalesOrderForm({
     } catch (error) {}
   }
 
-  async function getItemVat(itemId) {
+  async function getItem(itemId) {
     try {
       const res = await getRequest({
         extension: InventoryRepository.Item.get,
@@ -607,6 +639,27 @@ export default function SalesOrderForm({
       })
 
       return res?.record
+    } catch (error) {}
+  }
+
+  async function getTax(taxId) {
+    try {
+      const res = await getRequest({
+        extension: FinancialRepository.TaxSchedules.get,
+        parameters: `_recordId=${taxId}`
+      })
+
+      return res?.record
+    } catch (error) {}
+  }
+  async function getTaxDetails(taxId) {
+    try {
+      const res = await getRequest({
+        extension: FinancialRepository.TaxDetailPack.qry,
+        parameters: `_taxId=${taxId}`
+      })
+
+      return res?.list
     } catch (error) {}
   }
 
@@ -667,7 +720,7 @@ export default function SalesOrderForm({
       baseLaborPrice: itemPriceRow?.baseLaborPrice,
       vatAmount: itemPriceRow?.vatAmount,
       tdPct: formik?.values?.tdPct,
-      taxDetails: null
+      taxDetails: formik.values.isVatChecked ? null : newRow.taxDetails
     })
 
     update({
