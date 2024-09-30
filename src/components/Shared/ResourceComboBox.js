@@ -21,7 +21,7 @@ export default function ResourceComboBox({
   const { store: data } = rest
 
   const { getRequest } = useContext(RequestsContext)
-  const { cacheStore = {}, updateStore, fetchWithCache } = useCacheDataContext() || {}
+  const { updateStore, fetchWithCache } = useCacheDataContext() || {}
   const cacheAvailable = !!updateStore
   const { getAllKvsByDataset } = useContext(CommonContext)
   function fetch({ datasetId, endpointId, parameters }) {
@@ -44,10 +44,12 @@ export default function ResourceComboBox({
   const [apiResponse, setApiResponse] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
 
-  const apiUrl = endpointId || datasetId
-
   useEffect(() => {
-    fetchData()
+    const fetchDataAsync = async () => {
+      await fetchData()
+    }
+
+    fetchDataAsync()
   }, [parameters])
 
   const fetchData = async () => {

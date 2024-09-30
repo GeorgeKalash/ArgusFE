@@ -1,6 +1,5 @@
-import { useState, useContext } from 'react'
-import { Form, useFormik } from 'formik'
-import { Grid, FormControlLabel, Checkbox } from '@mui/material'
+import { useContext } from 'react'
+import { Grid } from '@mui/material'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
@@ -28,8 +27,6 @@ const SalesForm = ({ labels, maxAccess, store, record, cId }) => {
 
   const { recordId: itemId } = store
 
-  const validationSchema = yup.object({})
-
   const { formik } = useForm({
     maxAccess,
     initialValues: {
@@ -54,15 +51,12 @@ const SalesForm = ({ labels, maxAccess, store, record, cId }) => {
       valueType: yup.string().required()
     }),
     onSubmit: async obj => {
-      const plId = formik.values.plId
-      const currencyId = formik.values.currencyId
-
-      const response = await postRequest({
+      await postRequest({
         extension: SaleRepository.Sales.set,
         record: JSON.stringify(obj)
       })
 
-      if (!plId && !currencyId) {
+      if (!formik.values.plId && !formik.values.currencyId) {
         toast.success(platformLabels.Added)
       } else toast.success(platformLabels.Edited)
 
@@ -74,7 +68,7 @@ const SalesForm = ({ labels, maxAccess, store, record, cId }) => {
   const editMode = !!record
 
   useEffect(() => {
-    const fetchData = async () => {
+    ;(async function () {
       if (record && record.plId) {
         try {
           const res = await getRequest({
@@ -82,14 +76,10 @@ const SalesForm = ({ labels, maxAccess, store, record, cId }) => {
             parameters: `_itemId=${itemId}&_plId=${formik.values.plId}&_currencyId=${formik.values.currencyId}`
           })
 
-          if (res.record) {
-            formik.setValues(res.record)
-          }
+          formik.setValues(res?.record)
         } catch (error) {}
       }
-    }
-
-    fetchData()
+    })()
   }, [record])
 
   useEffect(() => {
@@ -99,18 +89,12 @@ const SalesForm = ({ labels, maxAccess, store, record, cId }) => {
           extension: SaleRepository.PriceLevel.qry,
           parameters: `_filter=`
         })
-        if (responsePriceLevel.list && responsePriceLevel.list.length > 0) {
-          const firstPriceLevel = responsePriceLevel.list[0]
-          formik.setFieldValue('plId', firstPriceLevel.recordId)
-        }
+        formik.setFieldValue('plId', responsePriceLevel?.list[0]?.recordId)
 
         const responsePriceType = await getRequest({
           extension: InventoryRepository.Items.pack
         })
-        if (responsePriceType.record && responsePriceType.record.priceTypes.length > 0) {
-          const firstPriceType = responsePriceType.record.priceTypes[0]
-          formik.setFieldValue('priceType', parseInt(firstPriceType.key))
-        }
+        formik.setFieldValue('priceType', parseInt(responsePriceType?.record?.priceTypes[0]?.key))
       })()
     }
   }, [])

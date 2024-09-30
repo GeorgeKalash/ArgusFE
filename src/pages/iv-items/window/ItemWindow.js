@@ -50,13 +50,7 @@ const ItemWindow = ({ recordId, labels, maxAccess }) => {
         <BarcodeForm labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} />
       </CustomTabPanel>
       <CustomTabPanel height={660} index={2} value={activeTab}>
-        <SalesList
-          labels={labels}
-          setStore={setStore}
-          maxAccess={maxAccess}
-          store={store}
-          formikInitial={formikInitial}
-        />
+        <SalesList labels={labels} maxAccess={maxAccess} store={store} formikInitial={formikInitial} />
       </CustomTabPanel>
       <CustomTabPanel height={660} index={3} value={activeTab}>
         <PropertiesForm labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} />
