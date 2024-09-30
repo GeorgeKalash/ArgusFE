@@ -1,14 +1,38 @@
 import * as signalR from '@microsoft/signalr'
+import axios from 'axios'
 
-class SignalRService {
+class PosPaymentService {
   constructor() {
     this.connection = null
+    this.baseUrl = 'http://localhost:5000'
+    this.deviceConnected = false
   }
 
-  // Initialize the SignalR connection
+  async startPayment(paymentData, callback) {
+    if (!this.deviceConnected) return
+    await this.startConnection()
+    this.subscribeToTransactionUpdates(callback)
+    this.invokeTransactionStart(paymentData)
+  }
+
+  resolvePamyent() {
+    this.unsubscribeFromTransactionUpdates()
+    this.stopConnection()
+  }
+
+  async isDeviceOnline() {
+    try {
+      const { data } = await axios.get(`${this.baseUrl}/api/Ingenico/checkDevice?_port=1`)
+      this.deviceConnected = data.data
+    } catch (error) {
+      this.deviceConnected = false
+      console.error('Error checking device:', error)
+    }
+  }
+
   async startConnection() {
     this.connection = new signalR.HubConnectionBuilder()
-      .withUrl('http://localhost:5000/transactionHub')
+      .withUrl(`${this.baseUrl}/transactionHub`)
       .withAutomaticReconnect()
       .configureLogging(signalR.LogLevel.Information)
       .build()
@@ -21,7 +45,6 @@ class SignalRService {
     }
   }
 
-  // subscribe to ReceiveStatus event
   subscribeToTransactionUpdates(callback) {
     if (this.connection) {
       this.connection.on('ReceiveStatus', status => {
@@ -30,7 +53,6 @@ class SignalRService {
     }
   }
 
-  // this is used to unsubscribe from the event when the component is unmounted
   unsubscribeFromTransactionUpdates() {
     if (this.connection) {
       this.connection.off('ReceiveStatus')
@@ -54,6 +76,6 @@ class SignalRService {
   }
 }
 
-const signalRService = new SignalRService()
+const posPaymentService = new PosPaymentService()
 
-export default signalRService
+export default posPaymentService

@@ -1,30 +1,20 @@
-import React, { useState } from 'react'
-import axios from 'axios'
-import { Typography, CircularProgress, Grid } from '@mui/material'
+import React, { useEffect } from 'react'
+import { Grid } from '@mui/material'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
+import posPaymentService from 'src/services/posPayment/PosPaymentService'
 
 const PosDeviceWindow = () => {
-  const [deviceStatus, setDeviceStatus] = useState('connecting...')
-  const [loading, setLoading] = useState(false)
-
-  const checkDevice = async () => {
-    setLoading(true)
-    try {
-      const { data } = await axios.get(`http://localhost:5000/api/Ingenico/checkDevice?_port=22`)
-      setDeviceStatus(data.data.toString())
-    } catch (error) {
-      setDeviceStatus(error.response.data)
-      console.error('Error checking device:', error)
+  useEffect(() => {
+    return () => {
+      posPaymentService.resolvePamyent()
     }
-    setLoading(false)
-  }
+  }, [])
 
   const actions = [
     {
       key: 'Check Device',
       condition: true,
-      onClick: checkDevice,
-      disabled: loading
+      onClick: () => posPaymentService.isDeviceOnline()
     }
   ]
 
@@ -37,7 +27,7 @@ const PosDeviceWindow = () => {
         </p>
       </Grid>
       <Grid item xs={12} marginLeft={'1rem'} marginRight={'1rem'}>
-        {loading ? <CircularProgress /> : <Typography>connection is: {deviceStatus}</Typography>}
+        Connecting...
       </Grid>
 
       <Grid item xs={12}>
