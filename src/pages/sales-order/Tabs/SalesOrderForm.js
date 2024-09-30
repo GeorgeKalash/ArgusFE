@@ -1117,7 +1117,12 @@ export default function SalesOrderForm({
               <Grid item xs={2}>
                 <FormControlLabel
                   control={
-                    <Checkbox name='vat' checked={formik.values?.isVattable} readOnly onChange={formik.handleChange} />
+                    <Checkbox
+                      name='isVattable'
+                      checked={formik.values?.isVattable}
+                      disabled={formik.values.items[0]?.itemId}
+                      onChange={formik.handleChange}
+                    />
                   }
                   label={labels.VAT}
                 />
