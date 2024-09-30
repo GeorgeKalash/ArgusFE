@@ -2,10 +2,10 @@ import * as signalR from '@microsoft/signalr'
 import axios from 'axios'
 
 class PosPaymentService {
+  deviceConnected = false
   constructor() {
     this.connection = null
     this.baseUrl = 'http://localhost:5000'
-    this.deviceConnected = false
   }
 
   async startPayment(paymentData, callback) {
@@ -28,6 +28,8 @@ class PosPaymentService {
       this.deviceConnected = false
       console.error('Error checking device:', error)
     }
+
+    return this.deviceConnected
   }
 
   async startConnection() {

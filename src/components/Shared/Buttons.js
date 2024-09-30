@@ -311,5 +311,12 @@ export const getButtons = platformLabels => [
     color: '#231f20',
     image: 'wallet-to-bank-icon.png',
     main: false
+  },
+  {
+    key: 'Start Transaction',
+    label: platformLabels.StartTransaction,
+    color: '#A95C68',
+    image: 'popup-window.png',
+    main: false
   }
 ]
