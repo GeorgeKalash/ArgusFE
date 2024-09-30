@@ -19,17 +19,14 @@ export function DataGrid({
 }) {
   const gridApiRef = useRef(null)
 
-  useEffect(() => {
-    if (!value?.length && allowAddNewLine) {
-      addNewRow()
-    }
-  }, [value])
+  // useEffect(() => {
+  //   if (!value?.length && allowAddNewLine) {
+  //     addNewRow()
+  //   }
+  // }, [value])
 
   const addNewRow = params => {
-    console.log(params)
     const highestIndex = params.node.data.id + 1
-
-    console.log('highestIndex', highestIndex)
 
     const defaultValues = Object.fromEntries(
       columns.filter(({ name }) => name !== 'id').map(({ name, defaultValue }) => [name, defaultValue])
@@ -217,6 +214,7 @@ export function DataGrid({
       gridApiRef.current.applyTransaction({ remove: [params.data] })
 
       const newRows = gridApiRef.current?.data?.filter(({ id }) => id !== params.data.id)
+
       onChange(newRows)
     }
 
@@ -267,7 +265,6 @@ export function DataGrid({
     onChange(updatedGridData)
   }
 
-  console.log(value)
   return (
     <Box sx={{ height: height || 'auto', flex: 1 }}>
       <CacheDataProvider>
@@ -288,7 +285,7 @@ export function DataGrid({
               }}
               onCellKeyDown={onCellKeyDown}
               onCellEditingStopped={onCellEditingStopped}
-              getRowId={params => params.data.id}
+              getRowId={params => params?.data?.id}
             />
           )}
         </div>
