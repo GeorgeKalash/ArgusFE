@@ -239,7 +239,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
           isDiplomat: obj.clientIDView?.isDiplomat,
           cityName: obj.clientIDView?.idCityName,
 
-          // //address
+          //address
           countryId: obj.addressView?.countryId,
           cityId: obj.addressView?.cityId,
           city: obj.addressView?.city,
@@ -260,9 +260,9 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
           bldgNo: obj.addressView?.bldgNo,
           poBox: obj.addressView?.poBox,
 
-          // //end address
+          //end address
 
-          // //clientIndividual
+          //clientIndividual
           birthDate: obj.clientIndividual?.birthDate && formatDateFromApi(obj.clientIndividual.birthDate),
           firstName: obj.clientIndividual?.firstName,
           lastName: obj.clientIndividual?.lastName,
@@ -276,7 +276,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
           incomeSourceId: obj.clientIndividual?.incomeSourceId,
           sponsorName: obj.clientIndividual?.sponsorName,
 
-          // // end clientIndividual
+          // end clientIndividual
 
           //clientMaster
           addressId: obj.clientMaster.addressId,
@@ -301,7 +301,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
           bankId: obj.clientMaster?.bankId,
           iban: obj.clientMaster?.iban,
 
-          // //clientRemittance
+          //clientRemittance
           recordId: recordId,
           recordIdRemittance: obj.clientRemittance?.recordId,
           otpVerified: obj.clientRemittance?.otpVerified,
