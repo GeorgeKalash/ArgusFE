@@ -1,8 +1,5 @@
-// ** Third Party Imports
-import dayjs from 'dayjs'
-
 // import moment from 'moment';
-import { compareAsc, format } from 'date-fns'
+import { format } from 'date-fns'
 
 function timeStamptoDate(timestamp) {
   const timezoneOffset = -new Date().getTimezoneOffset()
@@ -83,11 +80,16 @@ const formatDateToApiFunction = value => {
 }
 
 function formatDateDefault(date) {
+  return formatDateandTime(date)
+}
+
+function formatDateandTime(date, recFormat) {
   if (!date) return
 
-  const formats = JSON.parse(window.localStorage.getItem('default') && window.localStorage.getItem('default'))[
+  let formats = JSON.parse(window.localStorage.getItem('default') && window.localStorage.getItem('default'))[
     'dateFormat'
   ]
+  formats = recFormat ? `${formats} ` + recFormat : formats
   const timestamp = date instanceof Date ? date.getTime() : parseInt(date?.match(/\d+/)[0], 10)
   const formattedDate = format(timeStamptoDate(timestamp), formats)
 
@@ -95,18 +97,7 @@ function formatDateDefault(date) {
 }
 
 function formatDateTimeDefault(date) {
-  if (!date) return
-
-  const formats = JSON.parse(window.localStorage.getItem('default') && window.localStorage.getItem('default'))[
-    'dateFormat'
-  ]
-
-  const timestamp = date instanceof Date ? date.getTime() : parseInt(date?.match(/\d+/)[0], 10)
-
-  const fullFormat = `${formats} hh:mm a`
-  const formattedDate = format(timeStamptoDate(timestamp), fullFormat)
-
-  return formattedDate
+  return formatDateandTime(date, 'hh:mm a')
 }
 
 function formatTimestampToDate(timestamp) {

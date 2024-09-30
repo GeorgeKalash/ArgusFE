@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { InputAdornment, IconButton, Box } from '@mui/material'
+import { InputAdornment, IconButton } from '@mui/material'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import ClearIcon from '@mui/icons-material/Clear'
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
@@ -18,7 +18,6 @@ const CustomTimePicker = ({
   value,
   onChange,
   error,
-  helperText,
   disabledRangeTime = {},
   variant = 'outlined',
   size = 'small',
@@ -78,7 +77,6 @@ const CustomTimePicker = ({
             size: size,
             fullWidth: fullWidth,
             error: error,
-            helperText: helperText,
             InputProps: {
               endAdornment: !(_readOnly || disabled) && (
                 <InputAdornment position='end'>
