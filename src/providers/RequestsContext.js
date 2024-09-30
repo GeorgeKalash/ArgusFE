@@ -81,22 +81,26 @@ const RequestsProvider = ({ showLoading = false, children }) => {
     const disableLoading = body.disableLoading || false
     !disableLoading && !loading && setLoading(true)
 
-    return axios({
-      method: 'GET',
-      url: process.env.NEXT_PUBLIC_YAKEEN_URL + body.extension + '?' + body.parameters
-    })
-      .then(response => {
-        if (!disableLoading) debouncedCloseLoading()
-        resolve(response.data)
+    const throwError = body.throwError || false
+
+    return new Promise(async (resolve, reject) => {
+      return axios({
+        method: 'GET',
+        url: process.env.NEXT_PUBLIC_YAKEEN_URL + body.extension + '?' + body.parameters
       })
-      .catch(error => {
-        debouncedCloseLoading()
-        showError({
-          message: error,
-          height: error.response?.status === 404 || error.response?.status === 500 ? 400 : ''
+        .then(response => {
+          if (!disableLoading) debouncedCloseLoading()
+          resolve(response.data)
         })
-        throw error
-      })
+        .catch(error => {
+          debouncedCloseLoading()
+          showError({
+            message: error,
+            height: error.response?.status === 404 || error.response?.status === 500 ? 400 : ''
+          })
+          if (throwError) reject(error)
+        })
+    })
   }
 
   const getIdentityRequest = async body => {
