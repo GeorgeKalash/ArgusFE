@@ -64,26 +64,26 @@ const BarcodeForm = ({ store, labels, maxAccess }) => {
     }
   })
 
-  const postdata = obj => {
-    const data = obj?.barcodes?.map(({ itemId, ...rest }) => ({
-      itemId: recordId,
-      ...rest
-    }))
+  const postdata = async obj => {
+    try {
+      const data = obj?.barcodes?.map(({ itemId, ...rest }) => ({
+        itemId: recordId,
+        ...rest
+      }))
 
-    const list = {
-      itemId: recordId,
-      barcodes: data || []
-    }
+      const list = {
+        itemId: recordId,
+        barcodes: data || []
+      }
 
-    postRequest({
-      extension: InventoryRepository.Barcode.set2,
-      record: JSON.stringify(list)
-    })
-      .then(res => {
-        toast.success(platformLabels.Edited)
-        getData()
+      await postRequest({
+        extension: InventoryRepository.Barcode.set2,
+        record: JSON.stringify(list)
       })
-      .catch(error => {})
+
+      toast.success(platformLabels.Edited)
+      getData()
+    } catch (error) {}
   }
 
   const columns = [
@@ -122,19 +122,20 @@ const BarcodeForm = ({ store, labels, maxAccess }) => {
       }
     }
   ]
-  function getData() {
-    getRequest({
-      extension: InventoryRepository.Barcode.qry,
-      parameters: `_itemId=${recordId}&_pageSize=50&_startAt=0`
-    })
-      .then(res => {
-        const modifiedList = res.list?.map((category, index) => ({
-          ...category,
-          id: index + 1
-        }))
-        formik.setValues({ barcodes: modifiedList })
+  async function getData() {
+    try {
+      const response = await getRequest({
+        extension: InventoryRepository.Barcode.qry,
+        parameters: `_itemId=${recordId}&_pageSize=50&_startAt=0`
       })
-      .catch(error => {})
+
+      const modifiedList = response.list?.map((category, index) => ({
+        ...category,
+        id: index + 1
+      }))
+
+      formik.setValues({ barcodes: modifiedList })
+    } catch (error) {}
   }
   useEffect(() => {
     if (recordId) {

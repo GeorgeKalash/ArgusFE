@@ -29,19 +29,20 @@ const VendorForm = ({ labels, editMode, maxAccess, store, record }) => {
 
   const { recordId: itemId } = store
 
+  console.log(record)
+
   const { formik } = useForm({
     maxAccess,
     initialValues: {
       itemId,
-      vendorId: '',
-      currencyId: '',
+      vendorId: record.vendorId || '',
+      currencyId: record.currencyId || '',
       baseLaborPrice: '',
       priceList: '',
       markdown: '',
       sku: '',
       isPreferred: false,
-      deliveryLeadDays: '',
-      ...record
+      deliveryLeadDays: ''
     },
     enableReinitialize: true,
     validateOnChange: true,

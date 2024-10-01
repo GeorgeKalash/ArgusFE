@@ -95,7 +95,7 @@ const StrategiesForm = ({ labels, maxAccess, setStore, store, onChange }) => {
   }
 
   return (
-    <FormShell form={formik} resourceId={ResourceIds.PhysicalProperty} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell form={formik} resourceId={ResourceIds.Strategies} maxAccess={maxAccess} editMode={editMode}>
       <Grid container spacing={4}>
         <Grid item xs={12}>
           <CustomTextField

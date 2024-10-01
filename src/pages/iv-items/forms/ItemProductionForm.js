@@ -13,10 +13,12 @@ import { ManufacturingRepository } from 'src/repositories/ManufacturingRepositor
 import { SCRepository } from 'src/repositories/SCRepository'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function ItemProductionForm({ labels, editMode, maxAccess, store }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId } = store
+  const { platformLabels } = useContext(ControlContext)
 
   const { formik } = useForm({
     initialValues: {
@@ -45,7 +47,7 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
         ...obj,
         recordId: response.recordId
       })
-      toast.success('Record Edited Successfully')
+      toast.success(platformLabels.Edited)
 
       invalidate()
     }

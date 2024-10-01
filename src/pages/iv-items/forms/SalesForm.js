@@ -149,7 +149,7 @@ const SalesForm = ({ labels, maxAccess, store, record, cId }) => {
                   formik.setFieldValue('currencyId', newValue?.currencyId || '')
                 }}
                 onClear={() => formik.setFieldValue('currencyId', '')}
-                error={!formik.values.currencyId && check}
+                error={!formik.values.currencyId && formik.errors.currencyId}
               />
             </Grid>
 
