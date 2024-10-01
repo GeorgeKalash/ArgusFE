@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useRef } from 'react'
 import { AgGridReact } from 'ag-grid-react'
 import { Box, IconButton } from '@mui/material'
 import components from './components'
@@ -44,13 +44,10 @@ export function DataGrid({
       commit(newRowNode.data)
 
       setTimeout(() => {
-        // Get the newly added row node by ID
         const rowNode = gridApiRef.current.getRowNode(newRowNode.data.id)
 
         if (rowNode) {
           const rowIndex = rowNode.rowIndex
-
-          // Start editing the first column in the newly added row
           gridApiRef.current.startEditingCell({
             rowIndex: rowIndex,
             colKey: columns[0].name
@@ -62,13 +59,6 @@ export function DataGrid({
 
   const onCellKeyDown = params => {
     const { event, api, node } = params
-
-    if (event.key === 'Enter') {
-      event.preventDefault()
-      event.stopPropagation()
-
-      return
-    }
 
     if (event.key !== 'Tab') {
       return
@@ -237,7 +227,10 @@ export function DataGrid({
       sortable: false,
       cellRenderer: CustomCellRenderer,
       cellEditor: CustomCellEditor,
-      cellStyle: getCellStyle
+      cellStyle: getCellStyle,
+      suppressKeyboardEvent: params => {
+        return true
+      }
     })),
     allowDelete
       ? {
