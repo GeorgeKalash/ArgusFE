@@ -83,7 +83,7 @@ export default function SalesOrderForm({
     billAddress: '',
     subtotal: '',
     miscAmount: 0,
-    amount: '',
+    amount: 0,
     vatAmount: '',
     tdAmount: 0,
     overdraft: false,
@@ -168,6 +168,10 @@ export default function SalesOrderForm({
         copy.date = formatDateToApi(copy.date)
         copy.dueDate = formatDateToApi(copy.dueDate)
 
+        copy.qty = totalQty
+        copy.volume = totalVolume
+        copy.weight = totalWeight
+
         if (!obj.rateCalcMethod) delete copy.rateCalcMethod
 
         if (copy.serializedAddress) {
@@ -214,6 +218,24 @@ export default function SalesOrderForm({
 
   const editMode = !!formik.values.recordId
   const isClosed = formik.values.wip === 2
+
+  const totalVolume = formik.values.items.reduce((volumeSum, row) => {
+    const currentVolume = parseFloat(row.volume?.toString().replace(/,/g, '')) || 0
+
+    return volumeSum + currentVolume
+  }, 0)
+
+  const totalQty = formik.values.items.reduce((qtySum, row) => {
+    const currentQty = parseFloat(row.qty?.toString().replace(/,/g, '')) || 0
+
+    return qtySum + currentQty
+  }, 0)
+
+  const totalWeight = formik.values.items.reduce((weightSum, row) => {
+    const currentWeight = parseFloat(row.weight?.toString().replace(/,/g, '')) || 0
+
+    return weightSum + currentWeight
+  }, 0)
 
   const columns = [
     {
@@ -280,6 +302,7 @@ export default function SalesOrderForm({
           priceType: ItemConvertPrice?.priceType || 1,
           mdAmount: 0,
           qty: 0,
+          msId: itemInfo?.msId,
           extendedPrice: parseFloat('0').toFixed(2),
           mdValue: 0,
           taxId: rowTax,
@@ -549,13 +572,13 @@ export default function SalesOrderForm({
       vatAmount: parseFloat(item.vatAmount).toFixed(2),
       extendedPrice: parseFloat(item.extendedPrice).toFixed(2)
     }))
-
     formik.setValues({
       ...soHeader.record,
       tdAmount:
         soHeader?.record?.tdType == 1 || soHeader?.record?.tdType == null
           ? soHeader?.record?.tdAmount
           : soHeader?.record?.tdPct,
+      amount: parseFloat(soHeader?.record?.amount).toFixed(2),
       shipAddress: shipAdd,
       billAddress: billAdd,
       currentDiscount: soHeader?.record?.tdAmount,
@@ -642,16 +665,6 @@ export default function SalesOrderForm({
     } catch (error) {}
   }
 
-  async function getTax(taxId) {
-    try {
-      const res = await getRequest({
-        extension: FinancialRepository.TaxSchedules.get,
-        parameters: `_recordId=${taxId}`
-      })
-
-      return res?.record
-    } catch (error) {}
-  }
   async function getTaxDetails(taxId) {
     try {
       const res = await getRequest({
@@ -681,7 +694,9 @@ export default function SalesOrderForm({
 
       return newState
     })
+
     formik.setFieldValue('tdAmount', 0)
+    formik.setFieldValue('tdPct', 0)
     calcTotals(formik.values.items, 0)
     recalcGridVat(0)
   }
@@ -752,13 +767,6 @@ export default function SalesOrderForm({
 
     const subtotal = getSubtotal(parsedItemsArray)
 
-    if (tdAmount != 0) {
-      tdAmount =
-        formik.values.tdType == 1
-          ? parseFloat(formik.values.tdAmount)
-          : parseFloat(subtotal) * (parseFloat(formik.values.tdAmount) / 100)
-    }
-
     const _footerSummary = getFooterTotals(parsedItemsArray, {
       totalQty: 0,
       totalWeight: 0,
@@ -766,7 +774,7 @@ export default function SalesOrderForm({
       totalUpo: 0,
       sumVat: 0,
       sumExtended: parseFloat(subtotal),
-      tdAmount: tdAmount,
+      tdAmount: tdAmount || formik.values.tdAmount,
       net: 0,
       miscAmount: parseFloat(formik.values.miscAmount)
     })
@@ -775,6 +783,8 @@ export default function SalesOrderForm({
     formik.setFieldValue('totWeight', _footerSummary?.totalWeight?.toFixed(2) || 0)
     formik.setFieldValue('totQty', _footerSummary?.totalQty || 0)
     formik.setFieldValue('subtotal', subtotal?.toFixed(2) || 0)
+
+    console.log('check amount2 ', _footerSummary)
     formik.setFieldValue('amount', _footerSummary?.net?.toFixed(2) || 0)
     formik.setFieldValue('vatAmount', _footerSummary?.sumVat || 0)
   }
@@ -922,7 +932,7 @@ export default function SalesOrderForm({
         const soHeader = await getSalesOrder(recordId)
         const soItems = await getSalesOrderItems(recordId)
         await fillForm(soHeader, soItems)
-        calcTotals(soItems?.list)
+        calcTotals(soItems?.list, soHeader?.record?.tdAmount)
       } else {
         if (defaultSalesTD) {
           setCycleButtonState({ text: '%', value: 2 })
@@ -1272,7 +1282,7 @@ export default function SalesOrderForm({
             columns={columns}
             name='items'
             maxAccess={maxAccess}
-            disabled={isClosed}
+            disabled={isClosed || !formik.values.clientId}
             allowDelete={!isClosed}
           />
         </Grow>
@@ -1348,39 +1358,45 @@ export default function SalesOrderForm({
                     name='discount'
                     maxAccess={maxAccess}
                     label={labels.discount}
-                    value={formik.values.tdAmount}
+                    value={formik.values.tdType == 1 ? formik.values.tdAmount : formik.values.tdPct}
                     displayCycleButton={true}
                     readOnly={isClosed}
                     cycleButtonLabel={cycleButtonState.text}
                     decimalScale={2}
                     handleCycleButtonClick={handleCycleButtonClick}
                     onChange={e => {
-                      let tdAmount = Number(e.target.value)
-                      if (tdAmount < 0) tdAmount = 0
+                      let discount = Number(e.target.value)
                       if (formik.values.tdType == 1) {
-                        if (tdAmount > formik.values.subtotal) tdAmount = 0
+                        if (discount < 0 || discount > formik.values.subtotal) {
+                          discount = 0
+
+                          return
+                        }
+
+                        formik.setFieldValue('tdAmount', discount)
                       } else {
-                        if (tdAmount > 100) tdAmount = 0
+                        if (discount > 100) discount = 0
+                        formik.setFieldValue('tdPct', discount)
                       }
-                      formik.setFieldValue('tdAmount', tdAmount)
                     }}
-                    onBlur={async () => {
-                      calcTotals(formik.values.items)
-                      recalcGridVat(1)
+                    onBlur={async e => {
+                      let discountAmount = Number(e.target.value)
                       if (formik.values.tdType == 1) {
-                        const tdPct = (parseFloat(formik.values.tdAmount) / parseFloat(formik.values.subtotal)) * 100
-                        console.log('check tdPct ', tdPct)
+                        const tdPct = (parseFloat(discountAmount) / parseFloat(formik.values.subtotal)) * 100
                         formik.setFieldValue('tdPct', tdPct)
                       }
 
-                      // if (formik.values.tdType == 2) {
-                      //   const tdAmount = (parseFloat(formik.values.tdPct) * parseFloat(formik.values.subtotal)) / 100
-                      //   console.log('check tdAmount ', tdAmount)
-                      //   formik.setFieldValue('tdAmount', tdAmount)
-                      // }
+                      if (formik.values.tdType == 2) {
+                        const tdAmount = (parseFloat(discountAmount) * parseFloat(formik.values.subtotal)) / 100
+                        discountAmount = tdAmount
+                        formik.setFieldValue('tdAmount', tdAmount)
+                      }
+                      calcTotals(formik.values.items, discountAmount)
+                      recalcGridVat(1)
                     }}
                     onClear={() => {
                       formik.setFieldValue('tdAmount', 0)
+                      formik.setFieldValue('tdPct', 0)
                       calcTotals(formik.values.items, 0)
                     }}
                   />
@@ -1402,7 +1418,7 @@ export default function SalesOrderForm({
                 </Grid>
                 <Grid item>
                   <CustomNumberField
-                    name='vat'
+                    name='vatAmount'
                     maxAccess={maxAccess}
                     label={labels.VAT}
                     value={formik.values.vatAmount}
@@ -1411,7 +1427,7 @@ export default function SalesOrderForm({
                 </Grid>
                 <Grid item>
                   <CustomNumberField
-                    name='net'
+                    name='amount'
                     maxAccess={maxAccess}
                     label={labels.net}
                     value={formik.values.amount}
