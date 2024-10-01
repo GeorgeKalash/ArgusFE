@@ -416,7 +416,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
 
                 <Grid item xs={4}>
                   <CustomTimePicker
-                    label={labels.departureDate}
+                    label={labels.departureTime}
                     name='departureTimeField'
                     value={formik.values?.departureTimeField}
                     onChange={formik.setFieldValue}
@@ -499,7 +499,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
                 <Grid item xs={4}></Grid>
                 <Grid item xs={4}>
                   <CustomTimePicker
-                    label={labels.arrivalDate}
+                    label={labels.arrivalTime}
                     name='arrivalTimeField'
                     value={formik.values?.arrivalTimeField}
                     onChange={formik.setFieldValue}
