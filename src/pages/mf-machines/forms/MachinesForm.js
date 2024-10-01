@@ -183,7 +183,7 @@ export default function MachinesForms({ labels, maxAccess, recordId }) {
           <Grid item xs={12}>
             <ResourceComboBox
               endpointId={ManufacturingRepository.Labor.qry}
-              parameters={`_startAt=0&_pageSize=200`}
+              parameters={`_startAt=0&_pageSize=200&_params=`}
               name='laborId'
               label={labels.laborId}
               columnsInDropDown={[

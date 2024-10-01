@@ -31,7 +31,8 @@ export default function MobileSystem() {
       rt_mob_whatsapp: '',
       rt_mob_email1: '',
       rt_mob_email2: '',
-      rt_mob_call_us: ''
+      rt_mob_call_us: '',
+      smsMobileProviderId: ''
     },
     onSubmit: async obj => {
       try {
@@ -71,7 +72,8 @@ export default function MobileSystem() {
             obj.key === 'rt_mob_whatsapp' ||
             obj.key === 'rt_mob_email1' ||
             obj.key === 'rt_mob_call_us' ||
-            obj.key === 'rt_mob_email2'
+            obj.key === 'rt_mob_email2' ||
+            obj.key === 'smsMobileProviderId'
           )
         })
         filteredList.forEach(obj => {
@@ -147,6 +149,16 @@ export default function MobileSystem() {
               maxAccess={access}
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('rt_mob_email2', '')}
+            />
+          </Grid>
+          <Grid item xs={12} sx={{ marginLeft: '0.5rem', marginRight: '0.5rem' }}>
+            <CustomTextField
+              name='smsMobileProviderId'
+              label={labels.smsMobileProviderId}
+              value={formik.values.smsMobileProviderId}
+              maxAccess={access}
+              onChange={formik.handleChange}
+              onClear={() => formik.setFieldValue('smsMobileProviderId', '')}
             />
           </Grid>
         </Grid>

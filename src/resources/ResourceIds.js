@@ -1,5 +1,3 @@
-import Correspondent from 'src/pages/correspondent'
-
 export const ResourceIds = {
   GeneralLedger: 30303,
   JournalVoucher: 30302,
@@ -185,9 +183,11 @@ export const ResourceIds = {
   SalesTeam: 51117,
   PriceGroups: 51107,
   PaymentTerm: 51102,
+  InwardSettlement: 36313,
   DocumentTypeDefault: 51106,
   VendorGroups: 50101,
   ConsignmentSites: 51110,
+  Metals: 41107,
   LabelTemplates: 44102,
   FeeSchedule: 36126,
   FeeScheduleMap: 36127,
@@ -235,5 +235,17 @@ export const ResourceIds = {
   StockCountControllers: 44101,
   StockCountDTD: 44103,
   PurposeExchangeGroup: 35115,
-  IvSettings: 41115
+  Trip: 52303, //outbound transportation,
+  InventoryOpeningQtys: 41202,
+  IvReplenishements: 46302,
+  EndSiteCount: 44204,
+  RebuildInventory: 41501,
+  RebuildUndeliveredItems: 52504,
+  IvSettings: 41115,
+  FeeScheduleInwardsMap: 36130,
+  OpenOutwardsReturn: 36320,
+  AgingButton: 31419,
+  LotCategories: 41108,
+  ClientBalance: 36131,
+  SalesDefaults: 51114
 }

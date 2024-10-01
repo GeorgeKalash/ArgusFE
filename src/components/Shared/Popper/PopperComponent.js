@@ -5,6 +5,8 @@ import { Box } from '@mui/material'
 const PopperComponent = ({ children, anchorEl, open, ...props }) => {
   const [isVisible, setIsVisible] = useState(true)
   const [rect, setRect] = useState(anchorEl?.getBoundingClientRect())
+  const [popperRect, setPopperRect] = useState(null)
+
   const popperRef = useRef(null)
 
   useEffect(() => {
@@ -30,12 +32,20 @@ const PopperComponent = ({ children, anchorEl, open, ...props }) => {
     const handleScroll = () => {
       if (anchorEl) {
         setRect(anchorEl.getBoundingClientRect())
+        const popperRect = popperRef.current.getBoundingClientRect()
+        if (popperRect.height && popperRect.width) {
+          setPopperRect(popperRef.current.getBoundingClientRect())
+        }
       }
     }
 
     const handleResize = () => {
       if (anchorEl) {
         setRect(anchorEl.getBoundingClientRect())
+        const popperRect = popperRef.current.getBoundingClientRect()
+        if (popperRect.height && popperRect.width) {
+          setPopperRect(popperRef.current.getBoundingClientRect())
+        }
       }
     }
 
@@ -74,16 +84,21 @@ const PopperComponent = ({ children, anchorEl, open, ...props }) => {
   }, [open, anchorEl])
 
   const zoom = parseFloat(getComputedStyle(document.body).getPropertyValue('--zoom'))
-  const thresholdPercentage = 0.35
 
-  const canRenderBelow = window.innerHeight / zoom - (rect && rect.bottom) > window.innerHeight * thresholdPercentage
+  const canRenderBelow = window.innerHeight - rect?.bottom > popperRect?.height
 
   return ReactDOM.createPortal(
     <Box
       ref={popperRef}
       sx={{
         zIndex: '2 !important',
-        display: open && isVisible ? 'block' : 'none'
+        display: open && isVisible ? 'block' : 'none',
+        '& .MuiMultiSectionDigitalClock-root': {
+          width: '200px'
+        },
+        '& .MuiMenuItem-root': {
+          paddingRight: '10px'
+        }
       }}
       style={{
         position: 'absolute',

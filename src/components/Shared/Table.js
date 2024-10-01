@@ -22,7 +22,7 @@ import { useWindow } from 'src/windows'
 import DeleteDialog from './DeleteDialog'
 import StrictDeleteConfirmation from './StrictDeleteConfirmation'
 import { HIDDEN, accessLevel } from 'src/services/api/maxAccess'
-import { formatDateDefault, getTimeInTimeZone } from 'src/lib/date-helper'
+import { formatDateDefault, getTimeInTimeZone, formatDateTimeDefault } from 'src/lib/date-helper'
 import { getFormattedNumber } from 'src/lib/numberField-helper'
 import { VertLayout } from './Layouts/VertLayout'
 import { Grow } from './Layouts/Grow'
@@ -36,6 +36,7 @@ const Table = ({
   rowSelection = '',
   pagination = true,
   setData,
+  handleCheckboxChange = '',
   ...props
 }) => {
   const pageSize = props?.pageSize || 10000
@@ -66,6 +67,12 @@ const Table = ({
           valueGetter: ({ data }) => formatDateDefault(data?.[col.field])
         }
       }
+      if (col.type === 'dateTime') {
+        return {
+          ...col,
+          valueGetter: ({ data }) => data?.[col.field] && formatDateTimeDefault(data?.[col.field])
+        }
+      }
       if (col.type === 'number' || col?.type?.field === 'number') {
         return {
           ...col,
@@ -90,7 +97,7 @@ const Table = ({
   const filteredColumns = columns.filter(column => !shouldRemoveColumn(column))
 
   useEffect(() => {
-    console.log('props?.gridData?.list ', props?.gridData?.list)
+    // console.log('props?.gridData?.list ', props?.gridData?.list)
     const areAllValuesTrue = props?.gridData?.list?.every(item => item?.checked === true)
     setChecked(areAllValuesTrue)
     if (typeof setData === 'function') onSelectionChanged
@@ -352,6 +359,10 @@ const Table = ({
 
     setChecked(e.target.checked)
 
+    if (handleCheckboxChange) {
+      handleCheckboxChange()
+    }
+
     if (typeof setData === 'function') onSelectionChanged
   }
 
@@ -468,6 +479,10 @@ const Table = ({
                 node.setDataValue(params.colDef.field, false)
               }
             })
+          }
+
+          if (handleCheckboxChange) {
+            handleCheckboxChange()
           }
         }}
       />

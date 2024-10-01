@@ -422,15 +422,15 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       gender: yup.string().required(),
       street1: yup.string().required()
     }),
-    onSubmit: values => {
-      postRtDefault(values)
+    onSubmit: async values => {
+      await postRtDefault(values)
     }
   })
 
   const isClosed = clientIndividualFormik.values.status === 1
   const wip = clientIndividualFormik.values.wip === 2
 
-  const postRtDefault = obj => {
+  const postRtDefault = async obj => {
     const date = new Date()
 
     //CTCL
@@ -490,7 +490,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     }
 
     const obj4 = {
-      reference: obj.cltRemReference,
+      reference: '',
       salaryRangeId: obj.salaryRangeId,
       riskLevel: obj.riskLevel,
       smsLanguage: obj.smsLanguage,
@@ -571,7 +571,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
         workAddress: obj6.name && obj6.countryId && obj6.cityId && obj6.phone && obj6.street1 ? obj6 : null
       }
 
-      postRequest({
+      await postRequest({
         extension: RTCLRepository.CtClientIndividual.update,
         record: JSON.stringify(updateData)
       })
@@ -673,7 +673,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       disabled: !editMode
     },
     {
-      key: 'Beneficiary',
+      key: 'BeneficiaryList',
       condition: true,
       onClick: () => openBeneficiaryWindow(),
       disabled: !editMode
@@ -696,6 +696,12 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
 
       // onClick: onReopen,
       disabled: true
+    },
+    {
+      key: 'Client Balance',
+      condition: true,
+      onClick: 'onClientBalance',
+      disabled: !editMode
     }
   ]
   function openBeneficiaryWindow() {
@@ -1499,7 +1505,8 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                             labels: labels,
                             setAddress: setAddress,
                             address: address,
-                            maxAccess: maxAccess
+                            maxAccess: maxAccess,
+                            isCleared: false
                           },
                           width: 500,
                           height: 400,
@@ -1653,6 +1660,16 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                   </Grid>
                 </Grid>
               </Grid>
+              <Grid
+                sx={{
+                  position: 'fixed',
+                  bottom: 0,
+                  left: 0,
+                  width: '100%',
+                  padding: 3,
+                  textAlign: 'center'
+                }}
+              ></Grid>
             </Grid>
           </Grid>
         </Grow>

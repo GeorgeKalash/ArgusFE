@@ -17,5 +17,9 @@ export const RTCLRepository = {
   },
   Client: {
     get: service + 'getCLI'
+  },
+  ClientBalance: {
+    qry: service + 'qryCBA',
+    get: service + 'getCBA',
   }
 }

@@ -13,14 +13,17 @@ import GlobalIntegrationGrid from './GlobalIntegrationGrid'
 import AccountBalance from './AccountBalance'
 import CashTransaction from './CashTransaction'
 import FinancialTransaction from './FinancialTransaction'
+import Aging from './Aging'
 import { ControlContext } from 'src/providers/ControlContext'
 import { ClientRelationForm } from './ClientRelationForm'
+import { ClientBalance } from './ClientBalance'
 
 export default function FormShell({
   form,
   isSaved = true,
   isInfo = true,
   isSavedClear = true,
+  isGenerated = false,
   isCleared = true,
   children,
   editMode,
@@ -30,6 +33,7 @@ export default function FormShell({
   postVisible = false,
   resourceId,
   masterSource,
+  onGenerate,
   functionId,
   maxAccess,
   isPosted = false,
@@ -44,7 +48,7 @@ export default function FormShell({
 }) {
   const { stack } = useWindow()
   const [selectedReport, setSelectedReport] = useState(null)
-  const { clear } = useGlobalRecord()
+  const { clear, open } = useGlobalRecord() || {}
   const { platformLabels } = useContext(ControlContext)
   const isSavedClearVisible = isSavedClear && isSaved && isCleared
 
@@ -57,16 +61,19 @@ export default function FormShell({
     : true
 
   function handleReset() {
-    if (!form.values?.recordId) {
+    if (typeof form.values?.recordId === 'undefined') {
       form.resetForm({
         values: form.initialValues
       })
     } else {
       if (typeof clear === 'function') {
         clear()
+      } else {
+        form.resetForm({
+          values: form.initialValues
+        })
       }
     }
-
     if (setIDInfoAutoFilled) {
       setIDInfoAutoFilled(false)
     }
@@ -107,9 +114,23 @@ export default function FormShell({
       },
       width: 1200,
       height: 670,
-      title: platformLabels,
-      CashTransaction
+      title: platformLabels.CashTransaction
     })
+  }
+
+  async function handleSaveAndClear() {
+    const errors = await form.validateForm()
+    await form.submitForm()
+    if (Object.keys(errors).length == 0) {
+      await performPostSubmissionTasks()
+    }
+  }
+
+  const performPostSubmissionTasks = async () => {
+    if (typeof open === 'function') {
+      await open()
+    }
+    handleReset()
   }
 
   return (
@@ -131,9 +152,11 @@ export default function FormShell({
       {windowToolbarVisible && (
         <WindowToolbar
           print={print}
-          onSave={() => form?.handleSubmit()}
+          onSave={() => {
+            form?.handleSubmit()
+          }}
           onSaveClear={() => {
-            form?.handleSubmit(), handleReset()
+            handleSaveAndClear()
           }}
           onClear={() => handleReset()}
           onPost={() => {
@@ -216,6 +239,17 @@ export default function FormShell({
               title: platformLabels.ClientRelation
             })
           }
+          onClientBalance={() =>
+            stack({
+              Component: ClientBalance,
+              props: {
+                recordId: form.values?.recordId,
+              },
+              width: 500,
+              height: 350,
+              title: platformLabels.ClientBalance
+            })
+          }
           onAddClientRelation={() =>
             stack({
               Component: ClientRelationForm,
@@ -244,10 +278,24 @@ export default function FormShell({
               title: platformLabels.PreviewReport
             })
           }
+          onClickAging={() =>
+            stack({
+              Component: Aging,
+              props: {
+                recordId: form.values?.recordId,
+                functionId
+              },
+              width: 1000,
+              height: 620,
+              title: platformLabels.Aging
+            })
+          }
           isSaved={isSaved}
           isSavedClear={isSavedClearVisible}
+          onGenerate={onGenerate}
           isInfo={isInfo}
           isCleared={isCleared}
+          isGenerated={isGenerated}
           actions={actions}
           onApproval={onApproval}
           onRecordRemarks={onRecordRemarks}

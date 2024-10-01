@@ -1,7 +1,6 @@
 import { useState, useContext } from 'react'
-import { Box, Button, Grid, IconButton } from '@mui/material'
+import { Box, IconButton } from '@mui/material'
 import Icon from 'src/@core/components/icon'
-
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -9,9 +8,8 @@ import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepos
 import DocumentsWindow from './window/DocumentsWindow'
 import { useWindow } from 'src/windows'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { formatDateDefault } from 'src/lib/date-helper'
 import CreditOrderForm from '../credit-order/Forms/CreditOrderForm'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import CreditInvoiceForm from '../credit-invoice/Forms/CreditInvoiceForm'
@@ -21,13 +19,16 @@ import TransactionForm from '../currency-trading/forms/TransactionForm'
 import OutwardsForm from '../outwards-transfer/Tabs/OutwardsForm'
 import ClientTemplateForm from '../clients-list/forms/ClientTemplateForm'
 import { RTCLRepository } from 'src/repositories/RTCLRepository'
-
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import CashCountForm from '../cash-count/forms/CashCountForm'
 import CashTransferTab from '../cash-transfer/Tabs/CashTransferTab'
 import OutwardsModificationForm from '../outwards-modification/Forms/OutwardsModificationForm'
+import OutwardsReturnForm from '../outwards-return/Forms/OutwardsReturnForm'
+import InwardTransferForm from '../inward-transfer/forms/InwardTransferForm'
+import InwardSettlementForm from '../inward-settlement/forms/InwardSettlementForm'
+import { SystemRepository } from 'src/repositories/SystemRepository'
 
 const DocumentsOnHold = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -81,6 +82,19 @@ const DocumentsOnHold = () => {
     )
   }
 
+  const getPlantId = async userData => {
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.UserDefaults.get,
+        parameters: `_userId=${userData && userData.userId}&_key=plantId`
+      })
+
+      return res?.record?.value
+    } catch (error) {
+      return ''
+    }
+  }
+
   const popupComponent = async obj => {
     let relevantComponent
     let recordId = obj.recordId
@@ -90,6 +104,12 @@ const DocumentsOnHold = () => {
     let windowWidth
     let windowHeight
     let title
+
+    const userData = window.sessionStorage.getItem('userData')
+      ? JSON.parse(window.sessionStorage.getItem('userData'))
+      : null
+
+    const plantId = await getPlantId(userData)
 
     switch (obj.functionId) {
       case SystemFunction.CurrencyCreditOrderSale:
@@ -175,6 +195,33 @@ const DocumentsOnHold = () => {
         title = labels.outwardsModification
         break
 
+      case SystemFunction.OutwardsReturn:
+        relevantComponent = OutwardsReturnForm
+        labels = await getLabels(ResourceIds.OutwardsReturn)
+        relevantAccess = await getAccess(ResourceIds.OutwardsReturn)
+
+        windowWidth = 800
+        windowHeight = 630
+        title = labels.outwardsReturn
+        break
+
+      case SystemFunction.InwardTransfer:
+        relevantComponent = InwardTransferForm
+        labels = await getLabels(ResourceIds.InwardTransfer)
+        relevantAccess = await getAccess(ResourceIds.InwardTransfer)
+
+        windowWidth = 1200
+        title = labels.InwardTransfer
+        break
+
+      case SystemFunction.InwardSettlement:
+        relevantComponent = InwardSettlementForm
+        labels = await getLabels(ResourceIds.InwardSettlement)
+        relevantAccess = await getAccess(ResourceIds.InwardSettlement)
+
+        windowWidth = 1200
+        title = labels.InwardSettlement
+        break
       default:
         // Handle default case if needed
         break
@@ -186,7 +233,9 @@ const DocumentsOnHold = () => {
         props: {
           recordId: recordId,
           labels: labels,
-          maxAccess: relevantAccess
+          maxAccess: relevantAccess,
+          plantId: plantId,
+          userData: userData
         },
         width: windowWidth,
         height: windowHeight,

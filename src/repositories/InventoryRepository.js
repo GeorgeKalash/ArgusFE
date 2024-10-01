@@ -6,13 +6,24 @@ export const InventoryRepository = {
     get: service + 'getIT'
   },
   Group: {
-    qry: service + 'qryGRP'
+    qry: service + 'qryGRP',
+    page: service + 'pageGRP',
+    get: service + 'getGRP',
+    set: service + 'setGRP',
+    del: service + 'delGRP',
+    snapshot: service + 'snapshotGRP'
   },
   Category: {
     qry: service + 'qryCA',
     get: service + 'getCA',
     set: service + 'setCA',
     del: service + 'delCA'
+  },
+  LotCategory: {
+    page: service + 'pageLCA',
+    get: service + 'getLCA',
+    set: service + 'setLCA',
+    del: service + 'delLCA'
   },
   Measurement: {
     page: service + 'pageMS',
@@ -67,5 +78,25 @@ export const InventoryRepository = {
     get: service + 'getDI',
     set: service + 'setDI',
     del: service + 'delDI'
+  },
+  Metals: {
+    page: service + 'pageMTL',
+    get: service + 'getMTL',
+    set: service + 'setMTL',
+    del: service + 'delMTL'
+  },
+  Scrap: {
+    qry: service + 'qryMTS',
+    set2: service + 'set2MTS'
+  },
+  InventoryOpeningQtys: {
+    qry: service + 'qryOQ',
+    snapshot: service + 'snapshotOQ',
+    get: service + 'getOQ',
+    set: service + 'setOQ',
+    del: service + 'delOQ'
+  },
+  RebuildInventory: {
+    rebuild: service + 'rebuildFIS'
   }
 }

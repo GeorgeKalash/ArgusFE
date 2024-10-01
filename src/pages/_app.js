@@ -98,7 +98,13 @@ const Guard = ({ children, authGuard, guestGuard }) => {
   }
 }
 
-const queryClient = new QueryClient({})
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false
+    }
+  }
+})
 
 // ** Configure JSS & ClassName
 const App = props => {
