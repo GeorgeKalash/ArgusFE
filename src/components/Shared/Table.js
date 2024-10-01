@@ -36,6 +36,7 @@ const Table = ({
   rowSelection = '',
   pagination = true,
   setData,
+  checkboxFlex = '',
   handleCheckboxChange = '',
   ...props
 }) => {
@@ -505,6 +506,7 @@ const Table = ({
           {
             headerName: '',
             field: 'checked',
+            flex: checkboxFlex,
             cellRenderer: checkboxCellRenderer,
             headerComponent: params =>
               rowSelection !== 'single' && <Checkbox checked={checked} onChange={e => selectAll(params, e)} />,

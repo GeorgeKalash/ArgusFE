@@ -49,6 +49,7 @@ export const SaleRepository = {
     set2: service + 'set2TGM'
   },
   Client: {
+    get: service + 'getCL',
     snapshot: service + 'snapshotCL'
   },
   WorkFlow: {
@@ -127,9 +128,28 @@ export const SaleRepository = {
   },
   SalesOrder: {
     qry: service + 'qryORD',
+    page: service + 'pageORD',
     get: service + 'getORD',
     set: service + 'setORD',
+    set2: service + 'set2ORD',
     del: service + 'delORD',
+    close: service + 'closeORD',
+    reopen: service + 'reopenORD',
+    cancel: service + 'terminateORD',
+    postToInvoice: service + 'transfer2ORD',
     snapshot: service + 'snapshotORD'
+  },
+  SalesOrderItem: {
+    qry: service + 'qryORI'
+  },
+  ItemConvertPrice: {
+    get: service + 'getICP'
+  },
+  Address: {
+    qry: service + 'qryAD',
+    set: service + 'setAD'
+  },
+  FilterAddress: {
+    snapshot: service + 'snapshotADD'
   }
 }

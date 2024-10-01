@@ -98,5 +98,8 @@ export const InventoryRepository = {
   },
   RebuildInventory: {
     rebuild: service + 'rebuildFIS'
+  },
+  ItemPhysProp: {
+    get: service + 'getPP'
   }
 }
