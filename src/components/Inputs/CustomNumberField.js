@@ -103,11 +103,8 @@ const CustomNumberField = ({
                 sx={{
                   backgroundColor: '#708090',
                   color: 'white',
-                  ml: 1,
                   padding: '7px 8px',
-                  minHeight: '24px',
                   minWidth: '40px',
-                  fontSize: '0.875rem',
                   '&:hover': {
                     backgroundColor: '#607D8B'
                   }

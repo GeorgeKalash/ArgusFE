@@ -512,7 +512,7 @@ export default function SalesOrderForm({
       },
       width: 950,
       height: 600,
-      title: 'Workflow'
+      title: labels.workflow
     })
   }
 
@@ -522,6 +522,12 @@ export default function SalesOrderForm({
       condition: true,
       onClick: 'onRecordRemarks',
       disabled: !editMode
+    },
+    {
+      key: 'Approval',
+      condition: true,
+      onClick: 'onApproval',
+      disabled: !isClosed
     },
     {
       key: 'Close',
@@ -536,7 +542,13 @@ export default function SalesOrderForm({
       disabled: !isClosed || formik.values.status == 3 || formik.values.deliveryStatus == 4
     },
     {
-      key: 'Cancel',
+      key: 'Close',
+      condition: !isClosed,
+      onClick: onClose,
+      disabled: !((formik.values.deliveryStatus == 2 || formik.values.deliveryStatus == 1) && formik.values.status == 4)
+    },
+    {
+      key: 'Terminate',
       condition: true,
       onClick: onCancel,
       disabled: !((formik.values.deliveryStatus == 2 || formik.values.deliveryStatus == 1) && formik.values.status == 4)
@@ -688,17 +700,20 @@ export default function SalesOrderForm({
   }
 
   const handleCycleButtonClick = () => {
+    let currentTdType
     setCycleButtonState(prevState => {
       const newState = prevState.text === '%' ? { text: '123', value: 1 } : { text: '%', value: 2 }
       formik.setFieldValue('tdType', newState.value)
+      currentTdType = newState.value
 
       return newState
     })
 
     formik.setFieldValue('tdAmount', 0)
     formik.setFieldValue('tdPct', 0)
+    formik.setFieldValue('currentDiscount', 0)
     calcTotals(formik.values.items, 0)
-    recalcGridVat(0)
+    recalcGridVat(currentTdType, 0, 0, 0)
   }
 
   function getItemPriceRow(update, newRow, dirtyField) {
@@ -783,22 +798,20 @@ export default function SalesOrderForm({
     formik.setFieldValue('totWeight', _footerSummary?.totalWeight?.toFixed(2) || 0)
     formik.setFieldValue('totQty', _footerSummary?.totalQty || 0)
     formik.setFieldValue('subtotal', subtotal?.toFixed(2) || 0)
-
-    console.log('check amount2 ', _footerSummary)
     formik.setFieldValue('amount', _footerSummary?.net?.toFixed(2) || 0)
     formik.setFieldValue('vatAmount', _footerSummary?.sumVat || 0)
   }
 
-  function checkDiscount(typeChange) {
+  function checkDiscount(typeChange, tdPct, tdAmount, currentDiscount) {
     const _discountObj = getDiscValues({
-      tdAmount: parseFloat(formik.values.tdAmount),
-      tdPlain: formik.values.tdType == 1,
-      tdPct: formik.values.tdType == 2,
-      tdType: formik.values.tdType,
+      tdAmount: parseFloat(tdAmount),
+      tdPlain: typeChange == 1,
+      tdPct: typeChange == 2,
+      tdType: typeChange,
       subtotal: parseFloat(formik.values.subtotal),
-      currentDiscount: formik.values.currentDiscount,
-      hiddenTdPct: formik.values.tdPct,
-      hiddenTdAmount: formik.values.tdAmount,
+      currentDiscount: currentDiscount,
+      hiddenTdPct: tdPct,
+      hiddenTdAmount: parseFloat(tdAmount),
       typeChange: typeChange
     })
 
@@ -818,16 +831,16 @@ export default function SalesOrderForm({
         baseLaborPrice: parseFloat(item?.baseLaborPrice),
         vatAmount: parseFloat(item?.vatAmount),
         tdPct: parseFloat(formik?.values?.tdPct),
-        taxDetails: null
+        taxDetails: item.taxDetails
       })
       const index = item.id - 1
       formik.setFieldValue(`items[${index}].vatAmount`, parseFloat(vatCalcRow?.vatAmount).toFixed(2))
     })
   }
 
-  function recalcGridVat(typeChange) {
-    // checkDiscount(typeChange)
-    // recalcNewVat()
+  function recalcGridVat(typeChange, tdPct, tdAmount, currentDiscount) {
+    checkDiscount(typeChange, tdPct, tdAmount, currentDiscount)
+    recalcNewVat()
   }
 
   function ShowMdAmountErrorMessage(actualDiscount, clientMaxDiscount, rowData, update) {
@@ -947,7 +960,6 @@ export default function SalesOrderForm({
 
   useEffect(() => {
     calcTotals(formik.values.items)
-    recalcGridVat(0)
   }, [formik.values.items])
 
   return (
@@ -1358,7 +1370,7 @@ export default function SalesOrderForm({
                     name='discount'
                     maxAccess={maxAccess}
                     label={labels.discount}
-                    value={formik.values.tdType == 1 ? formik.values.tdAmount : formik.values.tdPct}
+                    value={formik.values.currentDiscount}
                     displayCycleButton={true}
                     readOnly={isClosed}
                     cycleButtonLabel={cycleButtonState.text}
@@ -1381,23 +1393,28 @@ export default function SalesOrderForm({
                     }}
                     onBlur={async e => {
                       let discountAmount = Number(e.target.value)
+                      let tdPct = Number(e.target.value)
+                      let tdAmount = Number(e.target.value)
+
                       if (formik.values.tdType == 1) {
-                        const tdPct = (parseFloat(discountAmount) / parseFloat(formik.values.subtotal)) * 100
+                        tdPct = (parseFloat(discountAmount) / parseFloat(formik.values.subtotal)) * 100
                         formik.setFieldValue('tdPct', tdPct)
                       }
 
                       if (formik.values.tdType == 2) {
-                        const tdAmount = (parseFloat(discountAmount) * parseFloat(formik.values.subtotal)) / 100
+                        tdAmount = (parseFloat(discountAmount) * parseFloat(formik.values.subtotal)) / 100
                         discountAmount = tdAmount
                         formik.setFieldValue('tdAmount', tdAmount)
                       }
+
                       calcTotals(formik.values.items, discountAmount)
-                      recalcGridVat(1)
+                      recalcGridVat(formik.values.tdType, tdPct, tdAmount, Number(e.target.value))
                     }}
                     onClear={() => {
                       formik.setFieldValue('tdAmount', 0)
                       formik.setFieldValue('tdPct', 0)
                       calcTotals(formik.values.items, 0)
+                      recalcGridVat(formik.values.tdType, 0, 0, 0)
                     }}
                   />
                 </Grid>

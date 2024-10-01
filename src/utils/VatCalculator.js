@@ -20,7 +20,7 @@ const calcVatAmountPerTaxDetail = (vatCalcRow, taxDetail) => {
 
   switch (taxDetail.taxBase) {
     case TAXBASE_POU:
-      if (vatCalcRow.tdPct === 0 || vatCalcRow.tdPct === '0') {
+      if (vatCalcRow.tdPct == 0) {
         vatAmount = (vatCalcRow.extendedPrice * taxDetail.amount) / 100
       } else {
         const tdExtendedPrice = vatCalcRow.extendedPrice * (1 - vatCalcRow.tdPct / 100)
