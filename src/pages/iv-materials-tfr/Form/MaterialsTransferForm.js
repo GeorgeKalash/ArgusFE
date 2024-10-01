@@ -541,7 +541,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       key: 'IV',
       condition: true,
       onClick: 'onInventoryTransaction',
-      disabled: !editMode
+      disabled: !editMode || !isPosted
     },
     {
       key: 'Post',
