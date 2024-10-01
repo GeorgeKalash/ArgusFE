@@ -227,17 +227,17 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
     } catch (exception) {}
   }
 
-  const onClose = async recId => {
+  const onClose = async () => {
     try {
       const res = await postRequest({
         extension: DeliveryRepository.Trip.close,
-        record: JSON.stringify({ recordId: recId })
+        record: JSON.stringify(formik.values)
       })
 
       if (recordId) toast.success(platformLabels.Closed)
       invalidate()
 
-      await refetchForm(res.recordId)
+      await refetchForm(formik.values.recordId)
     } catch (error) {}
   }
 
