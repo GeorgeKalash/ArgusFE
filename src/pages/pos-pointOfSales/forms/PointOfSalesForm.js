@@ -18,9 +18,10 @@ import { SaleRepository } from 'src/repositories/SaleRepository'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { DataSets } from 'src/resources/DataSets'
-import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import dayjs from 'dayjs'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import CustomTimePicker from 'src/components/Inputs/CustomTimePicker'
 
 const PointOfSalesForm = ({ labels, maxAccess, setStore, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -72,9 +73,21 @@ const PointOfSalesForm = ({ labels, maxAccess, setStore, store }) => {
     }),
     onSubmit: async obj => {
       try {
+        // Format maxEndTime to hh:mm
+        const date = new Date(obj.maxEndTime)
+        const hours = date.getUTCHours().toString().padStart(2, '0')
+        const minutes = date.getUTCMinutes().toString().padStart(2, '0')
+        const formattedMaxEndTime = `${hours}:${minutes}`
+
+        // Update the object with the formatted time
+        const updatedObj = {
+          ...obj,
+          maxEndTime: formattedMaxEndTime
+        }
+
         const response = await postRequest({
           extension: PointofSaleRepository.PointOfSales.set,
-          record: JSON.stringify(obj)
+          record: JSON.stringify(updatedObj)
         })
 
         if (!obj.recordId) {
@@ -104,11 +117,26 @@ const PointOfSalesForm = ({ labels, maxAccess, setStore, store }) => {
             parameters: `_recordId=${recordId}`
           })
 
-          formik.setValues({ ...res.record, onlineStore: Boolean(res.record.onlineStore) })
+          const [hours, minutes] = res.record.maxEndTime.split(':')
+
+          const transformedMaxEndTime = dayjs()
+            .set('hour', parseInt(hours, 10))
+            .set('minute', parseInt(minutes, 10))
+            .set('second', 0)
+            .set('millisecond', 0)
+
+          formik.setValues({
+            ...res.record,
+            onlineStore: Boolean(res.record.onlineStore),
+            maxEndTime: transformedMaxEndTime
+          })
         }
-      } catch (error) {}
+      } catch (error) {
+        // Handle errors here
+        console.error('Error fetching data:', error)
+      }
     })()
-  }, [])
+  }, [recordId])
 
   return (
     <FormShell form={formik} resourceId={ResourceIds.PointOfSale} maxAccess={maxAccess} editMode={editMode}>
@@ -305,15 +333,14 @@ const PointOfSalesForm = ({ labels, maxAccess, setStore, store }) => {
               />
             </Grid>
             <Grid item xs={6}>
-              <CustomNumberField
-                name='maxEndTime'
+              <CustomTimePicker
                 label={labels.maxEndTime}
-                value={formik.values.maxEndTime}
-                required
-                maxAccess={maxAccess}
-                onChange={formik.handleChange}
+                name='maxEndTime'
+                value={formik.values?.maxEndTime}
+                onChange={formik.setFieldValue}
                 onClear={() => formik.setFieldValue('maxEndTime', '')}
                 error={formik.touched.maxEndTime && Boolean(formik.errors.maxEndTime)}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={6}>
