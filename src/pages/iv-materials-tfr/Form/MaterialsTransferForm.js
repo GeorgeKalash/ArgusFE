@@ -33,15 +33,15 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
+  
+  const [measurementUnits, setMeasurementUnits] = useState([])
+  const [filters, setFilters] = useState(measurementUnits)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.MaterialTransfer,
     access,
     enabled: !recordId
   })
-
-  const [measurementUnits, setMeasurementUnits] = useState([])
-  const [filters, setFilters] = useState(measurementUnits)
 
   const initialValues = {
     recordId: null,
@@ -205,9 +205,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
 
           toast.success(platformLabels.Edited)
         }
-      } catch (error) {
-        console.log(error)
-      }
+      } catch (error) {}
     }
   })
 
