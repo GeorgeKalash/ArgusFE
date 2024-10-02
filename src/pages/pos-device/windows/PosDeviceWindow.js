@@ -8,9 +8,7 @@ const PosDeviceWindow = () => {
   const [deviceStatus, setDeviceStatus] = useState(false)
 
   useEffect(() => {
-    return () => {
-      posPaymentService.resolvePamyent()
-    }
+    return () => posPaymentService.resolvePamyent()
   }, [])
 
   const checkDeviceActions = [
@@ -28,7 +26,7 @@ const PosDeviceWindow = () => {
       onClick: () =>
         posPaymentService.startPayment(
           {
-            msgId: '',
+            msgId: 'PUR',
             ecrno: '',
             ecR_RCPT: '',
             amount: '',
