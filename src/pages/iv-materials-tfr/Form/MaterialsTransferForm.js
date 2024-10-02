@@ -638,7 +638,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
                     filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='dtId'
                     label={labels.documentType}
-                    readOnly={isPosted || isClosed}
+                    readOnly={isPosted || isClosed || editMode}
                     valueField='recordId'
                     displayField='name'
                     values={formik?.values}
