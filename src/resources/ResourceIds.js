@@ -263,5 +263,7 @@ export const ResourceIds = {
   LeaveScheduleFilter: 73103,
   PayrollFilter: 75201,
   BankTransferFilter: 75111,
-  EmployeeFilter: 71201
+  EmployeeFilter: 71201,
+  FinancialIntegrators: 51105,
+  SalesDefaults: 51114
 }
