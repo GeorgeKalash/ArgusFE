@@ -11,7 +11,7 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import moment from 'moment-hijri'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 
-const Confirmation = ({ labels, formik, editMode, idTypeStore, maxAccess, setNewProf }) => {
+const Confirmation = ({ labels, formik, editMode, idTypeStore, maxAccess, refreshProf = () => {} }) => {
   const [showAsPassword, setShowAsPassword] = useState(true)
   const [showAsPasswordRepeat, setShowAsPasswordRepeat] = useState(false)
   const { getRequest } = useContext(RequestsContext)
@@ -79,8 +79,7 @@ const Confirmation = ({ labels, formik, editMode, idTypeStore, maxAccess, setNew
           gender: res.gender === 'ذكر' ? '1' : '2',
           professionId: res.professionId
         })
-
-        res.newProfessionMode && setNewProf(true)
+        res.newProfessionMode && refreshProf()
       })
       .catch(error => {})
   }

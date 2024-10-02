@@ -43,7 +43,6 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
   const [showAsPasswordPhone, setShowAsPasswordPhone] = useState(false)
   const [showAsPasswordPhoneRepeat, setShowAsPasswordPhoneRepeat] = useState(false)
   const [referenceRequired, setReferenceRequired] = useState(true)
-  const [professionStore, setProfessionStore] = useState([])
   const [address, setAddress] = useState([])
   const [editMode, setEditMode] = useState(null)
   const [idTypeStore, setIdTypeStore] = useState([])
@@ -203,14 +202,6 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
   }
 
   useEffect(() => {
-    if (newProf) {
-      fillProfessionStore()
-      setNewProf(!newProf)
-    }
-  }, [newProf])
-
-  useEffect(() => {
-    fillProfessionStore()
     fillType()
 
     if (recordId) {
@@ -341,18 +332,6 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
         })
 
         setEditMode(true)
-      })
-      .catch(error => {})
-  }
-
-  const fillProfessionStore = status => {
-    var parameters = `_filter=`
-    getRequest({
-      extension: RemittanceSettingsRepository.Profession.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setProfessionStore(res.list)
       })
       .catch(error => {})
   }
@@ -722,6 +701,10 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     })
   }
 
+  const refreshProf = () => {
+    setNewProf(!newProf)
+  }
+
   return (
     <FormShell
       actions={!allowEdit ? actions : []}
@@ -877,7 +860,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                               idTypeStore: idTypeStore,
                               formik: clientIndividualFormik,
                               labels: labels,
-                              setNewProf
+                              refreshProf
                             },
                             title: labels.fetch,
                             width: 400,
@@ -1397,8 +1380,15 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         maxAccess={maxAccess}
                       />
                     </Grid>
-                    <Grid item xs={12}>
-                      <CustomComboBox
+                    <Grid item xs={12} key={newProf}>
+                      <ResourceComboBox
+                        endpointId={RemittanceSettingsRepository.Profession.qry}
+                        filter={
+                          idTypeStore.filter(item => item.recordId === clientIndividualFormik.values.idtId)[0]
+                            ?.isDiplomat
+                            ? item => item.diplomatStatus === 2
+                            : undefined
+                        }
                         name='professionId'
                         label={labels.profession}
                         valueField='recordId'
@@ -1408,19 +1398,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                           { key: 'name', value: 'Name' },
                           { key: 'flName', value: 'Foreign Language Name' }
                         ]}
-                        store={
-                          idTypeStore.filter(item => item.recordId === clientIndividualFormik.values.idtId)[0]
-                            ?.isDiplomat
-                            ? professionStore?.filter(item => item.diplomatStatus === 2)
-                            : professionStore
-                        }
-                        readOnly={editMode && !allowEdit}
-                        value={
-                          clientIndividualFormik.values.professionId &&
-                          professionStore?.filter(
-                            item => item.recordId === clientIndividualFormik.values.professionId
-                          )[0]
-                        }
+                        values={clientIndividualFormik.values}
                         required
                         onChange={(event, newValue) => {
                           if (newValue) {
