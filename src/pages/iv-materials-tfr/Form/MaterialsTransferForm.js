@@ -33,7 +33,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
-  
+
   const [measurementUnits, setMeasurementUnits] = useState([])
   const [filters, setFilters] = useState(measurementUnits)
 
@@ -768,29 +768,6 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
                   />
                 </Grid>
               </Grid>
-              <Grid container spacing={2} marginTop={0.5}>
-                <Grid item xs={6}>
-                  <ResourceComboBox
-                    endpointId={SystemRepository.Plant.qry}
-                    name='plantId'
-                    label={labels.plant}
-                    readOnly={isPosted || isClosed}
-                    valueField='recordId'
-                    displayField='name'
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    values={formik?.values}
-                    maxAccess={maxAccess}
-                    onClear={() => formik.setFieldValue('plantId', '')}
-                    onChange={(event, newValue) => {
-                      formik && formik.setFieldValue('plantId', newValue?.recordId)
-                    }}
-                    error={formik.touched.plantId && Boolean(formik.errors.plantId)}
-                  />
-                </Grid>
-              </Grid>
             </Grid>
             <Grid item xs={4}>
               <CustomTextArea
@@ -804,6 +781,27 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
                 onClear={() => formik.setFieldValue('notes', '')}
                 error={formik.touched.notes && Boolean(formik.errors.notes)}
               />
+              <Grid marginTop={3}>
+                <ResourceComboBox
+                  endpointId={SystemRepository.Plant.qry}
+                  name='plantId'
+                  label={labels.plant}
+                  readOnly={isPosted || isClosed}
+                  valueField='recordId'
+                  displayField='name'
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' }
+                  ]}
+                  values={formik?.values}
+                  maxAccess={maxAccess}
+                  onClear={() => formik.setFieldValue('plantId', '')}
+                  onChange={(event, newValue) => {
+                    formik && formik.setFieldValue('plantId', newValue?.recordId)
+                  }}
+                  error={formik.touched.plantId && Boolean(formik.errors.plantId)}
+                />
+              </Grid>
             </Grid>
           </Grid>
           <DataGrid
