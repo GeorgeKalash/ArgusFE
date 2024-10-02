@@ -62,11 +62,22 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
             parameters: `_recordId=${recordId}`
           })
 
-          formik.setValues(res.record)
+          if (res?.record) {
+            const newValues = Object.keys(formik.initialValues).reduce((acc, key) => {
+              acc[key] = res.record[key] !== null ? res.record[key] : formik.initialValues[key]
+
+              return acc
+            }, {})
+
+            formik.setValues(newValues)
+            console.log(res.record, 'Updated values')
+          }
         }
-      } catch (exception) {}
+      } catch (exception) {
+        console.error(exception)
+      }
     })()
-  }, [])
+  }, [recordId])
 
   return (
     <FormShell resourceId={ResourceIds.IdCategories} form={formik} maxAccess={maxAccess} editMode={editMode}>
