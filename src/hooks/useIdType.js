@@ -46,7 +46,7 @@ export default function useIdType() {
         }) ?? ''
     }
 
-    return formatted?.recordId
+    return formatted
   }
 
   return [getTypeValue]

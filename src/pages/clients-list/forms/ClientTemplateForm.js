@@ -45,9 +45,9 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
   const [referenceRequired, setReferenceRequired] = useState(true)
   const [address, setAddress] = useState([])
   const [editMode, setEditMode] = useState(null)
-  const [idTypeStore, setIdTypeStore] = useState([])
   const [otpShow, setOtpShow] = useState(false)
   const [newProf, setNewProf] = useState(false)
+  const [idtObj, setIdtObj] = useState({})
 
   const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
@@ -65,6 +65,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     idNoEncrypt: '',
     idNoRepeatEncrypt: '',
     idtId: '',
+    idtName: '',
     cityName: '',
 
     //address
@@ -175,12 +176,13 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
   async function checkTypes(value) {
     if (!value) {
       clientIndividualFormik.setFieldValue('idtId', '')
+      clientIndividualFormik.setFieldValue('idtName', '')
     }
     const idType = await getValue(value)
     if (idType) {
-      clientIndividualFormik.setFieldValue('idtId', idType)
-      const res = idTypeStore.filter(item => item.recordId === idType)[0]
-
+      clientIndividualFormik.setFieldValue('idtId', idType.recordId)
+      clientIndividualFormik.setFieldValue('idtName', idType.namexw)
+      const res = idtObj
       if (res['type'] && (res['type'] === 1 || res['type'] === 2)) {
         getCountry()
       }
@@ -202,8 +204,6 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
   }
 
   useEffect(() => {
-    fillType()
-
     if (recordId) {
       getClient(recordId)
     }
@@ -349,18 +349,6 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
           }
         })
         .catch(error => {})
-  }
-
-  const fillType = () => {
-    var parameters = `_filter=`
-    getRequest({
-      extension: CurrencyTradingSettingsRepository.IdTypes.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setIdTypeStore(res.list)
-      })
-      .catch(error => {})
   }
 
   const clientIndividualFormik = useFormik({
@@ -604,7 +592,6 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       stack({
         Component: OTPPhoneVerification,
         props: {
-          idTypeStore: idTypeStore,
           recordId: clientIndividualFormik.values.recordId,
           formValidation: clientIndividualFormik,
           functionId: clientIndividualFormik.values.functionId,
@@ -820,17 +807,14 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                       />
                     </Grid>
                     <Grid item xs={12}>
-                      <CustomComboBox
+                      <ResourceComboBox
+                        endpointId={CurrencyTradingSettingsRepository.IdTypes.qry}
                         name='idtId'
                         label={labels.id_type}
                         valueField='recordId'
                         displayField='name'
                         readOnly={editMode && true}
-                        store={idTypeStore}
-                        value={
-                          clientIndividualFormik.values.idtId &&
-                          idTypeStore.filter(item => item.recordId === clientIndividualFormik.values.idtId)[0]
-                        }
+                        values={clientIndividualFormik.values}
                         required
                         onChange={(event, newValue) => {
                           if (newValue) {
@@ -839,11 +823,14 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                             if (newValue['type'] && (newValue['type'] === 1 || newValue['type'] === 2)) {
                               getCountry()
                             }
-                            clientIndividualFormik.setFieldValue('idtId', newValue?.recordId)
                           } else {
                             fillFilterProfession('')
-                            clientIndividualFormik.setFieldValue('idtId', '')
                           }
+
+                          setIdtObj(newValue || {})
+
+                          clientIndividualFormik.setFieldValue('idtId', newValue?.recordId || '')
+                          clientIndividualFormik.setFieldValue('idtName', newValue?.name || '')
                         }}
                         error={clientIndividualFormik.touched.idtId && Boolean(clientIndividualFormik.errors.idtId)}
                         maxAccess={maxAccess}
@@ -857,7 +844,6 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                           stack({
                             Component: Confirmation,
                             props: {
-                              idTypeStore: idTypeStore,
                               formik: clientIndividualFormik,
                               labels: labels,
                               refreshProf
@@ -1383,12 +1369,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                     <Grid item xs={12} key={newProf}>
                       <ResourceComboBox
                         endpointId={RemittanceSettingsRepository.Profession.qry}
-                        filter={
-                          idTypeStore.filter(item => item.recordId === clientIndividualFormik.values.idtId)[0]
-                            ?.isDiplomat
-                            ? item => item.diplomatStatus === 2
-                            : undefined
-                        }
+                        filter={idtObj?.isDiplomat ? item => item.diplomatStatus === 2 : undefined}
                         name='professionId'
                         label={labels.profession}
                         valueField='recordId'

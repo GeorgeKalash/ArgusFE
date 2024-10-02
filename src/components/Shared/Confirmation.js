@@ -11,7 +11,7 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import moment from 'moment-hijri'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 
-const Confirmation = ({ labels, formik, editMode, idTypeStore, maxAccess, refreshProf = () => {} }) => {
+const Confirmation = ({ labels, formik, editMode, maxAccess, refreshProf = () => {} }) => {
   const [showAsPassword, setShowAsPassword] = useState(true)
   const [showAsPasswordRepeat, setShowAsPasswordRepeat] = useState(false)
   const { getRequest } = useContext(RequestsContext)
@@ -88,20 +88,7 @@ const Confirmation = ({ labels, formik, editMode, idTypeStore, maxAccess, refres
     <FormShell form={fetchFormik} maxAccess={maxAccess} editMode={editMode} infoVisible={false}>
       <Grid container spacing={4}>
         <Grid item xs={12}>
-          {}
-          <CustomComboBox
-            name='idtId'
-            label={labels.id_type}
-            valueField='recordId'
-            displayField='name'
-            readOnly={true}
-            store={idTypeStore}
-            value={
-              (fetchFormik.values?.idtId || fetchFormik.values?.id_type) &&
-              idTypeStore.filter(item => item.recordId === (fetchFormik.values.idtId || fetchFormik.values.id_type))[0]
-            }
-            required
-          />
+          <CustomTextField name='idTypeName' label={labels.id_type} readOnly={true} value={formik.values.idtName} />
         </Grid>
         <Grid item xs={12}>
           <CustomDatePicker
