@@ -1,14 +1,14 @@
-import React, { useContext, useRef } from 'react'
+import React, { useContext } from 'react'
 import { AgGridReact } from 'ag-grid-react'
 import 'ag-grid-community/styles/ag-grid.css'
 import 'ag-grid-community/styles/ag-theme-alpine.css'
-import { Box, IconButton, TextField } from '@mui/material'
+import { Box, IconButton, TextField, Tooltip } from '@mui/material'
 import Checkbox from '@mui/material/Checkbox'
 import Image from 'next/image'
 import editIcon from '../../../public/images/TableIcons/edit.png'
 import { useState } from 'react'
 import { useEffect } from 'react'
-import 'ag-grid-enterprise'
+import 'ag-grid-community'
 import FirstPageIcon from '@mui/icons-material/FirstPage'
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore'
 import NavigateNextIcon from '@mui/icons-material/NavigateNext'
@@ -97,7 +97,6 @@ const Table = ({
   const filteredColumns = columns.filter(column => !shouldRemoveColumn(column))
 
   useEffect(() => {
-    // console.log('props?.gridData?.list ', props?.gridData?.list)
     const areAllValuesTrue = props?.gridData?.list?.every(item => item?.checked === true)
     setChecked(areAllValuesTrue)
     if (typeof setData === 'function') onSelectionChanged
@@ -400,11 +399,125 @@ const Table = ({
     })
   }
 
+  const checkboxCellRenderer = params => {
+    return (
+      <Checkbox
+        checked={params.value}
+        onChange={e => {
+          const checked = e.target.checked
+          if (rowSelection !== 'single') {
+            params.node.setDataValue(params.colDef.field, checked)
+          } else {
+            params.api.forEachNode(node => {
+              if (node.id === params.node.id) {
+                node.setDataValue(params.colDef.field, checked)
+              } else if (checked) {
+                node.setDataValue(params.colDef.field, false)
+              }
+            })
+          }
+
+          if (handleCheckboxChange) {
+            handleCheckboxChange()
+          }
+        }}
+      />
+    )
+  }
+
+  const onFirstDataRendered = async params => {
+    params.api.sizeColumnsToFit()
+    await params.api.forEachNode(node => {
+      if (rowSelection === 'single') {
+        const checked = node.data?.checked || false
+        node.setDataValue('checked', checked)
+      }
+    })
+  }
+
+  const FieldWrapper = params => {
+    const [tooltipOpen, setTooltipOpen] = useState(false)
+
+    const handleClick = event => {
+      const range = document.createRange()
+      range.selectNodeContents(event.currentTarget)
+      const selection = window.getSelection()
+      selection.removeAllRanges()
+      selection.addRange(range)
+    }
+
+    const handleDoubleClick = params => {
+      navigator.clipboard.writeText(params.target.innerText).then(() => {
+        setTooltipOpen(true)
+        setTimeout(() => setTooltipOpen(false), 500)
+      })
+    }
+
+    return (
+      <Box>
+        {tooltipOpen && (
+          <Box
+            sx={{
+              zIndex: 1000,
+              position: 'fixed',
+              top: '-40px',
+              backgroundColor: 'black',
+              color: 'white',
+              paddingY: '1px',
+              paddingX: '3px',
+              borderRadius: '5px'
+            }}
+          >
+            Copied!
+          </Box>
+        )}
+        <Box
+          onClick={handleClick}
+          onDoubleClick={handleDoubleClick}
+          sx={{
+            userSelect: 'text',
+            cursor: 'pointer',
+            height: '50%',
+            width: '100%',
+            '&::selection': {
+              backgroundColor: 'none !important',
+              color: 'inherit'
+            },
+            '&:focus': {
+              outline: 'none'
+            }
+          }}
+        >
+          {params.value}
+        </Box>
+      </Box>
+    )
+  }
+
+  const columnDefs = [
+    ...(showCheckboxColumn
+      ? [
+          {
+            headerName: '',
+            field: 'checked',
+            cellRenderer: checkboxCellRenderer,
+            headerComponent: params =>
+              rowSelection !== 'single' && <Checkbox checked={checked} onChange={e => selectAll(params, e)} />,
+            suppressMenu: true
+          }
+        ]
+      : []),
+    ...filteredColumns.map(column => ({
+      ...column,
+      cellRenderer: column.cellRenderer ? column.cellRenderer : FieldWrapper
+    }))
+  ]
+
   if (props?.onEdit || props?.onDelete) {
     const deleteBtnVisible = maxAccess ? props?.onDelete && maxAccess > TrxType.EDIT : props?.onDelete ? true : false
 
-    if (!filteredColumns?.some(column => column.field === 'actions'))
-      filteredColumns?.push({
+    if (!columnDefs?.some(column => column.field === 'actions'))
+      columnDefs?.push({
         field: 'actions',
         headerName: '',
         width: 100,
@@ -462,58 +575,6 @@ const Table = ({
         }
       })
   }
-
-  const checkboxCellRenderer = params => {
-    return (
-      <Checkbox
-        checked={params.value}
-        onChange={e => {
-          const checked = e.target.checked
-          if (rowSelection !== 'single') {
-            params.node.setDataValue(params.colDef.field, checked)
-          } else {
-            params.api.forEachNode(node => {
-              if (node.id === params.node.id) {
-                node.setDataValue(params.colDef.field, checked)
-              } else if (checked) {
-                node.setDataValue(params.colDef.field, false)
-              }
-            })
-          }
-
-          if (handleCheckboxChange) {
-            handleCheckboxChange()
-          }
-        }}
-      />
-    )
-  }
-
-  const onFirstDataRendered = async params => {
-    params.api.sizeColumnsToFit()
-    await params.api.forEachNode(node => {
-      if (rowSelection === 'single') {
-        const checked = node.data?.checked || false
-        node.setDataValue('checked', checked)
-      }
-    })
-  }
-
-  const columnDefs = [
-    ...(showCheckboxColumn
-      ? [
-          {
-            headerName: '',
-            field: 'checked',
-            cellRenderer: checkboxCellRenderer,
-            headerComponent: params =>
-              rowSelection !== 'single' && <Checkbox checked={checked} onChange={e => selectAll(params, e)} />,
-            suppressMenu: true // if i want to remove menu from header
-          }
-        ]
-      : []),
-    ...filteredColumns
-  ]
 
   return (
     <VertLayout>
