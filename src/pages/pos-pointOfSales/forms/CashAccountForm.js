@@ -77,7 +77,7 @@ const CashAccountForm = ({ store, labels, maxAccess }) => {
       props: {
         endpointId: CashBankRepository.CbBankAccounts.qry,
         parameters: `_type=0`,
-        displayField: 'name',
+        displayField: ['name', 'reference'],
         valueField: 'recordId',
         mapping: [
           { from: 'recordId', to: 'cashAccountId' },
@@ -86,7 +86,10 @@ const CashAccountForm = ({ store, labels, maxAccess }) => {
           { from: 'typeName', to: 'typeName' }
         ],
 
-        columnsInDropDown: [{ key: 'name', value: 'Name' }]
+        columnsInDropDown: [
+          { key: 'name', value: 'Name' },
+          { key: 'reference', value: 'Reference' }
+        ]
       }
     },
 

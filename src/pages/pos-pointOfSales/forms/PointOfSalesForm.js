@@ -161,7 +161,6 @@ const PointOfSalesForm = ({ labels, maxAccess, setStore, store }) => {
                 endpointId={SystemRepository.Currency.qry}
                 name='currencyId'
                 label={labels.currency}
-                readOnly={formik.values.status == '3'}
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 columnsInDropDown={[
@@ -201,7 +200,7 @@ const PointOfSalesForm = ({ labels, maxAccess, setStore, store }) => {
                 endpointId={InventoryRepository.Site.qry}
                 name='siteId'
                 filter={item => item.plantId === formik.values.plantId}
-                readOnly={!!formik.values.onlineStore || !!!formik.values.plantId}
+                readOnly={!!formik.values.onlineStore || !!!formik.values.plantId || editMode}
                 required={!formik.values.onlineStore}
                 label={labels.invSite}
                 values={formik.values}

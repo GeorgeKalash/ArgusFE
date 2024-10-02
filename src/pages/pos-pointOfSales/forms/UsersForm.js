@@ -39,7 +39,8 @@ const UsersForm = ({ store, labels, maxAccess }) => {
           userId: '',
           spId: '',
           email: '',
-          spName: ''
+          spName: '',
+          spRef: ''
         }
       ]
     },
@@ -95,13 +96,18 @@ const UsersForm = ({ store, labels, maxAccess }) => {
       props: {
         endpointId: SaleRepository.SalesPerson.qry,
         parameters: `_filter=`,
-        displayField: 'name',
+        displayField: ['name', 'spRef'],
+
         valueField: 'recordId',
         mapping: [
           { from: 'recordId', to: 'spId' },
-          { from: 'name', to: 'spName' }
+          { from: 'name', to: 'spName' },
+          { from: 'spRef', to: 'spRef' }
         ],
-        columnsInDropDown: [{ key: 'name', value: 'Name' }]
+        columnsInDropDown: [
+          { key: 'name', value: 'Name' },
+          { key: 'spRef', value: 'Reference' }
+        ]
       }
     }
   ]
