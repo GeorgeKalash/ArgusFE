@@ -151,5 +151,9 @@ export const SaleRepository = {
   },
   FilterAddress: {
     snapshot: service + 'snapshotADD'
+  },
+  FinancialIntegrators: {
+    qry: service + 'qryFII',
+    set: service + 'setFII'
   }
 }
