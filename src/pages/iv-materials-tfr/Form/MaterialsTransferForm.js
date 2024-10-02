@@ -710,7 +710,12 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
                     readOnly={isPosted || isClosed}
                     label={labels.fromSite}
                     values={formik.values}
-                    displayField='name'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    displayFieldWidth={1}
                     required
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
@@ -748,7 +753,12 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
                     readOnly={isPosted || isClosed}
                     label={labels.toSite}
                     values={formik?.values}
-                    displayField='name'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    displayFieldWidth={1}
                     required
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
