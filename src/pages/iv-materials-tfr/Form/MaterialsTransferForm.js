@@ -34,8 +34,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
   const { stack } = useWindow()
   const { stack: stackError } = useError()
 
-  const [measurementUnits, setMeasurementUnits] = useState([])
-  const [filters, setFilters] = useState(measurementUnits)
+  const [filters, setFilters] = useState()
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.MaterialTransfer,
@@ -74,7 +73,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
         qty: null,
         componentSeqNo: 0,
         qtyInBase: '',
-        muId: 1,
+        muId: null,
         muQty: '',
         muRef: '',
         weight: null,
@@ -162,20 +161,23 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
           })
 
           formik.setFieldValue('reference', res2.record.reference)
-          notificationData = {
-            recordId: res.recordId,
-            functionId: SystemFunction.MaterialTransfer,
-            notificationGroupId: formik.values.notificationGroupId,
-            date: formik.values.date,
-            reference: res2.record.reference,
-            status: 1
+
+          if (!!formik.values.notificationGroupId) {
+            notificationData = {
+              recordId: res.recordId,
+              functionId: SystemFunction.MaterialTransfer,
+              notificationGroupId: formik.values.notificationGroupId,
+              date: formik.values.date,
+              reference: res2.record.reference,
+              status: 1
+            }
+  
+            await postRequest({
+              extension: AccessControlRepository.Notification.set,
+              record: JSON.stringify(notificationData)
+            })  
           }
-
-          await postRequest({
-            extension: AccessControlRepository.Notification.set,
-            record: JSON.stringify(notificationData)
-          })
-
+          
           invalidate()
         } else {
           if (formik.values.notificationGroupId) {
@@ -316,6 +318,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
                 totalCost,
                 msId: newRow?.msId,
                 muRef: updatedFilters?.[newRow?.itemId]?.list?.[0]?.reference,
+                muId: updatedFilters?.[newRow?.itemId]?.list?.[0]?.recordId,
                 metalId
               })
 
