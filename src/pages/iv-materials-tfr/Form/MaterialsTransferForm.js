@@ -76,13 +76,14 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
         qtyInBase: '',
         muId: 1,
         muQty: '',
+        muRef: '',
         weight: null,
         unitCost: 0,
         msId: null,
         trackBy: null,
         lotCategoryId: null,
         metalId: null,
-        totalCost: null,
+        totalCost: 0,
         priceType: null
       }
     ]
@@ -106,7 +107,8 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
         .of(
           yup.object().shape({
             sku: yup.string().required(),
-            qty: yup.string().required()
+            qty: yup.string().required(),
+            msId: yup.string().required()
           })
         )
         .required()
@@ -225,17 +227,6 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     }
   }
 
-  const getMeasurementUnits = async msId => {
-    const res = await getRequest({
-      extension: InventoryRepository.MeasurementUnit.qry,
-      parameters: `_msId=${msId}`
-    })
-
-    setMeasurementUnits(res)
-
-    return res
-  }
-
   const getUnitCost = async itemId => {
     const res = await getRequest({
       extension: InventoryRepository.Cost.get,
@@ -270,6 +261,17 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     return weightSum + weightValue
   }, 0)
 
+  const getMeasurementUnits = async msId => {
+    try {
+      const res = await getRequest({
+        extension: InventoryRepository.MeasurementUnit.qry,
+        parameters: `_msId=${msId}`
+      })
+
+      return res
+    } catch (error) {}
+  }
+
   const columns = [
     {
       component: 'resourcelookup',
@@ -303,17 +305,22 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
             const unitCost = (await getUnitCost(newRow?.itemId)) ?? 0
             const totalCost = calcTotalCost(newRow)
 
-            const measurementUnits = await getMeasurementUnits(newRow?.msId)
+            const res = await getMeasurementUnits(newRow?.msId)
 
-            update({
-              weight,
-              unitCost,
-              totalCost,
-              msId: newRow?.msId,
-              metalId
+            setFilters(prev => {
+              const updatedFilters = { ...prev, [newRow.itemId]: res }
+
+              update({
+                weight,
+                unitCost,
+                totalCost,
+                msId: newRow?.msId,
+                muRef: updatedFilters?.[newRow?.itemId]?.list?.[0]?.reference,
+                metalId
+              })
+
+              return updatedFilters
             })
-
-            setFilters(measurementUnits.list)
           }
         } catch (exception) {}
       }
@@ -339,7 +346,6 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       label: labels.muId,
       name: 'muRef',
       props: {
-        store: filters,
         displayField: 'reference',
         valueField: 'recordId',
         mapping: [
@@ -348,7 +354,10 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
           { from: 'recordId', to: 'muId' }
         ]
       },
-      async onChange({ row: { update, oldRow, newRow } }) {
+      propsReducer({ row, props }) {
+        return { ...props, store: filters[row.itemId]?.list ?? [] }
+      },
+      async onChange({ row: { update, newRow } }) {
         try {
           if (newRow) {
             const qtyInBase = newRow?.qty * newRow?.muQty
