@@ -280,6 +280,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
         valueField: 'recordId',
         displayField: 'sku',
         mandatory: true,
+        displayFieldWidth: 3,
         mapping: [
           { from: 'recordId', to: 'itemId' },
           { from: 'msId', to: 'msId' },
@@ -291,9 +292,9 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
         ],
         columnsInDropDown: [
           { key: 'sku', value: 'SKU' },
-          { key: 'name', value: 'Name' }
-        ],
-        displayFieldWidth: 1
+          { key: 'name', value: 'Name' },
+          { key: 'flName', value: 'flName' }
+        ]
       },
       async onChange({ row: { update, oldRow, newRow } }) {
         try {
