@@ -248,7 +248,6 @@ export const ResourceIds = {
   AgingButton: 31419,
   LotCategories: 41108,
   ClientBalance: 36131,
-  SalesDefaults: 51114,
   MaterialsTransfer: 41208,
   InventoryTransaction: 41209,
   FinancialIntegrators: 51105,
