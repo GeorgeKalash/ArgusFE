@@ -251,7 +251,9 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
           Component: CreditInvoiceForm,
           props: {
             _labels: _labelsINV,
-            maxAccess: accessINV,
+            access: accessINV,
+            plantId: plantId,
+            userData: userData,
             recordId: res.recordId
           },
           width: 900,

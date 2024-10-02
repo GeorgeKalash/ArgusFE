@@ -210,7 +210,7 @@ export default function CashCountForm({ labels, maxAccess: access, recordId }) {
           status: header.status,
           releaseStatus: header.releaseStatus,
           date: formatDateFromApi(header.date),
-          startTime: getTimeInTimeZone(header.startTime),
+          startTime: header.startTime && getTimeInTimeZone(header.startTime),
           endTime: header.endTime && getTimeInTimeZone(header.endTime),
           items: items.map(({ seqNo, variation, ...rest }, index) => ({
             id: seqNo,

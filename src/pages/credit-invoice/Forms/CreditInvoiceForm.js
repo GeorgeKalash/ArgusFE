@@ -512,7 +512,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
       key: 'Post',
       condition: true,
       onClick: onPost,
-      disabled: formik.values.status != 4
+      disabled: formik.values.status === 3 || formik.values.status === 4
     },
     {
       key: 'Cancel',

@@ -22,7 +22,7 @@ import { useWindow } from 'src/windows'
 import DeleteDialog from './DeleteDialog'
 import StrictDeleteConfirmation from './StrictDeleteConfirmation'
 import { HIDDEN, accessLevel } from 'src/services/api/maxAccess'
-import { formatDateDefault, getTimeInTimeZone } from 'src/lib/date-helper'
+import { formatDateDefault, getTimeInTimeZone, formatDateTimeDefault } from 'src/lib/date-helper'
 import { getFormattedNumber } from 'src/lib/numberField-helper'
 import { VertLayout } from './Layouts/VertLayout'
 import { Grow } from './Layouts/Grow'
@@ -65,6 +65,12 @@ const Table = ({
         return {
           ...col,
           valueGetter: ({ data }) => formatDateDefault(data?.[col.field])
+        }
+      }
+      if (col.type === 'dateTime') {
+        return {
+          ...col,
+          valueGetter: ({ data }) => data?.[col.field] && formatDateTimeDefault(data?.[col.field])
         }
       }
       if (col.type === 'number' || col?.type?.field === 'number') {
