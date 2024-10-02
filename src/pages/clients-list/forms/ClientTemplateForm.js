@@ -203,8 +203,10 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
   }
 
   useEffect(() => {
-    newProf && fillProfessionStore()
-    newProf && setNewProf(!newProf)
+    if (newProf) {
+      fillProfessionStore()
+      setNewProf(!newProf)
+    }
   }, [newProf])
 
   useEffect(() => {
@@ -638,15 +640,11 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
 
   const fillFilterProfession = value => {
     if (value) {
-      // const filteredList = professionStore?.filter(item => item.diplomatStatus === 2)
       clientIndividualFormik.setFieldValue('isDiplomat', true)
       clientIndividualFormik.setFieldValue('isDiplomatReadOnly', true)
-      // setProfessionFilterStore(filteredList)
     } else {
-      const filteredList = professionStore
       clientIndividualFormik.setFieldValue('isDiplomat', false)
       clientIndividualFormik.setFieldValue('isDiplomatReadOnly', false)
-      // setProfessionFilterStore(filteredList)
     }
   }
 
@@ -1418,7 +1416,6 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         }
                         readOnly={editMode && !allowEdit}
                         value={
-                          // professionFilterStore &&
                           clientIndividualFormik.values.professionId &&
                           professionStore?.filter(
                             item => item.recordId === clientIndividualFormik.values.professionId

@@ -77,9 +77,9 @@ const Confirmation = ({ labels, formik, editMode, idTypeStore, maxAccess, setNew
           fl_lastName: res.lastName,
           fl_familyName: res.familyName,
           gender: res.gender === 'ذكر' ? '1' : '2',
-          professionId: res.professionId,
-          natiobnality: res.professionId
+          professionId: res.professionId
         })
+
         res.newProfessionMode && setNewProf(true)
       })
       .catch(error => {})
