@@ -111,7 +111,13 @@ const recalcFooter = (_array, _footerSummary) => {
     _footerSummary.totalUpo += item.upo
     _footerSummary.sumVat += item.vatAmount
   })
-
+  console.log(
+    'check values ',
+    _footerSummary.sumExtended,
+    _footerSummary.sumVat,
+    _footerSummary.miscAmount,
+    _footerSummary.tdAmount
+  )
   _footerSummary.net =
     _footerSummary.sumExtended + _footerSummary.sumVat + _footerSummary.miscAmount - _footerSummary.tdAmount
 

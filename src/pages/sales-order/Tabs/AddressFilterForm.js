@@ -40,7 +40,7 @@ export default function AddressFilterForm({ labels, shipment, bill, form, window
           form.setFieldValue('shipToAddressId', checkedADD.addressId)
         }
         if (bill) {
-          form.setFieldValue('BillAddress', address)
+          form.setFieldValue('billAddress', address)
           form.setFieldValue('billAddressId', checkedADD.addressId)
           form.setFieldValue('billToAddressId', checkedADD.addressId)
         }
