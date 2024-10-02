@@ -9,12 +9,12 @@ import CustomComboBox from '../Inputs/CustomComboBox'
 import { formatDateFromApi, formatDateToApiFunction } from 'src/lib/date-helper'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import moment from 'moment-hijri'
-import { idID } from '@mui/material/locale'
+import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 
-const Confirmation = ({ labels, formik, editMode, idTypeStore, maxAccess }) => {
+const Confirmation = ({ labels, formik, editMode, idTypeStore, maxAccess, setNewProf }) => {
   const [showAsPassword, setShowAsPassword] = useState(true)
   const [showAsPasswordRepeat, setShowAsPasswordRepeat] = useState(false)
-  const { getMicroRequest } = useContext(RequestsContext)
+  const { getRequest } = useContext(RequestsContext)
 
   const handleCopy = event => {
     event.preventDefault()
@@ -55,19 +55,18 @@ const Confirmation = ({ labels, formik, editMode, idTypeStore, maxAccess }) => {
 
     const hijriDate = moment(formatDateToApiFunction(obj.birthDate), 'YYYY-MM-DD').format('iYYYY-iMM-iDD')
 
-    const defaultParams = `_number=${obj.idNo}&_dateTime=${hijriDate}&_type=${type}`
+    const defaultParams = `_number=${obj.idNo}&_date=${hijriDate}&_yakeenType=${type}`
     var parameters = defaultParams
-    getMicroRequest({
-      extension: 'getInformations',
+    getRequest({
+      extension: CurrencyTradingSettingsRepository.Yakeen.get,
       parameters: parameters
     })
-      .then(res => {
-        const dateObj = new Date(res?.idExpirationDate)
-        const convertedTimestamp = dateObj.getTime() || ''
+      .then(result => {
+        const res = result.record
 
         formik.setValues({
           ...formik.values,
-          expiryDate: convertedTimestamp,
+          expiryDate: formatDateFromApi(res.idExpirationDate),
           firstName: res.fl_firstName,
           middleName: res.fl_middleName,
           familyName: res.fl_familyName,
@@ -77,8 +76,11 @@ const Confirmation = ({ labels, formik, editMode, idTypeStore, maxAccess }) => {
           fl_middleName: res.middleName,
           fl_lastName: res.lastName,
           fl_familyName: res.familyName,
-          gender: res.gender === 'ذكر' ? '1' : '2'
+          gender: res.gender === 'ذكر' ? '1' : '2',
+          professionId: res.professionId,
+          natiobnality: res.professionId
         })
+        res.newProfessionMode && setNewProf(true)
       })
       .catch(error => {})
   }

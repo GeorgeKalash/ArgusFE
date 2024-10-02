@@ -44,11 +44,11 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
   const [showAsPasswordPhoneRepeat, setShowAsPasswordPhoneRepeat] = useState(false)
   const [referenceRequired, setReferenceRequired] = useState(true)
   const [professionStore, setProfessionStore] = useState([])
-  const [professionFilterStore, setProfessionFilterStore] = useState([])
   const [address, setAddress] = useState([])
   const [editMode, setEditMode] = useState(null)
   const [idTypeStore, setIdTypeStore] = useState([])
   const [otpShow, setOtpShow] = useState(false)
+  const [newProf, setNewProf] = useState(false)
 
   const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
@@ -203,6 +203,11 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
   }
 
   useEffect(() => {
+    newProf && fillProfessionStore()
+    newProf && setNewProf(!newProf)
+  }, [newProf])
+
+  useEffect(() => {
     fillProfessionStore()
     fillType()
 
@@ -338,7 +343,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       .catch(error => {})
   }
 
-  const fillProfessionStore = cId => {
+  const fillProfessionStore = status => {
     var parameters = `_filter=`
     getRequest({
       extension: RemittanceSettingsRepository.Profession.qry,
@@ -346,7 +351,6 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     })
       .then(res => {
         setProfessionStore(res.list)
-        setProfessionFilterStore(res.list)
       })
       .catch(error => {})
   }
@@ -634,15 +638,15 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
 
   const fillFilterProfession = value => {
     if (value) {
-      const filteredList = professionStore?.filter(item => item.diplomatStatus === 2)
+      // const filteredList = professionStore?.filter(item => item.diplomatStatus === 2)
       clientIndividualFormik.setFieldValue('isDiplomat', true)
       clientIndividualFormik.setFieldValue('isDiplomatReadOnly', true)
-      setProfessionFilterStore(filteredList)
+      // setProfessionFilterStore(filteredList)
     } else {
       const filteredList = professionStore
       clientIndividualFormik.setFieldValue('isDiplomat', false)
       clientIndividualFormik.setFieldValue('isDiplomatReadOnly', false)
-      setProfessionFilterStore(filteredList)
+      // setProfessionFilterStore(filteredList)
     }
   }
 
@@ -854,13 +858,9 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                             if (newValue['type'] && (newValue['type'] === 1 || newValue['type'] === 2)) {
                               getCountry()
                             }
-                          } else {
-                            fillFilterProfession('')
-                          }
-
-                          if (newValue) {
                             clientIndividualFormik.setFieldValue('idtId', newValue?.recordId)
                           } else {
+                            fillFilterProfession('')
                             clientIndividualFormik.setFieldValue('idtId', '')
                           }
                         }}
@@ -878,7 +878,8 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                             props: {
                               idTypeStore: idTypeStore,
                               formik: clientIndividualFormik,
-                              labels: labels
+                              labels: labels,
+                              setNewProf
                             },
                             title: labels.fetch,
                             width: 400,
@@ -1409,12 +1410,17 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                           { key: 'name', value: 'Name' },
                           { key: 'flName', value: 'Foreign Language Name' }
                         ]}
-                        store={professionFilterStore}
+                        store={
+                          idTypeStore.filter(item => item.recordId === clientIndividualFormik.values.idtId)[0]
+                            ?.isDiplomat
+                            ? professionStore?.filter(item => item.diplomatStatus === 2)
+                            : professionStore
+                        }
                         readOnly={editMode && !allowEdit}
                         value={
-                          professionFilterStore &&
+                          // professionFilterStore &&
                           clientIndividualFormik.values.professionId &&
-                          professionFilterStore?.filter(
+                          professionStore?.filter(
                             item => item.recordId === clientIndividualFormik.values.professionId
                           )[0]
                         }
