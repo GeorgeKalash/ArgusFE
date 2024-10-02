@@ -21,7 +21,7 @@ const InventoryTransaction = props => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: InventoryRepository.Transaction.qry,
+    endpointId: InventoryRepository.Transaction.qry2,
     datasetId: ResourceIds.InventoryTransaction
   })
 
@@ -64,7 +64,7 @@ const InventoryTransaction = props => {
 
   async function fetchGridData() {
     const res = await getRequest({
-      extension: InventoryRepository.Transaction.qry,
+      extension: InventoryRepository.Transaction.qry2,
       parameters: `_recordId=${recordId}&_functionId=${functionId}`
     })
     let totalExtendedCosts = 0

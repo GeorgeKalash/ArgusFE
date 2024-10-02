@@ -121,6 +121,6 @@ export const InventoryRepository = {
     get: service + 'getCOS',
   },
   Transaction: {
-    qry: service + 'qry2TRX',
+    qry2: service + 'qry2TRX',
   }
 }
