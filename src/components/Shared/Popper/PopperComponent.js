@@ -43,7 +43,13 @@ const PopperComponent = ({ children, anchorEl, open, ...props }) => {
       ref={popperRef}
       sx={{
         zIndex: '2 !important',
-        visibility: open ? 'visible' : 'hidden'
+        visibility: open ? 'visible' : 'hidden',
+        '& .MuiMultiSectionDigitalClock-root': {
+          width: '200px'
+        },
+        '& .MuiMenuItem-root': {
+          paddingRight: '10px'
+        }
       }}
       style={{
         position: 'absolute',
