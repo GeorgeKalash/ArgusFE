@@ -62,7 +62,7 @@ export default function RtReceiptVouchers() {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: RemittanceOutwardsRepository.ReceiptVouchers.page,
-    datasetId: ResourceIds.ReceiptVoucher,
+    datasetId: ResourceIds.RemittanceReceiptVoucher,
     filter: {
       filterFn: fetchWithFilter
     }
@@ -92,7 +92,7 @@ export default function RtReceiptVouchers() {
   }
 
   const { proxyAction } = useDocumentTypeProxy({
-    functionId: SystemFunction.ReceiptVoucher,
+    functionId: SystemFunction.RemittanceReceiptVoucher,
     action: openForm
   })
 

@@ -25,14 +25,14 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import FieldSet from 'src/components/Shared/FieldSet'
 import { DataGrid } from 'src/components/Shared/DataGrid'
-import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
+import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 
 export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId, cashAccountId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
-    functionId: SystemFunction.ReceiptVoucher,
+    functionId: SystemFunction.RemittanceReceiptVoucher,
     access: access,
     enabled: !recordId
   })
@@ -49,26 +49,10 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       reference: '',
       accountId: null,
       date: new Date(),
-      currencyId: null,
       dtId: documentType?.dtId,
-      dgId: '',
       amount: '',
-      baseAmount: '',
-      notes: '',
-      oDocId: '',
-      printStatus: '',
+      outwardId: null,
       status: 1,
-      paymentMethod: '1',
-      cashAccountId: null,
-      plantId: null,
-      exRate: 1.0,
-      rateCalcMethod: 1,
-      contactId: null,
-      collectorId: null,
-      isVerified: true,
-      template: 1,
-      sourceReference: '',
-      spId: '',
       amountRows: [
         {
           id: 1,
@@ -89,10 +73,8 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     },
     validationSchema: yup.object({
       accountId: yup.string().required(),
-      currencyId: yup.string().required(),
       cashAccountId: yup.string().required(),
-      amount: yup.string().required(),
-      paymentMethod: yup.string().required()
+      amount: yup.string().required()
     }),
     onSubmit: async obj => {
       try {
@@ -327,8 +309,8 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
 
   return (
     <FormShell
-      resourceId={ResourceIds.ReceiptVoucher}
-      functionId={SystemFunction.ReceiptVoucher}
+      resourceId={ResourceIds.RemittanceReceiptVoucher}
+      functionId={SystemFunction.RemittanceReceiptVoucher}
       form={formik}
       actions={actions}
       maxAccess={maxAccess}
@@ -358,8 +340,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                   <CustomDatePicker
                     name='date'
                     label={labels.date}
-                    onChange={formik.setFieldValue}
-                    readOnly={readOnly}
+                    readOnly={true}
                     value={formik.values.date}
                     maxAccess={maxAccess}
                     error={formik.touched.date && Boolean(formik.errors.date)}
@@ -371,21 +352,21 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
               <Grid container spacing={2}>
                 <Grid item xs={6}>
                   <ResourceLookup
-                    endpointId={RemittanceSettingsRepository.Correspondent.snapshot}
+                    endpointId={RemittanceOutwardsRepository.OutwardsOrder.snapshot}
                     valueField='reference'
-                    displayField='name'
-                    name='corId'
-                    label={labels.corName}
+                    displayField='beneficiaryName'
+                    name='outwardId'
+                    label={labels.outwardName}
                     form={formik}
                     displayFieldWidth={2}
-                    valueShow='corRef'
+                    valueShow='outwardRef'
                     readOnly={editMode}
-                    secondValueShow='corName'
+                    secondValueShow='outwardName'
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('corId', newValue ? newValue.recordId : '')
-                      formik.setFieldValue('corName', newValue ? newValue.name : '')
-                      formik.setFieldValue('corRef', newValue ? newValue.reference : '')
+                      formik.setFieldValue('outwardId', newValue ? newValue.recordId : '')
+                      formik.setFieldValue('outwardName', newValue ? newValue.beneficiaryName : '')
+                      formik.setFieldValue('outwardRef', newValue ? newValue.reference : '')
                     }}
                   />
                 </Grid>
@@ -394,7 +375,6 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                     name='amount'
                     label={labels.amount}
                     value={formik.values.amount}
-                    required
                     readOnly={true}
                     maxAccess={maxAccess}
                     onChange={e => formik.setFieldValue('amount', e.target.value)}
