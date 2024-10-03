@@ -58,6 +58,7 @@ const RPBGridToolbar = ({
   const formatDataDictForApi = rpbParams => {
     const formattedData = rpbParams.reduce((acc, { display }, index) => {
       acc[index] = display || ''
+
       return acc
     }, {})
 
