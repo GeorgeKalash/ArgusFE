@@ -16,7 +16,6 @@ import CreditInvoiceForm from '../credit-invoice/Forms/CreditInvoiceForm'
 import { KVSRepository } from 'src/repositories/KVSRepository'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 import TransactionForm from '../currency-trading/forms/TransactionForm'
-import OutwardsForm from '../outwards-transfer/Tabs/OutwardsForm'
 import ClientTemplateForm from '../clients-list/forms/ClientTemplateForm'
 import { RTCLRepository } from 'src/repositories/RTCLRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -29,6 +28,7 @@ import OutwardsReturnForm from '../outwards-return/Forms/OutwardsReturnForm'
 import InwardTransferForm from '../inward-transfer/forms/InwardTransferForm'
 import InwardSettlementForm from '../inward-settlement/forms/InwardSettlementForm'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import OutwardsForm from '../outwards-order/Tabs/OutwardsForm'
 
 const DocumentsOnHold = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -167,10 +167,10 @@ const DocumentsOnHold = () => {
 
         break
 
-      case SystemFunction.Outwards:
+      case SystemFunction.OutwardsOrder:
         relevantComponent = OutwardsForm
-        labels = await getLabels(ResourceIds.OutwardsTransfer)
-        relevantAccess = await getAccess(ResourceIds.OutwardsTransfer)
+        labels = await getLabels(ResourceIds.OutwardsOrder)
+        relevantAccess = await getAccess(ResourceIds.OutwardsOrder)
 
         windowWidth = 1100
         title = labels.OutwardsTransfer

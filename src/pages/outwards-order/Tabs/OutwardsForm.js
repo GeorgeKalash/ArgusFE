@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Grid, Button } from '@mui/material'
-import { getFormattedNumber } from 'src/lib/numberField-helper'
 import * as yup from 'yup'
 import { useWindow } from 'src/windows'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
@@ -30,8 +29,6 @@ import { DataSets } from 'src/resources/DataSets'
 import { RTCLRepository } from 'src/repositories/RTCLRepository'
 import FormGrid from 'src/components/form/layout/FormGrid'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
-import { DataGrid } from 'src/components/Shared/DataGrid'
-import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
@@ -40,34 +37,30 @@ import { useForm } from 'src/hooks/form'
 import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
 import { useInvalidate } from 'src/hooks/resource'
 import { ControlContext } from 'src/providers/ControlContext'
-import InfoForm from './InfoForm'
 import { RemittanceBankInterface } from 'src/repositories/RemittanceBankInterface'
 import BeneficiaryListWindow from '../Windows/BeneficiaryListWindow'
 
-export default function OutwardsForm({ labels, access, recordId, cashAccountId, plantId, userId, dtId, window }) {
+export default function OutwardsForm({ labels, access, recordId, plantId, userId, dtId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
   const DEFAULT_DELIVERYMODE = 7
-  const [mobilePlantExists, setMobilePlant] = useState(false)
 
   const { maxAccess } = useDocumentType({
-    functionId: SystemFunction.Outwards,
+    functionId: SystemFunction.OutwardsOrder,
     access,
     hasDT: false
   })
 
   const invalidate = useInvalidate({
-    endpointId: RemittanceOutwardsRepository.OutwardsTransfer.snapshot
+    endpointId: RemittanceOutwardsRepository.OutwardsOrder.snapshot
   })
 
   const initialValues = {
     recordId: recordId || null,
     dtId: dtId || null,
     plantId: plantId,
-    collectionPlantId: plantId,
-    cashAccountId: cashAccountId,
     userId: userId,
     productId: '',
     dispersalId: '',
@@ -117,9 +110,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
     cellPhone: '',
     poeId: '',
     status: 1,
-    ttNo: '',
     tokenNo: '',
-    trackingNo: '',
     valueDate: new Date(),
     defaultValueDate: new Date(),
     vatAmount: null,
@@ -138,7 +129,6 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
         id: 1,
         outwardId: '',
         seqNo: '',
-        cashAccountId: cashAccountId,
         cashAccount: '',
         ccId: '',
         ccName: '',
@@ -160,68 +150,27 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
     initialValues,
     validateOnChange: true,
     validationSchema: yup.object({
-      valueDate: yup.string().required(' '),
-      countryId: yup.string().required(' '),
-      dispersalType: yup.string().required(' '),
-      currencyId: yup.string().required(' '),
-      fcAmount: yup.string().required(' '),
-      productId: yup.string().required(' '),
-      commission: yup.string().required(' '),
-      lcAmount: yup.string().required(' '),
-      exRate: yup.string().required(' '),
-      clientId: yup.string().required(' '),
-      poeId: yup.string().required(' '),
-      beneficiaryId: yup.string().required(' '),
+      valueDate: yup.string().required(),
+      countryId: yup.string().required(),
+      dispersalType: yup.string().required(),
+      currencyId: yup.string().required(),
+      fcAmount: yup.string().required(),
+      productId: yup.string().required(),
+      commission: yup.string().required(),
+      lcAmount: yup.string().required(),
+      exRate: yup.string().required(),
+      clientId: yup.string().required(),
+      poeId: yup.string().required(),
+      beneficiaryId: yup.string().required(),
       tdAmount: yup.number().test(`isCommission less than tdAmount`, `Error`, function (value) {
         const { commission } = this.parent
 
         return value <= commission
-      }),
-      amountRows: yup
-        .array()
-        .of(
-          yup.object().shape({
-            type: yup
-              .string()
-              .required('Type is required')
-              .test('unique', 'Type must be unique', function (value) {
-                const { options } = this
-                if (!this.parent.outwardId) {
-                  const arrayOfTypes = options.context.amountRows.map(row => row.type)
-                  if (value == 2) {
-                    const countOfType1 = arrayOfTypes.filter(item => item === '2').length
-                    if (countOfType1 > 1) {
-                      return false
-                    }
-                  }
-                }
-
-                return true
-              }),
-            paidAmount: yup.string().test('Paid Amount', 'Paid Amount is required', function (value) {
-              if (this.parent.type == '2') {
-                return !!value
-              }
-
-              return true
-            }),
-            returnedAmount: yup.string().test('Returned Amount', 'Returned Amount is required', function (value) {
-              if (this.parent.type == '2') {
-                return !!value
-              }
-
-              return true
-            }),
-            amount: yup.string().nullable().required('Amount is required')
-          })
-        )
-
-        .required('Cash array is required')
+      })
     }),
     onSubmit: async values => {
       try {
         const copy = { ...values }
-        delete copy.amountRows
         delete copy.instantCashDetails
         delete copy.products
         copy.date = formatDateToApi(copy.date)
@@ -230,28 +179,14 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
         copy.vatAmount = vatAmount
         copy.amount = amount
 
-        const updatedRows = formik.values.amountRows.map((amountDetails, index) => {
-          const seqNo = index + 1
-
-          return {
-            ...amountDetails,
-            seqNo: seqNo,
-            cashAccountId: cashAccountId,
-            paidAmount: amountDetails.paidAmount || 0,
-            returnedAmount: amountDetails.returnedAmount || 0,
-            outwardId: formik.values.recordId || 0
-          }
-        })
-
         const amountGridData = {
           header: copy,
-          cash: updatedRows,
           bankType: formik.values.bankType,
           ICRequest: formik.values.instantCashDetails?.deliveryModeId ? formik.values.instantCashDetails : null
         }
 
         const amountRes = await postRequest({
-          extension: RemittanceOutwardsRepository.OutwardsTransfer.set2,
+          extension: RemittanceOutwardsRepository.OutwardsOrder.set2,
           record: JSON.stringify(amountGridData)
         })
 
@@ -262,7 +197,6 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
           const res2 = await getOutwards(amountRes.recordId)
           formik.setFieldValue('reference', res2.record.headerView.reference)
           invalidate()
-          setMobilePlant(false)
           !recordId && viewOTP(amountRes.recordId)
         }
       } catch (error) {}
@@ -272,121 +206,13 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
   const isClosed = formik.values.wip === 2
   const isPosted = formik.values.status === 4
 
-  const columns = [
-    {
-      component: 'resourcecombobox',
-      label: labels.type,
-      name: 'type',
-      props: {
-        datasetId: DataSets.CA_CASH_ACCOUNT_TYPE,
-        displayField: 'value',
-        valueField: 'key',
-        mapping: [
-          { from: 'key', to: 'type' },
-          { from: 'value', to: 'typeName' }
-        ]
-      },
-      async onChange({ row: { update, newRow } }) {
-        if (newRow.type != 2) return
-
-        const sumAmount = formik.values.amountRows.slice(0, -1).reduce((sum, row) => {
-          const curValue = parseFloat(row.amount.toString().replace(/,/g, '')) || 0
-
-          return sum + curValue
-        }, 0)
-
-        const currentAmount = (parseFloat(amount) - parseFloat(sumAmount)).toFixed(2)
-        update({ amount: currentAmount })
-      }
-    },
-    {
-      component: 'numberfield',
-      name: 'paidAmount',
-      label: labels.paidAmount,
-      defaultValue: '',
-      propsReducer({ row, props }) {
-        return { ...props, readOnly: row.type == 1 || !row.type }
-      },
-      async onChange({ row: { update, newRow } }) {
-        const sumAmount = formik.values.amountRows.slice(0, -1).reduce((sum, row) => {
-          const curValue = parseFloat(row.amount.toString().replace(/,/g, '')) || 0
-
-          return sum + curValue
-        }, 0)
-
-        let rowAmount
-        let returnedAmount
-
-        if (formik.values.amountRows.length === 1) {
-          rowAmount = newRow.paidAmount > sumAmount ? newRow.paidAmount : sumAmount - newRow.paidAmount
-          returnedAmount = (parseFloat(newRow.paidAmount) - parseFloat(amount)).toFixed(2)
-        } else {
-          const remainingAmount = (parseFloat(amount) - parseFloat(sumAmount)).toFixed(2)
-          returnedAmount = (parseFloat(newRow.paidAmount) - parseFloat(remainingAmount)).toFixed(2)
-          rowAmount = returnedAmount > 0 ? newRow.paidAmount - returnedAmount : newRow.paidAmount
-        }
-
-        update({
-          returnedAmount: returnedAmount,
-          amount: parseFloat(rowAmount).toFixed(2)
-        })
-      }
-    },
-    {
-      component: 'numberfield',
-      name: 'returnedAmount',
-      label: labels.returnedAmount,
-      defaultValue: '',
-      props: {
-        readOnly: true
-      }
-    },
-    {
-      component: 'numberfield',
-      name: 'amount',
-      label: labels.Amount,
-      defaultValue: ''
-    },
-    {
-      component: 'resourcecombobox',
-      name: 'ccName',
-      editable: false,
-      label: labels.creditCard,
-      props: {
-        endpointId: CashBankRepository.CreditCard.qry,
-        valueField: 'recordId',
-        displayField: 'name',
-        mapping: [
-          { from: 'recordId', to: 'ccId' },
-          { from: 'name', to: 'ccName' }
-        ],
-        columnsInDropDown: [
-          { key: 'reference', value: 'Reference' },
-          { key: 'name', value: 'Name' }
-        ],
-        displayFieldWidth: 2
-      }
-    },
-    {
-      component: 'numberfield',
-      header: labels.bankFees,
-      name: 'bankFees',
-      label: labels.bankFees
-    },
-    {
-      component: 'textfield',
-      header: labels.receiptRef,
-      name: 'receiptRef',
-      label: labels.receiptRef
-    }
-  ]
   function viewOTP(recId) {
     stack({
       Component: OTPPhoneVerification,
       props: {
         formValidation: formik,
         recordId: recId,
-        functionId: SystemFunction.Outwards,
+        functionId: SystemFunction.OutwardsOrder,
         onSuccess: () => {
           onClose(recId)
         }
@@ -399,7 +225,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
   async function getOutwards(recordId) {
     try {
       return await getRequest({
-        extension: RemittanceOutwardsRepository.OutwardsTransfer.get2,
+        extension: RemittanceOutwardsRepository.OutwardsOrder.get2,
         parameters: `_recordId=${recordId}`
       })
     } catch (error) {}
@@ -408,7 +234,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
   const onClose = async recId => {
     try {
       const res = await postRequest({
-        extension: RemittanceOutwardsRepository.OutwardsTransfer.close,
+        extension: RemittanceOutwardsRepository.OutwardsOrder.close,
         record: JSON.stringify({
           recordId: formik.values.recordId ?? recId
         })
@@ -426,7 +252,6 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
   const onReopen = async () => {
     try {
       const copy = { ...formik.values }
-      delete copy.amountRows
       delete copy.instantCashDetails
       copy.date = formatDateToApi(copy.date)
       copy.valueDate = formatDateToApi(copy.valueDate)
@@ -434,7 +259,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       copy.expiryDate = formatDateToApi(copy.expiryDate)
 
       const res = await postRequest({
-        extension: RemittanceOutwardsRepository.OutwardsTransfer.reopen,
+        extension: RemittanceOutwardsRepository.OutwardsOrder.reopen,
         record: JSON.stringify(copy)
       })
 
@@ -457,7 +282,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       copy.expiryDate = formatDateToApi(copy.expiryDate)
 
       await postRequest({
-        extension: RemittanceOutwardsRepository.OutwardsTransfer.post,
+        extension: RemittanceOutwardsRepository.OutwardsOrder.post,
         record: JSON.stringify(copy)
       })
 
@@ -470,12 +295,6 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
   const vatAmount = (formik.values.commission * formik.values.vatRate) / 100
 
   const amount = parseFloat(formik.values.lcAmount + (formik.values.commission + vatAmount - formik.values.tdAmount))
-
-  const receivedTotal = formik.values.amountRows.reduce((sumAmount, row) => {
-    const curValue = parseFloat(row.amount.toString().replace(/,/g, '')) || 0
-
-    return sumAmount + curValue
-  }, 0)
 
   const onProductSubmit = productData => {
     formik.setFieldValue('products', productData?.list)
@@ -505,12 +324,6 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
   }
 
   const fillOutwardsData = async data => {
-    const modifiedList = data.cash.map((item, index) => ({
-      ...item,
-      id: index + 1,
-      bankFees: item.bankFees ? parseFloat(item.bankFees).toFixed(2) : null,
-      amount: parseFloat(item.amount).toFixed(2)
-    }))
     formik.setValues(prevValues => ({
       ...prevValues,
       ...data.headerView,
@@ -518,9 +331,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       exRate: parseFloat(data.headerView.exRate).toFixed(5),
       defaultValueDate: formatDateFromApi(data.headerView.defaultValueDate),
       valueDate: formatDateFromApi(data.headerView.valueDate),
-      ttNo: data.ttNo,
       bankType: data.headerView.interfaceId,
-      amountRows: modifiedList,
       products: prevValues.products,
       instantCashDetails: prevValues.instantCashDetails
     }))
@@ -671,12 +482,6 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       condition: true,
       onClick: 'onClickGL',
       disabled: !editMode
-    },
-    {
-      key: 'Audit',
-      condition: true,
-      onClick: openInfo,
-      disabled: (editMode && !formik.values.corId) || !editMode
     }
   ]
   function openBeneficiaryWindow() {
@@ -707,18 +512,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       height: 500
     })
   }
-  function openInfo() {
-    stack({
-      Component: InfoForm,
-      props: {
-        labels,
-        formik
-      },
-      width: 700,
-      height: 610,
-      title: labels.Audit
-    })
-  }
+
   function openBankWindow() {
     if (formik.values.bankType === 1) {
       stack({
@@ -921,25 +715,6 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
     }
   }
 
-  async function checkMobilePlant() {
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.Defaults.get,
-        parameters: `_filter=&_key=rt_mob_plantId`
-      })
-
-      return res?.record?.value
-    } catch (error) {
-      return ''
-    }
-  }
-
-  async function fillMissingFields(plantId) {
-    setMobilePlant(true)
-    formik.setFieldValue('collectionPlantId', parseFloat(plantId))
-    formik.setFieldValue('cashAccountId', parseFloat(cashAccountId))
-  }
-
   useEffect(() => {
     ;(async function () {
       try {
@@ -948,9 +723,6 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
           const copy = { ...res.record.headerView }
           copy.lcAmount = 0
           await fillProducts(copy)
-          const mobilePlant = await checkMobilePlant()
-          if (mobilePlant && mobilePlant == copy.plantId && !res.record.cash.length > 0)
-            await fillMissingFields(copy.plantId)
         }
         await getDefaultVAT()
       } catch (error) {}
@@ -959,7 +731,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
 
   return (
     <FormShell
-      resourceId={ResourceIds.OutwardsTransfer}
+      resourceId={ResourceIds.OutwardsOrder}
       form={formik}
       editMode={editMode}
       maxAccess={maxAccess}
@@ -968,14 +740,14 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
       isClosed={isClosed}
       actions={actions}
       previewReport={editMode}
-      functionId={SystemFunction.Outwards}
-      disabledSubmit={(isClosed || editMode) && !mobilePlantExists}
+      functionId={SystemFunction.OutwardsOrder}
+      disabledSubmit={isClosed || editMode}
     >
       <VertLayout>
         <Grow>
           <Grid container>
             <Grid container rowGap={2} xs={12} spacing={2} sx={{ px: 2, pb: 2 }}>
-              <FormGrid item hideonempty xs={2.4}>
+              <FormGrid item hideonempty xs={3}>
                 <CustomTextField
                   name='reference'
                   label={labels.Reference}
@@ -987,7 +759,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                   error={formik.touched.reference && Boolean(formik.errors.reference)}
                 />
               </FormGrid>
-              <FormGrid item hideonempty xs={2.4}>
+              <FormGrid item hideonempty xs={3}>
                 <CustomDatePicker
                   name='date'
                   required
@@ -1002,7 +774,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                   helperText={formik.touched.date && formik.errors.date}
                 />
               </FormGrid>
-              <FormGrid item hideonempty xs={2.4}>
+              <FormGrid item hideonempty xs={3}>
                 <ResourceComboBox
                   datasetId={DataSets.DOCUMENT_STATUS}
                   name='status'
@@ -1018,19 +790,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                   error={formik.touched.status && Boolean(formik.errors.status)}
                 />
               </FormGrid>
-              <FormGrid item hideonempty xs={2.4}>
-                <CustomTextField
-                  name='ttNo'
-                  label={labels.ttNo}
-                  value={formik.values?.ttNo}
-                  readOnly
-                  onChange={formik.handleChange}
-                  onClear={() => formik.setFieldValue('ttNo', '')}
-                  error={formik.touched.ttNo && Boolean(formik.errors.ttNo)}
-                  maxAccess={maxAccess}
-                />
-              </FormGrid>
-              <FormGrid item hideonempty xs={2.4}>
+              <FormGrid item hideonempty xs={3}>
                 <CustomDatePicker
                   name='valueDate'
                   label={labels.valueDate}
@@ -1307,12 +1067,9 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                     maxLength={10}
                   />
                 </Grid>
-                <Grid item xs={12}>
-                  <CustomNumberField label='Amount Recieved' value={getFormattedNumber(receivedTotal)} readOnly />
-                </Grid>
               </FieldSet>
             </Grid>
-            <Grid container rowGap={2} xs={7.5} sx={{ pt: 2 }}>
+            <Grid container rowGap={2} xs={7.5} sx={{ pt: 2, height: '50%' }}>
               <FieldSet title='Client Details'>
                 <Grid item xs={12}>
                   <ResourceLookup
@@ -1362,7 +1119,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                     errorCheck={'clientId'}
                   />
                 </Grid>
-                <Grid container xs={12} spacing={2} sx={{ pl: '10px', pt: 1 }}>
+                <Grid container xs={12} spacing={2} sx={{ pl: '10px', pt: 2 }}>
                   <Grid item xs={3}>
                     <CustomTextField
                       name='firstName'
@@ -1416,7 +1173,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                     />
                   </Grid>
                 </Grid>
-                <Grid container xs={12} spacing={2} sx={{ flexDirection: 'row-reverse', pl: '10px', pt: 1 }}>
+                <Grid container xs={12} spacing={2} sx={{ flexDirection: 'row-reverse', pl: '10px', pt: 2 }}>
                   <Grid item xs={3}>
                     <CustomTextField
                       name='fl_firstName'
@@ -1474,7 +1231,7 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                     />
                   </Grid>
                 </Grid>
-                <Grid container xs={12} sx={{ pt: 1, pl: 2 }}>
+                <Grid container xs={12} sx={{ pl: 2, pt: 2 }}>
                   {/* First Column */}
                   <Grid container rowGap={2} xs={6} sx={{ px: 1 }}>
                     <Grid item xs={6}>
@@ -1650,25 +1407,6 @@ export default function OutwardsForm({ labels, access, recordId, cashAccountId, 
                 >
                   Bank API
                 </Button>
-              </Grid>
-
-              <Grid container>
-                <FieldSet title='Amount'>
-                  <Grid width={'100%'}>
-                    <DataGrid
-                      onChange={value => formik.setFieldValue('amountRows', value)}
-                      value={formik.values.amountRows}
-                      error={formik.errors.amountRows}
-                      disabled={(isClosed || editMode) && !mobilePlantExists}
-                      allowAddNewLine={!isClosed || !editMode}
-                      allowDelete={!isClosed || editMode}
-                      maxAccess={maxAccess}
-                      name='amountRows'
-                      height={170}
-                      columns={columns}
-                    />
-                  </Grid>
-                </FieldSet>
               </Grid>
             </Grid>
           </Grid>

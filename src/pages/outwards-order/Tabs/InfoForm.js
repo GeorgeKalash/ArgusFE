@@ -70,7 +70,7 @@ export default function InfoForm({ labels, formik }) {
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.OutwardsTransfer} form={formik} isCleared={false} isInfo={false} isSaved={false}>
+    <FormShell resourceId={ResourceIds.OutwardsOrder} form={formik} isCleared={false} isInfo={false} isSaved={false}>
       <Grid container spacing={2}>
         <Grid item xs={12} sx={{ mx: 5, mt: 2 }}>
           <CustomTextField

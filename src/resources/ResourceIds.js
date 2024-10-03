@@ -110,7 +110,7 @@ export const ResourceIds = {
   ModuleDeactivation: 23107,
   CompanyInfo: 20120,
   Dispersal: 36109,
-  OutwardsTransfer: 36301,
+  OutwardsOrder: 36301,
   FI_dimensions: 31112,
   BeneficiaryBank: 36303,
   BeneficiaryCash: 36304,

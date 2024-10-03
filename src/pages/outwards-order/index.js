@@ -18,11 +18,12 @@ import { useError } from 'src/error'
 import { getStorageData } from 'src/storage/storage'
 import { ControlContext } from 'src/providers/ControlContext'
 
-const OutwardsTransfer = () => {
+const OutwardsOrder = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
+  const userData = getStorageData('userData')
 
   const {
     query: { data },
@@ -33,27 +34,26 @@ const OutwardsTransfer = () => {
     access,
     invalidate
   } = useResourceQuery({
-    endpointId: RemittanceOutwardsRepository.OutwardsTransfer.snapshot,
-    datasetId: ResourceIds.OutwardsTransfer,
+    endpointId: RemittanceOutwardsRepository.OutwardsOrder.snapshot,
+    datasetId: ResourceIds.OutwardsOrder,
     filter: {
-      endpointId: RemittanceOutwardsRepository.OutwardsTransfer.snapshot,
+      endpointId: RemittanceOutwardsRepository.OutwardsOrder.snapshot,
       filterFn: fetchWithSearch
     }
   })
+
   async function fetchWithSearch({ filters }) {
     try {
       if (!filters.qry) {
         return { list: [] }
       } else {
         return await getRequest({
-          extension: RemittanceOutwardsRepository.OutwardsTransfer.snapshot,
+          extension: RemittanceOutwardsRepository.OutwardsOrder.snapshot,
           parameters: `_filter=${filters.qry}`
         })
       }
     } catch (error) {}
   }
-
-  const userData = getStorageData('userData')
 
   const getPlantId = async () => {
     try {
@@ -62,52 +62,36 @@ const OutwardsTransfer = () => {
         parameters: `_userId=${userData && userData.userId}&_key=plantId`
       })
 
-      if (res.record.value) {
-        return res.record.value
-      }
-
-      return ''
+      return res?.record?.value
     } catch (error) {
       return ''
     }
   }
 
-  const getCashAccountId = async () => {
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.UserDefaults.get,
-        parameters: `_userId=${userData && userData.userId}&_key=cashAccountId`
-      })
-
-      if (res.record.value) {
-        return res.record.value
-      }
-
-      return ''
-    } catch (error) {
-      return ''
-    }
-  }
   async function openForm(recordId) {
-    try {
-      const plantId = await getPlantId()
-      const cashAccountId = await getCashAccountId()
-
-      if (plantId !== '' && cashAccountId !== '') {
-        openOutWardsWindow(plantId, cashAccountId, recordId)
-      } else {
-        if (plantId === '') {
-          stackError({
-            message: `The user does not have a default plant.`
-          })
-        }
-        if (cashAccountId === '') {
-          stackError({
-            message: `The user does not have a default cash account.`
-          })
-        }
-      }
-    } catch (error) {}
+    const plantId = await getPlantId()
+    if (plantId) {
+      const dtId = await getDefaultDT()
+      stack({
+        Component: OutwardsForm,
+        props: {
+          plantId: plantId,
+          userId: userData.userId,
+          access,
+          labels: _labels,
+          recordId: recordId,
+          invalidate,
+          dtId
+        },
+        width: 1100,
+        height: 600,
+        title: _labels.OutwardsOrder
+      })
+    } else {
+      stackError({
+        message: _labels.PlantDefaultError
+      })
+    }
   }
 
   const columns = [
@@ -152,7 +136,7 @@ const OutwardsTransfer = () => {
   const delOutwards = async obj => {
     try {
       await postRequest({
-        extension: RemittanceOutwardsRepository.OutwardsTransfer.del,
+        extension: RemittanceOutwardsRepository.OutwardsOrder.del,
         record: JSON.stringify(obj)
       })
       invalidate()
@@ -161,18 +145,22 @@ const OutwardsTransfer = () => {
   }
 
   const { proxyAction } = useDocumentTypeProxy({
-    functionId: SystemFunction.Outwards,
+    functionId: SystemFunction.OutwardsOrder,
     action: openForm,
     hasDT: false
   })
 
   const getDefaultDT = async () => {
-    const res = await getRequest({
-      extension: SystemRepository.UserFunction.get,
-      parameters: `_userId=${userData.userId}&_functionId=${SystemFunction.Outwards}`
-    })
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.UserFunction.get,
+        parameters: `_userId=${userData.userId}&_functionId=${SystemFunction.OutwardsOrder}`
+      })
 
-    return res?.record?.dtId
+      return res?.record?.dtId
+    } catch (error) {
+      return ''
+    }
   }
 
   const addOutwards = async () => {
@@ -181,26 +169,6 @@ const OutwardsTransfer = () => {
 
   const editOutwards = obj => {
     openForm(obj.recordId)
-  }
-
-  async function openOutWardsWindow(plantId, cashAccountId, recordId) {
-    const dtId = await getDefaultDT()
-    stack({
-      Component: OutwardsForm,
-      props: {
-        plantId: plantId,
-        cashAccountId: cashAccountId,
-        userId: userData.userId,
-        access,
-        labels: _labels,
-        recordId: recordId,
-        invalidate,
-        dtId
-      },
-      width: 1100,
-      height: 600,
-      title: _labels.OutwardsTransfer
-    })
   }
 
   return (
@@ -236,4 +204,4 @@ const OutwardsTransfer = () => {
   )
 }
 
-export default OutwardsTransfer
+export default OutwardsOrder
