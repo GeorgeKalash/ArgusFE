@@ -43,23 +43,24 @@ const RPBGridToolbar = ({
     for (const [index, { fieldId, value }] of Object.entries(rpbParams)) {
       const numericValue = Number(fieldId)
       if (numericValue < minValue) {
-        minValue = numericValue
+        minValue = numericValue - 1
       }
     }
 
     const formattedData = rpbParams
+      ?.filter(({ fieldId, value }) => fieldId && value)
       .map(({ fieldId, value }) => `${fieldId}|${value}`)
-      .reduce((acc, curr, index) => acc + (index === minValue ? `${curr}` : `^${curr}`), '')
+      .reduce((acc, curr, index) => acc + (index === 0 ? `${curr}` : `^${curr}`), '')
 
     return formattedData
   }
 
   const formatDataDictForApi = rpbParams => {
-    const formattedData = rpbParams.reduce((acc, { fieldId, value, display, type }, index) => {
-      acc[index] = type === 'combobox' ? display : value
+    const formattedData = rpbParams.reduce((acc, { display }, index) => {
+      acc[index] = display || ''
       return acc
     }, {})
-    console.log('formattedData', formattedData)
+
     return formattedData
   }
 
@@ -101,11 +102,14 @@ const RPBGridToolbar = ({
         rpbParams &&
         rpbParams.length > 0 && (
           <Grid container sx={{ display: 'flex', pt: 2, margin: '0px !important' }}>
-            {rpbParams.map((param, i) => (
-              <Grid key={i} item>
-                [<b>{param.caption}:</b> {param.display}]
-              </Grid>
-            ))}
+            {rpbParams.map(
+              (param, i) =>
+                param.display && (
+                  <Grid key={i} item>
+                    [<b>{param.caption}:</b> {param.display}]
+                  </Grid>
+                )
+            )}
           </Grid>
         )
       }

@@ -137,8 +137,7 @@ const GetComboBox = ({ field, formik, rpbParams }) => {
                     fieldKey: field.key,
                     value: Number(newValue?.[apiDetails?.valueField]),
                     caption: field.caption,
-                    display: textValue,
-                    type: 'combobox'
+                    display: textValue
                   }
                 : ''
             )
@@ -292,23 +291,21 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
     onSubmit: values => {
       setRpbParams([])
 
-      const processedArray = values?.parameters
-        ?.filter((item, index) => item?.fieldId && item?.value != null)
-        ?.reduce((acc, item) => {
-          if (item?.fieldId) {
-            acc[item.fieldId] = {
-              ...item,
-              value:
-                item.fieldKey === 'date' || item.fieldKey?.indexOf('Date') > -1 ? formatDateTo(item.value) : item.value
-            }
-          }
+      const array = items.reduce((acc, { id }) => {
+        const param = values?.parameters?.filter(item => item?.fieldId === id)?.[0]
 
-          return acc
-        }, [])
+        acc[id] = {
+          ...param,
+          value:
+            param?.fieldKey === 'date' || param?.fieldKey?.indexOf('Date') > -1
+              ? formatDateTo(param?.value)
+              : param?.value
+        }
 
-      console.log('processedArray', processedArray)
+        return acc
+      }, [])
 
-      setRpbParams(processedArray)
+      setRpbParams(array)
       window.close()
     }
   })
