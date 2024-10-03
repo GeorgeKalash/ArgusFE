@@ -714,12 +714,12 @@ export const apiMappings = {
 
   [ResourceIds.EmployeeFilter]: {
     type: LOOKUP,
-    endpoint: EmployeeRepository.EmployeeFilters.snapshot,
+    endpoint: EmployeeRepository.Employee.snapshot,
     parameters: {
       _branchId: 0
     },
     firstField: 'reference',
-    secondField: 'name',
+    secondField: 'fullName',
     valueOnSelection: 'recordId',
     displayFieldWidth: 1,
     firstFieldWidth: '40%',
@@ -732,14 +732,14 @@ export const apiMappings = {
     type: COMBOBOX,
     endpoint: SystemRepository.GovernmentOrganization.qry,
     valueField: 'recordId',
-    displayField: ['reference', 'name'],
+    displayField: ['name'],
     columnsInDropDown: [{ key: 'name', value: 'Name' }]
   },
   [ResourceIds.DivisionFilter]: {
     type: COMBOBOX,
     endpoint: companyStructureRepository.DivisionFilters.qry,
     valueField: 'recordId',
-    displayField: ['reference', 'name'],
+    displayField: ['name'],
     columnsInDropDown: [{ key: 'name', value: 'Name' }]
   },
   [ResourceIds.BranchFilter]: {
@@ -757,7 +757,7 @@ export const apiMappings = {
     endpoint: companyStructureRepository.CompanyPositions.qry,
     parameters: `_filter=&_size=1000&_startAt=0&_sortBy=recordId`,
     valueField: 'recordId',
-    displayField: ['reference', 'name'],
+    displayField: ['name'],
     columnsInDropDown: [{ key: 'name', value: 'Name' }]
   },
   [ResourceIds.DepartmentFilter]: {
@@ -765,14 +765,14 @@ export const apiMappings = {
     endpoint: companyStructureRepository.DepartmentFilters.qry,
     parameters: `_filter=&_size=1000&_startAt=0&_type=0&_activeStatus=0&_sortBy=recordId`,
     valueField: 'recordId',
-    displayField: ['reference', 'name'],
+    displayField: ['name'],
     columnsInDropDown: [{ key: 'name', value: 'Name' }]
   },
   [ResourceIds.CertificateFilter]: {
     type: COMBOBOX,
     endpoint: EmployeeRepository.CertificateFilters.qry,
     valueField: 'recordId',
-    displayField: ['reference', 'name'],
+    displayField: ['name'],
     columnsInDropDown: [{ key: 'name', value: 'Name' }]
   },
   [ResourceIds.HRDocTypeFilter]: {
@@ -789,21 +789,21 @@ export const apiMappings = {
     type: COMBOBOX,
     endpoint: EmployeeRepository.SalaryChangeReasonFilters.qry,
     valueField: 'recordId',
-    displayField: ['reference', 'name'],
+    displayField: ['name'],
     columnsInDropDown: [{ key: 'name', value: 'Name' }]
   },
   [ResourceIds.EmploymentStatusFilter]: {
     type: COMBOBOX,
     endpoint: EmployeeRepository.EmploymentStatusFilters.qry,
     valueField: 'recordId',
-    displayField: ['reference', 'name'],
+    displayField: ['name'],
     columnsInDropDown: [{ key: 'name', value: 'Name' }]
   },
   [ResourceIds.SponsorFilter]: {
     type: COMBOBOX,
     endpoint: EmployeeRepository.SponsorFilters.qry,
     valueField: 'recordId',
-    displayField: ['reference', 'name'],
+    displayField: ['name'],
     columnsInDropDown: [{ key: 'name', value: 'Name' }]
   },
   [ResourceIds.AttendanceScheduleFilter]: {
@@ -831,7 +831,7 @@ export const apiMappings = {
     type: COMBOBOX,
     endpoint: LoanManagementRepository.LeaveScheduleFilters.qry,
     valueField: 'recordId',
-    displayField: ['reference', 'name'],
+    displayField: ['name'],
     columnsInDropDown: [{ key: 'name', value: 'Name' }]
   },
   [ResourceIds.PayrollFilter]: {
@@ -839,14 +839,14 @@ export const apiMappings = {
     endpoint: PayrollRepository.PayrollFilters.qry,
     parameters: `_year=0&_salaryType=5&_status=0`,
     valueField: 'recordId',
-    displayField: ['reference', 'name'],
+    displayField: ['reference'],
     columnsInDropDown: [{ key: 'reference', value: 'Reference' }]
   },
   [ResourceIds.BankTransferFilter]: {
     type: COMBOBOX,
     endpoint: PayrollRepository.BankTransferFilters.qry,
     valueField: 'recordId',
-    displayField: ['reference', 'name'],
+    displayField: ['name'],
     columnsInDropDown: [{ key: 'name', value: 'Name' }]
   }
 }

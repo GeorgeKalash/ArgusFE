@@ -18,8 +18,5 @@ export const EmployeeRepository = {
   },
   SponsorFilters: {
     qry: service + 'qrySP'
-  },
-  EmployeeFilters: {
-    snapshot: service + 'snapshotEM'
   }
 }
