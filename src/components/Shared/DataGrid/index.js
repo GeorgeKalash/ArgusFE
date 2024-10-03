@@ -60,12 +60,21 @@ export function DataGrid({
   const onCellKeyDown = params => {
     const { event, api, node } = params
 
-    if (event.key !== 'Tab') {
+    const allColumns = api.getColumnDefs()
+    const currentColumnIndex = allColumns?.findIndex(col => col.colId === params.column.getColId())
+
+    if (event.key === 'Enter') {
+      const nextColumnId = allColumns[currentColumnIndex + 1].colId
+      api.startEditingCell({
+        rowIndex: node.rowIndex,
+        colKey: nextColumnId
+      })
       return
     }
 
-    const allColumns = api.getColumnDefs()
-    const currentColumnIndex = allColumns?.findIndex(col => col.colId === params.column.getColId())
+    if (event.key !== 'Tab') {
+      return
+    }
 
     if (
       currentColumnIndex === allColumns.length - 2 &&
@@ -76,11 +85,10 @@ export function DataGrid({
       addNewRow(params)
     } else {
       const currentRowIndex = node.rowIndex
-      const currentColId = params.column.getColId()
-      const allColumns = api.getColumnDefs()
-      const currentColumnIndex = allColumns.findIndex(col => col.colId === currentColId)
-      if (currentColumnIndex < allColumns.length - 2) {
+
+      if (currentColumnIndex < allColumns.length - 2 && event.key === 'Tab') {
         const nextColumnId = allColumns[currentColumnIndex + 1].colId
+        console.log(nextColumnId)
         api.startEditingCell({
           rowIndex: currentRowIndex,
           colKey: nextColumnId
@@ -138,7 +146,7 @@ export function DataGrid({
       const rowNode = params.api.getRowNode(id)
       if (rowNode) {
         const currentData = rowNode.data
-        console.log('currentData', currentData)
+
         const newData = { ...currentData, ...changes }
         rowNode.updateData(newData)
       }
@@ -148,19 +156,26 @@ export function DataGrid({
       const changes = {
         [field]: value
       }
-
       setData(changes)
-      !value && params.api.stopEditing()
-      !value &&
+
+      if (!value) {
+        params.api.stopEditing()
         gridApiRef.current.startEditingCell({
           rowIndex: params.node.rowIndex,
           colKey: field
         })
+      }
     }
 
     const updateRow = ({ changes }) => {
       setData(changes)
       params.api.stopEditing()
+    }
+
+    const handleMouseOut = () => {
+      if (params.api) {
+        params.api.stopEditing()
+      }
     }
 
     return (
@@ -200,16 +215,21 @@ export function DataGrid({
   }
 
   const ActionCellRenderer = params => {
+    const handleMouseOver = () => {
+      if (params.api) {
+        params.api.stopEditing()
+      }
+    }
     const handleDelete = () => {
       gridApiRef.current.applyTransaction({ remove: [params.data] })
-
-      const newRows = gridApiRef.current?.data?.filter(({ id }) => id !== params.data.id)
+      console.log(params.data, gridApiRef.current?.data)
+      const newRows = value?.filter(({ id }) => id !== params.data.id)
 
       onChange(newRows)
     }
 
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }} onMouseOver={handleMouseOver}>
         <IconButton onClick={handleDelete} disabled={disabled}>
           <GridDeleteIcon />
         </IconButton>
@@ -229,7 +249,9 @@ export function DataGrid({
       cellEditor: CustomCellEditor,
       cellStyle: getCellStyle,
       suppressKeyboardEvent: params => {
-        return true
+        const { event } = params
+        console.log(event.code)
+        return event.code === 'ArrowDown' || event.code === 'ArrowUp' || event.code === 'Enter' ? true : false
       }
     })),
     allowDelete
