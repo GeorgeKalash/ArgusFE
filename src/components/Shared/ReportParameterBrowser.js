@@ -137,7 +137,8 @@ const GetComboBox = ({ field, formik, rpbParams }) => {
                     fieldKey: field.key,
                     value: Number(newValue?.[apiDetails?.valueField]),
                     caption: field.caption,
-                    display: textValue
+                    display: textValue,
+                    type: 'combobox'
                   }
                 : ''
             )
@@ -304,6 +305,8 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
 
           return acc
         }, [])
+
+      console.log('processedArray', processedArray)
 
       setRpbParams(processedArray)
       window.close()

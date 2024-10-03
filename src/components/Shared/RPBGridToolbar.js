@@ -54,6 +54,15 @@ const RPBGridToolbar = ({
     return formattedData
   }
 
+  const formatDataDictForApi = rpbParams => {
+    const formattedData = rpbParams.reduce((acc, { fieldId, value, display, type }, index) => {
+      acc[index] = type === 'combobox' ? display : value
+      return acc
+    }, {})
+    console.log('formattedData', formattedData)
+    return formattedData
+  }
+
   const actions = [
     {
       key: 'OpenRPB',
@@ -64,7 +73,12 @@ const RPBGridToolbar = ({
     {
       key: 'GO',
       condition: true,
-      onClick: () => onApply({ rpbParams: formatDataForApi(rpbParams), search: search }),
+      onClick: () =>
+        onApply({
+          rpbParams: formatDataForApi(rpbParams),
+          paramsDict: formatDataDictForApi(rpbParams),
+          search: search
+        }),
       disabled: false
     }
   ]
