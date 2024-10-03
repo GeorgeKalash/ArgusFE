@@ -18,13 +18,31 @@ export default function RtReceiptVouchers() {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
 
+  const getCashAccountId = async () => {
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.UserDefaults.get,
+        parameters: `_userId=${userData && userData.userId}&_key=cashAccountId`
+      })
+
+      if (res.record.value) {
+        return res.record.value
+      }
+
+      return ''
+    } catch (error) {
+      return ''
+    }
+  }
+
   function openForm(recordId) {
     stack({
       Component: ReceiptVoucherForm,
       props: {
         labels,
         maxAccess: access,
-        recordId: recordId || null
+        recordId: recordId || null,
+        cashAccountId: getCashAccountId()
       },
       width: 1000,
       height: 700,

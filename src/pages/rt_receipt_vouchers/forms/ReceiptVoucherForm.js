@@ -26,8 +26,12 @@ import { getStorageData } from 'src/storage/storage'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SaleRepository } from 'src/repositories/SaleRepository'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import FieldSet from 'src/components/Shared/FieldSet'
+import { DataGrid } from 'src/components/Shared/DataGrid'
+import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 
-export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId }) {
+export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId, cashAccountId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -68,7 +72,24 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       isVerified: true,
       template: 1,
       sourceReference: '',
-      spId: ''
+      spId: '',
+      amountRows: [
+        {
+          id: 1,
+          outwardId: '',
+          seqNo: '',
+          cashAccountId: cashAccountId,
+          cashAccount: '',
+          ccId: '',
+          ccName: '',
+          type: '',
+          amount: '',
+          paidAmount: 0,
+          returnedAmount: 0,
+          bankFees: '',
+          receiptRef: ''
+        }
+      ]
     },
     validationSchema: yup.object({
       accountId: yup.string().required(),
@@ -156,23 +177,6 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     } catch (e) {}
   }
 
-  const onCancel = async () => {
-    try {
-      const obj = formik.values
-
-      const res = await postRequest({
-        extension: FinancialRepository.ReceiptVouchers.cancel,
-        record: JSON.stringify({ ...obj, date: formatDateToApi(obj.date) })
-      })
-
-      if (res?.recordId) {
-        getData()
-        toast.success('Record Cancelled Successfully')
-        invalidate()
-      }
-    } catch (e) {}
-  }
-
   const onPost = async () => {
     try {
       const res = await postRequest({
@@ -188,43 +192,140 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     } catch (e) {}
   }
 
-  const actions = [
-    {
-      key: 'GL',
-      condition: true,
-      onClick: 'onClickGL',
-      disabled: !editMode
-    },
+  function openInfo() {
+    stack({
+      Component: InfoForm,
+      props: {
+        labels,
+        formik
+      },
+      width: 700,
+      height: 610,
+      title: labels.Audit
+    })
+  }
 
+  const columns = [
     {
-      key: 'Cancel',
-      condition: true,
-      onClick: onCancel,
-      disabled: !editMode || isPosted || isCancelled
+      component: 'resourcecombobox',
+      label: labels.type,
+      name: 'type',
+      props: {
+        datasetId: DataSets.CA_CASH_ACCOUNT_TYPE,
+        displayField: 'value',
+        valueField: 'key',
+        mapping: [
+          { from: 'key', to: 'type' },
+          { from: 'value', to: 'typeName' }
+        ]
+      },
+      async onChange({ row: { update, newRow } }) {
+        if (newRow.type != 2) return
+
+        const sumAmount = formik.values.amountRows.slice(0, -1).reduce((sum, row) => {
+          const curValue = parseFloat(row.amount.toString().replace(/,/g, '')) || 0
+
+          return sum + curValue
+        }, 0)
+
+        const currentAmount = (parseFloat(amount) - parseFloat(sumAmount)).toFixed(2)
+        update({ amount: currentAmount })
+      }
     },
     {
-      key: 'FI Trx',
-      condition: true,
-      onClick: 'onClickIT',
-      disabled: !editMode
+      component: 'numberfield',
+      name: 'paidAmount',
+      label: labels.paidAmount,
+      defaultValue: '',
+      propsReducer({ row, props }) {
+        return { ...props, readOnly: row.type == 1 || !row.type }
+      },
+      async onChange({ row: { update, newRow } }) {
+        const sumAmount = formik.values.amountRows.slice(0, -1).reduce((sum, row) => {
+          const curValue = parseFloat(row.amount.toString().replace(/,/g, '')) || 0
+
+          return sum + curValue
+        }, 0)
+
+        let rowAmount
+        let returnedAmount
+
+        if (formik.values.amountRows.length === 1) {
+          rowAmount = newRow.paidAmount > sumAmount ? newRow.paidAmount : sumAmount - newRow.paidAmount
+          returnedAmount = (parseFloat(newRow.paidAmount) - parseFloat(amount)).toFixed(2)
+        } else {
+          const remainingAmount = (parseFloat(amount) - parseFloat(sumAmount)).toFixed(2)
+          returnedAmount = (parseFloat(newRow.paidAmount) - parseFloat(remainingAmount)).toFixed(2)
+          rowAmount = returnedAmount > 0 ? newRow.paidAmount - returnedAmount : newRow.paidAmount
+        }
+
+        update({
+          returnedAmount: returnedAmount,
+          amount: parseFloat(rowAmount).toFixed(2)
+        })
+      }
     },
     {
-      key: 'Aging',
-      condition: true,
-      onClick: 'onClickAging',
-      disabled: !editMode
+      component: 'numberfield',
+      name: 'returnedAmount',
+      label: labels.returnedAmount,
+      defaultValue: '',
+      props: {
+        readOnly: true
+      }
     },
     {
-      key: 'RecordRemarks',
-      condition: true,
-      onClick: 'onRecordRemarks',
-      disabled: !editMode
+      component: 'numberfield',
+      name: 'amount',
+      label: labels.Amount,
+      defaultValue: ''
     },
+    {
+      component: 'resourcecombobox',
+      name: 'ccName',
+      editable: false,
+      label: labels.creditCard,
+      props: {
+        endpointId: CashBankRepository.CreditCard.qry,
+        valueField: 'recordId',
+        displayField: 'name',
+        mapping: [
+          { from: 'recordId', to: 'ccId' },
+          { from: 'name', to: 'ccName' }
+        ],
+        columnsInDropDown: [
+          { key: 'reference', value: 'Reference' },
+          { key: 'name', value: 'Name' }
+        ],
+        displayFieldWidth: 2
+      }
+    },
+    {
+      component: 'numberfield',
+      header: labels.bankFees,
+      name: 'bankFees',
+      label: labels.bankFees
+    },
+    {
+      component: 'textfield',
+      header: labels.receiptRef,
+      name: 'receiptRef',
+      label: labels.receiptRef
+    }
+  ]
+
+  const actions = [
     {
       key: 'Post',
       condition: true,
       onClick: onPost,
       disabled: isPosted || !editMode || isCancelled
+    },
+    {
+      key: 'Audit',
+      condition: true,
+      onClick: openInfo,
+      disabled: !editMode
     }
   ]
 
@@ -240,7 +341,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       previewReport={editMode}
     >
       <VertLayout>
-        <Grow>
+        <Fixed>
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <Grid container spacing={2}>
@@ -273,16 +374,23 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
             <Grid item xs={12}>
               <Grid container spacing={2}>
                 <Grid item xs={6}>
-                  <CustomTextField
-                    name='reference'
-                    label={labels.reference}
-                    value={formik.values.reference}
+                  <ResourceLookup
+                    endpointId={RemittanceSettingsRepository.Correspondent.snapshot}
+                    valueField='reference'
+                    displayField='name'
+                    name='corId'
+                    label={labels.corName}
+                    form={formik}
+                    displayFieldWidth={2}
+                    valueShow='corRef'
                     readOnly={editMode}
-                    maxAccess={!editMode && maxAccess}
-                    maxLength='30'
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('reference', '')}
-                    error={formik.touched.reference && Boolean(formik.errors.reference)}
+                    secondValueShow='corName'
+                    maxAccess={maxAccess}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('corId', newValue ? newValue.recordId : '')
+                      formik.setFieldValue('corName', newValue ? newValue.name : '')
+                      formik.setFieldValue('corRef', newValue ? newValue.reference : '')
+                    }}
                   />
                 </Grid>
                 <Grid item xs={6}>
@@ -291,20 +399,9 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                     label={labels.amount}
                     value={formik.values.amount}
                     required
-                    allowClear={!editMode}
                     readOnly={true}
                     maxAccess={maxAccess}
                     onChange={e => formik.setFieldValue('amount', e.target.value)}
-                    onBlur={async () => {
-                      if (!formik.values.fcAmount)
-                        await fillProducts({
-                          countryId: formik.values.countryId,
-                          currencyId: formik.values.currencyId,
-                          dispersalType: formik.values.dispersalType,
-                          amount: formik.values.amount || 0,
-                          fcAmount: formik.values.fcAmount || 0
-                        })
-                    }}
                     onClear={() => {
                       formik.setFieldValue('amount', '')
                       if (!formik.values.fcAmount) {
@@ -318,6 +415,26 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 </Grid>
               </Grid>
             </Grid>
+          </Grid>
+        </Fixed>
+        <Grow>
+          <Grid container>
+            <FieldSet title='Amount'>
+              <Grid width={'100%'}>
+                <DataGrid
+                  onChange={value => formik.setFieldValue('amountRows', value)}
+                  value={formik.values.amountRows}
+                  error={formik.errors.amountRows}
+                  disabled={editMode && !mobilePlantExists}
+                  allowAddNewLine={!editMode}
+                  allowDelete={editMode}
+                  maxAccess={maxAccess}
+                  name='amountRows'
+                  height={170}
+                  columns={columns}
+                />
+              </Grid>
+            </FieldSet>
           </Grid>
         </Grow>
       </VertLayout>
