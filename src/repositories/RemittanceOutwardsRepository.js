@@ -136,5 +136,14 @@ export const RemittanceOutwardsRepository = {
   CorrespondentOutwards: {
     qry: service + 'qryACE',
     set: service + 'setACE'
+  },
+  ReceiptVouchers: {
+    qry: service + 'qryRV',
+    page: service + 'pageRV',
+    get: service + 'getRV',
+    set: service + 'setRV',
+    set2: service + 'set2RV',
+    del: service + 'delRV',
+    snapshot: service + 'snapshotRV'
   }
 }
