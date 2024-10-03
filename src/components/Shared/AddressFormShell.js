@@ -49,6 +49,9 @@ export const AddressFormShell = ({
     validate: values => {
       const errors = {}
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      const bldgNoRegex = /^\d{4}$/
+      const postalCodeRegex = /^\d{5}$/
+
       if (
         ((values.name || values.cityId || values.phone || values.countryId || values.street1) && optional) ||
         !optional
@@ -72,6 +75,14 @@ export const AddressFormShell = ({
 
       if (values.email2 && !emailRegex?.test(values?.email2)) {
         errors.email2 = 'Invalid email format'
+      }
+
+      if (values.bldgNo && !bldgNoRegex.test(values.bldgNo)) {
+        errors.bldgNo = 'Building number must be exactly 4 digits'
+      }
+
+      if (values.postalCode && !postalCodeRegex.test(values.postalCode)) {
+        errors.postalCode = 'Postal code must be exactly 5 digits'
       }
 
       return errors

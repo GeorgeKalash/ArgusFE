@@ -24,12 +24,12 @@ const PlantWindow = ({ labels, editMode, maxAccess, recordId, height }) => {
   const { postRequest } = useContext(RequestsContext)
 
   async function onSubmit(address) {
-    const addressId = address.addressId
+    const addressId = address?.addressId
     setStore(prevStore => ({
       ...prevStore,
       address: { ...prevStore.address, recordId: addressId }
     }))
-    if (!store.plant.addressId) {
+    if (!store?.plant?.addressId) {
       const res = { ...store.plant, addressId: addressId }
       if (res) {
         const data = { ...res, recordId: store?.recordId }

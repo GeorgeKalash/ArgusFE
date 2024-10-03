@@ -94,6 +94,8 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
       const errors = {}
 
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      const bldgNoRegex = /^\d{4}$/
+      const postalCodeRegex = /^\d{5}$/
 
       if (values.email1 && !emailRegex.test(values.email1)) {
         errors.email1 = 'Invalid email format'
@@ -101,6 +103,14 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
 
       if (values.email2 && !emailRegex.test(values.email2)) {
         errors.email2 = 'Invalid email format'
+      }
+
+      if (values.bldgNo && !bldgNoRegex.test(values.bldgNo)) {
+        errors.bldgNo = 'Building number must be exactly 4 digits'
+      }
+
+      if (values.postalCode && !postalCodeRegex.test(values.postalCode)) {
+        errors.postalCode = 'Postal code must be exactly 5 digits'
       }
 
       return errors
