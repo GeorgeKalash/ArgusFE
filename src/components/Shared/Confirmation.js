@@ -9,8 +9,10 @@ import { formatDateFromApi, formatDateToApiFunction } from 'src/lib/date-helper'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import moment from 'moment-hijri'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
+import { VertLayout } from './Layouts/VertLayout'
+import { Grow } from './Layouts/Grow'
 
-const Confirmation = ({ labels, formik, editMode, maxAccess, refreshProf = () => {} }) => {
+const Confirmation = ({ labels, formik, editMode, maxAccess, refreshProf = () => {}, window }) => {
   const [showAsPassword, setShowAsPassword] = useState(true)
   const [showAsPasswordRepeat, setShowAsPasswordRepeat] = useState(false)
   const { getRequest } = useContext(RequestsContext)
@@ -79,88 +81,93 @@ const Confirmation = ({ labels, formik, editMode, maxAccess, refreshProf = () =>
           professionId: res.professionId
         })
         res.newProfessionMode && refreshProf()
+        window.close()
       })
       .catch(error => {})
   }
 
   return (
-    <FormShell form={fetchFormik} maxAccess={maxAccess} editMode={editMode} infoVisible={false}>
-      <Grid container spacing={4}>
-        <Grid item xs={12}>
-          <CustomTextField name='idTypeName' label={labels.id_type} readOnly={true} value={formik.values.idtName} />
-        </Grid>
-        <Grid item xs={12}>
-          <CustomDatePicker
-            name='birthDate'
-            label={labels.birthDate}
-            value={fetchFormik.values?.birthDate ? fetchFormik.values?.birthDate : fetchFormik.values?.birth_date}
-            required={true}
-            onChange={fetchFormik.setFieldValue}
-            onClear={() => fetchFormik.setFieldValue('birthDate', '')}
-            disabledDate={'>='}
-            readOnly={true}
-            error={fetchFormik.touched.birthDate && Boolean(fetchFormik.errors.birthDate)}
-            helperText={fetchFormik.touched.birthDate && fetchFormik.errors.birthDate}
-          />
-        </Grid>
+    <FormShell form={fetchFormik} maxAccess={maxAccess} editMode={editMode} isCleared={false} infoVisible={false}>
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={4}>
+            <Grid item xs={12}>
+              <CustomTextField name='idTypeName' label={labels.id_type} readOnly={true} value={formik.values.idtName} />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomDatePicker
+                name='birthDate'
+                label={labels.birthDate}
+                value={fetchFormik.values?.birthDate ? fetchFormik.values?.birthDate : fetchFormik.values?.birth_date}
+                required={true}
+                onChange={fetchFormik.setFieldValue}
+                onClear={() => fetchFormik.setFieldValue('birthDate', '')}
+                disabledDate={'>='}
+                readOnly={true}
+                error={fetchFormik.touched.birthDate && Boolean(fetchFormik.errors.birthDate)}
+                helperText={fetchFormik.touched.birthDate && fetchFormik.errors.birthDate}
+              />
+            </Grid>
 
-        <Grid item xs={12} sx={{ position: 'relative', width: '100%' }}>
-          <CustomTextField
-            sx={{ color: 'white' }}
-            name='idNo'
-            label={labels.id_number}
-            type={showAsPassword && 'password'}
-            value={fetchFormik.values?.idNo ? fetchFormik.values?.idNo : fetchFormik.values?.id_number}
-            required
-            onChange={e => {
-              fetchFormik.handleChange(e)
-            }}
-            onCopy={handleCopy}
-            onPaste={handleCopy}
-            readOnly={true}
-            maxLength='15'
-            onBlur={e => {
-              setShowAsPassword(true)
-            }}
-            onFocus={e => {
-              setShowAsPassword(false)
-            }}
-            onClear={() => {
-              fetchFormik.setFieldValue('idNo', '')
-            }}
-            error={fetchFormik.touched.idNo && Boolean(fetchFormik.errors.idNo)}
-            helperText={fetchFormik.touched.idNo && fetchFormik.errors.idNo}
-          />
-        </Grid>
+            <Grid item xs={12} sx={{ position: 'relative', width: '100%' }}>
+              <CustomTextField
+                sx={{ color: 'white' }}
+                name='idNo'
+                label={labels.id_number}
+                type={showAsPassword && 'password'}
+                value={fetchFormik.values?.idNo ? fetchFormik.values?.idNo : fetchFormik.values?.id_number}
+                required
+                onChange={e => {
+                  fetchFormik.handleChange(e)
+                }}
+                onCopy={handleCopy}
+                onPaste={handleCopy}
+                readOnly={true}
+                maxLength='15'
+                onBlur={e => {
+                  setShowAsPassword(true)
+                }}
+                onFocus={e => {
+                  setShowAsPassword(false)
+                }}
+                onClear={() => {
+                  fetchFormik.setFieldValue('idNo', '')
+                }}
+                error={fetchFormik.touched.idNo && Boolean(fetchFormik.errors.idNo)}
+                helperText={fetchFormik.touched.idNo && fetchFormik.errors.idNo}
+              />
+            </Grid>
 
-        <Grid item xs={12} sx={{ position: 'relative', width: '100%' }}>
-          <CustomTextField
-            name='idNoRepeat'
-            label={labels.confirmIdNumber}
-            value={fetchFormik.values?.idNoRepeat}
-            required
-            type={showAsPasswordRepeat && 'password'}
-            onChange={e => {
-              fetchFormik.handleChange(e)
-            }}
-            onCopy={handleCopy}
-            onPaste={handleCopy}
-            readOnly={editMode && true}
-            onBlur={e => {
-              setShowAsPasswordRepeat(true), fetchFormik.handleBlur(e)
-            }}
-            onFocus={e => {
-              setShowAsPasswordRepeat(false)
-            }}
-            maxLength='15'
-            onClear={() => {
-              fetchFormik.setFieldValue('idNoRepeat', '')
-            }}
-            error={fetchFormik.touched.idNoRepeat && Boolean(fetchFormik.errors.idNoRepeat)}
-            helperText={fetchFormik.touched.idNoRepeat && fetchFormik.errors.idNoRepeat}
-          />
-        </Grid>
-      </Grid>
+            <Grid item xs={12} sx={{ position: 'relative', width: '100%' }}>
+              <CustomTextField
+                name='idNoRepeat'
+                label={labels.confirmIdNumber}
+                value={fetchFormik.values?.idNoRepeat}
+                required
+                type={showAsPasswordRepeat && 'password'}
+                onChange={e => {
+                  fetchFormik.handleChange(e)
+                }}
+                onCopy={handleCopy}
+                onPaste={handleCopy}
+                readOnly={editMode && true}
+                onBlur={e => {
+                  setShowAsPasswordRepeat(true), fetchFormik.handleBlur(e)
+                }}
+                onFocus={e => {
+                  setShowAsPasswordRepeat(false)
+                }}
+                maxLength='15'
+                onClear={() => {
+                  fetchFormik.setFieldValue('idNoRepeat', '')
+                }}
+                error={fetchFormik.touched.idNoRepeat && Boolean(fetchFormik.errors.idNoRepeat)}
+                helperText={fetchFormik.touched.idNoRepeat && fetchFormik.errors.idNoRepeat}
+              />
+            </Grid>
+          </Grid>
+        </Grow>
+      </VertLayout>
     </FormShell>
   )
 }

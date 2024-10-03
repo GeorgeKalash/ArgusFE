@@ -181,7 +181,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     const idType = await getValue(value)
     if (idType) {
       clientIndividualFormik.setFieldValue('idtId', idType.recordId)
-      clientIndividualFormik.setFieldValue('idtName', idType.namexw)
+      clientIndividualFormik.setFieldValue('idtName', idType.name)
       const res = idtObj
       if (res['type'] && (res['type'] === 1 || res['type'] === 2)) {
         getCountry()
@@ -850,7 +850,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                             },
                             title: labels.fetch,
                             width: 400,
-                            height: 400
+                            height: 350
                           })
                         }
                         disabled={
