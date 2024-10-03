@@ -35,10 +35,12 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { useForm } from 'src/hooks/form'
 import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
-import { useInvalidate } from 'src/hooks/resource'
+import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ControlContext } from 'src/providers/ControlContext'
 import { RemittanceBankInterface } from 'src/repositories/RemittanceBankInterface'
 import BeneficiaryListWindow from '../Windows/BeneficiaryListWindow'
+import { getStorageData } from 'src/storage/storage'
+import ReceiptVoucherForm from 'src/pages/rt_receipt_vouchers/forms/ReceiptVoucherForm'
 
 export default function OutwardsForm({ labels, access, recordId, plantId, userId, dtId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -46,6 +48,11 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
   const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
   const DEFAULT_DELIVERYMODE = 7
+  const userData = getStorageData('userData')
+
+  const { labels: RVLabels, access: RVAccess } = useResourceQuery({
+    datasetId: ResourceIds.ReceiptVoucher
+  })
 
   const { maxAccess } = useDocumentType({
     functionId: SystemFunction.OutwardsOrder,
@@ -124,22 +131,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
     hiddenSponserName: '',
     otpVerified: false,
     bankType: '',
-    amountRows: [
-      {
-        id: 1,
-        outwardId: '',
-        seqNo: '',
-        cashAccount: '',
-        ccId: '',
-        ccName: '',
-        type: '',
-        amount: '',
-        paidAmount: 0,
-        returnedAmount: 0,
-        bankFees: '',
-        receiptRef: ''
-      }
-    ],
+    receiptId: null,
     instantCashDetails: {},
     products: [{}],
     ICRates: [{}]
@@ -222,6 +214,20 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
       title: labels.OTPVerification
     })
   }
+
+  const getCashAccountId = async () => {
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.UserDefaults.get,
+        parameters: `_userId=${userData?.userId}&_key=cashAccountId`
+      })
+
+      return res?.record?.value
+    } catch (error) {
+      return ''
+    }
+  }
+
   async function getOutwards(recordId) {
     try {
       return await getRequest({
@@ -482,6 +488,12 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
       condition: true,
       onClick: 'onClickGL',
       disabled: !editMode
+    },
+    {
+      key: 'Receipt Voucher',
+      condition: true,
+      onClick: openRV,
+      disabled: !(formik.values.status == 4)
     }
   ]
   function openBeneficiaryWindow() {
@@ -543,6 +555,22 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
         title: labels.terraPay
       })
     }
+  }
+
+  async function openRV() {
+    const cashAccountId = await getCashAccountId()
+    stack({
+      Component: ReceiptVoucherForm,
+      props: {
+        labels: RVLabels,
+        maxAccess: RVAccess,
+        recordId: formik.values.receiptId || '',
+        cashAccountId: cashAccountId
+      },
+      width: 1000,
+      height: 700,
+      title: labels.receiptVoucher
+    })
   }
 
   async function getDefaultVAT() {
