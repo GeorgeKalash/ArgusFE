@@ -421,7 +421,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                   onChange={value => formik.setFieldValue('amountRows', value)}
                   value={formik.values.amountRows}
                   error={formik.errors.amountRows}
-                  disabled={editMode && !mobilePlantExists}
+                  disabled={editMode}
                   allowAddNewLine={!editMode}
                   allowDelete={editMode}
                   maxAccess={maxAccess}

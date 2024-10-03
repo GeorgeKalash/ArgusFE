@@ -173,7 +173,7 @@ const DocumentsOnHold = () => {
         relevantAccess = await getAccess(ResourceIds.OutwardsOrder)
 
         windowWidth = 1100
-        title = labels.OutwardsTransfer
+        title = labels.OutwardsOrder
         break
 
       case SystemFunction.CashTransfer:
