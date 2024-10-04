@@ -71,13 +71,16 @@ export function DataGrid({
       return
     }
 
-    if (
-      currentColumnIndex === allColumns.length - 2 &&
-      node.rowIndex === api.getDisplayedRowCount() - 1 &&
-      allowAddNewLine
-    ) {
-      event.stopPropagation()
-      addNewRow(params)
+    if (currentColumnIndex === allColumns.length - 2 && node.rowIndex === api.getDisplayedRowCount() - 1) {
+      if (allowAddNewLine && !error) {
+        event.stopPropagation()
+        addNewRow(params)
+      } else {
+        api.startEditingCell({
+          rowIndex: node.rowIndex,
+          colKey: allColumns[currentColumnIndex].colId
+        })
+      }
     } else {
       const currentRowIndex = node.rowIndex
 
@@ -153,14 +156,15 @@ export function DataGrid({
         [field]: value
       }
       setData(changes)
+      commit(changes)
 
-      if (!value) {
-        params.api.stopEditing()
-        gridApiRef.current.startEditingCell({
-          rowIndex: params.node.rowIndex,
-          colKey: field
-        })
-      }
+      // if (!value) {
+      //   params.api.stopEditing()
+      //   gridApiRef.current.startEditingCell({
+      //     rowIndex: params.node.rowIndex,
+      //     colKey: field
+      //   })
+      // }
     }
 
     const updateRow = ({ changes }) => {
