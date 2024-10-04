@@ -1,20 +1,10 @@
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 
-export default function ResourceComboBoxEdit({
-  column: { props },
-  id,
-  field,
-  value,
-  updateRow,
-  update,
-  row,
-  store,
-  setStore
-}) {
+export default function ResourceComboBoxEdit({ column: { props }, id, field, value, updateRow, update, data }) {
   let changes = props?.mapping
     ? props.mapping
         ?.map(({ from, to }) => ({
-          [from]: row[to] || ''
+          [from]: data?.[to] || ''
         }))
         .reduce((acc, obj) => ({ ...acc, ...obj }), {})
     : value
