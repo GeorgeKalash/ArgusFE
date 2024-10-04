@@ -78,7 +78,11 @@ const Confirmation = ({ labels, formik, editMode, maxAccess, refreshProf = () =>
           fl_lastName: res.lastName,
           fl_familyName: res.familyName,
           gender: res.gender === 'ذكر' ? '1' : '2',
-          professionId: res.professionId
+          professionId: res.professionId,
+          nationalityId: res.nationalityId,
+          idCity: res.issuePlaceId,
+          cityRef: res.issuePlaceRef,
+          cityName: res.issuePlaceName
         })
         res.newProfessionMode && refreshProf()
         window.close()
