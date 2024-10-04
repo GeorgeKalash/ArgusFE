@@ -696,6 +696,12 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
 
       // onClick: onReopen,
       disabled: true
+    },
+    {
+      key: 'Client Balance',
+      condition: true,
+      onClick: 'onClientBalance',
+      disabled: !editMode
     }
   ]
   function openBeneficiaryWindow() {

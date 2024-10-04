@@ -67,7 +67,8 @@ export const CashBankRepository = {
   },
 
   CATransaction: {
-    page: service + 'pageTRX'
+    page: service + 'pageTRX',
+    snapshot: service + 'snapshotTRX'
   },
   CAadjustment: {
     qry: service + 'qryADJ',

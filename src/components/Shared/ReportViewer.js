@@ -58,12 +58,13 @@ const ReportViewer = ({ resourceId }) => {
       .catch(error => {})
   }
 
-  const generateReport = ({ params = '' }) => {
+  const generateReport = ({ params = '', paramsDict = '' }) => {
     const obj = {
       api_url: selectedReport.api_url + '?_params=' + params,
       assembly: selectedReport.assembly,
       format: selectedFormat.key,
-      reportClass: selectedReport.reportClass
+      reportClass: selectedReport.reportClass,
+      paramsDict: paramsDict
     }
     postRequest({
       url: process.env.NEXT_PUBLIC_REPORT_URL,
@@ -96,8 +97,8 @@ const ReportViewer = ({ resourceId }) => {
       })
   }, [reportStore])
 
-  const onApply = ({ rpbParams }) => {
-    generateReport({ _startAt: 0, _pageSize: 30, params: rpbParams })
+  const onApply = ({ rpbParams, paramsDict }) => {
+    generateReport({ _startAt: 0, _pageSize: 30, params: rpbParams, paramsDict: paramsDict })
   }
 
   return (

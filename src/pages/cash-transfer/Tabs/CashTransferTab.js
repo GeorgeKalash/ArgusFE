@@ -272,7 +272,8 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
       props: {
         recordId: formik.values.recordId,
         functionId: SystemFunction.CashTransfer,
-        editMode: isClosed
+        editMode: isClosed,
+        totalBaseAmount: totalLoc
       },
       width: 1200,
       height: 670,
@@ -474,11 +475,9 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
                   maxAccess={maxAccess}
                   onChange={(event, newValue) => {
                     formik.setFieldValue('toPlantId', newValue ? newValue.recordId : null)
-                    if (!newValue) {
-                      formik.setFieldValue('toCashAccountId', null)
-                      formik.setFieldValue('toCARef', null)
-                      formik.setFieldValue('toCAName', null)
-                    }
+                    formik.setFieldValue('toCashAccountId', null)
+                    formik.setFieldValue('toCARef', null)
+                    formik.setFieldValue('toCAName', null)
                   }}
                   error={formik.touched.toPlantId && Boolean(formik.errors.toPlantId)}
                 />
@@ -589,7 +588,7 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
                 label: labels.baseAmount,
                 name: 'baseAmount',
                 defaultValue: '',
-                props: { readOnly: true },
+                props: { readOnly: true }
               },
               {
                 component: 'numberfield',

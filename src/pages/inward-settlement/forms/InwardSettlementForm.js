@@ -45,7 +45,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
     recordId: recordId || null,
     dtId: dtId ? parseInt(dtId) : null,
     date: new Date(),
-    inwardDate: new Date(),
+    inwardDate: null,
     reference: '',
     plantId: parseInt(plantId),
     cashAccountId: parseInt(cashAccountId),
@@ -91,7 +91,6 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
       amount: yup.number().required(),
       dispersalMode: yup.number().required(),
       currencyId: yup.string().required(),
-      inwardDate: yup.string().required(),
       inwardId: yup.string().test('is-inward-mandatory', 'Inward reference is required', function () {
         const { interfaceId } = this.parent
 
@@ -192,6 +191,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
       }
     }
   })
+  console.log(formik)
 
   const editMode = !!formik.values.recordId
   const isClosed = formik.values.wip === 2
@@ -227,7 +227,7 @@ export default function InwardSettlementForm({ labels, recordId, access, plantId
     try {
       const res = await getRequest({
         extension: SystemRepository.UserFunction.get,
-        parameters: `_userId=${userId}&_functionId=${SystemFunction.InwardSettlement}`
+        parameters: `_userId=${userId}&_functionId=${SystemFunction.InwardTransfer}`
       })
 
       return res?.record?.dtId
