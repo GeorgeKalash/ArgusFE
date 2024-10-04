@@ -187,7 +187,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
           toast.success(actionMessage)
           formik.setFieldValue('recordId', amountRes.recordId)
           const res2 = await getOutwards(amountRes.recordId)
-          formik.setFieldValue('reference', res2.record.headerView.reference)
+          formik.setFieldValue('reference', res2.record.reference)
           invalidate()
           !recordId && viewOTP(amountRes.recordId)
         }
@@ -231,7 +231,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
   async function getOutwards(recordId) {
     try {
       return await getRequest({
-        extension: RemittanceOutwardsRepository.OutwardsOrder.get2,
+        extension: RemittanceOutwardsRepository.OutwardsOrder.get,
         parameters: `_recordId=${recordId}`
       })
     } catch (error) {}
@@ -332,12 +332,12 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
   const fillOutwardsData = async data => {
     formik.setValues(prevValues => ({
       ...prevValues,
-      ...data.headerView,
-      date: formatDateFromApi(data.headerView.date),
-      exRate: parseFloat(data.headerView.exRate).toFixed(5),
-      defaultValueDate: formatDateFromApi(data.headerView.defaultValueDate),
-      valueDate: formatDateFromApi(data.headerView.valueDate),
-      bankType: data.headerView.interfaceId,
+      ...data,
+      date: formatDateFromApi(data.date),
+      exRate: parseFloat(data.exRate).toFixed(5),
+      defaultValueDate: formatDateFromApi(data.defaultValueDate),
+      valueDate: formatDateFromApi(data.valueDate),
+      bankType: data.interfaceId,
       products: prevValues.products,
       instantCashDetails: prevValues.instantCashDetails
     }))
@@ -627,7 +627,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
   async function refetchForm(recordId) {
     const res = await getOutwards(recordId)
     await fillOutwardsData(res.record)
-    await chooseClient(res.record.headerView.clientId, res.record.headerView.category)
+    await chooseClient(res.record.clientId, res.record.category)
 
     return res
   }
@@ -748,7 +748,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
       try {
         if (recordId) {
           const res = await refetchForm(recordId)
-          const copy = { ...res.record.headerView }
+          const copy = { ...res.record }
           copy.lcAmount = 0
           await fillProducts(copy)
         }

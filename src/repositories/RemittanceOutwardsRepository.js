@@ -145,5 +145,9 @@ export const RemittanceOutwardsRepository = {
     set2: service + 'set2RV',
     del: service + 'delRV',
     snapshot: service + 'snapshotRV'
+  },
+  OutwardsTransfer: {
+    get: service + 'getOWT',
+    snapshot: service + 'snapshotOWT'
   }
 }

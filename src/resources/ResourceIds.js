@@ -250,5 +250,6 @@ export const ResourceIds = {
   ClientBalance: 36131,
   FinancialIntegrators: 51105,
   SalesDefaults: 51114,
-  RemittanceReceiptVoucher: 36323
+  RemittanceReceiptVoucher: 36323,
+  OutwardsTransfer: 36324
 }
