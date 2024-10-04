@@ -1,6 +1,5 @@
 import { DataGrid } from 'src/components/Shared/DataGrid'
-import FormShell from 'src/components/Shared/FormShell'
-import { ResourceIds } from 'src/resources/ResourceIds'
+import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import { useContext, useEffect, useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import * as yup from 'yup'
@@ -10,6 +9,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { useForm } from 'src/hooks/form'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 
 const BarcodeForm = ({ store, labels, maxAccess }) => {
   const { recordId } = store
@@ -147,25 +147,24 @@ const BarcodeForm = ({ store, labels, maxAccess }) => {
     setNumRows(formik.values.barcodes.length)
   }, [formik.values.barcodes])
 
+  const handleSubmit = () => {
+    formik.handleSubmit()
+  }
+
   return (
-    <FormShell
-      form={formik}
-      resourceId={ResourceIds.Category}
-      isCleared={false}
-      infoVisible={false}
-      maxAccess={maxAccess}
-    >
-      <VertLayout>
-        <Grow>
-          <DataGrid
-            onChange={value => formik.setFieldValue('barcodes', value)}
-            value={formik.values.barcodes || []}
-            error={formik.errors.barcodes}
-            columns={columns}
-          />
-        </Grow>
-      </VertLayout>
-    </FormShell>
+    <VertLayout>
+      <Grow>
+        <DataGrid
+          onChange={value => formik.setFieldValue('barcodes', value)}
+          value={formik.values.barcodes || []}
+          error={formik.errors.barcodes}
+          columns={columns}
+        />
+        <Fixed>
+          <WindowToolbar onSave={handleSubmit} isSaved={true} />
+        </Fixed>
+      </Grow>
+    </VertLayout>
   )
 }
 
