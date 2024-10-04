@@ -113,5 +113,27 @@ export const InventoryRepository = {
   },
   RebuildInventory: {
     rebuild: service + 'rebuildFIS'
+  },
+  MaterialsTransfer: {
+    qry: service + 'qryTFR',
+    snapshot: service + 'snapshotTFR',
+    get: service + 'getTFR',
+    set2: service + 'set2TFR',
+    del: service + 'delTFR',
+    close: service + 'closeTFR',
+    reopen: service + 'reopenTFR',
+    post: service + 'postTFR'
+  },
+  MaterialsTransferItems: {
+    qry: service + 'qryTFI',
+  },
+  PP: {
+    get: service + 'getPP',
+  },
+  Cost: {
+    get: service + 'getCOS',
+  },
+  Transaction: {
+    qry2: service + 'qry2TRX',
   }
 }

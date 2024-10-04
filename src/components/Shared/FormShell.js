@@ -17,6 +17,7 @@ import Aging from './Aging'
 import { ControlContext } from 'src/providers/ControlContext'
 import { ClientRelationForm } from './ClientRelationForm'
 import { ClientBalance } from './ClientBalance'
+import InventoryTransaction from './InventroyTransaction'
 
 export default function FormShell({
   form,
@@ -89,6 +90,18 @@ export default function FormShell({
       width: 1000,
       height: 500,
       title: platformLabels.Approvals
+    })
+  }
+
+  function onInventoryTransaction() {
+    stack({
+      Component: InventoryTransaction,
+      props: {
+        recordId: form.values.recordId,
+        functionId: functionId
+      },
+      width: 1000,
+      title: platformLabels.InventoryTransaction
     })
   }
 
@@ -298,6 +311,7 @@ export default function FormShell({
           isGenerated={isGenerated}
           actions={actions}
           onApproval={onApproval}
+          onInventoryTransaction={onInventoryTransaction}
           onRecordRemarks={onRecordRemarks}
           transactionClicked={transactionClicked}
           editMode={editMode}
