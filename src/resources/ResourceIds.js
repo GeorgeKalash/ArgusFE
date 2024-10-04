@@ -212,7 +212,7 @@ export const ResourceIds = {
   SalesZoneLevels: 51111,
   Client: 51202,
   SalesOrder: 51302,
-  Driver: 52201,
+  Drivers: 52201,
   Vehicle: 52202,
   SecurityGroupsFilter: 90101,
   AssetClass: 43101,
@@ -239,7 +239,6 @@ export const ResourceIds = {
   StockCountControllers: 44101,
   StockCountDTD: 44103,
   PurposeExchangeGroup: 35115,
-  Drivers: 52201,
   Trip: 52303, //outbound transportation,
   InventoryOpeningQtys: 41202,
   IvReplenishements: 46302,
@@ -252,5 +251,6 @@ export const ResourceIds = {
   AgingButton: 31419,
   LotCategories: 41108,
   ClientBalance: 36131,
+  FinancialIntegrators: 51105,
   SalesDefaults: 51114
 }

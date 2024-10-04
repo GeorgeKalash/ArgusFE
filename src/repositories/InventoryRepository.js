@@ -18,10 +18,12 @@ export const InventoryRepository = {
     snapshot: service + 'snapshotGRP'
   },
   Category: {
+    page: service + 'pageCA',
     qry: service + 'qryCA',
     get: service + 'getCA',
     set: service + 'setCA',
-    del: service + 'delCA'
+    del: service + 'delCA',
+    snapshot: service + 'snapshotCA'
   },
   LotCategory: {
     page: service + 'pageLCA',
@@ -45,12 +47,6 @@ export const InventoryRepository = {
     snapshot: service + 'snapshotSI'
   },
 
-  SiteGroups: {
-    qry: service + 'qrySGP',
-    get: service + 'getSGP',
-    set: service + 'setSGP',
-    del: service + 'delSGP'
-  },
   SiteGroups: {
     qry: service + 'qrySGP',
     get: service + 'getSGP',
@@ -91,6 +87,7 @@ export const InventoryRepository = {
     get: service + 'getITC',
     set: service + 'setITC'
   },
+
   MeasurementUnit: {
     qry: service + 'qryMU',
     get: service + 'getMU',
@@ -104,7 +101,26 @@ export const InventoryRepository = {
     del: service + 'delDI'
   },
   DimensionId: { set: service + 'set2ID', get: service + 'getID' },
+
+  SerialNumber: {
+    qry: service + 'qrySPF'
+  },
+
+  CategoryCurrency: {
+    get: service + 'getCAC',
+    qry: service + 'qryCAC',
+    set2: service + 'set2CAC',
+    del: service + 'delCAC'
+  },
+
+  CategorySites: {
+    get: service + 'getCAS',
+    qry: service + 'qryCAS',
+    set2: service + 'set2CAS',
+    del: service + 'delCAS'
+  },
   Metals: {
+    qry: service + 'qryMTL',
     page: service + 'pageMTL',
     get: service + 'getMTL',
     set: service + 'setMTL',
