@@ -15,57 +15,47 @@ export default function InfoForm({ labels, formik }) {
   const [corCurSymbol, setCorCurSymbol] = useState('')
 
   async function getDefaultBaseCurrency() {
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.Defaults.get,
-        parameters: `_filter=&_key=baseCurrencyId`
-      })
+    const res = await getRequest({
+      extension: SystemRepository.Defaults.get,
+      parameters: `_filter=&_key=baseCurrencyId`
+    })
 
-      return res?.record?.value
-    } catch (error) {}
+    return res?.record?.value
   }
   async function getCurrencySymbol(currencyId) {
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.Currency.get,
-        parameters: `_recordId=${currencyId}`
-      })
+    const res = await getRequest({
+      extension: SystemRepository.Currency.get,
+      parameters: `_recordId=${currencyId}`
+    })
 
-      return res?.record?.symbol
-    } catch (error) {}
+    return res?.record?.symbol
   }
   async function getBaseCurrencySymbol() {
-    try {
-      const getBaseCurId = await getDefaultBaseCurrency()
-      const symbol = await getCurrencySymbol(getBaseCurId)
-      setBaseCurSymbol(symbol)
-    } catch (error) {}
+    const getBaseCurId = await getDefaultBaseCurrency()
+    const symbol = await getCurrencySymbol(getBaseCurId)
+    setBaseCurSymbol(symbol)
   }
   async function getCorCurrencySymbol() {
-    try {
-      const symbol = await getCurrencySymbol(formik.values.corCurrencyId)
-      setCorCurSymbol(symbol)
-    } catch (error) {}
+    const symbol = await getCurrencySymbol(formik.values.corCurrencyId)
+    setCorCurSymbol(symbol)
   }
 
   useEffect(() => {
     ;(async function () {
-      try {
-        const res = await getRequest({
-          extension: RemittanceOutwardsRepository.OutwardGLInformation.get,
-          parameters: `_recordId=${formik.values?.recordId}`
-        })
-        res.record.corExRate = parseFloat(res.record.corExRate).toFixed(5)
-        res.record.corEvalExRate = parseFloat(res.record.corEvalExRate).toFixed(5)
-        res.record.netCommissionRevenue = parseFloat(res.record.netCommissionRevenue).toFixed(2)
-        res.record.baseCorCommission = parseFloat(res.record.baseCorCommission).toFixed(2)
-        res.record.grossProfit = parseFloat(res.record.grossProfit).toFixed(2)
-        res.record.corBaseAmount = parseFloat(res.record.corBaseAmount).toFixed(2)
-        setowiFieldsIFields(res.record)
+      const res = await getRequest({
+        extension: RemittanceOutwardsRepository.OutwardGLInformation.get,
+        parameters: `_recordId=${formik.values?.recordId}`
+      })
+      res.record.corExRate = parseFloat(res.record.corExRate).toFixed(5)
+      res.record.corEvalExRate = parseFloat(res.record.corEvalExRate).toFixed(5)
+      res.record.netCommissionRevenue = parseFloat(res.record.netCommissionRevenue).toFixed(2)
+      res.record.baseCorCommission = parseFloat(res.record.baseCorCommission).toFixed(2)
+      res.record.grossProfit = parseFloat(res.record.grossProfit).toFixed(2)
+      res.record.corBaseAmount = parseFloat(res.record.corBaseAmount).toFixed(2)
+      setowiFieldsIFields(res.record)
 
-        await getBaseCurrencySymbol()
-        await getCorCurrencySymbol()
-      } catch (error) {}
+      await getBaseCurrencySymbol()
+      await getCorCurrencySymbol()
     })()
   }, [])
 

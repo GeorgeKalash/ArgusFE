@@ -13,41 +13,27 @@ import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import toast from 'react-hot-toast'
 import GridToolbar from 'src/components/Shared/GridToolbar'
+import { SystemRepository } from 'src/repositories/SystemRepository'
+import { getStorageData } from 'src/storage/storage'
+import { useError } from 'src/error'
 
 export default function RtReceiptVouchers() {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const { stack: stackError } = useError()
+  const userData = getStorageData('userData')
 
   const getCashAccountId = async () => {
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.UserDefaults.get,
-        parameters: `_userId=${userData && userData.userId}&_key=cashAccountId`
-      })
-
-      if (res.record.value) {
-        return res.record.value
-      }
-
-      return ''
-    } catch (error) {
-      return ''
-    }
-  }
-
-  function openForm(recordId) {
-    stack({
-      Component: ReceiptVoucherForm,
-      props: {
-        labels,
-        maxAccess: access,
-        recordId: recordId || null,
-        cashAccountId: getCashAccountId()
-      },
-      width: 1000,
-      height: 700,
-      title: labels.receiptVoucher
+    const res = await getRequest({
+      extension: SystemRepository.UserDefaults.get,
+      parameters: `_userId=${userData && userData.userId}&_key=cashAccountId`
     })
+
+    if (res.record.value) {
+      return res.record.value
+    }
+
+    return ''
   }
 
   const {
@@ -67,6 +53,22 @@ export default function RtReceiptVouchers() {
       filterFn: fetchWithFilter
     }
   })
+
+  async function openForm(recordId) {
+    const cashAccountId = await getCashAccountId()
+    stack({
+      Component: ReceiptVoucherForm,
+      props: {
+        labels,
+        maxAccess: access,
+        recordId: recordId || null,
+        cashAccountId: cashAccountId
+      },
+      width: 1000,
+      height: 700,
+      title: labels.receiptVoucher
+    })
+  }
 
   async function fetchWithFilter({ filters, pagination }) {
     if (filters?.qry) {
@@ -96,8 +98,28 @@ export default function RtReceiptVouchers() {
     action: openForm
   })
 
+  const getPlantId = async () => {
+    const userData = getStorageData('userData')
+
+    const res = await getRequest({
+      extension: SystemRepository.UserDefaults.get,
+      parameters: `_userId=${userData && userData.userId}&_key=plantId`
+    })
+
+    return res?.record?.value
+  }
+
   const add = async () => {
-    await proxyAction()
+    const plantId = await getPlantId()
+    if (plantId !== '') {
+      await proxyAction()
+    } else {
+      stackError({
+        message: `The user does not have a default plant`
+      })
+
+      return
+    }
   }
 
   const edit = obj => {
@@ -113,17 +135,6 @@ export default function RtReceiptVouchers() {
       invalidate()
       toast.success('Record Deleted Successfully')
     } catch (e) {}
-  }
-
-  const onApply = ({ search, rpbParams }) => {
-    if (!search && rpbParams.length === 0) {
-      clearFilter('params')
-    } else if (!search) {
-      filterBy('params', rpbParams)
-    } else {
-      filterBy('qry', search)
-    }
-    refetch()
   }
 
   const onSearch = value => {
@@ -147,8 +158,8 @@ export default function RtReceiptVouchers() {
       flex: 1
     },
     {
-      field: 'owrtwardOrderRef',
-      headerName: labels.owrtwardOrderRef,
+      field: 'owoRef',
+      headerName: labels.outwardOrder,
       flex: 1
     },
     {
@@ -167,7 +178,6 @@ export default function RtReceiptVouchers() {
     <VertLayout>
       <Fixed>
         <GridToolbar onAdd={add} maxAccess={access} onSearch={onSearch} onSearchClear={onClear} inputSearch={true} />
-        {/* <GridToolbar onAdd={add} maxAccess={access}onClear={onClear} /> */}
       </Fixed>
       <Grow>
         <Table

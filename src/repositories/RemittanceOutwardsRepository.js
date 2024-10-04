@@ -16,6 +16,9 @@ export const RemittanceOutwardsRepository = {
   ProductDispersalEngine: {
     qry: service + 'qryPDE'
   },
+  OutwardsCash: {
+    qry: service + 'qryOWC'
+  },
   OutwardsOrder: {
     qry: service + 'qryOWO',
     qry2: service + 'qryOWO2',
@@ -144,6 +147,7 @@ export const RemittanceOutwardsRepository = {
     set: service + 'setRV',
     set2: service + 'set2RV',
     del: service + 'delRV',
+    post: service + 'postRV',
     snapshot: service + 'snapshotRV'
   }
 }
