@@ -478,7 +478,7 @@ export const apiMappings = {
       { key: 'name', value: 'Name' }
     ]
   },
-  [ResourceIds.Driver]: {
+  [ResourceIds.Drivers]: {
     type: COMBOBOX,
     endpoint: DeliveryRepository.Driver.qry,
     valueField: 'recordId',

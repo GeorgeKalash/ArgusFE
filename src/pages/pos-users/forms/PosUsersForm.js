@@ -97,7 +97,7 @@ export default function PosUsersForm({ labels, maxAccess, recordId, record, wind
 
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={PointofSaleRepository.PosUsersPOS.qry}
+                endpointId={PointofSaleRepository.PointOfSales.qry}
                 name='posId'
                 label={labels.pos}
                 valueField='recordId'
