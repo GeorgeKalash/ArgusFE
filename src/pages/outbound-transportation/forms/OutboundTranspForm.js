@@ -227,17 +227,17 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
     } catch (exception) {}
   }
 
-  const onClose = async recId => {
+  const onClose = async () => {
     try {
       const res = await postRequest({
         extension: DeliveryRepository.Trip.close,
-        record: JSON.stringify({ recordId: recId })
+        record: JSON.stringify(formik.values)
       })
 
       if (recordId) toast.success(platformLabels.Closed)
       invalidate()
 
-      await refetchForm(res.recordId)
+      await refetchForm(formik.values.recordId)
     } catch (error) {}
   }
 
@@ -417,7 +417,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
 
                 <Grid item xs={4}>
                   <CustomTimePicker
-                    label={labels.departureDate}
+                    label={labels.departureTime}
                     name='departureTimeField'
                     value={formik.values?.departureTimeField}
                     onChange={formik.setFieldValue}
@@ -500,7 +500,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
                 <Grid item xs={4}></Grid>
                 <Grid item xs={4}>
                   <CustomTimePicker
-                    label={labels.arrivalDate}
+                    label={labels.arrivalTime}
                     name='arrivalTimeField'
                     value={formik.values?.arrivalTimeField}
                     onChange={formik.setFieldValue}

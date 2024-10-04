@@ -1,8 +1,6 @@
 import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
-import GridToolbar from 'src/components/Shared/GridToolbar'
-import Tree from 'src/components/Shared/Tree'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useWindow } from 'src/windows'
 import { useResourceQuery } from 'src/hooks/resource'
@@ -11,10 +9,12 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
-import { SaleRepository } from 'src/repositories/SaleRepository'
-import SaleZoneForm from './forms/SaleZoneForm'
+import { PointofSaleRepository } from 'src/repositories/PointofSaleRepository'
 
-const SalesZone = () => {
+import GridToolbar from 'src/components/Shared/GridToolbar'
+import PointOfSalesWindow from './windows/PointOfSalesWindow'
+
+const PointOfSales = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -24,8 +24,8 @@ const SalesZone = () => {
 
     try {
       const response = await getRequest({
-        extension: SaleRepository.SalesZone.page,
-        parameters: `_pageSize=${_pageSize}&_startAt=${_startAt}&_filter=&_sortField=`
+        extension: PointofSaleRepository.PointOfSales.page,
+        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=&_params=`
       })
 
       return { ...response, _startAt: _startAt }
@@ -35,36 +35,47 @@ const SalesZone = () => {
   const {
     query: { data },
     labels: _labels,
-    refetch,
     invalidate,
     paginationParameters,
+
+    refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SaleRepository.SalesZone.page,
-    datasetId: ResourceIds.SalesZone
+    endpointId: PointofSaleRepository.PointOfSales.page,
+    datasetId: ResourceIds.PointOfSale
   })
 
   const columns = [
     {
-      field: 'szRef',
+      field: 'reference',
       headerName: _labels.reference,
       flex: 1
     },
     {
-      field: 'name',
-      headerName: _labels.name,
-      flex: 1
-    },
-
-    {
-      field: 'parentRef',
-      headerName: _labels.parentRef,
+      field: 'currencyName',
+      headerName: _labels.salesCurrency,
       flex: 1
     },
     {
-      field: 'parentName',
-      headerName: _labels.parent,
+      field: 'siteName',
+      headerName: _labels.invSite,
+      flex: 1
+    },
+    {
+      field: 'plantName',
+      headerName: _labels.plant,
+      flex: 1
+    },
+    ,
+    {
+      field: 'dtName',
+      headerName: _labels.docType,
+      flex: 1
+    },
+    {
+      field: 'plName',
+      headerName: _labels.pL,
       flex: 1
     }
   ]
@@ -76,7 +87,7 @@ const SalesZone = () => {
   const del = async obj => {
     try {
       await postRequest({
-        extension: SaleRepository.SalesZone.del,
+        extension: PointofSaleRepository.PointOfSales.del,
         record: JSON.stringify(obj)
       })
       invalidate()
@@ -86,38 +97,17 @@ const SalesZone = () => {
 
   function openForm(recordId) {
     stack({
-      Component: SaleZoneForm,
+      Component: PointOfSalesWindow,
       props: {
         labels: _labels,
         recordId: recordId,
         maxAccess: access
       },
-      width: 600,
-      height: 450,
-      title: _labels.saleZones
+      width: 800,
+      height: 600,
+      title: _labels.pos
     })
   }
-
-  function onTreeClick() {
-    stack({
-      Component: Tree,
-      props: {
-        data: data
-      },
-      width: 500,
-      height: 400,
-      title: _labels.tree
-    })
-  }
-
-  const actions = [
-    {
-      key: 'Tree',
-      condition: true,
-      onClick: onTreeClick,
-      disabled: false
-    }
-  ]
 
   const edit = obj => {
     openForm(obj?.recordId)
@@ -126,17 +116,12 @@ const SalesZone = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar
-          onAdd={add}
-          maxAccess={access}
-          actions={actions}
-          onTree={onTreeClick}
-          previewReport={ResourceIds.SalesZone}
-        />
+        <GridToolbar onAdd={add} maxAccess={access} />
       </Fixed>
       <Grow>
         <Table
           columns={columns}
+          globalStatus={false}
           gridData={data}
           rowId={['recordId']}
           onEdit={edit}
@@ -153,4 +138,4 @@ const SalesZone = () => {
   )
 }
 
-export default SalesZone
+export default PointOfSales
