@@ -32,7 +32,8 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
 
   const { changeDT, maxAccess } = useRefBehavior({
     access: access,
-    readOnlyOnEditMode: store.recordId
+    readOnlyOnEditMode: store.recordId,
+    name: 'sku'
   })
 
   const { formik } = useForm({

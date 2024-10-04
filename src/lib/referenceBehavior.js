@@ -66,9 +66,8 @@ const fetchData = async (getRequest, id, repository) => {
   return await getData(getRequest, extension, parameters)
 }
 
-const refBehavior = async (getRequest, maxAccess, selectNraId = undefined, readOnlyOnEditMode) => {
-  let sku = { readOnly: false, mandatory: false }
-  let reference = { readOnly: false, mandatory: false }
+const refBehavior = async (getRequest, maxAccess, selectNraId = undefined, readOnlyOnEditMode, name = 'reference') => {
+  let type = { readOnly: false, mandatory: false }
   let isExternal
 
   const nraId = selectNraId
@@ -76,38 +75,25 @@ const refBehavior = async (getRequest, maxAccess, selectNraId = undefined, readO
   if (nraId) {
     isExternal = await fetchData(getRequest, nraId, 'isExternal')
 
-    sku = {
-      readOnly: isExternal?.external ? false : true,
-      mandatory: isExternal?.external ? true : false
-    }
-    reference = {
+    type = {
       readOnly: isExternal?.external ? false : true,
       mandatory: isExternal?.external ? true : false
     }
   } else {
-    sku = {
-      readOnly: false,
-      mandatory: true
-    }
-    reference = {
+    type = {
       readOnly: false,
       mandatory: true
     }
   }
   if (readOnlyOnEditMode) {
-    sku = {
-      readOnly: true,
-      mandatory: false
-    }
-    reference = {
+    type = {
       readOnly: true,
       mandatory: false
     }
   }
 
   if (maxAccess) {
-    if (sku) maxAccess = await mergeWithMaxAccess(maxAccess, sku, 'sku')
-    if (reference) maxAccess = await mergeWithMaxAccess(maxAccess, reference, 'reference')
+    if (type) maxAccess = await mergeWithMaxAccess(maxAccess, type, name)
   }
 
   return {
