@@ -28,6 +28,7 @@ import OutwardsModificationForm from '../outwards-modification/Forms/OutwardsMod
 import OutwardsReturnForm from '../outwards-return/Forms/OutwardsReturnForm'
 import InwardTransferForm from '../inward-transfer/forms/InwardTransferForm'
 import InwardSettlementForm from '../inward-settlement/forms/InwardSettlementForm'
+import { SystemRepository } from 'src/repositories/SystemRepository'
 
 const DocumentsOnHold = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -81,6 +82,19 @@ const DocumentsOnHold = () => {
     )
   }
 
+  const getPlantId = async userData => {
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.UserDefaults.get,
+        parameters: `_userId=${userData && userData.userId}&_key=plantId`
+      })
+
+      return res?.record?.value
+    } catch (error) {
+      return ''
+    }
+  }
+
   const popupComponent = async obj => {
     let relevantComponent
     let recordId = obj.recordId
@@ -90,6 +104,12 @@ const DocumentsOnHold = () => {
     let windowWidth
     let windowHeight
     let title
+
+    const userData = window.sessionStorage.getItem('userData')
+      ? JSON.parse(window.sessionStorage.getItem('userData'))
+      : null
+
+    const plantId = await getPlantId(userData)
 
     switch (obj.functionId) {
       case SystemFunction.CurrencyCreditOrderSale:
@@ -213,7 +233,9 @@ const DocumentsOnHold = () => {
         props: {
           recordId: recordId,
           labels: labels,
-          maxAccess: relevantAccess
+          maxAccess: relevantAccess,
+          plantId: plantId,
+          userData: userData
         },
         width: windowWidth,
         height: windowHeight,

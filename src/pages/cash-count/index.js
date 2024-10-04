@@ -57,7 +57,7 @@ const CashCount = () => {
       field: 'date',
       headerName: _labels.date,
       flex: 1,
-      type: 'number'
+      type: 'date'
     },
     {
       field: 'plantName',
