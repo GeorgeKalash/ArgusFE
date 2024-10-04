@@ -33,9 +33,9 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
     maxAccess,
     initialValues: {
       recordId: recordId || null,
-      dtId: dtId || null,
-      plantId: plantId,
-      userId: userId,
+      dtId: null,
+      plantId: null,
+      userId: null,
       dispersalId: '',
       countryId: '',
       dispersalType: '',
@@ -168,15 +168,12 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
     <FormShell
       resourceId={ResourceIds.OutwardsTransfer}
       form={formik}
-      editMode={editMode}
+      editMode={true}
       maxAccess={maxAccess}
-      onClose={onClose}
-      onReopen={onReopen}
-      isClosed={isClosed}
       actions={actions}
-      previewReport={editMode}
+      previewReport={true}
       functionId={SystemFunction.OutwardsTransfer}
-      disabledSubmit={isClosed || editMode}
+      disabledSubmit={true}
     >
       <VertLayout>
         <Grow>
@@ -187,11 +184,9 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
                   name='reference'
                   label={labels.Reference}
                   value={formik?.values?.reference}
-                  maxAccess={!editMode && maxAccess}
+                  maxAccess={false && maxAccess}
                   maxLength='30'
-                  readOnly={editMode}
-                  onChange={formik.handleChange}
-                  error={formik.touched.reference && Boolean(formik.errors.reference)}
+                  readOnly
                 />
               </FormGrid>
               <FormGrid item hideonempty xs={3}>
@@ -200,13 +195,9 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
                   required
                   label={labels.date}
                   value={formik?.values?.date}
-                  onChange={formik.setFieldValue}
-                  editMode={editMode}
-                  readOnly={isClosed || isPosted || editMode}
+                  editMode={true}
+                  readOnly
                   maxAccess={maxAccess}
-                  onClear={() => formik.setFieldValue('date', '')}
-                  error={formik.touched.date && Boolean(formik.errors.date)}
-                  helperText={formik.touched.date && formik.errors.date}
                 />
               </FormGrid>
               <FormGrid item hideonempty xs={3}>
@@ -218,11 +209,6 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
                   valueField='key'
                   displayField='value'
                   values={formik.values}
-                  onClear={() => formik.setFieldValue('status', '')}
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('status', newValue?.key || '')
-                  }}
-                  error={formik.touched.status && Boolean(formik.errors.status)}
                 />
               </FormGrid>
               <FormGrid item hideonempty xs={3}>
@@ -230,13 +216,9 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
                   name='valueDate'
                   label={labels.valueDate}
                   value={formik?.values?.valueDate}
-                  onChange={formik.setFieldValue}
-                  readOnly={isClosed || isPosted || editMode}
+                  readOnly
                   required
                   maxAccess={maxAccess}
-                  onClear={() => formik.setFieldValue('valueDate', '')}
-                  error={formik.touched.valueDate && Boolean(formik.errors.valueDate)}
-                  helperText={formik.touched.valueDate && formik.errors.valueDate}
                 />
               </FormGrid>
             </Grid>
@@ -248,7 +230,7 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
                     name='countryId'
                     label={labels.Country}
                     required
-                    readOnly={isClosed || isPosted || editMode}
+                    readOnly
                     displayField={['countryRef', 'countryName']}
                     columnsInDropDown={[
                       { key: 'countryRef', value: 'Reference' },
@@ -256,19 +238,6 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
                     ]}
                     valueField='countryId'
                     values={formik.values}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('countryId', newValue ? newValue?.countryId : '')
-                      formik.setFieldValue('countryRef', newValue ? newValue?.countryRef : '')
-                      formik.setFieldValue('fcAmount', '')
-                      formik.setFieldValue('lcAmount', '')
-                      handleSelectedProduct(null, true)
-                      formik.setFieldValue('products', [])
-                      if (!newValue) {
-                        formik.setFieldValue('dispersalType', '')
-                        formik.setFieldValue('currencyId', '')
-                      }
-                    }}
-                    error={formik.touched.countryId && Boolean(formik.errors.countryId)}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -277,19 +246,11 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
                     parameters={formik.values.countryId && `_countryId=${formik.values.countryId}`}
                     label={labels.DispersalType}
                     required
-                    readOnly={isClosed || isPosted || !formik.values.countryId || editMode}
+                    readOnly
                     name='dispersalType'
                     displayField='dispersalTypeName'
                     valueField='dispersalType'
                     values={formik.values}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('dispersalType', newValue ? newValue?.dispersalType : '')
-                      formik.setFieldValue('dispersalTypeName', newValue ? newValue?.dispersalTypeName : '')
-                      formik.setFieldValue('beneficiaryId', '')
-                      formik.setFieldValue('beneficiaryName', '')
-                      if (!newValue) formik.setFieldValue('currencyId', '')
-                    }}
-                    error={formik.touched.dispersalType && Boolean(formik.errors.dispersalType)}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -310,12 +271,7 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
                     ]}
                     valueField='currencyId'
                     values={formik.values}
-                    readOnly={!formik.values.dispersalType || isClosed || isPosted || editMode}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('currencyId', newValue?.currencyId)
-                      formik.setFieldValue('currencyRef', newValue?.currencyRef)
-                    }}
-                    error={formik.touched.dispersalType && Boolean(formik.errors.dispersalType)}
+                    readOnly
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -324,28 +280,9 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
                     label={labels.fcAmount}
                     value={formik.values.fcAmount}
                     required
-                    allowClear={!editMode}
-                    readOnly={formik.values.lcAmount || editMode}
+                    allowClear={false}
+                    readOnly
                     maxAccess={maxAccess}
-                    onChange={e => formik.setFieldValue('fcAmount', e.target.value)}
-                    onBlur={async () => {
-                      if (!formik.values.lcAmount)
-                        await fillProducts({
-                          countryId: formik.values.countryId,
-                          currencyId: formik.values.currencyId,
-                          dispersalType: formik.values.dispersalType,
-                          lcAmount: formik.values.lcAmount || 0,
-                          fcAmount: formik.values.fcAmount || 0
-                        })
-                    }}
-                    onClear={() => {
-                      formik.setFieldValue('fcAmount', '')
-                      if (!formik.values.lcAmount) {
-                        handleSelectedProduct(null, true)
-                        formik.setFieldValue('products', [])
-                      }
-                    }}
-                    error={formik.touched.fcAmount && Boolean(formik.errors.fcAmount)}
                     maxLength={10}
                   />
                 </Grid>
@@ -355,32 +292,12 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
                     label={labels.lcAmount}
                     value={formik.values.lcAmount}
                     required
-                    allowClear={!editMode}
-                    readOnly={formik.values.fcAmount || editMode}
+                    allowClear={false}
+                    readOnly
                     maxAccess={maxAccess}
-                    onChange={e => formik.setFieldValue('lcAmount', e.target.value)}
-                    onBlur={async () => {
-                      if (!formik.values.fcAmount)
-                        await fillProducts({
-                          countryId: formik.values.countryId,
-                          currencyId: formik.values.currencyId,
-                          dispersalType: formik.values.dispersalType,
-                          lcAmount: formik.values.lcAmount || 0,
-                          fcAmount: formik.values.fcAmount || 0
-                        })
-                    }}
-                    onClear={() => {
-                      formik.setFieldValue('lcAmount', '')
-                      if (!formik.values.fcAmount) {
-                        handleSelectedProduct(null, true)
-                        formik.setFieldValue('products', [])
-                      }
-                    }}
-                    error={formik.touched.lcAmount && Boolean(formik.errors.lcAmount)}
                     maxLength={10}
                   />
                 </Grid>
-
                 <Grid container xs={12} spacing={1} sx={{ pt: 2, pl: 2 }}>
                   <Grid item xs={6}>
                     <CustomTextField
@@ -413,9 +330,6 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
                       readOnly
                       decimalScale={5}
                       maxAccess={maxAccess}
-                      onChange={e => formik.setFieldValue('exRate', e.target.value)}
-                      onClear={() => formik.setFieldValue('exRate', '')}
-                      error={formik.touched.exRate && Boolean(formik.errors.exRate)}
                       maxLength={10}
                     />
                   </Grid>
@@ -428,9 +342,6 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
                       required
                       readOnly
                       maxAccess={maxAccess}
-                      onChange={e => formik.setFieldValue('exRate2', e.target.value)}
-                      onClear={() => formik.setFieldValue('exRate2', '')}
-                      error={formik.touched.exRate2 && Boolean(formik.errors.exRate2)}
                       maxLength={10}
                     />
                   </Grid>
@@ -443,11 +354,6 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
                     required
                     readOnly
                     maxAccess={maxAccess}
-                    onClear={() => formik.setFieldValue('commission', '')}
-                    error={formik.touched.commission && Boolean(formik.errors.commission)}
-                    onChange={e => {
-                      formik.setFieldValue('commission', e.target.value)
-                    }}
                     maxLength={10}
                   />
                 </Grid>
@@ -469,12 +375,7 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
                     label={labels.discount}
                     value={formik.values.tdAmount}
                     maxAccess={maxAccess}
-                    onChange={e => {
-                      formik.setFieldValue('tdAmount', e.target.value)
-                    }}
-                    readOnly={editMode}
-                    onClear={() => formik.setFieldValue('tdAmount', 0)}
-                    error={formik.touched.tdAmount && Boolean(formik.errors.tdAmount)}
+                    readOnly
                     maxLength={10}
                   />
                 </Grid>
@@ -486,9 +387,6 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
                     required
                     readOnly
                     maxAccess={maxAccess}
-                    onChange={e => formik.setFieldValue('amount', amount)}
-                    onClear={() => formik.setFieldValue('amount', '')}
-                    error={formik.touched.amount && Boolean(formik.errors.amount)}
                     maxLength={10}
                   />
                 </Grid>
@@ -508,40 +406,12 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
                     label={labels.Client}
                     form={formik}
                     required
-                    readOnly={isClosed || isPosted || editMode}
+                    readOnly
                     displayFieldWidth={2}
                     valueShow='clientRef'
                     secondValueShow='clientName'
                     maxAccess={maxAccess}
-                    editMode={editMode}
-                    onChange={async (event, newValue) => {
-                      if (newValue?.status == -1) {
-                        stackError({
-                          message: `Chosen Client Must Be Active.`
-                        })
-
-                        return
-                      }
-
-                      const today = new Date()
-                      const expiryDate = new Date(parseInt(newValue?.expiryDate?.replace(/\/Date\((\d+)\)\//, '$1')))
-                      if (expiryDate < today) {
-                        stackError({
-                          message: `Expired Client.`
-                        })
-
-                        return
-                      }
-
-                      formik.setFieldValue('clientId', newValue ? newValue.recordId : '')
-                      formik.setFieldValue('clientName', newValue ? newValue.name : '')
-                      formik.setFieldValue('clientRef', newValue ? newValue.reference : '')
-                      formik.setFieldValue('category', newValue ? newValue.category : 1)
-                      await chooseClient(newValue?.recordId, newValue?.category)
-                      formik.setFieldValue('beneficiaryId', '')
-                      formik.setFieldValue('beneficiaryName', '')
-                    }}
-                    errorCheck={'clientId'}
+                    editMode={true}
                   />
                 </Grid>
                 <Grid container xs={12} spacing={2} sx={{ pl: '10px', pt: 2 }}>
@@ -551,10 +421,7 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
                       label={labels.firstName}
                       value={formik.values?.firstName}
                       readOnly
-                      onChange={formik.handleChange}
                       maxLength='20'
-                      onClear={() => formik.setFieldValue('firstName', '')}
-                      error={formik.touched.firstName && Boolean(formik.errors.firstName)}
                       maxAccess={maxAccess}
                     />
                   </Grid>
@@ -564,10 +431,7 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
                       label={labels.middleName}
                       value={formik.values?.middleName}
                       readOnly
-                      onChange={formik.handleChange}
                       maxLength='20'
-                      onClear={() => formik.setFieldValue('middleName', '')}
-                      error={formik.touched.middleName && Boolean(formik.errors.middleName)}
                       maxAccess={maxAccess}
                     />
                   </Grid>
@@ -577,10 +441,7 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
                       label={labels.lastName}
                       value={formik.values?.lastName}
                       readOnly
-                      onChange={formik.handleChange}
                       maxLength='20'
-                      onClear={() => formik.setFieldValue('lastName', '')}
-                      error={formik.touched.lastName && Boolean(formik.errors.lastName)}
                       maxAccess={maxAccess}
                     />
                   </Grid>
@@ -590,10 +451,7 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
                       label={labels.familyName}
                       value={formik.values?.familyName}
                       readOnly
-                      onChange={formik.handleChange}
                       maxLength='20'
-                      onClear={() => formik.setFieldValue('familyName', '')}
-                      error={formik.touched.familyName && Boolean(formik.errors.familyName)}
                       maxAccess={maxAccess}
                     />
                   </Grid>
@@ -605,11 +463,8 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
                       label={labels.flFirstName}
                       value={formik.values?.fl_firstName}
                       readOnly
-                      onChange={formik.handleChange}
                       maxLength='20'
                       dir='rtl'
-                      onClear={() => formik.setFieldValue('fl_firstName', '')}
-                      error={formik.touched.fl_firstName && Boolean(formik.errors.fl_firstName)}
                       maxAccess={maxAccess}
                     />
                   </Grid>
@@ -620,10 +475,7 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
                       value={formik.values?.fl_middleName}
                       readOnly
                       maxLength='20'
-                      onChange={formik.handleChange}
                       dir='rtl'
-                      onClear={() => formik.setFieldValue('fl_familyName', '')}
-                      error={formik.touched.fl_middleName && Boolean(formik.errors.fl_middleName)}
                       maxAccess={maxAccess}
                     />
                   </Grid>
@@ -633,11 +485,8 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
                       label={labels.flLastName}
                       value={formik.values?.fl_lastName}
                       readOnly
-                      onChange={formik.handleChange}
                       maxLength='20'
                       dir='rtl'
-                      onClear={() => formik.setFieldValue('fl_lastName', '')}
-                      error={formik.touched.fl_lastName && Boolean(formik.errors.fl_lastName)}
                       maxAccess={maxAccess}
                     />
                   </Grid>
@@ -647,54 +496,42 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
                       label={labels.flFamilyName}
                       value={formik.values?.fl_familyName}
                       readOnly
-                      onChange={formik.handleChange}
                       maxLength='20'
                       dir='rtl'
-                      onClear={() => formik.setFieldValue('fl_familyName', '')}
-                      error={formik.touched.fl_familyName && Boolean(formik.errors.fl_familyName)}
                       maxAccess={maxAccess}
                     />
                   </Grid>
                 </Grid>
-
-                <Grid container rowGap={2} xs={6} sx={{ px: 1 }}>
-                  <Grid item xs={6}>
-                    <ResourceComboBox
-                      endpointId={RemittanceSettingsRepository.Profession.qry}
-                      label={labels.profession}
-                      name='professionId'
-                      displayField={['reference', 'name']}
-                      columnsInDropDown={[
-                        { key: 'reference', value: 'Reference' },
-                        { key: 'name', value: 'Name' }
-                      ]}
-                      valueField='recordId'
-                      values={formik.values}
-                      readOnly
-                      error={formik.touched.professionId && Boolean(formik.errors.professionId)}
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <ResourceComboBox
-                      endpointId={CurrencyTradingSettingsRepository.PurposeExchange.qry}
-                      name='poeId'
-                      label={labels.purposeOfExchange}
-                      valueField='recordId'
-                      displayField={['reference', 'name']}
-                      columnsInDropDown={[
-                        { key: 'reference', value: 'Reference' },
-                        { key: 'name', value: 'Name' }
-                      ]}
-                      values={formik.values}
-                      onChange={(event, newValue) => {
-                        formik.setFieldValue('poeId', newValue ? newValue?.recordId : '')
-                      }}
-                      required
-                      readOnly={editMode}
-                      error={formik.touched.poeId && Boolean(formik.errors.poeId)}
-                      helperText={formik.touched.poeId && formik.errors.poeId}
-                    />
-                  </Grid>
+                <Grid item xs={6}>
+                  <ResourceComboBox
+                    endpointId={RemittanceSettingsRepository.Profession.qry}
+                    label={labels.profession}
+                    name='professionId'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    valueField='recordId'
+                    values={formik.values}
+                    readOnly
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <ResourceComboBox
+                    endpointId={CurrencyTradingSettingsRepository.PurposeExchange.qry}
+                    name='poeId'
+                    label={labels.purposeOfExchange}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    values={formik.values}
+                    required
+                    readOnly
+                  />
                 </Grid>
               </FieldSet>
               <Grid item xs={5} sx={{ pl: 5 }}>
@@ -715,15 +552,10 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
                     { key: 'shortName', value: 'ShortName' }
                   ]}
                   required
-                  readOnly={!formik.values.clientId || !formik.values.dispersalType || isClosed || isPosted || editMode}
+                  readOnly
                   maxAccess={maxAccess}
-                  editMode={editMode}
+                  editMode={true}
                   secondDisplayField={false}
-                  onChange={async (event, newValue) => {
-                    formik.setFieldValue('beneficiaryId', newValue?.beneficiaryId)
-                    formik.setFieldValue('beneficiaryName', newValue?.name)
-                    formik.setFieldValue('beneficiarySeqNo', newValue?.seqNo)
-                  }}
                   errorCheck={'beneficiaryId'}
                 />
               </Grid>
