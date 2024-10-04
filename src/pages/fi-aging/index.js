@@ -81,6 +81,18 @@ const FiAging = () => {
           totalRow.Total += agingEntry.Total
         })
   
+        const emptyRow = {
+          accountId: '',
+          accountRef: '',
+          accountName: '',
+          Total: ''
+        }
+
+        orderedLegCaptions.forEach(caption => {
+          emptyRow[caption] = ''
+        })
+
+        list.push(emptyRow)
         list.push(totalRow)
   
         defaultResponse.count = response?.record?.agings?.length
