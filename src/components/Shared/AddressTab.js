@@ -176,6 +176,8 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true }) =>
                 label={labels.bldgNo}
                 value={addressValidation.values.bldgNo}
                 readOnly={readOnly}
+                minLength={4}
+                maxLength={4}
                 onChange={addressValidation.handleChange}
                 onClear={() => addressValidation.setFieldValue('bldgNo', '')}
                 error={addressValidation.touched.bldgNo && Boolean(addressValidation.errors.bldgNo)}
@@ -217,6 +219,8 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true }) =>
                 name='postalCode'
                 label={labels.postalCode}
                 readOnly={readOnly}
+                minLength={5}
+                maxLength={5}
                 value={addressValidation.values.postalCode}
                 onChange={addressValidation.handleChange}
                 onClear={() => addressValidation.setFieldValue('postalCode', '')}
