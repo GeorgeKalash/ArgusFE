@@ -30,6 +30,11 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
   })
   const imageUploadRef = useRef(null)
 
+  const { changeDT, maxAccess } = useRefBehavior({
+    access: access,
+    readOnlyOnEditMode: store.recordId
+  })
+
   const { formik } = useForm({
     initialValues: {
       recordId: null,
@@ -60,8 +65,8 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       defSaleMUId: '',
       pgId: ''
     },
-    access,
-    enableReinitialize: true,
+    maxAccess,
+    enableReinitialize: false,
     validateOnChange: true,
 
     validationSchema: yup.object({
@@ -95,7 +100,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
           record: JSON.stringify({ ...obj, attachment: null })
         })
 
-        if (!recordId) {
+        if (!formik.values.recordId) {
           toast.success(platformLabels.Added)
           formik.setValues({
             ...obj,
@@ -112,6 +117,8 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
         setFormikInitial(formik.values)
 
         if (imageUploadRef.current) {
+          imageUploadRef.current.value = response.recordId
+
           await imageUploadRef.current.submit()
         }
 
@@ -128,11 +135,6 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
   })
 
   const editMode = !!recordId || formik.values.recordId
-
-  const { changeDT, maxAccess } = useRefBehavior({
-    access: access,
-    readOnlyOnEditMode: editMode
-  })
 
   useEffect(() => {
     ;(async function () {

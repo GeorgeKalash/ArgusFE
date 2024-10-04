@@ -13,8 +13,9 @@ import { Grid } from '@mui/material'
 import FormShell from 'src/components/Shared/FormShell'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
+import toast from 'react-hot-toast'
 
-const PropertiesForm = ({ store, labels, maxAccess }) => {
+const PropertiesForm = ({ store, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId } = store
 
@@ -32,22 +33,73 @@ const PropertiesForm = ({ store, labels, maxAccess }) => {
             parameters: `_filter=`
           })
 
-          const filteredDimensions = response.list.filter(
+          const filteredDimensions = response?.list?.filter(
             item => item.key.includes('ivtDimension') && item.value.length > 0
           )
           setDimensions(filteredDimensions)
 
-          const filteredDimensions2 = response.list.filter(
+          const filteredDimensions2 = response?.list?.filter(
             item => item.key.includes('ivtUDT') && item.key !== 'ivtUDTCount' && item.value.length > 0
           )
           setDimensionsUDT(filteredDimensions2)
-          toast.succes(platformLabels.Edited)
         } catch (error) {}
       }
 
       fetchDimension()
     }
-  }, [])
+  }, [recordId])
+
+  useEffect(() => {
+    const fetchDimensionsData = async () => {
+      if (recordId && dimensions.length > 0) {
+        try {
+          const dimensionRequests = dimensions.map(dimension => {
+            const dimensionNumber = dimension.key.match(/\d+$/)?.[0]
+
+            return getRequest({
+              extension: InventoryRepository.DimensionId.get,
+              parameters: `_itemId=${recordId}&_dimension=${dimensionNumber}`
+            })
+          })
+
+          const dimensionResponses = await Promise.all(dimensionRequests)
+
+          const newDimensionValues = dimensionResponses.reduce((acc, res, index) => {
+            const dimensionKey = dimensions[index].key
+            acc[dimensionKey] = res.record?.id || ''
+
+            return acc
+          }, {})
+
+          const udtRequests = dimensionsUDT.map(dimension => {
+            const dimensionNumber = dimension.key.match(/\d+$/)?.[0]
+
+            return getRequest({
+              extension: InventoryRepository.DimensionUDT.get,
+              parameters: `_itemId=${recordId}&_dimension=${dimensionNumber}`
+            })
+          })
+
+          const udtResponses = await Promise.all(udtRequests)
+
+          const newUDTValues = udtResponses.reduce((acc, res, index) => {
+            const udtKey = dimensionsUDT[index]?.key
+            acc[udtKey] = res.record?.value || ''
+
+            return acc
+          }, {})
+
+          formik.setValues(prevValues => ({
+            ...prevValues,
+            ...newDimensionValues,
+            ...newUDTValues
+          }))
+        } catch (error) {}
+      }
+    }
+
+    fetchDimensionsData()
+  }, [recordId, dimensionsUDT, dimensions])
 
   const { formik } = useForm({
     initialValues: {},
@@ -101,64 +153,13 @@ const PropertiesForm = ({ store, labels, maxAccess }) => {
             })
           })
         }
+        toast.success(platformLabels.Edited)
       } catch (error) {}
     }
   })
 
-  useEffect(() => {
-    const fetchDimensionsData = async () => {
-      if (recordId && dimensions.length > 0) {
-        try {
-          const dimensionRequests = dimensions.map(dimension => {
-            const dimensionNumber = dimension.key.match(/\d+$/)?.[0]
-
-            return getRequest({
-              extension: InventoryRepository.DimensionId.get,
-              parameters: `_itemId=${recordId}&_dimension=${dimensionNumber}`
-            })
-          })
-
-          const dimensionResponses = await Promise.all(dimensionRequests)
-
-          const newDimensionValues = dimensionResponses.reduce((acc, res, index) => {
-            const dimensionKey = dimensions[index].key
-            acc[dimensionKey] = res.record?.id || ''
-
-            return acc
-          }, {})
-
-          const udtRequests = dimensionsUDT.map(dimension => {
-            const dimensionNumber = dimension.key.match(/\d+$/)?.[0]
-
-            return getRequest({
-              extension: InventoryRepository.DimensionUDT.get,
-              parameters: `_itemId=${recordId}&_dimension=${dimensionNumber}`
-            })
-          })
-
-          const udtResponses = await Promise.all(udtRequests)
-
-          const newUDTValues = udtResponses.reduce((acc, res, index) => {
-            const udtKey = dimensionsUDT[index].key
-            acc[udtKey] = res.record?.value || ''
-
-            return acc
-          }, {})
-
-          formik.setValues(prevValues => ({
-            ...prevValues,
-            ...newDimensionValues,
-            ...newUDTValues
-          }))
-        } catch (error) {}
-      }
-    }
-
-    fetchDimensionsData()
-  }, [recordId, dimensions, dimensionsUDT])
-
   return (
-    <FormShell form={formik} resourceId={ResourceIds.Items} maxAccess={maxAccess} infoVisible={false}>
+    <FormShell form={formik} resourceId={ResourceIds.Items} maxAccess={maxAccess} infoVisible={false} isCleared={false}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>

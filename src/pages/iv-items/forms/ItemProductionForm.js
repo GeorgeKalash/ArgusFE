@@ -70,12 +70,9 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
             }, {})
 
             formik.setValues(newValues)
-            console.log(res.record, 'Updated values')
           }
         }
-      } catch (exception) {
-        console.error(exception)
-      }
+      } catch (exception) {}
     })()
   }, [recordId])
 

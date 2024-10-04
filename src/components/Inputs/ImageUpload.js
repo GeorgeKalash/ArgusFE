@@ -17,8 +17,10 @@ const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId }, ref) => 
     initialValues
   })
 
+  const uniqueRecord = recordId || ref?.current?.value
+
   useEffect(() => {
-    if (recordId) {
+    if (uniqueRecord) {
       getData()
     }
   }, [])
@@ -27,7 +29,7 @@ const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId }, ref) => 
     try {
       const result = await getRequest({
         extension: SystemRepository.Attachment.get,
-        parameters: `_resourceId=${resourceId}&_seqNo=${seqNo}&_recordId=${recordId}`
+        parameters: `_resourceId=${resourceId}&_seqNo=${seqNo}&_recordId=${uniqueRecord}`
       })
 
       setInitialData(result?.record)
@@ -48,7 +50,7 @@ const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId }, ref) => 
 
       let data = {
         resourceId: resourceId,
-        recordId: recordId,
+        recordId: uniqueRecord,
         seqNo: 0,
         fileName: file.name,
         folderId: null,
@@ -82,9 +84,11 @@ const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId }, ref) => 
 
   const submit = () => {
     if (formik.values?.file) {
+      const obj = { ...formik.values, recordId: ref.current.value || recordId }
+
       return postRequest({
         extension: SystemRepository.Attachment.set,
-        record: JSON.stringify(formik.values),
+        record: JSON.stringify(obj),
         file: formik.values?.file
       })
         .then(res => {

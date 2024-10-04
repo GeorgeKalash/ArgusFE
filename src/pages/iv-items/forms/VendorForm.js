@@ -29,14 +29,12 @@ const VendorForm = ({ labels, editMode, maxAccess, store, record }) => {
 
   const { recordId: itemId } = store
 
-  console.log(record)
-
   const { formik } = useForm({
     maxAccess,
     initialValues: {
       itemId,
-      vendorId: record.vendorId || '',
-      currencyId: record.currencyId || '',
+      vendorId: record?.vendorId || '',
+      currencyId: record?.currencyId || '',
       baseLaborPrice: '',
       priceList: '',
       markdown: '',
@@ -56,16 +54,23 @@ const VendorForm = ({ labels, editMode, maxAccess, store, record }) => {
       const vendorId = formik.values.vendorId
       const currencyId = formik.values.currencyId
 
+      const submitData = {
+        ...obj,
+        markdown: obj.markdown || 0
+      }
+
       const response = await postRequest({
         extension: PurchaseRepository.PriceList.set,
-        record: JSON.stringify(obj)
+        record: JSON.stringify(submitData)
       })
 
       if (!vendorId && !currencyId) {
         toast.success(platformLabels.Added)
-      } else toast.success(platformLabels.Edited)
+      } else {
+        toast.success(platformLabels.Edited)
+      }
 
-      formik.setValues(obj)
+      formik.setValues(submitData)
 
       invalidate()
     }
@@ -97,6 +102,7 @@ const VendorForm = ({ labels, editMode, maxAccess, store, record }) => {
       resourceId={ResourceIds.PriceList}
       maxAccess={maxAccess}
       editMode={editMode}
+      isCleared={false}
     >
       <VertLayout>
         <Grow>

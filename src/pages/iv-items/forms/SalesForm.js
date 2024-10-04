@@ -47,8 +47,16 @@ const SalesForm = ({ labels, maxAccess, store, record, cId }) => {
       currencyId: yup.string().required(),
       plId: yup.string().required(),
       priceType: yup.string().required(),
-      value: yup.string().required(),
-      valueType: yup.string().required()
+      value: yup.number().required().typeError(),
+      valueType: yup.string().required(),
+      minPrice: yup
+        .number()
+        .nullable()
+        .test(function (value) {
+          const { value: price } = this.parent
+
+          return value == null || price == null || value <= price
+        })
     }),
     onSubmit: async obj => {
       await postRequest({
@@ -106,6 +114,7 @@ const SalesForm = ({ labels, maxAccess, store, record, cId }) => {
       resourceId={ResourceIds.PriceList}
       maxAccess={maxAccess}
       editMode={editMode}
+      isCleared={false}
     >
       <VertLayout>
         <Grow>
@@ -222,6 +231,7 @@ const SalesForm = ({ labels, maxAccess, store, record, cId }) => {
                 value={formik.values.minPrice}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('minPrice', '')}
+                error={formik.touched.minPrice && Boolean(formik.errors.minPrice)}
               />
             </Grid>
           </Grid>

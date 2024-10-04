@@ -57,15 +57,21 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
           const { isMetal } = this.parent
 
           return isMetal ? value != null && value.trim() !== '' : true
+        }),
+      metalColorId: yup
+        .string()
+        .nullable()
+        .test('is-metalId-required', 'Metal ID is required when isMetal is true', function (value) {
+          const { isMetal } = this.parent
+
+          return isMetal ? value != null && value.trim() !== '' : true
         })
     }),
 
     onSubmit: async values => {
       try {
         await postPhysical(values)
-      } catch (error) {
-        toast.error(platformLabels.Error)
-      }
+      } catch (error) {}
     }
   })
 
@@ -177,6 +183,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
       maxAccess={maxAccess}
       editMode={editMode}
       infoVisible={false}
+      isCleared={false}
     >
       <VertLayout>
         <Grow>
@@ -319,11 +326,11 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
                 name='metalId'
                 label={labels.metal}
                 readOnly={formik.values?.isMetal === false}
+                required={formik.values?.isMetal === true}
                 valueField='recordId'
                 displayField='reference'
                 displayFieldWidth={1}
                 columnsInDropDown={[{ key: 'reference', value: 'Reference' }]}
-                required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('metalId', newValue?.recordId || '')
@@ -346,7 +353,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
                 displayField='reference'
                 displayFieldWidth={1}
                 columnsInDropDown={[{ key: 'reference', value: 'Reference' }]}
-                required
+                required={formik.values?.isMetal === true}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('metalColorId', newValue?.recordId || '')

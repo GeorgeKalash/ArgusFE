@@ -53,7 +53,7 @@ const ItemWindow = ({ recordId, labels, maxAccess }) => {
         <SalesList labels={labels} maxAccess={maxAccess} store={store} formikInitial={formikInitial} />
       </CustomTabPanel>
       <CustomTabPanel height={660} index={3} value={activeTab}>
-        <PropertiesForm labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} />
+        <PropertiesForm labels={labels} maxAccess={maxAccess} store={store} />
       </CustomTabPanel>
       <CustomTabPanel height={660} index={4} value={activeTab}>
         <PhysicalForm labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} editMode={editMode} />
