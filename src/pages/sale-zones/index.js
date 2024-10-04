@@ -110,6 +110,15 @@ const SalesZone = () => {
     })
   }
 
+  const actions = [
+    {
+      key: 'Tree',
+      condition: true,
+      onClick: onTreeClick,
+      disabled: false
+    }
+  ]
+
   const edit = obj => {
     openForm(obj?.recordId)
   }
@@ -117,7 +126,13 @@ const SalesZone = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} onTree={onTreeClick} previewReport={ResourceIds.SalesZone} />
+        <GridToolbar
+          onAdd={add}
+          maxAccess={access}
+          actions={actions}
+          onTree={onTreeClick}
+          previewReport={ResourceIds.SalesZone}
+        />
       </Fixed>
       <Grow>
         <Table
