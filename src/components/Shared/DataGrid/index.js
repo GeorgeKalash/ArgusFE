@@ -19,12 +19,6 @@ export function DataGrid({
 }) {
   const gridApiRef = useRef(null)
 
-  // useEffect(() => {
-  //   if (!value?.length && allowAddNewLine) {
-  //     addNewRow()
-  //   }
-  // }, [value])
-
   const addNewRow = params => {
     const highestIndex = params.node.data.id + 1
 
@@ -69,6 +63,7 @@ export function DataGrid({
         rowIndex: node.rowIndex,
         colKey: nextColumnId
       })
+
       return
     }
 
@@ -88,13 +83,14 @@ export function DataGrid({
 
       if (currentColumnIndex < allColumns.length - 2 && event.key === 'Tab') {
         const nextColumnId = allColumns[currentColumnIndex + 1].colId
-        console.log(nextColumnId)
+
         api.startEditingCell({
           rowIndex: currentRowIndex,
           colKey: nextColumnId
         })
       } else {
         const nextColumnId = allColumns[0].colId
+
         api.startEditingCell({
           rowIndex: currentRowIndex + 1,
           colKey: nextColumnId
@@ -220,9 +216,10 @@ export function DataGrid({
         params.api.stopEditing()
       }
     }
+
     const handleDelete = () => {
       gridApiRef.current.applyTransaction({ remove: [params.data] })
-      console.log(params.data, gridApiRef.current?.data)
+
       const newRows = value?.filter(({ id }) => id !== params.data.id)
 
       onChange(newRows)
@@ -250,7 +247,7 @@ export function DataGrid({
       cellStyle: getCellStyle,
       suppressKeyboardEvent: params => {
         const { event } = params
-        console.log(event.code)
+
         return event.code === 'ArrowDown' || event.code === 'ArrowUp' || event.code === 'Enter' ? true : false
       }
     })),
@@ -296,6 +293,7 @@ export function DataGrid({
               singleClickEdit={true}
               onGridReady={params => {
                 gridApiRef.current = params.api
+
                 onChange(value)
               }}
               onCellKeyDown={onCellKeyDown}
