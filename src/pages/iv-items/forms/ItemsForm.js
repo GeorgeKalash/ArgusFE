@@ -81,7 +81,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
         .test(function (value) {
           const { trackBy } = this.parent
 
-          return trackBy === '2' || trackBy === 2 ? value != null && value.trim() !== '' : true
+          return trackBy === 2 ? value != null && value.trim() !== '' : true
         }),
       spfId: yup
         .string()
@@ -89,7 +89,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
         .test(function (value) {
           const { trackBy } = this.parent
 
-          return trackBy === '1' || trackBy === 1 ? value != null && value.trim() !== '' : true
+          return trackBy === 1 ? value != null && value.trim() !== '' : true
         })
     }),
     onSubmit: async obj => {
@@ -147,8 +147,8 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
           })
           setFormikInitial(res.record)
           formik.setValues({ ...res.record, kitItem: !!res.record.kitItem })
-          setShowLotCategories(res.record.trackBy === '2' || res.record.trackBy === 2)
-          setShowSerialProfiles(res.record.trackBy === '1' || res.record.trackBy === 1)
+          setShowLotCategories(res.record.trackBy === 2)
+          setShowSerialProfiles(res.record.trackBy === 1)
           setStore(prevStore => ({
             ...prevStore,
             _msId: res.record.msId,
@@ -161,6 +161,14 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
     })()
   }, [])
 
+  useEffect(() => {
+    if (formik.values.kitItem) {
+      formik.setFieldValue('ivtItem', false)
+      formik.setFieldValue('trackBy', '')
+      formik.setFieldValue('valuation', '')
+    }
+  }, [formik.values.kitItem])
+
   return (
     <FormShell resourceId={ResourceIds.Items} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
@@ -168,7 +176,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
           <Grid container spacing={4}>
             <Grid item xs={6}>
               <Grid container spacing={2}>
-                <Grid item xs={5.9}>
+                <Grid item xs={6}>
                   <ResourceComboBox
                     dataGrid
                     endpointId={InventoryRepository.Items.pack}
@@ -210,6 +218,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     values={formik.values}
                     name='priceType'
                     label={labels.priceType}
+                    readOnly={formik.values.kitItem}
                     valueField='key'
                     displayField='value'
                     displayFieldWidth={1}
@@ -222,7 +231,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                   />
                 </Grid>
 
-                <Grid item xs={5.9}>
+                <Grid item xs={6}>
                   <CustomTextField
                     name='sku'
                     label={labels.reference}
@@ -322,7 +331,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                   />
                 </Grid>
 
-                <Grid item xs={5.9}>
+                <Grid item xs={6}>
                   <ResourceComboBox
                     endpointId={InventoryRepository.Items.pack}
                     reducer={response => {
@@ -361,6 +370,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     values={formik.values}
                     name='valuationMethod'
                     label={labels.valation}
+                    readOnly={formik.values.kitItem}
                     valueField='key'
                     displayField='value'
                     displayFieldWidth={1}
@@ -396,6 +406,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                         name='ivtItem'
                         checked={formik.values.ivtItem}
                         onChange={formik.handleChange}
+                        disabled={formik.values.kitItem}
                         maxAccess={maxAccess}
                       />
                     }
@@ -437,6 +448,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                         name='kitItem'
                         checked={formik.values.kitItem}
                         onChange={formik.handleChange}
+                        disabled={editMode}
                         maxAccess={maxAccess}
                       />
                     }
@@ -492,7 +504,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     valueField='key'
                     displayField='value'
                     displayFieldWidth={1}
-                    readOnly={editMode}
+                    readOnly={editMode || formik.values.kitItem}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
                       const trackByValue = newValue?.key || ''
@@ -504,7 +516,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                   />
                 </Grid>
 
-                {showLotCategories && (
+                {showLotCategories && !formik.values.kitItem && (
                   <Grid item xs={12}>
                     <ResourceComboBox
                       endpointId={InventoryRepository.Items.pack}
@@ -533,7 +545,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                   </Grid>
                 )}
 
-                {showSerialProfiles && (
+                {showSerialProfiles && !formik.values.kitItem && (
                   <Grid item xs={12}>
                     <ResourceComboBox
                       endpointId={InventoryRepository.Items.pack}
@@ -565,13 +577,3 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
     </FormShell>
   )
 }
-
-// Procurement
-// Item Group
-
-// Valuation
-// Vat Schedule
-// Track By
-// Unit Price
-// Lot Category
-//

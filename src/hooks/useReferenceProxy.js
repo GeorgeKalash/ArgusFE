@@ -16,7 +16,6 @@ export function useRefBehavior({ access, readOnlyOnEditMode, name }) {
   const query = useQuery({
     retry: false,
     staleTime: 0,
-
     queryKey: [nraId, !!access],
     queryFn: () => queryFn(nraId)
   })

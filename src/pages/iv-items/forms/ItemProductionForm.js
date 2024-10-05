@@ -22,7 +22,7 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
 
   const { formik } = useForm({
     initialValues: {
-      itemId: recordId,
+      itemId: store.recordId,
       lineId: '',
       spfId: '',
       ltId: '',
@@ -43,10 +43,7 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
         record: JSON.stringify(obj)
       })
 
-      formik.setValues({
-        ...obj,
-        recordId: response.recordId
-      })
+      formik.setValues(obj)
       toast.success(platformLabels.Edited)
 
       invalidate()
@@ -77,7 +74,13 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
   }, [recordId])
 
   return (
-    <FormShell resourceId={ResourceIds.IdCategories} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell
+      resourceId={ResourceIds.IdCategories}
+      form={formik}
+      maxAccess={maxAccess}
+      editMode={editMode}
+      isCleared={false}
+    >
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -149,7 +152,7 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
             </Grid>
             <Grid item xs={12}>
               <ResourceLookup
-                endpointId={ManufacturingRepository.ProductionClass.snapshot}
+                endpointId={ManufacturingRepository.Design.snapshot}
                 valueField='reference'
                 displayField='name'
                 name='designId'

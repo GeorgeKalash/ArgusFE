@@ -65,25 +65,23 @@ const BarcodeForm = ({ store, labels, maxAccess }) => {
   })
 
   const postdata = async obj => {
-    try {
-      const data = obj?.barcodes?.map(({ itemId, ...rest }) => ({
-        itemId: recordId,
-        ...rest
-      }))
+    const data = obj?.barcodes?.map(({ itemId, ...rest }) => ({
+      itemId: recordId,
+      ...rest
+    }))
 
-      const list = {
-        itemId: recordId,
-        barcodes: data || []
-      }
+    const list = {
+      itemId: recordId,
+      barcodes: data || []
+    }
 
-      await postRequest({
-        extension: InventoryRepository.Barcode.set2,
-        record: JSON.stringify(list)
-      })
+    await postRequest({
+      extension: InventoryRepository.Barcode.set2,
+      record: JSON.stringify(list)
+    })
 
-      toast.success(platformLabels.Edited)
-      getData()
-    } catch (error) {}
+    toast.success(platformLabels.Edited)
+    getData()
   }
 
   const columns = [

@@ -1,4 +1,4 @@
-import { useContext } from 'react'
+import { useContext, useState } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
@@ -17,6 +17,7 @@ import ItemWindow from './window/ItemWindow'
 const IvItems = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const [skuValue, setSku] = useState('')
 
   const { stack } = useWindow()
 
@@ -51,11 +52,11 @@ const IvItems = () => {
   })
 
   async function fetchWithSearch({ options = {}, qry }) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _size = 50 } = options
 
     const response = await getRequest({
       extension: InventoryRepository.Items.snapshot,
-      parameters: `_filter=${qry}&_startAt=${_startAt}&_size=${_pageSize}`
+      parameters: `_filter=${qry}&_startAt=${_startAt}&_size=${_size}`
     })
 
     return response
@@ -114,6 +115,11 @@ const IvItems = () => {
     }
   ]
 
+  const edit = obj => {
+    openForm(obj?.recordId)
+    setSku(obj?.sku)
+  }
+
   function openForm(recordId) {
     stack({
       Component: ItemWindow,
@@ -124,16 +130,12 @@ const IvItems = () => {
       },
       width: 1200,
       height: 660,
-      title: _labels.items
+      title: _labels.items + ' ' + skuValue
     })
   }
 
   const add = () => {
     openForm()
-  }
-
-  const edit = obj => {
-    openForm(obj?.recordId)
   }
 
   const del = async obj => {

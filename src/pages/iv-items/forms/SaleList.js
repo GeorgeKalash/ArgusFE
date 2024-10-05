@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect } from 'react'
+import { useContext, useEffect } from 'react'
 import { useWindow } from 'src/windows'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
@@ -53,18 +53,16 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
   useEffect(() => {
     ;(async function () {
       if (recordId) {
-        try {
-          const response = await getRequest({
-            extension: InventoryRepository.Currency.qry,
-            parameters: `&_itemId=${recordId}`
-          })
-          if (response.list && response.list.length > 0) {
-            formik.setFieldValue('currencyId', response.list[0].currencyId)
-          }
-        } catch (error) {}
+        const response = await getRequest({
+          extension: InventoryRepository.Currency.qry,
+          parameters: `&_itemId=${recordId}`
+        })
+        if (response.list && response.list.length > 0) {
+          formik.setFieldValue('currencyId', response.list[0].currencyId)
+        }
       }
     })()
-  }, [recordId])
+  }, [])
 
   async function fetchGridData() {
     if (formik.values.currencyId) {
@@ -157,14 +155,12 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: SaleRepository.Sales.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (exception) {}
+    await postRequest({
+      extension: SaleRepository.Sales.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   return (
@@ -175,7 +171,7 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
             onAdd={add}
             maxAccess={maxAccess}
             rightSection={
-              <Grid container spacing={2} sx={{ mt: 2 }}>
+              <Grid container spacing={2} sx={{ mt: -1 }}>
                 <Grid item xs={6}>
                   <ResourceComboBox
                     endpointId={store._msId ? InventoryRepository.MeasurementUnit.qry : ''}
