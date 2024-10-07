@@ -171,13 +171,12 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
               reference: res2.record.reference,
               status: 1
             }
-  
+
             await postRequest({
               extension: AccessControlRepository.Notification.set,
               record: JSON.stringify(notificationData)
-            })  
+            })
           }
-          
           invalidate()
         } else {
           if (formik.values.notificationGroupId) {
@@ -284,7 +283,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
         valueField: 'recordId',
         displayField: 'sku',
         mandatory: true,
-        displayFieldWidth: 3,
+        displayFieldWidth: 4,
         mapping: [
           { from: 'recordId', to: 'itemId' },
           { from: 'msId', to: 'msId' },
@@ -819,6 +818,8 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
           </Grid>
           <DataGrid
             onChange={value => formik.setFieldValue('transfers', value)}
+            name='items'
+            maxAccess={maxAccess}
             value={formik?.values?.transfers || []}
             error={formik?.errors?.transfers}
             columns={columns}
