@@ -80,6 +80,7 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
       maxAccess={maxAccess}
       editMode={editMode}
       isCleared={false}
+      infoVisible={false}
     >
       <VertLayout>
         <Grow>
