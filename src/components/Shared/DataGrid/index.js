@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import React, { useRef, useState } from 'react'
 import { AgGridReact } from 'ag-grid-react'
 import { Box, IconButton } from '@mui/material'
 import components from './components'
@@ -58,7 +58,7 @@ export function DataGrid({
     const currentColumnIndex = allColumns?.findIndex(col => col.colId === params.column.getColId())
 
     if (event.key === 'Enter') {
-      const nextColumnId = allColumns[currentColumnIndex + 1].colId
+      const nextColumnId = allColumns[currentColumnIndex].colId
       api.startEditingCell({
         rowIndex: node.rowIndex,
         colKey: nextColumnId
@@ -126,6 +126,7 @@ export function DataGrid({
 
   const CustomCellEditor = params => {
     const { column, data, maxAccess } = params
+    const [currentValue, setCurrentValue] = useState(params?.node?.data?.[params?.colDef?.field] || '') // Capture current data state
 
     const Component =
       typeof column?.colDef?.component === 'string'
@@ -157,16 +158,11 @@ export function DataGrid({
         [field]: value || ''
       }
 
-      setData(changes)
-      commit(changes)
+      setCurrentValue(value || '')
 
-      if (!value) {
-        params.api.stopEditing()
-        gridApiRef.current.startEditingCell({
-          rowIndex: params.node.rowIndex,
-          colKey: field
-        })
-      }
+      setData(changes)
+
+      commit(changes)
     }
 
     const updateRow = ({ changes }) => {
@@ -191,6 +187,7 @@ export function DataGrid({
           id={params.node.data.id}
           field={params.colDef.field}
           {...params}
+          value={currentValue}
           column={{
             ...column.colDef,
             props: column.propsReducer ? column?.propsReducer({ data, props }) : props
@@ -266,13 +263,14 @@ export function DataGrid({
   const onCellEditingStopped = params => {
     const { data } = params
     gridApiRef.current.applyTransaction({ update: [data] })
+
     commit(data)
   }
 
   const commit = data => {
     const allRowNodes = []
     gridApiRef.current.forEachNode(node => allRowNodes.push(node.data))
-    const updatedGridData = allRowNodes.map(row => (row.id === data.id ? data : row))
+    const updatedGridData = allRowNodes.map(row => (row.id === data?.id ? data : row))
 
     onChange(updatedGridData)
   }
@@ -297,8 +295,10 @@ export function DataGrid({
                 onChange(value)
               }}
               onCellKeyDown={onCellKeyDown}
+              rowHeight={45}
               onCellEditingStopped={onCellEditingStopped}
               getRowId={params => params?.data?.id}
+              cellValueChanged={params => console.log('params')}
             />
           )}
         </div>
