@@ -452,7 +452,7 @@ const Table = ({
         setTimeout(() => setTooltipOpen(false), 500)
       })
     }
-
+    console.log(params)
     return (
       <Box>
         {tooltipOpen && (
@@ -485,7 +485,12 @@ const Table = ({
             },
             '&:focus': {
               outline: 'none'
-            }
+            },
+            ...(!params.colDef?.wrapText && {
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            })
           }}
         >
           {params.value}
@@ -509,6 +514,7 @@ const Table = ({
       : []),
     ...filteredColumns.map(column => ({
       ...column,
+      flex: 1,
       cellRenderer: column.cellRenderer ? column.cellRenderer : FieldWrapper
     }))
   ]
