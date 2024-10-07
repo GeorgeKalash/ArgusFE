@@ -47,6 +47,7 @@ export const RemittanceSettingsRepository = {
     set2: service + 'set2PDA'
   },
   Correspondent: {
+    page: service + 'pageCOR',
     qry: service + 'qryCOR',
     get: service + 'getCOR',
     set: service + 'setCOR',
@@ -106,7 +107,7 @@ export const RemittanceSettingsRepository = {
     get: service + 'getPFN',
     set: service + 'setPFN',
     del: service + 'delPFN',
-    snapshot: service + 'snapshotPFN',
+    snapshot: service + 'snapshotPFN'
   },
   ClientIndividual: {
     qry: service + 'qryCLI'
