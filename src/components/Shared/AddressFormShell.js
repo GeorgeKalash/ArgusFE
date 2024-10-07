@@ -47,7 +47,7 @@ export const AddressFormShell = ({
     validateOnChange: true,
     validateOnBlur: true,
     validate: values => {
-      const errors = formik.errors;
+      const errors = {}
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
       if (
