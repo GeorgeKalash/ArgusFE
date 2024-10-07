@@ -383,7 +383,6 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       const errors = {}
 
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-
       if (values.isRelativeDiplomat && !values.relativeDiplomatInfo) {
         errors.relativeDiplomatInfo = 'Relative Diplomat Info is required'
       }
