@@ -49,7 +49,6 @@ export const AddressFormShell = ({
     validate: values => {
       const errors = {}
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-
       if (
         ((values.name || values.cityId || values.phone || values.countryId || values.street1) && optional) ||
         !optional
