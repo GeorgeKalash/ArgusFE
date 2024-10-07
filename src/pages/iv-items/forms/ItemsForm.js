@@ -74,7 +74,8 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
     validationSchema: yup.object({
       categoryId: yup.string().required(),
       name: yup.string().required(),
-      priceType: yup.string().required(),
+
+      // priceType: yup.string().required(),
       msId: yup.string().required(),
       lotCategoryId: yup
         .string()
@@ -111,7 +112,10 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
           setStore(prevStore => ({
             ...prevStore,
             recordId: response.recordId,
-            _msId: formik.values.msId
+            _msId: formik.values.msId,
+            _kit: formik.values.kit,
+            _name: formik.values.name,
+            _reference: formik.values.sku
           }))
         } else {
           toast.success(platformLabels.Edited)
@@ -153,9 +157,12 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
           setStore(prevStore => ({
             ...prevStore,
             _msId: res.record.msId,
+            _kit: !!res.record.kitItem,
             measurementId: res.record.defSaleMUId,
             priceGroupId: res.record.pgId,
-            returnPolicy: res.record.returnPolicyId
+            returnPolicy: res.record.returnPolicyId,
+            _name: res.record.name,
+            _reference: res.record.sku
           }))
         }
       } catch {}
@@ -222,6 +229,21 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     onChange={(event, newValue) => {
                       changeDT(newValue)
                       formik.setFieldValue('categoryId', newValue?.recordId || '')
+                      formik.setFieldValue('priceType', newValue?.priceType || '')
+                      formik.setFieldValue('trackBy', newValue?.trackBy || '')
+                      formik.setFieldValue('procurementMethod', newValue?.procurementMethod || '')
+                      formik.setFieldValue('msId', newValue?.msId || '')
+                      formik.setFieldValue('valuationMethod', newValue?.valuationMethod || '')
+                      formik.setFieldValue('taxId', newValue?.taxId || false),
+                        formik.setFieldValue('lotCategoryId', newValue?.lotCategoryId || ''),
+                        formik.setFieldValue('spfId', newValue?.spfId || '')
+                      setShowLotCategories(newValue?.trackBy === '2' || newValue?.trackBy === 2)
+                      setShowSerialProfiles(newValue?.trackBy === '1' || newValue?.trackBy === 1)
+                      setStore(prevStore => ({
+                        ...prevStore,
+                        _metal: formik.values.metalId,
+                        _isMetal: newValue?.isMetal
+                      }))
                     }}
                     error={formik.touched.categoryId && formik.errors.categoryId}
                   />
@@ -245,7 +267,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     valueField='key'
                     displayField='value'
                     displayFieldWidth={1}
-                    required
+                    required={!formik.values.kitItem}
                     maxAccess={!editMode && maxAccess}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('priceType', newValue?.key || '')

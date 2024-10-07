@@ -9,6 +9,7 @@ import SalesList from '../forms/SaleList.js'
 import PropertiesForm from '../forms/PropertiesForm.js'
 import BarcodeForm from '../forms/BarcodeForm.js'
 import ItemProductionForm from '../forms/ItemProductionForm.js'
+import KitForm from '../forms/KitForm.js'
 
 const ItemWindow = ({ recordId, labels, maxAccess }) => {
   const [activeTab, setActiveTab] = useState(0)
@@ -20,7 +21,12 @@ const ItemWindow = ({ recordId, labels, maxAccess }) => {
     _msId: null,
     measurementId: null,
     priceGroupId: null,
-    returnPolicy: null
+    returnPolicy: null,
+    _kit: false,
+    _name: null,
+    _reference: null,
+    _isMetal: false,
+    _metal: null
   })
 
   const tabs = [
@@ -32,6 +38,8 @@ const ItemWindow = ({ recordId, labels, maxAccess }) => {
     { label: labels.vendor, disabled: !store.recordId },
     { label: labels.production, disabled: !store.recordId }
   ]
+  console.log(tabs[7].disabled, 'dis')
+  console.log(store, 'store')
 
   return (
     <>
