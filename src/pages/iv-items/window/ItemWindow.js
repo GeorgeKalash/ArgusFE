@@ -9,7 +9,6 @@ import SalesList from '../forms/SaleList.js'
 import PropertiesForm from '../forms/PropertiesForm.js'
 import BarcodeForm from '../forms/BarcodeForm.js'
 import ItemProductionForm from '../forms/ItemProductionForm.js'
-import KitForm from '../forms/KitForm.js'
 
 const ItemWindow = ({ recordId, labels, maxAccess }) => {
   const [activeTab, setActiveTab] = useState(0)
