@@ -147,35 +147,31 @@ export function DataGrid({
         const currentData = rowNode.data
 
         const newData = { ...currentData, ...changes }
+
         rowNode.updateData(newData)
       }
     }
 
     async function update({ field, value }) {
       const changes = {
-        [field]: value
+        [field]: value || ''
       }
+
       setData(changes)
       commit(changes)
 
-      // if (!value) {
-      //   params.api.stopEditing()
-      //   gridApiRef.current.startEditingCell({
-      //     rowIndex: params.node.rowIndex,
-      //     colKey: field
-      //   })
-      // }
+      if (!value) {
+        params.api.stopEditing()
+        gridApiRef.current.startEditingCell({
+          rowIndex: params.node.rowIndex,
+          colKey: field
+        })
+      }
     }
 
     const updateRow = ({ changes }) => {
       setData(changes)
       params.api.stopEditing()
-    }
-
-    const handleMouseOut = () => {
-      if (params.api) {
-        params.api.stopEditing()
-      }
     }
 
     return (
