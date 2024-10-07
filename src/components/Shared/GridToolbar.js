@@ -10,6 +10,7 @@ const GridToolbar = ({
   leftSection,
   rightSection,
   bottomSection,
+  middleSection,
   inputSearch,
   onSearch,
   onSearchClear,
@@ -107,6 +108,11 @@ const GridToolbar = ({
                   search={true}
                   height={35}
                 />
+              </Grid>
+            )}
+            {middleSection && (
+              <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', ml: 2 }}>
+                {middleSection}
               </Grid>
             )}
             <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', m: '0px !important' }}>
