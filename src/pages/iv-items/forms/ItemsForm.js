@@ -74,8 +74,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
     validationSchema: yup.object({
       categoryId: yup.string().required(),
       name: yup.string().required(),
-
-      // priceType: yup.string().required(),
+      priceType: yup.string().required(),
       msId: yup.string().required(),
       lotCategoryId: yup
         .string()
