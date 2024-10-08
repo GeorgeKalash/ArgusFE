@@ -244,23 +244,34 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     else return 0
   }
 
-  const totalQty = formik?.values?.transfers?.reduce((qtySum, row) => {
-    const qtyValue = parseFloat(row?.qty) || 0
+  function calcUnitCost(rec, totalCost) {
+    if (rec.priceType === 1) {
+      rec.unitCost = totalCost / rec.qty
+    } else if (rec.priceType === 2) {
+      rec.unitCost = totalCost / (rec.qty * rec.volume)
+    } else if (rec.priceType === 3) {
+      rec.unitCost = totalCost / (rec.qty * rec.weight)
+    } else {
+      rec.unitCost = 0
+    }
 
-    return qtySum + qtyValue
-  }, 0)
+    return rec.unitCost
+  }
 
-  const totalCost = formik?.values?.transfers?.reduce((costSum, row) => {
-    const totalCostValue = parseFloat(row?.totalCost) || 0
+  const { totalQty, totalCost, totalWeight } = formik?.values?.transfers?.reduce(
+    (acc, row) => {
+      const qtyValue = parseFloat(row?.qty) || 0
+      const totalCostValue = parseFloat(row?.totalCost) || 0
+      const weightValue = parseFloat(row?.weight) || 0
 
-    return costSum + totalCostValue
-  }, 0)
-
-  const totalWeight = formik?.values?.transfers?.reduce((weightSum, row) => {
-    const weightValue = parseFloat(row?.weight) || 0
-
-    return weightSum + weightValue
-  }, 0)
+      return {
+        totalQty: acc.totalQty + qtyValue,
+        totalCost: acc.totalCost + totalCostValue,
+        totalWeight: acc.totalWeight + weightValue
+      }
+    },
+    { totalQty: 0, totalCost: 0, totalWeight: 0 }
+  )
 
   const getMeasurementUnits = async msId => {
     try {
@@ -401,12 +412,34 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     {
       component: 'numberfield',
       label: labels.unitCost,
-      name: 'unitCost'
+      name: 'unitCost',
+      async onChange({ row: { update, oldRow, newRow } }) {
+        try {
+          if (newRow) {
+            const totalCost = calcTotalCost(newRow)
+
+            update({
+              totalCost
+            })
+          }
+        } catch (exception) {}
+      }
     },
     {
       component: 'numberfield',
       label: labels.totalCost,
-      name: 'totalCost'
+      name: 'totalCost',
+      async onChange({ row: { update, newRow, oldRow } }) {
+        try {
+          if (newRow?.totalCost) {
+            const unitCost = calcUnitCost(newRow, newRow.totalCost)
+
+            update({
+              unitCost: unitCost.toFixed(2)
+            })
+          }
+        } catch (exception) {}
+      }
     }
   ]
 
