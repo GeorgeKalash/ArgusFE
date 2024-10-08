@@ -13,8 +13,7 @@ import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import BarcodesForm from './Forms/BarcodesForm'
-import CustomTextField from 'src/components/Inputs/CustomTextField'
-import { Button, Grid } from '@mui/material'
+import { Box, Button, Grid } from '@mui/material'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { useForm } from 'src/hooks/form'
 
@@ -34,23 +33,24 @@ const IvBarcodes = () => {
     validateOnChange: true,
     validationSchema: yup.object({
       itemId: yup.string().required()
-    }),
-    onSubmit: async obj => {
-      setSku(obj?.itemId)
-    }
+    })
   })
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    const response = await getRequest({
-      extension: InventoryRepository.Barcodes.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=&filter=&_itemId=${skuValue}`
-    })
-
-    setGridData(response)
-
-    return { ...response, _startAt: _startAt }
+    if (!!skuValue) {
+      const response = await getRequest({
+        extension: InventoryRepository.Barcodes.qry,
+        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=&filter=&_itemId=${skuValue}`
+      })
+  
+      setGridData(response)
+  
+      return { ...response, _startAt: _startAt }
+    } else {
+      setGridData([])
+    }
   }
 
   const {
@@ -112,16 +112,17 @@ const IvBarcodes = () => {
   ]
 
   const edit = obj => {
-    openForm(obj?.itemId, obj?.barcode)
+    openForm(obj?.itemId, obj?.barcode, obj?.msId)
   }
 
-  function openForm(recordId, barcode) {
+  function openForm(recordId, barcode, msId) {
     stack({
       Component: BarcodesForm,
       props: {
         labels: _labels,
         recordId,
         barcode,
+        msId,
         maxAccess: access
       },
       width: 600,
@@ -159,24 +160,28 @@ const IvBarcodes = () => {
               <ResourceLookup
                 endpointId={InventoryRepository.Item.snapshot}
                 name='itemId'
-                label={_labels.sku}
-                displayFieldWidth={2}
-                valueField='sku'
-                displayField='name'
-                valueShow='sku'
-                form={formik}
+                label={_labels?.sku}
+                valueField='recordId'
+                displayField='sku'
+                valueShow='itemRef'
                 secondValueShow='itemName'
+                form={formik}
+                columnsInDropDown={[
+                  { key: 'sku', value: 'SKU' },
+                  { key: 'name', value: 'Name' }
+                ]}
                 onChange={(event, newValue) => {
-                  if (newValue) {
-                    formik.setFieldValue('itemId', newValue?.recordId || 0)
-                    formik.setFieldValue('itemName', newValue?.name || '')
-                    setSku(newValue?.recordId)
-                  }
+                  formik.setFieldValue('itemId', newValue?.recordId)
+                  formik.setFieldValue('itemName', newValue?.name)
+                  formik.setFieldValue('sku', newValue?.sku)
+                  formik.setFieldValue('itemRef', newValue?.sku)
+                  setSku(newValue?.recordId)
                 }}
+                displayFieldWidth={2}
                 maxAccess={access}
               />
               <Button
-                sx={{ ml: 6, minWidth: '90px !important' }}
+                sx={{ minWidth: '90px !important', pr: 2, ml: 2, height: 35 }}
                 variant='contained'
                 size='small'
                 onClick={fetchGridData}
