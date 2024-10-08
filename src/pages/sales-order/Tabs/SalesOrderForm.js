@@ -575,15 +575,23 @@ export default function SalesOrderForm({
       ? setCycleButtonState({ text: '123', value: 1 })
       : setCycleButtonState({ text: '%', value: 2 })
 
-    const modifiedList = soItems.list?.map((item, index) => ({
-      ...item,
-      id: index + 1,
-      basePrice: parseFloat(item.basePrice).toFixed(5),
-      unitPrice: parseFloat(item.unitPrice).toFixed(3),
-      upo: parseFloat(item.upo).toFixed(2),
-      vatAmount: parseFloat(item.vatAmount).toFixed(2),
-      extendedPrice: parseFloat(item.extendedPrice).toFixed(2)
-    }))
+    const modifiedList = await Promise.all(
+      soItems.list?.map(async (item, index) => {
+        const taxDetailsResponse = await getTaxDetails(item.taxId)
+
+        return {
+          ...item,
+          id: index + 1,
+          basePrice: parseFloat(item.basePrice).toFixed(5),
+          unitPrice: parseFloat(item.unitPrice).toFixed(3),
+          upo: parseFloat(item.upo).toFixed(2),
+          vatAmount: parseFloat(item.vatAmount).toFixed(2),
+          extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
+          taxDetails: taxDetailsResponse
+        }
+      })
+    )
+
     formik.setValues({
       ...soHeader.record,
       tdAmount:
@@ -702,11 +710,9 @@ export default function SalesOrderForm({
   const handleCycleButtonClick = () => {
     let currentTdAmount
     let currentPctAmount
-
     if (cycleButtonState.value == 1) {
       currentPctAmount =
         formik.values.currentDiscount < 0 || formik.values.currentDiscount > 100 ? 0 : formik.values.currentDiscount
-
       currentTdAmount = (parseFloat(currentPctAmount) * parseFloat(formik.values.subtotal)) / 100
       formik.setFieldValue('tdAmount', currentTdAmount)
       formik.setFieldValue('tdPct', currentPctAmount)
@@ -721,7 +727,6 @@ export default function SalesOrderForm({
     }
     setCycleButtonState(prevState => {
       const newState = prevState.text === '%' ? { text: '123', value: 1 } : { text: '%', value: 2 }
-
       formik.setFieldValue('tdType', newState.value)
       recalcGridVat(newState.value, currentPctAmount, currentTdAmount, formik.values.currentDiscount)
       calcTotals(formik.values.items, currentTdAmount)
@@ -1433,7 +1438,10 @@ export default function SalesOrderForm({
                     onBlur={async () => {
                       calcTotals(formik.values.items)
                     }}
-                    onClear={() => formik.setFieldValue('miscAmount', 0)}
+                    onClear={() => {
+                      formik.setFieldValue('miscAmount', 0)
+                      calcTotals(formik.values.items)
+                    }}
                   />
                 </Grid>
                 <Grid item>

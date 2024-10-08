@@ -36,7 +36,7 @@ const SalesOrder = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SaleRepository.SalesOrder.snapshot,
+    endpointId: SaleRepository.SalesOrder.page,
     datasetId: ResourceIds.SalesOrder,
     filter: {
       filterFn: fetchWithFilter
@@ -50,7 +50,7 @@ const SalesOrder = () => {
       flex: 1
     },
     {
-      field: 'status',
+      field: 'statusName',
       headerName: labels.status,
       flex: 1
     },
@@ -325,6 +325,7 @@ const SalesOrder = () => {
           onEdit={editSO}
           refetch={refetch}
           onDelete={delSO}
+          deleteConfirmationType={'strict'}
           isLoading={false}
           pageSize={50}
           maxAccess={access}
