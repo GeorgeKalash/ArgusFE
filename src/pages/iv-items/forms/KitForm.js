@@ -2,7 +2,7 @@ import { useFormik } from 'formik'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
@@ -18,21 +18,35 @@ const KitForm = ({ store, labels, maxAccess }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const [numRows, setNumRows] = useState(0)
 
   const { formik } = useForm({
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      Kit: yup
+      kit: yup
         .array()
         .of(
           yup.object().shape({
-            componentId: yup.string().required(),
-            qty: yup.string().required()
+            componentSKU: yup.string().test(function (value) {
+              if (numRows > 1) {
+                return !!value
+              }
+
+              return true
+            }),
+            qty: yup.number().test(function (value) {
+              if (numRows > 1) {
+                return value > 0
+              }
+
+              return true
+            })
           })
         )
         .required()
     }),
+
     initialValues: {
       Kit: [
         {
@@ -41,6 +55,7 @@ const KitForm = ({ store, labels, maxAccess }) => {
           muiId: '',
           componentId: '',
           componentName: '',
+          muiId: '',
           componentSKU: '',
           qty: ''
         }
@@ -51,23 +66,24 @@ const KitForm = ({ store, labels, maxAccess }) => {
     }
   })
 
-  const postKit = obj => {
-    const Kit = obj?.Kit?.map(({ kitId, ...rest }) => ({
+  const postKit = async obj => {
+    const items = obj?.kit.map((item, index) => ({
+      ...item,
       kitId: recordId,
-      ...rest
+      seqNo: index + 1
     }))
 
     const data = {
       kitId: recordId,
-      users: Kit
+      components: items || []
     }
-    postRequest({
+
+    await postRequest({
       extension: InventoryRepository.Kit.set,
       record: JSON.stringify(data)
     })
       .then(res => {
         toast.success(platformLabels.Edited)
-        getData()
       })
       .catch(error => {})
   }
@@ -81,13 +97,17 @@ const KitForm = ({ store, labels, maxAccess }) => {
       name: 'componentSKU',
       props: {
         endpointId: InventoryRepository.Items.snapshot,
-        parameters: `_startAt=0&_size=50`,
+        parameters: {
+          _startAt: 0,
+          _size: 50
+        },
         displayField: 'sku',
         valueField: 'recordId',
         mapping: [
           { from: 'recordId', to: 'componentId' },
           { from: 'sku', to: 'componentSKU' },
-          { from: 'name', to: 'componentName' }
+          { from: 'name', to: 'componentName' },
+          { from: 'defSaleMUId', to: 'muId' }
         ],
 
         columnsInDropDown: [
@@ -112,14 +132,19 @@ const KitForm = ({ store, labels, maxAccess }) => {
     }
   ]
 
+  useEffect(() => {
+    setNumRows(formik?.values?.kit?.length)
+  }, [formik.values.kit])
+  console.log(numRows, 'lenn')
+
   function getData() {
     getRequest({
       extension: InventoryRepository.Kit.qry,
       parameters: `_kitId=${recordId}`
     })
       .then(res => {
-        const modifiedList = res.list?.map((user, index) => ({
-          ...user,
+        const modifiedList = res.list?.map((kitItems, index) => ({
+          ...kitItems,
           id: index + 1
         }))
         formik.setValues({ kit: modifiedList })
