@@ -63,15 +63,13 @@ export default function BarcodesForm({ labels, access, recordId, barcode }) {
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (barcode) {
-          const res = await getRequest({
-            extension: InventoryRepository.Barcodes.get,
-            parameters: `_barcode=${barcode}`
-          })
-          formik.setValues(res.record)
-        }
-      } catch (e) {}
+      if (barcode) {
+        const res = await getRequest({
+          extension: InventoryRepository.Barcodes.get,
+          parameters: `_barcode=${barcode}`
+        })
+        formik.setValues(res.record)
+      }
     })()
   }, [])
 
@@ -98,11 +96,15 @@ export default function BarcodesForm({ labels, access, recordId, barcode }) {
                 endpointId={InventoryRepository.Item.snapshot}
                 name='itemId'
                 label={labels?.sku}
-                valueField='sku'
-                displayField='name'
+                valueField='recordId'
+                displayField='sku'
                 valueShow='itemRef'
                 secondValueShow='itemName'
                 form={formik}
+                columnsInDropDown={[
+                  { key: 'sku', value: 'SKU' },
+                  { key: 'name', value: 'Name' }
+                ]}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('itemId', newValue?.recordId)
                   formik.setFieldValue('itemName', newValue?.name)
@@ -116,7 +118,7 @@ export default function BarcodesForm({ labels, access, recordId, barcode }) {
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={InventoryRepository.MeasurementUnit.qry}
-                parameters={`_msId=${formik.values.itemId}`}
+                parameters={`_msId=${recordId}`}
                 name='muId'
                 label={labels?.measurementUnit}
                 valueField='recordId'
