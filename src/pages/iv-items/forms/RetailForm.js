@@ -1,53 +1,44 @@
 import { useState, useEffect, useContext } from 'react'
-import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import { RequestsContext } from 'src/providers/RequestsContext'
-import { SystemRepository } from 'src/repositories/SystemRepository'
-import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import Table from 'src/components/Shared/Table'
-import { useResourceQuery } from 'src/hooks/resource'
-import { Grid } from '@mui/material'
-import * as yup from 'yup'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
-import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
-import { Fixed } from 'src/components/Shared/Layouts/Fixed'
-import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
-import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
-import { DataSets } from 'src/resources/DataSets'
-import FormShell from 'src/components/Shared/FormShell'
+import { RequestsContext } from 'src/providers/RequestsContext'
 import { ControlContext } from 'src/providers/ControlContext'
-import toast from 'react-hot-toast'
-import { CommonContext } from 'src/providers/CommonContext'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
+import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
+import FormShell from 'src/components/Shared/FormShell'
+import { DataSets } from 'src/resources/DataSets'
+import { CommonContext } from 'src/providers/CommonContext'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import toast from 'react-hot-toast'
+import { ResourceIds } from 'src/resources/ResourceIds'
 
-const RetailForm = ({ store, labels, maxAccess }) => {
+const RetailForm = ({ store, maxAccess }) => {
   const [data, setData] = useState([])
+  const [recordNum, setRecordsNum] = useState(0)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { getAllKvsByDataset } = useContext(CommonContext)
-  const [recordNum, setRecordsNum] = useState(0)
 
   const { formik } = useForm({
     maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
-
     onSubmit: async values => {
       const checkedUserIds = data.filter(row => row.checked).map(row => row.recordId)
-
       if (checkedUserIds.length > 0) {
         try {
           await postRequest({
             extension: RemittanceOutwardsRepository.Postoutwards.post2,
             record: JSON.stringify({ ids: checkedUserIds })
           })
+          toast.success(platformLabels.Posted)
         } catch (error) {}
       }
-      toast.success(platformLabels.Posted)
     }
   })
 
+  // Fetch the keys/labels (getRecordsNum)
   const getRecordsNum = () => {
     return new Promise((resolve, reject) => {
       getAllKvsByDataset({
@@ -59,34 +50,76 @@ const RetailForm = ({ store, labels, maxAccess }) => {
       })
     })
   }
+
+  // Fetch the first set of data (keys and labels)
   useEffect(() => {
     const fetchAccessLevel = async () => {
       try {
         const result = await getRecordsNum()
         setRecordsNum(result.length)
+
+        // Set the data for the table with initial checked false
+        const initialData = result.map(item => ({
+          key: item.key,
+          value: item.value,
+          checked: false
+        }))
+        setData(initialData)
       } catch (error) {}
     }
 
     fetchAccessLevel()
   }, [])
 
+  // Fetch the second set of data (flags) and merge with the first set
   useEffect(() => {
-    ;(async function () {
-      if (store.recordId) {
+    if (store.recordId && recordNum > 0) {
+      ;(async function () {
         const response = await getRequest({
           extension: InventoryRepository.ItemRetail.qry,
           parameters: `&_itemId=${store.recordId}&_count=${recordNum}`
         })
-        console.log(response, 'response')
-      }
-    })()
-  }, [])
 
-  const rowColumns = []
+        // Update the data based on idx and flag
+        const updatedData = data.map(row => {
+          const match = response.list.find(item => item.idx === parseInt(row.key))
+
+          return match ? { ...row, checked: match.flag } : row
+        })
+
+        setData(updatedData)
+      })()
+    }
+  }, [store.recordId, recordNum])
+
+  const rowColumns = [
+    {
+      field: 'value',
+      flex: 1, // Make the column take the full width
+      headerName: '' // Empty header to remove the label "Value"
+    }
+
+    // {
+    //   field: 'checked',
+    //   headerName: 'Checked',
+    //   renderCell: params => (
+    //     <input
+    //       type='checkbox'
+    //       checked={params.row.checked}
+    //       onChange={e => {
+    //         const updatedData = data.map(item =>
+    //           item.key === params.row.key ? { ...item, checked: e.target.checked } : item
+    //         )
+    //         setData(updatedData)
+    //       }}
+    //     />
+    //   )
+    // }
+  ]
 
   return (
     <FormShell
-      resourceId={ResourceIds.PostOutwards}
+      resourceId={ResourceIds.Items}
       form={formik}
       maxAccess
       isCleared={false}
@@ -99,7 +132,7 @@ const RetailForm = ({ store, labels, maxAccess }) => {
             columns={rowColumns}
             gridData={{ list: data }}
             setData={setData}
-            rowId={['recordId']}
+            rowId={['key']}
             pageSize={50}
             pagination={false}
             paginationType='client'
