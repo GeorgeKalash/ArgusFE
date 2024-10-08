@@ -139,12 +139,7 @@ const FiAging = () => {
   })
 
   async function fetchWithFilter({ filters, pagination }) {
-    if (filters.qry)
-      return await getRequest({
-        extension: RGFinancialRepository.FiAging.qry,
-        parameters: `_filter=${filters.qry}`
-      })
-    else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+    return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
   const onApply = ({ search, rpbParams }) => {
