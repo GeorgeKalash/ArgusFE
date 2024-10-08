@@ -110,11 +110,7 @@ const GridToolbar = ({
                 />
               </Grid>
             )}
-            {middleSection && (
-              <Grid item sx={{ display: 'flex', justifyContent: 'flex-start' }}>
-                {middleSection}
-              </Grid>
-            )}
+            {middleSection}
             <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', m: '0px !important' }}>
               {buttons
                 .filter(button => actions.some(action => action.key === button.key))
