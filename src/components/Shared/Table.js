@@ -514,7 +514,6 @@ const Table = ({
       : []),
     ...filteredColumns.map(column => ({
       ...column,
-      flex: 1,
       cellRenderer: column.cellRenderer ? column.cellRenderer : FieldWrapper
     }))
   ]
