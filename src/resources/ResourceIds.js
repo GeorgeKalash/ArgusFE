@@ -249,5 +249,6 @@ export const ResourceIds = {
   ClientBalance: 36131,
   FinancialIntegrators: 51105,
   SalesDefaults: 51114,
-  IVPhysicalCountItem: 44202
+  IVPhysicalCountItem: 44202,
+  FE_MetalSummaryControl: 41601 //Metal button
 }

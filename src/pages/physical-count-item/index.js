@@ -6,7 +6,6 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Button, Grid } from '@mui/material'
-import GridToolbar from 'src/components/Shared/GridToolbar'
 import { ControlContext } from 'src/providers/ControlContext'
 import { useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
@@ -16,6 +15,7 @@ import FormShell from 'src/components/Shared/FormShell'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { useForm } from 'src/hooks/form'
 import * as yup from 'yup'
+import MetalSummary from 'src/components/Shared/MetalSummary'
 
 const PhysicalCountItem = () => {
   const { stack } = useWindow()
@@ -23,9 +23,10 @@ const PhysicalCountItem = () => {
   const { platformLabels } = useContext(ControlContext)
   const [data, setData] = useState([])
   const [siteStore, setSiteStore] = useState([])
+  const [filteredItems, setFilteredItems] = useState([])
+  const [editMode, setEditMode] = useState(false)
 
   const {
-    //query: { data },
     labels: _labels,
     refetch,
     maxAccess
@@ -62,34 +63,21 @@ const PhysicalCountItem = () => {
     let sumCost = 0
     let sumWeight = 0
 
-    const updatedList = res.list.map(item => {
-      /* let decimalValue = 0
-      if (item.countedQty != null && item.currentCost != null) {
-        decimalValue = Math.round(item.countedQty * item.currentCost * 100) / 100 
-      } */
-
+    res.list.map(item => {
       sumCost += item.currentCost || 0
       sumWeight += item.weight || 0
-
-      /* return {
-        ...item,
-        costValue: decimalValue
-      } */
     })
+
     formik.setFieldValue('totalCostPrice', sumCost)
     formik.setFieldValue('totalWeight', sumWeight)
 
-    console.log(res)
-
-    console.log(updatedList)
-
-    //return res.list
     setData(res ?? { list: [] })
 
-    //return { ...response }
+    handleClick(res.list)
   }
 
   const fillSiteStore = stockCountId => {
+    setSiteStore([])
     var parameters = `_stockCountId=${stockCountId}`
     getRequest({
       extension: SCRepository.Sites.qry,
@@ -154,44 +142,34 @@ const PhysicalCountItem = () => {
 
     setData({ list: [] })
     setSiteStore([])
+    setFilteredItems([])
+    setEditMode(false)
   }
 
-  const handleClick = async () => {
+  const handleClick = async dataList => {
     try {
-      /* const convertedData = getImportData(parsedFileContent, columns)
+      setFilteredItems([])
 
-      const data = {
-        [objectName]: convertedData
-      }
-
-      try {
-        const res = await postRequest({
-          extension: endPoint,
-          record: JSON.stringify(data)
-        })
-
-        stack({
-          Component: ThreadProgress,
-          props: {
-            recordId: res.recordId,
-            access
-          },
-          width: 500,
-          height: 450,
-          closable: false,
-          title: platformLabels.Progress
-        })
-
-        toast.success(platformLabels.Imported)
-      } catch (exception) {} */
-    } catch (error) {}
+      const filteredItemsList = dataList
+        .filter(item => item.metalId && item.metalId.toString().trim() !== '')
+        .map(item => ({
+          qty: item.countedQty,
+          metalRef: null,
+          metalId: item.metalId,
+          metalPurity: item.metalPurity,
+          weight: item.weight,
+          priceType: item.priceType
+        }))
+      setFilteredItems(filteredItemsList)
+      setEditMode(dataList.length > 0)
+    } catch (exception) {}
   }
 
   const actions = [
     {
-      key: 'Import',
+      key: 'Metals',
       condition: true,
-      onClick: () => handleClick()
+      onClick: 'onClickMetal'
     }
   ]
 
@@ -205,7 +183,8 @@ const PhysicalCountItem = () => {
       actions={actions}
       maxAccess={maxAccess}
       resourceId={ResourceIds.IVPhysicalCountItem}
-      previewReport={true}
+      filteredItems={filteredItems}
+      previewReport={editMode}
     >
       <VertLayout>
         <Fixed>
@@ -228,6 +207,7 @@ const PhysicalCountItem = () => {
 
                   if (!newValue) {
                     setSiteStore([])
+                    setFilteredItems([])
                     clearGrid()
                   } else {
                     fillSiteStore(newValue?.recordId)
@@ -241,7 +221,6 @@ const PhysicalCountItem = () => {
                 name='siteId'
                 store={siteStore}
                 label={_labels.site}
-                //filter={item => item.isChecked}
                 valueField='siteId'
                 displayField={['siteRef', 'siteName']}
                 columnsInDropDown={[
@@ -280,8 +259,7 @@ const PhysicalCountItem = () => {
           <Table
             columns={columns}
             gridData={data ?? { list: [] }}
-            //rowId={['recordId']}
-
+            rowId={['recordId']}
             setData={setData}
             isLoading={false}
             pageSize={50}
@@ -293,7 +271,6 @@ const PhysicalCountItem = () => {
           />
         </Grow>
         <Fixed>
-          {/*  <WindowToolbar smallBox={true} actions={actions} /> */}
           <Grid container justifyContent='flex-end' spacing={2} sx={{ pt: 5 }}>
             <Grid item xs={2}>
               <CustomNumberField

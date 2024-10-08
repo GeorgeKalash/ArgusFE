@@ -339,7 +339,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
       actions={actions}
       functionId={SystemFunction.DeliveryTrip}
       disabledSubmit={isPosted || isClosed}
-      previewReport={true}
+      previewReport={editMode}
     >
       <VertLayout>
         <Fixed>
