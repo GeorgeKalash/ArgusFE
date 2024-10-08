@@ -17,7 +17,7 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { useInvalidate } from 'src/hooks/resource'
 
-export default function BarcodesForm({ labels, access, recordId, barcode }) {
+export default function BarcodesForm({ labels, access, recordId, barcode, msId }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -32,6 +32,7 @@ export default function BarcodesForm({ labels, access, recordId, barcode }) {
       sku: null,
       defaultQty: null,
       muId: null,
+      msId: msId,
       scaleDescription: null,
       posDescription: null,
       barcode: barcode,
@@ -98,8 +99,8 @@ export default function BarcodesForm({ labels, access, recordId, barcode }) {
                 label={labels?.sku}
                 valueField='recordId'
                 displayField='sku'
-                valueShow='itemRef'
-                secondValueShow='itemName'
+                valueShow='sku'
+                secondValueShow='name'
                 form={formik}
                 columnsInDropDown={[
                   { key: 'sku', value: 'SKU' },
@@ -110,6 +111,7 @@ export default function BarcodesForm({ labels, access, recordId, barcode }) {
                   formik.setFieldValue('itemName', newValue?.name)
                   formik.setFieldValue('sku', newValue?.sku)
                   formik.setFieldValue('itemRef', newValue?.sku)
+                  formik.setFieldValue('msId', newValue?.msId)
                 }}
                 maxAccess={access}
                 required
@@ -118,7 +120,8 @@ export default function BarcodesForm({ labels, access, recordId, barcode }) {
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={InventoryRepository.MeasurementUnit.qry}
-                parameters={`_msId=${recordId}`}
+                parameters={formik?.values?.msId ? `_msId=${formik?.values?.msId}` : ''}
+                readOnly={!formik?.values?.msId}
                 name='muId'
                 label={labels?.measurementUnit}
                 valueField='recordId'
