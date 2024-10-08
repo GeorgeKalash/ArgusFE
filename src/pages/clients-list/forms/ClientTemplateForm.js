@@ -161,7 +161,8 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     mobileVerified: '',
     isRelativeDiplomat: false,
     professionId: '',
-    cltRemReference: ''
+    cltRemReference: '',
+    idIssuePlaceCode: ''
   }
 
   const handleCopy = event => {
@@ -328,7 +329,9 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
           isRelativeDiplomat: obj.clientRemittance?.isRelativeDiplomat,
           trxAmountPerYear: obj.clientRemittance?.trxAmountPerYear,
           trxCountPerYear: obj.clientRemittance?.trxCountPerYear,
-          cltRemReference: obj.clientRemittance?.reference
+          cltRemReference: obj.clientRemittance?.reference,
+
+          idIssuePlaceCode: obj.extraInfo?.idIssuePlaceCode
         })
 
         setEditMode(true)
@@ -538,6 +541,9 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       unitNo: address.unitNo,
       subNo: address.subNo
     }
+
+    const obj7 = { idIssuePlaceCode: obj.idIssuePlaceCode }
+
     if (allowEdit) {
       obj4.clientId = recordId
 
@@ -547,7 +553,8 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
         ClientIndividual: obj3, //CTCLI
         clientRemittance: obj4,
         address: obj5,
-        workAddress: obj6.name && obj6.countryId && obj6.cityId && obj6.phone && obj6.street1 ? obj6 : null
+        workAddress: obj6.name && obj6.countryId && obj6.cityId && obj6.phone && obj6.street1 ? obj6 : null,
+        extraInfo: obj7
       }
 
       await postRequest({
@@ -942,7 +949,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                           _stateId: 0
                         }}
                         name='idCity'
-                        label={labels.issusPlace}
+                        label={labels.issueCity}
                         form={clientIndividualFormik}
                         valueField='name'
                         displayField='name'
@@ -960,6 +967,21 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                           }
                         }}
                         error={clientIndividualFormik.touched.idCity && Boolean(clientIndividualFormik.errors.idCity)}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <CustomTextField
+                        name='idIssuePlaceCode'
+                        label={labels.issusPlace}
+                        value={clientIndividualFormik.values?.idIssuePlaceCode}
+                        onChange={clientIndividualFormik.handleChange}
+                        readOnly={editMode && !allowEdit}
+                        onClear={() => clientIndividualFormik.setFieldValue('idIssuePlaceCode', '')}
+                        error={
+                          clientIndividualFormik.touched.idIssuePlaceCode &&
+                          Boolean(clientIndividualFormik.errors.idIssuePlaceCode)
+                        }
+                        maxAccess={maxAccess}
                       />
                     </Grid>
                   </FieldSet>
