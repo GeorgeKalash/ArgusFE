@@ -168,7 +168,7 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
       <VertLayout>
         <Fixed>
           <GridToolbar onAdd={add} maxAccess={maxAccess} />
-          <Grid container spacing={2} sx={{ ml: 20, mt: -12 }}>
+          <Grid container spacing={2} sx={{ pl: 25, mt: -12 }}>
             <Grid item xs={4}>
               <ResourceComboBox
                 endpointId={store._msId ? InventoryRepository.MeasurementUnit.qry : ''}
