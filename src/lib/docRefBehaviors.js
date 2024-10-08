@@ -26,15 +26,15 @@ const mergeWithMaxAccess = (maxAccess, reference, dcTypeRequired) => {
   } else {
     if (reference?.mandatory) {
       controls.push({
-        sgId: 18,
-        resourceId: ResourceIds.JournalVoucher,
+        sgId: 0,
+        resourceId: '',
         controlId: 'reference',
         accessLevel: reference?.mandatory ? MANDATORY : DISABLED
       })
     } else if (reference?.readOnly) {
       controls.push({
-        sgId: 18,
-        resourceId: ResourceIds.JournalVoucher,
+        sgId: 0,
+        resourceId: '',
         controlId: 'reference',
         accessLevel: reference?.readOnly ? DISABLED : MANDATORY
       })
@@ -46,7 +46,7 @@ const mergeWithMaxAccess = (maxAccess, reference, dcTypeRequired) => {
   if (dcTypeRequired) {
     controls.push({
       sgId: 18,
-      resourceId: ResourceIds.JournalVoucher,
+      resourceId: '',
       controlId: 'dtId',
       accessLevel: MANDATORY
     })
