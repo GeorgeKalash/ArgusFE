@@ -45,7 +45,7 @@ const mergeWithMaxAccess = (maxAccess, reference, dcTypeRequired) => {
 
   if (dcTypeRequired) {
     controls.push({
-      sgId: 18,
+      sgId: 0,
       resourceId: '',
       controlId: 'dtId',
       accessLevel: MANDATORY
