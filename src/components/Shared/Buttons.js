@@ -311,5 +311,12 @@ export const getButtons = platformLabels => [
     color: '#231f20',
     image: 'wallet-to-bank-icon.png',
     main: false
+  },
+  {
+    key: 'Metals',
+    label: platformLabels.Metals,
+    color: '#ADD8E6',
+    image: 'metals-icon.png',
+    main: false
   }
 ]
