@@ -60,7 +60,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       salesItem: true,
       purchaseItem: true,
       kitItem: false,
-      taxId: null,
+      taxId: '',
       lotCategoryId: null,
       spfId: '',
       categoryName: '',
@@ -233,7 +233,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                       formik.setFieldValue('procurementMethod', newValue?.procurementMethod || '')
                       formik.setFieldValue('msId', newValue?.msId || '')
                       formik.setFieldValue('valuationMethod', newValue?.valuationMethod || '')
-                      formik.setFieldValue('taxId', newValue?.taxId || false),
+                      formik.setFieldValue('taxId', newValue?.taxId || ''),
                         formik.setFieldValue('lotCategoryId', newValue?.lotCategoryId || ''),
                         formik.setFieldValue('spfId', newValue?.spfId || '')
                       setShowLotCategories(newValue?.trackBy === '2' || newValue?.trackBy === 2)
