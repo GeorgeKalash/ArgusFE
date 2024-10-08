@@ -50,12 +50,12 @@ const OutwardsTransfer = () => {
     },
     {
       field: 'countryRef',
-      headerName: _labels.CountryRef,
+      headerName: _labels.Country,
       flex: 1
     },
     {
       field: 'dispersalName',
-      headerName: _labels.DispersalName,
+      headerName: _labels.DispersalType,
       flex: 1
     },
     ,
@@ -66,7 +66,7 @@ const OutwardsTransfer = () => {
     },
     {
       field: 'rsName',
-      headerName: _labels.ReleaseStatus,
+      headerName: _labels.rsName,
       flex: 1
     },
     {
@@ -76,7 +76,7 @@ const OutwardsTransfer = () => {
     },
     {
       field: 'wipName',
-      headerName: _labels.WIP,
+      headerName: _labels.wip,
       flex: 1
     }
   ]

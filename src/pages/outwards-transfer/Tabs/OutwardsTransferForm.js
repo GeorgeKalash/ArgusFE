@@ -14,7 +14,6 @@ import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTrad
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi } from 'src/lib/date-helper'
-import { useError } from 'src/error'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import FieldSet from 'src/components/Shared/FieldSet'
 import { DataSets } from 'src/resources/DataSets'
@@ -24,10 +23,12 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
+import { useWindow } from 'src/windows'
+import AuditForm from './AuditForm'
 
 export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
   const { getRequest } = useContext(RequestsContext)
-  const { stack: stackError } = useError()
+  const { stack } = useWindow()
 
   const { formik } = useForm({
     maxAccess,
@@ -41,6 +42,7 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
       dispersalType: '',
       currencyId: '',
       beneficiaryId: '',
+      beneficiaryName: '',
       clientId: '',
       clientRef: '',
       clientName: '',
@@ -59,11 +61,13 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
       status: 1,
       releaseStatus: '',
       reference: '',
+      owoRef: '',
       date: new Date(),
       professionId: '',
       poeId: '',
       status: 1,
       valueDate: new Date(),
+      owtDate: new Date(),
       defaultValueDate: new Date(),
       vatAmount: null,
       taxPercent: null,
@@ -108,7 +112,7 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
     {
       key: 'Audit',
       condition: true,
-      onClick: openInfo,
+      onClick: openAudit,
       disabled: !formik.values.corId
     },
     {
@@ -144,9 +148,9 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
     })
   }
 
-  function openInfo() {
+  function openAudit() {
     stack({
-      Component: InfoForm,
+      Component: AuditForm,
       props: {
         labels,
         formik
@@ -190,6 +194,15 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
                 />
               </FormGrid>
               <FormGrid item hideonempty xs={3}>
+                <CustomTextField
+                  name='owoRef'
+                  label={labels.owtReference}
+                  value={formik?.values?.owoRef}
+                  maxAccess={maxAccess}
+                  readOnly
+                />
+              </FormGrid>
+              <FormGrid item hideonempty xs={3}>
                 <CustomDatePicker
                   name='date'
                   required
@@ -204,7 +217,7 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
                 <ResourceComboBox
                   datasetId={DataSets.DOCUMENT_STATUS}
                   name='status'
-                  label={labels.docStatus}
+                  label={labels.Status}
                   readOnly
                   valueField='key'
                   displayField='value'
@@ -216,6 +229,16 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
                   name='valueDate'
                   label={labels.valueDate}
                   value={formik?.values?.valueDate}
+                  readOnly
+                  required
+                  maxAccess={maxAccess}
+                />
+              </FormGrid>
+              <FormGrid item hideonempty xs={3}>
+                <CustomDatePicker
+                  name='owtDate'
+                  label={labels.owtDate}
+                  value={formik?.values?.owtDate}
                   readOnly
                   required
                   maxAccess={maxAccess}
