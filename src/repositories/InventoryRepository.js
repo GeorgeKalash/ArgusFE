@@ -149,6 +149,9 @@ export const InventoryRepository = {
   },
   ItemPhysProp: {
     get: service + 'getPP'
+  },
+  DimensionUDT: {
+    set: service + 'set2UDT',
+    get: service + 'getUDT'
   }
-  DimensionUDT: { set: service + 'set2UDT', get: service + 'getUDT' }
 }
