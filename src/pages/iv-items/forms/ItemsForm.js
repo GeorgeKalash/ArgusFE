@@ -23,6 +23,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
   const [showLotCategories, setShowLotCategories] = useState(false)
   const [showSerialProfiles, setShowSerialProfiles] = useState(false)
   const { recordId } = store
+  const [onKitItem, setOnKitItem] = useState(false)
 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -103,6 +104,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
         })
 
         if (!formik.values.recordId) {
+          setOnKitItem(false)
           toast.success(platformLabels.Added)
           formik.setValues({
             ...obj,
@@ -185,9 +187,12 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
 
   useEffect(() => {
     if (formik.values.kitItem) {
+      setOnKitItem(true)
       formik.setFieldValue('ivtItem', false)
       formik.setFieldValue('trackBy', '')
-      formik.setFieldValue('valuation', '')
+      formik.setFieldValue('valuationMethod', '')
+    } else {
+      setOnKitItem(false)
     }
   }, [formik.values.kitItem])
 
@@ -262,6 +267,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     values={formik.values}
                     name='priceType'
                     label={labels.priceType}
+                    defaultIndex={onKitItem ? 0 : null}
                     readOnly={formik.values.kitItem}
                     valueField='key'
                     displayField='value'
