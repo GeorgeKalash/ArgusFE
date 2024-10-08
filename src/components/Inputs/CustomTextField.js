@@ -104,7 +104,9 @@ const CustomTextField = ({
       fullWidth={fullWidth}
       autoFocus={focus}
       InputLabelProps={{
-        style: { index: 0 }
+        style: {
+          zIndex: 0
+        }
       }}
       inputProps={{
         autoComplete: 'off',
