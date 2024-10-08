@@ -452,7 +452,7 @@ const Table = ({
         setTimeout(() => setTooltipOpen(false), 500)
       })
     }
-    console.log(params)
+
     return (
       <Box>
         {tooltipOpen && (
