@@ -10,6 +10,7 @@ import PropertiesForm from '../forms/PropertiesForm.js'
 import BarcodeForm from '../forms/BarcodeForm.js'
 import ItemProductionForm from '../forms/ItemProductionForm.js'
 import KitForm from '../forms/KitForm.js'
+import RetailForm from '../forms/RetailForm.js'
 
 const ItemWindow = ({ recordId, labels, maxAccess }) => {
   const [activeTab, setActiveTab] = useState(0)
@@ -75,6 +76,9 @@ const ItemWindow = ({ recordId, labels, maxAccess }) => {
       </CustomTabPanel>
       <CustomTabPanel height={660} index={7} value={activeTab}>
         <KitForm labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} />
+      </CustomTabPanel>
+      <CustomTabPanel height={660} index={8} value={activeTab}>
+        <RetailForm labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} />
       </CustomTabPanel>
     </>
   )
