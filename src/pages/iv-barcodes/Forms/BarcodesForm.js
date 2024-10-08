@@ -21,13 +21,9 @@ export default function BarcodesForm({ labels, access, recordId, barcode, msId }
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
-  const invalidate = useInvalidate({
-    endpointId: InventoryRepository.Barcodes.qry
-  })
-
   const { formik } = useForm({
     initialValues: {
-      recordId: recordId,
+      recordId: barcode,
       itemId: recordId,
       sku: null,
       defaultQty: null,
@@ -35,28 +31,26 @@ export default function BarcodesForm({ labels, access, recordId, barcode, msId }
       msId: msId,
       scaleDescription: null,
       posDescription: null,
-      barcode: barcode,
+      barcode: '',
       isInactive: false
     },
     enableReinitialize: false,
     maxAccess: access,
     validateOnChange: true,
     validationSchema: yup.object({
-      sku: yup.string().required(),
+      itemId: yup.string().required(),
       barcode: yup.string().required()
     }),
     onSubmit: async obj => {
-      const response = await postRequest({
+      await postRequest({
         extension: InventoryRepository.Barcodes.set,
         record: JSON.stringify(obj)
       })
 
       if (!obj.recordId) {
         toast.success(platformLabels.Added)
-        formik.setFieldValue('recordId', response.recordId)
+        formik.setFieldValue('recordId', obj?.barcode)
       } else toast.success(platformLabels.Edited)
-
-      invalidate()
     }
   })
 
@@ -69,7 +63,7 @@ export default function BarcodesForm({ labels, access, recordId, barcode, msId }
           extension: InventoryRepository.Barcodes.get,
           parameters: `_barcode=${barcode}`
         })
-        formik.setValues(res.record)
+        formik.setValues({ ...res.record, recordId: res?.record?.barcode })
       }
     })()
   }, [])
@@ -83,8 +77,9 @@ export default function BarcodesForm({ labels, access, recordId, barcode, msId }
               <CustomTextField
                 name='barcode'
                 label={labels?.barcode}
-                value={formik.values.barcode}
+                value={formik?.values?.barcode}
                 required
+                readOnly={editMode}
                 maxLength='20'
                 maxAccess={access}
                 onChange={formik.handleChange}
@@ -97,10 +92,11 @@ export default function BarcodesForm({ labels, access, recordId, barcode, msId }
                 endpointId={InventoryRepository.Item.snapshot}
                 name='itemId'
                 label={labels?.sku}
+                readOnly={editMode}
                 valueField='recordId'
                 displayField='sku'
                 valueShow='sku'
-                secondValueShow='name'
+                secondValueShow='itemName'
                 form={formik}
                 columnsInDropDown={[
                   { key: 'sku', value: 'SKU' },
@@ -180,7 +176,7 @@ export default function BarcodesForm({ labels, access, recordId, barcode, msId }
                     name='isInactive'
                     maxAccess={access}
                     checked={formik.values?.isInactive}
-                    onChange={formik.handleChange}
+                    onChange={event => formik.setFieldValue('isInactive', event.target.checked ? true : false)}
                   />
                 }
                 label={labels?.isInactive}

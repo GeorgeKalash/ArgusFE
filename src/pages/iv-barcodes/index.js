@@ -42,7 +42,7 @@ const IvBarcodes = () => {
     if (!!skuValue) {
       const response = await getRequest({
         extension: InventoryRepository.Barcodes.qry,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=&filter=&_itemId=${skuValue}`
+        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=&filter=&_itemId=${skuValue || ''}`
       })
   
       setGridData(response)
@@ -77,7 +77,7 @@ const IvBarcodes = () => {
 
     const response = await getRequest({
       extension: InventoryRepository.Barcodes.snapshot,
-      parameters: `_filter=${qry}&_startAt=${_startAt}&_size=${_size}&_itemId=${skuValue}`
+      parameters: `_filter=${qry}&_startAt=${_startAt}&_size=${_size}&_itemId=${skuValue || ''}`
     })
 
     return response
@@ -112,17 +112,17 @@ const IvBarcodes = () => {
   ]
 
   const edit = obj => {
-    openForm(obj?.itemId, obj?.barcode, obj?.msId)
+    openForm(obj)
   }
 
-  function openForm(recordId, barcode, msId) {
+  function openForm(obj) {
     stack({
       Component: BarcodesForm,
       props: {
         labels: _labels,
-        recordId,
-        barcode,
-        msId,
+        recordId: obj?.recordId,
+        barcode: obj?.barcode,
+        msId: obj?.msId,
         maxAccess: access
       },
       width: 600,
