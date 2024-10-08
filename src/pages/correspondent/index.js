@@ -31,7 +31,7 @@ const Correspondent = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: RemittanceSettingsRepository.Correspondent.qry,
+    endpointId: RemittanceSettingsRepository.Correspondent.page,
     datasetId: ResourceIds.Correspondent,
 
     filter: {
@@ -56,7 +56,7 @@ const Correspondent = () => {
     var parameters = defaultParams
 
     const response = await getRequest({
-      extension: RemittanceSettingsRepository.Correspondent.qry,
+      extension: RemittanceSettingsRepository.Correspondent.page,
       parameters: parameters
     })
 
@@ -158,14 +158,14 @@ const Correspondent = () => {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar 
+        <RPBGridToolbar
           onSearch={onSearch}
-          onClear={onClear} 
-          labels={_labels} 
+          onClear={onClear}
+          labels={_labels}
           onAdd={addCorrespondent}
-          maxAccess={access} 
-          onApply={onApply} 
-          reportName={'RTCOR'} 
+          maxAccess={access}
+          onApply={onApply}
+          reportName={'RTCOR'}
         />
       </Fixed>
       <Grow>
