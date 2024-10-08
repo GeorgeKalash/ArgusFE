@@ -154,5 +154,10 @@ export const InventoryRepository = {
     set: service + 'setBCD',
     del: service + 'delBCD',
     qry: service + 'qryBCD'
+  },
+  Kit: {
+    set: service + 'set2KIT',
+    get: service + 'getKIT',
+    qry: service + 'qryKIT'
   }
 }

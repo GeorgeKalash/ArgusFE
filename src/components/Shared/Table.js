@@ -485,7 +485,12 @@ const Table = ({
             },
             '&:focus': {
               outline: 'none'
-            }
+            },
+            ...(!params.colDef?.wrapText && {
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            })
           }}
         >
           {params.value}

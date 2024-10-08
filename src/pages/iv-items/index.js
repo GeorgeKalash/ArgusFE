@@ -17,7 +17,6 @@ import ItemWindow from './window/ItemWindow'
 const IvItems = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const [skuValue, setSku] = useState('')
 
   const { stack } = useWindow()
 
@@ -115,23 +114,23 @@ const IvItems = () => {
     }
   ]
 
-  const edit = obj => {
-    openForm(obj?.recordId)
-    setSku(obj?.sku)
-  }
-
-  function openForm(recordId) {
+  function openForm(recordId, sku) {
     stack({
       Component: ItemWindow,
       props: {
         labels: _labels,
         recordId: recordId ? recordId : null,
+        sku: sku ? sku : null,
         maxAccess: access
       },
       width: 1200,
       height: 660,
-      title: _labels.items + ' ' + skuValue
+      title: _labels.items + ' ' + (sku || '')
     })
+  }
+
+  const edit = obj => {
+    openForm(obj?.recordId, obj?.sku)
   }
 
   const add = () => {

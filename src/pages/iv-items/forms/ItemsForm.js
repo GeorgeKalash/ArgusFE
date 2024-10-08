@@ -23,6 +23,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
   const [showLotCategories, setShowLotCategories] = useState(false)
   const [showSerialProfiles, setShowSerialProfiles] = useState(false)
   const { recordId } = store
+  const [onKitItem, setOnKitItem] = useState(false)
 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -60,7 +61,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       salesItem: true,
       purchaseItem: true,
       kitItem: false,
-      taxId: null,
+      taxId: '',
       lotCategoryId: null,
       spfId: '',
       categoryName: '',
@@ -103,6 +104,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
         })
 
         if (!formik.values.recordId) {
+          setOnKitItem(false)
           toast.success(platformLabels.Added)
           formik.setValues({
             ...obj,
@@ -111,7 +113,10 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
           setStore(prevStore => ({
             ...prevStore,
             recordId: response.recordId,
-            _msId: formik.values.msId
+            _msId: formik.values.msId,
+            _kit: formik.values.kit,
+            _name: formik.values.name,
+            _reference: formik.values.sku
           }))
         } else {
           toast.success(platformLabels.Edited)
@@ -153,9 +158,12 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
           setStore(prevStore => ({
             ...prevStore,
             _msId: res.record.msId,
+            _kit: !!res.record.kitItem,
             measurementId: res.record.defSaleMUId,
             priceGroupId: res.record.pgId,
-            returnPolicy: res.record.returnPolicyId
+            returnPolicy: res.record.returnPolicyId,
+            _name: res.record.name,
+            _reference: res.record.sku
           }))
         }
       } catch {}
@@ -179,9 +187,12 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
 
   useEffect(() => {
     if (formik.values.kitItem) {
+      setOnKitItem(true)
       formik.setFieldValue('ivtItem', false)
       formik.setFieldValue('trackBy', '')
-      formik.setFieldValue('valuation', '')
+      formik.setFieldValue('valuationMethod', '')
+    } else {
+      setOnKitItem(false)
     }
   }, [formik.values.kitItem])
 
@@ -222,6 +233,21 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     onChange={(event, newValue) => {
                       changeDT(newValue)
                       formik.setFieldValue('categoryId', newValue?.recordId || '')
+                      formik.setFieldValue('priceType', newValue?.priceType || '')
+                      formik.setFieldValue('trackBy', newValue?.trackBy || '')
+                      formik.setFieldValue('procurementMethod', newValue?.procurementMethod || '')
+                      formik.setFieldValue('msId', newValue?.msId || '')
+                      formik.setFieldValue('valuationMethod', newValue?.valuationMethod || '')
+                      formik.setFieldValue('taxId', newValue?.taxId || ''),
+                        formik.setFieldValue('lotCategoryId', newValue?.lotCategoryId || ''),
+                        formik.setFieldValue('spfId', newValue?.spfId || '')
+                      setShowLotCategories(newValue?.trackBy === '2' || newValue?.trackBy === 2)
+                      setShowSerialProfiles(newValue?.trackBy === '1' || newValue?.trackBy === 1)
+                      setStore(prevStore => ({
+                        ...prevStore,
+                        _metal: formik.values.metalId,
+                        _isMetal: newValue?.isMetal
+                      }))
                     }}
                     error={formik.touched.categoryId && formik.errors.categoryId}
                   />
@@ -241,11 +267,12 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     values={formik.values}
                     name='priceType'
                     label={labels.priceType}
+                    defaultIndex={onKitItem ? 0 : null}
                     readOnly={formik.values.kitItem}
                     valueField='key'
                     displayField='value'
                     displayFieldWidth={1}
-                    required
+                    required={!formik.values.kitItem}
                     maxAccess={!editMode && maxAccess}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('priceType', newValue?.key || '')

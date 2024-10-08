@@ -97,8 +97,7 @@ const refBehavior = async (getRequest, maxAccess, selectNraId = undefined, readO
   }
 
   return {
-    sku,
-    reference,
+    type,
     maxAccess,
     selectNraId
   }
