@@ -16,6 +16,9 @@ export const ManufacturingRepository = {
     get: service + 'getLIN',
     del: service + 'delLIN'
   },
+  CostGroup: {
+    qry: service + 'qryCG'
+  },
   WorkCenter: {
     page: service + 'pageWCT',
     qry: service + 'qryWCT',
@@ -73,7 +76,8 @@ export const ManufacturingRepository = {
     qry: service + 'qryCLS',
     set: service + 'setCLS',
     get: service + 'getCLS',
-    del: service + 'delCLS'
+    del: service + 'delCLS',
+    snapshot: service + 'qryCLS'
   },
   ProductionStandard: {
     qry: service + 'qrySTD'

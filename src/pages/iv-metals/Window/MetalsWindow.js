@@ -11,7 +11,7 @@ const MetalsWindows = ({ recordId, labels, maxAccess }) => {
     recordId: recordId
   })
 
-  const tabs = [{ label: labels.metals }, { label: labels.purity, disabled: !store.recordId }]
+  const tabs = [{ label: labels.metals }, { label: labels.scrap, disabled: !store.recordId }]
 
   return (
     <>
