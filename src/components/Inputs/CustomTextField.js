@@ -20,6 +20,7 @@ const CustomTextField = ({
   numberField = false,
   editMode = false,
   maxLength = '1000',
+  minLength = '0',
   position,
   dir = 'ltr',
   hidden = false,
@@ -30,7 +31,7 @@ const CustomTextField = ({
   ...props
 }) => {
   const name = props.name
-
+  const [error, setError] = useState(false)
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
 
   const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
@@ -86,6 +87,16 @@ const CustomTextField = ({
       e.target.value = inputValue?.replace(/[^a-zA-Z]/g, '')
       props?.onChange(e)
     }
+
+    if (minLength) {
+      if (inputValue.length === 0) {
+        setError(false)
+      } else if (inputValue.length < minLength) {
+        setError(true)
+      } else {
+        setError(false)
+      }
+    }
   }
 
   const required = props.required || accessLevel === MANDATORY
@@ -107,6 +118,7 @@ const CustomTextField = ({
         autoComplete: 'off',
         readOnly: _readOnly,
         maxLength: maxLength,
+        minLength: minLength,
         dir: dir, // Set direction to right-to-left
         inputMode: 'numeric',
         pattern: numberField && '[0-9]*', // Allow only numeric input
@@ -147,6 +159,7 @@ const CustomTextField = ({
       }}
       required={required}
       {...props}
+      error={error}
     />
   )
 }
