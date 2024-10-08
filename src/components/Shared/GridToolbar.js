@@ -111,7 +111,7 @@ const GridToolbar = ({
               </Grid>
             )}
             {middleSection && (
-              <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', ml: 2 }}>
+              <Grid item sx={{ display: 'flex', justifyContent: 'flex-start' }}>
                 {middleSection}
               </Grid>
             )}
