@@ -710,25 +710,30 @@ export default function SalesOrderForm({
   const handleCycleButtonClick = () => {
     let currentTdAmount
     let currentPctAmount
+    let currentDiscountAmount
     if (cycleButtonState.value == 1) {
       currentPctAmount =
         formik.values.currentDiscount < 0 || formik.values.currentDiscount > 100 ? 0 : formik.values.currentDiscount
       currentTdAmount = (parseFloat(currentPctAmount) * parseFloat(formik.values.subtotal)) / 100
+      currentDiscountAmount = currentPctAmount
       formik.setFieldValue('tdAmount', currentTdAmount)
       formik.setFieldValue('tdPct', currentPctAmount)
+      formik.setFieldValue('currentDiscount', currentPctAmount)
     } else {
       currentTdAmount =
         formik.values.currentDiscount < 0 || formik.values.subtotal < formik.values.currentDiscount
           ? 0
           : formik.values.currentDiscount
       currentPctAmount = (parseFloat(currentTdAmount) / parseFloat(formik.values.subtotal)) * 100
+      currentDiscountAmount = currentTdAmount
       formik.setFieldValue('tdPct', currentPctAmount)
       formik.setFieldValue('tdAmount', currentTdAmount)
+      formik.setFieldValue('currentDiscount', currentTdAmount)
     }
     setCycleButtonState(prevState => {
       const newState = prevState.text === '%' ? { text: '123', value: 1 } : { text: '%', value: 2 }
       formik.setFieldValue('tdType', newState.value)
-      recalcGridVat(newState.value, currentPctAmount, currentTdAmount, formik.values.currentDiscount)
+      recalcGridVat(newState.value, currentPctAmount, currentTdAmount, currentDiscountAmount)
       calcTotals(formik.values.items, currentTdAmount)
 
       return newState
@@ -777,7 +782,7 @@ export default function SalesOrderForm({
     })
   }
 
-  function calcTotals(itemsArray, tdAmount) {
+  function calcTotals(itemsArray, tdAmount, misc) {
     const parsedItemsArray = itemsArray
       .filter(item => item.itemId !== undefined)
       .map(item => ({
@@ -792,6 +797,7 @@ export default function SalesOrderForm({
       }))
 
     const subtotal = getSubtotal(parsedItemsArray)
+    const miscValue = misc == 0 ? 0 : parseFloat(formik.values.miscAmount)
 
     const _footerSummary = getFooterTotals(parsedItemsArray, {
       totalQty: 0,
@@ -802,7 +808,7 @@ export default function SalesOrderForm({
       sumExtended: parseFloat(subtotal),
       tdAmount: tdAmount || formik.values.tdAmount,
       net: 0,
-      miscAmount: parseFloat(formik.values.miscAmount)
+      miscAmount: miscValue
     })
 
     formik.setFieldValue('totVolume', _footerSummary?.totalVolume?.toFixed(2) || 0)
@@ -1440,7 +1446,7 @@ export default function SalesOrderForm({
                     }}
                     onClear={() => {
                       formik.setFieldValue('miscAmount', 0)
-                      calcTotals(formik.values.items)
+                      calcTotals(formik.values.items, formik.values.tdAmount, 0)
                     }}
                   />
                 </Grid>
