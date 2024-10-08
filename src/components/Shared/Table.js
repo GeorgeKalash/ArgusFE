@@ -33,6 +33,7 @@ const Table = ({
   globalStatus = true,
   viewCheckButtons = false,
   showCheckboxColumn = false,
+  disableSorting = false,
   rowSelection = '',
   pagination = true,
   setData,
@@ -64,29 +65,36 @@ const Table = ({
       if (col.type === 'date') {
         return {
           ...col,
-          valueGetter: ({ data }) => formatDateDefault(data?.[col.field])
+          valueGetter: ({ data }) => formatDateDefault(data?.[col.field]),
+          sortable: !disableSorting
         }
       }
       if (col.type === 'dateTime') {
         return {
           ...col,
-          valueGetter: ({ data }) => data?.[col.field] && formatDateTimeDefault(data?.[col.field])
+          valueGetter: ({ data }) => data?.[col.field] && formatDateTimeDefault(data?.[col.field]),
+          sortable: !disableSorting
         }
       }
       if (col.type === 'number' || col?.type?.field === 'number') {
         return {
           ...col,
-          valueGetter: ({ data }) => getFormattedNumber(data?.[col.field], col.type?.decimal)
+          valueGetter: ({ data }) => getFormattedNumber(data?.[col.field], col.type?.decimal),
+          sortable: !disableSorting
         }
       }
       if (col.type === 'timeZone') {
         return {
           ...col,
-          valueGetter: ({ data }) => data?.[col.field] && getTimeInTimeZone(data?.[col.field])
+          valueGetter: ({ data }) => data?.[col.field] && getTimeInTimeZone(data?.[col.field]),
+          sortable: !disableSorting
         }
       }
 
-      return col
+      return {
+        ...col,
+        sortable: !disableSorting
+      }
     })
 
   const shouldRemoveColumn = column => {

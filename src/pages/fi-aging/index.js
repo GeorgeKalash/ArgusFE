@@ -181,6 +181,7 @@ const FiAging = () => {
           rowId={['recordId']}
           isLoading={false}
           pageSize={50}
+          disableSorting={true}
           refetch={refetch}
           paginationParameters={paginationParameters}
           paginationType='api'
