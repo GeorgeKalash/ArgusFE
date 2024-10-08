@@ -88,6 +88,7 @@ const Table = ({
       if (col.type === 'checkbox') {
         return {
           ...col,
+          width: 110,
           cellRenderer: ({ data }) => {
             return <Checkbox checked={data?.[col.field]} style={{ pointerEvents: 'none' }} />
           }

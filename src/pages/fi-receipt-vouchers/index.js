@@ -159,8 +159,7 @@ export default function CurrencyTrading() {
     {
       field: 'isVerified',
       headerName: labels.isVerified,
-      type: 'checkbox',
-      flex: 1
+      type: 'checkbox'
     }
   ]
 

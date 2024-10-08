@@ -125,8 +125,7 @@ const FiPaymentVouchers = () => {
     {
       field: 'isVerified',
       headerName: _labels.isVerified,
-      type: 'checkbox',
-      flex: 1
+      type: 'checkbox'
     }
   ]
 

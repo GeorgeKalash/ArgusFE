@@ -94,8 +94,7 @@ const BeneficiaryWindow = ({ clientId }) => {
     {
       field: 'isInactive',
       headerName: _labels.isInactive,
-      type: 'checkbox',
-      flex: 1
+      type: 'checkbox'
     },
     {
       field: 'beneficiary history',
