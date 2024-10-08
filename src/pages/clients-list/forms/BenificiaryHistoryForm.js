@@ -74,6 +74,7 @@ export default function BenificiaryHistoryForm({ client, beneficiary }) {
     {
       field: 'isInactive',
       headerName: _labels.isInactive,
+      type: 'checkbox',
       flex: 1
     }
   ]

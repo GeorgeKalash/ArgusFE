@@ -85,6 +85,14 @@ const Table = ({
           valueGetter: ({ data }) => data?.[col.field] && getTimeInTimeZone(data?.[col.field])
         }
       }
+      if (col.type === 'checkbox') {
+        return {
+          ...col,
+          cellRenderer: ({ data }) => {
+            return <Checkbox checked={data?.[col.field]} style={{ pointerEvents: 'none' }} />
+          }
+        }
+      }
 
       return col
     })

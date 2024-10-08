@@ -9,13 +9,14 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
-import FiPaymentVouchersForm from './forms/FiPaymentVouchersForm'
-import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { useError } from 'src/error'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import { getStorageData } from 'src/storage/storage'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
+import { InventoryRepository } from 'src/repositories/InventoryRepository'
+import MaterialsTransferForm from './Form/MaterialsTransferForm'
 
-const FiPaymentVouchers = () => {
+const IvMaterialsTransfer = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack: stackError } = useError()
@@ -25,8 +26,10 @@ const FiPaymentVouchers = () => {
     const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
-      extension: FinancialRepository.PaymentVouchers.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}&filter=`
+      extension: InventoryRepository.MaterialsTransfer.qry,
+      parameters: `_filter=&_size=30&_startAt=${_startAt}&_sortBy=recordId desc&_pageSize=${_pageSize}&_params=${
+        params || ''
+      }`
     })
 
     if (response && response?.list) {
@@ -42,7 +45,7 @@ const FiPaymentVouchers = () => {
   async function fetchWithFilter({ filters, pagination }) {
     if (filters?.qry) {
       return await getRequest({
-        extension: FinancialRepository.PaymentVouchers.snapshot,
+        extension: InventoryRepository.MaterialsTransfer.snapshot,
         parameters: `_filter=${filters.qry}`
       })
     } else {
@@ -61,8 +64,8 @@ const FiPaymentVouchers = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: FinancialRepository.PaymentVouchers.page,
-    datasetId: ResourceIds.PaymentVouchers,
+    endpointId: InventoryRepository.MaterialsTransfer.qry,
+    datasetId: ResourceIds.MaterialsTransfer,
     filter: {
       filterFn: fetchWithFilter
     }
@@ -70,45 +73,74 @@ const FiPaymentVouchers = () => {
 
   const columns = [
     {
-      field: 'date',
-      headerName: _labels.date,
-      flex: 1,
-      type: 'date'
-    },
-    {
       field: 'reference',
       headerName: _labels.reference,
       flex: 1
     },
     {
-      field: 'accountTypeName',
-      headerName: _labels.accountType,
+      field: 'date',
+      headerName: _labels.date,
+      flex: 1,
+      type: 'date'
+    },
+
+    {
+      field: 'fromSiteRef',
+      headerName: _labels.fromSiteRef,
       flex: 1
     },
     {
-      field: 'accountRef',
-      headerName: _labels.account,
+      field: 'fromSiteName',
+      headerName: _labels.fromSite,
       flex: 1
     },
     {
-      field: 'accountName',
-      headerName: _labels.accountName,
+      field: 'toSiteRef',
+      headerName: _labels.toSiteRef,
       flex: 1
     },
     {
-      field: 'cashAccountName',
-      headerName: _labels.cashAccount,
+      field: 'toSiteName',
+      headerName: _labels.toSite,
       flex: 1
     },
     {
-      field: 'amount',
-      headerName: _labels.amount,
+      field: 'closedDate',
+      headerName: _labels.shippingDate,
+      flex: 1,
+      type: 'date'
+    },
+    {
+      field: 'receivedDate',
+      headerName: _labels.receivedDate,
+      flex: 1,
+      type: 'date'
+    },
+    {
+      field: 'pcs',
+      headerName: _labels.pcs,
       flex: 1,
       type: 'number'
     },
     {
-      field: 'currencyRef',
-      headerName: _labels.currency,
+      field: 'qty',
+      headerName: _labels.qty,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'statusName',
+      headerName: _labels.status,
+      flex: 1
+    },
+    {
+      field: 'wipName',
+      headerName: _labels.wip,
+      flex: 1
+    },
+    {
+      field: 'printStatusName',
+      headerName: _labels.print,
       flex: 1
     },
     {
@@ -116,11 +148,7 @@ const FiPaymentVouchers = () => {
       headerName: _labels.notes,
       flex: 1
     },
-    {
-      field: 'statusName',
-      headerName: _labels.status,
-      flex: 1
-    },
+
     {
       field: 'isVerified',
       headerName: _labels.isVerified,
@@ -138,49 +166,52 @@ const FiPaymentVouchers = () => {
   }
 
   const getPlantId = async () => {
-    const userData = window.sessionStorage.getItem('userData')
-      ? JSON.parse(window.sessionStorage.getItem('userData'))
-      : null
+    const userId = getStorageData('userData').userId
 
-    const parameters = `_userId=${userData && userData.userId}&_key=plantId`
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.UserDefaults.get,
+        parameters: `_userId=${userId}&_key=plantId`
+      })
 
-    return getRequest({
-      extension: SystemRepository.UserDefaults.get,
-      parameters: parameters
-    })
-      .then(res => res.record.value)
-      .catch(error => {})
+      return res.record.value
+    } catch (e) {}
   }
 
   function openOutWardsWindow(plantId, recordId) {
     stack({
-      Component: FiPaymentVouchersForm,
+      Component: MaterialsTransferForm,
       props: {
         labels: _labels,
-        recordId: recordId,
-        plantId: plantId,
+        recordId,
+        plantId,
         maxAccess: access
       },
-      width: 950,
-      height: 700,
-      title: _labels.paymentVoucher
+      width: 1000,
+      height: 680,
+      title: _labels.MaterialsTransfer
     })
   }
 
   async function openForm(recordId) {
-    try {
-      const plantId = await getPlantId()
-      openOutWardsWindow(plantId, recordId)
-    } catch (error) {}
+    const plantId = await getPlantId()
+
+    plantId !== ''
+      ? openOutWardsWindow(plantId, recordId)
+      : stackError({
+          message: platformLabels.noDefaultPlant
+        })
   }
 
   const del = async obj => {
-    await postRequest({
-      extension: FinancialRepository.PaymentVouchers.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success(platformLabels.Deleted)
+    try {
+      await postRequest({
+        extension: InventoryRepository.MaterialsTransfer.del,
+        record: JSON.stringify(obj)
+      })
+      invalidate()
+      toast.success(platformLabels.Deleted)
+    } catch (error) {}
   }
 
   const onApply = ({ search, rpbParams }) => {
@@ -212,7 +243,7 @@ const FiPaymentVouchers = () => {
           onAdd={add}
           maxAccess={access}
           onApply={onApply}
-          reportName={'FIPV'}
+          reportName={'IVTFR'}
         />
       </Fixed>
       <Grow>
@@ -229,9 +260,9 @@ const FiPaymentVouchers = () => {
           refetch={refetch}
           maxAccess={access}
         />
-      </Grow>{' '}
+      </Grow>
     </VertLayout>
   )
 }
 
-export default FiPaymentVouchers
+export default IvMaterialsTransfer
