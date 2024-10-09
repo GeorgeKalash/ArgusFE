@@ -130,7 +130,7 @@ const Financial = () => {
     {
       field: 'isVerified',
       headerName: _labels.isVerified,
-      flex: 1
+      type: 'checkbox'
     }
   ]
 

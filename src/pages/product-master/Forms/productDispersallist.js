@@ -58,12 +58,12 @@ const ProductDispersalList = ({ store, setStore, labels, maxAccess }) => {
     {
       field: 'isInactive',
       headerName: labels.isInactive,
-      flex: 1
+      type: 'checkbox'
     },
     {
       field: 'isDefault',
       headerName: labels.isDefault,
-      flex: 1
+      type: 'checkbox'
     }
   ]
 

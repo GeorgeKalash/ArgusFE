@@ -254,5 +254,6 @@ export const ResourceIds = {
   FinancialIntegrators: 51105,
   SalesDefaults: 51114,
   FIAging: 31405,
+  MetalColor: 41110,
   ItemSizes: 41117
 }
