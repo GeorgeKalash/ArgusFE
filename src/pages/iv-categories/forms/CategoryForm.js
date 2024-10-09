@@ -142,7 +142,10 @@ const CategoryForm = ({ labels, maxAccess, setStore, store }) => {
             name: res.record.name
           }))
 
-          formik.setValues(res.record)
+          formik.setValues({
+            ...res.record,
+            allowNegativeQty: Boolean(res.record.allowNegativeQty)
+          })
         }
       } catch (error) {}
     })()
