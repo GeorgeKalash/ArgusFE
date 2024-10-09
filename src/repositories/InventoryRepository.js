@@ -159,10 +159,14 @@ export const InventoryRepository = {
     get: service + 'getKIT',
     qry: service + 'qryKIT'
   },
+  ItemRetail: {
+    qry: service + 'qryITR',
+    set: service + 'set2ITR'
+  },
   ItemSizes: {
     get: service + 'getSIZ',
     set: service + 'setSIZ',
     del: service + 'delSIZ',
-    page: service + 'pageSIZ',
-  },
+    page: service + 'pageSIZ'
+  }
 }
