@@ -25,7 +25,7 @@ const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore,
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: RemittanceSettingsRepository.Correspondent.qry
+    endpointId: RemittanceSettingsRepository.Correspondent.page
   })
 
   const formik = useFormik({
