@@ -120,32 +120,40 @@ export const LOShipmentForm = ({ recordId, functionId, editMode, totalBaseAmount
     setSelectedRowId(row.id)
   }
 
-  const handleSerialsGridChange = newRows => {
-    const newReferences = newRows.map(row => row.reference);
-    const uniqueReferences = [...new Set(newReferences)];
+  const handleSerialsGridChange = newRows => { 
+    const newReference = newRows[newRows.length - 1]?.reference;
   
-    if (newReferences.length !== uniqueReferences.length) {
-      stackError({ message: 'Duplicate references are not allowed within the same package.' })
-
-      return
-    }
+    const isDuplicate = formik?.values?.packages?.some(pkg =>
+      pkg?.packageReferences?.some(ref => ref?.reference === newReference)
+    );
   
-    const allReferences = formik?.values?.packages?.flatMap(pkg => pkg?.packageReferences?.map(ref => ref.reference));
+    if (isDuplicate) {
+      stackError({ message: labels.referenceDuplicateMessage });
   
-    for (let ref of newReferences) {
-      if (allReferences.filter(existingRef => existingRef === ref).length > 1) {
-        stackError({ message: `The reference "${ref}" is already used in another package.` })
-
-        return
+      const lastIndex = newRows.map(row => row?.reference).lastIndexOf(newReference);
+  
+      if (lastIndex !== -1) {
+        const updatedRows = [...newRows];
+        updatedRows.splice(lastIndex, 1);  
+  
+        updatedRows.push({ seqNo: updatedRows.length + 1, reference: '', id: lastIndex });
+  
+        formik.setFieldValue(`packages[${index}].packageReferences`, updatedRows);
       }
+    } else {
+      if (formik.values.packages[index]?.packageReferences?.length < newRows.length) {
+        newRows[formik.values.packages[index]?.packageReferences?.length].seqNo =
+          formik.values.packages[index]?.packageReferences?.length + 1;
+      }
+  
+      const updatedRows = newRows.map((row, idx) => ({
+        ...row,
+        id: idx
+      }));
+  
+      formik.setFieldValue(`packages[${index}].packageReferences`, updatedRows);
     }
-    
-    if (formik.values.packages[index]?.packageReferences?.length < newRows.length) {
-      newRows[formik.values.packages[index]?.packageReferences?.length].seqNo =
-        formik.values.packages[index]?.packageReferences?.length + 1
-    }
-    formik.setFieldValue(`packages[${index}].packageReferences`, newRows)
-  }
+  };
 
   const handlePackageGridChange = newRows => {
     const updatedRows = newRows?.map(row => {
