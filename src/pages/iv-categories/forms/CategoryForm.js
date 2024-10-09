@@ -142,10 +142,7 @@ const CategoryForm = ({ labels, maxAccess, setStore, store }) => {
             name: res.record.name
           }))
 
-          formik.setValues({
-            ...res.record,
-            allowNegativeQty: Boolean(res.record.allowNegativeQty)
-          })
+          formik.setValues(res.record)
         }
       } catch (error) {}
     })()
@@ -485,7 +482,9 @@ const CategoryForm = ({ labels, maxAccess, setStore, store }) => {
                         name='allowNegativeQty'
                         maxAccess={maxAccess}
                         checked={formik.values?.allowNegativeQty}
-                        onChange={formik.handleChange}
+                        onChange={e => {
+                          formik.setFieldValue('allowNegativeQty', e.target.checked)
+                        }}
                       />
                     }
                     label={labels.allowNegativeQty}
@@ -497,7 +496,9 @@ const CategoryForm = ({ labels, maxAccess, setStore, store }) => {
                       <Checkbox
                         name='isInactive'
                         checked={formik.values?.isInactive}
-                        onChange={formik.handleChange}
+                        onChange={e => {
+                          formik.setFieldValue('isInactive', e.target.checked)
+                        }}
                         maxAccess={maxAccess}
                       />
                     }
