@@ -37,7 +37,7 @@ const ItemWindow = ({ recordId, labels, maxAccess }) => {
     { label: labels.physical, disabled: !store.recordId },
     { label: labels.vendor, disabled: !store.recordId },
     { label: labels.production, disabled: !store.recordId },
-    { label: 'kit', disabled: !store.recordId || !store._kit }
+    { label: labels.kit, disabled: !store.recordId || !store._kit }
   ]
   console.log(tabs[7].disabled, 'dis')
   console.log(store, 'store')

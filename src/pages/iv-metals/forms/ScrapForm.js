@@ -105,7 +105,7 @@ const ScrapForm = ({ store, maxAccess, labels }) => {
         form={formik}
         resourceId={ResourceIds.Metals}
         maxAccess={maxAccess}
-        infoVisible={true}
+        infoVisible={false}
         editMode={!!recordId}
         isCleared={false}
       >
