@@ -213,8 +213,7 @@ export default function CashCountNotesForm({
                 label: labels.qty,
                 name: 'qty',
                 props: {
-                  readOnly: true,
-                  decimalScale: 0
+                  readOnly: true
                 },
                 async onChange({ row: { update, newRow } }) {
                   const note = newRow?.note || 0
