@@ -127,7 +127,6 @@ const FiAging = () => {
     paginationParameters,
     filterBy,
     refetch,
-    clearFilter,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -142,26 +141,15 @@ const FiAging = () => {
     return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
-  const onApply = ({ search, rpbParams }) => {
-    if (!search && rpbParams.length === 0) {
-      clearFilter('params')
-    } else if (!search) {
-      filterBy('params', rpbParams)
-    } else {
-      filterBy('qry', search)
-    }
+  const onApply = ({ rpbParams }) => {
+    filterBy('params', rpbParams)
     refetch()
-  }
-
-  const onClear = () => {
-    clearFilter('qry')
   }
 
   return (
     <VertLayout>
       <Fixed>
         <RPBGridToolbar
-          onClear={onClear}
           labels={_labels}
           maxAccess={access}
           onApply={onApply}
