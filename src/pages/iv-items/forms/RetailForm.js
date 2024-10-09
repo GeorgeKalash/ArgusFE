@@ -11,7 +11,8 @@ import { CommonContext } from 'src/providers/CommonContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import toast from 'react-hot-toast'
-import { ResourceIds } from 'src/resources/ResourceIds'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import WindowToolbar from 'src/components/Shared/WindowToolbar'
 
 const RetailForm = ({ store, maxAccess }) => {
   const [data, setData] = useState([])
@@ -95,8 +96,8 @@ const RetailForm = ({ store, maxAccess }) => {
   const rowColumns = [
     {
       field: 'value',
-      flex: 1, // Make the column take the full width
-      headerName: '' // Empty header to remove the label "Value"
+      flex: 1,
+      headerName: ''
     }
 
     // {
@@ -117,32 +118,34 @@ const RetailForm = ({ store, maxAccess }) => {
     // }
   ]
 
+  const handleSave = () => {
+    const checkedItems = data.filter(item => item.checked)
+    const uncheckedItems = data.filter(item => !item.checked)
+
+    console.log('Checked Items:', checkedItems)
+    console.log('Unchecked Items:', uncheckedItems)
+  }
+
   return (
-    <FormShell
-      resourceId={ResourceIds.Items}
-      form={formik}
-      maxAccess
-      isCleared={false}
-      isSavedClear={false}
-      infoVisible={false}
-    >
-      <VertLayout>
-        <Grow>
-          <Table
-            columns={rowColumns}
-            gridData={{ list: data }}
-            setData={setData}
-            rowId={['key']}
-            pageSize={50}
-            pagination={false}
-            paginationType='client'
-            isLoading={false}
-            maxAccess={maxAccess}
-            showCheckboxColumn={true}
-          />
-        </Grow>
-      </VertLayout>
-    </FormShell>
+    <VertLayout>
+      <Grow>
+        <Table
+          columns={rowColumns}
+          gridData={{ list: data }}
+          setData={setData}
+          rowId={['key']}
+          pageSize={50}
+          pagination={false}
+          paginationType='client'
+          isLoading={false}
+          maxAccess={maxAccess}
+          showCheckboxColumn={true}
+        />
+      </Grow>
+      <Fixed>
+        <WindowToolbar onSave={handleSave} isSaved={true} />
+      </Fixed>
+    </VertLayout>
   )
 }
 
