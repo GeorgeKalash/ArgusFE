@@ -21,7 +21,6 @@ const IvBarcodes = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const [skuValue, setSku] = useState('')
-  const [gridData, setGridData] = useState([])
 
   const { stack } = useWindow()
 
@@ -39,17 +38,13 @@ const IvBarcodes = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    if (!!skuValue) {
+    if (skuValue) {
       const response = await getRequest({
         extension: InventoryRepository.Barcodes.qry,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=&filter=&_itemId=${skuValue || ''}`
+        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=&filter=&_itemId=${skuValue || 0}`
       })
   
-      setGridData(response)
-  
       return { ...response, _startAt: _startAt }
-    } else {
-      setGridData([])
     }
   }
 
@@ -69,10 +64,6 @@ const IvBarcodes = () => {
     search: {
       endpointId: InventoryRepository.Barcodes.snapshot,
       searchFn: fetchWithSearch
-    },
-        filter: {
-      filterFn: fetchGridData,
-      default: { functionId }
     }
   })
 
@@ -81,7 +72,7 @@ const IvBarcodes = () => {
 
     const response = await getRequest({
       extension: InventoryRepository.Barcodes.snapshot,
-      parameters: `_filter=${qry}&_startAt=${_startAt}&_size=${_size}&_itemId=${skuValue || ''}`
+      parameters: `_filter=${qry}&_startAt=${_startAt}&_size=${_size}`
     })
 
     return response
@@ -188,7 +179,7 @@ const IvBarcodes = () => {
                 sx={{ minWidth: '90px !important', pr: 2, ml: 2, height: 35 }}
                 variant='contained'
                 size='small'
-                onClick={fetchGridData}
+                onClick={refetch}
               >
                 {platformLabels.Apply}
               </Button>
@@ -199,7 +190,7 @@ const IvBarcodes = () => {
       <Grow>
         <Table
           columns={columns}
-          gridData={data || gridData}
+          gridData={data}
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
