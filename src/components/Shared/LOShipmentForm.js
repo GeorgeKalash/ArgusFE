@@ -17,10 +17,12 @@ import { DataSets } from 'src/resources/DataSets'
 import { getFormattedNumber } from 'src/lib/numberField-helper'
 import toast from 'react-hot-toast'
 import FieldSet from './FieldSet'
+import { useError } from 'src/error'
 
 export const LOShipmentForm = ({ recordId, functionId, editMode, totalBaseAmount }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const [selectedRowId, setSelectedRowId] = useState(null)
+  const { stack: stackError } = useError()
 
   const { formik } = useForm({
     initialValues: {
@@ -119,6 +121,25 @@ export const LOShipmentForm = ({ recordId, functionId, editMode, totalBaseAmount
   }
 
   const handleSerialsGridChange = newRows => {
+    const newReferences = newRows.map(row => row.reference);
+    const uniqueReferences = [...new Set(newReferences)];
+  
+    if (newReferences.length !== uniqueReferences.length) {
+      stackError({ message: 'Duplicate references are not allowed within the same package.' })
+
+      return
+    }
+  
+    const allReferences = formik?.values?.packages?.flatMap(pkg => pkg?.packageReferences?.map(ref => ref.reference));
+  
+    for (let ref of newReferences) {
+      if (allReferences.filter(existingRef => existingRef === ref).length > 1) {
+        stackError({ message: `The reference "${ref}" is already used in another package.` })
+
+        return
+      }
+    }
+    
     if (formik.values.packages[index]?.packageReferences?.length < newRows.length) {
       newRows[formik.values.packages[index]?.packageReferences?.length].seqNo =
         formik.values.packages[index]?.packageReferences?.length + 1
