@@ -48,8 +48,10 @@ const AgingForm = ({ recordId, labels, maxAccess }) => {
     }))
 
     const data = {
-      agpId: recordId,
-      name: '15 Days',
+      header: {
+        agpId: recordId,
+        name: '15 days' // Hardcoded name for testing
+      },
       items: items || []
     }
 
