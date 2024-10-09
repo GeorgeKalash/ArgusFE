@@ -148,6 +148,12 @@ export const InventoryRepository = {
     rebuild: service + 'rebuildFIS'
   },
   DimensionUDT: { set: service + 'set2UDT', get: service + 'getUDT' },
+  MetalColor: {
+    get: service + 'getMTC',
+    set: service + 'setMTC',
+    qry: service + 'qryMTC',
+    del: service + 'delMTC',
+  },
   Kit: {
     set: service + 'set2KIT',
     get: service + 'getKIT',
