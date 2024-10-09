@@ -53,7 +53,7 @@ export function DataGrid({
     const newRows = [...value]
     const index = newRows.findIndex(({ id }) => id === row.id)
     newRows[index] = row
-    onChange(newRows)
+    onChange(newRows, index)
 
     return row
   }
