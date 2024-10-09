@@ -1,18 +1,14 @@
-import { useContext, useState } from 'react'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useContext } from 'react'
+import { useResourceQuery } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import Table from 'src/components/Shared/Table'
 import toast from 'react-hot-toast'
-import { formatDateDefault } from 'src/lib/date-helper'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { CTTRXrepository } from 'src/repositories/CTTRXRepository'
 import { useWindow } from 'src/windows'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CreditInvoiceForm from './Forms/CreditInvoiceForm'
-import { getFormattedNumber } from 'src/lib/numberField-helper'
-
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
@@ -20,46 +16,14 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { useError } from 'src/error'
+import { getStorageData } from 'src/storage/storage'
 
 const CreditInvoice = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-
-  //states
-  const [errorMessage, setErrorMessage] = useState(null)
-  const [plantId, setPlantId] = useState(null)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
-
-  const userData = window.sessionStorage.getItem('userData')
-    ? JSON.parse(window.sessionStorage.getItem('userData'))
-    : null
-
-  const getPlantId = async () => {
-    const parameters = `_userId=${userData && userData.userId}&_key=plantId`
-
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.UserDefaults.get,
-        parameters: parameters
-      })
-
-      if (res.record.value) {
-        setPlantId(res.record.value)
-
-        return res.record.value
-      }
-
-      setPlantId('')
-
-      return ''
-    } catch (error) {
-      throw new Error(error)
-      setPlantId('')
-
-      return ''
-    }
-  }
+  const userData = getStorageData('userData').userId
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -69,6 +33,7 @@ const CreditInvoice = () => {
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
   }
+
   async function fetchWithSearch({ qry }) {
     return await getRequest({
       extension: CTTRXrepository.CreditInvoice.snapshot,
@@ -82,7 +47,8 @@ const CreditInvoice = () => {
     search,
     clear,
     access,
-    refetch
+    refetch,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: CTTRXrepository.CreditInvoice.page,
@@ -93,24 +59,27 @@ const CreditInvoice = () => {
     }
   })
 
-  const invalidate = useInvalidate({
-    endpointId: CTTRXrepository.CreditInvoice.page
-  })
+  async function getPlantId() {
+    const res = await getRequest({
+      extension: SystemRepository.UserDefaults.get,
+      parameters: `_userId=${userData}&_key=plantId`
+    })
+
+    return res?.record?.value
+  }
+
+  const getCashAccountId = async () => {
+    const res = await getRequest({
+      extension: SystemRepository.UserDefaults.get,
+      parameters: `_userId=${userData}&_key=cashAccountId`
+    })
+
+    return res?.record?.value
+  }
 
   const { proxyAction } = useDocumentTypeProxy({
     functionId: SystemFunction.CreditInvoicePurchase,
-    action: async () => {
-      const plantId = await getPlantId()
-      if (plantId !== '') {
-        openFormWindow(null, plantId)
-      } else {
-        stackError({
-          message: `The user does not have a default plant`
-        })
-
-        return
-      }
-    },
+    action: openForm,
     hasDT: false
   })
 
@@ -118,32 +87,29 @@ const CreditInvoice = () => {
     proxyAction()
   }
 
-  async function openFormWindow(recordId) {
+  async function openForm(recordId) {
+    let plantId
+    let cashAccountId
     if (!recordId) {
-      try {
-        const plantId = await getPlantId()
-        if (plantId !== '') {
-          openForm('', plantId)
-        } else {
-          stackError({
-            message: `The user does not have a default plant`
-          })
+      plantId = await getPlantId()
+      if (!plantId) {
+        stackError({
+          message: _labels.defaultPlant
+        })
 
-          return
-        }
-      } catch (error) {}
-    } else {
-      openForm(recordId)
+        return
+      }
     }
-  }
-  function openForm(recordId, plantId) {
+    if (!recordId) cashAccountId = await getCashAccountId()
+
     stack({
       Component: CreditInvoiceForm,
       props: {
         _labels,
         access,
-        plantId: plantId,
-        userData: userData,
+        plantId,
+        userData,
+        cashAccountId,
         recordId
       },
       width: 1000,
@@ -152,14 +118,12 @@ const CreditInvoice = () => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: CTTRXrepository.CreditInvoice.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
+    await postRequest({
+      extension: CTTRXrepository.CreditInvoice.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   return (
@@ -219,20 +183,19 @@ const CreditInvoice = () => {
               flex: 1
             }
           ]}
-          gridData={data ?? { list: [] }}
+          gridData={data}
           rowId={['recordId']}
           onEdit={obj => {
-            openFormWindow(obj.recordId, plantId)
+            openForm(obj.recordId)
           }}
           onDelete={del}
           isLoading={false}
           pageSize={50}
           maxAccess={access}
           refetch={refetch}
-          paginationType='client'
+          paginationType='api'
         />
       </Grow>
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </VertLayout>
   )
 }
