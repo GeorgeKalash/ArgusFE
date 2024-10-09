@@ -168,7 +168,8 @@ export default function CashCountNotesForm({
                 label: labels.currencyNote,
                 name: 'note',
                 props: {
-                  readOnly: true
+                  readOnly: true,
+                  decimalScale: 0
                 }
               },
               {
@@ -176,7 +177,8 @@ export default function CashCountNotesForm({
                 label: labels.qty1,
                 name: 'qty1',
                 props: {
-                  readOnly: readOnly
+                  readOnly: readOnly,
+                  decimalScale: 0
                 },
                 async onChange({ row }) {
                   sumQty(row)
@@ -187,7 +189,8 @@ export default function CashCountNotesForm({
                 label: labels.qty100,
                 name: 'qty100',
                 props: {
-                  readOnly: readOnly
+                  readOnly: readOnly,
+                  decimalScale: 0
                 },
                 async onChange({ row }) {
                   sumQty(row)
@@ -198,7 +201,8 @@ export default function CashCountNotesForm({
                 label: labels.qty1000,
                 name: 'qty1000',
                 props: {
-                  readOnly: readOnly
+                  readOnly: readOnly,
+                  decimalScale: 0
                 },
                 async onChange({ row }) {
                   sumQty(row)
@@ -210,7 +214,8 @@ export default function CashCountNotesForm({
                 label: labels.qty,
                 name: 'qty',
                 props: {
-                  readOnly: true
+                  readOnly: true,
+                  decimalScale: 0
                 },
                 async onChange({ row: { update, newRow } }) {
                   const note = newRow?.note || 0
@@ -224,7 +229,7 @@ export default function CashCountNotesForm({
                 component: 'numberfield',
                 label: labels.subTotal,
                 name: 'subTotal',
-                props: { readOnly: true }
+                props: { readOnly: true, decimalScale: 0 }
               }
             ]}
             allowDelete={false}
