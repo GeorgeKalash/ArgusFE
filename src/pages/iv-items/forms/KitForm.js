@@ -88,8 +88,6 @@ const KitForm = ({ store, labels, maxAccess }) => {
       .catch(error => {})
   }
 
-  console.log(formik.values)
-
   const columns = [
     {
       component: 'resourcelookup',
@@ -135,7 +133,6 @@ const KitForm = ({ store, labels, maxAccess }) => {
   useEffect(() => {
     setNumRows(formik?.values?.kit?.length)
   }, [formik.values.kit])
-  console.log(numRows, 'lenn')
 
   function getData() {
     getRequest({
