@@ -13,8 +13,7 @@ const FiAging = () => {
   const { getRequest } = useContext(RequestsContext)
   const [columns, setColumns] = useState([])
 
-  async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50, params } = options
+  async function fetchWithFilter({ filters }) {
 
     let defaultResponse = {
       count: 0,
@@ -24,10 +23,10 @@ const FiAging = () => {
     }
 
     try {
-      if (params) {
+      if (filters?.params) {
         const response = await getRequest({
           extension: RGFinancialRepository.FiAging.qry,
-          parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}`
+          parameters: `_params=${filters?.params}`
         })
   
         const legs = response?.record?.legs?.reduce((acc, leg) => {
@@ -135,10 +134,6 @@ const FiAging = () => {
       filterFn: fetchWithFilter
     }
   })
-
-  async function fetchWithFilter({ filters, pagination }) {
-    return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
-  }
 
   const onApply = ({ rpbParams }) => {
     filterBy('params', rpbParams)
