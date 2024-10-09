@@ -493,7 +493,12 @@ const Table = ({
             },
             '&:focus': {
               outline: 'none'
-            }
+            },
+            ...(!params.colDef?.wrapText && {
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            })
           }}
         >
           {params.value}
@@ -601,6 +606,9 @@ const Table = ({
             },
             '.ag-cell': {
               borderRight: '1px solid #d0d0d0 !important'
+            },
+            '.ag-cell .MuiBox-root': {
+              padding: '0px !important'
             }
           }}
         >

@@ -161,7 +161,8 @@ const CustomLookup = ({
               onBlur={e => {
                 if (!store.some(item => item[valueField] === inputValue) && e.target.value !== firstValue) {
                   setInputValue('')
-                  onChange(name, '')
+
+                  // onChange(name, '')
                   setFreeSolo(true)
                 }
               }}
