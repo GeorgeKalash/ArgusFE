@@ -1,11 +1,8 @@
 import { useState, useEffect, useContext } from 'react'
 import Table from 'src/components/Shared/Table'
-import { useForm } from 'src/hooks/form'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ControlContext } from 'src/providers/ControlContext'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
-import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
-import FormShell from 'src/components/Shared/FormShell'
 import { DataSets } from 'src/resources/DataSets'
 import { CommonContext } from 'src/providers/CommonContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -21,25 +18,6 @@ const RetailForm = ({ store, maxAccess }) => {
   const { platformLabels } = useContext(ControlContext)
   const { getAllKvsByDataset } = useContext(CommonContext)
 
-  const { formik } = useForm({
-    maxAccess,
-    enableReinitialize: true,
-    validateOnChange: true,
-    onSubmit: async values => {
-      const checkedUserIds = data.filter(row => row.checked).map(row => row.recordId)
-      if (checkedUserIds.length > 0) {
-        try {
-          await postRequest({
-            extension: RemittanceOutwardsRepository.Postoutwards.post2,
-            record: JSON.stringify({ ids: checkedUserIds })
-          })
-          toast.success(platformLabels.Posted)
-        } catch (error) {}
-      }
-    }
-  })
-
-  // Fetch the keys/labels (getRecordsNum)
   const getRecordsNum = () => {
     return new Promise((resolve, reject) => {
       getAllKvsByDataset({
@@ -52,14 +30,12 @@ const RetailForm = ({ store, maxAccess }) => {
     })
   }
 
-  // Fetch the first set of data (keys and labels)
   useEffect(() => {
     const fetchAccessLevel = async () => {
       try {
         const result = await getRecordsNum()
         setRecordsNum(result.length)
 
-        // Set the data for the table with initial checked false
         const initialData = result.map(item => ({
           key: item.key,
           value: item.value,
@@ -72,7 +48,6 @@ const RetailForm = ({ store, maxAccess }) => {
     fetchAccessLevel()
   }, [])
 
-  // Fetch the second set of data (flags) and merge with the first set
   useEffect(() => {
     if (store.recordId && recordNum > 0) {
       ;(async function () {
@@ -81,7 +56,6 @@ const RetailForm = ({ store, maxAccess }) => {
           parameters: `&_itemId=${store.recordId}&_count=${recordNum}`
         })
 
-        // Update the data based on idx and flag
         const updatedData = data.map(row => {
           const match = response.list.find(item => item.idx === parseInt(row.key))
 
@@ -99,31 +73,26 @@ const RetailForm = ({ store, maxAccess }) => {
       flex: 1,
       headerName: ''
     }
-
-    // {
-    //   field: 'checked',
-    //   headerName: 'Checked',
-    //   renderCell: params => (
-    //     <input
-    //       type='checkbox'
-    //       checked={params.row.checked}
-    //       onChange={e => {
-    //         const updatedData = data.map(item =>
-    //           item.key === params.row.key ? { ...item, checked: e.target.checked } : item
-    //         )
-    //         setData(updatedData)
-    //       }}
-    //     />
-    //   )
-    // }
   ]
 
-  const handleSave = () => {
-    const checkedItems = data.filter(item => item.checked)
-    const uncheckedItems = data.filter(item => !item.checked)
+  const handleSave = async () => {
+    const flags = data.map(item => ({
+      idx: parseInt(item.key),
+      flag: item.checked
+    }))
 
-    console.log('Checked Items:', checkedItems)
-    console.log('Unchecked Items:', uncheckedItems)
+    const payload = {
+      itemId: store.recordId,
+      flags
+    }
+
+    try {
+      await postRequest({
+        extension: InventoryRepository.ItemRetail.set,
+        record: JSON.stringify(payload)
+      })
+      toast.success(platformLabels.Updated)
+    } catch (error) {}
   }
 
   return (
