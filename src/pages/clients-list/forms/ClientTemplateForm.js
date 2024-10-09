@@ -452,6 +452,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       idIssueDate: obj.issueDate && formatDateToApiFunction(obj.issueDate),
       idCityId: obj.idCity,
       isDiplomat: obj.isDiplomat
+
       // extraInfo: { idIssuePlaceCode: obj.idIssuePlaceCode }
     }
 
@@ -542,8 +543,6 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       unitNo: address.unitNo,
       subNo: address.subNo
     }
-
-    // const obj7 = { idIssuePlaceCode: obj.idIssuePlaceCode }
 
     if (allowEdit) {
       obj4.clientId = recordId
