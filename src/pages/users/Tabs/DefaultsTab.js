@@ -115,6 +115,7 @@ const DefaultsTab = ({ labels, maxAccess, storeRecordId }) => {
       editMode={editMode}
       isSavedClear={false}
       isCleared={false}
+      infoVisible={false}
     >
       <VertLayout>
         <Grow>
@@ -155,6 +156,9 @@ const DefaultsTab = ({ labels, maxAccess, storeRecordId }) => {
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('plantId', newValue ? newValue.recordId : '')
+                  formik.setFieldValue('cashAccountId', '')
+                  formik.setFieldValue('cashAccountRef', '')
+                  formik.setFieldValue('cashAccountName', '')
                 }}
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
               />
