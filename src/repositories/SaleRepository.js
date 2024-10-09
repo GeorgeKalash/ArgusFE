@@ -54,6 +54,12 @@ export const SaleRepository = {
   WorkFlow: {
     graph: service + 'graph'
   },
+  Sales: {
+    qry: service + 'qryPR',
+    get: service + 'getPR',
+    set: service + 'setPR',
+    del: service + 'delPR'
+  },
   PosUsers: {
     qry: service + 'qrySP',
     get: service + 'getSP',
@@ -131,5 +137,9 @@ export const SaleRepository = {
     set: service + 'setORD',
     del: service + 'delORD',
     snapshot: service + 'snapshotORD'
-  }
+  },
+  FinancialIntegrators: {
+    qry: service + 'qryFII',
+    set: service + 'setFII',
+  },
 }

@@ -1,6 +1,10 @@
 const service = 'IV.asmx/'
 
 export const InventoryRepository = {
+  Barcode: {
+    qry: service + 'qryBCD',
+    set2: service + 'set2BCD'
+  },
   Item: {
     snapshot: service + 'snapshotIT',
     get: service + 'getIT'
@@ -14,10 +18,12 @@ export const InventoryRepository = {
     snapshot: service + 'snapshotGRP'
   },
   Category: {
+    page: service + 'pageCA',
     qry: service + 'qryCA',
     get: service + 'getCA',
     set: service + 'setCA',
-    del: service + 'delCA'
+    del: service + 'delCA',
+    snapshot: service + 'snapshotCA'
   },
   LotCategory: {
     page: service + 'pageLCA',
@@ -45,14 +51,14 @@ export const InventoryRepository = {
     qry: service + 'qrySGP',
     get: service + 'getSGP',
     set: service + 'setSGP',
-    del: service + 'delSGP'
-  },
-  SiteGroups: {
-    qry: service + 'qrySGP',
-    get: service + 'getSGP',
-    set: service + 'setSGP',
     del: service + 'delSGP',
     snapshot: service + 'snapshotSGP'
+  },
+  Physical: {
+    qry: service + 'qryPP',
+    get: service + 'getPP',
+    set: service + 'setPP',
+    calc: service + 'calcPP'
   },
   MaterialsAdjustment: {
     qry: service + 'qryADJ',
@@ -67,6 +73,21 @@ export const InventoryRepository = {
   MaterialsAdjustmentDetail: {
     qry: service + 'qryADI'
   },
+  Items: {
+    pack: service + 'packIT',
+    page: service + 'pageIT',
+    qry: service + 'qryIT',
+    get: service + 'getIT',
+    set: service + 'setIT',
+    del: service + 'delIT',
+    snapshot: service + 'snapshotIT2'
+  },
+  Currency: {
+    qry: service + 'qryITC',
+    get: service + 'getITC',
+    set: service + 'setITC'
+  },
+
   MeasurementUnit: {
     qry: service + 'qryMU',
     get: service + 'getMU',
@@ -79,7 +100,27 @@ export const InventoryRepository = {
     set: service + 'setDI',
     del: service + 'delDI'
   },
+  DimensionId: { set: service + 'set2ID', get: service + 'getID' },
+
+  SerialNumber: {
+    qry: service + 'qrySPF'
+  },
+
+  CategoryCurrency: {
+    get: service + 'getCAC',
+    qry: service + 'qryCAC',
+    set2: service + 'set2CAC',
+    del: service + 'delCAC'
+  },
+
+  CategorySites: {
+    get: service + 'getCAS',
+    qry: service + 'qryCAS',
+    set2: service + 'set2CAS',
+    del: service + 'delCAS'
+  },
   Metals: {
+    qry: service + 'qryMTL',
     page: service + 'pageMTL',
     get: service + 'getMTL',
     set: service + 'setMTL',
@@ -96,7 +137,36 @@ export const InventoryRepository = {
     set: service + 'setOQ',
     del: service + 'delOQ'
   },
+  SerialProfile: {
+    qry: service + 'qrySPF'
+  },
+  ItemProduction: {
+    get: service + 'getMFR',
+    set: service + 'setMFR'
+  },
   RebuildInventory: {
     rebuild: service + 'rebuildFIS'
+  },
+  DimensionUDT: { set: service + 'set2UDT', get: service + 'getUDT' },
+  MetalColor: {
+    get: service + 'getMTC',
+    set: service + 'setMTC',
+    qry: service + 'qryMTC',
+    del: service + 'delMTC',
+  },
+  Kit: {
+    set: service + 'set2KIT',
+    get: service + 'getKIT',
+    qry: service + 'qryKIT'
+  },
+  ItemRetail: {
+    qry: service + 'qryITR',
+    set: service + 'set2ITR'
+  },
+  ItemSizes: {
+    get: service + 'getSIZ',
+    set: service + 'setSIZ',
+    del: service + 'delSIZ',
+    page: service + 'pageSIZ'
   }
 }
