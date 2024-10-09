@@ -25,6 +25,7 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { useWindow } from 'src/windows'
 import InfoForm from 'src/pages/outwards-order/Tabs/InfoForm'
+import POSForm from './POSForm'
 
 export default function ReceiptVoucherForm({ labels, access, recordId, cashAccountId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -383,7 +384,7 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
       label: labels.POS,
       onClick: (e, row, update, updateRow) => {
         stack({
-          Component: CashCountNotes,
+          Component: POSForm,
           props: {},
           width: 700,
           title: labels.POS
