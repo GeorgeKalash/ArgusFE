@@ -253,5 +253,6 @@ export const ResourceIds = {
   ClientBalance: 36131,
   FinancialIntegrators: 51105,
   SalesDefaults: 51114,
-  MetalColor: 41110
+  MetalColor: 41110,
+  ItemSizes: 41117
 }
