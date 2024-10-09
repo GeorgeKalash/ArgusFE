@@ -325,7 +325,7 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
       })
     )
     if (list) {
-      stackError({ message: `${list} - has not in apiMappings` })
+      stackError({ message: `${list} - is not implemented` })
     }
     setItems(fieldComponentArray.filter(field => field !== null))
   }
