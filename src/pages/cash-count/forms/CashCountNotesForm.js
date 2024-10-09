@@ -168,8 +168,7 @@ export default function CashCountNotesForm({
                 label: labels.currencyNote,
                 name: 'note',
                 props: {
-                  readOnly: true,
-                  decimalScale: 0
+                  readOnly: true
                 }
               },
               {
@@ -229,7 +228,7 @@ export default function CashCountNotesForm({
                 component: 'numberfield',
                 label: labels.subTotal,
                 name: 'subTotal',
-                props: { readOnly: true, decimalScale: 0 }
+                props: { readOnly: true }
               }
             ]}
             allowDelete={false}
