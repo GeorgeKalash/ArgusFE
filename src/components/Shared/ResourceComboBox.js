@@ -14,61 +14,69 @@ export default function ResourceComboBox({
   filter = () => true,
   dataGrid,
   value,
+  reducer = res => res?.list,
   refresh,
   ...rest
 }) {
   const { store: data } = rest
 
   const { getRequest } = useContext(RequestsContext)
-  const { cacheStore = {}, updateStore = () => {} } = useCacheDataContext() || {}
+  const { updateStore, fetchWithCache } = useCacheDataContext() || {}
+  const cacheAvailable = !!updateStore
   const { getAllKvsByDataset } = useContext(CommonContext)
-
-  const [store, setStore] = useState([])
-  const [isLoading, setIsLoading] = useState(false)
-
-  const apiUrl = endpointId || datasetId
-
-  useEffect(() => {
-    if (!cacheStore[apiUrl]) fetchData()
-  }, [parameters])
-
-  const fetchData = () => {
-    if (parameters && !data && (datasetId || endpointId)) {
-      setIsLoading(true)
-      if (datasetId) {
+  function fetch({ datasetId, endpointId, parameters }) {
+    if (endpointId) {
+      return getRequest({
+        extension: endpointId,
+        parameters,
+        disableLoading: true
+      })
+    } else if (datasetId) {
+      return new Promise(resolve => {
         getAllKvsByDataset({
           _dataset: datasetId,
-          callback: list => {
-            if (dataGrid) {
-              updateStore(datasetId, list)
-            } else {
-              setStore(list)
-            }
-          }
+          callback: resolve
         })
-        setIsLoading(false)
-      } else
-        endpointId &&
-          getRequest({
-            extension: endpointId,
-            parameters,
-            disableLoading: true
-          }).then(res => {
-            setIsLoading(false)
-            if (dataGrid) updateStore(endpointId, res.list)
-            else setStore(res.list)
-          })
+      })
     }
   }
 
-  const filteredStore = data ? data : dataGrid ? cacheStore[apiUrl]?.filter?.(filter) : store?.filter?.(filter)
+  const [apiResponse, setApiResponse] = useState(null)
+  const [isLoading, setIsLoading] = useState(false)
+
+  useEffect(() => {
+    const fetchDataAsync = async () => {
+      await fetchData()
+    }
+
+    fetchDataAsync()
+  }, [parameters])
+
+  const fetchData = async () => {
+    if (parameters && !data && (datasetId || endpointId)) {
+      setIsLoading(true)
+
+      const data = cacheAvailable
+        ? await fetchWithCache({
+            queryKey: [datasetId || endpointId, parameters],
+            queryFn: () => fetch({ datasetId, endpointId, parameters })
+          })
+        : await fetch({ datasetId, endpointId, parameters })
+      setApiResponse(!!datasetId ? { list: data } : data)
+      setIsLoading(false)
+    }
+  }
+
+  let finalItemsList = data ? data : reducer(apiResponse)?.filter?.(filter)
 
   const _value =
     (typeof values[name] === 'object'
       ? values[name]
-      : (datasetId
-          ? filteredStore?.find(item => item[valueField] === values[name]?.toString())
-          : filteredStore?.find(item => item[valueField] === (values[name] || values))) ?? '') || value
+      : datasetId
+      ? finalItemsList?.find(item => item[valueField] === values[name]?.toString())
+      : finalItemsList?.find(item => item[valueField] === (values[name] || values))) ||
+    value ||
+    ''
 
   return (
     <CustomComboBox
@@ -77,10 +85,9 @@ export default function ResourceComboBox({
         refresh,
         fetchData,
         name,
-        store: (dataGrid ? cacheStore[apiUrl] : filteredStore) || data,
+        store: finalItemsList,
         valueField,
         value: _value,
-        name,
         isLoading
       }}
     />
