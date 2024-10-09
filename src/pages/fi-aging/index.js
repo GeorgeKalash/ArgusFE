@@ -129,7 +129,6 @@ const FiAging = () => {
     refetch,
     access
   } = useResourceQuery({
-    queryFn: fetchGridData,
     endpointId: RGFinancialRepository.FiAging.qry,
     datasetId: ResourceIds.FIAging,
     filter: {
