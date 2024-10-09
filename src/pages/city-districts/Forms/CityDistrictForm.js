@@ -1,6 +1,5 @@
-import { Grid } from '@mui/material'
+import { Checkbox, FormControlLabel, Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
-import { useFormik } from 'formik'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -14,10 +13,12 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function CityDistrictForm({ labels, recordId, maxAccess }) {
   const [editMode, setEditMode] = useState(!!recordId)
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: SystemRepository.CityDistrict.page
@@ -27,21 +28,23 @@ export default function CityDistrictForm({ labels, recordId, maxAccess }) {
     initialValues: {
       recordId: null,
       name: '',
+      flName: '',
       reference: '',
       countryId: null,
       cityId: null,
       countryName: '',
       cityName: '',
-      cityRef: ''
+      cityRef: '',
+      isInactive: false
     },
     maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required(' '),
-      reference: yup.string().required(' '),
-      countryId: yup.string().required(' '),
-      cityId: yup.string().required(' ')
+      name: yup.string().required(),
+      reference: yup.string().required(),
+      countryId: yup.string().required(),
+      cityId: yup.string().required()
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
@@ -52,12 +55,12 @@ export default function CityDistrictForm({ labels, recordId, maxAccess }) {
       })
 
       if (!recordId) {
-        toast.success('Record Added Successfully')
+        toast.success(platformLabels.Added)
         formik.setValues({
           ...obj,
           recordId: response.recordId
         })
-      } else toast.success('Record Edited Successfully')
+      } else toast.success(platformLabels.Edited)
       setEditMode(true)
 
       invalidate()
@@ -73,7 +76,10 @@ export default function CityDistrictForm({ labels, recordId, maxAccess }) {
             parameters: `_recordId=${recordId}`
           })
 
-          formik.setValues(res.record)
+          formik.setValues({
+            ...res.record,
+            isInactive: Boolean(res.record.isInactive)
+          })
         }
       } catch (exception) {}
     })()
@@ -109,6 +115,18 @@ export default function CityDistrictForm({ labels, recordId, maxAccess }) {
                 error={formik.touched.name && Boolean(formik.errors.name)}
                 maxLength='40'
                 maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='flName'
+                label={labels.flName}
+                value={formik.values.flName}
+                maxAccess={maxAccess}
+                maxLength='40'
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('flName', '')}
+                error={formik.touched.flName && Boolean(formik.errors.flName)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -167,6 +185,19 @@ export default function CityDistrictForm({ labels, recordId, maxAccess }) {
                 errorCheck={'cityId'}
                 maxAccess={maxAccess}
                 readOnly={!formik.values.countryId && true}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name='isInactive'
+                    maxAccess={maxAccess}
+                    checked={formik.values?.isInactive}
+                    onChange={formik.handleChange}
+                  />
+                }
+                label={labels.isInactive}
               />
             </Grid>
           </Grid>

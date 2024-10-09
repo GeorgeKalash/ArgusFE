@@ -1,15 +1,47 @@
-// ** Third Party Imports
-import dayjs from 'dayjs'
-
 // import moment from 'moment';
-import { compareAsc, format } from 'date-fns'
+import { format } from 'date-fns'
+
+function timeStamptoDate(timestamp) {
+  const timezoneOffset = -new Date().getTimezoneOffset()
+  const sign = timezoneOffset >= 0 ? '+' : '-'
+
+  const timeZoneHours = Math.floor(Math.abs(timezoneOffset) / 60)
+    .toString()
+    .padStart(2, '0')
+  const timeZoneMin = (Math.abs(timezoneOffset) % 60).toString().padStart(2, '0')
+  const isoTimeZone = `${sign}${timeZoneHours}:${timeZoneMin}`
+  const timestampWithTimezone = `${new Date(timestamp).toUTCString()}${isoTimeZone}`
+  const dateWithTimezone = new Date(timestampWithTimezone)
+
+  return dateWithTimezone
+}
+
+function dateToTimeStamp(date) {
+  let timezoneOffset = new Date().getTimezoneOffset()
+
+  const sign = timezoneOffset >= 0 ? '+' : '-'
+
+  const timeZoneHours = Math.floor(Math.abs(timezoneOffset) / 60)
+    .toString()
+    .padStart(2, '0')
+  const timeZoneMin = (Math.abs(timezoneOffset) % 60).toString().padStart(2, '0')
+  const isoTimeZone = `${sign}${timeZoneHours}:${timeZoneMin}`
+
+  const timestampWithTimezone = `${date.toUTCString()}${isoTimeZone}`
+  const dateWithTimezone = new Date(timestampWithTimezone)
+
+  return dateWithTimezone
+}
 
 const formatDateFromApi = date => {
   const timestamp = date && parseInt(date.match(/\d+/)[0], 10)
 
-  return timestamp ? new Date(timestamp) : null
+  return timestamp ? timeStamptoDate(timestamp) : null
 }
 
+/**
+ * @deprecated this was removed because inline component is removed
+ */
 const formatDateFromApiInline = date => {
   const [day, month, year] = date.split('/')
   const parsedDate = new Date(year, month - 1, day)
@@ -19,11 +51,12 @@ const formatDateFromApiInline = date => {
 }
 
 const formatDateToApi = date => {
-  const timestamp = date && date.valueOf()
+  const timestamp = date && dateToTimeStamp(new Date(date)).valueOf()
 
   return `/Date(${timestamp})/`
 }
 
+//should be edited??
 const formatDateToApiFunction = value => {
   var date = value
   date = new Date(date)
@@ -47,15 +80,24 @@ const formatDateToApiFunction = value => {
 }
 
 function formatDateDefault(date) {
+  return formatDateandTime(date)
+}
+
+function formatDateandTime(date, recFormat) {
   if (!date) return
 
-  const formats = JSON.parse(window.localStorage.getItem('default') && window.localStorage.getItem('default'))[
+  let formats = JSON.parse(window.localStorage.getItem('default') && window.localStorage.getItem('default'))[
     'dateFormat'
   ]
+  formats = recFormat ? `${formats} ` + recFormat : formats
   const timestamp = date instanceof Date ? date.getTime() : parseInt(date?.match(/\d+/)[0], 10)
-  const formattedDate = format(new Date(timestamp), formats)
+  const formattedDate = format(timeStamptoDate(timestamp), formats)
 
   return formattedDate
+}
+
+function formatDateTimeDefault(date) {
+  return formatDateandTime(date, 'hh:mm a')
 }
 
 function formatTimestampToDate(timestamp) {
@@ -69,7 +111,7 @@ function formatTimestampToDate(timestamp) {
   return formattedDate
 }
 function getTimeInTimeZone(dateString, timeZone = 0) {
-  const timestamp = parseInt(dateString.match(/\/Date\((\d+)\)\//)[1], 10)
+  const timestamp = parseInt(dateString?.match(/\/Date\((\d+)\)\//)[1], 10)
   const currentDate = new Date(timestamp)
 
   currentDate.setHours(currentDate.getHours() + timeZone)
@@ -84,6 +126,13 @@ function getTimeInTimeZone(dateString, timeZone = 0) {
   return `${newHours}:${newMinutes}:${newSeconds}`
 }
 
+const formatDate = dateString => {
+  const date = new Date(dateString)
+  const timestamp = date.getTime()
+
+  return `/Date(${timestamp})/`
+}
+
 export {
   formatDateFromApi,
   formatDateToApi,
@@ -91,5 +140,7 @@ export {
   formatDateDefault,
   formatTimestampToDate,
   formatDateFromApiInline,
-  getTimeInTimeZone
+  getTimeInTimeZone,
+  formatDate,
+  formatDateTimeDefault
 }

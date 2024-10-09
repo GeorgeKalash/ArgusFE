@@ -10,6 +10,7 @@ import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const ProductAgentForm = ({
   store,
@@ -21,6 +22,7 @@ const ProductAgentForm = ({
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId: pId, dispersals } = store
   const [_dispersalId, setDispersalId] = useState({})
+  const { platformLabels } = useContext(ControlContext)
 
   const columns = [
     {
@@ -56,12 +58,12 @@ const ProductAgentForm = ({
     initialValues: {
       agents: [{ id: 1, dispersalId: '', agentId: '', agentName: '' }]
     },
-    onSubmit: values => {
-      postProductAgents(values.agents)
+    onSubmit: async values => {
+      await postProductAgents(values.agents)
     }
   })
 
-  const postProductAgents = obj => {
+  const postProductAgents = async obj => {
     const data = {
       dispersalId: pId,
       productDispersalAgents: obj.map(({ dispersalId, ...rest }, index) => ({
@@ -72,11 +74,11 @@ const ProductAgentForm = ({
         ...rest
       }))
     }
-    postRequest({
+    await postRequest({
       extension: RemittanceSettingsRepository.ProductDispersalAgents.set2,
       record: JSON.stringify(data)
     }).then(res => {
-      if (res) toast.success('Record Edited Successfully')
+      if (res) toast.success(platformLabels.Edited)
     })
   }
 

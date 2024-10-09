@@ -44,12 +44,12 @@ const HistoryForm = ({ store, setStore, maxAccess, labels, editMode }) => {
         }
       ]
     },
-    onSubmit: values => {
-      postHistory(values)
+    onSubmit: async values => {
+      await postHistory(values)
     }
   })
 
-  const postHistory = obj => {
+  const postHistory = async obj => {
     const items = obj?.TaxHistoryView.map((item, index) => ({
       ...item,
       date: formatDateToApiFunction(item.date),
@@ -62,7 +62,7 @@ const HistoryForm = ({ store, setStore, maxAccess, labels, editMode }) => {
       items: items
     }
 
-    postRequest({
+    await postRequest({
       extension: FinancialRepository.TaxHistoryPack.set2,
       record: JSON.stringify(data)
     })

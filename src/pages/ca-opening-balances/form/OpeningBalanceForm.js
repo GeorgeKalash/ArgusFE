@@ -26,38 +26,39 @@ export default function OpeningBalanceForm({ labels, maxAccess, recordId, record
     initialValues: {
       recordId: recordId || null,
       fiscalYear: '',
-      accountId: '',
+      cashAccountId: '',
       currencyId: '',
       currencyRef: '',
       amount: '',
-      ...record
+      baseAmount: ''
     },
     maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       fiscalYear: yup.string().required(' '),
-      accountId: yup.string().required(' '),
+      cashAccountId: yup.string().required(' '),
       currencyId: yup.string().required(' '),
-      amount: yup.number().required(' ')
+      amount: yup.number().required(' '),
+      baseAmount: yup.number().required(' ')
     }),
     onSubmit: async obj => {
       const currencyId = formik.values.currencyId
       const fiscalYear = formik.values.fiscalYear
-      const accountId = formik.values.accountId
+      const cashAccountId = formik.values.cashAccountId
 
       await postRequest({
         extension: CashBankRepository.OpeningBalance.set,
         record: JSON.stringify(obj)
       })
 
-      if (!currencyId && !fiscalYear && !accountId) {
+      if (!currencyId && !fiscalYear && !cashAccountId) {
         toast.success('Record Added Successfully')
       } else toast.success('Record Edited Successfully')
       formik.setValues({
         ...obj,
 
-        recordId: String(obj.fiscalYear * 1000) + String(obj.accountId * 100) + String(obj.currencyId * 10)
+        recordId: String(obj.fiscalYear * 1000) + String(obj.cashAccountId * 100) + String(obj.currencyId * 10)
       })
 
       invalidate()
@@ -69,19 +70,19 @@ export default function OpeningBalanceForm({ labels, maxAccess, recordId, record
   useEffect(() => {
     ;(async function () {
       try {
-        if (record && record.currencyId && record.fiscalYear && record.accountId) {
+        if (record && record.currencyId && record.fiscalYear && record.cashAccountId && recordId) {
           const res = await getRequest({
             extension: CashBankRepository.OpeningBalance.get,
-            parameters: `_fiscalYear=${formik.values.fiscalYear}&_accountId=${formik.values.accountId}&_currencyId=${formik.values.currencyId}`
+            parameters: `_fiscalYear=${record.fiscalYear}&_cashAccountId=${record.cashAccountId}&_currencyId=${record.currencyId}`
           })
 
           formik.setValues({
             ...res.record,
-            accountId: formik.values.accountId,
+            cashAccountId: formik.values.cashAccountId,
 
             recordId:
               String(res.record.fiscalYear * 1000) +
-              String(res.record.accountId * 100) +
+              String(res.record.cashAccountId * 100) +
               String(res.record.currencyId * 10)
           })
         }
@@ -119,7 +120,7 @@ export default function OpeningBalanceForm({ labels, maxAccess, recordId, record
                 }}
                 required
                 readOnly={editMode}
-                name='accountId'
+                name='cashAccountId'
                 label={labels.accountRef}
                 valueField='reference'
                 displayField='name'
@@ -127,11 +128,11 @@ export default function OpeningBalanceForm({ labels, maxAccess, recordId, record
                 secondValueShow='cashAccountName'
                 form={formik}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('accountId', newValue?.recordId || '')
+                  formik.setFieldValue('cashAccountId', newValue?.recordId || '')
                   formik.setFieldValue('cashAccountRef', newValue?.reference || '')
                   formik.setFieldValue('cashAccountName', newValue?.name || '')
                 }}
-                error={formik.touched.accountId && Boolean(formik.errors.accountId)}
+                error={formik.touched.cashAccountId && Boolean(formik.errors.cashAccountId)}
                 maxAccess={maxAccess}
               />
             </Grid>
@@ -168,6 +169,20 @@ export default function OpeningBalanceForm({ labels, maxAccess, recordId, record
                 onChange={e => formik.setFieldValue('amount', e.target.value)}
                 onClear={() => formik.setFieldValue('amount', '')}
                 error={formik.touched.amount && Boolean(formik.errors.amount)}
+                maxLength={10}
+                decimalScale={2}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomNumberField
+                name='baseAmount'
+                required
+                label={labels.baseAmount}
+                value={formik.values.baseAmount}
+                maxAccess={maxAccess}
+                onChange={e => formik.setFieldValue('baseAmount', e.target.value)}
+                onClear={() => formik.setFieldValue('baseAmount', '')}
+                error={formik.touched.baseAmount && Boolean(formik.errors.baseAmount)}
                 maxLength={10}
                 decimalScale={2}
               />

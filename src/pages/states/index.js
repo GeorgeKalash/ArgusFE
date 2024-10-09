@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
@@ -11,10 +11,12 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import StatesForm from './forms/StatesForm'
 import { useWindow } from 'src/windows'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const States = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const { platformLabels } = useContext(ControlContext)
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, _countryId = 0 } = options
@@ -45,8 +47,18 @@ const States = () => {
 
   const columns = [
     {
+      field: 'reference',
+      headerName: _labels.reference,
+      flex: 1
+    },
+    {
       field: 'name',
       headerName: _labels.name,
+      flex: 1
+    },
+    {
+      field: 'flName',
+      headerName: _labels.flName,
       flex: 1
     },
     {
@@ -73,7 +85,7 @@ const States = () => {
         maxAccess: access
       },
       width: 500,
-      height: 300,
+      height: 400,
       title: _labels.State
     })
   }
@@ -84,7 +96,7 @@ const States = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
   }
 
   return (

@@ -5,9 +5,7 @@ import toast from 'react-hot-toast'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import { useResourceQuery } from 'src/hooks/resource'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
@@ -22,7 +20,8 @@ const MCDefault = ({ _labels, acces }) => {
     mc_defaultRTSA: null,
     mc_defaultRTPU: null,
     mc_defaultRTMF: null,
-    mc_defaultRTFI: null
+    mc_defaultRTFI: null,
+    mc_defaultRTTAX: null
   })
 
   useEffect(() => {
@@ -42,7 +41,8 @@ const MCDefault = ({ _labels, acces }) => {
             obj.key === 'mc_defaultRTSA' ||
             obj.key === 'mc_defaultRTPU' ||
             obj.key === 'mc_defaultRTMF' ||
-            obj.key === 'mc_defaultRTFI'
+            obj.key === 'mc_defaultRTFI' ||
+            obj.key === 'mc_defaultRTTAX'
           )
         })
         filteredList.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
@@ -83,7 +83,7 @@ const MCDefault = ({ _labels, acces }) => {
   return (
     <VertLayout>
       <Grow>
-        <Grid container spacing={5} sx={{ pl: '10px', pt: '10px' }} lg={4} xs={12}>
+        <Grid container spacing={5} sx={{ pl: '10px', pt: '10px' }} xs={12}>
           <Grid item xs={12}>
             <ResourceComboBox
               endpointId={MultiCurrencyRepository.RateType.qry}
@@ -138,6 +138,20 @@ const MCDefault = ({ _labels, acces }) => {
                 formik.setFieldValue('mc_defaultRTFI', newValue?.recordId || '')
               }}
               error={formik.touched.mc_defaultRTFI && Boolean(formik.errors.mc_defaultRTFI)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <ResourceComboBox
+              endpointId={MultiCurrencyRepository.RateType.qry}
+              name='mc_defaultRTTAX'
+              label={_labels.mc_defaultRTTAX}
+              valueField='recordId'
+              displayField='name'
+              values={formik.values}
+              onChange={(event, newValue) => {
+                formik.setFieldValue('mc_defaultRTTAX', newValue?.recordId || '')
+              }}
+              error={formik.touched.mc_defaultRTTAX && Boolean(formik.errors.mc_defaultRTTAX)}
             />
           </Grid>
         </Grid>

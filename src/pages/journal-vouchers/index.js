@@ -5,7 +5,7 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 import { formatDateDefault } from 'src/lib/date-helper'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import JournalVoucherForm from './forms/JournalVoucherForm'
@@ -14,6 +14,8 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
+import { responsiveFontSizes } from '@material-ui/core'
+import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
 const JournalVoucher = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -21,42 +23,43 @@ const JournalVoucher = () => {
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 50, params } = options
 
-    return await getRequest({
-      extension: GeneralLedgerRepository.JournalVoucher.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_params=&_sortField=`
+    const response = await getRequest({
+      extension: GeneralLedgerRepository.JournalVoucher.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_params=${params || ''}&_sortField=`
     })
+
+    return { ...response, _startAt: _startAt }
+  }
+
+  async function fetchWithFilter({ filters, pagination }) {
+    if (filters?.qry) {
+      return await getRequest({
+        extension: GeneralLedgerRepository.JournalVoucher.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+    } else {
+      return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+    }
   }
 
   const {
     query: { data },
     labels: _labels,
-    search,
-    clear,
+    filterBy,
+    clearFilter,
     paginationParameters,
-    access
+    invalidate,
+    access,
+    refetch
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: GeneralLedgerRepository.JournalVoucher.qry,
+    endpointId: GeneralLedgerRepository.JournalVoucher.page,
     datasetId: ResourceIds.JournalVoucher,
-    search: {
-      endpointId: GeneralLedgerRepository.JournalVoucher.snapshot,
-      searchFn: fetchWithSearch
+    filter: {
+      filterFn: fetchWithFilter
     }
-  })
-
-  async function fetchWithSearch({ qry }) {
-    const response = await getRequest({
-      extension: GeneralLedgerRepository.JournalVoucher.snapshot,
-      parameters: `_filter=${qry}`
-    })
-
-    return response
-  }
-
-  const invalidate = useInvalidate({
-    endpointId: GeneralLedgerRepository.JournalVoucher.qry
   })
 
   const columns = [
@@ -69,7 +72,7 @@ const JournalVoucher = () => {
       field: 'date',
       headerName: _labels.date,
       flex: 1,
-      valueGetter: ({ row }) => formatDateDefault(row?.date)
+      type: 'date'
     },
     {
       field: 'description',
@@ -92,7 +95,7 @@ const JournalVoucher = () => {
         recordId: recordId
       },
       width: 500,
-      height: 500,
+      height: 400,
       title: _labels.generalJournal
     })
   }
@@ -119,17 +122,36 @@ const JournalVoucher = () => {
     toast.success('Record Deleted Successfully')
   }
 
+  const onApply = ({ search, rpbParams }) => {
+    if (!search && rpbParams.length === 0) {
+      clearFilter('params')
+    } else if (!search) {
+      filterBy('params', rpbParams)
+    } else {
+      filterBy('qry', search)
+    }
+    refetch()
+  }
+
+  const onSearch = value => {
+    filterBy('qry', value)
+  }
+
+  const onClear = () => {
+    clearFilter('qry')
+  }
+
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar
+        <RPBGridToolbar
           onAdd={add}
           maxAccess={access}
-          onSearch={search}
-          onSearchClear={clear}
-          labels={_labels}
-          inputSearch={true}
-        />{' '}
+          onApply={onApply}
+          onSearch={onSearch}
+          onClear={onClear}
+          reportName={'GLTR'}
+        />
       </Fixed>
       <Grow>
         <Table

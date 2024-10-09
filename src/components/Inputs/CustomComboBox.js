@@ -1,16 +1,15 @@
-// ** MUI Imports
-import { Autocomplete, TextField } from '@mui/material'
+import { Autocomplete, IconButton, CircularProgress, Paper, TextField } from '@mui/material'
 import { ControlAccessLevel, TrxType } from 'src/resources/AccessLevels'
 import { Box } from '@mui/material'
+import RefreshIcon from '@mui/icons-material/Refresh'
 import React from 'react'
-import ReactDOM from 'react-dom'
 import PopperComponent from '../Shared/Popper/PopperComponent'
 
 const CustomComboBox = ({
-  type = 'text', //any valid HTML5 input type
+  type = 'text',
   name,
   label,
-  value,
+  value: _value,
   valueField = 'key',
   displayField = 'value',
   store = [],
@@ -18,18 +17,23 @@ const CustomComboBox = ({
   onChange,
   error,
   helperText,
-  variant = 'outlined', //outlined, standard, filled
-  size = 'small', //small, medium
+  variant = 'outlined',
+  size = 'small',
   fullWidth = true,
   required = false,
   autoFocus = false,
   disabled = false,
   readOnly = false,
+  neverPopulate = false,
   displayFieldWidth = 1,
+  defaultIndex,
   sx,
   columnsInDropDown,
   editMode = false,
   hasBorder = true,
+  fetchData,
+  refresh = true,
+  isLoading,
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
@@ -41,21 +45,24 @@ const CustomComboBox = ({
   const _required = required || fieldAccess === ControlAccessLevel.Mandatory
   const _hidden = fieldAccess === ControlAccessLevel.Hidden
 
+  const value = neverPopulate ? '' : _value
+
   return (
     <Autocomplete
       name={name}
-      value={value}
+      value={store?.[defaultIndex] || value}
       size={size}
       options={store}
       key={value}
       PopperComponent={PopperComponent}
+      PaperComponent={({ children }) => <Paper style={{ width: `${displayFieldWidth * 100}%` }}>{children}</Paper>}
       getOptionLabel={(option, value) => {
         if (typeof displayField == 'object') {
           const text = displayField
             .map(header => (option[header] ? option[header]?.toString() : header === '->' && header))
             ?.filter(item => item)
             ?.join(' ')
-          if (text) return text
+          if (text !== undefined) return text
         }
         if (typeof option === 'object') {
           return `${option[displayField]}`
@@ -82,7 +89,7 @@ const CustomComboBox = ({
           )
         }
       }}
-      isOptionEqualToValue={(option, value) => option[valueField] == getOptionBy}
+      isOptionEqualToValue={(option, value) => option[valueField] === value[valueField]}
       onChange={onChange}
       fullWidth={fullWidth}
       readOnly={_readOnly}
@@ -120,7 +127,6 @@ const CustomComboBox = ({
           return (
             <Box>
               <li {...props}>
-                {/* <Box sx={{ flex: 1 }}>{option[valueField]}</Box> */}
                 <Box sx={{ flex: 1 }}>{option[displayField]}</Box>
               </li>
             </Box>
@@ -130,6 +136,7 @@ const CustomComboBox = ({
       renderInput={params => (
         <TextField
           {...params}
+          inputProps={{ ...params.inputProps, tabIndex: _readOnly ? -1 : 0, ...(neverPopulate && { value: '' }) }}
           type={type}
           variant={variant}
           label={label}
@@ -139,15 +146,40 @@ const CustomComboBox = ({
           helperText={helperText}
           InputProps={{
             ...params.InputProps,
-            style: {
-              border: 'none' // Set width to 100%
-            }
+            endAdornment: (
+              <React.Fragment>
+                {isLoading ? (
+                  <CircularProgress color='inherit' size={18} />
+                ) : (
+                  refresh &&
+                  !readOnly && (
+                    <IconButton
+                      onClick={fetchData}
+                      aria-label='refresh data'
+                      sx={{
+                        p: '0px !important',
+                        marginRight: '-10px'
+                      }}
+                      size='small'
+                    >
+                      <RefreshIcon />
+                    </IconButton>
+                  )
+                )}
+                {params.InputProps.endAdornment}
+              </React.Fragment>
+            )
           }}
           sx={{
             '& .MuiOutlinedInput-root': {
               '& fieldset': {
-                border: !hasBorder && 'none' // Hide border
+                border: !hasBorder && 'none'
               }
+            },
+            '& .MuiAutocomplete-clearIndicator': {
+              pl: '0px !important',
+              marginRight: '-10px',
+              visibility: 'visible'
             }
           }}
         />

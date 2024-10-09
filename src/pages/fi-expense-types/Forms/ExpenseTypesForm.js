@@ -4,24 +4,23 @@ import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { MasterSource } from 'src/resources/MasterSource'
 import { useForm } from 'src/hooks/form'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function ExpenseTypesForms({ labels, maxAccess, recordId, invalidate }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const editMode = !!recordId
-
-  const [isLoading, setIsLoading] = useState(false)
+  const { platformLabels } = useContext(ControlContext)
 
   const { formik } = useForm({
     initialValues: {
-      recordId: recordId || null,
+      recordId: recordId,
       name: '',
       reference: '',
       description: ''
@@ -29,35 +28,31 @@ export default function ExpenseTypesForms({ labels, maxAccess, recordId, invalid
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required(' '),
-      reference: yup.string().required(' '),
-      description: yup.string().required(' ')
+      name: yup.string().required(),
+      reference: yup.string().required()
     }),
     onSubmit: async obj => {
-      const recordId = obj.recordId
-
-      const response = await postRequest({
-        extension: FinancialRepository.ExpenseTypes.set,
-        record: JSON.stringify(obj)
-      })
-
-      if (!obj.recordId) {
-        toast.success('Record Added Successfully')
-        formik.setValues({
-          ...obj,
-          recordId: response.recordId
+      try {
+        const response = await postRequest({
+          extension: FinancialRepository.ExpenseTypes.set,
+          record: JSON.stringify(obj)
         })
-      } else toast.success('Record Edited Successfully')
-      invalidate()
+  
+        if (!obj.recordId) {
+          toast.success(platformLabels.Added)
+          formik.setFieldValue('recordId', response.recordId)
+        } else toast.success(platformLabels.Edited)
+        invalidate()
+      } catch (error) {}
     }
   })
+
+  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
       try {
         if (recordId) {
-          setIsLoading(true)
-
           const res = await getRequest({
             extension: FinancialRepository.ExpenseTypes.get,
             parameters: `_recordId=${recordId}`
@@ -66,12 +61,28 @@ export default function ExpenseTypesForms({ labels, maxAccess, recordId, invalid
           formik.setValues(res.record)
         }
       } catch (exception) {}
-      setIsLoading(false)
     })()
   }, [])
 
+  const actions = [
+    {
+      key: 'Integration Account',
+      condition: true,
+      onClick: 'onClickGIA',
+      disabled: !editMode
+    }
+  ]
+
   return (
-    <FormShell resourceId={ResourceIds.Expense_Types} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell
+      resourceId={ResourceIds.Expense_Types}
+      form={formik}
+      isCleared={false}
+      maxAccess={maxAccess}
+      editMode={editMode}
+      actions={actions}
+      masterSource={MasterSource.ExpenseType}
+    >
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -106,7 +117,6 @@ export default function ExpenseTypesForms({ labels, maxAccess, recordId, invalid
                 name='description'
                 label={labels.description}
                 value={formik.values.description}
-                required
                 maxLength='100'
                 rows={2}
                 maxAccess={maxAccess}

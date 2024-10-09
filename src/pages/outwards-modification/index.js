@@ -1,9 +1,7 @@
 import { useContext } from 'react'
-import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { RTOWMRepository } from 'src/repositories/RTOWMRepository'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useWindow } from 'src/windows'
@@ -11,9 +9,9 @@ import OutwardsModificationForm from './Forms/OutwardsModificationForm'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { formatDateDefault } from 'src/lib/date-helper'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
+import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 
 const OutwardsModification = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -23,22 +21,17 @@ const OutwardsModification = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: RTOWMRepository.OutwardsModification.page,
+      extension: RemittanceOutwardsRepository.OutwardsModification.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
 
     return { ...response, _startAt: _startAt }
   }
-  async function fetchWithSearch({ options = {}, filters }) {
-    const { _startAt = 0, _pageSize = 50 } = options
-    if (!filters.qry) {
-      return { list: [] }
-    } else {
-      return await getRequest({
-        extension: RTOWMRepository.OutwardsModification.snapshot,
-        parameters: `_filter=${filters.qry}`
-      })
-    }
+  async function fetchWithSearch({ filters }) {
+    return await getRequest({
+      extension: RemittanceOutwardsRepository.OutwardsModification.snapshot,
+      parameters: `_filter=${filters.qry}`
+    })
   }
 
   const {
@@ -46,13 +39,14 @@ const OutwardsModification = () => {
     labels: _labels,
     refetch,
     access,
-    filterBy
+    filterBy,
+    clearFilter
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: RTOWMRepository.OutwardsModification.page,
+    endpointId: RemittanceOutwardsRepository.OutwardsModification.page,
     datasetId: ResourceIds.OutwardsModification,
     filter: {
-      endpointId: RTOWMRepository.OutwardsModification.snapshot,
+      endpointId: RemittanceOutwardsRepository.OutwardsModification.snapshot,
       filterFn: fetchWithSearch
     }
   })
@@ -72,7 +66,7 @@ const OutwardsModification = () => {
       field: 'date',
       headerName: _labels.date,
       flex: 1,
-      valueGetter: ({ row }) => formatDateDefault(row?.date)
+      type: 'date'
     },
     {
       field: 'rsName',
@@ -96,11 +90,11 @@ const OutwardsModification = () => {
       Component: OutwardsModificationForm,
       props: {
         labels: _labels,
-        recordId: recordId ? recordId : null,
+        recordId,
         access
       },
-      width: 1260,
-      height: 720,
+      width: 1200,
+      height: 670,
       title: _labels.outwardsModification
     })
   }
@@ -143,7 +137,7 @@ const OutwardsModification = () => {
           isLoading={false}
           pageSize={50}
           refetch={refetch}
-          paginationType='client'
+          paginationType='api'
           maxAccess={access}
         />
       </Grow>

@@ -1,16 +1,14 @@
 import Table from 'src/components/Shared/Table'
-import FormShell from 'src/components/Shared/FormShell'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import WindowToolbar from 'src/components/Shared/WindowToolbar'
+import { useEffect, useState } from 'react'
 
-const ProductsWindow = ({ labels, width, height, gridData, maxAccess, form }) => {
+const ProductsWindow = ({ labels, maxAccess, onProductSubmit, products, editMode, window }) => {
+  const [gridData, setGridData] = useState([])
+
   const columns = [
-    {
-      field: 'productRef',
-      headerName: labels.ProductRef,
-      flex: 1
-    },
     {
       field: 'productName',
       headerName: labels.ProductName,
@@ -18,22 +16,17 @@ const ProductsWindow = ({ labels, width, height, gridData, maxAccess, form }) =>
     },
     {
       field: 'corName',
-      headerName: labels.corName,
-      flex: 1
-    },
-    {
-      field: 'interfaceName',
-      headerName: labels.interface,
-      flex: 1
-    },
-    {
-      field: 'dispersalRef',
-      headerName: labels.DispersalRef,
+      headerName: labels.Correspondant,
       flex: 1
     },
     {
       field: 'fees',
       headerName: labels.Fees,
+      flex: 1
+    },
+    {
+      field: 'originAmount',
+      headerName: labels.originAmount,
       flex: 1
     },
     {
@@ -43,23 +36,41 @@ const ProductsWindow = ({ labels, width, height, gridData, maxAccess, form }) =>
     }
   ]
 
+  useEffect(() => {
+    ;(async function () {
+      try {
+        setGridData({ list: products })
+      } catch (error) {}
+    })()
+  }, [])
+
   return (
-    <FormShell resourceId={ResourceIds.OutwardsTransfer} form={form} maxAccess={maxAccess} infoVisible={false}>
-      <VertLayout>
-        <Grow>
-          <Table
-            columns={columns}
-            gridData={gridData}
-            rowId={['productId']}
-            isLoading={false}
-            pagination={false}
-            maxAccess={maxAccess}
-            showCheckboxColumn={true}
-            handleCheckedRows={() => {}}
-          />
-        </Grow>
-      </VertLayout>
-    </FormShell>
+    <VertLayout>
+      <Grow>
+        <Table
+          columns={columns}
+          gridData={gridData}
+          rowId={['productId']}
+          rowSelection='single'
+          isLoading={false}
+          maxAccess={maxAccess}
+          pagination={false}
+          showCheckboxColumn={true}
+          ChangeCheckedRow={setGridData}
+        />
+      </Grow>
+      <Fixed>
+        <WindowToolbar
+          onSave={() => {
+            onProductSubmit(gridData)
+            window.close()
+          }}
+          isSaved={true}
+          smallBox={true}
+          disabledSubmit={editMode}
+        />
+      </Fixed>
+    </VertLayout>
   )
 }
 

@@ -1,4 +1,6 @@
 import { useState, useContext } from 'react'
+import { Box, IconButton } from '@mui/material'
+import Icon from 'src/@core/components/icon'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -6,25 +8,27 @@ import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepos
 import DocumentsWindow from './window/DocumentsWindow'
 import { useWindow } from 'src/windows'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { formatDateDefault } from 'src/lib/date-helper'
 import CreditOrderForm from '../credit-order/Forms/CreditOrderForm'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import CreditInvoiceForm from '../credit-invoice/Forms/CreditInvoiceForm'
 import { KVSRepository } from 'src/repositories/KVSRepository'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 import TransactionForm from '../currency-trading/forms/TransactionForm'
-import OutwardsTab from '../outwards-transfer/Tabs/OutwardsTab'
+import OutwardsForm from '../outwards-transfer/Tabs/OutwardsForm'
 import ClientTemplateForm from '../clients-list/forms/ClientTemplateForm'
 import { RTCLRepository } from 'src/repositories/RTCLRepository'
-
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import CashCountForm from '../cash-count/forms/CashCountForm'
 import CashTransferTab from '../cash-transfer/Tabs/CashTransferTab'
 import OutwardsModificationForm from '../outwards-modification/Forms/OutwardsModificationForm'
+import OutwardsReturnForm from '../outwards-return/Forms/OutwardsReturnForm'
+import InwardTransferForm from '../inward-transfer/forms/InwardTransferForm'
+import InwardSettlementForm from '../inward-settlement/forms/InwardSettlementForm'
+import { SystemRepository } from 'src/repositories/SystemRepository'
 
 const DocumentsOnHold = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -34,7 +38,6 @@ const DocumentsOnHold = () => {
   const [selectedSeqNo, setSelectedSeqNo] = useState(null)
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
-  const [gridData, setGridData] = useState([])
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
@@ -51,72 +54,45 @@ const DocumentsOnHold = () => {
   const {
     query: { data },
     labels: _labels,
+    filterBy,
+    clearFilter,
     refetch,
+    clear,
     paginationParameters,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: DocumentReleaseRepository.DocumentsOnHold.qry,
-    datasetId: ResourceIds.DocumentsOnHold
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: DocumentReleaseRepository.DocumentsOnHold.qry
-  })
-  const [searchValue, setSearchValue] = useState('')
-
-  function onSearchClear() {
-    setSearchValue('')
-    setGridData({ count: 0, list: [], message: '', statusId: 1 })
-  }
-
-  const columns = [
-    {
-      field: 'reference',
-      headerName: _labels.reference,
-      flex: 1
-    },
-    {
-      field: 'functionName',
-      headerName: _labels.functionName,
-      flex: 1
-    },
-    {
-      field: 'thirdParty',
-      headerName: _labels.thirdParty,
-      flex: 1
-    },
-    {
-      field: 'date',
-      headerName: _labels.date,
-      flex: 1,
-      valueGetter: ({ row }) => formatDateDefault(row?.date)
+    datasetId: ResourceIds.DocumentsOnHold,
+    filter: {
+      endpointId: DocumentReleaseRepository.DocumentsOnHold.qry,
+      filterFn: fetchWithSearch
     }
-  ]
+  })
 
-  const edit = obj => {
-    setSelectedSeqNo(obj.seqNo)
-    setSelectedRecordId(obj.recordId)
-    setSelectedFunctioId(obj.functionId)
-    setWindowOpen(true)
+  async function fetchWithSearch({ options = {}, filters }) {
+    const { _startAt = 0, _pageSize = 50 } = options
+
+    return (
+      filters.qry &&
+      (await getRequest({
+        extension: DocumentReleaseRepository.DocumentsOnHold.qry,
+        parameters: `_filter=${filters.qry}&_functionId=0&_reference=${filters.qry}&_sortBy=reference desc&_response=0&_status=1&_pageSize=${_pageSize}&_startAt=${_startAt}`
+      }))
+    )
   }
 
-  async function getLabels(datasetId) {
-    const res = await getRequest({
-      extension: KVSRepository.getLabels,
-      parameters: `_dataset=${datasetId}`
-    })
+  const getPlantId = async userData => {
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.UserDefaults.get,
+        parameters: `_userId=${userData && userData.userId}&_key=plantId`
+      })
 
-    return res.list ? Object.fromEntries(res.list.map(({ key, value }) => [key, value])) : {}
-  }
-
-  async function getAccess(resourceId) {
-    const res = await getRequest({
-      extension: AccessControlRepository.maxAccess,
-      parameters: `_resourceId=${resourceId}`
-    })
-
-    return res
+      return res?.record?.value
+    } catch (error) {
+      return ''
+    }
   }
 
   const popupComponent = async obj => {
@@ -128,6 +104,12 @@ const DocumentsOnHold = () => {
     let windowWidth
     let windowHeight
     let title
+
+    const userData = window.sessionStorage.getItem('userData')
+      ? JSON.parse(window.sessionStorage.getItem('userData'))
+      : null
+
+    const plantId = await getPlantId(userData)
 
     switch (obj.functionId) {
       case SystemFunction.CurrencyCreditOrderSale:
@@ -186,7 +168,7 @@ const DocumentsOnHold = () => {
         break
 
       case SystemFunction.Outwards:
-        relevantComponent = OutwardsTab
+        relevantComponent = OutwardsForm
         labels = await getLabels(ResourceIds.OutwardsTransfer)
         relevantAccess = await getAccess(ResourceIds.OutwardsTransfer)
 
@@ -213,6 +195,33 @@ const DocumentsOnHold = () => {
         title = labels.outwardsModification
         break
 
+      case SystemFunction.OutwardsReturn:
+        relevantComponent = OutwardsReturnForm
+        labels = await getLabels(ResourceIds.OutwardsReturn)
+        relevantAccess = await getAccess(ResourceIds.OutwardsReturn)
+
+        windowWidth = 800
+        windowHeight = 630
+        title = labels.outwardsReturn
+        break
+
+      case SystemFunction.InwardTransfer:
+        relevantComponent = InwardTransferForm
+        labels = await getLabels(ResourceIds.InwardTransfer)
+        relevantAccess = await getAccess(ResourceIds.InwardTransfer)
+
+        windowWidth = 1200
+        title = labels.InwardTransfer
+        break
+
+      case SystemFunction.InwardSettlement:
+        relevantComponent = InwardSettlementForm
+        labels = await getLabels(ResourceIds.InwardSettlement)
+        relevantAccess = await getAccess(ResourceIds.InwardSettlement)
+
+        windowWidth = 1200
+        title = labels.InwardSettlement
+        break
       default:
         // Handle default case if needed
         break
@@ -224,7 +233,9 @@ const DocumentsOnHold = () => {
         props: {
           recordId: recordId,
           labels: labels,
-          maxAccess: relevantAccess
+          maxAccess: relevantAccess,
+          plantId: plantId,
+          userData: userData
         },
         width: windowWidth,
         height: windowHeight,
@@ -233,27 +244,72 @@ const DocumentsOnHold = () => {
     }
   }
 
-  const search = inp => {
-    setSearchValue(inp)
-    setGridData({ count: 0, list: [], message: '', statusId: 1 })
-    const input = inp
+  const openPopup = async obj => {
+    await popupComponent(obj)
+  }
 
-    if (input) {
-      var parameters = `_startAt=0&_functionId=0&_reference=${input}&_sortBy=reference desc&_response=0&_status=1&_pageSize=50`
-
-      getRequest({
-        extension: DocumentReleaseRepository.DocumentsOnHold.qry,
-        parameters: parameters
-      })
-        .then(res => {
-          setGridData(res)
-        })
-        .catch(error => {
-          setErrorMessage(error)
-        })
-    } else {
-      setGridData({ count: 0, list: [], message: '', statusId: 1 })
+  const columns = [
+    {
+      field: 'reference',
+      headerName: _labels.reference,
+      flex: 1
+    },
+    {
+      field: 'functionName',
+      headerName: _labels.functionName,
+      flex: 1
+    },
+    {
+      field: 'thirdParty',
+      headerName: _labels.thirdParty,
+      flex: 1
+    },
+    {
+      field: 'strategyName',
+      headerName: _labels.strategy,
+      flex: 1
+    },
+    {
+      field: 'date',
+      headerName: _labels.date,
+      flex: 1,
+      type: 'date'
+    },
+    {
+      width: 100,
+      cellRenderer: row => (
+        <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
+          <IconButton size='small' onClick={() => edit(row.data)}>
+            <Icon icon='mdi:application-edit-outline' fontSize={18} />
+          </IconButton>
+        </Box>
+      )
     }
+  ]
+
+  const edit = obj => {
+    setSelectedSeqNo(obj.seqNo)
+    setSelectedRecordId(obj.recordId)
+    setSelectedFunctioId(obj.functionId)
+    setWindowOpen(true)
+  }
+
+  async function getLabels(datasetId) {
+    const res = await getRequest({
+      extension: KVSRepository.getLabels,
+      parameters: `_dataset=${datasetId}`
+    })
+
+    return res.list ? Object.fromEntries(res.list.map(({ key, value }) => [key, value])) : {}
+  }
+
+  async function getAccess(resourceId) {
+    const res = await getRequest({
+      extension: AccessControlRepository.maxAccess,
+      parameters: `_resourceId=${resourceId}`
+    })
+
+    return res
   }
 
   return (
@@ -261,8 +317,12 @@ const DocumentsOnHold = () => {
       <Fixed>
         <GridToolbar
           maxAccess={access}
-          onSearch={search}
-          onSearchClear={onSearchClear}
+          onSearch={value => {
+            filterBy('qry', value)
+          }}
+          onSearchClear={() => {
+            clearFilter('qry')
+          }}
           labels={_labels}
           inputSearch={true}
         />
@@ -270,10 +330,9 @@ const DocumentsOnHold = () => {
       <Grow>
         <Table
           columns={columns}
-          gridData={searchValue.length > 0 ? gridData : data}
+          gridData={data}
           rowId={['functionId', 'seqNo', 'recordId']}
-          onEdit={edit}
-          popupComponent={popupComponent}
+          onEdit={openPopup}
           isLoading={false}
           pageSize={50}
           refetch={refetch}

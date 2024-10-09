@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 
 const defaultProvider = {
@@ -10,7 +10,6 @@ const defaultProvider = {
   logout: () => Promise.resolve()
 }
 const AuthContext = createContext(defaultProvider)
-
 import axios from 'axios'
 import SHA1 from 'crypto-js/sha1'
 import jwt from 'jwt-decode'
@@ -18,10 +17,8 @@ import jwt from 'jwt-decode'
 const encryptePWD = pwd => {
   var encryptedPWD = SHA1(pwd).toString()
   var shuffledString = ''
-
   for (let i = 0; i < encryptedPWD.length; i = i + 8) {
     var subString = encryptedPWD.slice(i, i + 8)
-
     shuffledString += subString.charAt(6) + subString.charAt(7)
     shuffledString += subString.charAt(4) + subString.charAt(5)
     shuffledString += subString.charAt(2) + subString.charAt(3)
@@ -38,23 +35,19 @@ const AuthProvider = ({ children }) => {
   const [getAC, setGetAC] = useState({})
   const [languageId, setLanguageId] = useState(1)
   const router = useRouter()
-
   useEffect(() => {
     const initAuth = async () => {
       const userData = window.localStorage.getItem('userData') || window.sessionStorage.getItem('userData')
       const savedLanguageId = window.localStorage.getItem('languageId')
-
       if (userData) {
         setUser(JSON.parse(userData))
         if (savedLanguageId) {
           setLanguageId(parseInt(savedLanguageId))
         }
-        setLoading(false)
       } else {
         if (savedLanguageId) {
           setLanguageId(parseInt(savedLanguageId))
         }
-        setLoading(false)
       }
     }
     initAuth()
@@ -62,7 +55,7 @@ const AuthProvider = ({ children }) => {
     const fetchData = async () => {
       const matchHostname = window.location.hostname.match(/^(.+)\.softmachine\.co$/)
 
-      const accountName = matchHostname ? matchHostname[1] : 'byc-deploy'
+      const accountName = matchHostname ? matchHostname[1] : 'anthonys'
 
       try {
         const response = await axios.get(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=${accountName}`)
@@ -73,6 +66,8 @@ const AuthProvider = ({ children }) => {
       } catch (error) {
         console.error('Error fetching data:', error)
       }
+
+      setLoading(false)
     }
 
     fetchData()
@@ -87,7 +82,6 @@ const AuthProvider = ({ children }) => {
           dbs: JSON.parse(getAC.data.record.dbs)
         }
       })
-
       if (getUS2.data.record === null) {
         throw new Error(`User ${params.username} not found`)
       }
@@ -114,6 +108,7 @@ const AuthProvider = ({ children }) => {
       const defaultSet = {
         dateFormat: defaultSettings.data.record.value ? defaultSettings.data.record.value : 'dd/MM/yyyy'
       }
+
       window.localStorage.setItem('default', JSON.stringify(defaultSet))
 
       const loggedUser = {
@@ -124,26 +119,27 @@ const AuthProvider = ({ children }) => {
         userType: getUS2.data.record.userType,
         employeeId: getUS2.data.record.employeeId,
         fullName: getUS2.data.record.fullName,
+        dashboardId: getUS2.data.record.dashboardId,
         role: 'admin',
         expiresAt: jwt(signIn3.data.record.accessToken).exp,
         ...signIn3.data.record
       }
-
-      setUser(loggedUser)
       setLanguageId(loggedUser.languageId)
       window.localStorage.setItem('languageId', loggedUser.languageId)
-
-      if (params.rememberMe) {
-        window.localStorage.setItem('userData', JSON.stringify(loggedUser))
+      if (getUS2.data.record.umcpnl === true) {
+        errorCallback({
+          username: params.username,
+          loggedUser,
+          getUS2: getUS2.data.record
+        })
       } else {
+        setUser(loggedUser)
         window.sessionStorage.setItem('userData', JSON.stringify(loggedUser))
+        const returnUrl = router.query.returnUrl
+        const redirectURL = returnUrl && returnUrl !== '/' ? returnUrl : '/'
+        router.replace(redirectURL)
       }
-
-      const returnUrl = router.query.returnUrl
-      const redirectURL = returnUrl && returnUrl !== '/' ? returnUrl : '/'
-      router.replace(redirectURL)
     } catch (error) {
-      console.log({ logError: error })
       if (errorCallback) errorCallback(error)
     }
   }
@@ -152,7 +148,6 @@ const AuthProvider = ({ children }) => {
     setUser(null)
     window.localStorage.removeItem('userData')
     window.sessionStorage.removeItem('userData')
-
     await router.push('/login')
     router.reload()
   }
@@ -170,7 +165,6 @@ const AuthProvider = ({ children }) => {
               refreshToken: user.refreshToken
             })
           )
-
           axios
             .post(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/newAT`, bodyFormData, {
               headers: {
@@ -209,6 +203,8 @@ const AuthProvider = ({ children }) => {
     login: handleLogin,
     logout: handleLogout,
     getAccessToken,
+    encryptePWD,
+    getAC,
     apiUrl: getAC?.data?.record.api || (typeof window !== 'undefined' ? window.localStorage.getItem('apiUrl') : '')
   }
 

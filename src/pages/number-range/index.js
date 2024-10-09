@@ -11,9 +11,11 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import NumberRangeForm from './forms/NumberRangeForm'
 import { useWindow } from 'src/windows'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const NumberRange = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const { stack } = useWindow()
 
@@ -108,7 +110,7 @@ const NumberRange = () => {
         maxAccess: access
       },
       width: 700,
-      height: 500,
+      height: 620,
       title: _labels.numberRange
     })
   }
@@ -119,7 +121,7 @@ const NumberRange = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
   }
 
   return (

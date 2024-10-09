@@ -13,11 +13,14 @@ import toast from 'react-hot-toast'
 import { useWindowDimensions } from 'src/lib/useWindowDimensions'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
+import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 
 const CorrespondentCountriesForm = ({ store, setStore, maxAccess, labels, expanded, editMode }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { height } = useWindowDimensions()
+  const { platformLabels } = useContext(ControlContext)
 
   const formik = useFormik({
     enableReinitialize: true,
@@ -42,16 +45,19 @@ const CorrespondentCountriesForm = ({ store, setStore, maxAccess, labels, expand
           countryId: '',
           countryRef: '',
           countryName: '',
-          flName: ''
+          flName: '',
+          purcRateTypeId: null,
+          saleRateTypeId: null,
+          isInactive: false
         }
       ]
     },
-    onSubmit: values => {
-      postCorrespondentCountries(values)
+    onSubmit: async values => {
+      await postCorrespondentCountries(values)
     }
   })
 
-  const postCorrespondentCountries = obj => {
+  const postCorrespondentCountries = async obj => {
     const correspondentCountries = obj?.countries
 
     const data = {
@@ -62,7 +68,7 @@ const CorrespondentCountriesForm = ({ store, setStore, maxAccess, labels, expand
       }))
     }
 
-    postRequest({
+    await postRequest({
       extension: RemittanceSettingsRepository.CorrespondentCountry.set2,
       record: JSON.stringify(data)
     })
@@ -71,7 +77,7 @@ const CorrespondentCountriesForm = ({ store, setStore, maxAccess, labels, expand
           ...prevStore,
           countries: correspondentCountries
         }))
-        toast.success('Record Edited Successfully')
+        toast.success(platformLabels.Edited)
       })
       .catch(error => {})
   }
@@ -100,7 +106,19 @@ const CorrespondentCountriesForm = ({ store, setStore, maxAccess, labels, expand
             }))
           } else {
             formik.setValues({
-              countries: [{ id: 1, corId: '', countryId: '', countryRef: '', countryName: '', flName: '' }]
+              countries: [
+                {
+                  id: 1,
+                  corId: '',
+                  countryId: '',
+                  countryRef: '',
+                  countryName: '',
+                  flName: '',
+                  purcRateTypeId: null,
+                  saleRateTypeId: null,
+                  isInactive: false
+                }
+              ]
             })
           }
         })
@@ -115,6 +133,7 @@ const CorrespondentCountriesForm = ({ store, setStore, maxAccess, labels, expand
         maxAccess={maxAccess}
         infoVisible={false}
         editMode={editMode}
+        isSavedClear={false}
       >
         <VertLayout>
           <Grow>
@@ -147,6 +166,51 @@ const CorrespondentCountriesForm = ({ store, setStore, maxAccess, labels, expand
                   label: labels?.name,
                   name: 'countryName',
                   props: { readOnly: true }
+                },
+                {
+                  component: 'resourcecombobox',
+                  label: labels.saleRateType,
+                  name: 'saleRateTypeId',
+                  props: {
+                    endpointId: MultiCurrencyRepository.RateType.qry,
+                    valueField: 'recordId',
+                    displayField: 'name',
+                    displayFieldWidth: 1.5,
+                    mapping: [
+                      { from: 'name', to: 'saleRateTypeName' },
+                      { from: 'reference', to: 'saleRateTypeRef' },
+                      { from: 'recordId', to: 'saleRateTypeId' }
+                    ],
+                    columnsInDropDown: [
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]
+                  }
+                },
+                {
+                  component: 'resourcecombobox',
+                  label: labels.purcRateType,
+                  name: 'purcRateTypeId',
+                  props: {
+                    endpointId: MultiCurrencyRepository.RateType.qry,
+                    valueField: 'recordId',
+                    displayField: 'name',
+                    displayFieldWidth: 1.5,
+                    mapping: [
+                      { from: 'name', to: 'purcRateTypeName' },
+                      { from: 'reference', to: 'purcRateTypeRef' },
+                      { from: 'recordId', to: 'purcRateTypeId' }
+                    ],
+                    columnsInDropDown: [
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]
+                  }
+                },
+                {
+                  component: 'checkbox',
+                  label: labels.isInActive,
+                  name: 'isInactive'
                 }
               ]}
               height={`${expanded ? height - 280 : 380}px`}

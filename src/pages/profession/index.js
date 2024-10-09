@@ -11,10 +11,12 @@ import { useWindow } from 'src/windows'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const Professions = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const { platformLabels } = useContext(ControlContext)
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -26,17 +28,30 @@ const Professions = () => {
 
     return { ...response, _startAt: _startAt }
   }
+  
+  async function fetchWithSearch({ filters }) {
+    return await getRequest({
+      extension: RemittanceSettingsRepository.Profession.snapshot,
+      parameters: `_filter=${filters.qry}`
+    })
+  }
 
   const {
     query: { data },
     labels: _labels,
     refetch,
+    filterBy,
+    clearFilter,
     paginationParameters,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: RemittanceSettingsRepository.Profession.page,
-    datasetId: ResourceIds.Profession
+    datasetId: ResourceIds.Profession,
+    filter: {
+      endpointId: RemittanceSettingsRepository.Profession.snapshot,
+      filterFn: fetchWithSearch
+    }
   })
 
   const invalidate = useInvalidate({
@@ -60,13 +75,8 @@ const Professions = () => {
       flex: 1
     },
     {
-      field: 'monthlyIncome',
-      headerName: _labels.monthlyIncome,
-      flex: 1
-    },
-    {
-      field: 'riskFactor',
-      headerName: _labels.riskFactor,
+      field: 'riskLevelName',
+      headerName: _labels.riskLevel,
       flex: 1
     }
   ]
@@ -99,13 +109,23 @@ const Professions = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
   }
 
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <GridToolbar 
+          onAdd={add} 
+          maxAccess={access}
+          onSearch={value => {
+            filterBy('qry', value)
+          }}
+          onSearchClear={() => {
+            clearFilter('qry')
+          }}
+          inputSearch={true} 
+        />
       </Fixed>
       <Grow>
         <Table

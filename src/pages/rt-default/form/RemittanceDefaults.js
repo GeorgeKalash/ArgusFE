@@ -12,12 +12,16 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import { FinancialRepository } from 'src/repositories/FinancialRepository'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 const RemittanceDefaults = ({ _labels }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getLabels, getAccess } = useContext(ControlContext)
   const [labels, setLabels] = useState(null)
   const [access, setAccess] = useState(null)
+  const { platformLabels } = useContext(ControlContext)
 
   const [errorMessage, setErrorMessage] = useState(null)
 
@@ -46,11 +50,28 @@ const RemittanceDefaults = ({ _labels }) => {
         res.list.map(obj => (myObject[obj.key] = obj.value))
         myObject['nraRef'] = null
 
-        rtDefaultFormValidation.setValues(myObject)
+        if (myObject['rt_fii_accountGroupId']) {
+          rtDefaultValidation.setFieldValue('rt_fii_accountGroupId', parseInt(myObject['rt_fii_accountGroupId']))
+        }
 
-        if (myObject && myObject['rt-nra-product']) {
+        if (myObject['rt-nra-product']) {
+          rtDefaultFormValidation.setFieldValue('rt-nra-product', myObject['rt-nra-product'])
           getNumberRange(myObject['rt-nra-product'])
         }
+
+        if (myObject['rt_max_monthly_amount']) {
+          rtDefaultValidation.setFieldValue('rt_max_monthly_amount', myObject['rt_max_monthly_amount'])
+        }
+
+        if (myObject['rt_max_yearly_ind_amount']) {
+          rtDefaultValidation.setFieldValue('rt_max_yearly_ind_amount', myObject['rt_max_yearly_ind_amount'])
+        }
+
+        if (myObject['rt_max_yearly_cor_amount']) {
+          rtDefaultValidation.setFieldValue('rt_max_yearly_cor_amount', myObject['rt_max_yearly_cor_amount'])
+        }
+
+        rtDefaultFormValidation.setValues(myObject)
       })
       .catch(error => {})
   }
@@ -87,7 +108,11 @@ const RemittanceDefaults = ({ _labels }) => {
     enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
-      'rt-nra-product': null
+      'rt-nra-product': null,
+      'rt_fii_accountGroupId': '',
+      'rt_max_monthly_amount': '',
+      'rt_max_yearly_ind_amount': '',
+      'rt_max_yearly_cor_amount': ''
     },
 
     onSubmit: values => {
@@ -108,7 +133,7 @@ const RemittanceDefaults = ({ _labels }) => {
       record: JSON.stringify({ sysDefaults: data })
     })
       .then(res => {
-        if (res) toast.success('Record Successfully')
+        if (res) toast.success(platformLabels.Updated)
       })
       .catch(error => {})
   }
@@ -145,6 +170,58 @@ const RemittanceDefaults = ({ _labels }) => {
                 }
               }}
               maxAccess={access}
+            />
+          </Grid>
+          <Grid item xs={12} sx={{ marginLeft: '0.5rem', marginRight: '0.5rem' }}>
+            <ResourceComboBox
+              endpointId={FinancialRepository.Group.qry}
+              name='rt_fii_accountGroupId'
+              label={_labels.dag}
+              valueField='recordId'
+              displayField='name'
+              values={rtDefaultValidation.values}
+              onChange={(event, newValue) => {
+                rtDefaultValidation.setFieldValue('rt_fii_accountGroupId', newValue?.recordId || '')
+              }}
+            />
+          </Grid>
+          <Grid item xs={12} sx={{ marginLeft: '0.5rem', marginRight: '0.5rem' }}>
+            <CustomNumberField
+              name='rt_max_monthly_amount'
+              label={_labels.maxInwardsSettlementPerMonth}
+              value={rtDefaultValidation.values.rt_max_monthly_amount}
+              onChange={rtDefaultValidation.handleChange}
+              onClear={() => rtDefaultValidation.setFieldValue('rt_max_monthly_amount', '')}
+              error={
+                rtDefaultValidation.touched.rt_max_monthly_amount &&
+                Boolean(rtDefaultValidation.errors.rt_max_monthly_amount)
+              }
+            />
+          </Grid>
+          <Grid item xs={12} sx={{ marginLeft: '0.5rem', marginRight: '0.5rem' }}>
+            <CustomNumberField
+              name='rt_max_yearly_ind_amount'
+              label={_labels.maxInwardsSettlementPerYear}
+              value={rtDefaultValidation.values.rt_max_yearly_ind_amount}
+              onChange={rtDefaultValidation.handleChange}
+              onClear={() => rtDefaultValidation.setFieldValue('rt_max_yearly_ind_amount', '')}
+              error={
+                rtDefaultValidation.touched.rt_max_yearly_ind_amount &&
+                Boolean(rtDefaultValidation.errors.rt_max_yearly_ind_amount)
+              }
+            />
+          </Grid>
+          <Grid item xs={12} sx={{ marginLeft: '0.5rem', marginRight: '0.5rem' }}>
+            <CustomNumberField
+              name='rt_max_yearly_cor_amount'
+              label={_labels.maxYearlyCorAmount}
+              value={rtDefaultValidation.values.rt_max_yearly_cor_amount}
+              onChange={rtDefaultValidation.handleChange}
+              onClear={() => rtDefaultValidation.setFieldValue('rt_max_yearly_cor_amount', '')}
+              error={
+                rtDefaultValidation.touched.rt_max_yearly_cor_amount &&
+                Boolean(rtDefaultValidation.errors.rt_max_yearly_cor_amount)
+              }
             />
           </Grid>
         </Grid>

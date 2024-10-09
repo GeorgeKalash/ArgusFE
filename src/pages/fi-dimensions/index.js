@@ -62,8 +62,8 @@ const FiDimensions = () => {
       )
     }),
 
-    onSubmit: values => {
-      postDimensionSettings(values)
+    onSubmit: async values => {
+      await postDimensionSettings(values)
     }
   })
 
@@ -99,7 +99,7 @@ const FiDimensions = () => {
     datasetId: ResourceIds.FI_dimensions
   })
 
-  const postDimensionSettings = obj => {
+  const postDimensionSettings = async obj => {
     var dataToPost = [{ key: 'DimCount', value: obj.DimCount }]
     for (let i = 1; i <= 20; i++) {
       const dimKey = `tpaDimension${i}`
@@ -107,7 +107,7 @@ const FiDimensions = () => {
         dataToPost.push({ key: dimKey, value: obj[dimKey] })
       }
     }
-    postRequest({
+    await postRequest({
       extension: SystemRepository.Defaults.set,
       record: JSON.stringify({ sysDefaults: dataToPost })
     })

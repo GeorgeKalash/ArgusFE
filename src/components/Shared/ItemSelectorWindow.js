@@ -1,8 +1,13 @@
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import IconButton from '@mui/material/IconButton'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import FormShell from './FormShell'
+import { VertLayout } from './Layouts/VertLayout'
+import { Fixed } from './Layouts/Fixed'
+import { Grid } from '@mui/material'
+import FieldSet from './FieldSet'
+import { AuthContext } from 'src/providers/AuthContext'
 
 const ItemSelectorWindow = ({
   initialAllListData,
@@ -15,6 +20,7 @@ const ItemSelectorWindow = ({
   const [allItems, setAllItems] = useState([])
   const [newSelected, setNewSelected] = useState([])
   const [newAll, setNewAll] = useState([])
+  const { languageId } = useContext(AuthContext)
 
   useEffect(() => {
     if (Array.isArray(initialAllListData)) {
@@ -131,106 +137,60 @@ const ItemSelectorWindow = ({
 
   return (
     <FormShell form={formik} infoVisible={false} isCleared={false}>
-      <div style={{ display: 'flex' }}>
-        {/* Left List */}
-        <div
-          style={{
-            border: '1px solid #ccc',
-            padding: '10px',
-            marginLeft: '30px',
-            flex: '1',
-            textAlign: 'center',
-            width: '50%',
-            maxHeight: '380px',
-            overflowY: 'auto'
-          }}
-        >
-          <h3 style={{ margin: '0', color: 'white', backgroundColor: 'black' }}>{itemSelectorLabels.title1}</h3>
-          <div
-            style={{
-              maxHeight: '330px',
-              height: '330px',
-              overflowY: 'auto',
-              border: '1px solid transparent'
-            }}
-          >
-            <ul style={{ listStyleType: 'none', padding: 0 }}>
-              {allItems.map(item => (
-                <li
-                  key={`key1_${item.id}`}
-                  style={{ margin: '0', padding: '0', borderBottom: '1px solid transparent' }}
-                >
-                  <label style={{ display: 'flex', alignItems: 'center', padding: '10px' }}>
-                    <input
-                      id={item.id}
-                      type='checkbox'
-                      onChange={() => handleToggle(item)}
-                      checked={item.checked || false}
-                      style={{ marginRight: '8px' }}
-                    />
-                    {item.name}
-                  </label>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-
-        {/* Centered Arrows */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-          <IconButton onClick={handleMoveRight}>
-            <ArrowForwardIcon />
-          </IconButton>
-          <IconButton onClick={handleMoveLeft}>
-            <ArrowBackIcon />
-          </IconButton>
-        </div>
-
-        {/* Right List */}
-        <div
-          style={{
-            border: '1px solid #ccc',
-            padding: '10px',
-            marginRight: '30px',
-            flex: '1',
-            textAlign: 'center',
-            width: '50%',
-            maxHeight: '380px',
-            overflowY: 'auto'
-          }}
-        >
-          <h3 style={{ margin: '0', color: 'white', backgroundColor: 'black' }}>{itemSelectorLabels.title2}</h3>
-
-          <div
-            style={{
-              maxHeight: '330px',
-              height: '330px',
-              overflowY: 'auto',
-              border: '1px solid transparent'
-            }}
-          >
-            <ul style={{ listStyleType: 'none', padding: 0 }}>
-              {selected.map(item => (
-                <li
-                  key={`key2_${item.id}`}
-                  style={{ margin: '0', padding: '0', borderBottom: '1px solid transparent' }}
-                >
-                  <label style={{ display: 'flex', alignItems: 'center', padding: '10px' }}>
-                    <input
-                      id={item.id}
-                      type='checkbox'
-                      onChange={() => handleToggle(item)}
-                      checked={item.checked || false}
-                      style={{ marginRight: '8px' }}
-                    />
-                    {item.name}
-                  </label>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </div>
+      <VertLayout>
+        <Fixed>
+          <Grid container xs={12}>
+            <Grid item xs={5}>
+              <FieldSet title={itemSelectorLabels.title1}>
+                <ul style={{ listStyleType: 'none', padding: 0, margin: 0 }}>
+                  {allItems.map(item => (
+                    <li key={`key1_${item.id}`} style={{ margin: '0', padding: '0' }}>
+                      <label style={{ display: 'flex', alignItems: 'center', padding: '10px' }}>
+                        <input
+                          id={item.id}
+                          type='checkbox'
+                          onChange={() => handleToggle(item)}
+                          checked={item.checked || false}
+                        />
+                        {item.name}
+                      </label>
+                    </li>
+                  ))}
+                </ul>
+              </FieldSet>
+            </Grid>
+            <Grid item xs={2}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                <IconButton sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }} onClick={handleMoveRight}>
+                  <ArrowForwardIcon />
+                </IconButton>
+                <IconButton sx={{ transform: languageId === 2 ? 'rotate(180deg)' : 'none' }} onClick={handleMoveLeft}>
+                  <ArrowBackIcon />
+                </IconButton>
+              </div>
+            </Grid>
+            <Grid item xs={5}>
+              <FieldSet title={itemSelectorLabels.title2}>
+                <ul style={{ listStyleType: 'none', padding: 0, margin: 0 }}>
+                  {selected.map(item => (
+                    <li key={`key2_${item.id}`} style={{ margin: '0', padding: '0' }}>
+                      <label style={{ display: 'flex', alignItems: 'center', padding: '10px' }}>
+                        <input
+                          id={item.id}
+                          type='checkbox'
+                          onChange={() => handleToggle(item)}
+                          checked={item.checked || false}
+                        />
+                        {item.name}
+                      </label>
+                    </li>
+                  ))}
+                </ul>
+              </FieldSet>
+            </Grid>
+          </Grid>
+        </Fixed>
+      </VertLayout>
     </FormShell>
   )
 }

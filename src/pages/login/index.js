@@ -1,23 +1,10 @@
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import Typography from '@mui/material/Typography'
 import { AuthContext } from 'src/providers/AuthContext'
-import { useState, useEffect, useContext } from 'react'
+import { useState, useContext } from 'react'
 import Link from 'next/link'
 import { useAuth } from 'src/hooks/useAuth'
-
-import {
-  Card,
-  CardContent,
-  Button,
-  Checkbox,
-  TextField,
-  Grid,
-  IconButton,
-  Box,
-  InputAdornment,
-  CardMedia
-} from '@mui/material'
-import MuiFormControlLabel from '@mui/material/FormControlLabel'
+import { Card, CardContent, Button, Grid, IconButton, Box, InputAdornment, CardMedia } from '@mui/material'
 import { styled, useTheme } from '@mui/material/styles'
 import Icon from 'src/@core/components/icon'
 import { useFormik } from 'formik'
@@ -25,18 +12,14 @@ import * as yup from 'yup'
 import BlankLayout from 'src/@core/layouts/BlankLayout'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { ControlContext } from 'src/providers/ControlContext'
+import { useWindow } from 'src/windows'
+import ChangePassword from 'src/components/Shared/ChangePassword'
+import axios from 'axios'
 
 const LinkStyled = styled(Link)(({ theme }) => ({
   fontSize: '0.875rem',
   textDecoration: 'none',
   color: theme.palette.primary.main
-}))
-
-const FormControlLabel = styled(MuiFormControlLabel)(({ theme }) => ({
-  '& .MuiFormControlLabel-label': {
-    fontSize: '0.875rem',
-    color: theme.palette.text.secondary
-  }
 }))
 
 const LoginPage = () => {
@@ -46,6 +29,7 @@ const LoginPage = () => {
   const auth = useAuth()
   const { companyName } = useContext(AuthContext)
   const { platformLabels } = useContext(ControlContext)
+  const { stack } = useWindow()
 
   const validation = useFormik({
     enableReinitialize: true,
@@ -61,7 +45,14 @@ const LoginPage = () => {
     }),
     onSubmit: values => {
       auth.login({ ...values }, error => {
-        setErrorMessage(error)
+        if (error?.getUS2?.umcpnl) {
+          const { loggedUser } = error
+
+          const onClose = async () => {
+            await updateUmcpnl(loggedUser, error?.getUS2)
+          }
+          openForm(error.username, loggedUser, onClose)
+        } else setErrorMessage(error)
       })
     }
   })
@@ -72,22 +63,87 @@ const LoginPage = () => {
     }
   }
 
+  function openForm(username, loggedUser, onClose) {
+    stack({
+      Component: ChangePassword,
+      props: {
+        reopenLogin: true,
+        username,
+        loggedUser,
+        _labels: platformLabels,
+        onClose: () => onClose()
+      },
+      expandable: false,
+      closable: false,
+      draggable: false,
+      width: 600,
+      height: 400,
+      spacing: false,
+      title: platformLabels.ChangePassword
+    })
+  }
+
+  const { apiUrl, languageId } = useAuth()
+
+  const updateUmcpnl = async (loggedUser, getUS2) => {
+    try {
+      const user = getUS2
+      const accessToken = loggedUser.accessToken
+      if (!accessToken) {
+        throw new Error('Failed to retrieve access token')
+      }
+
+      const updateUser = {
+        ...user,
+        umcpnl: false
+      }
+
+      var bodyFormData = new FormData()
+      bodyFormData.append('record', JSON.stringify(updateUser))
+
+      const res = await axios({
+        method: 'POST',
+        url: `${apiUrl}SY.asmx/setUS`,
+        headers: {
+          Authorization: 'Bearer ' + accessToken,
+          'Content-Type': 'multipart/form-data',
+          LanguageId: languageId
+        },
+        data: bodyFormData
+      }).then(res => {})
+    } catch (error) {
+      console.error(error)
+      stackError({ message: error.message })
+    }
+  }
+
   return (
     Boolean(Object.keys(platformLabels)?.length) && (
       <>
         <Box className='content-center' sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-          <Card sx={{ zIndex: 1, width: '28rem', marginBottom: 10, marginTop: 'auto' }}>
-            <CardMedia
-              component='img'
-              image='/images/logos/ArgusLogo.png'
-              alt='ArgusERP'
+          <Card sx={{ zIndex: 0, width: '28rem', marginBottom: 10, marginTop: 'auto' }}>
+            <Box
               sx={{
                 height: 60,
                 backgroundColor: theme.palette.primary.main,
-                objectFit: 'contain',
-                p: 4
+                p: 4,
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center'
               }}
-            />
+            >
+              <CardMedia
+                component='img'
+                image='/images/logos/ArgusLogo.png'
+                alt='ArgusERP'
+                sx={{
+                  height: '100%',
+                  maxWidth: '100%',
+                  objectFit: 'contain'
+                }}
+              />
+            </Box>
+
             <CardContent sx={{ p: theme => `${theme.spacing(8, 9, 0)} !important` }} onKeyDown={handleKeyDown}>
               <Grid container spacing={5}>
                 <Grid item xs={12}>
@@ -109,6 +165,7 @@ const LoginPage = () => {
                     value={validation.values.username}
                     type='text'
                     onChange={validation.handleChange}
+                    onClear={() => validation.setFieldValue('username', '')}
                     error={validation.touched.username && Boolean(validation.errors.username)}
                     helperText={validation.touched.username && validation.errors.username}
                   />
@@ -118,7 +175,7 @@ const LoginPage = () => {
                     name='password'
                     size='small'
                     fullWidth
-                    label={platformLabels.Password}
+                    label={platformLabels.password}
                     type={showPassword ? 'text' : 'password'}
                     value={validation.values.password}
                     onChange={validation.handleChange}
@@ -151,7 +208,7 @@ const LoginPage = () => {
                   justifyContent: 'space-between'
                 }}
               >
-                <LinkStyled href='/pages/auth/forgot-password-v1'>{platformLabels.ForgotPass}</LinkStyled>
+                <LinkStyled href='/forget-password/reset'>{platformLabels.ForgotPass}</LinkStyled>
               </Box>
               <Button
                 fullWidth

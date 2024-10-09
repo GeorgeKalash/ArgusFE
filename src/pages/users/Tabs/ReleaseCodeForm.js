@@ -11,9 +11,11 @@ import { AccessControlRepository } from 'src/repositories/AccessControlRepositor
 import toast from 'react-hot-toast'
 import * as yup from 'yup'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const ReleaseCodeForm = ({ labels, maxAccess, storeRecordId, invalidate, window }) => {
   const { postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const { formik } = useForm({
     enableReinitialize: false,
@@ -31,7 +33,7 @@ const ReleaseCodeForm = ({ labels, maxAccess, storeRecordId, invalidate, window 
           extension: AccessControlRepository.UserReleaseCode.set,
           record: JSON.stringify(obj)
         })
-        toast.success('Record Updated Successfully')
+        toast.success(platformLabels.Updated)
         window.close()
         invalidate()
       } catch (error) {}

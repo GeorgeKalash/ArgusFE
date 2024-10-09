@@ -103,6 +103,11 @@ const CustomTextField = ({
       size={size}
       fullWidth={fullWidth}
       autoFocus={focus}
+      InputLabelProps={{
+        style: {
+          zIndex: 0
+        }
+      }}
       inputProps={{
         autoComplete: 'off',
         readOnly: _readOnly,
@@ -113,7 +118,8 @@ const CustomTextField = ({
         style: {
           textAlign: numberField && 'right',
           '-moz-appearance': 'textfield' // Firefox
-        }
+        },
+        tabIndex: _readOnly ? -1 : 0 // Prevent focus if readOnly
       }}
       autoComplete={autoComplete}
       onInput={handleInput}

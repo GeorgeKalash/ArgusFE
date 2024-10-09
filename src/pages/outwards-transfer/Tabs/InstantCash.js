@@ -15,7 +15,7 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useError } from 'src/error'
 
-export default function InstantCash({ onInstantCashSubmit, cashData = {}, window, clientData, outwardsData }) {
+export default function InstantCash({ onSubmit, cashData = {}, window, clientData, outwardsData }) {
   const { getRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
 
@@ -26,78 +26,26 @@ export default function InstantCash({ onInstantCashSubmit, cashData = {}, window
   const { formik } = useForm({
     maxAccess,
     initialValues: {
-      payingAgent: '',
       deliveryModeId: '',
       currency: '',
-      partnerReference: '',
-      sourceAmount: outwardsData?.amount ?? '',
-      fromCountryId: '',
+      sourceAmount: outwardsData?.amount || 0,
       toCountryId: '',
-      sourceOfFundsId: 0,
-      remittancePurposeId: 0,
-      totalTransactionAmountPerAnnum: clientData?.hiddenTrxAmount ?? '',
-      transactionsPerAnnum: clientData?.hiddenTrxCount ?? '',
+      totalTransactionAmountPerAnnum: clientData.hiddenTrxAmount,
+      transactionsPerAnnum: clientData.hiddenTrxCount,
       remitter: {
-        cardNo: '',
-        firstName: '',
-        middleName: '',
-        lastName: '',
-        mobileNumber: '',
-        phoneNumber: '',
-        email: '',
-        address: {
-          addressLine1: '',
-          addressLine2: '',
-          district: '',
-          city: '',
-          postCode: '',
-          state: '',
-          country: ''
-        },
-        primaryId: {
-          type: 0,
-          number: '',
-          issueDate: null,
-          expiryDate: null,
-          placeOfIssue: ''
-        },
-        dateOfBirth: '',
-        gender: '',
-        nationality: '',
-        countryOfBirth: '',
-        countryOfResidence: '',
         relation: '',
         otherRelation: '',
-        profession: 0,
-        employerName: clientData?.hiddenSponserName,
+        employerName: clientData.hiddenSponserName,
         employerStatus: ''
       },
       beneficiary: {
-        cardNo: '',
-        firstName: '',
-        middleName: '',
-        lastName: '',
-        mobileNumber: '',
-        phoneNumber: '',
-        email: '',
         address: {
-          addressLine1: '',
-          addressLine2: '',
-          district: '',
-          city: '',
-          postCode: '',
-          state: '',
-          country: ''
+          postCode: ''
         },
-        dateOfBirth: null,
-        gender: '',
-        nationality: '',
-        countryOfBirth: '',
         bankDetails: {
           bankCode: '',
           bankName: '',
-          bankAddress1: '',
-          bankAccountNumber: ''
+          bankAddress1: ''
         }
       }
     },
@@ -118,34 +66,31 @@ export default function InstantCash({ onInstantCashSubmit, cashData = {}, window
       })
     }),
     onSubmit: values => {
-      values.sourceOfFundsId = 0
-      values.remittancePurposeId = 0
-      values.remitter.profession = 0
-      onInstantCashSubmit(values)
+      onSubmit(values)
       window.close()
     }
   })
   useEffect(() => {
     ;(async function () {
-      if (cashData.deliveryModeId) formik.setValues(cashData)
-      if (outwardsData.countryId) {
-        const res = await getRequest({
-          extension: SystemRepository.Country.get,
-          parameters: `_recordId=${outwardsData.countryId}`
-        })
-        if (!res.record?.isoCode1) {
-          stackError({
-            message: `Please assign iso code1 to ${res.record.name}`
+      try {
+        if (cashData.deliveryModeId) formik.setValues(cashData)
+        if (outwardsData.countryId) {
+          const res = await getRequest({
+            extension: SystemRepository.Country.get,
+            parameters: `_recordId=${outwardsData.countryId}`
           })
+          if (!res.record?.isoCode1) {
+            stackError({
+              message: `Please assign iso code1 to ${res.record.name}`
+            })
 
-          return
+            return
+          }
+          formik.setFieldValue('toCountryId', res?.record?.isoCode1.trim())
         }
-
-        formik.setFieldValue('toCountryId', res?.record?.isoCode1.trim())
-      }
+      } catch (error) {}
     })()
   }, [])
-  console.log('formik check ', formik)
 
   return (
     <FormShell
@@ -170,11 +115,7 @@ export default function InstantCash({ onInstantCashSubmit, cashData = {}, window
               values={formik.values}
               required
               onChange={(event, newValue) => {
-                if (newValue) {
-                  formik.setFieldValue('deliveryModeId', newValue?.recordId)
-                } else {
-                  formik.setFieldValue('deliveryModeId', '')
-                }
+                formik.setFieldValue('deliveryModeId', newValue ? newValue.recordId : '')
                 formik.setFieldValue('payingAgent', '')
               }}
               maxAccess={maxAccess}
@@ -214,13 +155,8 @@ export default function InstantCash({ onInstantCashSubmit, cashData = {}, window
               ]}
               values={formik.values}
               onChange={(event, newValue) => {
-                if (newValue) {
-                  formik.setFieldValue('payingAgent', newValue?.recordId)
-                  formik.setFieldValue('currency', newValue?.payingCurrency)
-                } else {
-                  formik.setFieldValue('payingAgent', '')
-                  formik.setFieldValue('currency', '')
-                }
+                formik.setFieldValue('payingAgent', newValue ? newValue.recordId : '')
+                formik.setFieldValue('currency', newValue ? newValue.payingCurrency : '')
               }}
               maxAccess={maxAccess}
               error={formik.touched.payingAgent && Boolean(formik.errors.payingAgent)}
@@ -300,11 +236,7 @@ export default function InstantCash({ onInstantCashSubmit, cashData = {}, window
                 displayField='name'
                 value={formik.values.remitter.employerStatus}
                 onChange={(event, newValue) => {
-                  if (newValue) {
-                    formik.setFieldValue('remitter.employerStatus', newValue?.recordId)
-                  } else {
-                    formik.setFieldValue('remitter.employerStatus', '')
-                  }
+                  formik.setFieldValue('remitter.employerStatus', newValue ? newValue.recordId : '')
                 }}
                 maxAccess={maxAccess}
                 error={formik.touched.remitter?.employerStatus && Boolean(formik.errors.remitter?.employerStatus)}

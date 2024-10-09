@@ -7,7 +7,16 @@ import toast from 'react-hot-toast'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import useResourceParams from 'src/hooks/useResourceParams'
 
-const OTPPhoneVerification = ({ formValidation, functionId, onClose, getData, window }) => {
+const OTPPhoneVerification = ({
+  formValidation,
+  recordId,
+  clientId,
+  functionId,
+  onClose,
+  getData,
+  onSuccess,
+  window
+}) => {
   const { postRequest } = useContext(RequestsContext)
 
   const { labels: labels, access } = useResourceParams({
@@ -40,7 +49,7 @@ const OTPPhoneVerification = ({ formValidation, functionId, onClose, getData, wi
 
   const otpSMS = () => {
     var data = {
-      clientId: formValidation.values.clientId,
+      clientId: formValidation.values.clientId || clientId,
       secret: '',
       functionId: functionId,
       deviceId: formValidation.values.cellPhone,
@@ -59,7 +68,8 @@ const OTPPhoneVerification = ({ formValidation, functionId, onClose, getData, wi
   const checkSMS = value => {
     if (value.length > 1) {
       var data = {
-        clientId: formValidation.values.clientId,
+        clientId: formValidation.values.clientId || clientId,
+        recordId: recordId || null,
         secret: '',
         functionId: functionId,
         deviceId: formValidation.values.cellPhone,
@@ -71,7 +81,8 @@ const OTPPhoneVerification = ({ formValidation, functionId, onClose, getData, wi
       })
         .then(res => {
           toast.success('Verification Completed')
-          getData(formValidation?.values?.clientId)
+          if (onSuccess) onSuccess()
+          if (getData) getData(formValidation?.values?.clientId)
           window.close()
         })
         .catch(error => {})

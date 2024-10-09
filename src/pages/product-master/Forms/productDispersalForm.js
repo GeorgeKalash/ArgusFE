@@ -12,9 +12,11 @@ import { useContext, useEffect } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const ProductDispersalForm = ({ pId, labels, recordId, getGridData, maxAccess, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const formik = useFormik({
     initialValues: {
@@ -29,29 +31,29 @@ const ProductDispersalForm = ({ pId, labels, recordId, getGridData, maxAccess, w
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      productId: yup.string().required('This field is required'),
-      reference: yup.string().required('This field is required'),
-      name: yup.string().required('This field is required'),
-      dispersalType: yup.string().required('This field is required'),
-      isDefault: yup.string().required('This field is required'),
-      isInactive: yup.string().required('This field is required')
+      productId: yup.string().required(),
+      reference: yup.string().required(),
+      name: yup.string().required(),
+      dispersalType: yup.string().required(),
+      isDefault: yup.string().required(),
+      isInactive: yup.string().required()
     }),
-    onSubmit: values => {
-      post(values)
+    onSubmit: async values => {
+      await post(values)
     }
   })
 
-  const post = obj => {
+  const post = async obj => {
     const recordId = obj.recordId
     const productId = obj.productId ? obj.productId : pId
-    postRequest({
+    await postRequest({
       extension: RemittanceSettingsRepository.ProductDispersal.set,
       record: JSON.stringify(obj)
     })
       .then(res => {
         if (!recordId) {
-          toast.success('Record Added Successfully')
-        } else toast.success('Record Editted Successfully')
+          toast.success(platformLabels.Added)
+        } else toast.success(platformLabels.Edited)
 
         getGridData(pId)
         window.close()

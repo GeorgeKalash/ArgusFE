@@ -6,15 +6,17 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 import GroupInfoWindow from './Windows/GroupInfoWindow'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const SecurityGroup = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const { platformLabels } = useContext(ControlContext)
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -32,15 +34,12 @@ const SecurityGroup = () => {
     labels: _labels,
     refetch,
     paginationParameters,
-    access
+    access,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: AccessControlRepository.SecurityGroup.qry,
     datasetId: ResourceIds.SecurityGroup
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: AccessControlRepository.SecurityGroup.qry
   })
 
   function openForm(recordId) {
@@ -48,11 +47,11 @@ const SecurityGroup = () => {
       Component: GroupInfoWindow,
       props: {
         labels: _labels,
-        recordId: recordId ? recordId : null,
+        recordId: recordId,
         maxAccess: access
       },
-      width: 600,
-      height: 600,
+      width: 900,
+      height: 700,
       title: _labels.securityGroups
     })
   }
@@ -79,12 +78,14 @@ const SecurityGroup = () => {
   }
 
   const del = async obj => {
-    await postRequest({
-      extension: AccessControlRepository.SecurityGroup.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success('Record Deleted Successfully')
+    try {
+      await postRequest({
+        extension: AccessControlRepository.SecurityGroup.del,
+        record: JSON.stringify(obj)
+      })
+      invalidate()
+      toast.success(platformLabels.Deleted)
+    } catch (error) {}
   }
 
   return (
@@ -95,7 +96,7 @@ const SecurityGroup = () => {
       <Grow>
         <Table
           columns={columns}
-          gridData={data ? data : { list: [] }}
+          gridData={data}
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}

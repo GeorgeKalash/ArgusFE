@@ -30,13 +30,6 @@ const CashCount = () => {
     })
   }
 
-  async function fetchGridData() {
-    return await getRequest({
-      extension: CashCountRepository.CashCountTransaction.qry,
-      parameters: ``
-    })
-  }
-
   const {
     query: { data },
     filterBy,
@@ -46,8 +39,7 @@ const CashCount = () => {
     access,
     invalidate
   } = useResourceQuery({
-    queryFn: fetchGridData,
-    endpointId: CashCountRepository.CashCountTransaction.qry,
+    endpointId: CashCountRepository.CashCountTransaction.snapshot,
     datasetId: ResourceIds.CashCountTransaction,
     filter: {
       endpointId: CashCountRepository.CashCountTransaction.snapshot,
@@ -65,7 +57,7 @@ const CashCount = () => {
       field: 'date',
       headerName: _labels.date,
       flex: 1,
-      valueGetter: ({ row }) => formatDateDefault(row?.date)
+      type: 'date'
     },
     {
       field: 'plantName',
@@ -81,13 +73,13 @@ const CashCount = () => {
       field: 'startTime',
       headerName: _labels.startTime,
       flex: 1,
-      valueGetter: ({ row }) => getTimeInTimeZone(row.startTime)
+      type: 'timeZone'
     },
     {
       field: 'endTime',
       headerName: _labels.endTime,
       flex: 1,
-      valueGetter: ({ row }) => row.endTime && getTimeInTimeZone(row.endTime)
+      type: 'timeZone'
     },
     {
       field: 'statusName',

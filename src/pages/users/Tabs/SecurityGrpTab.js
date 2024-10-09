@@ -12,12 +12,14 @@ import { useContext, useState } from 'react'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import toast from 'react-hot-toast'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const SecurityGrpTab = ({ labels, maxAccess, storeRecordId, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [initialAllListData, setSecurityGrpALLData] = useState([])
   const [initialSelectedListData, setSecurityGrpSelectedData] = useState([])
   const { stack } = useWindow()
+  const { platformLabels } = useContext(ControlContext)
 
   const columns = [
     {
@@ -52,7 +54,7 @@ const SecurityGrpTab = ({ labels, maxAccess, storeRecordId, window }) => {
         record: JSON.stringify(data)
       })
       invalidate()
-      toast.success('Record Added Successfully')
+      toast.success(platformLabels.Added)
       window.close()
     }
   })
@@ -144,7 +146,7 @@ const SecurityGrpTab = ({ labels, maxAccess, storeRecordId, window }) => {
       extension: AccessControlRepository.SecurityGroupUser.del,
       record: JSON.stringify(obj)
     })
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
     invalidate()
   }
 

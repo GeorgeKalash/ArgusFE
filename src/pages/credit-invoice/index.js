@@ -1,4 +1,3 @@
-import { Box } from '@mui/material'
 import { useContext, useState } from 'react'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -17,14 +16,20 @@ import { getFormattedNumber } from 'src/lib/numberField-helper'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
+import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
+import { SystemFunction } from 'src/resources/SystemFunction'
+import { useError } from 'src/error'
 
 const CreditInvoice = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   //states
   const [errorMessage, setErrorMessage] = useState(null)
   const [plantId, setPlantId] = useState(null)
   const { stack } = useWindow()
+  const { stack: stackError } = useError()
 
   const userData = window.sessionStorage.getItem('userData')
     ? JSON.parse(window.sessionStorage.getItem('userData'))
@@ -92,13 +97,25 @@ const CreditInvoice = () => {
     endpointId: CTTRXrepository.CreditInvoice.page
   })
 
+  const { proxyAction } = useDocumentTypeProxy({
+    functionId: SystemFunction.CreditInvoicePurchase,
+    action: async () => {
+      const plantId = await getPlantId()
+      if (plantId !== '') {
+        openFormWindow(null, plantId)
+      } else {
+        stackError({
+          message: `The user does not have a default plant`
+        })
+
+        return
+      }
+    },
+    hasDT: false
+  })
+
   const add = async () => {
-    const plantId = await getPlantId()
-    if (plantId !== '') {
-      openFormWindow(null, plantId)
-    } else {
-      throw new Error('The user does not have a default plant')
-    }
+    proxyAction()
   }
 
   async function openFormWindow(recordId) {
@@ -108,7 +125,11 @@ const CreditInvoice = () => {
         if (plantId !== '') {
           openForm('', plantId)
         } else {
-          throw new Error('The user does not have a default plant')
+          stackError({
+            message: `The user does not have a default plant`
+          })
+
+          return
         }
       } catch (error) {}
     } else {
@@ -120,7 +141,7 @@ const CreditInvoice = () => {
       Component: CreditInvoiceForm,
       props: {
         _labels,
-        maxAccess: access,
+        access,
         plantId: plantId,
         userData: userData,
         recordId
@@ -131,12 +152,14 @@ const CreditInvoice = () => {
   }
 
   const del = async obj => {
-    await postRequest({
-      extension: CTTRXrepository.CreditInvoice.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success('Record Deleted Successfully')
+    try {
+      await postRequest({
+        extension: CTTRXrepository.CreditInvoice.del,
+        record: JSON.stringify(obj)
+      })
+      invalidate()
+      toast.success(platformLabels.Deleted)
+    } catch (error) {}
   }
 
   return (
@@ -163,7 +186,7 @@ const CreditInvoice = () => {
               field: 'date',
               headerName: _labels.date,
               flex: 1,
-              valueGetter: ({ row }) => formatDateDefault(row?.date)
+              type: 'date'
             },
             {
               field: 'plantRef',
@@ -188,7 +211,7 @@ const CreditInvoice = () => {
               field: 'amount',
               headerName: _labels.amount,
               flex: 1,
-              valueGetter: ({ row }) => getFormattedNumber(row?.amount)
+              type: 'number'
             },
             {
               field: 'statusName',

@@ -13,10 +13,11 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useInvalidate } from 'src/hooks/resource'
+import { ControlContext } from 'src/providers/ControlContext'
 
-export default function CcCashNotesForm({ labels, maxAccess, currencyId, note, window }) {
+export default function CcCashNotesForm({ labels, maxAccess, record, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const editMode = !!currencyId
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: CashCountRepository.CcCashNotes.page
@@ -24,36 +25,51 @@ export default function CcCashNotesForm({ labels, maxAccess, currencyId, note, w
 
   const { formik } = useForm({
     initialValues: {
-      currencyId: currencyId || null,
+      recordId,
+      currencyId: '',
       note: null
     },
     maxAccess: maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      currencyId: yup.string().required(' '),
-      note: yup.string().required(' ')
+      currencyId: yup.string().required(),
+      note: yup.string().required()
     }),
     onSubmit: async obj => {
-      const response = await postRequest({
-        extension: CashCountRepository.CcCashNotes.set,
-        record: JSON.stringify(obj)
-      })
-
-      toast.success('Record Added Successfully')
-      window.close()
-      invalidate()
+      try {
+        const currencyId = formik.values.currencyId
+        const note = formik.values.note
+  
+        await postRequest({
+          extension: CashCountRepository.CcCashNotes.set,
+          record: JSON.stringify(obj)
+        })
+  
+        if (!currencyId && !note) {
+          toast.success(platformLabels.Added)
+        } else toast.success(platformLabels.Edited)
+        formik.setFieldValue('recordId',  String(obj.currencyId * 10) + obj.note)
+        window.close()
+        invalidate()
+      } catch (error) {}
     }
   })
+
+  const editMode = !!formik.values.recordId
+
   useEffect(() => {
     ;(async function () {
       try {
-        if (currencyId && note) {
+        if (record && record.currencyId && record.note && recordId) {
           const res = await getRequest({
             extension: CashCountRepository.CcCashNotes.get,
-            parameters: `_currencyId=${currencyId}&_note=${note}`
+            parameters: `_currencyId=${record.currencyId}&_note=${record.note}`
           })
-          formik.setValues(res.record)
+          formik.setValues({
+            ...res.record,
+            recordId: String(res.record.currencyId * 10) + res.record.note
+          })
         }
       } catch (e) {}
     })()
@@ -88,7 +104,7 @@ export default function CcCashNotesForm({ labels, maxAccess, currencyId, note, w
             <Grid item xs={12}>
               <CustomNumberField
                 name='note'
-                label={labels.note}
+                label={labels.currencyNote}
                 value={formik.values.note}
                 required
                 readOnly={editMode}

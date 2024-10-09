@@ -16,10 +16,11 @@ import { DataSets } from 'src/resources/DataSets'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function DocumentTypeForm({ labels, recordId, maxAccess }) {
-  const [isLoading, setIsLoading] = useState(false)
   const [editMode, setEditMode] = useState(!!recordId)
+  const { platformLabels } = useContext(ControlContext)
 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -59,12 +60,12 @@ export default function DocumentTypeForm({ labels, recordId, maxAccess }) {
       })
 
       if (!recordId) {
-        toast.success('Record Added Successfully')
+        toast.success(platformLabels.Added)
         formik.setValues({
           ...obj,
           recordId: response.recordId
         })
-      } else toast.success('Record Edited Successfully')
+      } else toast.success(platformLabels.Edited)
       setEditMode(true)
 
       invalidate()
@@ -143,7 +144,6 @@ export default function DocumentTypeForm({ labels, recordId, maxAccess }) {
                 valueField='recordId'
                 displayField='name'
                 values={formik.values}
-                required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('ilId', newValue?.recordId)

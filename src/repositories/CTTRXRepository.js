@@ -3,10 +3,12 @@ const service = 'CTTRX.asmx/'
 export const CTTRXrepository = {
   CurrencyTrading: {
     get2: service + 'get2CIV',
+    get3: service + 'get3CIV',
     set2: service + 'set2CIV',
     snapshot: service + 'snapshotCIV',
     close: service + 'closeCIV',
-    reopen: service + 'reopenCIV'
+    reopen: service + 'reopenCIV',
+    post: service + 'postCIV'
   },
   CreditOrder: {
     page: service + 'pageORD',

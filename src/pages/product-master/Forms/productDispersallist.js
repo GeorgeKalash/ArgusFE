@@ -8,12 +8,15 @@ import ProductDispersalForm from './productDispersalForm'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { ControlContext } from 'src/providers/ControlContext'
+import toast from 'react-hot-toast'
 
 const ProductDispersalList = ({ store, setStore, labels, maxAccess }) => {
   const { recordId: pId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [gridData, setGridData] = useState()
   const { stack } = useWindow()
+  const { platformLabels } = useContext(ControlContext)
 
   const getGridData = pId => {
     setGridData([])
@@ -55,12 +58,12 @@ const ProductDispersalList = ({ store, setStore, labels, maxAccess }) => {
     {
       field: 'isInactive',
       headerName: labels.isInactive,
-      flex: 1
+      type: 'checkbox'
     },
     {
       field: 'isDefault',
       headerName: labels.isDefault,
-      flex: 1
+      type: 'checkbox'
     }
   ]
 
@@ -76,16 +79,13 @@ const ProductDispersalList = ({ store, setStore, labels, maxAccess }) => {
     openForm(object.recordId)
   }
 
-  const del = obj => {
-    postRequest({
+  const del = async obj => {
+    await postRequest({
       extension: RemittanceSettingsRepository.ProductDispersal.del,
       record: JSON.stringify(obj)
     })
-      .then(res => {
-        toast.success('Record Deleted Successfully')
-        getGridData(obj.productId)
-      })
-      .catch(error => {})
+    await getGridData(pId)
+    toast.success(platformLabels.Deleted)
   }
 
   function openForm(recordId) {
@@ -104,24 +104,24 @@ const ProductDispersalList = ({ store, setStore, labels, maxAccess }) => {
   }
 
   return (
-      <VertLayout>
-        <Fixed>
-          <GridToolbar onAdd={add} maxAccess={maxAccess} />
-        </Fixed>
-        <Grow>
-          <Table
-            columns={columns}
-            gridData={gridData}
-            rowId={['recordId']}
-            api={getGridData}
-            onEdit={edit}
-            onDelete={del}
-            isLoading={false}
-            maxAccess={maxAccess}
-            pagination={false}
-          />
-        </Grow>
-      </VertLayout>
+    <VertLayout>
+      <Fixed>
+        <GridToolbar onAdd={add} maxAccess={maxAccess} />
+      </Fixed>
+      <Grow>
+        <Table
+          columns={columns}
+          gridData={gridData}
+          rowId={['recordId']}
+          api={getGridData}
+          onEdit={edit}
+          onDelete={del}
+          isLoading={false}
+          maxAccess={maxAccess}
+          pagination={false}
+        />
+      </Grow>
+    </VertLayout>
   )
 }
 

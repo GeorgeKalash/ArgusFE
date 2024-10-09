@@ -16,10 +16,12 @@ import { AccessControlRepository } from 'src/repositories/AccessControlRepositor
 import { POSRepository } from 'src/repositories/POSRepository'
 import toast from 'react-hot-toast'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
   const [data, setData] = useState([])
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const rowColumns = [
     {
@@ -60,7 +62,7 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
         record: JSON.stringify(resultObject)
       })
 
-      toast.success('Record Updated Successfully')
+      toast.success(platformLabels.Updated)
     }
   })
 
@@ -72,20 +74,26 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
       parameters: '_filter='
     })
 
-    const cashAccountRequestPromise = getRequest({
-      extension: CashBankRepository.CashAccount.qry,
-      parameters: '_filter=&_type=0'
-    })
+    const cashAccountRequestPromise =
+      classId == ResourceIds.CashAccounts &&
+      getRequest({
+        extension: CashBankRepository.CashAccount.qry,
+        parameters: '_filter=&_type=0'
+      })
 
-    const salesPersonRequestPromise = getRequest({
-      extension: SaleRepository.SalesPerson.qry,
-      parameters: '_filter='
-    })
+    const salesPersonRequestPromise =
+      classId == ResourceIds.SalesPerson &&
+      getRequest({
+        extension: SaleRepository.SalesPerson.qry,
+        parameters: '_filter='
+      })
 
-    const posRequestPromise = getRequest({
-      extension: POSRepository.PointOfSale.qry,
-      parameters: '_filter='
-    })
+    const posRequestPromise =
+      classId == ResourceIds.PointOfSale &&
+      getRequest({
+        extension: POSRepository.PointOfSale.qry,
+        parameters: '_filter='
+      })
 
     const rowAccessUserPromise = getRequest({
       extension: AccessControlRepository.RowAccessUserView.qry,
@@ -161,7 +169,14 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
   }, [storeRecordId])
 
   return (
-    <FormShell resourceId={ResourceIds.Users} form={formik} maxAccess={maxAccess} editMode={!!storeRecordId}>
+    <FormShell
+      resourceId={ResourceIds.Users}
+      form={formik}
+      maxAccess={maxAccess}
+      editMode={!!storeRecordId}
+      isSavedClear={false}
+      isCleared={false}
+    >
       <VertLayout>
         <Fixed>
           <Grid item xs={6}>

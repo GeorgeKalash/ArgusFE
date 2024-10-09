@@ -41,16 +41,16 @@ export function useDocumentType({ functionId, access, hasDT, enabled = true }) {
   const query = useQuery({
     retry: false,
     staleTime: 0,
-    enabled: !!functionId && enabled,
+    enabled: [!!functionId, functionId == undefined] && enabled,
     queryKey: [functionId, nraId, !!access],
-    queryFn: nraId || nraId === 'naraId' ? () => queryFn(nraId) : () => queryFn()
+    queryFn: nraId || nraId === 'nraId' ? () => queryFn(nraId) : () => queryFn()
   })
 
   return {
     documentType: query.data,
     maxAccess: query?.data?.maxAccess,
     changeDT(value) {
-      setNraId(value?.nraId ?? 'nraId')
+      setNraId(value?.nraId || 'nraId')
     }
   }
 }

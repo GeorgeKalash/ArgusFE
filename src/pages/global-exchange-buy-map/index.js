@@ -21,6 +21,7 @@ const GlobalExchangeBuyMap = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getLabels, getAccess } = useContext(ControlContext)
   const { height } = useWindowDimensions()
+  const { platformLabels } = useContext(ControlContext)
 
   const [errorMessage, setErrorMessage] = useState()
   const [access, setAccess] = useState(0)
@@ -67,8 +68,8 @@ const GlobalExchangeBuyMap = () => {
         }
       ]
     },
-    onSubmit: values => {
-      postExchangeMaps(values)
+    onSubmit: async values => {
+      await postExchangeMaps(values)
     }
   })
 
@@ -79,7 +80,7 @@ const GlobalExchangeBuyMap = () => {
     name: labels && labels.find(item => item.key === '4') && labels.find(item => item.key === '4').value
   }
 
-  const postExchangeMaps = obj => {
+  const postExchangeMaps = async obj => {
     const data = {
       currencyId: obj.currencyId,
       globalExchangeBuyMaps: obj.rows.map(({ currencyId, ...rest }) => ({
@@ -87,12 +88,12 @@ const GlobalExchangeBuyMap = () => {
         ...rest
       }))
     }
-    postRequest({
+    await postRequest({
       extension: RemittanceSettingsRepository.CorrespondentExchangeBuyMap.set2,
       record: JSON.stringify(data)
     })
       .then(res => {
-        if (res.statusId) toast.success('Record Successfully')
+        if (res.statusId) toast.success(platformLabels.Updated)
       })
       .catch(error => {})
   }
@@ -225,19 +226,19 @@ const GlobalExchangeBuyMap = () => {
           </Grid>
         </Grid>
       </Fixed>
-          <Grow>
-            {formik.values.currencyId && (
-              <DataGrid
-                onChange={value => formik.setFieldValue('rows', value)}
-                value={formik.values.rows}
-                error={formik.errors.rows}
-                columns={columns}
-              />
-            )}
-          </Grow>
-        <Fixed>
-          <WindowToolbar onSave={handleSubmit} isSaved={true} smallBox={true} />
-        </Fixed>
+      <Grow>
+        {formik.values.currencyId && (
+          <DataGrid
+            onChange={value => formik.setFieldValue('rows', value)}
+            value={formik.values.rows}
+            error={formik.errors.rows}
+            columns={columns}
+          />
+        )}
+      </Grow>
+      <Fixed>
+        <WindowToolbar onSave={handleSubmit} isSaved={true} smallBox={true} />
+      </Fixed>
     </VertLayout>
   )
 }

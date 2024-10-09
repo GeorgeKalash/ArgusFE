@@ -30,8 +30,10 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { LOTransportationForm } from 'src/components/Shared/LOTransportationForm'
+import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
+import { useForm } from 'src/hooks/form'
 
-export default function CreditInvoiceForm({ _labels, maxAccess, recordId, plantId, userData }) {
+export default function CreditInvoiceForm({ _labels, access, recordId, plantId, userData }) {
   const { height } = useWindowDimensions()
   const [isLoading, setIsLoading] = useState(false)
   const [isPosted, setIsPosted] = useState(false)
@@ -45,6 +47,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, plantI
   const [toCurrencyRef, setToCurrencyRef] = useState(null)
   const [baseCurrencyRef, setBaseCurrencyRef] = useState(null)
   const [visible, setVisible] = useState(false)
+  const [selectedFunctionId, setFunctionId] = useState(SystemFunction.CreditInvoicePurchase)
 
   const [initialValues, setInitialData] = useState({
     recordId: recordId || null,
@@ -72,21 +75,28 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, plantI
     cashAccountName: '',
     cashAccountRef: ''
   })
+
+  const { maxAccess } = useDocumentType({
+    functionId: selectedFunctionId,
+    access: access,
+    enabled: !recordId
+  })
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
     endpointId: CTTRXrepository.CreditInvoice.page
   })
 
-  const formik = useFormik({
+  const { formik } = useForm({
     initialValues,
+    maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      date: yup.string().required('This field is required'),
-      plantId: yup.string().required('This field is required'),
-      corId: yup.string().required('This field is required'),
-      cashAccountId: yup.string().required('This field is required')
+      date: yup.string().required(),
+      plantId: yup.string().required(),
+      corId: yup.string().required(),
+      cashAccountId: yup.string().required()
     }),
     onSubmit: async obj => {
       try {
@@ -165,10 +175,10 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, plantI
     validationSchema: yup.object({
       rows: yup.array().of(
         yup.object({
-          currencyId: yup.string().required('This field is required'),
-          qty: yup.string().required('This field is required'),
-          exRate: yup.string().required('This field is required'),
-          amount: yup.string().required('This field is required')
+          currencyId: yup.string().required(),
+          qty: yup.string().required(),
+          exRate: yup.string().required(),
+          amount: yup.string().required()
         })
       )
     })
@@ -209,10 +219,15 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, plantI
       getRequest({
         extension: RemittanceSettingsRepository.Correspondent.get,
         parameters: parameters
-      }).then(res => {
+      }).then(async res => {
         setToCurrency(res.record.currencyId)
         setToCurrencyRef(res.record.currencyRef)
-        getEXMBase(plant, res.record.currencyId, baseCurrency, 150)
+
+        const evalRate = await getRequest({
+          extension: CurrencyTradingSettingsRepository.Defaults.get,
+          parameters: '_key=ct_credit_eval_ratetype_id'
+        })
+        if (evalRate.record) getEXMBase(plant, res.record.currencyId, baseCurrency, evalRate.record.value)
       })
     } else {
       setToCurrency(null)
@@ -375,13 +390,15 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, plantI
             parameters: `_recordId=${recordId}`
           })
           res.record.date = formatDateFromApi(res.record.date)
-          setOperationType(res.record.functionId)
+          await setOperationType(res.record.functionId)
           formik.setValues(res.record)
           const baseCurrency = await getBaseCurrency()
           getCorrespondentById(res.record.corId ?? '', baseCurrency, res.record.plantId)
           setIsPosted(res.record.status === 3 ? true : false)
           setIsCancelled(res.record.status === -1 ? true : false)
           setVisible(res.record.status == 1 ? false : true)
+        } else {
+          await setOperationType(SystemFunction.CreditInvoicePurchase)
         }
       } catch (error) {
       } finally {
@@ -461,7 +478,8 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, plantI
       props: {
         recordId: formik.values.recordId,
         functionId: formik.values.functionId,
-        editMode: formik.values.status != 1
+        editMode: formik.values.status != 1,
+        totalBaseAmount: totalLoc
       },
       width: 1200,
       height: 670,
@@ -494,7 +512,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, plantI
       key: 'Post',
       condition: true,
       onClick: onPost,
-      disabled: formik.values.status != 4
+      disabled: formik.values.status === 3 || formik.values.status === 4
     },
     {
       key: 'Cancel',
@@ -816,12 +834,13 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, plantI
                 name='reference'
                 label={_labels.reference}
                 value={formik?.values?.reference}
+                editMode={editMode}
                 maxAccess={maxAccess}
                 maxLength='30'
-                readOnly={true}
-                required
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('reference', '')}
+                readOnly={editMode}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
-                helperText={formik.touched.reference && formik.errors.reference}
               />
             </Grid>
           </Grid>
@@ -891,7 +910,11 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, plantI
               row
               value={formik.values.functionId}
               defaultValue={SystemFunction.CreditInvoicePurchase}
-              onChange={e => setOperationType(e.target.value)}
+              onChange={async e => {
+                await setOperationType(e.target.value)
+                setFunctionId(e.target.value)
+                formik.setFieldValue('reference', '')
+              }}
             >
               <FormControlLabel
                 value={SystemFunction.CreditInvoicePurchase}

@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -19,6 +19,9 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
+import { useWindow } from 'src/windows'
+import WorkFlow from 'src/components/Shared/WorkFlow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function CAadjustmentForm({ labels, access, recordId, functionId }) {
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -26,6 +29,9 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
     access: access,
     enabled: !recordId
   })
+  const { platformLabels } = useContext(ControlContext)
+
+  const { stack } = useWindow()
 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -42,7 +48,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       plantId: '',
       date: new Date(),
       currencyId: '',
-      status: '',
+      status: 1,
       cashAccountId: '',
       amount: '',
       baseAmount: '',
@@ -58,6 +64,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       amount: yup.string().required(' '),
       currencyId: yup.string().required(' '),
       cashAccountId: yup.string().required(' '),
+      dtId: yup.string().required(' '),
       date: yup.string().required(' ')
     }),
     onSubmit: async obj => {
@@ -75,7 +82,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       })
 
       if (!recordId) {
-        toast.success('Record Added Successfully')
+        toast.success(platformLabels.Added)
         formik.setValues({
           ...obj,
           baseAmount: obj.amount,
@@ -83,7 +90,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
           recordId: response.recordId
         })
       } else {
-        toast.success('Record Edited Successfully')
+        toast.success(platformLabels.Edited)
       }
 
       try {
@@ -126,10 +133,30 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       })
 
       if (res?.recordId) {
-        toast.success('Record Posted Successfully')
+        toast.success(platformLabels.Posted)
         invalidate()
+
+        const getRes = await getRequest({
+          extension: CashBankRepository.CAadjustment.get,
+          parameters: `_recordId=${formik.values.recordId}`
+        })
+
+        getRes.record.date = formatDateFromApi(getRes.record.date)
+        formik.setValues(getRes.record)
       }
     } catch (error) {}
+  }
+
+  const onWorkFlowClick = async () => {
+    stack({
+      Component: WorkFlow,
+      props: {
+        functionId: formik.values.functionId,
+        recordId: formik.values.recordId
+      },
+      width: 950,
+      title: 'Workflow'
+    })
   }
 
   const actions = [
@@ -145,11 +172,24 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       onClick: 'onClickGL',
       disabled: !editMode
     },
+
     {
       key: 'Post',
       condition: true,
       onClick: onPost,
       disabled: !editMode || formik.values.status !== 1
+    },
+    {
+      key: 'WorkFlow',
+      condition: true,
+      onClick: onWorkFlowClick,
+      disabled: !editMode
+    },
+    {
+      key: 'Cash Transaction',
+      condition: true,
+      onClick: 'transactionClicked',
+      disabled: !editMode
     }
   ]
 
@@ -162,6 +202,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       actions={actions}
       functionId={functionId}
       previewReport={editMode}
+      disabledSubmit={formik.values.status !== 1}
     >
       <VertLayout>
         <Grow>
@@ -184,7 +225,6 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                 onChange={(event, newValue) => {
                   changeDT(newValue)
                   formik && formik.setFieldValue('dtId', newValue?.recordId)
-                  formik && formik.setFieldValue('status', newValue?.activeStatus)
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
               />
@@ -207,6 +247,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                 endpointId={SystemRepository.Plant.qry}
                 name='plantId'
                 label={labels.plant}
+                readOnly={formik.values.status == '3'}
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 columnsInDropDown={[
@@ -226,6 +267,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
               <CustomDatePicker
                 name='date'
                 label={labels.date}
+                readOnly={formik.values.status == '3'}
                 value={formik.values.date}
                 onChange={formik.setFieldValue}
                 required
@@ -239,6 +281,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                 endpointId={SystemRepository.Currency.qry}
                 name='currencyId'
                 label={labels.currency}
+                readOnly={formik.values.status == '3'}
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 columnsInDropDown={[
@@ -260,6 +303,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                 parameters={{
                   _type: 2
                 }}
+                readOnly={formik.values.status == '3'}
                 valueField='reference'
                 displayField='name'
                 name='cashAccountId'
@@ -288,6 +332,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                 type='text'
                 label={labels.amount}
                 value={formik.values.amount}
+                readOnly={formik.values.status == '3'}
                 required
                 maxAccess={maxAccess}
                 onChange={e => formik.setFieldValue('amount', e.target.value)}
@@ -300,6 +345,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
               <CustomTextArea
                 name='notes'
                 label={labels.notes}
+                readOnly={formik.values.status == '3'}
                 value={formik.values.notes}
                 maxLength='100'
                 rows={2}

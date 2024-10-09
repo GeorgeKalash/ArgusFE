@@ -9,10 +9,12 @@ import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTrad
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { DataSets } from 'src/resources/DataSets'
 import { useForm } from 'src/hooks/form'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const IdFieldsForm = ({ store, setStore, labels, editMode, height, expanded, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId: idtId } = store
+  const { platformLabels } = useContext(ControlContext)
 
   const { formik } = useForm({
     maxAccess: maxAccess,
@@ -31,12 +33,12 @@ const IdFieldsForm = ({ store, setStore, labels, editMode, height, expanded, max
     initialValues: {
       IdField: [{ id: 1, idtId: idtId, accessLevel: null, accessLevel: null, accessLevelName: '', controlId: '' }]
     },
-    onSubmit: values => {
-      postIdFields(values.IdField)
+    onSubmit: async values => {
+      await postIdFields(values.IdField)
     }
   })
 
-  const postIdFields = obj => {
+  const postIdFields = async obj => {
     const data = {
       idtId: idtId,
       items: obj.map(({ accessLevel, controlId }) => ({
@@ -45,12 +47,12 @@ const IdFieldsForm = ({ store, setStore, labels, editMode, height, expanded, max
         controlId: controlId
       }))
     }
-    postRequest({
+    await postRequest({
       extension: CurrencyTradingSettingsRepository.IdFields.set2,
       record: JSON.stringify(data)
     })
       .then(res => {
-        toast.success('Record Edited Successfully')
+        toast.success(platformLabels.Edited)
       })
       .catch(error => {})
   }

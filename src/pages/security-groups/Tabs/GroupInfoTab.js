@@ -12,16 +12,18 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import toast from 'react-hot-toast'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const GroupInfoTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const { formik } = useForm({
     initialValues: { recordId: storeRecordId || null, name: '', description: '' },
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required('This field is required')
+      name: yup.string().required()
     }),
     onSubmit: async values => {
       const res = await postRequest({
@@ -29,14 +31,14 @@ const GroupInfoTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
         record: JSON.stringify(values)
       })
       if (!values.recordId) {
-        toast.success('Record Added Successfully')
+        toast.success(platformLabels.Added)
         formik.setValues({
           ...values,
           recordId: res.recordId
         })
         setRecordId(res?.recordId)
       } else {
-        toast.success('Record Updated Successfully')
+        toast.success(platformLabels.Updated)
       }
       invalidate()
     }

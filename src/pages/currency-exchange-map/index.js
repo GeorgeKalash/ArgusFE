@@ -22,6 +22,7 @@ const NumberRange = () => {
   const { getLabels, getAccess } = useContext(ControlContext)
   const [access, setAccess] = useState(0)
   const [labels, setLabels] = useState(null)
+  const { platformLabels } = useContext(ControlContext)
 
   useEffect(() => {
     if (!access) getAccess(ResourceIds.currencyExchangeMap, setAccess)
@@ -64,8 +65,8 @@ const NumberRange = () => {
         }
       ]
     },
-    onSubmit: values => {
-      postExchangeMaps(values)
+    onSubmit: async values => {
+      await postExchangeMaps(values)
     }
   })
 
@@ -77,7 +78,7 @@ const NumberRange = () => {
     name: labels && labels.find(item => item.key === '5') && labels.find(item => item.key === '5').value
   }
 
-  const postExchangeMaps = obj => {
+  const postExchangeMaps = async obj => {
     const data = {
       currencyId: formik.values.currencyId,
       countryId: formik.values.countryId,
@@ -87,12 +88,12 @@ const NumberRange = () => {
         ...rest
       }))
     }
-    postRequest({
+    await postRequest({
       extension: RemittanceSettingsRepository.CurrencyExchangeMap.set2,
       record: JSON.stringify(data)
     })
       .then(res => {
-        if (res.statusId) toast.success('Record Successfully')
+        if (res.statusId) toast.success(platformLabels.Updated)
       })
       .catch(error => {})
   }

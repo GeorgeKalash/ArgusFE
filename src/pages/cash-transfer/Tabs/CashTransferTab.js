@@ -40,7 +40,7 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
   const [isPosted, setIsPosted] = useState(true)
 
   const invalidate = useInvalidate({
-    endpointId: CashBankRepository.CashTransfer.snapshot
+    endpointId: CashBankRepository.CashTransfer.page
   })
 
   const [initialValues, setInitialData] = useState({
@@ -272,7 +272,8 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
       props: {
         recordId: formik.values.recordId,
         functionId: SystemFunction.CashTransfer,
-        editMode: isClosed
+        editMode: isClosed,
+        totalBaseAmount: totalLoc
       },
       width: 1200,
       height: 670,
@@ -351,6 +352,12 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
       condition: true,
       onClick: 'onClickAC',
       disabled: false
+    },
+    {
+      key: 'Cash Transaction',
+      condition: true,
+      onClick: 'transactionClicked',
+      disabled: !editMode
     }
   ]
 
@@ -384,7 +391,8 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
                   value={formik?.values?.reference}
                   maxAccess={maxAccess}
                   maxLength='15'
-                  readOnly
+                  readOnly={editMode}
+                  error={formik.touched.reference && Boolean(formik.errors.reference)}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -467,11 +475,9 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
                   maxAccess={maxAccess}
                   onChange={(event, newValue) => {
                     formik.setFieldValue('toPlantId', newValue ? newValue.recordId : null)
-                    if (!newValue) {
-                      formik.setFieldValue('toCashAccountId', null)
-                      formik.setFieldValue('toCARef', null)
-                      formik.setFieldValue('toCAName', null)
-                    }
+                    formik.setFieldValue('toCashAccountId', null)
+                    formik.setFieldValue('toCARef', null)
+                    formik.setFieldValue('toCAName', null)
                   }}
                   error={formik.touched.toPlantId && Boolean(formik.errors.toPlantId)}
                 />
@@ -558,7 +564,7 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
                 label: labels.amount,
                 name: 'amount',
                 defaultValue: '',
-                props: { disabled: isClosed },
+                props: { readOnly: isClosed },
                 async onChange({ row: { update, newRow } }) {
                   if (!newRow?.amount) {
                     return
@@ -579,10 +585,17 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
               },
               {
                 component: 'numberfield',
+                label: labels.baseAmount,
+                name: 'baseAmount',
+                defaultValue: '',
+                props: { readOnly: true }
+              },
+              {
+                component: 'numberfield',
                 name: 'balance',
                 label: labels.balance,
                 defaultValue: '0',
-                props: { disabled: isClosed }
+                props: { readOnly: true }
               }
             ]}
           />

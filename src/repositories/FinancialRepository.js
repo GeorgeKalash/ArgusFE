@@ -47,7 +47,8 @@ export const FinancialRepository = {
     page: service + 'pageACB',
     get: service + 'getACB',
     set: service + 'setACB',
-    del: service + 'delACB'
+    del: service + 'delACB',
+    rebuild: service + 'rebuildACB'
   },
   TaxSchedules: {
     qry: service + 'qryTAX',
@@ -83,5 +84,95 @@ export const FinancialRepository = {
     get: service + 'getOBA',
     set: service + 'setOBA',
     del: service + 'delOBA'
+  },
+  FiMemo: {
+    qry: service + 'qryMEM',
+    page: service + 'pageMEM',
+    get: service + 'getMEM',
+    del: service + 'delMEM',
+    post: service + 'postMEM',
+    cancel: service + 'cancelMEM',
+    snapshot: service + 'snapshotMEM'
+  },
+  CreditNote: {
+    set: service + 'setCN',
+    del: service + 'delCN'
+  },
+  DebitNote: {
+    set: service + 'setDN',
+    del: service + 'delDN'
+  },
+  ServiceBillReceived: {
+    set: service + 'setSB',
+    del: service + 'delSB'
+  },
+  ServiceInvoice: {
+    set: service + 'setSI',
+    del: service + 'delSI'
+  },
+  FinancialTransaction: {
+    qry: service + 'qryTRX'
+  },
+  ReceiptVouchers: {
+    qry: service + 'qryRV',
+    get: service + 'getRV',
+    set: service + 'setRV',
+    del: service + 'delRV',
+    page: service + 'pageRV',
+    snapshot: service + 'snapshotRV',
+    cancel: service + 'cancelRV',
+    post: service + 'postRV'
+  },
+  Contact: {
+    qry: service + 'qryContact'
+  },
+  FIDocTypeDefaults: {
+    qry: service + 'qryDTD',
+    page: service + 'pageDTD',
+    get: service + 'getDTD',
+    set: service + 'setDTD',
+    del: service + 'delDTD'
+  },
+  DimensionValue: {
+    qry: service + 'qryDI',
+    page: service + 'pageDI',
+    get: service + 'getDI',
+    set: service + 'setDI',
+    del: service + 'delDI'
+  },
+  PaymentVouchers: {
+    qry: service + 'qryPV',
+    page: service + 'pagePV',
+    get: service + 'getPV',
+    set2: service + 'set2PV',
+    set: service + 'setPV',
+    del: service + 'delPV',
+    post: service + 'postPV',
+    cancel: service + 'cancelPV',
+    snapshot: service + 'snapshotPV'
+  },
+  AgingProfile: {
+    qry: service + 'qryAGP',
+    get: service + 'getAGP',
+    set: service + 'setAGP',
+    del: service + 'delAGP'
+  },
+  FIDimension: {
+    qry: service + 'qryDI',
+    get: service + 'getDI',
+    set: service + 'setDI',
+    del: service + 'delDI'
+  },
+  PaymentVoucherExpenses: {
+    qry: service + 'qryPVX'
+  },
+  PaymentVoucherCostCenters: {
+    qry: service + 'qryPVC'
+  },
+  Apply2: {
+    qry: service + 'qryAPL2'
+  },
+  Apply3: {
+    qry: service + 'qryAPL3'
   }
 }

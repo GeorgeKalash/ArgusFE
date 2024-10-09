@@ -1,22 +1,21 @@
-import { Box, Button, Grid, Tooltip, Typography, IconButton } from '@mui/material'
+import { Box, Button, Grid, IconButton } from '@mui/material'
 import Icon from 'src/@core/components/icon'
 import { useContext } from 'react'
 import { useResourceQuery } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import Table from 'src/components/Shared/Table'
-
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useWindow } from 'src/windows'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataSets } from 'src/resources/DataSets'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-import ResourceGlobalForm from './forms/ResourceGlobalForm'
-import AccessLevelForm from './forms/AccessLevelForm'
-import FieldGlobalForm from './forms/FieldGlobalForm'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useEffect } from 'react'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import ResourceGlobalForm from 'src/components/Shared/ResourceGlobalForm'
+import FieldGlobalForm from 'src/components/Shared/FieldGlobalForm'
+import AccessLevelForm from 'src/components/Shared/AccessLevelForm'
 
 const GlobalAuthorization = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -38,7 +37,8 @@ const GlobalAuthorization = () => {
     filterBy,
     clearFilter,
     access,
-    filters
+    filters,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchWithFilter,
     endpointId: SystemRepository.ModuleClassRES.qry,
@@ -64,7 +64,9 @@ const GlobalAuthorization = () => {
         labels: labels,
         maxAccess: access,
         data,
-        moduleId: filters.moduleId
+        moduleId: filters.moduleId,
+        invalidate,
+        resourceId: ResourceIds.GlobalAuthorization
       },
       width: 450,
       height: 200,
@@ -78,9 +80,9 @@ const GlobalAuthorization = () => {
       props: {
         labels: labels,
         maxAccess: access,
-        resourceId: row.key,
-        resourceName: row.value,
-        moduleId: filters.moduleId
+        row: { resourceId: row.data.key, resourceName: row.data.value, moduleId: filters.moduleId },
+        invalidate,
+        resourceId: ResourceIds.GlobalAuthorization
       },
       width: 450,
       height: 300,
@@ -94,8 +96,9 @@ const GlobalAuthorization = () => {
       props: {
         labels: labels,
         maxAccess: access,
-        resourceId: row.key,
-        resourceName: row.value
+        row: { resourceId: row.data.key, resourceName: row.data.value },
+        invalidate,
+        resourceId: ResourceIds.GlobalAuthorization
       },
       width: 500,
       height: 480,
@@ -120,27 +123,45 @@ const GlobalAuthorization = () => {
           }}
           labels={labels}
           inputSearch={true}
-        >
-          <Grid item sx={{ width: '350px', pt: '7px !important' }}>
-            <ResourceComboBox
-              datasetId={DataSets.MODULE}
-              name='moduleId'
-              values={{
-                moduleId: filters.moduleId
-              }}
-              valueField='key'
-              displayField='value'
-              onChange={(event, newValue) => {
-                onChange(newValue?.key)
-              }}
-            />
-          </Grid>
-          <Grid item sx={{ pt: '7px !important' }}>
-            <Button variant='contained' onClick={() => openApplyModuleLevel()} disabled={!filters.moduleId}>
-              <Icon icon='mdi:arrow-expand-right' fontSize={20} />
-            </Button>
-          </Grid>
-        </GridToolbar>
+          leftSection={
+            <>
+              <Grid item sx={{ width: '350px' }}>
+                <ResourceComboBox
+                  datasetId={DataSets.MODULE}
+                  name='moduleId'
+                  values={{
+                    moduleId: filters.moduleId
+                  }}
+                  valueField='key'
+                  displayField='value'
+                  onChange={(event, newValue) => {
+                    onChange(newValue?.key)
+                  }}
+                />
+              </Grid>
+              <Grid item>
+                <Button
+                  variant='contained'
+                  sx={{
+                    ml: 2,
+                    backgroundColor: '#231F20',
+                    '&:hover': {
+                      backgroundColor: '#231F20',
+                      opacity: 0.8
+                    },
+                    width: 'auto',
+                    height: '35px',
+                    objectFit: 'contain'
+                  }}
+                  onClick={() => openApplyModuleLevel()}
+                  disabled={!filters.moduleId}
+                >
+                  <Icon icon='mdi:arrow-expand-right' fontSize={20} />
+                </Button>
+              </Grid>
+            </>
+          }
+        />
       </Fixed>
       <Table
         columns={[
@@ -158,9 +179,9 @@ const GlobalAuthorization = () => {
             field: 'Resource Global',
             headerName: labels.resourceGlobal,
             width: 200,
-            renderCell: params => (
+            cellRenderer: row => (
               <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
-                <IconButton size='small' onClick={() => openResourceGlobal(params.row)}>
+                <IconButton size='small' onClick={() => openResourceGlobal(row)}>
                   <Icon icon='mdi:application-edit-outline' fontSize={18} />
                 </IconButton>
               </Box>
@@ -170,9 +191,9 @@ const GlobalAuthorization = () => {
             field: 'field Global',
             headerName: labels.fieldGlobal,
             width: 200,
-            renderCell: params => (
+            cellRenderer: row => (
               <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
-                <IconButton size='small' onClick={() => openFieldGlobal(params.row)}>
+                <IconButton size='small' onClick={() => openFieldGlobal(row)}>
                   <Icon icon='mdi:application-edit-outline' fontSize={18} />
                 </IconButton>
               </Box>

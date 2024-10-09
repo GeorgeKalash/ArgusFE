@@ -18,10 +18,12 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import { getSystemFunctionModule } from 'src/resources/SystemFunction'
 import { Module } from 'src/resources/Module'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, recordId, setWindowOpen }) {
   const [isLoading, setIsLoading] = useState(false)
   const [responseValue, setResponseValue] = useState(null)
+  const { platformLabels } = useContext(ControlContext)
 
   const [initialValues, setInitialData] = useState({
     recordId: null,
@@ -32,7 +34,8 @@ export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, re
     functionName: '',
     date: '',
     notes: '',
-    responseDate: ''
+    responseDate: '',
+    strategyName: ''
   })
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -69,17 +72,16 @@ export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, re
         }
 
         if (!functionId && !seqNo && !recordId && responseValue !== null) {
-          toast.success('Record Added Successfully')
+          toast.success(platformLabels.Added)
         } else {
-          toast.success('Record Edited Successfully')
+          toast.success(platformLabels.Edited)
         }
         setWindowOpen(false)
         invalidate()
-      } catch (error) {
-        toast('Something went wrong')
-      }
+      } catch (error) {}
     }
   })
+
   useEffect(() => {
     ;(async function () {
       try {
@@ -135,16 +137,16 @@ export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, re
   ]
 
   return (
-    <VertLayout>
-      <FormShell
-        actions={actions}
-        resourceId={ResourceIds.DocumentsOnHold}
-        form={formik}
-        maxAccess={maxAccess}
-        isCleared={false}
-        isInfo={false}
-        isSaved={false}
-      >
+    <FormShell
+      actions={actions}
+      resourceId={ResourceIds.DocumentsOnHold}
+      form={formik}
+      maxAccess={maxAccess}
+      isCleared={false}
+      isInfo={false}
+      isSaved={false}
+    >
+      <VertLayout>
         <Grow>
           <Grid container spacing={4}>
             <Grid item xs={12}>
@@ -177,6 +179,15 @@ export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, re
               />
             </Grid>
             <Grid item xs={12}>
+              <CustomTextField
+                name='strategyName'
+                label={labels.strategy}
+                value={formik.values.strategyName}
+                readOnly={true}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
               <CustomTextArea
                 name='notes'
                 label={labels.notes}
@@ -191,7 +202,7 @@ export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, re
             </Grid>
           </Grid>
         </Grow>
-      </FormShell>
-    </VertLayout>
+      </VertLayout>
+    </FormShell>
   )
 }

@@ -1,4 +1,4 @@
-import { Grid } from '@mui/material'
+import { Grid, FormControlLabel, Checkbox } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
@@ -10,15 +10,17 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataSets } from 'src/resources/DataSets'
-import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
+import { ControlContext } from 'src/providers/ControlContext'
+import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 
 export default function ProfessionsForm({ labels, maxAccess, recordId, setStore }) {
   const [editMode, setEditMode] = useState(!!recordId)
 
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: RemittanceSettingsRepository.Profession.page
@@ -30,28 +32,22 @@ export default function ProfessionsForm({ labels, maxAccess, recordId, setStore 
       reference: '',
       name: '',
       flName: '',
-      monthlyIncome: '',
-      riskFactor: '',
-      diplomatStatus: ''
+      riskLevelId: '',
+      diplomatStatus: '',
+      sraId: '',
+      pfgId: '',
+      approvalLevel: '',
+      isInactive: false
     },
     maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object().shape({
-      name: yup.string().required(' '),
-      reference: yup.string().required(' '),
-      flName: yup.string().required(' '),
-      monthlyIncome: yup
-        .string()
-        .required(' ')
-        .test({
-          name: 'greaterThanZero',
-          exclusive: true,
-          message: ' ',
-          test: value => parseFloat(value) > 0
-        }),
-      riskFactor: yup.string().required(' '),
-      diplomatStatus: yup.string().required(' ')
+      name: yup.string().required(),
+      reference: yup.string().required(),
+      flName: yup.string().required(),
+      sraId: yup.string().required(),
+      diplomatStatus: yup.string().required()
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
@@ -67,13 +63,13 @@ export default function ProfessionsForm({ labels, maxAccess, recordId, setStore 
           recordId: response.recordId,
           name: obj.name
         })
-        toast.success('Record Added Successfully')
+        toast.success(platformLabels.Added)
 
         formik.setValues({
           ...obj,
           recordId: response.recordId
         })
-      } else toast.success('Record Edited Successfully')
+      } else toast.success(platformLabels.Edited)
 
       setEditMode(true)
       invalidate()
@@ -142,32 +138,59 @@ export default function ProfessionsForm({ labels, maxAccess, recordId, setStore 
                 error={formik.touched.flName && Boolean(formik.errors.flName)}
               />
             </Grid>
-
             <Grid item xs={12}>
-              <CustomNumberField
-                name='monthlyIncome'
-                type='text'
-                label={labels.monthlyIncome}
-                value={formik.values.monthlyIncome}
+              <ResourceComboBox
+                endpointId={RemittanceSettingsRepository.SalaryRange.qry}
+                name='sraId'
+                label={labels.salaryRange}
+                valueField='recordId'
                 required
-                maxAccess={maxAccess}
-                onChange={e => formik.setFieldValue('monthlyIncome', e.target.value)}
-                onClear={() => formik.setFieldValue('monthlyIncome', '')}
-                error={formik.touched.monthlyIncome && Boolean(formik.errors.monthlyIncome)}
-                maxLength={10}
+                displayField={['min', '->', 'max']}
+                columnsInDropDown={[
+                  { key: 'min', value: 'MIN' },
+                  { key: 'max', value: 'MAX' }
+                ]}
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('sraId', newValue ? newValue?.recordId : '')
+                }}
+                error={formik.touched.sraId && Boolean(formik.errors.sraId)}
               />
             </Grid>
             <Grid item xs={12}>
-              <CustomTextField
-                name='riskFactor'
-                label={labels.riskFactor}
-                value={formik.values.riskFactor}
-                required
-                type='number'
-                maxAccess={maxAccess}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('riskFactor', '')}
-                error={formik.touched.riskFactor && Boolean(formik.errors.riskFactor)}
+              <ResourceComboBox
+                endpointId={CurrencyTradingSettingsRepository.RiskLevel.qry}
+                name='riskLevelId'
+                label={labels.riskLevel}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('riskLevelId', newValue ? newValue?.recordId : '')
+                }}
+                error={formik.touched.riskLevelId && Boolean(formik.errors.riskLevelId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={RemittanceSettingsRepository.ProfessionGroups.qry}
+                name='pfgId'
+                label={labels.professionGroups}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('pfgId', newValue ? newValue?.recordId : '')
+                }}
+                error={formik.touched.pfgId && Boolean(formik.errors.pfgId)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -185,6 +208,34 @@ export default function ProfessionsForm({ labels, maxAccess, recordId, setStore 
                   formik.setFieldValue('diplomatStatus', newValue?.key)
                 }}
                 error={formik.touched.diplomatStatus && Boolean(formik.errors.diplomatStatus)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.APPROVAL_LEVEL}
+                name='approvalLevel'
+                label={labels.approvalLevel}
+                valueField='key'
+                displayField='value'
+                values={formik.values}
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('approvalLevel', newValue?.key)
+                }}
+                error={formik.touched.approvalLevel && Boolean(formik.errors.approvalLevel)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name='isInactive'
+                    checked={formik.values?.isInactive}
+                    onChange={formik.handleChange}
+                    maxAccess={maxAccess}
+                  />
+                }
+                label={labels.isInActive}
               />
             </Grid>
           </Grid>

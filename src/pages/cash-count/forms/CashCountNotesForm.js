@@ -65,7 +65,7 @@ export default function CashCountNotesForm({
             changes: {
               counted,
               currencyNotes,
-              variation: counted - row.system,
+              variation: counted - (row.system || 0),
               flag: row.system === counted ? true : false
             }
           })
@@ -129,6 +129,7 @@ export default function CashCountNotesForm({
   const total = formik.values?.currencyNotes?.reduce((acc, { subTotal }) => {
     return acc + (subTotal || 0)
   }, 0)
+
   function sumQty({ update, newRow }) {
     const note = newRow?.note || 0
     const qty1 = newRow?.qty1 || 0
@@ -164,7 +165,7 @@ export default function CashCountNotesForm({
             columns={[
               {
                 component: 'numberfield',
-                label: labels.note,
+                label: labels.currencyNote,
                 name: 'note',
                 props: {
                   readOnly: true
@@ -175,7 +176,8 @@ export default function CashCountNotesForm({
                 label: labels.qty1,
                 name: 'qty1',
                 props: {
-                  readOnly: readOnly
+                  readOnly: readOnly,
+                  decimalScale: 0
                 },
                 async onChange({ row }) {
                   sumQty(row)
@@ -186,7 +188,8 @@ export default function CashCountNotesForm({
                 label: labels.qty100,
                 name: 'qty100',
                 props: {
-                  readOnly: readOnly
+                  readOnly: readOnly,
+                  decimalScale: 0
                 },
                 async onChange({ row }) {
                   sumQty(row)
@@ -197,7 +200,8 @@ export default function CashCountNotesForm({
                 label: labels.qty1000,
                 name: 'qty1000',
                 props: {
-                  readOnly: readOnly
+                  readOnly: readOnly,
+                  decimalScale: 0
                 },
                 async onChange({ row }) {
                   sumQty(row)

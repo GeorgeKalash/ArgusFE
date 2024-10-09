@@ -1,59 +1,41 @@
-import { Box } from '@mui/material'
-import { useContext, useState } from 'react'
+import { useContext } from 'react'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import Table from 'src/components/Shared/Table'
 import toast from 'react-hot-toast'
-import { formatDateDefault } from 'src/lib/date-helper'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { CTTRXrepository } from 'src/repositories/CTTRXRepository'
 import { useWindow } from 'src/windows'
-import { getFormattedNumber } from 'src/lib/numberField-helper'
-
-// ** Windows
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CreditOrderForm from './Forms/CreditOrderForm'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
+import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
+import { SystemFunction } from 'src/resources/SystemFunction'
+import { useError } from 'src/error'
 
 const CreditOrder = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
-
-  //states
-  const [windowOpen, setWindowOpen] = useState(false)
-  const [errorMessage, setErrorMessage] = useState(null)
-  const [plantId, setPlantId] = useState(null)
+  const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
+  const { stack: stackError } = useError()
 
   const userData = window.sessionStorage.getItem('userData')
     ? JSON.parse(window.sessionStorage.getItem('userData'))
     : null
 
   const getPlantId = async () => {
-    const parameters = `_userId=${userData && userData.userId}&_key=plantId`
-
     try {
       const res = await getRequest({
         extension: SystemRepository.UserDefaults.get,
-        parameters: parameters
+        parameters: `_userId=${userData && userData.userId}&_key=plantId`
       })
 
-      if (res.record.value) {
-        setPlantId(res.record.value)
-
-        return res.record.value
-      }
-
-      setPlantId('')
-
-      return ''
+      return res?.record?.value
     } catch (error) {
-      throw new Error(error)
-      setPlantId('')
-
       return ''
     }
   }
@@ -97,25 +79,39 @@ const CreditOrder = () => {
     endpointId: CTTRXrepository.CreditOrder.page
   })
 
+  const { proxyAction } = useDocumentTypeProxy({
+    functionId: SystemFunction.CurrencyCreditOrderPurchase,
+    action: async () => {
+      const plantId = await getPlantId()
+      if (plantId !== '') {
+        openFormWindow(null, plantId)
+      } else {
+        stackError({
+          message: `The user does not have a default plant`
+        })
+
+        return
+      }
+    },
+    hasDT: false
+  })
+
   const add = async () => {
-    const plantId = await getPlantId()
-    if (plantId !== '') {
-      openFormWindow(null, plantId)
-    } else {
-      throw new Error('The user does not have a default plant')
-    }
+    proxyAction()
   }
 
   async function openFormWindow(recordId) {
     if (!recordId) {
-      try {
-        const plantId = await getPlantId()
-        if (plantId !== '') {
-          openForm('', plantId)
-        } else {
-          throw new Error('The user does not have a default plant')
-        }
-      } catch (error) {}
+      const plantId = await getPlantId()
+      if (plantId !== '') {
+        openForm('', plantId)
+      } else {
+        stackError({
+          message: `The user does not have a default plant`
+        })
+
+        return
+      }
     } else {
       openForm(recordId)
     }
@@ -125,7 +121,7 @@ const CreditOrder = () => {
       Component: CreditOrderForm,
       props: {
         labels,
-        maxAccess: access,
+        access,
         plantId: plantId,
         userData: userData,
         recordId
@@ -136,13 +132,17 @@ const CreditOrder = () => {
     })
   }
 
+  const edit = obj => {
+    openFormWindow(obj.recordId)
+  }
+
   const del = async obj => {
     await postRequest({
       extension: CTTRXrepository.CreditOrder.del,
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
   }
 
   return (
@@ -169,7 +169,7 @@ const CreditOrder = () => {
               field: 'date',
               headerName: labels.date,
               flex: 1,
-              valueGetter: ({ row }) => formatDateDefault(row?.date)
+              type: 'date'
             },
             {
               field: 'plantRef',
@@ -189,7 +189,7 @@ const CreditOrder = () => {
               field: 'amount',
               headerName: labels.amount,
               flex: 1,
-              valueGetter: ({ row }) => getFormattedNumber(row?.amount)
+              type: 'number'
             },
             {
               field: 'rsName',
@@ -209,9 +209,7 @@ const CreditOrder = () => {
           ]}
           gridData={data ?? { list: [] }}
           rowId={['recordId']}
-          onEdit={obj => {
-            openFormWindow(obj.recordId, plantId)
-          }}
+          onEdit={edit}
           refetch={refetch}
           onDelete={del}
           isLoading={false}
@@ -221,7 +219,6 @@ const CreditOrder = () => {
           paginationType='api'
         />
       </Grow>
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </VertLayout>
   )
 }

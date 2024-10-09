@@ -11,14 +11,17 @@ import toast from 'react-hot-toast'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const BeneficiaryCash = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const { platformLabels } = useContext(ControlContext)
 
   const {
     query: { data },
     filterBy,
+    refetch,
     clearFilter,
     labels: _labels,
     access,
@@ -35,14 +38,20 @@ const BeneficiaryCash = () => {
 
   async function fetchWithSearch({ options = {}, filters }) {
     const { _clientId = 0, _dispersalType = 1 } = options
-    if (!filters.qry) {
-      return { list: [] }
-    } else {
-      return await getRequest({
-        extension: RemittanceOutwardsRepository.Beneficiary.snapshot,
-        parameters: `_clientId=${_clientId}&_dispersalType=${_dispersalType}&_filter=${filters.qry}`
-      })
-    }
+
+    const res = await getRequest({
+      extension: RemittanceOutwardsRepository.Beneficiary.snapshot,
+      parameters: `_clientId=${_clientId}&_dispersalType=${_dispersalType}&_filter=${filters.qry}&_currencyId=0`
+    })
+    res.list = res.list.map(item => {
+      if (item.isInactive === null) {
+        item.isInactive = false
+      }
+
+      return item
+    })
+
+    return res
   }
 
   async function openForm(obj) {
@@ -109,7 +118,12 @@ const BeneficiaryCash = () => {
     {
       field: 'isBlocked',
       headerName: _labels.isBlocked,
-      flex: 1
+      type: 'checkbox'
+    },
+    {
+      field: 'isInactive',
+      headerName: _labels.isInactive,
+      type: 'checkbox'
     }
   ]
 
@@ -119,7 +133,7 @@ const BeneficiaryCash = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
   }
 
   const addBenCash = () => {
@@ -149,7 +163,8 @@ const BeneficiaryCash = () => {
       <Grow>
         <Table
           columns={columns}
-          gridData={data ? data : { list: [] }}
+          gridData={data}
+          refetch={refetch}
           rowId={['beneficiaryId', 'clientId', 'seqNo']}
           onEdit={editBenCash}
           onDelete={delBenCash}

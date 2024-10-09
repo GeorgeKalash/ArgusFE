@@ -21,11 +21,13 @@ import { DataSets } from 'src/resources/DataSets'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [referenceRequired, setReferenceRequired] = useState(true)
   const [editMode, setEditMode] = useState(!!recordId)
+  const { platformLabels } = useContext(ControlContext)
 
   const [initialValues, setInitialData] = useState({
     //ClientCorporate
@@ -61,6 +63,7 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
     subNo: null,
     unitNo: null,
     bldgNo: '',
+    poBox: null,
 
     //end address
 
@@ -172,7 +175,8 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
       cityDistrictId: obj.cityDistrictId,
       bldgNo: obj.bldgNo,
       unitNo: obj.unitNo,
-      subNo: obj.subNo
+      subNo: obj.subNo,
+      poBox: obj.poBox
     }
 
     const data = {
@@ -185,7 +189,7 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
       record: JSON.stringify(data)
     })
       .then(res => {
-        toast.success('Record Successfully')
+        toast.success(platformLabels.Submit)
         setEditMode(true)
         getClient(res.recordId)
       })
@@ -232,6 +236,7 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
             subNo: obj.addressView?.subNo,
             unitNo: obj.addressView?.unitNo,
             bldgNo: obj.addressView?.bldgNo,
+            poBox: obj.addressView?.poBox,
 
             //end address
 
@@ -265,6 +270,18 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
       key: 'Client Relation',
       condition: true,
       onClick: 'onClientRelation',
+      disabled: !editMode
+    },
+    {
+      key: 'Add Client Relation',
+      condition: true,
+      onClick: 'onAddClientRelation',
+      disabled: !editMode
+    },
+    {
+      key: 'Client Balance',
+      condition: true,
+      onClick: 'onClientBalance',
       disabled: !editMode
     }
   ]
@@ -562,7 +579,12 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
             </Grid>
             <Grid item xs={6}>
               <FieldSet title={_labels.address}>
-                <AddressTab labels={_labels} access={maxAccess} addressValidation={formik} readOnly={editMode && true} />
+                <AddressTab
+                  labels={_labels}
+                  access={maxAccess}
+                  addressValidation={formik}
+                  readOnly={editMode && true}
+                />
               </FieldSet>
               <Grid item xs={12}>
                 <FormControlLabel
