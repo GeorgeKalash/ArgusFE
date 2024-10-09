@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -22,23 +22,23 @@ import { getStorageData } from 'src/storage/storage'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { ControlContext } from 'src/providers/ControlContext'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
-import FieldSet from 'src/components/Shared/FieldSet'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { useWindow } from 'src/windows'
 import InfoForm from 'src/pages/outwards-order/Tabs/InfoForm'
 
-export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId, cashAccountId }) {
+export default function ReceiptVoucherForm({ labels, access, recordId, cashAccountId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
-  const { documentType, maxAccess } = useDocumentType({
+  const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.RemittanceReceiptVoucher,
-    access: access
+    access: access,
+    enabled: !recordId
   })
 
   const invalidate = useInvalidate({
-    endpointId: RemittanceOutwardsRepository.ReceiptVouchers.qry
+    endpointId: RemittanceOutwardsRepository.ReceiptVouchers.page
   })
 
   const { formik } = useForm({
@@ -74,51 +74,49 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       ]
     },
 
-    // validationSchema: yup.object({
-    //   accountId: yup.string().required(),
-    //   cashAccountId: yup.string().required(),
-    //   amount: yup.string().required(),
-    //   cash: yup
-    //     .array()
-    //     .of(
-    //       yup.object().shape({
-    //         type: yup
-    //           .string()
-    //           .required('Type is required')
-    //           .test('unique', 'Type must be unique', function (value) {
-    //             const { options } = this
-    //             if (!this.parent.outwardId) {
-    //               const arrayOfTypes = options.context.cash.map(row => row.type)
-    //               if (value == 2) {
-    //                 const countOfType1 = arrayOfTypes.filter(item => item === '2').length
-    //                 if (countOfType1 > 1) {
-    //                   return false
-    //                 }
-    //               }
-    //             }
+    validationSchema: yup.object({
+      owoId: yup.string().required(),
+      cash: yup
+        .array()
+        .of(
+          yup.object().shape({
+            type: yup
+              .string()
+              .required('Type is required')
+              .test('unique', 'Type must be unique', function (value) {
+                const { options } = this
+                if (!this.parent.outwardId) {
+                  const arrayOfTypes = options.context.cash.map(row => row.type)
+                  if (value == 2) {
+                    const countOfType1 = arrayOfTypes.filter(item => item === '2').length
+                    if (countOfType1 > 1) {
+                      return false
+                    }
+                  }
+                }
 
-    //             return true
-    //           }),
-    //         paidAmount: yup.string().test('Paid Amount', 'Paid Amount is required', function (value) {
-    //           if (this.parent.type == '2') {
-    //             return !!value
-    //           }
+                return true
+              }),
+            paidAmount: yup.string().test('Paid Amount', 'Paid Amount is required', function (value) {
+              if (this.parent.type == '2') {
+                return !!value
+              }
 
-    //           return true
-    //         }),
-    //         returnedAmount: yup.string().test('Returned Amount', 'Returned Amount is required', function (value) {
-    //           if (this.parent.type == '2') {
-    //             return !!value
-    //           }
+              return true
+            }),
+            returnedAmount: yup.string().test('Returned Amount', 'Returned Amount is required', function (value) {
+              if (this.parent.type == '2') {
+                return !!value
+              }
 
-    //           return true
-    //         }),
-    //         amount: yup.string().nullable().required('Amount is required')
-    //       })
-    //     )
+              return true
+            }),
+            amount: yup.string().nullable().required('Amount is required')
+          })
+        )
 
-    //     .required('Cash array is required')
-    // }),
+        .required('Cash array is required')
+    }),
     onSubmit: async obj => {
       const header = {
         recordId: formik.values.recordId,
@@ -132,17 +130,38 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
         status: formik.values.status
       }
 
-      const data = { header: header, cash: formik.values.cash }
+      const cash = formik.values.cash.map((cash, index) => ({
+        ...cash,
+        id: index + 1,
+        seqNo: index + 1,
+        posStatus: 1,
+        cashAccountId: cashAccountId
+      }))
+
+      const data = { header: header, cash: cash }
+
+      const totalCashAmount = formik.values.cash
+        .reduce((sum, current) => sum + parseFloat(current.amount || 0), 0)
+        .toFixed(2)
+
+      if (totalCashAmount !== formik.values.amount.toFixed(2)) {
+        toast.error('The total amount does not match the sum of amounts in the grid.')
+
+        return
+      }
 
       const response = await postRequest({
         extension: RemittanceOutwardsRepository.ReceiptVouchers.set2,
         record: JSON.stringify(data)
       })
+
       if (!obj.recordId) {
         toast.success(platformLabels.Added)
         formik.setFieldValue('recordId', response.recordId)
         getData(response.recordId)
-      } else toast.success(platformLabels.Edited)
+      } else {
+        toast.success(platformLabels.Edited)
+      }
       invalidate()
     }
   })
@@ -208,13 +227,23 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       status: formik.values.status
     }
 
+    const totalCashAmount = formik.values.cash
+      .reduce((sum, current) => sum + parseFloat(current.amount || 0), 0)
+      .toFixed(2)
+
+    if (totalCashAmount !== formik.values.amount.toFixed(2)) {
+      toast.error('The total amount does not match the sum of amounts in the grid.')
+
+      return
+    }
+
     const res = await postRequest({
       extension: RemittanceOutwardsRepository.ReceiptVouchers.post,
       record: JSON.stringify(data)
     })
 
     if (res) {
-      toast.success('Record Posted Successfully')
+      toast.success(platformLabels.Posted)
       invalidate()
       getData()
     }
@@ -245,7 +274,8 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
         mapping: [
           { from: 'key', to: 'type' },
           { from: 'value', to: 'typeName' }
-        ]
+        ],
+        readOnly: isPosted
       },
       async onChange({ row: { update, newRow } }) {
         if (newRow.type != 2) return
@@ -265,6 +295,9 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       name: 'paidAmount',
       label: labels.paidAmount,
       defaultValue: '',
+      props: {
+        readOnly: true
+      },
       propsReducer({ row, props }) {
         return { ...props, readOnly: row.type == 1 || !row.type }
       },
@@ -306,25 +339,56 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       component: 'numberfield',
       name: 'amount',
       label: labels.Amount,
-      defaultValue: ''
+      defaultValue: '',
+      props: {
+        readOnly: isPosted
+      }
     },
     {
       component: 'numberfield',
       header: labels.bankFees,
       name: 'bankFees',
-      label: labels.bankFees
+      label: labels.bankFees,
+      props: {
+        readOnly: isPosted
+      }
     },
     {
       component: 'textfield',
       header: labels.receiptRef,
       name: 'receiptRef',
-      label: labels.receiptRef
+      label: labels.receiptRef,
+      props: {
+        readOnly: isPosted
+      }
     },
     {
-      component: 'textfield',
-      header: labels.posStatusName,
+      component: 'resourcecombobox',
+      label: labels.posStatusName,
       name: 'posStatusName',
-      label: labels.posStatusName
+      props: {
+        readOnly: true,
+        datasetId: DataSets.RT_POSSTATUS,
+        displayField: 'value',
+        valueField: 'key',
+        mapping: [
+          { from: 'value', to: 'posStatusName' },
+          { from: 'key', to: 'posStatus' }
+        ]
+      }
+    },
+    {
+      component: 'button',
+      name: 'POS',
+      label: labels.POS,
+      onClick: (e, row, update, updateRow) => {
+        stack({
+          Component: CashCountNotes,
+          props: {},
+          width: 700,
+          title: labels.POS
+        })
+      }
     }
   ]
 
@@ -394,6 +458,8 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                     form={formik}
                     secondDisplayField={false}
                     valueShow='owoRef'
+                    readOnly={isPosted}
+                    required
                     maxAccess={maxAccess}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
@@ -429,23 +495,16 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
           </Grid>
         </Fixed>
         <Grow>
-          <Grid container>
-            <FieldSet title='Amount'>
-              <Grid width={'100%'}>
-                <DataGrid
-                  onChange={value => formik.setFieldValue('cash', value)}
-                  value={formik.values.cash}
-                  error={formik.errors.cash}
-                  disabled={editMode}
-                  allowAddNewLine={!editMode}
-                  maxAccess={maxAccess}
-                  name='cash'
-                  height={170}
-                  columns={columns}
-                />
-              </Grid>
-            </FieldSet>
-          </Grid>
+          <DataGrid
+            onChange={value => formik.setFieldValue('cash', value)}
+            value={formik.values.cash}
+            error={formik.errors.cash}
+            maxAccess={maxAccess}
+            allowDelete={!isPosted}
+            allowAddNewLine={!isPosted}
+            name='cash'
+            columns={columns}
+          />
         </Grow>
       </VertLayout>
     </FormShell>

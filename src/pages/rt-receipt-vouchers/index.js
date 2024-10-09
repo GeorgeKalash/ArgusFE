@@ -16,9 +16,11 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { getStorageData } from 'src/storage/storage'
 import { useError } from 'src/error'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function RtReceiptVouchers() {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
   const userData = getStorageData('userData')
@@ -60,12 +62,12 @@ export default function RtReceiptVouchers() {
       Component: ReceiptVoucherForm,
       props: {
         labels,
-        maxAccess: access,
+        access: access,
         recordId: recordId || null,
         cashAccountId: cashAccountId
       },
-      width: 1000,
-      height: 700,
+      width: 1200,
+      height: 500,
       title: labels.receiptVoucher
     })
   }
@@ -83,14 +85,13 @@ export default function RtReceiptVouchers() {
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
-    try {
-      const response = await getRequest({
-        extension: RemittanceOutwardsRepository.ReceiptVouchers.page,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
-      })
 
-      return { ...response, _startAt: _startAt }
-    } catch (e) {}
+    const response = await getRequest({
+      extension: RemittanceOutwardsRepository.ReceiptVouchers.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
+    })
+
+    return { ...response, _startAt: _startAt }
   }
 
   const { proxyAction } = useDocumentTypeProxy({
@@ -133,7 +134,7 @@ export default function RtReceiptVouchers() {
         record: JSON.stringify(obj)
       })
       invalidate()
-      toast.success('Record Deleted Successfully')
+      toast.success(platformLabels.Deleted)
     } catch (e) {}
   }
 
