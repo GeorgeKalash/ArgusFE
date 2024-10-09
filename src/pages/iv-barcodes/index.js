@@ -95,7 +95,7 @@ const IvBarcodes = () => {
     },
     {
       field: 'muName',
-      headerName: _labels.measurementUnit,
+      headerName: _labels.msUnit,
       flex: 1
     },
     {

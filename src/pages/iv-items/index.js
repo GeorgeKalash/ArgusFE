@@ -114,13 +114,14 @@ const IvItems = () => {
     }
   ]
 
-  function openForm(recordId, sku) {
+  function openForm(recordId, sku, name) {
     stack({
       Component: ItemWindow,
       props: {
         labels: _labels,
         recordId: recordId ? recordId : null,
         sku: sku ? sku : null,
+        itemName: name,
         maxAccess: access
       },
       width: 1200,
@@ -130,7 +131,7 @@ const IvItems = () => {
   }
 
   const edit = obj => {
-    openForm(obj?.recordId, obj?.sku)
+    openForm(obj?.recordId, obj?.sku, obj?.name)
   }
 
   const add = () => {

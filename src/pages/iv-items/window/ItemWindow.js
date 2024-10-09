@@ -12,7 +12,7 @@ import ItemProductionForm from '../forms/ItemProductionForm.js'
 import KitForm from '../forms/KitForm.js'
 import RetailForm from '../forms/RetailForm.js'
 
-const ItemWindow = ({ recordId, labels, maxAccess }) => {
+const ItemWindow = ({ recordId, labels, sku, itemName, maxAccess }) => {
   const [activeTab, setActiveTab] = useState(0)
   const [formikInitial, setFormikInitial] = useState([])
   const editMode = !!recordId
@@ -58,7 +58,7 @@ const ItemWindow = ({ recordId, labels, maxAccess }) => {
         />
       </CustomTabPanel>
       <CustomTabPanel height={660} index={1} value={activeTab}>
-        <BarcodeForm labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} />
+        <BarcodeForm labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} sku={sku} itemName={itemName} />
       </CustomTabPanel>
       <CustomTabPanel height={660} index={2} value={activeTab}>
         <SalesList labels={labels} maxAccess={maxAccess} store={store} formikInitial={formikInitial} />

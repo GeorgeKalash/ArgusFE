@@ -17,7 +17,7 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { useInvalidate } from 'src/hooks/resource'
 
-export default function BarcodesForm({ labels, access, recordId, barcode, msId }) {
+export default function BarcodesForm({ labels, access, recordId, barcode, msId, obj, sku, itemName }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -29,8 +29,9 @@ export default function BarcodesForm({ labels, access, recordId, barcode, msId }
     initialValues: {
       recordId: barcode,
       itemId: recordId,
-      sku: null,
+      sku: sku,
       defaultQty: null,
+      itemName: itemName,
       muId: null,
       msId: msId,
       scaleDescription: null,
@@ -45,15 +46,15 @@ export default function BarcodesForm({ labels, access, recordId, barcode, msId }
       itemId: yup.string().required(),
       barcode: yup.string().required()
     }),
-    onSubmit: async obj => {
+    onSubmit: async values => {
       await postRequest({
         extension: InventoryRepository.Barcodes.set,
-        record: JSON.stringify(obj)
+        record: JSON.stringify(values)
       })
 
-      if (!obj.recordId) {
+      if (!values.recordId) {
         toast.success(platformLabels.Added)
-        formik.setFieldValue('recordId', obj?.barcode)
+        formik.setFieldValue('recordId', values?.barcode)
       } else toast.success(platformLabels.Edited)
       invalidate()
 
@@ -70,6 +71,8 @@ export default function BarcodesForm({ labels, access, recordId, barcode, msId }
           parameters: `_barcode=${barcode}`
         })
         formik.setValues({ ...res.record, recordId: res?.record?.barcode })
+      } else if (obj) {
+        formik.setValues({ ...obj, recordId: obj?.barcode })
       }
     })()
   }, [])
@@ -98,7 +101,7 @@ export default function BarcodesForm({ labels, access, recordId, barcode, msId }
                 endpointId={InventoryRepository.Item.snapshot}
                 name='itemId'
                 label={labels?.sku}
-                readOnly={editMode}
+                readOnly={editMode || (!!sku && !!itemName)}
                 valueField='recordId'
                 displayField='sku'
                 valueShow='sku'
@@ -125,7 +128,7 @@ export default function BarcodesForm({ labels, access, recordId, barcode, msId }
                 parameters={formik?.values?.msId ? `_msId=${formik?.values?.msId}` : ''}
                 readOnly={!formik?.values?.msId}
                 name='muId'
-                label={labels?.measurementUnit}
+                label={labels?.msUnit}
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 columnsInDropDown={[
