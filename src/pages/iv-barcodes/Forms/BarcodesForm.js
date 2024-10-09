@@ -21,6 +21,10 @@ export default function BarcodesForm({ labels, access, recordId, barcode, msId }
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
+  const invalidate = useInvalidate({
+    endpointId: InventoryRepository.Barcodes.qry
+  })
+
   const { formik } = useForm({
     initialValues: {
       recordId: barcode,
@@ -51,6 +55,8 @@ export default function BarcodesForm({ labels, access, recordId, barcode, msId }
         toast.success(platformLabels.Added)
         formik.setFieldValue('recordId', obj?.barcode)
       } else toast.success(platformLabels.Edited)
+      invalidate()
+
     }
   })
 

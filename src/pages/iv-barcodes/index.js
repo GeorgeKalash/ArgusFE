@@ -69,6 +69,10 @@ const IvBarcodes = () => {
     search: {
       endpointId: InventoryRepository.Barcodes.snapshot,
       searchFn: fetchWithSearch
+    },
+        filter: {
+      filterFn: fetchGridData,
+      default: { functionId }
     }
   })
 
