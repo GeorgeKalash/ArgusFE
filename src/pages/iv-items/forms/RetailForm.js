@@ -32,17 +32,15 @@ const RetailForm = ({ store, maxAccess }) => {
 
   useEffect(() => {
     const fetchAccessLevel = async () => {
-      try {
-        const result = await getRecordsNum()
-        setRecordsNum(result.length)
+      const result = await getRecordsNum()
+      setRecordsNum(result.length)
 
-        const initialData = result.map(item => ({
-          key: item.key,
-          value: item.value,
-          checked: false
-        }))
-        setData(initialData)
-      } catch (error) {}
+      const initialData = result.map(item => ({
+        key: item.key,
+        value: item.value,
+        checked: false
+      }))
+      setData(initialData)
     }
 
     fetchAccessLevel()
@@ -86,13 +84,11 @@ const RetailForm = ({ store, maxAccess }) => {
       flags
     }
 
-    try {
-      await postRequest({
-        extension: InventoryRepository.ItemRetail.set,
-        record: JSON.stringify(payload)
-      })
-      toast.success(platformLabels.Updated)
-    } catch (error) {}
+    await postRequest({
+      extension: InventoryRepository.ItemRetail.set,
+      record: JSON.stringify(payload)
+    })
+    toast.success(platformLabels.Updated)
   }
 
   return (
