@@ -255,5 +255,6 @@ export const ResourceIds = {
   SalesDefaults: 51114,
   RemittanceReceiptVoucher: 36323,
   ItemSizes: 41117,
-  OutwardsTransfer: 36324
+  OutwardsTransfer: 36324,
+  MetalColor: 41110
 }
