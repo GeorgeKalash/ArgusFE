@@ -14,7 +14,6 @@ const FiAging = () => {
   const [columns, setColumns] = useState([])
 
   async function fetchWithFilter({ filters }) {
-
     let defaultResponse = {
       count: 0,
       list: [],
@@ -22,102 +21,100 @@ const FiAging = () => {
       message: ''
     }
 
-    try {
-      if (filters?.params) {
-        const response = await getRequest({
-          extension: RGFinancialRepository.FiAging.qry,
-          parameters: `_params=${filters?.params}`
-        })
-  
-        const legs = response?.record?.legs?.reduce((acc, leg) => {
-          acc[leg.seqNo] = leg?.caption
-  
-          return acc
-        }, {})
-  
-        const orderedLegCaptions = Object.keys(legs)
-          .sort((a, b) => a - b)
-          .map(seqNo => legs[seqNo])
-  
-        const list = response?.record?.agings?.map(item => {
-          const agingEntry = {
-            accountId: item.accountId,
-            accountRef: item.accountRef,
-            accountName: item.accountName,
-            Total: 0
-          }
-  
-          item.amounts.forEach(amount => {
-            const legCaption = legs[amount.seqNo]
-            agingEntry[legCaption] = amount.amount || 0
-            agingEntry.Total += amount.amount || 0
-          })
-  
-          orderedLegCaptions.forEach(caption => {
-            if (!(caption in agingEntry)) {
-              agingEntry[caption] = 0
-            }
-          })
-  
-          return agingEntry
-        })
-  
-        const totalRow = {
-          accountId: '',
-          accountRef: '',
-          accountName: '',
+    if (filters?.params) {
+      const response = await getRequest({
+        extension: RGFinancialRepository.FiAging.qry,
+        parameters: `_params=${filters?.params}`
+      })
+
+      const legs = response?.record?.legs?.reduce((acc, leg) => {
+        acc[leg.seqNo] = leg?.caption
+
+        return acc
+      }, {})
+
+      const orderedLegCaptions = Object.keys(legs)
+        .sort((a, b) => a - b)
+        .map(seqNo => legs[seqNo])
+
+      const list = response?.record?.agings?.map(item => {
+        const agingEntry = {
+          accountId: item.accountId,
+          accountRef: item.accountRef,
+          accountName: item.accountName,
           Total: 0
         }
-  
-        orderedLegCaptions?.forEach(caption => {
-          totalRow[caption] = 0
+
+        item.amounts.forEach(amount => {
+          const legCaption = legs[amount.seqNo]
+          agingEntry[legCaption] = amount.amount || 0
+          agingEntry.Total += amount.amount || 0
         })
-  
-        list.forEach(agingEntry => {
-          orderedLegCaptions?.forEach(caption => {
-            totalRow[caption] += agingEntry[caption]
-          })
-          totalRow.Total += agingEntry.Total
-        })
-  
-        const emptyRow = {
-          accountId: '',
-          accountRef: '',
-          accountName: '',
-          Total: ''
-        }
 
         orderedLegCaptions.forEach(caption => {
-          emptyRow[caption] = ''
+          if (!(caption in agingEntry)) {
+            agingEntry[caption] = 0
+          }
         })
 
-        list.push(emptyRow)
-        list.push(totalRow)
-  
-        defaultResponse.count = response?.record?.agings?.length
-        defaultResponse.list = list
-        defaultResponse.statusId = response?.statusId || 1
-        defaultResponse.message = response?.message || ''
-  
-        if (defaultResponse?.list?.length > 0) {
-          const dynamicColumns = [
-            { field: 'accountRef', headerName: _labels.reference, flex: 1 },
-            { field: 'accountName', headerName: _labels.name, flex: 1 },
-            { field: 'Total', headerName: _labels.total, flex: 1, type: 'number' },
-            ...orderedLegCaptions?.map(caption => ({
-              field: caption,
-              headerName: caption,
-              flex: 1,
-              type: 'number'
-            }))
-          ]
-  
-          setColumns(dynamicColumns)
-        }
-  
-        return defaultResponse
+        return agingEntry
+      })
+
+      const totalRow = {
+        accountId: '',
+        accountRef: '',
+        accountName: '',
+        Total: 0
       }
-    } catch (error) {}
+
+      orderedLegCaptions?.forEach(caption => {
+        totalRow[caption] = 0
+      })
+
+      list.forEach(agingEntry => {
+        orderedLegCaptions?.forEach(caption => {
+          totalRow[caption] += agingEntry[caption]
+        })
+        totalRow.Total += agingEntry.Total
+      })
+
+      const emptyRow = {
+        accountId: '',
+        accountRef: '',
+        accountName: '',
+        Total: ''
+      }
+
+      orderedLegCaptions.forEach(caption => {
+        emptyRow[caption] = ''
+      })
+
+      list.push(emptyRow)
+      list.push(totalRow)
+
+      defaultResponse.count = response?.record?.agings?.length
+      defaultResponse.list = list
+      defaultResponse.statusId = response?.statusId || 1
+      defaultResponse.message = response?.message || ''
+
+      if (defaultResponse?.list?.length > 0) {
+        const dynamicColumns = [
+          { field: 'accountRef', headerName: _labels.reference, flex: 1 },
+          { field: 'accountName', headerName: _labels.name, flex: 1 },
+          { field: 'Total', headerName: _labels.total, flex: 1, type: 'number' },
+          ...orderedLegCaptions?.map(caption => ({
+            field: caption,
+            headerName: caption,
+            flex: 1,
+            type: 'number'
+          }))
+        ]
+
+        setColumns(dynamicColumns)
+      }
+
+      return defaultResponse
+    }
   }
 
   const {
@@ -142,13 +139,7 @@ const FiAging = () => {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar
-          labels={_labels}
-          maxAccess={access}
-          onApply={onApply}
-          reportName={'FI04'}
-          hasSearch={false}
-        />
+        <RPBGridToolbar labels={_labels} maxAccess={access} onApply={onApply} reportName={'FI04'} hasSearch={false} />
       </Fixed>
       <Grow>
         <Table
