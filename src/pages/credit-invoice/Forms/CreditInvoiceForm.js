@@ -36,8 +36,6 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
   const { stack } = useWindow()
   const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
-  const [toCurrency, setToCurrency] = useState(null)
-  const [toCurrencyRef, setToCurrencyRef] = useState(null)
   const [baseCurrencyRef, setBaseCurrencyRef] = useState(null)
   const [selectedFunctionId, setFunctionId] = useState(SystemFunction.CreditInvoicePurchase)
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -49,6 +47,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
   const [initialValues, setInitialData] = useState({
     recordId: recordId || null,
     currencyId: '',
+    currencyRef: '',
     date: new Date(),
     dtId: '',
     functionId: SystemFunction.CreditInvoicePurchase,
@@ -190,20 +189,13 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
       copy.amount = totalCUR
       copy.baseAmount = totalLoc
 
-      const lastRow = formik.values.rows[formik.values.rows.length - 1]
-
-      const isLastRowMandatoryOnly = !lastRow.currencyRef && !lastRow.qty && !lastRow.exRate && !lastRow.amount
-
-      // If last row contains only mandatory fields, remove it
-      const updatedRows = formik.values.rows
-        .filter((_, index) => !(index === formik.values.rows.length - 1 && isLastRowMandatoryOnly))
-        .map((orderDetail, index) => {
-          return {
-            ...orderDetail,
-            seqNo: index + 1,
-            invoiceId: formik.values.recordId || 0
-          }
-        })
+      const updatedRows = formik.values.rows.map((orderDetail, index) => {
+        return {
+          ...orderDetail,
+          seqNo: index + 1,
+          invoiceId: formik.values.recordId || 0
+        }
+      })
 
       const resultObject = {
         header: copy,
@@ -250,9 +242,6 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
     const res = await getInvoice(recordId)
     const res2 = await fillItemsGrid(recordId)
 
-    setToCurrency(res?.record?.currencyId)
-    setToCurrencyRef(res?.record?.currencyRef)
-
     formik.setValues(prevValues => ({
       ...prevValues,
       ...res.record,
@@ -269,17 +258,14 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
         extension: RemittanceSettingsRepository.Correspondent.get,
         parameters: `_recordId=${recordId}`
       })
-      setToCurrency(res?.record?.currencyId)
-      setToCurrencyRef(res?.record?.currencyRef)
+      formik.setFieldValue('currencyId', res?.record?.currencyId)
+      formik.setFieldValue('currencyRef', res?.record?.currencyRef)
 
       const evalRate = await getRequest({
         extension: CurrencyTradingSettingsRepository.Defaults.get,
         parameters: '_key=ct_credit_eval_ratetype_id'
       })
-      getEXMBase(plant, res?.record?.currencyId, baseCurrency, evalRate?.record?.value)
-    } else {
-      setToCurrency(null)
-      setToCurrencyRef(null)
+      await getEXMBase(plant, res?.record?.currencyId, baseCurrency, evalRate?.record?.value)
     }
   }
 
@@ -413,19 +399,6 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
     formik.setFieldValue('cashAccountName', res?.record?.name)
   }
 
-  useEffect(() => {
-    ;(async function () {
-      if (recordId) {
-        await refetchForm(recordId)
-        await getBaseCurrency()
-      } else {
-        await setOperationType(SystemFunction.CreditInvoicePurchase)
-        await getDefaultDT(SystemFunction.CreditInvoicePurchase)
-        if (cashAccountId) await getCashAcc()
-      }
-    })()
-  }, [])
-
   const onPost = async () => {
     const res = await postRequest({
       extension: CTTRXrepository.CreditInvoice.post,
@@ -455,7 +428,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
         recordId: formik.values.recordId
       },
       width: 950,
-      title: 'Workflow'
+      title: _labels.workflow
     })
   }
 
@@ -470,7 +443,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
       },
       width: 1200,
       height: 670,
-      title: 'Shipments'
+      title: _labels.shipments
     })
   }
 
@@ -484,7 +457,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
       },
       width: 700,
       height: 430,
-      title: 'Transportation'
+      title: _labels.transportation
     })
   }
 
@@ -563,9 +536,9 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
 
         const exchange = await getEXMCur({
           plantId: plantId ?? formik.values.plantId,
-          toCurrency: toCurrency ?? '',
-          fromCurrency: newRow?.currencyId ?? '',
-          rateType: formik.values.rateType ?? ''
+          toCurrency: formik?.values?.currencyId,
+          fromCurrency: newRow?.currencyId,
+          rateType: formik?.values?.rateType
         })
         if (!exchange?.rate) {
           update({
@@ -616,6 +589,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
       component: 'textfield',
       label: _labels.name,
       name: 'currencyName',
+      readOnly: true,
       props: {
         readOnly: true,
         disabled:
@@ -750,7 +724,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
     },
     {
       component: 'numberfield',
-      label: `${_labels.total} ${toCurrencyRef !== null ? toCurrencyRef : ''}`,
+      label: `${_labels.total} ${formik.values.currencyRef !== null ? formik.values.currencyRef : ''}`,
       name: 'amount',
       props: {
         readOnly: true,
@@ -764,6 +738,19 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
       width: 130
     }
   ]
+
+  useEffect(() => {
+    ;(async function () {
+      if (recordId) {
+        await refetchForm(recordId)
+        await getBaseCurrency()
+      } else {
+        await setOperationType(SystemFunction.CreditInvoicePurchase)
+        await getDefaultDT(SystemFunction.CreditInvoicePurchase)
+        if (cashAccountId) await getCashAcc()
+      }
+    })()
+  }, [])
 
   return (
     <FormShell
@@ -846,14 +833,10 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
                   if (newValue) {
                     const baseCurrency = await getBaseCurrency()
                     getCorrespondentById(newValue?.recordId, baseCurrency, formik.values.plantId)
-                    formik.setFieldValue('corId', newValue?.recordId)
-                    formik.setFieldValue('corName', newValue?.name || '')
-                    formik.setFieldValue('corRef', newValue?.reference || '')
-                  } else {
-                    formik.setFieldValue('corId', null)
-                    formik.setFieldValue('corName', null)
-                    formik.setFieldValue('corRef', null)
                   }
+                  formik.setFieldValue('corId', newValue ? newValue.recordId : '')
+                  formik.setFieldValue('corName', newValue ? newValue.name : '')
+                  formik.setFieldValue('corRef', newValue ? newValue.reference : '')
                 }}
                 errorCheck={'corId'}
               />
@@ -951,7 +934,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
               <Grid item xs={12}>
                 <CustomTextField
                   name='totalCUR'
-                  label={`${_labels.total} ${toCurrencyRef !== null ? toCurrencyRef : ''}`}
+                  label={`${_labels.total} ${formik.values.currencyRef !== null ? formik.values.currencyRef : ''}`}
                   value={getFormattedNumber(totalCUR.toFixed(2))}
                   numberField={true}
                   readOnly={true}

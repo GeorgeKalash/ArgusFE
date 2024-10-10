@@ -90,6 +90,7 @@ const CreditInvoice = () => {
   async function openForm(recordId) {
     let plantId
     let cashAccountId
+
     if (!recordId) {
       plantId = await getPlantId()
       if (!plantId) {
@@ -100,6 +101,7 @@ const CreditInvoice = () => {
         return
       }
     }
+
     if (!recordId) cashAccountId = await getCashAccountId()
 
     stack({
