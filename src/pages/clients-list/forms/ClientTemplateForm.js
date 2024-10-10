@@ -20,7 +20,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { DataSets } from 'src/resources/DataSets'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
-import { formatDateToApiFunction, formatDateFromApi } from 'src/lib/date-helper'
+import { formatDateToApiFunction, formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { RTCLRepository } from 'src/repositories/RTCLRepository'
 import { useWindow } from 'src/windows'
 import Confirmation from 'src/components/Shared/Confirmation'
@@ -55,7 +55,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
   const initialValues = {
     //clientIDView
     reference: '',
-    clientId: '',
+    clientId: null,
     expiryDate: null,
     issueDate: null,
     idCountry: '',
@@ -106,6 +106,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     // end clientIndividual
 
     //clientMaster
+    masterRecordId: '',
     addressId: '',
     category: '',
     nationalityId: '',
@@ -127,6 +128,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     iban: '',
 
     //clientRemittance
+    remittanceRecordId: '',
     trxCountPerYear: '',
     trxAmountPerYear: '',
     otpVerified: false,
@@ -224,6 +226,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
         clientIndividualFormik.setValues({
           //clientIDView
           functionId: SystemFunction.KYC,
+          masterRecordId: obj.clientMaster?.recordId,
           reference: obj.clientMaster?.reference,
           clientId: obj.clientIDView?.clientId,
           expiryDate: formatDateFromApi(obj.clientMaster?.expiryDate),
@@ -237,8 +240,10 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
           idtId: obj.clientIDView?.idtId,
           isDiplomat: obj.clientIDView?.isDiplomat,
           cityName: obj.clientIDView?.idCityName,
+          idIssuePlaceCode: obj.clientIDView?.extraInfo,
 
           //address
+          addressRecordId: obj.addressView?.recordId,
           countryId: obj.addressView?.countryId,
           cityId: obj.addressView?.cityId,
           city: obj.addressView?.city,
@@ -302,8 +307,8 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
 
           //clientRemittance
           recordId: recordId,
-          recordIdRemittance: obj.clientRemittance?.recordId,
-          otpVerified: obj.clientRemittance?.otpVerified,
+          remittanceRecordId: obj.clientRemittance?.recordId,
+          otpVerified: editMode ? false : obj.clientRemittance?.otpVerified,
           govCellVerified: obj.clientRemittance?.govCellVerified,
           addressId: obj.clientRemittance?.addressId,
           batchId: obj.clientRemittance?.batchId,
@@ -329,9 +334,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
           isRelativeDiplomat: obj.clientRemittance?.isRelativeDiplomat,
           trxAmountPerYear: obj.clientRemittance?.trxAmountPerYear,
           trxCountPerYear: obj.clientRemittance?.trxCountPerYear,
-          cltRemReference: obj.clientRemittance?.reference,
-
-          idIssuePlaceCode: obj.extraInfo?.idIssuePlaceCode
+          cltRemReference: obj.clientRemittance?.reference
         })
 
         setEditMode(true)
@@ -352,6 +355,22 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
           }
         })
         .catch(error => {})
+  }
+
+  const otpForm = () => {
+    stack({
+      Component: OTPPhoneVerification,
+      props: {
+        recordId: clientIndividualFormik.values.recordId,
+        formValidation: clientIndividualFormik,
+        functionId: clientIndividualFormik.values.functionId,
+        setEditMode: setEditMode,
+        getData: getClient
+      },
+      width: 400,
+      height: 400,
+      title: labels.OTPVerification
+    })
   }
 
   const clientIndividualFormik = useFormik({
@@ -416,27 +435,23 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     //CTCL
 
     const obj1 = {
-      category: 1,
+      recordId: obj.masterRecordId,
       reference: obj.reference,
+      category: 1,
       name: obj.firstName,
       flName: obj.fl_firstName,
+      keyword: obj.keyword,
       nationalityId: obj.nationalityId,
+      status: obj.status,
       addressId: null,
-      plantId: clientIndividualFormik.values.plantId,
       cellPhone: obj.cellPhone,
-      createdDate: formatDateToApiFunction(date.toISOString()),
-      expiryDate: formatDateToApiFunction(obj.expiryDate),
-      issueDate: obj.issueDate && formatDateToApiFunction(obj.issueDate), // test
-      professionId: obj.professionId,
-      otpVerified: obj.otpVerified,
-      govCellVerified: obj.govCellVerified,
-      plantName: obj.plantName,
-      nationalityName: obj.nationalityName,
-      status: obj.status,
-      categoryName: obj.categoryName,
       oldReference: obj.oldReference,
-      status: obj.status,
-      extraIncome: obj.extraIncome,
+      otp: obj.otpVerified,
+      plantId: clientIndividualFormik.values.plantId,
+      createdDate: formatDateToApi(date.toISOString()),
+      expiryDate: formatDateToApi(obj.expiryDate),
+      professionId: obj.professionId,
+      categoryName: obj.categoryName,
       extraIncomeId: obj.extraIncomeId,
       bankId: obj.bankId,
       iban: obj.iban
@@ -445,20 +460,19 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     //CCTD
     const obj2 = {
       idNo: obj.idNo,
-      plantId: clientIndividualFormik.values.plantId,
+      clientId: obj.clientId || 0,
       idCountryId: obj.idCountry,
       idtId: obj.idtId,
-      idExpiryDate: formatDateToApiFunction(obj.expiryDate),
-      idIssueDate: obj.issueDate && formatDateToApiFunction(obj.issueDate),
+      idExpiryDate: formatDateToApi(obj.expiryDate),
+      idIssueDate: obj.issueDate && formatDateToApi(obj.issueDate),
       idCityId: obj.idCity,
-      isDiplomat: obj.isDiplomat
-
-      // extraInfo: { idIssuePlaceCode: obj.idIssuePlaceCode }
+      isDiplomat: obj.isDiplomat,
+      extraInfo: obj.idIssuePlaceCode
     }
 
     //CTCLI
     const obj3 = {
-      // clientID: obj.clientID,
+      clientId: obj.clientId || 0,
       firstName: obj.firstName,
       lastName: obj.lastName,
       middleName: obj.middleName,
@@ -467,14 +481,17 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       fl_lastName: obj.fl_lastName,
       fl_middleName: obj.fl_middleName,
       fl_familyName: obj.fl_familyName,
-      birthDate: formatDateToApiFunction(obj.birthDate),
+      birthDate: formatDateToApi(obj.birthDate),
       isResident: obj.isResident,
-      incomeSourceId: obj.incomeSourceId,
-      sponsorName: obj.sponsorName
+      sponsorName: obj.sponsorName,
+      incomeSourceId: obj.incomeSourceId
     }
 
     const obj4 = {
-      reference: '',
+      recordId: obj.remittanceRecordId,
+      clientId: obj.clientId || 0,
+      plantId: clientIndividualFormik.values.plantId,
+      reference: obj.reference,
       salaryRangeId: obj.salaryRangeId,
       riskLevel: obj.riskLevel,
       smsLanguage: obj.smsLanguage,
@@ -487,20 +504,21 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       isDiplomat: obj.isDiplomat,
       isRelativeDiplomat: obj.isRelativeDiplomat,
       relativeDiplomatInfo: obj.relativeDiplomatInfo,
+      idNo: obj.idNo,
       otpVerified: obj.otpVerified,
-      govCellVerified: obj.govCellVerified,
       coveredFace: obj.coveredFace,
       isEmployee: obj.isEmployee,
-      cobId: obj.cobId,
-      idNo: obj.idNo,
       wip: 1,
-      releaseStatus: 1,
-      educationLevelName: obj.educationLevelName,
+      addressId: obj.addressId,
+      workAddressId: address?.recordId,
+      cobId: obj.cobId,
       trxCountPerYear: obj.trxCountPerYear,
-      trxAmountPerYear: obj.trxAmountPerYear
+      trxAmountPerYear: obj.trxAmountPerYear,
+      govCellVerified: obj.govCellVerified
     }
 
     const obj5 = {
+      recordId: obj.addressRecordId,
       name: obj.name,
       countryId: obj.countryId,
       stateId: obj.stateId,
@@ -523,6 +541,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     }
 
     const obj6 = {
+      recordId: address.recordId,
       name: address.name,
       countryId: address.countryId,
       stateId: address.stateId,
@@ -545,8 +564,6 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     }
 
     if (allowEdit) {
-      obj4.clientId = recordId
-
       const updateData = {
         plantId: clientIndividualFormik.values.plantId,
         clientID: obj2, //CTID
@@ -564,6 +581,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
         .then(res => {
           if (res) {
             toast.success(platformLabels.Edited)
+            otpForm()
           }
         })
         .catch(error => {})
@@ -595,21 +613,8 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
   }
 
   useEffect(() => {
-    if (clientIndividualFormik.values.clientId && otpShow)
-      stack({
-        Component: OTPPhoneVerification,
-        props: {
-          recordId: clientIndividualFormik.values.recordId,
-          formValidation: clientIndividualFormik,
-          functionId: clientIndividualFormik.values.functionId,
-          setEditMode: setEditMode,
-          getData: getClient
-        },
-        width: 400,
-        height: 400,
-        title: labels.OTPVerification
-      })
-  }, [clientIndividualFormik.values.clientId])
+    if (clientIndividualFormik.values.clientId && otpShow) otpForm()
+  }, [clientIndividualFormik.values.clientId, otpShow])
 
   const fillFilterProfession = value => {
     if (value) {
@@ -708,7 +713,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       editMode={editMode}
       isClosed={allowEdit ? false : isClosed}
       onClose={onClose}
-      disabledSubmit={editMode && true}
+      disabledSubmit={editMode && !allowEdit && true}
     >
       <VertLayout>
         <Grow>
@@ -737,7 +742,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         name='isResident'
                         checked={clientIndividualFormik.values?.isResident}
                         onChange={clientIndividualFormik.handleChange}
-                        disabled={editMode && true}
+                        disabled={editMode && !allowEdit}
                       />
                     }
                     label={labels.isResident}
@@ -766,7 +771,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                     onChange={clientIndividualFormik.setFieldValue}
                     onClear={() => clientIndividualFormik.setFieldValue('birthDate', '')}
                     disabledDate={'>='}
-                    readOnly={editMode}
+                    readOnly={editMode && !allowEdit && true}
                     error={Boolean(clientIndividualFormik.errors.birthDate)}
                     maxAccess={maxAccess}
                   />
@@ -801,7 +806,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                           checkTypes(e.target.value), setShowAsPassword(true)
                           !editMode && checkIdNumber(e.target.value)
                         }}
-                        readOnly={editMode && !allowEdit}
+                        readOnly={editMode}
                         maxLength='15'
                         onFocus={e => {
                           setShowAsPassword(false)
@@ -820,7 +825,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         label={labels.id_type}
                         valueField='recordId'
                         displayField='name'
-                        readOnly={editMode && true}
+                        readOnly={editMode && !allowEdit && true}
                         values={clientIndividualFormik.values}
                         required
                         onChange={(event, newValue) => {
@@ -864,7 +869,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                           !clientIndividualFormik?.values?.idtId ||
                           !clientIndividualFormik?.values?.birthDate ||
                           !clientIndividualFormik.values.idNo ||
-                          (editMode && !allowEdit)
+                          (editMode && clientIndividualFormik.values?.expiryDate < new Date())
                             ? true
                             : false
                         }
@@ -878,7 +883,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         name='expiryDate'
                         label={labels.expiryDate}
                         value={clientIndividualFormik.values?.expiryDate}
-                        readOnly={editMode && true}
+                        readOnly={editMode && !allowEdit && true}
                         required={true}
                         onChange={clientIndividualFormik.setFieldValue}
                         onClear={() => clientIndividualFormik.setFieldValue('expiryDate', '')}
@@ -895,7 +900,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         name='issueDate'
                         label={labels.issueDate}
                         value={clientIndividualFormik.values?.issueDate}
-                        readOnly={editMode && true}
+                        readOnly={editMode && !allowEdit && true}
                         onChange={clientIndividualFormik.setFieldValue}
                         onClear={() => clientIndividualFormik.setFieldValue('issueDate', '')}
                         disabledDate={!editMode && '>'}
@@ -913,7 +918,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         label={labels.issusCountry}
                         valueField='recordId'
                         displayField={['reference', 'name', 'flName']}
-                        readOnly={editMode}
+                        readOnly={editMode && !allowEdit && true}
                         columnsInDropDown={[
                           { key: 'reference', value: 'Reference' },
                           { key: 'name', value: 'Name' },
@@ -955,7 +960,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         displayField='name'
                         firstValue={clientIndividualFormik.values.cityName}
                         secondDisplayField={false}
-                        readOnly={(editMode || !clientIndividualFormik.values.idCountry) && true}
+                        readOnly={((editMode && !allowEdit) || !clientIndividualFormik.values.idCountry) && true}
                         maxAccess={maxAccess}
                         onChange={(event, newValue) => {
                           if (newValue) {
@@ -975,7 +980,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         label={labels.issusPlace}
                         value={clientIndividualFormik.values?.idIssuePlaceCode}
                         onChange={clientIndividualFormik.handleChange}
-                        readOnly={editMode}
+                        readOnly={editMode && !allowEdit && true}
                         onClear={() => clientIndividualFormik.setFieldValue('idIssuePlaceCode', '')}
                         error={
                           clientIndividualFormik.touched.idIssuePlaceCode &&
@@ -991,7 +996,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         labels={labels}
                         defaultReadOnly={{ countryId: true }}
                         addressValidation={clientIndividualFormik}
-                        readOnly={editMode && true}
+                        readOnly={editMode && !allowEdit && true}
                         access={maxAccess}
                       />
                     </FieldSet>
@@ -1010,7 +1015,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         type={showAsPasswordPhone && clientIndividualFormik.values?.cellPhone ? 'password' : 'text'}
                         label={labels.cellPhone}
                         value={clientIndividualFormik.values?.cellPhone}
-                        readOnly={editMode && true}
+                        readOnly={editMode && !allowEdit && true}
                         required
                         phone={true}
                         onChange={e => {
@@ -1047,7 +1052,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         label={labels.confirmCell}
                         value={clientIndividualFormik.values?.cellPhoneRepeat}
                         required
-                        readOnly={editMode && true}
+                        readOnly={editMode && !allowEdit && true}
                         maxLength='15'
                         autoComplete='off'
                         phone={true}
@@ -1092,7 +1097,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                           }}
                           language='english'
                           maxLength='10'
-                          readOnly={editMode}
+                          readOnly={editMode && !allowEdit && true}
                           onClear={() => clientIndividualFormik.setFieldValue('firstName', '')}
                           error={
                             clientIndividualFormik.touched.firstName && Boolean(clientIndividualFormik.errors.firstName)
@@ -1108,7 +1113,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                           onChange={clientIndividualFormik.handleChange}
                           language='english'
                           maxLength='10'
-                          readOnly={editMode}
+                          readOnly={editMode && !allowEdit && true}
                           onClear={() => clientIndividualFormik.setFieldValue('middleName', '')}
                           error={
                             clientIndividualFormik.touched.middleName &&
@@ -1132,7 +1137,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                           }}
                           language='english'
                           maxLength='10'
-                          readOnly={editMode}
+                          readOnly={editMode && !allowEdit && true}
                           onClear={() => clientIndividualFormik.setFieldValue('lastName', '')}
                           error={
                             clientIndividualFormik.touched.lastName && Boolean(clientIndividualFormik.errors.lastName)
@@ -1148,7 +1153,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                           onChange={clientIndividualFormik.handleChange}
                           language='english'
                           maxLength='10'
-                          readOnly={editMode}
+                          readOnly={editMode && !allowEdit && true}
                           onClear={() => clientIndividualFormik.setFieldValue('familyName', '')}
                           error={
                             clientIndividualFormik.touched.familyName &&
@@ -1171,7 +1176,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                           value={clientIndividualFormik.values?.fl_firstName}
                           onChange={clientIndividualFormik.handleChange}
                           maxLength='10'
-                          readOnly={editMode}
+                          readOnly={editMode && !allowEdit && true}
                           dir='rtl'
                           language='arabic'
                           onClear={() => clientIndividualFormik.setFieldValue('fl_firstName', '')}
@@ -1191,7 +1196,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                           label={labels.fl_middle}
                           value={clientIndividualFormik.values?.fl_middleName}
                           onChange={clientIndividualFormik.handleChange}
-                          readOnly={editMode}
+                          readOnly={editMode && !allowEdit && true}
                           dir='rtl'
                           language='arabic'
                           onClear={() => clientIndividualFormik.setFieldValue('fl_familyName', '')}
@@ -1211,7 +1216,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                           maxLength='10'
                           dir='rtl'
                           language='arabic'
-                          readOnly={editMode}
+                          readOnly={editMode && !allowEdit && true}
                           onClear={() => clientIndividualFormik.setFieldValue('fl_lastName', '')}
                           error={
                             clientIndividualFormik.touched.fl_lastName &&
@@ -1226,7 +1231,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                           label={labels.fl_family}
                           value={clientIndividualFormik.values?.fl_familyName}
                           onChange={clientIndividualFormik.handleChange}
-                          readOnly={editMode}
+                          readOnly={editMode && !allowEdit && true}
                           dir='rtl'
                           language='arabic'
                           onClear={() => clientIndividualFormik.setFieldValue('fl_familyName', '')}
@@ -1250,7 +1255,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                           { key: 'name', value: 'Name' },
                           { key: 'flName', value: 'Foreign Language Name' }
                         ]}
-                        readOnly={editMode}
+                        readOnly={editMode && !allowEdit && true}
                         values={clientIndividualFormik.values}
                         onChange={(event, newValue) => {
                           if (newValue) {
@@ -1275,7 +1280,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                           { key: 'name', value: 'Name' },
                           { key: 'flName', value: 'Foreign Language Name' }
                         ]}
-                        readOnly={editMode}
+                        readOnly={editMode && !allowEdit && true}
                         values={clientIndividualFormik.values}
                         required
                         onChange={(event, newValue) => {
@@ -1304,7 +1309,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         valueField='key'
                         displayField='value'
                         required
-                        readOnly={editMode}
+                        readOnly={editMode && !allowEdit && true}
                         values={clientIndividualFormik.values}
                         onChange={(event, newValue) => {
                           clientIndividualFormik.setFieldValue('coveredFace', false)
@@ -1325,7 +1330,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         label={labels.educationLevel}
                         valueField='key'
                         displayField='value'
-                        readOnly={editMode}
+                        readOnly={editMode && !allowEdit && true}
                         values={clientIndividualFormik.values}
                         onChange={(event, newValue) => {
                           if (newValue) {
@@ -1348,7 +1353,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         name='incomeSourceId'
                         label={labels.incomeSource}
                         valueField='recordId'
-                        readOnly={editMode}
+                        readOnly={editMode && !allowEdit && true}
                         displayField={['reference', 'name', 'flName']}
                         columnsInDropDown={[
                           { key: 'reference', value: 'Reference' },
@@ -1377,7 +1382,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         name='sponsorName'
                         label={labels.sponsorName}
                         value={clientIndividualFormik.values?.sponsorName}
-                        readOnly={editMode}
+                        readOnly={editMode && !allowEdit && true}
                         onChange={clientIndividualFormik.handleChange}
                         maxLength='15'
                         onClear={() => clientIndividualFormik.setFieldValue('sponsorName', '')}
@@ -1428,7 +1433,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                           { key: 'min', value: 'min' },
                           { key: 'max', value: 'max' }
                         ]}
-                        readOnly={editMode}
+                        readOnly={editMode && !allowEdit && true}
                         values={clientIndividualFormik.values}
                         onChange={(event, newValue) => {
                           if (newValue) {
@@ -1453,7 +1458,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         displayField='value'
                         values={clientIndividualFormik.values}
                         required
-                        readOnly={editMode}
+                        readOnly={editMode && !allowEdit && true}
                         onChange={(event, newValue) => {
                           if (newValue) {
                             clientIndividualFormik.setFieldValue('smsLanguage', newValue?.key)
@@ -1473,7 +1478,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         name='whatsAppNo'
                         label={labels.whatsapp}
                         value={clientIndividualFormik.values?.whatsAppNo}
-                        readOnly={editMode}
+                        readOnly={editMode && !allowEdit && true}
                         onChange={clientIndividualFormik.handleChange}
                         maxLength='15'
                         phone={true}
@@ -1512,7 +1517,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         stack({
                           Component: AddressFormShell,
                           props: {
-                            readOnly: editMode,
+                            readOnly: editMode && !allowEdit,
                             optional: true,
                             labels: labels,
                             setAddress: setAddress,
@@ -1535,7 +1540,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         stack({
                           Component: MoreDetails,
                           props: {
-                            readOnly: editMode,
+                            readOnly: editMode && !allowEdit,
                             labels: labels,
                             clientFormik: clientIndividualFormik,
                             maxAccess: maxAccess,
@@ -1560,7 +1565,9 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                             <Checkbox
                               name='isDiplomat'
                               checked={clientIndividualFormik.values?.isDiplomat}
-                              disabled={(clientIndividualFormik.values?.isDiplomatReadOnly || editMode) && true}
+                              disabled={
+                                (clientIndividualFormik.values?.isDiplomatReadOnly || (editMode && !allowEdit)) && true
+                              }
                               onChange={clientIndividualFormik.handleChange}
                             />
                           }
@@ -1573,7 +1580,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                             <Checkbox
                               name='isRelativeDiplomat'
                               checked={clientIndividualFormik.values?.isRelativeDiplomat}
-                              disabled={editMode}
+                              disabled={editMode && !allowEdit}
                               onChange={e => {
                                 clientIndividualFormik.handleChange(e),
                                   clientIndividualFormik.setFieldValue('relativeDiplomatInfo', '')
@@ -1622,8 +1629,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                           control={
                             <Checkbox
                               name='govCellVerified'
-                              disabled={true}
-                              readOnly={editMode && true}
+                              disabled={editMode && !allowEdit}
                               checked={clientIndividualFormik.values?.govCellVerified}
                               onChange={clientIndividualFormik.handleChange}
                             />
@@ -1656,7 +1662,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                           control={
                             <Checkbox
                               name='isEmployee'
-                              disabled={editMode && true}
+                              disabled={editMode && !allowEdit && true}
                               checked={clientIndividualFormik.values?.isEmployee}
                               onChange={clientIndividualFormik.handleChange}
                             />
