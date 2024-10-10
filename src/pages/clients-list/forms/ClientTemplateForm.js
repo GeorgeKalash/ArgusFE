@@ -426,7 +426,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     }
   })
 
-  const isClosed = clientIndividualFormik.values.status === 1
+  const isClosed = clientIndividualFormik.values.wip === 2
   const wip = clientIndividualFormik.values.wip === 2
 
   const postRtDefault = async obj => {
@@ -630,7 +630,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     const values = clientIndividualFormik.values
     try {
       const data = {
-        recordId: values?.recordIdRemittance
+        recordId: values?.remittanceRecordId
       }
 
       const res = await postRequest({
@@ -646,19 +646,19 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
   }
 
   const actions = [
-    {
+    !allowEdit && {
       key: 'Client Relation',
       condition: true,
       onClick: 'onClientRelation',
       disabled: !editMode
     },
-    {
+    !allowEdit && {
       key: 'Add Client Relation',
       condition: true,
       onClick: 'onAddClientRelation',
       disabled: !editMode
     },
-    {
+    !allowEdit && {
       key: 'BeneficiaryList',
       condition: true,
       onClick: () => openBeneficiaryWindow(),
@@ -674,7 +674,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       key: 'Close',
       condition: !isClosed,
       onClick: onClose,
-      disabled: isClosed || (wip && !isClosed) || !editMode || (isClosed && !wip)
+      disabled: (wip && !isClosed) || !editMode
     },
     {
       key: 'Reopen',
@@ -683,13 +683,16 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       // onClick: onReopen,
       disabled: true
     },
-    {
+    !allowEdit && {
       key: 'Client Balance',
       condition: true,
       onClick: 'onClientBalance',
       disabled: !editMode
     }
   ]
+
+  console.log(isClosed, wip && !isClosed, !editMode, isClosed && !wip)
+
   function openBeneficiaryWindow() {
     stack({
       Component: BeneficiaryWindow,
@@ -706,7 +709,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
 
   return (
     <FormShell
-      actions={!allowEdit ? actions : []}
+      actions={actions}
       resourceId={ResourceIds.UpdateClientRemittance}
       form={clientIndividualFormik}
       maxAccess={maxAccess}
@@ -850,6 +853,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                     </Grid>
 
                     <Grid item xs={12}>
+                      {/* {clientIndividualFormik.values?.expiryDate} */}
                       <Button
                         variant='contained'
                         onClick={() =>
@@ -869,7 +873,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                           !clientIndividualFormik?.values?.idtId ||
                           !clientIndividualFormik?.values?.birthDate ||
                           !clientIndividualFormik.values.idNo ||
-                          (editMode && clientIndividualFormik.values?.expiryDate < new Date())
+                          (editMode && new Date(clientIndividualFormik.values?.expiryDate) >= new Date())
                             ? true
                             : false
                         }
