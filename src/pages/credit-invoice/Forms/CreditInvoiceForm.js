@@ -114,7 +114,9 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
               message: 'currencyRef is required',
               test(value, context) {
                 const { parent } = context
-                if (parent.id == 1) return true
+                console.log('check validation ', parent)
+                if (parent.id == 1 && value) return true
+                if (parent.id == 1 && !value) return false
                 if (
                   parent.id > 1 &&
                   (!parent.amount || parent.amount == 0) &&
@@ -131,7 +133,8 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
               message: 'Quantity is required',
               test(value, context) {
                 const { parent } = context
-                if (parent.id == 1) return true
+                if (parent.id == 1 && value) return true
+                if (parent.id == 1 && !value) return false
                 if (
                   parent.id > 1 &&
                   (!parent.amount || parent.amount == 0) &&
@@ -148,7 +151,8 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
               message: 'Exchange rate is required',
               test(value, context) {
                 const { parent } = context
-                if (parent.id == 1) return true
+                if (parent.id == 1 && value) return true
+                if (parent.id == 1 && !value) return false
                 if (
                   parent.id > 1 &&
                   (!parent.amount || parent.amount == 0) &&
@@ -165,7 +169,8 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
               message: 'Amount is required',
               test(value, context) {
                 const { parent } = context
-                if (parent.id == 1) return true
+                if (parent.id == 1 && value) return true
+                if (parent.id == 1 && !value) return false
                 if (
                   parent.id > 1 &&
                   !parent.currencyRef &&
@@ -662,6 +667,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
       props: {
         readOnly: visible,
         mandatory: true,
+        decimalScale: 7,
         disabled:
           formik?.values?.corId === '' ||
           formik?.values?.corId === null ||
@@ -671,6 +677,15 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
       updateOn: 'blur',
       width: 130,
       async onChange({ row: { update, newRow } }) {
+        if (!newRow.currencyId) {
+          update({
+            exRate: '',
+            defaultRate: ''
+          })
+
+          return
+        }
+
         if (!newRow.exRate) {
           update({
             exRate: '',

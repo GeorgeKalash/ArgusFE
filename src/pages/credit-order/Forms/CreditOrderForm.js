@@ -37,9 +37,7 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
-  const [toCurrency, setToCurrency] = useState(null)
   const [selectedFunctionId, setFunctionId] = useState(SystemFunction.CurrencyCreditOrderPurchase)
-  const [toCurrencyRef, setToCurrencyRef] = useState(null)
   const [baseCurrencyRef, setBaseCurrencyRef] = useState(null)
   const { stack } = useWindow()
   const [confirmationWindowOpen, setConfirmationWindowOpen] = useState(false)
@@ -118,7 +116,8 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
               message: 'currencyRef is required',
               test(value, context) {
                 const { parent } = context
-                if (parent.id == 1) return true
+                if (parent.id == 1 && value) return true
+                if (parent.id == 1 && !value) return false
                 if (
                   parent.id > 1 &&
                   (!parent.amount || parent.amount == 0) &&
@@ -135,7 +134,8 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
               message: 'Quantity is required',
               test(value, context) {
                 const { parent } = context
-                if (parent.id == 1) return true
+                if (parent.id == 1 && value) return true
+                if (parent.id == 1 && !value) return false
                 if (
                   parent.id > 1 &&
                   (!parent.amount || parent.amount == 0) &&
@@ -152,7 +152,8 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
               message: 'Exchange rate is required',
               test(value, context) {
                 const { parent } = context
-                if (parent.id == 1) return true
+                if (parent.id == 1 && value) return true
+                if (parent.id == 1 && !value) return false
                 if (
                   parent.id > 1 &&
                   (!parent.amount || parent.amount == 0) &&
@@ -169,7 +170,8 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
               message: 'Amount is required',
               test(value, context) {
                 const { parent } = context
-                if (parent.id == 1) return true
+                if (parent.id == 1 && value) return true
+                if (parent.id == 1 && !value) return false
                 if (
                   parent.id > 1 &&
                   !parent.currencyRef &&
@@ -220,7 +222,7 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
     }
   })
 
-  const isClosed = formik.values.status == 2
+  const isClosed = formik.values.wip == 2
   const isTFR = formik.values.releaseStatus === 3 && formik.values.status !== 3
   const editMode = !!formik.values.recordId
 
@@ -528,6 +530,7 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
       name: 'exRate',
       props: {
         mandatory: true,
+        decimalScale: 7,
         disabled:
           formik?.values?.corId === '' ||
           formik?.values?.corId === null ||
@@ -537,6 +540,15 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
       width: 130,
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
+        if (!newRow.currencyId) {
+          update({
+            exRate: '',
+            defaultRate: ''
+          })
+
+          return
+        }
+
         if (!newRow.exRate) {
           update({
             exRate: '',
