@@ -8,10 +8,14 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import BarcodesForm from 'src/pages/iv-barcodes/Forms/BarcodesForm'
+import GridToolbar from 'src/components/Shared/GridToolbar'
+import { useWindow } from 'src/windows'
 
-const BarcodeForm = ({ store, labels, maxAccess }) => {
+const BarcodeForm = ({ store, labels, maxAccess, sku, itemName }) => {
   const { recordId } = store
   const { getRequest } = useContext(RequestsContext)
+  const { stack } = useWindow()
 
   const columns = [
     {
@@ -67,14 +71,44 @@ const BarcodeForm = ({ store, labels, maxAccess }) => {
     endpointId: InventoryRepository.Barcode.qry
   })
 
+  const add = () => {
+    openForm(null, sku, itemName, recordId)
+  }
+
+  const edit = obj => {
+    openForm(obj)
+  }
+
+  function openForm(obj, sku, itemName, recordId) {
+    stack({
+      Component: BarcodesForm,
+      props: {
+        labels: _labels,
+        recordId: obj?.recordId || recordId,
+        access: maxAccess,
+        store,
+        obj,
+        sku,
+        msId: store?._msId,
+        itemName
+      },
+      width: 600,
+      height: 500,
+      title: _labels.Barcodes
+    })
+  }
+
   return (
     <VertLayout>
-      <Fixed></Fixed>
+      <Fixed>
+        <GridToolbar onAdd={add} maxAccess={maxAccess} />
+      </Fixed>
       <Grow>
         <Table
           columns={columns}
           gridData={data}
           rowId={'barcode'}
+          onEdit={edit}
           isLoading={false}
           pageSize={50}
           pagination={false}
