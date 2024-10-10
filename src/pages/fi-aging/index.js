@@ -123,7 +123,6 @@ const FiAging = () => {
   const {
     query: { data },
     labels: _labels,
-    paginationParameters,
     filterBy,
     refetch,
     access
@@ -160,8 +159,7 @@ const FiAging = () => {
           pageSize={50}
           disableSorting={true}
           refetch={refetch}
-          paginationParameters={paginationParameters}
-          paginationType='api'
+          paginationType='client'
           maxAccess={access}
         />
       </Grow>
