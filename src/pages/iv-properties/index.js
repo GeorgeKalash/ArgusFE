@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from 'react'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
+import GridToolbar from 'src/components/Shared/GridToolbar'
 import Table from 'src/components/Shared/Table'
 import { useResourceQuery } from 'src/hooks/resource'
 import { Grid } from '@mui/material'
@@ -12,14 +12,13 @@ import { useForm } from 'src/hooks/form'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import FormShell from 'src/components/Shared/FormShell'
 import { ControlContext } from 'src/providers/ControlContext'
 import toast from 'react-hot-toast'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { useWindow } from 'src/windows'
 import PropertiesForm from './forms/PropertiesForm'
 
-const Postoutwards = () => {
+const Properties = () => {
   const [data, setData] = useState([])
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -29,7 +28,11 @@ const Postoutwards = () => {
   const fetchData = async () => {
     const dimensionNumber = formik.values?.dimValue?.match(/\d+$/)?.[0]
     setDimNum(dimensionNumber)
-    if (!dimensionNumber) return
+    if (!dimensionNumber) {
+      setData([])
+
+      return
+    }
 
     try {
       const response = await getRequest({
@@ -92,7 +95,9 @@ const Postoutwards = () => {
   }
 
   const add = () => {
-    openForm()
+    if (formik.values.dimValue) {
+      openForm()
+    }
   }
 
   const edit = obj => {
@@ -121,7 +126,6 @@ const Postoutwards = () => {
           extension: SystemRepository.Defaults.qry,
           parameters: `_filter=ivtDimension`
         })
-        console.log(res, 'ress')
 
         const firstValidKey = res.list.find(item => item.value !== '')?.key
         if (firstValidKey) {
@@ -132,50 +136,46 @@ const Postoutwards = () => {
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.PostOutwards}
-      form={formik}
-      maxAccess={access}
-      isCleared={false}
-      isSavedClear={false}
-      infoVisible={false}
-    >
-      <VertLayout>
-        <Fixed>
-          <Grid item xs={10}>
+    <VertLayout>
+      <Fixed>
+        <GridToolbar onAdd={add} maxAccess={access} />
+        <Grid container spacing={3} sx={{ pl: 35, mt: -13 }}>
+          <Grid item xs={4}>
             <ResourceComboBox
               endpointId={SystemRepository.Defaults.qry}
               parameters={`_filter=ivtDimension`}
               name='dimValue'
-              label={_labels.dimValue}
+              label={_labels.properties}
               valueField='key'
               displayField='value'
               values={formik.values}
               onChange={(event, newValue) => {
                 formik.setFieldValue('dimValue', newValue ? newValue.key : '')
               }}
+              required
               maxAccess={access}
               filter={item => item.value !== ''}
+              error={!formik.values.dimValue}
             />
           </Grid>
-        </Fixed>
-        <Grow>
-          <Table
-            columns={rowColumns}
-            gridData={data}
-            rowId={['id']}
-            pageSize={50}
-            onEdit={edit}
-            paginationType='client'
-            refetch={refetch}
-            isLoading={false}
-            onDelete={del}
-            maxAccess={access}
-          />
-        </Grow>
-      </VertLayout>
-    </FormShell>
+        </Grid>
+      </Fixed>
+      <Grow>
+        <Table
+          columns={rowColumns}
+          gridData={data || []}
+          rowId={['id']}
+          pageSize={50}
+          onEdit={edit}
+          paginationType='client'
+          refetch={refetch}
+          isLoading={false}
+          onDelete={del}
+          maxAccess={access}
+        />
+      </Grow>
+    </VertLayout>
   )
 }
 
-export default Postoutwards
+export default Properties

@@ -7,32 +7,33 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import CustomTextArea from 'src/components/Inputs/CustomTextArea'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
+import { ControlContext } from 'src/providers/ControlContext'
 
-export default function PropertiesForm({ labels, maxAccess, dimNum, id }) {
+export default function PropertiesForm({ labels, maxAccess, dimNum, id, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: SystemRepository.SMSTemplate.page
+    endpointId: InventoryRepository.Dimension.qry
   })
 
   const { formik } = useForm({
     initialValues: {
       id: id || null,
+      dimension: dimNum,
       name: ''
     },
     maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required(' '),
-      id: yup.string().required(' ')
+      name: yup.string().required(),
+      id: yup.string().required()
     }),
     onSubmit: async obj => {
       const id = obj?.id
@@ -41,20 +42,14 @@ export default function PropertiesForm({ labels, maxAccess, dimNum, id }) {
         extension: InventoryRepository.Dimension.set,
         record: JSON.stringify(obj)
       })
-
-      if (!recordId) {
-        toast.success('Record Added Successfully')
-        formik.setValues({
-          ...obj,
-          recordId: response.recordId
-        })
-      } else toast.success('Record Edited Successfully')
+      if (!id) {
+        toast.success(platformLabels.Added)
+      } else toast.success(platformLabels.Edited)
 
       invalidate()
+      window.close()
     }
   })
-
-  console.log(id, 'iiiiiiiiiiiiiiiii')
 
   useEffect(() => {
     ;(async function () {
@@ -69,15 +64,13 @@ export default function PropertiesForm({ labels, maxAccess, dimNum, id }) {
             formik.setValues(res.record)
           }
         }
-      } catch (exception) {
-        console.error('Error fetching dimension data:', exception)
-      }
+      } catch (exception) {}
     })()
-  }, [id, dimNum])
+  }, [id])
 
   return (
     <FormShell
-      resourceId={ResourceIds.SmsTemplates}
+      resourceId={ResourceIds.IVDimension}
       form={formik}
       maxAccess={maxAccess}
       infoVisible={false}
@@ -96,7 +89,7 @@ export default function PropertiesForm({ labels, maxAccess, dimNum, id }) {
                 maxLength='30'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('id', '')}
-                error={formik.touched.name && Boolean(formik.errors.name)}
+                error={formik.touched.id && Boolean(formik.errors.id)}
               />
             </Grid>
             <Grid item xs={12}>
