@@ -16,13 +16,21 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { useInvalidate } from 'src/hooks/resource'
+import { useBarcodeFieldBehaviours } from 'src/hooks/useBarcodeFieldBehaviours'
 
-export default function BarcodesForm({ labels, access, recordId, barcode, msId, obj, sku, itemName }) {
+export default function BarcodesForm({ labels, access, store, recordId, barcode, msId, obj, sku, itemName }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: InventoryRepository.Barcodes.qry
+  })
+
+  const { maxAccess, changeDT } = useBarcodeFieldBehaviours({
+    access: access,
+    editMode: false,
+    fieldName: 'barcode',
+    store
   })
 
   const { formik } = useForm({
@@ -40,11 +48,10 @@ export default function BarcodesForm({ labels, access, recordId, barcode, msId, 
       isInactive: false
     },
     enableReinitialize: false,
-    maxAccess: access,
+    maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
-      itemId: yup.string().required(),
-      barcode: yup.string().required()
+      itemId: yup.string().required()
     }),
     onSubmit: async values => {
       await postRequest({
@@ -77,25 +84,15 @@ export default function BarcodesForm({ labels, access, recordId, barcode, msId, 
     })()
   }, [])
 
+  useEffect(() => {
+    changeDT(store?.nraId)
+  }, [store?.nraId])
+
   return (
     <FormShell resourceId={ResourceIds.Barcodes} form={formik} maxAccess={access} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
-            <Grid item xs={12}>
-              <CustomTextField
-                name='barcode'
-                label={labels?.barcode}
-                value={formik?.values?.barcode}
-                required
-                readOnly={editMode}
-                maxLength='20'
-                maxAccess={access}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('barcode', '')}
-                error={formik.touched.barcode && Boolean(formik.errors.barcode)}
-              />
-            </Grid>
             <Grid item xs={12}>
               <ResourceLookup
                 endpointId={InventoryRepository.Item.snapshot}
@@ -120,6 +117,18 @@ export default function BarcodesForm({ labels, access, recordId, barcode, msId, 
                 }}
                 maxAccess={access}
                 required
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='barcode'
+                label={labels?.barcode}
+                value={formik?.values?.barcode}
+                maxLength='20'
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('barcode', '')}
+                error={formik.touched.barcode && Boolean(formik.errors.barcode)}
               />
             </Grid>
             <Grid item xs={12}>
