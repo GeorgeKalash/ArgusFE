@@ -128,14 +128,12 @@ export default function RtReceiptVouchers() {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: RemittanceOutwardsRepository.ReceiptVouchers.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (e) {}
+    await postRequest({
+      extension: RemittanceOutwardsRepository.ReceiptVouchers.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   const onSearch = value => {

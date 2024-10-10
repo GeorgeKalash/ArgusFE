@@ -40,25 +40,6 @@ export default function POSForm({ labels, formik }) {
     setCorCurSymbol(symbol)
   }
 
-  useEffect(() => {
-    ;(async function () {
-      const res = await getRequest({
-        extension: RemittanceOutwardsRepository.OutwardGLInformation.get,
-        parameters: `_recordId=${formik.values?.recordId}`
-      })
-      res.record.corExRate = parseFloat(res.record.corExRate).toFixed(5)
-      res.record.corEvalExRate = parseFloat(res.record.corEvalExRate).toFixed(5)
-      res.record.netCommissionRevenue = parseFloat(res.record.netCommissionRevenue).toFixed(2)
-      res.record.baseCorCommission = parseFloat(res.record.baseCorCommission).toFixed(2)
-      res.record.grossProfit = parseFloat(res.record.grossProfit).toFixed(2)
-      res.record.corBaseAmount = parseFloat(res.record.corBaseAmount).toFixed(2)
-      setowiFieldsIFields(res.record)
-
-      await getBaseCurrencySymbol()
-      await getCorCurrencySymbol()
-    })()
-  }, [])
-
   return (
     <FormShell resourceId={ResourceIds.OutwardsOrder} form={formik} isCleared={false} isInfo={false} isSaved={false}>
       <Grid container spacing={2}>

@@ -40,7 +40,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { RemittanceBankInterface } from 'src/repositories/RemittanceBankInterface'
 import BeneficiaryListWindow from '../Windows/BeneficiaryListWindow'
 import { getStorageData } from 'src/storage/storage'
-import ReceiptVoucherForm from 'src/pages/rt_receipt_vouchers/forms/ReceiptVoucherForm'
+import ReceiptVoucherForm from 'src/pages/rt-receipt-vouchers/forms/ReceiptVoucherForm'
 
 export default function OutwardsForm({ labels, access, recordId, plantId, userId, dtId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -51,7 +51,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
   const userData = getStorageData('userData')
 
   const { labels: RVLabels, access: RVAccess } = useResourceQuery({
-    datasetId: ResourceIds.ReceiptVoucher
+    datasetId: ResourceIds.RemittanceReceiptVoucher
   })
 
   const { maxAccess } = useDocumentType({
@@ -161,37 +161,35 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
       })
     }),
     onSubmit: async values => {
-      try {
-        const copy = { ...values }
-        delete copy.instantCashDetails
-        delete copy.products
-        copy.date = formatDateToApi(copy.date)
-        copy.valueDate = formatDateToApi(copy.valueDate)
-        copy.defaultValueDate = formatDateToApi(copy.defaultValueDate)
-        copy.vatAmount = vatAmount
-        copy.amount = amount
+      const copy = { ...values }
+      delete copy.instantCashDetails
+      delete copy.products
+      copy.date = formatDateToApi(copy.date)
+      copy.valueDate = formatDateToApi(copy.valueDate)
+      copy.defaultValueDate = formatDateToApi(copy.defaultValueDate)
+      copy.vatAmount = vatAmount
+      copy.amount = amount
 
-        const amountGridData = {
-          header: copy,
-          bankType: formik.values.bankType,
-          ICRequest: formik.values.instantCashDetails?.deliveryModeId ? formik.values.instantCashDetails : null
-        }
+      const amountGridData = {
+        header: copy,
+        bankType: formik.values.bankType,
+        ICRequest: formik.values.instantCashDetails?.deliveryModeId ? formik.values.instantCashDetails : null
+      }
 
-        const amountRes = await postRequest({
-          extension: RemittanceOutwardsRepository.OutwardsOrder.set2,
-          record: JSON.stringify(amountGridData)
-        })
+      const amountRes = await postRequest({
+        extension: RemittanceOutwardsRepository.OutwardsOrder.set2,
+        record: JSON.stringify(amountGridData)
+      })
 
-        if (amountRes.recordId) {
-          const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
-          toast.success(actionMessage)
-          formik.setFieldValue('recordId', amountRes.recordId)
-          const res2 = await getOutwards(amountRes.recordId)
-          formik.setFieldValue('reference', res2.record.reference)
-          invalidate()
-          !recordId && viewOTP(amountRes.recordId)
-        }
-      } catch (error) {}
+      if (amountRes.recordId) {
+        const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
+        toast.success(actionMessage)
+        formik.setFieldValue('recordId', amountRes.recordId)
+        const res2 = await getOutwards(amountRes.recordId)
+        formik.setFieldValue('reference', res2.record.reference)
+        invalidate()
+        !recordId && viewOTP(amountRes.recordId)
+      }
     }
   })
   const editMode = !!formik.values.recordId
@@ -216,86 +214,74 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
   }
 
   const getCashAccountId = async () => {
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.UserDefaults.get,
-        parameters: `_userId=${userData?.userId}&_key=cashAccountId`
-      })
+    const res = await getRequest({
+      extension: SystemRepository.UserDefaults.get,
+      parameters: `_userId=${userData?.userId}&_key=cashAccountId`
+    })
 
-      return res?.record?.value
-    } catch (error) {
-      return ''
-    }
+    return res?.record?.value
   }
 
   async function getOutwards(recordId) {
-    try {
-      return await getRequest({
-        extension: RemittanceOutwardsRepository.OutwardsOrder.get,
-        parameters: `_recordId=${recordId}`
-      })
-    } catch (error) {}
+    return await getRequest({
+      extension: RemittanceOutwardsRepository.OutwardsOrder.get,
+      parameters: `_recordId=${recordId}`
+    })
   }
 
   const onClose = async recId => {
-    try {
-      const res = await postRequest({
-        extension: RemittanceOutwardsRepository.OutwardsOrder.close,
-        record: JSON.stringify({
-          recordId: formik.values.recordId ?? recId
-        })
+    const res = await postRequest({
+      extension: RemittanceOutwardsRepository.OutwardsOrder.close,
+      record: JSON.stringify({
+        recordId: formik.values.recordId ?? recId
       })
+    })
 
-      if (res.recordId) {
-        if (recordId) toast.success(platformLabels.Closed)
-        invalidate()
-        refetchForm(res.recordId)
-        await getDefaultVAT()
-      }
-    } catch (error) {}
+    if (res.recordId) {
+      if (recordId) toast.success(platformLabels.Closed)
+      invalidate()
+      refetchForm(res.recordId)
+      await getDefaultVAT()
+    }
   }
 
   const onReopen = async () => {
-    try {
-      const copy = { ...formik.values }
-      delete copy.instantCashDetails
-      copy.date = formatDateToApi(copy.date)
-      copy.valueDate = formatDateToApi(copy.valueDate)
-      copy.defaultValueDate = formatDateToApi(copy.defaultValueDate)
-      copy.expiryDate = formatDateToApi(copy.expiryDate)
+    const copy = { ...formik.values }
+    delete copy.instantCashDetails
+    copy.date = formatDateToApi(copy.date)
+    copy.valueDate = formatDateToApi(copy.valueDate)
+    copy.defaultValueDate = formatDateToApi(copy.defaultValueDate)
+    copy.expiryDate = formatDateToApi(copy.expiryDate)
 
-      const res = await postRequest({
-        extension: RemittanceOutwardsRepository.OutwardsOrder.reopen,
-        record: JSON.stringify(copy)
-      })
+    const res = await postRequest({
+      extension: RemittanceOutwardsRepository.OutwardsOrder.reopen,
+      record: JSON.stringify(copy)
+    })
 
-      if (res.recordId) {
-        toast.success(platformLabels.Reopened)
-        invalidate()
+    if (res.recordId) {
+      toast.success(platformLabels.Reopened)
+      invalidate()
 
-        refetchForm(res.recordId)
-        await getDefaultVAT()
-      }
-    } catch (error) {}
+      refetchForm(res.recordId)
+      await getDefaultVAT()
+    }
   }
 
   const onPost = async () => {
-    try {
-      const copy = { ...formik.values }
-      copy.date = formatDateToApi(copy.date)
-      copy.valueDate = formatDateToApi(copy.valueDate)
-      copy.defaultValueDate = formatDateToApi(copy.defaultValueDate)
-      copy.expiryDate = formatDateToApi(copy.expiryDate)
+    const copy = { ...formik.values }
+    copy.date = formatDateToApi(copy.date)
+    copy.valueDate = formatDateToApi(copy.valueDate)
+    copy.defaultValueDate = formatDateToApi(copy.defaultValueDate)
+    copy.expiryDate = formatDateToApi(copy.expiryDate)
 
-      await postRequest({
-        extension: RemittanceOutwardsRepository.OutwardsOrder.post,
-        record: JSON.stringify(copy)
-      })
+    await postRequest({
+      extension: RemittanceOutwardsRepository.OutwardsOrder.post,
+      record: JSON.stringify(copy)
+    })
 
-      toast.success(platformLabels.Posted)
-      invalidate()
-      window.close()
-    } catch (error) {}
+    toast.success(platformLabels.Posted)
+    invalidate()
+    window.close()
   }
 
   const vatAmount = (formik.values.commission * formik.values.vatRate) / 100
@@ -394,54 +380,52 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
   }
 
   const chooseClient = async (clientId, category) => {
-    try {
-      if (clientId) {
-        if (category == 1) {
-          //client individual
-          const res = await getRequest({
-            extension: RTCLRepository.CtClientIndividual.get2,
-            parameters: `_clientId=${clientId}`
+    if (clientId) {
+      if (category == 1) {
+        //client individual
+        const res = await getRequest({
+          extension: RTCLRepository.CtClientIndividual.get2,
+          parameters: `_clientId=${clientId}`
+        })
+        if (!res.record?.clientRemittance) {
+          stackError({
+            message: `Chosen Client Has No KYC.`
           })
-          if (!res.record?.clientRemittance) {
-            stackError({
-              message: `Chosen Client Has No KYC.`
-            })
 
-            return
-          }
-          formik.setFieldValue('idNo', res?.record?.clientIDView?.idNo)
-          formik.setFieldValue('expiryDate', formatDateFromApi(res?.record?.clientIDView?.idExpiryDate))
-          formik.setFieldValue('firstName', res?.record?.clientIndividual?.firstName)
-          formik.setFieldValue('middleName', res?.record?.clientIndividual?.middleName)
-          formik.setFieldValue('lastName', res?.record?.clientIndividual?.lastName)
-          formik.setFieldValue('familyName', res?.record?.clientIndividual?.familyName)
-          formik.setFieldValue('fl_firstName', res?.record?.clientIndividual?.fl_firstName)
-          formik.setFieldValue('fl_middleName', res?.record?.clientIndividual?.fl_middleName)
-          formik.setFieldValue('fl_lastName', res?.record?.clientIndividual?.fl_lastName)
-          formik.setFieldValue('fl_familyName', res?.record?.clientIndividual?.fl_familyName)
-          formik.setFieldValue('professionId', res?.record?.clientIndividual?.professionId)
-          formik.setFieldValue('cellPhone', res?.record?.clientMaster?.cellPhone)
-          formik.setFieldValue('nationalityId', res?.record?.clientMaster?.nationalityId)
-          formik.setFieldValue('hiddenTrxCount', res?.record?.clientRemittance?.trxCountPerYear)
-          formik.setFieldValue('hiddenTrxAmount', res?.record?.clientRemittance?.trxAmountPerYear)
-          formik.setFieldValue('hiddenSponserName', res?.record?.clientIndividual?.sponsorName)
-        } else if (category == 2) {
-          //client corporate
-          const res = await getRequest({
-            extension: CTCLRepository.ClientCorporate.get,
-            parameters: `_clientId=${clientId}`
-          })
-          if (!res) {
-            return
-          }
-          formik.setFieldValue('nationalityId', res?.record?.clientMaster?.nationalityId)
-          formik.setFieldValue('cellPhone', res?.record?.clientMaster?.cellPhone)
-          formik.setFieldValue('expiryDate', formatDateFromApi(res?.record?.clientMaster?.expiryDate))
-
-          //formik.setFieldValue('idNo', res?.record?.clientIDView?.idNo)
+          return
         }
+        formik.setFieldValue('idNo', res?.record?.clientIDView?.idNo)
+        formik.setFieldValue('expiryDate', formatDateFromApi(res?.record?.clientIDView?.idExpiryDate))
+        formik.setFieldValue('firstName', res?.record?.clientIndividual?.firstName)
+        formik.setFieldValue('middleName', res?.record?.clientIndividual?.middleName)
+        formik.setFieldValue('lastName', res?.record?.clientIndividual?.lastName)
+        formik.setFieldValue('familyName', res?.record?.clientIndividual?.familyName)
+        formik.setFieldValue('fl_firstName', res?.record?.clientIndividual?.fl_firstName)
+        formik.setFieldValue('fl_middleName', res?.record?.clientIndividual?.fl_middleName)
+        formik.setFieldValue('fl_lastName', res?.record?.clientIndividual?.fl_lastName)
+        formik.setFieldValue('fl_familyName', res?.record?.clientIndividual?.fl_familyName)
+        formik.setFieldValue('professionId', res?.record?.clientIndividual?.professionId)
+        formik.setFieldValue('cellPhone', res?.record?.clientMaster?.cellPhone)
+        formik.setFieldValue('nationalityId', res?.record?.clientMaster?.nationalityId)
+        formik.setFieldValue('hiddenTrxCount', res?.record?.clientRemittance?.trxCountPerYear)
+        formik.setFieldValue('hiddenTrxAmount', res?.record?.clientRemittance?.trxAmountPerYear)
+        formik.setFieldValue('hiddenSponserName', res?.record?.clientIndividual?.sponsorName)
+      } else if (category == 2) {
+        //client corporate
+        const res = await getRequest({
+          extension: CTCLRepository.ClientCorporate.get,
+          parameters: `_clientId=${clientId}`
+        })
+        if (!res) {
+          return
+        }
+        formik.setFieldValue('nationalityId', res?.record?.clientMaster?.nationalityId)
+        formik.setFieldValue('cellPhone', res?.record?.clientMaster?.cellPhone)
+        formik.setFieldValue('expiryDate', formatDateFromApi(res?.record?.clientMaster?.expiryDate))
+
+        //formik.setFieldValue('idNo', res?.record?.clientIDView?.idNo)
       }
-    } catch (error) {}
+    }
   }
 
   const actions = [
@@ -477,12 +461,13 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
       onClick: () => openRelevantWindow(formik.values),
       disabled: formik.values.dispersalType && formik.values.clientId ? false : true
     },
-    {
-      key: 'Post',
-      condition: true,
-      onClick: onPost,
-      disabled: !isPosted || !formik.values.corId
-    },
+
+    // {
+    //   key: 'Post',
+    //   condition: true,
+    //   onClick: onPost,
+    //   disabled: !isPosted || !formik.values.corId
+    // },
     {
       key: 'GL',
       condition: true,
@@ -558,6 +543,8 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
   }
 
   async function openRV() {
+    window.close()
+
     const cashAccountId = await getCashAccountId()
     stack({
       Component: ReceiptVoucherForm,
@@ -565,53 +552,48 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
         labels: RVLabels,
         maxAccess: RVAccess,
         recordId: formik.values.receiptId || '',
-        cashAccountId: cashAccountId
+        cashAccountId: cashAccountId,
+        form: formik.values.receiptId ? null : formik
       },
-      width: 1000,
-      height: 700,
-      title: labels.receiptVoucher
+      width: 1200,
+      height: 500,
+      title: RVLabels.receiptVoucher
     })
   }
 
   async function getDefaultVAT() {
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.Defaults.get,
-        parameters: `_filter=&_key=vatPct`
-      })
-      formik.setFieldValue('vatRate', parseInt(res.record.value))
-      formik.setFieldValue('taxPercent', parseFloat(res.record.value))
-    } catch (error) {}
+    const res = await getRequest({
+      extension: SystemRepository.Defaults.get,
+      parameters: `_filter=&_key=vatPct`
+    })
+    formik.setFieldValue('vatRate', parseInt(res.record.value))
+    formik.setFieldValue('taxPercent', parseFloat(res.record.value))
   }
   async function getDefaultCountry() {
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.Defaults.get,
-        parameters: `_filter=&_key=countryId`
-      })
+    const res = await getRequest({
+      extension: SystemRepository.Defaults.get,
+      parameters: `_filter=&_key=countryId`
+    })
 
-      const countryRef = await getRequest({
-        extension: SystemRepository.Country.get,
-        parameters: `_recordId=${res?.record?.value}`
-      })
+    const countryRef = await getRequest({
+      extension: SystemRepository.Country.get,
+      parameters: `_recordId=${res?.record?.value}`
+    })
 
-      return countryRef.record.reference
-    } catch (error) {}
+    return countryRef.record.reference
   }
   async function getDefaultCurrency() {
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.Defaults.get,
-        parameters: `_filter=&_key=baseCurrencyId`
-      })
+    const res = await getRequest({
+      extension: SystemRepository.Defaults.get,
+      parameters: `_filter=&_key=baseCurrencyId`
+    })
 
-      const currencyRef = await getRequest({
-        extension: SystemRepository.Currency.get,
-        parameters: `_recordId=${res?.record?.value}`
-      })
+    const currencyRef = await getRequest({
+      extension: SystemRepository.Currency.get,
+      parameters: `_recordId=${res?.record?.value}`
+    })
 
-      return currencyRef.record.reference
-    } catch (error) {}
+    return currencyRef.record.reference
   }
 
   function onInstantCashSubmit(obj) {
@@ -745,15 +727,13 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await refetchForm(recordId)
-          const copy = { ...res.record }
-          copy.lcAmount = 0
-          await fillProducts(copy)
-        }
-        await getDefaultVAT()
-      } catch (error) {}
+      if (recordId) {
+        const res = await refetchForm(recordId)
+        const copy = { ...res.record }
+        copy.lcAmount = 0
+        await fillProducts(copy)
+      }
+      await getDefaultVAT()
     })()
   }, [])
 

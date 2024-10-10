@@ -24,10 +24,11 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { useWindow } from 'src/windows'
-import InfoForm from 'src/pages/outwards-order/Tabs/InfoForm'
 import POSForm from './POSForm'
+import AuditForm from 'src/pages/outwards-transfer/Tabs/AuditForm'
+import NormalDialog from 'src/components/Shared/NormalDialog'
 
-export default function ReceiptVoucherForm({ labels, access, recordId, cashAccountId }) {
+export default function ReceiptVoucherForm({ labels, access, recordId, cashAccountId, form }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -188,6 +189,13 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
     getDefaultDT()
     ;(async function () {
       recordId && getData()
+      form &&
+        formik.setValues({
+          ...formik.values,
+          amount: form.values.amount,
+          owoId: form.values.recordId,
+          owoRef: form.values.reference
+        })
     })()
   }, [recordId])
 
@@ -245,14 +253,27 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
 
     if (res) {
       toast.success(platformLabels.Posted)
+      openDialog(res.recordId)
       invalidate()
       getData()
     }
   }
 
+  function openDialog(recordId) {
+    stack({
+      Component: NormalDialog,
+      props: {
+        DialogText: `${platformLabels.Posted} ${recordId}`
+      },
+      width: 600,
+      height: 200,
+      title: platformLabels.Post
+    })
+  }
+
   function openInfo() {
     stack({
-      Component: InfoForm,
+      Component: AuditForm,
       props: {
         labels,
         formik
@@ -279,16 +300,13 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
         readOnly: isPosted
       },
       async onChange({ row: { update, newRow } }) {
-        if (newRow.type != 2) return
-
         const sumAmount = formik.values.cash.slice(0, -1).reduce((sum, row) => {
           const curValue = parseFloat(row.amount.toString().replace(/,/g, '')) || 0
 
           return sum + curValue
         }, 0)
-
         const currentAmount = (parseFloat(formik.values.amount) - parseFloat(sumAmount)).toFixed(2)
-        update({ amount: currentAmount })
+        update({ amount: currentAmount, POS: newRow.type === '1' })
       }
     },
     {
@@ -503,8 +521,8 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
             maxAccess={maxAccess}
             allowDelete={!isPosted}
             allowAddNewLine={!isPosted}
-            name='cash'
             columns={columns}
+            name='cash'
           />
         </Grow>
       </VertLayout>
