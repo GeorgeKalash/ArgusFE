@@ -12,7 +12,7 @@ import { useWindow } from 'src/windows'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import AgingForm from './forms/AgingForm'
 
-const SmsTemplate = () => {
+const AgingProfile = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const { stack } = useWindow()
@@ -55,21 +55,21 @@ const SmsTemplate = () => {
   }
 
   const edit = obj => {
-    openForm(obj?.recordId)
-    console.log(obj?.name, 'namr')
+    openForm(obj?.recordId, obj?.name)
   }
 
-  function openForm(recordId) {
+  function openForm(recordId, name) {
     stack({
       Component: AgingForm,
       props: {
         labels: _labels,
         recordId: recordId,
+        name: name,
         maxAccess: access
       },
-      width: 500,
-      height: 670,
-      title: _labels.agingProfile
+      width: 600,
+      height: 370,
+      title: _labels.aging
     })
   }
 
@@ -104,4 +104,4 @@ const SmsTemplate = () => {
   )
 }
 
-export default SmsTemplate
+export default AgingProfile

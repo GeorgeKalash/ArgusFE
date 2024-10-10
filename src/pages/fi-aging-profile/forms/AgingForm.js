@@ -1,4 +1,3 @@
-import { useFormik } from 'formik'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -9,23 +8,51 @@ import toast from 'react-hot-toast'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
-import { useForm } from 'src/hooks/form'
-import { Grid } from '@mui/material'
-import CustomTextField from 'src/components/Inputs/CustomTextField'
-import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
+import { useForm } from 'src/hooks/form'
+import CustomTextField from 'src/components/Inputs/CustomTextField'
+import { Grid } from '@mui/material'
+import { useInvalidate } from 'src/hooks/resource'
 
-const AgingForm = ({ recordId, labels, maxAccess }) => {
+const AgingForm = ({ recordId, labels, maxAccess, name, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const [numRows, setNumRows] = useState(0)
 
+  const invalidate = useInvalidate({
+    endpointId: FinancialRepository.AgingProfile.qry
+  })
+
   const { formik } = useForm({
     enableReinitialize: true,
     validateOnChange: true,
+    validationSchema: yup.object({
+      name: yup.string().required(),
+      agingLeg: yup
+        .array()
+        .of(
+          yup.object().shape({
+            caption: yup.string().test(function (value) {
+              if (numRows > 1) {
+                return !!value
+              }
 
+              return true
+            }),
+            days: yup.number().test(function (value) {
+              if (numRows > 1) {
+                return value > 0
+              }
+
+              return true
+            })
+          })
+        )
+        .required()
+    }),
     initialValues: {
-      name: '',
+      name: name || '',
+      recordId: recordId || '',
       agingLeg: [
         {
           id: 1,
@@ -36,33 +63,54 @@ const AgingForm = ({ recordId, labels, maxAccess }) => {
       ]
     },
     onSubmit: values => {
-      post(values)
+      const { agingLeg } = values
+
+      if (agingLeg.length === 1 && isRowEmpty(agingLeg[0])) {
+        formik.setValues({ agingLeg: [] })
+        postData([])
+      } else {
+        postData(values)
+      }
     }
   })
 
-  const post = async obj => {
-    const items = obj?.agingLeg.map((item, index) => ({
-      ...item,
-      agpId: recordId,
-      seqNo: index + 1
-    }))
+  const isRowEmpty = row => {
+    return !row.caption && !row.days
+  }
+
+  const postData = async obj => {
+    const items =
+      obj?.agingLeg?.map((item, index) => ({
+        ...item,
+        agpId: recordId,
+        seqNo: index + 1
+      })) || []
 
     const data = {
       header: {
-        agpId: recordId,
-        name: '15 days' // Hardcoded name for testing
+        recordId: recordId || '',
+        name: obj.name
       },
-      items: items || []
+      items: items
     }
 
-    await postRequest({
-      extension: FinancialRepository.AgingProfile.set2,
-      record: JSON.stringify(data)
-    })
-      .then(res => {
-        toast.success(platformLabels.Edited)
+    try {
+      const response = await postRequest({
+        extension: FinancialRepository.AgingProfile.set2,
+        record: JSON.stringify(data)
       })
-      .catch(error => {})
+
+      if (!formik.values.recordId) {
+        formik.setFieldValue('recordId', response.recordId)
+        window.close()
+      }
+
+      toast.success(platformLabels.Edited)
+    } catch (error) {
+      toast.error('Error submitting the form')
+    }
+
+    invalidate()
   }
 
   const columns = [
@@ -73,13 +121,13 @@ const AgingForm = ({ recordId, labels, maxAccess }) => {
     },
     {
       component: 'textfield',
-      label: labels.name,
+      label: labels.caption,
       name: 'caption'
     }
   ]
 
   useEffect(() => {
-    setNumRows(formik?.values?.agingLeg?.length)
+    setNumRows(formik.values.agingLeg.length)
   }, [formik.values.agingLeg])
 
   function getData() {
@@ -92,10 +140,16 @@ const AgingForm = ({ recordId, labels, maxAccess }) => {
           ...agingLegItems,
           id: index + 1
         }))
-        formik.setValues({ agingLeg: modifiedList })
+        formik.setValues({
+          ...formik.values,
+          agingLeg: modifiedList
+        })
       })
       .catch(error => {})
   }
+
+  const editMode = !!formik.values.recordId
+
   useEffect(() => {
     if (recordId) {
       getData()
@@ -107,11 +161,22 @@ const AgingForm = ({ recordId, labels, maxAccess }) => {
       form={formik}
       resourceId={ResourceIds.FIAgingProfile}
       isCleared={false}
-      infoVisible={false}
       maxAccess={maxAccess}
+      editMode={editMode}
     >
       <VertLayout>
         <Grow>
+          <Grid item xs={12}>
+            <CustomTextField
+              name='name'
+              label={labels.name}
+              value={formik.values.name}
+              onChange={formik.handleChange}
+              onClear={() => formik.setFieldValue('name', '')}
+              error={formik.touched.name && Boolean(formik.errors.name)}
+              maxAccess={maxAccess}
+            />
+          </Grid>
           <DataGrid
             onChange={value => formik.setFieldValue('agingLeg', value)}
             value={formik.values.agingLeg || []}
