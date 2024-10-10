@@ -90,7 +90,7 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
     enabled: !recordId
   })
 
-  const { labels: _labelsINV, access: accessINV } = useResourceParams({
+  const { labels: _labels, access: accessINV } = useResourceParams({
     datasetId: ResourceIds.CreditInvoice
   })
 
@@ -255,27 +255,27 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
   const onTFR = async () => {
     const res = await postRequest({
       extension: CTTRXrepository.CreditOrder.tfr,
-      record: JSON.stringify(copy)
+      record: JSON.stringify(formik.values)
     })
 
-    toast.success(platformLabels.Closed)
+    toast.success(platformLabels.Generated)
     invalidate()
-    await refetchForm(res?.recordId)
+    await refetchForm(formik.values.recordId)
     setConfirmationWindowOpen(false)
     window.close()
 
     stack({
       Component: CreditInvoiceForm,
       props: {
-        labels: _labelsINV,
+        _labels,
         access: accessINV,
-        plantId: plantId,
-        userData: userData,
-        recordId: res.recordId
+        recordId: res?.recordId,
+        plantId,
+        userData
       },
       width: 900,
       height: 600,
-      title: _labelsINV.creditInvoice
+      title: _labels.creditInvoice
     })
   }
 
@@ -733,7 +733,9 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
     {
       key: 'Invoice',
       condition: onTFR,
-      onClick: onTFR,
+      onClick: () => {
+        setConfirmationWindowOpen(true)
+      },
       disabled: !isTFR
     },
     {
@@ -949,7 +951,7 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
                 <CustomTextField
                   name='baseAmount'
                   maxAccess={maxAccess}
-                  label={`${labels.total}${baseCurrencyRef !== null ? baseCurrencyRef : ''}`}
+                  label={`${labels.total} ${baseCurrencyRef !== null ? baseCurrencyRef : ''}`}
                   style={{ textAlign: 'right' }}
                   value={getFormattedNumber(totalLoc.toFixed(2))}
                   numberField={true}

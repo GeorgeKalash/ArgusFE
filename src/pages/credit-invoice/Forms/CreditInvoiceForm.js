@@ -114,7 +114,6 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
               message: 'currencyRef is required',
               test(value, context) {
                 const { parent } = context
-                console.log('check validation ', parent)
                 if (parent.id == 1 && value) return true
                 if (parent.id == 1 && !value) return false
                 if (
@@ -877,15 +876,9 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
                 valueShow='cashAccountRef'
                 secondValueShow='cashAccountName'
                 onChange={(event, newValue) => {
-                  if (newValue) {
-                    formik.setFieldValue('cashAccountId', newValue?.recordId)
-                    formik.setFieldValue('cashAccountRef', newValue?.accountNo)
-                    formik.setFieldValue('cashAccountName', newValue?.name)
-                  } else {
-                    formik.setFieldValue('cashAccountId', null)
-                    formik.setFieldValue('cashAccountRef', null)
-                    formik.setFieldValue('cashAccountName', null)
-                  }
+                  formik.setFieldValue('cashAccountId', newValue ? newValue.recordId : '')
+                  formik.setFieldValue('cashAccountRef', newValue ? newValue.accountNo : '')
+                  formik.setFieldValue('cashAccountName', newValue ? newValue.name : '')
                 }}
                 errorCheck={'cashAccountId'}
               />

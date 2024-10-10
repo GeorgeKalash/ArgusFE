@@ -110,12 +110,11 @@ export function DataGrid({
         return
       }
     }
-    if (apiRef.current.getCellMode(rowIds[currentCell.rowIndex], columns[currentCell.columnIndex].field) === 'edit') {
+    if (apiRef.current.getCellMode(rowIds[currentCell.rowIndex], columns[currentCell.columnIndex].field) === 'edit')
       apiRef.current.stopCellEditMode({
         id: rowIds[nextCell.rowIndex],
         field: columns[nextCell.columnIndex].field
       })
-    }
 
     if (nextCell.columnIndex === columns.length - 1 - skip && nextCell.rowIndex === rowIds.length - 1) {
       addRow()
@@ -386,7 +385,6 @@ export function DataGrid({
                     newRow
                   })
                 }
-                const _isReadOnly = column.props.readOnly
 
                 return (
                   <Box
@@ -404,7 +402,6 @@ export function DataGrid({
                         'center',
                       border: `1px solid ${error?.[cell.rowIndex]?.[params.field] ? '#ff0000' : 'transparent'}`
                     }}
-                    tabIndex={_isReadOnly ? -1 : 0}
                   >
                     <Component {...params} update={update} updateRow={updateRow} column={column} />
                   </Box>
@@ -443,8 +440,6 @@ export function DataGrid({
                 }
                 const row = apiRef.current.getRow(params.id)
 
-                const _isReadOnly = column.props.readOnly
-
                 return (
                   <Box
                     sx={{
@@ -459,7 +454,6 @@ export function DataGrid({
                           column.component === 'icon') &&
                         'center'
                     }}
-                    tabIndex={_isReadOnly ? -1 : 0}
                   >
                     <Component
                       {...params}
