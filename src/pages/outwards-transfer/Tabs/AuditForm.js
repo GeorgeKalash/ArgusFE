@@ -8,7 +8,7 @@ import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutward
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-export default function InfoForm({ labels, formik }) {
+export default function AuditForm({ labels, formik }) {
   const { getRequest } = useContext(RequestsContext)
   const [owiFields, setowiFieldsIFields] = useState({})
   const [baseCurSymbol, setBaseCurSymbol] = useState('')

@@ -254,5 +254,6 @@ export const ResourceIds = {
   FinancialIntegrators: 51105,
   SalesDefaults: 51114,
   RemittanceReceiptVoucher: 36323,
-  ItemSizes: 41117
+  ItemSizes: 41117,
+  OutwardsTransfer: 36324
 }
