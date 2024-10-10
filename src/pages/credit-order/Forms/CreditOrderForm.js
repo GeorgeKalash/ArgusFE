@@ -40,7 +40,6 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
   const [selectedFunctionId, setFunctionId] = useState(SystemFunction.CurrencyCreditOrderPurchase)
   const [baseCurrencyRef, setBaseCurrencyRef] = useState(null)
   const { stack } = useWindow()
-  const [confirmationWindowOpen, setConfirmationWindowOpen] = useState(false)
 
   const [initialValues, setInitialData] = useState({
     recordId: recordId || null,
@@ -194,36 +193,32 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
       copy.deliveryDate = formatDateToApi(copy.deliveryDate)
       copy.amount = totalCUR
       copy.baseAmount = totalLoc
-      if (!formik.values.isTFRClicked) {
-        const lastRow = formik.values.rows[formik.values.rows.length - 1]
-        const isLastRowMandatoryOnly = !lastRow.currencyRef && !lastRow.qty && !lastRow.exRate && !lastRow.amount
+      const lastRow = formik.values.rows[formik.values.rows.length - 1]
+      const isLastRowMandatoryOnly = !lastRow.currencyRef && !lastRow.qty && !lastRow.exRate && !lastRow.amount
 
-        const updatedRows = formik.values.rows
-          .filter((_, index) => !(index === formik.values.rows.length - 1 && isLastRowMandatoryOnly))
-          .map((orderDetail, index) => {
-            return {
-              ...orderDetail,
-              seqNo: index + 1,
-              orderId: formik.values.recordId || 0
-            }
-          })
-
-        const resultObject = {
-          header: copy,
-          items: updatedRows
-        }
-
-        const res = await postRequest({
-          extension: CTTRXrepository.CreditOrder.set,
-          record: JSON.stringify(resultObject)
+      const updatedRows = formik.values.rows
+        .filter((_, index) => !(index === formik.values.rows.length - 1 && isLastRowMandatoryOnly))
+        .map((orderDetail, index) => {
+          return {
+            ...orderDetail,
+            seqNo: index + 1,
+            orderId: formik.values.recordId || 0
+          }
         })
 
-        toast.success(platformLabels.Updated)
-        await refetchForm(res?.recordId)
-        invalidate()
-      } else {
-        setConfirmationWindowOpen(true)
+      const resultObject = {
+        header: copy,
+        items: updatedRows
       }
+
+      const res = await postRequest({
+        extension: CTTRXrepository.CreditOrder.set,
+        record: JSON.stringify(resultObject)
+      })
+
+      toast.success(platformLabels.Updated)
+      await refetchForm(res?.recordId)
+      invalidate()
     }
   })
 
@@ -261,7 +256,6 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
     toast.success(platformLabels.Generated)
     invalidate()
     await refetchForm(formik.values.recordId)
-    setConfirmationWindowOpen(false)
     window.close()
 
     stack({
@@ -734,7 +728,17 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
       key: 'Invoice',
       condition: onTFR,
       onClick: () => {
-        setConfirmationWindowOpen(true)
+        stack({
+          Component: ConfirmationDialog,
+          props: {
+            DialogText: labels.transferMessage,
+            fullScreen: false,
+            okButtonAction: onTFR
+          },
+          width: 400,
+          height: 150,
+          title: ''
+        })
       },
       disabled: !isTFR
     },
@@ -759,26 +763,19 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
   }, [])
 
   return (
-    <VertLayout>
-      <ConfirmationDialog
-        DialogText={labels.transferMessage}
-        cancelButtonAction={() => setConfirmationWindowOpen(false)}
-        openCondition={confirmationWindowOpen}
-        okButtonAction={async () => {
-          await onTFR()
-        }}
-      />
-      <FormShell
-        resourceId={ResourceIds.CreditOrder}
-        form={formik}
-        maxAccess={maxAccess}
-        editMode={editMode}
-        onClose={onClose}
-        onReopen={onReopen}
-        isClosed={isClosed}
-        actions={actions}
-        previewReport={editMode}
-      >
+    <FormShell
+      resourceId={ResourceIds.CreditOrder}
+      form={formik}
+      maxAccess={maxAccess}
+      editMode={editMode}
+      onClose={onClose}
+      onReopen={onReopen}
+      isClosed={isClosed}
+      actions={actions}
+      previewReport={editMode}
+      disabledSubmit={isClosed}
+    >
+      <VertLayout>
         <Fixed>
           <Grid container xs={12} style={{ marginTop: '-10px' }}>
             <FormGrid hideonempty item xs={4}>
@@ -961,7 +958,7 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
             </Grid>
           </Grid>
         </Fixed>
-      </FormShell>
-    </VertLayout>
+      </VertLayout>
+    </FormShell>
   )
 }
