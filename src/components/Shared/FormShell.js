@@ -80,10 +80,11 @@ export default function FormShell({
   }
 
   function onApproval() {
+    console.log(form)
     stack({
       Component: Approvals,
       props: {
-        recordId: form.values.recordIdRemittance ?? form.values.recordId,
+        recordId: form.values.remittanceRecordId ?? form.values.recordId,
         functionId: form.values.functionId ?? functionId
       },
       width: 1000,
@@ -243,7 +244,7 @@ export default function FormShell({
             stack({
               Component: ClientBalance,
               props: {
-                recordId: form.values?.recordId,
+                recordId: form.values?.recordId
               },
               width: 500,
               height: 350,
