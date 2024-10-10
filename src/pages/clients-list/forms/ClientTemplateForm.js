@@ -691,8 +691,6 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     }
   ]
 
-  console.log(isClosed, wip && !isClosed, !editMode, isClosed && !wip)
-
   function openBeneficiaryWindow() {
     stack({
       Component: BeneficiaryWindow,
@@ -1288,7 +1286,6 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         values={clientIndividualFormik.values}
                         required
                         onChange={(event, newValue) => {
-                          console.log('newValue', newValue)
                           if (newValue) {
                             clientIndividualFormik.setFieldValue('nationalityId', newValue?.recordId)
                             clientIndividualFormik.setFieldValue('smsLanguage', newValue?.languageId)
