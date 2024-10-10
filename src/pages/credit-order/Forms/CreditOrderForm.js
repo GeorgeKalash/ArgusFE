@@ -195,13 +195,18 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
       copy.amount = totalCUR
       copy.baseAmount = totalLoc
       if (!formik.values.isTFRClicked) {
-        const updatedRows = formik.values.rows.map((orderDetail, index) => {
-          return {
-            ...orderDetail,
-            seqNo: index + 1,
-            orderId: formik.values.recordId || 0
-          }
-        })
+        const lastRow = formik.values.rows[formik.values.rows.length - 1]
+        const isLastRowMandatoryOnly = !lastRow.currencyRef && !lastRow.qty && !lastRow.exRate && !lastRow.amount
+
+        const updatedRows = formik.values.rows
+          .filter((_, index) => !(index === formik.values.rows.length - 1 && isLastRowMandatoryOnly))
+          .map((orderDetail, index) => {
+            return {
+              ...orderDetail,
+              seqNo: index + 1,
+              orderId: formik.values.recordId || 0
+            }
+          })
 
         const resultObject = {
           header: copy,
