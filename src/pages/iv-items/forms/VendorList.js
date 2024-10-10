@@ -74,7 +74,6 @@ const VendorList = ({ store, labels, maxAccess }) => {
     {
       field: 'isPreferred',
       headerName: labels.isPreffered,
-      flex: 1,
       type: 'checkbox'
     },
     {

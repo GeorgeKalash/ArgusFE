@@ -85,6 +85,15 @@ const Table = ({
           valueGetter: ({ data }) => data?.[col.field] && getTimeInTimeZone(data?.[col.field])
         }
       }
+      if (col.type === 'checkbox') {
+        return {
+          ...col,
+          width: 110,
+          cellRenderer: ({ data }) => {
+            return <Checkbox checked={data?.[col.field]} style={{ pointerEvents: 'none' }} />
+          }
+        }
+      }
 
       return col
     })
@@ -598,6 +607,9 @@ const Table = ({
             },
             '.ag-cell': {
               borderRight: '1px solid #d0d0d0 !important'
+            },
+            '.ag-cell .MuiBox-root': {
+              padding: '0px !important'
             }
           }}
         >

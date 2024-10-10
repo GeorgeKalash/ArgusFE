@@ -148,15 +148,25 @@ export const InventoryRepository = {
     rebuild: service + 'rebuildFIS'
   },
   DimensionUDT: { set: service + 'set2UDT', get: service + 'getUDT' },
+  MetalColor: {
+    get: service + 'getMTC',
+    set: service + 'setMTC',
+    qry: service + 'qryMTC',
+    del: service + 'delMTC',
+  },
   Kit: {
     set: service + 'set2KIT',
     get: service + 'getKIT',
     qry: service + 'qryKIT'
   },
+  ItemRetail: {
+    qry: service + 'qryITR',
+    set: service + 'set2ITR'
+  },
   ItemSizes: {
     get: service + 'getSIZ',
     set: service + 'setSIZ',
     del: service + 'delSIZ',
-    page: service + 'pageSIZ',
-  },
+    page: service + 'pageSIZ'
+  }
 }

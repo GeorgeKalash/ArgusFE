@@ -89,13 +89,7 @@ export default function MetalsForm({ labels, maxAccess, setStore, store }) {
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.Metals}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={editMode}
-      isCleared={false}
-    >
+    <FormShell resourceId={ResourceIds.Metals} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
