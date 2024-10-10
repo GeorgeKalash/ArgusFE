@@ -102,13 +102,12 @@ const AgingForm = ({ recordId, labels, maxAccess, name, window }) => {
 
       if (!formik.values.recordId) {
         formik.setFieldValue('recordId', response.recordId)
+        toast.success(platformLabels.Edited)
         window.close()
+      } else {
+        toast.success(platformLabels.Edited)
       }
-
-      toast.success(platformLabels.Edited)
-    } catch (error) {
-      toast.error('Error submitting the form')
-    }
+    } catch (error) {}
 
     invalidate()
   }
