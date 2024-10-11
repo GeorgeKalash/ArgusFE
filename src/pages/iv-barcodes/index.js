@@ -131,7 +131,7 @@ const IvBarcodes = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: InventoryRepository.Items.del,
+      extension: InventoryRepository.Barcodes.del,
       record: JSON.stringify(obj)
     })
     invalidate()

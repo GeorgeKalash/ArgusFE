@@ -11,11 +11,14 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import BarcodesForm from 'src/pages/iv-barcodes/Forms/BarcodesForm'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { useWindow } from 'src/windows'
+import { ControlContext } from 'src/providers/ControlContext'
+import toast from 'react-hot-toast'
 
 const BarcodeForm = ({ store, labels, maxAccess }) => {
   const { recordId, sku, itemName } = store
-  const { getRequest } = useContext(RequestsContext)
+  const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const { platformLabels } = useContext(ControlContext)
 
   const columns = [
     {
@@ -63,7 +66,8 @@ const BarcodeForm = ({ store, labels, maxAccess }) => {
   const {
     query: { data },
     labels: _labels,
-    refetch
+    refetch,
+    invalidate
   } = useResourceQuery({
     enabled: !!recordId,
     datasetId: ResourceIds.Items,
@@ -98,6 +102,15 @@ const BarcodeForm = ({ store, labels, maxAccess }) => {
     })
   }
 
+  const del = async obj => {
+    await postRequest({
+      extension: InventoryRepository.Barcodes.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
+  }
+
   return (
     <VertLayout>
       <Fixed>
@@ -109,6 +122,7 @@ const BarcodeForm = ({ store, labels, maxAccess }) => {
           gridData={data}
           rowId={'barcode'}
           onEdit={edit}
+          onDelete={del}
           isLoading={false}
           pageSize={50}
           pagination={false}
