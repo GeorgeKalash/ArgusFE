@@ -2,16 +2,12 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { DISABLED, MANDATORY } from 'src/services/api/maxAccess'
 
 const getData = async (getRequest, id) => {
-  try {
-    const res = await getRequest({
-      extension: SystemRepository.NumberRange.get,
-      parameters: `_recordId=${id}`
-    })
+  const res = await getRequest({
+    extension: SystemRepository.NumberRange.get,
+    parameters: `_recordId=${id}`
+  })
 
-    return res.record
-  } catch (error) {
-    return null
-  }
+  return res.record
 }
 
 const mergeWithMaxAccess = (maxAccess, field, fieldName) => {
