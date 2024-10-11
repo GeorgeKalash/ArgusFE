@@ -18,7 +18,7 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { useInvalidate } from 'src/hooks/resource'
 import { useBarcodeFieldBehaviours } from 'src/hooks/useBarcodeFieldBehaviours'
 
-export default function BarcodesForm({ labels, access, store, recordId, barcode, msId, obj }) {
+export default function BarcodesForm({ labels, access, store, recordId, msId }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -35,7 +35,7 @@ export default function BarcodesForm({ labels, access, store, recordId, barcode,
 
   const { formik } = useForm({
     initialValues: {
-      recordId: barcode,
+      recordId: recordId,
       itemId: recordId,
       sku: store?.sku,
       defaultQty: null,
@@ -73,14 +73,18 @@ export default function BarcodesForm({ labels, access, store, recordId, barcode,
 
   useEffect(() => {
     ;(async function () {
-      if (barcode) {
+      console.log(recordId, 'record')
+      if (store && !editMode) {
+        formik.setValues({ sku: store?.sku, itemName: store?.itemName })
+
+        return
+      }
+      if (recordId) {
         const res = await getRequest({
           extension: InventoryRepository.Barcodes.get,
-          parameters: `_barcode=${barcode}`
+          parameters: `_barcode=${recordId}`
         })
         formik.setValues({ ...res.record, recordId: res?.record?.barcode })
-      } else if (obj) {
-        formik.setValues({ ...obj, recordId: formik.values.barcode })
       }
     })()
   }, [])

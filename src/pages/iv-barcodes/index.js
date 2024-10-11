@@ -114,8 +114,7 @@ const IvBarcodes = () => {
       Component: BarcodesForm,
       props: {
         labels: _labels,
-        recordId: obj?.recordId,
-        barcode: obj?.barcode,
+        recordId: obj?.barcode,
         msId: obj?.msId,
         maxAccess: access
       },
