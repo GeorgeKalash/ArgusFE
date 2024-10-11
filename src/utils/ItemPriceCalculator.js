@@ -177,7 +177,6 @@ const verifyItemPrice = row => {
 }
 
 const recalcItemPrice = row => {
-  console.log('check row 2 ', row)
   switch (row.dirtyField) {
     case DIRTYFIELD_TWPG:
       row.baseLaborPrice = row.totalWeightPerG - row.basePrice
@@ -241,7 +240,6 @@ const recalcItemPrice = row => {
 }
 
 const getIPR = row => {
-  console.log('check row 1 ', row)
   if (row.priceType === PRICETYPE_UNIT_VOLUME && row.volume === 0) {
     alert('item volume not defined')
   }

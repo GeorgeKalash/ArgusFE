@@ -156,94 +156,66 @@ const SalesOrder = () => {
   }
 
   async function getDefaultUserSite() {
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.UserDefaults.get,
-        parameters: `_userId=${userId}&_key=siteId`
-      })
+    const res = await getRequest({
+      extension: SystemRepository.UserDefaults.get,
+      parameters: `_userId=${userId}&_key=siteId`
+    })
 
-      return res?.record?.value
-    } catch (error) {
-      return ''
-    }
+    return res?.record?.value
   }
 
   async function getDefaultPUSite() {
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.Defaults.get,
-        parameters: `_filter=&_key=PUSiteId`
-      })
+    const res = await getRequest({
+      extension: SystemRepository.Defaults.get,
+      parameters: `_filter=&_key=PUSiteId`
+    })
 
-      return res?.record?.value
-    } catch (error) {
-      return ''
-    }
+    return res?.record?.value
   }
 
   async function getDefaultSalesTD() {
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.Defaults.get,
-        parameters: `_filter=&_key=salesTD`
-      })
+    const res = await getRequest({
+      extension: SystemRepository.Defaults.get,
+      parameters: `_filter=&_key=salesTD`
+    })
 
-      return res?.record?.value
-    } catch (error) {
-      return ''
-    }
+    return res?.record?.value
   }
 
   async function getDefaultSalesCurrency() {
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.Defaults.get,
-        parameters: `_filter=&_key=currencyId`
-      })
+    const res = await getRequest({
+      extension: SystemRepository.Defaults.get,
+      parameters: `_filter=&_key=currencyId`
+    })
 
-      return res?.record?.value
-    } catch (error) {
-      return ''
-    }
+    return res?.record?.value
   }
 
   async function getDefaultUserPlant() {
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.UserDefaults.get,
-        parameters: `_userId=${userId}&_key=plantId`
-      })
+    const res = await getRequest({
+      extension: SystemRepository.UserDefaults.get,
+      parameters: `_userId=${userId}&_key=plantId`
+    })
 
-      return res?.record?.value
-    } catch (error) {
-      return ''
-    }
+    return res?.record?.value
   }
 
   async function getDefaultUserSP() {
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.UserDefaults.get,
-        parameters: `_userId=${userId}&_key=spId`
-      })
+    const res = await getRequest({
+      extension: SystemRepository.UserDefaults.get,
+      parameters: `_userId=${userId}&_key=spId`
+    })
 
-      return res?.record?.value
-    } catch (error) {
-      return ''
-    }
+    return res?.record?.value
   }
 
   async function getDefaultDT() {
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.UserFunction.get,
-        parameters: `_userId=${userId}&_functionId=${SystemFunction.SalesOrder}`
-      })
+    const res = await getRequest({
+      extension: SystemRepository.UserFunction.get,
+      parameters: `_userId=${userId}&_functionId=${SystemFunction.SalesOrder}`
+    })
 
-      return res?.record?.dtId
-    } catch (error) {
-      return ''
-    }
+    return res?.record?.dtId
   }
 
   async function openForm(recordId) {
@@ -276,14 +248,12 @@ const SalesOrder = () => {
   }
 
   const delSO = async obj => {
-    try {
-      await postRequest({
-        extension: SaleRepository.SalesOrder.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
+    await postRequest({
+      extension: SaleRepository.SalesOrder.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   const onSearch = value => {
