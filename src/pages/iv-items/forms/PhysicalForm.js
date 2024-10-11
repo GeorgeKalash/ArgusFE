@@ -97,38 +97,38 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
     try {
       const parameters = {
         _dirtyField: dirtyField,
-        _shape: formik.values.shape || 0,
-        _length: formik.values.length || 0,
-        _width: formik.values.width || 0,
-        _depth: formik.values.depth || 0,
-        _diameter: formik.values.diameter || 0,
-        _volume: formik.values.volume || 0,
-        _weight: formik.values.weight || 0,
-        _density: formik.values.density || 0
+        _shape: parseInt(formik.values.shape) || 0,
+        _length: parseInt(formik.values.length) || 0,
+        _width: parseInt(formik.values.width) || 0,
+        _depth: parseInt(formik.values.depth) || 0,
+        _diameter: parseInt(formik.values.diameter) || 0,
+        _volume: parseInt(formik.values.volume) || 0,
+        _weight: parseInt(formik.values.weight) || 0,
+        _density: parseInt(formik.values.density) || 0
       }
 
       if (dirtyField) {
         switch (dirtyField) {
           case 1:
-            parameters._length = newValue
+            parameters._length = parseInt(newValue) || 0
             break
           case 2:
-            parameters._width = newValue
+            parameters._width = parseInt(newValue) || 0
             break
           case 3:
-            parameters._depth = newValue
+            parameters._depth = parseInt(newValue) || 0
             break
           case 4:
-            parameters._diameter = newValue
+            parameters._diameter = parseInt(newValue) || 0
             break
           case 5:
-            parameters._volume = newValue
+            parameters._volume = parseInt(newValue) || 0
             break
           case 6:
-            parameters._weight = newValue
+            parameters._weight = parseInt(newValue) || 0
             break
           case 7:
-            parameters._density = newValue
+            parameters._density = parseInt(newValue) || 0
             break
           default:
             break
