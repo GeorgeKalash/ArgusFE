@@ -44,7 +44,7 @@ export default function BarcodesForm({ labels, access, store, recordId, msId }) 
       msId: msId,
       scaleDescription: null,
       posDescription: null,
-      barcode: '',
+      barcode: null,
       isInactive: false
     },
     enableReinitialize: false,
@@ -61,7 +61,7 @@ export default function BarcodesForm({ labels, access, store, recordId, msId }) 
 
       if (!values.recordId) {
         toast.success(platformLabels.Added)
-        formik.setFieldValue('recordId', values?.barcode)
+        formik.setFieldValue('recordId', values?.barcode || res?.recordId)
         formik.setFieldValue('barcode', res?.recordId)
       } else toast.success(platformLabels.Edited)
       invalidate()
@@ -74,7 +74,7 @@ export default function BarcodesForm({ labels, access, store, recordId, msId }) 
   useEffect(() => {
     ;(async function () {
       if (store && !editMode) {
-        formik.setValues({ itemId: store?.recordId, sku: store?.sku, itemName: store?.itemName })
+        formik.setValues({ ...formik.values, itemId: store?.recordId, sku: store?.sku, itemName: store?.itemName })
 
         return
       }
