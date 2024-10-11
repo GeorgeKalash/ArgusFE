@@ -18,7 +18,7 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { useInvalidate } from 'src/hooks/resource'
 import { useBarcodeFieldBehaviours } from 'src/hooks/useBarcodeFieldBehaviours'
 
-export default function BarcodesForm({ labels, access, store, recordId, barcode, msId, obj, sku, itemName }) {
+export default function BarcodesForm({ labels, access, store, recordId, barcode, msId, obj }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -37,9 +37,9 @@ export default function BarcodesForm({ labels, access, store, recordId, barcode,
     initialValues: {
       recordId: barcode,
       itemId: recordId,
-      sku: sku,
+      sku: store?.sku,
       defaultQty: null,
-      itemName: itemName,
+      itemName: store?.itemName,
       muId: null,
       msId: msId,
       scaleDescription: null,
@@ -98,7 +98,7 @@ export default function BarcodesForm({ labels, access, store, recordId, barcode,
                 endpointId={InventoryRepository.Item.snapshot}
                 name='itemId'
                 label={labels?.sku}
-                readOnly={editMode || (!!sku && !!itemName)}
+                readOnly={editMode || (!!store?.sku && !!store?.itemName)}
                 valueField='recordId'
                 displayField='sku'
                 valueShow='sku'

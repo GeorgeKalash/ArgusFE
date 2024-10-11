@@ -122,7 +122,7 @@ const IvItems = () => {
         recordId: obj?.recordId,
         sku: obj?.sku,
         itemName: obj?.name,
-        msId: obj.msId,
+        msId: obj?.msId,
         maxAccess: access
       },
       width: 1200,

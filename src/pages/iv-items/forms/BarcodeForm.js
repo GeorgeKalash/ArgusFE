@@ -76,14 +76,14 @@ const BarcodeForm = ({ store, labels, maxAccess }) => {
   })
 
   const add = () => {
-    openForm(null, sku, itemName, recordId)
+    openForm(null, recordId)
   }
 
   const edit = obj => {
     openForm(obj)
   }
 
-  function openForm(obj, sku, itemName, recordId) {
+  function openForm(obj, recordId) {
     stack({
       Component: BarcodesForm,
       props: {
@@ -92,9 +92,7 @@ const BarcodeForm = ({ store, labels, maxAccess }) => {
         access: maxAccess,
         store,
         obj,
-        sku,
-        msId: store?._msId,
-        itemName
+        msId: store?._msId
       },
       width: 600,
       height: 500,
