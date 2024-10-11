@@ -85,7 +85,6 @@ const barcodeFieldBehaviours = async (getRequest, fieldName = 'barcode', access,
   }
 
   if (access) {
-    console.log(access, mergeWithMaxAccess)
     access = mergeWithMaxAccess(access, field, fieldName)
   }
 
