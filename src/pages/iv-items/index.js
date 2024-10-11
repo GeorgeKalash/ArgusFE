@@ -120,8 +120,6 @@ const IvItems = () => {
       props: {
         labels: _labels,
         recordId: obj?.recordId,
-        sku: obj?.sku,
-        itemName: obj?.name,
         msId: obj?.msId,
         maxAccess: access
       },
