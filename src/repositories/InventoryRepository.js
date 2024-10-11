@@ -168,5 +168,11 @@ export const InventoryRepository = {
     set: service + 'setSIZ',
     del: service + 'delSIZ',
     page: service + 'pageSIZ'
-  }
+  },
+  CategoryLevel: {
+    set: service + 'setCAL',
+    set2: service + 'set2CAL',
+    get: service + 'getCAL',
+    qry: service + 'qryCAL'
+  },
 }
