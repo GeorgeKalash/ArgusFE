@@ -125,6 +125,7 @@ export default function BarcodesForm({ labels, access, store, recordId, barcode,
                 label={labels?.barcode}
                 value={formik?.values?.barcode}
                 maxLength='20'
+                readOnly={editMode}
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('barcode', '')}
