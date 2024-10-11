@@ -167,82 +167,77 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
     <FormShell form={formik} resourceId={ResourceIds.Items} maxAccess={maxAccess} infoVisible={false} isCleared={false}>
       <VertLayout>
         <Fixed>
-          <GridToolbar
-            onAdd={add}
-            maxAccess={maxAccess}
-            rightSection={
-              <Grid container spacing={2} sx={{ mt: -1 }}>
-                <Grid item xs={6}>
-                  <ResourceComboBox
-                    endpointId={store._msId ? InventoryRepository.MeasurementUnit.qry : ''}
-                    parameters={`_msId=${store._msId}`}
-                    name='defSaleMUId'
-                    label={labels.measure}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    values={formik.values}
-                    valueField='recordId'
-                    displayField={['reference', 'name']}
-                    maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('defSaleMUId', newValue?.recordId || '')
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={6}>
-                  <ResourceComboBox
-                    endpointId={SaleRepository.PriceGroups.qry}
-                    name='pgId'
-                    label={labels.priceGroups}
-                    valueField='recordId'
-                    displayField='name'
-                    values={formik.values}
-                    maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('pgId', newValue?.recordId || '')
-                    }}
-                    onClear={() => formik.setFieldValue('pgId', '')}
-                  />
-                </Grid>
-                <Grid item xs={6}>
-                  <ResourceComboBox
-                    endpointId={InventoryRepository.Currency.qry}
-                    parameters={recordId ? `_itemId=${recordId}` : ''}
-                    name='currencyId'
-                    label={labels.currency}
-                    valueField='currencyId'
-                    displayField={['currencyName']}
-                    columnsInDropDown={[{ key: 'currencyName', value: 'Name' }]}
-                    values={formik.values}
-                    maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('currencyId', newValue?.currencyId || '')
-                    }}
-                    onClear={() => formik.setFieldValue('currencyId', '')}
-                    error={!formik.values.currencyId}
-                  />
-                </Grid>
+          <GridToolbar onAdd={add} maxAccess={maxAccess} />
+          <Grid container spacing={2} sx={{ pl: 25, mt: -12 }}>
+            <Grid item xs={4}>
+              <ResourceComboBox
+                endpointId={store._msId ? InventoryRepository.MeasurementUnit.qry : ''}
+                parameters={`_msId=${store._msId}`}
+                name='defSaleMUId'
+                label={labels.measure}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('defSaleMUId', newValue?.recordId || '')
+                }}
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <ResourceComboBox
+                endpointId={SaleRepository.PriceGroups.qry}
+                name='pgId'
+                label={labels.priceGroups}
+                valueField='recordId'
+                displayField='name'
+                values={formik.values}
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('pgId', newValue?.recordId || '')
+                }}
+                onClear={() => formik.setFieldValue('pgId', '')}
+              />
+            </Grid>
+            <Grid item xs={4.01}>
+              <ResourceComboBox
+                endpointId={InventoryRepository.Currency.qry}
+                parameters={recordId ? `_itemId=${recordId}` : ''}
+                name='currencyId'
+                label={labels.currency}
+                valueField='currencyId'
+                displayField={['currencyName']}
+                columnsInDropDown={[{ key: 'currencyName', value: 'Name' }]}
+                values={formik.values}
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('currencyId', newValue?.currencyId || '')
+                }}
+                onClear={() => formik.setFieldValue('currencyId', '')}
+                error={!formik.values.currencyId}
+              />
+            </Grid>
 
-                <Grid item xs={6}>
-                  <ResourceComboBox
-                    endpointId={SaleRepository.ReturnPolicy.qry}
-                    name='returnPolicyId'
-                    label={labels.returnPolicy}
-                    valueField='recordId'
-                    displayField='name'
-                    values={formik.values}
-                    maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('returnPolicyId', newValue?.recordId || '')
-                    }}
-                    onClear={() => formik.setFieldValue('returnPolicyId', '')}
-                  />
-                </Grid>
-              </Grid>
-            }
-          />
+            <Grid item xs={4}>
+              <ResourceComboBox
+                endpointId={SaleRepository.ReturnPolicy.qry}
+                name='returnPolicyId'
+                label={labels.returnPolicy}
+                valueField='recordId'
+                displayField='name'
+                values={formik.values}
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('returnPolicyId', newValue?.recordId || '')
+                }}
+                onClear={() => formik.setFieldValue('returnPolicyId', '')}
+              />
+            </Grid>
+          </Grid>
         </Fixed>
         <Grow>
           <Table

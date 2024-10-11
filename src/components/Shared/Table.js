@@ -33,6 +33,7 @@ const Table = ({
   globalStatus = true,
   viewCheckButtons = false,
   showCheckboxColumn = false,
+  disableSorting = false,
   rowSelection = '',
   pagination = true,
   setData,
@@ -65,29 +66,45 @@ const Table = ({
       if (col.type === 'date') {
         return {
           ...col,
-          valueGetter: ({ data }) => formatDateDefault(data?.[col.field])
+          valueGetter: ({ data }) => formatDateDefault(data?.[col.field]),
+          sortable: !disableSorting
         }
       }
       if (col.type === 'dateTime') {
         return {
           ...col,
-          valueGetter: ({ data }) => data?.[col.field] && formatDateTimeDefault(data?.[col.field])
+          valueGetter: ({ data }) => data?.[col.field] && formatDateTimeDefault(data?.[col.field]),
+          sortable: !disableSorting
         }
       }
       if (col.type === 'number' || col?.type?.field === 'number') {
         return {
           ...col,
-          valueGetter: ({ data }) => getFormattedNumber(data?.[col.field], col.type?.decimal)
+          valueGetter: ({ data }) => getFormattedNumber(data?.[col.field], col.type?.decimal),
+          sortable: !disableSorting
         }
       }
       if (col.type === 'timeZone') {
         return {
           ...col,
-          valueGetter: ({ data }) => data?.[col.field] && getTimeInTimeZone(data?.[col.field])
+          valueGetter: ({ data }) => data?.[col.field] && getTimeInTimeZone(data?.[col.field]),
+          sortable: !disableSorting
+        }
+      }
+      if (col.type === 'checkbox') {
+        return {
+          ...col,
+          width: 110,
+          cellRenderer: ({ data }) => {
+            return <Checkbox checked={data?.[col.field]} style={{ pointerEvents: 'none' }} />
+          }
         }
       }
 
-      return col
+      return {
+        ...col,
+        sortable: !disableSorting
+      }
     })
 
   const shouldRemoveColumn = column => {
@@ -486,7 +503,12 @@ const Table = ({
             },
             '&:focus': {
               outline: 'none'
-            }
+            },
+            ...(!params.colDef?.wrapText && {
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            })
           }}
         >
           {params.value}
@@ -595,6 +617,9 @@ const Table = ({
             },
             '.ag-cell': {
               borderRight: '1px solid #d0d0d0 !important'
+            },
+            '.ag-cell .MuiBox-root': {
+              padding: '0px !important'
             }
           }}
         >

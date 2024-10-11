@@ -118,7 +118,7 @@ export const AddressFormShell = ({
       isCleared={isCleared}
       {...props}
     >
-      <AddressTab addressValidation={formik} readOnly={readOnly} required={required} />
+      <AddressTab addressValidation={formik} readOnly={readOnly} required={required} {...props} />
     </FormShell>
   )
 }

@@ -176,6 +176,7 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
       editMode={!!storeRecordId}
       isSavedClear={false}
       isCleared={false}
+      infoVisible={false}
     >
       <VertLayout>
         <Fixed>

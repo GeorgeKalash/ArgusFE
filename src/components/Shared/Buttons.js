@@ -121,6 +121,13 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'Receipt Voucher',
+    label: platformLabels.ReceiptVoucher,
+    color: '#231f20',
+    image: 'invoice.png',
+    main: false
+  },
+  {
     key: 'Tree',
     label: platformLabels.Tree,
     color: '#231f20',
