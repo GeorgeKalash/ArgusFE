@@ -1,4 +1,4 @@
-import { Grow, Table } from '@mui/material'
+import { Grow } from '@mui/material'
 import { useRouter } from 'next/router'
 import React, { useContext } from 'react'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
@@ -15,6 +15,7 @@ import { useWindow } from 'src/windows'
 import SaleTransactionForm from './forms/SaleTransactionForm'
 import { useResourceQuery } from 'src/hooks/resource'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import Table from 'src/components/Shared/Table'
 
 const SaTrx = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -38,7 +39,8 @@ const SaTrx = () => {
     endpointId: SaleRepository.SalesTransaction.snapshot,
     datasetId: ResourceIds.SalesInvoice,
     filter: {
-      filterFn: fetchWithFilter
+      filterFn: fetchWithFilter,
+      default: { functionId }
     }
   })
 
@@ -49,7 +51,7 @@ const SaTrx = () => {
       flex: 1
     },
     {
-      field: 'status',
+      field: 'statusName',
       headerName: labels.status,
       flex: 1
     },
@@ -110,7 +112,7 @@ const SaTrx = () => {
     {
       field: 'description',
       headerName: labels.description,
-      flex: 1
+      flex: 2
     },
     {
       field: 'isVerified',
@@ -183,17 +185,32 @@ const SaTrx = () => {
     }
   }
 
-  function openForm(recordId) {
+  async function getDefaultSalesTD() {
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.Defaults.get,
+        parameters: `_filter=&_key=salesTD`
+      })
+
+      return res?.record?.value
+    } catch (error) {
+      return ''
+    }
+  }
+
+  async function openForm(recordId) {
+    const defaultSalesTD = await getDefaultSalesTD()
     stack({
       Component: SaleTransactionForm,
       props: {
         labels: labels,
         recordId: recordId,
         access,
-        functionId: functionId
+        functionId: functionId,
+        defaultSalesTD
       },
-      width: 900,
-      height: 670,
+      width: 1300,
+      height: 720,
       title: getCorrectLabel(parseInt(functionId))
     })
   }
