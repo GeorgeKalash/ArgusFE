@@ -37,9 +37,9 @@ export default function BarcodesForm({ labels, access, store, recordId, msId }) 
     initialValues: {
       recordId: recordId,
       itemId: recordId || store?.recordId,
-      sku: store?.sku,
+      sku: store?._reference,
       defaultQty: null,
-      itemName: store?.itemName,
+      itemName: store?._name,
       muId: null,
       msId: msId,
       scaleDescription: null,
@@ -74,7 +74,7 @@ export default function BarcodesForm({ labels, access, store, recordId, msId }) 
   useEffect(() => {
     ;(async function () {
       if (store && !editMode) {
-        formik.setValues({ ...formik.values, itemId: store?.recordId, sku: store?.sku, itemName: store?.itemName })
+        formik.setValues({ ...formik.values, itemId: store?.recordId, sku: store?._reference, itemName: store?._name })
 
         return
       }
@@ -102,7 +102,7 @@ export default function BarcodesForm({ labels, access, store, recordId, msId }) 
                 endpointId={InventoryRepository.Item.snapshot}
                 name='itemId'
                 label={labels?.sku}
-                readOnly={editMode || (!!store?.sku && !!store?.itemName)}
+                readOnly={editMode || (!!store?._reference && !!store?._name)}
                 valueField='recordId'
                 displayField='sku'
                 valueShow='sku'

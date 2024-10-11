@@ -15,7 +15,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import toast from 'react-hot-toast'
 
 const BarcodeForm = ({ store, labels, maxAccess }) => {
-  const { recordId, sku, itemName } = store
+  const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
