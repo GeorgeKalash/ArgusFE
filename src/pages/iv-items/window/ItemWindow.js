@@ -12,14 +12,14 @@ import ItemProductionForm from '../forms/ItemProductionForm.js'
 import KitForm from '../forms/KitForm.js'
 import RetailForm from '../forms/RetailForm.js'
 
-const ItemWindow = ({ recordId, labels, maxAccess }) => {
+const ItemWindow = ({ recordId, labels, sku, itemName, msId, maxAccess }) => {
   const [activeTab, setActiveTab] = useState(0)
   const [formikInitial, setFormikInitial] = useState([])
   const editMode = !!recordId
 
   const [store, setStore] = useState({
     recordId: recordId || null,
-    _msId: null,
+    _msId: msId,
     measurementId: null,
     priceGroupId: null,
     returnPolicy: null,
@@ -27,7 +27,10 @@ const ItemWindow = ({ recordId, labels, maxAccess }) => {
     _name: null,
     _reference: null,
     _isMetal: false,
-    _metal: null
+    _metal: null,
+    nraId: null,
+    sku: sku,
+    itemName: itemName
   })
 
   const tabs = [

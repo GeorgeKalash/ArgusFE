@@ -151,12 +151,19 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
             extension: InventoryRepository.Items.get,
             parameters: `_recordId=${recordId}`
           })
+
+          const res2 = await getRequest({
+            extension: InventoryRepository.Category.get,
+            parameters: `_recordId=${res?.record?.categoryId}`
+          })
+
           setFormikInitial(res.record)
           formik.setValues({ ...res.record, kitItem: !!res.record.kitItem })
           setShowLotCategories(res.record.trackBy === 2)
           setShowSerialProfiles(res.record.trackBy === 1)
           setStore(prevStore => ({
             ...prevStore,
+            nraId: res2?.record?.nraId,
             _msId: res.record.msId,
             _kit: !!res.record.kitItem,
             measurementId: res.record.defSaleMUId,
@@ -232,6 +239,10 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
                       changeDT(newValue)
+                      setStore(prevStore => ({
+                        ...prevStore,
+                        nraId: newValue?.nraId
+                      }))
                       formik.setFieldValue('categoryId', newValue?.recordId || '')
                       formik.setFieldValue('priceType', newValue?.priceType || '')
                       formik.setFieldValue('trackBy', newValue?.trackBy || '')
