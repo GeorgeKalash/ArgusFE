@@ -56,10 +56,10 @@ const CategoryLevels = () => {
         yup.object().shape({
           levelId: yup
             .number()
-            .required('Level ID is required')
-            .integer('Level ID must be an integer')
-            .min(0, 'Level ID must be at least 0')
-            .max(9, 'Level ID must be no more than 9')
+            .required()
+            .integer()
+            .min(0)
+            .max(9)
             .test('is-unique', 'Level ID must be unique', function (value) {
               const { parent } = this
               const itemList = formik.values.items
