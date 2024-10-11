@@ -177,9 +177,7 @@ export const InventoryRepository = {
     page: service + 'pageSIZ'
   },
   CategoryLevel: {
-    set: service + 'setCAL',
     set2: service + 'set2CAL',
-    get: service + 'getCAL',
     qry: service + 'qryCAL'
   },
 }

@@ -33,18 +33,13 @@ const CategoryLevels = () => {
       extension: InventoryRepository.CategoryLevel.qry
     })
       .then(res => {
-        const result = res.list
-
-        const processedData = result.map((item, index) => ({
+        const processedData = res.list.map((item, index) => ({
           id: index + 1,
-          levelId: item?.levelId,
-          name: item?.name
+          ...item
         }))
-        if (res.list.length > 0) formik.setValues({ items: processedData })
+        formik.setValues({ items: processedData })
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch(error => {})
   }
 
   const { formik } = useForm({
@@ -60,7 +55,7 @@ const CategoryLevels = () => {
             .integer()
             .min(0)
             .max(9)
-            .test('is-unique', 'Level ID must be unique', function (value) {
+            .test('is-unique', `${labels.levelIDUniqueMessage}`, function (value) {
               const { parent } = this
               const itemList = formik.values.items
               const duplicate = itemList.find(item => item.levelId === value && item.id !== parent.id)
@@ -75,34 +70,30 @@ const CategoryLevels = () => {
       items: [
         {
           id: 1,
-          levelId: null,
+          levelId: 0,
           name: ''
         }
       ]
     },
     onSubmit: async values => {
-      try {
-        const levelIds = values.items.map(item => item.levelId)
+      const levelIds = values.items.map(item => item.levelId)
 
-        const uniqueLevelIds = new Set()
-        for (const id of levelIds) {
-          if (uniqueLevelIds.has(id)) {
-            stackError({ message: `Duplicate Level ID found: ${id}` })
+      const uniqueLevelIds = new Set()
+      for (const id of levelIds) {
+        if (uniqueLevelIds.has(id)) {
+          stackError({ message: `${labels.duplicateLevelIdFound}: ${id}` })
 
-            return
-          }
-          uniqueLevelIds.add(id)
+          return
         }
-
-        const data = { items: values.items }
-        await postRequest({
-          extension: InventoryRepository.CategoryLevel.set2,
-          record: JSON.stringify(data)
-        })
-        toast.success(platformLabels.Saved)
-      } catch (error) {
-        stackError({ message: `Save failed: ${error.message}` })
+        uniqueLevelIds.add(id)
       }
+
+      const data = { items: values.items }
+      await postRequest({
+        extension: InventoryRepository.CategoryLevel.set2,
+        record: JSON.stringify(data)
+      })
+      toast.success(platformLabels.Saved)
     }
   })
 
