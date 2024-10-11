@@ -125,7 +125,7 @@ const FiPaymentVouchers = () => {
     {
       field: 'isVerified',
       headerName: _labels.isVerified,
-      flex: 1
+      type: 'checkbox'
     }
   ]
 
@@ -208,14 +208,14 @@ const FiPaymentVouchers = () => {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar 
+        <RPBGridToolbar
           onSearch={onSearch}
-          onClear={onClear} 
-          labels={_labels} 
+          onClear={onClear}
+          labels={_labels}
           onAdd={add}
-          maxAccess={access} 
-          onApply={onApply} 
-          reportName={'FIPV'} 
+          maxAccess={access}
+          onApply={onApply}
+          reportName={'FIPV'}
         />
       </Fixed>
       <Grow>

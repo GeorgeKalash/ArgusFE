@@ -97,7 +97,7 @@ const Correspondent = () => {
     {
       field: 'isInactive',
       headerName: _labels.isInActive,
-      flex: 1
+      type: 'checkbox'
     }
   ]
 
