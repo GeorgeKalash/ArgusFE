@@ -61,7 +61,7 @@ export default function BarcodesForm({ labels, access, store, recordId, msId }) 
 
       if (!values.recordId) {
         toast.success(platformLabels.Added)
-        formik.setFieldValue('recordId', values?.barcode)
+        formik.setFieldValue('recordId', values?.barcode || res?.recordId)
         formik.setFieldValue('barcode', res?.recordId)
       } else toast.success(platformLabels.Edited)
       invalidate()
