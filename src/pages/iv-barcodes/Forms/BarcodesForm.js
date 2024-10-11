@@ -36,7 +36,7 @@ export default function BarcodesForm({ labels, access, store, recordId, msId }) 
   const { formik } = useForm({
     initialValues: {
       recordId: recordId,
-      itemId: recordId,
+      itemId: recordId || store?.recordId,
       sku: store?.sku,
       defaultQty: null,
       itemName: store?.itemName,
@@ -73,9 +73,8 @@ export default function BarcodesForm({ labels, access, store, recordId, msId }) 
 
   useEffect(() => {
     ;(async function () {
-      console.log(recordId, 'record')
       if (store && !editMode) {
-        formik.setValues({ sku: store?.sku, itemName: store?.itemName })
+        formik.setValues({ itemId: store?.recordId, sku: store?.sku, itemName: store?.itemName })
 
         return
       }
