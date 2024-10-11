@@ -70,10 +70,11 @@ export function DataGrid({
   useEffect(() => {
     if (!isUpdatingField && nextEdit) {
       const { id, field } = nextEdit
-
       if (!disabled) {
-        if (apiRef.current.getCellMode(id, field) === 'view') apiRef.current.startCellEditMode({ id, field })
-        apiRef.current.setCellFocus(id, field)
+        if (id) {
+          if (apiRef.current.getCellMode(id, field) === 'view') apiRef?.current.startCellEditMode({ id, field })
+          apiRef.current.setCellFocus(id, field)
+        }
       }
       setNextEdit(null)
     }

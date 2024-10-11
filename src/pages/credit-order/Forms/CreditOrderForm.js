@@ -751,6 +751,20 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
   ]
 
   useEffect(() => {
+    const lastRow = formik.values.rows[formik.values.rows.length - 1]
+    const isLastRowMandatoryOnly = !lastRow.currencyRef && !lastRow.qty && !lastRow.exRate && !lastRow.amount
+
+    const emptyRows = formik.values.rows.filter(
+      row => !row.currencyRef && (!row.qty || row.qty == 0) && !row.exRate && (!row.amount || row.amount == 0)
+    )
+
+    if (emptyRows.length > 1 && isLastRowMandatoryOnly) {
+      const updatedRows = formik.values.rows.slice(0, formik.values.rows.length - 1)
+      formik.setFieldValue('rows', updatedRows)
+    }
+  }, [formik.values.rows])
+
+  useEffect(() => {
     ;(async function () {
       if (recordId) {
         await refetchForm(recordId)
@@ -777,7 +791,7 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
     >
       <VertLayout>
         <Fixed>
-          <Grid container xs={12} style={{ marginTop: '-10px' }}>
+          <Grid container xs={12}>
             <FormGrid hideonempty item xs={4}>
               <CustomDatePicker
                 name='date'
