@@ -67,12 +67,17 @@ const BarcodeForm = ({ store, labels, maxAccess }) => {
     query: { data },
     labels: _labels,
     refetch,
-    invalidate
+    invalidate,
+    search,
   } = useResourceQuery({
     enabled: !!recordId,
     datasetId: ResourceIds.Items,
     queryFn: fetchGridData,
-    endpointId: InventoryRepository.Barcode.qry
+    endpointId: InventoryRepository.Barcode.qry,
+    search: {
+      endpointId: InventoryRepository.Barcodes.snapshot,
+      searchFn: fetchWithSearch
+    }
   })
 
   const add = () => {
@@ -100,6 +105,18 @@ const BarcodeForm = ({ store, labels, maxAccess }) => {
     })
   }
 
+  
+  async function fetchWithSearch({ options = {}, qry }) {
+    const { _startAt = 0, _size = 50 } = options
+
+    const response = await getRequest({
+      extension: InventoryRepository.Barcodes.snapshot,
+      parameters: `_filter=${qry}&_startAt=${_startAt}&_size=${_size}`
+    })
+
+    return response
+  }
+
   const del = async obj => {
     await postRequest({
       extension: InventoryRepository.Barcodes.del,
@@ -112,7 +129,12 @@ const BarcodeForm = ({ store, labels, maxAccess }) => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={maxAccess} />
+        <GridToolbar 
+          onAdd={add} 
+          maxAccess={maxAccess} 
+          onSearch={search}
+          inputSearch={true} 
+        />
       </Fixed>
       <Grow>
         <Table
