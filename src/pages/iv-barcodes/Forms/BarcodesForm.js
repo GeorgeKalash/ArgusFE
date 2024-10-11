@@ -73,7 +73,7 @@ export default function BarcodesForm({ labels, access, store, recordId, barcode,
 
   useEffect(() => {
     ;(async function () {
-      if (formik?.values?.barcode) {
+      if (barcode) {
         const res = await getRequest({
           extension: InventoryRepository.Barcodes.get,
           parameters: `_barcode=${barcode}`
@@ -81,7 +81,6 @@ export default function BarcodesForm({ labels, access, store, recordId, barcode,
         formik.setValues({ ...res.record, recordId: res?.record?.barcode })
       } else if (obj) {
         formik.setValues({ ...obj, recordId: formik.values.barcode })
-        console.log(formik)
       }
     })()
   }, [])
