@@ -253,9 +253,10 @@ export const ResourceIds = {
   ClientBalance: 36131,
   FinancialIntegrators: 51105,
   SalesDefaults: 51114,
+  Barcodes: 41230,
+  MetalColor: 41110,
   RemittanceReceiptVoucher: 36323,
   ItemSizes: 41117,
   OutwardsTransfer: 36324,
-  MetalColor: 41110,
   CategoryLevels: 41118,
 }

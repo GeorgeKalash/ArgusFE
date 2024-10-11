@@ -1,38 +1,53 @@
 import { useContext, useEffect, useState } from 'react'
-import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository';
-import { RequestsContext } from 'src/providers/RequestsContext';
+import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
+import { RequestsContext } from 'src/providers/RequestsContext'
 
 export default function useIdType() {
-  const [store, setStore] = useState();
-  const { getRequest} = useContext(RequestsContext)
+  const [store, setStore] = useState()
+  const { getRequest } = useContext(RequestsContext)
 
   const fillIdTypeStore = () => {
-    var parameters = ``;
+    var parameters = ``
     getRequest({
       extension: CurrencyTradingSettingsRepository.IdTypes.qry,
-      parameters: parameters,
+      parameters: parameters
     })
-      .then((res) => {
-        setStore(res.list);
+      .then(res => {
+        setStore(res.list)
       })
-      .catch((error) => {
-        // setErrorMessage(error);
-      });
-  };
+      .catch(error => {})
+  }
 
   useEffect(() => {
     !store && fillIdTypeStore()
   }, [store])
 
-  const getTypeValue = (value) => {
+  const getTypeValue = value => {
+    function isValidRegex(pattern) {
+      try {
+        new RegExp(pattern)
 
-    var  formatted = store?.find(item => item.format === value);
-     if(!formatted?.recordId){
-      formatted = store?.find(item => value.startsWith(item && item.format.includes("*") && item.format.replace('*', ''))) ?? '';
-     }
+        return true
+      } catch (e) {
+        return false
+      }
+    }
+    var formatted = store?.find(item => item.format === value)
+    if (!formatted?.recordId) {
+      formatted =
+        store?.find(item => {
+          if (item && item.format && isValidRegex(item.format)) {
+            const regex = new RegExp(item.format)
 
-    return  formatted?.recordId
-  };
+            return regex.test(value)
+          }
 
-  return [getTypeValue];
+          return false
+        }) ?? ''
+    }
+
+    return formatted
+  }
+
+  return [getTypeValue]
 }
