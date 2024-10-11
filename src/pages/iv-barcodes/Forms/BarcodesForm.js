@@ -54,7 +54,7 @@ export default function BarcodesForm({ labels, access, store, recordId, barcode,
       itemId: yup.string().required()
     }),
     onSubmit: async values => {
-      await postRequest({
+      const res = await postRequest({
         extension: InventoryRepository.Barcodes.set,
         record: JSON.stringify(values)
       })
@@ -62,6 +62,7 @@ export default function BarcodesForm({ labels, access, store, recordId, barcode,
       if (!values.recordId) {
         toast.success(platformLabels.Added)
         formik.setFieldValue('recordId', values?.barcode)
+        formik.setFieldValue('barcode', res?.recordId)
       } else toast.success(platformLabels.Edited)
       invalidate()
 
@@ -72,14 +73,15 @@ export default function BarcodesForm({ labels, access, store, recordId, barcode,
 
   useEffect(() => {
     ;(async function () {
-      if (barcode) {
+      if (formik?.values?.barcode) {
         const res = await getRequest({
           extension: InventoryRepository.Barcodes.get,
           parameters: `_barcode=${barcode}`
         })
         formik.setValues({ ...res.record, recordId: res?.record?.barcode })
       } else if (obj) {
-        formik.setValues({ ...obj, recordId: obj?.barcode })
+        formik.setValues({ ...obj, recordId: formik.values.barcode })
+        console.log(formik)
       }
     })()
   }, [])
