@@ -152,7 +152,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
       }))
     } catch (error) {}
   }
-
+  console.log(formik.values, 'values')
   useEffect(() => {
     ;(async function () {
       try {
@@ -171,9 +171,13 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
   }, [recordId])
 
   const handleFieldChange = (fieldName, dirtyField, value) => {
-    const newValue = value === '' ? 0 : value
+    const isNumber = !isNaN(value) && value !== ''
+    const newValue = isNumber ? value : formik.values[fieldName]
+
     formik.setFieldValue(fieldName, newValue)
-    fetchAndSetValues(dirtyField, newValue)
+    if (isNumber) {
+      fetchAndSetValues(dirtyField, newValue)
+    }
   }
 
   return (
