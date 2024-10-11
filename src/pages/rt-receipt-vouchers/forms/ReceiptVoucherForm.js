@@ -317,9 +317,6 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
       props: {
         readOnly: true
       },
-      propsReducer({ row, props }) {
-        return { ...props, readOnly: row.type == 1 || !row.type }
-      },
       async onChange({ row: { update, newRow } }) {
         const sumAmount = formik.values.cash.slice(0, -1).reduce((sum, row) => {
           const curValue = parseFloat(row.amount.toString().replace(/,/g, '')) || 0
