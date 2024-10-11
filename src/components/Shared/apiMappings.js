@@ -757,16 +757,22 @@ export const apiMappings = {
     endpoint: companyStructureRepository.CompanyPositions.qry,
     parameters: `_filter=&_size=1000&_startAt=0&_sortBy=recordId`,
     valueField: 'recordId',
-    displayField: ['name'],
-    columnsInDropDown: [{ key: 'name', value: 'Name' }]
+    displayField: ['positionRef', 'name'],
+    columnsInDropDown: [
+      { key: 'positionRef', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
   },
   [ResourceIds.DepartmentFilter]: {
     type: COMBOBOX,
     endpoint: companyStructureRepository.DepartmentFilters.qry,
     parameters: `_filter=&_size=1000&_startAt=0&_type=0&_activeStatus=0&_sortBy=recordId`,
     valueField: 'recordId',
-    displayField: ['name'],
-    columnsInDropDown: [{ key: 'name', value: 'Name' }]
+    displayField: ['departmentRef', 'name'],
+    columnsInDropDown: [
+      { key: 'departmentRef', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
   },
   [ResourceIds.CertificateFilter]: {
     type: COMBOBOX,
