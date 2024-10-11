@@ -12,8 +12,8 @@ import BarcodesForm from 'src/pages/iv-barcodes/Forms/BarcodesForm'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { useWindow } from 'src/windows'
 
-const BarcodeForm = ({ store, labels, maxAccess, sku, itemName }) => {
-  const { recordId } = store
+const BarcodeForm = ({ store, labels, maxAccess }) => {
+  const { recordId, sku, itemName } = store
   const { getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
 

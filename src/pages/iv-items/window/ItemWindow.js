@@ -28,7 +28,9 @@ const ItemWindow = ({ recordId, labels, sku, itemName, msId, maxAccess }) => {
     _reference: null,
     _isMetal: false,
     _metal: null,
-    nraId: null
+    nraId: null,
+    sku: sku,
+    itemName: itemName
   })
 
   const tabs = [
@@ -59,7 +61,7 @@ const ItemWindow = ({ recordId, labels, sku, itemName, msId, maxAccess }) => {
         />
       </CustomTabPanel>
       <CustomTabPanel height={660} index={1} value={activeTab}>
-        <BarcodeForm labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} sku={sku} itemName={itemName} />
+        <BarcodeForm labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} />
       </CustomTabPanel>
       <CustomTabPanel height={660} index={2} value={activeTab}>
         <SalesList labels={labels} maxAccess={maxAccess} store={store} formikInitial={formikInitial} />
