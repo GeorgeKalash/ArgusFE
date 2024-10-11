@@ -80,7 +80,6 @@ export default function FormShell({
   }
 
   function onApproval() {
-    console.log(form)
     stack({
       Component: Approvals,
       props: {
