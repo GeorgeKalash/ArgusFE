@@ -112,7 +112,7 @@ export const AddressFormShell = ({
       editMode={editMode}
       {...props}
     >
-      <AddressTab addressValidation={formik} readOnly={readOnly} required={required} />
+      <AddressTab addressValidation={formik} readOnly={readOnly} required={required} {...props} />
     </FormShell>
   )
 }

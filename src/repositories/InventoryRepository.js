@@ -148,6 +148,13 @@ export const InventoryRepository = {
     rebuild: service + 'rebuildFIS'
   },
   DimensionUDT: { set: service + 'set2UDT', get: service + 'getUDT' },
+  Barcodes: {
+    snapshot: service + 'snapshotBCD',
+    get: service + 'getBCD',
+    set: service + 'setBCD',
+    del: service + 'delBCD',
+    qry: service + 'qryBCD'
+  },
   MetalColor: {
     get: service + 'getMTC',
     set: service + 'setMTC',
@@ -159,10 +166,14 @@ export const InventoryRepository = {
     get: service + 'getKIT',
     qry: service + 'qryKIT'
   },
+  ItemRetail: {
+    qry: service + 'qryITR',
+    set: service + 'set2ITR'
+  },
   ItemSizes: {
     get: service + 'getSIZ',
     set: service + 'setSIZ',
     del: service + 'delSIZ',
-    page: service + 'pageSIZ',
-  },
+    page: service + 'pageSIZ'
+  }
 }

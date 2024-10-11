@@ -10,15 +10,16 @@ import PropertiesForm from '../forms/PropertiesForm.js'
 import BarcodeForm from '../forms/BarcodeForm.js'
 import ItemProductionForm from '../forms/ItemProductionForm.js'
 import KitForm from '../forms/KitForm.js'
+import RetailForm from '../forms/RetailForm.js'
 
-const ItemWindow = ({ recordId, labels, maxAccess }) => {
+const ItemWindow = ({ recordId, labels, sku, itemName, msId, maxAccess }) => {
   const [activeTab, setActiveTab] = useState(0)
   const [formikInitial, setFormikInitial] = useState([])
   const editMode = !!recordId
 
   const [store, setStore] = useState({
     recordId: recordId || null,
-    _msId: null,
+    _msId: msId,
     measurementId: null,
     priceGroupId: null,
     returnPolicy: null,
@@ -26,7 +27,8 @@ const ItemWindow = ({ recordId, labels, maxAccess }) => {
     _name: null,
     _reference: null,
     _isMetal: false,
-    _metal: null
+    _metal: null,
+    nraId: null,
   })
 
   const tabs = [
@@ -37,7 +39,8 @@ const ItemWindow = ({ recordId, labels, maxAccess }) => {
     { label: labels.physical, disabled: !store.recordId },
     { label: labels.vendor, disabled: !store.recordId },
     { label: labels.production, disabled: !store.recordId },
-    { label: labels.kit, disabled: !store.recordId || !store._kit }
+    { label: labels.kit, disabled: !store.recordId || !store._kit },
+    { label: 'retail', disabled: !store.recordId }
   ]
   console.log(tabs[7].disabled, 'dis')
   console.log(store, 'store')
@@ -75,6 +78,9 @@ const ItemWindow = ({ recordId, labels, maxAccess }) => {
       </CustomTabPanel>
       <CustomTabPanel height={660} index={7} value={activeTab}>
         <KitForm labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} />
+      </CustomTabPanel>
+      <CustomTabPanel height={660} index={8} value={activeTab}>
+        <RetailForm labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} />
       </CustomTabPanel>
     </>
   )
