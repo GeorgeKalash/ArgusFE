@@ -44,7 +44,7 @@ export default function BarcodesForm({ labels, access, store, recordId, msId }) 
       msId: msId,
       scaleDescription: null,
       posDescription: null,
-      barcode: '',
+      barcode: null,
       isInactive: false
     },
     enableReinitialize: false,
@@ -74,7 +74,7 @@ export default function BarcodesForm({ labels, access, store, recordId, msId }) 
   useEffect(() => {
     ;(async function () {
       if (store && !editMode) {
-        formik.setValues({ itemId: store?.recordId, sku: store?.sku, itemName: store?.itemName })
+        formik.setValues({ ...formik.values, itemId: store?.recordId, sku: store?.sku, itemName: store?.itemName })
 
         return
       }
