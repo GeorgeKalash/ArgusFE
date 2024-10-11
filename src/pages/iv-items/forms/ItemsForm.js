@@ -116,7 +116,9 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
             _msId: formik.values.msId,
             _kit: formik.values.kit,
             _name: formik.values.name,
-            _reference: formik.values.sku
+            _reference: formik.values.sku,
+            sku: formik.values.sku,
+            itemName: formik.values.name
           }))
         } else {
           toast.success(platformLabels.Edited)
@@ -170,7 +172,9 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
             priceGroupId: res.record.pgId,
             returnPolicy: res.record.returnPolicyId,
             _name: res.record.name,
-            _reference: res.record.sku
+            _reference: res.record.sku,
+            sku: res.record.sku,
+            itemName: res.record.itemName
           }))
         }
       } catch {}
