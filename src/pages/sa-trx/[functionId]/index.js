@@ -209,7 +209,7 @@ const SaTrx = () => {
         functionId: functionId,
         defaultSalesTD
       },
-      width: 1300,
+      width: 1330,
       height: 720,
       title: getCorrectLabel(parseInt(functionId))
     })
