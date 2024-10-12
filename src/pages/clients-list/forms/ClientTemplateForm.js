@@ -1,7 +1,6 @@
 import { Grid, FormControlLabel, Checkbox, Button } from '@mui/material'
 import { useEffect, useState, useContext } from 'react'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
@@ -20,7 +19,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { DataSets } from 'src/resources/DataSets'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
-import { formatDateToApiFunction, formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
+import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { RTCLRepository } from 'src/repositories/RTCLRepository'
 import { useWindow } from 'src/windows'
 import Confirmation from 'src/components/Shared/Confirmation'
@@ -47,7 +46,8 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
   const [editMode, setEditMode] = useState(null)
   const [otpShow, setOtpShow] = useState(false)
   const [newProf, setNewProf] = useState(false)
-  const [idtObj, setIdtObj] = useState({})
+  const [idTypes, setIdTypes] = useState({})
+  const [nationalities, setNationalities] = useState({})
 
   const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
@@ -185,7 +185,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     if (idType) {
       clientIndividualFormik.setFieldValue('idtId', idType.recordId)
       clientIndividualFormik.setFieldValue('idtName', idType.name)
-      const res = idtObj
+      const res = idTypes.list.filter(item => item.recordId === idType.recordId)?.[0]
       if (res['type'] && (res['type'] === 1 || res['type'] === 2)) {
         getCountry()
       }
@@ -350,7 +350,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
         parameters: parameters
       })
         .then(res => {
-          if (!res.record) {
+          if (res.record) {
             stackError({ message: 'the ID number exists.' })
           }
         })
@@ -399,7 +399,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     validationSchema: yup.object({
       reference: referenceRequired && yup.string().required(),
       isResident: yup.string().required(),
-      birthDate: yup.string().required(),
+      birthDate: yup.date().required(),
       idtId: yup.string().required(),
       idNo: yup.string().required(),
       expiryDate: yup.date().required(),
@@ -426,7 +426,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     }
   })
 
-  const isClosed = clientIndividualFormik.values.wip === 2
+  const isClosed = clientIndividualFormik.values.status === 2
   const wip = clientIndividualFormik.values.wip === 2
 
   const postRtDefault = async obj => {
@@ -491,7 +491,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       recordId: obj.remittanceRecordId,
       clientId: obj.clientId || 0,
       plantId: clientIndividualFormik.values.plantId,
-      reference: obj.reference,
+      reference: '', // obj.reference,
       salaryRangeId: obj.salaryRangeId,
       riskLevel: obj.riskLevel,
       smsLanguage: obj.smsLanguage,
@@ -564,6 +564,8 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     }
 
     if (allowEdit) {
+      obj1.status = -1
+
       const updateData = {
         plantId: clientIndividualFormik.values.plantId,
         clientID: obj2, //CTID
@@ -672,9 +674,9 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     },
     {
       key: 'Close',
-      condition: !isClosed,
+      condition: editMode,
       onClick: onClose,
-      disabled: (wip && !isClosed) || !editMode
+      disabled: !editMode
     },
     {
       key: 'Reopen',
@@ -704,6 +706,16 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
   const refreshProf = () => {
     setNewProf(!newProf)
   }
+
+  useEffect(() => {
+    if (clientIndividualFormik.values.nationalityId) {
+      const languageId = nationalities?.list?.filter(
+        item => item.recordId === clientIndividualFormik.values.nationalityId
+      )?.[0]?.languageId
+
+      languageId && clientIndividualFormik.setFieldValue('smsLanguage', languageId)
+    }
+  }, [clientIndividualFormik?.values?.nationalityId])
 
   return (
     <FormShell
@@ -773,7 +785,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                     onClear={() => clientIndividualFormik.setFieldValue('birthDate', '')}
                     disabledDate={'>='}
                     readOnly={editMode && !allowEdit && true}
-                    error={Boolean(clientIndividualFormik.errors.birthDate)}
+                    error={clientIndividualFormik.touched.birthDate && Boolean(clientIndividualFormik.errors.birthDate)}
                     maxAccess={maxAccess}
                   />
                 </Grid>
@@ -828,6 +840,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         displayField='name'
                         readOnly={editMode && !allowEdit && true}
                         values={clientIndividualFormik.values}
+                        setData={setIdTypes}
                         required
                         onChange={(event, newValue) => {
                           if (newValue) {
@@ -839,8 +852,6 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                           } else {
                             fillFilterProfession('')
                           }
-
-                          setIdtObj(newValue || {})
 
                           clientIndividualFormik.setFieldValue('idtId', newValue?.recordId || '')
                           clientIndividualFormik.setFieldValue('idtName', newValue?.name || '')
@@ -1275,6 +1286,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         endpointId={SystemRepository.Country.qry}
                         name='nationalityId'
                         label={labels.nationality}
+                        setData={setNationalities}
                         valueField='recordId'
                         displayField={['reference', 'name', 'flName']}
                         columnsInDropDown={[
@@ -1385,7 +1397,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         value={clientIndividualFormik.values?.sponsorName}
                         readOnly={editMode && !allowEdit && true}
                         onChange={clientIndividualFormik.handleChange}
-                        maxLength='15'
+                        maxLength='200'
                         onClear={() => clientIndividualFormik.setFieldValue('sponsorName', '')}
                         error={
                           clientIndividualFormik.touched.sponsorName &&
@@ -1397,7 +1409,12 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                     <Grid item xs={12} key={newProf}>
                       <ResourceComboBox
                         endpointId={RemittanceSettingsRepository.Profession.qry}
-                        filter={idtObj?.isDiplomat ? item => item.diplomatStatus === 2 : undefined}
+                        filter={
+                          idTypes?.list?.filter(item => item.recordId == clientIndividualFormik.values.idtId)?.[0]
+                            ?.isDiplomat
+                            ? item => item.diplomatStatus === 2
+                            : undefined
+                        }
                         name='professionId'
                         label={labels.profession}
                         valueField='recordId'
