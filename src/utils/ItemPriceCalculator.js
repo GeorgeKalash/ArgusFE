@@ -177,7 +177,6 @@ const verifyItemPrice = row => {
 }
 
 const recalcItemPrice = row => {
-  console.log(row)
   switch (row.dirtyField) {
     case DIRTYFIELD_TWPG:
       row.baseLaborPrice = row.totalWeightPerG - row.basePrice
@@ -198,9 +197,9 @@ const recalcItemPrice = row => {
       row = recalcExtendedPrice(row)
       break
     case DIRTYFIELD_UNIT_PRICE:
-      if (row.baseLaborPrice !== 0) {
+      if (row.baseLaborPrice != 0) {
         row = recalcBaseLaborPrice(row)
-      } else if (row.basePrice !== 0) {
+      } else if (row.basePrice != 0) {
         row = recalcBasePrice(row)
       }
       row = recalcExtendedPrice(row)
