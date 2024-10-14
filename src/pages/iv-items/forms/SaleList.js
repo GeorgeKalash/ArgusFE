@@ -148,7 +148,7 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
         muId: record?.muId,
 
         maxAccess,
-        cId: record?.plId || formik.values.currencyId,
+        cId: record?.currencyId || formik.values.currencyId,
 
         store
       },
