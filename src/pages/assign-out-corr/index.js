@@ -29,7 +29,7 @@ const OutwardsCorrespondent = () => {
     refetch
   } = useResourceQuery({
     queryFn: fetchWithFilter,
-    endpointId: RemittanceOutwardsRepository.OutwardsTransfer.qry2,
+    endpointId: RemittanceOutwardsRepository.OutwardsOrder.qry2,
     datasetId: ResourceIds.CorrespondentOutwards
   })
 
@@ -82,7 +82,7 @@ const OutwardsCorrespondent = () => {
     if (!formik.values.countryId) return
 
     const res = await getRequest({
-      extension: RemittanceOutwardsRepository.OutwardsTransfer.qry2,
+      extension: RemittanceOutwardsRepository.OutwardsOrder.qry2,
       parameters: `_countryId=${formik.values?.countryId}&_currencyId=${
         formik.values?.currencyId || 0
       }&_dispersalType=${formik.values?.dispersalType || 0}`

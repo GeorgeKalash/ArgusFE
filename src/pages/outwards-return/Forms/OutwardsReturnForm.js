@@ -25,7 +25,15 @@ import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
 import { useWindow } from 'src/windows'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 
-export default function OutwardsReturnForm({ labels, maxAccess: access, recordId, plantId, dtId, isOpenOutwards = false, refetch }) {
+export default function OutwardsReturnForm({
+  labels,
+  maxAccess: access,
+  recordId,
+  plantId,
+  dtId,
+  isOpenOutwards = false,
+  refetch
+}) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -151,7 +159,7 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
       props: {
         formValidation: formik,
         recordId: recId,
-        functionId: SystemFunction.OutwardsReturn,
+        functionId: SystemFunction.OutwardsReturn
       },
       width: 400,
       height: 400,
@@ -258,7 +266,7 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
       condition: true,
       onClick: 'onApproval',
       disabled: !isClosed
-    },
+    }
   ]
 
   useEffect(() => {
@@ -284,7 +292,7 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
       actions={actions}
       editMode={editMode}
       functionId={SystemFunction.OutwardsReturn}
-      disabledSubmit={isOpenOutwards ? false : (isPosted || isClosed)}
+      disabledSubmit={isOpenOutwards ? false : isPosted || isClosed}
     >
       <VertLayout>
         <Grow>
@@ -316,7 +324,7 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
             </Grid>
             <Grid item xs={6}>
               <ResourceLookup
-                endpointId={RemittanceOutwardsRepository.OutwardsTransfer.snapshot}
+                endpointId={RemittanceOutwardsRepository.OutwardsOrder.snapshot}
                 valueField='reference'
                 displayField='reference'
                 name='outwardRef'
@@ -534,7 +542,9 @@ export default function OutwardsReturnForm({ labels, maxAccess: access, recordId
                 }}
                 defaultIndex={formik?.values?.interfaceId ? 0 : null}
                 required
-                readOnly={isOpenOutwards ? !!formik.values.interfaceId : isPosted || isClosed || !!formik.values.interfaceId}
+                readOnly={
+                  isOpenOutwards ? !!formik.values.interfaceId : isPosted || isClosed || !!formik.values.interfaceId
+                }
                 maxAccess={maxAccess}
                 error={formik.touched.settlementStatus && Boolean(formik.errors.settlementStatus)}
               />
