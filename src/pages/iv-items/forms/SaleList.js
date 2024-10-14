@@ -121,7 +121,7 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
     },
     {
       field: 'priceWithVat',
-      headerName: labels.priceList,
+      headerName: labels.pwv,
       flex: 1
     },
     {

@@ -77,7 +77,7 @@ const SalesForm = ({ labels, maxAccess, store, cId, plId, record, muId }) => {
 
   useEffect(() => {
     ;(async function () {
-      if (record && formik.values.plId) {
+      if (record && record.currencyId && record.plId) {
         try {
           const res = await getRequest({
             extension: SaleRepository.Sales.get,
@@ -88,7 +88,7 @@ const SalesForm = ({ labels, maxAccess, store, cId, plId, record, muId }) => {
         } catch (error) {}
       }
     })()
-  }, [record])
+  }, [])
 
   useEffect(() => {
     if (!editMode) {
@@ -152,6 +152,7 @@ const SalesForm = ({ labels, maxAccess, store, cId, plId, record, muId }) => {
                   { key: 'name', value: 'Name' }
                 ]}
                 values={formik.values}
+                readOnly={editMode}
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 maxAccess={maxAccess}
