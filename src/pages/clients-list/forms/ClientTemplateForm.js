@@ -43,7 +43,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
   const [showAsPasswordPhoneRepeat, setShowAsPasswordPhoneRepeat] = useState(false)
   const [referenceRequired, setReferenceRequired] = useState(true)
   const [address, setAddress] = useState([])
-  const [editMode, setEditMode] = useState(null)
+  const [editMode, setEditMode] = useState(!!recordId)
   const [otpShow, setOtpShow] = useState(false)
   const [newProf, setNewProf] = useState(false)
   const [idTypes, setIdTypes] = useState({})
@@ -426,7 +426,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     }
   })
 
-  const isClosed = clientIndividualFormik.values.status === 2
+  const isClosed = clientIndividualFormik.values.status !== -1 && clientIndividualFormik.values.otpVerified
   const wip = clientIndividualFormik.values.wip === 2
 
   const postRtDefault = async obj => {
@@ -583,7 +583,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
         .then(res => {
           if (res) {
             toast.success(platformLabels.Edited)
-            otpForm()
+            // otpForm()
           }
         })
         .catch(error => {})
@@ -674,7 +674,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     },
     {
       key: 'Close',
-      condition: editMode,
+      condition: editMode && !isClosed,
       onClick: onClose,
       disabled: !editMode
     },
@@ -783,6 +783,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                     required={true}
                     onChange={clientIndividualFormik.setFieldValue}
                     onClear={() => clientIndividualFormik.setFieldValue('birthDate', '')}
+                    autoFocus={!editMode}
                     disabledDate={'>='}
                     readOnly={editMode && !allowEdit && true}
                     error={clientIndividualFormik.touched.birthDate && Boolean(clientIndividualFormik.errors.birthDate)}
@@ -862,7 +863,6 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                     </Grid>
 
                     <Grid item xs={12}>
-                      {/* {clientIndividualFormik.values?.expiryDate} */}
                       <Button
                         variant='contained'
                         onClick={() =>
@@ -908,7 +908,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                       />
                     </Grid>
 
-                    <Grid item xs={12}>
+                    <Grid item xs={6}>
                       <CustomDatePicker
                         name='issueDate'
                         label={labels.issueDate}
@@ -921,6 +921,18 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                           clientIndividualFormik.touched.issueDate && Boolean(clientIndividualFormik.errors.issueDate)
                         }
                         maxAccess={maxAccess}
+                      />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <CustomDatePickerHijri
+                        name='issueDateHijri'
+                        label={labels.issueDateHijri}
+                        value={clientIndividualFormik.values?.issueDate}
+                        onChange={(name, value) => {
+                          clientIndividualFormik.setFieldValue('issueDate', value)
+                        }}
+                        disabledDate={!editMode && '>'}
+                        onClear={() => clientIndividualFormik.setFieldValue('issueDate', '')}
                       />
                     </Grid>
 

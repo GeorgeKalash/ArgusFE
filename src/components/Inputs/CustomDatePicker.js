@@ -1,5 +1,5 @@
 // ** React Imports
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 // ** MUI Imports
 import { InputAdornment, IconButton } from '@mui/material'
@@ -38,6 +38,8 @@ const CustomDatePicker = ({
   hidden = false,
   ...props
 }) => {
+  const inputRef = useRef(null) // Step 1: Create a ref for the input field
+
   const dateFormat =
     window.localStorage.getItem('default') && JSON.parse(window.localStorage.getItem('default'))['dateFormat']
 
@@ -72,6 +74,18 @@ const CustomDatePicker = ({
     }
   }
 
+  useEffect(() => {
+    if (autoFocus) {
+      setOpenDatePicker(true)
+    }
+  }, [autoFocus])
+
+  useEffect(() => {
+    if (autoFocus && openDatePicker && inputRef.current) {
+      inputRef.current.focus() // Focus on the input
+    }
+  }, [autoFocus, openDatePicker])
+
   const newDate = new Date(disabledRangeDate.date)
   newDate.setDate(newDate.getDate() + disabledRangeDate.day)
 
@@ -96,7 +110,7 @@ const CustomDatePicker = ({
             }
           }
         }}
-        autoFocus={autoFocus}
+        // autoFocus={autoFocus}
         format={dateFormat}
         onChange={newValue => onChange(name, newValue)}
         onClose={() => setOpenDatePicker(false)}
@@ -113,6 +127,7 @@ const CustomDatePicker = ({
             fullWidth: fullWidth,
             error: error,
             helperText: helperText,
+            inputRef: inputRef,
             inputProps: {
               tabIndex: _readOnly ? -1 : 0
             },
