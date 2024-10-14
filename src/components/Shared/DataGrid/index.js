@@ -70,10 +70,11 @@ export function DataGrid({
   useEffect(() => {
     if (!isUpdatingField && nextEdit) {
       const { id, field } = nextEdit
-
       if (!disabled) {
-        if (apiRef.current.getCellMode(id, field) === 'view') apiRef.current.startCellEditMode({ id, field })
-        apiRef.current.setCellFocus(id, field)
+        if (id) {
+          if (apiRef.current.getCellMode(id, field) === 'view') apiRef?.current.startCellEditMode({ id, field })
+          apiRef.current.setCellFocus(id, field)
+        }
       }
       setNextEdit(null)
     }
@@ -386,6 +387,13 @@ export function DataGrid({
                   })
                 }
 
+                function handleCheckboxChange(event) {
+                  const updatedValue = event.target.checked
+                  updateRow({
+                    changes: { [params.field]: updatedValue }
+                  })
+                }
+
                 return (
                   <Box
                     sx={{
@@ -403,7 +411,11 @@ export function DataGrid({
                       border: `1px solid ${error?.[cell.rowIndex]?.[params.field] ? '#ff0000' : 'transparent'}`
                     }}
                   >
-                    <Component {...params} update={update} updateRow={updateRow} column={column} />
+                    {column.component === 'checkbox' ? (
+                      <input type='checkbox' checked={!!params.value} onChange={handleCheckboxChange} />
+                    ) : (
+                      <Component {...params} update={update} updateRow={updateRow} column={column} />
+                    )}
                   </Box>
                 )
               },
