@@ -28,7 +28,7 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
 
   const { formik } = useForm({
     initialValues: {
-      currencyId: '',
+      currencyId: 0,
       defSaleMUId: store.measurementId || '',
       pgId: store.priceGroupId || '',
       returnPolicyId: store.returnPolicy || ''
@@ -64,13 +64,13 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
     })()
   }, [recordId])
 
+  console.log(formik.values, 'formik')
+
   async function fetchGridData() {
-    if (formik.values.currencyId) {
-      return await getRequest({
-        extension: SaleRepository.Sales.qry,
-        parameters: `&_itemId=${recordId}&_currencyId=${formik.values.currencyId}`
-      })
-    }
+    return await getRequest({
+      extension: SaleRepository.Sales.qry,
+      parameters: `&_itemId=${recordId}&_currencyId=${formik.values.currencyId || 0}`
+    })
   }
 
   const {
@@ -86,13 +86,11 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
   })
 
   useEffect(() => {
-    if (formik.values.currencyId) {
-      ;(async () => {
-        await fetchGridData(formik.values.currencyId)
+    ;(async () => {
+      await fetchGridData(formik.values.currencyId)
 
-        refetch()
-      })()
-    }
+      refetch()
+    })()
   }, [formik.values.currencyId])
 
   const columns = [
@@ -218,7 +216,7 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('currencyId', newValue?.currencyId || '')
+                  formik.setFieldValue('currencyId', newValue?.currencyId || 0)
                 }}
                 onClear={() => formik.setFieldValue('currencyId', '')}
                 error={!formik.values.currencyId}
