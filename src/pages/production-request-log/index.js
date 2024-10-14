@@ -1,24 +1,26 @@
 import { useContext } from 'react'
-import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const ProductionRequestLog = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const {
     query: { data },
     labels: _labels,
     refetch,
-    access
+    access,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: ManufacturingRepository.LeanProductionPlanning.preview,
@@ -28,10 +30,6 @@ const ProductionRequestLog = () => {
   const handleSubmit = () => {
     calculateLeans()
   }
-
-  const invalidate = useInvalidate({
-    endpointId: ManufacturingRepository.LeanProductionPlanning.preview
-  })
 
   async function fetchGridData() {
     return await getRequest({
@@ -47,28 +45,24 @@ const ProductionRequestLog = () => {
       flex: 1
     },
     {
+      field: 'date',
+      headerName: _labels.date,
+      flex: 1,
+      type: 'date'
+    },
+    {
       field: 'sku',
-      headerName: _labels[3],
-      flex: 1
-    },
-    {
-      field: 'height',
-      headerName: _labels[4],
-      flex: 1
-    },
-    {
-      field: 'width',
-      headerName: _labels[5],
+      headerName: _labels.sku,
       flex: 1
     },
     {
       field: 'qty',
-      headerName: _labels[6],
+      headerName: _labels.qty,
       flex: 1
     },
     {
-      field: 'totalThickness',
-      headerName: _labels[7],
+      field: 'description',
+      headerName: _labels.description,
       flex: 1
     }
   ]
@@ -83,12 +77,12 @@ const ProductionRequestLog = () => {
       leanProductions: checkedObjects
     }
 
-    const res = await postRequest({
+    await postRequest({
       extension: ManufacturingRepository.LeanProductionPlanning.update,
       record: JSON.stringify(resultObject)
     })
 
-    toast.success('Record Updated Successfully')
+    toast.success(platformLabels.Updated)
     invalidate()
   }
 
@@ -106,13 +100,12 @@ const ProductionRequestLog = () => {
       <Grow>
         <Table
           columns={columns}
-          gridData={data ? data : { list: [] }}
+          gridData={data}
           rowId={['recordId', 'itemId', 'functionId']}
           onDelete={del}
           isLoading={false}
           maxAccess={access}
           showCheckboxColumn={true}
-          handleCheckedRows={() => {}}
           pageSize={50}
           paginationType='client'
           refetch={refetch}
