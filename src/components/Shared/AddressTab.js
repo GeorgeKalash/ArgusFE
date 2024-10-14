@@ -36,7 +36,7 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true, defa
 
   return (
     <VertLayout>
-      <Grid container gap={2}>
+      <Grid container gap={2} p={2}>
         <Grow>
           <Grid container gap={2}>
             <FormGrid hideonempty xs={12}>
@@ -63,8 +63,10 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true, defa
                   addressValidation.setFieldValue('cityDistrict', '')
                   if (newValue) {
                     addressValidation.setFieldValue('countryId', newValue?.recordId)
+                    addressValidation.setFieldValue('countryName', newValue?.name)
                   } else {
                     addressValidation.setFieldValue('countryId', '')
+                    addressValidation.setFieldValue('countryName', '')
                   }
                 }}
                 error={addressValidation.touched.countryId && Boolean(addressValidation.errors.countryId)}
@@ -85,6 +87,7 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true, defa
                 values={addressValidation.values}
                 onChange={(event, newValue) => {
                   addressValidation.setFieldValue('stateId', newValue?.recordId)
+                  addressValidation.setFieldValue('stateName', newValue?.name)
                   addressValidation.setFieldValue('cityId', '')
                   addressValidation.setFieldValue('cityDistrictId', '')
                   addressValidation.setFieldValue('city', '')
