@@ -146,6 +146,7 @@ const SalesForm = ({ labels, maxAccess, store, cId, plId, record, muId }) => {
                 endpointId={InventoryRepository.MeasurementUnit.qry}
                 parameters={`_msId=${store._msId}`}
                 name='muId'
+                readOnly={editMode}
                 label={labels.measure}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
