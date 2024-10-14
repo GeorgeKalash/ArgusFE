@@ -120,33 +120,36 @@ export const LOShipmentForm = ({ recordId, functionId, editMode, totalBaseAmount
     setSelectedRowId(row.id)
   }
 
-  const handleSerialsGridChange = (selectedRowId, newRows) => {
-    const newReference = newRows[selectedRowId]?.reference;
-  
-    const isDuplicate = formik?.values?.packages?.some(pkg =>
-      pkg?.packageReferences?.some((ref, idx) => ref?.reference === newReference)
-    );
-  
-    if (isDuplicate) {
-      stackError({ message: labels.referenceDuplicateMessage });
-  
-      newRows[selectedRowId] = {
-        reference: '',
-        id: newRows[selectedRowId]?.id,
-        seqNo: newRows[selectedRowId]?.seqNo,
-        functionId,
-        recordId
-      };
-  
-      formik.setFieldValue(`packages[${index}].packageReferences`, newRows);
+  const handleSerialsGridChange = newRows => {
+    if (formik.values.packages[index]?.packageReferences?.length < newRows.length) {
+      newRows[formik.values.packages[index]?.packageReferences?.length].seqNo =
+        formik.values.packages[index]?.packageReferences?.length + 1
+    }
 
-    } else {
-      if (formik.values.packages[index]?.packageReferences?.length < newRows.length) {
-        newRows[formik.values.packages[index]?.packageReferences?.length].seqNo =
-          formik.values.packages[index]?.packageReferences?.length + 1;
+    formik.setFieldValue(`packages[${index}].packageReferences`, newRows)
+  }
+
+  const handleReferenceBlur = (e, id) => {
+    const newReference = e.target.value
+    const allPackages = formik.values.packages
+
+    const isDuplicate = allPackages.some(pkg =>
+      pkg.packageReferences.some((ref, idx) => ref.reference === newReference && idx !== id - 1)
+    )
+
+    if (isDuplicate) {
+      stackError({ message: labels.referenceDuplicateMessage })
+
+      let newRows = [...formik.values.packages[index].packageReferences]
+
+      const idx = id - 1
+
+      newRows[idx] = {
+        id: idx,
+        ...newRows[idx],
+        reference: ''
       }
-  
-      formik.setFieldValue(`packages[${index}].packageReferences`, newRows);
+      formik.setFieldValue(`packages[${index}].packageReferences`, newRows)
     }
   };
 
@@ -332,7 +335,7 @@ export const LOShipmentForm = ({ recordId, functionId, editMode, totalBaseAmount
                   {selectedRowId && formik.values.packages[index] && (
                     <DataGrid
                       key={selectedRowId}
-                      onChange={(value, index) => handleSerialsGridChange(index, value)}
+                      onChange={value => handleSerialsGridChange(value)}
                       value={
                         formik.values.packages.find(item => item.id === selectedRowId).packageReferences || [
                           { seqNo: '1', id: 1, reference: '' }
@@ -360,7 +363,8 @@ export const LOShipmentForm = ({ recordId, functionId, editMode, totalBaseAmount
                             maxLength: 20,
                             mandatory: true,
                             readOnly: editMode
-                          }
+                          },
+                          onBlur: (e, id) => handleReferenceBlur(e, id)
                         }
                       ]}
                     />
