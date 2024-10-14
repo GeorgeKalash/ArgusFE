@@ -542,12 +542,6 @@ export default function SalesOrderForm({
       disabled: !isClosed || formik.values.status == 3 || formik.values.deliveryStatus == 4
     },
     {
-      key: 'Close',
-      condition: !isClosed,
-      onClick: onClose,
-      disabled: !((formik.values.deliveryStatus == 2 || formik.values.deliveryStatus == 1) && formik.values.status == 4)
-    },
-    {
       key: 'Terminate',
       condition: true,
       onClick: onCancel,
@@ -982,6 +976,7 @@ export default function SalesOrderForm({
   return (
     <FormShell
       resourceId={ResourceIds.SalesOrder}
+      functionId={SystemFunction.SalesOrder}
       form={formik}
       maxAccess={maxAccess}
       previewReport={editMode}
