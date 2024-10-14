@@ -1,4 +1,4 @@
-import { useContext } from 'react'
+import { useContext, useState } from 'react'
 import { Grid } from '@mui/material'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -17,9 +17,10 @@ import { SaleRepository } from 'src/repositories/SaleRepository'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { DataSets } from 'src/resources/DataSets'
 
-const SalesForm = ({ labels, maxAccess, store, record, cId }) => {
+const SalesForm = ({ labels, maxAccess, store, cId, plId, record, muId }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const [editMode, setEditMode] = useState(!!record)
 
   const invalidate = useInvalidate({
     endpointId: SaleRepository.Sales.qry
@@ -32,14 +33,13 @@ const SalesForm = ({ labels, maxAccess, store, record, cId }) => {
     initialValues: {
       itemId,
       currencyId: cId,
-      plId: '',
+      plId: plId || '',
       priceType: '',
+      muId: muId || 0,
       valueType: '',
       value: '',
       priceWithVat: '',
-      minPrice: '',
-
-      ...record
+      minPrice: ''
     },
     enableReinitialize: true,
     validateOnChange: true,
@@ -69,19 +69,19 @@ const SalesForm = ({ labels, maxAccess, store, record, cId }) => {
       } else toast.success(platformLabels.Edited)
 
       formik.setValues(obj)
+      setEditMode(true)
 
       invalidate()
     }
   })
-  const editMode = !!record
 
   useEffect(() => {
     ;(async function () {
-      if (record && record.plId) {
+      if (record && formik.values.plId) {
         try {
           const res = await getRequest({
             extension: SaleRepository.Sales.get,
-            parameters: `_itemId=${itemId}&_plId=${formik.values.plId}&_currencyId=${formik.values.currencyId}`
+            parameters: `_itemId=${itemId}&_plId=${formik.values.plId}&_currencyId=${formik.values.currencyId}&_muId=${formik.values.muId}`
           })
 
           formik.setValues(res?.record)
@@ -158,7 +158,6 @@ const SalesForm = ({ labels, maxAccess, store, record, cId }) => {
                   formik.setFieldValue('currencyId', newValue?.currencyId || '')
                 }}
                 onClear={() => formik.setFieldValue('currencyId', '')}
-                error={!formik.values.currencyId && formik.errors.currencyId}
               />
             </Grid>
 
@@ -232,6 +231,25 @@ const SalesForm = ({ labels, maxAccess, store, record, cId }) => {
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('minPrice', '')}
                 error={formik.touched.minPrice && Boolean(formik.errors.minPrice)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={InventoryRepository.MeasurementUnit.qry}
+                parameters={`_msId=${store._msId}`}
+                name='muId'
+                label={labels.measure}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('muId', newValue?.recordId || '')
+                }}
               />
             </Grid>
           </Grid>

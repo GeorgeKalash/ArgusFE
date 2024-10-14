@@ -1,4 +1,4 @@
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { useWindow } from 'src/windows'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
@@ -28,7 +28,7 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
 
   const { formik } = useForm({
     initialValues: {
-      currencyId: '',
+      currencyId: 0,
       defSaleMUId: store.measurementId || '',
       pgId: store.priceGroupId || '',
       returnPolicyId: store.returnPolicy || ''
@@ -62,13 +62,13 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
         }
       }
     })()
-  }, [])
+  }, [recordId])
 
   async function fetchGridData() {
-    if (formik.values.currencyId) {
+    if (recordId) {
       return await getRequest({
         extension: SaleRepository.Sales.qry,
-        parameters: `&_itemId=${recordId}&_currencyId=${formik.values.currencyId}`
+        parameters: `&_itemId=${recordId}&_currencyId=${formik.values.currencyId || 0}`
       })
     }
   }
@@ -86,13 +86,11 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
   })
 
   useEffect(() => {
-    if (formik.values.currencyId) {
-      ;(async () => {
-        await fetchGridData(formik.values.currencyId)
+    ;(async () => {
+      await fetchGridData(formik.values.currencyId)
 
-        refetch()
-      })()
-    }
+      refetch()
+    })()
   }, [formik.values.currencyId])
 
   const columns = [
@@ -144,8 +142,11 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
       props: {
         labels: labels,
         record: record,
+        plId: record?.plId,
+        muId: record?.muId,
+
         maxAccess,
-        cId: formik.values.currencyId,
+        cId: record?.currencyId || formik.values.currencyId,
 
         store
       },
@@ -215,7 +216,7 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('currencyId', newValue?.currencyId || '')
+                  formik.setFieldValue('currencyId', newValue?.currencyId || 0)
                 }}
                 onClear={() => formik.setFieldValue('currencyId', '')}
                 error={!formik.values.currencyId}
