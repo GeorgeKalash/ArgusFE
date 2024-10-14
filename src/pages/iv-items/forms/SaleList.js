@@ -1,4 +1,4 @@
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { useWindow } from 'src/windows'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
@@ -144,8 +144,11 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
       props: {
         labels: labels,
         record: record,
+        plId: record?.plId,
+        muId: record?.muId,
+
         maxAccess,
-        cId: formik.values.currencyId,
+        cId: record?.plId || formik.values.currencyId,
 
         store
       },
