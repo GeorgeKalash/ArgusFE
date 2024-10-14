@@ -5,11 +5,12 @@ class PosPaymentService {
   deviceConnected = false
   constructor() {
     this.connection = null
-    this.baseUrl = 'http://localhost:5000'
+    this.baseUrl = 'http://localhost:5140'
   }
 
   async startPayment(paymentData, callback) {
     if (!this.deviceConnected) return
+    console.log('start payment')
     await this.startConnection()
     this.subscribeToTransactionUpdates(callback)
     this.invokeTransactionStart(paymentData)
@@ -34,7 +35,7 @@ class PosPaymentService {
 
   async startConnection() {
     this.connection = new signalR.HubConnectionBuilder()
-      .withUrl(`${this.baseUrl}/transactionHub`)
+      .withUrl(`${this.baseUrl}/POSHub`)
       .withAutomaticReconnect()
       .configureLogging(signalR.LogLevel.Information)
       .build()
@@ -71,9 +72,10 @@ class PosPaymentService {
     }
   }
 
-  stopConnection() {
+  async stopConnection() {
     if (this.connection) {
-      this.connection.stop()
+      await this.connection.invoke('Stop_Connection')
+      console.log('Connection closed')
     }
   }
 }

@@ -19,23 +19,25 @@ const PosDeviceWindow = () => {
     }
   ]
 
+  console.log(responseData)
+
   const startTransactionActions = [
     {
       key: 'Start Transaction',
       condition: true,
-      onClick: () =>
-        posPaymentService.startPayment(
+      onClick: async () =>
+        await posPaymentService.startPayment(
           {
             msgId: 'PUR',
-            ecrno: '',
-            ecR_RCPT: '',
-            amount: '',
-            a1: '',
-            a2: '',
-            a3: '',
-            a4: '',
-            a5: '',
-            ipaddressOrPort: '',
+            ecrno: '1',
+            ecR_RCPT: 'Hello2',
+            amount: 50,
+            a1: '2',
+            a2: '3',
+            a3: '4',
+            a4: '5',
+            a5: '6',
+            ipaddressOrPort: '80808',
             log: 0
           },
           data => setResponseData(data)
@@ -54,12 +56,13 @@ const PosDeviceWindow = () => {
       <Grid item xs={12} marginLeft={'1rem'} marginRight={'1rem'}>
         {deviceStatus ? 'Device is connected' : 'Device not connected, you can not start transaction'}
       </Grid>
-
-      <Grid item xs={12}>
+      <Grid item xs={12} marginLeft={'1rem'} marginRight={'1rem'}>
+        Check Device:
         <WindowToolbar actions={checkDeviceActions} smallBox={true} />
       </Grid>
 
-      <Grid item xs={12}>
+      <Grid item xs={12} marginLeft={'1rem'} marginRight={'1rem'}>
+        Start Transaction:
         <WindowToolbar actions={startTransactionActions} smallBox={true} />
       </Grid>
     </Grid>
