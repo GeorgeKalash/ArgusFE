@@ -32,6 +32,8 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
+import { LOTransportationForm } from 'src/components/Shared/LOTransportationForm'
+import { LOShipmentForm } from 'src/components/Shared/LOShipmentForm'
 
 export default function CreditOrderForm({ labels, access, recordId, plantId, userData, window }) {
   const { platformLabels } = useContext(ControlContext)
@@ -705,6 +707,35 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
     })
   }
 
+  const shipmentClicked = () => {
+    stack({
+      Component: LOShipmentForm,
+      props: {
+        recordId: formik.values.recordId,
+        functionId: formik.values.functionId,
+        editMode: formik.values.status != 1,
+        totalBaseAmount: totalLoc
+      },
+      width: 1200,
+      height: 670,
+      title: _labels.shipments
+    })
+  }
+
+  const transportationClicked = () => {
+    stack({
+      Component: LOTransportationForm,
+      props: {
+        recordId: formik.values.recordId,
+        functionId: formik.values.functionId,
+        editMode: formik.values.status != 1
+      },
+      width: 700,
+      height: 430,
+      title: _labels.transportation
+    })
+  }
+
   const actions = [
     {
       key: 'Close',
@@ -746,6 +777,18 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
       key: 'WorkFlow',
       condition: true,
       onClick: onWorkFlowClick,
+      disabled: !editMode
+    },
+    {
+      key: 'Shipment',
+      condition: true,
+      onClick: shipmentClicked,
+      disabled: !editMode
+    },
+    {
+      key: 'Transportation',
+      condition: true,
+      onClick: transportationClicked,
       disabled: !editMode
     }
   ]
