@@ -101,9 +101,6 @@ export default function SalesOrderForm({
     volume: '',
     weight: '',
     qty: 0,
-    totQty: 0,
-    totWeight: 0,
-    totVolume: 0,
     serializedAddress: '',
     items: [
       {
@@ -162,80 +159,56 @@ export default function SalesOrderForm({
       )
     }),
     onSubmit: async obj => {
-      try {
-        const copy = { ...obj }
-        delete copy.items
-        copy.date = formatDateToApi(copy.date)
-        copy.dueDate = formatDateToApi(copy.dueDate)
+      const copy = { ...obj }
+      delete copy.items
+      copy.date = formatDateToApi(copy.date)
+      copy.dueDate = formatDateToApi(copy.dueDate)
 
-        copy.qty = totalQty
-        copy.volume = totalVolume
-        copy.weight = totalWeight
+      if (!obj.rateCalcMethod) delete copy.rateCalcMethod
 
-        if (!obj.rateCalcMethod) delete copy.rateCalcMethod
-
-        if (copy.serializedAddress) {
-          const addressData = {
-            clientId: copy.clientId,
-            address: address
-          }
-
-          const addressRes = await postRequest({
-            extension: SaleRepository.Address.set,
-            record: JSON.stringify(addressData)
-          })
-          copy.shipToAddressId = addressRes.recordId
+      if (copy.serializedAddress) {
+        const addressData = {
+          clientId: copy.clientId,
+          address: address
         }
 
-        const updatedRows = formik.values.items.map((itemDetails, index) => {
-          const { physicalProperty, ...rest } = itemDetails
-
-          return {
-            ...rest,
-            seqNo: index + 1,
-            siteId: obj.siteId,
-            applyVat: obj.isVattable
-          }
+        const addressRes = await postRequest({
+          extension: SaleRepository.Address.set,
+          record: JSON.stringify(addressData)
         })
+        copy.shipToAddressId = addressRes.recordId
+      }
 
-        const itemsGridData = {
-          header: copy,
-          items: updatedRows
+      const updatedRows = formik.values.items.map((itemDetails, index) => {
+        const { physicalProperty, ...rest } = itemDetails
+
+        return {
+          ...rest,
+          seqNo: index + 1,
+          siteId: obj.siteId,
+          applyVat: obj.isVattable
         }
+      })
 
-        const soRes = await postRequest({
-          extension: SaleRepository.SalesOrder.set2,
-          record: JSON.stringify(itemsGridData)
-        })
+      const itemsGridData = {
+        header: copy,
+        items: updatedRows
+      }
 
-        const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
-        toast.success(actionMessage)
-        await refetchForm(soRes.recordId)
-        invalidate()
-      } catch (error) {}
+      const soRes = await postRequest({
+        extension: SaleRepository.SalesOrder.set2,
+        record: JSON.stringify(itemsGridData)
+      })
+
+      const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
+      toast.success(actionMessage)
+      await refetchForm(soRes.recordId)
+      invalidate()
     }
   })
 
   const editMode = !!formik.values.recordId
   const isClosed = formik.values.wip === 2
-
-  const totalVolume = formik.values.items.reduce((volumeSum, row) => {
-    const currentVolume = parseFloat(row.volume?.toString().replace(/,/g, '')) || 0
-
-    return volumeSum + currentVolume
-  }, 0)
-
-  const totalQty = formik.values.items.reduce((qtySum, row) => {
-    const currentQty = parseFloat(row.qty?.toString().replace(/,/g, '')) || 0
-
-    return qtySum + currentQty
-  }, 0)
-
-  const totalWeight = formik.values.items.reduce((weightSum, row) => {
-    const currentWeight = parseFloat(row.weight?.toString().replace(/,/g, '')) || 0
-
-    return weightSum + currentWeight
-  }, 0)
 
   const columns = [
     {
@@ -433,74 +406,66 @@ export default function SalesOrderForm({
   ]
 
   async function onClose() {
-    try {
-      const copy = { ...formik.values }
-      delete copy.items
-      copy.date = formatDateToApi(copy.date)
-      copy.dueDate = formatDateToApi(copy.dueDate)
+    const copy = { ...formik.values }
+    delete copy.items
+    copy.date = formatDateToApi(copy.date)
+    copy.dueDate = formatDateToApi(copy.dueDate)
 
-      const res = await postRequest({
-        extension: SaleRepository.SalesOrder.close,
-        record: JSON.stringify(copy)
-      })
-      toast.success(platformLabels.Closed)
-      invalidate()
-      await refetchForm(res.recordId)
-    } catch (error) {}
+    const res = await postRequest({
+      extension: SaleRepository.SalesOrder.close,
+      record: JSON.stringify(copy)
+    })
+    toast.success(platformLabels.Closed)
+    invalidate()
+    await refetchForm(res.recordId)
   }
 
   async function onReopen() {
-    try {
-      const copy = { ...formik.values }
-      delete copy.items
-      copy.date = formatDateToApi(copy.date)
-      copy.dueDate = formatDateToApi(copy.dueDate)
+    const copy = { ...formik.values }
+    delete copy.items
+    copy.date = formatDateToApi(copy.date)
+    copy.dueDate = formatDateToApi(copy.dueDate)
 
-      const res = await postRequest({
-        extension: SaleRepository.SalesOrder.reopen,
-        record: JSON.stringify(copy)
-      })
+    const res = await postRequest({
+      extension: SaleRepository.SalesOrder.reopen,
+      record: JSON.stringify(copy)
+    })
 
-      toast.success(platformLabels.Reopened)
-      invalidate()
-      await refetchForm(res.recordId)
-    } catch (error) {}
+    toast.success(platformLabels.Reopened)
+    invalidate()
+    await refetchForm(res.recordId)
   }
 
   async function onCancel() {
-    try {
-      const copy = { ...formik.values }
-      delete copy.items
-      copy.date = formatDateToApi(copy.date)
-      copy.dueDate = formatDateToApi(copy.dueDate)
+    const copy = { ...formik.values }
+    delete copy.items
+    copy.date = formatDateToApi(copy.date)
+    copy.dueDate = formatDateToApi(copy.dueDate)
 
-      const res = await postRequest({
-        extension: SaleRepository.SalesOrder.cancel,
-        record: JSON.stringify(copy)
-      })
+    const res = await postRequest({
+      extension: SaleRepository.SalesOrder.cancel,
+      record: JSON.stringify(copy)
+    })
 
-      toast.success(platformLabels.Cancel)
-      invalidate()
-      await refetchForm(res.recordId)
-    } catch (error) {}
+    toast.success(platformLabels.Cancel)
+    invalidate()
+    await refetchForm(res.recordId)
   }
 
   async function toInvoice() {
-    try {
-      const copy = { ...formik.values }
-      delete copy.items
-      copy.date = formatDateToApi(copy.date)
-      copy.dueDate = formatDateToApi(copy.dueDate)
+    const copy = { ...formik.values }
+    delete copy.items
+    copy.date = formatDateToApi(copy.date)
+    copy.dueDate = formatDateToApi(copy.dueDate)
 
-      await postRequest({
-        extension: SaleRepository.SalesOrder.postToInvoice,
-        record: JSON.stringify(copy)
-      })
+    await postRequest({
+      extension: SaleRepository.SalesOrder.postToInvoice,
+      record: JSON.stringify(copy)
+    })
 
-      toast.success(platformLabels.Invoice)
-      invalidate()
-      window.close()
-    } catch (error) {}
+    toast.success(platformLabels.Invoice)
+    invalidate()
+    window.close()
   }
 
   async function onWorkFlowClick() {
@@ -601,104 +566,88 @@ export default function SalesOrderForm({
   }
 
   async function getSalesOrder(soId) {
-    try {
-      const res = await getRequest({
-        extension: SaleRepository.SalesOrder.get,
-        parameters: `_recordId=${soId}`
-      })
+    const res = await getRequest({
+      extension: SaleRepository.SalesOrder.get,
+      parameters: `_recordId=${soId}`
+    })
 
-      res.record.date = formatDateFromApi(res?.record?.date)
+    res.record.date = formatDateFromApi(res?.record?.date)
 
-      return res
-    } catch (error) {}
+    return res
   }
 
   async function getSalesOrderItems(soId) {
-    try {
-      return await getRequest({
-        extension: SaleRepository.SalesOrderItem.qry,
-        parameters: `_params=1|${soId}`
-      })
-    } catch (error) {}
+    return await getRequest({
+      extension: SaleRepository.SalesOrderItem.qry,
+      parameters: `_params=1|${soId}`
+    })
   }
 
   async function getAddress(addressId) {
     if (!addressId) return null
 
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.FormattedAddress.get,
-        parameters: `_addressId=${addressId}`
-      })
+    const res = await getRequest({
+      extension: SystemRepository.FormattedAddress.get,
+      parameters: `_addressId=${addressId}`
+    })
 
-      return res?.record?.formattedAddress.replace(/(\r\n|\r|\n)+/g, '\r\n')
-    } catch (error) {}
+    return res?.record?.formattedAddress.replace(/(\r\n|\r|\n)+/g, '\r\n')
   }
 
   async function fillClientData(clientId) {
     if (!clientId) return
 
-    try {
-      const res = await getRequest({
-        extension: SaleRepository.Client.get,
-        parameters: `_recordId=${clientId}`
-      })
-      formik.setFieldValue('currencyId', res?.record?.currencyId)
-      formik.setFieldValue('spId', res?.record?.spId)
-      formik.setFieldValue('ptId', res?.record?.ptId)
-      formik.setFieldValue('plId', res?.record?.plId)
-      formik.setFieldValue('szId', res?.record?.szId)
-      formik.setFieldValue('shipToAddressId', res?.record?.shipAddressId)
-      formik.setFieldValue('billToAddressId', res?.record?.billAddressId)
-      const shipAdd = await getAddress(res?.record?.shipAddressId)
-      const billAdd = await getAddress(res?.record?.billAddressId)
-      formik.setFieldValue('shipAddress', shipAdd)
-      formik.setFieldValue('billAddress', billAdd)
-    } catch (error) {}
+    const res = await getRequest({
+      extension: SaleRepository.Client.get,
+      parameters: `_recordId=${clientId}`
+    })
+    formik.setFieldValue('currencyId', res?.record?.currencyId)
+    formik.setFieldValue('spId', res?.record?.spId)
+    formik.setFieldValue('ptId', res?.record?.ptId)
+    formik.setFieldValue('plId', res?.record?.plId)
+    formik.setFieldValue('szId', res?.record?.szId)
+    formik.setFieldValue('shipToAddressId', res?.record?.shipAddressId)
+    formik.setFieldValue('billToAddressId', res?.record?.billAddressId)
+    const shipAdd = await getAddress(res?.record?.shipAddressId)
+    const billAdd = await getAddress(res?.record?.billAddressId)
+    formik.setFieldValue('shipAddress', shipAdd)
+    formik.setFieldValue('billAddress', billAdd)
   }
 
   async function getItemPhysProp(itemId) {
-    try {
-      const res = await getRequest({
-        extension: InventoryRepository.ItemPhysProp.get,
-        parameters: `_itemId=${itemId}`
-      })
+    const res = await getRequest({
+      extension: InventoryRepository.ItemPhysProp.get,
+      parameters: `_itemId=${itemId}`
+    })
 
-      return res?.record
-    } catch (error) {}
+    return res?.record
   }
 
   async function getItem(itemId) {
-    try {
-      const res = await getRequest({
-        extension: InventoryRepository.Item.get,
-        parameters: `_recordId=${itemId}`
-      })
+    const res = await getRequest({
+      extension: InventoryRepository.Item.get,
+      parameters: `_recordId=${itemId}`
+    })
 
-      return res?.record
-    } catch (error) {}
+    return res?.record
   }
 
   async function getTaxDetails(taxId) {
-    try {
-      const res = await getRequest({
-        extension: FinancialRepository.TaxDetailPack.qry,
-        parameters: `_taxId=${taxId}`
-      })
+    const res = await getRequest({
+      extension: FinancialRepository.TaxDetailPack.qry,
+      parameters: `_taxId=${taxId}`
+    })
 
-      return res?.list
-    } catch (error) {}
+    return res?.list
   }
 
   async function getItemConvertPrice(itemId) {
-    try {
-      const res = await getRequest({
-        extension: SaleRepository.ItemConvertPrice.get,
-        parameters: `_itemId=${itemId}&_clientId=${formik.values.clientId}&_currencyId=${formik.values.currencyId}&_plId=${formik.values.plId}`
-      })
+    const res = await getRequest({
+      extension: SaleRepository.ItemConvertPrice.get,
+      parameters: `_itemId=${itemId}&_clientId=${formik.values.clientId}&_currencyId=${formik.values.currencyId}&_plId=${formik.values.plId}`
+    })
 
-      return res?.record
-    } catch (error) {}
+    return res?.record
   }
 
   const handleCycleButtonClick = () => {
@@ -805,9 +754,9 @@ export default function SalesOrderForm({
       miscAmount: miscValue
     })
 
-    formik.setFieldValue('totVolume', _footerSummary?.totalVolume?.toFixed(2) || 0)
-    formik.setFieldValue('totWeight', _footerSummary?.totalWeight?.toFixed(2) || 0)
-    formik.setFieldValue('totQty', _footerSummary?.totalQty || 0)
+    formik.setFieldValue('volume', _footerSummary?.totalVolume?.toFixed(2) || 0)
+    formik.setFieldValue('weight', _footerSummary?.totalWeight?.toFixed(2) || 0)
+    formik.setFieldValue('qty', _footerSummary?.totalQty || 0)
     formik.setFieldValue('subtotal', subtotal?.toFixed(2) || 0)
     formik.setFieldValue('amount', _footerSummary?.net?.toFixed(2) || 0)
     formik.setFieldValue('vatAmount', _footerSummary?.sumVat || 0)
@@ -980,8 +929,6 @@ export default function SalesOrderForm({
       form={formik}
       maxAccess={maxAccess}
       previewReport={editMode}
-      onClose={onClose}
-      onReopen={onReopen}
       isClosed={isClosed}
       actions={actions}
       editMode={editMode}
@@ -1345,14 +1292,14 @@ export default function SalesOrderForm({
             >
               <Grid container item xs={6} direction='column' spacing={2} sx={{ px: 2, mt: 1 }}>
                 <Grid item>
-                  <CustomNumberField name='totalQTY' label={labels.totQty} value={formik.values.totQty} readOnly />
+                  <CustomNumberField name='totalQTY' label={labels.totQty} value={formik.values.qty} readOnly />
                 </Grid>
                 <Grid item>
                   <CustomNumberField
                     name='totVolume'
                     maxAccess={maxAccess}
                     label={labels.totVolume}
-                    value={formik.values.totVolume}
+                    value={formik.values.volume}
                     readOnly
                   />
                 </Grid>
@@ -1361,7 +1308,7 @@ export default function SalesOrderForm({
                     name='totWeight'
                     maxAccess={maxAccess}
                     label={labels.totWeight}
-                    value={formik.values.totWeight}
+                    value={formik.values.weight}
                     readOnly
                   />
                 </Grid>
