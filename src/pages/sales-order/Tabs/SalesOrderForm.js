@@ -37,8 +37,8 @@ import {
 } from 'src/utils/ItemPriceCalculator'
 import { getVatCalc } from 'src/utils/VatCalculator'
 import { getDiscValues, getFooterTotals, getSubtotal } from 'src/utils/FooterCalculator'
-import AddressFilterForm from './AddressFilterForm'
 import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
+import AddressFilterForm from 'src/components/Shared/AddressFilterForm'
 
 export default function SalesOrderForm({
   labels,
