@@ -92,5 +92,10 @@ export const CashBankRepository = {
     set: service + 'setBNB',
     del: service + 'delBNB',
     snapshot: service + 'snapshotBNB'
+  },
+  OpenMultiCurrencyCashTransfer: {
+    open: service + 'openTFM',
+    set: service + 'postTFM2',
+    get: service + 'getTFM'
   }
 }
