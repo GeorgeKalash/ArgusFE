@@ -1,4 +1,4 @@
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { useWindow } from 'src/windows'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
@@ -21,6 +21,7 @@ import FormShell from 'src/components/Shared/FormShell'
 const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId } = store
+  const [editMode, setEditMode] = useState(false)
 
   const { platformLabels } = useContext(ControlContext)
 
@@ -130,12 +131,14 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
 
   const add = () => {
     if (formik.values.currencyId) {
+      setEditMode(false)
       openForm()
     }
   }
 
   const edit = obj => {
     openForm(obj)
+    setEditMode(true)
   }
 
   function openForm(record) {
@@ -144,8 +147,12 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
       props: {
         labels: labels,
         record: record,
+        editMode: editMode,
+        plId: record?.plId,
+        muId: record?.muId,
+
         maxAccess,
-        cId: formik.values.currencyId,
+        cId: record?.plId || formik.values.currencyId,
 
         store
       },
