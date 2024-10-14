@@ -69,104 +69,96 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
     }),
 
     onSubmit: async values => {
-      try {
-        await postPhysical(values)
-      } catch (error) {}
+      await postPhysical(values)
     }
   })
 
   const postPhysical = async obj => {
     const isNewRecord = !obj?.itemId
 
-    try {
-      const res = await postRequest({
-        extension: InventoryRepository.Physical.set,
-        record: JSON.stringify(obj)
-      })
+    const res = await postRequest({
+      extension: InventoryRepository.Physical.set,
+      record: JSON.stringify(obj)
+    })
 
-      if (isNewRecord) {
-        toast.success(platformLabels.Added)
-      } else {
-        toast.success(platformLabels.Edited)
-      }
-      invalidate()
-    } catch {}
+    if (isNewRecord) {
+      toast.success(platformLabels.Added)
+    } else {
+      toast.success(platformLabels.Edited)
+    }
+    invalidate()
   }
 
   const fetchAndSetValues = async (dirtyField, newValue) => {
-    try {
-      const parameters = {
-        _dirtyField: dirtyField,
-        _shape: formik.values.shape || 0,
-        _length: formik.values.length || 0,
-        _width: formik.values.width || 0,
-        _depth: formik.values.depth || 0,
-        _diameter: formik.values.diameter || 0,
-        _volume: formik.values.volume || 0,
-        _weight: formik.values.weight || 0,
-        _density: formik.values.density || 0
+    const parameters = {
+      _dirtyField: dirtyField,
+      _shape: parseInt(formik.values.shape) || 0,
+      _length: parseInt(formik.values.length) || 0,
+      _width: parseInt(formik.values.width) || 0,
+      _depth: parseInt(formik.values.depth) || 0,
+      _diameter: parseInt(formik.values.diameter) || 0,
+      _volume: parseInt(formik.values.volume) || 0,
+      _weight: parseInt(formik.values.weight) || 0,
+      _density: parseInt(formik.values.density) || 0
+    }
+
+    if (dirtyField) {
+      switch (dirtyField) {
+        case 1:
+          parameters._length = parseInt(newValue) || 0
+          break
+        case 2:
+          parameters._width = parseInt(newValue) || 0
+          break
+        case 3:
+          parameters._depth = parseInt(newValue) || 0
+          break
+        case 4:
+          parameters._diameter = parseInt(newValue) || 0
+          break
+        case 5:
+          parameters._volume = parseInt(newValue) || 0
+          break
+        case 6:
+          parameters._weight = parseInt(newValue) || 0
+          break
+        case 7:
+          parameters._density = parseInt(newValue) || 0
+          break
+        default:
+          break
       }
+    }
 
-      if (dirtyField) {
-        switch (dirtyField) {
-          case 1:
-            parameters._length = newValue
-            break
-          case 2:
-            parameters._width = newValue
-            break
-          case 3:
-            parameters._depth = newValue
-            break
-          case 4:
-            parameters._diameter = newValue
-            break
-          case 5:
-            parameters._volume = newValue
-            break
-          case 6:
-            parameters._weight = newValue
-            break
-          case 7:
-            parameters._density = newValue
-            break
-          default:
-            break
-        }
-      }
+    const calc = await getRequest({
+      extension: InventoryRepository.Physical.calc,
+      parameters: new URLSearchParams(parameters).toString()
+    })
 
-      const calc = await getRequest({
-        extension: InventoryRepository.Physical.calc,
-        parameters: new URLSearchParams(parameters).toString()
-      })
-
-      formik.setValues(prevValues => ({
-        ...prevValues,
-        length: calc.record.length || prevValues.length,
-        width: calc.record.width || prevValues.width,
-        depth: calc.record.depth || prevValues.depth,
-        diameter: calc.record.diameter || prevValues.diameter,
-        volume: calc.record.volume || prevValues.volume,
-        weight: calc.record.weight || prevValues.weight,
-        density: calc.record.density || prevValues.density
-      }))
-    } catch (error) {}
+    formik.setValues(prevValues => ({
+      ...prevValues,
+      length: calc.record.length || prevValues.length,
+      width: calc.record.width || prevValues.width,
+      depth: calc.record.depth || prevValues.depth,
+      diameter: calc.record.diameter || prevValues.diameter,
+      volume: calc.record.volume || prevValues.volume,
+      weight: calc.record.weight || prevValues.weight,
+      density: calc.record.density || prevValues.density
+    }))
   }
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: InventoryRepository.Physical.get,
-            parameters: `_itemId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: InventoryRepository.Physical.get,
+          parameters: `_itemId=${recordId}`
+        })
 
-          if (res.record) {
-            formik.setValues({ ...res.record, isMetal: !!res.record.isMetal })
-          }
+        if (res.record) {
+          formik.setValues({ ...res.record, isMetal: !!res.record.isMetal })
         }
-      } catch (error) {}
+      }
     })()
   }, [recordId])
 
