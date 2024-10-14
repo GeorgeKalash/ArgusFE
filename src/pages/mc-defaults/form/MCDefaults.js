@@ -11,10 +11,12 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
+import { CommonContext } from 'src/providers/CommonContext'
 
 const MCDefault = ({ _labels, acces }) => {
-  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const { defaultsData } = useContext(CommonContext)
 
   const [initialValues, setInitialValues] = useState({
     mc_defaultRTSA: null,
@@ -30,25 +32,19 @@ const MCDefault = ({ _labels, acces }) => {
 
   const getDataResult = () => {
     const myObject = {}
-    var parameters = `_filter=`
-    getRequest({
-      extension: SystemRepository.Defaults.qry,
-      parameters: parameters
+    console.log(defaultsData, 'defaultsData')
+
+    const filteredList = defaultsData.list.filter(obj => {
+      return (
+        obj.key === 'mc_defaultRTSA' ||
+        obj.key === 'mc_defaultRTPU' ||
+        obj.key === 'mc_defaultRTMF' ||
+        obj.key === 'mc_defaultRTFI' ||
+        obj.key === 'mc_defaultRTTAX'
+      )
     })
-      .then(res => {
-        const filteredList = res.list.filter(obj => {
-          return (
-            obj.key === 'mc_defaultRTSA' ||
-            obj.key === 'mc_defaultRTPU' ||
-            obj.key === 'mc_defaultRTMF' ||
-            obj.key === 'mc_defaultRTFI' ||
-            obj.key === 'mc_defaultRTTAX'
-          )
-        })
-        filteredList.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
-        setInitialValues(myObject)
-      })
-      .catch(error => {})
+    filteredList.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
+    setInitialValues(myObject)
   }
 
   const formik = useFormik({
@@ -69,11 +65,9 @@ const MCDefault = ({ _labels, acces }) => {
     postRequest({
       extension: SystemRepository.Defaults.set,
       record: JSON.stringify({ sysDefaults: data })
+    }).then(res => {
+      if (res) toast.success(platformLabels.Edited)
     })
-      .then(res => {
-        if (res) toast.success(platformLabels.Edited)
-      })
-      .catch(error => {})
   }
 
   const handleSubmit = () => {

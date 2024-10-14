@@ -1,7 +1,4 @@
-// ** React Imports
 import { createContext, useContext, useEffect, useState } from 'react'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { KVSRepository } from 'src/repositories/KVSRepository'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
@@ -46,14 +43,9 @@ const ControlProvider = ({ children }) => {
     getRequest({
       extension: KVSRepository.getLabels,
       parameters: parameters
-    }).then(
-      res => {
-        callback(res.list)
-      },
-      error => {
-        console.error(error, 'Access')
-      }
-    )
+    }).then(res => {
+      callback(res.list)
+    })
   }
 
   const getAccess = (resourceId, callback) => {
@@ -61,14 +53,9 @@ const ControlProvider = ({ children }) => {
     getRequest({
       extension: AccessControlRepository.maxAccess,
       parameters: parameters
-    }).then(
-      res => {
-        callback(res)
-      },
-      error => {
-        console.error(error, 'Access')
-      }
-    )
+    }).then(res => {
+      callback(res)
+    })
   }
 
   const values = {
