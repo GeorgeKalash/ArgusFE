@@ -15,6 +15,7 @@ import toast from 'react-hot-toast'
 import { useInvalidate } from 'src/hooks/resource'
 import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
+import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 
 const PlantForm = ({ _labels, maxAccess, store, setStore, editMode }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -28,7 +29,7 @@ const PlantForm = ({ _labels, maxAccess, store, setStore, editMode }) => {
   const { formik } = useForm({
     maxAccess,
     initialValues: {
-      recordId: recordId || null,
+      recordId: recordId,
       addressId: null,
       address: null,
       reference: null,
@@ -40,16 +41,18 @@ const PlantForm = ({ _labels, maxAccess, store, setStore, editMode }) => {
       costCenterName: null,
       groupId: null,
       groupName: null,
-      segmentName: null
+      segmentName: null,
+      flName: '',
+      locationUrl: '',
     },
     enableReinitialize: false,
     validateOnChange: false,
     validationSchema: yup.object({
-      reference: yup.string().required(' '),
-      name: yup.string().required(' ')
+      reference: yup.string().required(),
+      name: yup.string().required()
     }),
-    onSubmit: values => {
-      postPlant(values)
+    onSubmit: async values => {
+      await postPlant(values)
     }
   })
 
@@ -195,6 +198,31 @@ const PlantForm = ({ _labels, maxAccess, store, setStore, editMode }) => {
             }}
             error={formik.touched.groupId && Boolean(formik.errors.groupId)}
             maxAccess={maxAccess}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <CustomTextField
+            name='flName'
+            label={_labels.flName}
+            value={formik.values.flName}
+            maxLength='30'
+            maxAccess={maxAccess}
+            onChange={formik.handleChange}
+            onClear={() => formik.setFieldValue('flName', '')}
+            error={formik.touched.flName && Boolean(formik.errors.flName)}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <CustomTextArea
+            name='locationUrl'
+            label={_labels.locationUrl}
+            value={formik.values.locationUrl}
+            rows={3}
+            maxLength='100'
+            maxAccess={maxAccess}
+            onChange={formik.handleChange}
+            onClear={() => formik.setFieldValue('locationUrl', '')}
+            error={formik.touched.locationUrl && Boolean(formik.errors.locationUrl)}
           />
         </Grid>
       </Grid>

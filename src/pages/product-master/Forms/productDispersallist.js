@@ -9,6 +9,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { ControlContext } from 'src/providers/ControlContext'
+import toast from 'react-hot-toast'
 
 const ProductDispersalList = ({ store, setStore, labels, maxAccess }) => {
   const { recordId: pId } = store
@@ -57,12 +58,12 @@ const ProductDispersalList = ({ store, setStore, labels, maxAccess }) => {
     {
       field: 'isInactive',
       headerName: labels.isInactive,
-      flex: 1
+      type: 'checkbox'
     },
     {
       field: 'isDefault',
       headerName: labels.isDefault,
-      flex: 1
+      type: 'checkbox'
     }
   ]
 
@@ -78,16 +79,13 @@ const ProductDispersalList = ({ store, setStore, labels, maxAccess }) => {
     openForm(object.recordId)
   }
 
-  const del = obj => {
-    postRequest({
+  const del = async obj => {
+    await postRequest({
       extension: RemittanceSettingsRepository.ProductDispersal.del,
       record: JSON.stringify(obj)
     })
-      .then(res => {
-        toast.success(platformLabels.Deleted)
-        getGridData(obj.productId)
-      })
-      .catch(error => {})
+    await getGridData(pId)
+    toast.success(platformLabels.Deleted)
   }
 
   function openForm(recordId) {

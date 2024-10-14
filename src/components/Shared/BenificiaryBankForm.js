@@ -1,6 +1,6 @@
 import { Checkbox, FormControlLabel, Grid } from '@mui/material'
 import * as yup from 'yup'
-import { useEffect, useContext, useState } from 'react'
+import { useEffect, useContext, useState, useRef } from 'react'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FormShell from 'src/components/Shared/FormShell'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
@@ -24,6 +24,7 @@ import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import { useError } from 'src/error'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { HIDDEN } from 'src/services/api/maxAccess'
 
 export default function BenificiaryBankForm({
   viewBtns = true,
@@ -35,16 +36,20 @@ export default function BenificiaryBankForm({
   submitted,
   setSubmitted,
   countryId,
+  currencyId,
   resetForm,
   setResetForm,
   onChange,
   setValidSubmit,
+  onSuccess,
   submitMainForm = true
 }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [maxAccess, setMaxAccess] = useState({ record: [] })
   const { stack: stackError } = useError()
   const [editMode, setEditMode] = useState(beneficiary?.beneficiaryId && !editable)
+  const hiddenIsInActive = useRef(false)
+  const hiddenIsBlocked = useRef(false)
 
   const initialValues = {
     //RTBEN
@@ -55,6 +60,7 @@ export default function BenificiaryBankForm({
     dispersalType: dispersalType || '',
     nationalityId: null,
     isBlocked: false,
+    isInactive: false,
     stoppedDate: null,
     stoppedReason: '',
     gender: null,
@@ -70,6 +76,7 @@ export default function BenificiaryBankForm({
     clientRef: client?.clientRef || '',
     clientName: client?.clientName || '',
     countryId: countryId || '',
+    currencyId: currencyId || null,
     seqNo: 1,
 
     //RTBEB
@@ -100,6 +107,7 @@ export default function BenificiaryBankForm({
       countryId: yup.string().required(' '),
       name: yup.string().required(' '),
       bankId: yup.string().required(' '),
+      currencyId: yup.string().required(),
       accountRefRepeat: yup.string().test('accountRef must match', 'Error', function (value) {
         const { accountRef } = this.parent
 
@@ -129,6 +137,7 @@ export default function BenificiaryBankForm({
           name: values.name,
           dispersalType: values.dispersalType,
           isBlocked: values.isBlocked,
+          isInactive: values.isInactive,
           stoppedDate: values.stoppedDate ? formatDateToApi(values.stoppedDate) : null,
           stoppedReason: values.stoppedReason,
           nationalityId: values.nationalityId,
@@ -139,6 +148,7 @@ export default function BenificiaryBankForm({
           addressLine1: values.addressLine1,
           addressLine2: values.addressLine2,
           countryId: values.countryId,
+          currencyId: values.currencyId,
           seqNo: values.seqNo
         }
 
@@ -165,10 +175,8 @@ export default function BenificiaryBankForm({
           record: JSON.stringify(data)
         })
 
-        if (res.recordId) {
-          toast.success('Record Updated Successfully')
-        }
-
+        toast.success('Record Updated Successfully')
+        if (onSuccess) onSuccess(res.recordId, values.name)
         setEditMode(true)
       }
     }
@@ -179,7 +187,7 @@ export default function BenificiaryBankForm({
       if (formik.values.countryId && dispersalType) {
         const qryCCL = await getRequest({
           extension: RemittanceSettingsRepository.CorrespondentControl.qry,
-          parameters: `_countryId=${formik.values.countryId}&_corId=${corId ?? 0}&_resourceId=${
+          parameters: `_countryId=${formik.values.countryId}&_corId=${corId || 0}&_resourceId=${
             ResourceIds.BeneficiaryBank
           }`
         })
@@ -187,7 +195,19 @@ export default function BenificiaryBankForm({
         const controls = { controls: qryCCL.list }
         const maxAccess = { record: controls }
         setMaxAccess(maxAccess)
+
+        const isInActiveAccessLevel = (maxAccess?.record?.controls ?? []).find(
+          ({ controlId }) => controlId === 'isInactive'
+        )
+
+        const isBlockedAccessLevel = (maxAccess?.record?.controls ?? []).find(
+          ({ controlId }) => controlId === 'isBlocked'
+        )
+
+        hiddenIsInActive.current = isInActiveAccessLevel?.accessLevel === HIDDEN
+        hiddenIsBlocked.current = isBlockedAccessLevel?.accessLevel === HIDDEN
       }
+
       if (beneficiary?.beneficiaryId && client?.clientId) {
         const RTBEB = await getRequest({
           extension: RemittanceOutwardsRepository.BeneficiaryBank.get,
@@ -208,6 +228,7 @@ export default function BenificiaryBankForm({
           dispersalType: dispersalType,
           nationalityId: RTBEN?.record?.nationalityId,
           isBlocked: RTBEN?.record?.isBlocked,
+          isInactive: RTBEN?.record?.isInactive,
           stoppedDate: RTBEN?.record?.stoppedDate && formatDateFromApi(RTBEN.record.stoppedDate),
           stoppedReason: RTBEN?.record?.stoppedReason,
           gender: RTBEN?.record?.gender,
@@ -223,6 +244,7 @@ export default function BenificiaryBankForm({
           clientRef: RTBEN?.record?.clientRef,
           clientName: RTBEN?.record?.clientName,
           countryId: RTBEN?.record?.countryId,
+          currencyId: RTBEN?.record?.currencyId,
           seqNo: RTBEN?.record?.seqNo,
 
           //RTBEB
@@ -268,6 +290,7 @@ export default function BenificiaryBankForm({
       name: values.name,
       dispersalType: values.dispersalType,
       isBlocked: values.isBlocked,
+      isInactive: values.isInactive,
       stoppedDate: values.stoppedDate ? formatDateToApi(values.stoppedDate) : null,
       stoppedReason: values.stoppedReason,
       nationalityId: values.nationalityId,
@@ -278,6 +301,7 @@ export default function BenificiaryBankForm({
       addressLine1: values.addressLine1,
       addressLine2: values.addressLine2,
       countryId: values.countryId,
+      currencyId: values.currencyId,
       seqNo: values.seqNo
     }
 
@@ -386,7 +410,8 @@ export default function BenificiaryBankForm({
                   displayField={['reference', 'name']}
                   columnsInDropDown={[
                     { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
+                    { key: 'name', value: 'Name' },
+                    { key: 'flName', value: 'FL Name' }
                   ]}
                   readOnly={(formik.values.countryId && editMode) || countryId || editMode}
                   values={formik.values}
@@ -421,7 +446,28 @@ export default function BenificiaryBankForm({
                   readOnly={(formik.values.countryId && editMode) || editMode || !formik.values.countryId}
                 />
               </FormGrid>
-
+              <FormGrid hideonempty xs={12}>
+                <ResourceComboBox
+                  endpointId={SystemRepository.Currency.qry}
+                  name='currencyId'
+                  label={_labels.currency}
+                  valueField='recordId'
+                  displayField={['reference', 'name']}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' },
+                    { key: 'flName', value: 'FL Name' }
+                  ]}
+                  values={formik.values}
+                  required
+                  readOnly={(formik.values.currencyId && editMode) || currencyId || editMode}
+                  maxAccess={maxAccess}
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('currencyId', newValue?.recordId || null)
+                  }}
+                  error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
+                />
+              </FormGrid>
               <FormGrid hideonempty xs={12}>
                 <CustomTextField
                   name='accountRef'
@@ -501,7 +547,8 @@ export default function BenificiaryBankForm({
                   displayField={['reference', 'name']}
                   columnsInDropDown={[
                     { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
+                    { key: 'name', value: 'Name' },
+                    { key: 'flName', value: 'FL Name' }
                   ]}
                   values={formik.values}
                   onChange={(event, newValue) => {
@@ -567,7 +614,6 @@ export default function BenificiaryBankForm({
                   label={_labels.country}
                   valueField='recordId'
                   displayField={['reference', 'name', 'flName']}
-                  displayFieldWidth={1.25}
                   columnsInDropDown={[
                     { key: 'reference', value: 'Reference' },
                     { key: 'name', value: 'Name' },
@@ -775,21 +821,40 @@ export default function BenificiaryBankForm({
                   required={formik.values.IBAN}
                 />
               </FormGrid>
-              <FormGrid hideonempty xs={12}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      name='isBlocked'
-                      readOnly
-                      disabled={true}
-                      checked={formik.values?.isBlocked}
-                      onChange={formik.handleChange}
-                      maxAccess={maxAccess}
-                    />
-                  }
-                  label={_labels.isBlocked}
-                />
-              </FormGrid>
+              {!hiddenIsInActive.current && (
+                <FormGrid hideonempty xs={12}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        name='isInactive'
+                        readOnly
+                        disabled={true}
+                        checked={formik.values?.isInactive}
+                        onChange={formik.handleChange}
+                        maxAccess={maxAccess}
+                      />
+                    }
+                    label={_labels.isInactive}
+                  />
+                </FormGrid>
+              )}
+              {!hiddenIsBlocked.current && (
+                <FormGrid hideonempty xs={12}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        name='isBlocked'
+                        readOnly
+                        disabled={true}
+                        checked={formik.values?.isBlocked}
+                        onChange={formik.handleChange}
+                        maxAccess={maxAccess}
+                      />
+                    }
+                    label={_labels.isBlocked}
+                  />
+                </FormGrid>
+              )}
               <FormGrid hideonempty xs={12}>
                 <CustomTextArea
                   name='remarks'

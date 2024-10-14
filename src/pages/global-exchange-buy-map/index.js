@@ -68,8 +68,8 @@ const GlobalExchangeBuyMap = () => {
         }
       ]
     },
-    onSubmit: values => {
-      postExchangeMaps(values)
+    onSubmit: async values => {
+      await postExchangeMaps(values)
     }
   })
 
@@ -80,7 +80,7 @@ const GlobalExchangeBuyMap = () => {
     name: labels && labels.find(item => item.key === '4') && labels.find(item => item.key === '4').value
   }
 
-  const postExchangeMaps = obj => {
+  const postExchangeMaps = async obj => {
     const data = {
       currencyId: obj.currencyId,
       globalExchangeBuyMaps: obj.rows.map(({ currencyId, ...rest }) => ({
@@ -88,7 +88,7 @@ const GlobalExchangeBuyMap = () => {
         ...rest
       }))
     }
-    postRequest({
+    await postRequest({
       extension: RemittanceSettingsRepository.CorrespondentExchangeBuyMap.set2,
       record: JSON.stringify(data)
     })

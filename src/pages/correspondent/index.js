@@ -1,7 +1,6 @@
 import { useState, useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
-import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CorrespondentWindow from './Windows/CorrespondentWindow'
@@ -13,6 +12,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
+import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
 const Correspondent = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -25,22 +25,38 @@ const Correspondent = () => {
     labels: _labels,
     paginationParameters,
     invalidate,
+    filterBy,
+    clearFilter,
     refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: RemittanceSettingsRepository.Correspondent.qry,
-    datasetId: ResourceIds.Correspondent
+    endpointId: RemittanceSettingsRepository.Correspondent.page,
+    datasetId: ResourceIds.Correspondent,
+
+    filter: {
+      endpointId: RemittanceSettingsRepository.Correspondent.snapshot,
+      filterFn: fetchWithSearch
+    }
   })
 
-  async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+  async function fetchWithSearch({ filters, pagination }) {
+    if (filters.qry)
+      return await getRequest({
+        extension: RemittanceSettingsRepository.Correspondent.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+    else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+  }
 
-    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}`
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50, params } = options
+
+    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
     var parameters = defaultParams
 
     const response = await getRequest({
-      extension: RemittanceSettingsRepository.Correspondent.qry,
+      extension: RemittanceSettingsRepository.Correspondent.page,
       parameters: parameters
     })
 
@@ -64,6 +80,11 @@ const Correspondent = () => {
       flex: 1
     },
     {
+      field: 'cgName',
+      headerName: _labels.group,
+      flex: 1
+    },
+    {
       field: 'currencyRef',
       headerName: _labels.currency,
       flex: 1
@@ -76,7 +97,7 @@ const Correspondent = () => {
     {
       field: 'isInactive',
       headerName: _labels.isInActive,
-      flex: 1
+      type: 'checkbox'
     }
   ]
 
@@ -106,7 +127,7 @@ const Correspondent = () => {
         recordId: recordId ? recordId : null
       },
       width: 900,
-      height: 600,
+      height: 660,
       title: _labels.correspondent
     })
   }
@@ -115,10 +136,37 @@ const Correspondent = () => {
     openForm(obj?.recordId)
   }
 
+  const onApply = ({ search, rpbParams }) => {
+    if (!search && rpbParams.length === 0) {
+      clearFilter('params')
+    } else if (!search) {
+      filterBy('params', rpbParams)
+    } else {
+      filterBy('qry', search)
+    }
+    refetch()
+  }
+
+  const onSearch = value => {
+    filterBy('qry', value)
+  }
+
+  const onClear = () => {
+    clearFilter('qry')
+  }
+
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={addCorrespondent} maxAccess={access} />
+        <RPBGridToolbar
+          onSearch={onSearch}
+          onClear={onClear}
+          labels={_labels}
+          onAdd={addCorrespondent}
+          maxAccess={access}
+          onApply={onApply}
+          reportName={'RTCOR'}
+        />
       </Fixed>
       <Grow>
         <Table

@@ -1,16 +1,8 @@
-// ** MUI Imports
 import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button, Box } from '@mui/material'
 import { ControlContext } from 'src/providers/ControlContext'
 import { useContext } from 'react'
 
-const ConfirmationDialog = ({
-  openCondition,
-  closeCondition,
-  DialogText,
-  okButtonAction,
-  cancelButtonAction,
-  fullScreen = true
-}) => {
+const ConfirmationDialog = ({ openCondition, closeCondition, DialogText, okButtonAction, fullScreen = true }) => {
   const { platformLabels } = useContext(ControlContext)
 
   return !fullScreen ? (
@@ -42,9 +34,6 @@ const ConfirmationDialog = ({
         <Button onClick={okButtonAction} color='primary'>
           {platformLabels.OK}
         </Button>
-        <Button onClick={cancelButtonAction} color='primary'>
-          {platformLabels.Cancel}
-        </Button>
       </Box>
     </Box>
   ) : (
@@ -56,9 +45,6 @@ const ConfirmationDialog = ({
       <DialogActions>
         <Button onClick={okButtonAction} color='primary'>
           {platformLabels.OK}
-        </Button>
-        <Button onClick={cancelButtonAction} color='primary'>
-          {platformLabels.Cancel}
         </Button>
       </DialogActions>
     </Dialog>

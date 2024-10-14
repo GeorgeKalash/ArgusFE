@@ -59,5 +59,25 @@ export const AccessControlRepository = {
   SGControlAccess: {
     qry: service + 'qryCRL',
     set2: service + 'set2CRL'
+  },
+  UserSiteView: {
+    qry: service + 'qryUSI',
+    set2: service + 'set2USI'
+  },
+  NotificationLabel: {
+    qry: service + 'qryNLB',
+    get: service + 'getNLB',
+    set: service + 'setNLB',
+    del: service + 'delNLB'
+  },
+  SGReleaseCode: {
+    qry: service + 'qryRCO',
+    set: service + 'setRCO',
+    del: service + 'delRCO'
+  },
+  DataAccessItem: {
+    qry: service + 'qryROW',
+    set: service + 'setROW',
+    del: service + 'delROW'
   }
 }

@@ -15,29 +15,41 @@ export const ResourceLookup = ({
   errorCheck,
   filter = {},
   viewHelperText = true,
+  minChars = 3,
   ...rest
 }) => {
   const { getRequest } = useContext(RequestsContext)
-  const [errorMessage, setErrorMessage] = useState()
   const [store, setStore] = useState([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [renderOption, setRenderOption] = useState(false)
 
   const onLookup = searchQry => {
     setStore([])
-    getRequest({
-      extension: endpointId,
-      parameters: new URLSearchParams({ ...parameters, _filter: searchQry })
-    })
-      .then(res => {
-        if (filter) {
-          res.list = res.list.filter(item => {
-            return Object.keys(filter).every(key => {
-              return parseInt(item[key]) == parseInt(filter[key])
-            })
-          })
-        }
-        setStore(res.list)
+    setRenderOption(false)
+    if (searchQry?.length >= minChars) {
+      setIsLoading(true)
+      getRequest({
+        extension: endpointId,
+        parameters: new URLSearchParams({ ...parameters, _filter: searchQry }),
+        disableLoading: true
       })
-      .catch(error => {})
+        .then(res => {
+          if (filter) {
+            res.list = res.list.filter(item => {
+              return Object.keys(filter).every(key => {
+                return parseInt(item[key]) == parseInt(filter[key])
+              })
+            })
+          }
+          setStore(res.list)
+          setRenderOption(true)
+        })
+        .catch(error => {})
+        .finally(() => {
+          setIsLoading(false)
+          setRenderOption(true)
+        })
+    }
   }
   const check = errorCheck ? errorCheck : name
 
@@ -69,10 +81,12 @@ export const ResourceLookup = ({
           error,
           onKeyUp,
           name,
+          isLoading,
+          renderOption,
+          minChars,
           ...rest
         }}
       />
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )
 }

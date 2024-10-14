@@ -1,7 +1,4 @@
-// ** React Imports
-import { createContext, useContext, useState } from 'react'
-
-// ** 3rd Party Imports
+import { createContext, useContext, useEffect, useState } from 'react'
 import axios from 'axios'
 import jwt from 'jwt-decode'
 import { AuthContext } from 'src/providers/AuthContext'
@@ -34,7 +31,6 @@ function LoadingOverlay() {
 
 const RequestsProvider = ({ showLoading = false, children }) => {
   const { user, setUser, apiUrl } = useContext(AuthContext)
-
   const errorModel = useError()
   const [loading, setLoading] = useState(false)
 
@@ -51,46 +47,60 @@ const RequestsProvider = ({ showLoading = false, children }) => {
 
   const getRequest = async body => {
     const accessToken = await getAccessToken()
+    const disableLoading = body.disableLoading || false
+    !disableLoading && !loading && setLoading(true)
 
-    !loading && setLoading(true)
+    const throwError = body.throwError || false
 
-    return axios({
-      method: 'GET',
-      url: apiUrl + body.extension + '?' + body.parameters,
-      headers: {
-        Authorization: 'Bearer ' + accessToken,
-        'Content-Type': 'multipart/form-data',
-        LanguageId: user.languageId
-      }
-    })
-      .then(res => {
-        debouncedCloseLoading()
-
-        return res.data
+    return new Promise(async (resolve, reject) => {
+      axios({
+        method: 'GET',
+        url: apiUrl + body.extension + '?' + body.parameters,
+        headers: {
+          Authorization: 'Bearer ' + accessToken,
+          'Content-Type': 'multipart/form-data',
+          LanguageId: user.languageId
+        }
       })
-      .catch(error => {
-        debouncedCloseLoading()
-        showError({
-          message: error,
-          height: error.response?.status === 404 || error.response?.status === 500 ? 400 : ''
+        .then(response => {
+          if (!disableLoading) debouncedCloseLoading()
+          resolve(response.data)
         })
-        throw error
-      })
+        .catch(error => {
+          debouncedCloseLoading()
+          showError({
+            message: error,
+            height: error.response?.status === 404 || error.response?.status === 500 ? 400 : ''
+          })
+          if (throwError) reject(error)
+        })
+    })
   }
 
   const getMicroRequest = async body => {
-    return axios({
-      method: 'GET',
-      url: process.env.NEXT_PUBLIC_YAKEEN_URL + body.extension + '?' + body.parameters
-    })
-      .then(res => res.data)
-      .catch(error => {
-        showError({
-          message: error,
-          height: error.response?.status === 404 || error.response?.status === 500 ? 400 : ''
-        })
-        throw error
+    const disableLoading = body.disableLoading || false
+    !disableLoading && !loading && setLoading(true)
+
+    const throwError = body.throwError || false
+
+    return new Promise(async (resolve, reject) => {
+      return axios({
+        method: 'GET',
+        url: process.env.NEXT_PUBLIC_YAKEEN_URL + body.extension + '?' + body.parameters
       })
+        .then(response => {
+          if (!disableLoading) debouncedCloseLoading()
+          resolve(response.data)
+        })
+        .catch(error => {
+          debouncedCloseLoading()
+          showError({
+            message: error,
+            height: error.response?.status === 404 || error.response?.status === 500 ? 400 : ''
+          })
+          if (throwError) reject(error)
+        })
+    })
   }
 
   const getIdentityRequest = async body => {
@@ -123,30 +133,38 @@ const RequestsProvider = ({ showLoading = false, children }) => {
 
     var bodyFormData = new FormData()
     bodyFormData.append('record', body.record)
+    body?.file && bodyFormData.append('file', body.file)
+    const disableLoading = body.disableLoading || false
+    !disableLoading && !loading && setLoading(true)
 
-    return axios({
-      method: 'POST',
-      url: url + body.extension,
-      headers: {
-        Authorization: 'Bearer ' + accessToken,
-        'Content-Type': 'multipart/form-data',
-        LanguageId: user.languageId
-      },
-      data: bodyFormData
-    })
-      .then(res => {
-        debouncedCloseLoading()
+    const throwError = body.throwError || false
 
-        return res.data
+    return new Promise(async (resolve, reject) => {
+      axios({
+        method: 'POST',
+        url: url + body.extension,
+        headers: {
+          Authorization: 'Bearer ' + accessToken,
+          'Content-Type': 'multipart/form-data',
+          LanguageId: user.languageId
+        },
+        data: bodyFormData
       })
-      .catch(error => {
-        debouncedCloseLoading()
-        showError({
-          message: error,
-          height: error.response?.status === 404 || error.response?.status === 500 ? 400 : ''
+        .then(response => {
+          if (!disableLoading) {
+            debouncedCloseLoading()
+          }
+          resolve(response.data)
         })
-        throw error
-      })
+        .catch(error => {
+          debouncedCloseLoading()
+          showError({
+            message: error,
+            height: error.response?.status === 404 || error.response?.status === 500 ? 400 : ''
+          })
+          if (throwError) reject(error)
+        })
+    })
   }
 
   const getAccessToken = async () => {

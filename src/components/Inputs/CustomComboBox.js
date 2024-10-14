@@ -1,12 +1,12 @@
-// ** MUI Imports
-import { Autocomplete, Paper, TextField } from '@mui/material'
+import { Autocomplete, IconButton, CircularProgress, Paper, TextField } from '@mui/material'
 import { ControlAccessLevel, TrxType } from 'src/resources/AccessLevels'
 import { Box } from '@mui/material'
+import RefreshIcon from '@mui/icons-material/Refresh'
 import React from 'react'
 import PopperComponent from '../Shared/Popper/PopperComponent'
 
 const CustomComboBox = ({
-  type = 'text', //any valid HTML5 input type
+  type = 'text',
   name,
   label,
   value: _value,
@@ -17,8 +17,8 @@ const CustomComboBox = ({
   onChange,
   error,
   helperText,
-  variant = 'outlined', //outlined, standard, filled
-  size = 'small', //small, medium
+  variant = 'outlined',
+  size = 'small',
   fullWidth = true,
   required = false,
   autoFocus = false,
@@ -26,10 +26,14 @@ const CustomComboBox = ({
   readOnly = false,
   neverPopulate = false,
   displayFieldWidth = 1,
+  defaultIndex,
   sx,
   columnsInDropDown,
   editMode = false,
   hasBorder = true,
+  fetchData,
+  refresh = true,
+  isLoading,
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
@@ -46,7 +50,7 @@ const CustomComboBox = ({
   return (
     <Autocomplete
       name={name}
-      value={value}
+      value={store?.[defaultIndex] || value}
       size={size}
       options={store}
       key={value}
@@ -123,7 +127,6 @@ const CustomComboBox = ({
           return (
             <Box>
               <li {...props}>
-                {/* <Box sx={{ flex: 1 }}>{option[valueField]}</Box> */}
                 <Box sx={{ flex: 1 }}>{option[displayField]}</Box>
               </li>
             </Box>
@@ -133,7 +136,7 @@ const CustomComboBox = ({
       renderInput={params => (
         <TextField
           {...params}
-          inputProps={{ ...params.inputProps, ...(neverPopulate && { value: '' }) }}
+          inputProps={{ ...params.inputProps, tabIndex: _readOnly ? -1 : 0, ...(neverPopulate && { value: '' }) }}
           type={type}
           variant={variant}
           label={label}
@@ -143,15 +146,40 @@ const CustomComboBox = ({
           helperText={helperText}
           InputProps={{
             ...params.InputProps,
-            style: {
-              border: 'none' // Set width to 100%
-            }
+            endAdornment: (
+              <React.Fragment>
+                {isLoading ? (
+                  <CircularProgress color='inherit' size={18} />
+                ) : (
+                  refresh &&
+                  !readOnly && (
+                    <IconButton
+                      onClick={fetchData}
+                      aria-label='refresh data'
+                      sx={{
+                        p: '0px !important',
+                        marginRight: '-10px'
+                      }}
+                      size='small'
+                    >
+                      <RefreshIcon />
+                    </IconButton>
+                  )
+                )}
+                {params.InputProps.endAdornment}
+              </React.Fragment>
+            )
           }}
           sx={{
             '& .MuiOutlinedInput-root': {
               '& fieldset': {
-                border: !hasBorder && 'none' // Hide border
+                border: !hasBorder && 'none'
               }
+            },
+            '& .MuiAutocomplete-clearIndicator': {
+              pl: '0px !important',
+              marginRight: '-10px',
+              visibility: 'visible'
             }
           }}
         />

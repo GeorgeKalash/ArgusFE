@@ -1,7 +1,6 @@
 import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
-import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
@@ -12,6 +11,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
+import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
 const ProductMaster = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -23,17 +23,32 @@ const ProductMaster = () => {
     labels: _labels,
     paginationParameters,
     invalidate,
+    filterBy,
+    clearFilter,
     refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: RemittanceSettingsRepository.Correspondent.qry,
-    datasetId: ResourceIds.ProductMaster
+    endpointId: RemittanceSettingsRepository.ProductMaster.qry,
+    datasetId: ResourceIds.ProductMaster,
+    filter: {
+      endpointId: RemittanceSettingsRepository.ProductMaster.snapshot,
+      filterFn: fetchWithSearch
+    }
   })
 
+  async function fetchWithSearch({ filters, pagination }) {
+    return filters.qry
+      ? await getRequest({
+          extension: RemittanceSettingsRepository.ProductMaster.snapshot,
+          parameters: `_filter=${filters.qry}`
+        })
+      : await fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+  }
+
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
-    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}`
+    const { _startAt = 0, _pageSize = 50, params } = options
+    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
     var parameters = defaultParams
 
     const response = await getRequest({
@@ -56,19 +71,24 @@ const ProductMaster = () => {
       flex: 1
     },
     {
-      field: 'typeName',
-      headerName: _labels.type,
-      flex: 1
-    },
-    {
-      field: 'functionName',
-      headerName: _labels.function,
-      flex: 1
-    },
-    {
       field: 'commissionBaseName',
       headerName: _labels.commissionBase,
       flex: 1
+    },
+    {
+      field: 'accessLevelName',
+      headerName: _labels.accessLevel,
+      flex: 1
+    },
+    {
+      field: 'corName',
+      headerName: _labels.correspondent,
+      flex: 1
+    },
+    {
+      field: 'isInactive',
+      headerName: _labels.isInactive,
+      type: 'checkbox'
     }
   ]
 
@@ -106,10 +126,37 @@ const ProductMaster = () => {
     openForm(obj?.recordId)
   }
 
+  const onApply = ({ search, rpbParams }) => {
+    if (!search && rpbParams.length === 0) {
+      clearFilter('params')
+    } else if (!search) {
+      filterBy('params', rpbParams)
+    } else {
+      filterBy('qry', search)
+    }
+    refetch()
+  }
+
+  const onSearch = value => {
+    filterBy('qry', value)
+  }
+
+  const onClear = () => {
+    clearFilter('qry')
+  }
+
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <RPBGridToolbar
+          onSearch={onSearch}
+          onClear={onClear}
+          labels={_labels}
+          onAdd={add}
+          maxAccess={access}
+          onApply={onApply}
+          reportName={'RTPRO'}
+        />
       </Fixed>
       <Grow>
         <Table

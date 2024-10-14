@@ -22,10 +22,12 @@ const City = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    return await getRequest({
+    const response = await getRequest({
       extension: SystemRepository.City.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_countryId=0&_stateId=0`
     })
+
+    return { ...response, _startAt: _startAt }
   }
 
   const {
@@ -70,7 +72,11 @@ const City = () => {
       headerName: _labels.name,
       flex: 1
     },
-    ,
+    {
+      field: 'flName',
+      headerName: _labels.flName,
+      flex: 1
+    },
     {
       field: 'countryName',
       headerName: _labels.country,
@@ -111,7 +117,7 @@ const City = () => {
         maxAccess: access
       },
       width: 500,
-      height: 360,
+      height: 460,
       title: _labels.cities
     })
   }

@@ -14,6 +14,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
+import { DataSets } from 'src/resources/DataSets'
 
 export default function CountryForm({ labels, maxAccess, recordId }) {
   const [editMode, setEditMode] = useState(!!recordId)
@@ -31,6 +32,7 @@ export default function CountryForm({ labels, maxAccess, recordId }) {
       name: '',
       reference: '',
       flName: '',
+      languageId: '',
       currencyId: null,
       regionId: null,
       ibanLength: '',
@@ -48,12 +50,12 @@ export default function CountryForm({ labels, maxAccess, recordId }) {
     validationSchema: yup.object({
       ibanLength: yup
         .number()
+        .nullable()
         .transform((value, originalValue) => validateNumberField(value, originalValue))
         .min(0, 'Value must be greater than or equal to 0')
         .max(32767, 'Value must be less than or equal to 32,767'),
       name: yup.string().required(' '),
-      reference: yup.string().required(' '),
-      flName: yup.string().required(' ')
+      reference: yup.string().required(' ')
     }),
     onSubmit: async obj => {
       obj.ibanLength = getNumberWithoutCommas(obj.ibanLength)
@@ -93,7 +95,7 @@ export default function CountryForm({ labels, maxAccess, recordId }) {
   }, [])
 
   return (
-    <FormShell reso urceId={ResourceIds.Countries} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell resourceId={ResourceIds.Countries} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -127,7 +129,6 @@ export default function CountryForm({ labels, maxAccess, recordId }) {
                 name='flName'
                 label={labels.fLang}
                 value={formik.values.flName}
-                required
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('flName', '')}
                 error={formik.touched.flName && Boolean(formik.errors.flName)}
@@ -199,6 +200,20 @@ export default function CountryForm({ labels, maxAccess, recordId }) {
                 onClear={() => formik.setFieldValue('isoCode1', '')}
                 error={formik.touched.isoCode2 && Boolean(formik.errors.isoCode2)}
                 maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.LANGUAGE}
+                name='languageId'
+                label={labels.language}
+                valueField='key'
+                displayField='value'
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('languageId', newValue?.key ?? '')
+                }}
+                error={formik.touched.languageId && Boolean(formik.errors.languageId)}
               />
             </Grid>
             <Grid item xs={12}>

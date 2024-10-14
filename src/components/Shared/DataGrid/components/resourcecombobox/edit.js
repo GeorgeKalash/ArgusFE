@@ -1,6 +1,16 @@
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 
-export default function ResourceComboBoxEdit({ column: { props }, id, field, value, updateRow, update, row }) {
+export default function ResourceComboBoxEdit({
+  column: { props },
+  id,
+  field,
+  value,
+  updateRow,
+  update,
+  row,
+  store,
+  setStore
+}) {
   let changes = props?.mapping
     ? props.mapping
         ?.map(({ from, to }) => ({
@@ -14,6 +24,7 @@ export default function ResourceComboBoxEdit({ column: { props }, id, field, val
       name={field}
       value={changes}
       autoFocus
+      dataGrid={true}
       label={''}
       hasBorder={false}
       onChange={(e, value) => {

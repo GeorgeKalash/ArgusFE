@@ -2,6 +2,9 @@
   "name": "materio-mui-react-nextjs-admin-template",
   "version": "2.2.0",
   "private": true,
+  "engines": {
+    "node": ">=18.0.0 <19.0.0"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -40,6 +43,9 @@
     "@popperjs/core": "2.11.7",
     "@reduxjs/toolkit": "1.9.5",
     "@tanstack/react-query": "^5.17.15",
+    "ag-grid-community": "^31.3.2",
+    "ag-grid-enterprise": "^31.3.2",
+    "ag-grid-react": "^31.3.2",
     "apexcharts-clevision": "3.28.5",
     "axios": "^1.6.5",
     "axios-mock-adapter": "1.21.4",
@@ -63,9 +69,9 @@
     "jwt-decode": "^3.1.2",
     "keen-slider": "6.8.5",
     "moment": "^2.30.1",
-    "next": "^14.2.3",
     "moment-hijri": "^2.1.2",
     "moment-jalaali": "^0.10.1",
+    "next": "^14.2.3",
     "next-auth": "^4.23.1",
     "npm": "^10.4.0",
     "nprogress": "0.2.0",
@@ -91,9 +97,10 @@
     "react-redux": "8.0.5",
     "react-to-print": "^2.15.1",
     "recharts": "2.5.0",
-    "styled-components": "^6.1.11",
+    "styled-components": "^6.1.12",
     "stylis": "4.1.4",
     "stylis-plugin-rtl": "2.1.1",
+    "uuid": "^10.0.0",
     "yup": "^1.3.3"
   },
   "devDependencies": {

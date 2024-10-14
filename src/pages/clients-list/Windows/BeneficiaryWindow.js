@@ -9,6 +9,10 @@ import { useFormik } from 'formik'
 import { useWindow } from 'src/windows'
 import BenificiaryCashForm from 'src/components/Shared/BenificiaryCashForm'
 import BenificiaryBankForm from 'src/components/Shared/BenificiaryBankForm'
+import BenificiaryHistoryForm from '../forms/BenificiaryHistoryForm'
+import { Box, IconButton } from '@mui/material'
+import Image from 'next/image'
+import historyIcon from '/public/images/TableIcons/history.png'
 
 const BeneficiaryWindow = ({ clientId }) => {
   const { stack } = useWindow()
@@ -36,10 +40,19 @@ const BeneficiaryWindow = ({ clientId }) => {
     datasetId: ResourceIds.Beneficiary
   })
   async function fetchGridData() {
-    return await getRequest({
+    const res = await getRequest({
       extension: RemittanceOutwardsRepository.Beneficiary.qry,
       parameters: `_clientId=${clientId}`
     })
+    res.list = res.list.map(item => {
+      if (item.isInactive === null) {
+        item.isInactive = false
+      }
+
+      return item
+    })
+
+    return res
   }
 
   const columns = [
@@ -59,6 +72,11 @@ const BeneficiaryWindow = ({ clientId }) => {
       flex: 1
     },
     {
+      field: 'countryName',
+      headerName: _labels.country,
+      flex: 1
+    },
+    {
       field: 'accountReference',
       headerName: _labels.accountRef,
       flex: 1
@@ -72,6 +90,23 @@ const BeneficiaryWindow = ({ clientId }) => {
       field: 'dispersalTypeName',
       headerName: _labels.dispersalType,
       flex: 1
+    },
+    {
+      field: 'isInactive',
+      headerName: _labels.isInactive,
+      type: 'checkbox'
+    },
+    {
+      field: 'beneficiary history',
+      headerName: _labels.beneficiaryHistory,
+      flex: 1,
+      cellRenderer: row => (
+        <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
+          <IconButton size='small' onClick={() => beneficiaryHistory(row)}>
+            <Image src={historyIcon} alt='History' width={18} height={18} />
+          </IconButton>
+        </Box>
+      )
     }
   ]
 
@@ -110,6 +145,19 @@ const BeneficiaryWindow = ({ clientId }) => {
         title: 'Bank'
       })
     }
+  }
+
+  const beneficiaryHistory = obj => {
+    stack({
+      Component: BenificiaryHistoryForm,
+      props: {
+        client: obj.data.clientId,
+        beneficiary: obj.data.beneficiaryId
+      },
+      width: 1100,
+      height: 500,
+      title: _labels.beneficiaryHistory
+    })
   }
 
   return (

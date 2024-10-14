@@ -6,7 +6,7 @@ import { InterfacesForm } from 'src/components/Shared/InterfacesForm'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 
-const PurposeOfExchangeWindow = ({ labels, maxAccess, recordId, height }) => {
+const PurposeOfExchangeWindow = ({ labels, maxAccess, recordId }) => {
   const [activeTab, setActiveTab] = useState(0)
 
   const [store, setStore] = useState({

@@ -40,7 +40,7 @@ export default function GenerateOpening({ _labels, access }) {
           record: JSON.stringify({ ...obj, tbendDate: formatDateToApi(obj.tbendDate) })
         })
 
-        toast.success(platformLabels.generated)
+        toast.success(platformLabels.Generated)
       } catch (error) {}
     }
   })

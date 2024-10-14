@@ -1,7 +1,6 @@
 import React, { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
-import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -11,56 +10,20 @@ import { useWindow } from 'src/windows'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-
-// function SampleWindow() {
-//   const { stack } = useWindow()
-
-//   return (
-//     <div>
-//       <Button
-//         onClick={() => {
-//           stack({
-//             Component: SampleWindow,
-//             title: 'New Window'
-//           })
-//         }}
-//       >
-//         Open New Window
-//       </Button>
-//       Hello World.
-//     </div>
-//   )
-// }
-
-// function WindowConsumer() {
-//   const { stack } = useWindow()
-
-//   return (
-//     <div>
-//       <Button
-//         onClick={() => {
-//           stack({
-//             Component: SampleWindow,
-//             title: 'Sample Window'
-//           })
-//         }}
-//       >
-//         Open Window
-//       </Button>
-//     </div>
-//   )
-// }
+import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const BPMasterData = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 50, params = [] } = options
 
     const response = await getRequest({
       extension: BusinessPartnerRepository.MasterData.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=&_sortBy=reference desc`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}&_sortBy=reference desc`
     })
 
     return { ...response, _startAt: _startAt }
@@ -68,29 +31,28 @@ const BPMasterData = () => {
 
   const {
     query: { data },
-    search,
-    clear,
+    filterBy,
     refetch,
-    paginationParameters,
+    clearFilter,
     labels: _labels,
     access,
+    paginationParameters,
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: BusinessPartnerRepository.MasterData.qry,
+    endpointId: BusinessPartnerRepository.MasterData.snapshot,
     datasetId: ResourceIds.BPMasterData,
-    search: {
-      endpointId: BusinessPartnerRepository.MasterData.snapshot,
-      searchFn: fetchWithSearch
+    filter: {
+      filterFn: fetchWithFilter
     }
   })
-  async function fetchWithSearch({ qry }) {
-    const response = await getRequest({
-      extension: BusinessPartnerRepository.MasterData.snapshot,
-      parameters: `_filter=${qry}`
-    })
-
-    return response
+  async function fetchWithFilter({ filters, pagination }) {
+    if (filters.qry)
+      return await getRequest({
+        extension: BusinessPartnerRepository.MasterData.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+    else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
   const columns = [
@@ -159,19 +121,38 @@ const BPMasterData = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
+  }
+
+  const onApply = ({ search, rpbParams }) => {
+    if (!search && rpbParams.length === 0) {
+      clearFilter('params')
+    } else if (!search) {
+      filterBy('params', rpbParams)
+    } else {
+      filterBy('qry', search)
+    }
+    refetch()
+  }
+
+  const onSearch = value => {
+    filterBy('qry', value)
+  }
+
+  const onClear = () => {
+    clearFilter('qry')
   }
 
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar
+        <RPBGridToolbar
           onAdd={add}
           maxAccess={access}
-          onSearch={search}
-          onSearchClear={clear}
-          labels={_labels}
-          inputSearch={true}
+          onApply={onApply}
+          onSearch={onSearch}
+          onClear={onClear}
+          reportName={'BPMAS'}
         />
       </Fixed>
       <Grow>

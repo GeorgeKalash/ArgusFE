@@ -7,14 +7,23 @@ import toast from 'react-hot-toast'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import useResourceParams from 'src/hooks/useResourceParams'
 
-const OTPPhoneVerification = ({ formValidation, recordId, functionId, onClose, getData, onSuccess, window }) => {
+const OTPPhoneVerification = ({
+  formValidation,
+  recordId,
+  clientId,
+  functionId,
+  onClose,
+  getData,
+  onSuccess,
+  window
+}) => {
   const { postRequest } = useContext(RequestsContext)
 
   const { labels: labels, access } = useResourceParams({
     datasetId: ResourceIds.OTPVerify
   })
   const [otp, setOtp] = useState(['', '', '', '', '', ''])
-  const [timer, setTimer] = useState(60)
+  const [timer, setTimer] = useState(30)
   const [error, setError] = useState('')
   const [disabled, setDisabled] = useState(0)
 
@@ -40,7 +49,7 @@ const OTPPhoneVerification = ({ formValidation, recordId, functionId, onClose, g
 
   const otpSMS = () => {
     var data = {
-      clientId: formValidation.values.clientId,
+      clientId: formValidation.values.clientId || clientId,
       secret: '',
       functionId: functionId,
       deviceId: formValidation.values.cellPhone,
@@ -59,7 +68,7 @@ const OTPPhoneVerification = ({ formValidation, recordId, functionId, onClose, g
   const checkSMS = value => {
     if (value.length > 1) {
       var data = {
-        clientId: formValidation.values.clientId,
+        clientId: formValidation.values.clientId || clientId,
         recordId: recordId || null,
         secret: '',
         functionId: functionId,
@@ -136,7 +145,7 @@ const OTPPhoneVerification = ({ formValidation, recordId, functionId, onClose, g
   }
 
   const handleResendOtp = () => {
-    setTimer(60)
+    setTimer(30)
     setError('')
     setOtp(['', '', '', '', '', ''])
     document.getElementById('otp-input-0').focus()

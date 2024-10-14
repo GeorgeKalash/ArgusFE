@@ -9,13 +9,15 @@ import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepos
 import FormShell from 'src/components/Shared/FormShell'
 import { useFormik } from 'formik'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { useInvalidate } from 'src/hooks/resource'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
+import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
+import { FinancialRepository } from 'src/repositories/FinancialRepository'
 
 const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -23,7 +25,7 @@ const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore,
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: RemittanceSettingsRepository.Correspondent.qry
+    endpointId: RemittanceSettingsRepository.Correspondent.page
   })
 
   const formik = useFormik({
@@ -34,26 +36,31 @@ const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore,
       name: null,
       reference: null,
       bpId: null,
+      cgId: null,
       currencyId: null,
       currencyRef: null,
+      owRateTypeId: null,
+      iwRateTypeId: null,
       isInactive: false,
-      interfaceId: null
+      interfaceId: null,
+      accountId: null
     },
     validationSchema: yup.object({
       reference: yup.string().required(),
       name: yup.string().required(),
       bpId: yup.string().required(),
+      cgId: yup.number().required(),
       bpRef: yup.string().required(),
       bpName: yup.string().required()
     }),
-    onSubmit: values => {
-      postCorrespondent(values)
+    onSubmit: async values => {
+      await postCorrespondent(values)
     }
   })
 
-  const postCorrespondent = obj => {
+  const postCorrespondent = async obj => {
     const recordId = obj?.recordId || ''
-    postRequest({
+    await postRequest({
       extension: RemittanceSettingsRepository.Correspondent.set,
       record: JSON.stringify(obj)
     })
@@ -65,7 +72,7 @@ const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore,
             recordId: res.recordId
           }))
           toast.success(platformLabels.Added)
-
+          getCorrespondentById(res.recordId)
           formik.setFieldValue('recordId', res.recordId)
         } else {
           toast.success(platformLabels.Edited)
@@ -102,6 +109,7 @@ const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore,
               <CustomTextField
                 name='reference'
                 label={labels.reference}
+                readOnly={editMode}
                 value={formik.values.reference}
                 required
                 onChange={formik.handleChange}
@@ -149,6 +157,25 @@ const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore,
               />
             </Grid>
             <Grid item xs={12}>
+              <ResourceLookup
+                endpointId={FinancialRepository.Account.snapshot}
+                name='accountId'
+                label={labels.accountRef}
+                valueField='reference'
+                displayField='name'
+                valueShow='accountRef'
+                secondValueShow='accountName'
+                form={formik}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('accountId', newValue?.recordId || '')
+                  formik.setFieldValue('accountRef', newValue?.reference || '')
+                  formik.setFieldValue('accountName', newValue?.name || '')
+                }}
+                error={formik.touched.accountId && Boolean(formik.errors.accountId)}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={SystemRepository.Currency.qry}
                 name='currencyId'
@@ -168,6 +195,25 @@ const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore,
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
+                endpointId={RemittanceSettingsRepository.CorrespondentGroup.qry}
+                name='cgId'
+                label={labels.group}
+                valueField='recordId'
+                required
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('cgId', newValue?.recordId)
+                }}
+                error={formik.touched.cgId && Boolean(formik.errors.cgId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
                 endpointId={RemittanceSettingsRepository.Interface.qry}
                 name='interfaceId'
                 label={labels.interface}
@@ -182,6 +228,42 @@ const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore,
                   formik.setFieldValue('interfaceId', newValue?.recordId)
                 }}
                 error={formik.touched.interfaceId && Boolean(formik.errors.interfaceId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={MultiCurrencyRepository.RateType.qry}
+                name='owRateTypeId'
+                label={labels.owRateType}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('owRateTypeId', newValue?.recordId)
+                }}
+                error={formik.touched.owRateTypeId && Boolean(formik.errors.owRateTypeId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={MultiCurrencyRepository.RateType.qry}
+                name='iwRateTypeId'
+                label={labels.iwRateType}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('iwRateTypeId', newValue?.recordId)
+                }}
+                error={formik.touched.iwRateTypeId && Boolean(formik.errors.iwRateTypeId)}
               />
             </Grid>
             <Grid item xs={12}>

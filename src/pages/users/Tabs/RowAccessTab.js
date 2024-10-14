@@ -169,7 +169,15 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
   }, [storeRecordId])
 
   return (
-    <FormShell resourceId={ResourceIds.Users} form={formik} maxAccess={maxAccess} editMode={!!storeRecordId}>
+    <FormShell
+      resourceId={ResourceIds.Users}
+      form={formik}
+      maxAccess={maxAccess}
+      editMode={!!storeRecordId}
+      isSavedClear={false}
+      isCleared={false}
+      infoVisible={false}
+    >
       <VertLayout>
         <Fixed>
           <Grid item xs={6}>

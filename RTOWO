@@ -1,0 +1,9 @@
+[REM-598 b2d29c87] RTOW-
+ 15 files changed, 118 insertions(+), 402 deletions(-)
+ rename src/pages/{outwards-transfer => outwards-order}/Tabs/InfoForm.js (98%)
+ rename src/pages/{outwards-transfer => outwards-order}/Tabs/InstantCash.js (100%)
+ rename src/pages/{outwards-transfer => outwards-order}/Tabs/OutwardsForm.js (84%)
+ rename src/pages/{outwards-transfer => outwards-order}/Tabs/TerraPay.js (100%)
+ rename src/pages/{outwards-transfer => outwards-order}/Windows/BeneficiaryListWindow.js (100%)
+ rename src/pages/{outwards-transfer => outwards-order}/Windows/ProductsWindow.js (100%)
+ rename src/pages/{outwards-transfer => outwards-order}/index.js (66%)

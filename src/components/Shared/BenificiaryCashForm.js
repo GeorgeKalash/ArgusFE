@@ -1,5 +1,5 @@
 import { Grid, FormControlLabel, Checkbox } from '@mui/material'
-import { useEffect, useState, useContext } from 'react'
+import { useEffect, useState, useContext, useRef } from 'react'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import * as yup from 'yup'
@@ -22,6 +22,7 @@ import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import FormGrid from 'src/components/form/layout/FormGrid'
+import { HIDDEN } from 'src/services/api/maxAccess'
 
 const BenificiaryCashForm = ({
   viewBtns = true,
@@ -31,12 +32,14 @@ const BenificiaryCashForm = ({
   submitted,
   setSubmitted,
   corId,
+  currencyId,
   countryId,
   editable = false,
   resetForm,
   setResetForm,
   onChange,
   setValidSubmit,
+  onSuccess,
   submitMainForm = true
 }) => {
   const [maxAccess, setMaxAccess] = useState({ record: [] })
@@ -44,6 +47,8 @@ const BenificiaryCashForm = ({
   const [editMode, setEditMode] = useState(beneficiary?.beneficiaryId && !editable)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [notArabic, setNotArabic] = useState(true)
+  const hiddenIsInActive = useRef(false)
+  const hiddenIsBlocked = useRef(false)
 
   const initialValues = {
     //RTBEN
@@ -54,12 +59,14 @@ const BenificiaryCashForm = ({
     dispersalType: dispersalType || '',
     nationalityId: null,
     isBlocked: false,
+    isInactive: false,
     stoppedDate: null,
     stoppedReason: '',
     gender: null,
     cobId: '',
     cellPhone: '',
     birthDate: null,
+    currencyId: currencyId || null,
     addressLine1: '',
     addressLine2: '',
     clientRef: client?.clientRef || '',
@@ -92,11 +99,12 @@ const BenificiaryCashForm = ({
       return errors
     },
     validationSchema: yup.object({
-      clientId: yup.string().required(' '),
-      countryId: yup.string().required(' '),
-      name: yup.string().required(' '),
-      firstName: yup.string().required(' '),
-      lastName: yup.string().required(' ')
+      clientId: yup.string().required(),
+      countryId: yup.string().required(),
+      name: yup.string().required(),
+      firstName: yup.string().required(),
+      lastName: yup.string().required(),
+      currencyId: yup.string().required()
     }),
     onSubmit: async values => {
       if (submitMainForm) {
@@ -107,11 +115,13 @@ const BenificiaryCashForm = ({
           name: values.name,
           dispersalType: values.dispersalType,
           isBlocked: values.isBlocked,
+          isInactive: values.isInactive,
           stoppedDate: values.stoppedDate ? formatDateToApi(values.stoppedDate) : null,
           stoppedReason: values.stoppedReason,
           nationalityId: values.nationalityId,
           cobId: values.cobId,
           birthDate: values.birthDate ? formatDateToApi(values.birthDate) : null,
+          currencyId: values.currencyId,
           cellPhone: values.cellPhone,
           addressLine1: values.addressLine1,
           addressLine2: values.addressLine2,
@@ -141,11 +151,10 @@ const BenificiaryCashForm = ({
           extension: RemittanceOutwardsRepository.BeneficiaryCash.set,
           record: JSON.stringify(data)
         })
-        if (res.recordId) {
-          toast.success('Record Updated Successfully')
-        }
 
         setEditMode(true)
+        toast.success('Record Updated Successfully')
+        if (onSuccess) onSuccess(res.recordId, values.name)
       }
     }
   })
@@ -153,12 +162,13 @@ const BenificiaryCashForm = ({
   const { labels: _labels } = useResourceQuery({
     datasetId: ResourceIds.BeneficiaryCash
   })
+
   useEffect(() => {
     ;(async function () {
       if (formik.values.countryId && dispersalType) {
         const qryCCL = await getRequest({
           extension: RemittanceSettingsRepository.CorrespondentControl.qry,
-          parameters: `_countryId=${formik.values.countryId}&_corId=${corId ?? 0}&_resourceId=${
+          parameters: `_countryId=${formik.values.countryId}&_corId=${corId || 0}&_resourceId=${
             ResourceIds.BeneficiaryCash
           }`
         })
@@ -166,6 +176,17 @@ const BenificiaryCashForm = ({
         const controls = { controls: qryCCL.list }
         const maxAccess = { record: controls }
         setMaxAccess(maxAccess)
+
+        const isInActiveAccessLevel = (maxAccess?.record?.controls ?? []).find(
+          ({ controlId }) => controlId === 'isInactive'
+        )
+
+        const isBlockedAccessLevel = (maxAccess?.record?.controls ?? []).find(
+          ({ controlId }) => controlId === 'isBlocked'
+        )
+
+        hiddenIsInActive.current = isInActiveAccessLevel?.accessLevel === HIDDEN
+        hiddenIsBlocked.current = isBlockedAccessLevel?.accessLevel === HIDDEN
       }
 
       if (beneficiary?.beneficiaryId && client?.clientId) {
@@ -190,12 +211,14 @@ const BenificiaryCashForm = ({
           dispersalType: dispersalType,
           nationalityId: RTBEN?.record?.nationalityId,
           isBlocked: RTBEN?.record?.isBlocked,
+          isInactive: RTBEN?.record?.isInactive,
           stoppedDate: RTBEN?.record?.stoppedDate && formatDateFromApi(RTBEN.record.stoppedDate),
           stoppedReason: RTBEN?.record?.stoppedReason,
           gender: RTBEN?.record?.gender,
           cobId: RTBEN?.record?.cobId,
           cellPhone: RTBEN?.record?.cellPhone,
           birthDate: RTBEN?.record?.birthDate && formatDateFromApi(RTBEN.record.birthDate),
+          currencyId: RTBEN?.record.currencyId,
           addressLine1: RTBEN?.record?.addressLine1,
           addressLine2: RTBEN?.record?.addressLine2,
           clientRef: RTBEN?.record?.clientRef,
@@ -227,7 +250,6 @@ const BenificiaryCashForm = ({
       setResetForm(false)
     }
   }, [resetForm])
-
   useEffect(() => {
     const values = formik.values
 
@@ -238,11 +260,13 @@ const BenificiaryCashForm = ({
       name: values.name,
       dispersalType: values.dispersalType,
       isBlocked: values.isBlocked,
+      isInactive: values.isInactive,
       stoppedDate: values.stoppedDate ? formatDateToApi(values.stoppedDate) : null,
       stoppedReason: values.stoppedReason,
       nationalityId: values.nationalityId,
       cobId: values.cobId,
       birthDate: values.birthDate ? formatDateToApi(values.birthDate) : null,
+      currencyId: values.currencyId,
       cellPhone: values.cellPhone,
       addressLine1: values.addressLine1,
       addressLine2: values.addressLine2,
@@ -316,25 +340,41 @@ const BenificiaryCashForm = ({
 
   const splitName = name => {
     const nameParts = name.trim().split(/\s+/) // Split the name by whitespace
+    if (!editMode) {
+      if (nameParts.length === 2) {
+        return {
+          firstName: nameParts[0],
+          middleName: '',
+          lastName: nameParts[1],
+          familyName: ''
+        }
+      }
 
-    const firstName = nameParts.shift() || ''
-    const familyName = nameParts.pop() || ''
-    let middleName = ''
-    let lastName = ''
+      if (nameParts.length === 3) {
+        return {
+          firstName: nameParts[0],
+          middleName: nameParts[1],
+          lastName: nameParts[2],
+          familyName: ''
+        }
+      }
 
-    if (nameParts.length > 0) {
-      // If there are remaining parts after extracting first and last words
-      if (nameParts.length === 1) {
-        // If only one remaining part, assign it to middleName
-        middleName = nameParts[0]
-      } else {
-        // Otherwise, split remaining parts into middleName and lastName
-        middleName = nameParts.slice(0, -1).join(' ')
-        lastName = nameParts.slice(-1)[0]
+      if (nameParts.length > 3) {
+        const firstName = nameParts.shift()
+        const familyName = nameParts.pop()
+        const middleName = nameParts.slice(0, -1).join(' ') || ''
+        const lastName = nameParts[nameParts.length - 1] || ''
+
+        return { firstName, middleName, lastName, familyName }
+      }
+
+      return {
+        firstName: nameParts[0] || '',
+        middleName: '',
+        lastName: '',
+        familyName: ''
       }
     }
-
-    return { firstName, middleName, lastName, familyName }
   }
 
   return (
@@ -342,7 +382,6 @@ const BenificiaryCashForm = ({
       resourceId={ResourceIds.BeneficiaryCash}
       form={formik}
       editMode={editMode}
-      setEditMode={setEditMode}
       maxAccess={maxAccess}
       disabledSubmit={editMode}
       isCleared={viewBtns}
@@ -399,8 +438,10 @@ const BenificiaryCashForm = ({
                   displayField={['reference', 'name']}
                   columnsInDropDown={[
                     { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
+                    { key: 'name', value: 'Name' },
+                    { key: 'flName', value: 'Foreign Language Name' }
                   ]}
+                  displayFieldWidth={0.8}
                   readOnly={(formik.values.countryId && editMode) || countryId || editMode}
                   values={formik.values}
                   onChange={(event, newValue) => {
@@ -421,7 +462,7 @@ const BenificiaryCashForm = ({
                 required
                 onChange={formik.handleChange}
                 onBlur={e => {
-                  constructNameField(formik.values)
+                  !editMode && constructNameField(formik.values)
                 }}
                 error={formik.touched.name && Boolean(formik.errors.name)}
                 maxAccess={maxAccess}
@@ -559,27 +600,14 @@ const BenificiaryCashForm = ({
                 />
               </FormGrid>
               <FormGrid hideonempty xs={12}>
-                <ResourceComboBox
-                  endpointId={SystemRepository.Country.qry}
-                  name='nationalityId'
-                  label={_labels.country}
-                  valueField='recordId'
-                  displayField={['reference', 'name', 'flName']}
-                  columnsInDropDown={[
-                    { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' },
-                    { key: 'flName', value: 'Foreign Language Name' }
-                  ]}
-                  values={formik.values}
-                  displayFieldWidth={1.25}
-                  onChange={(event, newValue) => {
-                    if (newValue) {
-                      formik.setFieldValue('nationalityId', newValue?.recordId)
-                    } else {
-                      formik.setFieldValue('nationalityId', '')
-                    }
-                  }}
-                  error={formik.touched.nationalityId && Boolean(formik.errors.nationalityId)}
+                <CustomDatePicker
+                  name='birthDate'
+                  label={_labels.birthDate}
+                  value={formik.values?.birthDate}
+                  onChange={formik.setFieldValue}
+                  disabledDate={'>='}
+                  onClear={() => formik.setFieldValue('birthDate', '')}
+                  error={formik.touched.birthDate && Boolean(formik.errors.birthDate)}
                   maxAccess={maxAccess}
                   readOnly={editMode}
                 />
@@ -593,8 +621,10 @@ const BenificiaryCashForm = ({
                   displayField={['reference', 'name']}
                   columnsInDropDown={[
                     { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
+                    { key: 'name', value: 'Name' },
+                    { key: 'flName', value: 'Foreign Language Name' }
                   ]}
+                  displayFieldWidth={0.8}
                   values={formik.values}
                   onChange={(event, newValue) => {
                     formik.setFieldValue('cobId', newValue ? newValue.recordId : '')
@@ -646,20 +676,31 @@ const BenificiaryCashForm = ({
                 />
               </FormGrid>
             </Grid>
-            <Grid container rowGap={2} xs={6} spacing={2} sx={{ px: 2, pt: 2, height: '50%' }}>
+            <Grid container rowGap={2} xs={6} spacing={2} sx={{ px: 2, pt: 2 }}>
               <FormGrid hideonempty xs={12}>
-                <CustomDatePicker
-                  name='birthDate'
-                  label={_labels.birthDate}
-                  value={formik.values?.birthDate}
-                  onChange={formik.setFieldValue}
-                  disabledDate={'>='}
-                  onClear={() => formik.setFieldValue('birthDate', '')}
-                  error={formik.touched.birthDate && Boolean(formik.errors.birthDate)}
+                <ResourceComboBox
+                  endpointId={SystemRepository.Currency.qry}
+                  name='currencyId'
+                  label={_labels.currency}
+                  valueField='recordId'
+                  displayField={['reference', 'name']}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' },
+                    { key: 'flName', value: 'Foreign Language Name' }
+                  ]}
+                  displayFieldWidth={0.8}
+                  values={formik.values}
+                  required
+                  readOnly={(formik.values.currencyId && editMode) || currencyId || editMode}
                   maxAccess={maxAccess}
-                  readOnly={editMode}
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('currencyId', newValue?.recordId || null)
+                  }}
+                  error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
                 />
               </FormGrid>
+
               <FormGrid hideonempty xs={12}>
                 <ResourceComboBox
                   datasetId={DataSets.GENDER}
@@ -688,7 +729,7 @@ const BenificiaryCashForm = ({
                     { key: 'name', value: 'Name' },
                     { key: 'flName', value: 'Foreign Language Name' }
                   ]}
-                  displayFieldWidth={1.25}
+                  displayFieldWidth={0.8}
                   values={formik.values}
                   onChange={(event, newValue) => {
                     if (newValue) {
@@ -702,13 +743,24 @@ const BenificiaryCashForm = ({
                   readOnly={editMode}
                 />
               </FormGrid>
-              <FormGrid hideonempty xs={12} sx={{ position: 'relative', width: '100%' }}>
-                <FormControlLabel
-                  control={<Checkbox name='isBlocked' disabled={true} checked={formik.values?.isBlocked} />}
-                  label={_labels.isBlocked}
-                  maxAccess={maxAccess}
-                />
-              </FormGrid>
+              {!hiddenIsInActive.current && (
+                <FormGrid hideonempty xs={12} sx={{ position: 'relative', width: '100%' }}>
+                  <FormControlLabel
+                    control={<Checkbox name='isInactive' disabled={true} checked={formik.values?.isInactive} />}
+                    label={_labels.isInactive}
+                    maxAccess={maxAccess}
+                  />
+                </FormGrid>
+              )}
+              {!hiddenIsBlocked.current && (
+                <FormGrid hideonempty xs={12} sx={{ position: 'relative', width: '100%' }}>
+                  <FormControlLabel
+                    control={<Checkbox name='isBlocked' disabled={true} checked={formik.values?.isBlocked} />}
+                    label={_labels.isBlocked}
+                    maxAccess={maxAccess}
+                  />
+                </FormGrid>
+              )}
               <FormGrid hideonempty xs={12}>
                 <CustomDatePicker
                   name='stoppedDate'

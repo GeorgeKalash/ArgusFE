@@ -16,7 +16,7 @@ import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ControlContext } from 'src/providers/ControlContext'
 
-export default function MemosDtdForm({ labels, maxAccess, dtId, functionId }) {
+export default function MemosDtdForm({ labels, maxAccess, recordId, functionId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -26,9 +26,9 @@ export default function MemosDtdForm({ labels, maxAccess, dtId, functionId }) {
 
   const { formik } = useForm({
     initialValues: {
-      dtId: dtId,
+      dtId: '',
       plantId: '',
-      recordId: dtId
+      recordId: recordId || ''
     },
     maxAccess,
     enableReinitialize: true,
@@ -37,11 +37,12 @@ export default function MemosDtdForm({ labels, maxAccess, dtId, functionId }) {
       dtId: yup.string().required(' ')
     }),
     onSubmit: async obj => {
+      const recordId = obj.recordId
       await postRequest({
         extension: FinancialRepository.FIDocTypeDefaults.set,
         record: JSON.stringify(obj)
       })
-      if (!dtId) {
+      if (!recordId) {
         formik.setFieldValue('recordId', obj.dtId)
       }
 
@@ -55,13 +56,13 @@ export default function MemosDtdForm({ labels, maxAccess, dtId, functionId }) {
   useEffect(() => {
     ;(async function () {
       try {
-        if (dtId) {
+        if (recordId) {
           const res = await getRequest({
             extension: FinancialRepository.FIDocTypeDefaults.get,
-            parameters: `_dtId=${dtId}`
+            parameters: `_dtId=${recordId}`
           })
 
-          formik.setValues({ ...res.record, recordId: dtId })
+          formik.setValues({ ...res.record, recordId: recordId })
         }
       } catch (exception) {}
     })()

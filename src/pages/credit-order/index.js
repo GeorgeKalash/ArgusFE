@@ -1,63 +1,37 @@
-import { Box } from '@mui/material'
-import { useContext, useState } from 'react'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useContext } from 'react'
+import { useResourceQuery } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import Table from 'src/components/Shared/Table'
 import toast from 'react-hot-toast'
-import { formatDateDefault } from 'src/lib/date-helper'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { CTTRXrepository } from 'src/repositories/CTTRXRepository'
 import { useWindow } from 'src/windows'
-import { getFormattedNumber } from 'src/lib/numberField-helper'
-
-// ** Windows
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CreditOrderForm from './Forms/CreditOrderForm'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
+import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
+import { SystemFunction } from 'src/resources/SystemFunction'
+import { useError } from 'src/error'
+import { getStorageData } from 'src/storage/storage'
 
 const CreditOrder = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-
-  //states
-  const [windowOpen, setWindowOpen] = useState(false)
-  const [errorMessage, setErrorMessage] = useState(null)
-  const [plantId, setPlantId] = useState(null)
   const { stack } = useWindow()
-
-  const userData = window.sessionStorage.getItem('userData')
-    ? JSON.parse(window.sessionStorage.getItem('userData'))
-    : null
+  const { stack: stackError } = useError()
+  const userData = getStorageData('userData').userId
 
   const getPlantId = async () => {
-    const parameters = `_userId=${userData && userData.userId}&_key=plantId`
+    const res = await getRequest({
+      extension: SystemRepository.UserDefaults.get,
+      parameters: `_userId=${userData}&_key=plantId`
+    })
 
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.UserDefaults.get,
-        parameters: parameters
-      })
-
-      if (res.record.value) {
-        setPlantId(res.record.value)
-
-        return res.record.value
-      }
-
-      setPlantId('')
-
-      return ''
-    } catch (error) {
-      throw new Error(error)
-      setPlantId('')
-
-      return ''
-    }
+    return res?.record?.value
   }
 
   async function fetchGridData(options = {}) {
@@ -70,6 +44,7 @@ const CreditOrder = () => {
 
     return { ...response, _startAt: _startAt }
   }
+
   async function fetchWithSearch({ qry }) {
     return await getRequest({
       extension: CTTRXrepository.CreditOrder.snapshot,
@@ -84,7 +59,8 @@ const CreditOrder = () => {
     search,
     refetch,
     clear,
-    access
+    access,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: CTTRXrepository.CreditOrder.page,
@@ -95,39 +71,31 @@ const CreditOrder = () => {
     }
   })
 
-  const invalidate = useInvalidate({
-    endpointId: CTTRXrepository.CreditOrder.page
+  const { proxyAction } = useDocumentTypeProxy({
+    functionId: SystemFunction.CurrencyCreditOrderPurchase,
+    action: openForm,
+    hasDT: false
   })
 
-  const add = async () => {
-    const plantId = await getPlantId()
-    if (plantId !== '') {
-      openFormWindow(null, plantId)
-    } else {
-      throw new Error('The user does not have a default plant')
-    }
-  }
+  async function openForm(recordId) {
+    let plantId
 
-  async function openFormWindow(recordId) {
     if (!recordId) {
-      try {
-        const plantId = await getPlantId()
-        if (plantId !== '') {
-          openForm('', plantId)
-        } else {
-          throw new Error('The user does not have a default plant')
-        }
-      } catch (error) {}
-    } else {
-      openForm(recordId)
+      plantId = await getPlantId()
+      if (!plantId) {
+        stackError({
+          message: labels.defaultPlant
+        })
+
+        return
+      }
     }
-  }
-  function openForm(recordId, plantId) {
+
     stack({
       Component: CreditOrderForm,
       props: {
         labels,
-        maxAccess: access,
+        access,
         plantId: plantId,
         userData: userData,
         recordId
@@ -136,6 +104,14 @@ const CreditOrder = () => {
       height: 600,
       title: labels.creditOrder
     })
+  }
+
+  const add = async () => {
+    proxyAction()
+  }
+
+  const edit = obj => {
+    openForm(obj.recordId)
   }
 
   const del = async obj => {
@@ -171,7 +147,7 @@ const CreditOrder = () => {
               field: 'date',
               headerName: labels.date,
               flex: 1,
-              valueGetter: ({ row }) => formatDateDefault(row?.date)
+              type: 'date'
             },
             {
               field: 'plantRef',
@@ -191,7 +167,7 @@ const CreditOrder = () => {
               field: 'amount',
               headerName: labels.amount,
               flex: 1,
-              valueGetter: ({ row }) => getFormattedNumber(row?.amount)
+              type: 'number'
             },
             {
               field: 'rsName',
@@ -209,11 +185,9 @@ const CreditOrder = () => {
               flex: 1
             }
           ]}
-          gridData={data ?? { list: [] }}
+          gridData={data}
           rowId={['recordId']}
-          onEdit={obj => {
-            openFormWindow(obj.recordId, plantId)
-          }}
+          onEdit={edit}
           refetch={refetch}
           onDelete={del}
           isLoading={false}
@@ -223,7 +197,6 @@ const CreditOrder = () => {
           paginationType='api'
         />
       </Grow>
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </VertLayout>
   )
 }

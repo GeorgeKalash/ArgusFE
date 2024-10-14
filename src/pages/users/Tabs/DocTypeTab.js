@@ -102,6 +102,7 @@ const DocTypeTab = ({ labels, maxAccess, storeRecordId }) => {
       editMode={!!storeRecordId}
       isSaved={false}
       isCleared={false}
+      infoVisible={false}
       form={formik}
     >
       <VertLayout>

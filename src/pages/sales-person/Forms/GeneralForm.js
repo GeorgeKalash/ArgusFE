@@ -24,9 +24,6 @@ export default function ScheduleForm({ labels, maxAccess, recordId, editMode, se
     name: '',
     cellPhone: '',
     commissionPct: '',
-    userId: '',
-    userEmail: '',
-    username: '',
     plantId: '',
     sptId: '',
     targetType: ''
@@ -52,8 +49,8 @@ export default function ScheduleForm({ labels, maxAccess, recordId, editMode, se
         toast.success('Record Added Successfully')
         setSelectedRecordId(response.recordId)
         setInitialData({
-          ...obj, // Spread the existing properties
-          recordId: response.recordId // Update only the recordId field
+          ...obj,
+          recordId: response.recordId
         })
       } else toast.success('Record Edited Successfully')
       setEditMode(true)
@@ -157,29 +154,6 @@ export default function ScheduleForm({ labels, maxAccess, recordId, editMode, se
                 onClear={() => formik.setFieldValue('commissionPct', '')}
                 error={formik.touched.commissionPct && Boolean(formik.errors.commissionPct)}
                 helperText={formik.touched.commissionPct && formik.errors.commissionPct}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <ResourceLookup
-                endpointId={SystemRepository.Users.snapshot}
-                name='userId'
-                label={labels[5]}
-                valueField='username'
-                displayField='username'
-                secondDisplayField={false}
-                valueShow='username'
-                form={formik}
-                onChange={(event, newValue) => {
-                  if (newValue) {
-                    formik.setFieldValue('userId', newValue?.recordId)
-                    formik.setFieldValue('username', newValue?.username || '')
-                  } else {
-                    formik.setFieldValue('userId', null)
-                    formik.setFieldValue('username', null)
-                  }
-                }}
-                errorCheck={'userId'}
-                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>

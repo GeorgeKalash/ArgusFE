@@ -6,7 +6,6 @@ export function useResourceQuery({ endpointId, filter, datasetId, queryFn, searc
   const [searchValue, setSearchValue] = useState('')
   const [filters, setFilters] = useState(filter?.default || {})
   const [apiOption, setApiOption] = useState('')
-
   const isSearchMode = !!searchValue
 
   const isFilterMode =
@@ -22,7 +21,6 @@ export function useResourceQuery({ endpointId, filter, datasetId, queryFn, searc
 
   const query = useQuery({
     retry: false,
-    refetchOnWindowFocus: false,
     queryKey: [endpointId, searchValue, JSON.stringify(filters), apiOption],
     queryFn: isSearchMode
       ? ({ queryKey: [_, qry] }) =>
@@ -45,8 +43,8 @@ export function useResourceQuery({ endpointId, filter, datasetId, queryFn, searc
     access,
     labels,
     query: query,
-    search(query) {
-      setSearchValue(query)
+    search(value) {
+      setSearchValue(value)
     },
     filterBy(name, value) {
       setFilters({

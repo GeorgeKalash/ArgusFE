@@ -9,41 +9,40 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
-import { formatDateDefault } from 'src/lib/date-helper'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const Characteristics = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
-
-  //control
 
   const {
     query: { data },
-    labels : _labels,
+    labels: _labels,
     paginationParameters,
     invalidate,
     refetch,
     access
   } = useResourceQuery({
-     queryFn: fetchGridData,
-     endpointId: DocumentReleaseRepository.CharacteristicsGeneral.qry,
-     datasetId: ResourceIds.Characteristics,
-   })
+    queryFn: fetchGridData,
+    endpointId: DocumentReleaseRepository.CharacteristicsGeneral.qry,
+    datasetId: ResourceIds.Characteristics
+  })
 
-  async function fetchGridData(options={}) {
+  async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}`
     var parameters = defaultParams
 
-     const response =  await getRequest({
+    const response = await getRequest({
       extension: DocumentReleaseRepository.CharacteristicsGeneral.qry,
       parameters: parameters
     })
 
-    return {...response,  _startAt: _startAt}
+    return { ...response, _startAt: _startAt }
   }
 
   const columns = [
@@ -60,7 +59,7 @@ const Characteristics = () => {
     {
       field: 'validFrom',
       headerName: _labels.validFrom,
-      valueGetter: ({ row }) => formatDateDefault(row?.validFrom),
+      type: 'date',
       flex: 1
     }
   ]
@@ -69,24 +68,23 @@ const Characteristics = () => {
     postRequest({
       extension: DocumentReleaseRepository.CharacteristicsGeneral.del,
       record: JSON.stringify(obj)
+    }).then(res => {
+      toast.success(platformLabels.Deleted)
+      invalidate()
     })
-      .then(res => {
-        toast.success('Record Deleted Successfully')
-        invalidate()
-      })
   }
 
   const addCharacteristics = () => {
-    openForm('')
+    openForm()
   }
 
-  function openForm (recordId){
+  function openForm(recordId) {
     stack({
       Component: CharacteristicsWindow,
       props: {
         labels: _labels,
-        recordId: recordId? recordId : null,
-        maxAccess: access,
+        recordId: recordId ? recordId : null,
+        maxAccess: access
       },
       width: 600,
       title: _labels.characteristics
@@ -94,7 +92,7 @@ const Characteristics = () => {
   }
 
   const popup = obj => {
-    openForm(obj?.recordId )
+    openForm(obj?.recordId)
   }
 
   return (

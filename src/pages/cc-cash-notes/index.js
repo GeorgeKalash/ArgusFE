@@ -11,11 +11,12 @@ import { useWindow } from 'src/windows'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { getFormattedNumber } from 'src/lib/numberField-helper'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const CcCashNotes = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const { platformLabels } = useContext(ControlContext)
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -57,7 +58,7 @@ const CcCashNotes = () => {
       field: 'note',
       headerName: labels.currencyNote,
       flex: 1,
-      valueGetter: ({ row }) => getFormattedNumber(row?.note)
+      type: 'number'
     }
   ]
 
@@ -66,25 +67,29 @@ const CcCashNotes = () => {
   }
 
   const popup = obj => {
-    openForm(obj?.currencyId, obj?.note)
+    openForm(obj)
   }
 
   const del = async obj => {
-    await postRequest({
-      extension: CashCountRepository.CcCashNotes.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success('Record Deleted Successfully')
+    try {
+      await postRequest({
+        extension: CashCountRepository.CcCashNotes.del,
+        record: JSON.stringify(obj)
+      })
+      invalidate()
+      toast.success(platformLabels.Deleted)
+    } catch (error) {}
   }
 
-  function openForm(currencyId, note) {
+  function openForm(record) {
     stack({
       Component: CcCashNotesForm,
       props: {
         labels: labels,
-        note: note ? note : null,
-        currencyId: currencyId ? currencyId : null,
+        record: record,
+        recordId: record
+          ? String(record.currencyId * 10) + record.note
+          : null,
         maxAccess: access
       },
       width: 600,

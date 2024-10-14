@@ -5,7 +5,12 @@ const service = 'GL.asmx/'
 export const GeneralLedgerRepository = {
   //IntegrationLogic
   IntegrationLogic: {
-    qry: service + 'qryIL'
+    qry: service + 'qryIL',
+    page: service + 'pageIL',
+    set: service + 'setIL',
+    get: service + 'getIL',
+    del: service + 'delIL',
+    snapshot: service + 'snapshotIL'
   },
 
   //CostCenter
@@ -22,7 +27,8 @@ export const GeneralLedgerRepository = {
     qry: service + 'qryIPT',
     get: service + 'getIPT',
     set: service + 'setIPT',
-    del: service + 'delIPT'
+    del: service + 'delIPT',
+    snapshot: service + 'snapshotIPT'
   },
   GLAccountGroups: {
     page: service + 'pageGRP',
@@ -52,6 +58,7 @@ export const GeneralLedgerRepository = {
     qry: service + 'qryJV',
     get: service + 'getJV',
     set: service + 'setJV',
+    post: service + 'postJV',
     del: service + 'delJV'
   },
   GeneralLedger: {
@@ -68,5 +75,17 @@ export const GeneralLedgerRepository = {
   },
   Account: {
     snapshot: service + 'snapshotAC'
+  },
+  IntegrationLogicDetails: {
+    qry: service + 'qryID',
+    page: service + 'pageID',
+    get: service + 'getID',
+    set: service + 'setID',
+    set2: service + 'set2ID',
+    del: service + 'delID'
+  },
+  IntegrationSystemFunction: {
+    qry: service + 'qryISF',
+    set2: service + 'set2ISF'
   }
 }

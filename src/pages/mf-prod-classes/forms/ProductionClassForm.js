@@ -39,8 +39,8 @@ export default function ProductionClassForm({
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      reference: yup.string().required('This field is required'),
-      name: yup.string().required('This field is required')
+      reference: yup.string().required(),
+      name: yup.string().required()
     }),
     onSubmit: async obj => {
       console.log(obj)
@@ -54,7 +54,7 @@ export default function ProductionClassForm({
       if (!recordId) {
         toast.success('Record Added Successfully')
         setInitialData({
-          ...obj, 
+          ...obj,
           recordId: response.recordId
         })
         setSelectedRecordId(response.recordId)

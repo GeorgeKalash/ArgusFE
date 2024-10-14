@@ -22,6 +22,9 @@ import { useFormik } from 'formik'
 import { AuthContext } from 'src/providers/AuthContext'
 import { formatDateToApi, formatDateToApiFunction } from 'src/lib/date-helper'
 import { getRate, DIRTYFIELD_AMOUNT, DIRTYFIELD_BASE_AMOUNT, DIRTYFIELD_RATE } from 'src/utils/RateCalculator'
+import { Grow } from './Layouts/Grow'
+import { Fixed } from './Layouts/Fixed'
+import { VertLayout } from './Layouts/VertLayout'
 
 const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -65,6 +68,7 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
         currencyId: '',
         sign: '',
         signName: '',
+        sourceReference: '',
         notes: '',
         functionId: functionId,
         exRate: '',
@@ -100,7 +104,7 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
     onSubmit: async values => {
       {
         const data = {
-          transactions: values.generalAccount.map(({ id, exRate, tpAccount, functionId, ...rest }) => ({
+          transactions: values.generalAccount.map(({ id, tpAccount, functionId, ...rest }) => ({
             seqNo: id,
             ...rest
           })),
@@ -131,10 +135,15 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
     labels: _labels,
     access
   } = useResourceQuery({
-    queryFn: fetchGridData,
+    filter: {
+      filterFn: fetchGridData,
+      default: { functionId }
+    },
 
     datasetId: ResourceIds.GeneralLedger
   })
+
+  const isRaw = formValues.status == 1
 
   useEffect(() => {
     if (formik2 && formik2.values && formik2.values.generalAccount && Array.isArray(formik2.values.generalAccount)) {
@@ -146,16 +155,17 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
         return isNaN(number) ? 0 : number
       }
 
-      const baseCredit = generalAccountData.reduce((acc, curr) => {
+      const baseCreditAmount = generalAccountData.reduce((acc, curr) => {
         return curr.sign == '2' ? acc + parseNumber(curr.baseAmount) : acc
       }, 0)
+      const baseCredit = parseFloat(baseCreditAmount).toFixed(2)
 
-      const baseDebit = generalAccountData.reduce((acc, curr) => {
+      const baseDebitAmount = generalAccountData.reduce((acc, curr) => {
         return curr.sign == '1' ? acc + parseNumber(curr.baseAmount) : acc
       }, 0)
+      const baseDebit = parseFloat(baseDebitAmount).toFixed(2)
 
-      const baseBalance = baseDebit - baseCredit
-
+      const baseBalance = parseFloat((baseDebit - baseCredit).toFixed(2))
       setBaseGridData({
         base: 'Base',
         credit: baseCredit,
@@ -217,12 +227,12 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
         costCenterId: row.costCenterId,
         costCenterRef: row.costCenterRef,
         costCenterName: row.costCenterName,
-
         currencyRef: row.currencyRef,
         currencyId: row.currencyId,
 
         sign: row.sign,
         signName: row.signName,
+        sourceReference: row.sourceReference,
         notes: row.notes,
         exRate: row.exRate,
         rateCalcMethod: row.rateCalcMethod,
@@ -276,43 +286,51 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
     return Math.floor(functionId / 100)
   }
 
-  function getCurrencyApi(_currencyId) {
-    const _rateDivision = getRateDivision(functionId)
+  async function getCurrencyApi(_currencyId) {
+    try {
+      const _rateDivision = getRateDivision(functionId)
 
-    return getRequest({
-      extension: MultiCurrencyRepository.Currency.get,
-      parameters: `_currencyId=${_currencyId}&_date=${formatDateToApiFunction(
-        formValues.date
-      )}&_rateDivision=${_rateDivision}`
-    })
+      const response = await getRequest({
+        extension: MultiCurrencyRepository.Currency.get,
+        parameters: `_currencyId=${_currencyId}&_date=${formatDateToApiFunction(
+          formValues.date
+        )}&_rateDivision=${_rateDivision}`
+      })
+
+      return response
+    } catch (error) {}
   }
 
   return (
     <FormShell
-      resourceId={ResourceIds.GeneralLedger}
+      resourceId={ResourceIds.JournalVoucher}
       form={formik2}
       maxAccess={access}
-      disabledSubmit={baseGridData.balance !== 0}
+      disabledSubmit={baseGridData.balance !== 0 || !isRaw}
       infoVisible={false}
+      previewReport={true}
     >
-        {formik && (
-          <Grid container spacing={2} padding={1}>
-            <Grid item xs={12} sm={6}>
-              <CustomTextField name='reference' label={_labels.reference} value={formik.reference} readOnly={true} />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <CustomDatePicker name='date' label={_labels.date} value={formik.date} readOnly={true} />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <CustomTextField name='currency' label={_labels.currency} value={formik.currencyRef} readOnly={true} />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <CustomTextField name='notes' label={_labels.notes} value={formik.notes} readOnly={true} />
-            </Grid>
+      {formik && (
+        <Grid container spacing={2} padding={1}>
+          <Grid item xs={12} sm={6}>
+            <CustomTextField name='reference' label={_labels.reference} value={formik.reference} readOnly={true} />
           </Grid>
-        )}
+          <Grid item xs={12} sm={6}>
+            <CustomDatePicker name='date' label={_labels.date} value={formik.date} readOnly={true} />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <CustomTextField name='currency' label={_labels.currency} value={formik.currencyRef} readOnly={true} />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <CustomTextField name='notes' label={_labels.notes} value={formik.notes} readOnly={true} />
+          </Grid>
+        </Grid>
+      )}
+      <Grow>
         <DataGrid
           onChange={value => formik2.setFieldValue('generalAccount', value)}
+          allowDelete={!!isRaw}
+          allowAddNewLine={!!isRaw}
           value={formik2.values.generalAccount}
           error={formik2.errors.generalAccount}
           name='glTransactions'
@@ -329,6 +347,8 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
                 parameters: '_type=',
                 valueField: 'recordId',
                 displayField: 'accountRef',
+                readOnly: !isRaw,
+
                 columnsInDropDown: [
                   { key: 'accountRef', value: 'reference' },
                   { key: 'name', value: 'name' }
@@ -348,12 +368,12 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
                     exRate: exRateValue
                   })
 
-                  if (newRow.currencyId) {
-                    const result = await getCurrencyApi(newRow?.currencyId)
+                  if (formValues.currencyId) {
+                    const result = await getCurrencyApi(formValues.currencyId)
 
-                    const result2 = result.record
-                    const exRate = exRateValue
-                    const rateCalcMethod = result2.rateCalcMethod
+                    const result2 = result?.record
+                    const exRate = result2?.exRate
+                    const rateCalcMethod = result2?.rateCalcMethod
 
                     const updatedRateRow = getRate({
                       amount: newRow?.amount,
@@ -374,7 +394,10 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
             {
               component: 'textfield',
               label: _labels.accountName,
-              name: 'accountName'
+              name: 'accountName',
+              props: {
+                readOnly: true
+              }
             },
             {
               component: 'resourcelookup',
@@ -385,6 +408,7 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
                 valueField: 'recordId',
                 displayField: 'reference',
                 displayFieldWidth: 3,
+                readOnly: !isRaw,
                 columnsInDropDown: [
                   { key: 'reference', value: 'reference' },
                   { key: 'name', value: 'name' }
@@ -399,15 +423,20 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
             {
               component: 'textfield',
               label: _labels.thirdPartyName,
+              props: {
+                readOnly: true
+              },
               name: 'tpAccountName'
             },
             {
               component: 'resourcelookup',
               label: _labels.costRef,
               name: 'costCenterRef',
+
               props: {
                 endpointId: GeneralLedgerRepository.CostCenter.snapshot,
                 valueField: 'recordId',
+                readOnly: !isRaw,
                 displayField: 'reference',
                 displayFieldWidth: 3,
                 columnsInDropDown: [
@@ -424,6 +453,9 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
             {
               component: 'textfield',
               label: _labels.costName,
+              props: {
+                readOnly: true
+              },
               name: 'costCenterName'
             },
             {
@@ -433,6 +465,7 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
               props: {
                 endpointId: SystemRepository.Currency.qry,
                 displayField: 'reference',
+                readOnly: !isRaw,
                 valueField: 'recordId',
                 mapping: [
                   { from: 'reference', to: 'currencyRef' },
@@ -444,11 +477,12 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
                 if (!newRow?.currencyId) {
                   return
                 }
-                if (newRow.currencyId) {
+
+                try {
                   const result = await getCurrencyApi(newRow?.currencyId)
-                  const result2 = result.record
-                  const exRate = result2.exRate
-                  const rateCalcMethod = result2.rateCalcMethod
+                  const result2 = result?.record
+                  const exRate = result2?.exRate
+                  const rateCalcMethod = result2?.rateCalcMethod
 
                   if (newRow?.amount) {
                     const amount =
@@ -467,7 +501,7 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
                     exRate: exRate,
                     rateCalcMethod: rateCalcMethod
                   })
-                }
+                } catch (error) {}
               }
             },
             {
@@ -476,6 +510,7 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
               name: 'signName',
               props: {
                 datasetId: DataSets.Sign,
+                readOnly: !isRaw,
                 displayField: 'value',
                 valueField: 'key',
                 mapping: [
@@ -486,12 +521,27 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
             },
             {
               component: 'textfield',
+              label: _labels.sourceReference,
+              name: 'sourceReference',
+              props: {
+                maxLength: 20,
+                readOnly: !isRaw
+              }
+            },
+            {
+              component: 'textfield',
               label: _labels.notes,
-              name: 'notes'
+              name: 'notes',
+              props: {
+                readOnly: !isRaw
+              }
             },
             {
               component: 'numberfield',
               label: _labels.exRate,
+              props: {
+                readOnly: !isRaw
+              },
               name: 'exRate',
               async onChange({ row: { update, oldRow, newRow } }) {
                 const updatedRateRow = getRate({
@@ -511,6 +561,9 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
             {
               component: 'numberfield',
               label: _labels.amount,
+              props: {
+                readOnly: !isRaw
+              },
               name: 'amount',
               async onChange({ row: { update, oldRow, newRow } }) {
                 const updatedRateRow = getRate({
@@ -530,6 +583,9 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
             {
               component: 'numberfield',
               label: _labels.baseAmount,
+              props: {
+                readOnly: !isRaw
+              },
               name: 'baseAmount',
               async onChange({ row: { update, oldRow, newRow } }) {
                 const updatedRateRow = getRate({
@@ -548,31 +604,30 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
             }
           ]}
         />
-
-        <Grid container spacing={2}>
-          <Grid item xs={6}>
+      </Grow>
+      <Fixed>
+        <Grid container sx={{ flex: 1 }}>
+          <Grid item xs={6} height={150} sx={{ display: 'flex', flex: 1 }}>
             <Table
               gridData={{ count: 1, list: [baseGridData] }}
               maxAccess={access}
-              height={150}
               columns={[
-                { field: 'base', headerName: _labels.base, flex: 1.5 },
-                { field: 'credit', headerName: _labels.credit, align: 'right', flex: 1.5 },
-                { field: 'debit', headerName: _labels.debit, align: 'right', flex: 1.5 },
-                { field: 'balance', headerName: _labels.balance, align: 'right', flex: 1.5 }
+                { field: 'base', headerName: _labels.base, flex: 1 },
+                { field: 'credit', headerName: _labels.credit, type: 'number', flex: 1 },
+                { field: 'debit', headerName: _labels.debit, type: 'number', flex: 1 },
+                { field: 'balance', headerName: _labels.balance, type: 'number', flex: 1 }
               ]}
               rowId={['seqNo']}
               pagination={false}
             />
           </Grid>
-          <Grid item xs={6}>
+          <Grid item xs={6} height={150} sx={{ display: 'flex', flex: 1 }}>
             <Table
-              height={150}
               columns={[
-                { field: 'currency', headerName: 'Currency', flex: 1.5 },
-                { field: 'debit', headerName: 'Debit', align: 'right', flex: 1.5 },
-                { field: 'credit', headerName: 'Credit', align: 'right', flex: 1.5 },
-                { field: 'balance', headerName: 'Balance', align: 'right', flex: 1.5 }
+                { field: 'currency', headerName: 'Currency', flex: 1 },
+                { field: 'debit', headerName: 'Debit', type: 'number', flex: 1 },
+                { field: 'credit', headerName: 'Credit', type: 'number', flex: 1 },
+                { field: 'balance', headerName: 'Balance', type: 'number', flex: 1 }
               ]}
               gridData={{ count: currencyGridData.length, list: currencyGridData }}
               rowId={['recordId']}
@@ -582,6 +637,7 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
             />
           </Grid>
         </Grid>
+      </Fixed>
     </FormShell>
   )
 }

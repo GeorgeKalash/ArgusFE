@@ -13,6 +13,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { useContext, useEffect } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ControlContext } from 'src/providers/ControlContext'
+import toast from 'react-hot-toast'
 
 const DefaultsTab = ({ labels, maxAccess, storeRecordId }) => {
   const editMode = !!storeRecordId
@@ -30,9 +31,7 @@ const DefaultsTab = ({ labels, maxAccess, storeRecordId }) => {
       cashAccountRef: '',
       cashAccountName: ''
     },
-    onSubmit: obj => {
-      const fields = ['cashAccountId', 'plantId', 'siteId', 'spId']
-
+    onSubmit: async obj => {
       const postField = async field => {
         const request = {
           key: field,
@@ -44,7 +43,11 @@ const DefaultsTab = ({ labels, maxAccess, storeRecordId }) => {
           record: JSON.stringify(request)
         })
       }
-      fields.forEach(postField)
+
+      const fields = ['cashAccountId', 'plantId', 'siteId', 'spId'].map(postField)
+
+      await Promise.all(fields)
+
       toast.success(platformLabels.Updated)
     }
   })
@@ -105,7 +108,15 @@ const DefaultsTab = ({ labels, maxAccess, storeRecordId }) => {
   }, [storeRecordId])
 
   return (
-    <FormShell resourceId={ResourceIds.Users} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell
+      resourceId={ResourceIds.Users}
+      form={formik}
+      maxAccess={maxAccess}
+      editMode={editMode}
+      isSavedClear={false}
+      isCleared={false}
+      infoVisible={false}
+    >
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -145,6 +156,9 @@ const DefaultsTab = ({ labels, maxAccess, storeRecordId }) => {
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('plantId', newValue ? newValue.recordId : '')
+                  formik.setFieldValue('cashAccountId', '')
+                  formik.setFieldValue('cashAccountRef', '')
+                  formik.setFieldValue('cashAccountName', '')
                 }}
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
               />
@@ -157,6 +171,7 @@ const DefaultsTab = ({ labels, maxAccess, storeRecordId }) => {
                   _startAt: 0,
                   _type: 0
                 }}
+                filter={formik.values.plantId && { plantId: formik.values.plantId }}
                 name='cashAccountId'
                 label={labels.cashAccount}
                 valueField='accountNo'

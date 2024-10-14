@@ -1,11 +1,9 @@
-import { useState, useContext } from 'react'
-import { Box } from '@mui/material'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { getFormattedNumberMax } from 'src/lib/numberField-helper'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -31,8 +29,19 @@ const Countries = () => {
     return { ...response, _startAt: _startAt }
   }
 
+  async function fetchWithSearch({ qry }) {
+    const response = await getRequest({
+      extension: SystemRepository.Country.snapshot,
+      parameters: `_filter=${qry}`
+    })
+
+    return response
+  }
+
   const {
     query: { data },
+    search,
+    clear,
     labels: _labels,
     paginationParameters,
     refetch,
@@ -40,7 +49,10 @@ const Countries = () => {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: SystemRepository.Country.page,
-    datasetId: ResourceIds.Countries
+    datasetId: ResourceIds.Countries,
+    search: {
+      searchFn: fetchWithSearch
+    }
   })
 
   const invalidate = useInvalidate({
@@ -78,8 +90,7 @@ const Countries = () => {
       headerName: _labels.ibanLength,
       flex: 1,
       align: 'right',
-
-      valueGetter: ({ row }) => getFormattedNumberMax(row?.ibanLength, 5, 0)
+      type: 'number'
     }
   ]
 
@@ -117,12 +128,13 @@ const Countries = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <GridToolbar onAdd={add} maxAccess={access} onSearch={search} onSearchClear={clear} labels={_labels} inputSearch={true} />
       </Fixed>
       <Grow>
         <Table
           columns={columns}
           gridData={data}
+          fetchGridData={fetchGridData}
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}

@@ -22,7 +22,6 @@ import { useForm } from 'src/hooks/form'
 const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, maxAccess: access }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId: pId } = store
-  const [type, setType] = useState('')
   const { platformLabels } = useContext(ControlContext)
 
   const { maxAccess, changeDT } = useDocumentType({
@@ -34,14 +33,13 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
     recordId: null,
     name: null,
     reference: null,
-    type: null,
-    functionId: null,
     corId: null,
     corName: null,
     corRef: null,
     languages: null,
     valueDays: null,
     commissionBase: null,
+    accessLevel: null,
     interfaceId: null,
     posMsg: null,
     posMsgIsActive: false,
@@ -49,10 +47,8 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
   })
 
   const invalidate = useInvalidate({
-    endpointId: RemittanceSettingsRepository.Correspondent.qry
+    endpointId: RemittanceSettingsRepository.ProductMaster.qry
   })
-  console.log('maxAccess')
-  console.log(maxAccess)
 
   const { formik } = useForm({
     maxAccess,
@@ -60,22 +56,19 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required(' '),
-      type: yup.string().required(' '),
-      functionId: yup.string().required(' '),
-      interfaceId: yup.string().required(' '),
-      commissionBase: yup.string().required(' '),
-      isInactive: yup.string().required(' '),
-      corId: type === '1' ? yup.string().required(' ') : yup.string().notRequired()
+      name: yup.string().required(),
+      commissionBase: yup.string().required(),
+      isInactive: yup.string().required(),
+      accessLevel: yup.string().required()
     }),
-    onSubmit: values => {
-      postProductMaster(values)
+    onSubmit: async values => {
+      await postProductMaster(values)
     }
   })
 
-  const postProductMaster = obj => {
+  const postProductMaster = async obj => {
     const recordId = obj.recordId
-    postRequest({
+    await postRequest({
       extension: RemittanceSettingsRepository.ProductMaster.set,
       record: JSON.stringify(obj)
     })
@@ -161,37 +154,6 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
                 />
               </Grid>
               <Grid item xs={12}>
-                <ResourceComboBox
-                  name='type'
-                  label={labels.type}
-                  datasetId={DataSets.RT_Product_Type}
-                  valueField='key'
-                  displayField='value'
-                  values={formik.values}
-                  required
-                  onChange={(event, newValue) => {
-                    formik && formik.setFieldValue('type', newValue?.key)
-                    setType(newValue?.key)
-                  }}
-                  error={formik.touched.type && Boolean(formik.errors.type)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <ResourceComboBox
-                  name='functionId'
-                  label={labels.function}
-                  datasetId={DataSets.RT_Function}
-                  valueField='key'
-                  displayField='value'
-                  values={formik.values}
-                  required
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('functionId', newValue?.key)
-                  }}
-                  error={formik.touched.functionId && Boolean(formik.errors.functionId)}
-                />
-              </Grid>
-              <Grid item xs={12}>
                 <CustomNumberField
                   name='valueDays'
                   label={labels.valueDays}
@@ -209,7 +171,6 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
                   endpointId={RemittanceSettingsRepository.Correspondent.snapshot}
                   label={labels.correspondent}
                   form={formik}
-                  required={formik.values.type === '1' ? true : false}
                   valueField='reference'
                   displayField='name'
                   firstValue={formik.values.corRef}
@@ -230,9 +191,6 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
                   maxAccess={maxAccess}
                 />
               </Grid>
-            </Grid>
-            {/* Second Column */}
-            <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
               <Grid item xs={12}>
                 <ResourceComboBox
                   datasetId={DataSets.RT_Language}
@@ -247,6 +205,9 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
                   error={formik.touched.languages && Boolean(formik.errors.languages)}
                 />
               </Grid>
+            </Grid>
+            {/* Second Column */}
+            <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
               <Grid item xs={12}>
                 <ResourceComboBox
                   endpointId={RemittanceSettingsRepository.Interface.qry}
@@ -255,7 +216,6 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
                   valueField='recordId'
                   displayField='name'
                   values={formik.values}
-                  required
                   onChange={(event, newValue) => {
                     formik.setFieldValue('interfaceId', newValue?.recordId)
                   }}
@@ -287,6 +247,21 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
                   onChange={formik.handleChange}
                   onClear={() => formik.setFieldValue('posMsg', '')}
                   error={formik.errors && Boolean(formik.errors.posMsg)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  datasetId={DataSets.RT_PROD_ACCESS_LEVEL}
+                  name='accessLevel'
+                  label={labels.accessLevel}
+                  required
+                  valueField='key'
+                  displayField='value'
+                  values={formik.values}
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('accessLevel', newValue?.key)
+                  }}
+                  error={formik.touched.accessLevel && Boolean(formik.errors.accessLevel)}
                 />
               </Grid>
               <Grid item xs={12}>

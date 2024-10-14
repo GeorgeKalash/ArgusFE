@@ -50,17 +50,18 @@ const CorrespondentCurrenciesForm = ({ store, labels, maxAccess, expanded, editM
           inward: false,
           bankDeposit: false,
           deal: false,
+          goc: false,
           isInactive: false,
           saved: false
         }
       ]
     },
-    onSubmit: values => {
-      postCorrespondentCurrencies(values)
+    onSubmit: async values => {
+      await postCorrespondentCurrencies(values)
     }
   })
 
-  const postCorrespondentCurrencies = obj => {
+  const postCorrespondentCurrencies = async obj => {
     const correspondentCurrencies = obj?.currencies?.map(({ corId, ...rest }) => ({
       corId: recordId,
       ...rest
@@ -70,7 +71,7 @@ const CorrespondentCurrenciesForm = ({ store, labels, maxAccess, expanded, editM
       corId: recordId,
       correspondentCurrencies: correspondentCurrencies
     }
-    postRequest({
+    await postRequest({
       extension: RemittanceSettingsRepository.CorrespondentCurrency.set2,
       record: JSON.stringify(data)
     })
@@ -122,6 +123,11 @@ const CorrespondentCurrenciesForm = ({ store, labels, maxAccess, expanded, editM
       component: 'checkbox',
       label: labels.deal,
       name: 'deal'
+    },
+    {
+      component: 'checkbox',
+      label: labels.consignation,
+      name: 'goc'
     },
     {
       component: 'checkbox',
@@ -181,6 +187,7 @@ const CorrespondentCurrenciesForm = ({ store, labels, maxAccess, expanded, editM
                   inward: false,
                   bankDeposit: false,
                   deal: false,
+                  goc: false,
                   isInactive: false,
                   saved: false
                 }
@@ -201,6 +208,7 @@ const CorrespondentCurrenciesForm = ({ store, labels, maxAccess, expanded, editM
       infoVisible={false}
       maxAccess={maxAccess}
       editMode={editMode}
+      isSavedClear={false}
     >
       <VertLayout>
         <Grow>

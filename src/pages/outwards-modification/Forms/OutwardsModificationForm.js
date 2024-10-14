@@ -17,7 +17,6 @@ import FieldSet from 'src/components/Shared/FieldSet'
 import BenificiaryCashForm from 'src/components/Shared/BenificiaryCashForm'
 import BenificiaryBankForm from 'src/components/Shared/BenificiaryBankForm'
 import toast from 'react-hot-toast'
-import { RTOWMRepository } from 'src/repositories/RTOWMRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
@@ -40,7 +39,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
   })
 
   const invalidate = useInvalidate({
-    endpointId: RTOWMRepository.OutwardsModification.page
+    endpointId: RemittanceOutwardsRepository.OutwardsModification.page
   })
 
   const { formik } = useForm({
@@ -55,6 +54,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
       ttNo: '',
       productName: '',
       clientId: '',
+      currencyId: '',
       clientRef: '',
       clientName: '',
       cellPhone: '',
@@ -97,7 +97,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
 
   async function getOutwardsModification(recordId) {
     return await getRequest({
-      extension: RTOWMRepository.OutwardsModification.get,
+      extension: RemittanceOutwardsRepository.OutwardsModification.get,
       parameters: `_recordId=${recordId}`
     })
   }
@@ -105,7 +105,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
   const onClose = async recId => {
     try {
       const res = await postRequest({
-        extension: RTOWMRepository.OutwardsModification.close,
+        extension: RemittanceOutwardsRepository.OutwardsModification.close,
         record: JSON.stringify({ recordId: recId })
       })
 
@@ -119,7 +119,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
   const onReopen = async () => {
     try {
       const res = await postRequest({
-        extension: RTOWMRepository.OutwardsModification.reopen,
+        extension: RemittanceOutwardsRepository.OutwardsModification.reopen,
         record: JSON.stringify({ recordId: formik.values.recordId })
       })
 
@@ -132,7 +132,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
   const onPost = async () => {
     try {
       const res = await postRequest({
-        extension: RTOWMRepository.OutwardsModification.post,
+        extension: RemittanceOutwardsRepository.OutwardsModification.post,
         record: JSON.stringify({
           recordId: formik.values.recordId
         })
@@ -161,7 +161,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
     setFieldValues(data)
 
     const res = await getRequest({
-      extension: RemittanceOutwardsRepository.OutwardsTransfer.get2,
+      extension: RemittanceOutwardsRepository.OutwardsOrder.get2,
       parameters: `_recordId=${data.outwardId}`
     })
 
@@ -172,6 +172,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
       amount: headerView.amount,
       productName: headerView.productName,
       clientId: headerView.clientId,
+      currencyId: headerView.currencyId,
       clientRef: headerView.clientRef,
       clientName: headerView.clientName,
       cellPhone: headerView.cellPhone,
@@ -261,7 +262,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
           }
 
           const res = await postRequest({
-            extension: RTOWMRepository.OutwardsModification.set2,
+            extension: RemittanceOutwardsRepository.OutwardsModification.set2,
             record: JSON.stringify(data)
           })
 
@@ -269,10 +270,12 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
           toast.success(actionMessage)
           await refetchForm(res.recordId)
           invalidate()
-
           !recordId && viewOTP(res.recordId)
         }
-      } catch (error) {}
+      } catch (error) {
+        setSubmitted(false)
+        setValidSubmit(false)
+      }
     })()
   }, [validSubmit])
 
@@ -323,7 +326,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
             </Grid>
             <Grid item xs={4} sx={{ pl: 1 }}>
               <ResourceLookup
-                endpointId={RemittanceOutwardsRepository.OutwardsTransfer.snapshot}
+                endpointId={RemittanceOutwardsRepository.OutwardsOrder.snapshot}
                 valueField='reference'
                 displayField='reference'
                 name='owRef'
@@ -394,10 +397,11 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
             </Grid>
             <Grid item xs={4} sx={{ pl: 1, pt: 2 }}>
               <ResourceLookup
-                endpointId={RemittanceOutwardsRepository.Beneficiary.snapshot}
+                endpointId={RemittanceOutwardsRepository.Beneficiary.snapshot2}
                 parameters={{
                   _clientId: formik.values.clientId,
-                  _dispersalType: formik.values.dispersalType
+                  _dispersalType: formik.values.dispersalType,
+                  _currencyId: formik.values.currencyId
                 }}
                 valueField='name'
                 displayField='name'
