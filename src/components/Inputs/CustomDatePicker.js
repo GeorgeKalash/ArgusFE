@@ -38,7 +38,7 @@ const CustomDatePicker = ({
   hidden = false,
   ...props
 }) => {
-  const inputRef = useRef(null) // Step 1: Create a ref for the input field
+  const inputRef = useRef(null)
 
   const dateFormat =
     window.localStorage.getItem('default') && JSON.parse(window.localStorage.getItem('default'))['dateFormat']
@@ -118,9 +118,8 @@ const CustomDatePicker = ({
         disabled={disabled}
         readOnly={_readOnly}
         clearable //bug from mui not working for now
-        shouldDisableDate={disabledDate && shouldDisableDate} // Enable this prop for date disabling
+        shouldDisableDate={disabledDate && shouldDisableDate}
         slotProps={{
-          // replacing clearable behaviour
           textField: {
             required: isRequired,
             size: size,
