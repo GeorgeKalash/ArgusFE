@@ -62,7 +62,7 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
         }
       }
     })()
-  }, [])
+  }, [recordId])
 
   async function fetchGridData() {
     if (formik.values.currencyId) {
