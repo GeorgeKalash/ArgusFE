@@ -39,37 +39,28 @@ import { getVatCalc } from 'src/utils/VatCalculator'
 import { getDiscValues, getFooterTotals, getSubtotal } from 'src/utils/FooterCalculator'
 import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
 import AddressFilterForm from 'src/components/Shared/AddressFilterForm'
+import { getStorageData } from 'src/storage/storage'
 
-export default function SalesOrderForm({
-  labels,
-  access: maxAccess,
-  siteId,
-  recordId,
-  defaultSalesTD,
-  currency,
-  plant,
-  salesPerson,
-  dtId,
-  window
-}) {
+export default function SalesOrderForm({ labels, access: maxAccess, recordId, currency, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
   const [cycleButtonState, setCycleButtonState] = useState({ text: '%', value: 2 })
   const [address, setAddress] = useState({})
+  const userId = getStorageData('userData').userId
 
   const [initialValues, setInitialData] = useState({
     recordId: recordId || null,
-    dtId: dtId ? parseInt(dtId) : null,
+    dtId: null,
     reference: '',
     date: new Date(),
     dueDate: new Date(),
-    plantId: plant ? parseInt(plant) : null,
+    plantId: null,
     clientId: '',
-    currencyId: currency ? parseInt(currency) : null,
+    currencyId: parseInt(currency),
     szId: '',
-    spId: salesPerson ? parseInt(salesPerson) : null,
-    siteId: siteId ? parseInt(siteId) : null,
+    spId: null,
+    siteId: null,
     description: '',
     status: 1,
     releaseStatus: '',
@@ -886,6 +877,60 @@ export default function SalesOrderForm({
     })
   }
 
+  async function getDefaultUserSite() {
+    const res = await getRequest({
+      extension: SystemRepository.UserDefaults.get,
+      parameters: `_userId=${userId}&_key=siteId`
+    })
+
+    return res?.record?.value
+  }
+
+  async function getDefaultPUSite() {
+    const res = await getRequest({
+      extension: SystemRepository.Defaults.get,
+      parameters: `_filter=&_key=PUSiteId`
+    })
+
+    return res?.record?.value
+  }
+
+  async function getDefaultSalesTD() {
+    const res = await getRequest({
+      extension: SystemRepository.Defaults.get,
+      parameters: `_filter=&_key=salesTD`
+    })
+
+    return res?.record?.value
+  }
+
+  async function getDefaultUserPlant() {
+    const res = await getRequest({
+      extension: SystemRepository.UserDefaults.get,
+      parameters: `_userId=${userId}&_key=plantId`
+    })
+
+    return res?.record?.value
+  }
+
+  async function getDefaultUserSP() {
+    const res = await getRequest({
+      extension: SystemRepository.UserDefaults.get,
+      parameters: `_userId=${userId}&_key=spId`
+    })
+
+    return res?.record?.value
+  }
+
+  async function getDefaultDT() {
+    const res = await getRequest({
+      extension: SystemRepository.UserFunction.get,
+      parameters: `_userId=${userId}&_functionId=${SystemFunction.SalesOrder}`
+    })
+
+    return res?.record?.dtId
+  }
+
   useEffect(() => {
     let shipAdd = ''
     const { name, street1, street2, city, phone, phone2, email1 } = address
@@ -906,6 +951,7 @@ export default function SalesOrderForm({
         await fillForm(soHeader, soItems)
         calcTotals(soItems?.list, soHeader?.record?.tdAmount)
       } else {
+        const defaultSalesTD = await getDefaultSalesTD()
         if (defaultSalesTD) {
           setCycleButtonState({ text: '%', value: 2 })
           formik.setFieldValue('tdType', 2)
@@ -913,6 +959,16 @@ export default function SalesOrderForm({
           setCycleButtonState({ text: '123', value: 1 })
           formik.setFieldValue('tdType', 1)
         }
+        const userDefaultSite = await getDefaultUserSite()
+        const userDefaultPUSite = await getDefaultPUSite()
+        const siteId = userDefaultSite ? userDefaultSite : userDefaultPUSite
+        const plant = await getDefaultUserPlant()
+        const salesPerson = await getDefaultUserSP()
+        const dtId = await getDefaultDT()
+        formik.setFieldValue('dtId', parseInt(dtId))
+        formik.setFieldValue('siteId', parseInt(siteId))
+        formik.setFieldValue('spId', parseInt(salesPerson))
+        formik.setFieldValue('plantId', parseInt(plant))
       }
     })()
   }, [])
