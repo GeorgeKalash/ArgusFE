@@ -553,14 +553,13 @@ export default function SalesOrderForm({
 
     formik.setValues({
       ...soHeader.record,
-      tdAmount:
+      currentDiscount:
         soHeader?.record?.tdType == 1 || soHeader?.record?.tdType == null
           ? soHeader?.record?.tdAmount
           : soHeader?.record?.tdPct,
       amount: parseFloat(soHeader?.record?.amount).toFixed(2),
       shipAddress: shipAdd,
       billAddress: billAdd,
-      currentDiscount: soHeader?.record?.tdAmount,
       items: modifiedList
     })
   }
