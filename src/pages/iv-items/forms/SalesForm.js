@@ -1,4 +1,4 @@
-import { useContext } from 'react'
+import { useContext, useState } from 'react'
 import { Grid } from '@mui/material'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -17,9 +17,10 @@ import { SaleRepository } from 'src/repositories/SaleRepository'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { DataSets } from 'src/resources/DataSets'
 
-const SalesForm = ({ labels, maxAccess, store, cId, plId, record, muId, editMode }) => {
+const SalesForm = ({ labels, maxAccess, store, cId, plId, record, muId }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const [editMode, setEditMode] = useState(!!record)
 
   const invalidate = useInvalidate({
     endpointId: SaleRepository.Sales.qry
@@ -68,6 +69,7 @@ const SalesForm = ({ labels, maxAccess, store, cId, plId, record, muId, editMode
       } else toast.success(platformLabels.Edited)
 
       formik.setValues(obj)
+      setEditMode(true)
 
       invalidate()
     }
@@ -96,6 +98,7 @@ const SalesForm = ({ labels, maxAccess, store, cId, plId, record, muId, editMode
           parameters: `_filter=`
         })
         formik.setFieldValue('plId', responsePriceLevel?.list[0]?.recordId)
+        console.log(formik.values, 'forkkkkk')
 
         const responsePriceType = await getRequest({
           extension: InventoryRepository.Items.pack
