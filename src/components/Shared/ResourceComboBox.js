@@ -16,6 +16,7 @@ export default function ResourceComboBox({
   value,
   reducer = res => res?.list,
   refresh,
+  setData,
   ...rest
 }) {
   const { store: data } = rest
@@ -63,6 +64,7 @@ export default function ResourceComboBox({
           })
         : await fetch({ datasetId, endpointId, parameters })
       setApiResponse(!!datasetId ? { list: data } : data)
+      if (typeof setData == 'function') setData(!!datasetId ? { list: data } : data)
       setIsLoading(false)
     }
   }
