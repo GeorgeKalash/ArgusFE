@@ -121,7 +121,6 @@ const OpenMultiCurrencyCashTransfer = () => {
       props: {
         labels: _labels,
         recordId: recordId,
-        plantId: formik.values.plantId,
         maxAccess: access
       },
       width: 500,
