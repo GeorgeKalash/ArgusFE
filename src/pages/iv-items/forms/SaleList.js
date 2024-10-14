@@ -64,13 +64,13 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
     })()
   }, [recordId])
 
-  console.log(formik.values, 'formik')
-
   async function fetchGridData() {
-    return await getRequest({
-      extension: SaleRepository.Sales.qry,
-      parameters: `&_itemId=${recordId}&_currencyId=${formik.values.currencyId || 0}`
-    })
+    if (recordId) {
+      return await getRequest({
+        extension: SaleRepository.Sales.qry,
+        parameters: `&_itemId=${recordId}&_currencyId=${formik.values.currencyId || 0}`
+      })
+    }
   }
 
   const {

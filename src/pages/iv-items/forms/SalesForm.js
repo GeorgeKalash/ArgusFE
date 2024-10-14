@@ -98,7 +98,6 @@ const SalesForm = ({ labels, maxAccess, store, cId, plId, record, muId }) => {
           parameters: `_filter=`
         })
         formik.setFieldValue('plId', responsePriceLevel?.list[0]?.recordId)
-        console.log(formik.values, 'forkkkkk')
 
         const responsePriceType = await getRequest({
           extension: InventoryRepository.Items.pack
