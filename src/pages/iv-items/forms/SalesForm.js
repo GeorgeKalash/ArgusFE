@@ -143,6 +143,25 @@ const SalesForm = ({ labels, maxAccess, store, cId, plId, record, muId }) => {
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
+                endpointId={InventoryRepository.MeasurementUnit.qry}
+                parameters={`_msId=${store._msId}`}
+                name='muId'
+                label={labels.measure}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('muId', newValue?.recordId || '')
+                }}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
                 endpointId={InventoryRepository.Currency.qry}
                 parameters={itemId ? `_itemId=${itemId}` : ''}
                 name='currencyId'
@@ -231,25 +250,6 @@ const SalesForm = ({ labels, maxAccess, store, cId, plId, record, muId }) => {
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('minPrice', '')}
                 error={formik.touched.minPrice && Boolean(formik.errors.minPrice)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <ResourceComboBox
-                endpointId={InventoryRepository.MeasurementUnit.qry}
-                parameters={`_msId=${store._msId}`}
-                name='muId'
-                label={labels.measure}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
-                values={formik.values}
-                valueField='recordId'
-                displayField={['reference', 'name']}
-                maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('muId', newValue?.recordId || '')
-                }}
               />
             </Grid>
           </Grid>

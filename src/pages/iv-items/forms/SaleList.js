@@ -100,6 +100,11 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
       flex: 1
     },
     {
+      field: 'muName',
+      headerName: labels.measure,
+      flex: 1
+    },
+    {
       field: 'ptName',
       headerName: labels.priceType,
       flex: 1
