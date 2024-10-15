@@ -101,6 +101,20 @@ const PhysicalCountItemDe = () => {
       .catch(error => {})
   }
 
+  const fillControllerStore = (stockCountId, siteId) => {
+    var parameters = `_stockCountId=${stockCountId}&_siteId=${siteId}`
+    getRequest({
+      extension: SCRepository.StockCountControllerTab.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        setControllerStore(res.list)
+
+        //enable import
+      })
+      .catch(error => {})
+  }
+
   const columns = [
     {
       field: 'sku',
@@ -234,8 +248,34 @@ const PhysicalCountItemDe = () => {
                 readOnly={formik.values.controllerId}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('siteId', newValue?.siteId)
+                  formik.setFieldValue('controllerId', '')
+
+                  if (!newValue) {
+                    setControllerStore([])
+                    setFilteredItems([])
+                    clearGrid()
+                  } else {
+                    fillControllerStore(formik.values.stockCountId, newValue?.recordId)
+                  }
                 }}
                 error={formik.touched.siteId && Boolean(formik.errors.siteId)}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={2}>
+              <ResourceComboBox
+                name='controllerId'
+                store={controllerStore}
+                label={_labels.controller}
+                valueField='controllerId'
+                displayField='controllerName'
+                values={formik.values}
+                required
+                readOnly={formik.values.controllerId}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('controllerId', newValue?.controllerId)
+                }}
+                error={formik.touched.controllerId && Boolean(formik.errors.controllerId)}
                 maxAccess={maxAccess}
               />
             </Grid>
