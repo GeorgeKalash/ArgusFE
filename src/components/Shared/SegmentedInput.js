@@ -1,11 +1,11 @@
 import InputMask from 'react-input-mask'
 import { FormControl, InputLabel, OutlinedInput } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
-import { CommonContext } from 'src/providers/CommonContext'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const SegmentedInput = ({ name, value, onChange, label, error, required, readOnly }) => {
   const [mask, setMask] = useState('')
-  const { defaultsData } = useContext(CommonContext)
+  const { defaultsData } = useContext(ControlContext)
 
   const handleInputChange = event => {
     if (!readOnly) {
