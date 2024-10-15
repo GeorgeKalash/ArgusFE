@@ -8,10 +8,12 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 import { RGFinancialRepository } from 'src/repositories/RGFinancialRepository'
+import { useError } from 'src/error'
 
 const FiAging = () => {
   const { getRequest } = useContext(RequestsContext)
   const [columns, setColumns] = useState([])
+  const { stack: stackError } = useError()
 
   async function fetchWithFilter({ filters }) {
     let defaultResponse = {
@@ -132,6 +134,11 @@ const FiAging = () => {
   })
 
   const onApply = ({ rpbParams }) => {
+    if (!rpbParams) {
+      stackError({
+        message: _labels.noParamsErrorMessage
+      })
+    }
     filterBy('params', rpbParams)
     refetch()
   }

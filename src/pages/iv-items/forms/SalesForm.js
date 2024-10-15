@@ -16,6 +16,7 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { DataSets } from 'src/resources/DataSets'
+import { SystemRepository } from 'src/repositories/SystemRepository'
 
 const SalesForm = ({ labels, maxAccess, store, cId, plId, record, muId }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -32,7 +33,7 @@ const SalesForm = ({ labels, maxAccess, store, cId, plId, record, muId }) => {
     maxAccess,
     initialValues: {
       itemId,
-      currencyId: cId,
+      currencyId: cId || '',
       plId: plId || '',
       priceType: '',
       muId: muId || 0,
@@ -146,6 +147,7 @@ const SalesForm = ({ labels, maxAccess, store, cId, plId, record, muId }) => {
                 endpointId={InventoryRepository.MeasurementUnit.qry}
                 parameters={`_msId=${store._msId}`}
                 name='muId'
+                readOnly={editMode}
                 label={labels.measure}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
@@ -162,21 +164,24 @@ const SalesForm = ({ labels, maxAccess, store, cId, plId, record, muId }) => {
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={InventoryRepository.Currency.qry}
-                parameters={itemId ? `_itemId=${itemId}` : ''}
+                endpointId={SystemRepository.Currency.qry}
                 name='currencyId'
                 label={labels.currency}
-                valueField='currencyId'
-                displayField={['currencyName']}
-                columnsInDropDown={[{ key: 'currencyName', value: 'Name' }]}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Currency Ref' },
+                  { key: 'name', value: 'Name' }
+                ]}
                 values={formik.values}
                 readOnly
                 required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('currencyId', newValue?.currencyId || '')
+                  formik && formik.setFieldValue('currencyId', newValue?.recordId)
                 }}
-                onClear={() => formik.setFieldValue('currencyId', '')}
+                error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
+                helperText={formik.touched.currencyId && formik.errors.currencyId}
               />
             </Grid>
 
