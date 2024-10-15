@@ -12,6 +12,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import ItemWindow from './window/ItemWindow'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
+import GridToolbar from 'src/components/Shared/GridToolbar'
 
 const IvItems = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -20,11 +21,11 @@ const IvItems = () => {
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50, params = [] } = options
+    const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
       extension: InventoryRepository.Items.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}&filter=&_sortField=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=&_params=`
     })
 
     return { ...response, _startAt: _startAt }
@@ -35,26 +36,29 @@ const IvItems = () => {
     labels: _labels,
     paginationParameters,
     refetch,
+    search,
+    clear,
     filterBy,
     clearFilter,
     access,
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: InventoryRepository.Items.snapshot,
+    endpointId: InventoryRepository.Items.qry,
     datasetId: ResourceIds.Items,
-    filter: {
-      filterFn: fetchWithFilter
+    search: {
+      endpointId: InventoryRepository.Items.snapshot,
+      searchFn: fetchWithSearch
     }
   })
 
-  async function fetchWithFilter({ filters, pagination }) {
-    if (filters.qry)
-      return await getRequest({
-        extension: InventoryRepository.Items.snapshot,
-        parameters: `_filter=${filters.qry}`
-      })
-    else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+  async function fetchWithSearch({ options = {}, qry }) {
+    const { _startAt = 0, _pageSize = 50 } = options
+
+    return await getRequest({
+      extension: InventoryRepository.Items.snapshot,
+      parameters: `_startAt=${_startAt}&_size=${_pageSize}&_filter=${qry}`
+    })
   }
 
   const columns = [
@@ -164,12 +168,11 @@ const IvItems = () => {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar
+        <GridToolbar
           onAdd={add}
           maxAccess={access}
-          onSearch={onSearch}
-          onClear={onClear}
-          reportName={'IVIT'}
+          onSearch={search}
+          onSearchClear={clear}
           labels={_labels}
           inputSearch={true}
           onApply={onApply}
