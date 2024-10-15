@@ -191,7 +191,7 @@ const GetDate = ({ field, formik, rpbParams }) => {
   }, [])
 
   return (
-    <Grid item xs={12} key={formik.values?.parameters?.[field.id]?.value}>
+    <Grid item xs={12} key={formik.values?.parameters?.[field.id]?.value ? true : false}>
       <CustomDatePicker
         name={`parameters[${field.id}]`}
         label={field.caption}
