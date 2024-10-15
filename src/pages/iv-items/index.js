@@ -60,7 +60,7 @@ const IvItems = () => {
       parameters: `_startAt=${_startAt}&_size=${_pageSize}&_filter=${qry}`
     })
 
-    return { ...response, _startAt: _startAt, _pageSize: _pageSize }
+    return { ...response, _startAt: _startAt }
   }
 
   const columns = [
