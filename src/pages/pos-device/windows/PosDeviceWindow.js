@@ -19,6 +19,15 @@ const PosDeviceWindow = () => {
     }
   ]
 
+  const cancelTransactionActions = [
+    {
+      key: 'Cancel Transaction',
+      condition: true,
+      onClick: async () => await posPaymentService.cancelPayment(),
+      disabled: responseData == null
+    }
+  ]
+
   console.log(responseData)
 
   const startTransactionActions = [
@@ -64,6 +73,10 @@ const PosDeviceWindow = () => {
       <Grid item xs={12} marginLeft={'1rem'} marginRight={'1rem'}>
         Start Transaction:
         <WindowToolbar actions={startTransactionActions} smallBox={true} />
+      </Grid>
+      <Grid item xs={12} marginLeft={'1rem'} marginRight={'1rem'}>
+        Cancel Transaction:
+        <WindowToolbar actions={cancelTransactionActions} smallBox={true} />
       </Grid>
     </Grid>
   )

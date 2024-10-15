@@ -16,12 +16,26 @@ class PosPaymentService {
     this.invokeTransactionStart(paymentData)
   }
 
+  async cancelPayment() {
+    try {
+      await axios.post(`${this.baseUrl}/api/pos/cancelTransaction`)
+      console.log('Transaction cancelled')
+    } catch (error) {
+      console.error('Error cancelling transaction:', error)
+    } finally {
+      this.resolvePamyent()
+    }
+  }
+
   resolvePamyent() {
     this.unsubscribeFromTransactionUpdates()
     this.stopConnection()
   }
 
   async isDeviceOnline() {
+    this.deviceConnected = true
+
+    return true
     try {
       const { data } = await axios.get(`${this.baseUrl}/api/Ingenico/checkDevice?_port=1`)
       this.deviceConnected = data.data
@@ -74,8 +88,13 @@ class PosPaymentService {
 
   async stopConnection() {
     if (this.connection) {
-      await this.connection.invoke('Stop_Connection')
-      console.log('Connection closed')
+      try {
+        await this.connection.invoke('Stop_Connection')
+        this.connection.stop()
+        console.log('Connection closed')
+      } catch (err) {
+        console.log('Error invoking Stop_Connection', err)
+      }
     }
   }
 }

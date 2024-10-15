@@ -318,5 +318,12 @@ export const getButtons = platformLabels => [
     color: '#A95C68',
     image: 'popup-window.png',
     main: false
+  },
+  {
+    key: 'Cancel Transaction',
+    label: platformLabels.CancelTransaction,
+    color: '#B9586C',
+    image: 'saveclear.png',
+    main: false
   }
 ]
