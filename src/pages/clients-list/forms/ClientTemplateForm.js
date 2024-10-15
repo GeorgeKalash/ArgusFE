@@ -790,7 +790,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                     required={true}
                     onChange={clientIndividualFormik.setFieldValue}
                     onClear={() => clientIndividualFormik.setFieldValue('birthDate', '')}
-                    focus={!editMode}
+                    autoFocus={!editMode}
                     disabledDate={'>='}
                     readOnly={editMode && !allowEdit && true}
                     error={clientIndividualFormik.touched.birthDate && Boolean(clientIndividualFormik.errors.birthDate)}

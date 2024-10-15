@@ -30,7 +30,6 @@ const CustomDatePicker = ({
   fullWidth = true,
   required = false,
   autoFocus = false,
-  focus = false,
   disabled = false,
   disabledDate = null,
   readOnly = false,
@@ -76,16 +75,11 @@ const CustomDatePicker = ({
   }
 
   useEffect(() => {
-    if (focus) {
-      setOpenDatePicker(true)
-    }
-  }, [focus])
-
-  useEffect(() => {
-    if (focus && openDatePicker && inputRef.current) {
+    if (autoFocus && inputRef.current) {
       inputRef.current.focus()
+      inputRef.current.select()
     }
-  }, [focus, openDatePicker])
+  }, [autoFocus, inputRef.current])
 
   const newDate = new Date(disabledRangeDate.date)
   newDate.setDate(newDate.getDate() + disabledRangeDate.day)
