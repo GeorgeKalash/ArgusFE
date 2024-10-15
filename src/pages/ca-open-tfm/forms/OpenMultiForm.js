@@ -13,7 +13,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 
-export default function OpenMultiForm({ labels, maxAccess, recordId, plId }) {
+export default function OpenMultiForm({ labels, maxAccess, recordId, plId, window }) {
   const { postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   console.log(plId, 'plantId2')
@@ -41,6 +41,7 @@ export default function OpenMultiForm({ labels, maxAccess, recordId, plId }) {
         record: JSON.stringify(obj)
       })
       toast.success(platformLabels.Submit)
+      window.close()
 
       invalidate()
     }
