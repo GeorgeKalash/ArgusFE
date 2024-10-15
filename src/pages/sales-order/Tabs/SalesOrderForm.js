@@ -306,7 +306,7 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
     },
     {
       component: 'textfield',
-      label: labels.measurementUnit,
+      label: labels.mu,
       name: 'muRef'
     },
     {
@@ -367,7 +367,7 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
     },
     {
       component: 'numberfield',
-      label: labels.mdAmount,
+      label: labels.markdown,
       name: 'mdAmount',
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
@@ -377,7 +377,7 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
     },
     {
       component: 'numberfield',
-      label: labels.sales,
+      label: labels.salesTrx,
       name: 'saTrx'
     },
     {
@@ -623,6 +623,8 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
   }
 
   async function getTaxDetails(taxId) {
+    if (!taxId) return
+
     const res = await getRequest({
       extension: FinancialRepository.TaxDetailPack.qry,
       parameters: `_taxId=${taxId}`
