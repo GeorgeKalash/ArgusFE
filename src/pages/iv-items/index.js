@@ -55,10 +55,12 @@ const IvItems = () => {
   async function fetchWithSearch({ options = {}, qry }) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    return await getRequest({
+    const response = await getRequest({
       extension: InventoryRepository.Items.snapshot,
       parameters: `_startAt=${_startAt}&_size=${_pageSize}&_filter=${qry}`
     })
+
+    return { ...response, _startAt: _startAt, _pageSize: _pageSize }
   }
 
   const columns = [
