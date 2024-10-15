@@ -86,7 +86,6 @@ const SalesForm = ({ labels, maxAccess, store, cId, plId, record, muId }) => {
           })
 
           formik.setValues(res?.record)
-          console.log(res.record, 'resssssssss')
         } catch (error) {}
       }
     })()
