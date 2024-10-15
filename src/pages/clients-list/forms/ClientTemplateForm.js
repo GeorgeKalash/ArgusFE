@@ -176,6 +176,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
   const invalidate = useInvalidate({
     endpointId: CTCLRepository.CtClientIndividual.snapshot
   })
+
   async function checkTypes(value) {
     if (!value) {
       clientIndividualFormik.setFieldValue('idtId', '')
@@ -308,7 +309,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
           //clientRemittance
           recordId: recordId,
           remittanceRecordId: obj.clientRemittance?.recordId,
-          otpVerified: editMode ? false : obj.clientRemittance?.otpVerified,
+          otpVerified: obj.clientRemittance?.otpVerified,
           govCellVerified: obj.clientRemittance?.govCellVerified,
           addressId: obj.clientRemittance?.addressId,
           batchId: obj.clientRemittance?.batchId,
@@ -426,7 +427,12 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     }
   })
 
-  const isClosed = clientIndividualFormik.values.status !== -1 && clientIndividualFormik.values.otpVerified
+  const isClosed = !(
+    editMode &&
+    clientIndividualFormik.values.status === -1 &&
+    !clientIndividualFormik.values.otpVerified
+  )
+
   const wip = clientIndividualFormik.values.wip === 2
 
   const postRtDefault = async obj => {
@@ -446,7 +452,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       addressId: null,
       cellPhone: obj.cellPhone,
       oldReference: obj.oldReference,
-      otp: obj.otpVerified,
+      otp: obj?.otp,
       plantId: clientIndividualFormik.values.plantId,
       createdDate: formatDateToApi(date.toISOString()),
       expiryDate: formatDateToApi(obj.expiryDate),
@@ -584,6 +590,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
           if (res) {
             toast.success(platformLabels.Edited)
             otpForm()
+            getClient(obj.recordId)
           }
         })
         .catch(error => {})
@@ -674,7 +681,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     },
     {
       key: 'Close',
-      condition: editMode && !isClosed,
+      condition: !isClosed,
       onClick: onClose,
       disabled: !editMode
     },
