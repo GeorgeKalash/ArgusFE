@@ -68,6 +68,7 @@ export default function OpenMultiForm({ labels, maxAccess, recordId, plId }) {
                 label={labels.cashAccount}
                 valueField='reference'
                 displayField='name'
+                filter={item => item.value.plantId == plId}
                 valueShow='cashAccountRef'
                 secondValueShow='cashAccountName'
                 form={formik}
