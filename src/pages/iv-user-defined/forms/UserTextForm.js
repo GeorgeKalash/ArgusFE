@@ -20,43 +20,43 @@ const UserTextForm = () => {
 
   const { formik } = useForm({
     initialValues: {
-      DimCount: '',
-      tpaDimension1: '',
-      tpaDimension2: '',
-      tpaDimension3: '',
-      tpaDimension4: '',
-      tpaDimension5: '',
-      tpaDimension6: '',
-      tpaDimension7: '',
-      tpaDimension8: '',
-      tpaDimension9: '',
-      tpaDimension10: '',
-      tpaDimension11: '',
-      tpaDimension12: '',
-      tpaDimension13: '',
-      tpaDimension14: '',
-      tpaDimension15: '',
-      tpaDimension16: '',
-      tpaDimension17: '',
-      tpaDimension18: '',
-      tpaDimension19: '',
-      tpaDimension20: ''
+      ivtUDTCount: '',
+      ivtUDT1: '',
+      ivtUDT2: '',
+      ivtUDT3: '',
+      ivtUDT4: '',
+      ivtUDT5: '',
+      ivtUDT6: '',
+      ivtUDT7: '',
+      ivtUDT8: '',
+      ivtUDT9: '',
+      ivtUDT10: '',
+      ivtUDT11: '',
+      ivtUDT12: '',
+      ivtUDT13: '',
+      ivtUDT14: '',
+      ivtUDT15: '',
+      ivtUDT16: '',
+      ivtUDT17: '',
+      ivtUDT18: '',
+      ivtUDT19: '',
+      ivtUDT20: ''
     },
     enableReinitialize: true,
     validateOnChange: true,
 
     validationSchema: yup.object({
-      DimCount: yup.number().nullable().required('Dim Count is required').min(1).max(20),
+      ivtUDTCount: yup.number().nullable().required().min(1).max(20),
       ...Object.fromEntries(
         Array.from({ length: 20 }, (_, i) => i + 1).map(num => [
-          `tpaDimension${num}`,
+          `ivtUDT${num}`,
           yup
             .string()
             .nullable()
-            .test(`is-tpaDimension${num}-required`, `Dimension ${num} is required`, function (value) {
-              const { DimCount } = this.parent
+            .test(function (value) {
+              const { ivtUDTCount } = this.parent
 
-              return DimCount >= num ? !!value : true
+              return ivtUDTCount >= num ? !!value : true
             })
         ])
       )
@@ -100,9 +100,9 @@ const UserTextForm = () => {
   })
 
   const postDimensionSettings = async obj => {
-    var dataToPost = [{ key: 'DimCount', value: obj.DimCount }]
+    var dataToPost = [{ key: 'ivtUDTCount', value: obj.ivtUDTCount }]
     for (let i = 1; i <= 20; i++) {
-      const dimKey = `tpaDimension${i}`
+      const dimKey = `ivtUDT${i}`
       if (obj[dimKey] !== undefined) {
         dataToPost.push({ key: dimKey, value: obj[dimKey] })
       }
@@ -126,10 +126,10 @@ const UserTextForm = () => {
   }
 
   function clearExcessFields(currentCount) {
-    const dimCount = currentCount
+    const ivtUDTCount = currentCount
     for (let i = 1; i <= 20; i++) {
-      const dimKey = `tpaDimension${i}`
-      if (i > dimCount) {
+      const dimKey = `ivtUDT${i}`
+      if (i > ivtUDTCount) {
         formik.setFieldValue(dimKey, '')
       }
     }
@@ -137,7 +137,7 @@ const UserTextForm = () => {
 
   const handleDimCountBlur = () => {
     if (stagingDimCount !== null) {
-      formik.setFieldValue('DimCount', stagingDimCount)
+      formik.setFieldValue('ivtUDTCount', stagingDimCount)
       process.nextTick(() => {
         clearExcessFields(stagingDimCount)
       })
@@ -150,15 +150,15 @@ const UserTextForm = () => {
         <Grid container spacing={3} width={'50%'} sx={{ marginLeft: '0.5rem' }}>
           <Grid item xs={12} sx={{ marginTop: '0.5rem' }}>
             <CustomTextField
-              name='DimCount'
-              label={_labels.DimCount}
-              value={stagingDimCount === null ? formik.values.DimCount : stagingDimCount}
+              name='ivtUDTCount'
+              label={_labels.ivtUDTCount}
+              value={stagingDimCount === null ? formik.values.ivtUDTCount : stagingDimCount}
               onChange={handleDimCountChange}
               onBlur={handleDimCountBlur}
               numberField={true}
               clearable={true}
               type='number'
-              error={formik.touched.DimCount && Boolean(formik.errors.DimCount)}
+              error={formik.touched.ivtUDTCount && Boolean(formik.errors.ivtUDTCount)}
               inputProps={{
                 min: 1,
                 max: 20,
@@ -166,7 +166,7 @@ const UserTextForm = () => {
                 inputMode: 'numeric',
                 pattern: '[1-20]*'
               }}
-              helperText={formik.touched.DimCount && formik.errors.DimCount}
+              helperText={formik.touched.ivtUDTCount && formik.errors.ivtUDTCount}
             />
           </Grid>
 
@@ -176,14 +176,14 @@ const UserTextForm = () => {
                 <Grid item xs={12} key={index}>
                   <CustomTextField
                     key={index}
-                    name={`tpaDimension${index + 1}`}
+                    name={`ivtUDT${index + 1}`}
                     label={`${_labels.Dim} ${index + 1}`}
-                    value={formik.values[`tpaDimension${index + 1}`]}
-                    onClear={() => formik.setFieldValue(`tpaDimension${index + 1}`, '')}
+                    value={formik.values[`ivtUDT${index + 1}`]}
+                    onClear={() => formik.setFieldValue(`ivtUDT${index + 1}`, '')}
                     onChange={formik.handleChange}
-                    error={formik.values.DimCount > index && Boolean(formik.errors[`tpaDimension${index + 1}`])}
+                    error={formik.values.ivtUDTCount > index && Boolean(formik.errors[`ivtUDT${index + 1}`])}
                     inputProps={{
-                      readOnly: formik.values.DimCount <= index || formik.values.DimCount === 'null'
+                      readOnly: formik.values.ivtUDTCount <= index || formik.values.ivtUDTCount === 'null'
                     }}
                   />
                 </Grid>
@@ -197,14 +197,14 @@ const UserTextForm = () => {
                 <Grid item xs={12} key={1}>
                   <CustomTextField
                     key={index + 10}
-                    name={`tpaDimension${index + 11}`}
+                    name={`ivtUDT${index + 11}`}
                     label={`${_labels.Dim} ${index + 11}`}
-                    value={formik.values[`tpaDimension${index + 11}`]}
-                    onClear={() => formik.setFieldValue(`tpaDimension${index + 11}`, '')}
+                    value={formik.values[`ivtUDT${index + 11}`]}
+                    onClear={() => formik.setFieldValue(`ivtUDT${index + 11}`, '')}
                     onChange={formik.handleChange}
-                    error={formik.errors[`tpaDimension${index + 11}`]}
+                    error={formik.errors[`ivtUDT${index + 11}`]}
                     inputProps={{
-                      readOnly: formik.values.DimCount <= index + 10 || formik.values.DimCount === 'null'
+                      readOnly: formik.values.ivtUDTCount <= index + 10 || formik.values.ivtUDTCount === 'null'
                     }}
                   />
                 </Grid>
