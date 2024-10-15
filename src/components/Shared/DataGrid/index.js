@@ -388,10 +388,17 @@ export function DataGrid({
                 }
 
                 function handleCheckboxChange(event) {
-                  const updatedValue = event.target.checked
-                  updateRow({
-                    changes: { [params.field]: updatedValue }
-                  })
+                  const changes = { [params.field]: event.target.checked }
+                  updateRow({ changes })
+                  const column = columns.find(col => col.name === params.field)
+                  if (column?.onChange) {
+                    column.onChange({
+                      row: {
+                        update: changes => updateRow({ changes }),
+                        newRow: { ...params.row, ...changes }
+                      }
+                    })
+                  }
                 }
 
                 return (
