@@ -33,34 +33,31 @@ const IvItems = () => {
 
   const {
     query: { data },
-    labels: _labels,
-    paginationParameters,
-    refetch,
-    search,
-    clear,
     filterBy,
+    refetch,
     clearFilter,
+    labels: _labels,
     access,
+    paginationParameters,
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: InventoryRepository.Items.qry,
+    endpointId: InventoryRepository.Items.snapshot,
     datasetId: ResourceIds.Items,
-    search: {
-      endpointId: InventoryRepository.Items.snapshot,
-      searchFn: fetchWithSearch
+    filter: {
+      filterFn: fetchWithFilter
     }
   })
+  async function fetchWithFilter({ filters, pagination = {} }) {
+    const { _startAt = 0, _size = 50 } = pagination
+    if (filters.qry) {
+      const response = await getRequest({
+        extension: InventoryRepository.Items.snapshot,
+        parameters: `_filter=${filters.qry}&_startAt=${_startAt}&_size=${_size}`
+      })
 
-  async function fetchWithSearch({ options = {}, qry }) {
-    const { _startAt = 0, _pageSize = 50 } = options
-
-    const response = await getRequest({
-      extension: InventoryRepository.Items.snapshot,
-      parameters: `_startAt=${_startAt}&_size=${_pageSize}&_filter=${qry}`
-    })
-
-    return { ...response, _startAt: _startAt }
+      return { ...response, _startAt: _startAt }
+    } else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
   const columns = [
@@ -159,14 +156,22 @@ const IvItems = () => {
     refetch()
   }
 
+  const onSearch = value => {
+    filterBy('qry', value)
+  }
+
+  const onClear = () => {
+    clearFilter('qry')
+  }
+
   return (
     <VertLayout>
       <Fixed>
         <GridToolbar
           onAdd={add}
           maxAccess={access}
-          onSearch={search}
-          onSearchClear={clear}
+          onSearch={onSearch}
+          onClear={onClear}
           labels={_labels}
           inputSearch={true}
           onApply={onApply}
