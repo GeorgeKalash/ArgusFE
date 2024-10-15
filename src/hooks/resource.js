@@ -38,7 +38,6 @@ export function useResourceQuery({ endpointId, filter, datasetId, queryFn, searc
       : () => queryFn(),
     enabled: access?.record?.maxAccess > 0 && enabled
   })
-  console.log(apiOption, 'optionsss')
 
   return {
     access,
