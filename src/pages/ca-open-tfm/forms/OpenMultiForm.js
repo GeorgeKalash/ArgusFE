@@ -13,9 +13,10 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 
-export default function OpenMultiForm({ labels, maxAccess, recordId }) {
+export default function OpenMultiForm({ labels, maxAccess, recordId, plId }) {
   const { postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  console.log(plId, 'plantId2')
 
   const invalidate = useInvalidate({
     endpointId: CashBankRepository.OpenMultiCurrencyCashTransfer.open

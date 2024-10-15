@@ -115,13 +115,14 @@ const OpenMultiCurrencyCashTransfer = () => {
     }
   ]
 
-  function openForm(recordId) {
+  function openForm(recordId, plantId) {
     stack({
       Component: OpenMultiForm,
       props: {
         labels: _labels,
         recordId: recordId,
-        maxAccess: access
+        maxAccess: access,
+        plId: plantId
       },
       width: 500,
       height: 270,
@@ -130,7 +131,8 @@ const OpenMultiCurrencyCashTransfer = () => {
   }
 
   const edit = obj => {
-    openForm(obj?.recordId)
+    console.log(formik.values.plantId, 'plantId')
+    openForm(obj?.recordId, formik.values.plantId)
   }
 
   const del = async obj => {
