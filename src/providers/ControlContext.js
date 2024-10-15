@@ -5,13 +5,30 @@ import { AccessControlRepository } from 'src/repositories/AccessControlRepositor
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { AuthContext } from './AuthContext'
 import axios from 'axios'
+import { SystemRepository } from 'src/repositories/SystemRepository'
 
 const ControlContext = createContext()
 
 const ControlProvider = ({ children }) => {
   const { getRequest } = useContext(RequestsContext)
-  const [apiPlatformLabels, setApiPlatformLabels] = useState(null)
   const { user, apiUrl, languageId } = useContext(AuthContext)
+  const userData = window.sessionStorage.getItem('userData')
+  const [defaultsData, setDefaultsData] = useState([])
+  const [apiPlatformLabels, setApiPlatformLabels] = useState(null)
+
+  useEffect(() => {
+    if (userData != null) getDefaults(setDefaultsData)
+  }, [userData, user?.userId])
+
+  const getDefaults = callback => {
+    var parameters = `_filter=`
+    getRequest({
+      extension: SystemRepository.Defaults.qry,
+      parameters: parameters
+    }).then(res => {
+      callback(res)
+    })
+  }
 
   useEffect(() => {
     getPlatformLabels(ResourceIds.Common, setApiPlatformLabels)
@@ -61,14 +78,12 @@ const ControlProvider = ({ children }) => {
   const values = {
     getLabels,
     getAccess,
-    platformLabels
+    platformLabels,
+    defaultsData,
+    setDefaultsData
   }
 
-  return (
-    <>
-      <ControlContext.Provider value={values}>{children}</ControlContext.Provider>
-    </>
-  )
+  return <ControlContext.Provider value={values}>{children}</ControlContext.Provider>
 }
 
 export { ControlContext, ControlProvider }

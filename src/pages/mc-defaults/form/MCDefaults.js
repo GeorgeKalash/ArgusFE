@@ -11,12 +11,10 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
-import { CommonContext } from 'src/providers/CommonContext'
 
 const MCDefault = ({ _labels, acces }) => {
   const { postRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
-  const { defaultsData } = useContext(CommonContext)
+  const { platformLabels, defaultsData, setDefaultsData } = useContext(ControlContext)
 
   const [initialValues, setInitialValues] = useState({
     mc_defaultRTSA: null,
@@ -32,7 +30,6 @@ const MCDefault = ({ _labels, acces }) => {
 
   const getDataResult = () => {
     const myObject = {}
-    console.log(defaultsData, 'defaultsData')
 
     const filteredList = defaultsData.list.filter(obj => {
       return (
@@ -67,6 +64,18 @@ const MCDefault = ({ _labels, acces }) => {
       record: JSON.stringify({ sysDefaults: data })
     }).then(res => {
       if (res) toast.success(platformLabels.Edited)
+
+      const updatedDefaultsData = [...defaultsData.list, ...data].reduce((acc, obj) => {
+        const existing = acc.find(item => item.key === obj.key)
+        if (existing) {
+          existing.value = obj.value
+        } else {
+          acc.push({ ...obj, value: obj.value })
+        }
+
+        return acc
+      }, [])
+      setDefaultsData({ list: updatedDefaultsData })
     })
   }
 
