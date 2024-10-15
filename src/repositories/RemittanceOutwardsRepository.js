@@ -148,6 +148,8 @@ export const RemittanceOutwardsRepository = {
     set2: service + 'set2RV',
     del: service + 'delRV',
     post: service + 'postRV',
+    close: service + 'closeRV',
+    reopen: service + 'reopenRV',
     snapshot: service + 'snapshotRV'
   },
   OutwardsTransfer: {

@@ -34,7 +34,6 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { useForm } from 'src/hooks/form'
-import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ControlContext } from 'src/providers/ControlContext'
 import { RemittanceBankInterface } from 'src/repositories/RemittanceBankInterface'
@@ -129,7 +128,6 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
     hiddenTrxAmount: '',
     hiddenTrxCount: '',
     hiddenSponserName: '',
-    otpVerified: false,
     bankType: '',
     receiptId: null,
     instantCashDetails: {},
@@ -188,30 +186,12 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
         const res2 = await getOutwards(amountRes.recordId)
         formik.setFieldValue('reference', res2.record.reference)
         invalidate()
-        !recordId && viewOTP(amountRes.recordId)
       }
     }
   })
   const editMode = !!formik.values.recordId
   const isClosed = formik.values.wip === 2
   const isPosted = formik.values.status === 4
-
-  function viewOTP(recId) {
-    stack({
-      Component: OTPPhoneVerification,
-      props: {
-        formValidation: formik,
-        recordId: recId,
-        functionId: SystemFunction.OutwardsOrder,
-        onSuccess: () => {
-          onClose(recId)
-        }
-      },
-      width: 400,
-      height: 400,
-      title: labels.OTPVerification
-    })
-  }
 
   const getCashAccountId = async () => {
     const res = await getRequest({
