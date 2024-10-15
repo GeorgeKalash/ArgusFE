@@ -583,7 +583,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
         .then(res => {
           if (res) {
             toast.success(platformLabels.Edited)
-            // otpForm()
+            otpForm()
           }
         })
         .catch(error => {})
