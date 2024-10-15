@@ -21,11 +21,11 @@ const IvItems = () => {
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 50, params = [] } = options
 
     const response = await getRequest({
       extension: InventoryRepository.Items.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=&_params=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=&_params=${params}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -167,15 +167,13 @@ const IvItems = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar
+        <RPBGridToolbar
           onAdd={add}
           maxAccess={access}
+          onApply={onApply}
           onSearch={onSearch}
           onClear={onClear}
-          labels={_labels}
-          inputSearch={true}
-          onApply={onApply}
-          refetch={refetch}
+          reportName={'IVIT'}
         />
       </Fixed>
       <Grow>
