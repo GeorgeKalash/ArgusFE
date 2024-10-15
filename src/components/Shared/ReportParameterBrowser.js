@@ -184,6 +184,7 @@ const GetDate = ({ field, formik, rpbParams }) => {
         fieldKey: field.key,
         value: new Date(field.value.toString())?.getTime() || '',
         caption: field.caption,
+        controlType: field?.controlType,
         display: formatDateDefault(new Date(field?.value?.toString()))
       })
     }
@@ -202,6 +203,7 @@ const GetDate = ({ field, formik, rpbParams }) => {
             fieldKey: field.key,
             value: newValue,
             caption: field.caption,
+            controlType: field?.controlType,
             display: formatDateDefault(newValue)
           })
         }}
@@ -296,10 +298,7 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
 
         acc[id] = {
           ...param,
-          value:
-            param?.fieldKey === 'date' || param?.fieldKey?.indexOf('Date') > -1
-              ? formatDateTo(param?.value)
-              : param?.value
+          value: param?.controlType === 4 ? formatDateTo(param?.value) : param?.value
         }
 
         return acc
@@ -340,7 +339,7 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
     const mappedData = rpbParams.reduce((acc, item) => {
       acc[item?.fieldId] = {
         ...item,
-        value: item.fieldKey === 'date' || item.fieldKey?.indexOf('Date') > -1 ? formatDateFrom(item.value) : item.value
+        value: item?.controlType === 4 ? formatDateFrom(item.value) : item.value
       }
 
       return acc
