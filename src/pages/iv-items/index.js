@@ -52,7 +52,7 @@ const IvItems = () => {
     if (filters.qry)
       return await getRequest({
         extension: InventoryRepository.Items.snapshot,
-        parameters: `_filter=${filters.qry}`
+        parameters: `_size=1000&_startAt=0&_filter=${filters.qry}`
       })
     else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }

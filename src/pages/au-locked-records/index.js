@@ -82,7 +82,7 @@ const LockedRecords = () => {
       field: 'clockStamp',
       headerName: _labels.clockStamp,
       flex: 1,
-      type: 'date'
+      type: 'dateTime'
     }
   ]
 
