@@ -320,6 +320,13 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'IV',
+    label: platformLabels.InventoryTransaction,
+    color: '#A76035',
+    image: 'popup-window.png',
+    main: false
+  },
+  {
     key: 'OTP',
     label: platformLabels.OTP,
     color: 'transparent',
