@@ -26,7 +26,7 @@ const OTPPhoneVerification = ({
   const [timer, setTimer] = useState(30)
   const [error, setError] = useState('')
   const [disabled, setDisabled] = useState(0)
-  
+
   useEffect(() => {
     let interval
 
