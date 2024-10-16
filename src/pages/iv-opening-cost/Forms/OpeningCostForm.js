@@ -41,7 +41,7 @@ export default function OpeningCostForm({ labels, maxAccess, recordId, record })
       avgCost: yup.number().min(0).max(999999999)
     }),
     onSubmit: async obj => {
-      const response = await postRequest({
+      await postRequest({
         extension: InventoryRepository.OpeningCost.set,
         record: JSON.stringify(obj)
       })
@@ -87,7 +87,7 @@ export default function OpeningCostForm({ labels, maxAccess, recordId, record })
                 endpointId={SystemRepository.FiscalYears.qry}
                 readOnly={editMode}
                 name='year'
-                label={labels.fiscalYear}
+                label={labels?.fiscalYear}
                 valueField='fiscalYear'
                 displayField='fiscalYear'
                 values={formik.values}
@@ -125,7 +125,7 @@ export default function OpeningCostForm({ labels, maxAccess, recordId, record })
             <Grid item xs={12}>
               <CustomTextField
                 name='itemName'
-                label={labels.name}
+                label={labels.item}
                 value={formik.values.itemName}
                 readOnly
                 maxAccess={maxAccess}
