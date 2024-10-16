@@ -15,6 +15,7 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import CustomTextField from 'src/components/Inputs/CustomTextField'
 
 export default function OpeningCostForm({ labels, maxAccess, recordId, record }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -29,15 +30,15 @@ export default function OpeningCostForm({ labels, maxAccess, recordId, record })
       recordId: null,
       itemId: null,
       year: '',
-      cost: 0
+      avgCost: 0
     },
     maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-        year: yup.string().required(),
-        itemId: yup.string().required(),
-        cost: yup.number().min(0).max(999999999),
+      year: yup.string().required(),
+      itemId: yup.string().required(),
+      avgCost: yup.number().min(0).max(999999999)
     }),
     onSubmit: async obj => {
       const response = await postRequest({
@@ -52,7 +53,6 @@ export default function OpeningCostForm({ labels, maxAccess, recordId, record })
           ...obj,
           recordId: String(obj.year) + String(obj.itemId)
         })
-
       } else toast.success(platformLabels.Edited)
 
       invalidate()
@@ -63,19 +63,15 @@ export default function OpeningCostForm({ labels, maxAccess, recordId, record })
 
   useEffect(() => {
     ;(async function () {
-      if (record && record.itemId && record.year && recordId) {
+      if (record && record?.itemId && record?.year && recordId) {
         const res = await getRequest({
           extension: InventoryRepository.OpeningCost.get,
-          parameters: `_itemId=${record.itemId}&_year=${year}`
+          parameters: `_itemId=${record?.itemId}&_fiscalYear=${record?.year}`
         })
 
         formik.setValues({
           ...res.record,
-          cashAccountId: formik.values.cashAccountId,
-
-          recordId:
-            String(res.record.year) +
-            String(res.record.itemId)
+          recordId: String(res.record.year) + String(res.record.itemId)
         })
       }
     })()
@@ -86,7 +82,7 @@ export default function OpeningCostForm({ labels, maxAccess, recordId, record })
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
-          <Grid item xs={12}>
+            <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={SystemRepository.FiscalYears.qry}
                 readOnly={editMode}
@@ -103,7 +99,7 @@ export default function OpeningCostForm({ labels, maxAccess, recordId, record })
                 error={formik.touched.year && Boolean(formik.errors.year)}
               />
             </Grid>
-          <Grid item xs={12}>
+            <Grid item xs={12}>
               <ResourceLookup
                 endpointId={InventoryRepository.Item.snapshot}
                 name='itemId'
@@ -112,7 +108,6 @@ export default function OpeningCostForm({ labels, maxAccess, recordId, record })
                 valueField='recordId'
                 displayField='sku'
                 valueShow='sku'
-                secondValueShow='itemName'
                 form={formik}
                 columnsInDropDown={[
                   { key: 'sku', value: 'SKU' },
@@ -128,15 +123,24 @@ export default function OpeningCostForm({ labels, maxAccess, recordId, record })
               />
             </Grid>
             <Grid item xs={12}>
+              <CustomTextField
+                name='itemName'
+                label={labels.name}
+                value={formik.values.itemName}
+                readOnly
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
               <CustomNumberField
-                name='cost'
+                name='avgCost'
                 label={labels.cost}
-                value={formik.values.cost}
+                value={formik.values.avgCost}
                 onChange={formik.handleChange}
-                maxLength={999999999}
+                maxLength={12}
                 decimalScale={3}
-                onClear={() => formik.setFieldValue('cost', '')}
-                error={formik.touched.cost && Boolean(formik.errors.cost)}
+                onClear={() => formik.setFieldValue('avgCost', '')}
+                error={formik.touched.avgCost && Boolean(formik.errors.avgCost)}
               />
             </Grid>
           </Grid>
