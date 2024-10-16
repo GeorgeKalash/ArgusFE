@@ -19,9 +19,28 @@ export default function CustomDatePickerHijri({
   onChange,
   readOnly,
   disabled,
+  disabledDate,
   fullWidth = true
 }) {
   const [openDatePicker, setOpenDatePicker] = useState(false)
+
+  const shouldDisableDate = dates => {
+    const date = new Date(dates)
+
+    const today = new Date()
+    today.setDate(today.getDate())
+    date.setDate(date.getDate())
+
+    if (disabledDate === '>=') {
+      return date >= today
+    }
+    if (disabledDate === '<') {
+      return date < today
+    }
+    if (disabledDate === '>') {
+      return date > today
+    }
+  }
 
   const handleDateChange = newValue => {
     const timestamp = newValue ? newValue.valueOf() : null
@@ -42,6 +61,7 @@ export default function CustomDatePickerHijri({
         open={openDatePicker}
         minDate={moment(new Date(1938, 0, 1))}
         maxDate={moment(new Date(2075, 11, 31))}
+        shouldDisableDate={disabledDate && shouldDisableDate} // Enable this prop for date disabling
         slots={{
           actionBar: props => <PickersActionBar {...props} actions={['accept', 'today']} />,
           popper: PopperComponent
