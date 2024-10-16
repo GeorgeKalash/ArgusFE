@@ -1,59 +1,56 @@
-import React from 'react'
+import React, { useState } from 'react'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import IconButton from '@mui/material/IconButton'
-import Box from '@mui/material/Box'
+import PercentIcon from '@mui/icons-material/Percent'
+import PinIcon from '@mui/icons-material/Pin'
+import InputAdornment from '@mui/material/InputAdornment'
+import ClearIcon from '@mui/icons-material/Clear'
 
 export default function NumberfieldEdit({ column: { props }, id, field, value, update }) {
-  return (
-    <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-      <CustomNumberField
-        value={value}
-        label={''}
-        readOnly={props?.readOnly}
-        decimalScale={props?.decimalScale}
-        autoFocus
-        hasBorder={false}
-        onChange={e => {
-          update({
-            id,
-            field,
-            value: e.target.value ? Number(e.target.value) : ''
-          })
-        }}
-        onClear={() =>
-          update({
-            id,
-            field,
-            value: ''
-          })
-        }
-        {...props}
-        sx={{
-          flexGrow: 1,
-          border: 'none', // Ensures no border on the field
-          '& .MuiOutlinedInput-root': {
-            borderRadius: 0, // Removes the rounded corners
-            '& fieldset': {
-              border: 'none' // Ensures the input field itself doesn't have a border
-            }
-          }
-        }}
-      />
+  const [isPercentIcon, setIsPercentIcon] = useState(true)
 
-      <IconButton
-        tabIndex={-1}
-        aria-label='switch icon'
-        onClick={() => {}}
-        sx={{
-          padding: '7px',
-          height: '100%',
-          '&:hover': {
-            backgroundColor: '#607D8B'
+  const handleIconClick = () => {
+    setIsPercentIcon(!isPercentIcon)
+  }
+
+  return (
+    <CustomNumberField
+      value={value}
+      label={''}
+      readOnly={props?.readOnly}
+      decimalScale={props?.decimalScale}
+      autoFocus
+      hasBorder={false}
+      onChange={e => {
+        update({
+          id,
+          field,
+          value: e.target.value ? Number(e.target.value) : ''
+        })
+      }}
+      {...props}
+      InputProps={{
+        endAdornment: (
+          <InputAdornment position='end'>
+            <IconButton onClick={() => update({ id, field, value: '' })}>
+              <ClearIcon />
+            </IconButton>
+            {props?.ShowDiscountIcons && (
+              <IconButton onClick={handleIconClick}>{isPercentIcon ? <PercentIcon /> : <PinIcon />}</IconButton>
+            )}
+          </InputAdornment>
+        )
+      }}
+      sx={{
+        flexGrow: 1,
+        border: 'none',
+        '& .MuiOutlinedInput-root': {
+          borderRadius: 0,
+          '& fieldset': {
+            border: 'none'
           }
-        }}
-      >
-        <img src='/images/buttonsIcons/switch-arrow-icon.png' alt='switch' style={{ width: '24px', height: '24px' }} />
-      </IconButton>
-    </Box>
+        }
+      }}
+    />
   )
 }
