@@ -16,7 +16,7 @@ import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 import { DataSets } from 'src/resources/DataSets'
 
-export default function CountryForm({ labels, maxAccess, recordId }) {
+export default function CountryForm({ labels, maxAccess, recordId, setStore }) {
   const [editMode, setEditMode] = useState(!!recordId)
   const { platformLabels } = useContext(ControlContext)
 
@@ -68,6 +68,10 @@ export default function CountryForm({ labels, maxAccess, recordId }) {
 
       if (!recordId) {
         toast.success(platformLabels.Added)
+        setStore({
+          recordId: response?.recordId,
+          name: obj?.name
+        })
         formik.setValues({
           ...obj,
           recordId: response.recordId
@@ -87,10 +91,15 @@ export default function CountryForm({ labels, maxAccess, recordId }) {
             extension: SystemRepository.Country.get,
             parameters: `_recordId=${recordId}`
           })
-
+          setStore({
+            recordId: res.record.recordId,
+            name: res.record.name
+          })
           formik.setValues(res.record)
         }
-      } catch (exception) {}
+      } catch (exception) {
+        console.log(exception)
+      }
     })()
   }, [])
 
