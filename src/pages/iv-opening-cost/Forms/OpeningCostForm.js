@@ -108,6 +108,7 @@ export default function OpeningCostForm({ labels, maxAccess, recordId, record })
                 valueField='recordId'
                 displayField='sku'
                 valueShow='sku'
+                secondDisplayField={false}
                 form={formik}
                 columnsInDropDown={[
                   { key: 'sku', value: 'SKU' },
