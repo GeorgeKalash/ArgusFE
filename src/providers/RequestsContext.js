@@ -78,18 +78,29 @@ const RequestsProvider = ({ showLoading = false, children }) => {
   }
 
   const getMicroRequest = async body => {
-    return axios({
-      method: 'GET',
-      url: process.env.NEXT_PUBLIC_YAKEEN_URL + body.extension + '?' + body.parameters
-    })
-      .then(res => res.data)
-      .catch(error => {
-        showError({
-          message: error,
-          height: error.response?.status === 404 || error.response?.status === 500 ? 400 : ''
-        })
-        throw error
+    const disableLoading = body.disableLoading || false
+    !disableLoading && !loading && setLoading(true)
+
+    const throwError = body.throwError || false
+
+    return new Promise(async (resolve, reject) => {
+      return axios({
+        method: 'GET',
+        url: process.env.NEXT_PUBLIC_YAKEEN_URL + body.extension + '?' + body.parameters
       })
+        .then(response => {
+          if (!disableLoading) debouncedCloseLoading()
+          resolve(response.data)
+        })
+        .catch(error => {
+          debouncedCloseLoading()
+          showError({
+            message: error,
+            height: error.response?.status === 404 || error.response?.status === 500 ? 400 : ''
+          })
+          if (throwError) reject(error)
+        })
+    })
   }
 
   const getIdentityRequest = async body => {

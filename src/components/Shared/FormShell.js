@@ -85,7 +85,7 @@ export default function FormShell({
     stack({
       Component: Approvals,
       props: {
-        recordId: form.values.recordIdRemittance ?? form.values.recordId,
+        recordId: form.values.remittanceRecordId ?? form.values.recordId,
         functionId: form.values.functionId ?? functionId
       },
       width: 1000,
