@@ -85,20 +85,16 @@ export default function CountryForm({ labels, maxAccess, recordId, setStore }) {
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: SystemRepository.Country.get,
-            parameters: `_recordId=${recordId}`
-          })
-          setStore({
-            recordId: res.record.recordId,
-            name: res.record.name
-          })
-          formik.setValues(res.record)
-        }
-      } catch (exception) {
-        console.log(exception)
+      if (recordId) {
+        const res = await getRequest({
+          extension: SystemRepository.Country.get,
+          parameters: `_recordId=${recordId}`
+        })
+        setStore({
+          recordId: res.record.recordId,
+          name: res.record.name
+        })
+        formik.setValues(res.record)
       }
     })()
   }, [])
