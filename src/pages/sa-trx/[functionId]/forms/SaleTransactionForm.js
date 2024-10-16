@@ -43,6 +43,7 @@ import AddressFilterForm from '../../../sales-order/Tabs/AddressFilterForm'
 import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import { RateDivision } from 'src/resources/RateDivision'
+import { useError } from 'src/error'
 
 export default function SaleTransactionForm({
   labels,
@@ -53,6 +54,7 @@ export default function SaleTransactionForm({
   window
 }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { stack: stackError } = useError()
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
   const [cycleButtonState, setCycleButtonState] = useState({ text: '%', value: 2 })
@@ -71,25 +73,25 @@ export default function SaleTransactionForm({
       date: new Date(),
       dueDate: new Date(),
       plantId: null,
-      clientId: '',
+      clientId: null,
       clientName: '',
       clientRef: '',
       currencyId: null,
-      szId: '',
+      szId: null,
       spId: null,
       siteId: null,
       description: '',
       status: 1,
       isVattable: false,
-      taxId: '',
+      taxId: null,
       subtotal: '',
       miscAmount: 0,
       amount: 0,
       vatAmount: 0,
       tdAmount: 0,
-      plId: '',
-      ptId: '',
-      billAddressId: '',
+      plId: null,
+      ptId: null,
+      billAddressId: null,
       billAddress: '',
       maxDiscount: '',
       currentDiscount: '',
@@ -227,10 +229,88 @@ export default function SaleTransactionForm({
       name: 'barcode',
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
-        const textfield = await getItemConvertPrice2(newRow, formik.values.header)
-        console.log(textfield)
+        const ItemConvertPrice = await getItemConvertPrice2(newRow, formik.values.header)
+        const itemPhysProp = await getItemPhysProp(ItemConvertPrice.record.itemId)
+        const itemInfo = await getItem(ItemConvertPrice.record.itemId)
 
-        //getItemPriceRow(update, newRow, DIRTYFIELD_QTY)
+        const weight = parseFloat(itemPhysProp?.weight || 0).toFixed(2)
+        const metalPurity = itemPhysProp?.metalPurity ?? 0
+        const isMetal = itemPhysProp?.isMetal ?? false
+        const metalId = itemPhysProp?.metalId ?? null
+
+        const postMetalToFinancials = formik?.values?.header?.postMetalToFinancials ?? false
+        const metalPrice = formik?.values?.header?.KGmetalPrice ?? 0
+        const basePrice = (metalPrice * metalPurity) / 1000
+        const basePriceValue = postMetalToFinancials === false ? basePrice : 0
+        const TotPricePerG = basePriceValue
+
+        let rowTax = null
+        let rowTaxDetails = null
+
+        if (!formik.values.header.taxId) {
+          if (itemInfo.taxId) {
+            const taxDetailsResponse = await getTaxDetails(itemInfo.taxId)
+
+            const details = taxDetailsResponse.map(item => ({
+              taxId: itemInfo.taxId,
+              taxCodeId: item.taxCodeId,
+              taxBase: item.taxBase,
+              amount: item.amount
+            }))
+            rowTax = itemInfo.taxId
+            rowTaxDetails = details
+          }
+        } else {
+          const taxDetailsResponse = await getTaxDetails(formik.values.header.taxId)
+
+          const details = taxDetailsResponse.map(item => ({
+            taxId: formik.values.header.taxId,
+            taxCodeId: item.taxCodeId,
+            taxBase: item.taxBase,
+            amount: item.amount
+          }))
+          rowTax = formik.values.header.taxId
+          rowTaxDetails = details
+        }
+
+        const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
+
+        setFilteredMU(filteredMeasurements)
+        update({
+          isMetal: isMetal,
+          metalId: metalId,
+          metalPurity: metalPurity,
+          volume: parseFloat(itemPhysProp?.volume) || 0,
+          weight: weight,
+          basePrice:
+            isMetal === false
+              ? parseFloat(ItemConvertPrice?.basePrice || 0).toFixed(5)
+              : metalPurity > 0
+              ? basePriceValue
+              : 0,
+          baseLaborPrice: 0,
+          TotPricePerG: TotPricePerG,
+          unitPrice:
+            ItemConvertPrice?.priceType === 3
+              ? weight * TotPricePerG
+              : parseFloat(ItemConvertPrice?.unitPrice || 0).toFixed(3),
+          upo: parseFloat(ItemConvertPrice?.upo || 0).toFixed(2),
+          priceType: ItemConvertPrice?.priceType || 1,
+          mdAmount: 0,
+          qty: 0,
+          msId: itemInfo?.msId,
+          muRef: filteredMeasurements?.[0]?.reference,
+          muId: filteredMeasurements?.[0]?.recordId,
+          extendedPrice: parseFloat('0').toFixed(2),
+          mdValue: 0,
+          taxId: rowTax,
+          taxDetails: rowTaxDetails
+        })
+
+        formik.setFieldValue(
+          'header.mdAmount',
+          formik.values.header.currentDiscount ? formik.values.header.currentDiscount : 0
+        )
       }
     },
     {
@@ -720,8 +800,14 @@ export default function SaleTransactionForm({
 
       const record = res?.record || {}
       const accountId = record.accountId
-      const currencyId = record.currencyId ?? formik.values.header.currencyId
+      const currencyId = record.currencyId == null ? formik.values.header.currencyId : null
+      if (!currencyId) {
+        stackError({ message: 'No currency or client currency' })
+
+        return
+      }
       const billAdd = await getAddress(record.billAddressId)
+      const accountLimit = await getAccountLimit(currencyId, accountId)
 
       formik.setValues({
         ...formik.values,
@@ -734,20 +820,19 @@ export default function SaleTransactionForm({
           maxDiscount: clientObject?.maxDiscount,
           currentDiscount: clientObject?.tdPct,
           taxId: clientObject?.taxId,
-          currencyId: record.currencyId,
+          currencyId: currencyId,
           spId: record.spId,
-          ptId: record.ptId ?? defaultPtId,
-          plId: record.plId ?? defaultPlId,
+          ptId: record.ptId,
+          plId: record.plId,
           szId: record.szId,
-          billAddressId: record.billAddressId
+          billAddressId: record.billAddressId,
+          billAddress: billAdd,
+          creditLimit: accountLimit?.limit ?? 0
         }
       })
-
-      formik.setFieldValue('header.billAddress', billAdd)
-
-      const accountLimit = await getAccountLimit(currencyId, accountId)
-      formik.setFieldValue('header.creditLimit', accountLimit?.limit ?? 0)
-    } catch (error) {}
+    } catch (error) {
+      console.error('Error in formik.setValues:', error)
+    }
   }
 
   async function getItemPhysProp(itemId) {
@@ -787,8 +872,6 @@ export default function SaleTransactionForm({
   }
 
   async function getItemConvertPrice2(row, header) {
-    console.log(header)
-
     // getICP2(string _barcode, int _clientId, int _currencyId, int _plId, double _exRate, double _rateCalcMethod)
     const res = await getRequest({
       extension: SaleRepository.ItemConvertPrice.get2,
@@ -1358,7 +1441,7 @@ export default function SaleTransactionForm({
               <Grid item xs={5}>
                 <ResourceComboBox
                   endpointId={FinancialRepository.TaxSchedules.qry}
-                  name='taxId'
+                  name='header.taxId'
                   label={labels.tax}
                   valueField='recordId'
                   displayField={['reference', 'name']}
@@ -1430,6 +1513,7 @@ export default function SaleTransactionForm({
           </Grid>
         </Fixed>
 
+        {console.log(formik.values.header)}
         <Grow>
           <DataGrid
             onChange={value => formik.setFieldValue('items', value)}
@@ -1438,8 +1522,7 @@ export default function SaleTransactionForm({
             name='items'
             columns={columns}
             maxAccess={maxAccess}
-
-            // disabled={!formik.values.header.clientId || !formik.values.header.currencyId}
+            disabled={!formik.values.header.clientId || !formik.values.header.currencyId}
           />
         </Grow>
 

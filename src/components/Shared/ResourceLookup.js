@@ -53,9 +53,6 @@ export const ResourceLookup = ({
     }
   }
   const check = errorCheck ? errorCheck : name
-  console.log(formObject)
-  console.log(formObject != null ? formObject[valueShow] : null)
-  console.log(formObject != null ? formObject[name] : null)
 
   const _firstValue =
     firstValue ||
