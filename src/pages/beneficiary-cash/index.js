@@ -118,12 +118,12 @@ const BeneficiaryCash = () => {
     {
       field: 'isBlocked',
       headerName: _labels.isBlocked,
-      flex: 1
+      type: 'checkbox'
     },
     {
       field: 'isInactive',
       headerName: _labels.isInactive,
-      flex: 1
+      type: 'checkbox'
     }
   ]
 

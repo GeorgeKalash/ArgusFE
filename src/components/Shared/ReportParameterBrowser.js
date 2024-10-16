@@ -291,21 +291,21 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
     onSubmit: values => {
       setRpbParams([])
 
-      const processedArray = values?.parameters
-        ?.filter((item, index) => item?.fieldId && item?.value != null)
-        ?.reduce((acc, item) => {
-          if (item?.fieldId) {
-            acc[item.fieldId] = {
-              ...item,
-              value:
-                item.fieldKey === 'date' || item.fieldKey?.indexOf('Date') > -1 ? formatDateTo(item.value) : item.value
-            }
-          }
+      const array = items.reduce((acc, { id }) => {
+        const param = values?.parameters?.filter(item => item?.fieldId === id)?.[0]
 
-          return acc
-        }, [])
+        acc[id] = {
+          ...param,
+          value:
+            param?.fieldKey === 'date' || param?.fieldKey?.indexOf('Date') > -1
+              ? formatDateTo(param?.value)
+              : param?.value
+        }
 
-      setRpbParams(processedArray)
+        return acc
+      }, [])
+
+      setRpbParams(array)
       window.close()
     }
   })
@@ -325,7 +325,7 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
       })
     )
     if (list) {
-      stackError({ message: `${list} - has not in apiMappings` })
+      stackError({ message: `${list} - is not implemented` })
     }
     setItems(fieldComponentArray.filter(field => field !== null))
   }

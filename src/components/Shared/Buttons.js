@@ -114,6 +114,13 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'Receipt Voucher',
+    label: platformLabels.ReceiptVoucher,
+    color: '#231f20',
+    image: 'invoice.png',
+    main: false
+  },
+  {
     key: 'Tree',
     label: platformLabels.Tree,
     color: '#231f20',
@@ -319,4 +326,12 @@ export const getButtons = platformLabels => [
     image: 'popup-window.png',
     main: false
   },
+  {
+    key: 'OTP',
+    label: platformLabels.OTP,
+    color: 'transparent',
+    image: 'Close.png',
+    border: '1px solid #01a437',
+    main: false
+  }
 ]
