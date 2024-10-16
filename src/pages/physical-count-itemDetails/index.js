@@ -1,6 +1,5 @@
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import Table from 'src/components/Shared/Table'
 import { useContext, useEffect, useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -15,7 +14,8 @@ import FormShell from 'src/components/Shared/FormShell'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { useForm } from 'src/hooks/form'
 import * as yup from 'yup'
-import MetalSummary from 'src/components/Shared/MetalSummary'
+import { DataGrid } from 'src/components/Shared/DataGrid'
+import { InventoryRepository } from 'src/repositories/InventoryRepository'
 
 const PhysicalCountItemDe = () => {
   const { stack } = useWindow()
@@ -27,13 +27,8 @@ const PhysicalCountItemDe = () => {
   const [filteredItems, setFilteredItems] = useState([])
   const [editMode, setEditMode] = useState(false)
 
-  const {
-    labels: _labels,
-    refetch,
-    maxAccess
-  } = useResourceQuery({
-    queryFn: fetchGridData,
-    endpointId: SCRepository.StockCountItemDetail.qry,
+  const { labels: _labels, maxAccess } = useResourceQuery({
+    //queryFn: fetchGridData,
     datasetId: ResourceIds.IVPhysicalCountItemDetails
   })
 
@@ -43,7 +38,16 @@ const PhysicalCountItemDe = () => {
       siteId: '',
       controllerId: '',
       totalQty: '',
-      totalWeight: ''
+      totalWeight: '',
+      rows: [
+        {
+          id: 1,
+          sku: '',
+          itemName: '',
+          countedQty: 0,
+          weight: 0
+        }
+      ]
     },
     maxAccess,
     enableReinitialize: true,
@@ -52,37 +56,60 @@ const PhysicalCountItemDe = () => {
       stockCountId: yup.string().required(),
       siteId: yup.string().required(),
       controllerId: yup.string().required()
-    })
+    }),
+    onSubmit: values => {}
   })
 
-  async function fetchGridData() {
+  async function fetchGridData(stockCountId, siteId, controllerId) {
     //if (!formik.values.stockCountId || !formik.values.siteId) return
 
-    const res = await getRequest({
+    await getRequest({
       extension: SCRepository.StockCountItemDetail.qry,
-      parameters: `_stockCountId=${formik.values?.stockCountId}&_siteId=${formik.values?.siteId}&_controllerId=${formik.values?.controllerId}`
+      parameters: `_stockCountId=${stockCountId}&_siteId=${siteId}&_controllerId=${controllerId}`
     })
+      .then(res => {
+        if (!res.list) {
+          //print
+        } else {
+          //print
+          const modifiedList = res.list?.map(({ ...rest }, index) => ({
+            id: index + 1,
+            ...rest
+          }))
+          formik.setFieldValue('rows', modifiedList)
+        }
 
-    if (!res.list) {
-      //fill empty line
-      //print
-    } else {
-      //print
-      setData(res ?? { list: [] })
+        setEditMode(res.list.length > 0)
+
+        //handleClick(res.list)
+      })
+      .catch(error => {})
+  }
+
+  useEffect(() => {
+    if (!formik.values.stockCountId) {
+      setSiteStore([])
+      setControllerStore([])
+      setFilteredItems([])
+      setEditMode(false)
     }
+  }, [formik.values.stockCountId])
 
+  useEffect(() => {
+    setTotals(formik.values.rows)
+  }, [formik.values.rows])
+
+  const setTotals = gridList => {
     let sumQty = 0
     let sumWeight = 0
 
-    res.list.map(item => {
+    gridList.map(item => {
       sumQty += item.countedQty || 0
       sumWeight += item.weight || 0
     })
 
     formik.setFieldValue('totalQty', sumQty)
     formik.setFieldValue('totalWeight', sumWeight)
-
-    handleClick(res.list)
   }
 
   const fillSiteStore = stockCountId => {
@@ -117,53 +144,96 @@ const PhysicalCountItemDe = () => {
 
   const columns = [
     {
-      field: 'sku',
-      headerName: _labels.sku,
-      flex: 1
-    }, //another column
-    {
-      field: 'itemName',
-      headerName: _labels.itemName,
-      flex: 1
+      component: 'textfield',
+      name: 'skuText',
+      label: _labels.sku
+
+      //skuFocusLeaveHandler
     },
     {
-      field: 'countedQty', //editable
-      headerName: _labels.qty,
-      flex: 1
+      component: 'resourcelookup',
+      label: _labels.sku,
+      name: 'sku',
+      props: {
+        endpointId: InventoryRepository.Item.snapshot,
+
+        //parameters: '_type=',
+        displayField: 'sku',
+        valueField: 'sku',
+        columnsInDropDown: [
+          { key: 'sku', value: 'sku' },
+          { key: 'name', value: 'Name' },
+          { key: 'flName', value: 'FL Name' }
+        ],
+        mapping: [
+          { from: 'recordId', to: 'itemId' },
+          { from: 'name', to: 'itemName' },
+          { from: 'priceType', to: 'priceType' }
+        ]
+      }
+
+      //fill item weight
+      /*  async onChange({ row: { update, oldRow, newRow } }) {
+        if (newRow.accountId) {
+          update({
+            currencyRef: formValues.currencyRef,
+            currencyId: formValues.currencyId,
+            exRate: exRateValue
+          })
+
+          if (formValues.currencyId) {
+            const result = await getCurrencyApi(formValues.currencyId)
+
+            const result2 = result?.record
+            const exRate = result2?.exRate
+            const rateCalcMethod = result2?.rateCalcMethod
+
+            const updatedRateRow = getRate({
+              amount: newRow?.amount,
+              exRate: exRate,
+              baseAmount: newRow?.baseAmount,
+              rateCalcMethod: rateCalcMethod,
+              dirtyField: DIRTYFIELD_RATE
+            })
+            update({
+              exRate: updatedRateRow.exRate,
+              amount: updatedRateRow.amount,
+              baseAmount: updatedRateRow.baseAmount
+            })
+          }
+        }
+      } */
     },
     {
-      field: 'metalPurity',
-      headerName: _labels.metalPurity,
-      flex: 1
+      component: 'textfield',
+      name: 'itemName',
+      label: _labels.itemName
     },
     {
-      field: 'weight', //calculate footer
-      headerName: _labels.weight,
-      flex: 1
+      component: 'numberfield',
+      label: _labels.qty,
+      name: 'countedQty'
+
+      //calculate footer
+    },
+    {
+      component: 'numberfield',
+      label: _labels.weight,
+      name: 'weight', //calculate footer
+      props: {
+        readOnly: true
+      }
     }
   ]
 
-  useEffect(() => {
-    ;(async function () {
-      try {
-        await fetchGridData()
-      } catch (error) {}
-    })()
-  }, [formik.values.stockCountId, formik.values.siteId, formik.values.controllerId])
-
   const clearGrid = () => {
-    formik.resetForm({
-      values: formik.initialValues
-    })
+    formik.setFieldValue('rows', formik.initialValues.rows)
 
-    setData({ list: [] })
-    setSiteStore([])
-    setControllerStore([])
     setFilteredItems([])
     setEditMode(false)
   }
 
-  const handleClick = async dataList => {
+  /* const handleClick = async dataList => {
     try {
       setFilteredItems([])
 
@@ -188,18 +258,17 @@ const PhysicalCountItemDe = () => {
       condition: true,
       onClick: 'onClickMetal'
     }
-  ]
+  ] */
 
   return (
     <FormShell
       form={formik}
       isInfo={false}
-      isCleared={false}
       isSavedClear={false}
-      actions={actions}
+      //actions={actions}
       maxAccess={maxAccess}
       resourceId={ResourceIds.IVPhysicalCountItemDetails}
-      filteredItems={filteredItems}
+      //filteredItems={filteredItems}
       previewReport={editMode}
     >
       <VertLayout>
@@ -255,7 +324,7 @@ const PhysicalCountItemDe = () => {
                     setFilteredItems([])
                     clearGrid()
                   } else {
-                    fillControllerStore(formik.values.stockCountId, newValue?.recordId)
+                    fillControllerStore(formik.values.stockCountId, newValue?.siteId)
                   }
                 }}
                 error={formik.touched.siteId && Boolean(formik.errors.siteId)}
@@ -274,6 +343,7 @@ const PhysicalCountItemDe = () => {
                 readOnly={formik.values.controllerId}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('controllerId', newValue?.controllerId)
+                  fetchGridData(formik.values.stockCountId, formik.values.siteId, newValue?.controllerId)
                 }}
                 error={formik.touched.controllerId && Boolean(formik.errors.controllerId)}
                 maxAccess={maxAccess}
@@ -298,18 +368,13 @@ const PhysicalCountItemDe = () => {
           </Grid>
         </Fixed>
         <Grow>
-          <Table
+          <DataGrid
+            onChange={value => {
+              formik.setFieldValue('rows', value)
+            }}
+            value={formik.values?.rows}
+            error={formik.errors?.rows}
             columns={columns}
-            gridData={data ?? { list: [] }}
-            rowId={['recordId']}
-            setData={setData}
-            isLoading={false}
-            pageSize={50}
-            refetch={refetch}
-            paginationType='api'
-            pagination={false}
-            maxAccess={maxAccess}
-            textTransform={true}
           />
         </Grow>
         <Fixed>
