@@ -18,12 +18,16 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { useWindow } from 'src/windows'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import OpenMultiForm from './forms/OpenMultiForm'
+import { getStorageData } from 'src/storage/storage'
 
 const OpenMultiCurrencyCashTransfer = () => {
   const [data, setData] = useState([])
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
+  const userData = getStorageData('userData')
+
+  const _userId = userData.userId
 
   const fetchData = async () => {
     if (!formik.values.plantId) {
@@ -64,6 +68,17 @@ const OpenMultiCurrencyCashTransfer = () => {
       plantId: yup.string().required()
     })
   })
+
+  useEffect(() => {
+    ;(async function () {
+      const res = await getRequest({
+        extension: SystemRepository.UserDefaults.get,
+        parameters: `_userId=${_userId}&_key=plantId`
+      })
+
+      formik.setFieldValue('plantId', parseInt(res.record.value) || '')
+    })()
+  }, [])
 
   const rowColumns = [
     {
@@ -154,7 +169,7 @@ const OpenMultiCurrencyCashTransfer = () => {
     <VertLayout>
       <Fixed>
         <GridToolbar maxAccess={access} />
-        <Grid container spacing={3} sx={{ pl: 15, mb: 2 }}>
+        <Grid container spacing={3} sx={{ pl: 5, mb: 2 }}>
           <Grid item xs={4}>
             <ResourceComboBox
               endpointId={SystemRepository.Plant.qry}
