@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CountryForm from '../forms/CountryForm'
 
-const CountryWindow = ({ labels, maxAccess, recordId, height }) => {
+const CountryWindow = ({ labels, maxAccess, recordId }) => {
   const [activeTab, setActiveTab] = useState(0)
 
   const [store, setStore] = useState({
@@ -18,12 +18,11 @@ const CountryWindow = ({ labels, maxAccess, recordId, height }) => {
   return (
     <>
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-      <CustomTabPanel height={height} index={0} value={activeTab}>
+      <CustomTabPanel index={0} value={activeTab}>
         <CountryForm labels={labels} maxAccess={maxAccess} recordId={recordId} setStore={setStore} />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
         <InterfacesForm
-          height={height}
           labels={labels}
           resourceId={ResourceIds.Countries}
           recordId={store.recordId}
