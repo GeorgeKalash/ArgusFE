@@ -34,7 +34,7 @@ function dateToTimeStamp(date) {
 }
 
 const formatDateFromApi = date => {
-  const timestamp = date && parseInt(date.match(/\d+/)[0], 10)
+  const timestamp = date && parseInt(date.match(/-?\d+/)[0], 10)
 
   return timestamp ? timeStamptoDate(timestamp) : null
 }
