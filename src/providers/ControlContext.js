@@ -30,6 +30,20 @@ const ControlProvider = ({ children }) => {
     })
   }
 
+  const updateDefaults = data => {
+    const updatedDefaultsData = [...defaultsData.list, ...data].reduce((acc, obj) => {
+      const existing = acc.find(item => item.key === obj.key)
+      if (existing) {
+        existing.value = obj.value
+      } else {
+        acc.push({ ...obj, value: obj.value })
+      }
+
+      return acc
+    }, [])
+    setDefaultsData({ list: updatedDefaultsData })
+  }
+
   useEffect(() => {
     getPlatformLabels(ResourceIds.Common, setApiPlatformLabels)
   }, [user?.languageId, languageId])
@@ -80,7 +94,8 @@ const ControlProvider = ({ children }) => {
     getAccess,
     platformLabels,
     defaultsData,
-    setDefaultsData
+    setDefaultsData,
+    updateDefaults
   }
 
   return <ControlContext.Provider value={values}>{children}</ControlContext.Provider>

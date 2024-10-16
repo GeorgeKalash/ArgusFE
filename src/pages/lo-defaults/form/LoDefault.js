@@ -17,7 +17,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 const LoDefault = ({ _labels, access }) => {
   const [errorMessage, setErrorMessage] = useState(null)
   const { postRequest } = useContext(RequestsContext)
-  const { defaultsData, setDefaultsData } = useContext(ControlContext)
+  const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
 
   const [initialValues, setInitialValues] = useState({
     transitSiteId: null,
@@ -57,7 +57,8 @@ const LoDefault = ({ _labels, access }) => {
       extension: SystemRepository.Defaults.set,
       record: JSON.stringify({ SysDefaults: data })
     }).then(res => {
-      if (res) toast.success('Record Successfully')
+      if (res) toast.success(platformLabels.Edited)
+      updateDefaults(data)
     })
   }
 
