@@ -13,7 +13,7 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { ControlContext } from 'src/providers/ControlContext'
 
-export default function PropertiesForm({ labels, maxAccess, dimNum, id, window, refetch }) {
+export default function PropertiesForm({ labels, maxAccess, dimNum, id, window, fetchData }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -40,7 +40,7 @@ export default function PropertiesForm({ labels, maxAccess, dimNum, id, window, 
 
       toast.success(platformLabels.Updated)
 
-      refetch()
+      fetchData()
       window.close()
     }
   })

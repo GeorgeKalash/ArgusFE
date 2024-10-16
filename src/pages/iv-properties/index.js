@@ -84,7 +84,7 @@ const Properties = () => {
         id: id,
         maxAccess: access,
         dimNum,
-        refetch: refetch
+        fetchData: fetchData
       },
       width: 500,
       height: 270,
