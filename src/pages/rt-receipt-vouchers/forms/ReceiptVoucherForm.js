@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -25,8 +25,8 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { useWindow } from 'src/windows'
 import POSForm from './POSForm'
-import AuditForm from 'src/pages/outwards-transfer/Tabs/AuditForm'
 import NormalDialog from 'src/components/Shared/NormalDialog'
+import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
 
 export default function ReceiptVoucherForm({ labels, access, recordId, cashAccountId, form }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -58,6 +58,9 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
       owoId: null,
       owoRef: '',
       status: 1,
+      wip: null,
+      otpVertified: false,
+      clientId: null,
       cash: [
         {
           id: 1,
@@ -129,7 +132,8 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
         dtId: formik.values.dtId,
         amount: formik.values.amount,
         owoId: formik.values.owoId,
-        status: formik.values.status
+        status: formik.values.status,
+        otpVertified: formik.values.otpVertified
       }
 
       const cash = formik.values.cash.map((cash, index) => ({
@@ -170,6 +174,7 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
 
   const editMode = !!recordId || !!formik.values.recordId
   const isPosted = formik.values.status === 3
+  const isClosed = formik.values.wip === 2
 
   const getDefaultDT = async () => {
     const userData = getStorageData('userData')
@@ -194,7 +199,8 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
           ...formik.values,
           amount: form.values.amount,
           owoId: form.values.recordId,
-          owoRef: form.values.reference
+          owoRef: form.values.reference,
+          clientId: formik.values.clientId
         })
     })()
   }, [recordId])
@@ -259,6 +265,64 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
     }
   }
 
+  const onClose = () => {
+    const data = {
+      recordId: formik.values.recordId
+    }
+    postRequest({
+      extension: RemittanceOutwardsRepository.ReceiptVouchers.close,
+      record: JSON.stringify(data)
+    }).then(res => {
+      if (res?.recordId) {
+        toast.success(platformLabels.Closed)
+        invalidate()
+        getData(res?.recordId)
+      }
+    })
+  }
+
+  function viewOTP() {
+    stack({
+      Component: OTPPhoneVerification,
+      props: {
+        formValidation: formik,
+        recordId: formik.values.recordId,
+        functionId: SystemFunction.RemittanceReceiptVoucher,
+        onSuccess: () => {
+          onClose(formik.values.recordId)
+        }
+      },
+      width: 400,
+      height: 400,
+      title: labels.OTPVerification
+    })
+  }
+
+  async function onReopen() {
+    const obj = formik.values
+
+    const data = {
+      recordId: formik.values.recordId,
+      reference: formik.values.reference,
+      date: formatDateToApi(formik.values.date),
+      plantId: formik.values.plantId,
+      wip: formik.values.wip,
+      amount: formik.values.amount,
+      owoId: formik.values.owoId
+    }
+
+    const res = await postRequest({
+      extension: RemittanceOutwardsRepository.ReceiptVouchers.reopen,
+      record: JSON.stringify(data)
+    }).then(res => {
+      if (res.recordId) {
+        toast.success(platformLabels.Reopened)
+        invalidate()
+        getData(obj?.recordId)
+      }
+    })
+  }
+
   function openDialog(recordId) {
     stack({
       Component: NormalDialog,
@@ -268,19 +332,6 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
       width: 600,
       height: 200,
       title: platformLabels.Post
-    })
-  }
-
-  function openInfo() {
-    stack({
-      Component: AuditForm,
-      props: {
-        labels,
-        formik
-      },
-      width: 700,
-      height: 610,
-      title: labels.Audit
     })
   }
 
@@ -314,12 +365,6 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
       name: 'paidAmount',
       label: labels.paidAmount,
       defaultValue: '',
-      props: {
-        readOnly: true
-      },
-      propsReducer({ row, props }) {
-        return { ...props, readOnly: row.type == 1 || !row.type }
-      },
       async onChange({ row: { update, newRow } }) {
         const sumAmount = formik.values.cash.slice(0, -1).reduce((sum, row) => {
           const curValue = parseFloat(row.amount.toString().replace(/,/g, '')) || 0
@@ -419,10 +464,22 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
       disabled: isPosted || !editMode
     },
     {
-      key: 'Audit',
+      key: 'Close',
+      condition: !isClosed,
+      onClick: onClose,
+      disabled: isClosed || !editMode
+    },
+    {
+      key: 'Reopen',
+      condition: isClosed,
+      onClick: onReopen,
+      disabled: !isClosed || !editMode || formik.values.releaseStatus === 3
+    },
+    {
+      key: 'OTP',
       condition: true,
-      onClick: openInfo,
-      disabled: !editMode
+      onClick: viewOTP,
+      disabled: false
     }
   ]
 
@@ -487,6 +544,7 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
                     onChange={(event, newValue) => {
                       formik.setFieldValue('owoId', newValue ? newValue.recordId : '')
                       formik.setFieldValue('amount', newValue ? newValue.amount : '')
+                      formik.setFieldValue('clientId', newValue ? newValue.clientId : '')
                     }}
                   />
                 </Grid>
