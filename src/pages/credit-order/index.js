@@ -1,5 +1,5 @@
 import { useContext } from 'react'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import Table from 'src/components/Shared/Table'
@@ -16,28 +16,22 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { useError } from 'src/error'
+import { getStorageData } from 'src/storage/storage'
 
 const CreditOrder = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
-
-  const userData = window.sessionStorage.getItem('userData')
-    ? JSON.parse(window.sessionStorage.getItem('userData'))
-    : null
+  const userData = getStorageData('userData').userId
 
   const getPlantId = async () => {
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.UserDefaults.get,
-        parameters: `_userId=${userData && userData.userId}&_key=plantId`
-      })
+    const res = await getRequest({
+      extension: SystemRepository.UserDefaults.get,
+      parameters: `_userId=${userData}&_key=plantId`
+    })
 
-      return res?.record?.value
-    } catch (error) {
-      return ''
-    }
+    return res?.record?.value
   }
 
   async function fetchGridData(options = {}) {
@@ -50,6 +44,7 @@ const CreditOrder = () => {
 
     return { ...response, _startAt: _startAt }
   }
+
   async function fetchWithSearch({ qry }) {
     return await getRequest({
       extension: CTTRXrepository.CreditOrder.snapshot,
@@ -64,7 +59,8 @@ const CreditOrder = () => {
     search,
     refetch,
     clear,
-    access
+    access,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: CTTRXrepository.CreditOrder.page,
@@ -75,48 +71,26 @@ const CreditOrder = () => {
     }
   })
 
-  const invalidate = useInvalidate({
-    endpointId: CTTRXrepository.CreditOrder.page
-  })
-
   const { proxyAction } = useDocumentTypeProxy({
     functionId: SystemFunction.CurrencyCreditOrderPurchase,
-    action: async () => {
-      const plantId = await getPlantId()
-      if (plantId !== '') {
-        openFormWindow(null, plantId)
-      } else {
-        stackError({
-          message: `The user does not have a default plant`
-        })
-
-        return
-      }
-    },
+    action: openForm,
     hasDT: false
   })
 
-  const add = async () => {
-    proxyAction()
-  }
+  async function openForm(recordId) {
+    let plantId
 
-  async function openFormWindow(recordId) {
     if (!recordId) {
-      const plantId = await getPlantId()
-      if (plantId !== '') {
-        openForm('', plantId)
-      } else {
+      plantId = await getPlantId()
+      if (!plantId) {
         stackError({
-          message: `The user does not have a default plant`
+          message: labels.defaultPlant
         })
 
         return
       }
-    } else {
-      openForm(recordId)
     }
-  }
-  function openForm(recordId, plantId) {
+
     stack({
       Component: CreditOrderForm,
       props: {
@@ -132,8 +106,12 @@ const CreditOrder = () => {
     })
   }
 
+  const add = async () => {
+    proxyAction()
+  }
+
   const edit = obj => {
-    openFormWindow(obj.recordId)
+    openForm(obj.recordId)
   }
 
   const del = async obj => {
@@ -207,7 +185,7 @@ const CreditOrder = () => {
               flex: 1
             }
           ]}
-          gridData={data ?? { list: [] }}
+          gridData={data}
           rowId={['recordId']}
           onEdit={edit}
           refetch={refetch}
