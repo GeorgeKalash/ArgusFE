@@ -674,7 +674,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
-            <Grid item xs={8}>
+            <Grid item xs={8} marginTop={1}>
               <Grid container spacing={2}>
                 <Grid item xs={6}>
                   <ResourceComboBox
@@ -786,7 +786,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
                     readOnly={isPosted || isClosed}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik && formik.setFieldValue('carrierId', newValue ? newValue.recordId : '')
+                      formik.setFieldValue('carrierId', newValue ? newValue.recordId : '')
                     }}
                     error={formik.touched.carrierId && Boolean(formik.errors.carrierId)}
                   />
@@ -814,19 +814,21 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
                 </Grid>
               </Grid>
             </Grid>
-            <Grid item xs={4}>
-              <CustomTextArea
-                name='notes'
-                label={labels.notes}
-                value={formik?.values?.notes}
-                readOnly={isPosted || isClosed}
-                maxLength='200'
-                maxAccess={maxAccess}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('notes', '')}
-                error={formik.touched.notes && Boolean(formik.errors.notes)}
-              />
-              <Grid marginTop={3}>
+            <Grid container xs={4} spacing={2} style={{ marginTop: 0 }}>
+              <Grid item xs={12} marginLeft={2}>
+                <CustomTextArea
+                  name='notes'
+                  label={labels.notes}
+                  value={formik?.values?.notes}
+                  readOnly={isPosted || isClosed}
+                  maxLength='200'
+                  maxAccess={maxAccess}
+                  onChange={formik.handleChange}
+                  onClear={() => formik.setFieldValue('notes', '')}
+                  error={formik.touched.notes && Boolean(formik.errors.notes)}
+                />
+              </Grid>
+              <Grid item xs={12} marginLeft={2}>
                 <ResourceComboBox
                   endpointId={SystemRepository.Plant.qry}
                   name='plantId'
@@ -842,7 +844,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
                   maxAccess={maxAccess}
                   onClear={() => formik.setFieldValue('plantId', '')}
                   onChange={(event, newValue) => {
-                    formik && formik.setFieldValue('plantId', newValue?.recordId)
+                    formik.setFieldValue('plantId', newValue?.recordId)
                   }}
                   error={formik.touched.plantId && Boolean(formik.errors.plantId)}
                 />
