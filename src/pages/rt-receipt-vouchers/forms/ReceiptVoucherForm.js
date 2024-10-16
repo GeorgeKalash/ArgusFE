@@ -59,7 +59,7 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
       owoRef: '',
       status: 1,
       wip: null,
-      otpVertified: false,
+      otpVerified: false,
       clientId: null,
       cash: [
         {
@@ -175,6 +175,7 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
   const editMode = !!recordId || !!formik.values.recordId
   const isPosted = formik.values.status === 3
   const isClosed = formik.values.wip === 2
+  const isOTPVerified = formik.values.otpVerified
 
   const getDefaultDT = async () => {
     const userData = getStorageData('userData')
@@ -461,7 +462,7 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
       key: 'Post',
       condition: true,
       onClick: onPost,
-      disabled: isPosted || !editMode
+      disabled: isPosted || !editMode || !isOTPVerified || !isClosed
     },
     {
       key: 'Close',
