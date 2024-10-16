@@ -34,13 +34,11 @@ const Properties = () => {
       return
     }
 
-    try {
-      const response = await getRequest({
-        extension: InventoryRepository.Dimension.qry,
-        parameters: `_dimension=${dimensionNumber}`
-      })
-      setData(response || [])
-    } catch (error) {}
+    const response = await getRequest({
+      extension: InventoryRepository.Dimension.qry,
+      parameters: `_dimension=${dimensionNumber}`
+    })
+    setData(response || [])
   }
 
   const {
@@ -49,9 +47,9 @@ const Properties = () => {
     invalidate,
     refetch
   } = useResourceQuery({
-    queryFn: fetchData,
     endpointId: InventoryRepository.Dimension.qry,
-    datasetId: ResourceIds.IVDimension
+    datasetId: ResourceIds.IVDimension,
+    queryFn: fetchData
   })
 
   const { formik } = useForm({
@@ -86,7 +84,8 @@ const Properties = () => {
         labels: _labels,
         id: id,
         maxAccess: access,
-        dimNum
+        dimNum,
+        invalidate: invalidate
       },
       width: 500,
       height: 270,
@@ -105,14 +104,12 @@ const Properties = () => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: InventoryRepository.Dimension.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
+    await postRequest({
+      extension: InventoryRepository.Dimension.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   useEffect(() => {
@@ -121,17 +118,15 @@ const Properties = () => {
 
   useEffect(() => {
     ;(async function () {
-      try {
-        const res = await getRequest({
-          extension: SystemRepository.Defaults.qry,
-          parameters: `_filter=ivtDimension`
-        })
+      const res = await getRequest({
+        extension: SystemRepository.Defaults.qry,
+        parameters: `_filter=ivtDimension`
+      })
 
-        const firstValidKey = res.list.find(item => item.value !== '')?.key
-        if (firstValidKey) {
-          formik.setFieldValue('dimValue', firstValidKey)
-        }
-      } catch (exception) {}
+      const firstValidKey = res.list.find(item => item.value !== '')?.key
+      if (firstValidKey) {
+        formik.setFieldValue('dimValue', firstValidKey)
+      }
     })()
   }, [])
 
@@ -163,7 +158,7 @@ const Properties = () => {
       <Grow>
         <Table
           columns={rowColumns}
-          gridData={data || []}
+          gridData={data}
           rowId={['id']}
           pageSize={50}
           onEdit={edit}

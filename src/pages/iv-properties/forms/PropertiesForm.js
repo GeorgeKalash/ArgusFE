@@ -1,10 +1,9 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -14,13 +13,9 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { ControlContext } from 'src/providers/ControlContext'
 
-export default function PropertiesForm({ labels, maxAccess, dimNum, id, window }) {
+export default function PropertiesForm({ labels, maxAccess, dimNum, id, window, invalidate }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-
-  const invalidate = useInvalidate({
-    endpointId: InventoryRepository.Dimension.qry
-  })
 
   const { formik } = useForm({
     initialValues: {
@@ -36,13 +31,11 @@ export default function PropertiesForm({ labels, maxAccess, dimNum, id, window }
       id: yup.string().required()
     }),
     onSubmit: async obj => {
-      const id = obj?.id
-
       const response = await postRequest({
         extension: InventoryRepository.Dimension.set,
         record: JSON.stringify(obj)
       })
-      if (!id) {
+      if (!obj?.id) {
         toast.success(platformLabels.Added)
       } else toast.success(platformLabels.Edited)
 
@@ -53,18 +46,14 @@ export default function PropertiesForm({ labels, maxAccess, dimNum, id, window }
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (id) {
-          const res = await getRequest({
-            extension: InventoryRepository.Dimension.get,
-            parameters: `_dimension=${dimNum}&_id=${id}`
-          })
+      if (id) {
+        const res = await getRequest({
+          extension: InventoryRepository.Dimension.get,
+          parameters: `_dimension=${dimNum}&_id=${id}`
+        })
 
-          if (res && res.record) {
-            formik.setValues(res.record)
-          }
-        }
-      } catch (exception) {}
+        formik.setValues(res.record)
+      }
     })()
   }, [id])
 
