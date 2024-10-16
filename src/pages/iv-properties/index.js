@@ -44,7 +44,6 @@ const Properties = () => {
   const {
     labels: _labels,
     access,
-    invalidate,
     refetch
   } = useResourceQuery({
     endpointId: InventoryRepository.Dimension.qry,
@@ -85,7 +84,7 @@ const Properties = () => {
         id: id,
         maxAccess: access,
         dimNum,
-        invalidate: invalidate
+        refetch: refetch
       },
       width: 500,
       height: 270,
@@ -108,7 +107,7 @@ const Properties = () => {
       extension: InventoryRepository.Dimension.del,
       record: JSON.stringify(obj)
     })
-    invalidate()
+    refetch()
     toast.success(platformLabels.Deleted)
   }
 

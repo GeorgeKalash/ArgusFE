@@ -13,7 +13,7 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { ControlContext } from 'src/providers/ControlContext'
 
-export default function PropertiesForm({ labels, maxAccess, dimNum, id, window, invalidate }) {
+export default function PropertiesForm({ labels, maxAccess, dimNum, id, window, refetch }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -31,15 +31,16 @@ export default function PropertiesForm({ labels, maxAccess, dimNum, id, window, 
       id: yup.string().required()
     }),
     onSubmit: async obj => {
+      const id = obj.id
+
       const response = await postRequest({
         extension: InventoryRepository.Dimension.set,
         record: JSON.stringify(obj)
       })
-      if (!obj?.id) {
-        toast.success(platformLabels.Added)
-      } else toast.success(platformLabels.Edited)
 
-      invalidate()
+      toast.success(platformLabels.Updated)
+
+      refetch()
       window.close()
     }
   })
