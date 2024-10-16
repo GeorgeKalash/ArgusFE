@@ -133,7 +133,8 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
         amount: formik.values.amount,
         owoId: formik.values.owoId,
         status: formik.values.status,
-        otpVertified: formik.values.otpVertified
+        otpVertified: formik.values.otpVertified,
+        clientId: formik.values.clientId
       }
 
       const cash = formik.values.cash.map((cash, index) => ({
@@ -201,7 +202,7 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
           amount: form.values.amount,
           owoId: form.values.recordId,
           owoRef: form.values.reference,
-          clientId: formik.values.clientId
+          clientId: form.values.clientId
         })
     })()
   }, [recordId])
@@ -240,7 +241,8 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
       dtId: formik.values.dtId,
       amount: formik.values.amount,
       owoId: formik.values.owoId,
-      status: formik.values.status
+      status: formik.values.status,
+      clientId: formik.values.clientId
     }
 
     const totalCashAmount = formik.values.cash
@@ -309,7 +311,8 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
       plantId: formik.values.plantId,
       wip: formik.values.wip,
       amount: formik.values.amount,
-      owoId: formik.values.owoId
+      owoId: formik.values.owoId,
+      clientId: formik.values.clientId
     }
 
     const res = await postRequest({
@@ -545,7 +548,8 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
                     onChange={(event, newValue) => {
                       formik.setFieldValue('owoId', newValue ? newValue.recordId : '')
                       formik.setFieldValue('amount', newValue ? newValue.amount : '')
-                      formik.setFieldValue('clientId', newValue ? newValue.clientId : '')
+
+                      // formik.setFieldValue('clientId', newValue ? newValue.clientId : '')
                     }}
                   />
                 </Grid>
