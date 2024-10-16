@@ -48,8 +48,8 @@ const Properties = () => {
     refetch
   } = useResourceQuery({
     endpointId: InventoryRepository.Dimension.qry,
-    datasetId: ResourceIds.IVDimension,
-    queryFn: fetchData
+    queryFn: fetchData,
+    datasetId: ResourceIds.IVDimension
   })
 
   const { formik } = useForm({
