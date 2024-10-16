@@ -95,7 +95,6 @@ export const CashBankRepository = {
   },
   OpenMultiCurrencyCashTransfer: {
     open: service + 'openTFM',
-    set: service + 'postTFM2',
-    get: service + 'getTFM'
+    set: service + 'postTFM2'
   }
 }
