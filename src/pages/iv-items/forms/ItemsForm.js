@@ -134,6 +134,11 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
           parameters: `_recordId=${response.recordId}`
         })
 
+        setStore(prevStore => ({
+          ...prevStore,
+          _reference: res.record.sku
+        }))
+
         formik.setFieldValue('sku', res.record.sku)
       } catch (error) {}
 
