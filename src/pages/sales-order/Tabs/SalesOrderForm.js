@@ -370,6 +370,7 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
       label: labels.markdown,
       name: 'mdAmount',
       updateOn: 'blur',
+      flex: 2,
       async onChange({ row: { update, newRow } }) {
         getItemPriceRow(update, newRow, DIRTYFIELD_MDAMOUNT)
         checkMdAmountPct(newRow, update)
