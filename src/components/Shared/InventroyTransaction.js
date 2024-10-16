@@ -69,7 +69,7 @@ const InventoryTransaction = props => {
     })
     let totalExtendedCosts = 0
 
-    res.list = res.list.map(item => {
+    res.list = res?.list?.map(item => {
       const amt = item.amount == null ? 0 : item.amount;
       item.extendedCost = item.qty * amt
 
