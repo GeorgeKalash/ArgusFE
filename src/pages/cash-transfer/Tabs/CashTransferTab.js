@@ -97,12 +97,17 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
       fromPlantId: yup.string().required(),
       date: yup.string().required(),
       toPlantId: yup.string().required(),
+      toCashAccountId: yup
+        .string()
+        .nullable()
+        .test('', function (value) {
+          const { fromPlantId, toPlantId } = this.parent
+          if (fromPlantId == toPlantId) {
+            return !!value
+          }
 
-      // toCashAccountId: yup.string().when('fromPlantId', {
-      //   is: fromPlantId => fromPlantId !== formik.values.toPlantId,
-      //   then: yup.string().required(),
-      //   otherwise: yup.string().nullable()
-      // }),
+          return true
+        }),
       transfers: yup
         .array()
         .of(
@@ -472,7 +477,7 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
                   displayField='name'
                   name='toCashAccountId'
                   displayFieldWidth={2}
-                  required={formik.values.fromPlantId != formik.values.toPlantId}
+                  required={formik.values.fromPlantId === formik.values.toPlantId}
                   readOnly={!formik.values.toPlantId || isClosed}
                   label={labels.toCashAcc}
                   form={formik}
