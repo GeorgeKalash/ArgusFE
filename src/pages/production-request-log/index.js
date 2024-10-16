@@ -55,14 +55,15 @@ const ProductionRequestLog = () => {
       headerName: _labels.sku,
       flex: 1
     },
+
     {
-      field: 'qty',
-      headerName: _labels.qty,
+      field: 'itemName',
+      headerName: _labels.description,
       flex: 1
     },
     {
-      field: 'description',
-      headerName: _labels.description,
+      field: 'qty',
+      headerName: _labels.qty,
       flex: 1
     }
   ]
