@@ -96,7 +96,7 @@ const UserTextForm = () => {
   }
 
   const { labels: _labels } = useResourceQuery({
-    datasetId: ResourceIds.FI_dimensions
+    datasetId: ResourceIds.UserDefined
   })
 
   const postDimensionSettings = async obj => {
@@ -151,7 +151,7 @@ const UserTextForm = () => {
           <Grid item xs={12} sx={{ marginTop: '0.5rem' }}>
             <CustomTextField
               name='ivtUDTCount'
-              label={_labels.ivtUDTCount}
+              label={_labels.propertiesCount}
               value={stagingDimCount === null ? formik.values.ivtUDTCount : stagingDimCount}
               onChange={handleDimCountChange}
               onBlur={handleDimCountBlur}
@@ -177,7 +177,7 @@ const UserTextForm = () => {
                   <CustomTextField
                     key={index}
                     name={`ivtUDT${index + 1}`}
-                    label={`${_labels.Dim} ${index + 1}`}
+                    label={`${_labels.property} ${index + 1}`}
                     value={formik.values[`ivtUDT${index + 1}`]}
                     onClear={() => formik.setFieldValue(`ivtUDT${index + 1}`, '')}
                     onChange={formik.handleChange}
@@ -198,7 +198,7 @@ const UserTextForm = () => {
                   <CustomTextField
                     key={index + 10}
                     name={`ivtUDT${index + 11}`}
-                    label={`${_labels.Dim} ${index + 11}`}
+                    label={`${_labels.property} ${index + 11}`}
                     value={formik.values[`ivtUDT${index + 11}`]}
                     onClear={() => formik.setFieldValue(`ivtUDT${index + 11}`, '')}
                     onChange={formik.handleChange}

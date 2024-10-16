@@ -95,10 +95,6 @@ const UserDifinedForm = () => {
       .catch(error => {})
   }
 
-  const { labels: _labels } = useResourceQuery({
-    datasetId: ResourceIds.UserDefined
-  })
-
   const postDimensionSettings = async obj => {
     var dataToPost = [{ key: 'ivtDimCount', value: obj.ivtDimCount }]
     for (let i = 1; i <= 20; i++) {
@@ -143,6 +139,10 @@ const UserDifinedForm = () => {
       })
     }
   }
+
+  const { labels: _labels } = useResourceQuery({
+    datasetId: ResourceIds.UserDefined
+  })
 
   return (
     <VertLayout>
