@@ -107,7 +107,7 @@ const Properties = () => {
       extension: InventoryRepository.Dimension.del,
       record: JSON.stringify(obj)
     })
-    refetch()
+    fetchData()
     toast.success(platformLabels.Deleted)
   }
 
