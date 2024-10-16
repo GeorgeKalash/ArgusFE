@@ -113,102 +113,100 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
         .required()
     }),
     onSubmit: async values => {
-      try {
-        const copy = { ...values }
-        delete copy.transfers
-        copy.date = !!copy.date ? formatDateToApi(copy.date) : null
-        copy.closedDate = !!copy.closedDate ? formatDateToApi(copy.closedDate) : null
-        copy.receivedDate = !!copy.receivedDate ? formatDateToApi(copy.receivedDate) : null
-        copy.status = copy.status === '' ? 1 : copy.status
-        copy.wip = copy.wip === '' ? 1 : copy.wip
+      const copy = { ...values }
+      delete copy.transfers
+      copy.date = !!copy.date ? formatDateToApi(copy.date) : null
+      copy.closedDate = !!copy.closedDate ? formatDateToApi(copy.closedDate) : null
+      copy.receivedDate = !!copy.receivedDate ? formatDateToApi(copy.receivedDate) : null
+      copy.status = copy.status === '' ? 1 : copy.status
+      copy.wip = copy.wip === '' ? 1 : copy.wip
 
-        const updatedRows = formik?.values?.transfers.map((transferDetail, index) => {
-          return {
-            ...transferDetail,
-            seqNo: index + 1,
-            transferId: formik.values.recordId || 0
-          }
-        })
-        if (values.fromSiteId === values.toSiteId) {
-          stackError({
-            message: `Cannot have same from and to site`
-          })
-
-          return
+      const updatedRows = formik?.values?.transfers.map((transferDetail, index) => {
+        return {
+          ...transferDetail,
+          seqNo: index + 1,
+          transferId: formik.values.recordId || 0
         }
-
-        const resultObject = {
-          header: copy,
-          items: updatedRows,
-          serials: [],
-          lots: []
-        }
-
-        let notificationData
-
-        const res = await postRequest({
-          extension: InventoryRepository.MaterialsTransfer.set2,
-          record: JSON.stringify(resultObject)
+      })
+      if (values.fromSiteId === values.toSiteId) {
+        stackError({
+          message: `Cannot have same from and to site`
         })
 
-        if (!values.recordId) {
-          toast.success(platformLabels.Added)
-          formik.setFieldValue('recordId', res.recordId)
+        return
+      }
 
-          const res2 = await getRequest({
-            extension: InventoryRepository.MaterialsTransfer.get,
-            parameters: `_recordId=${res.recordId}`
+      const resultObject = {
+        header: copy,
+        items: updatedRows,
+        serials: [],
+        lots: []
+      }
+
+      let notificationData
+
+      const res = await postRequest({
+        extension: InventoryRepository.MaterialsTransfer.set2,
+        record: JSON.stringify(resultObject)
+      })
+
+      if (!values.recordId) {
+        toast.success(platformLabels.Added)
+        formik.setFieldValue('recordId', res.recordId)
+
+        const res2 = await getRequest({
+          extension: InventoryRepository.MaterialsTransfer.get,
+          parameters: `_recordId=${res.recordId}`
+        })
+
+        formik.setFieldValue('reference', res2.record.reference)
+
+        if (!!formik.values.notificationGroupId) {
+          notificationData = {
+            recordId: res.recordId,
+            functionId: SystemFunction.MaterialTransfer,
+            notificationGroupId: formik.values.notificationGroupId,
+            date: formik.values.date,
+            reference: res2.record.reference,
+            status: 1
+          }
+
+          await postRequest({
+            extension: AccessControlRepository.Notification.set,
+            record: JSON.stringify(notificationData)
           })
-
-          formik.setFieldValue('reference', res2.record.reference)
-
-          if (!!formik.values.notificationGroupId) {
-            notificationData = {
-              recordId: res.recordId,
-              functionId: SystemFunction.MaterialTransfer,
-              notificationGroupId: formik.values.notificationGroupId,
-              date: formik.values.date,
-              reference: res2.record.reference,
-              status: 1
-            }
-
-            await postRequest({
-              extension: AccessControlRepository.Notification.set,
-              record: JSON.stringify(notificationData)
-            })
-          }
-          invalidate()
-        } else {
-          if (formik.values.notificationGroupId) {
-            notificationData = {
-              recordId: res.recordId,
-              functionId: SystemFunction.MaterialTransfer,
-              notificationGroupId: formik.values.notificationGroupId,
-              date: formik.values.date,
-              reference: formik.values.reference,
-              status: 1
-            }
-
-            await postRequest({
-              extension: AccessControlRepository.Notification.set,
-              record: JSON.stringify(notificationData)
-            })
-          } else if (!formik.values.notificationGroupId) {
-            const data = {
-              recordId: res.recordId,
-              functionId: SystemFunction.MaterialTransfer,
-              notificationGroupId: 0
-            }
-
-            await postRequest({
-              extension: AccessControlRepository.Notification.del,
-              record: JSON.stringify(data)
-            })
-          }
-
-          toast.success(platformLabels.Edited)
         }
-      } catch (error) {}
+        invalidate()
+      } else {
+        if (formik.values.notificationGroupId) {
+          notificationData = {
+            recordId: res.recordId,
+            functionId: SystemFunction.MaterialTransfer,
+            notificationGroupId: formik.values.notificationGroupId,
+            date: formik.values.date,
+            reference: formik.values.reference,
+            status: 1
+          }
+
+          await postRequest({
+            extension: AccessControlRepository.Notification.set,
+            record: JSON.stringify(notificationData)
+          })
+        } else if (!formik.values.notificationGroupId) {
+          const data = {
+            recordId: res.recordId,
+            functionId: SystemFunction.MaterialTransfer,
+            notificationGroupId: 0
+          }
+
+          await postRequest({
+            extension: AccessControlRepository.Notification.del,
+            record: JSON.stringify(data)
+          })
+        }
+
+        toast.success(platformLabels.Edited)
+      }
     }
   })
 
@@ -274,14 +272,12 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
   )
 
   const getMeasurementUnits = async msId => {
-    try {
-      const res = await getRequest({
-        extension: InventoryRepository.MeasurementUnit.qry,
-        parameters: `_msId=${msId}`
-      })
+    const res = await getRequest({
+      extension: InventoryRepository.MeasurementUnit.qry,
+      parameters: `_msId=${msId}`
+    })
 
-      return res
-    } catch (error) {}
+    return res
   }
 
   const columns = [
@@ -311,31 +307,29 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
         ]
       },
       async onChange({ row: { update, oldRow, newRow } }) {
-        try {
-          if (newRow?.itemId) {
-            const { weight, metalId } = await getWeightAndMetalId(newRow?.itemId)
-            const unitCost = (await getUnitCost(newRow?.itemId)) ?? 0
-            const totalCost = calcTotalCost(newRow)
+        if (newRow?.itemId) {
+          const { weight, metalId } = await getWeightAndMetalId(newRow?.itemId)
+          const unitCost = (await getUnitCost(newRow?.itemId)) ?? 0
+          const totalCost = calcTotalCost(newRow)
 
-            const res = await getMeasurementUnits(newRow?.msId)
+          const res = await getMeasurementUnits(newRow?.msId)
 
-            setFilters(prev => {
-              const updatedFilters = { ...prev, [newRow.itemId]: res }
+          setFilters(prev => {
+            const updatedFilters = { ...prev, [newRow.itemId]: res }
 
-              update({
-                weight,
-                unitCost,
-                totalCost,
-                msId: newRow?.msId,
-                muRef: updatedFilters?.[newRow?.itemId]?.list?.[0]?.reference,
-                muId: updatedFilters?.[newRow?.itemId]?.list?.[0]?.recordId,
-                metalId
-              })
-
-              return updatedFilters
+            update({
+              weight,
+              unitCost,
+              totalCost,
+              msId: newRow?.msId,
+              muRef: updatedFilters?.[newRow?.itemId]?.list?.[0]?.reference,
+              muId: updatedFilters?.[newRow?.itemId]?.list?.[0]?.recordId,
+              metalId
             })
-          }
-        } catch (exception) {}
+
+            return updatedFilters
+          })
+        }
       }
     },
     {
@@ -371,16 +365,14 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
         return { ...props, store: filters[row.itemId]?.list ?? [] }
       },
       async onChange({ row: { update, newRow } }) {
-        try {
-          if (newRow) {
-            const qtyInBase = newRow?.qty * newRow?.muQty
+        if (newRow) {
+          const qtyInBase = newRow?.qty * newRow?.muQty
 
-            update({
-              qtyInBase,
-              muQty: newRow?.muQty
-            })
-          }
-        } catch (exception) {}
+          update({
+            qtyInBase,
+            muQty: newRow?.muQty
+          })
+        }
       }
     },
     {
@@ -396,17 +388,15 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       label: labels.qty,
       name: 'qty',
       async onChange({ row: { update, oldRow, newRow } }) {
-        try {
-          if (newRow) {
-            const totalCost = calcTotalCost(newRow)
-            const qtyInBase = newRow?.qty * newRow?.muQty
+        if (newRow) {
+          const totalCost = calcTotalCost(newRow)
+          const qtyInBase = newRow?.qty * newRow?.muQty
 
-            update({
-              totalCost,
-              qtyInBase
-            })
-          }
-        } catch (exception) {}
+          update({
+            totalCost,
+            qtyInBase
+          })
+        }
       }
     },
     {
@@ -414,15 +404,13 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       label: labels.unitCost,
       name: 'unitCost',
       async onChange({ row: { update, oldRow, newRow } }) {
-        try {
-          if (newRow) {
-            const totalCost = calcTotalCost(newRow)
+        if (newRow) {
+          const totalCost = calcTotalCost(newRow)
 
-            update({
-              totalCost
-            })
-          }
-        } catch (exception) {}
+          update({
+            totalCost
+          })
+        }
       }
     },
     {
@@ -430,26 +418,22 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       label: labels.totalCost,
       name: 'totalCost',
       async onChange({ row: { update, newRow, oldRow } }) {
-        try {
-          if (newRow?.totalCost) {
-            const unitCost = calcUnitCost(newRow, newRow.totalCost)
+        if (newRow?.totalCost) {
+          const unitCost = calcUnitCost(newRow, newRow.totalCost)
 
-            update({
-              unitCost: unitCost.toFixed(2)
-            })
-          }
-        } catch (exception) {}
+          update({
+            unitCost: unitCost.toFixed(2)
+          })
+        }
       }
     }
   ]
 
   async function getData(recordId) {
-    try {
-      return await getRequest({
-        extension: InventoryRepository.MaterialsTransfer.get,
-        parameters: `_recordId=${recordId}`
-      })
-    } catch (error) {}
+    return await getRequest({
+      extension: InventoryRepository.MaterialsTransfer.get,
+      parameters: `_recordId=${recordId}`
+    })
   }
 
   async function refetchForm(recordId) {
@@ -476,36 +460,32 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
   }
 
   const onClose = async recId => {
-    try {
-      const res = await postRequest({
-        extension: InventoryRepository.MaterialsTransfer.close,
-        record: JSON.stringify({ recordId: recId })
-      })
+    const res = await postRequest({
+      extension: InventoryRepository.MaterialsTransfer.close,
+      record: JSON.stringify({ recordId: recId })
+    })
 
-      toast.success(platformLabels.Closed)
-      invalidate()
-      await refetchForm(formik.values.recordId)
-    } catch (error) {}
+    toast.success(platformLabels.Closed)
+    invalidate()
+    await refetchForm(formik.values.recordId)
   }
 
   async function onReopen() {
-    try {
-      const copy = { ...formik.values }
-      delete copy.transfers
-      delete copy.notificationGroupId
-      copy.date = !!copy.date ? formatDateToApi(copy.date) : null
-      copy.closedDate = !!copy.closedDate ? formatDateToApi(copy.closedDate) : null
-      copy.receivedDate = !!copy.receivedDate ? formatDateToApi(copy.receivedDate) : null
+    const copy = { ...formik.values }
+    delete copy.transfers
+    delete copy.notificationGroupId
+    copy.date = !!copy.date ? formatDateToApi(copy.date) : null
+    copy.closedDate = !!copy.closedDate ? formatDateToApi(copy.closedDate) : null
+    copy.receivedDate = !!copy.receivedDate ? formatDateToApi(copy.receivedDate) : null
 
-      await postRequest({
-        extension: InventoryRepository.MaterialsTransfer.reopen,
-        record: JSON.stringify(copy)
-      })
+    await postRequest({
+      extension: InventoryRepository.MaterialsTransfer.reopen,
+      record: JSON.stringify(copy)
+    })
 
-      toast.success(platformLabels.Reopened)
-      invalidate()
-      await refetchForm(formik.values.recordId)
-    } catch (error) {}
+    toast.success(platformLabels.Reopened)
+    invalidate()
+    await refetchForm(formik.values.recordId)
   }
 
   const onWorkFlowClick = async () => {
@@ -521,52 +501,50 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
   }
 
   const onPost = async () => {
-    try {
-      const copy = { ...formik.values }
-      delete copy.transfers
-      delete copy.notificationGroupId
-      copy.date = !!copy.date ? formatDateToApi(copy.date) : null
-      copy.closedDate = !!copy.closedDate ? formatDateToApi(copy.closedDate) : null
-      copy.receivedDate = !!copy.receivedDate ? formatDateToApi(copy.receivedDate) : null
+    const copy = { ...formik.values }
+    delete copy.transfers
+    delete copy.notificationGroupId
+    copy.date = !!copy.date ? formatDateToApi(copy.date) : null
+    copy.closedDate = !!copy.closedDate ? formatDateToApi(copy.closedDate) : null
+    copy.receivedDate = !!copy.receivedDate ? formatDateToApi(copy.receivedDate) : null
 
-      const res = await postRequest({
-        extension: InventoryRepository.MaterialsTransfer.post,
-        record: JSON.stringify(copy)
-      })
+    const res = await postRequest({
+      extension: InventoryRepository.MaterialsTransfer.post,
+      record: JSON.stringify(copy)
+    })
 
-      let notificationData
+    let notificationData
 
-      if (formik.values.notificationGroupId) {
-        notificationData = {
-          recordId: res.recordId,
-          functionId: SystemFunction.MaterialTransfer,
-          notificationGroupId: formik.values.notificationGroupId,
-          date: formik.values.date,
-          reference: formik.values.reference,
-          status: 3
-        }
-
-        await postRequest({
-          extension: AccessControlRepository.Notification.set,
-          record: JSON.stringify(notificationData)
-        })
-      } else if (!formik.values.notificationGroupId) {
-        const data = {
-          recordId: res.recordId,
-          functionId: SystemFunction.MaterialTransfer,
-          notificationGroupId: 0
-        }
-
-        await postRequest({
-          extension: AccessControlRepository.Notification.del,
-          record: JSON.stringify(data)
-        })
+    if (formik.values.notificationGroupId) {
+      notificationData = {
+        recordId: res.recordId,
+        functionId: SystemFunction.MaterialTransfer,
+        notificationGroupId: formik.values.notificationGroupId,
+        date: formik.values.date,
+        reference: formik.values.reference,
+        status: 3
       }
 
-      toast.success(platformLabels.Posted)
-      invalidate()
-      await refetchForm(res.recordId)
-    } catch (error) {}
+      await postRequest({
+        extension: AccessControlRepository.Notification.set,
+        record: JSON.stringify(notificationData)
+      })
+    } else if (!formik.values.notificationGroupId) {
+      const data = {
+        recordId: res.recordId,
+        functionId: SystemFunction.MaterialTransfer,
+        notificationGroupId: 0
+      }
+
+      await postRequest({
+        extension: AccessControlRepository.Notification.del,
+        record: JSON.stringify(data)
+      })
+    }
+
+    toast.success(platformLabels.Posted)
+    invalidate()
+    await refetchForm(res.recordId)
   }
 
   const actions = [
@@ -617,46 +595,40 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
   ]
 
   async function getNotificationData(recordId) {
-    try {
-      return await getRequest({
-        extension: AccessControlRepository.Notification.get,
-        parameters: `_recordId=${recordId}&_functionId=${SystemFunction.MaterialTransfer}`
-      })
-    } catch (error) {}
+    return await getRequest({
+      extension: AccessControlRepository.Notification.get,
+      parameters: `_recordId=${recordId}&_functionId=${SystemFunction.MaterialTransfer}`
+    })
   }
 
   async function getDataGrid() {
-    try {
-      return await getRequest({
-        extension: InventoryRepository.MaterialsTransferItems.qry,
-        parameters: `_transferId=${recordId}&_functionId=${SystemFunction.MaterialTransfer}`
-      })
-    } catch (error) {}
+    return await getRequest({
+      extension: InventoryRepository.MaterialsTransferItems.qry,
+      parameters: `_transferId=${recordId}&_functionId=${SystemFunction.MaterialTransfer}`
+    })
   }
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getData(recordId)
-          const resNotification = await getNotificationData(recordId)
-          const res3 = await getDataGrid()
+      if (recordId) {
+        const res = await getData(recordId)
+        const resNotification = await getNotificationData(recordId)
+        const res3 = await getDataGrid()
 
-          formik.setValues({
-            ...res.record,
-            transfers: res3.list.map(item => ({
-              ...item,
-              id: item.seqNo,
-              totalCost: calcTotalCost(item),
-              unitCost: item.unitCost ?? 0
-            })),
-            notificationGroupId: resNotification?.record?.notificationGroupId,
-            receivedDate: !!res?.record?.receivedDate ? formatDateFromApi(res?.record?.receivedDate) : null,
-            closedDate: !!res?.record?.closedDate ? formatDateFromApi(res?.record?.closedDate) : null,
-            date: !!res?.record?.date ? formatDateFromApi(res?.record?.date) : null
-          })
-        }
-      } catch (error) {}
+        formik.setValues({
+          ...res.record,
+          transfers: res3.list.map(item => ({
+            ...item,
+            id: item.seqNo,
+            totalCost: calcTotalCost(item),
+            unitCost: item.unitCost ?? 0
+          })),
+          notificationGroupId: resNotification?.record?.notificationGroupId,
+          receivedDate: !!res?.record?.receivedDate ? formatDateFromApi(res?.record?.receivedDate) : null,
+          closedDate: !!res?.record?.closedDate ? formatDateFromApi(res?.record?.closedDate) : null,
+          date: !!res?.record?.date ? formatDateFromApi(res?.record?.date) : null
+        })
+      }
     })()
   }, [])
 
