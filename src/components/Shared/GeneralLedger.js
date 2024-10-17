@@ -292,7 +292,7 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
 
       const response = await getRequest({
         extension: MultiCurrencyRepository.Currency.get,
-        parameters: `_currencyId=${_currencyId}&_date=${formatDateToApiFunction(
+        parameters: `_currencyId=${_currencyId}&_date=${formatDateToApi(
           formValues.date
         )}&_rateDivision=${_rateDivision}`
       })

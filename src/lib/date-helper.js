@@ -65,26 +65,13 @@ const formatDateToApi = date => {
 }
 
 //should be edited by Omar
-const formatDateToApiFunction = value => {
-  var date = value
-  date = new Date(date)
-  date = date.toLocaleDateString('en-US', {
-    weekday: 'short',
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-  })
+function formatDateForGetApI(dateString) {
+  const date = new Date(dateString)
+  const year = date.getFullYear()
+  const month = date.getMonth() + 1
+  const day = date.getDate()
 
-  const parsedDate = new Date(date)
-
-  // Format the date as "yyyy-MM-dd"
-  const year = parsedDate.getFullYear()
-  const month = String(parsedDate.getMonth() + 1).padStart(2, '0') // Months are 0-based
-  const day = String(parsedDate.getDate()).padStart(2, '0')
-
-  const formattedDateYYYYMMDD = `${year}-${month}-${day}`
-
-  return formattedDateYYYYMMDD
+  return `${year}-${month}-${day}`
 }
 
 function formatDateDefault(date) {
@@ -122,11 +109,10 @@ function formatTimestampToDate(timestamp) {
 
   return formattedDate
 }
+
 function getTimeInTimeZone(dateString) {
-  console.log(dateString, dateString)
   const timestamp = parseInt(dateString?.match(/\/Date\((\d+)\)\//)[1], 10)
   const date = new Date(timestamp)
-  console.log(date)
   let hours = date.getHours()
   let minutes = date.getMinutes()
   let seconds = date.getSeconds()
@@ -149,7 +135,7 @@ const formatDate = dateString => {
 export {
   formatDateFromApi,
   formatDateToApi,
-  formatDateToApiFunction,
+  formatDateForGetApI,
   formatDateDefault,
   formatTimestampToDate,
   formatDateFromApiInline,
