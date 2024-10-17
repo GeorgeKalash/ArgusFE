@@ -325,5 +325,13 @@ export const getButtons = platformLabels => [
     color: '#231f20',
     image: 'wallet-to-bank-icon.png',
     main: false
+  },
+  {
+    key: 'OTP',
+    label: platformLabels.OTP,
+    color: 'transparent',
+    image: 'Close.png',
+    border: '1px solid #01a437',
+    main: false
   }
 ]

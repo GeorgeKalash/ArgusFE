@@ -278,5 +278,7 @@ export const ResourceIds = {
   SalesInvoice: 51303,
   SaleReturn: 51304,
   ClientGOCOut: 51305,
-  ClientGOCIn: 51306
+  ClientGOCIn: 51306,
+  OpenMultiCurrencyCashTransfer: 33315,
+  LockedRecords: 23302
 }

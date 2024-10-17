@@ -23,6 +23,8 @@ import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 import { TimeAttendanceRepository } from 'src/repositories/TimeAttendanceRepository'
 import { LoanManagementRepository } from 'src/repositories/LoanManagementRepository'
 import { PayrollRepository } from 'src/repositories/PayrollRepository'
+import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
+import { CTCLRepository } from 'src/repositories/CTCLRepository'
 
 export const COMBOBOX = 1
 
@@ -707,6 +709,52 @@ export const apiMappings = {
     columnsInDropDown: [
       { key: 'reference', value: 'Reference' },
       { key: 'name', value: 'Name' }
+    ]
+  },
+  [ResourceIds.ProductMaster]: {
+    type: LOOKUP,
+    endpoint: RemittanceSettingsRepository.ProductMaster.snapshot,
+    firstField: 'reference',
+    secondField: 'name',
+    valueOnSelection: 'recordId',
+    displayFieldWidth: 1,
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+  [ResourceIds.Beneficiary]: {
+    type: LOOKUP,
+    endpoint: RemittanceOutwardsRepository.Beneficiary.snapshot,
+    parameters: {
+      _clientId: 0,
+      _dispersalType: 0,
+      _currencyId: 0
+    },
+    secondDisplayField: false,
+    firstField: ['name', 'currencyName', 'countryName', 'dispersalTypeName'],
+    valueOnSelection: 'beneficiaryId',
+    columnsInDropDown: [
+      { key: 'name', value: 'Name' },
+      { key: 'currencyName', value: 'Currency Name' },
+      { key: 'countryName', value: 'Country Name' },
+      { key: 'dispersalTypeName', value: 'Dispersal Type Name' }
+    ]
+  },
+  [ResourceIds.ClientList]: {
+    type: LOOKUP,
+    endpoint: CTCLRepository.CtClientIndividual.snapshot,
+    parameters: {
+      _category: 1
+    },
+    secondDisplayField: false,
+    firstField: ['reference', 'name', 'cellPhone'],
+    valueOnSelection: 'recordId',
+    displayFieldWidth: 1,
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' },
+      { key: 'cellPhone', value: 'cellPhone' }
     ]
   },
 

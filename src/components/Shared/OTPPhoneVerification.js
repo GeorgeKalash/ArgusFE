@@ -23,7 +23,7 @@ const OTPPhoneVerification = ({
     datasetId: ResourceIds.OTPVerify
   })
   const [otp, setOtp] = useState(['', '', '', '', '', ''])
-  const [timer, setTimer] = useState(30)
+  const [timer, setTimer] = useState(60)
   const [error, setError] = useState('')
   const [disabled, setDisabled] = useState(0)
 
@@ -145,7 +145,7 @@ const OTPPhoneVerification = ({
   }
 
   const handleResendOtp = () => {
-    setTimer(30)
+    setTimer(60)
     setError('')
     setOtp(['', '', '', '', '', ''])
     document.getElementById('otp-input-0').focus()
