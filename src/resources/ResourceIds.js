@@ -276,5 +276,6 @@ export const ResourceIds = {
   ItemSizes: 41117,
   OutwardsTransfer: 36324,
   OpenMultiCurrencyCashTransfer: 33315,
-  LockedRecords: 23302
+  LockedRecords: 23302,
+  AvailabilitiesBySite: 41226
 }
