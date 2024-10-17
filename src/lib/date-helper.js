@@ -110,12 +110,22 @@ function formatTimestampToDate(timestamp) {
   return formattedDate
 }
 
-function getTimeInTimeZone(dateString) {
+function getTimeInTimeZone(dateString, type = '') {
   const timestamp = parseInt(dateString?.match(/\/Date\((\d+)\)\//)[1], 10)
   const date = new Date(timestamp)
-  let hours = date.getHours()
-  let minutes = date.getMinutes()
-  let seconds = date.getSeconds()
+  let hours = ''
+  let minutes = ''
+  let seconds = ''
+
+  if (type === 'utc') {
+    hours = date.getHours()
+    minutes = date.getMinutes()
+    seconds = date.getSeconds()
+  } else {
+    hours = date.getUTCHours()
+    minutes = date.getUTCMinutes()
+    seconds = date.getUTCSeconds()
+  }
 
   hours = hours < 10 ? '0' + hours : hours
   minutes = minutes < 10 ? '0' + minutes : minutes

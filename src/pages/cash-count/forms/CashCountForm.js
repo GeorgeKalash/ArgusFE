@@ -358,7 +358,7 @@ export default function CashCountForm({ labels, maxAccess: access, recordId }) {
       parameters: ``
     })
     if (record) {
-      !editMode && formik.setFieldValue('startTime', getTimeInTimeZone(record?.utcDate))
+      !editMode && formik.setFieldValue('startTime', getTimeInTimeZone(record?.utcDate, 'utc'))
     }
   }
 
