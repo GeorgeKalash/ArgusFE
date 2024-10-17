@@ -94,20 +94,18 @@ const AgingForm = ({ recordId, labels, maxAccess, name, window }) => {
       items: items
     }
 
-    try {
-      const response = await postRequest({
-        extension: FinancialRepository.AgingProfile.set2,
-        record: JSON.stringify(data)
-      })
+    const response = await postRequest({
+      extension: FinancialRepository.AgingProfile.set2,
+      record: JSON.stringify(data)
+    })
 
-      if (!formik.values.recordId) {
-        formik.setFieldValue('recordId', response.recordId)
-        toast.success(platformLabels.Edited)
-        window.close()
-      } else {
-        toast.success(platformLabels.Edited)
-      }
-    } catch (error) {}
+    if (!obj.recordId) {
+      formik.setFieldValue('recordId', response.recordId)
+      toast.success(platformLabels.Added)
+      window.close()
+    } else {
+      toast.success(platformLabels.Edited)
+    }
 
     invalidate()
   }

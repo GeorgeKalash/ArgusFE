@@ -155,7 +155,8 @@ export const FinancialRepository = {
     qry: service + 'qryAGP',
     get: service + 'getAGP',
     set: service + 'setAGP',
-    del: service + 'delAGP'
+    del: service + 'delAGP',
+    set2: service + 'set2AGP'
   },
   FIDimension: {
     qry: service + 'qryDI',
@@ -174,5 +175,8 @@ export const FinancialRepository = {
   },
   Apply3: {
     qry: service + 'qryAPL3'
+  },
+  AgingLeg: {
+    qry: service + 'qryAGL'
   }
 }
