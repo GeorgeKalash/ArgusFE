@@ -11,6 +11,7 @@ export default function NumberfieldEdit({ column: { props }, id, field, value, u
 
   const handleIconClick = () => {
     setIsPercentIcon(!isPercentIcon)
+    props.iconsClicked(isPercentIcon, id)
   }
 
   return (

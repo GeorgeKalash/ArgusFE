@@ -1,6 +1,6 @@
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
-import { Grid, FormControlLabel, Checkbox } from '@mui/material'
+import { Grid, FormControlLabel, Checkbox, Box } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
@@ -33,7 +33,8 @@ import {
   DIRTYFIELD_UNIT_PRICE,
   DIRTYFIELD_MDAMOUNT,
   DIRTYFIELD_UPO,
-  DIRTYFIELD_EXTENDED_PRICE
+  DIRTYFIELD_EXTENDED_PRICE,
+  DIRTYFIELD_MDTYPE
 } from 'src/utils/ItemPriceCalculator'
 import { getVatCalc } from 'src/utils/VatCalculator'
 import { getDiscValues, getFooterTotals, getSubtotal } from 'src/utils/FooterCalculator'
@@ -119,6 +120,7 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
         mdAmount: 0,
         upo: 0,
         extendedPrice: 0,
+        mdAmountPct: null,
         priceType: 1,
         applyVat: false,
         taxId: '',
@@ -371,7 +373,10 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
       name: 'mdAmount',
       updateOn: 'blur',
       flex: 2,
-      props: { ShowDiscountIcons: true },
+      props: {
+        ShowDiscountIcons: true,
+        iconsClicked: markdownIconsClicked
+      },
       async onChange({ row: { update, newRow } }) {
         getItemPriceRow(update, newRow, DIRTYFIELD_MDAMOUNT)
         checkMdAmountPct(newRow, update)
@@ -397,6 +402,40 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
       name: 'notes'
     }
   ]
+
+  async function markdownIconsClicked(isPercent, id) {
+    if (!isPercent) {
+      formik.setFieldValue(`items[${id - 1}].mdAmountPct`, 1)
+      formik.setFieldValue(`items[${id - 1}].mdType`, 1)
+    } else {
+      formik.setFieldValue(`items[${id - 1}].mdAmountPct`, 2)
+      formik.setFieldValue(`items[${id - 1}].mdType`, 2)
+    }
+
+    const itemPriceRow = getIPR({
+      unitPrice: parseFloat(formik.values.items[id - 1].unitPrice || 0),
+      upo: parseFloat(formik.values.items[id - 1].upo) ? parseFloat(formik.values.items[id - 1].upo) : 0,
+      qty: formik.values.items[id - 1].qty,
+      extendedPrice: parseFloat(formik.values.items[id - 1].extendedPrice),
+      mdAmount: parseFloat(formik.values.items[id - 1].mdAmount),
+      mdType: formik.values.items[id - 1].mdType,
+      mdValue: parseFloat(formik.values.items[id - 1].mdValue),
+      dirtyField: DIRTYFIELD_MDTYPE
+    })
+
+    const vatCalcRow = getVatCalc({
+      basePrice: formik.values.items[id - 1].basePrice,
+      qty: formik.values.items[id - 1].qty,
+      extendedPrice: parseFloat(formik.values.items[id - 1].extendedPrice),
+      baseLaborPrice: formik.values.items[id - 1].baseLaborPrice,
+      vatAmount: parseFloat(formik.values.items[id - 1].vatAmount),
+      tdPct: formik.values.items[id - 1].tdPct,
+      taxDetails: formik.values.items[id - 1].isVatChecked ? null : formik.values.items[id - 1].taxDetails
+    })
+
+    formik.setFieldValue(`items[${id - 1}].extendedPrice`, parseFloat(itemPriceRow?.extendedPrice).toFixed(2))
+    formik.setFieldValue(`items[${id - 1}].vatAmount`, parseFloat(vatCalcRow?.vatAmount).toFixed(2))
+  }
 
   async function onClose() {
     const copy = { ...formik.values }
@@ -708,6 +747,9 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
 
     update({
       id: newRow?.id,
+      qty: parseFloat(itemPriceRow?.qty).toFixed(2),
+      volume: parseFloat(itemPriceRow?.volume).toFixed(2),
+      weight: parseFloat(itemPriceRow?.weight).toFixed(2),
       basePrice: parseFloat(itemPriceRow?.basePrice).toFixed(5),
       unitPrice: parseFloat(itemPriceRow?.unitPrice).toFixed(3),
       extendedPrice: parseFloat(itemPriceRow?.extendedPrice).toFixed(2),
