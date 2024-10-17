@@ -10,8 +10,8 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
-import CountryForm from './forms/CountryForm'
 import { ControlContext } from 'src/providers/ControlContext'
+import CountryWindow from './Windows/CountryWindow'
 
 const Countries = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -113,7 +113,7 @@ const Countries = () => {
 
   function openForm(recordId) {
     stack({
-      Component: CountryForm,
+      Component: CountryWindow,
       props: {
         labels: _labels,
         recordId: recordId,
