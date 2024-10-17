@@ -81,7 +81,7 @@ const GetLookup = ({ field, formik }) => {
               : ''
           )
         }}
-        error={Boolean(formik.errors?.parameters?.[field?.id])}
+        error={formik.touched?.parameters && Boolean(formik.errors?.parameters?.[field?.id])}
       />
     </Grid>
   )
@@ -142,7 +142,7 @@ const GetComboBox = ({ field, formik, rpbParams }) => {
                 : ''
             )
           }}
-          error={formik.touched?.parameters?.[field?.id] && Boolean(formik.errors?.parameters?.[field?.id])}
+          error={formik.touched?.parameters && Boolean(formik.errors?.parameters?.[field?.id])}
         />
       ) : (
         <>
@@ -168,7 +168,7 @@ const GetComboBox = ({ field, formik, rpbParams }) => {
                   : ''
               )
             }}
-            error={formik.touched?.parameters?.[field?.id] && Boolean(formik.errors?.parameters?.[field?.id])}
+            error={formik.touched?.parameters && Boolean(formik.errors?.parameters?.[field?.id])}
           />
         </>
       )}
@@ -198,16 +198,18 @@ const GetDate = ({ field, formik, rpbParams }) => {
         value={formik.values?.parameters?.[field.id]?.value}
         required={field.mandatory}
         onChange={(name, newValue) => {
-          formik.setFieldValue(`parameters[${field.id}]`, {
-            fieldId: field.id,
-            fieldKey: field.key,
-            value: newValue,
-            caption: field.caption,
-            controlType: field?.controlType,
-            display: formatDateDefault(newValue)
-          })
+          newValue
+            ? formik.setFieldValue(`parameters[${field.id}]`, {
+                fieldId: field.id,
+                fieldKey: field.key,
+                value: newValue,
+                caption: field.caption,
+                controlType: field?.controlType,
+                display: formatDateDefault(newValue)
+              })
+            : formik.setFieldValue(`parameters[${field.id}]`, undefined)
         }}
-        error={formik.errors?.parameters?.[field?.id] && Boolean(formik.errors?.parameters?.[field?.id])}
+        error={formik.touched?.parameters && Boolean(formik.errors?.parameters?.[field?.id])}
         onClear={() => formik.setFieldValue(`parameters[${field.id}]`, undefined)}
       />
     </Grid>
