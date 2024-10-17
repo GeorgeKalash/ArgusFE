@@ -230,8 +230,8 @@ export default function SaleTransactionForm({
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         const ItemConvertPrice = await getItemConvertPrice2(newRow, formik.values.header)
-        const itemPhysProp = await getItemPhysProp(ItemConvertPrice.record.itemId)
-        const itemInfo = await getItem(ItemConvertPrice.record.itemId)
+        const itemPhysProp = await getItemPhysProp(ItemConvertPrice?.itemId)
+        const itemInfo = await getItem(ItemConvertPrice?.itemId)
 
         const weight = parseFloat(itemPhysProp?.weight || 0).toFixed(2)
         const metalPurity = itemPhysProp?.metalPurity ?? 0
@@ -277,6 +277,9 @@ export default function SaleTransactionForm({
 
         setFilteredMU(filteredMeasurements)
         update({
+          sku: ItemConvertPrice?.sku,
+          itemName: ItemConvertPrice?.itemName,
+          itemId: ItemConvertPrice?.itemId,
           isMetal: isMetal,
           metalId: metalId,
           metalPurity: metalPurity,
@@ -667,14 +670,16 @@ export default function SaleTransactionForm({
     }
   ]
 
-  async function fillForm(recordId, saTrxHeader, saTrxItems) {
-    const billAdd = await getAddress(saTrxHeader?.record?.billAddressId)
+  async function fillForm(recordId, saTrxPack) {
+    const saTrxHeader = saTrxPack?.header
+    const saTrxItems = saTrxPack?.items
+    const billAdd = await getAddress(saTrxHeader?.billAddressId)
 
-    saTrxHeader?.record?.tdType == 1 || saTrxHeader?.record?.tdType == null
+    saTrxHeader?.tdType == 1 || saTrxHeader?.tdType == null
       ? setCycleButtonState({ text: '123', value: 1 })
       : setCycleButtonState({ text: '%', value: 2 })
 
-    const modifiedList = saTrxItems.list?.map((item, index) => ({
+    const modifiedList = saTrxItems?.map((item, index) => ({
       ...item,
       id: index + 1,
       basePrice: parseFloat(item.basePrice).toFixed(5),
@@ -683,34 +688,32 @@ export default function SaleTransactionForm({
       vatAmount: parseFloat(item.vatAmount).toFixed(2),
       extendedPrice: parseFloat(item.extendedPrice).toFixed(2)
     }))
+
     formik.setValues({
       recordId: recordId || null,
       ...formik.values,
       header: {
         ...formik.values.header,
-        ...saTrxHeader.record,
-        tdAmount:
-          saTrxHeader?.record?.tdType == 1 || saTrxHeader?.record?.tdType == null
-            ? saTrxHeader?.record?.tdAmount
-            : saTrxHeader?.record?.tdPct,
-        amount: parseFloat(saTrxHeader?.record?.amount).toFixed(2),
+        ...saTrxHeader,
+        tdAmount: saTrxHeader?.tdType == 1 || saTrxHeader?.tdType == null ? saTrxHeader?.tdAmount : saTrxHeader?.tdPct,
+        amount: parseFloat(saTrxHeader?.amount).toFixed(2),
         billAddress: billAdd,
-        currentDiscount: saTrxHeader?.record?.tdAmount,
-        KGmetalPrice: saTrxHeader?.record?.metalPrice * 1000
+        currentDiscount: saTrxHeader?.tdAmount,
+        KGmetalPrice: saTrxHeader?.metalPrice * 1000
       },
       items: modifiedList
     })
   }
 
-  async function getSalesTransactionHeader(transactionId) {
+  async function getSalesTransactionPack(transactionId) {
     const res = await getRequest({
-      extension: SaleRepository.SalesTransaction.get,
+      extension: SaleRepository.SalesTransaction.get2,
       parameters: `_recordId=${transactionId}`
     })
 
-    res.record.date = formatDateFromApi(res?.record?.date)
+    res.record.header.date = formatDateFromApi(res?.record?.header?.date)
 
-    return res
+    return res.record
   }
 
   async function getSalesTransactionItems(transactionId) {
@@ -962,8 +965,11 @@ export default function SaleTransactionForm({
   }
 
   function calcTotals(itemsArray, tdAmount) {
+    let subtotal = 0
+    let _footerSummary = null
+
     const parsedItemsArray = itemsArray
-      .filter(item => item.itemId !== undefined)
+      ?.filter(item => item.itemId !== undefined)
       .map(item => ({
         ...item,
         basePrice: parseFloat(item.basePrice) || 0,
@@ -974,20 +980,21 @@ export default function SaleTransactionForm({
         volume: parseFloat(item.volume) || 0,
         extendedPrice: parseFloat(item.extendedPrice) || 0
       }))
+    if (parsedItemsArray) {
+      subtotal = getSubtotal(parsedItemsArray)
 
-    const subtotal = getSubtotal(parsedItemsArray)
-
-    const _footerSummary = getFooterTotals(parsedItemsArray, {
-      totalQty: 0,
-      totalWeight: 0,
-      totalVolume: 0,
-      totalUpo: 0,
-      sumVat: 0,
-      sumExtended: parseFloat(subtotal),
-      tdAmount: tdAmount || formik.values.header.tdAmount,
-      net: 0,
-      miscAmount: parseFloat(formik.values.header.miscAmount)
-    })
+      _footerSummary = getFooterTotals(parsedItemsArray, {
+        totalQty: 0,
+        totalWeight: 0,
+        totalVolume: 0,
+        totalUpo: 0,
+        sumVat: 0,
+        sumExtended: parseFloat(subtotal),
+        tdAmount: tdAmount || formik.values.header.tdAmount,
+        net: 0,
+        miscAmount: parseFloat(formik.values.header.miscAmount)
+      })
+    }
 
     formik.setFieldValue('header.volume', _footerSummary?.totalVolume?.toFixed(2) || 0)
     formik.setFieldValue('header.weight', _footerSummary?.totalWeight?.toFixed(2) || 0)
@@ -1088,9 +1095,8 @@ export default function SaleTransactionForm({
   //   }
 
   async function refetchForm(recordId) {
-    const saTrxHeader = await getSalesTransactionHeader(recordId)
-    const saTrxItems = await getSalesTransactionItems(recordId)
-    await fillForm(recordId, saTrxHeader, saTrxItems)
+    const saTrxpack = await getSalesTransactionPack(recordId)
+    await fillForm(recordId, saTrxpack)
   }
 
   function openAddressFilterForm(clickShip, clickBill) {
@@ -1139,10 +1145,9 @@ export default function SaleTransactionForm({
       setMetalPriceOperations()
 
       if (recordId) {
-        const transactionHeader = await getSalesTransactionHeader(recordId)
-        const transactionItems = await getSalesTransactionItems(recordId)
-        await fillForm(recordId, transactionHeader, transactionItems)
-        calcTotals(transactionItems?.list, transactionHeader?.record?.tdAmount)
+        const transactionPack = await getSalesTransactionPack(recordId)
+        await fillForm(recordId, transactionPack)
+        calcTotals(transactionPack?.items?.list, transactionPack?.header?.tdAmount)
       } else {
         if (defaultSalesTD) {
           setCycleButtonState({ text: '%', value: 2 })
@@ -1425,13 +1430,14 @@ export default function SaleTransactionForm({
                   errorCheck={'clientId'}
                 />
               </Grid>
+
               <Grid item xs={2}>
                 <FormControlLabel
                   control={
                     <Checkbox
                       name='header.isVattable'
                       checked={formik.values?.header?.isVattable}
-                      disabled={formik?.values?.items[0]?.itemId}
+                      disabled={formik?.values?.items && formik?.values?.items[0]?.itemId}
                       onChange={formik.handleChange}
                     />
                   }
@@ -1513,11 +1519,10 @@ export default function SaleTransactionForm({
           </Grid>
         </Fixed>
 
-        {console.log(formik.values.header)}
         <Grow>
           <DataGrid
             onChange={value => formik.setFieldValue('items', value)}
-            value={formik.values.items}
+            value={formik?.values?.items}
             error={formik.errors.items}
             name='items'
             columns={columns}

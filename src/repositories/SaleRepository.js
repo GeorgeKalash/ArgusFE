@@ -168,6 +168,7 @@ export const SaleRepository = {
     qry: service + 'qryTR',
     snapshot: service + 'snapshotTRX',
     get: service + 'getTR',
+    get2: service + 'get2TR',
     set2: service + 'set2TRX',
     del: service + 'delTR'
   },

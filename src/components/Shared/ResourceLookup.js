@@ -73,8 +73,7 @@ export const ResourceLookup = ({
       : formObject != null
       ? formObject[name]
       : form.values[name])
-  console.log(_firstValue)
-  console.log(_secondValue)
+
   const error = form?.touched && form.touched[check] && Boolean(form.errors[check])
   const helperText = viewHelperText && form?.touched && form.touched[check] && form.errors[check]
   useEffect(() => {
