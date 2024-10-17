@@ -128,4 +128,13 @@ const getFooterTotals = (_array, _footerSummary) => {
   return _footerSummary
 }
 
-export { DiscountCalculator, FooterSummary, FooterCalculator, getDiscValues, getSubtotal, getFooterTotals }
+export {
+  DiscountCalculator,
+  FooterSummary,
+  FooterCalculator,
+  getDiscValues,
+  getSubtotal,
+  getFooterTotals,
+  DIRTYFIELD_TDPLAIN,
+  DIRTYFIELD_TDPCT
+}

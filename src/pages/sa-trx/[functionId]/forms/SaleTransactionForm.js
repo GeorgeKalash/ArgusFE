@@ -38,7 +38,13 @@ import {
   DIRTYFIELD_EXTENDED_PRICE
 } from 'src/utils/ItemPriceCalculator'
 import { getVatCalc } from 'src/utils/VatCalculator'
-import { getDiscValues, getFooterTotals, getSubtotal } from 'src/utils/FooterCalculator'
+import {
+  getDiscValues,
+  getFooterTotals,
+  getSubtotal,
+  DIRTYFIELD_TDPLAIN,
+  DIRTYFIELD_TDPCT
+} from 'src/utils/FooterCalculator'
 import AddressFilterForm from '../../../sales-order/Tabs/AddressFilterForm'
 import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
@@ -57,7 +63,7 @@ export default function SaleTransactionForm({
   const { stack: stackError } = useError()
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
-  const [cycleButtonState, setCycleButtonState] = useState({ text: '%', value: 2 })
+  const [cycleButtonState, setCycleButtonState] = useState({ text: '%', value: DIRTYFIELD_TDPCT })
   const [address, setAddress] = useState({})
   const [measurements, setMeasurements] = useState([])
   const [filteredMu, setFilteredMU] = useState([])
@@ -169,7 +175,18 @@ export default function SaleTransactionForm({
       header: yup.object({
         date: yup.string().required(),
         currencyId: yup.string().required(),
-        clientId: yup.string().required()
+        clientId: yup.string().required(),
+        siteId: yup
+          .string()
+          .nullable()
+          .test('', function (value) {
+            const { dtId } = this.parent
+            if (dtId == null) {
+              return !!value
+            }
+
+            return true
+          })
       }),
       items: yup.array().of(
         yup.object({
@@ -624,7 +641,7 @@ export default function SaleTransactionForm({
       record: JSON.stringify(formik.values.header)
     })
 
-    if (res?.recordId) {
+    if (res) {
       toast.success(platformLabels.Posted)
       invalidate()
       window.close()
@@ -712,6 +729,7 @@ export default function SaleTransactionForm({
     })
 
     res.record.header.date = formatDateFromApi(res?.record?.header?.date)
+    res.record.header.dueDate = formatDateFromApi(res?.record?.header?.dueDate)
 
     return res.record
   }
@@ -947,8 +965,6 @@ export default function SaleTransactionForm({
       taxDetails: formik.values.header.isVatChecked ? null : newRow.taxDetails
     })
 
-    console.log(itemPriceRow)
-
     update({
       id: newRow?.id,
       basePrice: parseFloat(itemPriceRow?.basePrice).toFixed(5),
@@ -1147,10 +1163,20 @@ export default function SaleTransactionForm({
       if (recordId) {
         const transactionPack = await getSalesTransactionPack(recordId)
         await fillForm(recordId, transactionPack)
-        calcTotals(transactionPack?.items?.list, transactionPack?.header?.tdAmount)
+        if (transactionPack.header.tdType == DIRTYFIELD_TDPCT) {
+          setCycleButtonState({ text: '%', value: DIRTYFIELD_TDPCT })
+          formik.setFieldValue('header.tdAmount', transactionPack.header.tdPct)
+          formik.setFieldValue('header.currentDiscount', transactionPack.header.tdPct)
+        } else {
+          setCycleButtonState({ text: '123', value: DIRTYFIELD_TDPLAIN })
+          formik.setFieldValue('header.tdAmount', transactionPack.header.tdAmount)
+          formik.setFieldValue('header.currentDiscount', transactionPack.header.tdAmount)
+        }
+
+        //calcTotals(transactionPack?.items?.list, transactionPack?.header?.tdAmount)
       } else {
         if (defaultSalesTD) {
-          setCycleButtonState({ text: '%', value: 2 })
+          setCycleButtonState({ text: '%', value: DIRTYFIELD_TDPCT })
           formik.setFieldValue('header.tdType', 2)
         } else {
           setCycleButtonState({ text: '123', value: 1 })
@@ -1160,9 +1186,9 @@ export default function SaleTransactionForm({
     })()
   }, [])
 
-  useEffect(() => {
-    calcTotals(formik.values.items)
-  }, [formik.values.items])
+  // useEffect(() => {
+  //   calcTotals(formik.values.items)
+  // }, [formik.values.items])
 
   const getResourceId = functionId => {
     switch (functionId) {
@@ -1211,6 +1237,7 @@ export default function SaleTransactionForm({
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_startAt=0&_pageSize=1000&_dgId=${functionId}`}
                     name='dtId'
+                    readOnly={editMode}
                     label={labels.documentType}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
@@ -1262,6 +1289,7 @@ export default function SaleTransactionForm({
                       { key: 'spRef', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
+                    readonly={isPosted}
                     valueField='recordId'
                     displayField='name'
                     values={formik.values.header}
@@ -1290,6 +1318,7 @@ export default function SaleTransactionForm({
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
+                    readonly={isPosted}
                     values={formik.values.header}
                     valueField='recordId'
                     displayField={['reference', 'name']}
@@ -1326,6 +1355,7 @@ export default function SaleTransactionForm({
                     name='date'
                     required
                     label={labels.date}
+                    readonly={isPosted}
                     value={formik?.values?.header?.date}
                     onChange={formik.setFieldValue}
                     editMode={editMode}
@@ -1340,6 +1370,7 @@ export default function SaleTransactionForm({
                     parameters={`_startAt=0&_pageSize=1000&_sortField="recordId"&_filter=`}
                     name='szId'
                     label={labels.saleZone}
+                    readonly={isPosted}
                     columnsInDropDown={[{ key: 'name', value: 'Name' }]}
                     valueField='recordId'
                     displayField='name'
@@ -1365,8 +1396,15 @@ export default function SaleTransactionForm({
                     displayField={['reference', 'name']}
                     maxAccess={maxAccess}
                     displayFieldWidth={2}
-                    readOnly={formik?.values?.header.commitItems == false}
-                    required={formik?.values?.header.commitItems == true}
+                    readOnly={
+                      formik?.values?.header.dtId ||
+                      (formik?.values?.header.dtId && formik?.values?.header.commitItems == false) ||
+                      isPosted
+                    }
+                    required={
+                      !formik?.values?.header.dtId ||
+                      (formik?.values?.header.dtId && formik?.values?.header.commitItems == true)
+                    }
                     onChange={(event, newValue) => {
                       formik.setFieldValue('header.siteId', newValue ? newValue.recordId : null)
                       formik.setFieldValue('header.siteRef', newValue ? newValue.reference : null)
@@ -1386,6 +1424,7 @@ export default function SaleTransactionForm({
                     value={formik.values.header.billAddress}
                     rows={3}
                     maxLength='100'
+                    readOnly={!formik.values.header.clientId || isPosted}
                     maxAccess={maxAccess}
                     viewDropDown={formik.values.header.clientId}
                     onChange={e => formik.setFieldValue('header.BillAddress', e.target.value)}
@@ -1412,6 +1451,7 @@ export default function SaleTransactionForm({
                   form={formik}
                   formObject={formik.values.header}
                   required
+                  readonly={isPosted}
                   displayFieldWidth={3}
                   valueShow='clientRef'
                   secondValueShow='clientName'
@@ -1451,6 +1491,7 @@ export default function SaleTransactionForm({
                   label={labels.tax}
                   valueField='recordId'
                   displayField={['reference', 'name']}
+                  readonly={isPosted}
                   columnsInDropDown={[
                     { key: 'reference', value: 'Reference' },
                     { key: 'name', value: 'Name' }
@@ -1471,6 +1512,7 @@ export default function SaleTransactionForm({
                   label={labels.currency}
                   valueField='recordId'
                   displayField={['reference', 'name']}
+                  readonly={isPosted}
                   columnsInDropDown={[
                     { key: 'reference', value: 'Reference' },
                     { key: 'name', value: 'Name' }
@@ -1492,6 +1534,7 @@ export default function SaleTransactionForm({
                   name='contactId'
                   label={labels.contact}
                   valueField='recordId'
+                  readonly={isPosted}
                   displayField={['reference', 'name']}
                   columnsInDropDown={[
                     { key: 'reference', value: 'Reference' },
@@ -1527,7 +1570,7 @@ export default function SaleTransactionForm({
             name='items'
             columns={columns}
             maxAccess={maxAccess}
-            disabled={!formik.values.header.clientId || !formik.values.header.currencyId}
+            disabled={isPosted || !formik.values.header.clientId || !formik.values.header.currencyId}
           />
         </Grow>
 
@@ -1605,10 +1648,11 @@ export default function SaleTransactionForm({
                     displayCycleButton={true}
                     cycleButtonLabel={cycleButtonState.text}
                     decimalScale={2}
+                    readonly={isPosted}
                     handleCycleButtonClick={handleCycleButtonClick}
                     onChange={e => {
                       let discount = Number(e.target.value)
-                      if (formik.values.header.tdType == 1) {
+                      if (formik.values.header.tdType == DIRTYFIELD_TDPCT) {
                         if (discount < 0 || formik.values.header.subtotal < discount) {
                           discount = 0
                         }
@@ -1652,6 +1696,7 @@ export default function SaleTransactionForm({
                     label={labels.misc}
                     value={formik.values.header.miscAmount}
                     decimalScale={2}
+                    readonly={isPosted}
                     onChange={e => formik.setFieldValue('header.miscAmount', e.target.value)}
                     onBlur={async () => {
                       calcTotals(formik.values.items)
