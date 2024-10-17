@@ -59,7 +59,7 @@ const RequestsProvider = ({ showLoading = false, children }) => {
         headers: {
           Authorization: 'Bearer ' + accessToken,
           'Content-Type': 'multipart/form-data',
-          LanguageId: user.languageId
+          LanguageId: user?.languageId
         }
       })
         .then(response => {

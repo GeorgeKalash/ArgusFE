@@ -1,12 +1,11 @@
 import InputMask from 'react-input-mask'
 import { FormControl, InputLabel, OutlinedInput } from '@mui/material'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useContext, useEffect, useState } from 'react'
-import { RequestsContext } from 'src/providers/RequestsContext'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const SegmentedInput = ({ name, value, onChange, label, error, required, readOnly }) => {
   const [mask, setMask] = useState('')
-  const { getRequest } = useContext(RequestsContext)
+  const { defaultsData } = useContext(ControlContext)
 
   const handleInputChange = event => {
     if (!readOnly) {
@@ -35,22 +34,14 @@ const SegmentedInput = ({ name, value, onChange, label, error, required, readOnl
         )
       )
     } else {
-      getRequest({
-        extension: SystemRepository.Defaults.qry,
-        parameters: '_filter='
-      })
-        .then(res => {
-          const defaultSegments = res.list
-            .filter(obj => ['GLACSeg0', 'GLACSeg1', 'GLACSeg2', 'GLACSeg3', 'GLACSeg4'].includes(obj.key))
-            .map(obj => ({
-              key: obj.key,
-              value: parseInt(obj.value)
-            }))
-            .filter(obj => obj.value)
-
-          setMask(createMaskFromSegments(defaultSegments))
-        })
-        .catch(error => {})
+      const defaultSegments = defaultsData.list
+        .filter(obj => ['GLACSeg0', 'GLACSeg1', 'GLACSeg2', 'GLACSeg3', 'GLACSeg4'].includes(obj.key))
+        .map(obj => ({
+          key: obj.key,
+          value: parseInt(obj.value)
+        }))
+        .filter(obj => obj.value)
+      setMask(createMaskFromSegments(defaultSegments))
     }
   }
 

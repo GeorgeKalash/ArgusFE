@@ -1,9 +1,4 @@
-// ** React Imports
-import { createContext, useContext, useEffect, useState } from 'react'
-
-// ** Custom Imports
-
-// ** API
+import { createContext, useContext } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { AuthContext } from 'src/providers/AuthContext'
@@ -12,7 +7,7 @@ const CommonContext = createContext()
 
 const CommonProvider = ({ children }) => {
   const { getRequest } = useContext(RequestsContext)
-  const { user, setUser } = useContext(AuthContext)
+  const { user } = useContext(AuthContext)
 
   const fillDocumentTypeStore = ({ _startAt = 0, _pageSize = 30, _dgId = 0, callback }) => {
     const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
@@ -21,11 +16,9 @@ const CommonProvider = ({ children }) => {
     getRequest({
       extension: SystemRepository.DocumentType.qry,
       parameters: parameters
+    }).then(res => {
+      callback(res.list)
     })
-      .then(res => {
-        callback(res.list)
-      })
-      .catch(error => {})
   }
 
   const getAllKvsByDataset = ({ _dataset = 0, callback }) => {
@@ -36,11 +29,9 @@ const CommonProvider = ({ children }) => {
       extension: SystemRepository.KeyValueStore,
       parameters: parameters,
       disableLoading: true
+    }).then(res => {
+      callback(res.list)
     })
-      .then(res => {
-        callback(res.list)
-      })
-      .catch(error => {})
   }
 
   const values = {
@@ -48,11 +39,7 @@ const CommonProvider = ({ children }) => {
     getAllKvsByDataset
   }
 
-  return (
-    <>
-      <CommonContext.Provider value={values}>{children}</CommonContext.Provider>
-    </>
-  )
+  return <CommonContext.Provider value={values}>{children}</CommonContext.Provider>
 }
 
 export { CommonContext, CommonProvider }
