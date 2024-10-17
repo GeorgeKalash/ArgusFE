@@ -12,6 +12,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import ItemWindow from './window/ItemWindow'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
+import GridToolbar from 'src/components/Shared/GridToolbar'
 
 const IvItems = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -24,7 +25,7 @@ const IvItems = () => {
 
     const response = await getRequest({
       extension: InventoryRepository.Items.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}&filter=&_sortField=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=&_params=${params}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -32,12 +33,12 @@ const IvItems = () => {
 
   const {
     query: { data },
-    labels: _labels,
-    paginationParameters,
-    refetch,
     filterBy,
+    refetch,
     clearFilter,
+    labels: _labels,
     access,
+    paginationParameters,
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -47,14 +48,16 @@ const IvItems = () => {
       filterFn: fetchWithFilter
     }
   })
-
-  async function fetchWithFilter({ filters, pagination }) {
-    if (filters.qry)
-      return await getRequest({
+  async function fetchWithFilter({ filters, pagination = {} }) {
+    const { _startAt = 0, _size = 50 } = pagination
+    if (filters.qry) {
+      const response = await getRequest({
         extension: InventoryRepository.Items.snapshot,
-        parameters: `_size=1000&_startAt=0&_filter=${filters.qry}`
+        parameters: `_filter=${filters.qry}&_startAt=${_startAt}&_size=${_size}`
       })
-    else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+
+      return { ...response, _startAt: _startAt }
+    } else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
   const columns = [
@@ -167,13 +170,10 @@ const IvItems = () => {
         <RPBGridToolbar
           onAdd={add}
           maxAccess={access}
+          onApply={onApply}
           onSearch={onSearch}
           onClear={onClear}
           reportName={'IVIT'}
-          labels={_labels}
-          inputSearch={true}
-          onApply={onApply}
-          refetch={refetch}
         />
       </Fixed>
       <Grow>
