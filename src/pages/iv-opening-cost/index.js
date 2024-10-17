@@ -1,7 +1,6 @@
 import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
-import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -88,9 +87,6 @@ const OpeningCost = () => {
       Component: OpeningCostForm,
       props: {
         labels: _labels,
-        recordId: record
-          ? String(record.year) + String(record.itemId)
-          : null,
         record,
         maxAccess: access
       },

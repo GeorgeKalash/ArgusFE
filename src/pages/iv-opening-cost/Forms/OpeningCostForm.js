@@ -17,9 +17,11 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 
-export default function OpeningCostForm({ labels, maxAccess, recordId, record }) {
+export default function OpeningCostForm({ labels, maxAccess, record }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+
+  const recordId = String(record.year) + String(record.itemId) || null;
 
   const invalidate = useInvalidate({
     endpointId: InventoryRepository.OpeningCost.qry
@@ -36,7 +38,7 @@ export default function OpeningCostForm({ labels, maxAccess, recordId, record })
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      year: yup.string().required(),
+      year: yup.number().required(),
       itemId: yup.string().required(),
       avgCost: yup.number().min(0).max(999999999)
     }),
@@ -63,7 +65,7 @@ export default function OpeningCostForm({ labels, maxAccess, recordId, record })
 
   useEffect(() => {
     ;(async function () {
-      if (record && record?.itemId && record?.year && recordId) {
+      if (record?.itemId && record?.year && recordId) {
         const res = await getRequest({
           extension: InventoryRepository.OpeningCost.get,
           parameters: `_itemId=${record?.itemId}&_fiscalYear=${record?.year}`
@@ -78,7 +80,16 @@ export default function OpeningCostForm({ labels, maxAccess, recordId, record })
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.InventoryOpeningCosts} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell 
+      resourceId={ResourceIds.InventoryOpeningCosts} 
+      form={formik} 
+      maxAccess={maxAccess} 
+      editMode={editMode}
+      infoVisible={false}
+      isSavedClear={false}
+      isInfo={false}
+      isCleared={false}
+    >
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -140,7 +151,7 @@ export default function OpeningCostForm({ labels, maxAccess, recordId, record })
                 onChange={formik.handleChange}
                 maxLength={12}
                 decimalScale={3}
-                onClear={() => formik.setFieldValue('avgCost', '')}
+                onClear={() => formik.setFieldValue('avgCost', 0)}
                 error={formik.touched.avgCost && Boolean(formik.errors.avgCost)}
               />
             </Grid>
