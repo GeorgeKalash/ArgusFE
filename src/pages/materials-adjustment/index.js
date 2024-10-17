@@ -61,18 +61,7 @@ const MaterialsAdjustment = () => {
       field: 'date',
       headerName: _labels[3],
       flex: 1,
-      valueFormatter: params => {
-        const dateString = params.value
-        const timestamp = parseInt(dateString.match(/\d+/)[0], 10)
-
-        if (!isNaN(timestamp)) {
-          const formattedDate = new Date(timestamp).toLocaleDateString('en-GB')
-
-          return formattedDate
-        } else {
-          return 'Invalid Date'
-        }
-      }
+      type: 'date'
     },
     {
       field: 'siteRef',

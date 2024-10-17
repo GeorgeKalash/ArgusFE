@@ -68,5 +68,8 @@ export const CurrencyTradingSettingsRepository = {
     set: service + 'setPEG',
     del: service + 'delPEG',
     page: service + 'pagePEG'
+  },
+  Yakeen: {
+    get: service + 'getYakeenInformations'
   }
 }
