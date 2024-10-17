@@ -122,20 +122,20 @@ function formatTimestampToDate(timestamp) {
 
   return formattedDate
 }
-function getTimeInTimeZone(dateString, timeZone = 0) {
+function getTimeInTimeZone(dateString) {
+  console.log(dateString, dateString)
   const timestamp = parseInt(dateString?.match(/\/Date\((\d+)\)\//)[1], 10)
-  const currentDate = new Date(timestamp)
+  const date = new Date(timestamp)
+  console.log(date)
+  let hours = date.getHours()
+  let minutes = date.getMinutes()
+  let seconds = date.getSeconds()
 
-  currentDate.setHours(currentDate.getHours() + timeZone)
-  function padNumber(num) {
-    return num < 10 ? '0' + num : num
-  }
+  hours = hours < 10 ? '0' + hours : hours
+  minutes = minutes < 10 ? '0' + minutes : minutes
+  seconds = seconds < 10 ? '0' + seconds : seconds
 
-  let newHours = padNumber(currentDate.getHours())
-  let newMinutes = padNumber(currentDate.getMinutes())
-  let newSeconds = padNumber(currentDate.getSeconds())
-
-  return `${newHours}:${newMinutes}:${newSeconds}`
+  return `${hours}:${minutes}:${seconds}`
 }
 
 //Omar
