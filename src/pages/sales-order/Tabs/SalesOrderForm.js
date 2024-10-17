@@ -368,14 +368,16 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
       name: 'taxDetails'
     },
     {
-      component: 'numberfield',
+      component: 'textfield',
       label: labels.markdown,
       name: 'mdAmount',
       updateOn: 'blur',
       flex: 2,
       props: {
         ShowDiscountIcons: true,
-        iconsClicked: markdownIconsClicked
+        iconsClicked: markdownIconsClicked,
+        gridData: formik.values.items,
+        type: 'numeric'
       },
       async onChange({ row: { update, newRow } }) {
         getItemPriceRow(update, newRow, DIRTYFIELD_MDAMOUNT)
@@ -403,13 +405,16 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
     }
   ]
 
-  async function markdownIconsClicked(isPercent, id) {
-    if (!isPercent) {
+  async function markdownIconsClicked(id) {
+    let currentMdType
+    if (formik.values.items[id - 1].mdType == 2) {
       formik.setFieldValue(`items[${id - 1}].mdAmountPct`, 1)
       formik.setFieldValue(`items[${id - 1}].mdType`, 1)
+      currentMdType = 1
     } else {
       formik.setFieldValue(`items[${id - 1}].mdAmountPct`, 2)
       formik.setFieldValue(`items[${id - 1}].mdType`, 2)
+      currentMdType = 2
     }
 
     const itemPriceRow = getIPR({
@@ -418,23 +423,26 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
       qty: formik.values.items[id - 1].qty,
       extendedPrice: parseFloat(formik.values.items[id - 1].extendedPrice),
       mdAmount: parseFloat(formik.values.items[id - 1].mdAmount),
-      mdType: formik.values.items[id - 1].mdType,
+      mdType: currentMdType,
       mdValue: parseFloat(formik.values.items[id - 1].mdValue),
       dirtyField: DIRTYFIELD_MDTYPE
     })
 
-    const vatCalcRow = getVatCalc({
-      basePrice: formik.values.items[id - 1].basePrice,
-      qty: formik.values.items[id - 1].qty,
-      extendedPrice: parseFloat(formik.values.items[id - 1].extendedPrice),
-      baseLaborPrice: formik.values.items[id - 1].baseLaborPrice,
-      vatAmount: parseFloat(formik.values.items[id - 1].vatAmount),
-      tdPct: formik.values.items[id - 1].tdPct,
-      taxDetails: formik.values.items[id - 1].isVatChecked ? null : formik.values.items[id - 1].taxDetails
-    })
-
     formik.setFieldValue(`items[${id - 1}].extendedPrice`, parseFloat(itemPriceRow?.extendedPrice).toFixed(2))
-    formik.setFieldValue(`items[${id - 1}].vatAmount`, parseFloat(vatCalcRow?.vatAmount).toFixed(2))
+
+    if (formik.values.items[id - 1].isVatChecked) {
+      const vatCalcRow = getVatCalc({
+        basePrice: formik.values.items[id - 1].basePrice,
+        qty: formik.values.items[id - 1].qty,
+        extendedPrice: parseFloat(itemPriceRow?.extendedPrice),
+        baseLaborPrice: formik.values.items[id - 1].baseLaborPrice,
+        vatAmount: parseFloat(formik.values.items[id - 1].vatAmount),
+        tdPct: formik.values.items[id - 1].tdPct,
+        taxDetails: formik.values.items[id - 1].isVatChecked ? formik.values.items[id - 1].taxDetails : null
+      })
+      formik.setFieldValue(`items[${id - 1}].vatAmount`, parseFloat(vatCalcRow?.vatAmount).toFixed(2))
+      recalcGridVat(formik.values.tdType, formik.values.tdPct, formik.values.tdAmount, formik.values.currentDiscount)
+    }
   }
 
   async function onClose() {
@@ -742,7 +750,7 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
       baseLaborPrice: itemPriceRow?.baseLaborPrice,
       vatAmount: parseFloat(itemPriceRow?.vatAmount),
       tdPct: formik?.values?.tdPct,
-      taxDetails: formik.values.isVatChecked ? null : newRow.taxDetails
+      taxDetails: formik.values.isVatChecked ? newRow.taxDetails : null
     })
 
     update({
@@ -1018,6 +1026,10 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
       }
     })()
   }, [])
+
+  useEffect(() => {
+    calcTotals(formik.values.items)
+  }, [formik.values.items])
 
   useEffect(() => {
     calcTotals(formik.values.items)

@@ -97,7 +97,6 @@ const recalcBaseLaborPrice = row => {
 }
 
 const calcExtendedPrice = row => {
-  console.log('calcExtendedPrice ', row)
   if (row.mdAmount === 0 || row.mdType !== MDTYPE_PCT) {
     row.mdValue = row.mdAmount
 
