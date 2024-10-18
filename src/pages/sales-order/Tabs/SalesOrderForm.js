@@ -377,7 +377,8 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
         ShowDiscountIcons: true,
         iconsClicked: markdownIconsClicked,
         gridData: formik.values.items,
-        type: 'numeric'
+        type: 'numeric',
+        concatenateWith: '%'
       },
       async onChange({ row: { update, newRow } }) {
         getItemPriceRow(update, newRow, DIRTYFIELD_MDAMOUNT)

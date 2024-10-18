@@ -14,10 +14,8 @@ export default function TextFieldEdit({ column: { props }, id, field, value, upd
 
   const handleChange = e => {
     const inputValue = e.target.value
-
-    // Allow only numeric input if props.type is 'numeric'
-    if (props.type === 'numeric') {
-      if (/^\d*$/.test(inputValue)) {
+    if (props?.type === 'numeric') {
+      if (/^\d*\.?\d*$/.test(inputValue)) {
         update({
           id,
           field,
@@ -34,7 +32,11 @@ export default function TextFieldEdit({ column: { props }, id, field, value, upd
   }
 
   const handleKeyPress = e => {
-    if (props.type === 'numeric' && !/^[0-9]$/.test(e.key) && e.key !== 'Backspace') {
+    if (props.type === 'numeric' && !/^[0-9.]$/.test(e.key) && e.key !== 'Backspace') {
+      e.preventDefault()
+    }
+
+    if (props.type === 'numeric' && e.key === '.' && value.includes('.')) {
       e.preventDefault()
     }
   }
@@ -47,7 +49,7 @@ export default function TextFieldEdit({ column: { props }, id, field, value, upd
       hasBorder={false}
       onChange={handleChange}
       onKeyPress={handleKeyPress}
-      inputMode={props.type === 'numeric' ? 'numeric' : 'text'}
+      inputMode={props.type === 'numeric' ? 'decimal' : 'text'}
       {...props}
       InputProps={{
         endAdornment: (
