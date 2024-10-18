@@ -61,7 +61,8 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
         status: 1,
         wip: null,
         otpVerified: false,
-        clientId: null
+        clientId: null,
+        releaseStatus: null
       },
       cash: [
         {
@@ -125,20 +126,37 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
         .required('Cash array is required')
     }),
     onSubmit: async obj => {
-      const header = formik.values.header.map((head, index) => ({
-        ...head,
-        date: formatDateToApi(date)
-      }))
+      const data = {
+        header: {
+          ...obj.header,
+          date: formatDateToApi(obj.header.date)
+        },
+        cash: obj.cash.map((cash, index) => ({
+          ...cash,
+          id: index + 1,
+          seqNo: index + 1,
+          posStatus: 1,
+          cashAccountId: cashAccountId
+        })),
 
-      const cash = formik.values.cash.map((cash, index) => ({
-        ...cash,
-        id: index + 1,
-        seqNo: index + 1,
-        posStatus: 1,
-        cashAccountId: cashAccountId
-      }))
+        ...(({ header, cash, ...rest }) => rest)(obj)
+      }
+      console.log(data)
 
-      const data = { header: header, cash: cash }
+      // const header = {
+      //   ...obj.header,
+      //   date: formatDateToApi(date)
+      // }
+
+      // const cash = obj.cash.map((cash, index) => ({
+      //   ...cash,
+      //   id: index + 1,
+      //   seqNo: index + 1,
+      //   posStatus: 1,
+      //   cashAccountId: cashAccountId
+      // }))
+
+      // const data = { header: header, cash: cash }
 
       const totalCashAmount = formik.values.cash
         .reduce((sum, current) => sum + parseFloat(current.amount || 0), 0)
@@ -181,7 +199,7 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
       parameters: `_userId=${_userId}&_key=plantId`
     })
     if (plantRecord) {
-      formik.setFieldValue('plantId', parseInt(plantRecord.value))
+      formik.setFieldValue('header.plantId', parseInt(plantRecord.value))
     }
   }
 
@@ -202,7 +220,7 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
         }
       }))
     }
-  }, [recordId, form, formik.setValues, JSON.stringify(formik.values.header)])
+  }, [recordId, form])
 
   async function getData(_recordId) {
     const finalRecordId = _recordId || recordId || formik.values.recordId
@@ -300,7 +318,7 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
       date: formatDateToApi(date)
     }))
 
-    const res = await postRequest({
+    await postRequest({
       extension: RemittanceOutwardsRepository.ReceiptVouchers.reopen,
       record: JSON.stringify(data)
     }).then(res => {
@@ -462,7 +480,7 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
       key: 'Reopen',
       condition: isClosed,
       onClick: onReopen,
-      disabled: !isClosed || !editMode || formik.values.releaseStatus === 3
+      disabled: !isClosed || !editMode || formik.values.header.releaseStatus === 3
     },
     {
       key: 'OTP',
@@ -518,21 +536,28 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
                   <ResourceLookup
                     endpointId={RemittanceOutwardsRepository.OutwardsOrder.snapshot}
                     valueField='reference'
-                    name='header.owoId'
+                    name='owoId'
                     label={labels.outwards}
                     form={formik}
-                    secondDisplayField={false}
-                    valueShow='header.owoRef'
-                    readOnly={isPosted}
+                    formObject={formik.values.header}
+                    valueShow='owoRef'
                     required
+                    secondDisplayField={false}
+                    readOnly={isPosted}
                     maxAccess={maxAccess}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
                       { key: 'amount', value: 'Amount' }
                     ]}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('header.owoId', newValue ? newValue.recordId : '')
-                      formik.setFieldValue('header.amount', newValue ? newValue.amount : '')
+                      formik.setValues({
+                        ...formik.values,
+                        header: {
+                          ...formik.values.header,
+                          owoId: newValue ? newValue.recordId : null,
+                          amount: newValue ? newValue.amount : formik.values.header.amount
+                        }
+                      })
                     }}
                   />
                 </Grid>
