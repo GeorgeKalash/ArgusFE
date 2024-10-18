@@ -1,6 +1,5 @@
 import { useContext } from 'react'
 import Table from 'src/components/Shared/Table'
-import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -17,6 +16,7 @@ import { SystemFunction } from 'src/resources/SystemFunction'
 import { useError } from 'src/error'
 import { getStorageData } from 'src/storage/storage'
 import { ControlContext } from 'src/providers/ControlContext'
+import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
 const OutwardsOrder = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -38,21 +38,28 @@ const OutwardsOrder = () => {
     datasetId: ResourceIds.OutwardsOrder,
     filter: {
       endpointId: RemittanceOutwardsRepository.OutwardsOrder.snapshot,
-      filterFn: fetchWithSearch
+      filterFn: fetchWithFilter
     }
   })
 
   async function fetchWithSearch({ filters }) {
-    try {
-      if (!filters.qry) {
-        return { list: [] }
-      } else {
-        return await getRequest({
-          extension: RemittanceOutwardsRepository.OutwardsOrder.snapshot,
-          parameters: `_filter=${filters.qry}`
-        })
-      }
-    } catch (error) {}
+    if (!filters.qry) {
+      return { list: [] }
+    } else {
+      return await getRequest({
+        extension: RemittanceOutwardsRepository.OutwardsOrder.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+    }
+  }
+
+  async function fetchWithFilter({ filters, pagination }) {
+    if (filters.qry)
+      return await getRequest({
+        extension: RemittanceOutwardsRepository.OutwardsOrder.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+    else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
   const getPlantId = async () => {
@@ -92,6 +99,25 @@ const OutwardsOrder = () => {
         message: _labels.PlantDefaultError
       })
     }
+  }
+
+  const onApply = ({ search, rpbParams }) => {
+    if (!search && rpbParams.length === 0) {
+      clearFilter('params')
+    } else if (!search) {
+      filterBy('params', rpbParams)
+    } else {
+      filterBy('qry', search)
+    }
+    refetch()
+  }
+
+  const onSearch = value => {
+    filterBy('qry', value)
+  }
+
+  const onClear = () => {
+    clearFilter('qry')
   }
 
   const columns = [
@@ -174,17 +200,16 @@ const OutwardsOrder = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar
+        <RPBGridToolbar
           onAdd={addOutwards}
           maxAccess={access}
-          onSearch={value => {
-            filterBy('qry', value)
-          }}
-          onSearchClear={() => {
-            clearFilter('qry')
-          }}
+          onSearch={onSearch}
+          onClear={onClear}
+          reportName={'RTOWO'}
           labels={_labels}
           inputSearch={true}
+          onApply={onApply}
+          refetch={refetch}
         />
       </Fixed>
       <Grow>
