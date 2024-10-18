@@ -410,14 +410,21 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
 
   async function markdownIconsClicked(id) {
     let currentMdType
+    let currenctMdAmount = parseFloat(formik.values.items[id - 1].mdAmount)
+    const maxClientAmountDiscount = formik.values.items[id - 1].unitPrice * (formik.values?.maxDiscount / 100)
+
     if (formik.values.items[id - 1].mdType == 2) {
+      if (currenctMdAmount < 0 || currenctMdAmount > 100) currenctMdAmount = 0
       formik.setFieldValue(`items[${id - 1}].mdAmountPct`, 1)
       formik.setFieldValue(`items[${id - 1}].mdType`, 1)
       currentMdType = 1
+      formik.setFieldValue(`items[${id - 1}].mdAmount`, parseFloat(currenctMdAmount).toFixed(2))
     } else {
+      if (currenctMdAmount < 0 || currenctMdAmount > maxClientAmountDiscount) currenctMdAmount = 0
       formik.setFieldValue(`items[${id - 1}].mdAmountPct`, 2)
       formik.setFieldValue(`items[${id - 1}].mdType`, 2)
       currentMdType = 2
+      formik.setFieldValue(`items[${id - 1}].mdAmount`, parseFloat(currenctMdAmount).toFixed(2))
     }
 
     const itemPriceRow = getIPR({
@@ -425,7 +432,7 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
       upo: parseFloat(formik.values.items[id - 1].upo) ? parseFloat(formik.values.items[id - 1].upo) : 0,
       qty: formik.values.items[id - 1].qty,
       extendedPrice: parseFloat(formik.values.items[id - 1].extendedPrice),
-      mdAmount: parseFloat(formik.values.items[id - 1].mdAmount),
+      mdAmount: currenctMdAmount,
       mdType: currentMdType,
       mdValue: parseFloat(formik.values.items[id - 1].mdValue),
       dirtyField: DIRTYFIELD_MDTYPE
@@ -745,6 +752,7 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
       tdPct: formik?.values?.tdPct,
       dirtyField: dirtyField
     })
+
     const vatCalcRow = getVatCalc({
       basePrice: itemPriceRow?.basePrice,
       qty: itemPriceRow?.qty,
