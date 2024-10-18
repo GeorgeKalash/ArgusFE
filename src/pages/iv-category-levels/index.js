@@ -28,18 +28,16 @@ const CategoryLevels = () => {
     getGridData()
   }, [])
 
-  function getGridData() {
-    getRequest({
+  async function getGridData() {
+    const res = await getRequest({
       extension: InventoryRepository.CategoryLevel.qry
     })
-      .then(res => {
-        const processedData = res.list.map((item, index) => ({
-          id: index + 1,
-          ...item
-        }))
-        formik.setValues({ items: processedData })
-      })
-      .catch(error => {})
+
+    const processedData = res?.list?.map((item, index) => ({
+      id: index + 1,
+      ...item
+    }))
+    formik.setValues({ items: processedData })
   }
 
   const { formik } = useForm({
