@@ -134,6 +134,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
       extension: InventoryRepository.Physical.calc,
       parameters: new URLSearchParams(parameters).toString()
     })
+    console.log(calc.record.volume, 'volume')
 
     formik.setValues(prevValues => ({
       ...prevValues,
@@ -166,7 +167,6 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
   const handleFieldChange = (fieldName, dirtyField, value) => {
     const isNumber = !isNaN(value) && value !== ''
     const newValue = isNumber ? value : formik.values[fieldName]
-    console.log(formik.values[fieldName], value)
     newValue && formik.setFieldValue(fieldName, value)
     formik.values[fieldName] != value && fetchAndSetValues(dirtyField, value)
   }
@@ -222,7 +222,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
                 value={formik.values.diameter}
                 maxAccess={maxAccess}
                 readOnly={formik.values?.shape === 1}
-                onChange={e => handleFieldChange('diameter', 4, e.target.value)}
+                onMouseLeave={e => handleFieldChange('diameter', 4, e?.target?.value)}
                 onClear={() => handleFieldChange('diameter', 4, 0)}
               />
             </Grid>
@@ -232,8 +232,8 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
                 label={labels.length}
                 value={formik.values.length}
                 maxAccess={maxAccess}
-                onChange={e => handleFieldChange('length', 1, e.target.value)}
-                onClear={() => handleFieldChange('length', 1, 0)}
+                onMouseLeave={e => handleFieldChange('length', 1, e?.target?.value)}
+                onClear={() => formik.setFieldValue('length', 0)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -243,8 +243,8 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
                 readOnly={formik.values?.shape === 2}
                 value={formik.values.width}
                 maxAccess={maxAccess}
-                onChange={e => handleFieldChange('width', 2, e.target.value)}
-                onClear={() => handleFieldChange('width', 2, 0)}
+                onMouseLeave={e => handleFieldChange('width', 2, e?.target?.value)}
+                onClear={() => formik.setFieldValue('width', 0)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -254,8 +254,8 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
                 value={formik.values.depth}
                 readOnly={formik.values?.shape === 2}
                 maxAccess={maxAccess}
-                onChange={e => handleFieldChange('depth', 3, e.target.value)}
-                onClear={() => handleFieldChange('depth', 3, 0)}
+                onMouseLeave={e => handleFieldChange('depth', 3, e?.target?.value)}
+                onClear={() => formik.setFieldValue('depth', 0)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -264,8 +264,8 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
                 label={labels.volume}
                 value={formik.values.volume}
                 maxAccess={maxAccess}
-                onChange={e => handleFieldChange('volume', 5, e.target.value)}
-                onClear={() => handleFieldChange('volume', 5, 0)}
+                onMouseLeave={e => handleFieldChange('volume', 5, e?.target?.value)}
+                onClear={() => formik.setFieldValue('volume', 0)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -285,7 +285,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
                 label={labels.density}
                 value={formik.values.density}
                 maxAccess={maxAccess}
-                onChange={e => handleFieldChange('density', 7, e.target.value)}
+                onMouseLeave={e => handleFieldChange('density', 7, e?.target?.value)}
                 onClear={() => handleFieldChange('density', 7, 0)}
                 decimalScale={3}
               />
