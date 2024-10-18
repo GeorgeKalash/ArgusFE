@@ -82,12 +82,18 @@ const CTExchangeRates = () => {
     {
       component: 'textfield',
       label: labels.min,
-      name: 'minRate'
+      name: 'minRate',
+      props: {
+        maxLength: formik.values.rate
+      }
     },
     {
       component: 'textfield',
       label: labels.rate,
-      name: 'rate'
+      name: 'rate',
+      props: {
+        maxLength: formik.values.maxRate
+      }
     },
     {
       component: 'textfield',
@@ -105,17 +111,30 @@ const CTExchangeRates = () => {
         .array()
         .of(
           yup.object().shape({
-            minRate: yup.string().required().test('min-rate-check', function () {
-              const { rate, minRate } = this?.parent
+            minRate: yup
+              .number()
+              .required()
+              .test('min-rate-check', function (value) {
+                const { rate } = this.parent
 
-              return minRate <= rate;
-            }),
-            maxRate: yup.string().required(),
-            rate: yup.string().required().test('rate-max-check', function () {
-              const { rate, maxRate } = this?.parent
+                return value <= rate
+              }),
+            maxRate: yup
+              .number()
+              .required()
+              .test('max-rate-check', function (value) {
+                const { rate } = this.parent
 
-              return rate <= maxRate;
-            }),
+                return value >= rate
+              }),
+            rate: yup
+              .number()
+              .required()
+              .test('rate-check', function (value) {
+                const { minRate, maxRate } = this.parent
+
+                return value >= minRate && value <= maxRate
+              }),
             rateCalcMethodName: yup.string().required()
           })
         )
@@ -152,17 +171,30 @@ const CTExchangeRates = () => {
         .array()
         .of(
           yup.object().shape({
-            minRate: yup.string().required().test('min-rate-check', function () {
-              const { rate, minRate } = this.parent
+            minRate: yup
+              .number()
+              .required()
+              .test('min-rate-check', function (value) {
+                const { rate } = this.parent
 
-              return minRate <= rate;
-            }),
-            maxRate: yup.string().required(),
-            rate: yup.string().required().test('rate-max-check', function () {
-              const { rate, maxRate } = this.parent
+                return value <= rate
+              }),
+            maxRate: yup
+              .number()
+              .required()
+              .test('max-rate-check', function (value) {
+                const { rate } = this.parent
 
-              return rate <= maxRate;
-            }),
+                return value >= rate
+              }),
+            rate: yup
+              .number()
+              .required()
+              .test('rate-check', function (value) {
+                const { minRate, maxRate } = this.parent
+
+                return value >= minRate && value <= maxRate
+              }),
             rateCalcMethodName: yup.string().required()
           })
         )
