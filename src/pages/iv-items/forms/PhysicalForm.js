@@ -89,38 +89,38 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
   const fetchAndSetValues = async (dirtyField, newValue) => {
     const parameters = {
       _dirtyField: dirtyField,
-      _shape: parseInt(formik.values.shape) || 0,
-      _length: parseInt(formik.values.length) || 0,
-      _width: parseInt(formik.values.width) || 0,
-      _depth: parseInt(formik.values.depth) || 0,
-      _diameter: parseInt(formik.values.diameter) || 0,
-      _volume: parseInt(formik.values.volume) || 0,
-      _weight: parseInt(formik.values.weight) || 0,
-      _density: parseInt(formik.values.density) || 0
+      _shape: parseFloat(formik.values.shape) || 0,
+      _length: parseFloat(formik.values.length) || 0,
+      _width: parseFloat(formik.values.width) || 0,
+      _depth: parseFloat(formik.values.depth) || 0,
+      _diameter: parseFloat(formik.values.diameter) || 0,
+      _volume: parseFloat(formik.values.volume) || 0,
+      _weight: parseFloat(formik.values.weight) || 0,
+      _density: parseFloat(formik.values.density) || 0
     }
 
     if (dirtyField) {
       switch (dirtyField) {
         case 1:
-          parameters._length = parseInt(newValue) || 0
+          parameters._length = parseFloat(newValue) || 0
           break
         case 2:
-          parameters._width = parseInt(newValue) || 0
+          parameters._width = parseFloat(newValue) || 0
           break
         case 3:
-          parameters._depth = parseInt(newValue) || 0
+          parameters._depth = parseFloat(newValue) || 0
           break
         case 4:
-          parameters._diameter = parseInt(newValue) || 0
+          parameters._diameter = parseFloat(newValue) || 0
           break
         case 5:
-          parameters._volume = parseInt(newValue) || 0
+          parameters._volume = parseFloat(newValue) || 0
           break
         case 6:
-          parameters._weight = parseInt(newValue) || 0
+          parameters._weight = parseFloat(newValue) || 0
           break
         case 7:
-          parameters._density = parseInt(newValue) || 0
+          parameters._density = parseFloat(newValue) || 0
           break
         default:
           break
