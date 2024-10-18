@@ -24,7 +24,6 @@ const Properties = () => {
   const { platformLabels } = useContext(ControlContext)
   const [dimNum, setDimNum] = useState(0)
   const { stack } = useWindow()
-  const [firstValue, setFirstValue] = useState('')
 
   const fetchData = async () => {
     const dimensionNumber = formik.values?.dimValue?.match(/\d+$/)?.[0]
@@ -124,7 +123,6 @@ const Properties = () => {
       })
 
       const firstValidKey = res.list.find(item => item.value !== '')?.key
-      setFirstValue(firstValidKey)
       if (firstValidKey) {
         formik.setFieldValue('dimValue', firstValidKey)
       }
@@ -146,9 +144,8 @@ const Properties = () => {
               displayField='value'
               values={formik.values}
               onChange={(event, newValue) => {
-                formik.setFieldValue('dimValue', newValue ? newValue.key : firstValue)
+                formik.setFieldValue('dimValue', newValue ? newValue.key : '')
               }}
-              onClear={() => formik.setFieldValue('dimValue', firstValue)}
               required
               maxAccess={access}
               filter={item => item.value !== ''}
