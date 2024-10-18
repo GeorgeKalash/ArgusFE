@@ -19,6 +19,11 @@ export default function TextFieldEdit({ column: { props, ...column }, id, field,
           column?.onBlur(e, id);
         }
       }}
+      onKeyDown={(e) => {
+        if (column?.onKeyDown) {
+          column?.onKeyDown(e, id);
+        }
+      }}
       onChange={e => {
         update({
           id,

@@ -341,7 +341,6 @@ export const LOShipmentForm = ({ recordId, functionId, editMode, totalBaseAmount
                           { seqNo: '1', id: 1, reference: '' }
                         ]
                       }
-                      onCellKeyDown={handleReferenceChange}
                       maxAccess={maxAccess}
                       allowAddNewLine={
                         !editMode &&
@@ -365,7 +364,8 @@ export const LOShipmentForm = ({ recordId, functionId, editMode, totalBaseAmount
                             mandatory: true,
                             readOnly: editMode
                           },
-                          onBlur: (e, id) => handleReferenceChange(e, id)
+                          onBlur: (e, id) => handleReferenceChange(e, id),
+                          onKeyDown: (e, id) => handleReferenceChange(e, id),
                         }
                       ]}
                     />
