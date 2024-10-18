@@ -28,6 +28,7 @@ export function DataGrid({
   allowAddNewLine = true,
   onSelectionChange,
   rowSelectionModel,
+  onCellKeyDown,
   disabled = false
 }) {
   async function processDependenciesForColumn(newRow, oldRow, editCell) {
@@ -96,6 +97,11 @@ export function DataGrid({
     if (event.key !== 'Tab') {
       return
     }
+
+    if (event.key === 'Tab' && onCellKeyDown) {
+      onCellKeyDown(event, params?.id)
+    }
+
     const rowIds = gridExpandedSortedRowIdsSelector(apiRef.current.state)
     const columns = apiRef.current.getVisibleColumns()
 

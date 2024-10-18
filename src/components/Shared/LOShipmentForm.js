@@ -129,7 +129,7 @@ export const LOShipmentForm = ({ recordId, functionId, editMode, totalBaseAmount
     formik.setFieldValue(`packages[${index}].packageReferences`, newRows)
   }
 
-  const handleReferenceBlur = (e, id) => {
+  const handleReferenceChange = (e, id) => {
     const newReference = e.target.value
     const allPackages = formik.values.packages
 
@@ -341,6 +341,7 @@ export const LOShipmentForm = ({ recordId, functionId, editMode, totalBaseAmount
                           { seqNo: '1', id: 1, reference: '' }
                         ]
                       }
+                      onCellKeyDown={handleReferenceChange}
                       maxAccess={maxAccess}
                       allowAddNewLine={
                         !editMode &&
@@ -364,7 +365,7 @@ export const LOShipmentForm = ({ recordId, functionId, editMode, totalBaseAmount
                             mandatory: true,
                             readOnly: editMode
                           },
-                          onBlur: (e, id) => handleReferenceBlur(e, id)
+                          onBlur: (e, id) => handleReferenceChange(e, id)
                         }
                       ]}
                     />
