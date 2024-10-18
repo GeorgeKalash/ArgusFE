@@ -40,6 +40,15 @@ const CustomNumberField = ({
 
   const required = props.required || accessLevel === MANDATORY
 
+  const handleKeyPress = e => {
+    const regex = /[0-9.-]/
+    const key = String.fromCharCode(e.which || e.keyCode)
+
+    if (!regex.test(key)) {
+      e.preventDefault()
+    }
+  }
+
   const handleNumberFieldNewValue = e => {
     const regex = /^[0-9,]+(\.\d+)?$/
     let value = e?.target?.value
@@ -68,6 +77,7 @@ const CustomNumberField = ({
     <></>
   ) : (
     <NumericFormat
+      hey={value}
       label={label}
       allowLeadingZeros
       allowNegative={allowNegative}
@@ -84,7 +94,8 @@ const CustomNumberField = ({
       onInput={handleInput}
       InputProps={{
         inputProps: {
-          tabIndex: readOnly ? -1 : 0 // Prevent focus on the input field
+          tabIndex: readOnly ? -1 : 0, // Prevent focus on the input field
+          onKeyPress: handleKeyPress // Prevent letters from being typed
         },
         autoComplete: 'off',
         readOnly: _readOnly,

@@ -1,4 +1,4 @@
-import { useContext } from 'react'
+import { useContext, useState } from 'react'
 import { Grid } from '@mui/material'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -22,6 +22,8 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
   const invalidate = useInvalidate({
     endpointId: InventoryRepository.Physical.qry
   })
+
+  const [disabled, setDisabled] = useState(false)
 
   const { platformLabels } = useContext(ControlContext)
 
@@ -162,10 +164,10 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
     const isNumber = !isNaN(value) && value !== ''
     const newValue = isNumber ? value : formik.values[fieldName]
 
-    formik.setFieldValue(fieldName, newValue)
-    if (isNumber) {
-      fetchAndSetValues(dirtyField, newValue)
-    }
+    // formik.setFieldValue(fieldName, newValue)
+    // if (isNumber) {
+    fetchAndSetValues(dirtyField, value)
+    // }
   }
 
   return (
@@ -271,6 +273,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
                 label={labels.weight}
                 value={formik.values.weight}
                 maxAccess={maxAccess}
+                allowNegative={false}
                 onChange={e => handleFieldChange('weight', 6, e.target.value)}
                 onClear={() => handleFieldChange('weight', 6, 0)}
               />
