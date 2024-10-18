@@ -142,8 +142,6 @@ const CTExchangeRates = () => {
       await postExchangeMaps(values, formik.values.currencyId, formik.values.raCurrencyId, formik.values.puRateTypeId)
     }
   })
-  
-  console.log(puFormik)
 
   const { formik: saFormik } = useForm({
     maxAccess: access,
@@ -154,13 +152,13 @@ const CTExchangeRates = () => {
         .array()
         .of(
           yup.object().shape({
-            minRate: yup.string().required().test('min-rate-check', 'Min rate must be less than or equal to rate', function (value) {
+            minRate: yup.string().required().test('min-rate-check', function () {
               const { rate, minRate } = this.parent
 
               return minRate <= rate;
             }),
             maxRate: yup.string().required(),
-            rate: yup.string().required().test('rate-max-check', 'Rate must be less than or equal to max rate', function (value) {
+            rate: yup.string().required().test('rate-max-check', function () {
               const { rate, maxRate } = this.parent
 
               return rate <= maxRate;
