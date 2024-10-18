@@ -95,7 +95,7 @@ const CustomNumberField = ({
       InputProps={{
         inputProps: {
           tabIndex: readOnly ? -1 : 0, // Prevent focus on the input field
-          onKeyPress: handleKeyPress // Prevent letters from being typed
+          onKeyPress: handleKeyPress
         },
         autoComplete: 'off',
         readOnly: _readOnly,
