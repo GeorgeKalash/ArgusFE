@@ -143,7 +143,6 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
       density: calc.record.density || prevValues.density
     }))
   }
-  console.log(formik.values, 'values')
   useEffect(() => {
     ;(async function () {
       if (recordId) {
