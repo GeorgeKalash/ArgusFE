@@ -97,7 +97,17 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
       fromPlantId: yup.string().required(),
       date: yup.string().required(),
       toPlantId: yup.string().required(),
-      toCashAccountId: yup.string().required(),
+      toCashAccountId: yup
+        .string()
+        .nullable()
+        .test('', function (value) {
+          const { fromPlantId, toPlantId } = this.parent
+          if (fromPlantId == toPlantId) {
+            return !!value
+          }
+
+          return true
+        }),
       transfers: yup
         .array()
         .of(
@@ -214,26 +224,6 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
     }
   }
 
-  const onPost = async () => {
-    const { transfers, ...rest } = formik.values
-    const copy = { ...rest }
-    copy.date = formatDateToApi(copy.date)
-    copy.wip = copy.wip === '' ? 1 : copy.wip
-    copy.status = copy.status === '' ? 1 : copy.status
-    copy.baseAmount = totalLoc
-
-    const res = await postRequest({
-      extension: CashBankRepository.CashTransfer.post,
-      record: JSON.stringify(copy)
-    })
-
-    if (res?.recordId) {
-      toast.success('Record Posted Successfully')
-      invalidate()
-      setIsPosted(true)
-    }
-  }
-
   const fillCurrencyTransfer = async (transferId, data) => {
     const res = await getRequest({
       extension: CashBankRepository.CurrencyTransfer.qry,
@@ -334,12 +324,6 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
       condition: true,
       onClick: 'onApproval',
       disabled: !isClosed
-    },
-    {
-      key: 'Post',
-      condition: true,
-      onClick: onPost,
-      disabled: isPosted
     },
     {
       key: 'Shipment',
@@ -493,7 +477,7 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
                   displayField='name'
                   name='toCashAccountId'
                   displayFieldWidth={2}
-                  required
+                  required={formik.values.fromPlantId === formik.values.toPlantId}
                   readOnly={!formik.values.toPlantId || isClosed}
                   label={labels.toCashAcc}
                   form={formik}

@@ -8,10 +8,17 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import BarcodesForm from 'src/pages/iv-barcodes/Forms/BarcodesForm'
+import GridToolbar from 'src/components/Shared/GridToolbar'
+import { useWindow } from 'src/windows'
+import { ControlContext } from 'src/providers/ControlContext'
+import toast from 'react-hot-toast'
 
 const BarcodeForm = ({ store, labels, maxAccess }) => {
   const { recordId } = store
-  const { getRequest } = useContext(RequestsContext)
+  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { stack } = useWindow()
+  const { platformLabels } = useContext(ControlContext)
 
   const columns = [
     {
@@ -59,22 +66,82 @@ const BarcodeForm = ({ store, labels, maxAccess }) => {
   const {
     query: { data },
     labels: _labels,
-    refetch
+    refetch,
+    invalidate,
+    search,
   } = useResourceQuery({
     enabled: !!recordId,
     datasetId: ResourceIds.Items,
     queryFn: fetchGridData,
-    endpointId: InventoryRepository.Barcode.qry
+    endpointId: InventoryRepository.Barcode.qry,
+    search: {
+      endpointId: InventoryRepository.Barcodes.snapshot,
+      searchFn: fetchWithSearch
+    }
   })
+
+  const add = () => {
+    openForm()
+  }
+
+  const edit = obj => {
+    openForm(obj)
+  }
+
+  function openForm(obj) {
+    stack({
+      Component: BarcodesForm,
+      props: {
+        labels: _labels,
+        recordId: obj?.barcode,
+        access: maxAccess,
+        store,
+        msId: store?._msId
+      },
+      width: 600,
+      height: 500,
+      title: _labels.Barcodes
+    })
+  }
+
+  
+  async function fetchWithSearch({ options = {}, qry }) {
+    const { _startAt = 0, _size = 50 } = options
+
+    const response = await getRequest({
+      extension: InventoryRepository.Barcodes.snapshot,
+      parameters: `_filter=${qry}&_startAt=${_startAt}&_size=${_size}`
+    })
+
+    return response
+  }
+
+  const del = async obj => {
+    await postRequest({
+      extension: InventoryRepository.Barcodes.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
+  }
 
   return (
     <VertLayout>
-      <Fixed></Fixed>
+      <Fixed>
+        <GridToolbar 
+          onAdd={add} 
+          maxAccess={maxAccess} 
+          onSearch={search}
+          inputSearch={true} 
+        />
+      </Fixed>
       <Grow>
         <Table
           columns={columns}
           gridData={data}
           rowId={'barcode'}
+          onEdit={edit}
+          onDelete={del}
           isLoading={false}
           pageSize={50}
           pagination={false}
