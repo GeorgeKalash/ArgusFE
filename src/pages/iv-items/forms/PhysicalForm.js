@@ -164,11 +164,16 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
     })()
   }, [recordId])
 
-  const handleFieldChange = (fieldName, dirtyField, value) => {
-    const isNumber = !isNaN(value) && value !== ''
-    const newValue = isNumber ? value : formik.values[fieldName]
-    newValue && formik.setFieldValue(fieldName, value)
-    formik.values[fieldName]?.toString() != value?.toString() && fetchAndSetValues(dirtyField, value)
+  const handleFieldChange = (fieldName, dirtyField, value = 0) => {
+    if (value > 0) {
+      formik.setFieldValue(fieldName, value)
+      if (formik.values[fieldName]?.toString() != value?.toString()) fetchAndSetValues(dirtyField, value)
+    }
+  }
+
+  const handleFieldClear = (fieldName, dirtyField, value = 0) => {
+    formik.setFieldValue(fieldName, value)
+    handleFieldChange(fieldName, dirtyField, value)
   }
 
   return (
@@ -223,7 +228,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
                 maxAccess={maxAccess}
                 readOnly={formik.values?.shape === 1}
                 onMouseLeave={e => handleFieldChange('diameter', 4, e?.target?.value)}
-                onClear={() => formik.setFieldValue('diameter', 0)}
+                onClear={() => handleFieldClear('length', 4, 0)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -233,7 +238,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
                 value={formik.values.length}
                 maxAccess={maxAccess}
                 onMouseLeave={e => handleFieldChange('length', 1, e?.target?.value)}
-                onClear={() => formik.setFieldValue('length', 0)}
+                onClear={() => handleFieldClear('length', 1, 0)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -244,7 +249,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
                 value={formik.values.width}
                 maxAccess={maxAccess}
                 onMouseLeave={e => handleFieldChange('width', 2, e?.target?.value)}
-                onClear={() => formik.setFieldValue('width', 0)}
+                onClear={() => handleFieldClear('width', 2, 0)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -255,7 +260,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
                 readOnly={formik.values?.shape === 2}
                 maxAccess={maxAccess}
                 onMouseLeave={e => handleFieldChange('depth', 3, e?.target?.value)}
-                onClear={() => formik.setFieldValue('depth', 0)}
+                onClear={() => handleFieldClear('depth', 3, 0)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -265,7 +270,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
                 value={formik.values.volume}
                 maxAccess={maxAccess}
                 onMouseLeave={e => handleFieldChange('volume', 5, e?.target?.value)}
-                onClear={() => formik.setFieldValue('volume', 0)}
+                onClear={() => handleFieldClear('volume', 5, 0)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -275,11 +280,8 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
                 value={formik.values.weight}
                 maxAccess={maxAccess}
                 allowNegative={false}
-                onMouseLeave={e => e.target.value > 0 && handleFieldChange('weight', 6, e?.target?.value)}
-                onClear={() => {
-                  formik.setFieldValue('weight', 0)
-                  handleFieldChange('weight', 6, 0)
-                }}
+                onMouseLeave={e => handleFieldChange('weight', 6, e?.target?.value)}
+                onClear={() => handleFieldClear('weight', 6, 0)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -289,7 +291,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
                 value={formik.values.density}
                 maxAccess={maxAccess}
                 onMouseLeave={e => handleFieldChange('density', 7, e?.target?.value)}
-                onClear={() => handleFieldChange('density', 7, 0)}
+                onClear={() => handleFieldClear('density', 7, 0)}
                 decimalScale={3}
               />
             </Grid>

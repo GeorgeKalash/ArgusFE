@@ -52,13 +52,13 @@ const CustomNumberField = ({
 
   const handleNumberChangeValue = e => {
     const value = formatNumber(e)
-    e.target.value = value
+    if (value) e.target.value = value
     onChange(e)
   }
 
   const handleNumberMouseLeave = e => {
     const value = formatNumber(e)
-    e.target.value = value
+    if (value) e.target.value = value
     onMouseLeave(e)
   }
 
