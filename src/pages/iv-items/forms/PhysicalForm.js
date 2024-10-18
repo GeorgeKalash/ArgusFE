@@ -15,6 +15,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { ControlContext } from 'src/providers/ControlContext'
+import CustomTextField from 'src/components/Inputs/CustomTextField'
 
 const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -46,7 +47,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
       density: 0,
       metalPurity: ''
     },
-    enableReinitialize: true,
+    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       metalId: yup
@@ -145,6 +146,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
       density: calc.record.density || prevValues.density
     }))
   }
+
   useEffect(() => {
     ;(async function () {
       if (recordId) {
@@ -163,11 +165,9 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
   const handleFieldChange = (fieldName, dirtyField, value) => {
     const isNumber = !isNaN(value) && value !== ''
     const newValue = isNumber ? value : formik.values[fieldName]
-
-    // formik.setFieldValue(fieldName, newValue)
-    // if (isNumber) {
-    fetchAndSetValues(dirtyField, value)
-    // }
+    console.log(formik.values[fieldName], value)
+    newValue && formik.setFieldValue(fieldName, value)
+    formik.values[fieldName] != value && fetchAndSetValues(dirtyField, value)
   }
 
   return (
@@ -274,8 +274,8 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
                 value={formik.values.weight}
                 maxAccess={maxAccess}
                 allowNegative={false}
-                onChange={e => handleFieldChange('weight', 6, e.target.value)}
-                onClear={() => handleFieldChange('weight', 6, 0)}
+                onMouseLeave={e => handleFieldChange('weight', 6, e?.target?.value)}
+                onClear={() => formik.setFieldValue('weight', 0)}
               />
             </Grid>
             <Grid item xs={12}>
