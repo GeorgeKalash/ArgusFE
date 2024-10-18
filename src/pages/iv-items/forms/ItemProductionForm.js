@@ -203,16 +203,15 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={SCRepository.LabelTemplate.qry}
-                values={formik.values}
                 name='ltId'
                 label={labels.template}
                 valueField='recordId'
                 displayField='name'
-                maxAccess={maxAccess}
+                values={formik.values}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('ltId ', newValue?.recordId || '')
+                  formik.setFieldValue('ltId', newValue ? newValue.recordId : '')
                 }}
-                error={formik.touched.ltId && Boolean(formik.errors.ltId)}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>

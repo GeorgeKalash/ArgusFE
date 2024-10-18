@@ -175,7 +175,7 @@ export default function FormShell({
                 resourceId: resourceId,
                 setErrorMessage: setErrorMessage
               },
-              width: 700,
+              width: 900,
               height: 600,
               title: platformLabels.TransactionLog
             })
