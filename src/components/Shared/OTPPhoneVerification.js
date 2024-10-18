@@ -6,6 +6,7 @@ import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import toast from 'react-hot-toast'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import useResourceParams from 'src/hooks/useResourceParams'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const OTPPhoneVerification = ({
   formValidation,
@@ -18,12 +19,13 @@ const OTPPhoneVerification = ({
   window
 }) => {
   const { postRequest } = useContext(RequestsContext)
+  const { defaultsData } = useContext(ControlContext)
 
   const { labels: labels, access } = useResourceParams({
     datasetId: ResourceIds.OTPVerify
   })
   const [otp, setOtp] = useState(['', '', '', '', '', ''])
-  const [timer, setTimer] = useState(60)
+  const [timer, setTimer] = useState(null)
   const [error, setError] = useState('')
   const [disabled, setDisabled] = useState(0)
 
@@ -47,6 +49,18 @@ const OTPPhoneVerification = ({
     otpSMS()
   }, [])
 
+  useEffect(() => {
+    if (defaultsData?.list?.find(obj => obj.key === 'otp-expiry-time')) {
+      const expiryTimeObj = defaultsData.list.find(obj => obj.key === 'otp-expiry-time')
+      const expiryTime = parseInt(expiryTimeObj?.value, 10)
+      if (!isNaN(expiryTime)) {
+        setTimer(expiryTime)
+      }
+    } else {
+      setError('OTP Expiry Time is Not Filled.')
+    }
+  }, [defaultsData])
+
   const otpSMS = () => {
     var data = {
       clientId: formValidation.values.clientId || clientId,
@@ -58,11 +72,9 @@ const OTPPhoneVerification = ({
     postRequest({
       extension: CTCLRepository.OTPRepository.sms,
       record: JSON.stringify(data)
+    }).then(res => {
+      setError(res.error)
     })
-      .then(res => {
-        setError(res.error)
-      })
-      .catch(error => {})
   }
 
   const checkSMS = value => {
@@ -78,14 +90,12 @@ const OTPPhoneVerification = ({
       postRequest({
         extension: CTCLRepository.OTPRepository.checkSms,
         record: JSON.stringify(data)
+      }).then(res => {
+        toast.success('Verification Completed')
+        if (onSuccess) onSuccess()
+        if (getData) getData(formValidation?.values?.clientId)
+        window.close()
       })
-        .then(res => {
-          toast.success('Verification Completed')
-          if (onSuccess) onSuccess()
-          if (getData) getData(formValidation?.values?.clientId)
-          window.close()
-        })
-        .catch(error => {})
     } else {
       setError('All Fields Required')
     }

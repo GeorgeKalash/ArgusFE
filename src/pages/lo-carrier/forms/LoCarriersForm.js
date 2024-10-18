@@ -17,11 +17,13 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import { useForm } from 'src/hooks/form'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function LoCarriersForms({ labels, maxAccess, recordId }) {
   const [editMode, setEditMode] = useState(!!recordId)
 
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: LogisticsRepository.LoCarrier.page
@@ -36,7 +38,6 @@ export default function LoCarriersForms({ labels, maxAccess, recordId }) {
       siteId: null,
       bpId: null,
       bpName: null,
-
       bpRef: null,
       cashAccountId: null,
       cashAccountRef: '',
@@ -46,9 +47,9 @@ export default function LoCarriersForms({ labels, maxAccess, recordId }) {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      reference: yup.string().required(' '),
-      name: yup.string().required(' '),
-      type: yup.string().required(' ')
+      reference: yup.string().required(),
+      name: yup.string().required(),
+      type: yup.string().required()
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
@@ -59,12 +60,12 @@ export default function LoCarriersForms({ labels, maxAccess, recordId }) {
       })
 
       if (!recordId) {
-        toast.success('Record Added Successfully')
+        toast.success(platformLabels.Added)
         formik.setValues({
           ...obj,
           recordId: response.recordId
         })
-      } else toast.success('Record Edited Successfully')
+      } else toast.success(platformLabels.Edited)
       setEditMode(true)
 
       invalidate()
@@ -73,16 +74,14 @@ export default function LoCarriersForms({ labels, maxAccess, recordId }) {
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: LogisticsRepository.LoCarrier.get,
-            parameters: `_recordId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: LogisticsRepository.LoCarrier.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          formik.setValues(res.record)
-        }
-      } catch (exception) {}
+        formik.setValues(res.record)
+      }
     })()
   }, [])
 
