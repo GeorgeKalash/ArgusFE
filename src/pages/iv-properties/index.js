@@ -24,6 +24,7 @@ const Properties = () => {
   const { platformLabels } = useContext(ControlContext)
   const [dimNum, setDimNum] = useState(0)
   const { stack } = useWindow()
+  const [firstValue, setFirstValue] = useState('')
 
   const fetchData = async () => {
     const dimensionNumber = formik.values?.dimValue?.match(/\d+$/)?.[0]
@@ -123,6 +124,7 @@ const Properties = () => {
       })
 
       const firstValidKey = res.list.find(item => item.value !== '')?.key
+      setFirstValue(firstValidKey)
       if (firstValidKey) {
         formik.setFieldValue('dimValue', firstValidKey)
       }
@@ -133,7 +135,7 @@ const Properties = () => {
     <VertLayout>
       <Fixed>
         <GridToolbar onAdd={add} maxAccess={access} />
-        <Grid container spacing={3} sx={{ pl: 35, mt: -13 }}>
+        <Grid container spacing={3} sx={{ pl: 35, mt: -13, mb: 2 }}>
           <Grid item xs={4}>
             <ResourceComboBox
               endpointId={SystemRepository.Defaults.qry}
@@ -144,8 +146,9 @@ const Properties = () => {
               displayField='value'
               values={formik.values}
               onChange={(event, newValue) => {
-                formik.setFieldValue('dimValue', newValue ? newValue.key : '')
+                formik.setFieldValue('dimValue', newValue ? newValue.key : firstValue)
               }}
+              onClear={() => formik.setFieldValue('dimValue', firstValue)}
               required
               maxAccess={access}
               filter={item => item.value !== ''}
