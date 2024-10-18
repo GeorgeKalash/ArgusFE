@@ -105,13 +105,13 @@ const CTExchangeRates = () => {
         .array()
         .of(
           yup.object().shape({
-            minRate: yup.string().required().test('min-rate-check', function (value) {
+            minRate: yup.string().required().test('min-rate-check', function () {
               const { rate, minRate } = this?.parent
 
               return minRate <= rate;
             }),
             maxRate: yup.string().required(),
-            rate: yup.string().required().test('rate-max-check', function (value) {
+            rate: yup.string().required().test('rate-max-check', function () {
               const { rate, maxRate } = this?.parent
 
               return rate <= maxRate;
