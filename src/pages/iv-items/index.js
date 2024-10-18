@@ -12,11 +12,11 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import ItemWindow from './window/ItemWindow'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
-import GridToolbar from 'src/components/Shared/GridToolbar'
 
 const IvItems = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const [params, setParams] = useState('')
 
   const { stack } = useWindow()
 
@@ -153,6 +153,9 @@ const IvItems = () => {
     } else {
       filterBy('qry', search)
     }
+    if (rpbParams) {
+      setParams(rpbParams)
+    }
     refetch()
   }
 
@@ -161,6 +164,7 @@ const IvItems = () => {
   }
 
   const onClear = () => {
+    onApply({ search: '', rpbParams: params })
     clearFilter('qry')
   }
 
