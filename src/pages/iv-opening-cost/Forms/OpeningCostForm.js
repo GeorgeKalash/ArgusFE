@@ -31,7 +31,7 @@ export default function OpeningCostForm({ labels, maxAccess, record }) {
     initialValues: {
       recordId: null,
       itemId: null,
-      itemName: null,
+      itemName: '',
       year: null,
       avgCost: 0
     },
