@@ -41,10 +41,12 @@ import { getDiscValues, getFooterTotals, getSubtotal } from 'src/utils/FooterCal
 import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
 import AddressFilterForm from 'src/components/Shared/AddressFilterForm'
 import { getStorageData } from 'src/storage/storage'
+import { useError } from 'src/error'
 
 export default function SalesOrderForm({ labels, access: maxAccess, recordId, currency, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
   const [cycleButtonState, setCycleButtonState] = useState({ text: '%', value: 2 })
   const [address, setAddress] = useState({})
@@ -431,7 +433,7 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
 
     formik.setFieldValue(`items[${id - 1}].extendedPrice`, parseFloat(itemPriceRow?.extendedPrice).toFixed(2))
 
-    if (formik.values.items[id - 1].isVatChecked) {
+    if (formik.values.items[id - 1].isVattable) {
       const vatCalcRow = getVatCalc({
         basePrice: formik.values.items[id - 1].basePrice,
         qty: formik.values.items[id - 1].qty,
@@ -439,7 +441,7 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
         baseLaborPrice: formik.values.items[id - 1].baseLaborPrice,
         vatAmount: parseFloat(formik.values.items[id - 1].vatAmount),
         tdPct: formik.values.items[id - 1].tdPct,
-        taxDetails: formik.values.items[id - 1].isVatChecked ? formik.values.items[id - 1].taxDetails : null
+        taxDetails: formik.values.items[id - 1].isVattable ? formik.values.items[id - 1].taxDetails : null
       })
       formik.setFieldValue(`items[${id - 1}].vatAmount`, parseFloat(vatCalcRow?.vatAmount).toFixed(2))
       recalcGridVat(formik.values.tdType, formik.values.tdPct, formik.values.tdAmount, formik.values.currentDiscount)
@@ -743,7 +745,6 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
       tdPct: formik?.values?.tdPct,
       dirtyField: dirtyField
     })
-
     const vatCalcRow = getVatCalc({
       basePrice: itemPriceRow?.basePrice,
       qty: itemPriceRow?.qty,
@@ -751,7 +752,7 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
       baseLaborPrice: itemPriceRow?.baseLaborPrice,
       vatAmount: parseFloat(itemPriceRow?.vatAmount),
       tdPct: formik?.values?.tdPct,
-      taxDetails: formik.values.isVatChecked ? newRow.taxDetails : null
+      taxDetails: formik.values.isVattable ? newRow.taxDetails : null
     })
 
     update({
@@ -848,19 +849,18 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
     recalcNewVat(tdPct)
   }
 
-  function ShowMdAmountErrorMessage(clientMaxDiscount, rowData, update) {
+  function ShowMdValueErrorMessage(clientMaxDiscount, rowData, update) {
     if (parseFloat(rowData.mdAmount) > clientMaxDiscount) {
       formik.setFieldValue('mdAmount', clientMaxDiscount)
       rowData.mdAmount = clientMaxDiscount
-
-      // getItemPriceRow(update, rowData, DIRTYFIELD_MDAMOUNT)
+      getItemPriceRow(update, rowData, DIRTYFIELD_MDAMOUNT)
       stackError({
         message: labels.clientMaxPctDiscount + ' ' + clientMaxDiscount + '%'
       })
     }
   }
 
-  function ShowMdValueErrorMessage(actualDiscountAmount, clientMaxDiscountValue, rowData, update) {
+  function ShowMdAmountErrorMessage(actualDiscountAmount, clientMaxDiscountValue, rowData, update) {
     if (actualDiscountAmount > clientMaxDiscountValue) {
       formik.setFieldValue('mdType', 2)
       formik.setFieldValue('mdAmount', clientMaxDiscountValue)
@@ -878,13 +878,13 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
     if (!formik.values.maxDiscount) return
     if (rowData.mdType == 1) {
       if (rowData.mdAmount > formik.values.maxDiscount) {
-        ShowMdAmountErrorMessage(formik.values.maxDiscount, rowData, update)
+        ShowMdValueErrorMessage(formik.values.maxDiscount, rowData, update)
 
         return false
       }
     } else {
       if (rowData.mdAmount > maxClientAmountDiscount) {
-        ShowMdValueErrorMessage(rowData.mdAmount, maxClientAmountDiscount, rowData, update)
+        ShowMdAmountErrorMessage(rowData.mdAmount, maxClientAmountDiscount, rowData, update)
 
         return false
       }
