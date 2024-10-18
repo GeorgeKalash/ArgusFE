@@ -142,6 +142,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
       depth: calc.record.depth || prevValues.depth,
       diameter: calc.record.diameter || prevValues.diameter,
       volume: calc.record.volume || prevValues.volume,
+
       weight: calc.record.weight || prevValues.weight,
       density: calc.record.density || prevValues.density
     }))
