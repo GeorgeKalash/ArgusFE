@@ -1,4 +1,4 @@
-import { useContext } from 'react'
+import { useContext, useState } from 'react'
 import { Grid } from '@mui/material'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -22,6 +22,8 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
   const invalidate = useInvalidate({
     endpointId: InventoryRepository.Physical.qry
   })
+
+  const [disabled, setDisabled] = useState(false)
 
   const { platformLabels } = useContext(ControlContext)
 
@@ -91,6 +93,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
   }
 
   const fetchAndSetValues = async (dirtyField, newValue) => {
+    setDisabled(true)
     try {
       const parameters = {
         _dirtyField: dirtyField,
@@ -147,6 +150,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
         weight: calc.record.weight || prevValues.weight,
         density: calc.record.density || prevValues.density
       }))
+      setDisabled(false)
     } catch (error) {}
   }
   console.log(formik.values, 'values')
@@ -171,10 +175,10 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
     const isNumber = !isNaN(value) && value !== ''
     const newValue = isNumber ? value : formik.values[fieldName]
 
-    formik.setFieldValue(fieldName, newValue)
-    if (isNumber) {
-      fetchAndSetValues(dirtyField, newValue)
-    }
+    // formik.setFieldValue(fieldName, newValue)
+    // if (isNumber) {
+    fetchAndSetValues(dirtyField, value)
+    // }
   }
 
   return (
