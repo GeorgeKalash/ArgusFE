@@ -141,6 +141,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
       depth: calc.record.depth || prevValues.depth,
       diameter: calc.record.diameter || prevValues.diameter,
       volume: calc.record.volume || prevValues.volume,
+
       weight: calc.record.weight || prevValues.weight,
       density: calc.record.density || prevValues.density
     }))
@@ -164,10 +165,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
     const isNumber = !isNaN(value) && value !== ''
     const newValue = isNumber ? value : formik.values[fieldName]
 
-    // formik.setFieldValue(fieldName, newValue)
-    // if (isNumber) {
     fetchAndSetValues(dirtyField, value)
-    // }
   }
 
   return (
@@ -274,8 +272,17 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
                 value={formik.values.weight}
                 maxAccess={maxAccess}
                 allowNegative={false}
-                onChange={e => handleFieldChange('weight', 6, e.target.value)}
-                onClear={() => handleFieldChange('weight', 6, 0)}
+                onBlur={e => {
+                  if (e.target.value > 0) {
+                    handleFieldChange('weight', 6, e.target.value)
+                    console.log(e.target.value)
+                  }
+                }}
+                onChange={e => formik.setFieldValue('weight', e.target.value || '')}
+                onClear={() => {
+                  formik.setFieldValue('weight', 0)
+                  handleFieldChange('weight', 6, 0)
+                }}
               />
             </Grid>
             <Grid item xs={12}>
