@@ -266,7 +266,7 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
           unitPrice: parseFloat(ItemConvertPrice?.unitPrice || 0).toFixed(3),
           upo: parseFloat(ItemConvertPrice?.upo || 0).toFixed(2),
           priceType: ItemConvertPrice?.priceType || 1,
-          mdAmount: 0,
+          mdAmount: formik.values.maxDiscount ? parseFloat(formik.values.maxDiscount).toFixed(2) : 0,
           qty: 0,
           msId: itemInfo?.msId,
           extendedPrice: parseFloat('0').toFixed(2),
@@ -848,12 +848,12 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
     recalcNewVat(tdPct)
   }
 
-  function ShowMdAmountErrorMessage(actualDiscount, clientMaxDiscount, rowData, update) {
-    if (actualDiscount > clientMaxDiscount) {
+  function ShowMdAmountErrorMessage(clientMaxDiscount, rowData, update) {
+    if (parseFloat(rowData.mdAmount) > clientMaxDiscount) {
       formik.setFieldValue('mdAmount', clientMaxDiscount)
       rowData.mdAmount = clientMaxDiscount
-      getItemPriceRow(update, rowData, DIRTYFIELD_MDAMOUNT)
-      calcTotals(formik.values.items)
+
+      // getItemPriceRow(update, rowData, DIRTYFIELD_MDAMOUNT)
       stackError({
         message: labels.clientMaxPctDiscount + ' ' + clientMaxDiscount + '%'
       })
@@ -867,7 +867,6 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
       rowData.mdType = 2
       rowData.mdAmount = clientMaxDiscountValue
       getItemPriceRow(update, rowData, DIRTYFIELD_MDAMOUNT)
-      calcTotals(formik.values.items)
       stackError({
         message: labels.clientMaxDiscount + ' ' + clientMaxDiscountValue
       })
@@ -879,19 +878,15 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
     if (!formik.values.maxDiscount) return
     if (rowData.mdType == 1) {
       if (rowData.mdAmount > formik.values.maxDiscount) {
-        ShowMdAmountErrorMessage(value, clientMax, rowData, update)
+        ShowMdAmountErrorMessage(formik.values.maxDiscount, rowData, update)
 
         return false
-      } else {
-        return true
       }
     } else {
       if (rowData.mdAmount > maxClientAmountDiscount) {
-        ShowMdValueErrorMessage(value, maxClientAmountDiscount, rowData, update)
+        ShowMdValueErrorMessage(rowData.mdAmount, maxClientAmountDiscount, rowData, update)
 
         return false
-      } else {
-        return true
       }
     }
   }
@@ -1027,10 +1022,6 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
       }
     })()
   }, [])
-
-  useEffect(() => {
-    calcTotals(formik.values.items)
-  }, [formik.values.items])
 
   useEffect(() => {
     calcTotals(formik.values.items)
@@ -1255,7 +1246,6 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
                     formik.setFieldValue('clientRef', newValue?.reference)
                     formik.setFieldValue('isVattable', newValue?.isSubjectToVAT || false)
                     formik.setFieldValue('maxDiscount', newValue?.maxDiscount)
-                    formik.setFieldValue('currentDiscount', newValue?.tdPct)
                     formik.setFieldValue('taxId', newValue?.taxId)
                     fillClientData(newValue?.recordId)
                   }}
