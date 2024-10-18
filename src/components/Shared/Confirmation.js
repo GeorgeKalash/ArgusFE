@@ -11,8 +11,9 @@ import moment from 'moment-hijri'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import { VertLayout } from './Layouts/VertLayout'
 import { Grow } from './Layouts/Grow'
+import { useForm } from 'src/hooks/form'
 
-const Confirmation = ({ labels, formik, editMode, maxAccess, refreshProf = () => {}, window }) => {
+const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refreshProf = () => {}, window }) => {
   const [showAsPassword, setShowAsPassword] = useState(true)
   const [showAsPasswordRepeat, setShowAsPasswordRepeat] = useState(false)
   const { getRequest } = useContext(RequestsContext)
@@ -21,13 +22,13 @@ const Confirmation = ({ labels, formik, editMode, maxAccess, refreshProf = () =>
     event.preventDefault()
   }
 
-  const fetchFormik = useFormik({
+  const { formik } = useForm({
     enableReinitialize: false,
     validateOnChange: true,
     initialValues: {
-      idtId: formik.values?.idtId ? formik.values.idtId : formik.values?.id_type,
-      birthDate: formik.values?.birthDate ? formik.values.birthDate : formik.values?.birth_date,
-      idNo: formik.values?.idNo ? formik.values.idNo : formik.values?.id_number,
+      idtId: clientformik.values?.idtId ? clientformik.values.idtId : clientformik.values?.id_type,
+      birthDate: clientformik.values?.birthDate ? clientformik.values.birthDate : clientformik.values?.birth_date,
+      idNo: clientformik.values?.idNo ? clientformik.values.idNo : clientformik.values?.id_number,
       idNoRepeat: ''
     },
 
@@ -46,13 +47,9 @@ const Confirmation = ({ labels, formik, editMode, maxAccess, refreshProf = () =>
   })
 
   const postFetchDefault = obj => {
-    let type
-    if (obj.idtId === 28) {
-      type = 1
-    }
-    if (obj.idtId === 26) {
-      type = 2
-    }
+    console.log(idTypes)
+
+    const type = idTypes?.list?.filter(item => item?.recordId == obj?.idtId)?.[0]?.type
 
     const hijriDate = moment(formatDateToApiFunction(obj.birthDate), 'YYYY-MM-DD').format('iYYYY-iMM-iDD')
 
@@ -65,23 +62,22 @@ const Confirmation = ({ labels, formik, editMode, maxAccess, refreshProf = () =>
       .then(result => {
         const res = result.record
 
-        formik.setValues({
-          ...formik.values,
-          expiryDate: formatDateFromApi(res.idExpirationDate),
-          firstName: res.fl_firstName,
-          middleName: res.fl_middleName,
-          familyName: res.fl_familyName,
-          lastName: res.fl_lastName,
-          flName: res.flName,
-          fl_firstName: res.firstName,
-          fl_middleName: res.middleName,
-          fl_lastName: res.lastName,
-          fl_familyName: res.familyName,
-          gender: res.gender === 'ذكر' ? '1' : '2',
-          professionId: res.professionId,
-          nationalityId: res.nationalityId,
-          idIssuePlaceCode: res.idIssuePlaceCode
-        })
+        clientformik.setFieldValue('expiryDate', formatDateFromApi(res.idExpirationDate))
+        clientformik.setFieldValue('firstName', res.fl_firstName)
+        clientformik.setFieldValue('middleName', res.fl_middleName)
+        clientformik.setFieldValue('familyName', res.fl_familyName)
+        clientformik.setFieldValue('lastName', res.fl_lastName)
+        clientformik.setFieldValue('flName', res.flName)
+        clientformik.setFieldValue('fl_firstName', res.firstName)
+        clientformik.setFieldValue('fl_middleName', res.middleName)
+        clientformik.setFieldValue('fl_lastName', res.lastName)
+        clientformik.setFieldValue('fl_familyName', res.familyName)
+        clientformik.setFieldValue('gender', res.gender === 'ذكر' ? '1' : '2')
+        clientformik.setFieldValue('professionId', res.professionId)
+        clientformik.setFieldValue('nationalityId', res.nationalityId)
+        clientformik.setFieldValue('idIssuePlaceCode', res.idIssuePlaceCode)
+        clientformik.setFieldValue('sponsorName', res.sponsorName)
+
         res.newProfessionMode && refreshProf()
         window.close()
       })
@@ -89,25 +85,30 @@ const Confirmation = ({ labels, formik, editMode, maxAccess, refreshProf = () =>
   }
 
   return (
-    <FormShell form={fetchFormik} maxAccess={maxAccess} editMode={editMode} isCleared={false} infoVisible={false}>
+    <FormShell form={formik} maxAccess={maxAccess} editMode={editMode} isCleared={false} infoVisible={false}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
             <Grid item xs={12}>
-              <CustomTextField name='idTypeName' label={labels.id_type} readOnly={true} value={formik.values.idtName} />
+              <CustomTextField
+                name='idTypeName'
+                label={labels.id_type}
+                readOnly={true}
+                value={clientformik.values.idtName}
+              />
             </Grid>
             <Grid item xs={12}>
               <CustomDatePicker
                 name='birthDate'
                 label={labels.birthDate}
-                value={fetchFormik.values?.birthDate ? fetchFormik.values?.birthDate : fetchFormik.values?.birth_date}
+                value={formik.values?.birthDate ? formik.values?.birthDate : formik.values?.birth_date}
                 required={true}
-                onChange={fetchFormik.setFieldValue}
-                onClear={() => fetchFormik.setFieldValue('birthDate', '')}
+                onChange={formik.setFieldValue}
+                onClear={() => formik.setFieldValue('birthDate', '')}
                 disabledDate={'>='}
                 readOnly={true}
-                error={fetchFormik.touched.birthDate && Boolean(fetchFormik.errors.birthDate)}
-                helperText={fetchFormik.touched.birthDate && fetchFormik.errors.birthDate}
+                error={formik.touched.birthDate && Boolean(formik.errors.birthDate)}
+                helperText={formik.touched.birthDate && formik.errors.birthDate}
               />
             </Grid>
 
@@ -117,10 +118,10 @@ const Confirmation = ({ labels, formik, editMode, maxAccess, refreshProf = () =>
                 name='idNo'
                 label={labels.id_number}
                 type={showAsPassword && 'password'}
-                value={fetchFormik.values?.idNo ? fetchFormik.values?.idNo : fetchFormik.values?.id_number}
+                value={clientformik.values?.idNo ? formik.values?.idNo : formik.values?.id_number}
                 required
                 onChange={e => {
-                  fetchFormik.handleChange(e)
+                  formik.handleChange(e)
                 }}
                 onCopy={handleCopy}
                 onPaste={handleCopy}
@@ -133,10 +134,10 @@ const Confirmation = ({ labels, formik, editMode, maxAccess, refreshProf = () =>
                   setShowAsPassword(false)
                 }}
                 onClear={() => {
-                  fetchFormik.setFieldValue('idNo', '')
+                  formik.setFieldValue('idNo', '')
                 }}
-                error={fetchFormik.touched.idNo && Boolean(fetchFormik.errors.idNo)}
-                helperText={fetchFormik.touched.idNo && fetchFormik.errors.idNo}
+                error={formik.touched.idNo && Boolean(formik.errors.idNo)}
+                helperText={formik.touched.idNo && formik.errors.idNo}
               />
             </Grid>
 
@@ -144,27 +145,27 @@ const Confirmation = ({ labels, formik, editMode, maxAccess, refreshProf = () =>
               <CustomTextField
                 name='idNoRepeat'
                 label={labels.confirmIdNumber}
-                value={fetchFormik.values?.idNoRepeat}
+                value={formik.values?.idNoRepeat}
                 required
                 type={showAsPasswordRepeat && 'password'}
                 onChange={e => {
-                  fetchFormik.handleChange(e)
+                  formik.handleChange(e)
                 }}
                 onCopy={handleCopy}
                 onPaste={handleCopy}
                 readOnly={editMode && true}
                 onBlur={e => {
-                  setShowAsPasswordRepeat(true), fetchFormik.handleBlur(e)
+                  setShowAsPasswordRepeat(true), formik.handleBlur(e)
                 }}
                 onFocus={e => {
                   setShowAsPasswordRepeat(false)
                 }}
                 maxLength='15'
                 onClear={() => {
-                  fetchFormik.setFieldValue('idNoRepeat', '')
+                  formik.setFieldValue('idNoRepeat', '')
                 }}
-                error={fetchFormik.touched.idNoRepeat && Boolean(fetchFormik.errors.idNoRepeat)}
-                helperText={fetchFormik.touched.idNoRepeat && fetchFormik.errors.idNoRepeat}
+                error={formik.touched.idNoRepeat && Boolean(formik.errors.idNoRepeat)}
+                helperText={formik.touched.idNoRepeat && formik.errors.idNoRepeat}
               />
             </Grid>
           </Grid>
