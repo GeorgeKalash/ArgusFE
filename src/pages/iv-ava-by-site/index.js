@@ -114,32 +114,47 @@ const AvailabilitiesBySite = () => {
     }
   ]
 
-  // const edit = obj => {
-  //   openForm(obj)
-  // }
+  const onSerial = obj => {
+    console.log(obj)
+  }
 
-  //   function openForm(record) {
-  //     stack({
-  //       Component: ExRatesForm,
-  //       props: {
-  //         labels: _labels,
-  //         record: record,
-  //         maxAccess: access,
-  //         recordId: record ? String(record.exId) + String(record.dayId) + String(record.seqNo) : null
-  //       },
-  //       width: 500,
-  //       height: 400,
-  //       title: _labels.exRate
-  //     })
-  //   }
+  const onLot = obj => {
+    console.openLotForm(obj)
+  }
+
+  function openLotForm(record) {
+    stack({
+      Component: ExRatesForm,
+      props: {
+        labels: _labels,
+        record: record,
+        maxAccess: access,
+        recordId: record ? String(record.exId) + String(record.dayId) + String(record.seqNo) : null
+      },
+      width: 500,
+      height: 400,
+      title: _labels.exRate
+    })
+  }
+
+  function openSerialForm(record) {
+    stack({
+      Component: ExRatesForm,
+      props: {
+        labels: _labels,
+        record: record,
+        maxAccess: access,
+        recordId: record ? String(record.exId) + String(record.dayId) + String(record.seqNo) : null
+      },
+      width: 500,
+      height: 400,
+      title: _labels.exRate
+    })
+  }
 
   const onApply = ({ rpbParams }) => {
     filterBy('params', rpbParams)
     refetch()
-  }
-
-  const edit = obj => {
-    console.log(obj)
   }
 
   return (
@@ -151,10 +166,12 @@ const AvailabilitiesBySite = () => {
         <Table
           columns={columns}
           gridData={data}
-          rowId={['recordId']}
+          rowId={['itemId']}
+          serialLotTable={true}
+          onLot={onLot}
+          onSerial={onSerial}
           maxAccess={access}
           refetch={refetch}
-          onEdit={edit}
           pageSize={50}
           paginationParameters={paginationParameters}
           paginationType='api'
