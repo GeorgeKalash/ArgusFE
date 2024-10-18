@@ -52,14 +52,14 @@ const ClientsList = () => {
       editable: false
     },
     {
-      field: 'name',
+      field: 'fullName',
       headerName: labels.name,
       flex: 1,
       editable: false
     },
 
     {
-      field: 'flName',
+      field: 'fullFlName',
       headerName: labels.flName,
       flex: 1,
       editable: false
