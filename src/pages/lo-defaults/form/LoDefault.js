@@ -12,10 +12,12 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const LoDefault = ({ _labels, access }) => {
   const [errorMessage, setErrorMessage] = useState(null)
-  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { postRequest } = useContext(RequestsContext)
+  const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
 
   const [initialValues, setInitialValues] = useState({
     transitSiteId: null,
@@ -28,23 +30,12 @@ const LoDefault = ({ _labels, access }) => {
 
   const getDataResult = () => {
     const myObject = {}
-    var parameters = `_filter=`
-    getRequest({
-      extension: SystemRepository.Defaults.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        console.log(res)
 
-        const filteredList = res.list.filter(obj => {
-          return obj.key === 'transitSiteId' || obj.key === 'lo_min_car_amount'
-        })
-        filteredList.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
-        setInitialValues(myObject)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+    const filteredList = defaultsData.list.filter(obj => {
+      return obj.key === 'transitSiteId' || obj.key === 'lo_min_car_amount'
+    })
+    filteredList.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
+    setInitialValues(myObject)
   }
 
   const formik = useFormik({
@@ -65,13 +56,10 @@ const LoDefault = ({ _labels, access }) => {
     postRequest({
       extension: SystemRepository.Defaults.set,
       record: JSON.stringify({ SysDefaults: data })
+    }).then(res => {
+      if (res) toast.success(platformLabels.Edited)
+      updateDefaults(data)
     })
-      .then(res => {
-        if (res) toast.success('Record Successfully')
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
   }
 
   const handleSubmit = () => {

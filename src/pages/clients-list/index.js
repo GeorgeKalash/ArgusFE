@@ -1,10 +1,8 @@
 import React, { useContext } from 'react'
 import Table from 'src/components/Shared/Table'
-import { useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-import { formatDateDefault } from 'src/lib/date-helper'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import { useWindow } from 'src/windows'
@@ -25,6 +23,7 @@ const ClientsList = () => {
     filterBy,
     clearFilter,
     labels: labels,
+    refetch,
     access
   } = useResourceQuery({
     endpointId: CTCLRepository.CtClientIndividual.snapshot,
@@ -179,6 +178,7 @@ const ClientsList = () => {
           onEdit={editClient}
           pageSize={50}
           paginationType='client'
+          refetch={refetch}
         />
       </Grow>
     </VertLayout>

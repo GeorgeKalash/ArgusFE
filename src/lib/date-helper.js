@@ -1,6 +1,9 @@
 // import moment from 'moment';
 import { format } from 'date-fns'
 
+/**
+ * @deprecated this was removed because we need to send same date time even if different that asp
+ */
 function timeStamptoDate(timestamp) {
   const timezoneOffset = -new Date().getTimezoneOffset()
   const sign = timezoneOffset >= 0 ? '+' : '-'
@@ -16,6 +19,9 @@ function timeStamptoDate(timestamp) {
   return dateWithTimezone
 }
 
+/**
+ * @deprecated this was removed because we need to send same date time even if different that asp
+ */
 function dateToTimeStamp(date) {
   let timezoneOffset = new Date().getTimezoneOffset()
 
@@ -36,7 +42,8 @@ function dateToTimeStamp(date) {
 const formatDateFromApi = date => {
   const timestamp = date && parseInt(date.match(/-?\d+/)[0], 10)
 
-  return timestamp ? timeStamptoDate(timestamp) : null
+  //return timestamp ? timeStamptoDate(timestamp) : null
+  return timestamp ? new Date(timestamp) : null
 }
 
 /**
@@ -51,12 +58,13 @@ const formatDateFromApiInline = date => {
 }
 
 const formatDateToApi = date => {
-  const timestamp = date && dateToTimeStamp(new Date(date)).valueOf()
+  //const timestamp = date && dateToTimeStamp(new Date(date)).valueOf()
+  const timestamp = date && date.valueOf()
 
   return `/Date(${timestamp})/`
 }
 
-//should be edited??
+//should be edited by Omar
 const formatDateToApiFunction = value => {
   var date = value
   date = new Date(date)
@@ -80,6 +88,7 @@ const formatDateToApiFunction = value => {
 }
 
 function formatDateDefault(date) {
+  //used for report params
   return formatDateandTime(date)
 }
 
@@ -91,7 +100,9 @@ function formatDateandTime(date, recFormat) {
   ]
   formats = recFormat ? `${formats} ` + recFormat : formats
   const timestamp = date instanceof Date ? date.getTime() : parseInt(date?.match(/\d+/)[0], 10)
-  const formattedDate = format(timeStamptoDate(timestamp), formats)
+
+  //const formattedDate = format(timeStamptoDate(timestamp), formats)
+  const formattedDate = format(timestamp, formats)
 
   return formattedDate
 }
@@ -100,6 +111,7 @@ function formatDateTimeDefault(date) {
   return formatDateandTime(date, 'hh:mm a')
 }
 
+//Omar
 function formatTimestampToDate(timestamp) {
   if (!timestamp) return
 
@@ -126,6 +138,7 @@ function getTimeInTimeZone(dateString, timeZone = 0) {
   return `${newHours}:${newMinutes}:${newSeconds}`
 }
 
+//Omar
 const formatDate = dateString => {
   const date = new Date(dateString)
   const timestamp = date.getTime()
