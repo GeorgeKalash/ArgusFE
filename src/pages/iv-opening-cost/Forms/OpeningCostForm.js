@@ -31,7 +31,8 @@ export default function OpeningCostForm({ labels, maxAccess, record }) {
     initialValues: {
       recordId: null,
       itemId: null,
-      year: '',
+      itemName: null,
+      year: null,
       avgCost: 0
     },
     maxAccess,
@@ -40,7 +41,7 @@ export default function OpeningCostForm({ labels, maxAccess, record }) {
     validationSchema: yup.object({
       year: yup.number().required(),
       itemId: yup.string().required(),
-      avgCost: yup.number().min(0).max(999999999)
+      avgCost: yup.number().min(0).max(999999999).required()
     }),
     onSubmit: async obj => {
       await postRequest({
@@ -98,14 +99,14 @@ export default function OpeningCostForm({ labels, maxAccess, record }) {
                 endpointId={SystemRepository.FiscalYears.qry}
                 readOnly={editMode}
                 name='year'
-                label={labels?.fiscalYear}
+                label={labels.fiscalYear}
                 valueField='fiscalYear'
                 displayField='fiscalYear'
                 values={formik.values}
                 required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('year', newValue?.fiscalYear)
+                  formik.setFieldValue('year', newValue?.fiscalYear || null)
                 }}
                 error={formik.touched.year && Boolean(formik.errors.year)}
               />
@@ -114,7 +115,7 @@ export default function OpeningCostForm({ labels, maxAccess, record }) {
               <ResourceLookup
                 endpointId={InventoryRepository.Item.snapshot}
                 name='itemId'
-                label={labels?.sku}
+                label={labels.sku}
                 readOnly={editMode}
                 valueField='recordId'
                 displayField='sku'
@@ -126,9 +127,9 @@ export default function OpeningCostForm({ labels, maxAccess, record }) {
                   { key: 'name', value: 'Name' }
                 ]}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('itemId', newValue?.recordId)
-                  formik.setFieldValue('itemName', newValue?.name)
-                  formik.setFieldValue('sku', newValue?.sku)
+                  formik.setFieldValue('itemId', newValue?.recordId || '')
+                  formik.setFieldValue('itemName', newValue?.name || '')
+                  formik.setFieldValue('sku', newValue?.sku || '')
                 }}
                 maxAccess={maxAccess}
                 required
@@ -150,6 +151,7 @@ export default function OpeningCostForm({ labels, maxAccess, record }) {
                 value={formik.values.avgCost}
                 onChange={formik.handleChange}
                 maxLength={12}
+                required
                 decimalScale={3}
                 onClear={() => formik.setFieldValue('avgCost', 0)}
                 error={formik.touched.avgCost && Boolean(formik.errors.avgCost)}
