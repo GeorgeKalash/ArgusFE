@@ -273,6 +273,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
                 label={labels.weight}
                 value={formik.values.weight}
                 maxAccess={maxAccess}
+                allowNegative={false}
                 onChange={e => handleFieldChange('weight', 6, e.target.value)}
                 onClear={() => handleFieldChange('weight', 6, 0)}
               />
