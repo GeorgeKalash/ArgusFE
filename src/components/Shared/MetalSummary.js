@@ -16,30 +16,28 @@ const MetalSummary = ({ originalList }) => {
     getRequest({
       extension: InventoryRepository.Metals.qry,
       parameters: parameters
-    })
-      .then(res => {
-        const metalsStoreList = res.list
+    }).then(res => {
+      const metalsStoreList = res.list
 
-        const updatedData = originalList.map(item => {
-          const matchedMetal = metalsStoreList.find(metalStoreItem => item.metalId === metalStoreItem.recordId)
+      const updatedData = originalList.map(item => {
+        const matchedMetal = metalsStoreList.find(metalStoreItem => item.metalId === metalStoreItem.recordId)
 
-          if (matchedMetal) {
-            return { ...item, metalRef: matchedMetal.reference }
-          }
-
-          return item
-        })
-
-        const viewedList = processMetalsList(updatedData)
-
-        const transformedData = {
-          count: viewedList.length,
-          list: viewedList
+        if (matchedMetal) {
+          return { ...item, metalRef: matchedMetal.reference }
         }
 
-        setGridData(transformedData)
+        return item
       })
-      .catch(error => {})
+
+      const viewedList = processMetalsList(updatedData)
+
+      const transformedData = {
+        count: viewedList.length,
+        list: viewedList
+      }
+
+      setGridData(transformedData)
+    })
   }
 
   const processMetalsList = metalsList => {
@@ -116,7 +114,6 @@ const MetalSummary = ({ originalList }) => {
     <VertLayout>
       <Grow>
         <Table
-          sx={{ mb: 3 }}
           columns={columns}
           gridData={gridData}
           rowId={['metalRef']}

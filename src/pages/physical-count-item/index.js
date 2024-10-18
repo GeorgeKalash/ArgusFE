@@ -8,17 +8,14 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Button, Grid } from '@mui/material'
 import { ControlContext } from 'src/providers/ControlContext'
 import { useResourceQuery } from 'src/hooks/resource'
-import { useWindow } from 'src/windows'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SCRepository } from 'src/repositories/SCRepository'
 import FormShell from 'src/components/Shared/FormShell'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { useForm } from 'src/hooks/form'
 import * as yup from 'yup'
-import MetalSummary from 'src/components/Shared/MetalSummary'
 
 const PhysicalCountItem = () => {
-  const { stack } = useWindow()
   const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const [data, setData] = useState([])
@@ -82,11 +79,9 @@ const PhysicalCountItem = () => {
     getRequest({
       extension: SCRepository.Sites.qry,
       parameters: parameters
+    }).then(res => {
+      setSiteStore(res.list)
     })
-      .then(res => {
-        setSiteStore(res.list)
-      })
-      .catch(error => {})
   }
 
   const columns = [
@@ -129,9 +124,7 @@ const PhysicalCountItem = () => {
 
   useEffect(() => {
     ;(async function () {
-      try {
-        await fetchGridData()
-      } catch (error) {}
+      await fetchGridData()
     })()
   }, [formik.values.stockCountId, formik.values.siteId])
 
@@ -147,22 +140,20 @@ const PhysicalCountItem = () => {
   }
 
   const handleClick = async dataList => {
-    try {
-      setFilteredItems([])
+    setFilteredItems([])
 
-      const filteredItemsList = dataList
-        .filter(item => item.metalId && item.metalId.toString().trim() !== '')
-        .map(item => ({
-          qty: item.countedQty,
-          metalRef: null,
-          metalId: item.metalId,
-          metalPurity: item.metalPurity,
-          weight: item.weight,
-          priceType: item.priceType
-        }))
-      setFilteredItems(filteredItemsList)
-      setEditMode(dataList.length > 0)
-    } catch (exception) {}
+    const filteredItemsList = dataList
+      .filter(item => item.metalId && item.metalId.toString().trim() !== '')
+      .map(item => ({
+        qty: item.countedQty,
+        metalRef: null,
+        metalId: item.metalId,
+        metalPurity: item.metalPurity,
+        weight: item.weight,
+        priceType: item.priceType
+      }))
+    setFilteredItems(filteredItemsList)
+    setEditMode(dataList.length > 0)
   }
 
   const actions = [
