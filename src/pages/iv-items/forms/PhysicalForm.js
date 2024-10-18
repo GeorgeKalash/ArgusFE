@@ -134,7 +134,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
       extension: InventoryRepository.Physical.calc,
       parameters: new URLSearchParams(parameters).toString()
     })
-    console.log(calc.record.volume, 'volume')
+    console.log(calc.record, 'calc.record')
 
     formik.setValues(prevValues => ({
       ...prevValues,
@@ -142,9 +142,9 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
       width: calc.record.width || prevValues.width,
       depth: calc.record.depth || prevValues.depth,
       diameter: calc.record.diameter || prevValues.diameter,
-      volume: calc.record.volume || prevValues.volume,
+      volume: calc.record.volume || prevValues.volume || 0,
 
-      weight: calc.record.weight || prevValues.weight,
+      weight: calc.record.weight || prevValues.weight || 0,
       density: calc.record.density || prevValues.density
     }))
   }
@@ -168,7 +168,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
     const isNumber = !isNaN(value) && value !== ''
     const newValue = isNumber ? value : formik.values[fieldName]
     newValue && formik.setFieldValue(fieldName, value)
-    formik.values[fieldName] != value && fetchAndSetValues(dirtyField, value)
+    formik.values[fieldName]?.toString() != value?.toString() && fetchAndSetValues(dirtyField, value)
   }
 
   return (
@@ -223,7 +223,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
                 maxAccess={maxAccess}
                 readOnly={formik.values?.shape === 1}
                 onMouseLeave={e => handleFieldChange('diameter', 4, e?.target?.value)}
-                onClear={() => handleFieldChange('diameter', 4, 0)}
+                onClear={() => formik.setFieldValue('diameter', 0)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -275,8 +275,11 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
                 value={formik.values.weight}
                 maxAccess={maxAccess}
                 allowNegative={false}
-                onMouseLeave={e => handleFieldChange('weight', 6, e?.target?.value)}
-                onClear={() => formik.setFieldValue('weight', 0)}
+                onMouseLeave={e => e.target.value > 0 && handleFieldChange('weight', 6, e?.target?.value)}
+                onClear={() => {
+                  formik.setFieldValue('weight', 0)
+                  handleFieldChange('weight', 6, 0)
+                }}
               />
             </Grid>
             <Grid item xs={12}>

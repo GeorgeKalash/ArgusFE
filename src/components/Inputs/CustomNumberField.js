@@ -68,6 +68,7 @@ const CustomNumberField = ({
     if (value && regex.test(value)) {
       value = value.replace(/[^0-9.]/g, '')
       const _newValue = getNumberWithoutCommas(value)
+
       return _newValue
     }
   }
