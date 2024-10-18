@@ -21,7 +21,7 @@ export default function OpeningCostForm({ labels, maxAccess, record }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
-  const recordId = String(record.year) + String(record.itemId) || null;
+  const recordId = String(record?.year) + String(record?.itemId) || null;
 
   const invalidate = useInvalidate({
     endpointId: InventoryRepository.OpeningCost.qry
