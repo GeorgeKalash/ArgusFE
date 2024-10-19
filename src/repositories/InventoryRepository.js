@@ -181,5 +181,15 @@ export const InventoryRepository = {
     set: service + 'setSIZ',
     del: service + 'delSIZ',
     page: service + 'pageSIZ'
+  },
+  CategoryLevel: {
+    set2: service + 'set2CAL',
+    qry: service + 'qryCAL'
+  },
+  OpeningCost: {
+    get: service + 'getOC',
+    set: service + 'setOC',
+    del: service + 'delOC',
+    qry: service + 'qryOC'
   }
 }

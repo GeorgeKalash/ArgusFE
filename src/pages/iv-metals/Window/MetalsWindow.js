@@ -8,7 +8,7 @@ const MetalsWindows = ({ recordId, labels, maxAccess }) => {
   const [activeTab, setActiveTab] = useState(0)
 
   const [store, setStore] = useState({
-    recordId: recordId
+    recordId: recordId || null
   })
 
   const tabs = [{ label: labels.metals }, { label: labels.scrap, disabled: !store.recordId }]

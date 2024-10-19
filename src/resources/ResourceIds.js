@@ -279,6 +279,9 @@ export const ResourceIds = {
   SaleReturn: 51304,
   ClientGOCOut: 51305,
   ClientGOCIn: 51306,
+  CategoryLevels: 41118,
+  MetalColor: 41110,
+  InventoryOpeningCosts: 41203,
   OpenMultiCurrencyCashTransfer: 33315,
   LockedRecords: 23302
 }
