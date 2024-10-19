@@ -53,14 +53,12 @@ export default function AddressFilterForm({ labels, shipment, bill, form, window
   async function getAddress(addressId) {
     if (!addressId) return null
 
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.FormattedAddress.get,
-        parameters: `_addressId=${addressId}`
-      })
+    const res = await getRequest({
+      extension: SystemRepository.FormattedAddress.get,
+      parameters: `_addressId=${addressId}`
+    })
 
-      return res?.record?.formattedAddress.replace(/(\r\n|\r|\n)+/g, '\r\n')
-    } catch (error) {}
+    return res?.record?.formattedAddress.replace(/(\r\n|\r|\n)+/g, '\r\n')
   }
 
   const rowColumns = [

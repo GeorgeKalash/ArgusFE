@@ -81,6 +81,7 @@ const Table = ({
         return {
           ...col,
           valueGetter: ({ data }) => getFormattedNumber(data?.[col.field], col.type?.decimal),
+          cellStyle: { textAlign: 'right' },
           sortable: !disableSorting
         }
       }
