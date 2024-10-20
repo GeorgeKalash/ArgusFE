@@ -177,6 +177,7 @@ const verifyItemPrice = row => {
 }
 
 const recalcItemPrice = row => {
+  console.log(row)
   switch (row.dirtyField) {
     case DIRTYFIELD_TWPG:
       row.baseLaborPrice = row.totalWeightPerG - row.basePrice
