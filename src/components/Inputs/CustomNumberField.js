@@ -22,9 +22,11 @@ const CustomNumberField = ({
   hasBorder = true,
   maxLength = 1000,
   thousandSeparator = ',',
-  min = '',
-  max = '',
+  min,
+  max,
+  step = 1,
   allowNegative = true,
+  arrow = false,
   ...props
 }) => {
   const name = props.name
@@ -85,7 +87,11 @@ const CustomNumberField = ({
       onInput={handleInput}
       InputProps={{
         inputProps: {
-          tabIndex: readOnly ? -1 : 0 // Prevent focus on the input field
+          min: min,
+          max: max,
+          step: step,
+          type: arrow ? 'number' : 'text',
+          tabIndex: readOnly ? -1 : 0
         },
         autoComplete: 'off',
         readOnly: _readOnly,
@@ -102,7 +108,7 @@ const CustomNumberField = ({
       sx={{
         '& .MuiOutlinedInput-root': {
           '& fieldset': {
-            border: !hasBorder && 'none' // Hide border
+            border: !hasBorder && 'none'
           }
         }
       }}
