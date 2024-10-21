@@ -428,20 +428,9 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
     }
 
     const newRow = {
-      id: id,
-      unitPrice: parseFloat(formik.values.items[id - 1].unitPrice || 0),
-      basePrice: formik.values.items[id - 1].basePrice,
-      upo: parseFloat(formik.values.items[id - 1].upo) ? parseFloat(formik.values.items[id - 1].upo) : 0,
-      qty: formik.values.items[id - 1].qty,
-      extendedPrice: parseFloat(formik.values.items[id - 1].extendedPrice),
-      baseLaborPrice: formik.values.items[id - 1].baseLaborPrice,
-      vatAmount: parseFloat(formik.values.items[id - 1].vatAmount),
+      ...formik.values.items[id - 1],
       mdAmount: currenctMdAmount,
-      mdType: currentMdType,
-      mdValue: parseFloat(formik.values.items[id - 1].mdValue),
-      tdPct: formik.values.items[id - 1].tdPct,
-      taxDetails: formik.values.items[id - 1].isVattable ? formik.values.items[id - 1].taxDetails : null,
-      dirtyField: DIRTYFIELD_MDTYPE
+      mdType: currentMdType
     }
 
     getItemPriceRow(updateRow, newRow, DIRTYFIELD_MDTYPE, true)
