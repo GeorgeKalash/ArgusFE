@@ -1,5 +1,6 @@
 // import moment from 'moment';
 import { format } from 'date-fns'
+import dayjs from 'dayjs'
 
 /**
  * @deprecated this was removed because we need to send same date time even if different that asp
@@ -64,27 +65,8 @@ const formatDateToApi = date => {
   return `/Date(${timestamp})/`
 }
 
-//should be edited by Omar
-const formatDateToApiFunction = value => {
-  var date = value
-  date = new Date(date)
-  date = date.toLocaleDateString('en-US', {
-    weekday: 'short',
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-  })
-
-  const parsedDate = new Date(date)
-
-  // Format the date as "yyyy-MM-dd"
-  const year = parsedDate.getFullYear()
-  const month = String(parsedDate.getMonth() + 1).padStart(2, '0') // Months are 0-based
-  const day = String(parsedDate.getDate()).padStart(2, '0')
-
-  const formattedDateYYYYMMDD = `${year}-${month}-${day}`
-
-  return formattedDateYYYYMMDD
+function formatDateForGetApI(dateString) {
+  return dayjs(dateString).format('YYYY-MM-DD')
 }
 
 function formatDateDefault(date) {
@@ -122,20 +104,29 @@ function formatTimestampToDate(timestamp) {
 
   return formattedDate
 }
-function getTimeInTimeZone(dateString, timeZone = 0) {
-  const timestamp = parseInt(dateString?.match(/\/Date\((\d+)\)\//)[1], 10)
-  const currentDate = new Date(timestamp)
 
-  currentDate.setHours(currentDate.getHours() + timeZone)
-  function padNumber(num) {
-    return num < 10 ? '0' + num : num
+function getTimeInTimeZone(dateString, type = '') {
+  const timestamp = parseInt(dateString?.match(/\/Date\((\d+)\)\//)[1], 10)
+  const date = new Date(timestamp)
+  let hours = ''
+  let minutes = ''
+  let seconds = ''
+
+  if (type === 'utc') {
+    hours = date.getHours()
+    minutes = date.getMinutes()
+    seconds = date.getSeconds()
+  } else {
+    hours = date.getUTCHours()
+    minutes = date.getUTCMinutes()
+    seconds = date.getUTCSeconds()
   }
 
-  let newHours = padNumber(currentDate.getHours())
-  let newMinutes = padNumber(currentDate.getMinutes())
-  let newSeconds = padNumber(currentDate.getSeconds())
+  hours = hours < 10 ? '0' + hours : hours
+  minutes = minutes < 10 ? '0' + minutes : minutes
+  seconds = seconds < 10 ? '0' + seconds : seconds
 
-  return `${newHours}:${newMinutes}:${newSeconds}`
+  return `${hours}:${minutes}:${seconds}`
 }
 
 //Omar
@@ -149,7 +140,7 @@ const formatDate = dateString => {
 export {
   formatDateFromApi,
   formatDateToApi,
-  formatDateToApiFunction,
+  formatDateForGetApI,
   formatDateDefault,
   formatTimestampToDate,
   formatDateFromApiInline,

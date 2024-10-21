@@ -3,7 +3,7 @@ import { DataGrid } from 'src/components/Shared/DataGrid'
 import FormShell from 'src/components/Shared/FormShell'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
-import { formatDateFromApi, formatDateToApiFunction } from 'src/lib/date-helper'
+import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
@@ -52,7 +52,7 @@ const HistoryForm = ({ store, setStore, maxAccess, labels, editMode }) => {
   const postHistory = async obj => {
     const items = obj?.TaxHistoryView.map((item, index) => ({
       ...item,
-      date: formatDateToApiFunction(item.date),
+      date: formatDateToApi(item.date),
       taxCodeId: recordId,
       seqNo: index + 1
     }))
