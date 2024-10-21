@@ -115,7 +115,8 @@ const AvailabilitiesBySite = () => {
   ]
 
   const onSerial = obj => {
-    openSerialForm(obj.itemId)
+    openSerialForm(obj.itemId, obj.siteId)
+    console.log(obj, 'objjjjjjjjjjjjj')
   }
 
   const onLot = obj => {
@@ -137,12 +138,13 @@ const AvailabilitiesBySite = () => {
   //   })
   // }
 
-  function openSerialForm(itemId) {
+  function openSerialForm(itemId, siteId) {
     stack({
       Component: SerialForm,
       props: {
         labels: _labels,
-        recordId: itemId,
+        itemId: itemId,
+        siteId: siteId,
         maxAccess: access
       },
       width: 600,

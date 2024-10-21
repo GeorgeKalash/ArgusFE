@@ -159,7 +159,7 @@ export const InventoryRepository = {
     get: service + 'getMTC',
     set: service + 'setMTC',
     qry: service + 'qryMTC',
-    del: service + 'delMTC',
+    del: service + 'delMTC'
   },
   Kit: {
     set: service + 'set2KIT',
@@ -175,5 +175,8 @@ export const InventoryRepository = {
     set: service + 'setSIZ',
     del: service + 'delSIZ',
     page: service + 'pageSIZ'
+  },
+  AvailabilitySerial: {
+    qry: service + 'qryAVS'
   }
 }
