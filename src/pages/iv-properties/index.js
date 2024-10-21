@@ -21,7 +21,7 @@ import PropertiesForm from './forms/PropertiesForm'
 const Properties = () => {
   const [data, setData] = useState([])
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
+  const { platformLabels, defaultsData } = useContext(ControlContext)
   const [dimNum, setDimNum] = useState(0)
   const { stack } = useWindow()
 
@@ -117,12 +117,10 @@ const Properties = () => {
 
   useEffect(() => {
     ;(async function () {
-      const res = await getRequest({
-        extension: SystemRepository.Defaults.qry,
-        parameters: `_filter=ivtDimension`
-      })
-
-      const firstValidKey = res.list.find(item => item.value !== '')?.key
+      const myObject = {}
+      const filteredList = defaultsData?.list?.filter(obj => obj.key.startsWith('ivtDimension'))
+      filteredList?.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
+      const firstValidKey = filteredList?.find(item => item.value !== '')?.key
       if (firstValidKey) {
         formik.setFieldValue('dimValue', firstValidKey)
       }
@@ -132,27 +130,31 @@ const Properties = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
-        <Grid container spacing={3} sx={{ pl: 35, mt: -13, mb: 2 }}>
-          <Grid item xs={4}>
-            <ResourceComboBox
-              endpointId={SystemRepository.Defaults.qry}
-              parameters={`_filter=ivtDimension`}
-              name='dimValue'
-              label={_labels.properties}
-              valueField='key'
-              displayField='value'
-              values={formik.values}
-              onChange={(event, newValue) => {
-                formik.setFieldValue('dimValue', newValue ? newValue.key : '')
-              }}
-              required
-              maxAccess={access}
-              filter={item => item.value !== ''}
-              error={!formik.values.dimValue}
-            />
-          </Grid>
-        </Grid>
+        <GridToolbar
+          onAdd={add}
+          maxAccess={access}
+          middleSection={
+            <Grid item sx={{ display: 'flex', mr: 2 }}>
+              <ResourceComboBox
+                endpointId={SystemRepository.Defaults.qry}
+                parameters={`_filter=ivtDimension`}
+                sx={{ width: 450 }}
+                name='dimValue'
+                label={_labels.properties}
+                valueField='key'
+                displayField='value'
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('dimValue', newValue ? newValue.key : '')
+                }}
+                required
+                maxAccess={access}
+                filter={item => item.value !== ''}
+                error={!formik.values.dimValue}
+              />
+            </Grid>
+          }
+        />
       </Fixed>
       <Grow>
         <Table
