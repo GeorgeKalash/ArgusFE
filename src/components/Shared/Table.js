@@ -359,10 +359,6 @@ const Table = ({
     }
   }
 
-  const getRowClass = params => {
-    return params?.rowIndex % 2 === 0 ? 'even-row' : ''
-  }
-
   const selectAll = (params, e) => {
     const gridApi = params.api
     const allNodes = []
@@ -630,7 +626,6 @@ const Table = ({
             paginationPageSize={pageSize}
             rowSelection={'single'}
             suppressAggFuncInHeader={true}
-            getRowClass={getRowClass}
             rowHeight={35}
             onFirstDataRendered={onFirstDataRendered}
           />

@@ -194,9 +194,6 @@ code[class*='language-'] {
   transform-origin: left center;
   transition: transform 0.3s ease-in-out;
 }
-.ag-theme-alpine .even-row {
-  background-color: rgb(238, 238, 238); /* Light gray background for even rows */
-}
 
 .ag-theme-alpine .ag-row-hover {
   background-color: rgb(242, 234, 234) !important; /* Hover color */
