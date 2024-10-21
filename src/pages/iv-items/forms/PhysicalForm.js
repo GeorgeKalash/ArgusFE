@@ -173,7 +173,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
 
   const handleFieldClear = (fieldName, dirtyField, value = 0) => {
     formik.setFieldValue(fieldName, value)
-    handleFieldChange(fieldName, dirtyField, value)
+    fetchAndSetValues(dirtyField, value)
   }
 
   return (
