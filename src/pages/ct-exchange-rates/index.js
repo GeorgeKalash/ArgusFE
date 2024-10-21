@@ -82,18 +82,12 @@ const CTExchangeRates = () => {
     {
       component: 'textfield',
       label: labels.min,
-      name: 'minRate',
-      props: {
-        maxLength: formik.values.rate
-      }
+      name: 'minRate'
     },
     {
       component: 'textfield',
       label: labels.rate,
-      name: 'rate',
-      props: {
-        maxLength: formik.values.maxRate
-      }
+      name: 'rate'
     },
     {
       component: 'textfield',
