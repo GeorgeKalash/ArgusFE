@@ -209,7 +209,7 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
                 displayField='name'
                 values={formik.values}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('ltId', newValue ? newValue.recordId : '')
+                  formik.setFieldValue('ltId', newValue?.recordId || '')
                 }}
                 maxAccess={maxAccess}
               />

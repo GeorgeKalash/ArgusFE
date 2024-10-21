@@ -172,8 +172,7 @@ export default function FormShell({
               Component: TransactionLog,
               props: {
                 recordId: form.values?.recordId ?? form.values.clientId,
-                resourceId: resourceId,
-                setErrorMessage: setErrorMessage
+                resourceId: resourceId
               },
               width: 900,
               height: 600,
