@@ -97,6 +97,7 @@ export function DataGrid({
     if (event.key !== 'Tab') {
       return
     }
+
     const rowIds = gridExpandedSortedRowIdsSelector(apiRef.current.state)
     const columns = apiRef.current.getVisibleColumns()
 
