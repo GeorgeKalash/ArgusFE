@@ -12,9 +12,11 @@ import { useForm } from 'src/hooks/form'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const UserTextForm = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
 
   const [stagingDimCount, setStagingDimCount] = useState(null)
 
@@ -73,26 +75,19 @@ const UserTextForm = () => {
 
   const getDataResult = () => {
     const fetchedValues = {}
-    var parameters = `_filter=`
-    getRequest({
-      extension: SystemRepository.Defaults.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        const filteredList = res.list.filter(obj => {
-          return Object.keys(formik.values).includes(obj.key)
-        })
 
-        filteredList.forEach(obj => {
-          if (obj.value && !isNaN(obj.value) && obj.value.trim() !== '') {
-            fetchedValues[obj.key] = parseInt(obj.value)
-          } else {
-            fetchedValues[obj.key] = obj.value
-          }
-        })
-        formik.setValues(fetchedValues)
-      })
-      .catch(error => {})
+    const filteredList = defaultsData?.list?.filter(obj => {
+      return Object.keys(formik.values).includes(obj.key)
+    })
+
+    filteredList?.forEach(obj => {
+      if (obj.value && !isNaN(obj.value) && obj.value.trim() !== '') {
+        fetchedValues[obj.key] = parseInt(obj.value)
+      } else {
+        fetchedValues[obj.key] = obj.value
+      }
+    })
+    formik.setValues(fetchedValues)
   }
 
   const { labels: _labels } = useResourceQuery({
@@ -110,11 +105,10 @@ const UserTextForm = () => {
     await postRequest({
       extension: SystemRepository.Defaults.set,
       record: JSON.stringify({ sysDefaults: dataToPost })
+    }).then(res => {
+      toast.success(platformLabels.Updated)
+      updateDefaults(dataToPost)
     })
-      .then(res => {
-        toast.success('Record Successfully Updated')
-      })
-      .catch(error => {})
   }
 
   const handleSubmit = () => {
