@@ -1,5 +1,6 @@
 // import moment from 'moment';
 import { format } from 'date-fns'
+import dayjs from 'dayjs'
 
 /**
  * @deprecated this was removed because we need to send same date time even if different that asp
@@ -64,14 +65,8 @@ const formatDateToApi = date => {
   return `/Date(${timestamp})/`
 }
 
-//should be edited by Omar
 function formatDateForGetApI(dateString) {
-  const date = new Date(dateString)
-  const year = date.getFullYear()
-  const month = date.getMonth() + 1
-  const day = date.getDate()
-
-  return `${year}-${month}-${day}`
+  return dayjs(dateString).format('YYYY-MM-DD')
 }
 
 function formatDateDefault(date) {
