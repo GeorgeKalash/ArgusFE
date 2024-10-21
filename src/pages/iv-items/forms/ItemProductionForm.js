@@ -101,6 +101,8 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
                   if (newValue) {
                     formik.setFieldValue('lineId', newValue?.recordId || '')
                     formik.setFieldValue('ltId', '')
+                  } else {
+                    formik.setFieldValue('lineId', '')
                   }
                 }}
                 error={formik.touched.lineId && Boolean(formik.errors.lineId)}
