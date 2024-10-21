@@ -18,6 +18,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -43,7 +44,11 @@ const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore,
       iwRateTypeId: null,
       isInactive: false,
       interfaceId: null,
-      accountId: null
+      accountId: null,
+      nraRef: '',
+      nraDescription: '',
+      nraId: '',
+      minReviewTime: null
     },
     validationSchema: yup.object({
       reference: yup.string().required(),
@@ -264,6 +269,36 @@ const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore,
                   formik.setFieldValue('iwRateTypeId', newValue?.recordId)
                 }}
                 error={formik.touched.iwRateTypeId && Boolean(formik.errors.iwRateTypeId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceLookup
+                endpointId={SystemRepository.NumberRange.snapshot}
+                valueField='reference'
+                displayField='description'
+                name='nraRef'
+                label={labels.nuRange}
+                form={formik}
+                secondDisplayField={true}
+                firstValue={formik.values.nraRef}
+                secondValue={formik.values.nraDescription}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('nraId', newValue?.recordId || null)
+                  formik.setFieldValue('nraRef', newValue?.reference || null)
+                  formik.setFieldValue('nraDescription', newValue?.description || null)
+                }}
+                errorCheck={'nraId'}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomNumberField
+                name='minReviewTime'
+                label={labels.minReviewTime}
+                value={formik.values.minReviewTime}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('minReviewTime', '')}
+                error={formik.touched.minReviewTime && Boolean(formik.errors.minReviewTime)}
               />
             </Grid>
             <Grid item xs={12}>
