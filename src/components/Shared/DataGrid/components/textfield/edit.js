@@ -47,6 +47,16 @@ export default function TextFieldEdit({ column: { props }, id, field, value, upd
       label={''}
       autoFocus
       hasBorder={false}
+      onBlur={e => {
+        if (column?.onBlur) {
+          column?.onBlur(e, id)
+        }
+      }}
+      onKeyDown={e => {
+        if (column?.onKeyDown) {
+          column?.onKeyDown(e, id)
+        }
+      }}
       onChange={handleChange}
       onKeyPress={handleKeyPress}
       inputMode={props.type === 'numeric' ? 'decimal' : 'text'}
