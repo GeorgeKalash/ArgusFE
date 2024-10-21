@@ -12,10 +12,11 @@ import { useForm } from 'src/hooks/form'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const UserDifinedForm = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
 
   const [stagingDimCount, setStagingDimCount] = useState(null)
 
@@ -74,26 +75,19 @@ const UserDifinedForm = () => {
 
   const getDataResult = () => {
     const fetchedValues = {}
-    var parameters = `_filter=`
-    getRequest({
-      extension: SystemRepository.Defaults.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        const filteredList = res.list.filter(obj => {
-          return Object.keys(formik.values).includes(obj.key)
-        })
 
-        filteredList.forEach(obj => {
-          if (obj.value && !isNaN(obj.value) && obj.value.trim() !== '') {
-            fetchedValues[obj.key] = parseInt(obj.value)
-          } else {
-            fetchedValues[obj.key] = obj.value
-          }
-        })
-        formik.setValues(fetchedValues)
-      })
-      .catch(error => {})
+    const filteredList = defaultsData?.list?.filter(obj => {
+      return Object.keys(formik.values).includes(obj.key)
+    })
+
+    filteredList?.forEach(obj => {
+      if (obj.value && !isNaN(obj.value) && obj.value.trim() !== '') {
+        fetchedValues[obj.key] = parseInt(obj.value)
+      } else {
+        fetchedValues[obj.key] = obj.value
+      }
+    })
+    formik.setValues(fetchedValues)
   }
 
   const postDimensionSettings = async obj => {
@@ -107,11 +101,10 @@ const UserDifinedForm = () => {
     await postRequest({
       extension: SystemRepository.Defaults.set,
       record: JSON.stringify({ sysDefaults: dataToPost })
+    }).then(res => {
+      toast.success(platformLabels.Updated)
+      updateDefaults(dataToPost)
     })
-      .then(res => {
-        toast.success('Record Successfully Updated')
-      })
-      .catch(error => {})
   }
 
   const handleSubmit = () => {
@@ -150,17 +143,23 @@ const UserDifinedForm = () => {
       <Grow>
         <Grid container spacing={3} width={'50%'} sx={{ marginLeft: '0.5rem' }}>
           <Grid item xs={12} sx={{ marginTop: '0.5rem' }}>
-            <CustomNumberField
+            <CustomTextField
               name='ivtDimCount'
               label={_labels.propertiesCount}
               value={stagingDimCount === null ? formik.values.ivtDimCount : stagingDimCount}
               onChange={handleDimCountChange}
               onBlur={handleDimCountBlur}
-              unClearable={true}
-              arrow={true}
-              min={1}
-              max={20}
+              numberField={true}
+              clearable={true}
+              type='number'
               error={formik.touched.ivtDimCount && Boolean(formik.errors.ivtDimCount)}
+              inputProps={{
+                min: 1,
+                max: 20,
+                maxLength: 2,
+                inputMode: 'numeric',
+                pattern: '[1-20]*'
+              }}
             />
           </Grid>
 
