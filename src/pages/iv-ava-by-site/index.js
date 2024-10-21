@@ -8,6 +8,7 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
+import SerialForm from './forms/SerialForm'
 
 const AvailabilitiesBySite = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -34,7 +35,6 @@ const AvailabilitiesBySite = () => {
     paginationParameters,
     refetch,
     access,
-    invalidate,
 
     filterBy
   } = useResourceQuery({
@@ -115,40 +115,39 @@ const AvailabilitiesBySite = () => {
   ]
 
   const onSerial = obj => {
-    console.log(obj)
+    openSerialForm(obj.itemId)
   }
 
   const onLot = obj => {
-    console.openLotForm(obj)
+    console.log(obj)
   }
 
-  function openLotForm(record) {
-    stack({
-      Component: ExRatesForm,
-      props: {
-        labels: _labels,
-        record: record,
-        maxAccess: access,
-        recordId: record ? String(record.exId) + String(record.dayId) + String(record.seqNo) : null
-      },
-      width: 500,
-      height: 400,
-      title: _labels.exRate
-    })
-  }
+  // function openLotForm(itemId) {
+  //   stack({
+  //     Component: ExRatesForm,
+  //     props: {
+  //       labels: _labels,
+  //       record: record,
+  //       maxAccess: access,
+  //       recordId: record ? String(record.exId) + String(record.dayId) + String(record.seqNo) : null
+  //     },
+  //     width: 500,
+  //     height: 400,
+  //     title: _labels.exRate
+  //   })
+  // }
 
-  function openSerialForm(record) {
+  function openSerialForm(itemId) {
     stack({
-      Component: ExRatesForm,
+      Component: SerialForm,
       props: {
         labels: _labels,
-        record: record,
-        maxAccess: access,
-        recordId: record ? String(record.exId) + String(record.dayId) + String(record.seqNo) : null
+        recordId: itemId,
+        maxAccess: access
       },
-      width: 500,
+      width: 600,
       height: 400,
-      title: _labels.exRate
+      title: _labels.netVolume
     })
   }
 
