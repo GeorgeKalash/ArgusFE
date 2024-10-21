@@ -227,7 +227,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
                 value={formik.values.diameter}
                 maxAccess={maxAccess}
                 readOnly={formik.values?.shape === 1}
-                onMouseLeave={e => handleFieldChange('diameter', 4, e?.target?.value)}
+                onBlur={e => handleFieldChange('diameter', 4, e?.target?.value)}
                 onClear={() => handleFieldClear('length', 4, 0)}
               />
             </Grid>
@@ -237,7 +237,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
                 label={labels.length}
                 value={formik.values.length}
                 maxAccess={maxAccess}
-                onMouseLeave={e => handleFieldChange('length', 1, e?.target?.value)}
+                onBlur={e => handleFieldChange('length', 1, e?.target?.value)}
                 onClear={() => handleFieldClear('length', 1, 0)}
               />
             </Grid>
@@ -248,7 +248,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
                 readOnly={formik.values?.shape === 2}
                 value={formik.values.width}
                 maxAccess={maxAccess}
-                onMouseLeave={e => handleFieldChange('width', 2, e?.target?.value)}
+                onBlur={e => handleFieldChange('width', 2, e?.target?.value)}
                 onClear={() => handleFieldClear('width', 2, 0)}
               />
             </Grid>
@@ -259,7 +259,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
                 value={formik.values.depth}
                 readOnly={formik.values?.shape === 2}
                 maxAccess={maxAccess}
-                onMouseLeave={e => handleFieldChange('depth', 3, e?.target?.value)}
+                onBlur={e => handleFieldChange('depth', 3, e?.target?.value)}
                 onClear={() => handleFieldClear('depth', 3, 0)}
               />
             </Grid>
@@ -269,7 +269,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
                 label={labels.volume}
                 value={formik.values.volume}
                 maxAccess={maxAccess}
-                onMouseLeave={e => handleFieldChange('volume', 5, e?.target?.value)}
+                onBlur={e => handleFieldChange('volume', 5, e?.target?.value)}
                 onClear={() => handleFieldClear('volume', 5, 0)}
               />
             </Grid>
@@ -280,7 +280,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
                 value={formik.values.weight}
                 maxAccess={maxAccess}
                 allowNegative={false}
-                onMouseLeave={e => handleFieldChange('weight', 6, e?.target?.value)}
+                onBlur={e => handleFieldChange('weight', 6, e?.target?.value)}
                 onClear={() => handleFieldClear('weight', 6, 0)}
               />
             </Grid>
@@ -290,7 +290,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
                 label={labels.density}
                 value={formik.values.density}
                 maxAccess={maxAccess}
-                onMouseLeave={e => handleFieldChange('density', 7, e?.target?.value)}
+                onBlur={e => handleFieldChange('density', 7, e?.target?.value)}
                 onClear={() => handleFieldClear('density', 7, 0)}
                 decimalScale={3}
               />
