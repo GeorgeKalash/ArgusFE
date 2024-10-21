@@ -1,5 +1,5 @@
 // ** React Imports
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 // ** MUI Imports
 import { InputAdornment, IconButton } from '@mui/material'
@@ -38,6 +38,8 @@ const CustomDatePicker = ({
   hidden = false,
   ...props
 }) => {
+  const inputRef = useRef(null)
+
   const dateFormat =
     window.localStorage.getItem('default') && JSON.parse(window.localStorage.getItem('default'))['dateFormat']
 
@@ -72,6 +74,13 @@ const CustomDatePicker = ({
     }
   }
 
+  useEffect(() => {
+    if (autoFocus && inputRef.current) {
+      inputRef.current.focus()
+      inputRef.current.select()
+    }
+  }, [autoFocus, inputRef.current])
+
   const newDate = new Date(disabledRangeDate.date)
   newDate.setDate(newDate.getDate() + disabledRangeDate.day)
 
@@ -104,15 +113,15 @@ const CustomDatePicker = ({
         disabled={disabled}
         readOnly={_readOnly}
         clearable //bug from mui not working for now
-        shouldDisableDate={disabledDate && shouldDisableDate} // Enable this prop for date disabling
+        shouldDisableDate={disabledDate && shouldDisableDate}
         slotProps={{
-          // replacing clearable behaviour
           textField: {
             required: isRequired,
             size: size,
             fullWidth: fullWidth,
             error: error,
             helperText: helperText,
+            inputRef: inputRef,
             inputProps: {
               tabIndex: _readOnly ? -1 : 0
             },

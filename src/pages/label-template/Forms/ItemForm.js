@@ -13,7 +13,6 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SCRepository } from 'src/repositories/SCRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
-import { replace } from 'stylis'
 
 const ItemForm = ({ tlId, labels, seqNo, getGridData, maxAccess, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)

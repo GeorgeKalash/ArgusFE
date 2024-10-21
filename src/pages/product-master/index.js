@@ -88,7 +88,7 @@ const ProductMaster = () => {
     {
       field: 'isInactive',
       headerName: _labels.isInactive,
-      flex: 1
+      type: 'checkbox'
     }
   ]
 
@@ -148,14 +148,14 @@ const ProductMaster = () => {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar 
+        <RPBGridToolbar
           onSearch={onSearch}
-          onClear={onClear} 
-          labels={_labels} 
+          onClear={onClear}
+          labels={_labels}
           onAdd={add}
-          maxAccess={access} 
-          onApply={onApply} 
-          reportName={'RTPRO'} 
+          maxAccess={access}
+          onApply={onApply}
+          reportName={'RTPRO'}
         />
       </Fixed>
       <Grow>

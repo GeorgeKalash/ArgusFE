@@ -8,6 +8,12 @@ export const PurchaseRepository = {
     set: service + 'setGRP',
     del: service + 'delGRP'
   },
+  PriceList: {
+    qry: service + 'qryPRI',
+    del: service + 'delPRI',
+    get: service + 'getPRI',
+    set: service + 'setPRI'
+  },
   PUOrderStatus: {
     qry: service + 'qryPOS',
     page: service + 'pagePOS',

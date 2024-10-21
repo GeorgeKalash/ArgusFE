@@ -5,24 +5,23 @@ import toast from 'react-hot-toast'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import { useResourceQuery } from 'src/hooks/resource'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 
-const MCDefault = ({ _labels, acces }) => {
-  const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
+const MCDefault = ({ _labels }) => {
+  const { postRequest } = useContext(RequestsContext)
+  const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
 
   const [initialValues, setInitialValues] = useState({
     mc_defaultRTSA: null,
     mc_defaultRTPU: null,
     mc_defaultRTMF: null,
-    mc_defaultRTFI: null
+    mc_defaultRTFI: null,
+    mc_defaultRTTAX: null
   })
 
   useEffect(() => {
@@ -31,24 +30,18 @@ const MCDefault = ({ _labels, acces }) => {
 
   const getDataResult = () => {
     const myObject = {}
-    var parameters = `_filter=`
-    getRequest({
-      extension: SystemRepository.Defaults.qry,
-      parameters: parameters
+
+    const filteredList = defaultsData?.list?.filter(obj => {
+      return (
+        obj.key === 'mc_defaultRTSA' ||
+        obj.key === 'mc_defaultRTPU' ||
+        obj.key === 'mc_defaultRTMF' ||
+        obj.key === 'mc_defaultRTFI' ||
+        obj.key === 'mc_defaultRTTAX'
+      )
     })
-      .then(res => {
-        const filteredList = res.list.filter(obj => {
-          return (
-            obj.key === 'mc_defaultRTSA' ||
-            obj.key === 'mc_defaultRTPU' ||
-            obj.key === 'mc_defaultRTMF' ||
-            obj.key === 'mc_defaultRTFI'
-          )
-        })
-        filteredList.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
-        setInitialValues(myObject)
-      })
-      .catch(error => {})
+    filteredList.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
+    setInitialValues(myObject)
   }
 
   const formik = useFormik({
@@ -69,11 +62,10 @@ const MCDefault = ({ _labels, acces }) => {
     postRequest({
       extension: SystemRepository.Defaults.set,
       record: JSON.stringify({ sysDefaults: data })
+    }).then(res => {
+      if (res) toast.success(platformLabels.Edited)
+      updateDefaults(data)
     })
-      .then(res => {
-        if (res) toast.success(platformLabels.Edited)
-      })
-      .catch(error => {})
   }
 
   const handleSubmit = () => {
@@ -138,6 +130,20 @@ const MCDefault = ({ _labels, acces }) => {
                 formik.setFieldValue('mc_defaultRTFI', newValue?.recordId || '')
               }}
               error={formik.touched.mc_defaultRTFI && Boolean(formik.errors.mc_defaultRTFI)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <ResourceComboBox
+              endpointId={MultiCurrencyRepository.RateType.qry}
+              name='mc_defaultRTTAX'
+              label={_labels.mc_defaultRTTAX}
+              valueField='recordId'
+              displayField='name'
+              values={formik.values}
+              onChange={(event, newValue) => {
+                formik.setFieldValue('mc_defaultRTTAX', newValue?.recordId || '')
+              }}
+              error={formik.touched.mc_defaultRTTAX && Boolean(formik.errors.mc_defaultRTTAX)}
             />
           </Grid>
         </Grid>
