@@ -5,11 +5,11 @@ import PinIcon from '@mui/icons-material/Pin'
 import InputAdornment from '@mui/material/InputAdornment'
 import ClearIcon from '@mui/icons-material/Clear'
 
-export default function TextFieldEdit({ column: { props }, id, field, value, update }) {
+export default function TextFieldEdit({ column: { props, ...column }, id, field, value, update, updateRow }) {
   const isPercentIcon = props?.gridData ? props?.gridData[id - 1]?.mdType === 1 : false
 
   const handleIconClick = () => {
-    props.iconsClicked(id)
+    props.iconsClicked(id, updateRow)
   }
 
   const handleChange = e => {

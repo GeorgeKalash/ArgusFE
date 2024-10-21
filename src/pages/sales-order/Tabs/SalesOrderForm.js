@@ -377,7 +377,7 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
       flex: 2,
       props: {
         ShowDiscountIcons: true,
-        iconsClicked: markdownIconsClicked,
+        iconsClicked: (id, updateRow) => handleIconClick(id, updateRow),
         gridData: formik.values.items,
         type: 'numeric',
         concatenateWith: '%'
@@ -408,7 +408,7 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
     }
   ]
 
-  async function markdownIconsClicked(id) {
+  async function handleIconClick(id, updateRow) {
     let currentMdType
     let currenctMdAmount = parseFloat(formik.values.items[id - 1].mdAmount)
     const maxClientAmountDiscount = formik.values.items[id - 1].unitPrice * (formik.values?.maxDiscount / 100)
@@ -427,32 +427,26 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
       formik.setFieldValue(`items[${id - 1}].mdAmount`, parseFloat(currenctMdAmount).toFixed(2))
     }
 
-    const itemPriceRow = getIPR({
+    const newRow = {
+      id: id,
       unitPrice: parseFloat(formik.values.items[id - 1].unitPrice || 0),
+      basePrice: formik.values.items[id - 1].basePrice,
       upo: parseFloat(formik.values.items[id - 1].upo) ? parseFloat(formik.values.items[id - 1].upo) : 0,
       qty: formik.values.items[id - 1].qty,
       extendedPrice: parseFloat(formik.values.items[id - 1].extendedPrice),
+      baseLaborPrice: formik.values.items[id - 1].baseLaborPrice,
+      vatAmount: parseFloat(formik.values.items[id - 1].vatAmount),
       mdAmount: currenctMdAmount,
       mdType: currentMdType,
       mdValue: parseFloat(formik.values.items[id - 1].mdValue),
+      tdPct: formik.values.items[id - 1].tdPct,
+      taxDetails: formik.values.items[id - 1].isVattable ? formik.values.items[id - 1].taxDetails : null,
       dirtyField: DIRTYFIELD_MDTYPE
-    })
-
-    formik.setFieldValue(`items[${id - 1}].extendedPrice`, parseFloat(itemPriceRow?.extendedPrice).toFixed(2))
-
-    if (formik.values.items[id - 1].isVattable) {
-      const vatCalcRow = getVatCalc({
-        basePrice: formik.values.items[id - 1].basePrice,
-        qty: formik.values.items[id - 1].qty,
-        extendedPrice: parseFloat(itemPriceRow?.extendedPrice),
-        baseLaborPrice: formik.values.items[id - 1].baseLaborPrice,
-        vatAmount: parseFloat(formik.values.items[id - 1].vatAmount),
-        tdPct: formik.values.items[id - 1].tdPct,
-        taxDetails: formik.values.items[id - 1].isVattable ? formik.values.items[id - 1].taxDetails : null
-      })
-      formik.setFieldValue(`items[${id - 1}].vatAmount`, parseFloat(vatCalcRow?.vatAmount).toFixed(2))
-      recalcGridVat(formik.values.tdType, formik.values.tdPct, formik.values.tdAmount, formik.values.currentDiscount)
     }
+
+    getItemPriceRow(updateRow, newRow, DIRTYFIELD_MDTYPE, true)
+    checkMdAmountPct(newRow, updateRow)
+    calcTotals(formik.values.items, formik.values.tdAmount)
   }
 
   async function onClose() {
@@ -734,7 +728,7 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
     })
   }
 
-  function getItemPriceRow(update, newRow, dirtyField) {
+  function getItemPriceRow(update, newRow, dirtyField, iconClicked) {
     const itemPriceRow = getIPR({
       priceType: newRow?.priceType,
       basePrice: newRow?.basePrice,
@@ -763,7 +757,7 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
       taxDetails: formik.values.isVattable ? newRow.taxDetails : null
     })
 
-    update({
+    let commonData = {
       id: newRow?.id,
       qty: parseFloat(itemPriceRow?.qty).toFixed(2),
       volume: parseFloat(itemPriceRow?.volume).toFixed(2),
@@ -776,7 +770,10 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
       mdType: itemPriceRow?.mdType,
       mdAmount: parseFloat(itemPriceRow?.mdAmount).toFixed(2),
       vatAmount: parseFloat(vatCalcRow?.vatAmount).toFixed(2)
-    })
+    }
+
+    let data = iconClicked ? { changes: commonData } : commonData
+    update(data)
   }
 
   function calcTotals(itemsArray, tdAmount, misc) {
