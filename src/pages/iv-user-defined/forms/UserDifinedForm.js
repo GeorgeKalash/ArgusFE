@@ -13,6 +13,7 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 const UserDifinedForm = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -143,23 +144,17 @@ const UserDifinedForm = () => {
       <Grow>
         <Grid container spacing={3} width={'50%'} sx={{ marginLeft: '0.5rem' }}>
           <Grid item xs={12} sx={{ marginTop: '0.5rem' }}>
-            <CustomTextField
+            <CustomNumberField
               name='ivtDimCount'
               label={_labels.propertiesCount}
               value={stagingDimCount === null ? formik.values.ivtDimCount : stagingDimCount}
               onChange={handleDimCountChange}
               onBlur={handleDimCountBlur}
-              numberField={true}
-              clearable={true}
-              type='number'
+              unClearable={true}
+              min={1}
+              max={20}
+              arrow={true}
               error={formik.touched.ivtDimCount && Boolean(formik.errors.ivtDimCount)}
-              inputProps={{
-                min: 1,
-                max: 20,
-                maxLength: 2,
-                inputMode: 'numeric',
-                pattern: '[1-20]*'
-              }}
             />
           </Grid>
 
