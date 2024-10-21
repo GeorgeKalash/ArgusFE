@@ -94,8 +94,19 @@ const Table = ({
         return {
           ...col,
           width: 110,
-          cellRenderer: ({ data }) => {
-            return <Checkbox checked={data?.[col.field]} style={{ pointerEvents: 'none' }} />
+          cellRenderer: ({ data, node }) => {
+            const handleCheckboxChange = event => {
+              const checked = event.target.checked
+              node.setDataValue(col.field, checked)
+            }
+
+            return (
+              <Checkbox
+                checked={data?.[col.field]}
+                onChange={col.editable ? handleCheckboxChange : null}
+                style={col.editable ? {} : { pointerEvents: 'none' }}
+              />
+            )
           }
         }
       }
