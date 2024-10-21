@@ -594,6 +594,12 @@ const Table = ({
       })
   }
 
+  const gridOptions = {
+    rowClassRules: {
+      'even-row': params => params.node.rowIndex % 2 === 0
+    }
+  }
+
   return (
     <VertLayout>
       <Grow>
@@ -628,6 +634,7 @@ const Table = ({
             suppressAggFuncInHeader={true}
             rowHeight={35}
             onFirstDataRendered={onFirstDataRendered}
+            gridOptions={gridOptions}
           />
         </Box>
       </Grow>
