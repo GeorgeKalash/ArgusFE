@@ -165,15 +165,17 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
   }, [recordId])
 
   const handleFieldChange = (fieldName, dirtyField, value = 0) => {
-    if (value > 0) {
-      formik.setFieldValue(fieldName, value)
-      if (formik.values[fieldName]?.toString() != value?.toString()) fetchAndSetValues(dirtyField, value)
+    const newValue = value?.trim() === '' || isNaN(value) ? 0 : parseFloat(value) || 0
+    formik.setFieldValue(fieldName, newValue)
+    if (formik.values[fieldName]?.toString() !== newValue?.toString()) {
+      fetchAndSetValues(dirtyField, newValue)
     }
   }
 
-  const handleFieldClear = (fieldName, dirtyField, value = 0) => {
-    formik.setFieldValue(fieldName, value)
-    fetchAndSetValues(dirtyField, value)
+  const handleFieldClear = (fieldName, dirtyField) => {
+    const newValue = 0
+    formik.setFieldValue(fieldName, newValue)
+    fetchAndSetValues(dirtyField, newValue)
   }
 
   return (
