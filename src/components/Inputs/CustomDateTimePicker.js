@@ -36,7 +36,7 @@ const CustomDateTimePicker = ({
   editMode = false,
   hasBorder = true,
   hidden = false,
-  formatTime = 'hh:mm aa', // send 'hh:mm:ss aa' for showing seconds 
+  formatTime = 'hh:mm aa', // send 'hh:mm:ss aa' to show seconds 
   defaultValue,
   ...props
 }) => {
