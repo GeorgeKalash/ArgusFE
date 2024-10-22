@@ -45,9 +45,9 @@ const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore,
       isInactive: false,
       interfaceId: null,
       accountId: null,
-      nraRef: '',
-      nraDescription: '',
-      nraId: '',
+      nraRef: null,
+      nraDescription: null,
+      nraId: null,
       minReviewTime: null
     },
     validationSchema: yup.object({
@@ -276,7 +276,9 @@ const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore,
                 endpointId={SystemRepository.NumberRange.snapshot}
                 valueField='reference'
                 displayField='description'
-                name='nraRef'
+                name='nraId'
+                valueShow='nraRef'
+                secondValueShow='nraDescription'
                 label={labels.nuRange}
                 form={formik}
                 secondDisplayField={true}
