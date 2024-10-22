@@ -122,20 +122,6 @@ export function DataGrid({
     const column = Cols?.find(item => item.name == params.field)
     if (event.key == 'Tab' && column?.props?.jumpToNextLine && nextCell.rowIndex === rowIds.length - 1) {
       addRow()
-
-      process.nextTick(() => {
-        const rowIds2 = gridExpandedSortedRowIdsSelector(apiRef.current.state)
-        const columns2 = apiRef.current.getVisibleColumns()
-        const field = columns2[nextCell.columnIndex].field
-        const id = rowIds2[nextCell.rowIndex + 1]
-        console.log(field, id, columns, rowIds, rowIds2, columns2)
-        setNextEdit({
-          id,
-          field
-        })
-      })
-
-      return
     }
 
     if (nextCell.columnIndex === columns.length - 1 - skip && nextCell.rowIndex === rowIds.length - 1) {
@@ -152,30 +138,29 @@ export function DataGrid({
 
     event.preventDefault()
     event.defaultMuiPrevented = true
+    console.log('nextCell.TEST')
 
     process.nextTick(() => {
       const rowIds = gridExpandedSortedRowIdsSelector(apiRef.current.state)
       const columns = apiRef.current.getVisibleColumns()
 
-      if(Cols?.props?.jumpToNextLine){
-        const field = columns2[nextCell.columnIndex].field
-        const id = rowIds2[nextCell.rowIndex + 1]
-      }
-
-      if (!event.shiftKey) {
-        if (nextCell.columnIndex < columns.length - 1 - skip) {
-          nextCell.columnIndex += 1
-        } else {
-          nextCell.rowIndex += 1
-          nextCell.columnIndex = 0
-        }
-      } else if (nextCell.columnIndex > 0) {
-        nextCell.columnIndex -= 1
+      if (event.key == 'Tab' && column?.props?.jumpToNextLine) {
+        nextCell.rowIndex += 1
       } else {
-        nextCell.rowIndex -= 1
-        nextCell.columnIndex = columns.length - 1
+        if (!event.shiftKey) {
+          if (nextCell.columnIndex < columns.length - 1 - skip) {
+            nextCell.columnIndex += 1
+          } else {
+            nextCell.rowIndex += 1
+            nextCell.columnIndex = 0
+          }
+        } else if (nextCell.columnIndex > 0) {
+          nextCell.columnIndex -= 1
+        } else {
+          nextCell.rowIndex -= 1
+          nextCell.columnIndex = columns.length - 1
+        }
       }
-
       const field = columns[nextCell.columnIndex].field
       const id = rowIds[nextCell.rowIndex]
 

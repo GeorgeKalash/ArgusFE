@@ -44,13 +44,13 @@ const PhysicalCountItemDe = () => {
           id: 1,
           sku: '',
           itemName: '',
-          countedQty: 0,
+          countedQty: 1,
           weight: 0
         }
       ]
     },
     maxAccess,
-    enableReinitialize: true,
+    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       stockCountId: yup.string().required(),
@@ -203,6 +203,9 @@ const PhysicalCountItemDe = () => {
         jumpToNextLine: true
       },
       async onChange({ row: { update, oldRow, newRow } }) {
+        // update({
+        //   countedQty: 1
+        // })
         console.log(oldRow)
         console.log(newRow)
 
@@ -303,9 +306,8 @@ const PhysicalCountItemDe = () => {
     {
       component: 'numberfield',
       label: _labels.qty,
-      name: 'countedQty'
-
-      //calculate footer
+      name: 'countedQty',
+      defaultValue: 1
     },
     {
       component: 'numberfield',
