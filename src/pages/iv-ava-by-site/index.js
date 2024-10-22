@@ -9,6 +9,11 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 import SerialForm from './forms/SerialForm'
+import serialIcon from '../../../public/images/TableIcons/imgSerials.png'
+import lotIcon from '../../../public/images/TableIcons/lot.png'
+import { Box, IconButton } from '@mui/material'
+import Image from 'next/image'
+import historyIcon from '/public/images/TableIcons/history.png'
 
 const AvailabilitiesBySite = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -111,32 +116,45 @@ const AvailabilitiesBySite = () => {
       field: 'netPrice',
       headerName: _labels.netPrice,
       flex: 1
+    },
+    {
+      flex: 1,
+      cellRenderer: row => {
+        const trackBy1 = row.data.trackBy === 1
+        const trackBy2 = row.data.trackBy === 2
+
+        if (trackBy1) {
+          return (
+            <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
+              <IconButton size='small' onClick={() => onSerial(row.data)}>
+                <Image src={serialIcon} width={18} height={18} alt='Serial' />
+              </IconButton>
+            </Box>
+          )
+        }
+
+        if (trackBy2) {
+          return (
+            <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
+              <IconButton size='small' onClick={() => onLot(row)}>
+                <Image src={lotIcon} width={18} height={18} alt='Lot' />
+              </IconButton>
+            </Box>
+          )
+        }
+
+        return null
+      }
     }
   ]
 
   const onSerial = obj => {
     openSerialForm(obj.itemId, obj.siteId)
-    console.log(obj, 'objjjjjjjjjjjjj')
   }
 
   const onLot = obj => {
     console.log(obj)
   }
-
-  // function openLotForm(itemId) {
-  //   stack({
-  //     Component: ExRatesForm,
-  //     props: {
-  //       labels: _labels,
-  //       record: record,
-  //       maxAccess: access,
-  //       recordId: record ? String(record.exId) + String(record.dayId) + String(record.seqNo) : null
-  //     },
-  //     width: 500,
-  //     height: 400,
-  //     title: _labels.exRate
-  //   })
-  // }
 
   function openSerialForm(itemId, siteId) {
     stack({
@@ -169,8 +187,6 @@ const AvailabilitiesBySite = () => {
           gridData={data}
           rowId={['itemId']}
           serialLotTable={true}
-          onLot={onLot}
-          onSerial={onSerial}
           maxAccess={access}
           refetch={refetch}
           pageSize={50}

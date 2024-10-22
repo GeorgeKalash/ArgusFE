@@ -6,8 +6,6 @@ import { Box, IconButton, TextField, Tooltip } from '@mui/material'
 import Checkbox from '@mui/material/Checkbox'
 import Image from 'next/image'
 import editIcon from '../../../public/images/TableIcons/edit.png'
-import serialIcon from '../../../public/images/TableIcons/imgSerials.png'
-import lotIcon from '../../../public/images/TableIcons/lot.png'
 import { useState } from 'react'
 import { useEffect } from 'react'
 import 'ag-grid-community'
@@ -600,44 +598,45 @@ const Table = ({
         }
       })
   }
-  if ((props?.onSerial || props?.onLot) && serialLotTable) {
-    if (!columnDefs?.some(column => column.field === 'actions'))
-      columnDefs?.push({
-        field: 'actions',
-        headerName: '',
-        width: 100,
-        cellRenderer: params => {
-          const { data } = params
-          const trackBy1 = data.trackBy === 1
-          const trackBy2 = data.trackBy === 2
 
-          return (
-            <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
-              {props?.onSerial && trackBy1 && (
-                <IconButton
-                  size='small'
-                  onClick={e => {
-                    props?.onSerial(data)
-                  }}
-                >
-                  <Image src={serialIcon} alt='Edit' width={18} height={18} />
-                </IconButton>
-              )}
-              {props?.onLot && trackBy2 && (
-                <IconButton
-                  size='small'
-                  onClick={e => {
-                    props?.onLot(data)
-                  }}
-                >
-                  <Image src={lotIcon} alt='Edit' width={18} height={18} />
-                </IconButton>
-              )}
-            </Box>
-          )
-        }
-      })
-  }
+  // if ((props?.onSerial || props?.onLot) && serialLotTable) {
+  //   if (!columnDefs?.some(column => column.field === 'actions'))
+  //     columnDefs?.push({
+  //       field: 'actions',
+  //       headerName: '',
+  //       width: 100,
+  //       cellRenderer: params => {
+  //         const { data } = params
+  //         const trackBy1 = data.trackBy === 1
+  //         const trackBy2 = data.trackBy === 2
+
+  //         return (
+  //           <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
+  //             {props?.onSerial && trackBy1 && (
+  //               <IconButton
+  //                 size='small'
+  //                 onClick={e => {
+  //                   props?.onSerial(data)
+  //                 }}
+  //               >
+  //                 <Image src={serialIcon} alt='Edit' width={18} height={18} />
+  //               </IconButton>
+  //             )}
+  //             {props?.onLot && trackBy2 && (
+  //               <IconButton
+  //                 size='small'
+  //                 onClick={e => {
+  //                   props?.onLot(data)
+  //                 }}
+  //               >
+  //                 <Image src={lotIcon} alt='Edit' width={18} height={18} />
+  //               </IconButton>
+  //             )}
+  //           </Box>
+  //         )
+  //       }
+  //     })
+  // }
 
   return (
     <VertLayout>
