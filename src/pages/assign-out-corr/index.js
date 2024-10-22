@@ -87,7 +87,6 @@ const OutwardsCorrespondent = () => {
         formik.values?.currencyId || 0
       }&_dispersalType=${formik.values?.dispersalType || 0}`
     })
-    console.log(formik?.values, 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
 
     setData(res ?? { list: [] })
   }
