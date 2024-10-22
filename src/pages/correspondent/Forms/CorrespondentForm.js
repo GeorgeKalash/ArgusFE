@@ -289,7 +289,6 @@ const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore,
                   formik.setFieldValue('nraRef', newValue?.reference || null)
                   formik.setFieldValue('nraDescription', newValue?.description || null)
                 }}
-                errorCheck={'nraId'}
                 maxAccess={maxAccess}
               />
             </Grid>
@@ -300,7 +299,6 @@ const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore,
                 value={formik.values.minReviewTime}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('minReviewTime', '')}
-                error={formik.touched.minReviewTime && Boolean(formik.errors.minReviewTime)}
               />
             </Grid>
             <Grid item xs={12}>
