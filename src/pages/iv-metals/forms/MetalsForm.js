@@ -141,6 +141,7 @@ export default function MetalsForm({ labels, maxAccess, setStore, store }) {
                 label={labels.reportingPurity}
                 value={formik.values.reportingPurity}
                 maxAccess={maxAccess}
+                allowNegative={false}
                 maxLength={6}
                 decimalScale={5}
                 onChange={formik.handleChange}
