@@ -53,8 +53,6 @@ const SerialForm = ({ labels, maxAccess, itemId, siteId }) => {
     }
   ]
 
-  console.log(data, 'dataaaaaaaaaaaaaaaaaaaa')
-
   return (
     <VertLayout>
       <Grow>
