@@ -42,8 +42,9 @@ import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
 import AddressFilterForm from 'src/components/Shared/AddressFilterForm'
 import { getStorageData } from 'src/storage/storage'
 import { useError } from 'src/error'
+import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 
-export default function SalesOrderForm({ labels, access: maxAccess, recordId, currency, window }) {
+export default function SalesOrderForm({ labels, access, recordId, currency, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
@@ -134,6 +135,12 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
 
   const invalidate = useInvalidate({
     endpointId: SaleRepository.SalesOrder.page
+  })
+
+  const { maxAccess } = useDocumentType({
+    functionId: SystemFunction.SalesOrder,
+    access: access,
+    enabled: !recordId
   })
 
   const { formik } = useForm({
@@ -325,12 +332,18 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
     {
       component: 'numberfield',
       label: labels.volume,
-      name: 'volume'
+      name: 'volume',
+      props: {
+        readOnly: true
+      }
     },
     {
       component: 'numberfield',
       label: labels.weight,
-      name: 'weight'
+      name: 'weight',
+      props: {
+        readOnly: true
+      }
     },
     {
       component: 'numberfield',
@@ -339,6 +352,7 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         getItemPriceRow(update, newRow, DIRTYFIELD_BASE_PRICE)
+        calcTotals(formik.values.items)
       }
     },
     {
@@ -348,6 +362,7 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         getItemPriceRow(update, newRow, DIRTYFIELD_UNIT_PRICE)
+        calcTotals(formik.values.items)
       }
     },
     {
@@ -357,17 +372,21 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         getItemPriceRow(update, newRow, DIRTYFIELD_UPO)
+        calcTotals(formik.values.items)
       }
     },
     {
       component: 'numberfield',
       label: labels.VAT,
-      name: 'vatAmount'
+      name: 'vatAmount',
+      props: {
+        readOnly: true
+      }
     },
     {
       component: 'numberfield',
       label: labels.tax,
-      name: 'taxDetails'
+      name: 'tax'
     },
     {
       component: 'textfield',
@@ -385,6 +404,7 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
       async onChange({ row: { update, newRow } }) {
         getItemPriceRow(update, newRow, DIRTYFIELD_MDAMOUNT)
         checkMdAmountPct(newRow, update)
+        calcTotals(formik.values.items)
       }
     },
     {
@@ -399,6 +419,7 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         getItemPriceRow(update, newRow, DIRTYFIELD_EXTENDED_PRICE)
+        calcTotals(formik.values.items)
       }
     },
     {
@@ -760,9 +781,17 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
       mdAmount: parseFloat(itemPriceRow?.mdAmount).toFixed(2),
       vatAmount: parseFloat(vatCalcRow?.vatAmount).toFixed(2)
     }
-
     let data = iconClicked ? { changes: commonData } : commonData
     update(data)
+
+    // let modifiedItemsList = formik.values.items.map(item => {
+    //   if (item.id === newRow.id) {
+    //     return commonData
+    //   }
+
+    //   return item
+    // })
+    // calcTotals(formik.values.items)
   }
 
   function calcTotals(itemsArray, tdAmount, misc) {
@@ -1016,10 +1045,6 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
       }
     })()
   }, [])
-
-  useEffect(() => {
-    calcTotals(formik.values.items)
-  }, [formik.values.items])
 
   return (
     <FormShell

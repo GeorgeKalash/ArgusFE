@@ -240,6 +240,7 @@ const recalcItemPrice = row => {
 }
 
 const getIPR = row => {
+  console.log('check row ', row)
   if (row.priceType === PRICETYPE_UNIT_VOLUME && row.volume === 0) {
     alert('item volume not defined')
   }
