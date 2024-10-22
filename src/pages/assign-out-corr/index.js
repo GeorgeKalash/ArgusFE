@@ -87,6 +87,7 @@ const OutwardsCorrespondent = () => {
         formik.values?.currencyId || 0
       }&_dispersalType=${formik.values?.dispersalType || 0}`
     })
+    console.log(formik?.values, 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
 
     setData(res ?? { list: [] })
   }
@@ -152,7 +153,7 @@ const OutwardsCorrespondent = () => {
           <Grid container spacing={2} sx={{ pt: 5 }}>
             <Grid item xs={2}>
               <ResourceComboBox
-                endpointId={SystemRepository.Country.qry}
+                endpointId={RemittanceOutwardsRepository.UnassignedCountry.unassigned}
                 name='countryId'
                 label={labels.country}
                 valueField='recordId'
@@ -167,7 +168,15 @@ const OutwardsCorrespondent = () => {
                 displayFieldWidth={1.75}
                 onChange={(event, newValue) => {
                   if (newValue) {
-                    formik.setFieldValue('countryId', newValue?.recordId || 0)
+                    formik.setFieldValue('countryId', newValue.recordId)
+                    formik.setFieldValue('currencyId', '')
+                    formik.setFieldValue('dispersalType', '')
+                  } else {
+                    formik.setFieldValue('countryId', '')
+                    formik.setFieldValue('currencyId', '')
+                    formik.setFieldValue('dispersalType', '')
+
+                    setData([])
                   }
                 }}
                 error={formik.touched.countryId && Boolean(formik.errors.countryId)}
@@ -176,9 +185,11 @@ const OutwardsCorrespondent = () => {
             </Grid>
             <Grid item xs={2}>
               <ResourceComboBox
-                endpointId={SystemRepository.Currency.qry}
+                endpointId={RemittanceOutwardsRepository.UnassignedCurrency.unassigned}
+                parameters={formik.values.countryId && `_countryId=${formik.values.countryId || 0}`}
                 name='currencyId'
                 label={labels.currency}
+                readOnly={!formik.values.countryId}
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 columnsInDropDown={[
@@ -188,23 +199,28 @@ const OutwardsCorrespondent = () => {
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('currencyId', newValue?.recordId || 0)
+                  formik.setFieldValue('currencyId', newValue?.recordId || null)
+                  formik.setFieldValue('dispersalType', '')
                 }}
                 error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
               />
             </Grid>
             <Grid item xs={2}>
               <ResourceComboBox
+                endpointId={RemittanceOutwardsRepository.UnassignedDispersalType.unassigned}
+                parameters={
+                  formik.values.currencyId &&
+                  `_countryId=${formik.values.countryId || 0}&_currencyId=${formik.values.currencyId || 0}`
+                }
                 name='dispersalType'
                 label={labels.dispersalType}
-                datasetId={DataSets.RT_Dispersal_Type}
+                readOnly={!formik.values.currencyId}
                 valueField='key'
                 displayField='value'
                 values={formik.values}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('dispersalType', newValue?.key || 0)
+                  formik.setFieldValue('dispersalType', newValue?.key)
                 }}
-                error={formik.touched.dispersalType && Boolean(formik.errors.dispersalType)}
               />
             </Grid>
           </Grid>

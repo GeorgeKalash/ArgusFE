@@ -155,5 +155,8 @@ export const RemittanceOutwardsRepository = {
   OutwardsTransfer: {
     get: service + 'getOWT',
     snapshot: service + 'snapshotOWT'
-  }
+  },
+  UnassignedCountry: { unassigned: service + 'unassignedCOU' },
+  UnassignedCurrency: { unassigned: service + 'unassignedCU' },
+  UnassignedDispersalType: { unassigned: service + 'unassignedDT' }
 }
