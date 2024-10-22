@@ -460,7 +460,7 @@ const BenificiaryCashForm = ({
               </FormGrid>
             </Grid>
             <Grid container xs={12}>
-              <FormGrid hideonempty xs={6} sx={{ pr: 2 }}>
+              <FormGrid hideonempty xs={6}>
                 <ResourceComboBox
                   endpointId={SystemRepository.Currency.qry}
                   name='currencyId'
@@ -483,6 +483,8 @@ const BenificiaryCashForm = ({
                   error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
                 />
               </FormGrid>
+            </Grid>
+            <Grid container xs={12}>
               <FormGrid hideonempty xs={6}>
                 <CustomTextField
                   name='name'
@@ -501,6 +503,121 @@ const BenificiaryCashForm = ({
               </FormGrid>
             </Grid>
 
+            <Grid container xs={12} spacing={2}>
+              <FormGrid item hideonempty xs={3}>
+                <CustomTextField
+                  name='firstName'
+                  label={_labels.firstName}
+                  value={formik.values?.firstName}
+                  required
+                  readOnly={notArabic || editMode}
+                  onChange={formik.handleChange}
+                  maxLength='20'
+                  onClear={() => formik.setFieldValue('firstName', '')}
+                  error={formik.touched.firstName && Boolean(formik.errors.firstName)}
+                  maxAccess={maxAccess}
+                />
+              </FormGrid>
+              <FormGrid item hideonempty xs={3}>
+                <CustomTextField
+                  name='middleName'
+                  label={_labels.middleName}
+                  value={formik.values?.middleName}
+                  readOnly
+                  onChange={formik.handleChange}
+                  maxLength='20'
+                  onClear={() => formik.setFieldValue('middleName', '')}
+                  error={formik.touched.middleName && Boolean(formik.errors.middleName)}
+                  maxAccess={maxAccess}
+                />
+              </FormGrid>
+              <FormGrid item hideonempty xs={3}>
+                <CustomTextField
+                  name='lastName'
+                  label={_labels.lastName}
+                  value={formik.values?.lastName}
+                  required
+                  readOnly={notArabic || editMode}
+                  onChange={formik.handleChange}
+                  maxLength='20'
+                  onClear={() => formik.setFieldValue('lastName', '')}
+                  error={formik.touched.lastName && Boolean(formik.errors.lastName)}
+                  maxAccess={maxAccess}
+                />
+              </FormGrid>
+              <FormGrid item hideonempty xs={3}>
+                <CustomTextField
+                  name='familyName'
+                  label={_labels.familyName}
+                  value={formik.values?.familyName}
+                  readOnly
+                  onChange={formik.handleChange}
+                  maxLength='20'
+                  onClear={() => formik.setFieldValue('familyName', '')}
+                  error={formik.touched.familyName && Boolean(formik.errors.familyName)}
+                  maxAccess={maxAccess}
+                />
+              </FormGrid>
+            </Grid>
+
+            <Grid container xs={12} spacing={2} sx={{ flexDirection: 'row-reverse', pt: 2, pl: '10px' }}>
+              <FormGrid hideonempty xs={3}>
+                <CustomTextField
+                  name='fl_firstName'
+                  label={_labels.flFirstName}
+                  value={formik.values?.fl_firstName}
+                  readOnly
+                  onChange={formik.handleChange}
+                  maxLength='20'
+                  dir='rtl' // Set direction to right-to-left
+                  onClear={() => formik.setFieldValue('fl_firstName', '')}
+                  error={formik.touched.fl_firstName && Boolean(formik.errors.fl_firstName)}
+                  maxAccess={maxAccess}
+                />
+              </FormGrid>
+              <FormGrid hideonempty xs={3}>
+                <CustomTextField
+                  name='fl_middleName'
+                  label={_labels.flMiddleName}
+                  value={formik.values?.fl_middleName}
+                  readOnly
+                  maxLength='20'
+                  onChange={formik.handleChange}
+                  dir='rtl' // Set direction to right-to-left
+                  onClear={() => formik.setFieldValue('fl_familyName', '')}
+                  error={formik.touched.fl_middleName && Boolean(formik.errors.fl_middleName)}
+                  maxAccess={maxAccess}
+                />
+              </FormGrid>
+              <FormGrid hideonempty xs={3}>
+                <CustomTextField
+                  name='fl_lastName'
+                  label={_labels.flLastName}
+                  value={formik.values?.fl_lastName}
+                  readOnly
+                  onChange={formik.handleChange}
+                  maxLength='20'
+                  dir='rtl' // Set direction to right-to-left
+                  onClear={() => formik.setFieldValue('fl_lastName', '')}
+                  error={formik.touched.fl_lastName && Boolean(formik.errors.fl_lastName)}
+                  maxAccess={maxAccess}
+                />
+              </FormGrid>
+              <FormGrid hideonempty xs={3}>
+                <CustomTextField
+                  name='fl_familyName'
+                  label={_labels.flFamilyName}
+                  value={formik.values?.fl_familyName}
+                  readOnly
+                  maxLength='20'
+                  maxAccess={maxAccess}
+                  onChange={formik.handleChange}
+                  dir='rtl' // Set direction to right-to-left
+                  onClear={() => formik.setFieldValue('fl_familyName', '')}
+                  error={formik.touched.fl_familyName && Boolean(formik.errors.fl_familyName)}
+                />
+              </FormGrid>
+            </Grid>
             <Grid container xs={12}>
               <FormGrid hideonempty xs={6} sx={{ pr: 2 }}>
                 <ResourceComboBox
@@ -642,175 +759,62 @@ const BenificiaryCashForm = ({
                 />
               </FormGrid>
             </Grid>
-            <FormGrid hideonempty xs={12}>
-              <ResourceComboBox
-                endpointId={CurrencyTradingSettingsRepository.RelationType.qry}
-                name='rtId'
-                label={_labels.relationType}
-                displayField='name'
-                valueField='recordId'
-                values={formik.values}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('rtId', newValue ? newValue?.recordId : '')
-                }}
-                maxAccess={maxAccess}
-                error={formik.touched.rtId && Boolean(formik.errors.rtId)}
-                readOnly={editMode}
-              />
-            </FormGrid>
-            <Grid container xs={12} spacing={2}>
-              <FormGrid item hideonempty xs={3}>
-                <CustomTextField
-                  name='firstName'
-                  label={_labels.firstName}
-                  value={formik.values?.firstName}
-                  required
-                  readOnly={notArabic || editMode}
-                  onChange={formik.handleChange}
-                  maxLength='20'
-                  onClear={() => formik.setFieldValue('firstName', '')}
-                  error={formik.touched.firstName && Boolean(formik.errors.firstName)}
-                  maxAccess={maxAccess}
-                />
-              </FormGrid>
-              <FormGrid item hideonempty xs={3}>
-                <CustomTextField
-                  name='middleName'
-                  label={_labels.middleName}
-                  value={formik.values?.middleName}
-                  readOnly
-                  onChange={formik.handleChange}
-                  maxLength='20'
-                  onClear={() => formik.setFieldValue('middleName', '')}
-                  error={formik.touched.middleName && Boolean(formik.errors.middleName)}
-                  maxAccess={maxAccess}
-                />
-              </FormGrid>
-              <FormGrid item hideonempty xs={3}>
-                <CustomTextField
-                  name='lastName'
-                  label={_labels.lastName}
-                  value={formik.values?.lastName}
-                  required
-                  readOnly={notArabic || editMode}
-                  onChange={formik.handleChange}
-                  maxLength='20'
-                  onClear={() => formik.setFieldValue('lastName', '')}
-                  error={formik.touched.lastName && Boolean(formik.errors.lastName)}
-                  maxAccess={maxAccess}
-                />
-              </FormGrid>
-              <FormGrid item hideonempty xs={3}>
-                <CustomTextField
-                  name='familyName'
-                  label={_labels.familyName}
-                  value={formik.values?.familyName}
-                  readOnly
-                  onChange={formik.handleChange}
-                  maxLength='20'
-                  onClear={() => formik.setFieldValue('familyName', '')}
-                  error={formik.touched.familyName && Boolean(formik.errors.familyName)}
-                  maxAccess={maxAccess}
-                />
-              </FormGrid>
-            </Grid>
-
-            <Grid container xs={12} spacing={2} sx={{ flexDirection: 'row-reverse', pt: 2, pl: '10px' }}>
-              <FormGrid hideonempty xs={3}>
-                <CustomTextField
-                  name='fl_firstName'
-                  label={_labels.flFirstName}
-                  value={formik.values?.fl_firstName}
-                  readOnly
-                  onChange={formik.handleChange}
-                  maxLength='20'
-                  dir='rtl' // Set direction to right-to-left
-                  onClear={() => formik.setFieldValue('fl_firstName', '')}
-                  error={formik.touched.fl_firstName && Boolean(formik.errors.fl_firstName)}
-                  maxAccess={maxAccess}
-                />
-              </FormGrid>
-              <FormGrid hideonempty xs={3}>
-                <CustomTextField
-                  name='fl_middleName'
-                  label={_labels.flMiddleName}
-                  value={formik.values?.fl_middleName}
-                  readOnly
-                  maxLength='20'
-                  onChange={formik.handleChange}
-                  dir='rtl' // Set direction to right-to-left
-                  onClear={() => formik.setFieldValue('fl_familyName', '')}
-                  error={formik.touched.fl_middleName && Boolean(formik.errors.fl_middleName)}
-                  maxAccess={maxAccess}
-                />
-              </FormGrid>
-              <FormGrid hideonempty xs={3}>
-                <CustomTextField
-                  name='fl_lastName'
-                  label={_labels.flLastName}
-                  value={formik.values?.fl_lastName}
-                  readOnly
-                  onChange={formik.handleChange}
-                  maxLength='20'
-                  dir='rtl' // Set direction to right-to-left
-                  onClear={() => formik.setFieldValue('fl_lastName', '')}
-                  error={formik.touched.fl_lastName && Boolean(formik.errors.fl_lastName)}
-                  maxAccess={maxAccess}
-                />
-              </FormGrid>
-              <FormGrid hideonempty xs={3}>
-                <CustomTextField
-                  name='fl_familyName'
-                  label={_labels.flFamilyName}
-                  value={formik.values?.fl_familyName}
-                  readOnly
-                  maxLength='20'
-                  maxAccess={maxAccess}
-                  onChange={formik.handleChange}
-                  dir='rtl' // Set direction to right-to-left
-                  onClear={() => formik.setFieldValue('fl_familyName', '')}
-                  error={formik.touched.fl_familyName && Boolean(formik.errors.fl_familyName)}
-                />
-              </FormGrid>
-            </Grid>
-            <Grid container rowGap={2} xs={6} spacing={2} sx={{ px: 2, pt: 2 }}>
-              {!hiddenIsInActive.current && (
-                <FormGrid hideonempty xs={12} sx={{ position: 'relative', width: '100%' }}>
-                  <FormControlLabel
-                    control={<Checkbox name='isInactive' disabled={true} checked={formik.values?.isInactive} />}
-                    label={_labels.isInactive}
+            <Grid container xs={12}>
+              <Grid container rowGap={2} xs={6} spacing={2} sx={{ px: 2, pt: 2 }}>
+                {!hiddenIsInActive.current && (
+                  <FormGrid hideonempty xs={12} sx={{ position: 'relative', width: '100%' }}>
+                    <FormControlLabel
+                      control={<Checkbox name='isInactive' disabled={true} checked={formik.values?.isInactive} />}
+                      label={_labels.isInactive}
+                      maxAccess={maxAccess}
+                    />
+                  </FormGrid>
+                )}
+                {!hiddenIsBlocked.current && (
+                  <FormGrid hideonempty xs={12} sx={{ position: 'relative', width: '100%' }}>
+                    <FormControlLabel
+                      control={<Checkbox name='isBlocked' disabled={true} checked={formik.values?.isBlocked} />}
+                      label={_labels.isBlocked}
+                      maxAccess={maxAccess}
+                    />
+                  </FormGrid>
+                )}
+                <FormGrid hideonempty xs={12}>
+                  <CustomDatePicker
+                    name='stoppedDate'
+                    label={_labels.stoppedDate}
+                    value={formik.values?.stoppedDate}
+                    readOnly={true}
+                    error={formik.touched.stoppedDate && Boolean(formik.errors.stoppedDate)}
                     maxAccess={maxAccess}
                   />
                 </FormGrid>
-              )}
-              {!hiddenIsBlocked.current && (
-                <FormGrid hideonempty xs={12} sx={{ position: 'relative', width: '100%' }}>
-                  <FormControlLabel
-                    control={<Checkbox name='isBlocked' disabled={true} checked={formik.values?.isBlocked} />}
-                    label={_labels.isBlocked}
+                <FormGrid hideonempty xs={12}>
+                  <CustomTextArea
+                    name='stoppedReason'
+                    label={_labels.stoppedReason}
+                    readOnly
+                    value={formik.values.stoppedReason}
+                    rows={3}
+                    error={formik.touched.stoppedReason && Boolean(formik.errors.stoppedReason)}
                     maxAccess={maxAccess}
                   />
                 </FormGrid>
-              )}
-              <FormGrid hideonempty xs={12}>
-                <CustomDatePicker
-                  name='stoppedDate'
-                  label={_labels.stoppedDate}
-                  value={formik.values?.stoppedDate}
-                  readOnly={true}
-                  error={formik.touched.stoppedDate && Boolean(formik.errors.stoppedDate)}
+              </Grid>
+              <FormGrid hideonempty xs={6} sx={{ pl: 2 }}>
+                <ResourceComboBox
+                  endpointId={CurrencyTradingSettingsRepository.RelationType.qry}
+                  name='rtId'
+                  label={_labels.relationType}
+                  displayField='name'
+                  valueField='recordId'
+                  values={formik.values}
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('rtId', newValue ? newValue?.recordId : '')
+                  }}
                   maxAccess={maxAccess}
-                />
-              </FormGrid>
-              <FormGrid hideonempty xs={12}>
-                <CustomTextArea
-                  name='stoppedReason'
-                  label={_labels.stoppedReason}
-                  readOnly
-                  value={formik.values.stoppedReason}
-                  rows={3}
-                  error={formik.touched.stoppedReason && Boolean(formik.errors.stoppedReason)}
-                  maxAccess={maxAccess}
+                  error={formik.touched.rtId && Boolean(formik.errors.rtId)}
+                  readOnly={editMode}
                 />
               </FormGrid>
             </Grid>
