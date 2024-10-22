@@ -170,6 +170,7 @@ const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore,
                 displayField='name'
                 valueShow='accountRef'
                 secondValueShow='accountName'
+                readOnly={editMode}
                 form={formik}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('accountId', newValue?.recordId || '')
