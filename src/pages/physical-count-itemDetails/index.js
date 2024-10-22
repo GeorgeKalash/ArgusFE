@@ -26,9 +26,9 @@ const PhysicalCountItemDe = () => {
   const [controllerStore, setControllerStore] = useState([])
   const [filteredItems, setFilteredItems] = useState([])
   const [editMode, setEditMode] = useState(false)
+  const [disSkuLookup, setDisSkuLookup] = useState(false)
 
   const { labels: _labels, maxAccess } = useResourceQuery({
-    //queryFn: fetchGridData,
     datasetId: ResourceIds.IVPhysicalCountItemDetails
   })
 
@@ -61,7 +61,7 @@ const PhysicalCountItemDe = () => {
   })
 
   async function fetchGridData(stockCountId, siteId, controllerId) {
-    //if (!formik.values.stockCountId || !formik.values.siteId) return
+    getDTDsku(stockCountId)
 
     await getRequest({
       extension: SCRepository.StockCountItemDetail.qry,
@@ -142,15 +142,104 @@ const PhysicalCountItemDe = () => {
       .catch(error => {})
   }
 
+  async function getDTDsku(stockCountId) {
+    let dtId
+    let disableSKULookup = false
+
+    const res = await getRequest({
+      extension: SCRepository.StockCount.get,
+      parameters: `_recordId=${stockCountId}`
+    })
+
+    console.log(dtId)
+    console.log(res)
+    console.log('resss', res?.record?.dtId)
+    res?.record?.dtId ? (dtId = res?.record?.dtId) : null
+    console.log(dtId)
+
+    if (dtId) {
+      const DTDres = await getRequest({
+        extension: SCRepository.DocumentTypeDefaults.get,
+        parameters: `_dtId=${dtId}`
+      })
+      console.log(DTDres)
+      DTDres?.record?.disableSKULookup ? (disableSKULookup = DTDres?.record?.disableSKULookup) : false
+    }
+
+    console.log(disableSKULookup)
+    setDisSkuLookup(disableSKULookup)
+  }
+
+  async function fillItemProps(itemId) {
+    /* const res = await getRequest({
+      extension: SCRepository.StockCount.get,
+      parameters: `_recordId=${stockCountId}`
+    }) */
+  }
+
   const columns = [
     {
-      component: 'textfield',
-      name: 'skuText',
-      label: _labels.sku
+      component: disSkuLookup ? 'textfield' : 'resourcelookup',
+      name: 'sku',
+      label: _labels.sku,
+      props: {
+        ...(!disSkuLookup && {
+          endpointId: InventoryRepository.Item.snapshot,
+          mapping: [
+            { from: 'recordId', to: 'itemId' },
+            { from: 'sku', to: 'sku' },
+            { from: 'name', to: 'itemName' },
+            { from: 'priceType', to: 'priceType' }
+          ],
+          displayField: 'sku',
+          valueField: 'recordId',
+          columnsInDropDown: [
+            { key: 'sku', value: 'sku' },
+            { key: 'name', value: 'Name' },
+            { key: 'flName', value: 'FL Name' }
+          ],
+          displayFieldWidth: 1
+        }),
+        jumpToNextLine: true
+      },
+      async onChange({ row: { update, oldRow, newRow } }) {
+        console.log(oldRow)
+        console.log(newRow)
+
+        /* if (newRow.accountId) {
+          update({
+            currencyRef: formValues.currencyRef,
+            currencyId: formValues.currencyId,
+            exRate: exRateValue
+          })
+
+          if (formValues.currencyId) {
+            const result = await getCurrencyApi(formValues.currencyId)
+
+            const result2 = result?.record
+            const exRate = result2?.exRate
+            const rateCalcMethod = result2?.rateCalcMethod
+
+            const updatedRateRow = getRate({
+              amount: newRow?.amount,
+              exRate: exRate,
+              baseAmount: newRow?.baseAmount,
+              rateCalcMethod: rateCalcMethod,
+              dirtyField: DIRTYFIELD_RATE
+            })
+            update({
+              exRate: updatedRateRow.exRate,
+              amount: updatedRateRow.amount,
+              baseAmount: updatedRateRow.baseAmount
+            })
+          }
+        } */
+      }
 
       //skuFocusLeaveHandler
     },
-    {
+
+    /* {
       component: 'resourcelookup',
       label: _labels.sku,
       name: 'sku',
@@ -159,7 +248,7 @@ const PhysicalCountItemDe = () => {
 
         //parameters: '_type=',
         displayField: 'sku',
-        valueField: 'sku',
+        valueField: 'recordId',
         columnsInDropDown: [
           { key: 'sku', value: 'sku' },
           { key: 'name', value: 'Name' },
@@ -167,13 +256,15 @@ const PhysicalCountItemDe = () => {
         ],
         mapping: [
           { from: 'recordId', to: 'itemId' },
+          { from: 'sku', to: 'sku' },
           { from: 'name', to: 'itemName' },
           { from: 'priceType', to: 'priceType' }
-        ]
-      }
+        ],
+        displayFieldWidth: 1
+      } */
 
-      //fill item weight
-      /*  async onChange({ row: { update, oldRow, newRow } }) {
+    //fill item weight
+    /*  async onChange({ row: { update, oldRow, newRow } }) {
         if (newRow.accountId) {
           update({
             currencyRef: formValues.currencyRef,
@@ -203,11 +294,11 @@ const PhysicalCountItemDe = () => {
           }
         }
       } */
-    },
+    //},
     {
       component: 'textfield',
       name: 'itemName',
-      label: _labels.itemName
+      label: _labels.name
     },
     {
       component: 'numberfield',

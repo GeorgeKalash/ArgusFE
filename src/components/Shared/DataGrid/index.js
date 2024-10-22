@@ -87,6 +87,8 @@ export function DataGrid({
     }
   }
 
+  const Cols = columns
+
   const handleCellKeyDown = (params, event) => {
     if (event.key === 'Enter') {
       event.stopPropagation()
@@ -117,6 +119,25 @@ export function DataGrid({
         field: columns[nextCell.columnIndex].field
       })
 
+    const column = Cols?.find(item => item.name == params.field)
+    if (event.key == 'Tab' && column?.props?.jumpToNextLine && nextCell.rowIndex === rowIds.length - 1) {
+      addRow()
+
+      process.nextTick(() => {
+        const rowIds2 = gridExpandedSortedRowIdsSelector(apiRef.current.state)
+        const columns2 = apiRef.current.getVisibleColumns()
+        const field = columns2[nextCell.columnIndex].field
+        const id = rowIds2[nextCell.rowIndex + 1]
+        console.log(field, id, columns, rowIds, rowIds2, columns2)
+        setNextEdit({
+          id,
+          field
+        })
+      })
+
+      return
+    }
+
     if (nextCell.columnIndex === columns.length - 1 - skip && nextCell.rowIndex === rowIds.length - 1) {
       addRow()
     }
@@ -135,6 +156,11 @@ export function DataGrid({
     process.nextTick(() => {
       const rowIds = gridExpandedSortedRowIdsSelector(apiRef.current.state)
       const columns = apiRef.current.getVisibleColumns()
+
+      if(Cols?.props?.jumpToNextLine){
+        const field = columns2[nextCell.columnIndex].field
+        const id = rowIds2[nextCell.rowIndex + 1]
+      }
 
       if (!event.shiftKey) {
         if (nextCell.columnIndex < columns.length - 1 - skip) {
