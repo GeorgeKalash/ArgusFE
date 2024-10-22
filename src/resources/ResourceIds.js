@@ -275,5 +275,9 @@ export const ResourceIds = {
   RemittanceReceiptVoucher: 36323,
   ItemSizes: 41117,
   OutwardsTransfer: 36324,
+  CategoryLevels: 41118,
+  MetalColor: 41110,
+  InventoryOpeningCosts: 41203,
+  OpenMultiCurrencyCashTransfer: 33315,
   LockedRecords: 23302
 }

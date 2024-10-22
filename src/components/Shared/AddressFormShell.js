@@ -53,9 +53,9 @@ export const AddressFormShell = ({
         ((values.name || values.cityId || values.phone || values.countryId || values.street1) && optional) ||
         !optional
       ) {
-        if (!values.name) {
-          errors.name = ' '
-        }
+        // if (!values.name) {
+        //   errors.name = ' '
+        // }
         if (!values.street1) {
           errors.street1 = ' '
         }
