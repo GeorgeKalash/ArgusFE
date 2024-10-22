@@ -5,11 +5,11 @@ import PinIcon from '@mui/icons-material/Pin'
 import InputAdornment from '@mui/material/InputAdornment'
 import ClearIcon from '@mui/icons-material/Clear'
 
-export default function TextFieldEdit({ column: { props, ...column }, id, field, value, update }) {
+export default function TextFieldEdit({ column: { props, ...column }, id, field, value, update, updateRow }) {
   const isPercentIcon = props?.gridData ? props?.gridData[id - 1]?.mdType === 1 : false
 
   const handleIconClick = () => {
-    props.iconsClicked(id)
+    props.iconsClicked(id, updateRow)
   }
 
   const handleChange = e => {
@@ -47,13 +47,6 @@ export default function TextFieldEdit({ column: { props, ...column }, id, field,
       label={''}
       autoFocus
       hasBorder={false}
-      onClear={e =>
-        update({
-          id,
-          field,
-          value: ''
-        })
-      }
       onBlur={e => {
         if (column?.onBlur) {
           column?.onBlur(e, id)
@@ -64,13 +57,7 @@ export default function TextFieldEdit({ column: { props, ...column }, id, field,
           column?.onKeyDown(e, id)
         }
       }}
-      onChange={e => {
-        update({
-          id,
-          field,
-          value: e.target.value || ''
-        })
-      }}
+      onChange={handleChange}
       onKeyPress={handleKeyPress}
       inputMode={props.type === 'numeric' ? 'decimal' : 'text'}
       {...props}
@@ -96,7 +83,6 @@ export default function TextFieldEdit({ column: { props, ...column }, id, field,
           }
         }
       }}
-      {...props}
     />
   )
 }
