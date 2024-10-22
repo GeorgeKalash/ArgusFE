@@ -261,10 +261,17 @@ export function DataGrid({
   ].filter(Boolean)
 
   const onCellEditingStopped = params => {
-    const { data } = params
+    const { data, oldValue, newValue, node } = params
+
     gridApiRef.current.applyTransaction({ update: [data] })
 
     commit(data)
+
+    console.log('params', params)
+    const column = columns.find(({ field }) => field === params.field)
+
+    console.log(column)
+    column.onChange({ row: { oldRow, newRow } })
   }
 
   const commit = data => {
