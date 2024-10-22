@@ -51,6 +51,8 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
   const { platformLabels } = useContext(ControlContext)
   const [cycleButtonState, setCycleButtonState] = useState({ text: '%', value: 2 })
   const [address, setAddress] = useState({})
+  const [filteredMu, setFilteredMU] = useState([])
+  const [measurements, setMeasurements] = useState([])
   const userId = getStorageData('userData').userId
 
   const [initialValues, setInitialData] = useState({
@@ -267,6 +269,9 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
           rowTaxDetails = details
         }
 
+        const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
+        setFilteredMU(filteredMeasurements)
+
         update({
           volume: parseFloat(itemPhysProp?.volume) || 0,
           weight: parseFloat(itemPhysProp?.weight || 0).toFixed(2),
@@ -278,6 +283,8 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
           mdAmount: formik.values.maxDiscount ? parseFloat(formik.values.maxDiscount).toFixed(2) : 0,
           qty: 0,
           msId: itemInfo?.msId,
+          muRef: filteredMeasurements?.[0]?.reference,
+          muId: filteredMeasurements?.[0]?.recordId,
           extendedPrice: parseFloat('0').toFixed(2),
           mdValue: 0,
           taxId: rowTax,
@@ -316,9 +323,25 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       }
     },
     {
-      component: 'textfield',
-      label: labels.mu,
-      name: 'muRef'
+      component: 'resourcecombobox',
+      label: labels.measurementUnit,
+      name: 'muRef',
+      props: {
+        store: filteredMu,
+        displayField: 'reference',
+        valueField: 'recordId',
+        mapping: [
+          { from: 'reference', to: 'muRef' },
+          { from: 'qty', to: 'muQty' },
+          { from: 'recordId', to: 'muId' }
+        ]
+      },
+      async onChange({ row: { update, newRow } }) {
+        const filteredItems = filteredMu.filter(item => item.recordId === newRow?.muId)
+        update({
+          baseQty: newRow?.qty * filteredItems?.qty
+        })
+      }
     },
     {
       component: 'numberfield',
@@ -428,7 +451,6 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       name: 'notes'
     }
   ]
-
   async function handleIconClick(id, updateRow) {
     let currentMdType
     let currenctMdAmount = parseFloat(formik.values.items[id - 1].mdAmount)
@@ -1004,6 +1026,13 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     return res?.record?.dtId
   }
 
+  const getMeasurementUnits = async () => {
+    return await getRequest({
+      extension: InventoryRepository.MeasurementUnit.qry,
+      parameters: `_msId=0`
+    })
+  }
+
   useEffect(() => {
     let shipAdd = ''
     const { name, street1, street2, city, phone, phone2, email1 } = address
@@ -1018,6 +1047,8 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
 
   useEffect(() => {
     ;(async function () {
+      const muList = await getMeasurementUnits()
+      setMeasurements(muList?.list)
       if (recordId) {
         const soHeader = await getSalesOrder(recordId)
         const soItems = await getSalesOrderItems(recordId)
