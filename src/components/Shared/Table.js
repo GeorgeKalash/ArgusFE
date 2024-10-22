@@ -94,8 +94,19 @@ const Table = ({
         return {
           ...col,
           width: 110,
-          cellRenderer: ({ data }) => {
-            return <Checkbox checked={data?.[col.field]} style={{ pointerEvents: 'none' }} />
+          cellRenderer: ({ data, node }) => {
+            const handleCheckboxChange = event => {
+              const checked = event.target.checked
+              node.setDataValue(col.field, checked)
+            }
+
+            return (
+              <Checkbox
+                checked={data?.[col.field]}
+                onChange={col.editable ? handleCheckboxChange : null}
+                style={col.editable ? {} : { pointerEvents: 'none' }}
+              />
+            )
           }
         }
       }
@@ -359,10 +370,6 @@ const Table = ({
     }
   }
 
-  const getRowClass = params => {
-    return params?.rowIndex % 2 === 0 ? 'even-row' : ''
-  }
-
   const selectAll = (params, e) => {
     const gridApi = params.api
     const allNodes = []
@@ -598,6 +605,12 @@ const Table = ({
       })
   }
 
+  const gridOptions = {
+    rowClassRules: {
+      'even-row': params => params.node.rowIndex % 2 === 0
+    }
+  }
+
   return (
     <VertLayout>
       <Grow>
@@ -630,9 +643,9 @@ const Table = ({
             paginationPageSize={pageSize}
             rowSelection={'single'}
             suppressAggFuncInHeader={true}
-            getRowClass={getRowClass}
             rowHeight={35}
             onFirstDataRendered={onFirstDataRendered}
+            gridOptions={gridOptions}
           />
         </Box>
       </Grow>
