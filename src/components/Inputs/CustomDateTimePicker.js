@@ -1,7 +1,4 @@
-// ** React Imports
-import { useRef, useState } from 'react'
-
-// ** MUI Imports
+import { useState } from 'react'
 import { InputAdornment, IconButton } from '@mui/material'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import ClearIcon from '@mui/icons-material/Clear'
@@ -20,7 +17,6 @@ const CustomDateTimePicker = ({
   value,
   onChange,
   error,
-  helperText,
   disabledRangeDate = {},
   max = null,
   min = null,
@@ -36,7 +32,7 @@ const CustomDateTimePicker = ({
   editMode = false,
   hasBorder = true,
   hidden = false,
-  formatTime = 'hh:mm aa', // send 'hh:mm:ss aa' to show seconds 
+  formatTime = 'hh:mm aa',
   defaultValue,
   ...props
 }) => {
@@ -120,7 +116,7 @@ const CustomDateTimePicker = ({
         sx={{
           '& .MuiOutlinedInput-root': {
             '& fieldset': {
-              border: !hasBorder && 'none' // Hide border
+              border: !hasBorder && 'none'
             }
           }
         }}
@@ -131,16 +127,14 @@ const CustomDateTimePicker = ({
         open={openDatePicker}
         disabled={disabled}
         readOnly={_readOnly}
-        clearable //bug from mui not working for now
-        shouldDisableDate={disabledDate && shouldDisableDate} // Enable this prop for date disabling
+        clearable
+        shouldDisableDate={disabledDate && shouldDisableDate} 
         slotProps={{
-          // replacing clearable behaviour
           textField: {
             required: isRequired,
             size: size,
             fullWidth: fullWidth,
             error: error,
-            helperText: helperText,
             inputProps: {
               tabIndex: _readOnly ? -1 : 0
             },
