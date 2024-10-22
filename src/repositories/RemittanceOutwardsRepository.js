@@ -158,7 +158,7 @@ export const RemittanceOutwardsRepository = {
   },
   UnassignedCountry: { unassigned: service + 'unassignedCOU' },
   UnassignedCurrency: { unassigned: service + 'unassignedCU' },
-  UnassignedDispersalType: { unassigned: service + 'unassignedDT' }
+  UnassignedDispersalType: { unassigned: service + 'unassignedDT' },
   AssignedCountry: {
     assigned: service + 'assignedCOU'
   },
