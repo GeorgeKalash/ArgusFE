@@ -10,7 +10,8 @@ const CustomNumberField = ({
   value = '',
   size = 'small',
   label,
-  onChange,
+  onChange = () => {},
+  onMouseLeave = () => {},
   readOnly = false,
   allowClear = false,
   decimalScale = 2,
@@ -43,14 +44,35 @@ const CustomNumberField = ({
 
   const required = props.required || accessLevel === MANDATORY
 
-  const handleNumberFieldNewValue = e => {
+  const handleKeyPress = e => {
+    const regex = /[0-9.-]/
+    const key = String.fromCharCode(e.which || e.keyCode)
+
+    if (!regex.test(key)) {
+      e.preventDefault()
+    }
+  }
+
+  const handleNumberChangeValue = e => {
+    const value = formatNumber(e)
+    if (value) e.target.value = value
+    onChange(e)
+  }
+
+  const handleNumberMouseLeave = e => {
+    const value = formatNumber(e)
+    if (value) e.target.value = value
+    onMouseLeave(e)
+  }
+
+  const formatNumber = e => {
     const regex = /^[0-9,]+(\.\d+)?$/
     let value = e?.target?.value
     if (value && regex.test(value)) {
       value = value.replace(/[^0-9.]/g, '')
       const _newValue = getNumberWithoutCommas(value)
-      e.target.value = _newValue
-      onChange(e)
+
+      return _newValue
     }
   }
 
@@ -71,6 +93,7 @@ const CustomNumberField = ({
     <></>
   ) : (
     <NumericFormat
+      hey={value}
       label={label}
       allowLeadingZeros
       allowNegative={allowNegative}
@@ -91,7 +114,8 @@ const CustomNumberField = ({
           max: max,
           step: step,
           type: arrow ? 'number' : 'text',
-          tabIndex: readOnly ? -1 : 0
+          tabIndex: readOnly ? -1 : 0,
+          onKeyPress: handleKeyPress
         },
         autoComplete: 'off',
         readOnly: _readOnly,
@@ -104,7 +128,8 @@ const CustomNumberField = ({
         )
       }}
       customInput={TextField}
-      onChange={e => handleNumberFieldNewValue(e)}
+      onChange={e => handleNumberChangeValue(e)}
+      onMouseLeave={e => handleNumberMouseLeave(e)}
       sx={{
         '& .MuiOutlinedInput-root': {
           '& fieldset': {

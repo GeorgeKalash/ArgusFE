@@ -253,7 +253,6 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, w
                     formik && formik.setFieldValue('dtId', newValue?.recordId)
                   }}
                   error={formik.touched.dtId && Boolean(formik.errors.dtId)}
-                  helperText={formik.touched.dtId && formik.errors.dtId}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -267,7 +266,6 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, w
                   onChange={formik.handleChange}
                   onClear={() => formik.setFieldValue('reference', '')}
                   error={formik.touched.reference && Boolean(formik.errors.reference)}
-                  helperText={formik.touched.reference && formik.errors.reference}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -280,7 +278,6 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, w
                   maxAccess={maxAccess}
                   onClear={() => formik.setFieldValue('date', '')}
                   error={formik.touched.date && Boolean(formik.errors.date)}
-                  helperText={formik.touched.date && formik.errors.date}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -337,7 +334,6 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, w
                   onChange={formik.handleChange}
                   onClear={() => formik.setFieldValue('description', '')}
                   error={formik.touched.description && Boolean(formik.errors.description)}
-                  helperText={formik.touched.description && formik.errors.description}
                 />
               </Grid>
             </Grid>
@@ -363,7 +359,6 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, w
               maxLength='30'
               readOnly={true}
               error={formik.touched.reference && Boolean(formik.errors.reference)}
-              helperText={formik.touched.reference && formik.errors.reference}
             />
           </Grid>
         </Fixed>
