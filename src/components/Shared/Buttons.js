@@ -21,6 +21,13 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'Terminate',
+    label: platformLabels.Terminate,
+    color: '#FF0000',
+    image: 'cancelWhite.png',
+    main: false
+  },
+  {
     key: 'WorkFlow',
     label: platformLabels.WorkFlow,
     color: '#231f20',
@@ -274,7 +281,7 @@ export const getButtons = platformLabels => [
     color: '#231f20',
     image: 'saveclear.png',
     main: true,
-    disabled: 'disabledSavedClear'
+    disabled: 'disabledSavedClear || isPosted || isClosed'
   },
   {
     key: 'Submit',
