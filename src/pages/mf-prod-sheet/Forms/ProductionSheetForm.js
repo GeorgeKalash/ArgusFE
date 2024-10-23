@@ -76,7 +76,8 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.date().required(),
-      siteId: yup.string().required(),
+      siteId: yup.number().required(),
+      dtId: yup.string().required(),
       items: yup
         .array()
         .of(
@@ -280,7 +281,7 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
                 displayField='name'
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('siteId', newValue?.recordId)
+                  formik.setFieldValue('siteId', newValue?.recordId || null)
                 }}
                 error={formik.touched.siteId && Boolean(formik.errors.siteId)}
               />
