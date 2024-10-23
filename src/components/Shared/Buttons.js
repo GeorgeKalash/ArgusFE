@@ -328,5 +328,12 @@ export const getButtons = platformLabels => [
     image: 'Close.png',
     border: '1px solid #01a437',
     main: false
+  },
+  {
+    key: 'Metals',
+    label: platformLabels.Metals,
+    color: '#ADD8E6',
+    image: 'metals-icon.png',
+    main: false
   }
 ]
