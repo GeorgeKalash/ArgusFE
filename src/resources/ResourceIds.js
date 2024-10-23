@@ -270,7 +270,7 @@ export const ResourceIds = {
   FinancialIntegrators: 51105,
   SalesDefaults: 51114,
   IVPhysicalCountItem: 44202,
-  FE_MetalSummaryControl: 41601, //Metal button,
+  FE_MetalSummaryControl: 41601,
   FIAging: 31405,
   Barcodes: 41230,
   MetalColor: 41110,

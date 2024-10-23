@@ -7,7 +7,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 
-const MetalSummary = ({ originalList }) => {
+const MetalSummary = ({ filteredItems }) => {
   const { getRequest } = useContext(RequestsContext)
   const [gridData, setGridData] = useState({})
 
@@ -19,7 +19,7 @@ const MetalSummary = ({ originalList }) => {
     }).then(res => {
       const metalsStoreList = res.list
 
-      const updatedData = originalList.map(item => {
+      const updatedData = filteredItems.map(item => {
         const matchedMetal = metalsStoreList.find(metalStoreItem => item.metalId === metalStoreItem.recordId)
 
         if (matchedMetal) {
@@ -81,7 +81,7 @@ const MetalSummary = ({ originalList }) => {
 
   useEffect(() => {
     fetchGridData()
-  }, [originalList])
+  }, [filteredItems])
 
   const { labels: labels, access } = useResourceQuery({
     datasetId: ResourceIds.FE_MetalSummaryControl
