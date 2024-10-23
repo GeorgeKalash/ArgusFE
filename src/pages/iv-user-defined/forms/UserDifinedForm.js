@@ -142,8 +142,8 @@ const UserDifinedForm = () => {
   return (
     <VertLayout>
       <Grow>
-        <Grid container spacing={3} width={'50%'} sx={{ marginLeft: '0.5rem' }}>
-          <Grid item xs={12} sx={{ marginTop: '0.5rem' }}>
+        <Grid container spacing={3} width={'50%'} sx={{ marginLeft: '0.5rem', marginTop: '0.5rem' }}>
+          <Grid item xs={12}>
             <CustomNumberField
               name='ivtDimCount'
               label={_labels.propertiesCount}
