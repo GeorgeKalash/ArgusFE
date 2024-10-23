@@ -42,14 +42,17 @@ import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
 import AddressFilterForm from 'src/components/Shared/AddressFilterForm'
 import { getStorageData } from 'src/storage/storage'
 import { useError } from 'src/error'
+import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 
-export default function SalesOrderForm({ labels, access: maxAccess, recordId, currency, window }) {
+export default function SalesOrderForm({ labels, access, recordId, currency, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
   const [cycleButtonState, setCycleButtonState] = useState({ text: '%', value: 2 })
   const [address, setAddress] = useState({})
+  const [filteredMu, setFilteredMU] = useState([])
+  const [measurements, setMeasurements] = useState([])
   const userId = getStorageData('userData').userId
 
   const [initialValues, setInitialData] = useState({
@@ -134,6 +137,12 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
 
   const invalidate = useInvalidate({
     endpointId: SaleRepository.SalesOrder.page
+  })
+
+  const { maxAccess } = useDocumentType({
+    functionId: SystemFunction.SalesOrder,
+    access: access,
+    enabled: !recordId
   })
 
   const { formik } = useForm({
@@ -260,6 +269,9 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
           rowTaxDetails = details
         }
 
+        const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
+        setFilteredMU(filteredMeasurements)
+
         update({
           volume: parseFloat(itemPhysProp?.volume) || 0,
           weight: parseFloat(itemPhysProp?.weight || 0).toFixed(2),
@@ -271,6 +283,8 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
           mdAmount: formik.values.maxDiscount ? parseFloat(formik.values.maxDiscount).toFixed(2) : 0,
           qty: 0,
           msId: itemInfo?.msId,
+          muRef: filteredMeasurements?.[0]?.reference,
+          muId: filteredMeasurements?.[0]?.recordId,
           extendedPrice: parseFloat('0').toFixed(2),
           mdValue: 0,
           taxId: rowTax,
@@ -309,9 +323,25 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
       }
     },
     {
-      component: 'textfield',
-      label: labels.mu,
-      name: 'muRef'
+      component: 'resourcecombobox',
+      label: labels.measurementUnit,
+      name: 'muRef',
+      props: {
+        store: filteredMu,
+        displayField: 'reference',
+        valueField: 'recordId',
+        mapping: [
+          { from: 'reference', to: 'muRef' },
+          { from: 'qty', to: 'muQty' },
+          { from: 'recordId', to: 'muId' }
+        ]
+      },
+      async onChange({ row: { update, newRow } }) {
+        const filteredItems = filteredMu.filter(item => item.recordId === newRow?.muId)
+        update({
+          baseQty: newRow?.qty * filteredItems?.qty
+        })
+      }
     },
     {
       component: 'numberfield',
@@ -325,12 +355,18 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
     {
       component: 'numberfield',
       label: labels.volume,
-      name: 'volume'
+      name: 'volume',
+      props: {
+        readOnly: true
+      }
     },
     {
       component: 'numberfield',
       label: labels.weight,
-      name: 'weight'
+      name: 'weight',
+      props: {
+        readOnly: true
+      }
     },
     {
       component: 'numberfield',
@@ -339,6 +375,7 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         getItemPriceRow(update, newRow, DIRTYFIELD_BASE_PRICE)
+        calcTotals(formik.values.items)
       }
     },
     {
@@ -348,6 +385,7 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         getItemPriceRow(update, newRow, DIRTYFIELD_UNIT_PRICE)
+        calcTotals(formik.values.items)
       }
     },
     {
@@ -357,17 +395,21 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         getItemPriceRow(update, newRow, DIRTYFIELD_UPO)
+        calcTotals(formik.values.items)
       }
     },
     {
       component: 'numberfield',
       label: labels.VAT,
-      name: 'vatAmount'
+      name: 'vatAmount',
+      props: {
+        readOnly: true
+      }
     },
     {
       component: 'numberfield',
       label: labels.tax,
-      name: 'taxDetails'
+      name: 'tax'
     },
     {
       component: 'textfield',
@@ -385,6 +427,7 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
       async onChange({ row: { update, newRow } }) {
         getItemPriceRow(update, newRow, DIRTYFIELD_MDAMOUNT)
         checkMdAmountPct(newRow, update)
+        calcTotals(formik.values.items)
       }
     },
     {
@@ -399,6 +442,7 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         getItemPriceRow(update, newRow, DIRTYFIELD_EXTENDED_PRICE)
+        calcTotals(formik.values.items)
       }
     },
     {
@@ -407,7 +451,6 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
       name: 'notes'
     }
   ]
-
   async function handleIconClick(id, updateRow) {
     let currentMdType
     let currenctMdAmount = parseFloat(formik.values.items[id - 1].mdAmount)
@@ -760,9 +803,17 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
       mdAmount: parseFloat(itemPriceRow?.mdAmount).toFixed(2),
       vatAmount: parseFloat(vatCalcRow?.vatAmount).toFixed(2)
     }
-
     let data = iconClicked ? { changes: commonData } : commonData
     update(data)
+
+    // let modifiedItemsList = formik.values.items.map(item => {
+    //   if (item.id === newRow.id) {
+    //     return commonData
+    //   }
+
+    //   return item
+    // })
+    // calcTotals(formik.values.items)
   }
 
   function calcTotals(itemsArray, tdAmount, misc) {
@@ -975,6 +1026,13 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
     return res?.record?.dtId
   }
 
+  const getMeasurementUnits = async () => {
+    return await getRequest({
+      extension: InventoryRepository.MeasurementUnit.qry,
+      parameters: `_msId=0`
+    })
+  }
+
   useEffect(() => {
     let shipAdd = ''
     const { name, street1, street2, city, phone, phone2, email1 } = address
@@ -989,6 +1047,8 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
 
   useEffect(() => {
     ;(async function () {
+      const muList = await getMeasurementUnits()
+      setMeasurements(muList?.list)
       if (recordId) {
         const soHeader = await getSalesOrder(recordId)
         const soItems = await getSalesOrderItems(recordId)
@@ -1016,10 +1076,6 @@ export default function SalesOrderForm({ labels, access: maxAccess, recordId, cu
       }
     })()
   }, [])
-
-  useEffect(() => {
-    calcTotals(formik.values.items)
-  }, [formik.values.items])
 
   return (
     <FormShell
