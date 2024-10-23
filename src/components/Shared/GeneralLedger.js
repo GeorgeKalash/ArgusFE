@@ -361,7 +361,7 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
               },
 
               async onChange({ row: { update, oldRow, newRow } }) {
-                console.log('yrsy')
+                console.log(update, oldRow, newRow)
                 if (newRow.accountId) {
                   update({
                     currencyRef: formValues.currencyRef,

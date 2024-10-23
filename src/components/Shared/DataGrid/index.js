@@ -19,6 +19,14 @@ export function DataGrid({
 }) {
   const gridApiRef = useRef(null)
 
+  const process = (params, oldRow, newRow, update) => {
+    console.log('params', params)
+    const column = columns.find(({ field }) => field === params.field)
+
+    console.log(params, oldRow, newRow)
+    column.onChange({ row: { oldRow: oldRow, newRow: oldRow, update: update } })
+  }
+
   const addNewRow = params => {
     const highestIndex = params.node.data.id + 1
 
@@ -166,8 +174,10 @@ export function DataGrid({
     }
 
     const updateRow = ({ changes }) => {
+      const oldRow = params.data
       setData(changes)
       params.api.stopEditing()
+      process(params, oldRow, params.data, setData)
     }
 
     return (
@@ -261,17 +271,11 @@ export function DataGrid({
   ].filter(Boolean)
 
   const onCellEditingStopped = params => {
-    const { data, oldValue, newValue, node } = params
+    const { data } = params
 
     gridApiRef.current.applyTransaction({ update: [data] })
 
     commit(data)
-
-    console.log('params', params)
-    const column = columns.find(({ field }) => field === params.field)
-
-    console.log(column)
-    column.onChange({ row: { oldRow, newRow } })
   }
 
   const commit = data => {
