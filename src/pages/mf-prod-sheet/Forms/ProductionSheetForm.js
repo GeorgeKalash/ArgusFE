@@ -23,7 +23,7 @@ import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 
 export default function ProductionSheetForm({ labels, maxAccess: access, recordId, plantId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
+  const { platformLabels, defaultsData } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: ManufacturingRepository.ProductionSheet.page
@@ -34,6 +34,18 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
     access,
     enabled: !recordId
   })
+
+  useEffect(() => {
+    getDataResult()
+  }, [])
+
+  const getDataResult = () => {
+    const site = defaultsData?.list?.find(obj => {
+      return obj.key === 'de_siteId'
+    })
+
+    formik.setFieldValue('siteId', parseInt(site?.value))
+  }
 
   const { formik } = useForm({
     initialValues: {
