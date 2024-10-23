@@ -105,7 +105,7 @@ const getDiscValues = _discountObj => {
 
 const recalcFooter = (_array, _footerSummary) => {
   _array.forEach(item => {
-    _footerSummary.totalQty += item.qty
+    _footerSummary.totalQty += parseFloat(item.qty)
     _footerSummary.totalWeight += item.qty * item.weight
     _footerSummary.totalVolume += item.qty * item.volume
     _footerSummary.totalUpo += item.upo
