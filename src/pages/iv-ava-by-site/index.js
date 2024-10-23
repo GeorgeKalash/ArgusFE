@@ -13,7 +13,7 @@ import serialIcon from '../../../public/images/TableIcons/imgSerials.png'
 import lotIcon from '../../../public/images/TableIcons/lot.png'
 import { Box, IconButton } from '@mui/material'
 import Image from 'next/image'
-import historyIcon from '/public/images/TableIcons/history.png'
+import LotForm from './forms/LotForm'
 
 const AvailabilitiesBySite = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -136,7 +136,7 @@ const AvailabilitiesBySite = () => {
         if (trackBy2) {
           return (
             <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
-              <IconButton size='small' onClick={() => onLot(row)}>
+              <IconButton size='small' onClick={() => onLot(row.data)}>
                 <Image src={lotIcon} width={18} height={18} alt='Lot' />
               </IconButton>
             </Box>
@@ -153,7 +153,7 @@ const AvailabilitiesBySite = () => {
   }
 
   const onLot = obj => {
-    console.log(obj)
+    openLotForm(obj.lotCategoryId, obj.itemId, obj.siteId)
   }
 
   function openSerialForm(itemId, siteId) {
@@ -161,13 +161,29 @@ const AvailabilitiesBySite = () => {
       Component: SerialForm,
       props: {
         labels: _labels,
-        itemId: itemId,
-        siteId: siteId,
+        itemId,
+        siteId,
         maxAccess: access
       },
       width: 600,
       height: 400,
-      title: _labels.netVolume
+      title: _labels.serialNo
+    })
+  }
+
+  function openLotForm(lotId, itemId, siteId) {
+    stack({
+      Component: LotForm,
+      props: {
+        labels: _labels,
+        lotId,
+        itemId,
+        siteId,
+        maxAccess: access
+      },
+      width: 600,
+      height: 400,
+      title: _labels.lotAva
     })
   }
 

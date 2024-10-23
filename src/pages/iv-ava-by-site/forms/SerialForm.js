@@ -10,7 +10,6 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 const SerialForm = ({ labels, maxAccess, itemId, siteId }) => {
   const { getRequest } = useContext(RequestsContext)
   const [data, setData] = useState([])
-  console.log(itemId, 'itemId')
 
   async function fetchGridData() {
     const response = await getRequest({
@@ -33,7 +32,7 @@ const SerialForm = ({ labels, maxAccess, itemId, siteId }) => {
   const columns = [
     {
       field: 'srlNo',
-      headerName: labels.srlNo,
+      headerName: labels.serialNo,
       flex: 1
     },
     {
@@ -48,7 +47,7 @@ const SerialForm = ({ labels, maxAccess, itemId, siteId }) => {
     },
     {
       field: 'pcs',
-      headerName: labels.pcs,
+      headerName: labels.pieces,
       flex: 1
     }
   ]
@@ -59,7 +58,7 @@ const SerialForm = ({ labels, maxAccess, itemId, siteId }) => {
         <Table
           columns={columns}
           gridData={data}
-          rowId={['itemId']}
+          rowId={['sku']}
           isLoading={false}
           pageSize={50}
           paginationType='api'
