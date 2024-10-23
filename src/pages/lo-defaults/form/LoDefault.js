@@ -31,10 +31,10 @@ const LoDefault = ({ _labels, access }) => {
   const getDataResult = () => {
     const myObject = {}
 
-    const filteredList = defaultsData.list.filter(obj => {
+    const filteredList = defaultsData?.list?.filter(obj => {
       return obj.key === 'transitSiteId' || obj.key === 'lo_min_car_amount'
     })
-    filteredList.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
+    filteredList?.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
     setInitialValues(myObject)
   }
 
