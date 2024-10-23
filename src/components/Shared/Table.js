@@ -2,7 +2,7 @@ import React, { useContext } from 'react'
 import { AgGridReact } from 'ag-grid-react'
 import 'ag-grid-community/styles/ag-grid.css'
 import 'ag-grid-community/styles/ag-theme-alpine.css'
-import { Box, IconButton, TextField, Tooltip } from '@mui/material'
+import { Box, IconButton, TextField } from '@mui/material'
 import Checkbox from '@mui/material/Checkbox'
 import Image from 'next/image'
 import editIcon from '../../../public/images/TableIcons/edit.png'
@@ -32,7 +32,6 @@ const Table = ({
   paginationType = '',
   globalStatus = true,
   viewCheckButtons = false,
-  serialLotTable = false,
   showCheckboxColumn = false,
   disableSorting = false,
   rowSelection = '',
@@ -95,8 +94,19 @@ const Table = ({
         return {
           ...col,
           width: 110,
-          cellRenderer: ({ data }) => {
-            return <Checkbox checked={data?.[col.field]} style={{ pointerEvents: 'none' }} />
+          cellRenderer: ({ data, node }) => {
+            const handleCheckboxChange = event => {
+              const checked = event.target.checked
+              node.setDataValue(col.field, checked)
+            }
+
+            return (
+              <Checkbox
+                checked={data?.[col.field]}
+                onChange={col.editable ? handleCheckboxChange : null}
+                style={col.editable ? {} : { pointerEvents: 'none' }}
+              />
+            )
           }
         }
       }
@@ -360,10 +370,6 @@ const Table = ({
     }
   }
 
-  const getRowClass = params => {
-    return params?.rowIndex % 2 === 0 ? 'even-row' : ''
-  }
-
   const selectAll = (params, e) => {
     const gridApi = params.api
     const allNodes = []
@@ -599,44 +605,11 @@ const Table = ({
       })
   }
 
-  // if ((props?.onSerial || props?.onLot) && serialLotTable) {
-  //   if (!columnDefs?.some(column => column.field === 'actions'))
-  //     columnDefs?.push({
-  //       field: 'actions',
-  //       headerName: '',
-  //       width: 100,
-  //       cellRenderer: params => {
-  //         const { data } = params
-  //         const trackBy1 = data.trackBy === 1
-  //         const trackBy2 = data.trackBy === 2
-
-  //         return (
-  //           <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
-  //             {props?.onSerial && trackBy1 && (
-  //               <IconButton
-  //                 size='small'
-  //                 onClick={e => {
-  //                   props?.onSerial(data)
-  //                 }}
-  //               >
-  //                 <Image src={serialIcon} alt='Edit' width={18} height={18} />
-  //               </IconButton>
-  //             )}
-  //             {props?.onLot && trackBy2 && (
-  //               <IconButton
-  //                 size='small'
-  //                 onClick={e => {
-  //                   props?.onLot(data)
-  //                 }}
-  //               >
-  //                 <Image src={lotIcon} alt='Edit' width={18} height={18} />
-  //               </IconButton>
-  //             )}
-  //           </Box>
-  //         )
-  //       }
-  //     })
-  // }
+  const gridOptions = {
+    rowClassRules: {
+      'even-row': params => params.node.rowIndex % 2 === 0
+    }
+  }
 
   return (
     <VertLayout>
@@ -670,9 +643,9 @@ const Table = ({
             paginationPageSize={pageSize}
             rowSelection={'single'}
             suppressAggFuncInHeader={true}
-            getRowClass={getRowClass}
             rowHeight={35}
             onFirstDataRendered={onFirstDataRendered}
+            gridOptions={gridOptions}
           />
         </Box>
       </Grow>
