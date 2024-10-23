@@ -127,7 +127,28 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
     }
   })
 
+  const onPost = async () => {
+    const res = await postRequest({
+      extension: ManufacturingRepository.ProductionSheet.post,
+      record: JSON.stringify(formik.values)
+    })
+
+    toast.success(platformLabels.Posted)
+    invalidate()
+    await getData(res?.recordId)
+  }
+
   const editMode = !!formik.values.recordId
+  const isPosted = formik.values.status === 3
+
+  const actions = [
+    {
+      key: 'Post',
+      condition: true,
+      onClick: onPost,
+      disabled: !editMode || isPosted
+    }
+  ]
 
   const columns = [
     {
@@ -176,7 +197,7 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
       component: 'textfield',
       label: labels.notes,
       name: 'notes'
-    },
+    }
   ]
 
   async function getData(recordId) {
@@ -215,6 +236,7 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
 
   return (
     <FormShell
+      actions={actions}
       resourceId={ResourceIds.ProductionSheet}
       form={formik}
       maxAccess={maxAccess}
@@ -234,7 +256,6 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
                 readOnly={editMode}
                 valueField='recordId'
                 displayField='name'
-                required
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
@@ -249,9 +270,8 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
                 name='reference'
                 label={labels.reference}
                 value={formik.values.reference}
-                required
                 readOnly={editMode}
-                maxAccess={maxAccess}
+                maxAccess={!editMode && maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('reference', '')}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
@@ -275,6 +295,7 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
                 endpointId={InventoryRepository.Site.qry}
                 name='siteId'
                 required
+                readOnly
                 refresh={editMode}
                 label={labels.site}
                 values={formik.values}
@@ -309,6 +330,7 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
           <DataGrid
             onChange={value => formik.setFieldValue('items', value)}
             maxAccess={maxAccess}
+            disabled={isPosted}
             value={formik?.values?.items || []}
             error={formik?.errors?.items}
             columns={columns}

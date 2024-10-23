@@ -118,11 +118,7 @@ const ProductionSheet = () => {
   async function openForm(recordId) {
     const plantId = await getPlantId()
 
-    plantId !== ''
-      ? OpenProductionSheetForm(plantId, recordId)
-      : stackError({
-          message: platformLabels.noDefaultPlant
-        })
+    OpenProductionSheetForm(plantId, recordId)
   }
 
   const del = async obj => {
