@@ -84,8 +84,8 @@ const GateKeeper = () => {
               labels: _labelsADJ,
               maxAccess: accessADJ
             },
-            width: 900,
-            height: 600,
+            width: 1200,
+            height: 700,
             title: _labelsADJ[1]
           })
         }
