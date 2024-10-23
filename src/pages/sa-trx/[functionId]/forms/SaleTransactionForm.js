@@ -71,7 +71,8 @@ export default function SaleTransactionForm({
   const [filteredMu, setFilteredMU] = useState([])
   const [metalPriceVisibility, setmetalPriceVisibility] = useState(false)
   const [defaultsDataState, setDefaultsDataState] = useState(null)
-  const [userDefaultsDataState, setUserDefaultsDataState] = useState({})
+  const [userDefaultsDataState, setUserDefaultsDataState] = useState(null)
+  const [reCal, setReCal] = useState(false)
 
   const [initialValues, setInitialData] = useState({
     recordId: recordId || null,
@@ -107,7 +108,7 @@ export default function SaleTransactionForm({
       currentDiscount: '',
       exRate: 1,
       rateCalcMethod: 1,
-      tdType: '',
+      tdType: DIRTYFIELD_TDPCT,
       tdPct: 0,
       baseAmount: 0,
       volume: 0,
@@ -433,7 +434,8 @@ export default function SaleTransactionForm({
             extendedPrice: parseFloat('0').toFixed(2),
             mdValue: 0,
             taxId: rowTax,
-            taxDetails: rowTaxDetails
+            taxDetails: rowTaxDetails,
+            mdtype: MDTYPE_PCT
           })
 
           formik.setFieldValue(
@@ -602,7 +604,7 @@ export default function SaleTransactionForm({
       flex: 2,
       props: {
         ShowDiscountIcons: true,
-        iconsClicked: id => handleIconClick(id),
+        iconsClicked: (id, updateRow) => handleIconClick(id, updateRow),
         gridData: formik.values.items,
         type: 'numeric',
         concatenateWith: '%'
@@ -633,82 +635,33 @@ export default function SaleTransactionForm({
     }
   ]
 
-  const handleIconClick = id => {
-    markdownIconsClicked(id, ({ row: { update, newRow } }) => {
-      getItemPriceRow(update, newRow, DIRTYFIELD_MDTYPE)
-      checkMdAmountPct(newRow, update)
-      calcTotals(formik.values.items, formik.values.header.tdAmount)
-    })
-  }
-
-  async function markdownIconsClicked(id, onChange) {
+  async function handleIconClick(id, updateRow) {
     let currentMdType
     let currentMdAmount = parseFloat(formik.values.items[id - 1].mdAmount)
-    let maxClientAmountDiscount = formik.values.items[id - 1].unitPrice
-    if (formik.values?.header.maxDiscount)
-      maxClientAmountDiscount = formik.values.items[id - 1].unitPrice * (formik.values?.header.maxDiscount / 100)
+    const maxClientAmountDiscount = formik.values.items[id - 1].unitPrice * (formik.values?.maxDiscount / 100)
 
-    const updatedItems = [...formik.values.items]
-
-    if (updatedItems[id - 1].mdType === 2) {
+    if (formik.values.items[id - 1].mdType == 2) {
       if (currentMdAmount < 0 || currentMdAmount > 100) currentMdAmount = 0
-
+      formik.setFieldValue(`items[${id - 1}].mdAmountPct`, 1)
+      formik.setFieldValue(`items[${id - 1}].mdType`, 1)
       currentMdType = 1
-      updatedItems[id - 1].mdType = currentMdType
-      updatedItems[id - 1].mdAmount = parseFloat(currentMdAmount).toFixed(2)
+      formik.setFieldValue(`items[${id - 1}].mdAmount`, parseFloat(currentMdAmount).toFixed(2))
     } else {
       if (currentMdAmount < 0 || currentMdAmount > maxClientAmountDiscount) currentMdAmount = 0
-
+      formik.setFieldValue(`items[${id - 1}].mdAmountPct`, 2)
+      formik.setFieldValue(`items[${id - 1}].mdType`, 2)
       currentMdType = 2
-      updatedItems[id - 1].mdType = currentMdType
-      updatedItems[id - 1].mdAmount = parseFloat(currentMdAmount).toFixed(2)
+      formik.setFieldValue(`items[${id - 1}].mdAmount`, parseFloat(currentMdAmount).toFixed(2))
     }
 
-    if (onChange) {
-      const updatedItem = updatedItems[id - 1] // Get the updated row
-      onChange({
-        row: {
-          update: formik.setFieldValue, // Pass formik's setFieldValue to allow future updates
-          newRow: updatedItem // Pass the updated row with local changes
-        }
-      })
+    const newRow = {
+      ...formik.values.items[id - 1],
+      mdAmount: currentMdAmount,
+      mdType: currentMdType
     }
 
-    await formik.setValues({
-      ...formik.values,
-      items: updatedItems
-    })
-
-    /*const itemPriceRow = getIPR({
-      unitPrice: parseFloat(formik.values.items[id - 1].unitPrice || 0),
-      upo: parseFloat(formik.values.items[id - 1].upo) ? parseFloat(formik.values.items[id - 1].upo) : 0,
-      qty: formik.values.items[id - 1].qty,
-      extendedPrice: parseFloat(formik.values.items[id - 1].extendedPrice),
-      mdAmount: currenctMdAmount,
-      mdType: currentMdType,
-      mdValue: parseFloat(formik.values.items[id - 1].mdValue),
-      dirtyField: DIRTYFIELD_MDTYPE
-    })
-
-    formik.setFieldValue(`items[${id - 1}].extendedPrice`, parseFloat(itemPriceRow?.extendedPrice).toFixed(2))
-
-    if (formik.values.items[id - 1].isVattable) {
-      const vatCalcRow = getVatCalc({
-        basePrice: formik.values.items[id - 1].basePrice,
-        qty: formik.values.items[id - 1].qty,
-        extendedPrice: parseFloat(itemPriceRow?.extendedPrice),
-        baseLaborPrice: formik.values.items[id - 1].baseLaborPrice,
-        baseLaborPrice: formik.values.items[id - 1].baseLaborPrice,
-        vatAmount: parseFloat(formik.values.items[id - 1].vatAmount),
-        tdPct: formik.values.items[id - 1].tdPct,
-        taxDetails: formik.values.items[id - 1].isVattable ? formik.values.items[id - 1].taxDetails : null
-      })
-      formik.setFieldValue(`items[${id - 1}].vatAmount`, parseFloat(vatCalcRow?.vatAmount).toFixed(2))
-      recalcGridVat(formik.values.tdType, formik.values.tdPct, formik.values.tdAmount, formik.values.currentDiscount)
-      calcTotals(formik.values.items, currentTdAmount)
-
-    }
-    */
+    getItemPriceRow(updateRow, newRow, DIRTYFIELD_MDTYPE, true)
+    checkMdAmountPct(newRow, updateRow)
   }
 
   async function onWorkFlowClick() {
@@ -821,13 +774,6 @@ export default function SaleTransactionForm({
     res.record.header.dueDate = formatDateFromApi(res?.record?.header?.dueDate)
 
     return res.record
-  }
-
-  async function getSalesTransactionItems(transactionId) {
-    return await getRequest({
-      extension: SaleRepository.SalesTransactionItems.qry,
-      parameters: `_params=1|${transactionId}&_pageSize=3000&_startAt=0&_sortBy=seqno`
-    })
   }
 
   const getMeasurementUnits = async () => {
@@ -1018,13 +964,14 @@ export default function SaleTransactionForm({
 
       formik.setFieldValue('header.tdType', newState.value)
       recalcGridVat(newState.value, currentPctAmount, currentTdAmount, formik.values.header.currentDiscount)
-      calcTotals(formik.values.items, currentTdAmount)
 
       return newState
     })
   }
 
-  function getItemPriceRow(update, newRow, dirtyField) {
+  function getItemPriceRow(update, newRow, dirtyField, iconClicked) {
+    !reCal && setReCal(true)
+
     const itemPriceRow = getIPR({
       priceType: newRow?.priceType,
       basePrice: parseFloat(newRow?.basePrice || 0),
@@ -1054,13 +1001,12 @@ export default function SaleTransactionForm({
       taxDetails: formik.values.header.isVatChecked ? null : newRow.taxDetails
     })
 
-    console.log('itemPriceRow ', itemPriceRow)
-
-    update({
+    let commonData = {
       id: newRow?.id,
+      qty: parseFloat(itemPriceRow?.qty).toFixed(2),
+      volume: parseFloat(itemPriceRow?.volume).toFixed(2),
+      weight: parseFloat(itemPriceRow?.weight).toFixed(2),
       basePrice: parseFloat(itemPriceRow?.basePrice).toFixed(5),
-      baseLaborPrice: parseFloat(itemPriceRow?.baseLaborPrice).toFixed(2),
-      totalWeightPerG: parseFloat(itemPriceRow?.totalWeightPerG).toFixed(2),
       unitPrice: parseFloat(itemPriceRow?.unitPrice).toFixed(3),
       extendedPrice: parseFloat(itemPriceRow?.extendedPrice).toFixed(2),
       upo: parseFloat(itemPriceRow?.upo).toFixed(2),
@@ -1068,51 +1014,46 @@ export default function SaleTransactionForm({
       mdType: itemPriceRow?.mdType,
       mdAmount: parseFloat(itemPriceRow?.mdAmount).toFixed(2),
       vatAmount: parseFloat(vatCalcRow?.vatAmount).toFixed(2)
-    })
-  }
-
-  function calcTotals(itemsArray, tdAmount) {
-    let subtotal = 0
-    let _footerSummary = null
-
-    const parsedItemsArray = itemsArray
-      ?.filter(item => item.itemId !== undefined)
-      .map(item => ({
-        ...item,
-        basePrice: parseFloat(item.basePrice) || 0,
-        unitPrice: parseFloat(item.unitPrice) || 0,
-        upo: parseFloat(item.upo) || 0,
-        vatAmount: parseFloat(item.vatAmount) || 0,
-        weight: parseFloat(item.weight) || 0,
-        volume: parseFloat(item.volume) || 0,
-        extendedPrice: parseFloat(item.extendedPrice) || 0
-      }))
-    if (parsedItemsArray) {
-      subtotal = getSubtotal(parsedItemsArray)
-
-      _footerSummary = getFooterTotals(parsedItemsArray, {
-        totalQty: 0,
-        totalWeight: 0,
-        totalVolume: 0,
-        totalUpo: 0,
-        sumVat: 0,
-        sumExtended: parseFloat(subtotal),
-        tdAmount: tdAmount || formik.values.header.tdAmount,
-        net: 0,
-        miscAmount: parseFloat(formik.values.header.miscAmount)
-      })
     }
-
-    console.log(_footerSummary)
-
-    formik.setFieldValue('header.volume', _footerSummary?.totalVolume?.toFixed(2) || 0)
-    formik.setFieldValue('header.weight', _footerSummary?.totalWeight?.toFixed(2) || 0)
-    formik.setFieldValue('header.qty', _footerSummary?.totalQty.toFixed(2) || 0)
-    formik.setFieldValue('header.subtotal', subtotal?.toFixed(2) || 0)
-    formik.setFieldValue('header.amount', _footerSummary?.net?.toFixed(2) || 0)
-    formik.setFieldValue('header.vatAmount', _footerSummary?.sumVat.toFixed(2) || 0)
-    formik.setFieldValue('header.baseAmount', _footerSummary?.net.toFixed(2) || 0)
+    let data = iconClicked ? { changes: commonData } : commonData
+    update(data)
   }
+
+  const parsedItemsArray = formik.values.items
+    ?.filter(item => item.itemId !== undefined)
+    .map(item => ({
+      ...item,
+      basePrice: parseFloat(item.basePrice) || 0,
+      unitPrice: parseFloat(item.unitPrice) || 0,
+      upo: parseFloat(item.upo) || 0,
+      vatAmount: parseFloat(item.vatAmount) || 0,
+      weight: parseFloat(item.weight) || 0,
+      volume: parseFloat(item.volume) || 0,
+      extendedPrice: parseFloat(item.extendedPrice) || 0
+    }))
+
+  const subTotal = getSubtotal(parsedItemsArray)
+
+  const miscValue = formik.values.miscAmount == 0 ? 0 : parseFloat(formik.values.header.miscAmount)
+
+  const _footerSummary = getFooterTotals(parsedItemsArray, {
+    totalQty: 0,
+    totalWeight: 0,
+    totalVolume: 0,
+    totalUpo: 0,
+    sumVat: 0,
+    sumExtended: parseFloat(subTotal),
+    tdAmount: parseFloat(formik.values.header.tdAmount),
+    net: 0,
+    miscAmount: miscValue
+  })
+
+  const totalQty = reCal ? _footerSummary?.totalQty : formik.values?.header.qty?.toFixed(2) || 0
+  const amount = reCal ? _footerSummary?.net : formik.values?.header.amount || 0
+  const totalVolume = reCal ? _footerSummary?.totalVolume : formik.values?.header.volume || 0
+  const totalWeight = reCal ? _footerSummary?.totalWeight : formik.values?.header.weight || 0
+  const subtotal = reCal ? subTotal : formik.values?.subtotal || 0 || 0
+  const vatAmount = reCal ? _footerSummary?.sumVat : formik.values?.header.vatAmount || 0
 
   function checkDiscount(typeChange, tdPct, tdAmount, currentDiscount) {
     const _discountObj = getDiscValues({
@@ -1120,7 +1061,7 @@ export default function SaleTransactionForm({
       tdPlain: typeChange == 1,
       tdPct: typeChange == 2,
       tdType: typeChange,
-      subtotal: parseFloat(formik.values.header.subtotal),
+      subtotal: subtotal,
       currentDiscount: currentDiscount,
       hiddenTdPct: tdPct,
       hiddenTdAmount: parseFloat(tdAmount),
@@ -1160,7 +1101,6 @@ export default function SaleTransactionForm({
       formik.setFieldValue('header.mdAmount', clientMaxDiscount)
       rowData.mdAmount = clientMaxDiscount
       getItemPriceRow(update, rowData, DIRTYFIELD_MDAMOUNT)
-      calcTotals(formik.values.items)
       stackError({
         message: labels.clientMaxPctDiscount + ' ' + clientMaxDiscount + '%'
       })
@@ -1174,7 +1114,6 @@ export default function SaleTransactionForm({
       rowData.mdType = 2
       rowData.mdAmount = clientMaxDiscountValue
       getItemPriceRow(update, rowData, DIRTYFIELD_MDAMOUNT)
-      calcTotals(formik.values.items)
       stackError({
         message: labels.clientMaxDiscount + ' ' + clientMaxDiscountValue
       })
@@ -1305,10 +1244,6 @@ export default function SaleTransactionForm({
     formik.setFieldValue('header.spId', userDefaultsDataState.spId)
     formik.setFieldValue('header.siteId', userDefaultsDataState.siteId)
   }
-
-  // useEffect(() => {
-  //   calcTotals(formik.values.items)
-  // }, [formik.values.items])
 
   const getResourceId = functionId => {
     switch (functionId) {
@@ -1685,7 +1620,10 @@ export default function SaleTransactionForm({
 
         <Grow>
           <DataGrid
-            onChange={value => formik.setFieldValue('items', value)}
+            onChange={(value, action) => {
+              formik.setFieldValue('items', value)
+              action === 'delete' && setReCal(true)
+            }}
             value={formik?.values?.items}
             error={formik.errors.items}
             name='items'
@@ -1722,20 +1660,14 @@ export default function SaleTransactionForm({
             >
               <Grid container item xs={6} direction='column' spacing={1} sx={{ px: 2, mt: 1 }}>
                 <Grid item>
-                  <CustomNumberField
-                    name='qty'
-                    maxAccess={maxAccess}
-                    label={labels.totQty}
-                    value={formik.values.header.qty}
-                    readOnly
-                  />
+                  <CustomNumberField name='qty' maxAccess={maxAccess} label={labels.totQty} value={totalQty} readOnly />
                 </Grid>
                 <Grid item>
                   <CustomNumberField
                     name='volume'
                     maxAccess={maxAccess}
                     label={labels.totVolume}
-                    value={formik.values.header.volume}
+                    value={totalVolume}
                     readOnly
                   />
                 </Grid>
@@ -1744,7 +1676,7 @@ export default function SaleTransactionForm({
                     name='weight'
                     maxAccess={maxAccess}
                     label={labels.totWeight}
-                    value={formik.values.header.weight}
+                    value={totalWeight}
                     readOnly
                   />
                 </Grid>
@@ -1756,7 +1688,7 @@ export default function SaleTransactionForm({
                     name='subTotal'
                     maxAccess={maxAccess}
                     label={labels.subtotal}
-                    value={formik.values.header.subtotal}
+                    value={subtotal}
                     readOnly
                   />
                 </Grid>
@@ -1789,23 +1721,21 @@ export default function SaleTransactionForm({
                       let tdPct = Number(e.target.value)
                       let tdAmount = Number(e.target.value)
 
-                      if (formik.values.header.tdType == 1) {
-                        tdPct = (parseFloat(discountAmount) / parseFloat(formik.values.header.subtotal)) * 100
+                      if (formik.values.header.tdType == DIRTYFIELD_TDPCT) {
+                        tdPct = (parseFloat(discountAmount) / parseFloat(subtotal)) * 100
                         formik.setFieldValue('header.tdPct', tdPct)
                       }
 
-                      if (formik.values.header.tdType == 2) {
-                        tdAmount = (parseFloat(discountAmount) * parseFloat(formik.values.header.subtotal)) / 100
+                      if (formik.values.header.tdType == DIRTYFIELD_TDPLAIN) {
+                        tdAmount = (parseFloat(discountAmount) * parseFloat(subtotal)) / 100
                         formik.setFieldValue('header.tdAmount', tdAmount)
                       }
 
                       await recalcGridVat(formik.values.header.tdType, tdPct, tdAmount, Number(e.target.value))
-                      calcTotals(formik.values.items, tdAmount)
                     }}
                     onClear={() => {
                       formik.setFieldValue('header.tdAmount', 0)
                       formik.setFieldValue('header.tdPct', 0)
-                      calcTotals(formik.values.items, 0)
                       recalcGridVat(formik.values.header.tdType, 0, 0, 0)
                     }}
                   />
@@ -1819,9 +1749,6 @@ export default function SaleTransactionForm({
                     decimalScale={2}
                     readonly={isPosted}
                     onChange={e => formik.setFieldValue('header.miscAmount', e.target.value)}
-                    onBlur={async () => {
-                      calcTotals(formik.values.items)
-                    }}
                     onClear={() => formik.setFieldValue('header.miscAmount', 0)}
                   />
                 </Grid>
@@ -1830,18 +1757,12 @@ export default function SaleTransactionForm({
                     name='vatAmount'
                     maxAccess={maxAccess}
                     label={labels.VAT}
-                    value={formik.values.header.vatAmount}
+                    value={vatAmount}
                     readOnly
                   />
                 </Grid>
                 <Grid item>
-                  <CustomNumberField
-                    name='amount'
-                    maxAccess={maxAccess}
-                    label={labels.net}
-                    value={formik.values.header.amount}
-                    readOnly
-                  />
+                  <CustomNumberField name='amount' maxAccess={maxAccess} label={labels.net} value={amount} readOnly />
                 </Grid>
               </Grid>
             </Grid>
