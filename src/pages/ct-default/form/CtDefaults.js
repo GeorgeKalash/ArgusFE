@@ -43,11 +43,7 @@ const CtDefaults = ({ _labels, access }) => {
     }),
     initialValues: {
       'ct-nra-individual': null,
-      'ct-nra-individual-ref': '',
-      'ct-nra-individual-description': '',
       'ct-nra-corporate': null,
-      'ct-nra-corporate-ref': '',
-      'ct-nra-corporate-description': '',
       'otp-expiry-time': null,
       ct_cash_sales_ratetype_id: null,
       ct_cash_purchase_ratetype_id: null,
@@ -65,7 +61,7 @@ const CtDefaults = ({ _labels, access }) => {
     const myObject = {}
     defaultsData.list.forEach(obj => {
       if (arrayAllow.includes(obj.key)) {
-        myObject[obj.key] = obj.key ? parseInt(obj.value) : null
+        myObject[obj.key] = obj.value ? parseInt(obj.value) : null
         formik.setFieldValue(obj.key, parseInt(obj.value))
       }
     })
@@ -78,10 +74,9 @@ const CtDefaults = ({ _labels, access }) => {
   }
 
   const getNumberRange = (nraId, key) => {
-    var parameters = `_filter=` + '&_recordId=' + nraId
     getRequest({
       extension: SystemRepository.NumberRange.get,
-      parameters: parameters
+      parameters: `_filter=` + '&_recordId=' + nraId
     }).then(res => {
       if (key === 'ct-nra-individual') {
         formik.setFieldValue('ct-nra-individual', res.record.recordId)
@@ -109,7 +104,7 @@ const CtDefaults = ({ _labels, access }) => {
       extension: CurrencyTradingSettingsRepository.Defaults.set2,
       record: JSON.stringify({ sysDefaults: data })
     }).then(res => {
-      if (res) toast.success(platformLabels.Updated)
+      toast.success(platformLabels.Updated)
       updateDefaults(data)
     })
   }

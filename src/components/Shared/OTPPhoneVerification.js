@@ -155,7 +155,11 @@ const OTPPhoneVerification = ({
   }
 
   const handleResendOtp = () => {
-    setTimer(60)
+    const expiryTimeObj = defaultsData.list.find(obj => obj.key === 'otp-expiry-time')
+    const expiryTime = parseInt(expiryTimeObj?.value, 10)
+    if (!isNaN(expiryTime)) {
+      setTimer(expiryTime)
+    }
     setError('')
     setOtp(['', '', '', '', '', ''])
     document.getElementById('otp-input-0').focus()
