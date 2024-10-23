@@ -81,7 +81,7 @@ const GetLookup = ({ field, formik }) => {
               : ''
           )
         }}
-        error={Boolean(formik.errors?.parameters?.[field?.id])}
+        error={formik.touched?.parameters && Boolean(formik.errors?.parameters?.[field?.id])}
       />
     </Grid>
   )
@@ -142,7 +142,7 @@ const GetComboBox = ({ field, formik, rpbParams }) => {
                 : ''
             )
           }}
-          error={formik.touched?.parameters?.[field?.id] && Boolean(formik.errors?.parameters?.[field?.id])}
+          error={formik.touched?.parameters && Boolean(formik.errors?.parameters?.[field?.id])}
         />
       ) : (
         <>
@@ -168,7 +168,7 @@ const GetComboBox = ({ field, formik, rpbParams }) => {
                   : ''
               )
             }}
-            error={formik.touched?.parameters?.[field?.id] && Boolean(formik.errors?.parameters?.[field?.id])}
+            error={formik.touched?.parameters && Boolean(formik.errors?.parameters?.[field?.id])}
           />
         </>
       )}
@@ -184,28 +184,32 @@ const GetDate = ({ field, formik, rpbParams }) => {
         fieldKey: field.key,
         value: new Date(field.value.toString())?.getTime() || '',
         caption: field.caption,
+        controlType: field?.controlType,
         display: formatDateDefault(new Date(field?.value?.toString()))
       })
     }
   }, [])
 
   return (
-    <Grid item xs={12} key={field.id}>
+    <Grid item xs={12} key={formik.values?.parameters?.[field.id]?.value ? true : false}>
       <CustomDatePicker
         name={`parameters[${field.id}]`}
         label={field.caption}
         value={formik.values?.parameters?.[field.id]?.value}
         required={field.mandatory}
         onChange={(name, newValue) => {
-          formik.setFieldValue(`parameters[${field.id}]`, {
-            fieldId: field.id,
-            fieldKey: field.key,
-            value: newValue,
-            caption: field.caption,
-            display: formatDateDefault(newValue)
-          })
+          newValue
+            ? formik.setFieldValue(`parameters[${field.id}]`, {
+                fieldId: field.id,
+                fieldKey: field.key,
+                value: newValue,
+                caption: field.caption,
+                controlType: field?.controlType,
+                display: formatDateDefault(newValue)
+              })
+            : formik.setFieldValue(`parameters[${field.id}]`, undefined)
         }}
-        error={formik.errors?.parameters?.[field?.id] && Boolean(formik.errors?.parameters?.[field?.id])}
+        error={formik.touched?.parameters && Boolean(formik.errors?.parameters?.[field?.id])}
         onClear={() => formik.setFieldValue(`parameters[${field.id}]`, undefined)}
       />
     </Grid>
@@ -296,10 +300,7 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
 
         acc[id] = {
           ...param,
-          value:
-            param?.fieldKey === 'date' || param?.fieldKey?.indexOf('Date') > -1
-              ? formatDateTo(param?.value)
-              : param?.value
+          value: param?.controlType === 4 ? formatDateTo(param?.value) : param?.value
         }
 
         return acc
@@ -340,7 +341,7 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
     const mappedData = rpbParams.reduce((acc, item) => {
       acc[item?.fieldId] = {
         ...item,
-        value: item.fieldKey === 'date' || item.fieldKey?.indexOf('Date') > -1 ? formatDateFrom(item.value) : item.value
+        value: item?.controlType === 4 ? formatDateFrom(item.value) : item.value
       }
 
       return acc

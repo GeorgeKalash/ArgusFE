@@ -221,6 +221,7 @@ export const getButtons = platformLabels => [
     key: 'OpenRPB',
     label: platformLabels.OpenRPB,
     color: '#231F20',
+    image: 'parameters.png',
     main: false
   },
   {
@@ -233,6 +234,7 @@ export const getButtons = platformLabels => [
     key: 'GO',
     label: platformLabels.Apply,
     color: '#231F20',
+    image: 'go.png',
     main: false
   },
   {
