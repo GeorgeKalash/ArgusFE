@@ -176,7 +176,7 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
   async function getDataGrid() {
     return await getRequest({
       extension: ManufacturingRepository.ProductionSheetItem.qry,
-      parameters: `_itemId=${recordId}&_functionId=${SystemFunction.ProductionSheet}`
+      parameters: `_psId=${recordId}&_functionId=${SystemFunction.ProductionSheet}`
     })
   }
 
@@ -295,7 +295,6 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
           </Grid>
           <DataGrid
             onChange={value => formik.setFieldValue('items', value)}
-            name='items'
             maxAccess={maxAccess}
             value={formik?.values?.items || []}
             error={formik?.errors?.items}
