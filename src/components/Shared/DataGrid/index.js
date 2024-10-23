@@ -28,7 +28,8 @@ export function DataGrid({
   allowAddNewLine = true,
   onSelectionChange,
   rowSelectionModel,
-  disabled = false
+  disabled = false,
+  onDoDelete = () => {}
 }) {
   async function processDependenciesForColumn(newRow, oldRow, editCell) {
     const column = columns.find(({ name }) => name === editCell.field)
@@ -189,7 +190,7 @@ export function DataGrid({
 
   function deleteRow(deleteId) {
     const newRows = value.filter(({ id }) => id !== deleteId)
-    onChange(newRows)
+    onChange(newRows, 'delete')
   }
 
   const actionsColumn = {
