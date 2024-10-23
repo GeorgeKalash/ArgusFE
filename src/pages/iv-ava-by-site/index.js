@@ -202,7 +202,6 @@ const AvailabilitiesBySite = () => {
           columns={columns}
           gridData={data}
           rowId={['itemId']}
-          serialLotTable={true}
           maxAccess={access}
           refetch={refetch}
           pageSize={50}
