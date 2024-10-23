@@ -375,7 +375,6 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         getItemPriceRow(update, newRow, DIRTYFIELD_BASE_PRICE)
-        calcTotals(formik.values.items)
       }
     },
     {
@@ -385,7 +384,6 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         getItemPriceRow(update, newRow, DIRTYFIELD_UNIT_PRICE)
-        calcTotals(formik.values.items)
       }
     },
     {
@@ -395,7 +393,6 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         getItemPriceRow(update, newRow, DIRTYFIELD_UPO)
-        calcTotals(formik.values.items)
       }
     },
     {
@@ -427,7 +424,6 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       async onChange({ row: { update, newRow } }) {
         getItemPriceRow(update, newRow, DIRTYFIELD_MDAMOUNT)
         checkMdAmountPct(newRow, update)
-        calcTotals(formik.values.items)
       }
     },
     {
@@ -442,7 +438,6 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         getItemPriceRow(update, newRow, DIRTYFIELD_EXTENDED_PRICE)
-        calcTotals(formik.values.items)
       }
     },
     {
@@ -806,17 +801,21 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     let data = iconClicked ? { changes: commonData } : commonData
     update(data)
 
-    // let modifiedItemsList = formik.values.items.map(item => {
-    //   if (item.id === newRow.id) {
-    //     return commonData
-    //   }
+    let modifiedItemsList = formik.values.items.map(item => {
+      console.log('check items ', item)
+      if (item.id === newRow.id) {
+        return commonData
+      }
 
-    //   return item
-    // })
-    // calcTotals(formik.values.items)
+      return item
+    })
+
+    calcTotals(modifiedItemsList)
   }
 
   function calcTotals(itemsArray, tdAmount, misc) {
+    console.log('check array ', itemsArray)
+
     const parsedItemsArray = itemsArray
       .filter(item => item.itemId !== undefined)
       .map(item => ({
@@ -830,6 +829,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
         extendedPrice: parseFloat(item.extendedPrice) || 0
       }))
 
+    console.log('check array ', parsedItemsArray)
     const subtotal = getSubtotal(parsedItemsArray)
     const miscValue = misc == 0 ? 0 : parseFloat(formik.values.miscAmount)
 
