@@ -97,7 +97,7 @@ const ProductionSheet = () => {
       parameters: `_userId=${userId}&_key=plantId`
     })
 
-    return res.record.value
+    return res?.record?.value
   }
 
   function OpenProductionSheetForm(plantId, recordId) {

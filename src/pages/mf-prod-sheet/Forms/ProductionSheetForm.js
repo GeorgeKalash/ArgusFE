@@ -20,6 +20,8 @@ import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
+import CustomTextArea from 'src/components/Inputs/CustomTextArea'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 
 export default function ProductionSheetForm({ labels, maxAccess: access, recordId, plantId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -31,7 +33,7 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.ProductionSheet,
-    access,
+    access: access,
     enabled: !recordId
   })
 
@@ -57,6 +59,7 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
       status: 1,
       date: new Date(),
       plantId: parseInt(plantId),
+      notes: '',
       items: [
         {
           id: 1,
@@ -77,7 +80,6 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
     validationSchema: yup.object({
       date: yup.date().required(),
       siteId: yup.number().required(),
-      dtId: yup.string().required(),
       items: yup
         .array()
         .of(
@@ -156,7 +158,7 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
       condition: true,
       onClick: 'onInventoryTransaction',
       disabled: !editMode || !isPosted
-    },
+    }
   ]
 
   const columns = [
@@ -250,6 +252,7 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}
+      disabledSubmit={isPosted}
       functionId={SystemFunction.ProductionSheet}
     >
       <VertLayout>
@@ -258,7 +261,7 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
             <Grid item xs={6}>
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
-                parameters={`_dgId=${SystemFunction.ProductionSheet}&_startAt=${0}&_pageSize=${50}`}
+                parameters={`_dgId=${SystemFunction.ProductionSheet}&_startAt=${0}&_pageSize=${1000}`}
                 filter={!editMode ? item => item.activeStatus === 1 : undefined}
                 name='dtId'
                 label={labels.documentType}
@@ -266,12 +269,12 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
                 valueField='recordId'
                 displayField='name'
                 values={formik.values}
-                maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={async (event, newValue) => {
                   formik.setFieldValue('dtId', newValue?.recordId || '')
                   changeDT(newValue)
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={6}>
@@ -339,11 +342,30 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
           <DataGrid
             onChange={value => formik.setFieldValue('items', value)}
             maxAccess={maxAccess}
+            name='items'
             disabled={isPosted}
             value={formik?.values?.items || []}
             error={formik?.errors?.items}
             columns={columns}
+            allowDelete={!isPosted}
+            allowAddNewLine={!isPosted}
           />
+          <Fixed>
+            <Grid container spacing={4} sx={{ mb: 3, display: 'flex', justifyContent: 'left' }}>
+              <Grid item xs={4}>
+                <CustomTextArea
+                  name='notes'
+                  label={labels.notes}
+                  value={formik.values.notes}
+                  maxLength='100'
+                  maxAccess={maxAccess}
+                  onChange={formik.handleChange}
+                  onClear={() => formik.setFieldValue('notes', '')}
+                  error={formik.touched.notes && Boolean(formik.errors.notes)}
+                />
+              </Grid>
+            </Grid>
+          </Fixed>
         </Grow>
       </VertLayout>
     </FormShell>
