@@ -121,7 +121,8 @@ export const ManufacturingRepository = {
     set2: service + 'set2PST',
     get2: service + 'get2PST',
     del: service + 'delPST',
-    post: service + 'postPST'
+    post: service + 'postPST',
+    snapshot: service + 'snapshotPST'
   },
   ProductionSheetItem: {
     qry: service + 'qryPSI',
