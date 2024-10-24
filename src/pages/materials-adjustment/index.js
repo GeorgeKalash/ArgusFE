@@ -102,8 +102,8 @@ const MaterialsAdjustment = () => {
         labels: _labels,
         maxAccess: access
       },
-      width: 900,
-      height: 600,
+      width: 1200,
+      height: 700,
       title: _labels[1]
     })
   }

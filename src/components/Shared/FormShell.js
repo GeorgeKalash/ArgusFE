@@ -14,6 +14,7 @@ import AccountBalance from './AccountBalance'
 import CashTransaction from './CashTransaction'
 import FinancialTransaction from './FinancialTransaction'
 import Aging from './Aging'
+import MetalSummary from './MetalSummary'
 import { ControlContext } from 'src/providers/ControlContext'
 import { ClientRelationForm } from './ClientRelationForm'
 import { ClientBalance } from './ClientBalance'
@@ -45,7 +46,8 @@ export default function FormShell({
   previewReport = false,
   setIDInfoAutoFilled,
   visibleClear,
-  actions
+  actions,
+  filteredItems = []
 }) {
   const { stack } = useWindow()
   const [selectedReport, setSelectedReport] = useState(null)
@@ -283,7 +285,9 @@ export default function FormShell({
                 selectedReport: selectedReport,
                 recordId: form.values?.recordId,
                 functionId: form.values?.functionId,
-                resourceId: resourceId
+                resourceId: resourceId,
+                scId: form.values?.stockCountId,
+                siteId: form.values?.siteId
               },
               width: 1150,
               height: 700,
@@ -300,6 +304,18 @@ export default function FormShell({
               width: 1000,
               height: 620,
               title: platformLabels.Aging
+            })
+          }
+          onClickMetal={() =>
+            stack({
+              Component: MetalSummary,
+              props: {
+                filteredItems
+              },
+              width: 600,
+              height: 550,
+              title: platformLabels.Metals,
+              expandable: false
             })
           }
           isSaved={isSaved}

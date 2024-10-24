@@ -62,7 +62,7 @@ export default function OutwardsReturnForm({
       recordId: recordId || null,
       dtId: dtId || null,
       reference: '',
-      outwardId: '',
+      owId: '',
       outwardRef: '',
       requestedBy: null,
       date: new Date(),
@@ -100,14 +100,15 @@ export default function OutwardsReturnForm({
       releaseStatus: null,
       otpVerified: false,
       settlementStatus: null,
-      interfaceId: null
+      interfaceId: null,
+      attemptNo: 1
     },
     maxAccess,
     enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.string().required(),
-      outwardId: yup.number().required(),
+      owtId: yup.number().required(),
       outwardRef: yup.string().required(),
       requestedBy: yup.string().required(),
       currencyId: yup.string().required(),
@@ -116,8 +117,6 @@ export default function OutwardsReturnForm({
       fcAmount: yup.string().required(),
       dispersalName: yup.string().required(),
       vatAmount: yup.string().required(),
-      tdAmount: yup.string().required(),
-      productName: yup.string().required(),
       settlementStatus: yup.number().required(),
       lcAmount: yup.string().required(),
       exRate: yup.string().required(),
@@ -324,18 +323,17 @@ export default function OutwardsReturnForm({
             </Grid>
             <Grid item xs={6}>
               <ResourceLookup
-                endpointId={RemittanceOutwardsRepository.OutwardsOrder.snapshot}
+                endpointId={RemittanceOutwardsRepository.OutwardsTransfer.snapshot}
                 valueField='reference'
                 displayField='reference'
                 name='outwardRef'
-                filter={item => item.status === 3}
                 secondDisplayField={false}
                 required
                 label={labels.outwards}
                 form={formik}
                 readOnly={isPosted || isClosed || isOpenOutwards}
                 onChange={async (event, newValue) => {
-                  formik.setFieldValue('outwardId', newValue ? newValue.recordId : '')
+                  formik.setFieldValue('owtId', newValue ? newValue.recordId : '')
                   formik.setFieldValue('outwardRef', newValue ? newValue.reference : '')
                   formik.setFieldValue('clientId', newValue ? newValue.clientId : '')
                   formik.setFieldValue('clientName', newValue ? newValue.clientName : '')
@@ -485,7 +483,6 @@ export default function OutwardsReturnForm({
                 error={formik.touched.productName && Boolean(formik.errors.productName)}
                 maxAccess={maxAccess}
                 readOnly
-                required
               />
             </Grid>
             <Grid item xs={6}>
@@ -555,7 +552,6 @@ export default function OutwardsReturnForm({
                 label={labels.tdAmount}
                 value={formik?.values?.tdAmount}
                 readOnly
-                required
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('tdAmount', '')}

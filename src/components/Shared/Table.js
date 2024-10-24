@@ -2,7 +2,7 @@ import React, { useContext } from 'react'
 import { AgGridReact } from 'ag-grid-react'
 import 'ag-grid-community/styles/ag-grid.css'
 import 'ag-grid-community/styles/ag-theme-alpine.css'
-import { Box, IconButton, TextField, Tooltip } from '@mui/material'
+import { Box, IconButton, TextField } from '@mui/material'
 import Checkbox from '@mui/material/Checkbox'
 import Image from 'next/image'
 import editIcon from '../../../public/images/TableIcons/edit.png'
@@ -94,8 +94,19 @@ const Table = ({
         return {
           ...col,
           width: 110,
-          cellRenderer: ({ data }) => {
-            return <Checkbox checked={data?.[col.field]} style={{ pointerEvents: 'none' }} />
+          cellRenderer: ({ data, node }) => {
+            const handleCheckboxChange = event => {
+              const checked = event.target.checked
+              node.setDataValue(col.field, checked)
+            }
+
+            return (
+              <Checkbox
+                checked={data?.[col.field]}
+                onChange={col.editable ? handleCheckboxChange : null}
+                style={col.editable ? {} : { pointerEvents: 'none' }}
+              />
+            )
           }
         }
       }
