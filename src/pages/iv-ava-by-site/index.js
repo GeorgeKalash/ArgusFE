@@ -14,16 +14,17 @@ import lotIcon from '../../../public/images/TableIcons/lot.png'
 import { Box, IconButton } from '@mui/material'
 import Image from 'next/image'
 import LotForm from './forms/LotForm'
+import { ReportIvGenerator } from 'src/repositories/ReportIvGeneratorRepository'
 
 const AvailabilitiesBySite = () => {
-  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
-      extension: `RG.IV.asmx/IV403_p`,
+      extension: ReportIvGenerator.Report403.endpoint,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}&exId=`
     })
 
@@ -44,7 +45,7 @@ const AvailabilitiesBySite = () => {
     filterBy
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: `RG.IV.asmx/IV403_p`,
+    endpointId: ReportIvGenerator.Report403.endpoint,
     datasetId: ResourceIds.AvailabilitiesBySite,
     filter: {
       filterFn: fetchWithFilter
@@ -75,50 +76,60 @@ const AvailabilitiesBySite = () => {
     {
       field: 'unitCost',
       headerName: _labels.unitCost,
+      type: 'decimal',
       flex: 1
     },
     {
       field: 'unitPrice',
       headerName: _labels.unitPrice,
+      type: 'decimal',
       flex: 1
     },
     {
       field: 'qty',
       headerName: _labels.qty,
+      type: 'decimal',
       flex: 1
     },
     {
       field: 'pieces',
       headerName: _labels.pieces,
+      type: 'decimal',
       flex: 1
     },
     {
       field: 'committed',
       headerName: _labels.committed,
+      type: 'decimal',
       flex: 1
     },
     {
       field: 'netWeight',
       headerName: _labels.netWeight,
+      type: 'decimal',
       flex: 1
     },
     {
       field: 'netVolume',
       headerName: _labels.netVolume,
-      flex: 1
+      flex: 1,
+      type: 'decimal'
     },
     {
       field: 'netCost',
       headerName: _labels.netCost,
+      type: 'decimal',
       flex: 1
     },
     {
       field: 'netPrice',
       headerName: _labels.netPrice,
+      type: 'decimal',
       flex: 1
     },
     {
       flex: 1,
+      headerName: 'S/L',
       cellRenderer: row => {
         const trackBy1 = row.data.trackBy === 1
         const trackBy2 = row.data.trackBy === 2

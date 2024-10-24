@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useState } from 'react'
 import Table from 'src/components/Shared/Table'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -7,7 +7,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-const SerialForm = ({ labels, maxAccess, itemId, siteId }) => {
+const SerialForm = ({ labels, itemId, siteId }) => {
   const { getRequest } = useContext(RequestsContext)
   const [data, setData] = useState([])
 
@@ -18,10 +18,6 @@ const SerialForm = ({ labels, maxAccess, itemId, siteId }) => {
     })
     setData(response)
   }
-
-  useEffect(() => {
-    fetchGridData()
-  }, [])
 
   const { refetch, access, paginationParameters } = useResourceQuery({
     datasetId: ResourceIds.AvailabilitiesBySite,
@@ -41,8 +37,8 @@ const SerialForm = ({ labels, maxAccess, itemId, siteId }) => {
       flex: 1
     },
     {
-      field: 'sku',
-      headerName: labels.sku,
+      field: 'siteRef',
+      headerName: labels.site,
       flex: 1
     },
     {
