@@ -78,14 +78,12 @@ const Currencies = () => {
   ]
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: SystemRepository.Currency.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
+    await postRequest({
+      extension: SystemRepository.Currency.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   const add = () => {
