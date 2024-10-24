@@ -148,8 +148,10 @@ const AuthProvider = ({ children }) => {
     setUser(null)
     window.localStorage.removeItem('userData')
     window.sessionStorage.removeItem('userData')
+
+    // router.reload()
+
     await router.push('/login')
-    router.reload()
   }
 
   const getAccessToken = async () => {
