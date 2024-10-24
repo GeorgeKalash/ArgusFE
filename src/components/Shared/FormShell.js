@@ -18,6 +18,7 @@ import MetalSummary from './MetalSummary'
 import { ControlContext } from 'src/providers/ControlContext'
 import { ClientRelationForm } from './ClientRelationForm'
 import { ClientBalance } from './ClientBalance'
+import InventoryTransaction from './InventoryTransaction'
 
 export default function FormShell({
   form,
@@ -126,6 +127,18 @@ export default function FormShell({
     if (Object.keys(errors).length == 0) {
       await performPostSubmissionTasks()
     }
+  }
+
+  function onInventoryTransaction() {
+    stack({
+      Component: InventoryTransaction,
+      props: {
+        recordId: form.values.recordId,
+        functionId: functionId
+      },
+      width: 1000,
+      title: platformLabels.InventoryTransaction
+    })
   }
 
   const performPostSubmissionTasks = async () => {
@@ -313,6 +326,7 @@ export default function FormShell({
           isGenerated={isGenerated}
           actions={actions}
           onApproval={onApproval}
+          onInventoryTransaction={onInventoryTransaction}
           onRecordRemarks={onRecordRemarks}
           transactionClicked={transactionClicked}
           editMode={editMode}

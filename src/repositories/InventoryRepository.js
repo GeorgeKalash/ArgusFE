@@ -192,5 +192,8 @@ export const InventoryRepository = {
     set: service + 'setOC',
     del: service + 'delOC',
     qry: service + 'qryOC'
-  }
+  },
+  Transaction: {
+    qry2: service + 'qry2TRX',
+  },
 }
