@@ -76,18 +76,6 @@ const Table = ({
           sortable: !disableSorting
         }
       }
-      if (col.type === 'decimal') {
-        return {
-          ...col,
-          valueGetter: ({ data }) => {
-            const value = data?.[col.field]
-            if (value === undefined || value === null) return ''
-
-            return value.toFixed(2)
-          },
-          sortable: !disableSorting
-        }
-      }
       if (col.type === 'number' || col?.type?.field === 'number') {
         return {
           ...col,

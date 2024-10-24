@@ -76,55 +76,46 @@ const AvailabilitiesBySite = () => {
     {
       field: 'unitCost',
       headerName: _labels.unitCost,
-      type: 'decimal',
       flex: 1
     },
     {
       field: 'unitPrice',
       headerName: _labels.unitPrice,
-      type: 'decimal',
       flex: 1
     },
     {
       field: 'qty',
       headerName: _labels.qty,
-      type: 'decimal',
       flex: 1
     },
     {
       field: 'pieces',
       headerName: _labels.pieces,
-      type: 'decimal',
       flex: 1
     },
     {
       field: 'committed',
       headerName: _labels.committed,
-      type: 'decimal',
       flex: 1
     },
     {
       field: 'netWeight',
       headerName: _labels.netWeight,
-      type: 'decimal',
       flex: 1
     },
     {
       field: 'netVolume',
       headerName: _labels.netVolume,
-      flex: 1,
-      type: 'decimal'
+      flex: 1
     },
     {
       field: 'netCost',
       headerName: _labels.netCost,
-      type: 'decimal',
       flex: 1
     },
     {
       field: 'netPrice',
       headerName: _labels.netPrice,
-      type: 'decimal',
       flex: 1
     },
     {
