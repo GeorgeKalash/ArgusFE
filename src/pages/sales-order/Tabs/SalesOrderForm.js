@@ -1,6 +1,6 @@
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
-import { Grid, FormControlLabel, Checkbox, Box } from '@mui/material'
+import { Grid, FormControlLabel, Checkbox } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
@@ -835,22 +835,12 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     miscAmount: miscValue
   })
 
-  //const reCalculateValues = () => {
-  const totalQty = reCal ? _footerSummary?.totalQty : formik.values?.qty?.toFixed(2) || 0
+  const totalQty = reCal ? _footerSummary?.totalQty : formik.values?.qty || 0
   const amount = reCal ? _footerSummary?.net : formik.values?.amount || 0
   const totalVolume = reCal ? _footerSummary?.totalVolume : formik.values?.totalVolume || 0
   const totalWeight = reCal ? _footerSummary?.totalWeight : formik.values?.totalWeight || 0
   const subtotal = reCal ? subTotal : formik.values?.subtotal || 0
   const vatAmount = reCal ? _footerSummary?.sumVat : formik.values?.sumVat || 0
-
-  //   formik.setFieldValue('qty', parseFloat(totalQty).toFixed(2))
-  //   formik.setFieldValue('amount', parseFloat(amount).toFixed(2))
-  //   formik.setFieldValue('volume', parseFloat(totalVolume).toFixed(2))
-  //   formik.setFieldValue('weight', parseFloat(totalWeight).toFixed(2))
-  //   formik.setFieldValue('subtotal', parseFloat(subtotal).toFixed(2))
-  //   formik.setFieldValue('vatAmount', parseFloat(vatAmount).toFixed(2))
-  // }
-  // reCalculateValues()
 
   function checkDiscount(typeChange, tdPct, tdAmount, currentDiscount) {
     const _discountObj = getDiscValues({
@@ -1043,6 +1033,15 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     formik.setFieldValue('shipAddress', shipAdd)
     formik.setFieldValue('serializedAddress', shipAdd)
   }, [address])
+
+  useEffect(() => {
+    formik.setFieldValue('qty', parseFloat(totalQty).toFixed(2))
+    formik.setFieldValue('amount', parseFloat(amount).toFixed(2))
+    formik.setFieldValue('volume', parseFloat(totalVolume).toFixed(2))
+    formik.setFieldValue('weight', parseFloat(totalWeight).toFixed(2))
+    formik.setFieldValue('subtotal', parseFloat(subtotal).toFixed(2))
+    formik.setFieldValue('vatAmount', parseFloat(vatAmount).toFixed(2))
+  }, [totalQty, amount, totalVolume, totalWeight, subtotal, vatAmount])
 
   useEffect(() => {
     ;(async function () {
