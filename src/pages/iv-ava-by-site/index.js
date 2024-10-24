@@ -164,8 +164,7 @@ const AvailabilitiesBySite = () => {
       props: {
         labels: _labels,
         itemId,
-        siteId,
-        maxAccess: access
+        siteId
       },
       width: 600,
       height: 400,
