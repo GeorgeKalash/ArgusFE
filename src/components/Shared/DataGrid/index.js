@@ -19,12 +19,17 @@ export function DataGrid({
 }) {
   const gridApiRef = useRef(null)
 
-  const process = (params, oldRow, newRow, update) => {
+  const process = (params, oldRow, setData) => {
     console.log('params', params)
     const column = columns.find(({ field }) => field === params.field)
 
-    console.log(params, oldRow, newRow)
-    column.onChange({ row: { oldRow: oldRow, newRow: oldRow, update: update } })
+    const updateRowCommit = changes => {
+      setData(changes)
+      commit(changes)
+    }
+    if (column.onChange) {
+      column.onChange({ row: { oldRow: oldRow, newRow: params.node.data, update: updateRowCommit } })
+    }
   }
 
   const addNewRow = params => {
@@ -175,9 +180,11 @@ export function DataGrid({
 
     const updateRow = ({ changes }) => {
       const oldRow = params.data
+
       setData(changes)
+      process(params, oldRow, setData)
+
       params.api.stopEditing()
-      process(params, oldRow, params.data, setData)
     }
 
     return (

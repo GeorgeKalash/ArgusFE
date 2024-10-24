@@ -361,11 +361,11 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
               },
 
               async onChange({ row: { update, oldRow, newRow } }) {
-                console.log(update, oldRow, newRow)
+                console.log(update, oldRow, newRow, formValues.currencyId)
                 if (newRow.accountId) {
                   update({
-                    currencyRef: formValues.currencyRef,
-                    currencyId: formValues.currencyId,
+                    currencyRef: 'LBP',
+                    currencyId: 1,
                     exRate: exRateValue
                   })
 
