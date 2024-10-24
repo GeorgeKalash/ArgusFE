@@ -148,10 +148,24 @@ export const RemittanceOutwardsRepository = {
     set2: service + 'set2RV',
     del: service + 'delRV',
     post: service + 'postRV',
+    close: service + 'closeRV',
+    reopen: service + 'reopenRV',
     snapshot: service + 'snapshotRV'
   },
   OutwardsTransfer: {
     get: service + 'getOWT',
     snapshot: service + 'snapshotOWT'
+  },
+  UnassignedCountry: { unassigned: service + 'unassignedCOU' },
+  UnassignedCurrency: { unassigned: service + 'unassignedCU' },
+  UnassignedDispersalType: { unassigned: service + 'unassignedDT' },
+  AssignedCountry: {
+    assigned: service + 'assignedCOU'
+  },
+  AssignedCurrency: {
+    assigned: service + 'assignedCU'
+  },
+  AssignedDispersalType: {
+    assigned: service + 'assignedDT'
   }
 }

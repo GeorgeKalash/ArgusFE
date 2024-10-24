@@ -52,6 +52,12 @@ export const SCRepository = {
     get: service + 'getDTD',
     del: service + 'delDTD'
   },
+  StockCountItem: {
+    qry: service + 'qryITM',
+    set: service + 'setITM',
+    get: service + 'getITM',
+    del: service + 'delITM'
+  },
   StockCountItemDetail: {
     qry: service + 'qryITD',
     set: service + 'setITD',

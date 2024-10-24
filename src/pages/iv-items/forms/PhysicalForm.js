@@ -1,15 +1,12 @@
-import { useContext } from 'react'
+import { useContext, useState } from 'react'
 import { Grid } from '@mui/material'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { RequestsContext } from 'src/providers/RequestsContext'
-
 import { useEffect } from 'react'
 import { FormControlLabel, Checkbox } from '@mui/material'
-
 import * as yup from 'yup'
-
 import toast from 'react-hot-toast'
 import { useForm } from 'src/hooks/form'
 import { useInvalidate } from 'src/hooks/resource'
@@ -18,6 +15,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { ControlContext } from 'src/providers/ControlContext'
+import CustomTextField from 'src/components/Inputs/CustomTextField'
 
 const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -25,6 +23,8 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
   const invalidate = useInvalidate({
     endpointId: InventoryRepository.Physical.qry
   })
+
+  const [disabled, setDisabled] = useState(false)
 
   const { platformLabels } = useContext(ControlContext)
 
@@ -47,7 +47,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
       density: 0,
       metalPurity: ''
     },
-    enableReinitialize: true,
+    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       metalId: yup
@@ -69,109 +69,110 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
     }),
 
     onSubmit: async values => {
-      try {
-        await postPhysical(values)
-      } catch (error) {}
+      await postPhysical(values)
     }
   })
 
   const postPhysical = async obj => {
     const isNewRecord = !obj?.itemId
 
-    try {
-      const res = await postRequest({
-        extension: InventoryRepository.Physical.set,
-        record: JSON.stringify(obj)
-      })
+    const res = await postRequest({
+      extension: InventoryRepository.Physical.set,
+      record: JSON.stringify(obj)
+    })
 
-      if (isNewRecord) {
-        toast.success(platformLabels.Added)
-      } else {
-        toast.success(platformLabels.Edited)
-      }
-      invalidate()
-    } catch {}
+    if (isNewRecord) {
+      toast.success(platformLabels.Added)
+    } else {
+      toast.success(platformLabels.Edited)
+    }
+    invalidate()
   }
 
   const fetchAndSetValues = async (dirtyField, newValue) => {
-    try {
-      const parameters = {
-        _dirtyField: dirtyField,
-        _shape: formik.values.shape || 0,
-        _length: formik.values.length || 0,
-        _width: formik.values.width || 0,
-        _depth: formik.values.depth || 0,
-        _diameter: formik.values.diameter || 0,
-        _volume: formik.values.volume || 0,
-        _weight: formik.values.weight || 0,
-        _density: formik.values.density || 0
+    const parameters = {
+      _dirtyField: dirtyField,
+      _shape: parseFloat(formik.values.shape) || 0,
+      _length: parseFloat(formik.values.length) || 0,
+      _width: parseFloat(formik.values.width) || 0,
+      _depth: parseFloat(formik.values.depth) || 0,
+      _diameter: parseFloat(formik.values.diameter) || 0,
+      _volume: parseFloat(formik.values.volume) || 0,
+      _weight: parseFloat(formik.values.weight) || 0,
+      _density: parseFloat(formik.values.density) || 0
+    }
+
+    if (dirtyField) {
+      switch (dirtyField) {
+        case 1:
+          parameters._length = parseFloat(newValue) || 0
+          break
+        case 2:
+          parameters._width = parseFloat(newValue) || 0
+          break
+        case 3:
+          parameters._depth = parseFloat(newValue) || 0
+          break
+        case 4:
+          parameters._diameter = parseFloat(newValue) || 0
+          break
+        case 5:
+          parameters._volume = parseFloat(newValue) || 0
+          break
+        case 6:
+          parameters._weight = parseFloat(newValue) || 0
+          break
+        case 7:
+          parameters._density = parseFloat(newValue) || 0
+          break
+        default:
+          break
       }
+    }
 
-      if (dirtyField) {
-        switch (dirtyField) {
-          case 1:
-            parameters._length = newValue
-            break
-          case 2:
-            parameters._width = newValue
-            break
-          case 3:
-            parameters._depth = newValue
-            break
-          case 4:
-            parameters._diameter = newValue
-            break
-          case 5:
-            parameters._volume = newValue
-            break
-          case 6:
-            parameters._weight = newValue
-            break
-          case 7:
-            parameters._density = newValue
-            break
-          default:
-            break
-        }
-      }
+    const calc = await getRequest({
+      extension: InventoryRepository.Physical.calc,
+      parameters: new URLSearchParams(parameters).toString()
+    })
 
-      const calc = await getRequest({
-        extension: InventoryRepository.Physical.calc,
-        parameters: new URLSearchParams(parameters).toString()
-      })
+    formik.setValues(prevValues => ({
+      ...prevValues,
+      length: calc.record.length || prevValues.length,
+      width: calc.record.width || prevValues.width,
+      depth: calc.record.depth || prevValues.depth,
+      diameter: calc.record.diameter || prevValues.diameter,
+      volume: calc.record.volume || prevValues.volume,
 
-      formik.setValues(prevValues => ({
-        ...prevValues,
-        length: calc.record.length || prevValues.length,
-        width: calc.record.width || prevValues.width,
-        depth: calc.record.depth || prevValues.depth,
-        diameter: calc.record.diameter || prevValues.diameter,
-        volume: calc.record.volume || prevValues.volume,
-        weight: calc.record.weight || prevValues.weight,
-        density: calc.record.density || prevValues.density
-      }))
-    } catch (error) {}
+      weight: calc.record.weight || prevValues.weight,
+      density: calc.record.density || prevValues.density
+    }))
   }
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: InventoryRepository.Physical.get,
-            parameters: `_itemId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: InventoryRepository.Physical.get,
+          parameters: `_itemId=${recordId}`
+        })
 
-          if (res.record) {
-            formik.setValues({ ...res.record, isMetal: !!res.record.isMetal })
-          }
+        if (res.record) {
+          formik.setValues({ ...res.record, isMetal: !!res.record.isMetal })
         }
-      } catch (error) {}
+      }
     })()
   }, [recordId])
 
-  const handleFieldChange = (fieldName, dirtyField, value) => {
-    const newValue = value === '' ? 0 : value
+  const handleFieldChange = (fieldName, dirtyField, e) => {
+    const value = e?.target?.value
+    if (value > 0) {
+      formik.setFieldValue(fieldName, value)
+      if (formik.values[fieldName]?.toString() != value?.toString()) fetchAndSetValues(dirtyField, value)
+    }
+  }
+
+  const handleFieldClear = (fieldName, dirtyField) => {
+    const newValue = 0
     formik.setFieldValue(fieldName, newValue)
     fetchAndSetValues(dirtyField, newValue)
   }
@@ -227,8 +228,8 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
                 value={formik.values.diameter}
                 maxAccess={maxAccess}
                 readOnly={formik.values?.shape === 1}
-                onChange={e => handleFieldChange('diameter', 4, e.target.value)}
-                onClear={() => handleFieldChange('diameter', 4, 0)}
+                onMouseLeave={e => handleFieldChange('diameter', 4, e)}
+                onClear={() => handleFieldClear('length', 4)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -237,8 +238,8 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
                 label={labels.length}
                 value={formik.values.length}
                 maxAccess={maxAccess}
-                onChange={e => handleFieldChange('length', 1, e.target.value)}
-                onClear={() => handleFieldChange('length', 1, 0)}
+                onMouseLeave={e => handleFieldChange('length', 1, e)}
+                onClear={() => handleFieldClear('length', 1)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -248,8 +249,8 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
                 readOnly={formik.values?.shape === 2}
                 value={formik.values.width}
                 maxAccess={maxAccess}
-                onChange={e => handleFieldChange('width', 2, e.target.value)}
-                onClear={() => handleFieldChange('width', 2, 0)}
+                onMouseLeave={e => handleFieldChange('width', 2, e)}
+                onClear={() => handleFieldClear('width', 2)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -259,8 +260,8 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
                 value={formik.values.depth}
                 readOnly={formik.values?.shape === 2}
                 maxAccess={maxAccess}
-                onChange={e => handleFieldChange('depth', 3, e.target.value)}
-                onClear={() => handleFieldChange('depth', 3, 0)}
+                onMouseLeave={e => handleFieldChange('depth', 3, e)}
+                onClear={() => handleFieldClear('depth', 3)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -269,8 +270,8 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
                 label={labels.volume}
                 value={formik.values.volume}
                 maxAccess={maxAccess}
-                onChange={e => handleFieldChange('volume', 5, e.target.value)}
-                onClear={() => handleFieldChange('volume', 5, 0)}
+                onMouseLeave={e => handleFieldChange('volume', 5, e)}
+                onClear={() => handleFieldClear('volume', 5)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -279,8 +280,9 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
                 label={labels.weight}
                 value={formik.values.weight}
                 maxAccess={maxAccess}
-                onChange={e => handleFieldChange('weight', 6, e.target.value)}
-                onClear={() => handleFieldChange('weight', 6, 0)}
+                allowNegative={false}
+                onMouseLeave={e => handleFieldChange('weight', 6, e?.target?.value)}
+                onClear={() => handleFieldClear('weight', 6)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -289,8 +291,8 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
                 label={labels.density}
                 value={formik.values.density}
                 maxAccess={maxAccess}
-                onChange={e => handleFieldChange('density', 7, e.target.value)}
-                onClear={() => handleFieldChange('density', 7, 0)}
+                onMouseLeave={e => handleFieldChange('density', 7, e?.target?.value)}
+                onClear={() => handleFieldClear('density', 7)}
                 decimalScale={3}
               />
             </Grid>

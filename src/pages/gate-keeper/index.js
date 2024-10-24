@@ -1,7 +1,7 @@
 import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import { useWindow } from 'src/windows'
@@ -10,26 +10,23 @@ import useResourceParams from 'src/hooks/useResourceParams'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import FormShell from 'src/components/Shared/FormShell'
 import { useForm } from 'src/hooks/form'
-import * as yup from 'yup'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const GateKeeper = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const { platformLabels } = useContext(ControlContext)
 
   const { labels: _labels, access } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: ManufacturingRepository.LeanProductionPlanning.preview,
     datasetId: ResourceIds.GateKeeper
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: ManufacturingRepository.LeanProductionPlanning.preview
   })
 
   const { labels: _labelsADJ, access: accessADJ } = useResourceParams({
@@ -40,7 +37,6 @@ const GateKeeper = () => {
     access,
     enableReinitialize: true,
     validateOnChange: true,
-    validationSchema: yup.object({}),
     initialValues: {
       rows: [
         {
@@ -79,8 +75,8 @@ const GateKeeper = () => {
           record: JSON.stringify(resultObject)
         })
         if (res.recordId) {
-          toast.success('Record Generated Successfully')
-          invalidate()
+          toast.success(platformLabels.Generated)
+          fetchGridData()
           stack({
             Component: MaterialsAdjustmentForm,
             props: {
@@ -88,8 +84,8 @@ const GateKeeper = () => {
               labels: _labelsADJ,
               maxAccess: accessADJ
             },
-            width: 900,
-            height: 600,
+            width: 1200,
+            height: 700,
             title: _labelsADJ[1]
           })
         }
@@ -193,7 +189,7 @@ const GateKeeper = () => {
     {
       key: 'Refresh',
       condition: true,
-      onClick: () => invalidate(),
+      onClick: () => fetchGridData(),
       disabled: false
     }
   ]

@@ -214,6 +214,7 @@ export const getButtons = platformLabels => [
     key: 'OpenRPB',
     label: platformLabels.OpenRPB,
     color: '#231F20',
+    image: 'parameters.png',
     main: false
   },
   {
@@ -226,6 +227,14 @@ export const getButtons = platformLabels => [
     key: 'GO',
     label: platformLabels.Apply,
     color: '#231F20',
+    image: 'go.png',
+    main: false
+  },
+  {
+    key: 'IV',
+    label: platformLabels.InventoryTransaction,
+    color: '#A76035',
+    image: 'popup-window.png',
     main: false
   },
   {
@@ -317,6 +326,21 @@ export const getButtons = platformLabels => [
     label: platformLabels.ClientBalance,
     color: '#231f20',
     image: 'wallet-to-bank-icon.png',
+    main: false
+  },
+  {
+    key: 'OTP',
+    label: platformLabels.OTP,
+    color: 'transparent',
+    image: 'Close.png',
+    border: '1px solid #01a437',
+    main: false
+  },
+  {
+    key: 'Metals',
+    label: platformLabels.Metals,
+    color: '#ADD8E6',
+    image: 'metals-icon.png',
     main: false
   }
 ]

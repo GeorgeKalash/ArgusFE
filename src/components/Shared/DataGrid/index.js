@@ -99,6 +99,7 @@ export function DataGrid({
     if (event.key !== 'Tab') {
       return
     }
+
     const rowIds = gridExpandedSortedRowIdsSelector(apiRef.current.state)
     const columns = apiRef.current.getVisibleColumns()
 
@@ -398,6 +399,20 @@ export function DataGrid({
                   })
                 }
 
+                function handleCheckboxChange(event) {
+                  const changes = { [params.field]: event.target.checked }
+                  updateRow({ changes })
+                  const column = columns.find(col => col.name === params.field)
+                  if (column?.onChange) {
+                    column.onChange({
+                      row: {
+                        update: changes => updateRow({ changes }),
+                        newRow: { ...params.row, ...changes }
+                      }
+                    })
+                  }
+                }
+
                 return (
                   <Box
                     sx={{
@@ -412,10 +427,16 @@ export function DataGrid({
                           column.component === 'button' ||
                           column.component === 'icon') &&
                         'center',
-                      border: `1px solid ${error?.[cell.rowIndex]?.[params.field] ? '#ff0000' : 'transparent'}`
+                      border: `1px solid ${error?.[cell.rowIndex]?.[params.field] ? '#ff0000' : 'transparent'}`,
+                      whiteSpace: 'normal',
+                      wordWrap: 'break-word'
                     }}
                   >
-                    <Component {...params} update={update} updateRow={updateRow} column={column} />
+                    {column.component === 'checkbox' ? (
+                      <input type='checkbox' checked={!!params.value} onChange={handleCheckboxChange} />
+                    ) : (
+                      <Component {...params} update={update} updateRow={updateRow} column={column} />
+                    )}
                   </Box>
                 )
               },

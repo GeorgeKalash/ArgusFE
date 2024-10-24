@@ -26,11 +26,15 @@ export default function BatchPostForm({ access }) {
 
   const today = new Date()
 
+  const newStartDate = new Date()
+  newStartDate.setMonth(0)
+  newStartDate.setDate(1)
+
   const { formik } = useForm({
     initialValues: {
-      startDate: new Date(today.getFullYear(), 0, 1),
+      startDate: newStartDate,
       endDate: today,
-      status: parseInt(status),
+      status: parseInt(status)
     },
     enableReinitialize: false,
     maxAccess: access,
@@ -75,14 +79,7 @@ export default function BatchPostForm({ access }) {
   ]
 
   return (
-    <FormShell
-      form={formik}
-      actions={actions}
-      isSaved={false}
-      editMode={true}
-      isInfo={false}
-      isCleared={false}
-    >
+    <FormShell form={formik} actions={actions} isSaved={false} editMode={true} isInfo={false} isCleared={false}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -122,9 +119,9 @@ export default function BatchPostForm({ access }) {
                 values={formik.values}
                 onChange={(event, newValue) => {
                   if (newValue?.recordId) {
-                    formik.setFieldValue('plantId', newValue?.recordId);
+                    formik.setFieldValue('plantId', newValue?.recordId)
                   } else {
-                    delete formik?.values?.plantId;
+                    delete formik?.values?.plantId
                   }
                 }}
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}

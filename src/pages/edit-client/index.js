@@ -3,12 +3,7 @@ import { Box } from '@mui/material'
 import Table from 'src/components/Shared/Table'
 import { useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
-
-import { SystemRepository } from 'src/repositories/SystemRepository'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-import { formatDateDefault } from 'src/lib/date-helper'
-
-// ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
@@ -21,11 +16,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const ClientsList = () => {
   const { stack } = useWindow()
-
-  //control
   const { getRequest } = useContext(RequestsContext)
-
-  //error
   const [errorMessage, setErrorMessage] = useState(null)
 
   const {
@@ -33,7 +24,8 @@ const ClientsList = () => {
     filterBy,
     clearFilter,
     labels: labels,
-    access
+    access,
+    refetch
   } = useResourceQuery({
     endpointId: CTCLRepository.CtClientIndividual.snapshot,
     datasetId: ResourceIds.ClientMaster,
@@ -158,6 +150,7 @@ const ClientsList = () => {
           onEdit={editClient}
           pageSize={50}
           paginationType='client'
+          refetch={refetch}
         />
       </Grow>
       {errorMessage?.error && (

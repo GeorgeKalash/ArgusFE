@@ -1,31 +1,31 @@
 import { useContext, useState } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
-import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-
 import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import ItemWindow from './window/ItemWindow'
+import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
 const IvItems = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const [params, setParams] = useState('')
 
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 50, params = [] } = options
 
     const response = await getRequest({
       extension: InventoryRepository.Items.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=&filter=&_sortField=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=&_params=${params}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -33,32 +33,31 @@ const IvItems = () => {
 
   const {
     query: { data },
-    labels: _labels,
-    paginationParameters,
+    filterBy,
     refetch,
+    clearFilter,
+    labels: _labels,
     access,
-    search,
-    clear,
+    paginationParameters,
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: InventoryRepository.Items.qry,
+    endpointId: InventoryRepository.Items.snapshot,
     datasetId: ResourceIds.Items,
-    search: {
-      endpointId: InventoryRepository.Items.snapshot,
-      searchFn: fetchWithSearch
+    filter: {
+      filterFn: fetchWithFilter
     }
   })
+  async function fetchWithFilter({ filters, pagination = {} }) {
+    const { _startAt = 0, _size = 50 } = pagination
+    if (filters.qry) {
+      const response = await getRequest({
+        extension: InventoryRepository.Items.snapshot,
+        parameters: `_filter=${filters.qry}&_startAt=${_startAt}&_size=${_size}`
+      })
 
-  async function fetchWithSearch({ options = {}, qry }) {
-    const { _startAt = 0, _size = 50 } = options
-
-    const response = await getRequest({
-      extension: InventoryRepository.Items.snapshot,
-      parameters: `_filter=${qry}&_startAt=${_startAt}&_size=${_size}`
-    })
-
-    return response
+      return { ...response, _startAt: _startAt }
+    } else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
   const columns = [
@@ -138,27 +137,47 @@ const IvItems = () => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: InventoryRepository.Items.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (exception) {}
+    await postRequest({
+      extension: InventoryRepository.Items.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
+  }
+
+  const onApply = ({ search, rpbParams }) => {
+    if (!search && rpbParams.length === 0) {
+      clearFilter('params')
+    } else if (!search) {
+      filterBy('params', rpbParams)
+    } else {
+      filterBy('qry', search)
+    }
+    if (rpbParams) {
+      setParams(rpbParams)
+    }
+    refetch()
+  }
+
+  const onSearch = value => {
+    filterBy('qry', value)
+  }
+
+  const onClear = () => {
+    onApply({ search: '', rpbParams: params })
+    clearFilter('qry')
   }
 
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar
+        <RPBGridToolbar
           onAdd={add}
           maxAccess={access}
-          onSearch={search}
-          onSearchClear={clear}
-          labels={_labels}
-          inputSearch={true}
-          refetch={refetch}
+          onApply={onApply}
+          onSearch={onSearch}
+          onClear={onClear}
+          reportName={'IVIT'}
         />
       </Fixed>
       <Grow>
