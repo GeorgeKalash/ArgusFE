@@ -281,4 +281,5 @@ export const ResourceIds = {
   OpenMultiCurrencyCashTransfer: 33315,
   LockedRecords: 23302,
   ProductionSheet: 42327,
+  InventoryTransaction: 41209,
 }
