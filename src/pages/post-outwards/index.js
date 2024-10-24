@@ -98,8 +98,6 @@ const Postoutwards = () => {
       toast.success(platformLabels.Posted)
     }
   })
-  console.log(formik.values, 'formikkkk')
-  console.log(formatDateToApi(formik.values.date), 'dateeeeeeeeeee')
 
   const rowColumns = [
     {
