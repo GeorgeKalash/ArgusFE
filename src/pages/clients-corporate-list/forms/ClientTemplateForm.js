@@ -111,7 +111,7 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
       countryId: yup.string().required(' '),
       cityId: yup.string().required(' '),
       name1: yup.string().required(' '),
-      // name: yup.string().required(' '),
+      name: yup.string().required(' '),
       nationalityId: yup.string().required(' '),
       cellPhone: yup.string().required(' '),
       capital: yup.string().required(' '),
