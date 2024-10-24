@@ -129,6 +129,10 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
     }
   })
 
+  useEffect(() => {
+    if (documentType?.dtId) formik.setFieldValue('dtId', documentType.dtId)
+  }, [documentType?.dtId])
+
   const onPost = async () => {
     const copy = { ...formik.values }
     delete copy.items
