@@ -93,7 +93,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     currentDiscount: '',
     exRate: 1,
     rateCalcMethod: '',
-    tdType: 2, // discount
+    tdType: 2,
     tdPct: 0,
     baseAmount: 0,
     volume: '',
@@ -731,17 +731,18 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     if (cycleButtonState.value == 1) {
       currentPctAmount =
         formik.values.currentDiscount < 0 || formik.values.currentDiscount > 100 ? 0 : formik.values.currentDiscount
-      currentTdAmount = (parseFloat(currentPctAmount) * parseFloat(formik.values.subtotal)) / 100
+      currentTdAmount = (parseFloat(currentPctAmount) * parseFloat(subtotal)) / 100
       currentDiscountAmount = currentPctAmount
+
       formik.setFieldValue('tdAmount', currentTdAmount)
       formik.setFieldValue('tdPct', currentPctAmount)
       formik.setFieldValue('currentDiscount', currentPctAmount)
     } else {
       currentTdAmount =
-        formik.values.currentDiscount < 0 || formik.values.subtotal < formik.values.currentDiscount
+        formik.values.currentDiscount < 0 || subtotal < formik.values.currentDiscount
           ? 0
           : formik.values.currentDiscount
-      currentPctAmount = (parseFloat(currentTdAmount) / parseFloat(formik.values.subtotal)) * 100
+      currentPctAmount = (parseFloat(currentTdAmount) / parseFloat(subtotal)) * 100
       currentDiscountAmount = currentTdAmount
       formik.setFieldValue('tdPct', currentPctAmount)
       formik.setFieldValue('tdAmount', currentTdAmount)
@@ -834,12 +835,22 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     miscAmount: miscValue
   })
 
+  //const reCalculateValues = () => {
   const totalQty = reCal ? _footerSummary?.totalQty : formik.values?.qty?.toFixed(2) || 0
   const amount = reCal ? _footerSummary?.net : formik.values?.amount || 0
   const totalVolume = reCal ? _footerSummary?.totalVolume : formik.values?.totalVolume || 0
   const totalWeight = reCal ? _footerSummary?.totalWeight : formik.values?.totalWeight || 0
-  const subtotal = reCal ? subTotal : formik.values?.subtotal || 0 || 0
+  const subtotal = reCal ? subTotal : formik.values?.subtotal || 0
   const vatAmount = reCal ? _footerSummary?.sumVat : formik.values?.sumVat || 0
+
+  //   formik.setFieldValue('qty', parseFloat(totalQty).toFixed(2))
+  //   formik.setFieldValue('amount', parseFloat(amount).toFixed(2))
+  //   formik.setFieldValue('volume', parseFloat(totalVolume).toFixed(2))
+  //   formik.setFieldValue('weight', parseFloat(totalWeight).toFixed(2))
+  //   formik.setFieldValue('subtotal', parseFloat(subtotal).toFixed(2))
+  //   formik.setFieldValue('vatAmount', parseFloat(vatAmount).toFixed(2))
+  // }
+  // reCalculateValues()
 
   function checkDiscount(typeChange, tdPct, tdAmount, currentDiscount) {
     const _discountObj = getDiscValues({
@@ -854,13 +865,12 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       typeChange: typeChange
     })
 
-    formik.setFieldValue('tdAmount', _discountObj?.tdAmount?.toFixed(2) || 0)
+    formik.setFieldValue('tdAmount', _discountObj?.hiddenTdAmount?.toFixed(2) || 0)
     formik.setFieldValue('tdType', _discountObj?.tdType)
     formik.setFieldValue('currentDiscount', _discountObj?.currentDiscount || 0)
     formik.setFieldValue('tdPct', _discountObj?.hiddenTdPct)
   }
 
-  // recalcNewVat every row
   function recalcNewVat(tdPct) {
     formik.values.items.map(item => {
       const vatCalcRow = getVatCalc({
@@ -1487,7 +1497,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                     onChange={e => {
                       let discount = Number(e.target.value)
                       if (formik.values.tdType == 1) {
-                        if (discount < 0 || formik.values.subtotal < discount) {
+                        if (discount < 0 || subtotal < discount) {
                           discount = 0
                         }
                         formik.setFieldValue('tdAmount', discount)
@@ -1501,7 +1511,6 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                       let discountAmount = Number(e.target.value)
                       let tdPct = Number(e.target.value)
                       let tdAmount = Number(e.target.value)
-
                       if (formik.values.tdType == 1) {
                         tdPct = (parseFloat(discountAmount) / parseFloat(subtotal)) * 100
                         formik.setFieldValue('tdPct', tdPct)
