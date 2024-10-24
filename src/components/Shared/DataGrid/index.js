@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { AgGridReact } from 'ag-grid-react'
 import { Box, IconButton } from '@mui/material'
 import components from './components'
@@ -6,11 +6,14 @@ import { CacheDataProvider } from 'src/providers/CacheDataContext'
 import 'ag-grid-community/styles/ag-grid.css'
 import 'ag-grid-community/styles/ag-theme-alpine.css'
 import { GridDeleteIcon } from '@mui/x-data-grid'
+import { HIDDEN, accessLevel } from 'src/services/api/maxAccess'
 
 export function DataGrid({
+  name, // maxAccess
   columns,
   value,
   error,
+  maxAccess,
   height,
   onChange,
   disabled = false,
@@ -20,17 +23,23 @@ export function DataGrid({
   const gridApiRef = useRef(null)
 
   const process = (params, oldRow, setData) => {
-    console.log('params', params)
-    const column = columns.find(({ field }) => field === params.field)
+    const column = columns.find(({ name }) => name === params.colDef.field)
 
     const updateRowCommit = changes => {
       setData(changes)
       commit(changes)
     }
+
     if (column.onChange) {
       column.onChange({ row: { oldRow: oldRow, newRow: params.node.data, update: updateRowCommit } })
     }
   }
+
+  useEffect(() => {
+    if (!value?.length && allowAddNewLine) {
+      addNewRow()
+    }
+  }, [value])
 
   const addNewRow = params => {
     const highestIndex = params.node.data.id + 1
@@ -167,6 +176,8 @@ export function DataGrid({
     }
 
     async function update({ field, value }) {
+      const oldRow = params.data
+
       const changes = {
         [field]: value || ''
       }
@@ -176,6 +187,8 @@ export function DataGrid({
       setData(changes)
 
       commit(changes)
+
+      process(params, oldRow, setData) //for onchange columns
     }
 
     const updateRow = ({ changes }) => {
@@ -226,13 +239,15 @@ export function DataGrid({
 
   const ActionCellRenderer = params => {
     const handleMouseOver = () => {
-      if (params.api) {
-        params.api.stopEditing()
-      }
+      // if (params.api) {
+      //   params.api.stopEditing()
+      // }
     }
 
     const handleDelete = () => {
-      gridApiRef.current.applyTransaction({ remove: [params.data] })
+      params.api.stopEditing()
+
+      params.api.applyTransaction({ remove: [params.data] })
 
       const newRows = value?.filter(({ id }) => id !== params.data.id)
 
@@ -275,7 +290,9 @@ export function DataGrid({
           cellRenderer: ActionCellRenderer
         }
       : null
-  ].filter(Boolean)
+  ]
+    .filter(Boolean)
+    .filter(({ name: field }) => accessLevel({ maxAccess, name: `${name}.${field}` }) !== HIDDEN)
 
   const onCellEditingStopped = params => {
     const { data } = params
@@ -309,14 +326,12 @@ export function DataGrid({
               singleClickEdit={true}
               onGridReady={params => {
                 gridApiRef.current = params.api
-
                 onChange(value)
               }}
               onCellKeyDown={onCellKeyDown}
               rowHeight={45}
               onCellEditingStopped={onCellEditingStopped}
               getRowId={params => params?.data?.id}
-              cellValueChanged={params => console.log('params')}
             />
           )}
         </div>
