@@ -28,7 +28,7 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
   const { platformLabels, defaultsData } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: ManufacturingRepository.ProductionSheet.page
+    endpointId: ManufacturingRepository.ProductionSheet.qry
   })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
