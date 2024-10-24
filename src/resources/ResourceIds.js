@@ -284,4 +284,5 @@ export const ResourceIds = {
   LockedRecords: 23302,
   ProductionSheet: 42327,
   InventoryTransaction: 41209,
+  SalesTrxForm: 51307
 }

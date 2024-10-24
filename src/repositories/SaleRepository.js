@@ -161,5 +161,8 @@ export const SaleRepository = {
   FinancialIntegrators: {
     qry: service + 'qryFII',
     set: service + 'setFII'
+  },
+  SATrx: {
+    qry: service + 'qryTRX'
   }
 }

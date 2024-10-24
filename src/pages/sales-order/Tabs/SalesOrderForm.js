@@ -43,6 +43,7 @@ import AddressFilterForm from 'src/components/Shared/AddressFilterForm'
 import { getStorageData } from 'src/storage/storage'
 import { useError } from 'src/error'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
+import SalesTrxForm from 'src/components/Shared/SalesTrxForm'
 
 export default function SalesOrderForm({ labels, access, recordId, currency, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -290,7 +291,8 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
           mdValue: 0,
           taxId: rowTax,
           taxDetails: rowTaxDetails,
-          mdType: 1
+          mdType: 1,
+          saTrx: true
         })
 
         formik.setFieldValue('mdAmount', formik.values.currentDiscount ? formik.values.currentDiscount : 0)
@@ -429,9 +431,23 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       }
     },
     {
-      component: 'numberfield',
+      component: 'button',
+      name: 'saTrx',
       label: labels.salesTrx,
-      name: 'saTrx'
+      onClick: (e, row, update, newRow) => {
+        console.log('newRow ', row)
+        stack({
+          Component: SalesTrxForm,
+          props: {
+            recordId: row?.orderId,
+            functionId: SystemFunction.SalesOrder,
+            itemId: row?.itemId,
+            clientId: row?.clientId
+          },
+          width: 700,
+          title: labels?.salesTrx
+        })
+      }
     },
     {
       component: 'numberfield',
@@ -619,6 +635,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
           upo: parseFloat(item.upo).toFixed(2),
           vatAmount: parseFloat(item.vatAmount).toFixed(2),
           extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
+          saTrx: true,
           taxDetails: taxDetailsResponse
         }
       })
