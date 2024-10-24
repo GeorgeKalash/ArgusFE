@@ -128,9 +128,12 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
   })
 
   const onPost = async () => {
+    const copy = { ...formik.values }
+    delete copy.items
+
     const res = await postRequest({
       extension: ManufacturingRepository.ProductionSheet.post,
-      record: JSON.stringify(formik.values)
+      record: JSON.stringify(copy)
     })
 
     toast.success(platformLabels.Posted)
@@ -147,7 +150,13 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
       condition: true,
       onClick: onPost,
       disabled: !editMode || isPosted
-    }
+    },
+    {
+      key: 'IV',
+      condition: true,
+      onClick: 'onInventoryTransaction',
+      disabled: !editMode || !isPosted
+    },
   ]
 
   const columns = [
