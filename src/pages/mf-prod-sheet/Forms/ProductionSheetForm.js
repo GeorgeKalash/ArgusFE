@@ -286,7 +286,7 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
                 name='reference'
                 label={labels.reference}
                 value={formik.values.reference}
-                readOnly={editMode}
+                readOnly={editMode || isPosted}
                 maxAccess={!editMode && maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('reference', '')}
@@ -299,7 +299,7 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
                 label={labels.date}
                 value={formik?.values?.date}
                 required
-                readOnly={editMode}
+                readOnly={editMode || isPosted}
                 onChange={formik.setFieldValue}
                 onClear={() => formik.setFieldValue('date', '')}
                 error={formik.touched.date && Boolean(formik.errors.date)}
@@ -312,7 +312,7 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
                 name='siteId'
                 required
                 readOnly
-                refresh={editMode}
+                refresh={editMode || isPosted}
                 label={labels.site}
                 values={formik.values}
                 displayField='name'
@@ -334,6 +334,7 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
                 ]}
+                readOnly={isPosted}
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
@@ -362,6 +363,7 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
                   label={labels.notes}
                   value={formik.values.notes}
                   maxLength='100'
+                  readOnly={isPosted}
                   maxAccess={maxAccess}
                   onChange={formik.handleChange}
                   onClear={() => formik.setFieldValue('notes', '')}
