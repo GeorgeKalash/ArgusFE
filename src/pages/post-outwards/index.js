@@ -1,7 +1,6 @@
 import { useState, useEffect, useContext } from 'react'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import Table from 'src/components/Shared/Table'
 import { useResourceQuery } from 'src/hooks/resource'
@@ -14,24 +13,43 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
-import { DataSets } from 'src/resources/DataSets'
 import FormShell from 'src/components/Shared/FormShell'
 import { ControlContext } from 'src/providers/ControlContext'
 import toast from 'react-hot-toast'
+import { formatDateToApi } from 'src/lib/date-helper'
+import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 const Postoutwards = () => {
   const [data, setData] = useState([])
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
+  const formatDate = date => {
+    if (!date) return '1-1-1970'
+
+    const d = new Date(date)
+    const month = d.getMonth() + 1
+    const day = d.getDate()
+    const year = d.getFullYear()
+
+    return `${month}-${day}-${year}`
+  }
+
   const fetchRemittanceData = () => {
     if (!formik.values.countryId) return
+    const formattedFromDate = formatDate(formik.values.fromDate)
+
+    const formattedToDate =
+      formatDate(formik.values.toDate) === '1-1-1970' ? '1-1-2050' : formatDate(formik.values.toDate)
 
     getRequest({
       extension: RemittanceOutwardsRepository.Postoutwards.qry,
       parameters: `_countryId=${formik.values.countryId}&_currencyId=${formik.values.currencyId || 0}&_corId=${
         formik.values.corId || 0
-      }&_dispersalType=${formik.values.dispersalType || 0}`
+      }&_dispersalType=${formik.values.dispersalType || 0}&_fromAmount=${formik.values.fromAmount || 0}&_toAmount=${
+        formik.values.toAmount || 0
+      }&_fromDate=${formattedFromDate}&_todate=${formattedToDate}`
     })
       .then(response => {
         setData(response.list || [])
@@ -53,8 +71,11 @@ const Postoutwards = () => {
     initialValues: {
       countryId: '',
       currencyId: '',
+      fromAmount: '',
       corId: '',
-      dispersalType: ''
+      dispersalType: '',
+      fromDate: '',
+      toDate: ''
     },
     access,
     enableReinitialize: true,
@@ -77,6 +98,8 @@ const Postoutwards = () => {
       toast.success(platformLabels.Posted)
     }
   })
+  console.log(formik.values, 'formikkkk')
+  console.log(formatDateToApi(formik.values.date), 'dateeeeeeeeeee')
 
   const rowColumns = [
     {
@@ -116,7 +139,16 @@ const Postoutwards = () => {
 
   useEffect(() => {
     fetchRemittanceData()
-  }, [formik.values.countryId, formik.values.currencyId, formik.values.corId, formik.values.dispersalType])
+  }, [
+    formik.values.countryId,
+    formik.values.currencyId,
+    formik.values.corId,
+    formik.values.dispersalType,
+    formik.values.fromDate,
+    formik.values.toDate,
+    formik.values.fromAmount,
+    formik.values.toAmount
+  ])
 
   return (
     <FormShell
@@ -182,6 +214,26 @@ const Postoutwards = () => {
                     }}
                   />
                 </Grid>
+                <Grid item xs={10}>
+                  <CustomNumberField
+                    name='fromAmount'
+                    label={_labels.fromAmount}
+                    value={formik.values.fromAmount}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('fromAmount', '')}
+                    decimalScale={2}
+                  />
+                </Grid>
+                <Grid item xs={10}>
+                  <CustomNumberField
+                    name='toAmount'
+                    label={_labels.toAmount}
+                    value={formik.values.toAmount}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('toAmount', '')}
+                    decimalScale={2}
+                  />
+                </Grid>
               </Grid>
             </Grid>
 
@@ -226,6 +278,28 @@ const Postoutwards = () => {
                     onChange={(event, newValue) => {
                       formik.setFieldValue('dispersalType', newValue?.key)
                     }}
+                  />
+                </Grid>
+                <Grid item xs={10}>
+                  <CustomDatePicker
+                    name='fromDate'
+                    max={formik.values.toDate}
+                    label={_labels.fromDate}
+                    value={formik?.values?.fromDate}
+                    onChange={formik.setFieldValue}
+                    onClear={() => formik.setFieldValue('fromDate', '')}
+                    error={false}
+                  />
+                </Grid>
+                <Grid item xs={10}>
+                  <CustomDatePicker
+                    name='toDate'
+                    min={formik.values.fromDate}
+                    label={_labels.toDate}
+                    value={formik?.values?.toDate}
+                    onChange={formik.setFieldValue}
+                    onClear={() => formik.setFieldValue('toDate', '')}
+                    error={false}
                   />
                 </Grid>
               </Grid>
