@@ -111,6 +111,10 @@ export const RemittanceOutwardsRepository = {
     set: service + 'setAPX',
     del: service + 'delAPX'
   },
+  AutoPostExclusionPlants: {
+    get2: service + 'get2APXP',
+    set2: service + 'set2APXP'
+  },
   OutwardsModification: {
     qry: service + 'qryOWM',
     page: service + 'pageOWM',
