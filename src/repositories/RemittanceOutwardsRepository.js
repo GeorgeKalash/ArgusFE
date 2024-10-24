@@ -123,7 +123,7 @@ export const RemittanceOutwardsRepository = {
     close: service + 'closeOWM'
   },
   Postoutwards: {
-    qry: service + 'qryOW3',
+    qry: service + 'qryOWT3',
     post2: service + 'post2OW'
   },
   OutwardsReturn: {

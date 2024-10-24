@@ -1,7 +1,6 @@
 import { useState, useEffect, useContext } from 'react'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import Table from 'src/components/Shared/Table'
 import { useResourceQuery } from 'src/hooks/resource'
@@ -14,24 +13,42 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
-import { DataSets } from 'src/resources/DataSets'
 import FormShell from 'src/components/Shared/FormShell'
 import { ControlContext } from 'src/providers/ControlContext'
 import toast from 'react-hot-toast'
+import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 const Postoutwards = () => {
   const [data, setData] = useState([])
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
+  const formatDate = date => {
+    if (!date) return '1-1-1970'
+
+    const d = new Date(date)
+    const month = d.getMonth() + 1
+    const day = d.getDate()
+    const year = d.getFullYear()
+
+    return `${month}-${day}-${year}`
+  }
+
   const fetchRemittanceData = () => {
     if (!formik.values.countryId) return
+    const formattedFromDate = formatDate(formik.values.fromDate)
+
+    const formattedToDate =
+      formatDate(formik.values.toDate) === '1-1-1970' ? '1-1-2050' : formatDate(formik.values.toDate)
 
     getRequest({
       extension: RemittanceOutwardsRepository.Postoutwards.qry,
       parameters: `_countryId=${formik.values.countryId}&_currencyId=${formik.values.currencyId || 0}&_corId=${
         formik.values.corId || 0
-      }&_dispersalType=${formik.values.dispersalType || 0}`
+      }&_dispersalType=${formik.values.dispersalType || 0}&_fromAmount=${formik.values.fromAmount || 0}&_toAmount=${
+        formik.values.toAmount || 0
+      }&_fromDate=${formattedFromDate}&_todate=${formattedToDate}`
     })
       .then(response => {
         setData(response.list || [])
@@ -53,8 +70,13 @@ const Postoutwards = () => {
     initialValues: {
       countryId: '',
       currencyId: '',
+      fromAmount: '',
       corId: '',
-      dispersalType: ''
+      dispersalType: '',
+      totalFc: '',
+      totalAm: '',
+      fromDate: '',
+      toDate: ''
     },
     access,
     enableReinitialize: true,
@@ -107,6 +129,12 @@ const Postoutwards = () => {
       flex: 1
     },
     {
+      field: 'fcAmount',
+      headerName: _labels.fcAmount,
+      flex: 1,
+      type: 'number'
+    },
+    {
       field: 'amount',
       headerName: _labels.amount,
       flex: 1,
@@ -115,8 +143,42 @@ const Postoutwards = () => {
   ]
 
   useEffect(() => {
+    console.log('Data list:', data) // Log data to see if rows are populated
     fetchRemittanceData()
-  }, [formik.values.countryId, formik.values.currencyId, formik.values.corId, formik.values.dispersalType])
+  }, [
+    formik.values.countryId,
+    formik.values.currencyId,
+    formik.values.corId,
+    formik.values.dispersalType,
+    formik.values.fromDate,
+    formik.values.toDate,
+    formik.values.fromAmount,
+    formik.values.toAmount
+  ])
+
+  function calcFc() {
+    const totalFc =
+      formik.values.countryId && formik.values.currencyId
+        ? data?.reduce((sumAmount, row) => {
+            let curValue = 0
+            if (row.checked) curValue = parseFloat(row.fcAmount.toString().replace(/,/g, '')) || 0
+
+            return sumAmount + curValue
+          }, 0)
+        : 0
+
+    const totalAm =
+      formik.values.countryId && formik.values.currencyId
+        ? data?.reduce((sumAmount, row) => {
+            let curValue = 0
+            if (row.checked) curValue = parseFloat(row.amount.toString().replace(/,/g, '')) || 0
+
+            return sumAmount + curValue
+          }, 0)
+        : 0
+    formik.setFieldValue('totalFc', totalFc)
+    formik.setFieldValue('totalAm', totalAm)
+  }
 
   return (
     <FormShell
@@ -182,6 +244,26 @@ const Postoutwards = () => {
                     }}
                   />
                 </Grid>
+                <Grid item xs={10}>
+                  <CustomNumberField
+                    name='fromAmount'
+                    label={_labels.fromAmount}
+                    value={formik.values.fromAmount}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('fromAmount', '')}
+                    decimalScale={2}
+                  />
+                </Grid>
+                <Grid item xs={10}>
+                  <CustomNumberField
+                    name='toAmount'
+                    label={_labels.toAmount}
+                    value={formik.values.toAmount}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('toAmount', '')}
+                    decimalScale={2}
+                  />
+                </Grid>
               </Grid>
             </Grid>
 
@@ -228,6 +310,28 @@ const Postoutwards = () => {
                     }}
                   />
                 </Grid>
+                <Grid item xs={10}>
+                  <CustomDatePicker
+                    name='fromDate'
+                    max={formik.values.toDate}
+                    label={_labels.fromDate}
+                    value={formik?.values?.fromDate}
+                    onChange={formik.setFieldValue}
+                    onClear={() => formik.setFieldValue('fromDate', '')}
+                    error={false}
+                  />
+                </Grid>
+                <Grid item xs={10}>
+                  <CustomDatePicker
+                    name='toDate'
+                    min={formik.values.fromDate}
+                    label={_labels.toDate}
+                    value={formik?.values?.toDate}
+                    onChange={formik.setFieldValue}
+                    onClear={() => formik.setFieldValue('toDate', '')}
+                    error={false}
+                  />
+                </Grid>
               </Grid>
             </Grid>
           </Grid>
@@ -244,9 +348,32 @@ const Postoutwards = () => {
             refetch={refetch}
             isLoading={false}
             maxAccess={access}
+            handleCheckboxChange={calcFc}
             showCheckboxColumn={true}
           />
         </Grow>
+        <Fixed>
+          <Grid container justifyContent='flex-end' spacing={2} sx={{ px: 2, ml: -14 }}>
+            <Grid item xs={1.2}>
+              <CustomNumberField
+                name='totalFc'
+                label={_labels.totalFc}
+                value={formik.values.totalFc}
+                readOnly={true}
+                hidden={!(formik.values.countryId && formik.values.currencyId)}
+              />
+            </Grid>
+            <Grid item xs={1.2}>
+              <CustomNumberField
+                name='totalAm'
+                label={_labels.totalAm}
+                value={formik.values.totalAm}
+                readOnly={true}
+                hidden={!(formik.values.countryId && formik.values.currencyId)}
+              />
+            </Grid>
+          </Grid>
+        </Fixed>
       </VertLayout>
     </FormShell>
   )
