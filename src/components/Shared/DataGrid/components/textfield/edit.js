@@ -3,7 +3,7 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 export default function TextFieldEdit({ column: { props, ...column }, id, field, value, update }) {
   return (
     <CustomTextField
-      value={value}
+      value={value || undefined}
       label={''}
       autoFocus
       hasBorder={false}

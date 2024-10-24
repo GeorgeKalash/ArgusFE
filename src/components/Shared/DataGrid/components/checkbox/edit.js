@@ -1,4 +1,3 @@
-// import Checkbox from '@material-ui/core/Checkbox';
 import { Checkbox } from '@mui/material'
 
 export default function checkBoxEdit({ id, field, value, update, row, column: { props } }) {
