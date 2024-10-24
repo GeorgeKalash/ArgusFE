@@ -88,6 +88,9 @@ const OpeningCost = () => {
       props: {
         labels: _labels,
         record,
+        recordId: record
+          ? String(record.year) + String(record.itemId)
+          : null,
         maxAccess: access
       },
       width: 550,

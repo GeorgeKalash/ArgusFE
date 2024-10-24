@@ -269,6 +269,8 @@ export const ResourceIds = {
   EmployeeFilter: 71201,
   FinancialIntegrators: 51105,
   SalesDefaults: 51114,
+  IVPhysicalCountItem: 44202,
+  FE_MetalSummaryControl: 41601,
   FIAging: 31405,
   Barcodes: 41230,
   MetalColor: 41110,
@@ -279,5 +281,6 @@ export const ResourceIds = {
   MetalColor: 41110,
   InventoryOpeningCosts: 41203,
   OpenMultiCurrencyCashTransfer: 33315,
-  LockedRecords: 23302
+  LockedRecords: 23302,
+  ProductionSheet: 42327,
 }

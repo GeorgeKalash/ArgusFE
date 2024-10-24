@@ -17,11 +17,9 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 
-export default function OpeningCostForm({ labels, maxAccess, record }) {
+export default function OpeningCostForm({ labels, maxAccess, record, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-
-  const recordId = String(record?.year) + String(record?.itemId) || null;
 
   const invalidate = useInvalidate({
     endpointId: InventoryRepository.OpeningCost.qry
@@ -87,9 +85,7 @@ export default function OpeningCostForm({ labels, maxAccess, record }) {
       maxAccess={maxAccess} 
       editMode={editMode}
       infoVisible={false}
-      isSavedClear={false}
       isInfo={false}
-      isCleared={false}
     >
       <VertLayout>
         <Grow>
