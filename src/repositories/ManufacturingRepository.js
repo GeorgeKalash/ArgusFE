@@ -128,5 +128,12 @@ export const ManufacturingRepository = {
     set: service + 'setPSI',
     get: service + 'getPSI',
     del: service + 'delPSI'
+  },
+  DocumentTypeDefault: {
+    qry: service + 'qryDTD',
+    get: service + 'getDTD',
+    set: service + 'setDTD',
+    del: service + 'delDTD',
+    page: service + 'pageDTD'
   }
 }
