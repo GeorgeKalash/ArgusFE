@@ -121,7 +121,13 @@ export function DataGrid({
       })
 
     const column = Cols?.find(item => item.name == params.field)
-    if (event.key == 'Tab' && column?.props?.jumpToNextLine && nextCell.rowIndex === rowIds.length - 1) {
+    if (
+      event.key == 'Tab' &&
+      column?.props?.jumpToNextLine &&
+      nextCell.rowIndex === rowIds.length - 1 &&
+      !error &&
+      allowAddNewLine
+    ) {
       addRow()
     }
 
@@ -145,7 +151,7 @@ export function DataGrid({
       const rowIds = gridExpandedSortedRowIdsSelector(apiRef.current.state)
       const columns = apiRef.current.getVisibleColumns()
 
-      if (event.key == 'Tab' && column?.props?.jumpToNextLine) {
+      if (event.key == 'Tab' && column?.props?.jumpToNextLine && !error && allowAddNewLine) {
         nextCell.rowIndex += 1
       } else {
         if (!event.shiftKey) {

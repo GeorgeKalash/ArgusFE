@@ -78,6 +78,7 @@ export const InventoryRepository = {
     page: service + 'pageIT',
     qry: service + 'qryIT',
     get: service + 'getIT',
+    get2: service + 'getIT2',
     set: service + 'setIT',
     del: service + 'delIT',
     snapshot: service + 'snapshotIT2'
@@ -159,7 +160,7 @@ export const InventoryRepository = {
     get: service + 'getMTC',
     set: service + 'setMTC',
     qry: service + 'qryMTC',
-    del: service + 'delMTC',
+    del: service + 'delMTC'
   },
   Kit: {
     set: service + 'set2KIT',
@@ -187,6 +188,6 @@ export const InventoryRepository = {
     qry: service + 'qryOC'
   },
   Transaction: {
-    qry2: service + 'qry2TRX',
-  },
+    qry2: service + 'qry2TRX'
+  }
 }
