@@ -247,26 +247,36 @@ const PhysicalCountItemDe = () => {
         // update({
         //   countedQty: 1
         // })
+
         console.log('rows', oldRow)
         console.log(newRow)
         let itemId
 
         if (disSkuLookup) {
-          const txtRes = await getRequest({
+          /*  */
+          /* const txtRes = await getRequest({
             extension: InventoryRepository.Items.get2,
             parameters: `_sku=${newRow?.sku}`
           })
           itemId = txtRes?.record?.recordId ? txtRes?.record?.recordId : ''
+
           update({
             itemId: itemId,
             itemName: txtRes?.record?.name ? txtRes?.record?.name : '',
             priceType: txtRes?.record?.metalId ? txtRes?.record?.priceType : 0
-          })
+          }) */
         } else {
           itemId = newRow?.itemId
           if (disableItemDuplicate) {
             if (formik.values.rows.find(item => item.itemId == itemId)) {
               console.log('in')
+
+              update({
+                itemId: null,
+                itemName: '',
+                sku: null,
+                priceType: null
+              }) // not clearing
 
               /* const duplicateIndex = formik.values.rows.findIndex(item => item.itemId === itemId)
               if (duplicateIndex !== -1) {
@@ -276,13 +286,6 @@ const PhysicalCountItemDe = () => {
               /* const newRows = formik.values.rows.filter(({ id }) => id !== newRow.id)
               formik.setFieldValue('rows', newRows) */
             }
-
-            update({
-              itemId: null,
-              itemName: '',
-              sku: '',
-              priceType: null
-            })
 
             /* console.log(formik.values.rows[1])
               console.log(`${formik.values.rows[1]}`)
@@ -311,6 +314,37 @@ const PhysicalCountItemDe = () => {
             metalId: res?.record?.metalId ? res?.record?.metalId : null,
             isMetal: res?.record?.isMetal ? res?.record?.isMetal : null
           })
+        }
+      },
+      async onKeyDown(e, id, update) {
+        if (disSkuLookup && e.code == 'Tab') {
+          /* if (disableItemDuplicate) {
+            console.log('E', e.target.value.toString())
+            console.log(formik.values.rows)
+            if (formik.values.rows.find(item => item.sku == e.target.value.toString())) {
+              console.log('in', e)
+              update({
+                id: id,
+                field: 'sku',
+                value: ''
+              })
+
+              return
+            }
+          }  */ // done but opening new line
+
+          const txtRes = await getRequest({
+            extension: InventoryRepository.Items.get2,
+            parameters: `_sku=${e.target.value}`
+          })
+          const itemId = txtRes?.record?.recordId ? txtRes?.record?.recordId : ''
+
+          /* update({
+            itemId: itemId,
+            itemName: txtRes?.record?.name ? txtRes?.record?.name : '',
+            priceType: txtRes?.record?.metalId ? txtRes?.record?.priceType : 0
+          }) */
+          console.log('update', update)
         }
       }
 

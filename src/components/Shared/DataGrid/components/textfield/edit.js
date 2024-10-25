@@ -1,6 +1,6 @@
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 
-export default function TextFieldEdit({ column: { props, ...column }, id, field, value, update }) {
+export default function TextFieldEdit({ column: { props, ...column }, id, field, value, update, updateRow }) {
   return (
     <CustomTextField
       value={value}
@@ -14,14 +14,14 @@ export default function TextFieldEdit({ column: { props, ...column }, id, field,
           value: ''
         })
       }
-      onBlur={(e) => {
+      onBlur={e => {
         if (column?.onBlur) {
-          column?.onBlur(e, id);
+          column?.onBlur(e, id)
         }
       }}
-      onKeyDown={(e) => {
+      onKeyDown={e => {
         if (column?.onKeyDown) {
-          column?.onKeyDown(e, id);
+          column?.onKeyDown(e, id, updateRow)
         }
       }}
       onChange={e => {
