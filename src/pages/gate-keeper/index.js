@@ -10,16 +10,19 @@ import Table from 'src/components/Shared/Table'
 const GateKeeper = () => {
   const { getRequest } = useContext(RequestsContext)
 
-  const { 
-    query: { data }, 
-    labels: _labels, 
+  const {
+    query: { data },
+    labels: _labels,
     access,
     refetch,
     paginationParameters
   } = useResourceQuery({
-    queryFn: fetchGridData,
     endpointId: ManufacturingRepository.LeanProductionPlanning.preview,
-    datasetId: ResourceIds.GateKeeper
+    datasetId: ResourceIds.GateKeeper,
+    filter: {
+      filterFn: fetchGridData,
+      default: { status: 2 }
+    }
   })
 
   async function fetchGridData() {
@@ -31,7 +34,7 @@ const GateKeeper = () => {
     if (response && response?.list) {
       response.list = response?.list?.map(item => ({
         ...item,
-        balance: item.qty - (item.qtyProduced ?? 0),
+        balance: item.qty - (item.qtyProduced ?? 0)
       }))
     }
 
@@ -42,12 +45,12 @@ const GateKeeper = () => {
     {
       field: 'sku',
       headerName: _labels[1],
-      flex: 1,
+      flex: 1
     },
     {
       field: 'qty',
       headerName: _labels[2],
-      flex: 1,
+      flex: 1
     },
     {
       field: 'qtyProduced',
