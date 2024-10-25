@@ -43,16 +43,27 @@ const OutwardsCorrespondent = () => {
       type: 'date'
     },
     {
+      field: 'countryRef',
+      headerName: labels.country,
+      flex: 1
+    },
+    {
       field: 'currencyRef',
-      headerName: labels.currency
+      headerName: labels.currency,
+      flex: 1
+    },
+    {
+      field: 'dispersalName',
+      headerName: labels.dispersalType,
+      flex: 1
     },
     {
       field: 'clientName',
       headerName: labels.client
     },
     {
-      field: 'lcAmount',
-      headerName: labels.lcAmount
+      field: 'fcAmount',
+      headerName: labels.fcAmount
     },
     {
       field: 'amount',
@@ -324,7 +335,7 @@ const OutwardsCorrespondent = () => {
         </Grow>
         <Fixed>
           <Grid container justifyContent='flex-end' spacing={2} sx={{ px: 2 }}>
-            <Grid item xs={1.6}>
+            <Grid item xs={1.2}>
               <CustomNumberField
                 name='totalFc'
                 label={labels.totalFc}
@@ -333,7 +344,7 @@ const OutwardsCorrespondent = () => {
                 hidden={!(formik.values.countryId && formik.values.currencyId)}
               />
             </Grid>
-            <Grid item xs={1.6}>
+            <Grid item xs={1.2}>
               <CustomNumberField name='totalAm' label={labels.totalAm} value={formik.values.totalAm} readOnly={true} />
             </Grid>
           </Grid>
