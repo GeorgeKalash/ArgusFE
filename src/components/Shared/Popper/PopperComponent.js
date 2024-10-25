@@ -44,19 +44,14 @@ const PopperComponent = ({ children, anchorEl, open, ...props }) => {
       sx={{
         zIndex: '2 !important',
         visibility: open ? 'visible' : 'hidden',
-        '& .MuiDateCalendar-root': {
-          height: 300
-        },
         '& .MuiMultiSectionDigitalClock-root': {
-          width: '200px',
-          height: '300px'
+          width: '200px'
         },
         '& .MuiMenuItem-root': {
           paddingRight: '10px'
         }
       }}
       style={{
-        height: '190px',
         position: 'absolute',
         top: rect?.bottom / zoom,
         left: rect?.left / zoom,
