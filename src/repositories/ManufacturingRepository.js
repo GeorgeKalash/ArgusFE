@@ -64,9 +64,9 @@ export const ManufacturingRepository = {
     del: service + 'delMAS'
   },
   LeanProductionPlanning: {
-    preview: service + 'previewLEAN',
-    update: service + 'updateLEAN',
-    del: service + 'delLEAN'
+    preview: service + 'previewPQ',
+    update: service + 'updatePQ',
+    del: service + 'delPQ'
   },
   MaterialsAdjustment: {
     generate: service + 'generateADJ'
