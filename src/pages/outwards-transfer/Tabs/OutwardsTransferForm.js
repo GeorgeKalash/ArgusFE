@@ -258,329 +258,325 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
               </Grid>
             </Grid>
             <Grid item xs={12}>
-              <Grid container xs={12}>
+              <Grid container spacing={2} xs={12}>
                 <Grid item xs={4.5}>
                   <FieldSet title='Transaction Details'>
-                    <Grid container xs={12} spacing={2}>
-                      <Grid item xs={12}>
-                        <ResourceComboBox
-                          endpointId={RemittanceOutwardsRepository.Country.qry}
-                          name='countryId'
-                          label={labels.Country}
-                          required
-                          readOnly
-                          displayField={['countryRef', 'countryName']}
-                          columnsInDropDown={[
-                            { key: 'countryRef', value: 'Reference' },
-                            { key: 'countryName', value: 'Name' }
-                          ]}
-                          valueField='countryId'
-                          values={formik.values}
-                        />
-                      </Grid>
-                      <Grid item xs={12}>
-                        <ResourceComboBox
-                          endpointId={formik.values.countryId && RemittanceOutwardsRepository.DispersalType.qry}
-                          parameters={formik.values.countryId && `_countryId=${formik.values.countryId}`}
-                          label={labels.DispersalType}
-                          required
-                          readOnly
-                          name='dispersalType'
-                          displayField='dispersalTypeName'
-                          valueField='dispersalType'
-                          values={formik.values}
-                        />
-                      </Grid>
-                      <Grid item xs={12}>
-                        <ResourceComboBox
-                          endpointId={
-                            formik.values.countryId &&
-                            formik.values.dispersalType &&
-                            RemittanceOutwardsRepository.Currency.qry
-                          }
-                          parameters={`_dispersalType=${formik.values.dispersalType}&_countryId=${formik.values.countryId}`}
-                          label={labels.Currency}
-                          required
-                          name='currencyId'
-                          displayField={['currencyRef', 'currencyName']}
-                          columnsInDropDown={[
-                            { key: 'currencyRef', value: 'Reference' },
-                            { key: 'currencyName', value: 'Name' }
-                          ]}
-                          valueField='currencyId'
-                          values={formik.values}
-                          readOnly
-                        />
-                      </Grid>
-                      <Grid item xs={12}>
-                        <CustomNumberField
-                          name='fcAmount'
-                          label={labels.fcAmount}
-                          value={formik.values.fcAmount}
-                          required
-                          allowClear={false}
-                          readOnly
-                          maxAccess={maxAccess}
-                          maxLength={10}
-                        />
-                      </Grid>
-                      <Grid item xs={12}>
-                        <CustomNumberField
-                          name='lcAmount'
-                          label={labels.lcAmount}
-                          value={formik.values.lcAmount}
-                          required
-                          allowClear={false}
-                          readOnly
-                          maxAccess={maxAccess}
-                          maxLength={10}
-                        />
-                      </Grid>
-                      <Grid item xs={12}>
-                        <Grid container xs={12} spacing={2}>
-                          <Grid item xs={6}>
-                            <CustomTextField
-                              name='corRef'
-                              label={labels.corRef}
-                              value={formik.values?.corRef}
-                              readOnly
-                              required={formik.values.corId}
-                              maxAccess={maxAccess}
-                            />
-                          </Grid>
-                          <Grid item xs={6}>
-                            <CustomTextField
-                              name='corName'
-                              label={labels.corName}
-                              value={formik.values?.corName}
-                              readOnly
-                              required={formik.values.corId}
-                              maxAccess={maxAccess}
-                            />
-                          </Grid>
+                    <Grid item xs={12}>
+                      <ResourceComboBox
+                        endpointId={RemittanceOutwardsRepository.Country.qry}
+                        name='countryId'
+                        label={labels.Country}
+                        required
+                        readOnly
+                        displayField={['countryRef', 'countryName']}
+                        columnsInDropDown={[
+                          { key: 'countryRef', value: 'Reference' },
+                          { key: 'countryName', value: 'Name' }
+                        ]}
+                        valueField='countryId'
+                        values={formik.values}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <ResourceComboBox
+                        endpointId={formik.values.countryId && RemittanceOutwardsRepository.DispersalType.qry}
+                        parameters={formik.values.countryId && `_countryId=${formik.values.countryId}`}
+                        label={labels.DispersalType}
+                        required
+                        readOnly
+                        name='dispersalType'
+                        displayField='dispersalTypeName'
+                        valueField='dispersalType'
+                        values={formik.values}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <ResourceComboBox
+                        endpointId={
+                          formik.values.countryId &&
+                          formik.values.dispersalType &&
+                          RemittanceOutwardsRepository.Currency.qry
+                        }
+                        parameters={`_dispersalType=${formik.values.dispersalType}&_countryId=${formik.values.countryId}`}
+                        label={labels.Currency}
+                        required
+                        name='currencyId'
+                        displayField={['currencyRef', 'currencyName']}
+                        columnsInDropDown={[
+                          { key: 'currencyRef', value: 'Reference' },
+                          { key: 'currencyName', value: 'Name' }
+                        ]}
+                        valueField='currencyId'
+                        values={formik.values}
+                        readOnly
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <CustomNumberField
+                        name='fcAmount'
+                        label={labels.fcAmount}
+                        value={formik.values.fcAmount}
+                        required
+                        allowClear={false}
+                        readOnly
+                        maxAccess={maxAccess}
+                        maxLength={10}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <CustomNumberField
+                        name='lcAmount'
+                        label={labels.lcAmount}
+                        value={formik.values.lcAmount}
+                        required
+                        allowClear={false}
+                        readOnly
+                        maxAccess={maxAccess}
+                        maxLength={10}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Grid container xs={12} spacing={2}>
+                        <Grid item xs={6}>
+                          <CustomTextField
+                            name='corRef'
+                            label={labels.corRef}
+                            value={formik.values?.corRef}
+                            readOnly
+                            required={formik.values.corId}
+                            maxAccess={maxAccess}
+                          />
+                        </Grid>
+                        <Grid item xs={6}>
+                          <CustomTextField
+                            name='corName'
+                            label={labels.corName}
+                            value={formik.values?.corName}
+                            readOnly
+                            required={formik.values.corId}
+                            maxAccess={maxAccess}
+                          />
                         </Grid>
                       </Grid>
-                      <Grid item xs={12}>
-                        <Grid container xs={12} spacing={2}>
-                          <Grid item xs={6}>
-                            <CustomNumberField
-                              name='exRate'
-                              label={labels.exRateMultiply}
-                              value={formik.values.exRate}
-                              required
-                              readOnly
-                              decimalScale={5}
-                              maxAccess={maxAccess}
-                              maxLength={10}
-                            />
-                          </Grid>
-                          <Grid item xs={6}>
-                            <CustomNumberField
-                              name='exRate2'
-                              decimalScale={5}
-                              label={labels.exRateDivide}
-                              value={formik.values?.exRate ? 1 / formik.values.exRate : ''}
-                              required
-                              readOnly
-                              maxAccess={maxAccess}
-                              maxLength={10}
-                            />
-                          </Grid>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Grid container xs={12} spacing={2}>
+                        <Grid item xs={6}>
+                          <CustomNumberField
+                            name='exRate'
+                            label={labels.exRateMultiply}
+                            value={formik.values.exRate}
+                            required
+                            readOnly
+                            decimalScale={5}
+                            maxAccess={maxAccess}
+                            maxLength={10}
+                          />
+                        </Grid>
+                        <Grid item xs={6}>
+                          <CustomNumberField
+                            name='exRate2'
+                            decimalScale={5}
+                            label={labels.exRateDivide}
+                            value={formik.values?.exRate ? 1 / formik.values.exRate : ''}
+                            required
+                            readOnly
+                            maxAccess={maxAccess}
+                            maxLength={10}
+                          />
                         </Grid>
                       </Grid>
-                      <Grid item xs={12}>
-                        <CustomNumberField
-                          name='commission'
-                          label={labels.commission}
-                          value={formik.values.commission}
-                          required
-                          readOnly
-                          maxAccess={maxAccess}
-                          maxLength={10}
-                        />
-                      </Grid>
-                      <Grid item xs={12}>
-                        <CustomNumberField
-                          name='vatAmount'
-                          label={labels.vatRate}
-                          value={vatAmount}
-                          readOnly
-                          maxAccess={maxAccess}
-                          maxLength={10}
-                        />
-                      </Grid>
-                      <Grid item xs={12}>
-                        <CustomNumberField
-                          name='tdAmount'
-                          label={labels.discount}
-                          value={formik.values.tdAmount}
-                          maxAccess={maxAccess}
-                          readOnly
-                          maxLength={10}
-                        />
-                      </Grid>
-                      <Grid item xs={12}>
-                        <CustomNumberField
-                          name='amount'
-                          label={labels.NetToPay}
-                          value={amount}
-                          required
-                          readOnly
-                          maxAccess={maxAccess}
-                          maxLength={10}
-                        />
-                      </Grid>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <CustomNumberField
+                        name='commission'
+                        label={labels.commission}
+                        value={formik.values.commission}
+                        required
+                        readOnly
+                        maxAccess={maxAccess}
+                        maxLength={10}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <CustomNumberField
+                        name='vatAmount'
+                        label={labels.vatRate}
+                        value={vatAmount}
+                        readOnly
+                        maxAccess={maxAccess}
+                        maxLength={10}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <CustomNumberField
+                        name='tdAmount'
+                        label={labels.discount}
+                        value={formik.values.tdAmount}
+                        maxAccess={maxAccess}
+                        readOnly
+                        maxLength={10}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <CustomNumberField
+                        name='amount'
+                        label={labels.NetToPay}
+                        value={amount}
+                        required
+                        readOnly
+                        maxAccess={maxAccess}
+                        maxLength={10}
+                      />
                     </Grid>
                   </FieldSet>
                 </Grid>
                 <Grid item xs={7.5}>
                   <FieldSet title='Client Details'>
-                    <Grid container xs={12} spacing={2}>
-                      <Grid item xs={12}>
-                        <ResourceLookup
-                          endpointId={CTCLRepository.ClientCorporate.snapshot}
-                          parameters={{
-                            _category: 0
-                          }}
-                          valueField='reference'
-                          displayField='name'
-                          name='clientId'
-                          label={labels.Client}
-                          form={formik}
-                          required
-                          readOnly
-                          displayFieldWidth={2}
-                          valueShow='clientRef'
-                          secondValueShow='clientName'
-                          maxAccess={maxAccess}
-                          editMode={true}
-                        />
-                      </Grid>
-                      <Grid item xs={12}>
-                        <Grid container xs={12} spacing={2}>
-                          <Grid item xs={3}>
-                            <CustomTextField
-                              name='firstName'
-                              label={labels.firstName}
-                              value={formik.values?.firstName}
-                              readOnly
-                              maxLength='20'
-                              maxAccess={maxAccess}
-                            />
-                          </Grid>
-                          <Grid item xs={3}>
-                            <CustomTextField
-                              name='middleName'
-                              label={labels.middleName}
-                              value={formik.values?.middleName}
-                              readOnly
-                              maxLength='20'
-                              maxAccess={maxAccess}
-                            />
-                          </Grid>
-                          <Grid item xs={3}>
-                            <CustomTextField
-                              name='lastName'
-                              label={labels.lastName}
-                              value={formik.values?.lastName}
-                              readOnly
-                              maxLength='20'
-                              maxAccess={maxAccess}
-                            />
-                          </Grid>
-                          <Grid item xs={3}>
-                            <CustomTextField
-                              name='familyName'
-                              label={labels.familyName}
-                              value={formik.values?.familyName}
-                              readOnly
-                              maxLength='20'
-                              maxAccess={maxAccess}
-                            />
-                          </Grid>
+                    <Grid item xs={12}>
+                      <ResourceLookup
+                        endpointId={CTCLRepository.ClientCorporate.snapshot}
+                        parameters={{
+                          _category: 0
+                        }}
+                        valueField='reference'
+                        displayField='name'
+                        name='clientId'
+                        label={labels.Client}
+                        form={formik}
+                        required
+                        readOnly
+                        displayFieldWidth={2}
+                        valueShow='clientRef'
+                        secondValueShow='clientName'
+                        maxAccess={maxAccess}
+                        editMode={true}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Grid container xs={12} spacing={2}>
+                        <Grid item xs={3}>
+                          <CustomTextField
+                            name='firstName'
+                            label={labels.firstName}
+                            value={formik.values?.firstName}
+                            readOnly
+                            maxLength='20'
+                            maxAccess={maxAccess}
+                          />
+                        </Grid>
+                        <Grid item xs={3}>
+                          <CustomTextField
+                            name='middleName'
+                            label={labels.middleName}
+                            value={formik.values?.middleName}
+                            readOnly
+                            maxLength='20'
+                            maxAccess={maxAccess}
+                          />
+                        </Grid>
+                        <Grid item xs={3}>
+                          <CustomTextField
+                            name='lastName'
+                            label={labels.lastName}
+                            value={formik.values?.lastName}
+                            readOnly
+                            maxLength='20'
+                            maxAccess={maxAccess}
+                          />
+                        </Grid>
+                        <Grid item xs={3}>
+                          <CustomTextField
+                            name='familyName'
+                            label={labels.familyName}
+                            value={formik.values?.familyName}
+                            readOnly
+                            maxLength='20'
+                            maxAccess={maxAccess}
+                          />
                         </Grid>
                       </Grid>
-                      <Grid item xs={12}>
-                        <Grid container xs={12} spacing={2}>
-                          <Grid item xs={3}>
-                            <CustomTextField
-                              name='fl_firstName'
-                              label={labels.flFirstName}
-                              value={formik.values?.fl_firstName}
-                              readOnly
-                              maxLength='20'
-                              dir='rtl'
-                              maxAccess={maxAccess}
-                            />
-                          </Grid>
-                          <Grid item xs={3}>
-                            <CustomTextField
-                              name='fl_middleName'
-                              label={labels.flMiddleName}
-                              value={formik.values?.fl_middleName}
-                              readOnly
-                              maxLength='20'
-                              dir='rtl'
-                              maxAccess={maxAccess}
-                            />
-                          </Grid>
-                          <Grid item xs={3}>
-                            <CustomTextField
-                              name='fl_lastName'
-                              label={labels.flLastName}
-                              value={formik.values?.fl_lastName}
-                              readOnly
-                              maxLength='20'
-                              dir='rtl'
-                              maxAccess={maxAccess}
-                            />
-                          </Grid>
-                          <Grid item xs={3}>
-                            <CustomTextField
-                              name='fl_familyName'
-                              label={labels.flFamilyName}
-                              value={formik.values?.fl_familyName}
-                              readOnly
-                              maxLength='20'
-                              dir='rtl'
-                              maxAccess={maxAccess}
-                            />
-                          </Grid>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Grid container xs={12} spacing={2}>
+                        <Grid item xs={3}>
+                          <CustomTextField
+                            name='fl_firstName'
+                            label={labels.flFirstName}
+                            value={formik.values?.fl_firstName}
+                            readOnly
+                            maxLength='20'
+                            dir='rtl'
+                            maxAccess={maxAccess}
+                          />
+                        </Grid>
+                        <Grid item xs={3}>
+                          <CustomTextField
+                            name='fl_middleName'
+                            label={labels.flMiddleName}
+                            value={formik.values?.fl_middleName}
+                            readOnly
+                            maxLength='20'
+                            dir='rtl'
+                            maxAccess={maxAccess}
+                          />
+                        </Grid>
+                        <Grid item xs={3}>
+                          <CustomTextField
+                            name='fl_lastName'
+                            label={labels.flLastName}
+                            value={formik.values?.fl_lastName}
+                            readOnly
+                            maxLength='20'
+                            dir='rtl'
+                            maxAccess={maxAccess}
+                          />
+                        </Grid>
+                        <Grid item xs={3}>
+                          <CustomTextField
+                            name='fl_familyName'
+                            label={labels.flFamilyName}
+                            value={formik.values?.fl_familyName}
+                            readOnly
+                            maxLength='20'
+                            dir='rtl'
+                            maxAccess={maxAccess}
+                          />
                         </Grid>
                       </Grid>
-                      <Grid item xs={12}>
-                        <Grid container xs={12} spacing={2}>
-                          <Grid item xs={6}>
-                            <ResourceComboBox
-                              endpointId={RemittanceSettingsRepository.Profession.qry}
-                              label={labels.profession}
-                              name='professionId'
-                              displayField={['reference', 'name']}
-                              columnsInDropDown={[
-                                { key: 'reference', value: 'Reference' },
-                                { key: 'name', value: 'Name' }
-                              ]}
-                              valueField='recordId'
-                              values={formik.values}
-                              readOnly
-                            />
-                          </Grid>
-                          <Grid item xs={6}>
-                            <ResourceComboBox
-                              endpointId={CurrencyTradingSettingsRepository.PurposeExchange.qry}
-                              name='poeId'
-                              label={labels.purposeOfExchange}
-                              valueField='recordId'
-                              displayField={['reference', 'name']}
-                              columnsInDropDown={[
-                                { key: 'reference', value: 'Reference' },
-                                { key: 'name', value: 'Name' }
-                              ]}
-                              values={formik.values}
-                              required
-                              readOnly
-                            />
-                          </Grid>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Grid container xs={12} spacing={2}>
+                        <Grid item xs={6}>
+                          <ResourceComboBox
+                            endpointId={RemittanceSettingsRepository.Profession.qry}
+                            label={labels.profession}
+                            name='professionId'
+                            displayField={['reference', 'name']}
+                            columnsInDropDown={[
+                              { key: 'reference', value: 'Reference' },
+                              { key: 'name', value: 'Name' }
+                            ]}
+                            valueField='recordId'
+                            values={formik.values}
+                            readOnly
+                          />
+                        </Grid>
+                        <Grid item xs={6}>
+                          <ResourceComboBox
+                            endpointId={CurrencyTradingSettingsRepository.PurposeExchange.qry}
+                            name='poeId'
+                            label={labels.purposeOfExchange}
+                            valueField='recordId'
+                            displayField={['reference', 'name']}
+                            columnsInDropDown={[
+                              { key: 'reference', value: 'Reference' },
+                              { key: 'name', value: 'Name' }
+                            ]}
+                            values={formik.values}
+                            required
+                            readOnly
+                          />
                         </Grid>
                       </Grid>
                     </Grid>
