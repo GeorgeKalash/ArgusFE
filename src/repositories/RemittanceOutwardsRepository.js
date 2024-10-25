@@ -124,7 +124,7 @@ export const RemittanceOutwardsRepository = {
   },
   Postoutwards: {
     qry: service + 'qryOWT3',
-    post2: service + 'post2OW'
+    post2: service + 'post2OWT'
   },
   OutwardsReturn: {
     page: service + 'pageOWR',

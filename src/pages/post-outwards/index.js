@@ -78,16 +78,12 @@ const Postoutwards = () => {
     access,
     enableReinitialize: true,
     validateOnChange: true,
-    validationSchema: yup.object({
-      countryId: yup.string().required()
-    }),
     onSubmit: async values => {
-      const checkedUserIds = data.filter(row => row.checked).map(row => row.recordId)
-
-      if (checkedUserIds.length > 0) {
+      const checkedOwoIds = data.filter(row => row.checked).map(row => row.recordId)
+      if (checkedOwoIds.length > 0) {
         await postRequest({
           extension: RemittanceOutwardsRepository.Postoutwards.post2,
-          record: JSON.stringify({ ids: checkedUserIds })
+          record: JSON.stringify({ ids: checkedOwoIds })
         })
       }
       fetchRemittanceData()
