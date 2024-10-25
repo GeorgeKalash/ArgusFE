@@ -13,6 +13,7 @@ export default function SalesTrxForm({ functionId, recordId, itemId, clientId })
   const {
     query: { data },
     labels: labels,
+    refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -75,16 +76,29 @@ export default function SalesTrxForm({ functionId, recordId, itemId, clientId })
   ]
 
   async function fetchGridData() {
-    return await getRequest({
+    const res = await getRequest({
       extension: SaleRepository.SATrx.qry,
       parameters: `_functionId=${functionId}&_recordId=${recordId}&_itemId=${itemId}&_clientId=${clientId}`
     })
+    res.list = res?.list?.map(item => ({
+      ...item,
+      unitPrice: parseFloat(item?.baseAmount / item?.qty).toFixed(2)
+    }))
+
+    return res
   }
 
   return (
     <VertLayout>
       <Grow>
-        <Table columns={columns} gridData={data} rowId={['itemId']} pagination={false} maxAccess={access} />
+        <Table
+          columns={columns}
+          gridData={data}
+          rowId={['itemId']}
+          pagination={false}
+          maxAccess={access}
+          refetch={refetch}
+        />
       </Grow>
     </VertLayout>
   )

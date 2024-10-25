@@ -57,9 +57,15 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
   const userId = getStorageData('userData').userId
   const [reCal, setReCal] = useState(false)
 
+  const { documentType, maxAccess, changeDT } = useDocumentType({
+    functionId: SystemFunction.SalesOrder,
+    access: access,
+    enabled: !recordId
+  })
+
   const [initialValues, setInitialData] = useState({
     recordId: recordId || null,
-    dtId: null,
+    dtId: documentType?.dtId,
     reference: '',
     date: new Date(),
     dueDate: new Date(),
@@ -139,12 +145,6 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
 
   const invalidate = useInvalidate({
     endpointId: SaleRepository.SalesOrder.page
-  })
-
-  const { maxAccess } = useDocumentType({
-    functionId: SystemFunction.SalesOrder,
-    access: access,
-    enabled: !recordId
   })
 
   const { formik } = useForm({
@@ -238,7 +238,13 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
         displayFieldWidth: 5
       },
       async onChange({ row: { update, newRow } }) {
-        if (!newRow.itemId) return
+        if (!newRow.itemId) {
+          update({
+            saTrx: false
+          })
+
+          return
+        }
         const itemPhysProp = await getItemPhysProp(newRow.itemId)
         const itemInfo = await getItem(newRow.itemId)
         const ItemConvertPrice = await getItemConvertPrice(newRow.itemId)
@@ -439,12 +445,12 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
         stack({
           Component: SalesTrxForm,
           props: {
-            recordId: row?.orderId,
-            functionId: SystemFunction.SalesOrder,
+            recordId: 0,
+            functionId: SystemFunction.SalesInvoice,
             itemId: row?.itemId,
-            clientId: row?.clientId
+            clientId: formik?.values?.clientId
           },
-          width: 700,
+          width: 1000,
           title: labels?.salesTrx
         })
       }
@@ -693,7 +699,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     formik.setFieldValue('currencyId', res?.record?.currencyId)
     formik.setFieldValue('spId', res?.record?.spId)
     formik.setFieldValue('ptId', res?.record?.ptId)
-    formik.setFieldValue('plId', res?.record?.plId)
+    formik.setFieldValue('plId', res?.record?.plId || (await getDefaultPlId()) || 0)
     formik.setFieldValue('szId', res?.record?.szId)
     formik.setFieldValue('shipToAddressId', res?.record?.shipAddressId)
     formik.setFieldValue('billToAddressId', res?.record?.billAddressId)
@@ -987,10 +993,18 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     return res?.record?.value
   }
 
-  async function getDefaultPUSite() {
+  async function getDefaultSASite() {
     const res = await getRequest({
       extension: SystemRepository.Defaults.get,
-      parameters: `_filter=&_key=PUSiteId`
+      parameters: `_filter=&_key=siteId`
+    })
+
+    return res?.record?.value
+  }
+  async function getDefaultPlId() {
+    const res = await getRequest({
+      extension: SystemRepository.Defaults.get,
+      parameters: `_filter=&_key=plId`
     })
 
     return res?.record?.value
@@ -1023,15 +1037,6 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     return res?.record?.value
   }
 
-  async function getDefaultDT() {
-    const res = await getRequest({
-      extension: SystemRepository.UserFunction.get,
-      parameters: `_userId=${userId}&_functionId=${SystemFunction.SalesOrder}`
-    })
-
-    return res?.record?.dtId
-  }
-
   const getMeasurementUnits = async () => {
     return await getRequest({
       extension: InventoryRepository.MeasurementUnit.qry,
@@ -1061,6 +1066,10 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
   }, [totalQty, amount, totalVolume, totalWeight, subtotal, vatAmount])
 
   useEffect(() => {
+    if (documentType?.dtId) formik.setFieldValue('dtId', documentType.dtId)
+  }, [documentType?.dtId])
+
+  useEffect(() => {
     ;(async function () {
       const muList = await getMeasurementUnits()
 
@@ -1082,12 +1091,10 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
           formik.setFieldValue('tdType', 1)
         }
         const userDefaultSite = await getDefaultUserSite()
-        const userDefaultPUSite = await getDefaultPUSite()
-        const siteId = userDefaultSite ? userDefaultSite : userDefaultPUSite
+        const userDefaultSASite = await getDefaultSASite()
+        const siteId = userDefaultSite ? userDefaultSite : userDefaultSASite
         const plant = await getDefaultUserPlant()
         const salesPerson = await getDefaultUserSP()
-        const dtId = await getDefaultDT()
-        formik.setFieldValue('dtId', parseInt(dtId))
         formik.setFieldValue('siteId', parseInt(siteId))
         formik.setFieldValue('spId', parseInt(salesPerson))
         formik.setFieldValue('plantId', parseInt(plant))
@@ -1142,6 +1149,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('dtId', newValue ? newValue.recordId : null)
+                      changeDT(newValue)
                     }}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}
                   />
