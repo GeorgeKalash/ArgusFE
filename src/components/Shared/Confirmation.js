@@ -1,11 +1,10 @@
 import { Grid } from '@mui/material'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
-import { useFormik } from 'formik'
 import * as yup from 'yup'
 import FormShell from './FormShell'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { useState, useContext } from 'react'
-import { formatDateFromApi, formatDateToApiFunction } from 'src/lib/date-helper'
+import { formatDateForGetApI, formatDateFromApi } from 'src/lib/date-helper'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import moment from 'moment-hijri'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
@@ -51,7 +50,7 @@ const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refr
 
     const type = idTypes?.list?.filter(item => item?.recordId == obj?.idtId)?.[0]?.type
 
-    const hijriDate = moment(formatDateToApiFunction(obj.birthDate), 'YYYY-MM-DD').format('iYYYY-iMM-iDD')
+    const hijriDate = moment(formatDateForGetApI(obj.birthDate), 'YYYY-MM-DD').format('iYYYY-iMM-iDD')
 
     const defaultParams = `_number=${obj.idNo}&_date=${hijriDate}&_yakeenType=${type}`
     var parameters = defaultParams

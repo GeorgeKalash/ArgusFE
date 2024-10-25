@@ -109,7 +109,9 @@ export const RemittanceOutwardsRepository = {
     qry: service + 'qryAPX',
     get: service + 'getAPX',
     set: service + 'setAPX',
-    del: service + 'delAPX'
+    del: service + 'delAPX',
+    get2: service + 'get2APX',
+    set2: service + 'set2APX'
   },
   OutwardsModification: {
     qry: service + 'qryOWM',
@@ -155,5 +157,17 @@ export const RemittanceOutwardsRepository = {
   OutwardsTransfer: {
     get: service + 'getOWT',
     snapshot: service + 'snapshotOWT'
+  },
+  UnassignedCountry: { unassigned: service + 'unassignedCOU' },
+  UnassignedCurrency: { unassigned: service + 'unassignedCU' },
+  UnassignedDispersalType: { unassigned: service + 'unassignedDT' },
+  AssignedCountry: {
+    assigned: service + 'assignedCOU'
+  },
+  AssignedCurrency: {
+    assigned: service + 'assignedCU'
+  },
+  AssignedDispersalType: {
+    assigned: service + 'assignedDT'
   }
 }
