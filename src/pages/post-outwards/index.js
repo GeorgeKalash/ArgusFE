@@ -36,7 +36,6 @@ const Postoutwards = () => {
   }
 
   const fetchRemittanceData = () => {
-    if (!formik.values.countryId) return
     const formattedFromDate = formatDate(formik.values.fromDate)
 
     const formattedToDate =
@@ -68,7 +67,7 @@ const Postoutwards = () => {
 
   const { formik } = useForm({
     initialValues: {
-      countryId: '',
+      countryId: 0,
       currencyId: '',
       fromAmount: '',
       corId: '',
@@ -112,10 +111,19 @@ const Postoutwards = () => {
       flex: 1,
       type: 'date'
     },
-
+    {
+      field: 'countryRef',
+      headerName: _labels.country,
+      flex: 1
+    },
     {
       field: 'currencyRef',
       headerName: _labels.currency,
+      flex: 1
+    },
+    {
+      field: 'dispersalName',
+      headerName: _labels.dispersal,
       flex: 1
     },
     {
@@ -143,8 +151,9 @@ const Postoutwards = () => {
   ]
 
   useEffect(() => {
-    console.log('Data list:', data) // Log data to see if rows are populated
     fetchRemittanceData()
+    formik.setFieldValue('totalAm', 0)
+    formik.setFieldValue('totalFc', 0)
   }, [
     formik.values.countryId,
     formik.values.currencyId,
@@ -155,7 +164,6 @@ const Postoutwards = () => {
     formik.values.fromAmount,
     formik.values.toAmount
   ])
-
   function calcFc() {
     const totalFc =
       formik.values.countryId && formik.values.currencyId
@@ -167,15 +175,13 @@ const Postoutwards = () => {
           }, 0)
         : 0
 
-    const totalAm =
-      formik.values.countryId && formik.values.currencyId
-        ? data?.reduce((sumAmount, row) => {
-            let curValue = 0
-            if (row.checked) curValue = parseFloat(row.amount.toString().replace(/,/g, '')) || 0
+    const totalAm = data?.reduce((sumAmount, row) => {
+      let curValue = 0
+      if (row.checked) curValue = parseFloat(row.amount.toString().replace(/,/g, '')) || 0
 
-            return sumAmount + curValue
-          }, 0)
-        : 0
+      return sumAmount + curValue
+    }, 0)
+
     formik.setFieldValue('totalFc', totalFc)
     formik.setFieldValue('totalAm', totalAm)
   }
@@ -192,9 +198,9 @@ const Postoutwards = () => {
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12}>
               <Grid container spacing={2}>
-                <Grid item xs={10}>
+                <Grid item xs={3}>
                   <ResourceComboBox
                     endpointId={RemittanceOutwardsRepository.AssignedCountry.assigned}
                     name='countryId'
@@ -207,7 +213,6 @@ const Postoutwards = () => {
                     values={formik.values}
                     valueField='recordId'
                     displayField={['reference', 'name', 'flName']}
-                    required
                     maxAccess={access}
                     onChange={(event, newValue) => {
                       if (newValue) {
@@ -215,61 +220,16 @@ const Postoutwards = () => {
                         formik.setFieldValue('currencyId', '')
                         formik.setFieldValue('dispersalType', '')
                       } else {
-                        formik.setFieldValue('countryId', '')
+                        formik.setFieldValue('countryId', 0)
                         formik.setFieldValue('currencyId', '')
                         formik.setFieldValue('dispersalType', '')
-
-                        setData([])
                       }
                     }}
                     error={formik.touched.countryId && Boolean(formik.errors.countryId)}
                   />
                 </Grid>
-                <Grid item xs={10}>
-                  <ResourceLookup
-                    endpointId={RemittanceSettingsRepository.Correspondent.snapshot}
-                    valueField='reference'
-                    displayField='name'
-                    name='corId'
-                    label={_labels.cor}
-                    form={formik}
-                    displayFieldWidth={2}
-                    valueShow='corRef'
-                    secondValueShow='corName'
-                    maxAccess={access}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('corId', newValue ? newValue.recordId : '')
-                      formik.setFieldValue('corName', newValue ? newValue.name : '')
-                      formik.setFieldValue('corRef', newValue ? newValue.reference : '')
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={10}>
-                  <CustomNumberField
-                    name='fromAmount'
-                    label={_labels.fromAmount}
-                    value={formik.values.fromAmount}
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('fromAmount', '')}
-                    decimalScale={2}
-                  />
-                </Grid>
-                <Grid item xs={10}>
-                  <CustomNumberField
-                    name='toAmount'
-                    label={_labels.toAmount}
-                    value={formik.values.toAmount}
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('toAmount', '')}
-                    decimalScale={2}
-                  />
-                </Grid>
-              </Grid>
-            </Grid>
 
-            <Grid item xs={12} md={6}>
-              <Grid container spacing={2}>
-                <Grid item xs={10}>
+                <Grid item xs={3}>
                   <ResourceComboBox
                     endpointId={RemittanceOutwardsRepository.AssignedCurrency.assigned}
                     parameters={formik.values.countryId && `_countryId=${formik.values.countryId || 0}`}
@@ -292,7 +252,8 @@ const Postoutwards = () => {
                     error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
                   />
                 </Grid>
-                <Grid item xs={10}>
+
+                <Grid item xs={3}>
                   <ResourceComboBox
                     endpointId={RemittanceOutwardsRepository.AssignedDispersalType.assigned}
                     parameters={
@@ -310,7 +271,50 @@ const Postoutwards = () => {
                     }}
                   />
                 </Grid>
-                <Grid item xs={10}>
+
+                <Grid item xs={3}>
+                  <ResourceLookup
+                    endpointId={RemittanceSettingsRepository.Correspondent.snapshot}
+                    valueField='reference'
+                    displayField='name'
+                    name='corId'
+                    label={_labels.cor}
+                    form={formik}
+                    displayFieldWidth={2}
+                    valueShow='corRef'
+                    secondValueShow='corName'
+                    maxAccess={access}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('corId', newValue ? newValue.recordId : '')
+                      formik.setFieldValue('corName', newValue ? newValue.name : '')
+                      formik.setFieldValue('corRef', newValue ? newValue.reference : '')
+                    }}
+                  />
+                </Grid>
+
+                <Grid item xs={3}>
+                  <CustomNumberField
+                    name='fromAmount'
+                    label={_labels.fromAmount}
+                    value={formik.values.fromAmount}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('fromAmount', '')}
+                    decimalScale={2}
+                  />
+                </Grid>
+
+                <Grid item xs={3}>
+                  <CustomNumberField
+                    name='toAmount'
+                    label={_labels.toAmount}
+                    value={formik.values.toAmount}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('toAmount', '')}
+                    decimalScale={2}
+                  />
+                </Grid>
+
+                <Grid item xs={3}>
                   <CustomDatePicker
                     name='fromDate'
                     max={formik.values.toDate}
@@ -321,7 +325,8 @@ const Postoutwards = () => {
                     error={false}
                   />
                 </Grid>
-                <Grid item xs={10}>
+
+                <Grid item xs={3}>
                   <CustomDatePicker
                     name='toDate'
                     min={formik.values.fromDate}
@@ -343,7 +348,7 @@ const Postoutwards = () => {
             setData={setData}
             rowId={['recordId']}
             pageSize={50}
-            pagination={!!formik.values.countryId}
+            pagination={true}
             paginationType='client'
             refetch={refetch}
             isLoading={false}
@@ -353,7 +358,7 @@ const Postoutwards = () => {
           />
         </Grow>
         <Fixed>
-          <Grid container justifyContent='flex-end' spacing={2} sx={{ px: 2, ml: -14 }}>
+          <Grid container justifyContent='flex-end' spacing={2} sx={{ px: 2, mr: -11 }}>
             <Grid item xs={1.2}>
               <CustomNumberField
                 name='totalFc'
