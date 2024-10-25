@@ -51,13 +51,7 @@ export default function CurrencyForm({ labels, maxAccess, recordId }) {
       reference: yup.string().required(),
       decimals: yup.string().required(),
       currencyType: yup.string().required(),
-      profileId: yup.string().required(),
-      maxRateVarPct: yup
-        .number()
-        .nullable()
-        .transform((value, originalValue) => validateNumberField(value, originalValue))
-        .min(0, labels.minValue)
-        .max(99, labels.maxValue)
+      profileId: yup.string().required()
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
