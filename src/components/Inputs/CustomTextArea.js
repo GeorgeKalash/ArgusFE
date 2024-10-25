@@ -22,6 +22,7 @@ const CustomTextArea = ({
   fullWidth = true,
   autoFocus = false,
   readOnly = false,
+  disabled = false,
   autoComplete = 'off',
   numberField = false,
   editMode = false,
@@ -90,12 +91,12 @@ const CustomTextArea = ({
                   </IconButton>
                 )}
                 {viewAdd && (
-                  <IconButton tabIndex={-1} edge='end' onClick={handleAddAction} aria-label='Add'>
+                  <IconButton tabIndex={-1} edge='end' onClick={handleAddAction} aria-label='Add' disabled={disabled}>
                     <Image src={AddAction} alt='Add' width={18} height={18} />
                   </IconButton>
                 )}
                 {viewDropDown && (
-                  <IconButton tabIndex={-1} edge='end' onClick={onDropDown} aria-label='Drop down'>
+                  <IconButton tabIndex={-1} edge='end' onClick={onDropDown} aria-label='Drop down' disabled={disabled}>
                     <Image src={DropDownArrow} alt='Drop Down' width={18} height={18} />
                   </IconButton>
                 )}

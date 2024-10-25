@@ -296,8 +296,10 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
           extendedPrice: parseFloat('0').toFixed(2),
           mdValue: 0,
           taxId: rowTax,
-          taxDetails: rowTaxDetails,
+          taxDetails: formik.values.isVattable ? rowTaxDetails : null,
           mdType: 1,
+          siteId: formik?.values?.siteId,
+          siteRef: await getSiteRef(formik?.values?.siteId),
           saTrx: true
         })
 
@@ -631,7 +633,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
 
     const modifiedList = await Promise.all(
       soItems.list?.map(async (item, index) => {
-        const taxDetailsResponse = await getTaxDetails(item.taxId)
+        const taxDetailsResponse = soHeader?.record?.isVattable ? await getTaxDetails(item.taxId) : null
 
         return {
           ...item,
@@ -1037,6 +1039,17 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     return res?.record?.value
   }
 
+  async function getSiteRef(siteId) {
+    if (!siteId) return null
+
+    const res = await getRequest({
+      extension: InventoryRepository.Site.get,
+      parameters: `_recordId=${siteId}`
+    })
+
+    return res?.record?.reference
+  }
+
   const getMeasurementUnits = async () => {
     return await getRequest({
       extension: InventoryRepository.MeasurementUnit.qry,
@@ -1263,6 +1276,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                     rows={3}
                     maxLength='100'
                     readOnly
+                    disabled={formik.values.exWorks}
                     maxAccess={maxAccess}
                     viewDropDown={formik.values.clientId}
                     viewAdd={formik.values.clientId && !editMode}
