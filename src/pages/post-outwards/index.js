@@ -297,7 +297,7 @@ const Postoutwards = () => {
                     name='fromAmount'
                     label={_labels.fromAmount}
                     value={formik.values.fromAmount}
-                    onChange={formik.handleChange}
+                    onBlur={formik.handleChange}
                     onClear={() => formik.setFieldValue('fromAmount', '')}
                     decimalScale={2}
                   />
@@ -308,7 +308,7 @@ const Postoutwards = () => {
                     name='toAmount'
                     label={_labels.toAmount}
                     value={formik.values.toAmount}
-                    onChange={formik.handleChange}
+                    onBlur={formik.handleChange}
                     onClear={() => formik.setFieldValue('toAmount', '')}
                     decimalScale={2}
                   />
