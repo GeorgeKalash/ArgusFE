@@ -71,7 +71,8 @@ export function DataGrid({
     if (!isUpdatingField && nextEdit) {
       const { id, field } = nextEdit
       if (!disabled) {
-        if (id) {
+        if (id && !!field) {
+          console.log(id, field)
           if (apiRef.current.getCellMode(id, field) === 'view') apiRef?.current.startCellEditMode({ id, field })
           apiRef.current.setCellFocus(id, field)
         }
@@ -84,6 +85,35 @@ export function DataGrid({
     return {
       rowIndex: apiRef.current.getRowIndexRelativeToVisibleRows(id),
       columnIndex: apiRef.current.getColumnIndex(field)
+    }
+  }
+
+  const skipReadOnly = (rowIndex, id) => {
+    for (let i = rowIndex + 1; i < columns.length; i++) {
+      if (rowIndex === columns.length - 1) {
+        addRow();
+      }
+
+      if (!columns?.[i]?.props?.readOnly) {
+        if (i === columns.length - 1) {
+          addRow();
+        }
+
+        return {
+          columnIndex: i,
+          rowIndex: id
+        }
+      }
+    }
+
+    for (let i = 0; i < columns.length; i++) {
+
+      if (!columns?.[i]?.props?.readOnly) {
+        return {
+          columnIndex: i,
+          rowIndex: id + 1
+        }
+      } 
     }
   }
 
@@ -137,20 +167,11 @@ export function DataGrid({
       const rowIds = gridExpandedSortedRowIdsSelector(apiRef.current.state)
       const columns = apiRef.current.getVisibleColumns()
 
-      if (!event.shiftKey) {
-        if (nextCell.columnIndex < columns.length - 1 - skip) {
-          nextCell.columnIndex += 1
-        } else {
-          nextCell.rowIndex += 1
-          nextCell.columnIndex = 0
-        }
-      } else if (nextCell.columnIndex > 0) {
-        nextCell.columnIndex -= 1
-      } else {
-        nextCell.rowIndex -= 1
-        nextCell.columnIndex = columns.length - 1
-      }
+      const { columnIndex, rowIndex } = skipReadOnly(nextCell.columnIndex, nextCell.rowIndex)
 
+      nextCell.columnIndex = columnIndex;
+      nextCell.rowIndex = rowIndex;
+      
       const field = columns[nextCell.columnIndex].field
       const id = rowIds[nextCell.rowIndex]
 

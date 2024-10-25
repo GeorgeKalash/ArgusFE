@@ -206,12 +206,12 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
       name: 'itemName',
       props: {
         readOnly: true
-      }
+      },
     },
     {
       component: 'numberfield',
       label: labels.qty,
-      name: 'qty'
+      name: 'qty',
     },
     {
       component: 'numberfield',
@@ -219,15 +219,15 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
       name: 'orderedQty',
       props: {
         readOnly: true
-      }
+      },
     },
     {
       component: 'textfield',
       label: labels.notes,
-      name: 'notes'
+      name: 'notes',
     }
-  ]
-
+  ];
+  
   async function getData(recordId) {
     return await getRequest({
       extension: ManufacturingRepository.ProductionSheet.get,
@@ -358,7 +358,15 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
             </Grid>
           </Grid>
           <DataGrid
-            onChange={value => formik.setFieldValue('items', value)}
+            onChange={value => {
+              const data = value?.map((item) => {
+                return {
+                  ...item,
+                  orderedQty: 0
+                }
+              })
+              formik.setFieldValue('items', data)
+            }}
             maxAccess={maxAccess}
             name='items'
             disabled={isPosted}
