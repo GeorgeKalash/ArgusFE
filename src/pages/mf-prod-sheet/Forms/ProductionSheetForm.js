@@ -146,7 +146,18 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
     invalidate()
 
     const res2 = await getData(res?.recordId)
-    formik.setFieldValue('status', res2?.record?.status)
+
+        const res3 = await getDataGrid()
+
+        formik.setValues({
+          ...res2.record,
+          items: res3.list.map(item => ({
+            ...item,
+            id: item.seqNo,
+            orderedQty: item.orderedQty ?? 0
+          })),
+          date: !!res2?.record?.date ? formatDateFromApi(res2?.record?.date) : null
+        })
   }
 
   const editMode = !!formik.values.recordId
@@ -227,7 +238,7 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
   async function getDataGrid() {
     return await getRequest({
       extension: ManufacturingRepository.ProductionSheetItem.qry,
-      parameters: `_psId=${recordId}&_functionId=${SystemFunction.ProductionSheet}`
+      parameters: `_psId=${recordId ?? formik?.values?.recordId}&_functionId=${SystemFunction.ProductionSheet}`
     })
   }
 
