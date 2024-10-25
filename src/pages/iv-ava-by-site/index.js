@@ -131,7 +131,7 @@ const AvailabilitiesBySite = () => {
                   src={trackBy === 1 ? serialIcon : lotIcon}
                   width={18}
                   height={18}
-                  alt={trackBy === 1 ? 'Serial' : 'Lot'}
+                  alt={trackBy === 1 ? labels.serial : labels.lot}
                 />
               </IconButton>
             </Box>
