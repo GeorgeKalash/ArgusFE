@@ -364,13 +364,7 @@ const Postoutwards = () => {
               />
             </Grid>
             <Grid item xs={1.2}>
-              <CustomNumberField
-                name='totalAm'
-                label={_labels.totalAm}
-                value={formik.values.totalAm}
-                readOnly={true}
-                hidden={!(formik.values.countryId && formik.values.currencyId)}
-              />
+              <CustomNumberField name='totalAm' label={_labels.totalAm} value={formik.values.totalAm} readOnly={true} />
             </Grid>
           </Grid>
         </Fixed>
