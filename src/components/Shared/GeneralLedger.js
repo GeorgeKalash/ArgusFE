@@ -20,7 +20,7 @@ import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepositor
 import { DataGrid } from './DataGrid'
 import { useFormik } from 'formik'
 import { AuthContext } from 'src/providers/AuthContext'
-import { formatDateToApi, formatDateToApiFunction } from 'src/lib/date-helper'
+import { formatDateForGetApI, formatDateToApi } from 'src/lib/date-helper'
 import { getRate, DIRTYFIELD_AMOUNT, DIRTYFIELD_BASE_AMOUNT, DIRTYFIELD_RATE } from 'src/utils/RateCalculator'
 import { Grow } from './Layouts/Grow'
 import { Fixed } from './Layouts/Fixed'
@@ -292,7 +292,7 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
 
       const response = await getRequest({
         extension: MultiCurrencyRepository.Currency.get,
-        parameters: `_currencyId=${_currencyId}&_date=${formatDateToApiFunction(
+        parameters: `_currencyId=${_currencyId}&_date=${formatDateForGetApI(
           formValues.date
         )}&_rateDivision=${_rateDivision}`
       })

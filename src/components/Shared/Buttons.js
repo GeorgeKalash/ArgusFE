@@ -231,6 +231,13 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'IV',
+    label: platformLabels.InventoryTransaction,
+    color: '#A76035',
+    image: 'popup-window.png',
+    main: false
+  },
+  {
     key: 'Clear',
     label: platformLabels.Clear,
     condition: 'isCleared',
@@ -327,6 +334,13 @@ export const getButtons = platformLabels => [
     color: 'transparent',
     image: 'Close.png',
     border: '1px solid #01a437',
+    main: false
+  },
+  {
+    key: 'Metals',
+    label: platformLabels.Metals,
+    color: '#ADD8E6',
+    image: 'metals-icon.png',
     main: false
   }
 ]
