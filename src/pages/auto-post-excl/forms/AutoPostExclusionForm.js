@@ -161,7 +161,7 @@ export default function AutoPostExclusionForm({ labels, maxAccess, recordId }) {
           items: rows
         })
       } else {
-        const rows = plants.list.map((plant, index) => {
+        const rows = plants?.list?.map((plant, index) => {
           return {
             checked: false,
             exclusionId: recordId || 0,
