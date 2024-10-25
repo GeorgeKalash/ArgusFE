@@ -48,11 +48,9 @@ const Postoutwards = () => {
       }&_dispersalType=${formik.values.dispersalType || 0}&_fromAmount=${formik.values.fromAmount || 0}&_toAmount=${
         formik.values.toAmount || 0
       }&_fromDate=${formattedFromDate}&_todate=${formattedToDate}`
+    }).then(response => {
+      setData(response.list || [])
     })
-      .then(response => {
-        setData(response.list || [])
-      })
-      .catch(error => {})
   }
 
   const {
@@ -87,12 +85,10 @@ const Postoutwards = () => {
       const checkedUserIds = data.filter(row => row.checked).map(row => row.recordId)
 
       if (checkedUserIds.length > 0) {
-        try {
-          await postRequest({
-            extension: RemittanceOutwardsRepository.Postoutwards.post2,
-            record: JSON.stringify({ ids: checkedUserIds })
-          })
-        } catch (error) {}
+        await postRequest({
+          extension: RemittanceOutwardsRepository.Postoutwards.post2,
+          record: JSON.stringify({ ids: checkedUserIds })
+        })
       }
       fetchRemittanceData()
       toast.success(platformLabels.Posted)
@@ -358,8 +354,8 @@ const Postoutwards = () => {
           />
         </Grow>
         <Fixed>
-          <Grid container justifyContent='flex-end' spacing={2} sx={{ px: 2, mr: -11 }}>
-            <Grid item xs={1.2}>
+          <Grid container justifyContent='flex-end' spacing={2} sx={{ px: 2 }}>
+            <Grid item xs={1.6}>
               <CustomNumberField
                 name='totalFc'
                 label={_labels.totalFc}
@@ -368,7 +364,7 @@ const Postoutwards = () => {
                 hidden={!(formik.values.countryId && formik.values.currencyId)}
               />
             </Grid>
-            <Grid item xs={1.2}>
+            <Grid item xs={1.6}>
               <CustomNumberField name='totalAm' label={_labels.totalAm} value={formik.values.totalAm} readOnly={true} />
             </Grid>
           </Grid>
