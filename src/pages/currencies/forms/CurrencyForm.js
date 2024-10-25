@@ -257,6 +257,8 @@ export default function CurrencyForm({ labels, maxAccess, recordId }) {
                 maxAccess={maxAccess}
                 onChange={e => formik.setFieldValue('maxRateVarPct', e.target.value)}
                 onClear={() => formik.setFieldValue('maxRateVarPct', null)}
+                allowNegative={false}
+                maxLength={4}
                 error={formik.touched.maxRateVarPct && Boolean(formik.errors.maxRateVarPct)}
                 decimalScale={2}
               />
