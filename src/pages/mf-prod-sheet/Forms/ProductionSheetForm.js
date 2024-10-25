@@ -144,7 +144,9 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
 
     toast.success(platformLabels.Posted)
     invalidate()
-    await getData(res?.recordId)
+
+    const res2 = await getData(res?.recordId)
+    formik.setFieldValue('status', res2?.record?.status)
   }
 
   const editMode = !!formik.values.recordId
