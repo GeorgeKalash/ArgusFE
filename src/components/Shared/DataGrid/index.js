@@ -7,6 +7,8 @@ import 'ag-grid-community/styles/ag-grid.css'
 import 'ag-grid-community/styles/ag-theme-alpine.css'
 import { GridDeleteIcon } from '@mui/x-data-grid'
 import { HIDDEN, accessLevel } from 'src/services/api/maxAccess'
+import { useWindow } from 'src/windows'
+import DeleteDialog from '../DeleteDialog'
 
 export function DataGrid({
   name, // maxAccess
@@ -22,6 +24,8 @@ export function DataGrid({
 }) {
   const gridApiRef = useRef(null)
 
+  const { stack } = useWindow()
+
   const process = (params, oldRow, setData) => {
     const column = columns.find(({ name }) => name === params.colDef.field)
 
@@ -35,11 +39,31 @@ export function DataGrid({
     }
   }
 
-  useEffect(() => {
-    if (!value?.length && allowAddNewLine) {
-      addNewRow()
-    }
-  }, [value])
+  function deleteRow(deleteId) {
+    const newRows = value.filter(({ id }) => id !== deleteId)
+    onChange(newRows)
+  }
+
+  function openDelete(id) {
+    stack({
+      Component: DeleteDialog,
+      props: {
+        open: [true, {}],
+        fullScreen: false,
+        onConfirm: () => deleteRow(id)
+      },
+      width: 450,
+      height: 170,
+      canExpand: false,
+      title: 'Delete'
+    })
+  }
+
+  // useEffect(() => {
+  //   if (!value?.length && allowAddNewLine) {
+  //     addNewRow()
+  //   }
+  // }, [value])
 
   const addNewRow = params => {
     const highestIndex = params.node.data.id + 1
@@ -238,25 +262,17 @@ export function DataGrid({
   }
 
   const ActionCellRenderer = params => {
-    const handleMouseOver = () => {
-      // if (params.api) {
-      //   params.api.stopEditing()
-      // }
-    }
-
-    const handleDelete = () => {
-      params.api.stopEditing()
-
-      params.api.applyTransaction({ remove: [params.data] })
-
-      const newRows = value?.filter(({ id }) => id !== params.data.id)
-
-      onChange(newRows)
+    const handleMouseOver = event => {
+      // params.api.stopEditing()
     }
 
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }} onMouseOver={handleMouseOver}>
-        <IconButton onClick={handleDelete} disabled={disabled}>
+      <Box
+        sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+        onClick={() => openDelete(params.data.id)}
+        onMouseOver={handleMouseOver}
+      >
+        <IconButton disabled={disabled}>
           <GridDeleteIcon />
         </IconButton>
       </Box>
@@ -287,7 +303,8 @@ export function DataGrid({
           flex: 0.5,
           editable: false,
           sortable: false,
-          cellRenderer: ActionCellRenderer
+          cellRenderer: ActionCellRenderer,
+          suppressClickEdit: true
         }
       : null
   ]
@@ -327,6 +344,11 @@ export function DataGrid({
               onGridReady={params => {
                 gridApiRef.current = params.api
                 onChange(value)
+              }}
+              onCellClicked={event => {
+                if (event.colDef.field === 'actions') {
+                  alert(params)
+                }
               }}
               onCellKeyDown={onCellKeyDown}
               rowHeight={45}
