@@ -105,7 +105,7 @@ export default function AutoPostExclusionForm({ labels, maxAccess, recordId }) {
       }
 
       const response = await postRequest({
-        extension: RemittanceOutwardsRepository.AutoPostExclusionPlants.set2,
+        extension: RemittanceOutwardsRepository.AutoPostExclusion.set2,
         record: JSON.stringify(resultObject)
       })
 
@@ -127,8 +127,8 @@ export default function AutoPostExclusionForm({ labels, maxAccess, recordId }) {
       })
       if (recordId) {
         const result = await getRequest({
-          extension: RemittanceOutwardsRepository.AutoPostExclusionPlants.get2,
-          parameters: `_exclusionId=${recordId}`
+          extension: RemittanceOutwardsRepository.AutoPostExclusion.get2,
+          parameters: `_recordId=${recordId}`
         })
 
         const rows = plants.list.map((plant, index) => {
@@ -149,6 +149,8 @@ export default function AutoPostExclusionForm({ labels, maxAccess, recordId }) {
           name: result.record.header.name,
           functionId: result.record.header.functionId,
           corId: result.record.header.corId,
+          corRef: result.record.header.corRef,
+          corName: result.record.header.corId,
           currencyId: result.record.header.currencyId,
           countryId: result.record.header.countryId,
           dispersalType: result.record.header.dispersalType,
