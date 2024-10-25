@@ -10,7 +10,6 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-
 import { ControlContext } from 'src/providers/ControlContext'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
@@ -39,39 +38,34 @@ export default function ProdSheetDtdForm({ labels, maxAccess, recordId }) {
       dtId: yup.string().required()
     }),
     onSubmit: async obj => {
-      try {
-        const response = await postRequest({
-          extension: ManufacturingRepository.DocumentTypeDefault.set,
-          record: JSON.stringify(obj)
-        })
+      await postRequest({
+        extension: ManufacturingRepository.DocumentTypeDefault.set,
+        record: JSON.stringify(obj)
+      })
 
-        if (!formik.values.recordId) {
-          formik.setFieldValue('recordId', formik.values.dtId)
+      if (!obj.dtId) {
+        toast.success(platformLabels.Added)
+      } else toast.success(platformLabels.Updated)
+      formik.setFieldValue('recordId', formik.values.dtId)
 
-          toast.success(platformLabels.Added)
-        } else toast.success(platformLabels.Edited)
-
-        invalidate()
-      } catch (error) {}
+      invalidate()
     }
   })
   const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: ManufacturingRepository.DocumentTypeDefault.get,
-            parameters: `_dtId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: ManufacturingRepository.DocumentTypeDefault.get,
+          parameters: `_dtId=${recordId}`
+        })
 
-          formik.setValues({
-            ...res.record,
-            recordId: recordId
-          })
-        }
-      } catch (exception) {}
+        formik.setValues({
+          ...res.record,
+          recordId: recordId
+        })
+      }
     })()
   }, [])
 

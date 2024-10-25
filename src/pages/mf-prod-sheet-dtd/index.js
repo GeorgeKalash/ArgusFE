@@ -39,7 +39,7 @@ const ProdSheetDtd = () => {
 
   const {
     query: { data },
-    labels: _labels,
+    labels,
     invalidate,
     paginationParameters,
     refetch,
@@ -53,17 +53,17 @@ const ProdSheetDtd = () => {
   const columns = [
     {
       field: 'dtName',
-      headerName: _labels.docType,
+      headerName: labels.docType,
       flex: 1
     },
     {
       field: 'siteName',
-      headerName: _labels.site,
+      headerName: labels.site,
       flex: 1
     },
     {
       field: 'disableSKULookup',
-      headerName: _labels.dsl,
+      headerName: labels.dsl,
       type: 'checkbox',
       flex: 1
     }
@@ -74,27 +74,25 @@ const ProdSheetDtd = () => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: ManufacturingRepository.DocumentTypeDefault.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
+    await postRequest({
+      extension: ManufacturingRepository.DocumentTypeDefault.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   function openForm(record) {
     stack({
       Component: ProdSheetDtdForm,
       props: {
-        labels: _labels,
+        labels,
         recordId: record?.dtId,
         maxAccess: access
       },
       width: 600,
       height: 500,
-      title: _labels.docTypeDefault
+      title: labels.docTypeDefault
     })
   }
 
