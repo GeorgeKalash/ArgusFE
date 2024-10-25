@@ -24,7 +24,7 @@ const AvailabilitiesBySite = () => {
     const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
-      extension: ReportIvGenerator.Report403.endpoint,
+      extension: ReportIvGenerator.Report403,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}&exId=`
     })
 
@@ -37,15 +37,14 @@ const AvailabilitiesBySite = () => {
 
   const {
     query: { data },
-    labels: _labels,
+    labels,
     paginationParameters,
     refetch,
     access,
-
     filterBy
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: ReportIvGenerator.Report403.endpoint,
+    endpointId: ReportIvGenerator.Report403,
     datasetId: ResourceIds.AvailabilitiesBySite,
     filter: {
       filterFn: fetchWithFilter
@@ -55,91 +54,85 @@ const AvailabilitiesBySite = () => {
   const columns = [
     {
       field: 'sku',
-      headerName: _labels.sku,
+      headerName: labels.sku,
       flex: 1
     },
     {
       field: 'name',
-      headerName: _labels.name,
+      headerName: labels.name,
       flex: 1
     },
     {
       field: 'siteRef',
-      headerName: _labels.siteRef,
+      headerName: labels.siteRef,
       flex: 1
     },
     {
       field: 'siteName',
-      headerName: _labels.siteName,
+      headerName: labels.siteName,
       flex: 1
     },
     {
       field: 'unitCost',
-      headerName: _labels.unitCost,
+      headerName: labels.unitCost,
       flex: 1
     },
     {
       field: 'unitPrice',
-      headerName: _labels.unitPrice,
+      headerName: labels.unitPrice,
       flex: 1
     },
     {
       field: 'qty',
-      headerName: _labels.qty,
+      headerName: labels.qty,
       flex: 1
     },
     {
       field: 'pieces',
-      headerName: _labels.pieces,
+      headerName: labels.pieces,
       flex: 1
     },
     {
       field: 'committed',
-      headerName: _labels.committed,
+      headerName: labels.committed,
       flex: 1
     },
     {
       field: 'netWeight',
-      headerName: _labels.netWeight,
+      headerName: labels.netWeight,
       flex: 1
     },
     {
       field: 'netVolume',
-      headerName: _labels.netVolume,
+      headerName: labels.netVolume,
       flex: 1
     },
     {
       field: 'netCost',
-      headerName: _labels.netCost,
+      headerName: labels.netCost,
       flex: 1
     },
     {
       field: 'netPrice',
-      headerName: _labels.netPrice,
+      headerName: labels.netPrice,
       flex: 1
     },
     {
       flex: 1,
       headerName: 'S/L',
       cellRenderer: row => {
-        const trackBy1 = row.data.trackBy === 1
-        const trackBy2 = row.data.trackBy === 2
+        const { trackBy } = row.data
 
-        if (trackBy1) {
+        if (trackBy === 1 || trackBy === 2) {
           return (
             <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
-              <IconButton size='small' onClick={() => onSerial(row.data)}>
-                <Image src={serialIcon} width={18} height={18} alt='Serial' />
-              </IconButton>
-            </Box>
-          )
-        }
-
-        if (trackBy2) {
-          return (
-            <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
-              <IconButton size='small' onClick={() => onLot(row.data)}>
-                <Image src={lotIcon} width={18} height={18} alt='Lot' />
+              <IconButton size='small' onClick={() => (trackBy === 1 ? onSerial(row.data) : onLot(row.data))}>
+                <Image
+                  src={trackBy === 1 ? serialIcon : lotIcon}
+                  width={18}
+                  height={18}
+                  alt={trackBy === 1 ? 'Serial' : 'Lot'}
+                />
               </IconButton>
             </Box>
           )
@@ -162,13 +155,13 @@ const AvailabilitiesBySite = () => {
     stack({
       Component: SerialForm,
       props: {
-        labels: _labels,
+        labels,
         itemId,
         siteId
       },
       width: 600,
       height: 400,
-      title: _labels.serialNo
+      title: labels.serialNo
     })
   }
 
