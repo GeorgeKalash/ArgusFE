@@ -109,7 +109,9 @@ export const RemittanceOutwardsRepository = {
     qry: service + 'qryAPX',
     get: service + 'getAPX',
     set: service + 'setAPX',
-    del: service + 'delAPX'
+    del: service + 'delAPX',
+    get2: service + 'get2APX',
+    set2: service + 'set2APX'
   },
   OutwardsModification: {
     qry: service + 'qryOWM',

@@ -5,8 +5,7 @@ export const CurrencyTradingClientRepository = {
     get: service + 'getID'
   },
   Client: {
-    snapshot : service +  'snapshotCL',
+    snapshot: service + 'snapshotCL',
     get: service + 'getCL'
-  },
-
+  }
 }
