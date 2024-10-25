@@ -21,7 +21,7 @@ const OTPPhoneVerification = ({
   const { postRequest } = useContext(RequestsContext)
   const { defaultsData } = useContext(ControlContext)
 
-  const { labels: labels, access } = useResourceParams({
+  const { labels: labels } = useResourceParams({
     datasetId: ResourceIds.OTPVerify
   })
   const [otp, setOtp] = useState(['', '', '', '', '', ''])
@@ -38,7 +38,7 @@ const OTPPhoneVerification = ({
       }, 1000)
     } else {
       clearInterval(interval)
-      setError('OTP expired. Please request a new one.')
+      setError(labels.OTPTimeNotSet)
     }
 
     return () => clearInterval(interval)

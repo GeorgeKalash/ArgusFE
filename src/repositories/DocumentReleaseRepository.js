@@ -23,7 +23,6 @@ export const DocumentReleaseRepository = {
     del: service + 'delGRP'
   },
   GroupCode: {
-    //DRGroupAprover
     qry: service + 'qryGCO',
     get: service + 'getGCO',
     set: service + 'setGCO',
