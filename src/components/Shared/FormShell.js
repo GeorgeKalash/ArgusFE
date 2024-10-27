@@ -19,6 +19,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { ClientRelationForm } from './ClientRelationForm'
 import { ClientBalance } from './ClientBalance'
 import InventoryTransaction from './InventoryTransaction'
+import SalesTrxForm from './SalesTrxForm'
 
 export default function FormShell({
   form,
@@ -217,6 +218,19 @@ export default function FormShell({
               width: 1000,
               height: 620,
               title: platformLabels.financialTransaction
+            })
+          }
+          onClickSATRX={() =>
+            stack({
+              Component: SalesTrxForm,
+              props: {
+                recordId: form.values?.recordId,
+                functionId: functionId,
+                itemId: 0,
+                clientId: form?.values?.header?.clientId
+              },
+              width: 1200,
+              title: platformLabels.SalesTransactions
             })
           }
           onClickGIA={() =>
