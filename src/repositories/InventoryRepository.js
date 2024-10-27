@@ -181,5 +181,8 @@ export const InventoryRepository = {
     set: service + 'setSIZ',
     del: service + 'delSIZ',
     page: service + 'pageSIZ'
+  },
+  Transaction: {
+    qry2: service + 'qry2TRX'
   }
 }

@@ -1,6 +1,6 @@
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
-import { Grid, FormControlLabel, Checkbox, Box } from '@mui/material'
+import { Grid, FormControlLabel, Checkbox } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
@@ -43,6 +43,7 @@ import AddressFilterForm from 'src/components/Shared/AddressFilterForm'
 import { getStorageData } from 'src/storage/storage'
 import { useError } from 'src/error'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
+import SalesTrxForm from 'src/components/Shared/SalesTrxForm'
 
 export default function SalesOrderForm({ labels, access, recordId, currency, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -56,9 +57,15 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
   const userId = getStorageData('userData').userId
   const [reCal, setReCal] = useState(false)
 
+  const { documentType, maxAccess, changeDT } = useDocumentType({
+    functionId: SystemFunction.SalesOrder,
+    access: access,
+    enabled: !recordId
+  })
+
   const [initialValues, setInitialData] = useState({
     recordId: recordId || null,
-    dtId: null,
+    dtId: documentType?.dtId,
     reference: '',
     date: new Date(),
     dueDate: new Date(),
@@ -93,7 +100,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     currentDiscount: '',
     exRate: 1,
     rateCalcMethod: '',
-    tdType: 2, // discount
+    tdType: 2,
     tdPct: 0,
     baseAmount: 0,
     volume: '',
@@ -138,12 +145,6 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
 
   const invalidate = useInvalidate({
     endpointId: SaleRepository.SalesOrder.page
-  })
-
-  const { maxAccess } = useDocumentType({
-    functionId: SystemFunction.SalesOrder,
-    access: access,
-    enabled: !recordId
   })
 
   const { formik } = useForm({
@@ -237,7 +238,13 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
         displayFieldWidth: 5
       },
       async onChange({ row: { update, newRow } }) {
-        if (!newRow.itemId) return
+        if (!newRow.itemId) {
+          update({
+            saTrx: false
+          })
+
+          return
+        }
         const itemPhysProp = await getItemPhysProp(newRow.itemId)
         const itemInfo = await getItem(newRow.itemId)
         const ItemConvertPrice = await getItemConvertPrice(newRow.itemId)
@@ -289,8 +296,11 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
           extendedPrice: parseFloat('0').toFixed(2),
           mdValue: 0,
           taxId: rowTax,
-          taxDetails: rowTaxDetails,
-          mdType: 1
+          taxDetails: formik.values.isVattable ? rowTaxDetails : null,
+          mdType: 1,
+          siteId: formik?.values?.siteId,
+          siteRef: await getSiteRef(formik?.values?.siteId),
+          saTrx: true
         })
 
         formik.setFieldValue('mdAmount', formik.values.currentDiscount ? formik.values.currentDiscount : 0)
@@ -429,9 +439,23 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       }
     },
     {
-      component: 'numberfield',
+      component: 'button',
+      name: 'saTrx',
       label: labels.salesTrx,
-      name: 'saTrx'
+      onClick: (e, row, update, newRow) => {
+        console.log('newRow ', row)
+        stack({
+          Component: SalesTrxForm,
+          props: {
+            recordId: 0,
+            functionId: SystemFunction.SalesInvoice,
+            itemId: row?.itemId,
+            clientId: formik?.values?.clientId
+          },
+          width: 1000,
+          title: labels?.salesTrx
+        })
+      }
     },
     {
       component: 'numberfield',
@@ -609,7 +633,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
 
     const modifiedList = await Promise.all(
       soItems.list?.map(async (item, index) => {
-        const taxDetailsResponse = await getTaxDetails(item.taxId)
+        const taxDetailsResponse = soHeader?.record?.isVattable ? await getTaxDetails(item.taxId) : null
 
         return {
           ...item,
@@ -619,6 +643,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
           upo: parseFloat(item.upo).toFixed(2),
           vatAmount: parseFloat(item.vatAmount).toFixed(2),
           extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
+          saTrx: true,
           taxDetails: taxDetailsResponse
         }
       })
@@ -676,7 +701,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     formik.setFieldValue('currencyId', res?.record?.currencyId)
     formik.setFieldValue('spId', res?.record?.spId)
     formik.setFieldValue('ptId', res?.record?.ptId)
-    formik.setFieldValue('plId', res?.record?.plId)
+    formik.setFieldValue('plId', res?.record?.plId || (await getDefaultPlId()) || 0)
     formik.setFieldValue('szId', res?.record?.szId)
     formik.setFieldValue('shipToAddressId', res?.record?.shipAddressId)
     formik.setFieldValue('billToAddressId', res?.record?.billAddressId)
@@ -731,17 +756,18 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     if (cycleButtonState.value == 1) {
       currentPctAmount =
         formik.values.currentDiscount < 0 || formik.values.currentDiscount > 100 ? 0 : formik.values.currentDiscount
-      currentTdAmount = (parseFloat(currentPctAmount) * parseFloat(formik.values.subtotal)) / 100
+      currentTdAmount = (parseFloat(currentPctAmount) * parseFloat(subtotal)) / 100
       currentDiscountAmount = currentPctAmount
+
       formik.setFieldValue('tdAmount', currentTdAmount)
       formik.setFieldValue('tdPct', currentPctAmount)
       formik.setFieldValue('currentDiscount', currentPctAmount)
     } else {
       currentTdAmount =
-        formik.values.currentDiscount < 0 || formik.values.subtotal < formik.values.currentDiscount
+        formik.values.currentDiscount < 0 || subtotal < formik.values.currentDiscount
           ? 0
           : formik.values.currentDiscount
-      currentPctAmount = (parseFloat(currentTdAmount) / parseFloat(formik.values.subtotal)) * 100
+      currentPctAmount = (parseFloat(currentTdAmount) / parseFloat(subtotal)) * 100
       currentDiscountAmount = currentTdAmount
       formik.setFieldValue('tdPct', currentPctAmount)
       formik.setFieldValue('tdAmount', currentTdAmount)
@@ -834,11 +860,11 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     miscAmount: miscValue
   })
 
-  const totalQty = reCal ? _footerSummary?.totalQty : formik.values?.qty?.toFixed(2) || 0
+  const totalQty = reCal ? _footerSummary?.totalQty : formik.values?.qty || 0
   const amount = reCal ? _footerSummary?.net : formik.values?.amount || 0
   const totalVolume = reCal ? _footerSummary?.totalVolume : formik.values?.totalVolume || 0
   const totalWeight = reCal ? _footerSummary?.totalWeight : formik.values?.totalWeight || 0
-  const subtotal = reCal ? subTotal : formik.values?.subtotal || 0 || 0
+  const subtotal = reCal ? subTotal : formik.values?.subtotal || 0
   const vatAmount = reCal ? _footerSummary?.sumVat : formik.values?.sumVat || 0
 
   function checkDiscount(typeChange, tdPct, tdAmount, currentDiscount) {
@@ -854,13 +880,12 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       typeChange: typeChange
     })
 
-    formik.setFieldValue('tdAmount', _discountObj?.tdAmount?.toFixed(2) || 0)
+    formik.setFieldValue('tdAmount', _discountObj?.hiddenTdAmount?.toFixed(2) || 0)
     formik.setFieldValue('tdType', _discountObj?.tdType)
     formik.setFieldValue('currentDiscount', _discountObj?.currentDiscount || 0)
     formik.setFieldValue('tdPct', _discountObj?.hiddenTdPct)
   }
 
-  // recalcNewVat every row
   function recalcNewVat(tdPct) {
     formik.values.items.map(item => {
       const vatCalcRow = getVatCalc({
@@ -970,10 +995,18 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     return res?.record?.value
   }
 
-  async function getDefaultPUSite() {
+  async function getDefaultSASite() {
     const res = await getRequest({
       extension: SystemRepository.Defaults.get,
-      parameters: `_filter=&_key=PUSiteId`
+      parameters: `_filter=&_key=siteId`
+    })
+
+    return res?.record?.value
+  }
+  async function getDefaultPlId() {
+    const res = await getRequest({
+      extension: SystemRepository.Defaults.get,
+      parameters: `_filter=&_key=plId`
     })
 
     return res?.record?.value
@@ -1006,13 +1039,15 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     return res?.record?.value
   }
 
-  async function getDefaultDT() {
+  async function getSiteRef(siteId) {
+    if (!siteId) return null
+
     const res = await getRequest({
-      extension: SystemRepository.UserFunction.get,
-      parameters: `_userId=${userId}&_functionId=${SystemFunction.SalesOrder}`
+      extension: InventoryRepository.Site.get,
+      parameters: `_recordId=${siteId}`
     })
 
-    return res?.record?.dtId
+    return res?.record?.reference
   }
 
   const getMeasurementUnits = async () => {
@@ -1033,6 +1068,19 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     formik.setFieldValue('shipAddress', shipAdd)
     formik.setFieldValue('serializedAddress', shipAdd)
   }, [address])
+
+  useEffect(() => {
+    formik.setFieldValue('qty', parseFloat(totalQty).toFixed(2))
+    formik.setFieldValue('amount', parseFloat(amount).toFixed(2))
+    formik.setFieldValue('volume', parseFloat(totalVolume).toFixed(2))
+    formik.setFieldValue('weight', parseFloat(totalWeight).toFixed(2))
+    formik.setFieldValue('subtotal', parseFloat(subtotal).toFixed(2))
+    formik.setFieldValue('vatAmount', parseFloat(vatAmount).toFixed(2))
+  }, [totalQty, amount, totalVolume, totalWeight, subtotal, vatAmount])
+
+  useEffect(() => {
+    if (documentType?.dtId) formik.setFieldValue('dtId', documentType.dtId)
+  }, [documentType?.dtId])
 
   useEffect(() => {
     ;(async function () {
@@ -1056,12 +1104,10 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
           formik.setFieldValue('tdType', 1)
         }
         const userDefaultSite = await getDefaultUserSite()
-        const userDefaultPUSite = await getDefaultPUSite()
-        const siteId = userDefaultSite ? userDefaultSite : userDefaultPUSite
+        const userDefaultSASite = await getDefaultSASite()
+        const siteId = userDefaultSite ? userDefaultSite : userDefaultSASite
         const plant = await getDefaultUserPlant()
         const salesPerson = await getDefaultUserSP()
-        const dtId = await getDefaultDT()
-        formik.setFieldValue('dtId', parseInt(dtId))
         formik.setFieldValue('siteId', parseInt(siteId))
         formik.setFieldValue('spId', parseInt(salesPerson))
         formik.setFieldValue('plantId', parseInt(plant))
@@ -1116,6 +1162,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('dtId', newValue ? newValue.recordId : null)
+                      changeDT(newValue)
                     }}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}
                   />
@@ -1229,6 +1276,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                     rows={3}
                     maxLength='100'
                     readOnly
+                    disabled={formik.values.exWorks}
                     maxAccess={maxAccess}
                     viewDropDown={formik.values.clientId}
                     viewAdd={formik.values.clientId && !editMode}
@@ -1487,7 +1535,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                     onChange={e => {
                       let discount = Number(e.target.value)
                       if (formik.values.tdType == 1) {
-                        if (discount < 0 || formik.values.subtotal < discount) {
+                        if (discount < 0 || subtotal < discount) {
                           discount = 0
                         }
                         formik.setFieldValue('tdAmount', discount)
@@ -1501,7 +1549,6 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                       let discountAmount = Number(e.target.value)
                       let tdPct = Number(e.target.value)
                       let tdAmount = Number(e.target.value)
-
                       if (formik.values.tdType == 1) {
                         tdPct = (parseFloat(discountAmount) / parseFloat(subtotal)) * 100
                         formik.setFieldValue('tdPct', tdPct)
