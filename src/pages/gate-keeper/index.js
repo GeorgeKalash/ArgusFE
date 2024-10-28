@@ -14,8 +14,7 @@ const GateKeeper = () => {
     query: { data },
     labels: _labels,
     access,
-    refetch,
-    paginationParameters
+    refetch
   } = useResourceQuery({
     endpointId: ManufacturingRepository.LeanProductionPlanning.preview,
     datasetId: ResourceIds.GateKeeper,
@@ -87,8 +86,7 @@ const GateKeeper = () => {
           isLoading={false}
           pageSize={50}
           refetch={refetch}
-          paginationParameters={paginationParameters}
-          paginationType='api'
+          paginationType='client'
           maxAccess={access}
         />
       </Grow>
