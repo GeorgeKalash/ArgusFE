@@ -278,7 +278,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
                 value={formik.values.weight}
                 maxAccess={maxAccess}
                 allowNegative={false}
-                onMouseLeave={e => handleFieldChange('weight', 6, e?.target?.value)}
+                onMouseLeave={e => handleFieldChange('weight', 6, e)}
                 onClear={() => handleFieldClear('weight', 6)}
               />
             </Grid>
