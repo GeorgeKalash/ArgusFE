@@ -175,7 +175,7 @@ const AvailabilitiesBySite = () => {
         siteId,
         maxAccess: access
       },
-      width: 900,
+      width: 1150,
       height: 450,
       title: labels.lotAva
     })
