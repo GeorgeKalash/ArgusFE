@@ -49,6 +49,59 @@ export function DataGrid({
     return updatedRow
   }
 
+  const updateAndNewRow = async ({ fieldName, changes }) => {
+    // const rowIds = gridExpandedSortedRowIdsSelector(apiRef.current.state)
+    // console.log('rowIds', rowIds.length, changes.id)
+
+    // if (rowIds.length === changes.id) {
+    stageRowUpdate({
+      changes
+    })
+
+    const changess = stagedChanges.current
+
+    if (!changess) return apiRef.current.getRow(currentEditCell.current.id)
+
+    const row = apiRef.current.getRow(currentEditCell.current.id)
+
+    const updatedRow = await processDependenciesForColumn(
+      {
+        ...row,
+        ...changess
+      },
+      row,
+      {
+        id: currentEditCell.current.id,
+        field: currentEditCell.current.field
+      }
+    )
+
+    apiRef.current.updateRows([updatedRow])
+
+    const highestIndex = value?.length
+      ? value.reduce((max, current) => (max[idName] > current[idName] ? max : current))[idName] + 1
+      : 1
+
+    const defaultValues = Object.fromEntries(
+      columns?.filter(({ name }) => name !== idName).map(({ name, defaultValue }) => [name, defaultValue])
+    )
+
+    onChange([
+      ...value.map(row => (row[idName] === updatedRow[idName] ? updatedRow : row)), // Update existing row
+      {
+        [idName]: highestIndex, // Add new row with unique id
+        ...defaultValues
+      }
+    ])
+    console.log('test')
+
+    setNextEdit({
+      id: changes.id + 1,
+      field: fieldName
+    })
+    // }
+  }
+
   function handleRowChange(row) {
     const newRows = [...value]
     const index = newRows.findIndex(({ id }) => id === row.id)
@@ -128,7 +181,11 @@ export function DataGrid({
       !error &&
       allowAddNewLine
     ) {
-      addRow()
+      if (column.component === 'resourcelookup') {
+        addRow()
+      } else {
+        return
+      }
     }
 
     if (nextCell.columnIndex === columns.length - 1 - skip && nextCell.rowIndex === rowIds.length - 1) {
@@ -151,23 +208,23 @@ export function DataGrid({
       const rowIds = gridExpandedSortedRowIdsSelector(apiRef.current.state)
       const columns = apiRef.current.getVisibleColumns()
 
-      if (event.key == 'Tab' && column?.props?.jumpToNextLine && !error && allowAddNewLine) {
-        nextCell.rowIndex += 1
-      } else {
-        if (!event.shiftKey) {
-          if (nextCell.columnIndex < columns.length - 1 - skip) {
-            nextCell.columnIndex += 1
-          } else {
-            nextCell.rowIndex += 1
-            nextCell.columnIndex = 0
-          }
-        } else if (nextCell.columnIndex > 0) {
-          nextCell.columnIndex -= 1
+      // if (event.key == 'Tab' && column?.props?.jumpToNextLine && !error && allowAddNewLine) {
+      //   nextCell.rowIndex += 1
+      // } else {
+      if (!event.shiftKey) {
+        if (nextCell.columnIndex < columns.length - 1 - skip) {
+          nextCell.columnIndex += 1
         } else {
-          nextCell.rowIndex -= 1
-          nextCell.columnIndex = columns.length - 1
+          nextCell.rowIndex += 1
+          nextCell.columnIndex = 0
         }
+      } else if (nextCell.columnIndex > 0) {
+        nextCell.columnIndex -= 1
+      } else {
+        nextCell.rowIndex -= 1
+        nextCell.columnIndex = columns.length - 1
       }
+      // }
       const field = columns[nextCell.columnIndex].field
       const id = rowIds[nextCell.rowIndex]
 
@@ -189,6 +246,14 @@ export function DataGrid({
       columns.filter(({ name }) => name !== idName).map(({ name, defaultValue }) => [name, defaultValue])
     )
 
+    console.log('TESTTTTT', [
+      ...value,
+      {
+        [idName]: highestIndex,
+        ...defaultValues
+      }
+    ])
+
     onChange([
       ...value,
       {
@@ -196,6 +261,17 @@ export function DataGrid({
         ...defaultValues
       }
     ])
+  }
+
+  const addNewRow = id => {
+    setTimeout(() => {
+      addRow()
+
+      setNextEdit({
+        id: id + 1,
+        field: 'sku'
+      })
+    }, 100)
   }
 
   useEffect(() => {
@@ -245,10 +321,11 @@ export function DataGrid({
   const stagedChanges = useRef(null)
 
   function stageRowUpdate({ changes }) {
+    console.log('changes', changes)
     apiRef.current.setEditCellValue({
       id: currentEditCell.current.id,
       field: currentEditCell.current.field,
-      value: changes[currentEditCell.current.field]
+      value: changes?.[currentEditCell?.current?.field]
     })
 
     stagedChanges.current = changes
@@ -500,6 +577,7 @@ export function DataGrid({
                         ...column,
                         props: column.propsReducer ? column?.propsReducer({ row, props }) : props
                       }}
+                      addRow={updateAndNewRow}
                       update={update}
                       updateRow={updateRow}
                       isLoading={isUpdatingField}

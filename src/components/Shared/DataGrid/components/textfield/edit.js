@@ -1,6 +1,6 @@
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 
-export default function TextFieldEdit({ column: { props, ...column }, id, field, value, update, updateRow }) {
+export default function TextFieldEdit({ column: { props, ...column }, id, field, value, update, updateRow, addRow }) {
   return (
     <CustomTextField
       value={value}
@@ -20,8 +20,9 @@ export default function TextFieldEdit({ column: { props, ...column }, id, field,
         }
       }}
       onKeyDown={e => {
+        console.log(addRow)
         if (column?.onKeyDown) {
-          column?.onKeyDown(e, id, updateRow)
+          column?.onKeyDown(e, id, updateRow, addRow)
         }
       }}
       onChange={e => {

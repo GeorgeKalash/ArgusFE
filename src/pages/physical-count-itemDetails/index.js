@@ -66,7 +66,8 @@ const PhysicalCountItemDe = () => {
       controllerId: yup.string().required(),
       rows: yup.array().of(
         yup.object().shape({
-          sku: yup.string().required()
+          sku: yup.string().required(),
+          itemName: yup.string().required()
         })
       )
     }),
@@ -243,41 +244,22 @@ const PhysicalCountItemDe = () => {
         }),
         jumpToNextLine: jumpToNextLine
       },
-      async onChange({ row: { update, oldRow, newRow } }) {
-        // update({
-        //   countedQty: 1
-        // })
+      async onChange({ row: { update, newRow } }) {
+        update({
+          countedQty: 1
+        })
 
-        console.log('rows', oldRow)
-        console.log(newRow)
         let itemId
-
-        if (disSkuLookup) {
-          /*  */
-          /* const txtRes = await getRequest({
-            extension: InventoryRepository.Items.get2,
-            parameters: `_sku=${newRow?.sku}`
-          })
-          itemId = txtRes?.record?.recordId ? txtRes?.record?.recordId : ''
-
-          update({
-            itemId: itemId,
-            itemName: txtRes?.record?.name ? txtRes?.record?.name : '',
-            priceType: txtRes?.record?.metalId ? txtRes?.record?.priceType : 0
-          }) */
-        } else {
+        if (!disSkuLookup) {
           itemId = newRow?.itemId
           if (disableItemDuplicate) {
             if (formik.values.rows.find(item => item.itemId == itemId)) {
-              console.log('in')
-
               update({
                 itemId: null,
                 itemName: '',
                 sku: null,
                 priceType: null
               }) // not clearing
-
               /* const duplicateIndex = formik.values.rows.findIndex(item => item.itemId === itemId)
               if (duplicateIndex !== -1) {
                 const updatedRows = formik.values.rows.filter((_, index) => index !== duplicateIndex)
@@ -286,7 +268,6 @@ const PhysicalCountItemDe = () => {
               /* const newRows = formik.values.rows.filter(({ id }) => id !== newRow.id)
               formik.setFieldValue('rows', newRows) */
             }
-
             /* console.log(formik.values.rows[1])
               console.log(`${formik.values.rows[1]}`)
               formik.setFieldValue(`${formik.values.rows[1]}`, {
@@ -295,18 +276,15 @@ const PhysicalCountItemDe = () => {
                 sku: '',
                 priceType: null
               }) */
-
             return
           }
         }
-
         if (itemId) {
           // Fill Item Phy Properties
           const res = await getRequest({
             extension: InventoryRepository.Physical.get,
             parameters: `_itemId=${itemId}`
           })
-
           console.log(res)
           update({
             weight: res?.record?.weight ? res?.record?.weight : 0,
@@ -316,7 +294,7 @@ const PhysicalCountItemDe = () => {
           })
         }
       },
-      async onKeyDown(e, id, update) {
+      async onKeyDown(e, id, update, addRow) {
         if (disSkuLookup && e.code == 'Tab') {
           /* if (disableItemDuplicate) {
             console.log('E', e.target.value.toString())
@@ -339,20 +317,23 @@ const PhysicalCountItemDe = () => {
           })
           const itemId = txtRes?.record?.recordId ? txtRes?.record?.recordId : ''
 
-          /* update({
-            itemId: itemId,
-            itemName: txtRes?.record?.name ? txtRes?.record?.name : '',
-            priceType: txtRes?.record?.metalId ? txtRes?.record?.priceType : 0
-          }) */
-          console.log('update', update)
+          addRow({
+            fieldName: 'sku',
+            changes: {
+              id: id,
+              sku: e.target.value,
+              itemId: itemId,
+              itemName: txtRes?.record?.name ? txtRes?.record?.name : '',
+              priceType: txtRes?.record?.metalId ? txtRes?.record?.priceType : 0
+            }
+          })
+          // // update({
+          // //   itemId: itemId,
+          // //   itemName: txtRes?.record?.name ? txtRes?.record?.name : '',
+          // //   priceType: txtRes?.record?.metalId ? txtRes?.record?.priceType : 0
+          // // })
         }
       }
-
-      /* onblur(){
-
-      } */
-
-      //skuFocusLeaveHandler
     },
 
     /* {
