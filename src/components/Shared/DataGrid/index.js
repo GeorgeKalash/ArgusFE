@@ -212,13 +212,16 @@ export function DataGrid({
 
       commit(changes)
 
-      process(params, oldRow, setData) //for onchange columns
+      process(params, oldRow, setData)
     }
 
     const updateRow = ({ changes }) => {
       const oldRow = params.data
 
       setData(changes)
+
+      commit(changes)
+
       process(params, oldRow, setData)
 
       params.api.stopEditing()
@@ -262,17 +265,12 @@ export function DataGrid({
   }
 
   const ActionCellRenderer = params => {
-    const handleMouseOver = event => {
-      // params.api.stopEditing()
-    }
-
     return (
       <Box
-        sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+        sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1 }}
         onClick={() => openDelete(params.data.id)}
-        onMouseOver={handleMouseOver}
       >
-        <IconButton disabled={disabled}>
+        <IconButton>
           <GridDeleteIcon />
         </IconButton>
       </Box>
@@ -300,11 +298,10 @@ export function DataGrid({
       ? {
           field: 'actions',
           headerName: '',
-          flex: 0.5,
+          flex: 0.7,
           editable: false,
           sortable: false,
-          cellRenderer: ActionCellRenderer,
-          suppressClickEdit: true
+          cellRenderer: ActionCellRenderer
         }
       : null
   ]
@@ -316,7 +313,7 @@ export function DataGrid({
 
     gridApiRef.current.applyTransaction({ update: [data] })
 
-    commit(data)
+    // commit(data)
   }
 
   const commit = data => {
@@ -344,11 +341,6 @@ export function DataGrid({
               onGridReady={params => {
                 gridApiRef.current = params.api
                 onChange(value)
-              }}
-              onCellClicked={event => {
-                if (event.colDef.field === 'actions') {
-                  alert(params)
-                }
               }}
               onCellKeyDown={onCellKeyDown}
               rowHeight={45}

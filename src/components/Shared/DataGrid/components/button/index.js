@@ -15,7 +15,7 @@ function DataGridButton({ row, column: { props, ...column }, update, updateRow, 
         column.onClick(e, row, update, updateRow)
       }}
       variant={!!props?.imgSrc ? '' : 'contained'}
-      disabled={!row[field]}
+      disabled={!row?.[field]}
     >
       {!!props?.imgSrc ? (
         <img src={props?.imgSrc} alt='popup' />
