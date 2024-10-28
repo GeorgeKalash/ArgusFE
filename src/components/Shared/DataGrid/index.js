@@ -88,10 +88,23 @@ export function DataGrid({
     }
   }
 
-  const skipReadOnly = (rowIndex, id) => {
-    for (let i = rowIndex + 1; i < columns.length; i++) {
-      if (rowIndex === columns.length - 1) {
+  const skipReadOnly = (columnIndex, rowIndex) => {
+    for (let i = columnIndex + 1; i < columns.length; i++) {
+
+      if (i === columns.length - 1 && columns?.[columns.length - 1]?.props?.readOnly) {
         addRow();
+      }
+
+      const isLastColumn = columnIndex === columns.length - 1;
+      const isLastRow = rowIndex === value.length - 1;
+      
+      if (isLastColumn && isLastRow && !columns?.[columns.length - 1]?.props?.readOnly) {
+        addRow();
+
+        return {
+          columnIndex: 0, 
+          rowIndex: rowIndex + 1
+        };
       }
 
       if (!columns?.[i]?.props?.readOnly) {
@@ -101,7 +114,7 @@ export function DataGrid({
 
         return {
           columnIndex: i,
-          rowIndex: id
+          rowIndex
         }
       }
     }
@@ -111,7 +124,7 @@ export function DataGrid({
       if (!columns?.[i]?.props?.readOnly) {
         return {
           columnIndex: i,
-          rowIndex: id + 1
+          rowIndex: rowIndex + 1
         }
       } 
     }
@@ -148,9 +161,9 @@ export function DataGrid({
         field: columns[nextCell.columnIndex].field
       })
 
-    if (nextCell.columnIndex === columns.length - 1 - skip && nextCell.rowIndex === rowIds.length - 1) {
-      addRow()
-    }
+    // if (nextCell.columnIndex === columns.length - 1 - skip && nextCell.rowIndex === rowIds.length - 1) {
+    //   addRow()
+    // }
 
     if (nextCell.columnIndex === columns.length - 1 && nextCell.rowIndex === rowIds.length - 1 && !event.shiftKey) {
       return
