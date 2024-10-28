@@ -16,7 +16,7 @@ const GateKeeper = () => {
     var parameters = defaultParams
 
     const response = await getRequest({
-      extension: ManufacturingRepository.LeanProductionPlanning.preview,
+      extension: ManufacturingRepository.LeanProductionPlanning.preview2,
       parameters: parameters
     })
 
@@ -38,7 +38,7 @@ const GateKeeper = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: ManufacturingRepository.LeanProductionPlanning.preview,
+    endpointId: ManufacturingRepository.LeanProductionPlanning.preview2,
     datasetId:  ResourceIds.GateKeeper
   })
 
