@@ -134,7 +134,7 @@ const Postoutwards = () => {
               <Grid container spacing={2}>
                 <Grid item xs={10}>
                   <ResourceComboBox
-                    endpointId={SystemRepository.Country.qry}
+                    endpointId={RemittanceOutwardsRepository.AssignedCountry.assigned}
                     name='countryId'
                     label={_labels.country}
                     columnsInDropDown={[
@@ -150,8 +150,13 @@ const Postoutwards = () => {
                     onChange={(event, newValue) => {
                       if (newValue) {
                         formik.setFieldValue('countryId', newValue.recordId)
+                        formik.setFieldValue('currencyId', '')
+                        formik.setFieldValue('dispersalType', '')
                       } else {
                         formik.setFieldValue('countryId', '')
+                        formik.setFieldValue('currencyId', '')
+                        formik.setFieldValue('dispersalType', '')
+
                         setData([])
                       }
                     }}
@@ -184,9 +189,11 @@ const Postoutwards = () => {
               <Grid container spacing={2}>
                 <Grid item xs={10}>
                   <ResourceComboBox
-                    endpointId={SystemRepository.Currency.qry}
+                    endpointId={RemittanceOutwardsRepository.AssignedCurrency.assigned}
+                    parameters={formik.values.countryId && `_countryId=${formik.values.countryId || 0}`}
                     name='currencyId'
                     label={_labels.currency}
+                    readOnly={!formik.values.countryId}
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     columnsInDropDown={[
@@ -198,15 +205,21 @@ const Postoutwards = () => {
                     maxAccess={access}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('currencyId', newValue?.recordId || null)
+                      formik.setFieldValue('dispersalType', '')
                     }}
                     error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
                   />
                 </Grid>
                 <Grid item xs={10}>
                   <ResourceComboBox
+                    endpointId={RemittanceOutwardsRepository.AssignedDispersalType.assigned}
+                    parameters={
+                      formik.values.currencyId &&
+                      `_countryId=${formik.values.countryId || 0}&_currencyId=${formik.values.currencyId || 0}`
+                    }
                     name='dispersalType'
                     label={_labels.dispersal}
-                    datasetId={DataSets.RT_Dispersal_Type}
+                    readOnly={!formik.values.currencyId}
                     valueField='key'
                     displayField='value'
                     values={formik.values}

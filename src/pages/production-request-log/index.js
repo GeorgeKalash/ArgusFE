@@ -22,9 +22,12 @@ const ProductionRequestLog = () => {
     access,
     invalidate
   } = useResourceQuery({
-    queryFn: fetchGridData,
     endpointId: ManufacturingRepository.LeanProductionPlanning.preview,
-    datasetId: ResourceIds.ProductionRequestLog
+    datasetId: ResourceIds.ProductionRequestLog,
+    filter: {
+      filterFn: fetchGridData,
+      default: { status: 1 }
+    }
   })
 
   const handleSubmit = () => {
@@ -45,21 +48,26 @@ const ProductionRequestLog = () => {
       flex: 1
     },
     {
-      field: 'date',
-      headerName: _labels.date,
-      flex: 1,
-      type: 'date'
+      field: 'checked',
+      headerName: '',
+      type: 'checkbox',
+      editable: true
     },
     {
       field: 'sku',
       headerName: _labels.sku,
       flex: 1
     },
-
     {
       field: 'itemName',
       headerName: _labels.description,
       flex: 1
+    },
+    {
+      field: 'date',
+      headerName: _labels.date,
+      flex: 1,
+      type: 'date'
     },
     {
       field: 'qty',
@@ -106,7 +114,6 @@ const ProductionRequestLog = () => {
           onDelete={del}
           isLoading={false}
           maxAccess={access}
-          showCheckboxColumn={true}
           pageSize={50}
           paginationType='client'
           refetch={refetch}

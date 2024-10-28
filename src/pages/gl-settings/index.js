@@ -13,11 +13,13 @@ import * as yup from 'yup'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const GLSettings = () => {
   const [errorMessage, setErrorMessage] = useState(null)
-  const { getRequest, postRequest } = useContext(RequestsContext)
-  const [focus, setFocus] = useState()
+  const { postRequest } = useContext(RequestsContext)
+  const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
+  const [setFocus] = useState()
   const handleBlur = () => setFocus(undefined)
 
   const [initialValues, setInitialValues] = useState({
@@ -40,49 +42,40 @@ const GLSettings = () => {
 
   const getDataResult = () => {
     const myObject = {}
-    var parameters = `_filter=`
-    getRequest({
-      extension: SystemRepository.Defaults.qry,
-      parameters: parameters
+
+    const filteredList = defaultsData?.list?.filter(obj => {
+      return (
+        obj.key === 'GLACSegments' ||
+        obj.key === 'GLACSeg0' ||
+        obj.key === 'GLACSeg1' ||
+        obj.key === 'GLACSeg2' ||
+        obj.key === 'GLACSeg3' ||
+        obj.key === 'GLACSeg4' ||
+        obj.key === 'GLACSegName0' ||
+        obj.key === 'GLACSegName1' ||
+        obj.key === 'GLACSegName2' ||
+        obj.key === 'GLACSegName3' ||
+        obj.key === 'GLACSegName4'
+      )
     })
-      .then(res => {
-        const filteredList = res.list.filter(obj => {
-          return (
-            obj.key === 'GLACSegments' ||
-            obj.key === 'GLACSeg0' ||
-            obj.key === 'GLACSeg1' ||
-            obj.key === 'GLACSeg2' ||
-            obj.key === 'GLACSeg3' ||
-            obj.key === 'GLACSeg4' ||
-            obj.key === 'GLACSegName0' ||
-            obj.key === 'GLACSegName1' ||
-            obj.key === 'GLACSegName2' ||
-            obj.key === 'GLACSegName3' ||
-            obj.key === 'GLACSegName4'
-          )
-        })
 
-        filteredList.forEach(obj => {
-          myObject[obj.key] =
-            obj.key === 'GLACSegments' ||
-            obj.key === 'GLACSeg0' ||
-            obj.key === 'GLACSeg1' ||
-            obj.key === 'GLACSeg2' ||
-            obj.key === 'GLACSeg3' ||
-            obj.key === 'GLACSeg4'
-              ? obj.value
-                ? parseInt(obj.value)
-                : null
-              : obj.value
-              ? obj.value
-              : null
-        })
+    filteredList?.forEach(obj => {
+      myObject[obj.key] =
+        obj.key === 'GLACSegments' ||
+        obj.key === 'GLACSeg0' ||
+        obj.key === 'GLACSeg1' ||
+        obj.key === 'GLACSeg2' ||
+        obj.key === 'GLACSeg3' ||
+        obj.key === 'GLACSeg4'
+          ? obj.value
+            ? parseInt(obj.value)
+            : null
+          : obj.value
+          ? obj.value
+          : null
+    })
 
-        setInitialValues(myObject)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+    setInitialValues(myObject)
   }
 
   const { labels: _labels, access } = useResourceQuery({
@@ -95,11 +88,11 @@ const GLSettings = () => {
     validateOnChange: true,
 
     validationSchema: yup.object({
-      GLACSegments: yup.number().nullable().required('GLACSegments is required').min(2).max(5),
-      GLACSeg0: yup.number().nullable().required('Segment 1 is required').min(1).max(8),
-      GLACSegName0: yup.string().nullable().required('GLACSegName0 is required'),
-      GLACSeg1: yup.number().nullable().required('Segment 2 is required').min(1).max(8),
-      GLACSegName1: yup.string().nullable().required('GLACSegName1 is required'),
+      GLACSegments: yup.number().nullable().required().min(2).max(5),
+      GLACSeg0: yup.number().nullable().required().min(1).max(8),
+      GLACSegName0: yup.string().nullable().required(),
+      GLACSeg1: yup.number().nullable().required().min(1).max(8),
+      GLACSegName1: yup.string().nullable().required(),
       GLACSeg2: yup
         .number()
         .nullable()
@@ -179,13 +172,10 @@ const GLSettings = () => {
     await postRequest({
       extension: SystemRepository.Defaults.set,
       record: JSON.stringify({ sysDefaults: dataToPost })
+    }).then(res => {
+      toast.success(platformLabels.Edited)
+      updateDefaults(dataToPost)
     })
-      .then(res => {
-        toast.success('Record Successfully')
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
   }
 
   const handleSubmit = () => {
