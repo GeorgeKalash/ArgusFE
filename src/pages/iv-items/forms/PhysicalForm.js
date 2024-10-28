@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react'
+import { useContext } from 'react'
 import { Grid } from '@mui/material'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -15,16 +15,13 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { ControlContext } from 'src/providers/ControlContext'
-import CustomTextField from 'src/components/Inputs/CustomTextField'
 
 const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
-    endpointId: InventoryRepository.Physical.qry
+    endpointId: InventoryRepository.Items.snapshot
   })
-
-  const [disabled, setDisabled] = useState(false)
 
   const { platformLabels } = useContext(ControlContext)
 
