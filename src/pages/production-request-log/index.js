@@ -22,9 +22,12 @@ const ProductionRequestLog = () => {
     access,
     invalidate
   } = useResourceQuery({
-    queryFn: fetchGridData,
     endpointId: ManufacturingRepository.LeanProductionPlanning.preview,
-    datasetId: ResourceIds.ProductionRequestLog
+    datasetId: ResourceIds.ProductionRequestLog,
+    filter: {
+      filterFn: fetchGridData,
+      default: { status: 1 }
+    }
   })
 
   const handleSubmit = () => {
