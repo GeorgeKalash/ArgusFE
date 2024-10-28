@@ -40,7 +40,6 @@ import { getVatCalc } from 'src/utils/VatCalculator'
 import { getDiscValues, getFooterTotals, getSubtotal } from 'src/utils/FooterCalculator'
 import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
 import AddressFilterForm from 'src/components/Shared/AddressFilterForm'
-import { getStorageData } from 'src/storage/storage'
 import { useError } from 'src/error'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import SalesTrxForm from 'src/components/Shared/SalesTrxForm'
@@ -49,13 +48,13 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
-  const { platformLabels } = useContext(ControlContext)
+  const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
   const [cycleButtonState, setCycleButtonState] = useState({ text: '%', value: 2 })
   const [address, setAddress] = useState({})
   const [filteredMu, setFilteredMU] = useState([])
   const [measurements, setMeasurements] = useState([])
-  const userId = getStorageData('userData').userId
   const [reCal, setReCal] = useState(false)
+  const [defaults, setDefaults] = useState({ userDefaultsList: {}, systemDefaultsList: {} })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.SalesOrder,
@@ -443,7 +442,6 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       name: 'saTrx',
       label: labels.salesTrx,
       onClick: (e, row, update, newRow) => {
-        console.log('newRow ', row)
         stack({
           Component: SalesTrxForm,
           props: {
@@ -701,7 +699,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     formik.setFieldValue('currencyId', res?.record?.currencyId)
     formik.setFieldValue('spId', res?.record?.spId)
     formik.setFieldValue('ptId', res?.record?.ptId)
-    formik.setFieldValue('plId', res?.record?.plId || (await getDefaultPlId()) || 0)
+    formik.setFieldValue('plId', res?.record?.plId || defaults.systemDefaultsList.plId || 0)
     formik.setFieldValue('szId', res?.record?.szId)
     formik.setFieldValue('shipToAddressId', res?.record?.shipAddressId)
     formik.setFieldValue('billToAddressId', res?.record?.billAddressId)
@@ -986,57 +984,11 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     })
   }
 
-  async function getDefaultUserSite() {
-    const res = await getRequest({
-      extension: SystemRepository.UserDefaults.get,
-      parameters: `_userId=${userId}&_key=siteId`
+  const getMeasurementUnits = async () => {
+    return await getRequest({
+      extension: InventoryRepository.MeasurementUnit.qry,
+      parameters: `_msId=0`
     })
-
-    return res?.record?.value
-  }
-
-  async function getDefaultSASite() {
-    const res = await getRequest({
-      extension: SystemRepository.Defaults.get,
-      parameters: `_filter=&_key=siteId`
-    })
-
-    return res?.record?.value
-  }
-  async function getDefaultPlId() {
-    const res = await getRequest({
-      extension: SystemRepository.Defaults.get,
-      parameters: `_filter=&_key=plId`
-    })
-
-    return res?.record?.value
-  }
-
-  async function getDefaultSalesTD() {
-    const res = await getRequest({
-      extension: SystemRepository.Defaults.get,
-      parameters: `_filter=&_key=salesTD`
-    })
-
-    return res?.record?.value
-  }
-
-  async function getDefaultUserPlant() {
-    const res = await getRequest({
-      extension: SystemRepository.UserDefaults.get,
-      parameters: `_userId=${userId}&_key=plantId`
-    })
-
-    return res?.record?.value
-  }
-
-  async function getDefaultUserSP() {
-    const res = await getRequest({
-      extension: SystemRepository.UserDefaults.get,
-      parameters: `_userId=${userId}&_key=spId`
-    })
-
-    return res?.record?.value
   }
 
   async function getSiteRef(siteId) {
@@ -1049,12 +1001,35 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
 
     return res?.record?.reference
   }
+  async function getDefaultData() {
+    const systemKeys = ['siteId', 'salesTD', 'plId']
+    const userKeys = ['plantId', 'siteId', 'spId']
 
-  const getMeasurementUnits = async () => {
-    return await getRequest({
-      extension: InventoryRepository.MeasurementUnit.qry,
-      parameters: `_msId=0`
-    })
+    const systemObject = (defaultsData?.list || []).reduce((acc, { key, value }) => {
+      if (systemKeys.includes(key)) {
+        acc[key] = value === 'True' || value === 'False' ? value : value ? parseInt(value) : null
+      }
+
+      return acc
+    }, {})
+
+    const userObject = (userDefaultsData?.list || []).reduce((acc, { key, value }) => {
+      if (userKeys.includes(key)) {
+        acc[key] = value ? parseInt(value) : null
+      }
+
+      return acc
+    }, {})
+    setDefaults(prevDefaults => ({
+      ...prevDefaults,
+      userDefaultsList: userObject,
+      systemDefaultsList: systemObject
+    }))
+
+    return {
+      userDefaultsList: userObject,
+      systemDefaultsList: systemObject
+    }
   }
 
   useEffect(() => {
@@ -1085,8 +1060,8 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
   useEffect(() => {
     ;(async function () {
       const muList = await getMeasurementUnits()
-
       setMeasurements(muList?.list)
+      const defaultObj = await getDefaultData()
 
       if (recordId) {
         const soItems = await getSalesOrderItems(recordId)
@@ -1095,7 +1070,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
 
         await fillForm(soHeader, soItems)
       } else {
-        const defaultSalesTD = await getDefaultSalesTD()
+        const defaultSalesTD = defaultObj.systemDefaultsList.salesTD
         if (defaultSalesTD) {
           setCycleButtonState({ text: '%', value: 2 })
           formik.setFieldValue('tdType', 2)
@@ -1103,11 +1078,11 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
           setCycleButtonState({ text: '123', value: 1 })
           formik.setFieldValue('tdType', 1)
         }
-        const userDefaultSite = await getDefaultUserSite()
-        const userDefaultSASite = await getDefaultSASite()
+        const userDefaultSite = defaultObj.userDefaultsList.siteId
+        const userDefaultSASite = defaultObj.systemDefaultsList.siteId
         const siteId = userDefaultSite ? userDefaultSite : userDefaultSASite
-        const plant = await getDefaultUserPlant()
-        const salesPerson = await getDefaultUserSP()
+        const plant = defaultObj.userDefaultsList.plantId
+        const salesPerson = defaultObj.userDefaultsList.spId
         formik.setFieldValue('siteId', parseInt(siteId))
         formik.setFieldValue('spId', parseInt(salesPerson))
         formik.setFieldValue('plantId', parseInt(plant))
