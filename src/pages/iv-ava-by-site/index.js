@@ -169,7 +169,7 @@ const AvailabilitiesBySite = () => {
     stack({
       Component: LotForm,
       props: {
-        labels: _labels,
+        labels,
         lotId,
         itemId,
         siteId,
@@ -177,7 +177,7 @@ const AvailabilitiesBySite = () => {
       },
       width: 600,
       height: 400,
-      title: _labels.lotAva
+      title: labels.lotAva
     })
   }
 
