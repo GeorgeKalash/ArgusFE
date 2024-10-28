@@ -129,7 +129,7 @@ const AvailabilitiesBySite = () => {
               <IconButton size='small' onClick={() => (trackBy === 1 ? onSerial(row.data) : onLot(row.data))}>
                 <Image
                   src={trackBy === 1 ? serialIcon : lotIcon}
-                  width={18}
+                  width={trackBy === 1 ? 25 : 18}
                   height={18}
                   alt={trackBy === 1 ? labels.serial : labels.lot}
                 />
@@ -175,8 +175,8 @@ const AvailabilitiesBySite = () => {
         siteId,
         maxAccess: access
       },
-      width: 600,
-      height: 400,
+      width: 900,
+      height: 450,
       title: labels.lotAva
     })
   }
