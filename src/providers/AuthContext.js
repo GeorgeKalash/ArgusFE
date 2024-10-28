@@ -55,7 +55,7 @@ const AuthProvider = ({ children }) => {
     const fetchData = async () => {
       const matchHostname = window.location.hostname.match(/^(.+)\.softmachine\.co$/)
 
-      const accountName = matchHostname ? matchHostname[1] : 'cil-deploy'
+      const accountName = matchHostname ? matchHostname[1] : 'byc-deploy'
 
       try {
         const response = await axios.get(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=${accountName}`)
@@ -74,6 +74,7 @@ const AuthProvider = ({ children }) => {
   }, [])
 
   const handleLogin = async (params, errorCallback) => {
+    setLoading(true)
     try {
       const getUS2 = await axios.get(`${getAC.data.record.api}/SY.asmx/getUS2?_email=${params.username}`, {
         headers: {
@@ -139,6 +140,7 @@ const AuthProvider = ({ children }) => {
         const redirectURL = returnUrl && returnUrl !== '/' ? returnUrl : '/'
         router.replace(redirectURL)
       }
+      setLoading(false)
     } catch (error) {
       if (errorCallback) errorCallback(error)
     }
@@ -148,9 +150,6 @@ const AuthProvider = ({ children }) => {
     setUser(null)
     window.localStorage.removeItem('userData')
     window.sessionStorage.removeItem('userData')
-
-    // router.reload()
-
     await router.push('/login')
   }
 
