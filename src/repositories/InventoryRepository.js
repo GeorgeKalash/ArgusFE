@@ -147,11 +147,13 @@ export const InventoryRepository = {
   RebuildInventory: {
     rebuild: service + 'rebuildFIS'
   },
-
   ItemPhysProp: {
     get: service + 'getPP'
   },
-  DimensionUDT: { set: service + 'set2UDT', get: service + 'getUDT' },
+  DimensionUDT: {
+    set: service + 'set2UDT',
+    get: service + 'getUDT'
+  },
   Barcodes: {
     snapshot: service + 'snapshotBCD',
     get: service + 'getBCD',
@@ -180,17 +182,7 @@ export const InventoryRepository = {
     del: service + 'delSIZ',
     page: service + 'pageSIZ'
   },
-  CategoryLevel: {
-    set2: service + 'set2CAL',
-    qry: service + 'qryCAL'
-  },
-  OpeningCost: {
-    get: service + 'getOC',
-    set: service + 'setOC',
-    del: service + 'delOC',
-    qry: service + 'qryOC'
-  },
   Transaction: {
-    qry2: service + 'qry2TRX',
-  },
+    qry2: service + 'qry2TRX'
+  }
 }

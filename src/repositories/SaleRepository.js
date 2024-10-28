@@ -130,6 +130,7 @@ export const SaleRepository = {
     get: service + 'getTR',
     set: service + 'setTR',
     del: service + 'delTR',
+    post: service + 'postTR',
     snapshot: service + 'snapshotTR'
   },
   SalesOrder: {
@@ -149,7 +150,8 @@ export const SaleRepository = {
     qry: service + 'qryORI'
   },
   ItemConvertPrice: {
-    get: service + 'getICP'
+    get: service + 'getICP',
+    get2: service + 'getICP2'
   },
   Address: {
     qry: service + 'qryAD',
@@ -164,5 +166,19 @@ export const SaleRepository = {
   },
   SATrx: {
     qry: service + 'qryTRX'
+  },
+  SalesTransaction: {
+    qry: service + 'qryTR',
+    snapshot: service + 'snapshotTRX',
+    get: service + 'getTR',
+    get2: service + 'get2TR',
+    set2: service + 'set2TRX',
+    del: service + 'delTR'
+  },
+  SalesTransactionItems: {
+    qry: service + 'qryIT'
+  },
+  Contact: {
+    contact: service + 'qryContact'
   }
 }
