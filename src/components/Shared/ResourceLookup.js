@@ -14,7 +14,7 @@ export const ResourceLookup = ({
   secondValueShow,
   errorCheck,
   filter = {},
-  autoFistValue = true,
+  autoSelectFistValue = true,
   viewHelperText = true,
   minChars = 3,
   ...rest
@@ -71,7 +71,7 @@ export const ResourceLookup = ({
   }
 
   const onKeyDown = e => {
-    if ((e.key === 'Tab' || e.key === 'Enter') && autoFistValue && store?.[0]) {
+    if ((e.key === 'Tab' || e.key === 'Enter') && autoSelectFistValue && store?.[0]) {
       rest.onChange('', store[0])
     }
   }
