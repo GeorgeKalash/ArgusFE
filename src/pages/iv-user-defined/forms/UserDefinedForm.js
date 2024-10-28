@@ -15,43 +15,24 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
-const UserDifinedForm = () => {
-  const { getRequest, postRequest } = useContext(RequestsContext)
+const UserDefinedForm = () => {
+  const { postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
 
-  const [stagingDimCount, setStagingDimCount] = useState(null)
+  const counter = 20
 
   const { formik } = useForm({
     initialValues: {
       ivtDimCount: '',
-      ivtDimension1: '',
-      ivtDimension2: '',
-      ivtDimension3: '',
-      ivtDimension4: '',
-      ivtDimension5: '',
-      ivtDimension6: '',
-      ivtDimension7: '',
-      ivtDimension8: '',
-      ivtDimension9: '',
-      ivtDimension10: '',
-      ivtDimension11: '',
-      ivtDimension12: '',
-      ivtDimension13: '',
-      ivtDimension14: '',
-      ivtDimension15: '',
-      ivtDimension16: '',
-      ivtDimension17: '',
-      ivtDimension18: '',
-      ivtDimension19: '',
-      ivtDimension20: ''
+      ...Object.fromEntries(Array.from({ length: counter }, (_, i) => [`ivtDimension${i + 1}`, '']))
     },
     enableReinitialize: true,
     validateOnChange: true,
 
     validationSchema: yup.object({
-      ivtDimCount: yup.number().nullable().required().min(1).max(20),
+      ivtDimCount: yup.number().nullable().required().min(1).max(counter),
       ...Object.fromEntries(
-        Array.from({ length: 20 }, (_, i) => i + 1).map(num => [
+        Array.from({ length: counter }, (_, i) => i + 1).map(num => [
           `ivtDimension${num}`,
           yup
             .string()
@@ -69,6 +50,8 @@ const UserDifinedForm = () => {
       await postDimensionSettings(values)
     }
   })
+
+  const [stagingDimCount, setStagingDimCount] = useState(formik.values.ivtDimCount || null)
 
   useEffect(() => {
     getDataResult()
@@ -93,7 +76,7 @@ const UserDifinedForm = () => {
 
   const postDimensionSettings = async obj => {
     var dataToPost = [{ key: 'ivtDimCount', value: obj.ivtDimCount }]
-    for (let i = 1; i <= 20; i++) {
+    for (let i = 1; i <= counter; i++) {
       const dimKey = `ivtDimension${i}`
       if (obj[dimKey] !== undefined) {
         dataToPost.push({ key: dimKey, value: obj[dimKey] })
@@ -113,12 +96,17 @@ const UserDifinedForm = () => {
   }
 
   const handleDimCountChange = event => {
-    setStagingDimCount(event.target.value)
+    let value = parseInt(event.target.value, 10)
+    if (value > counter) {
+      value = counter
+    }
+    setStagingDimCount(value)
+    formik.setFieldValue('ivtDimCount', value)
   }
 
   function clearExcessFields(currentCount) {
     const ivtDimCount = currentCount
-    for (let i = 1; i <= 20; i++) {
+    for (let i = 1; i <= counter; i++) {
       const dimKey = `ivtDimension${i}`
       if (i > ivtDimCount) {
         formik.setFieldValue(dimKey, '')
@@ -149,10 +137,13 @@ const UserDifinedForm = () => {
               label={_labels.propertiesCount}
               value={stagingDimCount === null ? formik.values.ivtDimCount : stagingDimCount}
               onChange={handleDimCountChange}
+              maxLength={2}
+              decimalScale={0}
               onBlur={handleDimCountBlur}
               unClearable={true}
               min={1}
-              max={20}
+              max={counter}
+              allowNegative={false}
               arrow={true}
               error={formik.touched.ivtDimCount && Boolean(formik.errors.ivtDimCount)}
             />
@@ -208,4 +199,4 @@ const UserDifinedForm = () => {
   )
 }
 
-export default UserDifinedForm
+export default UserDefinedForm
