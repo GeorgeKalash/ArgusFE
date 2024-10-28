@@ -320,7 +320,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
           mdValue: 0,
           mdType: MDTYPE_PCT,
           extendedPrice: parseFloat('0').toFixed(2),
-          taxId: formik.values.isVattable ? rowTax : null,
+          taxId: rowTax,
           taxDetails: formik.values.isVattable ? rowTaxDetails : null,
           siteId: formik?.values?.header?.siteId,
           siteRef: formik?.values?.header?.siteRef
@@ -1071,7 +1071,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
     miscAmount: miscValue
   })
 
-  const totalQty = reCal ? _footerSummary?.totalQty : formik.values?.header.qty?.toFixed(2) || 0
+  const totalQty = reCal ? _footerSummary?.totalQty : formik.values?.header?.qty || 0
   const amount = reCal ? _footerSummary?.net : formik.values?.header.amount || 0
   const totalVolume = reCal ? _footerSummary?.totalVolume : formik.values?.header.volume || 0
   const totalWeight = reCal ? _footerSummary?.totalWeight : formik.values?.header.weight || 0
@@ -1590,7 +1590,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                   name='taxId'
                   label={labels.tax}
                   valueField='recordId'
-                  displayField={['reference', 'name']}
+                  displayField={['name']}
                   readOnly
                   values={formik.values.header}
                   error={formik.touched.taxId && Boolean(formik.errors.taxId)}
