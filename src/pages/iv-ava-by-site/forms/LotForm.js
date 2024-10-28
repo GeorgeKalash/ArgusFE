@@ -18,10 +18,6 @@ const LotForm = ({ labels, maxAccess, lotId, itemId, siteId }) => {
     setData(response)
   }
 
-  useEffect(() => {
-    fetchGridData()
-  }, [])
-
   const [columns, setColumns] = useState([])
 
   async function getDynamicColumns() {
@@ -101,9 +97,8 @@ const LotForm = ({ labels, maxAccess, lotId, itemId, siteId }) => {
 
     setColumns(dynamicColumns)
   }
-
   useEffect(() => {
-    getDynamicColumns()
+    getDynamicColumns(), fetchGridData()
   }, [])
 
   return (
