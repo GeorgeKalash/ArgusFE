@@ -233,8 +233,7 @@ const CustomLookup = ({
                       </InputAdornment>
                     )}
                   </div>
-                ),
-                tabIndex: _readOnly ? -1 : 0 // Prevent focus if readOnly
+                )
               }}
               sx={{
                 ...(secondDisplayField && {
