@@ -40,6 +40,7 @@ export default function GenFiscalForm({ _labels, maxAccess }) {
       toast.success(platformLabels.Generated)
     }
   })
+  console.log(formik.values, 'valuessss')
 
   return (
     <FormShell
@@ -63,7 +64,11 @@ export default function GenFiscalForm({ _labels, maxAccess }) {
                 required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('fiscalYear', newValue?.fiscalYear || '')
+                  if (newValue) {
+                    formik.setFieldValue('fiscalYear', newValue.fiscalYear)
+                  } else {
+                    formik.setFieldValue('fiscalYear', '')
+                  }
                 }}
                 error={formik.touched.fiscalYear && Boolean(formik.errors.fiscalYear)}
               />
