@@ -36,8 +36,9 @@ const CustomDateTimePicker = ({
   defaultValue,
   ...props
 }) => {
-  const dateFormat =
-    `${window.localStorage.getItem('default') && JSON.parse(window.localStorage.getItem('default'))['dateFormat']} ${formatTime}`
+  const dateFormat = `${
+    window.localStorage.getItem('default') && JSON.parse(window.localStorage.getItem('default'))['dateFormat']
+  } ${formatTime}`
 
   const [openDatePicker, setOpenDatePicker] = useState(false)
 
@@ -76,29 +77,28 @@ const CustomDateTimePicker = ({
   const isRequired = required || accessLevel === MANDATORY
 
   const getDefaultValue = () => {
-    let value;
-  
+    let value
+
     switch (defaultValue) {
       case 'today':
-        value = new Date();
-        break;
-        
+        value = new Date()
+        break
+
       case 'yesterday':
-        value = new Date();
-        value.setDate(value.getDate() - 1); 
-        break;
-        
-      case 'boy': 
-        value = new Date(new Date().getFullYear(), 0, 1);
-        break;
-        
+        value = new Date()
+        value.setDate(value.getDate() - 1)
+        break
+
+      case 'boy':
+        value = new Date(new Date().getFullYear(), 0, 1)
+        break
+
       default:
-        value = null;
+        value = null
     }
-  
-    return value;
-  };
-  
+
+    return value
+  }
 
   return _hidden ? (
     <></>
@@ -159,7 +159,7 @@ const CustomDateTimePicker = ({
         }}
         slots={{
           actionBar: props => <PickersActionBar {...props} actions={['accept', 'today']} />,
-          popper: PopperComponent
+          popper: props => <PopperComponent isDateTimePicker={true} {...props} />
         }}
       />
     </LocalizationProvider>
