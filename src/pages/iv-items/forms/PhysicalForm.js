@@ -288,7 +288,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
                 label={labels.density}
                 value={formik.values.density}
                 maxAccess={maxAccess}
-                onMouseLeave={e => handleFieldChange('density', 7, e?.target?.value)}
+                onMouseLeave={e => handleFieldChange('density', 7, e)}
                 onClear={() => handleFieldClear('density', 7)}
                 decimalScale={3}
               />
