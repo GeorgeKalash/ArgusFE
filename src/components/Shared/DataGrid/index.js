@@ -9,6 +9,7 @@ import { GridDeleteIcon } from '@mui/x-data-grid'
 import { HIDDEN, accessLevel } from 'src/services/api/maxAccess'
 import { useWindow } from 'src/windows'
 import DeleteDialog from '../DeleteDialog'
+import nextAppLoader from 'next/dist/build/webpack/loaders/next-app-loader'
 
 export function DataGrid({
   name, // maxAccess
@@ -25,6 +26,8 @@ export function DataGrid({
   const gridApiRef = useRef(null)
 
   const { stack } = useWindow()
+
+  const skip = allowDelete ? 1 : 0
 
   const process = (params, oldRow, setData) => {
     const column = columns.find(({ name }) => name === params.colDef.field)
@@ -97,6 +100,27 @@ export function DataGrid({
     }
   }
 
+  const findCell = params => {
+    console.log(params, params.column.getColId())
+    const allColumns = params.api.getColumnDefs()
+
+    if (gridApiRef.current) {
+      return {
+        rowIndex: params.rowIndex,
+        columnIndex: allColumns?.findIndex(col => col.colId === params.column.getColId())
+      }
+    }
+  }
+
+  const getAllRows = () => {
+    const allRows = []
+    gridApiRef.current.forEachNode(node => {
+      allRows.push(node.data) // Push the row data into the array
+    })
+    console.log('All Rows:', allRows)
+    return allRows // You can return this array for further use
+  }
+
   const onCellKeyDown = params => {
     const { event, api, node } = params
 
@@ -116,36 +140,80 @@ export function DataGrid({
     if (event.key !== 'Tab') {
       return
     }
+    // params.api.stopEditing()
 
-    if (currentColumnIndex === allColumns.length - 2 && node.rowIndex === api.getDisplayedRowCount() - 1) {
+    const nextCell = findCell(params)
+
+    console.log('nextCell', nextCell)
+    const rowIds = getAllRows()
+
+    if (currentColumnIndex === allColumns.length - 1 - skip && node.rowIndex === api.getDisplayedRowCount() - 1) {
       if (allowAddNewLine && !error) {
         event.stopPropagation()
         addNewRow(params)
       } else {
-        api.startEditingCell({
-          rowIndex: node.rowIndex,
-          colKey: allColumns[currentColumnIndex].colId
-        })
+        // api.startEditingCell({
+        //   rowIndex: node.rowIndex,
+        //   colKey: allColumns[currentColumnIndex].colId
+        // })
       }
     } else {
       const currentRowIndex = node.rowIndex
 
-      if (currentColumnIndex < allColumns.length - 2 && event.key === 'Tab') {
+      if (currentColumnIndex < allColumns.length - 2 && event.key === 'Tab' && !event.shiftKey) {
         const nextColumnId = allColumns[currentColumnIndex + 1].colId
 
-        api.startEditingCell({
-          rowIndex: currentRowIndex,
-          colKey: nextColumnId
-        })
+        // api.startEditingCell({
+        //   rowIndex: currentRowIndex,
+        //   colKey: nextColumnId
+        // })
       } else {
-        const nextColumnId = allColumns[0].colId
-
-        api.startEditingCell({
-          rowIndex: currentRowIndex + 1,
-          colKey: nextColumnId
-        })
+        // const nextColumnId = allColumns[0].colId
+        // api.startEditingCell({
+        //   rowIndex: currentRowIndex + 1,
+        //   colKey: nextColumnId
+        // })
       }
     }
+    // if (nextCell.columnIndex === allColumns.length - 1 && nextCell.rowIndex === rowIds.length - 1 && !event.shiftKey) {
+    //   api.startEditingCell({
+    //     rowIndex: currentRowIndex,
+    //     colKey: allColumns[currentColumnIndex].colId
+    //   })
+
+    //   return
+    // }
+
+    // if (nextCell.columnIndex === 0 && nextCell.rowIndex === 0 && event.shiftKey) {
+    //   return
+    // }
+
+    const columns = gridApiRef.current.getColumnDefs()
+    // const rows = getAllRows
+    if (!event.shiftKey) {
+      if (currentColumnIndex < allColumns.length - skip) {
+        nextCell.columnIndex += 1
+      } else if (currentColumnIndex === allColumns.length - skip && node.rowIndex !== api.getDisplayedRowCount() - 1) {
+        console.log('yessss')
+        nextCell.rowIndex += 1
+        nextCell.columnIndex = 0
+      }
+    } else if (nextCell.columnIndex > 0) {
+      nextCell.columnIndex -= 1
+      console.log('omar-2', -1)
+    } else {
+      nextCell.rowIndex -= 1
+      nextCell.columnIndex = columns.length - 1 - skip
+
+      console.log('omar-3', 1)
+    }
+
+    const field = columns[nextCell.columnIndex].field
+
+    api.startEditingCell({
+      rowIndex: nextCell.rowIndex,
+      colKey: field
+    })
   }
 
   const CustomCellRenderer = params => {
@@ -347,6 +415,7 @@ export function DataGrid({
               onCellEditingStopped={onCellEditingStopped}
               getRowId={params => params?.data?.id}
               tabToNextCell={() => true}
+              tabToPreviousCell={() => true}
             />
           )}
         </div>
