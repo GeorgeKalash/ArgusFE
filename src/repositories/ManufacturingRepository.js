@@ -64,9 +64,10 @@ export const ManufacturingRepository = {
     del: service + 'delMAS'
   },
   LeanProductionPlanning: {
-    preview: service + 'previewLEAN',
-    update: service + 'updateLEAN',
-    del: service + 'delLEAN'
+    preview: service + 'previewPQ',
+    preview2: service + 'previewPQ2',
+    update: service + 'updatePQ',
+    del: service + 'delPQ'
   },
   MaterialsAdjustment: {
     generate: service + 'generateADJ'
@@ -113,5 +114,21 @@ export const ManufacturingRepository = {
     get: service + 'getJOB',
     del: service + 'delJOB',
     snapshot: service + 'snapshotJOB'
+  },
+  ProductionSheet: {
+    page: service + 'pagePST',
+    qry: service + 'qryPST',
+    get: service + 'getPST',
+    set2: service + 'set2PST',
+    get2: service + 'get2PST',
+    del: service + 'delPST',
+    post: service + 'postPST',
+    snapshot: service + 'snapshotPST'
+  },
+  ProductionSheetItem: {
+    qry: service + 'qryPSI',
+    set: service + 'setPSI',
+    get: service + 'getPSI',
+    del: service + 'delPSI'
   }
 }

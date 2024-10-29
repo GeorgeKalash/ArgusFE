@@ -416,7 +416,9 @@ export function DataGrid({
                           column.component === 'button' ||
                           column.component === 'icon') &&
                         'center',
-                      border: `1px solid ${error?.[cell.rowIndex]?.[params.field] ? '#ff0000' : 'transparent'}`
+                      border: `1px solid ${error?.[cell.rowIndex]?.[params.field] ? '#ff0000' : 'transparent'}`,
+                      whiteSpace: 'normal',
+                      wordWrap: 'break-word'
                     }}
                   >
                     {column.component === 'checkbox' ? (
