@@ -45,7 +45,12 @@ const ProductionRequestLog = () => {
     {
       field: 'reference',
       headerName: _labels.reference,
-      flex: 1
+      flex: .6
+    },
+    {
+      field: 'qty',
+      headerName: _labels.qty,
+      flex: .4
     },
     {
       field: 'checked',
@@ -54,26 +59,21 @@ const ProductionRequestLog = () => {
       editable: true
     },
     {
+      field: 'itemName',
+      headerName: _labels.description,
+      flex: 2
+    },
+    {
       field: 'sku',
       headerName: _labels.sku,
       flex: 1
     },
     {
-      field: 'itemName',
-      headerName: _labels.description,
-      flex: 1
-    },
-    {
       field: 'date',
       headerName: _labels.date,
-      flex: 1,
+      flex: .7,
       type: 'date'
     },
-    {
-      field: 'qty',
-      headerName: _labels.qty,
-      flex: 1
-    }
   ]
 
   const calculateLeans = async () => {
