@@ -129,6 +129,11 @@ const Postoutwards = () => {
       flex: 1
     },
     {
+      field: 'timeToPost',
+      headerName: _labels.timeToPost,
+      flex: 1
+    },
+    {
       field: 'fcAmount',
       headerName: _labels.fcAmount,
       flex: 1,
@@ -351,7 +356,7 @@ const Postoutwards = () => {
         </Grow>
         <Fixed>
           <Grid container justifyContent='flex-end' spacing={2} sx={{ px: 2 }}>
-            <Grid item xs={1.2}>
+            <Grid item xs={1}>
               <CustomNumberField
                 name='totalFc'
                 label={_labels.totalFc}
@@ -360,7 +365,7 @@ const Postoutwards = () => {
                 hidden={!(formik.values.countryId && formik.values.currencyId)}
               />
             </Grid>
-            <Grid item xs={1.2}>
+            <Grid item xs={1}>
               <CustomNumberField name='totalAm' label={_labels.totalAm} value={formik.values.totalAm} readOnly={true} />
             </Grid>
           </Grid>
