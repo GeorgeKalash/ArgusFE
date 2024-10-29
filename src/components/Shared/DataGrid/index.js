@@ -298,7 +298,7 @@ export function DataGrid({
       ? {
           field: 'actions',
           headerName: '',
-          flex: 0.7,
+          width: 50,
           editable: false,
           sortable: false,
           cellRenderer: ActionCellRenderer
@@ -346,6 +346,7 @@ export function DataGrid({
               rowHeight={45}
               onCellEditingStopped={onCellEditingStopped}
               getRowId={params => params?.data?.id}
+              tabToNextCell={() => true}
             />
           )}
         </div>
