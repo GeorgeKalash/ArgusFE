@@ -45,7 +45,6 @@ export default function GenFiscalForm({ _labels, maxAccess }) {
     <FormShell
       resourceId={ResourceIds.GenerateFiscalYear}
       form={formik}
-      height={300}
       maxAccess={maxAccess}
       editMode={true}
       isCleared={false}
