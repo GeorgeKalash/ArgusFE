@@ -28,7 +28,7 @@ export default function GenFiscalForm({ _labels, maxAccess }) {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      fiscalYear: yup.string().required(''),
+      fiscalYear: yup.string().required(),
       openingStatus: yup.string().required()
     }),
     onSubmit: async obj => {
@@ -63,7 +63,7 @@ export default function GenFiscalForm({ _labels, maxAccess }) {
                 required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('fiscalYear', newValue?.fiscalYear)
+                  formik.setFieldValue('fiscalYear', newValue?.fiscalYear || '')
                 }}
                 error={formik.touched.fiscalYear && Boolean(formik.errors.fiscalYear)}
               />
