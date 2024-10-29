@@ -21,6 +21,7 @@ const CustomLookup = ({
   displayField = 'value',
   onLookup,
   onChange,
+  onKeyDown,
   error,
   firstFieldWidth = secondDisplayField ? '50%' : '100%',
   displayFieldWidth = 1,
@@ -158,6 +159,7 @@ const CustomLookup = ({
                   setFreeSolo(false)
                 }
               }}
+              onKeyDown={onKeyDown}
               onBlur={e => {
                 if (!store.some(item => item[valueField] === inputValue) && e.target.value !== firstValue) {
                   setInputValue('')
@@ -231,8 +233,7 @@ const CustomLookup = ({
                       </InputAdornment>
                     )}
                   </div>
-                ),
-                tabIndex: _readOnly ? -1 : 0 // Prevent focus if readOnly
+                )
               }}
               sx={{
                 ...(secondDisplayField && {
