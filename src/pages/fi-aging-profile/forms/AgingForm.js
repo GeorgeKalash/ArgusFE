@@ -17,7 +17,6 @@ import { useInvalidate } from 'src/hooks/resource'
 const AgingForm = ({ recordId, labels, maxAccess, name, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const [numRows, setNumRows] = useState(0)
 
   const invalidate = useInvalidate({
     endpointId: FinancialRepository.AgingProfile.qry
@@ -32,26 +31,14 @@ const AgingForm = ({ recordId, labels, maxAccess, name, window }) => {
         .array()
         .of(
           yup.object().shape({
-            caption: yup.string().test(function (value) {
-              if (numRows > 1) {
-                return !!value
-              }
-
-              return true
-            }),
-            days: yup.number().test(function (value) {
-              if (numRows > 1) {
-                return value > 0
-              }
-
-              return true
-            })
+            days: yup.string().required(),
+            caption: yup.string().required()
           })
         )
         .required()
     }),
     initialValues: {
-      name: name || '',
+      name: name,
       recordId: recordId || '',
       agingLeg: [
         {
@@ -66,7 +53,7 @@ const AgingForm = ({ recordId, labels, maxAccess, name, window }) => {
       const { agingLeg } = values
 
       if (agingLeg.length === 1 && isRowEmpty(agingLeg[0])) {
-        formik.setValues({ agingLeg: [] })
+        formik.setValues({ ...values, agingLeg: [] })
         postData([])
       } else {
         postData(values)
@@ -89,7 +76,7 @@ const AgingForm = ({ recordId, labels, maxAccess, name, window }) => {
     const data = {
       header: {
         recordId: recordId || '',
-        name: obj.name
+        name: formik.values.name
       },
       items: items
     }
@@ -106,7 +93,6 @@ const AgingForm = ({ recordId, labels, maxAccess, name, window }) => {
     } else {
       toast.success(platformLabels.Edited)
     }
-
     invalidate()
   }
 
@@ -123,26 +109,20 @@ const AgingForm = ({ recordId, labels, maxAccess, name, window }) => {
     }
   ]
 
-  useEffect(() => {
-    setNumRows(formik.values.agingLeg.length)
-  }, [formik.values.agingLeg])
-
   function getData() {
     getRequest({
       extension: FinancialRepository.AgingLeg.qry,
       parameters: `_agpId=${recordId}`
-    })
-      .then(res => {
-        const modifiedList = res.list?.map((agingLegItems, index) => ({
-          ...agingLegItems,
-          id: index + 1
-        }))
-        formik.setValues({
-          ...formik.values,
-          agingLeg: modifiedList
-        })
+    }).then(res => {
+      const modifiedList = res.list?.map((agingLegItems, index) => ({
+        ...agingLegItems,
+        id: index + 1
+      }))
+      formik.setValues({
+        ...formik.values,
+        agingLeg: modifiedList
       })
-      .catch(error => {})
+    })
   }
 
   const editMode = !!formik.values.recordId
@@ -168,6 +148,7 @@ const AgingForm = ({ recordId, labels, maxAccess, name, window }) => {
               name='name'
               label={labels.name}
               value={formik.values.name}
+              required
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('name', '')}
               error={formik.touched.name && Boolean(formik.errors.name)}
