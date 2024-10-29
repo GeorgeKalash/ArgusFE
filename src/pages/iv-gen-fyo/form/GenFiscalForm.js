@@ -28,7 +28,7 @@ export default function GenFiscalForm({ _labels, maxAccess }) {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      fiscalYear: yup.number().required(),
+      fiscalYear: yup.string().required(''),
       openingStatus: yup.string().required()
     }),
     onSubmit: async obj => {
