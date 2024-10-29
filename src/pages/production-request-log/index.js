@@ -101,7 +101,7 @@ const ProductionRequestLog = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
   }
 
   return (
@@ -114,8 +114,7 @@ const ProductionRequestLog = () => {
           onDelete={del}
           isLoading={false}
           maxAccess={access}
-          pageSize={50}
-          paginationType='client'
+          pagination={false}
           refetch={refetch}
         />
       </Grow>
