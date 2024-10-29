@@ -5,8 +5,6 @@ import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { ResourceIds } from 'src/resources/ResourceIds'
-import { useResourceQuery } from 'src/hooks/resource'
 import * as yup from 'yup'
 import { useForm } from 'src/hooks/form'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
@@ -15,7 +13,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
-const UserDefinedForm = () => {
+const UserDefinedForm = ({ labels }) => {
   const { postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
 
@@ -40,7 +38,7 @@ const UserDefinedForm = () => {
             .test(function (value) {
               const { ivtDimCount } = this.parent
 
-              return ivtDimCount >= num ? !!value : true
+              return parseInt(ivtDimCount) >= num ? !!value : true
             })
         ])
       )
@@ -50,7 +48,6 @@ const UserDefinedForm = () => {
       await postDimensionSettings(values)
     }
   })
-
   const [stagingDimCount, setStagingDimCount] = useState(formik.values.ivtDimCount || null)
 
   useEffect(() => {
@@ -96,36 +93,32 @@ const UserDefinedForm = () => {
   }
 
   const handleDimCountChange = event => {
-    let value = parseInt(event.target.value, 10)
-    if (value > counter) {
-      value = counter
-    }
+    const value = event.target.value
     setStagingDimCount(value)
-    formik.setFieldValue('ivtDimCount', value)
   }
 
   function clearExcessFields(currentCount) {
-    const ivtDimCount = currentCount
     for (let i = 1; i <= counter; i++) {
       const dimKey = `ivtDimension${i}`
-      if (i > ivtDimCount) {
-        formik.setFieldValue(dimKey, '')
+      if (i > currentCount) {
+        formik.setFieldValue(dimKey, '', false)
       }
     }
   }
 
   const handleDimCountBlur = () => {
-    if (stagingDimCount !== null) {
-      formik.setFieldValue('ivtDimCount', stagingDimCount)
-      process.nextTick(() => {
-        clearExcessFields(stagingDimCount)
-      })
-    }
-  }
+    let value = parseInt(stagingDimCount, 10)
 
-  const { labels: _labels } = useResourceQuery({
-    datasetId: ResourceIds.UserDefined
-  })
+    if (!value || value < 1) {
+      value = 1
+    } else if (value > counter) {
+      value = counter
+    }
+
+    setStagingDimCount(value)
+    formik.setFieldValue('ivtDimCount', value)
+    clearExcessFields(value)
+  }
 
   return (
     <VertLayout>
@@ -134,7 +127,7 @@ const UserDefinedForm = () => {
           <Grid item xs={12}>
             <CustomNumberField
               name='ivtDimCount'
-              label={_labels.propertiesCount}
+              label={labels.propertiesCount}
               value={stagingDimCount === null ? formik.values.ivtDimCount : stagingDimCount}
               onChange={handleDimCountChange}
               maxLength={2}
@@ -156,7 +149,7 @@ const UserDefinedForm = () => {
                   <CustomTextField
                     key={index}
                     name={`ivtDimension${index + 1}`}
-                    label={`${_labels.property} ${index + 1}`}
+                    label={`${labels.property} ${index + 1}`}
                     value={formik.values[`ivtDimension${index + 1}`]}
                     onClear={() => formik.setFieldValue(`ivtDimension${index + 1}`, '')}
                     onChange={formik.handleChange}
@@ -177,7 +170,7 @@ const UserDefinedForm = () => {
                   <CustomTextField
                     key={index + 10}
                     name={`ivtDimension${index + 11}`}
-                    label={`${_labels.property} ${index + 11}`}
+                    label={`${labels.property} ${index + 11}`}
                     value={formik.values[`ivtDimension${index + 11}`]}
                     onClear={() => formik.setFieldValue(`ivtDimension${index + 11}`, '')}
                     onChange={formik.handleChange}

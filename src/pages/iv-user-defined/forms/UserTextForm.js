@@ -16,34 +16,15 @@ import { ControlContext } from 'src/providers/ControlContext'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 const UserTextForm = () => {
-  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
 
-  const [stagingDimCount, setStagingDimCount] = useState(null)
+  const counter = 20
 
   const { formik } = useForm({
     initialValues: {
       ivtUDTCount: '',
-      ivtUDT1: '',
-      ivtUDT2: '',
-      ivtUDT3: '',
-      ivtUDT4: '',
-      ivtUDT5: '',
-      ivtUDT6: '',
-      ivtUDT7: '',
-      ivtUDT8: '',
-      ivtUDT9: '',
-      ivtUDT10: '',
-      ivtUDT11: '',
-      ivtUDT12: '',
-      ivtUDT13: '',
-      ivtUDT14: '',
-      ivtUDT15: '',
-      ivtUDT16: '',
-      ivtUDT17: '',
-      ivtUDT18: '',
-      ivtUDT19: '',
-      ivtUDT20: ''
+      ...Object.fromEntries(Array.from({ length: counter }, (_, i) => [`ivtUDT${i + 1}`, '']))
     },
     enableReinitialize: true,
     validateOnChange: true,
@@ -116,27 +97,33 @@ const UserTextForm = () => {
     formik.handleSubmit()
   }
 
+  const [stagingDimCount, setStagingDimCount] = useState(formik.values.ivtUDTCount || null)
+
   const handleDimCountChange = event => {
     setStagingDimCount(event.target.value)
   }
 
   function clearExcessFields(currentCount) {
-    const ivtUDTCount = currentCount
-    for (let i = 1; i <= 20; i++) {
+    for (let i = 1; i <= counter; i++) {
       const dimKey = `ivtUDT${i}`
-      if (i > ivtUDTCount) {
-        formik.setFieldValue(dimKey, '')
+      if (i > currentCount) {
+        formik.setFieldValue(dimKey, '', false)
       }
     }
   }
 
   const handleDimCountBlur = () => {
-    if (stagingDimCount !== null) {
-      formik.setFieldValue('ivtUDTCount', stagingDimCount)
-      process.nextTick(() => {
-        clearExcessFields(stagingDimCount)
-      })
+    let value = parseInt(stagingDimCount, 10)
+
+    if (!value || value < 1) {
+      value = 1
+    } else if (value > counter) {
+      value = counter
     }
+
+    setStagingDimCount(value)
+    formik.setFieldValue('ivtUDTCount', value)
+    clearExcessFields(value)
   }
 
   return (
@@ -154,6 +141,8 @@ const UserTextForm = () => {
               min={1}
               max={20}
               arrow={true}
+              maxLength={2}
+              decimalScale={0}
               error={formik.touched.ivtUDTCount && Boolean(formik.errors.ivtUDTCount)}
             />
           </Grid>

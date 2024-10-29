@@ -13,19 +13,21 @@ const PropertiesWindow = () => {
   const { labels: _labels, access } = useResourceQuery({
     datasetId: ResourceIds.UserDefined
   })
-  const tabs = [{ label: _labels.userProperties }, { label: _labels.userText }]
 
-  return (
-    <VertLayout>
-      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-      <CustomTabPanel index={0} value={activeTab}>
-        <UserDefinedForm maxAccess={access} />
-      </CustomTabPanel>
-      <CustomTabPanel index={1} value={activeTab}>
-        <UserTextForm maxAccess={access} />
-      </CustomTabPanel>
-    </VertLayout>
-  )
+  const tabs = [{ label: _labels.userProperties }, { label: _labels.userText }]
+  if (_labels && Object.keys(_labels).length > 0) {
+    return (
+      <VertLayout>
+        <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
+        <CustomTabPanel index={0} value={activeTab}>
+          <UserDefinedForm maxAccess={access} labels={_labels} />
+        </CustomTabPanel>
+        <CustomTabPanel index={1} value={activeTab} labels={_labels}>
+          <UserTextForm maxAccess={access} />
+        </CustomTabPanel>
+      </VertLayout>
+    )
+  }
 }
 
 export default PropertiesWindow
