@@ -84,7 +84,11 @@ export default function GenFiscalForm({ _labels, maxAccess }) {
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('openingStatus', newValue?.key)
+                  if (newValue) {
+                    formik.setFieldValue('openingStatus', newValue.key)
+                  } else {
+                    formik.setFieldValue('openingStatus', '')
+                  }
                 }}
                 error={formik.touched.openingStatus && Boolean(formik.errors.openingStatus)}
               />
