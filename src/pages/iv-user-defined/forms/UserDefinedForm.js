@@ -16,6 +16,7 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 const UserDefinedForm = ({ labels }) => {
   const { postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
+  const [errored, setErrored] = useState(false)
 
   const counter = 20
 
@@ -89,6 +90,9 @@ const UserDefinedForm = ({ labels }) => {
   }
 
   const handleSubmit = () => {
+    if (errored) {
+      return
+    }
     formik.handleSubmit()
   }
 
@@ -108,12 +112,12 @@ const UserDefinedForm = ({ labels }) => {
 
   const handleDimCountBlur = () => {
     let value = parseInt(stagingDimCount, 10)
+    if (value > counter || !value || value < 1) {
+      setErrored(true)
 
-    if (!value || value < 1) {
-      value = 1
-    } else if (value > counter) {
-      value = counter
+      return
     }
+    setErrored(false)
 
     setStagingDimCount(value)
     formik.setFieldValue('ivtDimCount', value)
@@ -138,7 +142,7 @@ const UserDefinedForm = ({ labels }) => {
               max={counter}
               allowNegative={false}
               arrow={true}
-              error={formik.touched.ivtDimCount && Boolean(formik.errors.ivtDimCount)}
+              error={errored || (formik.touched.ivtDimCount && Boolean(formik.errors.ivtDimCount))}
             />
           </Grid>
 
@@ -153,9 +157,13 @@ const UserDefinedForm = ({ labels }) => {
                     value={formik.values[`ivtDimension${index + 1}`]}
                     onClear={() => formik.setFieldValue(`ivtDimension${index + 1}`, '')}
                     onChange={formik.handleChange}
-                    error={formik.values.ivtDimCount > index && Boolean(formik.errors[`ivtDimension${index + 1}`])}
+                    error={
+                      !errored &&
+                      formik.values.ivtDimCount > index &&
+                      Boolean(formik.errors[`ivtDimension${index + 1}`])
+                    }
                     inputProps={{
-                      readOnly: formik.values.ivtDimCount <= index || formik.values.ivtDimCount === 'null'
+                      readOnly: errored || formik.values.ivtDimCount <= index || formik.values.ivtDimCount === 'null'
                     }}
                   />
                 </Grid>
@@ -174,9 +182,10 @@ const UserDefinedForm = ({ labels }) => {
                     value={formik.values[`ivtDimension${index + 11}`]}
                     onClear={() => formik.setFieldValue(`ivtDimension${index + 11}`, '')}
                     onChange={formik.handleChange}
-                    error={formik.errors[`ivtDimension${index + 11}`]}
+                    error={!errored && formik.errors[`ivtDimension${index + 11}`]}
                     inputProps={{
-                      readOnly: formik.values.ivtDimCount <= index + 10 || formik.values.ivtDimCount === 'null'
+                      readOnly:
+                        errored || formik.values.ivtDimCount <= index + 10 || formik.values.ivtDimCount === 'null'
                     }}
                   />
                 </Grid>

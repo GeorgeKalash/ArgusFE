@@ -18,6 +18,7 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 const UserTextForm = () => {
   const { postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
+  const [errored, setErrored] = useState(false)
 
   const counter = 20
 
@@ -94,13 +95,17 @@ const UserTextForm = () => {
   }
 
   const handleSubmit = () => {
+    if (errored) {
+      return
+    }
     formik.handleSubmit()
   }
 
   const [stagingDimCount, setStagingDimCount] = useState(formik.values.ivtUDTCount || null)
 
   const handleDimCountChange = event => {
-    setStagingDimCount(event.target.value)
+    const value = event.target.value
+    setStagingDimCount(value)
   }
 
   function clearExcessFields(currentCount) {
@@ -114,12 +119,12 @@ const UserTextForm = () => {
 
   const handleDimCountBlur = () => {
     let value = parseInt(stagingDimCount, 10)
+    if (value > counter || !value || value < 1) {
+      setErrored(true)
 
-    if (!value || value < 1) {
-      value = 1
-    } else if (value > counter) {
-      value = counter
+      return
     }
+    setErrored(false)
 
     setStagingDimCount(value)
     formik.setFieldValue('ivtUDTCount', value)
@@ -143,7 +148,7 @@ const UserTextForm = () => {
               arrow={true}
               maxLength={2}
               decimalScale={0}
-              error={formik.touched.ivtUDTCount && Boolean(formik.errors.ivtUDTCount)}
+              error={errored || (formik.touched.ivtUDTCount && Boolean(formik.errors.ivtUDTCount))}
             />
           </Grid>
 
@@ -158,9 +163,11 @@ const UserTextForm = () => {
                     value={formik.values[`ivtUDT${index + 1}`]}
                     onClear={() => formik.setFieldValue(`ivtUDT${index + 1}`, '')}
                     onChange={formik.handleChange}
-                    error={formik.values.ivtUDTCount > index && Boolean(formik.errors[`ivtUDT${index + 1}`])}
+                    error={
+                      !errored && formik.values.ivtUDTCount > index && Boolean(formik.errors[`ivtUDT${index + 1}`])
+                    }
                     inputProps={{
-                      readOnly: formik.values.ivtUDTCount <= index || formik.values.ivtUDTCount === 'null'
+                      readOnly: errored || formik.values.ivtUDTCount <= index || formik.values.ivtUDTCount === 'null'
                     }}
                   />
                 </Grid>
@@ -179,9 +186,10 @@ const UserTextForm = () => {
                     value={formik.values[`ivtUDT${index + 11}`]}
                     onClear={() => formik.setFieldValue(`ivtUDT${index + 11}`, '')}
                     onChange={formik.handleChange}
-                    error={formik.errors[`ivtUDT${index + 11}`]}
+                    error={!errored && formik.errors[`ivtUDT${index + 11}`]}
                     inputProps={{
-                      readOnly: formik.values.ivtUDTCount <= index + 10 || formik.values.ivtUDTCount === 'null'
+                      readOnly:
+                        errored || formik.values.ivtUDTCount <= index + 10 || formik.values.ivtUDTCount === 'null'
                     }}
                   />
                 </Grid>
