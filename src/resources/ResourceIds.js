@@ -284,5 +284,6 @@ export const ResourceIds = {
   LockedRecords: 23302,
   AvailabilitiesBySite: 41226,
   ProductionSheet: 42327,
-  InventoryTransaction: 41209
+  InventoryTransaction: 41209,
+  GenerateFiscalYear: 41503
 }

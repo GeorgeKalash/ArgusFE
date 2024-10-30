@@ -194,6 +194,9 @@ export const InventoryRepository = {
     qry: service + 'qryOC'
   },
   Transaction: {
-    qry2: service + 'qry2TRX',
+    qry2: service + 'qry2TRX'
   },
+  GenerateFiscalYear: {
+    gen: service + 'genFIS'
+  }
 }
