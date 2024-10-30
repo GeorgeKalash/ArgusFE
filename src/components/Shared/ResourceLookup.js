@@ -15,6 +15,7 @@ export const ResourceLookup = ({
   secondValueShow,
   errorCheck,
   filter = {},
+  autoSelectFistValue = true,
   viewHelperText = true,
   minChars = 3,
   ...rest
@@ -87,6 +88,12 @@ export const ResourceLookup = ({
     }
   }
 
+  const onKeyDown = e => {
+    if ((e.key === 'Tab' || e.key === 'Enter') && autoSelectFistValue && store?.[0]) {
+      rest.onChange('', store[0])
+    }
+  }
+
   return (
     <>
       <CustomLookup
@@ -98,6 +105,7 @@ export const ResourceLookup = ({
           secondValue: _secondValue,
           error,
           onKeyUp,
+          onKeyDown,
           name,
           isLoading,
           renderOption,
