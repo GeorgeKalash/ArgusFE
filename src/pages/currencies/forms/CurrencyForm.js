@@ -1,4 +1,3 @@
-// ** MUI Imports
 import { Grid, FormControlLabel, Checkbox } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
@@ -9,12 +8,14 @@ import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { DataSets } from 'src/resources/DataSets'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
+import { validateNumberField } from 'src/lib/numberField-helper'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 export default function CurrencyForm({ labels, maxAccess, recordId }) {
   const [editMode, setEditMode] = useState(!!recordId)
@@ -39,54 +40,51 @@ export default function CurrencyForm({ labels, maxAccess, recordId }) {
       sale: false,
       purchase: false,
       isoCode: '',
-      symbol: ''
+      symbol: '',
+      maxRateVarPct: null
     },
     maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required(' '),
-      reference: yup.string().required(' '),
-      decimals: yup.string().required(' '),
-      currencyType: yup.string().required(' '),
-      profileId: yup.string().required(' ')
+      name: yup.string().required(),
+      reference: yup.string().required(),
+      decimals: yup.string().required(),
+      currencyType: yup.string().required(),
+      profileId: yup.string().required()
     }),
     onSubmit: async obj => {
-      try {
-        const recordId = obj.recordId
+      const recordId = obj.recordId
 
-        const response = await postRequest({
-          extension: SystemRepository.Currency.set,
-          record: JSON.stringify(obj)
+      const response = await postRequest({
+        extension: SystemRepository.Currency.set,
+        record: JSON.stringify(obj)
+      })
+
+      if (!recordId) {
+        toast.success(platformLabels.Added)
+        formik.setValues({
+          ...obj,
+          recordId: response.recordId
         })
-
-        if (!recordId) {
-          toast.success(platformLabels.Added)
-          formik.setValues({
-            ...obj,
-            recordId: response.recordId
-          })
-        } else {
-          toast.success(platformLabels.Edited)
-        }
-        setEditMode(true)
-        invalidate()
-      } catch (error) {}
+      } else {
+        toast.success(platformLabels.Edited)
+      }
+      setEditMode(true)
+      invalidate()
     }
   })
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: SystemRepository.Currency.get,
-            parameters: `_recordId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: SystemRepository.Currency.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          formik.setValues(res.record)
-        }
-      } catch (exception) {}
+        formik.setValues(res.record)
+      }
     })()
   }, [])
 
@@ -195,7 +193,7 @@ export default function CurrencyForm({ labels, maxAccess, recordId }) {
                 error={formik.touched.currencyType && Boolean(formik.errors.currencyType)}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={6}>
               <FormControlLabel
                 control={
                   <Checkbox
@@ -208,7 +206,7 @@ export default function CurrencyForm({ labels, maxAccess, recordId }) {
                 label={labels.sales}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={6}>
               <FormControlLabel
                 control={
                   <Checkbox
@@ -243,6 +241,20 @@ export default function CurrencyForm({ labels, maxAccess, recordId }) {
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('symbol', '')}
                 error={formik.touched.symbol && Boolean(formik.errors.symbol)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomNumberField
+                name='maxRateVarPct'
+                label={labels.maxRateVarPct}
+                value={formik.values.maxRateVarPct}
+                maxAccess={maxAccess}
+                onChange={e => formik.setFieldValue('maxRateVarPct', e.target.value)}
+                onClear={() => formik.setFieldValue('maxRateVarPct', null)}
+                allowNegative={false}
+                maxLength={4}
+                error={formik.touched.maxRateVarPct && Boolean(formik.errors.maxRateVarPct)}
+                decimalScale={2}
               />
             </Grid>
           </Grid>

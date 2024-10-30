@@ -3,83 +3,49 @@ import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { useWindow } from 'src/windows'
+import { FinancialRepository } from 'src/repositories/FinancialRepository'
+import AgingForm from './forms/AgingForm'
 import { ControlContext } from 'src/providers/ControlContext'
-import AutoPostExclusionForm from './forms/AutoPostExclusionForm'
 
-const AutoPostExclusion = () => {
+const AgingProfile = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+
+  const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: RemittanceOutwardsRepository.AutoPostExclusion.qry,
+      extension: FinancialRepository.AgingProfile.qry,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
 
     return { ...response, _startAt: _startAt }
   }
 
-  const { stack } = useWindow()
-
   const {
     query: { data },
     labels: _labels,
+    invalidate,
     refetch,
-    paginationParameters,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: RemittanceOutwardsRepository.AutoPostExclusion.qry,
-    datasetId: ResourceIds.AutoPostExclusion
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: RemittanceOutwardsRepository.AutoPostExclusion.qry
+    endpointId: FinancialRepository.AgingProfile.qry,
+    datasetId: ResourceIds.FIAgingProfile
   })
 
   const columns = [
     {
       field: 'name',
-      headerName: _labels.name,
-      flex: 1
-    },
-    {
-      field: 'functionName',
-      headerName: _labels.function,
-      flex: 1
-    },
-    {
-      field: 'corName',
-      headerName: _labels.corName,
-      flex: 1
-    },
-    {
-      field: 'currencyName',
-      headerName: _labels.currencyName,
-      flex: 1
-    },
-    {
-      field: 'dispersalTypeName',
-      headerName: _labels.dispersal,
-      flex: 1
-    },
-    {
-      field: 'plantGroupName',
-      headerName: _labels.plantGroup,
-      flex: 1
-    },
-    {
-      field: 'cgName',
-      headerName: _labels.correspondentGroup,
+      headerName: _labels.reference,
       flex: 1
     }
   ]
@@ -89,26 +55,27 @@ const AutoPostExclusion = () => {
   }
 
   const edit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj?.recordId, obj?.name)
   }
 
-  function openForm(recordId) {
+  function openForm(recordId, name) {
     stack({
-      Component: AutoPostExclusionForm,
+      Component: AgingForm,
       props: {
         labels: _labels,
         recordId: recordId,
+        name: name || '',
         maxAccess: access
       },
-      width: 1200,
-      height: 650,
-      title: _labels.autoPostExclusion
+      width: 600,
+      height: 370,
+      title: _labels.aging
     })
   }
 
   const del = async obj => {
     await postRequest({
-      extension: RemittanceOutwardsRepository.AutoPostExclusion.del,
+      extension: FinancialRepository.AgingProfile.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -127,16 +94,15 @@ const AutoPostExclusion = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
           refetch={refetch}
+          isLoading={false}
           pageSize={50}
-          paginationParameters={paginationParameters}
+          paginationType='client'
           maxAccess={access}
-          paginationType='api'
         />
       </Grow>
     </VertLayout>
   )
 }
 
-export default AutoPostExclusion
+export default AgingProfile
