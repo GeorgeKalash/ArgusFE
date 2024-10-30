@@ -16,15 +16,29 @@ const ProductionRequestLog = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
+  async function fetchWithSearch({ qry }) {
+    const response = await getRequest({
+      extension: ManufacturingRepository.LeanProductionPlanning.snapshot,
+      parameters: `_filter=${qry}`
+    })
+
+    return response
+  }
+
   const {
     query: { data },
+    search,
     labels: _labels,
     refetch,
     access,
-    invalidate
+    invalidate,
+    clear
   } = useResourceQuery({
     endpointId: ManufacturingRepository.LeanProductionPlanning.preview,
     datasetId: ResourceIds.ProductionRequestLog,
+    search: {
+      searchFn: fetchWithSearch
+    },
     filter: {
       filterFn: fetchGridData,
       default: { status: 1 }
@@ -117,7 +131,7 @@ const ProductionRequestLog = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar actions={actions} />
+        <GridToolbar actions={actions} onSearch={search} onSearchClear={clear} labels={_labels} inputSearch={true}/>
       </Fixed>
       <Grow>
         <Table
