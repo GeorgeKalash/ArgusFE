@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react'
 import ReactDOM from 'react-dom'
 import { Box } from '@mui/material'
 
-const PopperComponent = ({ children, anchorEl, open, ...props }) => {
+const PopperComponent = ({ children, anchorEl, open, isDateTimePicker = false, ...props }) => {
   const [rect, setRect] = useState(anchorEl?.getBoundingClientRect())
   const popperRef = useRef(null)
 
@@ -49,7 +49,15 @@ const PopperComponent = ({ children, anchorEl, open, ...props }) => {
         },
         '& .MuiMenuItem-root': {
           paddingRight: '10px'
-        }
+        },
+        ...(isDateTimePicker && {
+          '& .MuiDateCalendar-root': {
+            height: 300 
+          },
+          '& .MuiMultiSectionDigitalClock-root': { 
+            height: '300px' 
+          }
+        })
       }}
       style={{
         position: 'absolute',
