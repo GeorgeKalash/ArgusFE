@@ -49,7 +49,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       groupId: null,
       msId: null,
       description: '',
-      priceType: null,
+      priceType: '',
       ptName: '',
       procurementMethod: null,
       valuationMethod: null,
@@ -196,6 +196,8 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       disabled: !editMode
     }
   ]
+  const [list, setList] = useState([])
+  console.log(list[0].value, 'ppppppppppppppppppppppppppp')
 
   useEffect(() => {
     if (formik.values.kitItem) {
@@ -203,6 +205,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       formik.setFieldValue('ivtItem', false)
       formik.setFieldValue('trackBy', '')
       formik.setFieldValue('valuationMethod', '')
+      formik.setFieldValue('priceType', 0)
     } else {
       setOnKitItem(false)
     }
@@ -277,13 +280,14 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                         key: parseInt(priceTypes.key),
                         value: priceTypes.value
                       }))
+                      setList(formattedPriceTypes)
 
                       return formattedPriceTypes
                     }}
                     values={formik.values}
                     name='priceType'
                     label={labels.priceType}
-                    defaultIndex={onKitItem ? 0 : null}
+                    defaultIndex={!!onKitItem ? 0 : null}
                     readOnly={formik.values.kitItem}
                     valueField='key'
                     displayField='value'
@@ -291,7 +295,11 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     required={!formik.values.kitItem}
                     maxAccess={!editMode && maxAccess}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('priceType', newValue?.key || '')
+                      if (newValue) {
+                        formik.setFieldValue('priceType', newValue?.key)
+                      } else {
+                        formik.setFieldValue('priceType', '')
+                      }
                     }}
                     error={formik.touched.priceType && formik.errors.priceType}
                   />
