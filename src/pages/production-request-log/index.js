@@ -10,6 +10,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
+import GridToolbar from 'src/components/Shared/GridToolbar'
 
 const ProductionRequestLog = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -104,8 +105,20 @@ const ProductionRequestLog = () => {
     toast.success(platformLabels.Deleted)
   }
 
+  const actions = [
+    {
+      key: 'Refresh',
+      condition: true,
+      onClick: () => fetchGridData(),
+      disabled: false
+    }
+  ]
+
   return (
     <VertLayout>
+      <Fixed>
+        <GridToolbar actions={actions} />
+      </Fixed>
       <Grow>
         <Table
           columns={columns}
