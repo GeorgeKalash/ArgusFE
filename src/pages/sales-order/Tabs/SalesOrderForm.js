@@ -220,6 +220,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       component: 'resourcelookup',
       label: labels.sku,
       name: 'sku',
+      flex: 2,
       props: {
         endpointId: InventoryRepository.Item.snapshot,
         parameters: '_categoryId=0&_msId=0&_startAt=0&_size=1000',
@@ -309,6 +310,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       component: 'textfield',
       label: labels.itemName,
       name: 'itemName',
+      flex: 3,
       props: {
         readOnly: true
       }
@@ -467,7 +469,8 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     {
       component: 'textfield',
       label: labels.notes,
-      name: 'notes'
+      name: 'notes',
+      flex: 2
     }
   ]
 
@@ -858,10 +861,12 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     miscAmount: miscValue
   })
 
+  console.log('check misc ', _footerSummary, reCal)
+
   const totalQty = reCal ? _footerSummary?.totalQty : formik.values?.qty || 0
   const amount = reCal ? _footerSummary?.net : formik.values?.amount || 0
-  const totalVolume = reCal ? _footerSummary?.totalVolume : formik.values?.totalVolume || 0
-  const totalWeight = reCal ? _footerSummary?.totalWeight : formik.values?.totalWeight || 0
+  const totalVolume = reCal ? _footerSummary?.totalVolume : formik.values?.volume || 0
+  const totalWeight = reCal ? _footerSummary?.totalWeight : formik.values?.weight || 0
   const subtotal = reCal ? subTotal : formik.values?.subtotal || 0
   const vatAmount = reCal ? _footerSummary?.sumVat : formik.values?.sumVat || 0
 
@@ -1468,7 +1473,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                 </Grid>
                 <Grid item>
                   <CustomNumberField
-                    name='totVolume'
+                    name='totalVolume'
                     maxAccess={maxAccess}
                     label={labels.totVolume}
                     value={totalVolume}
@@ -1477,7 +1482,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                 </Grid>
                 <Grid item>
                   <CustomNumberField
-                    name='totWeight'
+                    name='totalWeight'
                     maxAccess={maxAccess}
                     label={labels.totWeight}
                     value={totalWeight}
@@ -1521,6 +1526,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                       formik.setFieldValue('currentDiscount', discount)
                     }}
                     onBlur={async e => {
+                      setReCal(true)
                       let discountAmount = Number(e.target.value)
                       let tdPct = Number(e.target.value)
                       let tdAmount = Number(e.target.value)
@@ -1552,7 +1558,9 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                     decimalScale={2}
                     readOnly={isClosed}
                     onChange={e => formik.setFieldValue('miscAmount', e.target.value)}
-                    onBlur={async () => {}}
+                    onBlur={async () => {
+                      setReCal(true)
+                    }}
                     onClear={() => {
                       formik.setFieldValue('miscAmount', 0)
                     }}
