@@ -292,8 +292,6 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
                   error={formik.touched.userType && Boolean(formik.errors.userType)}
                 />
               </Grid>
-            </Grid>
-            <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
               <Grid item xs={12}>
                 <ResourceComboBox
                   name='languageId'
@@ -310,6 +308,8 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
                   error={formik.touched.languageId && Boolean(formik.errors.languageId)}
                 />
               </Grid>
+            </Grid>
+            <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
               <Grid item xs={12}>
                 <ResourceComboBox
                   endpointId={AccessControlRepository.NotificationGroup.qry}
