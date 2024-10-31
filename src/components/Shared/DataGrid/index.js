@@ -24,8 +24,6 @@ export function DataGrid({
   onSelectionChange,
   bg
 }) {
-  console.log('maxAccess', maxAccess)
-
   const gridApiRef = useRef(null)
 
   const { stack } = useWindow()
@@ -162,7 +160,7 @@ export function DataGrid({
     }
 
     const field = columns[nextCell.columnIndex].field
-    console.log(nextCell.rowIndex, field)
+
     api.startEditingCell({
       rowIndex: nextCell.rowIndex,
       colKey: field
@@ -193,7 +191,6 @@ export function DataGrid({
 
     async function update({ field, value }) {
       const oldRow = params.data
-      console.log(value)
 
       const changes = {
         [field]: value || undefined
@@ -293,8 +290,6 @@ export function DataGrid({
       params.api.stopEditing()
     }
     const comp = column.colDef.component
-
-    console.log('params', maxAccess)
 
     return (
       <Box
@@ -403,7 +398,6 @@ export function DataGrid({
         !event.target.value &&
         event.target.classList.contains('ag-center-cols-viewport')
       ) {
-        console.log('STOP')
         gridApiRef.current?.stopEditing()
       }
     }

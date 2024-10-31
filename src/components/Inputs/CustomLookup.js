@@ -21,6 +21,7 @@ const CustomLookup = ({
   displayField = 'value',
   onLookup,
   onChange,
+  onKeyDown,
   error,
   firstFieldWidth = secondDisplayField ? '50%' : '100%',
   displayFieldWidth = 1,
@@ -158,6 +159,7 @@ const CustomLookup = ({
                   setFreeSolo(false)
                 }
               }}
+              onKeyDown={onKeyDown}
               onBlur={e => {
                 if (!store.some(item => item[valueField] === inputValue) && e.target.value !== firstValue) {
                   setInputValue('')
@@ -186,7 +188,7 @@ const CustomLookup = ({
               helperText={helperText}
               InputProps={{
                 ...params.InputProps,
-                endAdornment: (
+                endAdornment: !_readOnly && (
                   <div
                     style={{
                       position: 'absolute',
@@ -196,44 +198,41 @@ const CustomLookup = ({
                       display: 'flex'
                     }}
                   >
-                    {!_readOnly && (
-                      <InputAdornment sx={{ margin: '0px !important' }} position='end' disabled={_readOnly}>
+                    <InputAdornment sx={{ margin: '0px !important' }} position='end'>
+                      <IconButton
+                        sx={{ margin: '0px !important', padding: '0px !important' }}
+                        tabIndex={-1}
+                        edge='end'
+                        onClick={() => {
+                          setInputValue('')
+                          onChange(name, '')
+                          setStore([])
+                          setFreeSolo(true)
+                        }}
+                        aria-label='clear input'
+                      >
+                        <ClearIcon sx={{ border: '0px', fontSize: 20 }} />
+                      </IconButton>
+                    </InputAdornment>
+
+                    {!isLoading ? (
+                      <InputAdornment sx={{ margin: '0px !important' }} position='end'>
                         <IconButton
                           sx={{ margin: '0px !important', padding: '0px !important' }}
                           tabIndex={-1}
                           edge='end'
-                          onClick={() => {
-                            setInputValue('')
-                            onChange(name, '')
-                            setStore([])
-                            setFreeSolo(true)
-                          }}
-                          aria-label='clear input'
+                          style={{ pointerEvents: 'none' }}
                         >
-                          <ClearIcon sx={{ border: '0px', fontSize: 20 }} />
+                          <SearchIcon style={{ cursor: 'pointer', border: '0px', fontSize: 20 }} />
                         </IconButton>
                       </InputAdornment>
+                    ) : (
+                      <InputAdornment sx={{ margin: '0px !important' }} position='end'>
+                        <CircularProgress size={15} style={{ marginLeft: 5 }} />
+                      </InputAdornment>
                     )}
-                    {!_readOnly &&
-                      (!isLoading ? (
-                        <InputAdornment sx={{ margin: '0px !important' }} position='end'>
-                          <IconButton
-                            sx={{ margin: '0px !important', padding: '0px !important' }}
-                            tabIndex={-1}
-                            edge='end'
-                            style={{ pointerEvents: 'none' }}
-                          >
-                            <SearchIcon style={{ cursor: 'pointer', border: '0px', fontSize: 20 }} />
-                          </IconButton>
-                        </InputAdornment>
-                      ) : (
-                        <InputAdornment sx={{ margin: '0px !important' }} position='end'>
-                          <CircularProgress size={15} style={{ marginLeft: 5 }} />
-                        </InputAdornment>
-                      ))}
                   </div>
-                ),
-                tabIndex: _readOnly ? -1 : 0 // Prevent focus if readOnly
+                )
               }}
               sx={{
                 ...(secondDisplayField && {
