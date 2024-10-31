@@ -112,7 +112,7 @@ const CustomNumberField = ({
         },
         autoComplete: 'off',
         readOnly: _readOnly,
-        endAdornment: (!readOnly || allowClear) && !props.disabled && (value || value === 0) && (
+        endAdornment: (!_readOnly || allowClear) && !props.disabled && (value || value === 0) && (
           <InputAdornment position='end'>
             <IconButton tabIndex={-1} edge='end' onClick={onClear} aria-label='clear input'>
               <ClearIcon sx={{ border: '0px', fontSize: 20 }} />

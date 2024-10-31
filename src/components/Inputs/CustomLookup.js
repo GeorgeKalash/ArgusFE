@@ -196,8 +196,8 @@ const CustomLookup = ({
                       display: 'flex'
                     }}
                   >
-                    {!readOnly && (
-                      <InputAdornment sx={{ margin: '0px !important' }} position='end'>
+                    {!_readOnly && (
+                      <InputAdornment sx={{ margin: '0px !important' }} position='end' disabled={_readOnly}>
                         <IconButton
                           sx={{ margin: '0px !important', padding: '0px !important' }}
                           tabIndex={-1}
@@ -214,22 +214,23 @@ const CustomLookup = ({
                         </IconButton>
                       </InputAdornment>
                     )}
-                    {!isLoading ? (
-                      <InputAdornment sx={{ margin: '0px !important' }} position='end'>
-                        <IconButton
-                          sx={{ margin: '0px !important', padding: '0px !important' }}
-                          tabIndex={-1}
-                          edge='end'
-                          style={{ pointerEvents: 'none' }}
-                        >
-                          <SearchIcon style={{ cursor: 'pointer', border: '0px', fontSize: 20 }} />
-                        </IconButton>
-                      </InputAdornment>
-                    ) : (
-                      <InputAdornment sx={{ margin: '0px !important' }} position='end'>
-                        <CircularProgress size={15} style={{ marginLeft: 5 }} />
-                      </InputAdornment>
-                    )}
+                    {!_readOnly &&
+                      (!isLoading ? (
+                        <InputAdornment sx={{ margin: '0px !important' }} position='end'>
+                          <IconButton
+                            sx={{ margin: '0px !important', padding: '0px !important' }}
+                            tabIndex={-1}
+                            edge='end'
+                            style={{ pointerEvents: 'none' }}
+                          >
+                            <SearchIcon style={{ cursor: 'pointer', border: '0px', fontSize: 20 }} />
+                          </IconButton>
+                        </InputAdornment>
+                      ) : (
+                        <InputAdornment sx={{ margin: '0px !important' }} position='end'>
+                          <CircularProgress size={15} style={{ marginLeft: 5 }} />
+                        </InputAdornment>
+                      ))}
                   </div>
                 ),
                 tabIndex: _readOnly ? -1 : 0 // Prevent focus if readOnly

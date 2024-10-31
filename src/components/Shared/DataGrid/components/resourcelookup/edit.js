@@ -1,6 +1,16 @@
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 
-export default function ResourceLookupEdit({ id, value, data, updateRow, column: { props }, update, field, name }) {
+export default function ResourceLookupEdit({
+  id,
+  value,
+  data,
+  updateRow,
+  column: { props },
+  update,
+  field,
+  name,
+  maxAccess
+}) {
   let changes = props?.mapping
     ? props.mapping
         ?.map(({ from, to }) => ({
@@ -8,6 +18,8 @@ export default function ResourceLookupEdit({ id, value, data, updateRow, column:
         }))
         .reduce((acc, obj) => ({ ...acc, ...obj }), {})
     : value
+
+  console.log('maxAccess===', maxAccess)
 
   return (
     <ResourceLookup
@@ -19,6 +31,7 @@ export default function ResourceLookupEdit({ id, value, data, updateRow, column:
       userTypes={false}
       valueField={props.valueField}
       displayField={props.displayField}
+      maxAccess={maxAccess}
       columnsInDropDown={props.columnsInDropDown}
       firstValue={changes}
       secondValue={changes}

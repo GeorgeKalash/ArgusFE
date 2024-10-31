@@ -24,6 +24,8 @@ export function DataGrid({
   onSelectionChange,
   bg
 }) {
+  console.log('maxAccess', maxAccess)
+
   const gridApiRef = useRef(null)
 
   const { stack } = useWindow()
@@ -242,7 +244,7 @@ export function DataGrid({
         ? components[column?.colDef?.component]?.edit
         : column?.component?.edit
 
-    const maxAccessName = `${params.node.id}.${column.name}`
+    const maxAccessName = `${name}.${column.colId}`
 
     const props = {
       ...column.colDef.props,
@@ -292,7 +294,7 @@ export function DataGrid({
     }
     const comp = column.colDef.component
 
-    console.log('params', params)
+    console.log('params', maxAccess)
 
     return (
       <Box
@@ -345,6 +347,7 @@ export function DataGrid({
   const columnDefs = [
     ...columns.map(column => ({
       ...column,
+      // props: { ...column },
       field: column.name,
       headerName: column.label || column.name,
       editable: !disabled,
@@ -352,6 +355,7 @@ export function DataGrid({
       sortable: false,
       cellRenderer: CustomCellRenderer,
       cellEditor: CustomCellEditor,
+      cellEditorParams: { maxAccess }, // Pass maxAccess here
       cellStyle: getCellStyle,
       suppressKeyboardEvent: params => {
         const { event } = params

@@ -9,6 +9,7 @@ import EventIcon from '@mui/icons-material/Event'
 import { AdapterMomentHijri } from '@mui/x-date-pickers/AdapterMomentHijri'
 import moment from 'moment-hijri'
 import PopperComponent from '../Shared/Popper/PopperComponent'
+import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
 
 export default function CustomDatePickerHijri({
   variant = 'outlined',
@@ -20,9 +21,25 @@ export default function CustomDatePickerHijri({
   readOnly,
   disabled,
   disabledDate,
-  fullWidth = true
+  fullWidth = true,
+  hidden = false,
+  required = false,
+  ...props
 }) {
   const [openDatePicker, setOpenDatePicker] = useState(false)
+
+  const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
+
+  const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
+
+  const _readOnly =
+    maxAccess < 3 ||
+    accessLevel === DISABLED ||
+    (readOnly && accessLevel !== MANDATORY && accessLevel !== FORCE_ENABLED)
+
+  const _hidden = accessLevel ? accessLevel === HIDDEN : hidden
+
+  const isRequired = required || accessLevel === MANDATORY
 
   const shouldDisableDate = dates => {
     const date = new Date(dates)
@@ -47,7 +64,9 @@ export default function CustomDatePickerHijri({
     onChange(name, timestamp)
   }
 
-  return (
+  return _hidden ? (
+    <></>
+  ) : (
     <LocalizationProvider dateAdapter={AdapterMomentHijri}>
       <DatePicker
         variant={variant}
@@ -68,14 +87,15 @@ export default function CustomDatePickerHijri({
         }}
         slotProps={{
           textField: {
-            readOnly: true,
+            required: isRequired,
+            readOnly: _readOnly,
             size: size,
             fullWidth: fullWidth,
             inputProps: {
-              tabIndex: readOnly ? -1 : 0 // Prevent focus on the input field
+              tabIndex: _readOnly ? -1 : 0 // Prevent focus on the input field
             },
             InputProps: {
-              endAdornment: !(readOnly || disabled) && (
+              endAdornment: !(_readOnly || disabled) && (
                 <InputAdornment position='end'>
                   {Boolean(value) && (
                     <IconButton tabIndex={-1} edge='start' onClick={() => onChange(name, null)} sx={{ mr: -2 }}>
