@@ -45,18 +45,20 @@ export function DataGrid({
     }
   }
 
-  function deleteRow(deleteId) {
-    const newRows = value.filter(({ id }) => id !== deleteId)
+  function deleteRow(params) {
+    const newRows = value.filter(({ id }) => id !== params.data.id)
+    gridApiRef.current.applyTransaction({ remove: [params.data] })
+
     onChange(newRows)
   }
 
-  function openDelete(id) {
+  function openDelete(params) {
     stack({
       Component: DeleteDialog,
       props: {
         open: [true, {}],
         fullScreen: false,
-        onConfirm: () => deleteRow(id)
+        onConfirm: () => deleteRow(params)
       },
       width: 450,
       height: 170,
@@ -331,7 +333,7 @@ export function DataGrid({
     return (
       <Box
         sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1 }}
-        onClick={() => openDelete(params.data.id)}
+        onClick={() => openDelete(params)}
       >
         <IconButton>
           <GridDeleteIcon />
