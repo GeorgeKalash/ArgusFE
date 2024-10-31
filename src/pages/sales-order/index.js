@@ -172,7 +172,7 @@ const SalesOrder = () => {
         currency,
         recordId
       },
-      width: 1200,
+      width: 1300,
       height: 730,
       title: labels.salesOrder
     })

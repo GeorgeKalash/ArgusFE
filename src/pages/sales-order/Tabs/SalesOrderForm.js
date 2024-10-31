@@ -861,8 +861,6 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     miscAmount: miscValue
   })
 
-  console.log('check misc ', _footerSummary, reCal)
-
   const totalQty = reCal ? _footerSummary?.totalQty : formik.values?.qty || 0
   const amount = reCal ? _footerSummary?.net : formik.values?.amount || 0
   const totalVolume = reCal ? _footerSummary?.totalVolume : formik.values?.volume || 0
@@ -1253,7 +1251,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                     name='shipAddress'
                     label={labels.shipTo}
                     value={formik.values.shipAddress}
-                    rows={3}
+                    rows={3.5}
                     maxLength='100'
                     readOnly
                     disabled={formik.values.exWorks}
@@ -1271,7 +1269,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                     name='billAddress'
                     label={labels.billTo}
                     value={formik.values.billAddress}
-                    rows={3}
+                    rows={3.5}
                     maxLength='100'
                     readOnly={isClosed}
                     maxAccess={maxAccess}
@@ -1295,6 +1293,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                   endpointId={SaleRepository.Client.snapshot}
                   valueField='reference'
                   displayField='name'
+                  secondFieldLabel={labels.name}
                   name='clientId'
                   label={labels.client}
                   form={formik}

@@ -19,6 +19,7 @@ const CustomLookup = ({
   onKeyUp,
   valueField = 'key',
   displayField = 'value',
+  secondFieldLabel = '',
   onLookup,
   onChange,
   onKeyDown,
@@ -261,7 +262,7 @@ const CustomLookup = ({
           <TextField
             size={size}
             variant={variant}
-            placeholder={displayField.toUpperCase()}
+            placeholder={secondFieldLabel == '' ? displayField.toUpperCase() : secondFieldLabel.toUpperCase()}
             value={secondValue ? secondValue : ''}
             required={isRequired}
             disabled={disabled}
