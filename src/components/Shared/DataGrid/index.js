@@ -28,7 +28,8 @@ export function DataGrid({
 
   const { stack } = useWindow()
 
-  const [ready, setReady] = useState(0)
+  const [ready, setReady] = useState(false)
+
   const skip = allowDelete ? 1 : 0
 
   const process = (params, oldRow, setData) => {
@@ -400,12 +401,12 @@ export function DataGrid({
     const gridContainer = gridContainerRef.current
 
     if (gridContainer) {
-      document.addEventListener('mousedown', handleBlur)
+      document.addEventListener('click', handleBlur)
     }
 
     return () => {
       if (gridContainer) {
-        document.removeEventListener('mousedown', handleBlur)
+        document.removeEventListener('click', handleBlur)
       }
     }
   }, [])
