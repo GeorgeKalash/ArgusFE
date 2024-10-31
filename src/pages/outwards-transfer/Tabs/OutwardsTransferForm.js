@@ -250,7 +250,7 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
                     name='soaRef'
                     label={labels.soaRef}
                     value={formik?.values?.soaRef}
-                    maxAccess={false && maxAccess}
+                    maxAccess={maxAccess}
                     maxLength='30'
                     readOnly
                   />
