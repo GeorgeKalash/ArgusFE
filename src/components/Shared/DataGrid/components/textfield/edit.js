@@ -43,7 +43,7 @@ export default function TextFieldEdit({ column: { props, ...column }, id, field,
 
   return (
     <CustomTextField
-      value={value}
+      value={value || undefined}
       label={''}
       autoFocus
       hasBorder={false}

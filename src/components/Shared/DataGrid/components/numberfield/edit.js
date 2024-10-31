@@ -1,12 +1,12 @@
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
-export default function NumberfieldEdit({ column: { props }, id, field, value, update }) {
+export default function NumberfieldEdit({ column: { props }, value, update, id, field }) {
   return (
     <CustomNumberField
       value={value}
       label={''}
       readOnly={props?.readOnly}
-      decimalScale={props?.decimalScale} // much number after .
+      decimalScale={props?.decimalScale}
       autoFocus
       hasBorder={false}
       onChange={e => {

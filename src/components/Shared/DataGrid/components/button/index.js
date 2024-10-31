@@ -1,9 +1,6 @@
 import { Button } from '@mui/material'
-import { useGridApiRef } from '@mui/x-data-grid'
 
-function DataGridButton({ row, column: { props, ...column }, field, update, updateRow }) {
-  const apiRef = useGridApiRef()
-
+function DataGridButton({ row, column: { props, ...column }, update, updateRow, field }) {
   return (
     <Button
       sx={{
@@ -17,14 +14,14 @@ function DataGridButton({ row, column: { props, ...column }, field, update, upda
       onClick={e => {
         column.onClick(e, row, update, updateRow)
       }}
-      variant={!!props?.imgSrc ? '' :'contained'}
-      disabled={!row[field]}
+      variant={!!props?.imgSrc ? '' : 'contained'}
+      disabled={!row?.[field]}
     >
-      {
-       !!props?.imgSrc ? 
-       <img src={props?.imgSrc} alt='popup' />
-        : <img src='/images/buttonsIcons/popup.png' alt='popup' />
-      }
+      {!!props?.imgSrc ? (
+        <img src={props?.imgSrc} alt='popup' />
+      ) : (
+        <img src='/images/buttonsIcons/popup.png' alt='popup' />
+      )}
     </Button>
   )
 }
