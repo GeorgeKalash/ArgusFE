@@ -285,5 +285,6 @@ export const ResourceIds = {
   AvailabilitiesBySite: 41226,
   ProductionSheet: 42327,
   InventoryTransaction: 41209,
-  GenerateFiscalYear: 41503
+  GenerateFiscalYear: 41503,
+  AvailabilitiesGrid: 41206
 }

@@ -198,5 +198,8 @@ export const InventoryRepository = {
   },
   GenerateFiscalYear: {
     gen: service + 'genFIS'
+  },
+  Availability: {
+    qry: service + 'qryAVA'
   }
 }

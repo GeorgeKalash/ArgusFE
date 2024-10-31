@@ -8,13 +8,8 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
-import SerialForm from './forms/SerialForm'
-import serialIcon from '../../../public/images/TableIcons/imgSerials.png'
-import lotIcon from '../../../public/images/TableIcons/lot.png'
-import { Box, IconButton } from '@mui/material'
-import Image from 'next/image'
-import LotForm from './forms/LotForm'
 import { ReportIvGenerator } from 'src/repositories/ReportIvGeneratorRepository'
+import AvailabilityList from './form/AvailabilityList'
 
 const AvailabilitiesBySite = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -24,7 +19,7 @@ const AvailabilitiesBySite = () => {
     const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
-      extension: ReportIvGenerator.Report403,
+      extension: ReportIvGenerator.Report408,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}&exId=`
     })
 
@@ -44,8 +39,8 @@ const AvailabilitiesBySite = () => {
     filterBy
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: ReportIvGenerator.Report403,
-    datasetId: ResourceIds.AvailabilitiesBySite,
+    endpointId: ReportIvGenerator.Report408,
+    datasetId: ResourceIds.AvailabilitiesGrid,
     filter: {
       filterFn: fetchWithFilter
     }
@@ -63,16 +58,6 @@ const AvailabilitiesBySite = () => {
       flex: 1
     },
     {
-      field: 'siteRef',
-      headerName: labels.siteRef,
-      flex: 1
-    },
-    {
-      field: 'siteName',
-      headerName: labels.siteName,
-      flex: 1
-    },
-    {
       field: 'unitCost',
       headerName: labels.unitCost,
       flex: 1
@@ -82,21 +67,13 @@ const AvailabilitiesBySite = () => {
       headerName: labels.unitPrice,
       flex: 1
     },
+
     {
       field: 'qty',
       headerName: labels.qty,
       flex: 1
     },
-    {
-      field: 'pieces',
-      headerName: labels.pieces,
-      flex: 1
-    },
-    {
-      field: 'committed',
-      headerName: labels.committed,
-      flex: 1
-    },
+    ,
     {
       field: 'netWeight',
       headerName: labels.netWeight,
@@ -116,69 +93,28 @@ const AvailabilitiesBySite = () => {
       field: 'netPrice',
       headerName: labels.netPrice,
       flex: 1
-    },
-    {
-      flex: 1,
-      headerName: 'S/L',
-      cellRenderer: row => {
-        const { trackBy } = row.data
-
-        if (trackBy === 1 || trackBy === 2) {
-          return (
-            <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
-              <IconButton size='small' onClick={() => (trackBy === 1 ? onSerial(row.data) : onLot(row.data))}>
-                <Image
-                  src={trackBy === 1 ? serialIcon : lotIcon}
-                  width={trackBy === 1 ? 25 : 18}
-                  height={18}
-                  alt={trackBy === 1 ? labels.serial : labels.lot}
-                />
-              </IconButton>
-            </Box>
-          )
-        }
-
-        return null
-      }
     }
   ]
 
-  const onSerial = obj => {
-    openSerialForm(obj.itemId, obj.siteId)
+  const edit = obj => {
+    openAvailability(obj.itemId, obj.qty, obj.sku, obj.name)
+    console.log(obj)
   }
 
-  const onLot = obj => {
-    openLotForm(obj.lotCategoryId, obj.itemId, obj.siteId)
-  }
-
-  function openSerialForm(itemId, siteId) {
+  function openAvailability(itemId, qty, sku, name) {
     stack({
-      Component: SerialForm,
+      Component: AvailabilityList,
       props: {
         labels,
         itemId,
-        siteId
-      },
-      width: 600,
-      height: 400,
-      title: labels.serialNo
-    })
-  }
-
-  function openLotForm(lotId, itemId, siteId) {
-    stack({
-      Component: LotForm,
-      props: {
-        labels,
-        lotId,
-        itemId,
-        siteId,
-        siteColumn: true,
+        qty,
+        sku,
+        name,
         maxAccess: access
       },
-      width: 1150,
-      height: 450,
-      title: labels.lotAva
+      width: 800,
+      height: 550,
+      title: labels.skuAva
     })
   }
 
@@ -190,7 +126,7 @@ const AvailabilitiesBySite = () => {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar hasSearch={false} maxAccess={access} onApply={onApply} reportName={'IV403'} />
+        <RPBGridToolbar hasSearch={false} maxAccess={access} onApply={onApply} reportName={'IV408'} />
       </Fixed>
       <Grow>
         <Table
@@ -198,6 +134,7 @@ const AvailabilitiesBySite = () => {
           gridData={data}
           rowId={['itemId']}
           maxAccess={access}
+          onEdit={edit}
           refetch={refetch}
           pageSize={50}
           paginationParameters={paginationParameters}
