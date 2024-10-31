@@ -1,4 +1,3 @@
-import { Grid, Box } from '@mui/material'
 import React, { useContext, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -10,6 +9,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { ControlContext } from 'src/providers/ControlContext'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const UserSecretOTPQrCodeForm = () => {
   const [qrCodeUrl, setQrCodeUrl] = useState('')
@@ -65,26 +65,23 @@ const UserSecretOTPQrCodeForm = () => {
 
   return (
     <VertLayout>
-      <Grid container spacing={4} justifyContent='center'>
-        <Box mt={20}>
-          {qrCodeUrl ? (
-            <img
-              src={qrCodeUrl}
-              alt={_labels.QRCode}
-              style={{
-                width: 200,
-                height: 200
-              }}
-            />
-          ) : (
-            <div></div>
-          )}
-        </Box>
-      </Grid>
+      <Grow>
+        {qrCodeUrl ? (
+          <img
+            src={qrCodeUrl}
+            alt={_labels.QRCode}
+            style={{
+              width: 200,
+              height: 200,
+              margin: 'auto'
+            }}
+          />
+        ) : (
+          <div></div>
+        )}
+      </Grow>
       <Fixed>
-        <Grid item xs={12} sx={{ marginTop: '30px' }}>
-          <WindowToolbar actions={actions} smallBox={true} />
-        </Grid>
+        <WindowToolbar actions={actions} smallBox={true} />
       </Fixed>
     </VertLayout>
   )
