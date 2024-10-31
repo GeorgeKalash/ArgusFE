@@ -345,7 +345,7 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
                 displayFieldWidth: 3,
                 endpointId: GeneralLedgerRepository.Account.snapshot,
                 parameters: '_type=',
-                valueField: 'accountRef',
+                valueField: 'recordId',
                 displayField: 'accountRef',
                 readOnly: !isRaw,
 
