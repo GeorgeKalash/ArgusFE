@@ -90,7 +90,7 @@ export function DataGrid({
   const allColumns = columns
       .filter(({ name: fieldName }) => accessLevel({ maxAccess, name: `${name}.${fieldName}` }) !== HIDDEN)
   
-  const skipReadOnly = (columnIndex, rowIndex) => {
+  const skipReadOnlyTab = (columnIndex, rowIndex) => {
     for (let i = columnIndex + 1; i < allColumns.length; i++) {
       if (!allColumns?.[i]?.props?.readOnly) {
 
@@ -110,6 +110,27 @@ export function DataGrid({
       } 
     }
   }
+
+  const skipReadOnlyShiftTab = (columnIndex, rowIndex) => {
+    for (let i = columnIndex - 1; i >= 0; i--) {
+      if (!allColumns?.[i]?.props?.readOnly) {
+        return {
+          columnIndex: i,
+          rowIndex
+        };
+      }
+    }
+  
+    for (let i = allColumns.length - 1; i >= 0; i--) {
+      if (!allColumns?.[i]?.props?.readOnly) {
+        return {
+          columnIndex: i,
+          rowIndex: rowIndex - 1
+        };
+      }
+    }
+  }
+  
 
   const nextColumn = (columnIndex) => {
     let count = 0
@@ -174,10 +195,19 @@ export function DataGrid({
       const rowIds = gridExpandedSortedRowIdsSelector(apiRef.current.state)
       const columns = apiRef.current.getVisibleColumns()
 
-      const { columnIndex, rowIndex } = skipReadOnly(nextCell.columnIndex, nextCell.rowIndex)
+      if (!event.shiftKey) {
+        const { columnIndex, rowIndex } = skipReadOnlyTab(nextCell.columnIndex, nextCell.rowIndex)
 
-      nextCell.columnIndex = columnIndex;
-      nextCell.rowIndex = rowIndex;
+        nextCell.columnIndex = columnIndex;
+        nextCell.rowIndex = rowIndex;
+
+      } else if (nextCell.columnIndex > 0) {
+        const { columnIndex, rowIndex } = skipReadOnlyShiftTab(nextCell.columnIndex, nextCell.rowIndex)
+
+        nextCell.columnIndex = columnIndex;
+        nextCell.rowIndex = rowIndex;
+      }
+
       
       const field = columns[nextCell.columnIndex].field
       const id = rowIds[nextCell.rowIndex]
