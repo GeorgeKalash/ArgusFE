@@ -11,13 +11,14 @@ export default function ResourceLookupEdit({
   name,
   maxAccess
 }) {
-  let changes = props?.mapping
-    ? props.mapping
-        ?.map(({ from, to }) => ({
-          [from]: data?.[to] || ''
-        }))
-        .reduce((acc, obj) => ({ ...acc, ...obj }), {})
-    : value
+  let changes =
+    props?.mapping && !value
+      ? props.mapping
+          ?.map(({ from, to }) => ({
+            [from]: data?.[to] || ''
+          }))
+          .reduce((acc, obj) => ({ ...acc, ...obj }), {})
+      : value
 
   return (
     <ResourceLookup
