@@ -394,6 +394,27 @@ export function DataGrid({
 
   useEffect(() => {
     function handleBlur(event) {
+      if (gridContainerRef.current && !gridContainerRef.current.contains(event.target)) {
+        gridApiRef.current?.stopEditing()
+      }
+    }
+
+    const gridContainer = gridContainerRef.current
+
+    if (gridContainer) {
+      document.addEventListener('mousedown', handleBlur)
+    }
+
+    return () => {
+      if (gridContainer) {
+        document.removeEventListener('mousedown', handleBlur)
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    function handleBlur(event) {
+      console.log('event', event)
       if (
         gridContainerRef.current &&
         !event.target.value &&
