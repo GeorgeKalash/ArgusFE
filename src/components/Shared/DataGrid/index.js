@@ -20,11 +20,15 @@ export function DataGrid({
   onChange,
   disabled = false,
   allowDelete = true,
-  allowAddNewLine = true
+  allowAddNewLine = true,
+  onSelectionChange,
+  bg
 }) {
   const gridApiRef = useRef(null)
 
   const { stack } = useWindow()
+
+  const skip = allowDelete ? 1 : 0
 
   const process = (params, oldRow, setData) => {
     const column = columns.find(({ name }) => name === params.colDef.field)
@@ -59,14 +63,14 @@ export function DataGrid({
     })
   }
 
-  // useEffect(() => {
-  //   if (!value?.length && allowAddNewLine) {
-  //     addNewRow()
-  //   }
-  // }, [value])
+  useEffect(() => {
+    if (!value?.length && allowAddNewLine) {
+      addNewRow()
+    }
+  }, [value])
 
   const addNewRow = params => {
-    const highestIndex = params.node.data.id + 1
+    const highestIndex = params?.node?.data?.id + 1 || 0
 
     const defaultValues = Object.fromEntries(
       columns.filter(({ name }) => name !== 'id').map(({ name, defaultValue }) => [name, defaultValue])
@@ -77,9 +81,9 @@ export function DataGrid({
       ...defaultValues
     }
 
-    const res = gridApiRef.current.applyTransaction({ add: [newRow] })
+    const res = gridApiRef.current?.applyTransaction({ add: [newRow] })
 
-    if (res.add.length > 0) {
+    if (res?.add?.length > 0) {
       const newRowNode = res.add[0]
       commit(newRowNode.data)
 
@@ -94,6 +98,17 @@ export function DataGrid({
           })
         }
       }, 0)
+    }
+  }
+
+  const findCell = params => {
+    const allColumns = params.api.getColumnDefs()
+
+    if (gridApiRef.current) {
+      return {
+        rowIndex: params.rowIndex,
+        columnIndex: allColumns?.findIndex(col => col.colId === params.column.getColId())
+      }
     }
   }
 
@@ -117,35 +132,42 @@ export function DataGrid({
       return
     }
 
-    if (currentColumnIndex === allColumns.length - 2 && node.rowIndex === api.getDisplayedRowCount() - 1) {
+    const nextCell = findCell(params)
+
+    if (currentColumnIndex === allColumns.length - 1 - skip && node.rowIndex === api.getDisplayedRowCount() - 1) {
       if (allowAddNewLine && !error) {
         event.stopPropagation()
         addNewRow(params)
-      } else {
-        api.startEditingCell({
-          rowIndex: node.rowIndex,
-          colKey: allColumns[currentColumnIndex].colId
-        })
-      }
-    } else {
-      const currentRowIndex = node.rowIndex
-
-      if (currentColumnIndex < allColumns.length - 2 && event.key === 'Tab') {
-        const nextColumnId = allColumns[currentColumnIndex + 1].colId
-
-        api.startEditingCell({
-          rowIndex: currentRowIndex,
-          colKey: nextColumnId
-        })
-      } else {
-        const nextColumnId = allColumns[0].colId
-
-        api.startEditingCell({
-          rowIndex: currentRowIndex + 1,
-          colKey: nextColumnId
-        })
       }
     }
+
+    const columns = gridApiRef.current.getColumnDefs()
+    if (!event.shiftKey) {
+      if (nextCell.columnIndex < columns.length - skip - 1) {
+        nextCell.columnIndex += 1
+      } else if (
+        nextCell.columnIndex === columns.length - 1 - skip &&
+        node.rowIndex !== api.getDisplayedRowCount() - 1
+      ) {
+        nextCell.rowIndex += 1
+        nextCell.columnIndex = 0
+      }
+    } else if (nextCell.columnIndex > 0) {
+      nextCell.columnIndex -= 1
+    } else {
+      nextCell.rowIndex -= 1
+      nextCell.columnIndex = columns.length - 1 - skip
+    }
+
+    const field = columns[nextCell.columnIndex].field
+
+    api.startEditingCell({
+      rowIndex: nextCell.rowIndex,
+      colKey: field
+    })
+
+    const row = params.data
+    if (onSelectionChange) onSelectionChange(row)
   }
 
   const CustomCellRenderer = params => {
@@ -156,16 +178,56 @@ export function DataGrid({
         ? components[column.colDef.component].view
         : column.colDef.component.view
 
+    const setData = changes => {
+      const id = params.node?.id
+      const rowNode = params.api.getRowNode(id)
+      if (rowNode) {
+        const currentData = rowNode.data
+
+        const newData = { ...currentData, ...changes }
+        rowNode.updateData(newData)
+      }
+    }
+
+    async function update({ field, value }) {
+      const oldRow = params.data
+
+      const changes = {
+        [field]: value || undefined
+      }
+
+      setData(changes)
+
+      commit(changes)
+
+      process(params, oldRow, setData)
+    }
+
+    const updateRow = ({ changes }) => {
+      const oldRow = params.data
+
+      setData(changes)
+
+      commit(changes)
+
+      process(params, oldRow, setData)
+    }
+
     return (
       <Box
         sx={{
           width: '100%',
           height: '100%',
           padding: '0 1000px',
-          display: 'flex'
+          display: 'flex',
+          justifyContent:
+            (column.colDef.component === 'checkbox' ||
+              column.colDef.component === 'button' ||
+              column.colDef.component === 'icon') &&
+            'center'
         }}
       >
-        <Component {...params} column={column} />
+        <Component {...params} column={column.colDef} updateRow={updateRow} update={update} />
       </Box>
     )
   }
@@ -179,7 +241,7 @@ export function DataGrid({
         ? components[column?.colDef?.component]?.edit
         : column?.component?.edit
 
-    const maxAccessName = `${params.node.id}.${column.name}`
+    const maxAccessName = `${name}.${column.colId}`
 
     const props = {
       ...column.colDef.props,
@@ -189,6 +251,7 @@ export function DataGrid({
 
     const setData = changes => {
       const id = params.node?.id
+
       const rowNode = params.api.getRowNode(id)
       if (rowNode) {
         const currentData = rowNode.data
@@ -203,7 +266,7 @@ export function DataGrid({
       const oldRow = params.data
 
       const changes = {
-        [field]: value || ''
+        [field]: value || undefined
       }
 
       setCurrentValue(value || '')
@@ -226,6 +289,7 @@ export function DataGrid({
 
       params.api.stopEditing()
     }
+    const comp = column.colDef.component
 
     return (
       <Box
@@ -235,9 +299,7 @@ export function DataGrid({
           padding: '0 0px',
           display: 'flex',
           alignItems: 'center',
-          justifyContent:
-            (column.component === 'checkbox' || column.component === 'button' || column.component === 'icon') &&
-            'center'
+          justifyContent: (comp === 'checkbox' || comp === 'button' || comp === 'icon') && 'center'
         }}
       >
         <Component
@@ -287,6 +349,7 @@ export function DataGrid({
       sortable: false,
       cellRenderer: CustomCellRenderer,
       cellEditor: CustomCellEditor,
+      cellEditorParams: { maxAccess },
       cellStyle: getCellStyle,
       suppressKeyboardEvent: params => {
         const { event } = params
@@ -298,7 +361,7 @@ export function DataGrid({
       ? {
           field: 'actions',
           headerName: '',
-          flex: 0.7,
+          width: 50,
           editable: false,
           sortable: false,
           cellRenderer: ActionCellRenderer
@@ -308,14 +371,6 @@ export function DataGrid({
     .filter(Boolean)
     .filter(({ name: field }) => accessLevel({ maxAccess, name: `${name}.${field}` }) !== HIDDEN)
 
-  const onCellEditingStopped = params => {
-    const { data } = params
-
-    gridApiRef.current.applyTransaction({ update: [data] })
-
-    // commit(data)
-  }
-
   const commit = data => {
     const allRowNodes = []
     gridApiRef.current.forEachNode(node => allRowNodes.push(node.data))
@@ -324,31 +379,105 @@ export function DataGrid({
     onChange(updatedGridData)
   }
 
+  const onCellClicked = params => {
+    const { colDef, rowIndex, api } = params
+
+    api.startEditingCell({
+      rowIndex: rowIndex,
+      colKey: colDef.field
+    })
+  }
+
+  const gridContainerRef = useRef(null)
+
+  useEffect(() => {
+    function handleBlur(event) {
+      if (
+        gridContainerRef.current &&
+        !event.target.value &&
+        event.target.classList.contains('ag-center-cols-viewport')
+      ) {
+        gridApiRef.current?.stopEditing()
+      }
+    }
+
+    const gridContainer = gridContainerRef.current
+
+    if (gridContainer) {
+      gridContainer.addEventListener('mousedown', handleBlur)
+    }
+
+    return () => {
+      if (gridContainer) {
+        gridContainer.removeEventListener('mousedown', handleBlur)
+      }
+    }
+  }, [])
+
+  function handleRowChange(row) {
+    const newRows = [...value]
+    const index = newRows.findIndex(({ id }) => id === row.id)
+    newRows[index] = row
+    onChange(newRows)
+
+    return row
+  }
+
+  async function updateState({ newRow }) {
+    gridApiRef.current.updateRows([newRow])
+
+    handleRowChange(newRow)
+  }
+
+  const handleRowClick = params => {
+    const selectedRow = params?.data
+    if (onSelectionChange) {
+      async function update({ newRow }) {
+        updateState({
+          newRow
+        })
+      }
+      onSelectionChange(selectedRow, update)
+    }
+  }
+
   return (
     <Box sx={{ height: height || 'auto', flex: 1 }}>
       <CacheDataProvider>
-        <div className='ag-theme-alpine' style={{ height: '100%', width: '100%' }}>
+        <Box
+          className='ag-theme-alpine'
+          style={{ height: '100%', width: '100%' }}
+          sx={{
+            '.ag-header': {
+              background: bg
+            }
+          }}
+          ref={gridContainerRef}
+        >
           {value && (
             <AgGridReact
               gridApiRef={gridApiRef}
               rowData={value}
               columnDefs={columnDefs}
               suppressRowClickSelection={false}
-              stopEditingWhenCellsLoseFocus={true}
+              stopEditingWhenCellsLoseFocus={false}
               rowSelection='single'
               editType='cell'
-              singleClickEdit={true}
+              singleClickEdit={false}
               onGridReady={params => {
                 gridApiRef.current = params.api
                 onChange(value)
               }}
               onCellKeyDown={onCellKeyDown}
+              onCellClicked={onCellClicked}
               rowHeight={45}
-              onCellEditingStopped={onCellEditingStopped}
               getRowId={params => params?.data?.id}
+              tabToNextCell={() => true}
+              tabToPreviousCell={() => true}
+              onRowClicked={handleRowClick}
             />
           )}
-        </div>
+        </Box>
       </CacheDataProvider>
     </Box>
   )

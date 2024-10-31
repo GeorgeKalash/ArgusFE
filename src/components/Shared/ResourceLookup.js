@@ -1,7 +1,6 @@
 import React, { useContext, useState, useEffect } from 'react'
 import CustomLookup from '../Inputs/CustomLookup'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import ErrorWindow from './ErrorWindow'
 
 export const ResourceLookup = ({
   endpointId,
@@ -18,6 +17,7 @@ export const ResourceLookup = ({
   autoSelectFistValue = true,
   viewHelperText = true,
   minChars = 3,
+  autoSelectFistValue = true,
   ...rest
 }) => {
   const { getRequest } = useContext(RequestsContext)

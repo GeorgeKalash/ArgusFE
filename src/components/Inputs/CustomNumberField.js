@@ -117,7 +117,7 @@ const CustomNumberField = ({
         },
         autoComplete: 'off',
         readOnly: _readOnly,
-        endAdornment: (
+        endAdornment: (!_readOnly || allowClear) && !props.disabled && (value || value === 0) && (
           <InputAdornment position='end'>
             {displayCycleButton && (
               <Button

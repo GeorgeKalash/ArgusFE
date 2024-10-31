@@ -189,7 +189,7 @@ const CustomLookup = ({
               helperText={helperText}
               InputProps={{
                 ...params.InputProps,
-                endAdornment: (
+                endAdornment: !_readOnly && (
                   <div
                     style={{
                       position: 'absolute',
@@ -199,24 +199,23 @@ const CustomLookup = ({
                       display: 'flex'
                     }}
                   >
-                    {!readOnly && (
-                      <InputAdornment sx={{ margin: '0px !important' }} position='end'>
-                        <IconButton
-                          sx={{ margin: '0px !important', padding: '0px !important' }}
-                          tabIndex={-1}
-                          edge='end'
-                          onClick={() => {
-                            setInputValue('')
-                            onChange(name, '')
-                            setStore([])
-                            setFreeSolo(true)
-                          }}
-                          aria-label='clear input'
-                        >
-                          <ClearIcon sx={{ border: '0px', fontSize: 20 }} />
-                        </IconButton>
-                      </InputAdornment>
-                    )}
+                    <InputAdornment sx={{ margin: '0px !important' }} position='end'>
+                      <IconButton
+                        sx={{ margin: '0px !important', padding: '0px !important' }}
+                        tabIndex={-1}
+                        edge='end'
+                        onClick={() => {
+                          setInputValue('')
+                          onChange(name, '')
+                          setStore([])
+                          setFreeSolo(true)
+                        }}
+                        aria-label='clear input'
+                      >
+                        <ClearIcon sx={{ border: '0px', fontSize: 20 }} />
+                      </IconButton>
+                    </InputAdornment>
+
                     {!isLoading ? (
                       <InputAdornment sx={{ margin: '0px !important' }} position='end'>
                         <IconButton

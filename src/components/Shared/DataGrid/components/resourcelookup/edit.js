@@ -1,6 +1,24 @@
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 
-export default function ResourceLookupEdit({ id, value, updateRow, column: { props }, update, field }) {
+export default function ResourceLookupEdit({
+  id,
+  value,
+  data,
+  updateRow,
+  column: { props },
+  update,
+  field,
+  name,
+  maxAccess
+}) {
+  let changes = props?.mapping
+    ? props.mapping
+        ?.map(({ from, to }) => ({
+          [from]: data?.[to] || ''
+        }))
+        .reduce((acc, obj) => ({ ...acc, ...obj }), {})
+    : value
+
   return (
     <ResourceLookup
       autoFocus
@@ -11,9 +29,10 @@ export default function ResourceLookupEdit({ id, value, updateRow, column: { pro
       userTypes={false}
       valueField={props.valueField}
       displayField={props.displayField}
+      maxAccess={maxAccess}
       columnsInDropDown={props.columnsInDropDown}
-      firstValue={value}
-      secondValue={value}
+      firstValue={changes}
+      secondValue={changes}
       form={{
         values: {}
       }}
