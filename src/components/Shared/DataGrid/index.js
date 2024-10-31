@@ -28,6 +28,7 @@ export function DataGrid({
 
   const { stack } = useWindow()
 
+  const [ready, setReady] = useState(0)
   const skip = allowDelete ? 1 : 0
 
   const process = (params, oldRow, setData) => {
@@ -64,10 +65,10 @@ export function DataGrid({
   }
 
   useEffect(() => {
-    if (!value?.length && allowAddNewLine) {
+    if (!value?.length && allowAddNewLine && ready) {
       addNewRow()
     }
-  }, [value])
+  }, [ready])
 
   const addNewRow = params => {
     const highestIndex = params?.node?.data?.id + 1 || 0
@@ -76,13 +77,14 @@ export function DataGrid({
       columns.filter(({ name }) => name !== 'id').map(({ name, defaultValue }) => [name, defaultValue])
     )
 
+    console.log(allowAddNewLine)
     const newRow = {
       id: highestIndex,
       ...defaultValues
     }
 
     const res = gridApiRef.current?.applyTransaction({ add: [newRow] })
-
+    console.log('res', res)
     if (res?.add?.length > 0) {
       const newRowNode = res.add[0]
       commit(newRowNode.data)
@@ -467,6 +469,7 @@ export function DataGrid({
               onGridReady={params => {
                 gridApiRef.current = params.api
                 onChange(value)
+                setReady(true)
               }}
               onCellKeyDown={onCellKeyDown}
               onCellClicked={onCellClicked}
