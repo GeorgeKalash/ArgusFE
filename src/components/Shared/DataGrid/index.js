@@ -88,29 +88,12 @@ export function DataGrid({
     }
   }
 
+  const allColumns = columns
+      .filter(({ name: fieldName }) => accessLevel({ maxAccess, name: `${name}.${fieldName}` }) !== HIDDEN)
+  
   const skipReadOnly = (columnIndex, rowIndex) => {
-    for (let i = columnIndex + 1; i < columns.length; i++) {
-
-      if (i === columns.length - 1 && columns?.[columns.length - 1]?.props?.readOnly) {
-        addRow();
-      }
-
-      const isLastColumn = columnIndex === columns.length - 1;
-      const isLastRow = rowIndex === value.length - 1;
-      
-      if (isLastColumn && isLastRow && !columns?.[columns.length - 1]?.props?.readOnly) {
-        addRow();
-
-        return {
-          columnIndex: 0, 
-          rowIndex: rowIndex + 1
-        };
-      }
-
-      if (!columns?.[i]?.props?.readOnly) {
-        if (i === columns.length - 1) {
-          addRow();
-        }
+    for (let i = columnIndex + 1; i < allColumns.length; i++) {
+      if (!allColumns?.[i]?.props?.readOnly) {
 
         return {
           columnIndex: i,
@@ -119,15 +102,25 @@ export function DataGrid({
       }
     }
 
-    for (let i = 0; i < columns.length; i++) {
-
-      if (!columns?.[i]?.props?.readOnly) {
+    for (let i = 0; i < allColumns.length; i++) {
+      if (!allColumns?.[i]?.props?.readOnly) {
         return {
           columnIndex: i,
           rowIndex: rowIndex + 1
         }
       } 
     }
+  }
+
+  const nextColumn = (columnIndex) => {
+    let count = 0
+    for (let i = columnIndex + 1; i < allColumns.length; i++) {
+      if (!allColumns?.[i]?.props?.readOnly) {
+        count++
+      }
+    }
+
+    return count
   }
 
   const handleCellKeyDown = (params, event) => {
@@ -161,9 +154,11 @@ export function DataGrid({
         field: columns[nextCell.columnIndex].field
       })
 
-    // if (nextCell.columnIndex === columns.length - 1 - skip && nextCell.rowIndex === rowIds.length - 1) {
-    //   addRow()
-    // }
+    const countColumn = nextColumn(nextCell.columnIndex);
+
+    if ((nextCell.columnIndex === columns.length - 1 - skip || !countColumn) && nextCell.rowIndex === rowIds.length - 1) {
+      addRow()
+    }
 
     if (nextCell.columnIndex === columns.length - 1 && nextCell.rowIndex === rowIds.length - 1 && !event.shiftKey) {
       return
