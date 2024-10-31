@@ -50,7 +50,8 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
       password: '',
       confirmPassword: '',
       dashboardId: null,
-      umcpnl: false
+      umcpnl: false,
+      is2FAEnabled: false
     },
     enableReinitialize: true,
     validateOnChange: true,
@@ -60,6 +61,17 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
       email: yup.string().required(),
       activeStatus: yup.string().required(),
       userType: yup.string().required(),
+      otpDevice: yup
+        .string()
+        .nullable()
+        .test('', function (value) {
+          const { is2FAEnabled } = this.parent
+          if (is2FAEnabled) {
+            return !!value
+          }
+
+          return true
+        }),
       languageId: yup.string().required(),
       ...(passwordState
         ? {}
@@ -424,6 +436,42 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
                     />
                   }
                   label={labels.umcpnl}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      name='is2FAEnabled'
+                      maxAccess={maxAccess}
+                      checked={formik.values?.is2FAEnabled}
+                      onChange={e => {
+                        formik.setFieldValue('is2FAEnabled', e.target.checked)
+                        if (e.target.checked == false) {
+                          formik.setFieldValue('otpDevice', '')
+                        }
+                      }}
+                      disabled={!editMode}
+                    />
+                  }
+                  label={labels.is2FAEnabled}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  name='otpDevice'
+                  label={labels.otpDevice}
+                  readOnly={!formik.values.is2FAEnabled}
+                  required={formik.values.is2FAEnabled}
+                  datasetId={DataSets.OTP_DEVICE}
+                  values={formik.values}
+                  valueField='key'
+                  displayField='value'
+                  maxAccess={maxAccess}
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('otpDevice', newValue ? newValue?.key : '')
+                  }}
+                  error={formik.values.is2FAEnabled && formik.touched.otpDevice && Boolean(formik.errors.otpDevice)}
                 />
               </Grid>
             </Grid>
