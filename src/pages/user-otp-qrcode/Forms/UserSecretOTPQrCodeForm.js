@@ -83,9 +83,9 @@ const UserSecretOTPQrCodeForm = () => {
         </Box>
       </Grid>
       <Fixed>
-      <Grid item xs={12} sx={{ marginTop: '30px' }}>
-        <WindowToolbar actions={actions} smallBox={true} />
-      </Grid>
+        <Grid item xs={12} sx={{ marginTop: '30px' }}>
+          <WindowToolbar actions={actions} smallBox={true} />
+        </Grid>
       </Fixed>
     </VertLayout>
   )
