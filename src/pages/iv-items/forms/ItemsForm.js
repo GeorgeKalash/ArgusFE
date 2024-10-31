@@ -196,8 +196,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       disabled: !editMode
     }
   ]
-  const [list, setList] = useState([])
-  console.log(list[0].value, 'ppppppppppppppppppppppppppp')
+  const [plist, setList] = useState([])
 
   useEffect(() => {
     if (formik.values.kitItem) {
@@ -205,7 +204,6 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       formik.setFieldValue('ivtItem', false)
       formik.setFieldValue('trackBy', '')
       formik.setFieldValue('valuationMethod', '')
-      formik.setFieldValue('priceType', 0)
     } else {
       setOnKitItem(false)
     }
