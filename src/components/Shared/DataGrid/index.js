@@ -414,7 +414,6 @@ export function DataGrid({
 
   useEffect(() => {
     function handleBlur(event) {
-      console.log('event', event)
       if (
         gridContainerRef.current &&
         !event.target.value &&
