@@ -1135,7 +1135,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
-                    readOnly={isClosed}
+                    readOnly={editMode}
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     values={formik.values}
