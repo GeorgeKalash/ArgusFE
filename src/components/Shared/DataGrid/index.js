@@ -176,7 +176,7 @@ export function DataGrid({
 
     const countColumn = nextColumn(nextCell.columnIndex);
 
-    if ((nextCell.columnIndex === columns.length - 1 - skip || !countColumn) && nextCell.rowIndex === rowIds.length - 1) {
+    if ((nextCell.columnIndex === columns.length - 1 - skip || !countColumn) && nextCell.rowIndex === rowIds.length - 1 && !event.shiftKey) {
       addRow()
     }
 
@@ -201,7 +201,7 @@ export function DataGrid({
         nextCell.columnIndex = columnIndex;
         nextCell.rowIndex = rowIndex;
 
-      } else if (nextCell.columnIndex > 0) {
+      } else {
         const { columnIndex, rowIndex } = skipReadOnlyShiftTab(nextCell.columnIndex, nextCell.rowIndex)
 
         nextCell.columnIndex = columnIndex;
