@@ -1,6 +1,6 @@
 import { Button } from '@mui/material'
 
-function DataGridButton({ row, column: { props, ...column }, update, updateRow, field }) {
+function DataGridButton({ data, column: { props, ...column }, update, updateRow, isEditMode }) {
   return (
     <Button
       sx={{
@@ -10,12 +10,13 @@ function DataGridButton({ row, column: { props, ...column }, update, updateRow, 
         height: 35,
         objectFit: 'contain'
       }}
-      autoFocus
+      autoFocus={isEditMode}
       onClick={e => {
-        column.onClick(e, row, update, updateRow)
+        column?.onClick(e, data, update, updateRow)
       }}
       variant={!!props?.imgSrc ? '' : 'contained'}
-      disabled={!row?.[field]}
+
+      // disabled={!data?.[field]}
     >
       {!!props?.imgSrc ? (
         <img src={props?.imgSrc} alt='popup' />
@@ -27,6 +28,6 @@ function DataGridButton({ row, column: { props, ...column }, update, updateRow, 
 }
 
 export default {
-  view: DataGridButton,
-  edit: DataGridButton
+  view: props => <DataGridButton {...props} isEditMode={false} />,
+  edit: props => <DataGridButton {...props} isEditMode={true} />
 }
