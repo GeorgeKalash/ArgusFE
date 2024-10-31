@@ -51,6 +51,7 @@ const AuthProvider = ({ children }) => {
     }
   }
 
+
   const fetchData = async () => {
     const matchHostname = window.location.hostname.match(/^(.+)\.softmachine\.co$/)
 
