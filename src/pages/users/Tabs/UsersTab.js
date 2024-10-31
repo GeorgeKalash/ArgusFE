@@ -45,7 +45,7 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
       languageId: '',
       notificationGroupId: '',
       employeeId: '',
-
+      otpDevice: '',
       spId: '',
       password: '',
       confirmPassword: '',
