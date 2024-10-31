@@ -161,8 +161,10 @@ export function DataGrid({
 
     const currentCell = { ...nextCell }
 
+    console.log(error)
+
     if (nextCell.columnIndex === columns.length - 1 - skip && nextCell.rowIndex === rowIds.length - 1) {
-      if (error || !allowAddNewLine) {
+      if ((error || !allowAddNewLine) && !event.shiftKey) {
         event.stopPropagation()
 
         return
