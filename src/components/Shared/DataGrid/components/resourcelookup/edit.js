@@ -19,8 +19,6 @@ export default function ResourceLookupEdit({
         .reduce((acc, obj) => ({ ...acc, ...obj }), {})
     : value
 
-  console.log('maxAccess===', maxAccess)
-
   return (
     <ResourceLookup
       autoFocus

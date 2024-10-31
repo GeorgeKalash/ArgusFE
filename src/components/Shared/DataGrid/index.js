@@ -342,7 +342,6 @@ export function DataGrid({
   const columnDefs = [
     ...columns.map(column => ({
       ...column,
-      // props: { ...column },
       field: column.name,
       headerName: column.label || column.name,
       editable: !disabled,
@@ -350,7 +349,7 @@ export function DataGrid({
       sortable: false,
       cellRenderer: CustomCellRenderer,
       cellEditor: CustomCellEditor,
-      cellEditorParams: { maxAccess }, // Pass maxAccess here
+      cellEditorParams: { maxAccess },
       cellStyle: getCellStyle,
       suppressKeyboardEvent: params => {
         const { event } = params
