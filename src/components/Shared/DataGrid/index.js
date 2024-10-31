@@ -72,7 +72,6 @@ export function DataGrid({
       const { id, field } = nextEdit
       if (!disabled) {
         if (id && !!field) {
-          console.log(id, field)
           if (apiRef.current.getCellMode(id, field) === 'view') apiRef?.current.startCellEditMode({ id, field })
           apiRef.current.setCellFocus(id, field)
         }
