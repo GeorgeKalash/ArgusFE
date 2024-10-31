@@ -34,6 +34,7 @@ const ProductionRequestLog = () => {
     invalidate,
     clear
   } = useResourceQuery({
+    queryFn: fetchGridData,
     endpointId: ManufacturingRepository.LeanProductionPlanning.preview,
     datasetId: ResourceIds.ProductionRequestLog,
     search: {
