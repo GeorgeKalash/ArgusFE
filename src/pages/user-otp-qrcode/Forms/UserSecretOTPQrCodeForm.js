@@ -1,6 +1,5 @@
 import { Grid, Box } from '@mui/material'
 import React, { useContext, useEffect, useState } from 'react'
-import Image from 'next/image'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
