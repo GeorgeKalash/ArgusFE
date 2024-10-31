@@ -77,14 +77,12 @@ export function DataGrid({
       columns.filter(({ name }) => name !== 'id').map(({ name, defaultValue }) => [name, defaultValue])
     )
 
-    console.log(allowAddNewLine)
     const newRow = {
       id: highestIndex,
       ...defaultValues
     }
 
     const res = gridApiRef.current?.applyTransaction({ add: [newRow] })
-    console.log('res', res)
     if (res?.add?.length > 0) {
       const newRowNode = res.add[0]
       commit(newRowNode.data)
