@@ -229,5 +229,9 @@ export const SystemRepository = {
   PlantsSchedule: {
     set2: service + 'set2PLS',
     qry: service + 'qryPLS'
+  },
+  UserOTPQrcode: {
+    get: service + 'getUS',
+    set: service + 'setUS'
   }
 }
