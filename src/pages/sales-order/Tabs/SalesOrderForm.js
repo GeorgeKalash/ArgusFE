@@ -43,6 +43,7 @@ import AddressFilterForm from 'src/components/Shared/AddressFilterForm'
 import { useError } from 'src/error'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import SalesTrxForm from 'src/components/Shared/SalesTrxForm'
+import { getFormattedNumber } from 'src/lib/numberField-helper'
 
 export default function SalesOrderForm({ labels, access, recordId, currency, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -225,7 +226,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
         endpointId: InventoryRepository.Item.snapshot,
         parameters: '_categoryId=0&_msId=0&_startAt=0&_size=1000',
         displayField: 'sku',
-        valueField: 'sku',
+        valueField: 'recordId',
         mapping: [
           { from: 'recordId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
@@ -751,6 +752,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
   }
 
   const handleCycleButtonClick = () => {
+    setReCal(true)
     let currentTdAmount
     let currentPctAmount
     let currentDiscountAmount
@@ -1581,7 +1583,13 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                   />
                 </Grid>
                 <Grid item>
-                  <CustomNumberField name='amount' maxAccess={maxAccess} label={labels.net} value={amount} readOnly />
+                  <CustomNumberField
+                    name='amount'
+                    maxAccess={maxAccess}
+                    label={labels.net}
+                    value={getFormattedNumber(amount)}
+                    readOnly
+                  />
                 </Grid>
               </Grid>
             </Grid>
