@@ -35,7 +35,7 @@ export function DataGrid({
 
     const updateRowCommit = changes => {
       setData(changes)
-      commit(changes)
+      commit({ changes: { ...params.node.data, changes } })
     }
 
     if (column.onChange) {

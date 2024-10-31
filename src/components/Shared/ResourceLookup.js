@@ -17,7 +17,6 @@ export const ResourceLookup = ({
   autoSelectFistValue = true,
   viewHelperText = true,
   minChars = 3,
-  autoSelectFistValue = true,
   ...rest
 }) => {
   const { getRequest } = useContext(RequestsContext)
