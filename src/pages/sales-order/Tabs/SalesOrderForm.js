@@ -225,7 +225,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
         endpointId: InventoryRepository.Item.snapshot,
         parameters: '_categoryId=0&_msId=0&_startAt=0&_size=1000',
         displayField: 'sku',
-        valueField: 'recordId',
+        valueField: 'sku',
         mapping: [
           { from: 'recordId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
@@ -880,7 +880,6 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       hiddenTdAmount: parseFloat(tdAmount),
       typeChange: typeChange
     })
-
     formik.setFieldValue('tdAmount', _discountObj?.hiddenTdAmount?.toFixed(2) || 0)
     formik.setFieldValue('tdType', _discountObj?.tdType)
     formik.setFieldValue('currentDiscount', _discountObj?.currentDiscount || 0)
@@ -1059,6 +1058,13 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
   useEffect(() => {
     if (documentType?.dtId) formik.setFieldValue('dtId', documentType.dtId)
   }, [documentType?.dtId])
+
+  useEffect(() => {
+    if (reCal) {
+      let currentTdAmount = (parseFloat(formik.values.tdPct) * parseFloat(subtotal)) / 100
+      recalcGridVat(formik.values.tdType, formik.values.tdPct, currentTdAmount, formik.values.currentDiscount)
+    }
+  }, [subtotal])
 
   useEffect(() => {
     ;(async function () {
