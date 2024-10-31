@@ -64,8 +64,17 @@ const UserSecretOTPQrCodeForm = () => {
     }
   })
 
+  const actions = [
+    {
+      key: 'generated 2 FA',
+      condition: true,
+      onClick: () => formik.handleSubmit(),
+      disabled: false
+    }
+  ]
+
   return (
-    <FormShell form={formik} editMode={true} isInfo={false} isCleared={false}>
+    <FormShell form={formik} actions={actions} isSaved={false} editMode={true} isInfo={false} isCleared={false}>
       <VertLayout>
         <Grid container spacing={4} justifyContent='center'>
           <Box mt={20}>
