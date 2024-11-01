@@ -5,7 +5,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-const LotForm = ({ labels, maxAccess, lotId, itemId, siteId, siteColumn }) => {
+const LotForm = ({ labels, maxAccess, lotId, itemId, siteId }) => {
   const { getRequest } = useContext(RequestsContext)
 
   const [data, setData] = useState([])
@@ -88,13 +88,13 @@ const LotForm = ({ labels, maxAccess, lotId, itemId, siteId, siteColumn }) => {
         flex: 1
       })
     }
-    if (siteColumn) {
-      dynamicColumns.push({
-        field: 'siteRef',
-        headerName: labels.site,
-        flex: 1
-      })
-    }
+
+    dynamicColumns.push({
+      field: 'siteRef',
+      headerName: labels.site,
+      flex: 1
+    })
+
     setColumns(dynamicColumns)
   }
   useEffect(() => {
