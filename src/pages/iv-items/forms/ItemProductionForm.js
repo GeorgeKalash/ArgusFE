@@ -27,6 +27,8 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
       spfId: '',
       ltId: '',
       classId: '',
+      designName: '',
+      designRef: '',
       designId: '',
       standardCost: '',
       standardId: '',
@@ -207,8 +209,9 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
                 displayField='name'
                 values={formik.values}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('ltId', newValue?.recordId || '')
+                  formik.setFieldValue('ltId', newValue ? newValue.recordId : '')
                 }}
+                error={formik.touched.ltId && Boolean(formik.errors.ltId)}
                 maxAccess={maxAccess}
               />
             </Grid>
