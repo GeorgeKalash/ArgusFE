@@ -63,7 +63,15 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
       capacityVolume: null,
       wip: 1,
       wipName: '',
-      orders: []
+      orders: [{
+        id: 1,
+        soRef: null,
+        soId: null,
+        soDate: null,
+        clientName: null,
+        soVolume: null,
+        soWipStatusName: null
+      }]
     },
     maxAccess,
     enableReinitialize: false,
@@ -108,8 +116,6 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
       }
 
       if (hasDuplicates) {
-        //console.log('Duplicate soId found. Operation aborted.')
-
         return
       }
 
