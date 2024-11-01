@@ -28,7 +28,7 @@ const ItemWindow = ({ recordId, labels, sku, itemName, msId, maxAccess }) => {
     _reference: null,
     _isMetal: false,
     _metal: null,
-    nraId: null,
+    nraId: null
   })
 
   const tabs = [
@@ -39,11 +39,9 @@ const ItemWindow = ({ recordId, labels, sku, itemName, msId, maxAccess }) => {
     { label: labels.physical, disabled: !store.recordId },
     { label: labels.vendor, disabled: !store.recordId },
     { label: labels.production, disabled: !store.recordId },
-    { label: labels.kit, disabled: !store.recordId || !store._kit },
-    { label: 'retail', disabled: !store.recordId }
+    { label: labels.kit, disabled: !store._kit },
+    { label: labels.retail, disabled: !store.recordId }
   ]
-  console.log(tabs[7].disabled, 'dis')
-  console.log(store, 'store')
 
   return (
     <>

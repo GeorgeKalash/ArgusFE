@@ -95,15 +95,13 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
         })
     }),
     onSubmit: async obj => {
-      const recordId = obj.recordId
-
       try {
         const response = await postRequest({
           extension: InventoryRepository.Items.set,
           record: JSON.stringify({ ...obj, attachment: null })
         })
 
-        if (!formik.values.recordId) {
+        if (!obj.recordId) {
           setOnKitItem(false)
           toast.success(platformLabels.Added)
           formik.setValues({
@@ -114,7 +112,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
             ...prevStore,
             recordId: response.recordId,
             _msId: formik.values.msId,
-            _kit: formik.values.kit,
+            _kit: formik.values.kitItem,
             _name: formik.values.name,
             _reference: formik.values.sku
           }))
@@ -170,7 +168,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
             ...prevStore,
             nraId: res2?.record?.nraId,
             _msId: res.record.msId,
-            _kit: !!res.record.kitItem,
+            _kit: res.record.kitItem,
             measurementId: res.record.defSaleMUId,
             priceGroupId: res.record.pgId,
             returnPolicy: res.record.returnPolicyId,
@@ -196,17 +194,31 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       disabled: !editMode
     }
   ]
-
   useEffect(() => {
     if (formik.values.kitItem) {
       setOnKitItem(true)
+      fetchfirstPriceType()
       formik.setFieldValue('ivtItem', false)
       formik.setFieldValue('trackBy', '')
       formik.setFieldValue('valuationMethod', '')
     } else {
       setOnKitItem(false)
+      formik.setFieldValue('priceType', '')
     }
   }, [formik.values.kitItem])
+
+  async function fetchfirstPriceType() {
+    const response = await getRequest({
+      extension: InventoryRepository.Items.pack
+    })
+
+    const formattedPriceTypes = response?.record?.priceTypes?.map(priceTypes => ({
+      key: parseInt(priceTypes.key),
+      value: priceTypes.value
+    }))
+
+    formik.setFieldValue('priceType', formattedPriceTypes[0].key)
+  }
 
   return (
     <FormShell
@@ -249,7 +261,10 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                         nraId: newValue?.nraId
                       }))
                       formik.setFieldValue('categoryId', newValue?.recordId || '')
-                      formik.setFieldValue('priceType', newValue?.priceType || '')
+                      if (!formik.values.kitItem) {
+                        formik.setFieldValue('priceType', newValue?.priceType || '')
+                      }
+
                       formik.setFieldValue('trackBy', newValue?.trackBy || '')
                       formik.setFieldValue('procurementMethod', newValue?.procurementMethod || '')
                       formik.setFieldValue('msId', newValue?.msId || '')
@@ -283,7 +298,6 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     values={formik.values}
                     name='priceType'
                     label={labels.priceType}
-                    defaultIndex={onKitItem ? 0 : null}
                     readOnly={formik.values.kitItem}
                     valueField='key'
                     displayField='value'
