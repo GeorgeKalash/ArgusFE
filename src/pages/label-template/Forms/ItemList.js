@@ -36,6 +36,11 @@ const ItemList = ({ recordId: tlId, labels, maxAccess }) => {
 
   const columns = [
     {
+      field: 'seqNo',
+      headerName: labels.seqNo,
+      flex: 1
+    },
+    {
       field: 'itemKey',
       headerName: labels.itemKey,
       flex: 1

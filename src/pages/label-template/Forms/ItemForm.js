@@ -36,6 +36,7 @@ const ItemForm = ({ tlId, labels, seqNo, getGridData, maxAccess, window }) => {
     enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
+      seqNo: yup.string().required(),
       itemKey: yup.string().required(),
       displayType: yup.string().required(),
       x: yup.string().required(),
@@ -87,6 +88,18 @@ const ItemForm = ({ tlId, labels, seqNo, getGridData, maxAccess, window }) => {
         <Grow>
           <Grid container gap={2}>
             <Grid container xs={12} spacing={2}>
+              <Grid item xs={12}>
+                <CustomTextField
+                  name='seqNo'
+                  label={labels.seqNo}
+                  value={formik.values?.seqNo}
+                  required
+                  onChange={formik.handleChange}
+                  onClear={() => formik.setFieldValue('seqNo', '')}
+                  error={formik.touched.seqNo && Boolean(formik.errors.seqNo)}
+                  maxAccess={maxAccess}
+                />
+              </Grid>
               <Grid item xs={12}>
                 <CustomTextField
                   name='itemKey'
