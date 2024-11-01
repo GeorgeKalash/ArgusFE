@@ -700,7 +700,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       parameters: `_recordId=${clientId}`
     })
     formik.setFieldValue('currencyId', res?.record?.currencyId)
-    formik.setFieldValue('spId', res?.record?.spId)
+    formik.setFieldValue('spId', res?.record?.spId || formik.values.spId)
     formik.setFieldValue('ptId', res?.record?.ptId)
     formik.setFieldValue('plId', res?.record?.plId || defaults.systemDefaultsList.plId || 0)
     formik.setFieldValue('szId', res?.record?.szId)
@@ -888,7 +888,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
   }
 
   function recalcNewVat(tdPct) {
-    formik.values.items.map(item => {
+    formik.values.items.map((item, index) => {
       const vatCalcRow = getVatCalc({
         basePrice: parseFloat(item?.basePrice),
         qty: item?.qty,
@@ -898,8 +898,6 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
         tdPct: tdPct,
         taxDetails: item.taxDetails
       })
-
-      const index = item.id - 1
       formik.setFieldValue(`items[${index}].vatAmount`, parseFloat(vatCalcRow?.vatAmount).toFixed(2))
     })
   }
