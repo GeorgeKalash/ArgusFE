@@ -48,6 +48,7 @@ export function DataGrid({
   function deleteRow(params) {
     const newRows = value.filter(({ id }) => id !== params.data.id)
     gridApiRef.current.applyTransaction({ remove: [params.data] })
+    if (newRows?.length < 1) setReady(true)
 
     onChange(newRows)
   }
@@ -70,8 +71,9 @@ export function DataGrid({
   useEffect(() => {
     if (!value?.length && allowAddNewLine && ready) {
       addNewRow()
+      setReady(false)
     }
-  }, [ready])
+  }, [ready, value])
 
   const addNewRow = params => {
     const highestIndex = params?.node?.data?.id + 1 || 0
@@ -499,6 +501,7 @@ export function DataGrid({
               tabToNextCell={() => true}
               tabToPreviousCell={() => true}
               onRowClicked={handleRowClick}
+              onC
             />
           )}
         </Box>
