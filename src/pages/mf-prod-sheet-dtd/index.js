@@ -12,6 +12,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import ProdSheetDtdForm from './form/ProdSheetDtdForm'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
+import { SystemFunction } from 'src/resources/SystemFunction'
 
 const ProdSheetDtd = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -23,15 +24,7 @@ const ProdSheetDtd = () => {
 
     const response = await getRequest({
       extension: ManufacturingRepository.DocumentTypeDefault.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
-    })
-
-    response.list = response.list.map(dt => {
-      if (dt.disableSKULookup === null) {
-        dt.disableSKULookup = false
-      }
-
-      return dt
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_functionId=${SystemFunction.ProductionSheet}`
     })
 
     return { ...response, _startAt: _startAt }
