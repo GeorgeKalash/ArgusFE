@@ -866,7 +866,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
   const totalVolume = reCal ? _footerSummary?.totalVolume : formik.values?.volume || 0
   const totalWeight = reCal ? _footerSummary?.totalWeight : formik.values?.weight || 0
   const subtotal = reCal ? subTotal : formik.values?.subtotal || 0
-  const vatAmount = reCal ? _footerSummary?.sumVat : formik.values?.sumVat || 0
+  const vatAmount = reCal ? _footerSummary?.sumVat : formik.values?.vatAmount || 0
 
   function checkDiscount(typeChange, tdPct, tdAmount, currentDiscount) {
     const _discountObj = getDiscValues({
