@@ -173,7 +173,6 @@ const AvailabilitiesBySite = () => {
         lotId,
         itemId,
         siteId,
-        siteColumn: true,
         maxAccess: access
       },
       width: 1150,

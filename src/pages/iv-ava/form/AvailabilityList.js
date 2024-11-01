@@ -12,7 +12,7 @@ import Image from 'next/image'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import SerialForm from './SerialForm'
-import LotForm from 'src/pages/iv-ava-by-site/forms/LotForm'
+import LotForm from './LotForm'
 
 const AvailabilityList = ({ itemId, sku, name, qty, labels, access }) => {
   const { getRequest } = useContext(RequestsContext)
