@@ -5,7 +5,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-const LotForm = ({ labels, maxAccess, lotId, itemId, siteId }) => {
+const LotForm = ({ labels, maxAccess, obj }) => {
   const { getRequest } = useContext(RequestsContext)
 
   const [data, setData] = useState([])
@@ -13,7 +13,7 @@ const LotForm = ({ labels, maxAccess, lotId, itemId, siteId }) => {
   async function fetchGridData() {
     const response = await getRequest({
       extension: InventoryRepository.AvailabilityLot.qry,
-      parameters: `_itemId=${itemId}&_siteId=${siteId}`
+      parameters: `_itemId=${obj.itemId}&_siteId=${obj.siteId}`
     })
     setData(response)
   }
@@ -23,7 +23,7 @@ const LotForm = ({ labels, maxAccess, lotId, itemId, siteId }) => {
   async function getDynamicColumns() {
     const response = await getRequest({
       extension: InventoryRepository.LotCategory.get,
-      parameters: `_recordId=${lotId}`
+      parameters: `_recordId=${obj.lotCategoryId}`
     })
 
     const dynamicColumns = [
@@ -92,7 +92,8 @@ const LotForm = ({ labels, maxAccess, lotId, itemId, siteId }) => {
     setColumns(dynamicColumns)
   }
   useEffect(() => {
-    getDynamicColumns(), fetchGridData()
+    getDynamicColumns()
+    fetchGridData()
   }, [])
 
   return (

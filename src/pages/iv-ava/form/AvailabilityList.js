@@ -28,7 +28,7 @@ const AvailabilityList = ({ itemId, sku, name, qty, labels, access }) => {
       parameters: `_itemId=${itemId}&_siteId=${0}&_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
 
-    const filteredData = response.list.filter(item => item.siteRef && item.siteName)
+    const filteredData = response?.list?.filter(item => item.siteRef && item.siteName)
 
     setData({ ...response, list: filteredData })
 
@@ -77,20 +77,19 @@ const AvailabilityList = ({ itemId, sku, name, qty, labels, access }) => {
   ]
 
   const onSerial = obj => {
-    openSerialForm(obj.itemId, obj.siteId)
+    openSerialForm(obj)
   }
 
   const onLot = obj => {
-    openLotForm(obj.lotCategoryId, obj.itemId, obj.siteId)
+    openLotForm(obj)
   }
 
-  function openSerialForm(itemId, siteId) {
+  function openSerialForm(obj) {
     stack({
       Component: SerialForm,
       props: {
         labels,
-        itemId,
-        siteId
+        obj
       },
       width: 600,
       height: 400,
@@ -98,14 +97,12 @@ const AvailabilityList = ({ itemId, sku, name, qty, labels, access }) => {
     })
   }
 
-  function openLotForm(lotId, itemId, siteId) {
+  function openLotForm(obj) {
     stack({
       Component: LotForm,
       props: {
         labels,
-        lotId,
-        itemId,
-        siteId,
+        obj,
         maxAccess: access
       },
       width: 1150,

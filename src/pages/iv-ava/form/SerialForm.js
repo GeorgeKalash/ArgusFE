@@ -7,14 +7,14 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-const SerialForm = ({ labels, itemId, siteId }) => {
+const SerialForm = ({ labels, obj }) => {
   const { getRequest } = useContext(RequestsContext)
   const [data, setData] = useState([])
 
   async function fetchGridData() {
     const response = await getRequest({
       extension: InventoryRepository.AvailabilitySerial.qry,
-      parameters: `_itemId=${itemId}&_siteId=${siteId}&_srlNo=&_startAt=0&_pageSize=50`
+      parameters: `_itemId=${obj.itemId}&_siteId=${obj.siteId}&_srlNo=&_startAt=0&_pageSize=50`
     })
     setData(response)
   }
