@@ -43,7 +43,6 @@ import AddressFilterForm from 'src/components/Shared/AddressFilterForm'
 import { useError } from 'src/error'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import SalesTrxForm from 'src/components/Shared/SalesTrxForm'
-import { getFormattedNumber } from 'src/lib/numberField-helper'
 
 export default function SalesOrderForm({ labels, access, recordId, currency, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -1504,7 +1503,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                     name='subTotal'
                     maxAccess={maxAccess}
                     label={labels.subtotal}
-                    value={getFormattedNumber(subtotal)}
+                    value={subtotal}
                     readOnly
                   />
                 </Grid>
@@ -1583,13 +1582,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                   />
                 </Grid>
                 <Grid item>
-                  <CustomNumberField
-                    name='amount'
-                    maxAccess={maxAccess}
-                    label={labels.net}
-                    value={getFormattedNumber(amount)}
-                    readOnly
-                  />
+                  <CustomNumberField name='amount' maxAccess={maxAccess} label={labels.net} value={amount} readOnly />
                 </Grid>
               </Grid>
             </Grid>
