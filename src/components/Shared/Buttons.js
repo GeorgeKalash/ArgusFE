@@ -342,5 +342,12 @@ export const getButtons = platformLabels => [
     color: '#ADD8E6',
     image: 'metals-icon.png',
     main: false
-  }
+  },
+  {
+    key: 'generated 2 FA',
+    label: platformLabels.Generated2FA,
+    color: '#231f20',
+    image: 'save.png',
+    main: true
+  },
 ]

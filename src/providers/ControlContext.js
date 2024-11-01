@@ -6,6 +6,8 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { AuthContext } from './AuthContext'
 import axios from 'axios'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import { useError } from 'src/error'
+import { debounce } from 'lodash'
 
 const ControlContext = createContext()
 
@@ -15,6 +17,12 @@ const ControlProvider = ({ children }) => {
   const userData = window.sessionStorage.getItem('userData')
   const [defaultsData, setDefaultsData] = useState([])
   const [apiPlatformLabels, setApiPlatformLabels] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const errorModel = useError()
+
+  async function showError(props) {
+    if (errorModel) await errorModel.stack(props)
+  }
 
   useEffect(() => {
     if (userData != null) getDefaults(setDefaultsData)
@@ -48,11 +56,20 @@ const ControlProvider = ({ children }) => {
     getPlatformLabels(ResourceIds.Common, setApiPlatformLabels)
   }, [user?.languageId, languageId])
 
+  const debouncedCloseLoading = debounce(() => {
+    setLoading(false)
+  }, 500)
+
   const platformLabels = apiPlatformLabels
     ? Object.fromEntries(apiPlatformLabels.map(({ key, value }) => [key, value]))
     : {}
 
   const getPlatformLabels = (resourceId, callback) => {
+    const disableLoading = false
+    !disableLoading && !loading && setLoading(true)
+
+    const throwError = false
+
     var parameters = '_dataset=' + resourceId + '&_language=1'
 
     axios({
@@ -64,9 +81,17 @@ const ControlProvider = ({ children }) => {
       }
     })
       .then(res => {
+        if (!disableLoading) debouncedCloseLoading()
         callback(res.data.list)
       })
-      .catch(error => {})
+      .catch(error => {
+        debouncedCloseLoading()
+        showError({
+          message: error,
+          height: error.response?.status === 404 || error.response?.status === 500 ? 400 : ''
+        })
+        if (throwError) reject(error)
+      })
   }
 
   const getLabels = (resourceId, callback) => {
