@@ -84,5 +84,8 @@ export const AccessControlRepository = {
     qry: service + 'qryLOK',
     del: service + 'delLOK',
     snapshot: service + 'snapshotLOK',
+  },
+  UserOTPQrcode: {
+    secret: service + 'secretKEY'
   }
 }
