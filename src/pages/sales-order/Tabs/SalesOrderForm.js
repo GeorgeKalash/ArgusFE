@@ -1504,7 +1504,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
                     name='subTotal'
                     maxAccess={maxAccess}
                     label={labels.subtotal}
-                    value={subtotal}
+                    value={getFormattedNumber(subtotal)}
                     readOnly
                   />
                 </Grid>
