@@ -143,7 +143,6 @@ const LoginPage = () => {
                 }}
               />
             </Box>
-
             <CardContent sx={{ p: theme => `${theme.spacing(8, 9, 0)} !important` }} onKeyDown={handleKeyDown}>
               <Grid container spacing={5}>
                 <Grid item xs={12}>

@@ -10,10 +10,11 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
-import { SaleRepository } from 'src/repositories/SaleRepository'
-import DocumentTypeDefaultForm from './forms/DocumentTypeDefaultForm'
+import ProdSheetDtdForm from './form/ProdSheetDtdForm'
+import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
+import { SystemFunction } from 'src/resources/SystemFunction'
 
-const DocumentTypeDefault = () => {
+const ProdSheetDtd = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -21,43 +22,41 @@ const DocumentTypeDefault = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    try {
-      const response = await getRequest({
-        extension: SaleRepository.DocumentTypeDefault.qry,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_functionId=5106`
-      })
+    const response = await getRequest({
+      extension: ManufacturingRepository.DocumentTypeDefault.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_functionId=${SystemFunction.ProductionSheet}`
+    })
 
-      return { ...response, _startAt: _startAt }
-    } catch (error) {}
+    return { ...response, _startAt: _startAt }
   }
 
   const {
     query: { data },
-    labels: _labels,
+    labels,
     invalidate,
+    paginationParameters,
     refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SaleRepository.DocumentTypeDefault.qry,
-    datasetId: ResourceIds.DocumentTypeDefault
+    endpointId: ManufacturingRepository.DocumentTypeDefault.page,
+    datasetId: ResourceIds.ProdSheetDocumentTypeDefault
   })
 
   const columns = [
     {
       field: 'dtName',
-      headerName: _labels.documentType,
+      headerName: labels.docType,
       flex: 1
     },
     {
-      field: 'commitItems',
-      headerName: _labels.commitItems,
-      type: 'checkbox',
+      field: 'siteName',
+      headerName: labels.site,
       flex: 1
     },
     {
       field: 'disableSKULookup',
-      headerName: _labels.dsl,
+      headerName: labels.dsl,
       type: 'checkbox',
       flex: 1
     }
@@ -68,27 +67,25 @@ const DocumentTypeDefault = () => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: SaleRepository.DocumentTypeDefault.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
+    await postRequest({
+      extension: ManufacturingRepository.DocumentTypeDefault.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   function openForm(record) {
     stack({
-      Component: DocumentTypeDefaultForm,
+      Component: ProdSheetDtdForm,
       props: {
-        labels: _labels,
+        labels,
         recordId: record?.dtId,
         maxAccess: access
       },
       width: 600,
       height: 500,
-      title: _labels.dtDefault
+      title: labels.docTypeDefault
     })
   }
 
@@ -111,7 +108,8 @@ const DocumentTypeDefault = () => {
           isLoading={false}
           pageSize={50}
           refetch={refetch}
-          paginationType='client'
+          paginationParameters={paginationParameters}
+          paginationType='api'
           maxAccess={access}
         />
       </Grow>
@@ -119,4 +117,4 @@ const DocumentTypeDefault = () => {
   )
 }
 
-export default DocumentTypeDefault
+export default ProdSheetDtd
