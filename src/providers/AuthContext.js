@@ -51,11 +51,10 @@ const AuthProvider = ({ children }) => {
     }
   }
 
-
   const fetchData = async () => {
     const matchHostname = window.location.hostname.match(/^(.+)\.softmachine\.co$/)
 
-    const accountName = matchHostname ? matchHostname[1] : 'byc-deploy'
+    const accountName = matchHostname ? matchHostname[1] : 'burger'
 
     try {
       const response = await axios.get(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=${accountName}`)
@@ -76,7 +75,7 @@ const AuthProvider = ({ children }) => {
   }, [])
 
   const handleLogin = async (params, errorCallback) => {
-    setLoading(true)
+    // setLoading(true)
     try {
       const getUS2 = await axios.get(`${getAC.data.record.api}/SY.asmx/getUS2?_email=${params.username}`, {
         headers: {
@@ -129,7 +128,7 @@ const AuthProvider = ({ children }) => {
       }
       setLanguageId(loggedUser.languageId)
       window.localStorage.setItem('languageId', loggedUser.languageId)
-      if (getUS2.data.record.umcpnl === true) {
+      if (getUS2.data.record.umcpnl === true || getUS2.data.record.is2FAEnabled === true) {
         errorCallback({
           username: params.username,
           loggedUser,
@@ -142,7 +141,8 @@ const AuthProvider = ({ children }) => {
         const redirectURL = returnUrl && returnUrl !== '/' ? returnUrl : '/'
         router.replace(redirectURL)
       }
-      setLoading(false)
+
+      // setLoading(false)
     } catch (error) {
       if (errorCallback) errorCallback(error)
     }
