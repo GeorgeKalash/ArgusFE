@@ -783,7 +783,6 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       return newState
     })
   }
-
   function getItemPriceRow(update, newRow, dirtyField, iconClicked) {
     !reCal && setReCal(true)
 
@@ -881,7 +880,8 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       hiddenTdAmount: parseFloat(tdAmount),
       typeChange: typeChange
     })
-    formik.setFieldValue('tdAmount', _discountObj?.hiddenTdAmount?.toFixed(2) || 0)
+
+    formik.setFieldValue('tdAmount', _discountObj?.hiddenTdAmount ? _discountObj?.hiddenTdAmount?.toFixed(2) : 0)
     formik.setFieldValue('tdType', _discountObj?.tdType)
     formik.setFieldValue('currentDiscount', _discountObj?.currentDiscount || 0)
     formik.setFieldValue('tdPct', _discountObj?.hiddenTdPct)
