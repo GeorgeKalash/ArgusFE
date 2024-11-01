@@ -10,44 +10,43 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
-
 import { ControlContext } from 'src/providers/ControlContext'
-import { SaleRepository } from 'src/repositories/SaleRepository'
+import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
+import { SystemFunction } from 'src/resources/SystemFunction'
+import { SystemRepository } from 'src/repositories/SystemRepository'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 
-export default function ConsignmentSitesForm({ labels, maxAccess, recordId }) {
+export default function ProdSheetDtdForm({ labels, maxAccess, recordId }) {
   const { platformLabels } = useContext(ControlContext)
 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
-    endpointId: SaleRepository.ConsignmentSites.qry
+    endpointId: ManufacturingRepository.DocumentTypeDefault.page
   })
 
   const { formik } = useForm({
     initialValues: {
+      dtId: '',
       recordId: recordId || null,
-      clientId: '',
       siteId: '',
-      clientRef: ''
+      disableSKULookup: false
     },
     maxAccess,
     enableReinitialize: false,
     validationSchema: yup.object({
-      clientRef: yup.string().required()
+      dtId: yup.string().required()
     }),
     onSubmit: async obj => {
-      const response = await postRequest({
-        extension: SaleRepository.ConsignmentSites.set,
+      await postRequest({
+        extension: ManufacturingRepository.DocumentTypeDefault.set,
         record: JSON.stringify(obj)
       })
 
-      if (!formik.values.recordId) {
-        formik.setFieldValue('recordId', formik.values.clientId)
-
+      if (!obj.dtId) {
         toast.success(platformLabels.Added)
-      } else toast.success(platformLabels.Edited)
+      } else toast.success(platformLabels.Updated)
+      formik.setFieldValue('recordId', formik.values.dtId)
 
       invalidate()
     }
@@ -58,65 +57,80 @@ export default function ConsignmentSitesForm({ labels, maxAccess, recordId }) {
     ;(async function () {
       if (recordId) {
         const res = await getRequest({
-          extension: SaleRepository.ConsignmentSites.get,
-          parameters: `_clientId=${recordId}`
+          extension: ManufacturingRepository.DocumentTypeDefault.get,
+          parameters: `_dtId=${recordId}`
         })
 
-        formik.setValues({ ...res.record, recordId: res.record.clientId })
+        formik.setValues({
+          ...res.record,
+          recordId: recordId
+        })
       }
     })()
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.ConsignmentSites} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell
+      resourceId={ResourceIds.ProdSheetDocumentTypeDefault}
+      form={formik}
+      maxAccess={maxAccess}
+      editMode={editMode}
+    >
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
             <Grid item xs={12}>
-              <ResourceLookup
-                endpointId={SaleRepository.Client.snapshot}
-                parameters={`_startAt=0&_pageSize=50&_filter=`}
-                valueField='reference'
-                displayField='name'
-                name='clientRef'
-                label={labels.client}
-                form={formik}
-                required
-                readOnly={editMode}
-                valueShow='clientRef'
-                secondValueShow='clientName'
-                maxAccess={maxAccess}
-                displayFieldWidth={2}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Ref.' },
-                  { key: 'name', value: 'Name' }
-                ]}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('clientId', newValue ? newValue.recordId : '')
-                  formik.setFieldValue('clientName', newValue ? newValue.name : '')
-                  formik.setFieldValue('clientRef', newValue ? newValue.reference : '')
-                }}
-                error={formik.touched.clientRef && Boolean(formik.errors.clientRef)}
-              />
-            </Grid>
-            <Grid item xs={12}>
               <ResourceComboBox
-                name='siteId'
-                endpointId={InventoryRepository.Site.qry}
-                parameters='_filter='
-                label={labels.site}
-                valueField='recordId'
-                displayField='name'
+                endpointId={SystemRepository.DocumentType.qry}
+                parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.ProductionSheet}`}
+                name='dtId'
+                required
+                label={labels.docType}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
                 ]}
+                valueField='recordId'
+                displayField={'name'}
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('siteId', newValue ? newValue.recordId : '')
+                  formik && formik.setFieldValue('dtId', newValue?.recordId || '')
                 }}
-                error={formik.touched.siteId && Boolean(formik.errors.siteId)}
+                error={formik.touched.dtId && Boolean(formik.errors.dtId)}
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={InventoryRepository.Site.qry}
+                name='siteId'
+                label={labels.site}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                values={formik.values}
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik && formik.setFieldValue('siteId', newValue?.recordId)
+                }}
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    maxAccess={maxAccess}
+                    name='disableSKULookup'
+                    checked={formik.values?.disableSKULookup}
+                    onChange={formik.handleChange}
+                  />
+                }
+                label={labels.dsl}
               />
             </Grid>
           </Grid>
