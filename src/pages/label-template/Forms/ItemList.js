@@ -113,13 +113,13 @@ const ItemList = ({ recordId: tlId, labels, maxAccess }) => {
       Component: ItemForm,
       props: {
         labels,
-        seqNo: seqNo || gridData?.list?.length + 1,
         tlId,
+        seqNo,
         maxAccess,
         getGridData
       },
       width: 700,
-      height: 450,
+      height: 500,
       title: labels?.item
     })
   }

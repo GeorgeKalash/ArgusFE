@@ -20,7 +20,7 @@ const ItemForm = ({ tlId, labels, seqNo, getGridData, maxAccess, window }) => {
 
   const formik = useFormik({
     initialValues: {
-      seqNo,
+      seqNo: '',
       labelTemplateId: tlId,
       itemKey: '',
       displayType: '',
@@ -80,7 +80,7 @@ const ItemForm = ({ tlId, labels, seqNo, getGridData, maxAccess, window }) => {
   }
   useEffect(() => {
     if (seqNo) getDispersalById(seqNo)
-  }, [seqNo])
+  }, [])
 
   return (
     <FormShell form={formik} maxAccess={maxAccess} infoVisible={false} isSavedClear={false} isCleared={false}>
@@ -89,7 +89,7 @@ const ItemForm = ({ tlId, labels, seqNo, getGridData, maxAccess, window }) => {
           <Grid container gap={2}>
             <Grid container xs={12} spacing={2}>
               <Grid item xs={12}>
-                <CustomTextField
+                <CustomNumberField
                   name='seqNo'
                   label={labels.seqNo}
                   value={formik.values?.seqNo}
