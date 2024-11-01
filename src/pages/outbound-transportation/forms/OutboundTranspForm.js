@@ -278,7 +278,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
       key: 'Reopen',
       condition: isClosed,
       onClick: onReopen,
-      disabled: !isClosed
+      disabled: !isClosed || isPosted
     }
   ]
 
