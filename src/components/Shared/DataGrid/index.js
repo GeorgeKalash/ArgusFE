@@ -239,7 +239,7 @@ export function DataGrid({
 
   const CustomCellEditor = params => {
     const { column, data, maxAccess } = params
-    const [currentValue, setCurrentValue] = useState(params?.node?.data?.[params?.colDef?.field] || '') // Capture current data state
+    const [currentValue, setCurrentValue] = useState(params?.node?.data) // Capture current data state
 
     const Component =
       typeof column?.colDef?.component === 'string'
@@ -286,13 +286,15 @@ export function DataGrid({
     const updateRow = ({ changes }) => {
       const oldRow = params.data
 
+      setCurrentValue(changes || '')
+
       setData(changes)
 
       commit(changes)
 
       process(params, oldRow, setData)
 
-      params.api.stopEditing()
+      // params.api.stopEditing()
     }
     const comp = column.colDef.component
 
@@ -309,7 +311,6 @@ export function DataGrid({
       >
         <Component
           id={params.node.data.id}
-          field={params.colDef.field}
           {...params}
           value={currentValue}
           column={{
@@ -501,7 +502,6 @@ export function DataGrid({
               tabToNextCell={() => true}
               tabToPreviousCell={() => true}
               onRowClicked={handleRowClick}
-              onC
             />
           )}
         </Box>

@@ -1,9 +1,9 @@
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 
-export default function TextFieldEdit({ column: { props, ...column }, id, value, field, update }) {
+export default function TextFieldEdit({ id, column: { props, field, ...column }, value, update }) {
   return (
     <CustomTextField
-      value={value}
+      value={value?.[field]}
       label={''}
       autoFocus
       hasBorder={false}
