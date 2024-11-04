@@ -5,7 +5,7 @@ import PinIcon from '@mui/icons-material/Pin'
 import InputAdornment from '@mui/material/InputAdornment'
 import ClearIcon from '@mui/icons-material/Clear'
 
-export default function TextFieldEdit({ column: { props, ...column }, id, field, value, update, updateRow }) {
+export default function TextFieldEdit({ id, column: { props, field, ...column }, value, update, updateRow }) {
   const isPercentIcon = props?.gridData ? props?.gridData[id - 1]?.mdType === 1 : false
 
   const handleIconClick = () => {
@@ -43,7 +43,7 @@ export default function TextFieldEdit({ column: { props, ...column }, id, field,
 
   return (
     <CustomTextField
-      value={value || undefined}
+      value={value?.[field] || undefined}
       label={''}
       autoFocus
       hasBorder={false}

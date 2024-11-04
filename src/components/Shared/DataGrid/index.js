@@ -274,13 +274,14 @@ export function DataGrid({
         [field]: value || undefined
       }
 
-      setCurrentValue(value || '')
+      setCurrentValue(changes)
 
       setData(changes)
 
-      commit(changes)
-
-      process(params, oldRow, setData)
+      if (column.colDef.updateOn !== 'blur') {
+        commit(changes)
+        process(params, oldRow, setData)
+      }
     }
 
     const updateRow = ({ changes }) => {
@@ -290,12 +291,13 @@ export function DataGrid({
 
       setData(changes)
 
-      commit(changes)
+      if (column.colDef.updateOn !== 'blur') {
+        commit(changes)
 
-      process(params, oldRow, setData)
-
-      // params.api.stopEditing()
+        process(params, oldRow, setData)
+      }
     }
+
     const comp = column.colDef.component
 
     return (
@@ -467,6 +469,25 @@ export function DataGrid({
     }
   }
 
+  const onCellEditingStopped = params => {
+    const { data, colDef } = params
+
+    if (colDef.updateOn === 'blur') {
+      const setData = changes => {
+        const id = params.node?.id
+        const rowNode = params.api.getRowNode(id)
+        if (rowNode) {
+          const currentData = rowNode.data
+
+          const newData = { ...currentData, ...changes }
+          rowNode.updateData(newData)
+        }
+      }
+
+      process(params, data, setData)
+    }
+  }
+
   return (
     <Box sx={{ height: height || 'auto', flex: 1 }}>
       <CacheDataProvider>
@@ -502,6 +523,7 @@ export function DataGrid({
               tabToNextCell={() => true}
               tabToPreviousCell={() => true}
               onRowClicked={handleRowClick}
+              onCellEditingStopped={onCellEditingStopped}
             />
           )}
         </Box>
