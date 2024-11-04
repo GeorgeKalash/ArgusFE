@@ -346,6 +346,13 @@ export default function CreditOrderForm({ labels, access, recordId, plantId, use
       parameters: `_plantId=${plantId}&_currencyId=${currencyId}&_raCurrencyId=${baseCurrency}&_rateTypeId=${rateType}`
     })
 
+    if (!res?.record?.rate) {
+      stackError({
+        message: labels.undefinedCorRate
+      })
+
+      return
+    }
     formik.setFieldValue('currencyId', currencyId)
     formik.setFieldValue('exRate', res?.record?.rate)
     formik.setFieldValue('rateCalcMethod', res?.record?.rateCalcMethod)
