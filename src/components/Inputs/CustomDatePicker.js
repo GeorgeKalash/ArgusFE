@@ -50,7 +50,7 @@ const CustomDatePicker = ({
   const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
 
   const _readOnly =
-    maxAccess < 3 ||
+    maxAccess < 2 ||
     accessLevel === DISABLED ||
     (readOnly && accessLevel !== MANDATORY && accessLevel !== FORCE_ENABLED)
 
