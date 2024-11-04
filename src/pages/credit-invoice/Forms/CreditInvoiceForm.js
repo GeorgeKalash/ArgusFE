@@ -319,7 +319,7 @@ export default function CreditInvoiceForm({ _labels, access, recordId, plantId, 
       parameters: `_plantId=${plantId}&_currencyId=${currencyId}&_raCurrencyId=${baseCurrency}&_rateTypeId=${rateType}`
     })
 
-    if (res?.record?.rate) {
+    if (!res?.record?.rate) {
       stackError({
         message: _labels.undefinedCorRate
       })
