@@ -331,9 +331,8 @@ export const getButtons = platformLabels => [
   {
     key: 'OTP',
     label: platformLabels.OTP,
-    color: 'transparent',
-    image: 'Close.png',
-    border: '1px solid #01a437',
+    color: '#231f20',
+    image: 'sms.png',
     main: false
   },
   {
@@ -349,5 +348,5 @@ export const getButtons = platformLabels => [
     color: '#231f20',
     image: 'save.png',
     main: true
-  },
+  }
 ]
