@@ -54,26 +54,21 @@ const LoginPage = () => {
           }
           openForm(error.username, loggedUser, onClose)
         } else if (error?.getUS2?.is2FAEnabled) {
-          const onClose = async () => {
-            await updateOTP(loggedUser, error?.getUS2)
-          }
-          viewOTP(loggedUser, onClose)
+          viewOTP(loggedUser)
         } else setErrorMessage(error)
       })
     }
   })
 
-  function viewOTP(loggedUser, onClose) {
+  function viewOTP(loggedUser) {
     stack({
       Component: OTPAuthentication,
       props: {
         formValidation: validation,
         loggedUser,
-        onClose: () => onClose()
+        onClose: () => auth.EnableLogin(loggedUser)
       },
       expandable: false,
-      closable: false,
-      draggable: false,
       width: 400,
       height: 400,
       spacing: false,
@@ -108,39 +103,6 @@ const LoginPage = () => {
   }
 
   const { apiUrl, languageId } = useAuth()
-
-  const updateOTP = async (loggedUser, getUS2) => {
-    try {
-      const user = getUS2
-      const accessToken = loggedUser.accessToken
-      if (!accessToken) {
-        throw new Error('Failed to retrieve access token')
-      }
-
-      const updateUser = {
-        ...user,
-        is2FAEnabled: false
-      }
-
-      var bodyFormData = new FormData()
-      bodyFormData.append('record', JSON.stringify(updateUser))
-
-      await axios({
-        method: 'POST',
-        url: `${apiUrl}SY.asmx/setUS`,
-        headers: {
-          Authorization: 'Bearer ' + accessToken,
-          'Content-Type': 'multipart/form-data',
-          LanguageId: languageId
-        },
-        data: bodyFormData
-      }).then(res => {
-        validation.handleSubmit()
-      })
-    } catch (error) {
-      stackError({ message: error.message })
-    }
-  }
 
   const updateUmcpnl = async (loggedUser, getUS2) => {
     try {
