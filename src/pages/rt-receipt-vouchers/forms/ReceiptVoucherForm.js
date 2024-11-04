@@ -483,7 +483,13 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
       key: 'OTP',
       condition: true,
       onClick: viewOTP,
-      disabled: false
+      disabled: !editMode
+    },
+    {
+      key: 'GL',
+      condition: true,
+      onClick: 'onClickGL',
+      disabled: !editMode
     }
   ]
 
@@ -548,8 +554,7 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
                     onChange={(event, newValue) => {
                       formik.setFieldValue('owoId', newValue ? newValue.recordId : '')
                       formik.setFieldValue('amount', newValue ? newValue.amount : '')
-
-                      // formik.setFieldValue('clientId', newValue ? newValue.clientId : '')
+                      formik.setFieldValue('clientId', newValue ? newValue.clientId : '')
                     }}
                   />
                 </Grid>
