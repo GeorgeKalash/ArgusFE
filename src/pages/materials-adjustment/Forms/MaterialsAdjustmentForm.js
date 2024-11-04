@@ -1,7 +1,6 @@
-import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
-import { Grid, Box } from '@mui/material'
+import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
@@ -10,19 +9,19 @@ import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { useWindowDimensions } from 'src/lib/useWindowDimensions'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
+import { DataGrid } from 'src/components/Shared/DataGrid'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, expanded, window }) {
-  const { height } = useWindowDimensions()
-  const [isLoading, setIsLoading] = useState(false)
+export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, window }) {
   const [isPosted, setIsPosted] = useState(false)
-  const [itemStore, setItemStore] = useState([])
   const [editMode, setEditMode] = useState(!!recordId)
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -33,7 +32,22 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, e
     plantId: '',
     siteId: '',
     description: '',
-    date: null
+    date: null,
+    rows: [
+      {
+        id: 1,
+        itemId: '',
+        sku: '',
+        itemName: '',
+        qty: '',
+        totalCost: '',
+        totalQty: '',
+        muQty: '',
+        qtyInBase: '',
+        notes: '',
+        seqNo: ''
+      }
+    ]
   })
 
   const invalidate = useInvalidate({
@@ -45,26 +59,29 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, e
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      siteId: yup.string().required()
+      siteId: yup.string().required(),
+      rows: yup
+        .array()
+        .of(
+          yup.object().shape({
+            sku: yup.string().required(),
+            qty: yup.number().required()
+          })
+        )
+        .required()
     }),
     onSubmit: async obj => {
       const copy = { ...obj }
       copy.date = formatDateToApi(copy.date)
 
-      const updatedRows = detailsFormik.values.rows.map((adjDetail, index) => {
+      const updatedRows = formik.values.rows.map((adjDetail, index) => {
         const seqNo = index + 1
-        if (adjDetail.muQty === null) {
-          return {
-            ...adjDetail,
-            qtyInBase: 0,
-            seqNo: seqNo
-          }
-        } else {
-          return {
-            ...adjDetail,
-            qtyInBase: adjDetail.muQty * adjDetail.qty,
-            seqNo: seqNo
-          }
+        let muQty = adjDetail.muQty || 1
+
+        return {
+          ...adjDetail,
+          qtyInBase: muQty * adjDetail.qty,
+          seqNo: seqNo
         }
       })
 
@@ -92,32 +109,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, e
     }
   })
 
-  const detailsFormik = useFormik({
-    enableReinitialize: true,
-    validateOnChange: true,
-    initialValues: {
-      rows: [
-        {
-          itemId: '',
-          sku: '',
-          itemName: '',
-          qty: '',
-          totalCost: '',
-          totalQty: '',
-          muQty: '',
-          qtyInBase: '',
-          notes: '',
-          seqNo: ''
-        }
-      ]
-    },
-    validationSchema: yup.object({
-      itemId: yup.string().required()
-    })
-  })
-
-  const totalQty = detailsFormik.values.rows.reduce((qtySum, row) => {
-    // Parse qty as a number, assuming it's a numeric value
+  const totalQty = formik.values?.rows?.reduce((qtySum, row) => {
     const qtyValue = parseFloat(row.qty) || 0
 
     return qtySum + qtyValue
@@ -135,72 +127,47 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, e
     setIsPosted(true)
   }
 
-  const lookupSKU = async searchQry => {
-    setItemStore([])
-
-    if (searchQry) {
-      var parameters = `_filter=${searchQry}&_categoryId=0&_msId=0&_startAt=0&_size=1000`
-      await getRequest({
-        extension: InventoryRepository.Item.snapshot,
-        parameters: parameters
-      })
-      setItemStore(res.list)
-    }
-  }
-
   const columns = [
     {
-      field: 'lookup',
-      header: labels[7],
-      nameId: 'itemId',
+      component: 'resourcelookup',
+      label: labels[7],
       name: 'sku',
-      mandatory: true,
-      store: itemStore,
-      valueField: 'recordId',
-      displayField: 'sku',
-      widthDropDown: 400,
-      readOnly: isPosted,
-      fieldsToUpdate: [
-        { from: 'recordId', to: 'itemId' },
-        { from: 'sku', to: 'sku' },
-        { from: 'name', to: 'itemName' }
-      ],
-      columnsInDropDown: [
-        { key: 'sku', value: 'SKU' },
-        { key: 'name', value: 'Item Name' }
-      ],
-      onLookup: lookupSKU,
-      width: 150
+      props: {
+        endpointId: InventoryRepository.Item.snapshot,
+        valueField: 'recordId',
+        displayField: 'sku',
+        mapping: [
+          { from: 'recordId', to: 'itemId' },
+          { from: 'sku', to: 'sku' },
+          { from: 'name', to: 'itemName' }
+        ],
+        columnsInDropDown: [
+          { key: 'sku', value: 'SKU' },
+          { key: 'name', value: 'Name' }
+        ],
+        displayFieldWidth: 3
+      }
     },
     {
-      field: 'textfield',
-      header: labels[8],
+      component: 'textfield',
+      label: labels[8],
       name: 'itemName',
-      readOnly: true,
-      width: 350
+      props: {
+        readOnly: true
+      }
     },
     {
-      field: 'textfield',
-      header: labels[9],
+      component: 'numberfield',
       name: 'qty',
-      mandatory: true,
-      readOnly: isPosted,
-      width: 100
+      label: labels[9],
+      props: {
+        readOnly: isPosted
+      }
     },
     {
-      field: 'textfield',
-      header: labels[16],
-      name: 'totalCost',
-      readOnly: true,
-      hidden: true,
-      width: 100
-    },
-    {
-      field: 'textfield',
-      header: labels[6],
-      name: 'notes',
-      readOnly: isPosted,
-      width: 300
+      component: 'textfield',
+      label: labels[6],
+      name: 'notes'
     }
   ]
 
@@ -212,35 +179,33 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, e
       parameters: parameters
     })
 
-    // Create a new list by modifying each object in res.list
-    const modifiedList = res.list.map(item => ({
-      ...item,
-      totalCost: item.unitCost * item.qty // Modify this based on your calculation
-    }))
-    detailsFormik.setValues({
-      ...detailsFormik.values,
-      rows: modifiedList
-    })
+    return res
   }
-
-  useEffect(() => {}, [height])
 
   useEffect(() => {
     ;(async function () {
       if (recordId) {
-        setIsLoading(true)
-        fillDetailsGrid(recordId)
-
         const res = await getRequest({
           extension: InventoryRepository.MaterialsAdjustment.get,
           parameters: `_recordId=${recordId}`
         })
+        const res2 = await fillDetailsGrid(recordId)
+
+        const modifiedList = res2?.list?.map((item, index) => ({
+          ...item,
+          id: index + 1,
+          totalCost: item.unitCost * item.qty
+        }))
+
+        formik.setValues({
+          ...res.record,
+          date: formatDateFromApi(res.record.date),
+          rows: modifiedList
+        })
+
         setIsPosted(res.record.status === 3 ? true : false)
-        res.record.date = formatDateFromApi(res.record.date)
-        setInitialData(res.record)
       }
     })()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const actions = [
@@ -262,155 +227,142 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, e
       postVisible={true}
       actions={actions}
       previewReport={editMode}
+      disabledSubmit={isPosted}
     >
-      <Grid container>
-        <Grid container xs={12} style={{ overflow: 'hidden' }}>
-          {/* First Column */}
-          <Grid container rowGap={1} xs={6} style={{ marginTop: '10px' }}>
-            <Grid item xs={12}>
-              <ResourceComboBox
-                endpointId={SystemRepository.DocumentType.qry}
-                parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.MaterialAdjustment}`}
-                name='dtId'
-                label={labels[2]}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
-                readOnly={isPosted}
-                valueField='recordId'
-                displayField={['reference', 'name']}
-                values={formik.values}
-                maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik && formik.setFieldValue('dtId', newValue?.recordId)
-                }}
-                error={formik.touched.dtId && Boolean(formik.errors.dtId)}
-                helperText={formik.touched.dtId && formik.errors.dtId}
-              />
+      <VertLayout>
+        <Fixed>
+          <Grid container xs={12} sx={{ overflow: 'hidden', pt: 1 }}>
+            {/* First Column */}
+            <Grid container rowGap={1} xs={6}>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  endpointId={SystemRepository.DocumentType.qry}
+                  parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.MaterialAdjustment}`}
+                  name='dtId'
+                  label={labels[2]}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' }
+                  ]}
+                  readOnly={isPosted}
+                  valueField='recordId'
+                  displayField={['reference', 'name']}
+                  values={formik.values}
+                  maxAccess={maxAccess}
+                  onChange={(event, newValue) => {
+                    formik && formik.setFieldValue('dtId', newValue?.recordId)
+                  }}
+                  error={formik.touched.dtId && Boolean(formik.errors.dtId)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <CustomTextField
+                  name='reference'
+                  label={labels[12]}
+                  value={formik?.values?.reference}
+                  maxAccess={maxAccess}
+                  maxLength='30'
+                  readOnly={isPosted}
+                  onChange={formik.handleChange}
+                  onClear={() => formik.setFieldValue('reference', '')}
+                  error={formik.touched.reference && Boolean(formik.errors.reference)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <CustomDatePicker
+                  name='date'
+                  label={labels[3]}
+                  readOnly={isPosted}
+                  value={formik?.values?.date}
+                  onChange={formik.handleChange}
+                  maxAccess={maxAccess}
+                  onClear={() => formik.setFieldValue('date', '')}
+                  error={formik.touched.date && Boolean(formik.errors.date)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  endpointId={SystemRepository.Plant.qry}
+                  name='plantId'
+                  label={labels[4]}
+                  readOnly={isPosted}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' }
+                  ]}
+                  values={formik.values}
+                  valueField='recordId'
+                  displayField={['reference', 'name']}
+                  maxAccess={maxAccess}
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('plantId', newValue?.recordId)
+                  }}
+                  error={formik.touched.plantId && Boolean(formik.errors.plantId)}
+                />
+              </Grid>
             </Grid>
-            <Grid item xs={12}>
-              <CustomTextField
-                name='reference'
-                label={labels[12]}
-                value={formik?.values?.reference}
-                maxAccess={maxAccess}
-                maxLength='30'
-                readOnly={isPosted}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('reference', '')}
-                error={formik.touched.reference && Boolean(formik.errors.reference)}
-                helperText={formik.touched.reference && formik.errors.reference}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomDatePicker
-                name='date'
-                label={labels[3]}
-                readOnly={isPosted}
-                value={formik?.values?.date}
-                onChange={formik.handleChange}
-                maxAccess={maxAccess}
-                onClear={() => formik.setFieldValue('date', '')}
-                error={formik.touched.date && Boolean(formik.errors.date)}
-                helperText={formik.touched.date && formik.errors.date}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <ResourceComboBox
-                endpointId={SystemRepository.Plant.qry}
-                name='plantId'
-                label={labels[4]}
-                readOnly={isPosted}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
-                values={formik.values}
-                valueField='recordId'
-                displayField={['reference', 'name']}
-                maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('plantId', newValue?.recordId)
-                }}
-                error={formik.touched.plantId && Boolean(formik.errors.plantId)}
-              />
-            </Grid>
-          </Grid>
-          <Grid container rowGap={1} xs={6} sx={{ px: 2 }} style={{ marginTop: '10px' }}>
-            <Grid item xs={12}>
-              <ResourceComboBox
-                endpointId={InventoryRepository.Site.qry}
-                name='siteId'
-                readOnly={isPosted}
-                label={labels[5]}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
-                values={formik.values}
-                valueField='recordId'
-                displayField={['reference', 'name']}
-                required
-                maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('siteId', newValue?.recordId)
-                }}
-                error={formik.touched.siteId && Boolean(formik.errors.siteId)}
-              />
-            </Grid>
-            <Grid item xs={12} sx={{ pb: 6 }}>
-              <CustomTextArea
-                name='description'
-                label={labels[13]}
-                value={formik?.values?.description}
-                rows={4}
-                readOnly={isPosted}
-                maxAccess={maxAccess}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('description', '')}
-                error={formik.touched.description && Boolean(formik.errors.description)}
-                helperText={formik.touched.description && formik.errors.description}
-              />
+            <Grid container rowGap={1} xs={6} sx={{ px: 2 }}>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  endpointId={InventoryRepository.Site.qry}
+                  name='siteId'
+                  readOnly={isPosted}
+                  label={labels[5]}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' }
+                  ]}
+                  values={formik.values}
+                  valueField='recordId'
+                  displayField={['reference', 'name']}
+                  required
+                  maxAccess={maxAccess}
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('siteId', newValue?.recordId)
+                  }}
+                  error={formik.touched.siteId && Boolean(formik.errors.siteId)}
+                />
+              </Grid>
+              <Grid item xs={12} sx={{ pb: 6 }}>
+                <CustomTextArea
+                  name='description'
+                  label={labels[13]}
+                  value={formik?.values?.description}
+                  rows={4}
+                  readOnly={isPosted}
+                  maxAccess={maxAccess}
+                  onChange={formik.handleChange}
+                  onClear={() => formik.setFieldValue('description', '')}
+                  error={formik.touched.description && Boolean(formik.errors.description)}
+                />
+              </Grid>
             </Grid>
           </Grid>
-        </Grid>
-        <Grid container sx={{ pt: 2 }} xs={12}>
-          <Box sx={{ width: '100%' }}>
-            <InlineEditGrid
-              gridValidation={detailsFormik}
-              columns={columns}
-              defaultRow={{
-                itemId: '',
-                sku: '',
-                itemName: '',
-                qty: '',
-                totalCost: '',
-                muQty: '',
-                qtyInBase: '',
-                notes: '',
-                seqNo: ''
-              }}
-              allowDelete={!isPosted}
-              allowAddNewLine={!isPosted}
-              scrollable={true}
-              scrollHeight={`${expanded ? height - 430 : 200}px`}
-            />
-          </Box>
-        </Grid>
-        <Grid container rowGap={1} xs={6} style={{ marginTop: '5px' }}>
-          <CustomTextField
-            name='reference'
-            label={labels[15]}
-            maxAccess={maxAccess}
-            value={totalQty}
-            maxLength='30'
-            readOnly={true}
-            error={formik.touched.reference && Boolean(formik.errors.reference)}
-            helperText={formik.touched.reference && formik.errors.reference}
+        </Fixed>
+        <Grow>
+          <DataGrid
+            onChange={value => formik.setFieldValue('rows', value)}
+            value={formik.values.rows}
+            error={formik.errors.rows}
+            columns={columns}
+            allowAddNewLine={!isPosted}
+            allowDelete={!isPosted}
           />
-        </Grid>
-      </Grid>
+        </Grow>
+        <Fixed>
+          <Grid container rowGap={1} xs={6}>
+            <CustomTextField
+              name='totalQty'
+              label={labels[15]}
+              maxAccess={maxAccess}
+              value={totalQty}
+              maxLength='30'
+              readOnly={true}
+              error={formik.touched.reference && Boolean(formik.errors.reference)}
+            />
+          </Grid>
+        </Fixed>
+      </VertLayout>
     </FormShell>
   )
 }

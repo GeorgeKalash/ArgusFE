@@ -22,7 +22,7 @@ export const DeliveryRepository = {
     qry: service + 'qryTRP',
     del: service + 'delTRP',
     snapshot: service + 'snapshotTRP',
-
+    reopen: service + 'reopenTRP',
     post: service + 'postTRP',
     close: service + 'closeTRP'
   },

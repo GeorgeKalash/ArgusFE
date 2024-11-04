@@ -10,6 +10,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
+import GridToolbar from 'src/components/Shared/GridToolbar'
 
 const ProductionRequestLog = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -22,9 +23,12 @@ const ProductionRequestLog = () => {
     access,
     invalidate
   } = useResourceQuery({
-    queryFn: fetchGridData,
     endpointId: ManufacturingRepository.LeanProductionPlanning.preview,
-    datasetId: ResourceIds.ProductionRequestLog
+    datasetId: ResourceIds.ProductionRequestLog,
+    filter: {
+      filterFn: fetchGridData,
+      default: { status: 1 }
+    }
   })
 
   const handleSubmit = () => {
@@ -42,30 +46,35 @@ const ProductionRequestLog = () => {
     {
       field: 'reference',
       headerName: _labels.reference,
-      flex: 1
+      flex: .6
     },
     {
-      field: 'date',
-      headerName: _labels.date,
-      flex: 1,
-      type: 'date'
+      field: 'qty',
+      headerName: _labels.qty,
+      flex: .4
+    },
+    {
+      field: 'checked',
+      headerName: '',
+      type: 'checkbox',
+      editable: true
+    },
+    {
+      field: 'itemName',
+      headerName: _labels.description,
+      flex: 2
     },
     {
       field: 'sku',
       headerName: _labels.sku,
       flex: 1
     },
-
     {
-      field: 'itemName',
-      headerName: _labels.description,
-      flex: 1
+      field: 'date',
+      headerName: _labels.date,
+      flex: .7,
+      type: 'date'
     },
-    {
-      field: 'qty',
-      headerName: _labels.qty,
-      flex: 1
-    }
   ]
 
   const calculateLeans = async () => {
@@ -93,11 +102,23 @@ const ProductionRequestLog = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
   }
+
+  const actions = [
+    {
+      key: 'Refresh',
+      condition: true,
+      onClick: () => fetchGridData(),
+      disabled: false
+    }
+  ]
 
   return (
     <VertLayout>
+      <Fixed>
+        <GridToolbar actions={actions} />
+      </Fixed>
       <Grow>
         <Table
           columns={columns}
@@ -106,9 +127,7 @@ const ProductionRequestLog = () => {
           onDelete={del}
           isLoading={false}
           maxAccess={access}
-          showCheckboxColumn={true}
-          pageSize={50}
-          paginationType='client'
+          pagination={false}
           refetch={refetch}
         />
       </Grow>
