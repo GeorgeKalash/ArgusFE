@@ -116,6 +116,11 @@ const OTPAuthentication = ({ loggedUser, onClose, window }) => {
     checkSMS(enteredOtp)
   }
 
+  useEffect(() => {
+    document.getElementById(`otp-input-${0}`).focus()
+    document.getElementById(`otp-input-${0}`).select()
+  }, [])
+
   return (
     <div width={500} height={300} onClose={onClose}>
       <Grid className={styles.phoneVerificationContainer}>
