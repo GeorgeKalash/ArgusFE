@@ -303,7 +303,7 @@ export default function FormShell({
                 resourceId: resourceId,
                 scId: form.values?.stockCountId,
                 siteId: form.values?.siteId,
-                onSucess: previewBtnClicked
+                onSuccess: previewBtnClicked
               },
               width: 1150,
               height: 700,
