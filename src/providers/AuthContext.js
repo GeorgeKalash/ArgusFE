@@ -51,7 +51,6 @@ const AuthProvider = ({ children }) => {
     }
   }
 
-
   const fetchData = async () => {
     const matchHostname = window.location.hostname.match(/^(.+)\.softmachine\.co$/)
 
@@ -76,7 +75,6 @@ const AuthProvider = ({ children }) => {
   }, [])
 
   const handleLogin = async (params, errorCallback) => {
-    setLoading(true)
     try {
       const getUS2 = await axios.get(`${getAC.data.record.api}/SY.asmx/getUS2?_email=${params.username}`, {
         headers: {
@@ -142,7 +140,6 @@ const AuthProvider = ({ children }) => {
         const redirectURL = returnUrl && returnUrl !== '/' ? returnUrl : '/'
         router.replace(redirectURL)
       }
-      setLoading(false)
     } catch (error) {
       if (errorCallback) errorCallback(error)
     }
