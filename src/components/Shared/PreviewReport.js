@@ -46,7 +46,7 @@ export default function PreviewReport({
     })
       .then(res => {
         setPdfUrl(res.recordId)
-        onSuccess
+        onSuccess()
       })
       .catch(error => {
         console.log({ generateReportERROR: error })
