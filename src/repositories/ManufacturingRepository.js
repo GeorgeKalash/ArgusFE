@@ -65,6 +65,7 @@ export const ManufacturingRepository = {
   },
   LeanProductionPlanning: {
     preview: service + 'previewPQ',
+    preview2: service + 'previewPQ2',
     update: service + 'updatePQ',
     del: service + 'delPQ'
   },
@@ -129,5 +130,12 @@ export const ManufacturingRepository = {
     set: service + 'setPSI',
     get: service + 'getPSI',
     del: service + 'delPSI'
+  },
+  DocumentTypeDefault: {
+    qry: service + 'qryDTD',
+    get: service + 'getDTD',
+    set: service + 'setDTD',
+    del: service + 'delDTD',
+    page: service + 'pageDTD'
   }
 }
