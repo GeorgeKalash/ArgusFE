@@ -163,7 +163,6 @@ export const RemittanceSettingsRepository = {
     set: service + 'setEI'
   },
   CountryRisk: {
-    qry: service + 'qryCOU',
     page: service + 'pageCOU',
     get: service + 'getCOU',
     set: service + 'setCOU',
