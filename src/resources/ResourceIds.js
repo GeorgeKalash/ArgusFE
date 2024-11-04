@@ -287,5 +287,6 @@ export const ResourceIds = {
   ProdSheetDocumentTypeDefault: 42120,
   InventoryTransaction: 41209,
   GenerateFiscalYear: 41503,
-  UserSecretOTPQrCode: 23201
+  UserSecretOTPQrCode: 23201,
+  CountryRiskLevel: 36132
 }
