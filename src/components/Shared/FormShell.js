@@ -45,6 +45,7 @@ export default function FormShell({
   addClientRelation = false,
   setErrorMessage,
   previewReport = false,
+  previewBtnClicked = () => {},
   setIDInfoAutoFilled,
   visibleClear,
   actions,
@@ -301,7 +302,8 @@ export default function FormShell({
                 functionId: form.values?.functionId,
                 resourceId: resourceId,
                 scId: form.values?.stockCountId,
-                siteId: form.values?.siteId
+                siteId: form.values?.siteId,
+                onSucess: previewBtnClicked
               },
               width: 1150,
               height: 700,

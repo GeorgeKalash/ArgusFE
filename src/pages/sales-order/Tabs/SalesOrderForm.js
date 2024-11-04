@@ -1098,6 +1098,17 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     })()
   }, [])
 
+  async function previewBtnClicked() {
+    const data = { printStatus: 2, recordId: formik.values.recordId }
+
+    await postRequest({
+      extension: SaleRepository.PrintedSA.printed,
+      record: JSON.stringify(data)
+    })
+
+    invalidate()
+  }
+
   return (
     <FormShell
       resourceId={ResourceIds.SalesOrder}
@@ -1105,6 +1116,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       form={formik}
       maxAccess={maxAccess}
       previewReport={editMode}
+      previewBtnClicked={previewBtnClicked}
       isClosed={isClosed}
       actions={actions}
       editMode={editMode}
