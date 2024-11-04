@@ -198,5 +198,15 @@ export const InventoryRepository = {
   },
   GenerateFiscalYear: {
     gen: service + 'genFIS'
+  },
+  IVMDParts: {
+    qry: service + 'qryIT'
+  },
+  ItemParts: {
+    qry: service + 'qryITP',
+    set2: service + 'set2ITP'
+  },
+  Parts: {
+    snapshot: service + 'snapshotPRT'
   }
 }
