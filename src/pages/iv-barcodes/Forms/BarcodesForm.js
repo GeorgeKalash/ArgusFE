@@ -38,7 +38,7 @@ export default function BarcodesForm({ labels, access, store, recordId, msId }) 
       recordId: recordId,
       itemId: recordId || store?.recordId,
       sku: store?._reference,
-      defaultQty: null,
+      defaultQty: '',
       itemName: store?._name,
       muId: null,
       msId: msId,
@@ -65,7 +65,6 @@ export default function BarcodesForm({ labels, access, store, recordId, msId }) 
         formik.setFieldValue('barcode', res?.recordId)
       } else toast.success(platformLabels.Edited)
       invalidate()
-
     }
   })
 

@@ -1,9 +1,6 @@
-import GlobalIntegration from 'src/pages/global-integration'
-
 const service = 'GL.asmx/'
 
 export const GeneralLedgerRepository = {
-  //IntegrationLogic
   IntegrationLogic: {
     qry: service + 'qryIL',
     page: service + 'pageIL',
@@ -13,7 +10,6 @@ export const GeneralLedgerRepository = {
     snapshot: service + 'snapshotIL'
   },
 
-  //CostCenter
   CostCenter: {
     page: service + 'pageCC',
     qry: service + 'qryCC',

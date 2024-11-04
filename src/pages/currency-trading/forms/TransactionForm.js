@@ -8,7 +8,7 @@ import FieldSet from 'src/components/Shared/FieldSet'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useError } from 'src/error'
-import { formatDateFromApi, formatDateToApiFunction } from 'src/lib/date-helper'
+import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
@@ -122,7 +122,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       formik.setFieldValue('id_type', idType)
       if (idType) {
         const res = idTypeStore.filter(item => item.recordId === idType)[0]
-        if (res.type === 1 || res.type === 2) {
+        if (res?.type === 1 || res?.type === 2) {
           const countryId = await Country(getRequest)
           formik.setFieldValue('issue_country', parseInt(countryId))
         }
@@ -284,7 +284,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
               dtId,
               reference: values.reference,
               status: values.status,
-              date: formatDateToApiFunction(values.date),
+              date: formatDateToApi(values.date),
               functionId: values.functionId,
               plantId: plantId ? plantId : values.plantId,
               clientId,
@@ -310,7 +310,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
               cellPhone: values.cellPhone,
               oldReference: null,
               otp: false,
-              createdDate: formatDateToApiFunction(values.date),
+              createdDate: formatDateToApi(values.date),
               expiryDate: null
             },
             clientIndividual: {
@@ -323,7 +323,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
               fl_lastName: values.fl_lastName,
               fl_middleName: values.fl_middleName,
               fl_familyName: values.fl_familyName,
-              birthDate: formatDateToApiFunction(values.birth_date),
+              birthDate: formatDateToApi(values.birth_date),
               isResident: values.resident,
               professionId: values.profession,
               incomeSourceId: values.source_of_income,
@@ -334,7 +334,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
               clientId,
               idCountryId: values.issue_country,
               idtId: values.id_type,
-              idExpiryDate: formatDateToApiFunction(values.expiry_date),
+              idExpiryDate: formatDateToApi(values.expiry_date),
               idIssueDate: null,
               idCityId: null,
               isDiplomat: false
@@ -569,7 +569,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
 
       const data = {
         recordId: values?.recordId || null,
-        date: formatDateToApiFunction(values.date),
+        date: formatDateToApi(values.date),
         reference: values.reference,
         status: values.status,
         functionId: values.functionId,
@@ -680,7 +680,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
 
       const data = {
         recordId: values?.recordId || null,
-        date: formatDateToApiFunction(values.date),
+        date: formatDateToApi(values.date),
         reference: values.reference,
         status: values.status,
         functionId: values.functionId,
