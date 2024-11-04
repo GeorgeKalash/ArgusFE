@@ -36,6 +36,11 @@ const ItemList = ({ recordId: tlId, labels, maxAccess }) => {
 
   const columns = [
     {
+      field: 'seqNo',
+      headerName: labels.seqNo,
+      flex: 1
+    },
+    {
       field: 'itemKey',
       headerName: labels.itemKey,
       flex: 1
@@ -108,13 +113,13 @@ const ItemList = ({ recordId: tlId, labels, maxAccess }) => {
       Component: ItemForm,
       props: {
         labels,
-        seqNo: seqNo || gridData?.list?.length + 1,
         tlId,
+        seqNo,
         maxAccess,
         getGridData
       },
       width: 700,
-      height: 450,
+      height: 500,
       title: labels?.item
     })
   }
