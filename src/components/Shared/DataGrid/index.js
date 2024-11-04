@@ -76,7 +76,7 @@ export function DataGrid({
   }, [ready, value])
 
   const addNewRow = params => {
-    const highestIndex = params?.node?.data?.id + 1 || 0
+    const highestIndex = params?.node?.data?.id + 1 || 1
 
     const defaultValues = Object.fromEntries(
       columns.filter(({ name }) => name !== 'id').map(({ name, defaultValue }) => [name, defaultValue])
