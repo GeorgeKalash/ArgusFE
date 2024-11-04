@@ -68,7 +68,8 @@ const LoginPage = () => {
       Component: OTPAuthentication,
       props: {
         formValidation: validation,
-        loggedUser
+        loggedUser,
+        onClose: () => onClose()
       },
       expandable: false,
       closable: false,
@@ -76,7 +77,6 @@ const LoginPage = () => {
       width: 400,
       height: 400,
       spacing: false,
-      onClose: () => onClose(),
       title: platformLabels.OTPVerification
     })
   }
@@ -134,7 +134,9 @@ const LoginPage = () => {
           LanguageId: languageId
         },
         data: bodyFormData
-      }).then(res => {})
+      }).then(res => {
+        validation.handleSubmit()
+      })
     } catch (error) {
       stackError({ message: error.message })
     }
