@@ -1,24 +1,13 @@
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 
-export default function ResourceLookupEdit({
-  id,
-  value,
-  data,
-  updateRow,
-  column: { props },
-  update,
-  field,
-  name,
-  maxAccess
-}) {
-  let changes =
-    props?.mapping && !value
-      ? props.mapping
-          ?.map(({ from, to }) => ({
-            [from]: data?.[to] || ''
-          }))
-          .reduce((acc, obj) => ({ ...acc, ...obj }), {})
-      : value
+export default function ResourceLookupEdit({ id, column: { props, field }, value, updateRow, update }) {
+  let changes = props?.mapping
+    ? props?.mapping
+        ?.map(({ from, to }) => ({
+          [from]: value && value.hasOwnProperty(to) ? value[to] : ''
+        }))
+        .reduce((acc, obj) => ({ ...acc, ...obj }), {})
+    : value
 
   return (
     <ResourceLookup
@@ -30,10 +19,9 @@ export default function ResourceLookupEdit({
       userTypes={false}
       valueField={props.valueField}
       displayField={props.displayField}
-      maxAccess={maxAccess}
       columnsInDropDown={props.columnsInDropDown}
-      firstValue={changes}
-      secondValue={changes}
+      firstValue={changes[props.displayField]}
+      secondValue={changes[props.displayField]}
       form={{
         values: {}
       }}
