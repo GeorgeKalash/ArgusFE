@@ -36,7 +36,7 @@ export function DataGrid({
     const column = columns.find(({ name }) => name === params.colDef.field)
 
     const updateRowCommit = changes => {
-      setData(changes)
+      setData(changes, params)
       commit({ changes: { ...params.node.data, changes } })
     }
 
@@ -183,17 +183,6 @@ export function DataGrid({
         ? components[column.colDef.component].view
         : column.colDef.component.view
 
-    const setData = changes => {
-      const id = params.node?.id
-      const rowNode = params.api.getRowNode(id)
-      if (rowNode) {
-        const currentData = rowNode.data
-
-        const newData = { ...currentData, ...changes }
-        rowNode.updateData(newData)
-      }
-    }
-
     async function update({ field, value }) {
       const oldRow = params.data
 
@@ -201,7 +190,7 @@ export function DataGrid({
         [field]: value || undefined
       }
 
-      setData(changes)
+      setData(changes, params)
 
       commit(changes)
 
@@ -211,7 +200,7 @@ export function DataGrid({
     const updateRow = ({ changes }) => {
       const oldRow = params.data
 
-      setData(changes)
+      setData(changes, params)
 
       commit(changes)
 
@@ -254,19 +243,6 @@ export function DataGrid({
       maxAccess
     }
 
-    const setData = changes => {
-      const id = params.node?.id
-
-      const rowNode = params.api.getRowNode(id)
-      if (rowNode) {
-        const currentData = rowNode.data
-
-        const newData = { ...currentData, ...changes }
-
-        rowNode.updateData(newData)
-      }
-    }
-
     async function update({ field, value }) {
       const oldRow = params.data
 
@@ -276,7 +252,7 @@ export function DataGrid({
 
       setCurrentValue(changes)
 
-      setData(changes)
+      setData(changes, params)
 
       if (column.colDef.updateOn !== 'blur') {
         commit(changes)
@@ -289,7 +265,7 @@ export function DataGrid({
 
       setCurrentValue(changes || '')
 
-      setData(changes)
+      setData(changes, params)
 
       if (column.colDef.updateOn !== 'blur') {
         commit(changes)
@@ -469,21 +445,23 @@ export function DataGrid({
     }
   }
 
+  const setData = (changes, params) => {
+    const id = params.node?.id
+
+    const rowNode = params.api.getRowNode(id)
+    if (rowNode) {
+      const currentData = rowNode.data
+
+      const newData = { ...currentData, ...changes }
+
+      rowNode.updateData(newData)
+    }
+  }
+
   const onCellEditingStopped = params => {
     const { data, colDef } = params
 
     if (colDef.updateOn === 'blur') {
-      const setData = changes => {
-        const id = params.node?.id
-        const rowNode = params.api.getRowNode(id)
-        if (rowNode) {
-          const currentData = rowNode.data
-
-          const newData = { ...currentData, ...changes }
-          rowNode.updateData(newData)
-        }
-      }
-
       process(params, data, setData)
     }
   }
