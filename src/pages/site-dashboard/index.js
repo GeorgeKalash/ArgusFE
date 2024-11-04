@@ -86,8 +86,11 @@ const SiteDashboard = () => {
       siteId: yup.string().required()
     }),
     onSubmit: () => {
-      refetchAvailabilities()
-      refetchActivities()
+      paginationActivities({ _startAt: 0, _pageSize: 50 });
+      paginationAvailabilities({ _startAt: 0, _pageSize: 50 });
+
+      refetchAvailabilities();
+      refetchActivities();
     }
   })
 
