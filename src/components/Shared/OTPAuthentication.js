@@ -44,6 +44,7 @@ const OTPAuthentication = ({ loggedUser, onClose, window }) => {
         .then(res => {
           toast.success(platformLabels.verificationCompleted)
           window.close()
+          onClose()
         })
         .catch(error => {
           showError({

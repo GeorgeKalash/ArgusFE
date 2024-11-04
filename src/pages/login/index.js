@@ -54,13 +54,16 @@ const LoginPage = () => {
           }
           openForm(error.username, loggedUser, onClose)
         } else if (error?.getUS2?.is2FAEnabled) {
-          viewOTP(loggedUser)
+          const onClose = async () => {
+            await updateOTP(loggedUser, error?.getUS2)
+          }
+          viewOTP(loggedUser, onClose)
         } else setErrorMessage(error)
       })
     }
   })
 
-  function viewOTP(loggedUser) {
+  function viewOTP(loggedUser, onClose) {
     stack({
       Component: OTPAuthentication,
       props: {
@@ -73,6 +76,7 @@ const LoginPage = () => {
       width: 400,
       height: 400,
       spacing: false,
+      onClose: () => onClose(),
       title: platformLabels.OTPVerification
     })
   }
@@ -105,6 +109,37 @@ const LoginPage = () => {
 
   const { apiUrl, languageId } = useAuth()
 
+  const updateOTP = async (loggedUser, getUS2) => {
+    try {
+      const user = getUS2
+      const accessToken = loggedUser.accessToken
+      if (!accessToken) {
+        throw new Error('Failed to retrieve access token')
+      }
+
+      const updateUser = {
+        ...user,
+        is2FAEnabled: false
+      }
+
+      var bodyFormData = new FormData()
+      bodyFormData.append('record', JSON.stringify(updateUser))
+
+      await axios({
+        method: 'POST',
+        url: `${apiUrl}SY.asmx/setUS`,
+        headers: {
+          Authorization: 'Bearer ' + accessToken,
+          'Content-Type': 'multipart/form-data',
+          LanguageId: languageId
+        },
+        data: bodyFormData
+      }).then(res => {})
+    } catch (error) {
+      stackError({ message: error.message })
+    }
+  }
+
   const updateUmcpnl = async (loggedUser, getUS2) => {
     try {
       const user = getUS2
@@ -121,7 +156,7 @@ const LoginPage = () => {
       var bodyFormData = new FormData()
       bodyFormData.append('record', JSON.stringify(updateUser))
 
-      const res = await axios({
+      await axios({
         method: 'POST',
         url: `${apiUrl}SY.asmx/setUS`,
         headers: {
@@ -132,7 +167,6 @@ const LoginPage = () => {
         data: bodyFormData
       }).then(res => {})
     } catch (error) {
-      console.error(error)
       stackError({ message: error.message })
     }
   }
