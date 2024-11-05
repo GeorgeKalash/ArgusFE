@@ -526,7 +526,6 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
 
   async function openRV() {
     window.close()
-    console.log(formik.values)
     const cashAccountId = await getCashAccountId()
     stack({
       Component: ReceiptVoucherForm,

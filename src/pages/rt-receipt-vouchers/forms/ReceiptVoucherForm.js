@@ -193,10 +193,8 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
   }
 
   useEffect(() => {
-    console.log(form)
     getDefaultDT()
     ;(async function () {
-      console.log(recordId)
       recordId && getData(recordId)
       form &&
         formik.setValues({
@@ -503,7 +501,7 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
       actions={actions}
       maxAccess={maxAccess}
       editMode={editMode}
-      disabledSubmit={isPosted}
+      disabledSubmit={isPosted || isClosed}
     >
       <VertLayout>
         <Fixed>
