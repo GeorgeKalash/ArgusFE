@@ -15,6 +15,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { useWindow } from 'src/windows'
 import ChangePassword from 'src/components/Shared/ChangePassword'
 import axios from 'axios'
+import OTPAuthentication from 'src/components/Shared/OTPAuthentication'
 
 const LinkStyled = styled(Link)(({ theme }) => ({
   fontSize: '0.875rem',
@@ -45,17 +46,35 @@ const LoginPage = () => {
     }),
     onSubmit: values => {
       auth.login({ ...values }, error => {
-        if (error?.getUS2?.umcpnl) {
-          const { loggedUser } = error
+        const { loggedUser } = error
 
+        if (error?.getUS2?.umcpnl) {
           const onClose = async () => {
             await updateUmcpnl(loggedUser, error?.getUS2)
           }
           openForm(error.username, loggedUser, onClose)
+        } else if (error?.getUS2?.is2FAEnabled) {
+          viewOTP(loggedUser)
         } else setErrorMessage(error)
       })
     }
   })
+
+  function viewOTP(loggedUser) {
+    stack({
+      Component: OTPAuthentication,
+      props: {
+        formValidation: validation,
+        loggedUser,
+        onClose: () => auth.EnableLogin(loggedUser)
+      },
+      expandable: false,
+      width: 400,
+      height: 400,
+      spacing: false,
+      title: platformLabels.OTPVerification
+    })
+  }
 
   const handleKeyDown = event => {
     if (event.key === 'Enter') {
@@ -101,7 +120,7 @@ const LoginPage = () => {
       var bodyFormData = new FormData()
       bodyFormData.append('record', JSON.stringify(updateUser))
 
-      const res = await axios({
+      await axios({
         method: 'POST',
         url: `${apiUrl}SY.asmx/setUS`,
         headers: {
@@ -112,7 +131,6 @@ const LoginPage = () => {
         data: bodyFormData
       }).then(res => {})
     } catch (error) {
-      console.error(error)
       stackError({ message: error.message })
     }
   }
