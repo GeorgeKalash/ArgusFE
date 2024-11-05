@@ -17,6 +17,10 @@ const ItemPartForm = ({ labels, maxAccess, obj }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
+  const isRowEmpty = row => {
+    return !row.partId
+  }
+
   const { formik } = useForm({
     enableReinitialize: true,
     validateOnChange: true,
@@ -60,10 +64,6 @@ const ItemPartForm = ({ labels, maxAccess, obj }) => {
       }
     }
   })
-
-  const isRowEmpty = row => {
-    return !row.partId
-  }
 
   const postData = async obj => {
     const itemsToPost = obj?.items
