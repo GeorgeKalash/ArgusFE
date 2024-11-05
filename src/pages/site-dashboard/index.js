@@ -116,10 +116,8 @@ const SiteDashboard = () => {
                 values={formik.values}
                 maxAccess={access}
                 onChange={(event, newValue) => {
-                  if (newValue) {
-                    formik.setFieldValue('siteId', newValue?.recordId || null)
-                    setSiteId(newValue?.recordId)
-                  }
+                  formik.setFieldValue('siteId', newValue?.recordId || null)
+                  setSiteId(newValue?.recordId)
                 }}
               />
               <Button
