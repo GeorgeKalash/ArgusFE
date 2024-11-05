@@ -1,7 +1,6 @@
 import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
-import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -12,22 +11,21 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
 import ProductionSheetForm from './Forms/ProductionSheetForm'
-import { useError } from 'src/error'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
 const ProductionSheet = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
-  const { stack: stackError } = useError()
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
-      extension: ManufacturingRepository.ProductionSheet.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      extension: ManufacturingRepository.ProductionSheet.qry,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -39,11 +37,16 @@ const ProductionSheet = () => {
     paginationParameters,
     refetch,
     access,
-    invalidate
+    invalidate,
+    filterBy,
+    clearFilter
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: ManufacturingRepository.ProductionSheet.page,
-    datasetId: ResourceIds.ProductionSheet
+    endpointId: ManufacturingRepository.ProductionSheet.qry,
+    datasetId: ResourceIds.ProductionSheet,
+    filter: {
+      filterFn: fetchWithFilter
+    }
   })
 
   const columns = [
@@ -97,8 +100,18 @@ const ProductionSheet = () => {
       parameters: `_userId=${userId}&_key=plantId`
     })
 
-    return res.record.value
+    return res?.record?.value
   }
+
+  async function fetchWithFilter({ filters, pagination }) {
+    if (filters.qry)
+      return await getRequest({
+        extension: ManufacturingRepository.ProductionSheet.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+    else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+  }
+
 
   function OpenProductionSheetForm(plantId, recordId) {
     stack({
@@ -130,10 +143,37 @@ const ProductionSheet = () => {
     toast.success(platformLabels.Deleted)
   }
 
+  const onApply = ({ search, rpbParams }) => {
+    if (!search && rpbParams.length === 0) {
+      clearFilter('params')
+    } else if (!search) {
+      filterBy('params', rpbParams)
+    } else {
+      filterBy('qry', search)
+    }
+    refetch()
+  }
+
+  const onSearch = value => {
+    filterBy('qry', value)
+  }
+
+  const onClear = () => {
+    clearFilter('qry')
+  }
+
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <RPBGridToolbar 
+          onSearch={onSearch}
+          onClear={onClear} 
+          onAdd={add}
+          labels={_labels} 
+          maxAccess={access} 
+          onApply={onApply} 
+          reportName={'MFPST'} 
+        />
       </Fixed>
       <Grow>
         <Table

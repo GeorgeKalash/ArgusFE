@@ -20,18 +20,20 @@ import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
+import CustomTextArea from 'src/components/Inputs/CustomTextArea'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 
 export default function ProductionSheetForm({ labels, maxAccess: access, recordId, plantId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: ManufacturingRepository.ProductionSheet.page
+    endpointId: ManufacturingRepository.ProductionSheet.qry
   })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.ProductionSheet,
-    access,
+    access: access,
     enabled: !recordId
   })
 
@@ -57,6 +59,7 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
       status: 1,
       date: new Date(),
       plantId: parseInt(plantId),
+      notes: '',
       items: [
         {
           id: 1,
@@ -77,7 +80,6 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
     validationSchema: yup.object({
       date: yup.date().required(),
       siteId: yup.number().required(),
-      dtId: yup.string().required(),
       items: yup
         .array()
         .of(
@@ -127,15 +129,35 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
     }
   })
 
+  useEffect(() => {
+    if (documentType?.dtId) formik.setFieldValue('dtId', documentType.dtId)
+  }, [documentType?.dtId])
+
   const onPost = async () => {
+    const copy = { ...formik.values }
+    delete copy.items
+
     const res = await postRequest({
       extension: ManufacturingRepository.ProductionSheet.post,
-      record: JSON.stringify(formik.values)
+      record: JSON.stringify(copy)
     })
 
     toast.success(platformLabels.Posted)
     invalidate()
-    await getData(res?.recordId)
+
+    const res2 = await getData(res?.recordId)
+
+        const res3 = await getDataGrid()
+
+        formik.setValues({
+          ...res2.record,
+          items: res3.list.map(item => ({
+            ...item,
+            id: item.seqNo,
+            orderedQty: item.orderedQty ?? 0
+          })),
+          date: !!res2?.record?.date ? formatDateFromApi(res2?.record?.date) : null
+        })
   }
 
   const editMode = !!formik.values.recordId
@@ -147,6 +169,12 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
       condition: true,
       onClick: onPost,
       disabled: !editMode || isPosted
+    },
+    {
+      key: 'IV',
+      condition: true,
+      onClick: 'onInventoryTransaction',
+      disabled: !editMode || !isPosted
     }
   ]
 
@@ -210,7 +238,7 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
   async function getDataGrid() {
     return await getRequest({
       extension: ManufacturingRepository.ProductionSheetItem.qry,
-      parameters: `_psId=${recordId}&_functionId=${SystemFunction.ProductionSheet}`
+      parameters: `_psId=${recordId ?? formik?.values?.recordId}&_functionId=${SystemFunction.ProductionSheet}`
     })
   }
 
@@ -241,6 +269,7 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}
+      disabledSubmit={isPosted}
       functionId={SystemFunction.ProductionSheet}
     >
       <VertLayout>
@@ -249,7 +278,7 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
             <Grid item xs={6}>
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
-                parameters={`_dgId=${SystemFunction.ProductionSheet}&_startAt=${0}&_pageSize=${50}`}
+                parameters={`_dgId=${SystemFunction.ProductionSheet}&_startAt=${0}&_pageSize=${1000}`}
                 filter={!editMode ? item => item.activeStatus === 1 : undefined}
                 name='dtId'
                 label={labels.documentType}
@@ -257,12 +286,12 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
                 valueField='recordId'
                 displayField='name'
                 values={formik.values}
-                maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={async (event, newValue) => {
                   formik.setFieldValue('dtId', newValue?.recordId || '')
                   changeDT(newValue)
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={6}>
@@ -270,7 +299,7 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
                 name='reference'
                 label={labels.reference}
                 value={formik.values.reference}
-                readOnly={editMode}
+                readOnly={editMode || isPosted}
                 maxAccess={!editMode && maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('reference', '')}
@@ -283,7 +312,7 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
                 label={labels.date}
                 value={formik?.values?.date}
                 required
-                readOnly={editMode}
+                readOnly={editMode || isPosted}
                 onChange={formik.setFieldValue}
                 onClear={() => formik.setFieldValue('date', '')}
                 error={formik.touched.date && Boolean(formik.errors.date)}
@@ -296,7 +325,7 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
                 name='siteId'
                 required
                 readOnly
-                refresh={editMode}
+                refresh={editMode || isPosted}
                 label={labels.site}
                 values={formik.values}
                 displayField='name'
@@ -318,6 +347,7 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
                 ]}
+                readOnly={isPosted}
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
@@ -330,11 +360,31 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
           <DataGrid
             onChange={value => formik.setFieldValue('items', value)}
             maxAccess={maxAccess}
+            name='items'
             disabled={isPosted}
             value={formik?.values?.items || []}
             error={formik?.errors?.items}
             columns={columns}
+            allowDelete={!isPosted}
+            allowAddNewLine={!isPosted}
           />
+          <Fixed>
+            <Grid container spacing={4} sx={{ mb: 3, display: 'flex', justifyContent: 'left' }}>
+              <Grid item xs={4}>
+                <CustomTextArea
+                  name='notes'
+                  label={labels.notes}
+                  value={formik.values.notes}
+                  maxLength='100'
+                  readOnly={isPosted}
+                  maxAccess={maxAccess}
+                  onChange={formik.handleChange}
+                  onClear={() => formik.setFieldValue('notes', '')}
+                  error={formik.touched.notes && Boolean(formik.errors.notes)}
+                />
+              </Grid>
+            </Grid>
+          </Fixed>
         </Grow>
       </VertLayout>
     </FormShell>

@@ -27,6 +27,7 @@ export const InventoryRepository = {
   },
   LotCategory: {
     page: service + 'pageLCA',
+    qry: service + 'qryLCA',
     get: service + 'getLCA',
     set: service + 'setLCA',
     del: service + 'delLCA'
@@ -147,7 +148,13 @@ export const InventoryRepository = {
   RebuildInventory: {
     rebuild: service + 'rebuildFIS'
   },
-  DimensionUDT: { set: service + 'set2UDT', get: service + 'getUDT' },
+  ItemPhysProp: {
+    get: service + 'getPP'
+  },
+  DimensionUDT: {
+    set: service + 'set2UDT',
+    get: service + 'getUDT'
+  },
   Barcodes: {
     snapshot: service + 'snapshotBCD',
     get: service + 'getBCD',
@@ -159,7 +166,7 @@ export const InventoryRepository = {
     get: service + 'getMTC',
     set: service + 'setMTC',
     qry: service + 'qryMTC',
-    del: service + 'delMTC',
+    del: service + 'delMTC'
   },
   Kit: {
     set: service + 'set2KIT',
@@ -176,6 +183,12 @@ export const InventoryRepository = {
     del: service + 'delSIZ',
     page: service + 'pageSIZ'
   },
+  AvailabilitySerial: {
+    qry: service + 'qryAVS'
+  },
+  AvailabilityLot: {
+    qry: service + 'qryLOA'
+  },
   CategoryLevel: {
     set2: service + 'set2CAL',
     qry: service + 'qryCAL'
@@ -185,5 +198,11 @@ export const InventoryRepository = {
     set: service + 'setOC',
     del: service + 'delOC',
     qry: service + 'qryOC'
+  },
+  Transaction: {
+    qry2: service + 'qry2TRX'
+  },
+  GenerateFiscalYear: {
+    gen: service + 'genFIS'
   }
 }

@@ -2,9 +2,10 @@ import { Box, Grid, Autocomplete, TextField, IconButton, InputAdornment, Paper }
 import SearchIcon from '@mui/icons-material/Search'
 import ClearIcon from '@mui/icons-material/Clear'
 import { useEffect, useState } from 'react'
-import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
+import { HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
 import PopperComponent from '../Shared/Popper/PopperComponent'
 import CircularProgress from '@mui/material/CircularProgress' // Import CircularProgress from MUI or use any other spinner component
+import { TrxType } from 'src/resources/AccessLevels'
 
 const CustomLookup = ({
   type = 'text',
@@ -19,6 +20,7 @@ const CustomLookup = ({
   onKeyUp,
   valueField = 'key',
   displayField = 'value',
+  secondFieldLabel = '',
   onLookup,
   onChange,
   onKeyDown,
@@ -54,10 +56,7 @@ const CustomLookup = ({
 
   const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
 
-  const _readOnly =
-    maxAccess < 3 ||
-    accessLevel === DISABLED ||
-    (readOnly && accessLevel !== MANDATORY && accessLevel !== FORCE_ENABLED)
+  const _readOnly = editMode ? editMode && maxAccess < TrxType.EDIT : readOnly
 
   const _hidden = accessLevel ? accessLevel === HIDDEN : hidden
 
@@ -260,7 +259,7 @@ const CustomLookup = ({
           <TextField
             size={size}
             variant={variant}
-            placeholder={displayField.toUpperCase()}
+            placeholder={secondFieldLabel == '' ? displayField.toUpperCase() : secondFieldLabel.toUpperCase()}
             value={secondValue ? secondValue : ''}
             required={isRequired}
             disabled={disabled}

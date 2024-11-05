@@ -18,6 +18,8 @@ import MetalSummary from './MetalSummary'
 import { ControlContext } from 'src/providers/ControlContext'
 import { ClientRelationForm } from './ClientRelationForm'
 import { ClientBalance } from './ClientBalance'
+import InventoryTransaction from './InventoryTransaction'
+import SalesTrxForm from './SalesTrxForm'
 
 export default function FormShell({
   form,
@@ -43,6 +45,7 @@ export default function FormShell({
   addClientRelation = false,
   setErrorMessage,
   previewReport = false,
+  previewBtnClicked = () => {},
   setIDInfoAutoFilled,
   visibleClear,
   actions,
@@ -128,6 +131,18 @@ export default function FormShell({
     }
   }
 
+  function onInventoryTransaction() {
+    stack({
+      Component: InventoryTransaction,
+      props: {
+        recordId: form.values.recordId,
+        functionId: functionId
+      },
+      width: 1000,
+      title: platformLabels.InventoryTransaction
+    })
+  }
+
   const performPostSubmissionTasks = async () => {
     if (typeof open === 'function') {
       await open()
@@ -206,6 +221,19 @@ export default function FormShell({
               title: platformLabels.financialTransaction
             })
           }
+          onClickSATRX={() =>
+            stack({
+              Component: SalesTrxForm,
+              props: {
+                recordId: form.values?.recordId,
+                functionId: functionId,
+                itemId: 0,
+                clientId: form?.values?.header?.clientId
+              },
+              width: 1200,
+              title: platformLabels.SalesTransactions
+            })
+          }
           onClickGIA={() =>
             stack({
               Component: GlobalIntegrationGrid,
@@ -274,7 +302,8 @@ export default function FormShell({
                 functionId: form.values?.functionId,
                 resourceId: resourceId,
                 scId: form.values?.stockCountId,
-                siteId: form.values?.siteId
+                siteId: form.values?.siteId,
+                onSuccess: previewBtnClicked
               },
               width: 1150,
               height: 700,
@@ -313,6 +342,7 @@ export default function FormShell({
           isGenerated={isGenerated}
           actions={actions}
           onApproval={onApproval}
+          onInventoryTransaction={onInventoryTransaction}
           onRecordRemarks={onRecordRemarks}
           transactionClicked={transactionClicked}
           editMode={editMode}
