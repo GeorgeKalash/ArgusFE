@@ -37,7 +37,7 @@ export default function CountryRiskLevelForm({ labels, maxAccess, recordId }) {
       riskLevel: yup.string().required()
     }),
     onSubmit: async obj => {
-      const response = await postRequest({
+      await postRequest({
         extension: RemittanceSettingsRepository.CountryRisk.set,
         record: JSON.stringify(obj)
       })
@@ -107,9 +107,7 @@ export default function CountryRiskLevelForm({ labels, maxAccess, recordId }) {
                 required
                 values={formik.values}
                 onChange={(event, newValue) => {
-                  if (newValue) {
-                    formik.setFieldValue('riskLevel', newValue?.recordId || null)
-                  }
+                  formik.setFieldValue('riskLevel', newValue?.recordId || null)
                 }}
                 error={formik.touched.riskLevel && Boolean(formik.errors.riskLevel)}
                 maxAccess={maxAccess}

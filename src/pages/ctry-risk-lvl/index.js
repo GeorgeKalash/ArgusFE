@@ -69,7 +69,6 @@ const CountryRiskLevel = () => {
   }
 
   function openForm(recordId) {
-    console.log(recordId)
     stack({
       Component: CountryRiskLevelForm,
       props: {
