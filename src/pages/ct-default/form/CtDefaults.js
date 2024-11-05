@@ -39,7 +39,7 @@ const CtDefaults = ({ _labels, access }) => {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      'otp-expiry-time': yup.number().min(30).max(120)
+      'otp-expiry-time': yup.number().min(30).max(120).nullable(true)
     }),
     initialValues: {
       'ct-nra-individual': null,
