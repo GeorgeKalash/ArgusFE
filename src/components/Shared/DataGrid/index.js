@@ -330,7 +330,7 @@ export function DataGrid({
       headerName: column.label || column.name,
       editable: !disabled,
       flex: column.flex || 1,
-      sortable: false,
+      sortable: column?.sortable || false,
       cellRenderer: CustomCellRenderer,
       cellEditor: CustomCellEditor,
       cellEditorParams: { maxAccess },
