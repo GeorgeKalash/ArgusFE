@@ -533,6 +533,7 @@ export default function OutwardsReturnForm({
                 label={labels.settlementStatus}
                 valueField='key'
                 displayField='value'
+                formik={formik}
                 values={formik.values}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('settlementStatus', newValue ? newValue?.key : '')
