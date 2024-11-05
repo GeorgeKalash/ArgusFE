@@ -97,7 +97,7 @@ const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refr
                 name='idTypeName'
                 label={labels.id_type}
                 readOnly={true}
-                value={clientformik.values.idtName}
+                value={idTypes?.list?.find(item => item.recordId === clientformik.values.idtId)?.name}
               />
             </Grid>
             <Grid item xs={12}>
