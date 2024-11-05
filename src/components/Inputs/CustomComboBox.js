@@ -2,13 +2,14 @@ import { Autocomplete, IconButton, CircularProgress, Paper, TextField } from '@m
 import { ControlAccessLevel, TrxType } from 'src/resources/AccessLevels'
 import { Box } from '@mui/material'
 import RefreshIcon from '@mui/icons-material/Refresh'
-import React from 'react'
+import React, { useEffect } from 'react'
 import PopperComponent from '../Shared/Popper/PopperComponent'
 
 const CustomComboBox = ({
   type = 'text',
   name,
   label,
+  formik,
   value: _value,
   valueField = 'key',
   displayField = 'value',
@@ -45,12 +46,20 @@ const CustomComboBox = ({
   const _required = required || fieldAccess === ControlAccessLevel.Mandatory
   const _hidden = fieldAccess === ControlAccessLevel.Hidden
 
-  const value = neverPopulate ? '' : _value
+  useEffect(() => {
+    const defaultValue = store?.[defaultIndex]?.recordId || store?.[defaultIndex]?.key || ''
+
+    if (defaultIndex !== undefined && defaultIndex !== null && formik?.values[name] !== defaultValue) {
+      formik.setFieldValue(name, defaultValue)
+    }
+  }, [defaultIndex, formik, name, store])
+
+  const value = neverPopulate ? '' : _value || (defaultIndex !== undefined && store[defaultIndex]) || ''
 
   return (
     <Autocomplete
       name={name}
-      value={store?.[defaultIndex] || value}
+      value={value}
       size={size}
       options={store}
       key={value}

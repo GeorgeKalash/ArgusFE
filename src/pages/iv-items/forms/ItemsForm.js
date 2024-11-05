@@ -17,6 +17,7 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { useRefBehavior } from 'src/hooks/useReferenceProxy'
 import { MasterSource } from 'src/resources/MasterSource'
+import { SystemRepository } from 'src/repositories/SystemRepository'
 
 export default function ItemsForm({ labels, maxAccess: access, setStore, store, setFormikInitial }) {
   const { platformLabels } = useContext(ControlContext)
@@ -69,13 +70,13 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       pgId: ''
     },
     maxAccess,
-    enableReinitialize: false,
+    enableReinitialize: true,
     validateOnChange: true,
 
     validationSchema: yup.object({
       categoryId: yup.string().required(),
       name: yup.string().required(),
-      priceType: yup.string().required(),
+      priceType: yup.number().required(),
       msId: yup.string().required(),
       lotCategoryId: yup
         .string()
@@ -198,7 +199,6 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
     if (formik.values.kitItem) {
       setOnKitItem(true)
 
-      // fetchfirstPriceType()
       formik.setFieldValue('ivtItem', false)
       formik.setFieldValue('trackBy', '')
       formik.setFieldValue('valuationMethod', '')
@@ -207,21 +207,6 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       formik.setFieldValue('priceType', '')
     }
   }, [formik.values.kitItem])
-
-  // async function fetchfirstPriceType() {
-  //   const response = await getRequest({
-  //     extension: InventoryRepository.Items.pack
-  //   })
-
-  //   const formattedPriceTypes = response?.record?.priceTypes?.map(priceTypes => ({
-  //     key: parseInt(priceTypes.key),
-  //     value: priceTypes.value
-  //   }))
-
-  //   formik.setFieldValue('priceType', formattedPriceTypes[0].key)
-  // }
-  console.log(formik.values.priceType, 'priceType')
-  console.log(onKitItem, 'onKitItem')
 
   return (
     <FormShell
@@ -300,6 +285,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     values={formik.values}
                     defaultIndex={onKitItem ? 0 : null}
                     name='priceType'
+                    formik={formik}
                     label={labels.priceType}
                     readOnly={formik.values.kitItem}
                     valueField='key'
@@ -313,7 +299,6 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     error={formik.touched.priceType && formik.errors.priceType}
                   />
                 </Grid>
-
                 <Grid item xs={6}>
                   <CustomTextField
                     name='sku'
