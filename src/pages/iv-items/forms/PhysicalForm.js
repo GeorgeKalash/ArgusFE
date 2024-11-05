@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react'
+import { useContext } from 'react'
 import { Grid } from '@mui/material'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -15,16 +15,13 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { ControlContext } from 'src/providers/ControlContext'
-import CustomTextField from 'src/components/Inputs/CustomTextField'
 
 const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
-    endpointId: InventoryRepository.Physical.qry
+    endpointId: InventoryRepository.Items.snapshot
   })
-
-  const [disabled, setDisabled] = useState(false)
 
   const { platformLabels } = useContext(ControlContext)
 
@@ -281,7 +278,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
                 value={formik.values.weight}
                 maxAccess={maxAccess}
                 allowNegative={false}
-                onMouseLeave={e => handleFieldChange('weight', 6, e?.target?.value)}
+                onMouseLeave={e => handleFieldChange('weight', 6, e)}
                 onClear={() => handleFieldClear('weight', 6)}
               />
             </Grid>
@@ -291,7 +288,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
                 label={labels.density}
                 value={formik.values.density}
                 maxAccess={maxAccess}
-                onMouseLeave={e => handleFieldChange('density', 7, e?.target?.value)}
+                onMouseLeave={e => handleFieldChange('density', 7, e)}
                 onClear={() => handleFieldClear('density', 7)}
                 decimalScale={3}
               />

@@ -52,11 +52,13 @@ const DocumentTypeDefault = () => {
     {
       field: 'commitItems',
       headerName: _labels.commitItems,
+      type: 'checkbox',
       flex: 1
     },
     {
       field: 'disableSKULookup',
       headerName: _labels.dsl,
+      type: 'checkbox',
       flex: 1
     }
   ]

@@ -10,25 +10,14 @@ import Table from 'src/components/Shared/Table'
 const GateKeeper = () => {
   const { getRequest } = useContext(RequestsContext)
 
-  const {
-    query: { data },
-    labels: _labels,
-    access,
-    refetch,
-    paginationParameters
-  } = useResourceQuery({
-    endpointId: ManufacturingRepository.LeanProductionPlanning.preview,
-    datasetId: ResourceIds.GateKeeper,
-    filter: {
-      filterFn: fetchGridData,
-      default: { status: 2 }
-    }
-  })
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50 } = options
+    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&_status=2`
+    var parameters = defaultParams
 
-  async function fetchGridData() {
     const response = await getRequest({
-      extension: ManufacturingRepository.LeanProductionPlanning.preview,
-      parameters: `_status=2`
+      extension: ManufacturingRepository.LeanProductionPlanning.preview2,
+      parameters: parameters
     })
 
     if (response && response?.list) {
@@ -38,8 +27,20 @@ const GateKeeper = () => {
       }))
     }
 
-    return { ...response }
+    return { ...response, _startAt: _startAt }
   }
+
+  const {
+    query: { data },
+    labels: _labels,
+    paginationParameters,
+    refetch,
+    access
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: ManufacturingRepository.LeanProductionPlanning.preview2,
+    datasetId:  ResourceIds.GateKeeper
+  })
 
   const columns = [
     {
@@ -86,9 +87,9 @@ const GateKeeper = () => {
           rowId={['recordId']}
           isLoading={false}
           pageSize={50}
-          refetch={refetch}
-          paginationParameters={paginationParameters}
           paginationType='api'
+          paginationParameters={paginationParameters}
+          refetch={refetch}
           maxAccess={access}
         />
       </Grow>
