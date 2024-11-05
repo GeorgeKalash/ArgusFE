@@ -39,7 +39,7 @@ const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refr
       idNo: yup.string().required(),
       idNoRepeat: yup
         .string()
-        .required('Repeat Password is required')
+        .required()
         .oneOf([yup.ref('idNo'), null], 'Number must match')
     }),
     onSubmit: values => {
@@ -57,34 +57,32 @@ const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refr
     getRequest({
       extension: CurrencyTradingSettingsRepository.Yakeen.get,
       parameters: parameters
+    }).then(result => {
+      const res = result.record
+
+      if (!res.errorId) {
+        clientformik.setFieldValue('expiryDate', formatDateFromApi(res.idExpirationDate))
+        clientformik.setFieldValue('firstName', res.fl_firstName)
+        clientformik.setFieldValue('middleName', res.fl_middleName)
+        clientformik.setFieldValue('familyName', res.fl_familyName)
+        clientformik.setFieldValue('lastName', res.fl_lastName)
+        clientformik.setFieldValue('flName', res.flName)
+        clientformik.setFieldValue('fl_firstName', res.firstName)
+        clientformik.setFieldValue('fl_middleName', res.middleName)
+        clientformik.setFieldValue('fl_lastName', res.lastName)
+        clientformik.setFieldValue('fl_familyName', res.familyName)
+        clientformik.setFieldValue('gender', res.gender === 'ذكر' ? '1' : '2')
+        clientformik.setFieldValue('professionId', res.professionId)
+        clientformik.setFieldValue('nationalityId', res.nationalityId)
+        clientformik.setFieldValue('idIssuePlaceCode', res.idIssuePlaceCode)
+        clientformik.setFieldValue('sponsorName', res.sponsorName)
+
+        res.newProfessionMode && refreshProf()
+        window.close()
+      } else {
+        stackError({ message: JSON.stringify(res?.errorDetail) })
+      }
     })
-      .then(result => {
-        const res = result.record
-
-        if (!res.errorId) {
-          clientformik.setFieldValue('expiryDate', formatDateFromApi(res.idExpirationDate))
-          clientformik.setFieldValue('firstName', res.fl_firstName)
-          clientformik.setFieldValue('middleName', res.fl_middleName)
-          clientformik.setFieldValue('familyName', res.fl_familyName)
-          clientformik.setFieldValue('lastName', res.fl_lastName)
-          clientformik.setFieldValue('flName', res.flName)
-          clientformik.setFieldValue('fl_firstName', res.firstName)
-          clientformik.setFieldValue('fl_middleName', res.middleName)
-          clientformik.setFieldValue('fl_lastName', res.lastName)
-          clientformik.setFieldValue('fl_familyName', res.familyName)
-          clientformik.setFieldValue('gender', res.gender === 'ذكر' ? '1' : '2')
-          clientformik.setFieldValue('professionId', res.professionId)
-          clientformik.setFieldValue('nationalityId', res.nationalityId)
-          clientformik.setFieldValue('idIssuePlaceCode', res.idIssuePlaceCode)
-          clientformik.setFieldValue('sponsorName', res.sponsorName)
-
-          res.newProfessionMode && refreshProf()
-          window.close()
-        } else {
-          stackError({ message: JSON.stringify(res?.errorDetail) })
-        }
-      })
-      .catch(error => {})
   }
 
   return (
