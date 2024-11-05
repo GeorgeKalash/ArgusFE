@@ -11,11 +11,13 @@ import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTrad
 import { VertLayout } from './Layouts/VertLayout'
 import { Grow } from './Layouts/Grow'
 import { useForm } from 'src/hooks/form'
+import { useError } from 'src/error'
 
 const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refreshProf = () => {}, window }) => {
   const [showAsPassword, setShowAsPassword] = useState(true)
   const [showAsPasswordRepeat, setShowAsPasswordRepeat] = useState(false)
   const { getRequest } = useContext(RequestsContext)
+  const { stack: stackError } = useError()
 
   const handleCopy = event => {
     event.preventDefault()
@@ -46,8 +48,6 @@ const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refr
   })
 
   const postFetchDefault = obj => {
-    console.log(idTypes)
-
     const type = idTypes?.list?.filter(item => item?.recordId == obj?.idtId)?.[0]?.type
 
     const hijriDate = moment(formatDateForGetApI(obj.birthDate), 'YYYY-MM-DD').format('iYYYY-iMM-iDD')
@@ -61,24 +61,28 @@ const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refr
       .then(result => {
         const res = result.record
 
-        clientformik.setFieldValue('expiryDate', formatDateFromApi(res.idExpirationDate))
-        clientformik.setFieldValue('firstName', res.fl_firstName)
-        clientformik.setFieldValue('middleName', res.fl_middleName)
-        clientformik.setFieldValue('familyName', res.fl_familyName)
-        clientformik.setFieldValue('lastName', res.fl_lastName)
-        clientformik.setFieldValue('flName', res.flName)
-        clientformik.setFieldValue('fl_firstName', res.firstName)
-        clientformik.setFieldValue('fl_middleName', res.middleName)
-        clientformik.setFieldValue('fl_lastName', res.lastName)
-        clientformik.setFieldValue('fl_familyName', res.familyName)
-        clientformik.setFieldValue('gender', res.gender === 'ذكر' ? '1' : '2')
-        clientformik.setFieldValue('professionId', res.professionId)
-        clientformik.setFieldValue('nationalityId', res.nationalityId)
-        clientformik.setFieldValue('idIssuePlaceCode', res.idIssuePlaceCode)
-        clientformik.setFieldValue('sponsorName', res.sponsorName)
+        if (!res.errorId) {
+          clientformik.setFieldValue('expiryDate', formatDateFromApi(res.idExpirationDate))
+          clientformik.setFieldValue('firstName', res.fl_firstName)
+          clientformik.setFieldValue('middleName', res.fl_middleName)
+          clientformik.setFieldValue('familyName', res.fl_familyName)
+          clientformik.setFieldValue('lastName', res.fl_lastName)
+          clientformik.setFieldValue('flName', res.flName)
+          clientformik.setFieldValue('fl_firstName', res.firstName)
+          clientformik.setFieldValue('fl_middleName', res.middleName)
+          clientformik.setFieldValue('fl_lastName', res.lastName)
+          clientformik.setFieldValue('fl_familyName', res.familyName)
+          clientformik.setFieldValue('gender', res.gender === 'ذكر' ? '1' : '2')
+          clientformik.setFieldValue('professionId', res.professionId)
+          clientformik.setFieldValue('nationalityId', res.nationalityId)
+          clientformik.setFieldValue('idIssuePlaceCode', res.idIssuePlaceCode)
+          clientformik.setFieldValue('sponsorName', res.sponsorName)
 
-        res.newProfessionMode && refreshProf()
-        window.close()
+          res.newProfessionMode && refreshProf()
+          window.close()
+        } else {
+          stackError({ message: JSON.stringify(res?.errorDetail) })
+        }
       })
       .catch(error => {})
   }
