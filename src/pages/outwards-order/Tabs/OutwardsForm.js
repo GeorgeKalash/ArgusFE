@@ -799,6 +799,22 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                   helperText={formik.touched.valueDate && formik.errors.valueDate}
                 />
               </FormGrid>
+              <FormGrid item hideonempty xs={3}>
+                <ResourceComboBox
+                  datasetId={DataSets.WF_STATUS}
+                  name='wfStatus'
+                  label={labels.wfStatus}
+                  readOnly
+                  valueField='key'
+                  displayField='value'
+                  values={formik.values}
+                  onClear={() => formik.setFieldValue('wfStatus', '')}
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('wfStatus', newValue?.key || '')
+                  }}
+                  error={formik.touched.wfStatus && Boolean(formik.errors.wfStatus)}
+                />
+              </FormGrid>
             </Grid>
             <Grid container rowGap={2} xs={4.5} sx={{ pt: 2 }}>
               <FieldSet title='Transaction Details'>
