@@ -193,9 +193,11 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
   }
 
   useEffect(() => {
+    console.log(form)
     getDefaultDT()
     ;(async function () {
-      recordId && getData()
+      console.log(recordId)
+      recordId && getData(recordId)
       form &&
         formik.setValues({
           ...formik.values,
@@ -222,7 +224,7 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
 
       formik.setValues({
         ...res.record,
-        date: formatDateFromApi(res.record.date),
+        date: formatDateFromApi(res?.record?.date),
         cash: result.list.map((amount, index) => ({
           id: index + 1,
           ...amount

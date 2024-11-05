@@ -77,7 +77,11 @@ const OutwardsOrder = () => {
 
   async function openForm(recordId) {
     const plantId = await getPlantId()
-    if (plantId) {
+    if (!recordId && !plantId) {
+      stackError({
+        message: _labels.PlantDefaultError
+      })
+    } else {
       const dtId = await getDefaultDT()
       stack({
         Component: OutwardsForm,
@@ -93,10 +97,6 @@ const OutwardsOrder = () => {
         width: 1100,
         height: 600,
         title: _labels.OutwardsOrder
-      })
-    } else {
-      stackError({
-        message: _labels.PlantDefaultError
       })
     }
   }
