@@ -15,7 +15,7 @@ const AvailabilitiesTab = ({ data, pagination, refetch, access, labels: _labels 
       flex: 1
     },
     {
-      field: 'pieces',
+      field: 'onHand',
       headerName: _labels.qty,
       flex: 1,
       type: 'number'
