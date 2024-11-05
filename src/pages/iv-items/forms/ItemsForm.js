@@ -197,7 +197,8 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
   useEffect(() => {
     if (formik.values.kitItem) {
       setOnKitItem(true)
-      fetchfirstPriceType()
+
+      // fetchfirstPriceType()
       formik.setFieldValue('ivtItem', false)
       formik.setFieldValue('trackBy', '')
       formik.setFieldValue('valuationMethod', '')
@@ -207,18 +208,20 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
     }
   }, [formik.values.kitItem])
 
-  async function fetchfirstPriceType() {
-    const response = await getRequest({
-      extension: InventoryRepository.Items.pack
-    })
+  // async function fetchfirstPriceType() {
+  //   const response = await getRequest({
+  //     extension: InventoryRepository.Items.pack
+  //   })
 
-    const formattedPriceTypes = response?.record?.priceTypes?.map(priceTypes => ({
-      key: parseInt(priceTypes.key),
-      value: priceTypes.value
-    }))
+  //   const formattedPriceTypes = response?.record?.priceTypes?.map(priceTypes => ({
+  //     key: parseInt(priceTypes.key),
+  //     value: priceTypes.value
+  //   }))
 
-    formik.setFieldValue('priceType', formattedPriceTypes[0].key)
-  }
+  //   formik.setFieldValue('priceType', formattedPriceTypes[0].key)
+  // }
+  console.log(formik.values.priceType, 'priceType')
+  console.log(onKitItem, 'onKitItem')
 
   return (
     <FormShell
@@ -264,7 +267,6 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                       if (!formik.values.kitItem) {
                         formik.setFieldValue('priceType', newValue?.priceType || '')
                       }
-
                       formik.setFieldValue('trackBy', newValue?.trackBy || '')
                       formik.setFieldValue('procurementMethod', newValue?.procurementMethod || '')
                       formik.setFieldValue('msId', newValue?.msId || '')
@@ -296,6 +298,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                       return formattedPriceTypes
                     }}
                     values={formik.values}
+                    defaultIndex={onKitItem ? 0 : null}
                     name='priceType'
                     label={labels.priceType}
                     readOnly={formik.values.kitItem}
