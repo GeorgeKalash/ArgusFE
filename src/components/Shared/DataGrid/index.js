@@ -121,42 +121,21 @@ export function DataGrid({
     ({ name: fieldName }) => accessLevel({ maxAccess, name: `${name}.${fieldName}` }) !== HIDDEN && accessLevel({ maxAccess, name: `${name}.${fieldName}` }) !== DISABLED
   )
 
-  const skipReadOnlyTab = (columnIndex, rowIndex) => {
-    for (let i = columnIndex + 1; i < allColumns.length; i++) {
+  const findNextEditableColumn = (columnIndex, rowIndex, direction) => {
+    const limit = direction > 0 ? allColumns.length : -1;
+    const step = direction > 0 ? 1 : -1;
+    for (let i = columnIndex + step; i !== limit; i += step) {
       if (!allColumns?.[i]?.props?.readOnly) {
-        return {
-          columnIndex: i,
-          rowIndex
-        }
+        return { columnIndex: i, rowIndex };
       }
     }
 
-    for (let i = 0; i < allColumns.length; i++) {
+    for (let i = direction > 0 ? 0 : allColumns.length - 1; i !== limit; i += step) {
       if (!allColumns?.[i]?.props?.readOnly) {
         return {
           columnIndex: i,
-          rowIndex: rowIndex + 1
-        }
-      }
-    }
-  }
-
-  const skipReadOnlyShiftTab = (columnIndex, rowIndex) => {
-    for (let i = columnIndex - 1; i >= 0; i--) {
-      if (!allColumns?.[i]?.props?.readOnly) {
-        return {
-          columnIndex: i,
-          rowIndex
-        }
-      }
-    }
-
-    for (let i = allColumns.length - 1; i >= 0; i--) {
-      if (!allColumns?.[i]?.props?.readOnly) {
-        return {
-          columnIndex: i,
-          rowIndex: rowIndex - 1
-        }
+          rowIndex: rowIndex + direction
+        };
       }
     }
   }
@@ -216,11 +195,13 @@ export function DataGrid({
 
     const columns = gridApiRef.current.getColumnDefs()
     if (!event.shiftKey) {
+      const skipReadOnlyTab = (columnIndex, rowIndex) => findNextEditableColumn(columnIndex, rowIndex, 1);
       const { columnIndex, rowIndex } = skipReadOnlyTab(nextCell.columnIndex, nextCell.rowIndex)
 
       nextCell.columnIndex = columnIndex
       nextCell.rowIndex = rowIndex
     } else {
+      const skipReadOnlyShiftTab = (columnIndex, rowIndex) => findNextEditableColumn(columnIndex, rowIndex, -1);
       const { columnIndex, rowIndex } = skipReadOnlyShiftTab(nextCell.columnIndex, nextCell.rowIndex)
 
       nextCell.columnIndex = columnIndex
