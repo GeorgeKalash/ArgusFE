@@ -10,11 +10,11 @@ export default function PreviewReport({
   resourceId,
   outerGrid = false,
   scId,
-  siteId
+  siteId,
+  onSuccess
 }) {
   const { postRequest } = useContext(RequestsContext)
   const [pdfURL, setPdfUrl] = useState(null)
-
   useEffect(() => {
     generateReport()
   }, [selectedReport])
@@ -46,6 +46,7 @@ export default function PreviewReport({
     })
       .then(res => {
         setPdfUrl(res.recordId)
+        onSuccess()
       })
       .catch(error => {
         console.log({ generateReportERROR: error })
