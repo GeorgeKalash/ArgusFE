@@ -118,20 +118,20 @@ export function DataGrid({
   }
 
   const allColumns = columns.filter(
-    ({ name: fieldName }) => accessLevel({ maxAccess, name: `${name}.${fieldName}` }) !== HIDDEN && accessLevel({ maxAccess, name: `${name}.${fieldName}` }) !== DISABLED
+    ({ name: fieldName }) => accessLevel({ maxAccess, name: `${name}.${fieldName}` }) !== HIDDEN
   )
 
   const findNextEditableColumn = (columnIndex, rowIndex, direction) => {
     const limit = direction > 0 ? allColumns.length : -1;
     const step = direction > 0 ? 1 : -1;
     for (let i = columnIndex + step; i !== limit; i += step) {
-      if (!allColumns?.[i]?.props?.readOnly) {
+      if (!allColumns?.[i]?.props?.readOnly && accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) !== DISABLED) {
         return { columnIndex: i, rowIndex };
       }
     }
 
     for (let i = direction > 0 ? 0 : allColumns.length - 1; i !== limit; i += step) {
-      if (!allColumns?.[i]?.props?.readOnly) {
+      if (!allColumns?.[i]?.props?.readOnly && accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) !== DISABLED) {
         return {
           columnIndex: i,
           rowIndex: rowIndex + direction
