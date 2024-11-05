@@ -54,7 +54,7 @@ const OTPAuthentication = ({ loggedUser, onClose, window }) => {
           if (throwError) reject(error)
         })
     } else {
-      setError('All Fields Required')
+      setError(platformLabels.AllFieldsRequired)
     }
   }
 
