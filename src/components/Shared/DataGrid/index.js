@@ -6,7 +6,7 @@ import { CacheDataProvider } from 'src/providers/CacheDataContext'
 import 'ag-grid-community/styles/ag-grid.css'
 import 'ag-grid-community/styles/ag-theme-alpine.css'
 import { GridDeleteIcon } from '@mui/x-data-grid'
-import { HIDDEN, accessLevel } from 'src/services/api/maxAccess'
+import { DISABLED, HIDDEN, accessLevel } from 'src/services/api/maxAccess'
 import { useWindow } from 'src/windows'
 import DeleteDialog from '../DeleteDialog'
 
@@ -118,7 +118,7 @@ export function DataGrid({
   }
 
   const allColumns = columns.filter(
-    ({ name: fieldName }) => accessLevel({ maxAccess, name: `${name}.${fieldName}` }) !== HIDDEN
+    ({ name: fieldName }) => accessLevel({ maxAccess, name: `${name}.${fieldName}` }) !== HIDDEN && accessLevel({ maxAccess, name: `${name}.${fieldName}` }) !== DISABLED
   )
 
   const skipReadOnlyTab = (columnIndex, rowIndex) => {
