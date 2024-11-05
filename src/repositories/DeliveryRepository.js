@@ -34,5 +34,8 @@ export const DeliveryRepository = {
   },
   Reduild: {
     rebuild: service + 'rebuildMW'
+  },
+  TRP: {
+    flag: service + 'flagTRP'
   }
 }

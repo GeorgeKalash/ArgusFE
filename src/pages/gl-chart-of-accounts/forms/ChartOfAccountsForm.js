@@ -118,7 +118,6 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId, onCha
                 name='name'
                 label={labels.name}
                 value={formik.values.name}
-                readOnly={editMode}
                 required
                 rows={2}
                 maxAccess={maxAccess}
