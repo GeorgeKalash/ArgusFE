@@ -104,8 +104,8 @@ const ItemParts = () => {
         obj,
         maxAccess: access
       },
-      width: 600,
-      height: 370,
+      width: 700,
+      height: 470,
       title: _labels.itemParts
     })
   }

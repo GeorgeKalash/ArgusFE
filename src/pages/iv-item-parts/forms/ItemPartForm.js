@@ -28,6 +28,11 @@ const ItemPartForm = ({ labels, maxAccess, obj }) => {
           yup.object().shape({
             qty: yup.number().test(function (value) {
               return isRowEmpty(this.parent) || value > 0
+            }),
+            partRef: yup.string().test(function (value) {
+              const rowIndex = this.options.index
+
+              return rowIndex === 0 || value
             })
           })
         )
@@ -61,11 +66,13 @@ const ItemPartForm = ({ labels, maxAccess, obj }) => {
   }
 
   const postData = async obj => {
-    const itemsToPost = obj?.items?.map((item, index) => ({
-      ...item,
-      itemId: obj.itemId,
-      seqNo: index + 1
-    }))
+    const itemsToPost = obj?.items
+      ?.filter(item => item.partId && item.partRef)
+      .map((item, index) => ({
+        ...item,
+        itemId: obj.itemId,
+        seqNo: index + 1
+      }))
 
     const data = {
       itemId: obj.itemId,
@@ -122,7 +129,7 @@ const ItemPartForm = ({ labels, maxAccess, obj }) => {
     }
   ]
 
-  function getData() {
+  useEffect(() => {
     getRequest({
       extension: InventoryRepository.ItemParts.qry,
       parameters: `_itemId=${obj.recordId}`
@@ -136,10 +143,6 @@ const ItemPartForm = ({ labels, maxAccess, obj }) => {
         items: modifiedList
       })
     })
-  }
-
-  useEffect(() => {
-    getData()
   }, [obj.recordId])
 
   return (
