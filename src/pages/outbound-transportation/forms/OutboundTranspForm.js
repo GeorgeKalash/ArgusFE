@@ -27,13 +27,27 @@ import dayjs from 'dayjs'
 
 export default function OutboundTranspForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
+  const { platformLabels, userDefaultsData } = useContext(ControlContext)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.DeliveryTrip,
     access,
     enabled: !recordId
   })
+
+  async function getDefaultData() {
+    const userKeys = ['plantId']
+
+    const plantIdDefault = (userDefaultsData?.list || []).reduce((acc, { key, value }) => {
+      if (userKeys.includes(key)) {
+        acc[key] = value ? parseInt(value) : null
+      }
+      
+      return acc
+    }, {})
+
+    formik.setFieldValue('plantId', parseInt(plantIdDefault?.plantId))
+  }
 
   const invalidate = useInvalidate({
     endpointId: DeliveryRepository.Trip.page
@@ -255,6 +269,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
 
   useEffect(() => {
     ;(async function () {
+      getDefaultData()
       if (recordId) {
         await refetchForm(recordId)
       }
@@ -346,6 +361,22 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
     }
   ]
 
+  async function previewBtnClicked() {
+    console.log('previewBtnClicked')
+    const data = { printStatus: 2, recordId: formik.values.recordId }
+
+    await postRequest({
+      extension: DeliveryRepository.TRP.flag,
+      record: JSON.stringify(data)
+    })
+
+    invalidate()
+  }
+
+  useEffect(() => {
+    if (documentType?.dtId) formik.setFieldValue('dtId', documentType.dtId)
+  }, [documentType?.dtId])
+
   return (
     <FormShell
       resourceId={ResourceIds.Trip}
@@ -353,6 +384,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
       maxAccess={maxAccess}
       editMode={editMode}
       actions={actions}
+      previewBtnClicked={previewBtnClicked}
       functionId={SystemFunction.DeliveryTrip}
       disabledSubmit={isPosted || isClosed}
       previewReport={editMode}

@@ -1,9 +1,9 @@
 import { Icon } from '@iconify/react'
 
-export default function icon({ column, row, field }) {
+export default function icon({ value, field }) {
   return (
     <>
-      {row?.[field] ? (
+      {value?.[field] ? (
         <Icon icon='mdi:check' style={{ fontSize: '28px', color: '#4eb558' }} />
       ) : (
         <Icon icon='mdi:close' style={{ fontSize: '28px', color: '#f44336' }} />
