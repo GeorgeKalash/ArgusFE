@@ -376,7 +376,9 @@ export function DataGrid({
 
   useEffect(() => {
     function handleBlur(event) {
-      if (gridContainerRef.current && !gridContainerRef.current.contains(event.target)) {
+      const isClickInsideAutocomplete = event.target.closest('.MuiAutocomplete-option')
+
+      if (gridContainerRef.current && !isClickInsideAutocomplete && !gridContainerRef.current.contains(event.target)) {
         gridApiRef.current?.stopEditing()
       }
     }
