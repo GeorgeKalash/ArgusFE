@@ -247,7 +247,7 @@ const CtDefaults = ({ _labels, access }) => {
               decimalScale={0}
               maxAccess={access}
               onChange={e => formik.setFieldValue('otp-expiry-time', e.target.value)}
-              onClear={() => formik.setFieldValue('otp-expiry-time', null)}
+              onClear={() => formik.setFieldValue('otp-expiry-time', '')}
               error={formik.touched['otp-expiry-time'] && Boolean(formik.errors['otp-expiry-time'])}
             />
           </Grid>
