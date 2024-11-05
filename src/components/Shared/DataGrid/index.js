@@ -117,6 +117,61 @@ export function DataGrid({
     }
   }
 
+  const allColumns = columns.filter(
+    ({ name: fieldName }) => accessLevel({ maxAccess, name: `${name}.${fieldName}` }) !== HIDDEN
+  )
+
+  const skipReadOnlyTab = (columnIndex, rowIndex) => {
+    for (let i = columnIndex + 1; i < allColumns.length; i++) {
+      if (!allColumns?.[i]?.props?.readOnly) {
+        return {
+          columnIndex: i,
+          rowIndex
+        }
+      }
+    }
+
+    for (let i = 0; i < allColumns.length; i++) {
+      if (!allColumns?.[i]?.props?.readOnly) {
+        return {
+          columnIndex: i,
+          rowIndex: rowIndex + 1
+        }
+      }
+    }
+  }
+
+  const skipReadOnlyShiftTab = (columnIndex, rowIndex) => {
+    for (let i = columnIndex - 1; i >= 0; i--) {
+      if (!allColumns?.[i]?.props?.readOnly) {
+        return {
+          columnIndex: i,
+          rowIndex
+        }
+      }
+    }
+
+    for (let i = allColumns.length - 1; i >= 0; i--) {
+      if (!allColumns?.[i]?.props?.readOnly) {
+        return {
+          columnIndex: i,
+          rowIndex: rowIndex - 1
+        }
+      }
+    }
+  }
+
+  const nextColumn = columnIndex => {
+    let count = 0
+    for (let i = columnIndex + 1; i < allColumns.length; i++) {
+      if (!allColumns?.[i]?.props?.readOnly) {
+        count++
+      }
+    }
+
+    return count
+  }
+
   const onCellKeyDown = params => {
     const { event, api, node } = params
 
@@ -140,6 +195,19 @@ export function DataGrid({
     const nextCell = findCell(params)
 
     if (currentColumnIndex === allColumns.length - 1 - skip && node.rowIndex === api.getDisplayedRowCount() - 1) {
+      if ((error || !allowAddNewLine) && !event.shiftKey) {
+        event.stopPropagation()
+
+        return
+      }
+    }
+
+    const countColumn = nextColumn(nextCell.columnIndex)
+
+    if (
+      (currentColumnIndex === allColumns.length - 1 - skip || !countColumn) &&
+      node.rowIndex === api.getDisplayedRowCount() - 1
+    ) {
       if (allowAddNewLine && !error) {
         event.stopPropagation()
         addNewRow(params)
@@ -148,20 +216,15 @@ export function DataGrid({
 
     const columns = gridApiRef.current.getColumnDefs()
     if (!event.shiftKey) {
-      if (nextCell.columnIndex < columns.length - skip - 1) {
-        nextCell.columnIndex += 1
-      } else if (
-        nextCell.columnIndex === columns.length - 1 - skip &&
-        node.rowIndex !== api.getDisplayedRowCount() - 1
-      ) {
-        nextCell.rowIndex += 1
-        nextCell.columnIndex = 0
-      }
-    } else if (nextCell.columnIndex > 0) {
-      nextCell.columnIndex -= 1
+      const { columnIndex, rowIndex } = skipReadOnlyTab(nextCell.columnIndex, nextCell.rowIndex)
+
+      nextCell.columnIndex = columnIndex
+      nextCell.rowIndex = rowIndex
     } else {
-      nextCell.rowIndex -= 1
-      nextCell.columnIndex = columns.length - 1 - skip
+      const { columnIndex, rowIndex } = skipReadOnlyShiftTab(nextCell.columnIndex, nextCell.rowIndex)
+
+      nextCell.columnIndex = columnIndex
+      nextCell.rowIndex = rowIndex
     }
 
     const field = columns[nextCell.columnIndex].field
