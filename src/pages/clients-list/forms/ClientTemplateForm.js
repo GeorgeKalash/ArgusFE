@@ -38,9 +38,9 @@ import { useForm } from 'src/hooks/form'
 const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = false }) => {
   const { stack } = useWindow()
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const [showAsPassword, setShowAsPassword] = useState(false)
-  const [showAsPasswordPhone, setShowAsPasswordPhone] = useState(false)
-  const [showAsPasswordPhoneRepeat, setShowAsPasswordPhoneRepeat] = useState(false)
+  const [showAsPassword, setShowAsPassword] = useState(!!recordId)
+  const [showAsPasswordPhone, setShowAsPasswordPhone] = useState(!!recordId)
+  const [showAsPasswordPhoneRepeat, setShowAsPasswordPhoneRepeat] = useState(!!recordId)
   const [referenceRequired, setReferenceRequired] = useState(true)
   const [address, setAddress] = useState([])
   const [editMode, setEditMode] = useState(!!recordId)

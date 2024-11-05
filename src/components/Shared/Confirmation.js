@@ -11,11 +11,13 @@ import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTrad
 import { VertLayout } from './Layouts/VertLayout'
 import { Grow } from './Layouts/Grow'
 import { useForm } from 'src/hooks/form'
+import { useError } from 'src/error'
 
 const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refreshProf = () => {}, window }) => {
   const [showAsPassword, setShowAsPassword] = useState(true)
   const [showAsPasswordRepeat, setShowAsPasswordRepeat] = useState(false)
   const { getRequest } = useContext(RequestsContext)
+  const { stack: stackError } = useError()
 
   const handleCopy = event => {
     event.preventDefault()
@@ -37,7 +39,7 @@ const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refr
       idNo: yup.string().required(),
       idNoRepeat: yup
         .string()
-        .required('Repeat Password is required')
+        .required()
         .oneOf([yup.ref('idNo'), null], 'Number must match')
     }),
     onSubmit: values => {
@@ -46,8 +48,6 @@ const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refr
   })
 
   const postFetchDefault = obj => {
-    console.log(idTypes)
-
     const type = idTypes?.list?.filter(item => item?.recordId == obj?.idtId)?.[0]?.type
 
     const hijriDate = moment(formatDateForGetApI(obj.birthDate), 'YYYY-MM-DD').format('iYYYY-iMM-iDD')
@@ -57,10 +57,10 @@ const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refr
     getRequest({
       extension: CurrencyTradingSettingsRepository.Yakeen.get,
       parameters: parameters
-    })
-      .then(result => {
-        const res = result.record
+    }).then(result => {
+      const res = result.record
 
+      if (!res.errorId) {
         clientformik.setFieldValue('expiryDate', formatDateFromApi(res.idExpirationDate))
         clientformik.setFieldValue('firstName', res.fl_firstName)
         clientformik.setFieldValue('middleName', res.fl_middleName)
@@ -79,8 +79,10 @@ const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refr
 
         res.newProfessionMode && refreshProf()
         window.close()
-      })
-      .catch(error => {})
+      } else {
+        stackError({ message: JSON.stringify(res?.errorDetail) })
+      }
+    })
   }
 
   return (
@@ -93,7 +95,7 @@ const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refr
                 name='idTypeName'
                 label={labels.id_type}
                 readOnly={true}
-                value={clientformik.values.idtName}
+                value={idTypes?.list?.find(item => item.recordId === clientformik.values.idtId)?.name}
               />
             </Grid>
             <Grid item xs={12}>
