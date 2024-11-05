@@ -26,6 +26,8 @@ const OTPPhoneVerification = ({
   })
   const [otp, setOtp] = useState(['', '', '', '', '', ''])
   const [timer, setTimer] = useState(null)
+  const [sent, setSent] = useState(false)
+
   const [error, setError] = useState('')
   const [disabled, setDisabled] = useState(0)
 
@@ -46,20 +48,20 @@ const OTPPhoneVerification = ({
 
   useEffect(() => {
     document.getElementById(`otp-input-${0}`).focus()
-    otpSMS()
+    // otpSMS()
   }, [])
 
-  useEffect(() => {
-    if (defaultsData?.list?.find(obj => obj.key === 'otp-expiry-time')) {
-      const expiryTimeObj = defaultsData.list.find(obj => obj.key === 'otp-expiry-time')
-      const expiryTime = parseInt(expiryTimeObj?.value, 10)
-      if (!isNaN(expiryTime)) {
-        setTimer(expiryTime)
-      }
-    } else {
-      setError('OTP Expiry Time is Not Filled.')
-    }
-  }, [defaultsData])
+  // useEffect(() => {
+  //   if (defaultsData?.list?.find(obj => obj.key === 'otp-expiry-time')) {
+  //     const expiryTimeObj = defaultsData.list.find(obj => obj.key === 'otp-expiry-time')
+  //     const expiryTime = parseInt(expiryTimeObj?.value, 10)
+  //     if (!isNaN(expiryTime)) {
+  //       setTimer(expiryTime)
+  //     }
+  //   } else {
+  //     setError('OTP Expiry Time is Not Filled.')
+  //   }
+  // }, [defaultsData])
 
   const otpSMS = () => {
     var data = {
@@ -155,6 +157,7 @@ const OTPPhoneVerification = ({
   }
 
   const handleResendOtp = () => {
+    setSent(true)
     const expiryTimeObj = defaultsData.list.find(obj => obj.key === 'otp-expiry-time')
     const expiryTime = parseInt(expiryTimeObj?.value, 10)
     if (!isNaN(expiryTime)) {
