@@ -1,7 +1,6 @@
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import { CustomTabs } from 'src/components/Shared/CustomTabs'
 import { useContext, useState } from 'react'
-import * as yup from 'yup'
 import AvailabilitiesTab from './Windows/AvailabilitiesTab'
 import ActivitiesTab from './Windows/ActivitiesTab'
 import { useResourceQuery } from 'src/hooks/resource'
@@ -17,7 +16,6 @@ import { useForm } from 'src/hooks/form'
 
 const SiteDashboard = () => {
   const [activeTab, setActiveTab] = useState(0)
-  const [siteId, setSiteId] = useState()
   const { getRequest } = useContext(RequestsContext)
 
   const { platformLabels } = useContext(ControlContext)
@@ -27,16 +25,33 @@ const SiteDashboard = () => {
   })
 
   async function fetchGridAvailabilities(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 50 } = options;
 
-    if (!!siteId) {
-      const response = await getRequest({
-        extension: InventoryRepository.Availability.qry,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_siteId=${siteId}&_itemId=${0}&_functionId=0&_filter=&_size=30`
-      })
-
-      return { ...response, _startAt: _startAt }
+    if (!formik.values.siteId) {
+      return { count: 0, list: [], statusId: 1, message: '' }; 
     }
+
+    const response = await getRequest({
+      extension: InventoryRepository.Availability.qry,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_siteId=${formik.values.siteId}&_itemId=${0}&_functionId=0&_filter=&_size=30`
+    });
+
+    return { ...response, _startAt: _startAt };
+  }
+  
+  async function fetchGridActivities(options = {}) {
+    const { _startAt = 0, _pageSize = 50 } = options;
+
+    if (!formik.values.siteId) {
+      return { count: 0, list: [], statusId: 1, message: '' };
+    }
+
+    const response = await getRequest({
+      extension: InventoryRepository.Transaction.qry3,
+      parameters: `_filter=&_size=30&_startAt=${_startAt}&_siteId=${formik.values.siteId}&_functionId=0&_itemId=0&_pageSize=${_pageSize}&_sortBy=itemId`
+    });
+
+    return { ...response, _startAt: _startAt };
   }
 
   const {
@@ -49,19 +64,6 @@ const SiteDashboard = () => {
     endpointId: InventoryRepository.Availability.qry,
     datasetId: ResourceIds.SiteDashboard
   })
-
-  async function fetchGridActivities(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
-
-    if (!!siteId) {
-      const response = await getRequest({
-        extension: InventoryRepository.Transaction.qry3,
-        parameters: `_filter=&_size=30&_startAt=${_startAt}&_siteId=${siteId}&_functionId=0&_itemId=0&_pageSize=${_pageSize}&_sortBy=itemId`
-      })
-
-      return { ...response, _startAt: _startAt }
-    }
-  }
 
   const {
     query: { data: activities },
@@ -82,9 +84,6 @@ const SiteDashboard = () => {
     },
     enableReinitialize: true,
     validateOnChange: true,
-    validationSchema: yup.object({
-      siteId: yup.string().required()
-    }),
     onSubmit: () => {
       paginationActivities({ _startAt: 0, _pageSize: 50 });
       paginationAvailabilities({ _startAt: 0, _pageSize: 50 });
@@ -116,8 +115,7 @@ const SiteDashboard = () => {
                 values={formik.values}
                 maxAccess={access}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('siteId', newValue?.recordId || null)
-                  setSiteId(newValue?.recordId)
+                  formik.setFieldValue('siteId', newValue?.recordId || null);
                 }}
               />
               <Button
