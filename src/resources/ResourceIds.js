@@ -292,6 +292,5 @@ export const ResourceIds = {
   InventoryTransaction: 41209,
   GenerateFiscalYear: 41503,
   SalesTrxForm: 51307,
-  UserSecretOTPQrCode: 23201,
-  TrxDetails: 20100
+  UserSecretOTPQrCode: 23201
 }
