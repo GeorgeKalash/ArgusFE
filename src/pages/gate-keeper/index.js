@@ -6,9 +6,12 @@ import { ManufacturingRepository } from 'src/repositories/ManufacturingRepositor
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import Table from 'src/components/Shared/Table'
+import toast from 'react-hot-toast'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const GateKeeper = () => {
-  const { getRequest } = useContext(RequestsContext)
+  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -34,7 +37,8 @@ const GateKeeper = () => {
     query: { data },
     labels: _labels,
     refetch,
-    access
+    access,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: ManufacturingRepository.LeanProductionPlanning.preview2,
@@ -77,6 +81,15 @@ const GateKeeper = () => {
     }
   ]
 
+  const del = async obj => {
+    await postRequest({
+      extension: ManufacturingRepository.LeanProductionPlanning.cancel,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Cancelled)
+  }
+
   return (
     <VertLayout>
       <Grow>
@@ -84,6 +97,7 @@ const GateKeeper = () => {
           columns={columns}
           gridData={data}
           rowId={['recordId']}
+          onDelete={del}
           isLoading={false}
           pagination={false}
           refetch={refetch}
