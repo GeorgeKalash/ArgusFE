@@ -1,8 +1,8 @@
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import { CustomTabs } from 'src/components/Shared/CustomTabs'
 import { useContext, useState } from 'react'
-import AvailabilitiesTab from './Windows/AvailabilitiesTab'
-import ActivitiesTab from './Windows/ActivitiesTab'
+import AvailabilitiesTab from './Tabs/AvailabilitiesTab'
+import ActivitiesTab from './Tabs/ActivitiesTab'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
@@ -13,6 +13,8 @@ import { ControlContext } from 'src/providers/ControlContext'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useForm } from 'src/hooks/form'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const SiteDashboard = () => {
   const [activeTab, setActiveTab] = useState(0)
@@ -25,33 +27,35 @@ const SiteDashboard = () => {
   })
 
   async function fetchGridAvailabilities(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options;
+    const { _startAt = 0, _pageSize = 50 } = options
 
     if (!formik.values.siteId) {
-      return { count: 0, list: [], statusId: 1, message: '' }; 
+      return { count: 0, list: [], statusId: 1, message: '' }
     }
 
     const response = await getRequest({
       extension: InventoryRepository.Availability.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_siteId=${formik.values.siteId}&_itemId=${0}&_functionId=0&_filter=&_size=30`
-    });
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_siteId=${
+        formik.values.siteId
+      }&_itemId=${0}&_functionId=0&_filter=&_size=30`
+    })
 
-    return { ...response, _startAt: _startAt };
+    return { ...response, _startAt: _startAt }
   }
-  
+
   async function fetchGridActivities(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options;
+    const { _startAt = 0, _pageSize = 50 } = options
 
     if (!formik.values.siteId) {
-      return { count: 0, list: [], statusId: 1, message: '' };
+      return { count: 0, list: [], statusId: 1, message: '' }
     }
 
     const response = await getRequest({
       extension: InventoryRepository.Transaction.qry3,
       parameters: `_filter=&_size=30&_startAt=${_startAt}&_siteId=${formik.values.siteId}&_functionId=0&_itemId=0&_pageSize=${_pageSize}&_sortBy=itemId`
-    });
+    })
 
-    return { ...response, _startAt: _startAt };
+    return { ...response, _startAt: _startAt }
   }
 
   const {
@@ -85,16 +89,16 @@ const SiteDashboard = () => {
     enableReinitialize: true,
     validateOnChange: true,
     onSubmit: () => {
-      paginationActivities({ _startAt: 0, _pageSize: 50 });
-      paginationAvailabilities({ _startAt: 0, _pageSize: 50 });
+      paginationActivities({ _startAt: 0, _pageSize: 50 })
+      paginationAvailabilities({ _startAt: 0, _pageSize: 50 })
 
-      refetchAvailabilities();
-      refetchActivities();
+      refetchAvailabilities()
+      refetchActivities()
     }
   })
 
   return (
-    <>
+    <VertLayout>
       <Fixed>
         <GridToolbar
           maxAccess={access}
@@ -114,7 +118,7 @@ const SiteDashboard = () => {
                 values={formik.values}
                 maxAccess={access}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('siteId', newValue?.recordId || null);
+                  formik.setFieldValue('siteId', newValue?.recordId || null)
                 }}
               />
               <Button
@@ -131,28 +135,30 @@ const SiteDashboard = () => {
           }
         />
       </Fixed>
-      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-      <CustomTabPanel index={0} value={activeTab}>
-        <AvailabilitiesTab
-          labels={labels}
-          maxAccess={access}
-          data={Availabilities}
-          pagination={paginationAvailabilities}
-          refetch={refetchAvailabilities}
-          access={accessAvailabilities}
-        />
-      </CustomTabPanel>
-      <CustomTabPanel index={1} value={activeTab}>
-        <ActivitiesTab
-          maxAccess={access}
-          labels={labels}
-          data={activities}
-          pagination={paginationActivities}
-          refetch={refetchActivities}
-          access={accessActivities}
-        />
-      </CustomTabPanel>
-    </>
+      <Grow>
+        <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
+        <CustomTabPanel index={0} value={activeTab}>
+          <AvailabilitiesTab
+            labels={labels}
+            maxAccess={access}
+            data={Availabilities}
+            pagination={paginationAvailabilities}
+            refetch={refetchAvailabilities}
+            access={accessAvailabilities}
+          />
+        </CustomTabPanel>
+        <CustomTabPanel index={1} value={activeTab}>
+          <ActivitiesTab
+            maxAccess={access}
+            labels={labels}
+            data={activities}
+            pagination={paginationActivities}
+            refetch={refetchActivities}
+            access={accessActivities}
+          />
+        </CustomTabPanel>
+      </Grow>
+    </VertLayout>
   )
 }
 
