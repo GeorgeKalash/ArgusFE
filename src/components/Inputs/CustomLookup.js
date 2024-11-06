@@ -55,7 +55,6 @@ const CustomLookup = ({
   }, [firstValue])
 
   const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
-
   const _readOnly = editMode ? editMode && maxAccess < TrxType.EDIT : readOnly
 
   const _hidden = accessLevel ? accessLevel === HIDDEN : hidden

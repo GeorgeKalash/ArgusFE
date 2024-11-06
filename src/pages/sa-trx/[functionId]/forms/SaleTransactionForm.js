@@ -1398,7 +1398,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                   <ResourceComboBox
                     endpointId={SaleRepository.SalesPerson.qry}
                     name='spId'
-                    readonly={isPosted}
+                    readOnly={isPosted}
                     label={labels.salesPerson}
                     columnsInDropDown={[
                       { key: 'spRef', value: 'Reference' },
@@ -1433,7 +1433,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
-                    readonly={isPosted}
+                    readOnly={isPosted}
                     values={formik.values.header}
                     valueField='recordId'
                     displayField={['reference', 'name']}
@@ -1470,7 +1470,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                     name='date'
                     required
                     label={labels.date}
-                    readonly={isPosted}
+                    readOnly={isPosted}
                     value={formik?.values?.header?.date}
                     onChange={formik.setFieldValue}
                     editMode={editMode}
@@ -1485,7 +1485,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                     parameters={`_startAt=0&_pageSize=1000&_sortField="recordId"&_filter=`}
                     name='szId'
                     label={labels.saleZone}
-                    readonly={isPosted}
+                    readOnly={isPosted}
                     columnsInDropDown={[{ key: 'name', value: 'Name' }]}
                     valueField='recordId'
                     displayField='name'
@@ -1566,12 +1566,11 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                   form={formik}
                   formObject={formik.values.header}
                   required
-                  readonly={isPosted}
+                  readOnly={isPosted}
                   displayFieldWidth={3}
                   valueShow='clientRef'
                   secondValueShow='clientName'
-                  maxAccess={maxAccess}
-                  editMode={editMode}
+                  maxAccess={maxAccess} //editMode={editMode}
                   columnsInDropDown={[
                     { key: 'reference', value: 'Reference' },
                     { key: 'name', value: 'Name' },
@@ -1619,7 +1618,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                   label={labels.currency}
                   valueField='recordId'
                   displayField={['reference', 'name']}
-                  readonly={isPosted}
+                  readOnly={isPosted}
                   columnsInDropDown={[
                     { key: 'reference', value: 'Reference' },
                     { key: 'name', value: 'Name' }
@@ -1642,7 +1641,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                   name='contactId'
                   label={labels.contact}
                   valueField='recordId'
-                  readonly={isPosted}
+                  readOnly={isPosted}
                   displayField={['reference', 'name']}
                   columnsInDropDown={[
                     { key: 'reference', value: 'Reference' },
@@ -1753,7 +1752,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                     displayCycleButton={true}
                     cycleButtonLabel={cycleButtonState.text}
                     decimalScale={2}
-                    readonly={isPosted}
+                    readOnly={isPosted}
                     handleCycleButtonClick={handleCycleButtonClick}
                     onChange={e => {
                       let discount = Number(e.target.value)
@@ -1799,7 +1798,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                     label={labels.misc}
                     value={formik.values.header.miscAmount}
                     decimalScale={2}
-                    readonly={isPosted}
+                    readOnly={isPosted}
                     onChange={e => formik.setFieldValue('header.miscAmount', e.target.value)}
                     onClear={() => formik.setFieldValue('header.miscAmount', 0)}
                   />
