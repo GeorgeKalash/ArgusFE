@@ -38,7 +38,6 @@ import {
   DIRTYFIELD_MDTYPE,
   DIRTYFIELD_UPO,
   DIRTYFIELD_EXTENDED_PRICE,
-  MDTYPE_AMOUNT,
   MDTYPE_PCT
 } from 'src/utils/ItemPriceCalculator'
 import { getVatCalc } from 'src/utils/VatCalculator'
@@ -340,7 +339,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       flex: 2,
       props: {
         endpointId: InventoryRepository.Item.snapshot,
-        parameters: '_categoryId=0&_msId=0&_startAt=0&_size=1000',
+        parameters: { _categoryId: 0, _msId: 0, _startAt: 0, _size: 1000 },
         displayField: 'sku',
         valueField: 'recordId',
         mapping: [
@@ -423,7 +422,6 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                 : parseFloat(ItemConvertPrice?.unitPrice || 0).toFixed(3),
             upo: parseFloat(ItemConvertPrice?.upo || 0).toFixed(2),
             priceType: ItemConvertPrice?.priceType || 1,
-            mdAmount: 0,
             qty: 0,
             msId: itemInfo?.msId,
             muRef: filteredMeasurements?.[0]?.reference,
@@ -434,8 +432,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
             extendedPrice: parseFloat('0').toFixed(2),
             mdValue: 0,
             taxId: rowTax,
-            taxDetails: rowTaxDetails,
-            mdtype: MDTYPE_PCT
+            taxDetails: rowTaxDetails
           })
 
           formik.setFieldValue(
@@ -453,6 +450,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       component: 'textfield',
       label: labels.itemName,
       name: 'itemName',
+      flex: 3,
       props: {
         readOnly: true
       }
@@ -676,6 +674,8 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       mdAmount: currentMdAmount,
       mdType: currentMdType
     }
+
+    console.log(newRow)
 
     getItemPriceRow(updateRow, newRow, DIRTYFIELD_MDTYPE, true)
     checkMdAmountPct(newRow, updateRow)
@@ -963,6 +963,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
   }
 
   const handleCycleButtonClick = () => {
+    setReCal(true)
     let currentTdAmount
     let currentPctAmount
 
@@ -1092,7 +1093,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       hiddenTdAmount: parseFloat(tdAmount),
       typeChange: typeChange
     })
-    formik.setFieldValue('header.tdAmount', _discountObj?.tdAmount?.toFixed(2) || 0)
+    formik.setFieldValue('header.tdAmount', _discountObj?.hiddenTdAmount ? _discountObj?.hiddenTdAmount?.toFixed(2) : 0)
     formik.setFieldValue('header.tdType', _discountObj?.tdType)
     formik.setFieldValue('header.currentDiscount', _discountObj?.currentDiscount || 0)
     formik.setFieldValue('header.tdPct', _discountObj?.hiddenTdPct)
@@ -1100,7 +1101,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
   }
 
   function recalcNewVat(tdPct) {
-    formik.values.items.map(item => {
+    formik.values.items.map((item, index) => {
       const vatCalcRow = getVatCalc({
         basePrice: parseFloat(item?.basePrice),
         qty: item?.qty,
@@ -1111,7 +1112,6 @@ export default function SaleTransactionForm({ labels, access, recordId, function
         taxDetails: item.taxDetails
       })
 
-      const index = item.id - 1
       formik.setFieldValue(`items[${index}].vatAmount`, parseFloat(vatCalcRow?.vatAmount).toFixed(2))
     })
   }
@@ -1228,6 +1228,18 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       onChangeDtId(documentType.dtId)
     }
   }, [documentType?.dtId])
+
+  useEffect(() => {
+    if (reCal) {
+      let currentTdAmount = (parseFloat(formik.values.header.tdPct) * parseFloat(subtotal)) / 100
+      recalcGridVat(
+        formik.values.header.tdType,
+        formik.values.header.tdPct,
+        currentTdAmount,
+        formik.values.header.currentDiscount
+      )
+    }
+  }, [subtotal])
 
   useEffect(() => {
     ;(async function () {
@@ -1660,7 +1672,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                 {metalPriceVisibility && (
                   <CustomNumberField
                     name='KGmetalPrice'
-                    label={labels.KGmetalPrice}
+                    label={labels.metalPrice}
                     value={formik.values.header.KGmetalPrice}
                     readOnly
                   />
@@ -1769,6 +1781,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                       formik.setFieldValue('header.currentDiscount', discount)
                     }}
                     onBlur={async e => {
+                      setReCal(true)
                       let discountAmount = Number(e.target.value)
                       let tdPct = Number(e.target.value)
                       let tdAmount = Number(e.target.value)
@@ -1801,6 +1814,9 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                     decimalScale={2}
                     readonly={isPosted}
                     onChange={e => formik.setFieldValue('header.miscAmount', e.target.value)}
+                    onBlur={async () => {
+                      setReCal(true)
+                    }}
                     onClear={() => formik.setFieldValue('header.miscAmount', 0)}
                   />
                 </Grid>
