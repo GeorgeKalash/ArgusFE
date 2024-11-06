@@ -33,7 +33,6 @@ const GateKeeper = () => {
   const {
     query: { data },
     labels: _labels,
-    paginationParameters,
     refetch,
     access
   } = useResourceQuery({
@@ -86,9 +85,7 @@ const GateKeeper = () => {
           gridData={data}
           rowId={['recordId']}
           isLoading={false}
-          pageSize={50}
-          paginationType='api'
-          paginationParameters={paginationParameters}
+          pagination={false}
           refetch={refetch}
           maxAccess={access}
         />
