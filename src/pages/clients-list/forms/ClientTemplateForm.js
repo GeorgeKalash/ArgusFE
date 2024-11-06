@@ -1244,17 +1244,17 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                 <Grid container spacing={2} xs={12}>
                   <Grid item xs='auto'>
                     <Button variant='contained' color='primary'>
-                      {'PREVIEW'}
+                      {labels.preview}
                     </Button>
                   </Grid>
                   <Grid item xs='auto'>
                     <Button variant='contained' color='primary'>
-                      {'SCANNER'}
+                      {labels.scanner}
                     </Button>
                   </Grid>
                   <Grid item xs='auto'>
                     <Button variant='contained' color='primary'>
-                      {'DIGITAL ID'}
+                      {labels.digitalId}
                     </Button>
                   </Grid>
                 </Grid>
