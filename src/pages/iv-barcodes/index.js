@@ -102,6 +102,16 @@ const IvBarcodes = () => {
       field: 'defaultQty',
       headerName: _labels.defaultQty,
       flex: 1
+    },
+    {
+      field: 'scaleDescription',
+      headerName: _labels.scaleDescription,
+      flex: 1
+    },
+    {
+      field: 'posDescription',
+      headerName: _labels.posDescription,
+      flex: 1
     }
   ]
 
