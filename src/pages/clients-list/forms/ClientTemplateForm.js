@@ -812,7 +812,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                       <CustomTextField
                         name='idNo'
                         label={labels.id_number}
-                        type={showAsPassword && 'password'}
+                        type={showAsPassword ? 'password' : ''}
                         value={formik.values?.idNo}
                         required
                         onChange={e => {
@@ -1524,7 +1524,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
 
                   <Grid container xs={12} sx={{ pt: 5 }}>
                     <FieldSet title={labels.diplomat}>
-                      <Grid item xs={12}>
+                      <Grid item xs={6}>
                         <FormControlLabel
                           control={
                             <Checkbox
@@ -1537,7 +1537,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                           label={labels?.isDiplomat}
                         />
                       </Grid>
-                      <Grid item xs={12}>
+                      <Grid item xs={6}>
                         <FormControlLabel
                           control={
                             <Checkbox

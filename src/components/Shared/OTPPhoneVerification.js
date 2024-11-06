@@ -34,6 +34,7 @@ const OTPPhoneVerification = ({
 
   useEffect(() => {
     let interval
+
     if (sent) {
       if (timer > 0) {
         interval = setInterval(() => {
@@ -44,6 +45,7 @@ const OTPPhoneVerification = ({
         setError(labels.OTPTimeNotSet)
       }
     }
+
     return () => clearInterval(interval)
   }, [timer, sent])
 
@@ -196,7 +198,6 @@ const OTPPhoneVerification = ({
         >
           {labels.verifyOTP}
         </button>
-        {/* {error && <p className={styles.errorMessage}>{error}</p>} */}
       </Grid>
     </div>
   )
