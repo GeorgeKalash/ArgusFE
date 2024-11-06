@@ -126,8 +126,8 @@ export default function BarcodesForm({ labels, access, store, recordId, msId }) 
                   formik.setFieldValue('sku', newValue?.sku)
                   formik.setFieldValue('itemRef', newValue?.sku)
                   formik.setFieldValue('msId', newValue?.msId)
-                  formik.setFieldValue('scaleDescription', newValue?.description)
-                  formik.setFieldValue('posDescription', newValue?.description)
+                  formik.setFieldValue('scaleDescription', newValue?.name)
+                  formik.setFieldValue('posDescription', newValue?.name)
                 }}
                 maxAccess={access}
                 required
