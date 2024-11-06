@@ -6,7 +6,7 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 
 export default function DataForm({ obj }) {
-  const [data, setData] = useState('')
+  const [data, setData] = useState({})
   const { getRequest } = useContext(RequestsContext)
 
   useEffect(() => {
@@ -16,7 +16,7 @@ export default function DataForm({ obj }) {
         parameters: `_recordId=${obj.recordId}`
       })
 
-      setData(res.record.data)
+      setData(JSON.parse(res.record.data))
     })()
   }, [])
 
@@ -29,7 +29,7 @@ export default function DataForm({ obj }) {
           }}
         >
           <Grid item style={{ height: 290 }}>
-            <pre>{JSON.stringify(JSON.parse(data), null, 2)}</pre>
+            {<pre style={{ margin: 0, fontFamily: 'inherit', fontWeight: 450 }}>{JSON.stringify(data, null, 2)}</pre>}
           </Grid>
         </DialogContent>
       </Fixed>
