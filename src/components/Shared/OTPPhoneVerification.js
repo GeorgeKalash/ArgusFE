@@ -7,6 +7,7 @@ import toast from 'react-hot-toast'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import useResourceParams from 'src/hooks/useResourceParams'
 import { ControlContext } from 'src/providers/ControlContext'
+import { Box } from '@mui/material'
 
 const OTPPhoneVerification = ({
   formValidation,
@@ -33,18 +34,18 @@ const OTPPhoneVerification = ({
 
   useEffect(() => {
     let interval
-
-    if (timer > 0) {
-      interval = setInterval(() => {
-        setTimer(prevTimer => prevTimer - 1)
-      }, 1000)
-    } else {
-      clearInterval(interval)
-      setError(labels.OTPTimeNotSet)
+    if (sent) {
+      if (timer > 0) {
+        interval = setInterval(() => {
+          setTimer(prevTimer => prevTimer - 1)
+        }, 1000)
+      } else {
+        clearInterval(interval)
+        setError(labels.OTPTimeNotSet)
+      }
     }
-
     return () => clearInterval(interval)
-  }, [timer])
+  }, [timer, sent])
 
   const otpSMS = () => {
     var data = {
@@ -182,7 +183,7 @@ const OTPPhoneVerification = ({
               {labels.timeRemaining}: {timer}s
             </p>
           ) : (
-            <p className={styles.expiredTimer}>{labels.OTPExpired}</p>
+            <p className={styles.expiredTimer}>{sent && labels.OTPExpired}</p>
           )}
         </Grid>
         <button className={styles.resendButton} onClick={handleResendOtp} disabled={timer > 0}>
@@ -195,7 +196,7 @@ const OTPPhoneVerification = ({
         >
           {labels.verifyOTP}
         </button>
-        {error && <p className={styles.errorMessage}>{error}</p>}
+        {/* {error && <p className={styles.errorMessage}>{error}</p>} */}
       </Grid>
     </div>
   )

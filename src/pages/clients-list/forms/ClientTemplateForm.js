@@ -738,7 +738,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
           <Grid container xs={12} spacing={2} sx={{ padding: '20px' }}>
             <Grid item xs={6} sx={{ padding: '30px' }}>
               <Grid container spacing={2}>
-                <Grid item xs={6}>
+                <Grid item xs={4}>
                   <TextFieldReference
                     endpointId={CurrencyTradingSettingsRepository.Defaults.get}
                     param={'ct-nra-individual'}
@@ -753,7 +753,18 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                     maxAccess={maxAccess}
                   />
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item xs={4}>
+                  <CustomTextField
+                    name='cltRemReference'
+                    label={labels.lastKYC}
+                    value={formik?.values?.cltRemReference}
+                    maxAccess={maxAccess}
+                    maxLength='30'
+                    readOnly
+                    error={formik.touched.cltRemReference && Boolean(formik.errors.cltRemReference)}
+                  />
+                </Grid>
+                <Grid item xs={4}>
                   <FormControlLabel
                     control={
                       <Checkbox
@@ -766,17 +777,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                     label={labels.isResident}
                   />
                 </Grid>
-                <Grid item xs={12}>
-                  <CustomTextField
-                    name='cltRemReference'
-                    label={labels.lastKYC}
-                    value={formik?.values?.cltRemReference}
-                    maxAccess={maxAccess}
-                    maxLength='30'
-                    readOnly
-                    error={formik.touched.cltRemReference && Boolean(formik.errors.cltRemReference)}
-                  />
-                </Grid>
+
                 <Grid item xs={6}>
                   <CustomDatePicker
                     name='birthDate'
@@ -807,7 +808,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                 </Grid>
                 <Grid item xs={12}>
                   <FieldSet title={labels.id}>
-                    <Grid item xs={12}>
+                    <Grid item xs={5}>
                       <CustomTextField
                         name='idNo'
                         label={labels.id_number}
@@ -835,7 +836,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         maxAccess={maxAccess}
                       />
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid item xs={5}>
                       <ResourceComboBox
                         endpointId={CurrencyTradingSettingsRepository.IdTypes.qry}
                         name='idtId'
@@ -861,7 +862,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                       />
                     </Grid>
 
-                    <Grid item xs={12}>
+                    <Grid item xs={2}>
                       <Button
                         variant='contained'
                         onClick={() =>
@@ -891,7 +892,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                       </Button>
                     </Grid>
 
-                    <Grid item xs={12}>
+                    <Grid item xs={4}>
                       <CustomDatePicker
                         name='expiryDate'
                         label={labels.expiryDate}
@@ -906,7 +907,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                       />
                     </Grid>
 
-                    <Grid item xs={6}>
+                    <Grid item xs={4}>
                       <CustomDatePicker
                         name='issueDate'
                         label={labels.issueDate}
@@ -919,7 +920,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         maxAccess={maxAccess}
                       />
                     </Grid>
-                    <Grid item xs={6}>
+                    <Grid item xs={4}>
                       <CustomDatePickerHijri
                         name='issueDateHijri'
                         label={labels.issueDateHijri}
@@ -933,7 +934,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                       />
                     </Grid>
 
-                    <Grid item xs={12}>
+                    <Grid item xs={4}>
                       <ResourceComboBox
                         endpointId={SystemRepository.Country.qry}
                         name='idCountry'
@@ -941,6 +942,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         valueField='recordId'
                         displayField={['reference', 'name', 'flName']}
                         readOnly={editMode && !allowEdit && true}
+                        displayFieldWidth={1.5}
                         columnsInDropDown={[
                           { key: 'reference', value: 'Reference' },
                           { key: 'name', value: 'Name' },
@@ -966,7 +968,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                       />
                     </Grid>
 
-                    <Grid item xs={12}>
+                    <Grid item xs={4}>
                       <ResourceLookup
                         endpointId={SystemRepository.City.snapshot}
                         parameters={{
@@ -994,7 +996,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         error={formik.touched.idCity && Boolean(formik.errors.idCity)}
                       />
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid item xs={4}>
                       <CustomTextField
                         name='idIssuePlaceCode'
                         label={labels.issusPlace}
@@ -1006,17 +1008,254 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         maxAccess={maxAccess}
                       />
                     </Grid>
-                  </FieldSet>
-                  <Grid item xs={12} sx={{ marginTop: '20px' }}>
-                    <FieldSet title={labels.address}>
-                      <AddressTab
-                        labels={labels}
-                        defaultReadOnly={{ countryId: true }}
-                        addressValidation={formik}
+                    <Grid item xs={12}>
+                      <Grid container spacing={2} sx={{ direction: dir }}>
+                        {' '}
+                        <Grid item xs={3}>
+                          <CustomTextField
+                            name='firstName'
+                            label={labels.first}
+                            value={formik.values?.firstName}
+                            required
+                            onChange={e => {
+                              formik.handleChange(e)
+                              formik.setFieldValue('name', e.target.value + ' ' + formik.values?.lastName)
+                            }}
+                            language='english'
+                            maxLength='10'
+                            readOnly={editMode && !allowEdit && true}
+                            onClear={() => formik.setFieldValue('firstName', '')}
+                            error={formik.touched.firstName && Boolean(formik.errors.firstName)}
+                            maxAccess={maxAccess}
+                          />
+                        </Grid>
+                        <Grid item xs={3}>
+                          <CustomTextField
+                            name='middleName'
+                            label={labels.middle}
+                            value={formik.values?.middleName}
+                            onChange={formik.handleChange}
+                            language='english'
+                            maxLength='10'
+                            readOnly={editMode && !allowEdit && true}
+                            onClear={() => formik.setFieldValue('middleName', '')}
+                            error={formik.touched.middleName && Boolean(formik.errors.middleName)}
+                            maxAccess={maxAccess}
+                          />
+                        </Grid>
+                        <Grid item xs={3}>
+                          <CustomTextField
+                            name='lastName'
+                            label={labels.last}
+                            value={formik.values?.lastName}
+                            required
+                            onChange={e => {
+                              formik.handleChange(e),
+                                formik.setFieldValue('name', formik.values?.firstName + ' ' + e.target.value)
+                            }}
+                            language='english'
+                            maxLength='10'
+                            readOnly={editMode && !allowEdit && true}
+                            onClear={() => formik.setFieldValue('lastName', '')}
+                            error={formik.touched.lastName && Boolean(formik.errors.lastName)}
+                            maxAccess={maxAccess}
+                          />
+                        </Grid>
+                        <Grid item xs={3}>
+                          <CustomTextField
+                            name='familyName'
+                            label={labels.family}
+                            value={formik.values?.familyName}
+                            onChange={formik.handleChange}
+                            language='english'
+                            maxLength='10'
+                            readOnly={editMode && !allowEdit && true}
+                            onClear={() => formik.setFieldValue('familyName', '')}
+                            error={formik.touched.familyName && Boolean(formik.errors.familyName)}
+                            maxAccess={maxAccess}
+                          />
+                        </Grid>
+                      </Grid>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Grid container spacing={2} sx={{ flexDirection: 'row-reverse', direction: dir }}>
+                        <Grid item xs={3}>
+                          <CustomTextField
+                            name='fl_firstName'
+                            label={labels.fl_first}
+                            value={formik.values?.fl_firstName}
+                            onChange={formik.handleChange}
+                            maxLength='10'
+                            readOnly={editMode && !allowEdit && true}
+                            dir='rtl'
+                            language='arabic'
+                            onClear={() => formik.setFieldValue('fl_firstName', '')}
+                            error={formik.touched.fl_firstName && Boolean(formik.errors.fl_firstName)}
+                            helperText={formik.touched.fl_firstName && formik.errors.fl_firstName}
+                            maxAccess={maxAccess}
+                          />
+                        </Grid>
+                        <Grid item xs={3}>
+                          <CustomTextField
+                            name='fl_middleName'
+                            label={labels.fl_middle}
+                            value={formik.values?.fl_middleName}
+                            onChange={formik.handleChange}
+                            readOnly={editMode && !allowEdit && true}
+                            dir='rtl'
+                            language='arabic'
+                            onClear={() => formik.setFieldValue('fl_familyName', '')}
+                            error={formik.touched.fl_middleName && Boolean(formik.errors.fl_middleName)}
+                            maxAccess={maxAccess}
+                          />
+                        </Grid>
+                        <Grid item xs={3}>
+                          <CustomTextField
+                            name='fl_lastName'
+                            label={labels.fl_last}
+                            value={formik.values?.fl_lastName}
+                            onChange={formik.handleChange}
+                            maxLength='10'
+                            dir='rtl'
+                            language='arabic'
+                            readOnly={editMode && !allowEdit && true}
+                            onClear={() => formik.setFieldValue('fl_lastName', '')}
+                            error={formik.touched.fl_lastName && Boolean(formik.errors.fl_lastName)}
+                            maxAccess={maxAccess}
+                          />
+                        </Grid>
+                        <Grid item xs={3}>
+                          <CustomTextField
+                            name='fl_familyName'
+                            label={labels.fl_family}
+                            value={formik.values?.fl_familyName}
+                            onChange={formik.handleChange}
+                            readOnly={editMode && !allowEdit && true}
+                            dir='rtl'
+                            language='arabic'
+                            onClear={() => formik.setFieldValue('fl_familyName', '')}
+                            error={formik.touched.fl_familyName && Boolean(formik.errors.fl_familyName)}
+                            maxAccess={maxAccess}
+                          />
+                        </Grid>
+                      </Grid>
+                    </Grid>
+                    <Grid item xs={4}>
+                      <ResourceComboBox
+                        endpointId={SystemRepository.Country.qry}
+                        name='nationalityId'
+                        label={labels.nationality}
+                        setData={setNationalities}
+                        valueField='recordId'
+                        displayField={['reference', 'name', 'flName']}
+                        columnsInDropDown={[
+                          { key: 'reference', value: 'Reference' },
+                          { key: 'name', value: 'Name' },
+                          { key: 'flName', value: 'Foreign Language Name' }
+                        ]}
+                        displayFieldWidth={1.5}
                         readOnly={editMode && !allowEdit && true}
-                        access={maxAccess}
+                        values={formik.values}
+                        required
+                        onChange={(event, newValue) => {
+                          if (newValue) {
+                            formik.setFieldValue('nationalityId', newValue?.recordId)
+                            formik.setFieldValue('smsLanguage', newValue?.languageId)
+                          } else {
+                            formik.setFieldValue('nationalityId', '')
+                            formik.setFieldValue('smsLanguage', '')
+                          }
+                        }}
+                        error={formik.touched.nationalityId && Boolean(formik.errors.nationalityId)}
+                        maxAccess={maxAccess}
                       />
-                    </FieldSet>
+                    </Grid>
+
+                    <Grid item xs={4}>
+                      <ResourceComboBox
+                        datasetId={DataSets.GENDER}
+                        name='gender'
+                        label={labels.gender}
+                        valueField='key'
+                        displayField='value'
+                        required
+                        readOnly={editMode && !allowEdit && true}
+                        values={formik.values}
+                        onChange={(event, newValue) => {
+                          formik.setFieldValue('coveredFace', false)
+                          if (newValue) {
+                            formik.setFieldValue('gender', newValue?.key)
+                          } else {
+                            formik.setFieldValue('gender', '')
+                          }
+                        }}
+                        error={formik.touched.gender && Boolean(formik.errors.gender)}
+                        maxAccess={maxAccess}
+                      />
+                    </Grid>
+                    <Grid item xs={4} key={newProf}>
+                      <ResourceComboBox
+                        endpointId={RemittanceSettingsRepository.Profession.qry}
+                        filter={
+                          idTypes?.list?.filter(item => item.recordId == formik.values.idtId)?.[0]?.isDiplomat
+                            ? item => item.diplomatStatus === 2
+                            : undefined
+                        }
+                        name='professionId'
+                        label={labels.profession}
+                        valueField='recordId'
+                        readOnly={editMode && !allowEdit && true}
+                        displayField={['reference', 'name', 'flName']}
+                        columnsInDropDown={[
+                          { key: 'reference', value: 'Reference' },
+                          { key: 'name', value: 'Name' },
+                          { key: 'flName', value: 'Foreign Language Name' }
+                        ]}
+                        displayFieldWidth={1.5}
+                        values={formik.values}
+                        required
+                        onChange={(event, newValue) => {
+                          if (newValue) {
+                            formik.setFieldValue('professionId', newValue?.recordId)
+                          } else {
+                            formik.setFieldValue('professionId', '')
+                          }
+                        }}
+                        error={formik.touched.professionId && Boolean(formik.errors.professionId)}
+                        maxAccess={maxAccess}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <CustomTextField
+                        name='sponsorName'
+                        label={labels.sponsorName}
+                        value={formik.values?.sponsorName}
+                        readOnly={editMode && !allowEdit && true}
+                        onChange={formik.handleChange}
+                        maxLength='200'
+                        onClear={() => formik.setFieldValue('sponsorName', '')}
+                        error={formik.touched.sponsorName && Boolean(formik.errors.sponsorName)}
+                        maxAccess={maxAccess}
+                      />
+                    </Grid>
+                  </FieldSet>
+                </Grid>
+
+                <Grid container spacing={2} xs={12}>
+                  <Grid item xs='auto'>
+                    <Button variant='contained' color='primary'>
+                      {'PREVIEW'}
+                    </Button>
+                  </Grid>
+                  <Grid item xs='auto'>
+                    <Button variant='contained' color='primary'>
+                      {'SCANNER'}
+                    </Button>
+                  </Grid>
+                  <Grid item xs='auto'>
+                    <Button variant='contained' color='primary'>
+                      {'DIGITAL ID'}
+                    </Button>
                   </Grid>
                 </Grid>
               </Grid>
@@ -1086,139 +1325,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         maxAccess={maxAccess}
                       />
                     </Grid>
-                    <Grid container spacing={2} sx={{ paddingTop: '20px', direction: dir }}>
-                      <Grid item xs={3}>
-                        <CustomTextField
-                          name='firstName'
-                          label={labels.first}
-                          value={formik.values?.firstName}
-                          required
-                          onChange={e => {
-                            formik.handleChange(e)
-                            formik.setFieldValue('name', e.target.value + ' ' + formik.values?.lastName)
-                          }}
-                          language='english'
-                          maxLength='10'
-                          readOnly={editMode && !allowEdit && true}
-                          onClear={() => formik.setFieldValue('firstName', '')}
-                          error={formik.touched.firstName && Boolean(formik.errors.firstName)}
-                          maxAccess={maxAccess}
-                        />
-                      </Grid>
-                      <Grid item xs={3}>
-                        <CustomTextField
-                          name='middleName'
-                          label={labels.middle}
-                          value={formik.values?.middleName}
-                          onChange={formik.handleChange}
-                          language='english'
-                          maxLength='10'
-                          readOnly={editMode && !allowEdit && true}
-                          onClear={() => formik.setFieldValue('middleName', '')}
-                          error={formik.touched.middleName && Boolean(formik.errors.middleName)}
-                          maxAccess={maxAccess}
-                        />
-                      </Grid>
-                      <Grid item xs={3}>
-                        <CustomTextField
-                          name='lastName'
-                          label={labels.last}
-                          value={formik.values?.lastName}
-                          required
-                          onChange={e => {
-                            formik.handleChange(e),
-                              formik.setFieldValue('name', formik.values?.firstName + ' ' + e.target.value)
-                          }}
-                          language='english'
-                          maxLength='10'
-                          readOnly={editMode && !allowEdit && true}
-                          onClear={() => formik.setFieldValue('lastName', '')}
-                          error={formik.touched.lastName && Boolean(formik.errors.lastName)}
-                          maxAccess={maxAccess}
-                        />
-                      </Grid>
-                      <Grid item xs={3}>
-                        <CustomTextField
-                          name='familyName'
-                          label={labels.family}
-                          value={formik.values?.familyName}
-                          onChange={formik.handleChange}
-                          language='english'
-                          maxLength='10'
-                          readOnly={editMode && !allowEdit && true}
-                          onClear={() => formik.setFieldValue('familyName', '')}
-                          error={formik.touched.familyName && Boolean(formik.errors.familyName)}
-                          maxAccess={maxAccess}
-                        />
-                      </Grid>
-                    </Grid>
-
-                    <Grid
-                      container
-                      spacing={2}
-                      sx={{ flexDirection: 'row-reverse', paddingTop: '5px', direction: dir }}
-                    >
-                      <Grid item xs={3}>
-                        <CustomTextField
-                          name='fl_firstName'
-                          label={labels.fl_first}
-                          value={formik.values?.fl_firstName}
-                          onChange={formik.handleChange}
-                          maxLength='10'
-                          readOnly={editMode && !allowEdit && true}
-                          dir='rtl'
-                          language='arabic'
-                          onClear={() => formik.setFieldValue('fl_firstName', '')}
-                          error={formik.touched.fl_firstName && Boolean(formik.errors.fl_firstName)}
-                          helperText={formik.touched.fl_firstName && formik.errors.fl_firstName}
-                          maxAccess={maxAccess}
-                        />
-                      </Grid>
-                      <Grid item xs={3}>
-                        <CustomTextField
-                          name='fl_middleName'
-                          label={labels.fl_middle}
-                          value={formik.values?.fl_middleName}
-                          onChange={formik.handleChange}
-                          readOnly={editMode && !allowEdit && true}
-                          dir='rtl'
-                          language='arabic'
-                          onClear={() => formik.setFieldValue('fl_familyName', '')}
-                          error={formik.touched.fl_middleName && Boolean(formik.errors.fl_middleName)}
-                          maxAccess={maxAccess}
-                        />
-                      </Grid>
-                      <Grid item xs={3}>
-                        <CustomTextField
-                          name='fl_lastName'
-                          label={labels.fl_last}
-                          value={formik.values?.fl_lastName}
-                          onChange={formik.handleChange}
-                          maxLength='10'
-                          dir='rtl'
-                          language='arabic'
-                          readOnly={editMode && !allowEdit && true}
-                          onClear={() => formik.setFieldValue('fl_lastName', '')}
-                          error={formik.touched.fl_lastName && Boolean(formik.errors.fl_lastName)}
-                          maxAccess={maxAccess}
-                        />
-                      </Grid>
-                      <Grid item xs={3}>
-                        <CustomTextField
-                          name='fl_familyName'
-                          label={labels.fl_family}
-                          value={formik.values?.fl_familyName}
-                          onChange={formik.handleChange}
-                          readOnly={editMode && !allowEdit && true}
-                          dir='rtl'
-                          language='arabic'
-                          onClear={() => formik.setFieldValue('fl_familyName', '')}
-                          error={formik.touched.fl_familyName && Boolean(formik.errors.fl_familyName)}
-                          maxAccess={maxAccess}
-                        />
-                      </Grid>
-                    </Grid>
-                    <Grid item xs={12}>
+                    <Grid item xs={4}>
                       <ResourceComboBox
                         endpointId={SystemRepository.Country.qry}
                         name='cobId'
@@ -1231,6 +1338,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                           { key: 'flName', value: 'Foreign Language Name' }
                         ]}
                         readOnly={editMode && !allowEdit && true}
+                        displayFieldWidth={1.5}
                         values={formik.values}
                         onChange={(event, newValue) => {
                           if (newValue) {
@@ -1243,80 +1351,8 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         maxAccess={maxAccess}
                       />
                     </Grid>
-                    <Grid item xs={12}>
-                      <ResourceComboBox
-                        endpointId={SystemRepository.Country.qry}
-                        name='nationalityId'
-                        label={labels.nationality}
-                        setData={setNationalities}
-                        valueField='recordId'
-                        displayField={['reference', 'name', 'flName']}
-                        columnsInDropDown={[
-                          { key: 'reference', value: 'Reference' },
-                          { key: 'name', value: 'Name' },
-                          { key: 'flName', value: 'Foreign Language Name' }
-                        ]}
-                        readOnly={editMode && !allowEdit && true}
-                        values={formik.values}
-                        required
-                        onChange={(event, newValue) => {
-                          if (newValue) {
-                            formik.setFieldValue('nationalityId', newValue?.recordId)
-                            formik.setFieldValue('smsLanguage', newValue?.languageId)
-                          } else {
-                            formik.setFieldValue('nationalityId', '')
-                            formik.setFieldValue('smsLanguage', '')
-                          }
-                        }}
-                        error={formik.touched.nationalityId && Boolean(formik.errors.nationalityId)}
-                        maxAccess={maxAccess}
-                      />
-                    </Grid>
 
-                    <Grid item xs={12}>
-                      <ResourceComboBox
-                        datasetId={DataSets.GENDER}
-                        name='gender'
-                        label={labels.gender}
-                        valueField='key'
-                        displayField='value'
-                        required
-                        readOnly={editMode && !allowEdit && true}
-                        values={formik.values}
-                        onChange={(event, newValue) => {
-                          formik.setFieldValue('coveredFace', false)
-                          if (newValue) {
-                            formik.setFieldValue('gender', newValue?.key)
-                          } else {
-                            formik.setFieldValue('gender', '')
-                          }
-                        }}
-                        error={formik.touched.gender && Boolean(formik.errors.gender)}
-                        maxAccess={maxAccess}
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <ResourceComboBox
-                        datasetId={DataSets.EDUCATION_LEVEL}
-                        name='educationLevel'
-                        label={labels.educationLevel}
-                        valueField='key'
-                        displayField='value'
-                        readOnly={editMode && !allowEdit && true}
-                        values={formik.values}
-                        onChange={(event, newValue) => {
-                          if (newValue) {
-                            formik.setFieldValue('educationLevel', newValue?.key)
-                          } else {
-                            formik.setFieldValue('educationLevel', null)
-                          }
-                        }}
-                        error={formik.touched.educationLevel && Boolean(formik.errors.educationLevel)}
-                        maxAccess={maxAccess}
-                      />
-                    </Grid>
-
-                    <Grid item xs={12}>
+                    <Grid item xs={4}>
                       <ResourceComboBox
                         endpointId={RemittanceSettingsRepository.SourceOfIncome.qry}
                         name='incomeSourceId'
@@ -1329,6 +1365,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                           { key: 'name', value: 'Name' },
                           { key: 'flName', value: 'Foreign Language Name' }
                         ]}
+                        displayFieldWidth={1.5}
                         values={formik.values}
                         required
                         onChange={(event, newValue) => {
@@ -1343,51 +1380,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                       />
                     </Grid>
 
-                    <Grid item xs={12}>
-                      <CustomTextField
-                        name='sponsorName'
-                        label={labels.sponsorName}
-                        value={formik.values?.sponsorName}
-                        readOnly={editMode && !allowEdit && true}
-                        onChange={formik.handleChange}
-                        maxLength='200'
-                        onClear={() => formik.setFieldValue('sponsorName', '')}
-                        error={formik.touched.sponsorName && Boolean(formik.errors.sponsorName)}
-                        maxAccess={maxAccess}
-                      />
-                    </Grid>
-                    <Grid item xs={12} key={newProf}>
-                      <ResourceComboBox
-                        endpointId={RemittanceSettingsRepository.Profession.qry}
-                        filter={
-                          idTypes?.list?.filter(item => item.recordId == formik.values.idtId)?.[0]?.isDiplomat
-                            ? item => item.diplomatStatus === 2
-                            : undefined
-                        }
-                        name='professionId'
-                        label={labels.profession}
-                        valueField='recordId'
-                        readOnly={editMode && !allowEdit && true}
-                        displayField={['reference', 'name', 'flName']}
-                        columnsInDropDown={[
-                          { key: 'reference', value: 'Reference' },
-                          { key: 'name', value: 'Name' },
-                          { key: 'flName', value: 'Foreign Language Name' }
-                        ]}
-                        values={formik.values}
-                        required
-                        onChange={(event, newValue) => {
-                          if (newValue) {
-                            formik.setFieldValue('professionId', newValue?.recordId)
-                          } else {
-                            formik.setFieldValue('professionId', '')
-                          }
-                        }}
-                        error={formik.touched.professionId && Boolean(formik.errors.professionId)}
-                        maxAccess={maxAccess}
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
+                    <Grid item xs={4}>
                       <ResourceComboBox
                         endpointId={RemittanceSettingsRepository.SalaryRange.qry}
                         name='salaryRangeId'
@@ -1411,7 +1404,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         maxAccess={maxAccess}
                       />
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid item xs={4}>
                       <ResourceComboBox
                         datasetId={DataSets.LANGUAGE}
                         name='smsLanguage'
@@ -1432,7 +1425,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         maxAccess={maxAccess}
                       />
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid item xs={4}>
                       <CustomTextField
                         name='whatsAppNo'
                         label={labels.whatsapp}
@@ -1446,7 +1439,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         maxAccess={maxAccess}
                       />
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid item xs={4}>
                       <ResourceComboBox
                         name='status'
                         label={labels.status}
@@ -1467,51 +1460,66 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                       />
                     </Grid>
                   </FieldSet>
-                  <Grid item xs={12}>
-                    <Button
-                      variant='contained'
-                      onClick={() =>
-                        stack({
-                          Component: AddressFormShell,
-                          props: {
-                            readOnly: editMode && !allowEdit,
-                            optional: true,
-                            labels: labels,
-                            setAddress: setAddress,
-                            address: address,
-                            maxAccess: maxAccess,
-                            isCleared: false
-                          },
-                          width: 500,
-                          height: 400,
-                          title: labels.workAddress
-                        })
-                      }
-                    >
-                      {labels.workAddress}
-                    </Button>
-                    <Button
-                      sx={{ ml: 2 }}
-                      variant='contained'
-                      onClick={() =>
-                        stack({
-                          Component: MoreDetails,
-                          props: {
-                            readOnly: editMode && !allowEdit,
-                            labels: labels,
-                            clientFormik: formik,
-                            maxAccess: maxAccess,
-                            editMode: editMode,
-                            allowEdit
-                          },
-                          width: 500,
-                          height: 400,
-                          title: labels.moreDetails
-                        })
-                      }
-                    >
-                      {labels.moreDetails}
-                    </Button>
+                  <Grid item xs={12} sx={{ marginTop: '20px' }}>
+                    <FieldSet title={labels.address}>
+                      <AddressTab
+                        labels={labels}
+                        defaultReadOnly={{ countryId: true }}
+                        addressValidation={formik}
+                        readOnly={editMode && !allowEdit && true}
+                        access={maxAccess}
+                      />
+                    </FieldSet>
+                  </Grid>
+                  <Grid container spacing={2} xs={12}>
+                    <Grid item xs='auto'>
+                      <Button
+                        variant='contained'
+                        onClick={() =>
+                          stack({
+                            Component: AddressFormShell,
+                            props: {
+                              readOnly: editMode && !allowEdit,
+                              optional: true,
+                              labels: labels,
+                              setAddress: setAddress,
+                              address: address,
+                              maxAccess: maxAccess,
+                              isCleared: false
+                            },
+                            width: 800,
+                            height: 400,
+                            title: labels.workAddress
+                          })
+                        }
+                      >
+                        {labels.workAddress}
+                      </Button>
+                    </Grid>
+                    <Grid item xs='auto'>
+                      <Button
+                        sx={{ ml: 2 }}
+                        variant='contained'
+                        onClick={() =>
+                          stack({
+                            Component: MoreDetails,
+                            props: {
+                              readOnly: editMode && !allowEdit,
+                              labels: labels,
+                              clientFormik: formik,
+                              maxAccess: maxAccess,
+                              editMode: editMode,
+                              allowEdit
+                            },
+                            width: 500,
+                            height: 400,
+                            title: labels.moreDetails
+                          })
+                        }
+                      >
+                        {labels.moreDetails}
+                      </Button>
+                    </Grid>
                   </Grid>
 
                   <Grid container xs={12} sx={{ pt: 5 }}>
@@ -1561,7 +1569,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                       </Grid>
                     </FieldSet>
                     <Grid container xs={12} sx={{ p: 5 }}>
-                      <Grid item xs={12}>
+                      <Grid item xs={3}>
                         <FormControlLabel
                           control={
                             <Checkbox
@@ -1575,7 +1583,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                           label={labels?.OTPVerified}
                         />
                       </Grid>
-                      <Grid item xs={12}>
+                      <Grid item xs={3}>
                         <FormControlLabel
                           control={
                             <Checkbox
@@ -1589,7 +1597,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                         />
                       </Grid>
 
-                      <Grid item xs={12}>
+                      <Grid item xs={3}>
                         <FormControlLabel
                           control={
                             <Checkbox
@@ -1604,7 +1612,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                           label={labels?.coveredFace}
                         />
                       </Grid>
-                      <Grid item xs={12}>
+                      <Grid item xs={3}>
                         <FormControlLabel
                           control={
                             <Checkbox
