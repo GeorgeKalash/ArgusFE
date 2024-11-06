@@ -283,9 +283,8 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                       return formattedPriceTypes
                     }}
                     values={formik.values}
-                    defaultIndex={onKitItem ? 0 : null}
+                    defaultIndex={onKitItem && 0}
                     name='priceType'
-                    formik={formik}
                     label={labels.priceType}
                     readOnly={formik.values.kitItem}
                     valueField='key'
@@ -293,7 +292,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     displayFieldWidth={1}
                     required={!formik.values.kitItem}
                     maxAccess={!editMode && maxAccess}
-                    onChange={(event, newValue) => {
+                    onChange={(newValue) => {
                       formik.setFieldValue('priceType', newValue?.key || '')
                     }}
                     error={formik.touched.priceType && formik.errors.priceType}

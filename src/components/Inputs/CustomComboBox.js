@@ -9,8 +9,7 @@ const CustomComboBox = ({
   type = 'text',
   name,
   label,
-  formik,
-  value: _value,
+  value,
   valueField = 'key',
   displayField = 'value',
   store = [],
@@ -47,14 +46,10 @@ const CustomComboBox = ({
   const _hidden = fieldAccess === ControlAccessLevel.Hidden
 
   useEffect(() => {
-    const defaultValue = store?.[defaultIndex]?.recordId || store?.[defaultIndex]?.key || ''
-
-    if (defaultIndex !== undefined && defaultIndex !== null && formik?.values[name] !== defaultValue) {
-      formik.setFieldValue(name, defaultValue)
+    if (!value && store?.length > 0 && typeof defaultIndex === 'number' && defaultIndex === 0) {
+      onChange(store?.[defaultIndex])
     }
-  }, [defaultIndex, formik, name, store])
-
-  const value = neverPopulate ? '' : _value || (defaultIndex !== undefined && store[defaultIndex]) || ''
+  }, [defaultIndex])
 
   return (
     <Autocomplete
