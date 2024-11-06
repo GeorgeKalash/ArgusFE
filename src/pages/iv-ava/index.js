@@ -97,19 +97,15 @@ const AvailabilitiesBySite = () => {
   ]
 
   const edit = obj => {
-    openAvailability(obj.itemId, obj.qty, obj.sku, obj.name)
-    console.log(obj)
+    openAvailability(obj)
   }
 
-  function openAvailability(itemId, qty, sku, name) {
+  function openAvailability(obj) {
     stack({
       Component: AvailabilityList,
       props: {
         labels,
-        itemId,
-        qty,
-        sku,
-        name,
+        obj,
         maxAccess: access
       },
       width: 800,

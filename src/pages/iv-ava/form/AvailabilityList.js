@@ -14,7 +14,7 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import SerialForm from './SerialForm'
 import LotForm from './LotForm'
 
-const AvailabilityList = ({ itemId, sku, name, qty, labels, access }) => {
+const AvailabilityList = ({ obj, labels, access }) => {
   const { getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
 
@@ -25,7 +25,7 @@ const AvailabilityList = ({ itemId, sku, name, qty, labels, access }) => {
 
     const response = await getRequest({
       extension: InventoryRepository.Availability.qry,
-      parameters: `_itemId=${itemId}&_siteId=${0}&_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      parameters: `_itemId=${obj.itemId}&_siteId=${0}&_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
 
     const filteredData = response?.list?.filter(item => item.siteRef && item.siteName)
@@ -116,13 +116,13 @@ const AvailabilityList = ({ itemId, sku, name, qty, labels, access }) => {
       <Fixed>
         <Grid container spacing={1.5} m={1}>
           <Grid item xs={7}>
-            <CustomTextField label={labels.sku} value={sku} />
+            <CustomTextField label={labels.sku} value={obj.sku} readOnly />
           </Grid>
           <Grid item xs={7}>
-            <CustomTextField label={labels.name} value={name} />
+            <CustomTextField label={labels.name} value={obj.name} readOnly />
           </Grid>
           <Grid item xs={7}>
-            <CustomTextField label={labels.onHand} value={qty} />
+            <CustomTextField label={labels.onHand} value={obj.qty} readOnly />
           </Grid>
         </Grid>
       </Fixed>
