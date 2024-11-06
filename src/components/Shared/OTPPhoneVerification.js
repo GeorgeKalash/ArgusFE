@@ -26,6 +26,8 @@ const OTPPhoneVerification = ({
   })
   const [otp, setOtp] = useState(['', '', '', '', '', ''])
   const [timer, setTimer] = useState(null)
+  const [sent, setSent] = useState(false)
+
   const [error, setError] = useState('')
   const [disabled, setDisabled] = useState(0)
 
@@ -43,23 +45,6 @@ const OTPPhoneVerification = ({
 
     return () => clearInterval(interval)
   }, [timer])
-
-  useEffect(() => {
-    document.getElementById(`otp-input-${0}`).focus()
-    otpSMS()
-  }, [])
-
-  useEffect(() => {
-    if (defaultsData?.list?.find(obj => obj.key === 'otp-expiry-time')) {
-      const expiryTimeObj = defaultsData.list.find(obj => obj.key === 'otp-expiry-time')
-      const expiryTime = parseInt(expiryTimeObj?.value, 10)
-      if (!isNaN(expiryTime)) {
-        setTimer(expiryTime)
-      }
-    } else {
-      setError('OTP Expiry Time is Not Filled.')
-    }
-  }, [defaultsData])
 
   const otpSMS = () => {
     var data = {
@@ -155,6 +140,7 @@ const OTPPhoneVerification = ({
   }
 
   const handleResendOtp = () => {
+    setSent(true)
     const expiryTimeObj = defaultsData.list.find(obj => obj.key === 'otp-expiry-time')
     const expiryTime = parseInt(expiryTimeObj?.value, 10)
     if (!isNaN(expiryTime)) {
@@ -183,6 +169,7 @@ const OTPPhoneVerification = ({
               type='text'
               id={`otp-input-${index}`}
               maxLength='1'
+              readOnly={!timer}
               onKeyUp={e => handleKeyUp(index, e)}
               value={digit}
               onChange={e => handleOtpChange(index, e)}
@@ -199,7 +186,7 @@ const OTPPhoneVerification = ({
           )}
         </Grid>
         <button className={styles.resendButton} onClick={handleResendOtp} disabled={timer > 0}>
-          {labels.resendOTP}
+          {sent ? labels.resendOTP : labels.sendOtp}
         </button>
         <button
           className={styles.verifyButton}
