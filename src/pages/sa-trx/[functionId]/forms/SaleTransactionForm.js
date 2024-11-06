@@ -1,5 +1,5 @@
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
-import { formatDateFromApi, formatDateToApi, formatDateToApiFunction } from 'src/lib/date-helper'
+import { formatDateFromApi, formatDateToApi, formatDateForGetApI } from 'src/lib/date-helper'
 import { Grid, FormControlLabel, Checkbox } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
@@ -208,8 +208,8 @@ export default function SaleTransactionForm({ labels, access, recordId, function
         const payload = {
           header: {
             ...obj.header,
-            date: formatDateToApiFunction(obj.header.date),
-            dueDate: formatDateToApiFunction(obj.header.dueDate)
+            date: formatDateToApi(obj.header.date),
+            dueDate: formatDateToApi(obj.header.dueDate)
           },
           items: obj.items.map(({ id, isVattable, taxDetails, ...rest }) => ({
             seqNo: id,
@@ -291,6 +291,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
         setFilteredMU(filteredMeasurements)
         update({
           sku: ItemConvertPrice?.sku,
+          barcode: ItemConvertPrice?.barcode,
           itemName: ItemConvertPrice?.itemName,
           itemId: ItemConvertPrice?.itemId,
           isMetal: isMetal,
@@ -336,6 +337,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       component: 'resourcelookup',
       label: labels.sku,
       name: 'sku',
+      flex: 2,
       props: {
         endpointId: InventoryRepository.Item.snapshot,
         parameters: '_categoryId=0&_msId=0&_startAt=0&_size=1000',
@@ -823,7 +825,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
     if (baseMetalCuId) {
       const res = await getRequest({
         extension: MultiCurrencyRepository.Currency.get,
-        parameters: `_currencyId=${baseMetalCuId}&&_date=${formatDateToApiFunction(
+        parameters: `_currencyId=${baseMetalCuId}&&_date=${formatDateForGetApI(
           formik.values.header.date
         )}&_rateDivision=${RateDivision.SALES}`
       })
@@ -1319,6 +1321,17 @@ export default function SaleTransactionForm({ labels, access, recordId, function
     }
   }
 
+  async function previewBtnClicked() {
+    const data = { printStatus: 2, recordId: formik.values.header.recordId }
+
+    await postRequest({
+      extension: SaleRepository.FlagTR,
+      record: JSON.stringify(data)
+    })
+
+    invalidate()
+  }
+
   return (
     <FormShell
       resourceId={getResourceId(parseInt(functionId))}
@@ -1326,6 +1339,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       functionId={functionId}
       maxAccess={maxAccess}
       previewReport={editMode}
+      previewBtnClicked={previewBtnClicked}
       actions={actions}
       editMode={editMode}
       disabledSubmit={isPosted}
@@ -1384,15 +1398,16 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                   <ResourceComboBox
                     endpointId={SaleRepository.SalesPerson.qry}
                     name='spId'
+                    readonly={isPosted}
                     label={labels.salesPerson}
                     columnsInDropDown={[
                       { key: 'spRef', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
-                    readonly={isPosted}
                     valueField='recordId'
                     displayField='name'
                     values={formik.values.header}
+                    maxAccess={maxAccess}
                     displayFieldWidth={1.5}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('header.spId', newValue ? newValue.recordId : null)
