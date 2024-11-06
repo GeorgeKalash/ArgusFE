@@ -38,36 +38,32 @@ export default function ConsignmentSitesForm({ labels, maxAccess, recordId }) {
       clientRef: yup.string().required()
     }),
     onSubmit: async obj => {
-      try {
-        const response = await postRequest({
-          extension: SaleRepository.ConsignmentSites.set,
-          record: JSON.stringify(obj)
-        })
+      const response = await postRequest({
+        extension: SaleRepository.ConsignmentSites.set,
+        record: JSON.stringify(obj)
+      })
 
-        if (!formik.values.recordId) {
-          formik.setFieldValue('recordId', formik.values.clientId)
+      if (!formik.values.recordId) {
+        formik.setFieldValue('recordId', formik.values.clientId)
 
-          toast.success(platformLabels.Added)
-        } else toast.success(platformLabels.Edited)
+        toast.success(platformLabels.Added)
+      } else toast.success(platformLabels.Edited)
 
-        invalidate()
-      } catch (error) {}
+      invalidate()
     }
   })
   const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: SaleRepository.ConsignmentSites.get,
-            parameters: `_clientId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: SaleRepository.ConsignmentSites.get,
+          parameters: `_clientId=${recordId}`
+        })
 
-          formik.setValues({ ...res.record, recordId: res.record.clientId })
-        }
-      } catch (exception) {}
+        formik.setValues({ ...res.record, recordId: res.record.clientId })
+      }
     })()
   }, [])
 

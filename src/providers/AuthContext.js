@@ -35,41 +35,42 @@ const AuthProvider = ({ children }) => {
   const [getAC, setGetAC] = useState({})
   const [languageId, setLanguageId] = useState(1)
   const router = useRouter()
+
+  const initAuth = async () => {
+    const userData = window.localStorage.getItem('userData') || window.sessionStorage.getItem('userData')
+    const savedLanguageId = window.localStorage.getItem('languageId')
+    if (userData) {
+      setUser(JSON.parse(userData))
+      if (savedLanguageId) {
+        setLanguageId(parseInt(savedLanguageId))
+      }
+    } else {
+      if (savedLanguageId) {
+        setLanguageId(parseInt(savedLanguageId))
+      }
+    }
+  }
+
+  const fetchData = async () => {
+    const matchHostname = window.location.hostname.match(/^(.+)\.softmachine\.co$/)
+
+    const accountName = matchHostname ? matchHostname[1] : 'cil-deploy'
+
+    try {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=${accountName}`)
+
+      setCompanyName(response.data.record.companyName)
+      setGetAC(response)
+      window.localStorage.setItem('apiUrl', response.data.record.api)
+    } catch (error) {
+      console.error('Error fetching data:', error)
+    }
+
+    setLoading(false)
+  }
+
   useEffect(() => {
-    const initAuth = async () => {
-      const userData = window.localStorage.getItem('userData') || window.sessionStorage.getItem('userData')
-      const savedLanguageId = window.localStorage.getItem('languageId')
-      if (userData) {
-        setUser(JSON.parse(userData))
-        if (savedLanguageId) {
-          setLanguageId(parseInt(savedLanguageId))
-        }
-      } else {
-        if (savedLanguageId) {
-          setLanguageId(parseInt(savedLanguageId))
-        }
-      }
-    }
     initAuth()
-
-    const fetchData = async () => {
-      const matchHostname = window.location.hostname.match(/^(.+)\.softmachine\.co$/)
-
-      const accountName = matchHostname ? matchHostname[1] : 'gs-deploy'
-
-      try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=${accountName}`)
-
-        setCompanyName(response.data.record.companyName)
-        setGetAC(response)
-        window.localStorage.setItem('apiUrl', response.data.record.api)
-      } catch (error) {
-        console.error('Error fetching data:', error)
-      }
-
-      setLoading(false)
-    }
-
     fetchData()
   }, [])
 
@@ -149,7 +150,8 @@ const AuthProvider = ({ children }) => {
     window.localStorage.removeItem('userData')
     window.sessionStorage.removeItem('userData')
     await router.push('/login')
-    router.reload()
+    initAuth()
+    fetchData()
   }
 
   const getAccessToken = async () => {

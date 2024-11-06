@@ -286,7 +286,11 @@ export const ResourceIds = {
   InventoryOpeningCosts: 41203,
   OpenMultiCurrencyCashTransfer: 33315,
   LockedRecords: 23302,
+  AvailabilitiesBySite: 41226,
   ProductionSheet: 42327,
+  ProdSheetDocumentTypeDefault: 42120,
   InventoryTransaction: 41209,
-  SalesTrxForm: 51307
+  GenerateFiscalYear: 41503,
+  SalesTrxForm: 51307,
+  UserSecretOTPQrCode: 23201
 }

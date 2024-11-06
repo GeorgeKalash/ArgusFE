@@ -1,7 +1,6 @@
 import React, { useContext, useState, useEffect } from 'react'
 import CustomLookup from '../Inputs/CustomLookup'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import ErrorWindow from './ErrorWindow'
 
 export const ResourceLookup = ({
   endpointId,
@@ -15,6 +14,7 @@ export const ResourceLookup = ({
   secondValueShow,
   errorCheck,
   filter = {},
+  autoSelectFistValue = true,
   viewHelperText = true,
   minChars = 3,
   ...rest
@@ -76,6 +76,7 @@ export const ResourceLookup = ({
 
   const error = form?.touched && form.touched[check] && Boolean(form.errors[check])
   const helperText = viewHelperText && form?.touched && form.touched[check] && form.errors[check]
+
   useEffect(() => {
     setStore([])
   }, [_firstValue])
@@ -84,6 +85,12 @@ export const ResourceLookup = ({
     if (e.target.value?.length > 0) {
       setStore([])
     } else {
+    }
+  }
+
+  const onKeyDown = e => {
+    if ((e.key === 'Tab' || e.key === 'Enter') && autoSelectFistValue && store?.[0]) {
+      rest.onChange('', store[0])
     }
   }
 
@@ -98,6 +105,7 @@ export const ResourceLookup = ({
           secondValue: _secondValue,
           error,
           onKeyUp,
+          onKeyDown,
           name,
           isLoading,
           renderOption,

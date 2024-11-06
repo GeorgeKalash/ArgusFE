@@ -10,44 +10,48 @@ import Table from 'src/components/Shared/Table'
 const GateKeeper = () => {
   const { getRequest } = useContext(RequestsContext)
 
-  const { 
-    query: { data }, 
-    labels: _labels, 
-    access,
-    refetch,
-    paginationParameters
-  } = useResourceQuery({
-    queryFn: fetchGridData,
-    endpointId: ManufacturingRepository.LeanProductionPlanning.preview,
-    datasetId: ResourceIds.GateKeeper
-  })
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50 } = options
+    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&_status=2`
+    var parameters = defaultParams
 
-  async function fetchGridData() {
     const response = await getRequest({
-      extension: ManufacturingRepository.LeanProductionPlanning.preview,
-      parameters: `_status=2`
+      extension: ManufacturingRepository.LeanProductionPlanning.preview2,
+      parameters: parameters
     })
 
     if (response && response?.list) {
       response.list = response?.list?.map(item => ({
         ...item,
-        balance: item.qty - (item.qtyProduced ?? 0),
+        balance: item.qty - (item.qtyProduced ?? 0)
       }))
     }
 
-    return { ...response }
+    return { ...response, _startAt: _startAt }
   }
+
+  const {
+    query: { data },
+    labels: _labels,
+    paginationParameters,
+    refetch,
+    access
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: ManufacturingRepository.LeanProductionPlanning.preview2,
+    datasetId:  ResourceIds.GateKeeper
+  })
 
   const columns = [
     {
       field: 'sku',
       headerName: _labels[1],
-      flex: 1,
+      flex: 1
     },
     {
       field: 'qty',
       headerName: _labels[2],
-      flex: 1,
+      flex: 1
     },
     {
       field: 'qtyProduced',
@@ -83,9 +87,9 @@ const GateKeeper = () => {
           rowId={['recordId']}
           isLoading={false}
           pageSize={50}
-          refetch={refetch}
-          paginationParameters={paginationParameters}
           paginationType='api'
+          paginationParameters={paginationParameters}
+          refetch={refetch}
           maxAccess={access}
         />
       </Grow>

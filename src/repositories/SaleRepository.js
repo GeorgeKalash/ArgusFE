@@ -180,5 +180,8 @@ export const SaleRepository = {
   },
   Contact: {
     contact: service + 'qryContact'
+  },
+  PrintedSA: {
+    printed: service + 'flagORD'
   }
 }
