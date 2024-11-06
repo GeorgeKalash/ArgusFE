@@ -142,6 +142,7 @@ const BarcodeForm = ({ store, labels, maxAccess }) => {
           rowId={'barcode'}
           onEdit={edit}
           onDelete={del}
+          deleteConfirmationType={'strict'}
           isLoading={false}
           pageSize={50}
           pagination={false}

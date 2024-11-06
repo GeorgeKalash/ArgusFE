@@ -1,7 +1,8 @@
 import { Grid } from '@mui/material'
 import * as yup from 'yup'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useRef } from 'react'
 import FormShell from 'src/components/Shared/FormShell'
+import ImageUpload from 'src/components/Inputs/ImageUpload'
 import toast from 'react-hot-toast'
 import { Checkbox, FormControlLabel } from '@mui/material'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -33,6 +34,8 @@ export default function BarcodesForm({ labels, access, store, recordId, msId }) 
     store
   })
 
+  const imageUploadRef = useRef(null)
+
   const { formik } = useForm({
     initialValues: {
       recordId: recordId,
@@ -58,6 +61,12 @@ export default function BarcodesForm({ labels, access, store, recordId, msId }) 
         extension: InventoryRepository.Barcodes.set,
         record: JSON.stringify(values)
       })
+
+      if (imageUploadRef.current) {
+        imageUploadRef.current.value = res.recordId
+
+        await imageUploadRef.current.submit()
+      }
 
       if (!values.recordId) {
         toast.success(platformLabels.Added)
@@ -117,6 +126,8 @@ export default function BarcodesForm({ labels, access, store, recordId, msId }) 
                   formik.setFieldValue('sku', newValue?.sku)
                   formik.setFieldValue('itemRef', newValue?.sku)
                   formik.setFieldValue('msId', newValue?.msId)
+                  formik.setFieldValue('scaleDescription', newValue?.description)
+                  formik.setFieldValue('posDescription', newValue?.description)
                 }}
                 maxAccess={access}
                 required
@@ -190,6 +201,9 @@ export default function BarcodesForm({ labels, access, store, recordId, msId }) 
                 onClear={() => formik.setFieldValue('posDescription', '')}
                 error={formik.touched.posDescription && Boolean(formik.errors.posDescription)}
               />
+            </Grid>
+            <Grid item xs={12}>
+              <ImageUpload ref={imageUploadRef} resourceId={ResourceIds.Barcodes} seqNo={0} recordId={recordId} />
             </Grid>
             <Grid item xs={12}>
               <FormControlLabel
