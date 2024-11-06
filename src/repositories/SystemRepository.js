@@ -232,5 +232,8 @@ export const SystemRepository = {
   },
   FormattedAddress: {
     get: service + 'formattedADD'
+  },
+  TrxDetails: {
+    qry: service + 'qryTL2'
   }
 }
