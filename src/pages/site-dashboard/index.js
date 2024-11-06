@@ -105,7 +105,6 @@ const SiteDashboard = () => {
                 endpointId={InventoryRepository.Site.qry}
                 name='siteId'
                 label={labels.site}
-                required
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 columnsInDropDown={[
