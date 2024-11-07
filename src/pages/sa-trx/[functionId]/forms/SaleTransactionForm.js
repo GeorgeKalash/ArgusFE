@@ -95,7 +95,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       status: 1,
       isVattable: false,
       taxId: null,
-      subtotal: '',
+      subtotal: 0,
       miscAmount: 0,
       amount: 0,
       vatAmount: 0,
@@ -675,8 +675,6 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       mdType: currentMdType
     }
 
-    console.log(newRow)
-
     getItemPriceRow(updateRow, newRow, DIRTYFIELD_MDTYPE, true)
     checkMdAmountPct(newRow, updateRow)
   }
@@ -771,7 +769,6 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
       saTrx: true
     }))
-
     formik.setValues({
       recordId: recordId || null,
       ...formik.values,
