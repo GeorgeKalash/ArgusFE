@@ -45,8 +45,8 @@ export default function BarcodesForm({ labels, access, store, recordId, msId }) 
       itemName: store?._name,
       muId: null,
       msId: msId,
-      scaleDescription: null,
-      posDescription: null,
+      scaleDescription: store?.description,
+      posDescription: store?.description,
       barcode: null,
       isInactive: false
     },
@@ -71,7 +71,6 @@ export default function BarcodesForm({ labels, access, store, recordId, msId }) 
       if (!values.recordId) {
         toast.success(platformLabels.Added)
         formik.setFieldValue('recordId', res?.recordId)
-        formik.setFieldValue('barcode', res?.recordId)
       } else toast.success(platformLabels.Edited)
       invalidate()
     }
@@ -91,7 +90,8 @@ export default function BarcodesForm({ labels, access, store, recordId, msId }) 
           extension: InventoryRepository.Barcodes.get,
           parameters: `_barcode=${recordId}`
         })
-        formik.setValues({ ...res.record, recordId: res?.record?.barcode })
+        formik.setValues(res.record)
+        formik.setFieldValue('recordId', res?.record?.recordId)
       }
     })()
   }, [])
@@ -105,67 +105,74 @@ export default function BarcodesForm({ labels, access, store, recordId, msId }) 
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
-            <Grid item xs={12}>
-              <ResourceLookup
-                endpointId={InventoryRepository.Item.snapshot}
-                name='itemId'
-                label={labels?.sku}
-                readOnly={editMode || (!!store?._reference && !!store?._name)}
-                valueField='recordId'
-                displayField='sku'
-                valueShow='sku'
-                secondValueShow='itemName'
-                form={formik}
-                columnsInDropDown={[
-                  { key: 'sku', value: 'SKU' },
-                  { key: 'name', value: 'Name' }
-                ]}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('itemId', newValue?.recordId)
-                  formik.setFieldValue('itemName', newValue?.name)
-                  formik.setFieldValue('sku', newValue?.sku)
-                  formik.setFieldValue('itemRef', newValue?.sku)
-                  formik.setFieldValue('msId', newValue?.msId)
-                  formik.setFieldValue('scaleDescription', newValue?.name)
-                  formik.setFieldValue('posDescription', newValue?.name)
-                }}
-                maxAccess={access}
-                required
-              />
+            <Grid item xs={8}>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <ResourceLookup
+                    endpointId={InventoryRepository.Item.snapshot}
+                    name='itemId'
+                    label={labels?.sku}
+                    readOnly={editMode || (!!store?._reference && !!store?._name)}
+                    valueField='recordId'
+                    displayField='sku'
+                    valueShow='sku'
+                    secondValueShow='itemName'
+                    form={formik}
+                    columnsInDropDown={[
+                      { key: 'sku', value: 'SKU' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('itemId', newValue?.recordId)
+                      formik.setFieldValue('itemName', newValue?.name)
+                      formik.setFieldValue('sku', newValue?.sku)
+                      formik.setFieldValue('itemRef', newValue?.sku)
+                      formik.setFieldValue('msId', newValue?.msId)
+                      formik.setFieldValue('scaleDescription', newValue?.name)
+                      formik.setFieldValue('posDescription', newValue?.name)
+                    }}
+                    maxAccess={access}
+                    required
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='barcode'
+                    label={labels?.barcode}
+                    value={formik?.values?.barcode}
+                    maxLength='20'
+                    readOnly={editMode}
+                    maxAccess={maxAccess}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('barcode', '')}
+                    error={formik.touched.barcode && Boolean(formik.errors.barcode)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={InventoryRepository.MeasurementUnit.qry}
+                    parameters={formik?.values?.msId ? `_msId=${formik?.values?.msId}` : ''}
+                    readOnly={!formik?.values?.msId}
+                    name='muId'
+                    label={labels?.msUnit}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    values={formik.values}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('muId', newValue?.recordId)
+                    }}
+                    error={formik.touched.muId && Boolean(formik.errors.muId)}
+                    maxAccess={access}
+                  />
+                </Grid>
+              </Grid>
             </Grid>
-            <Grid item xs={12}>
-              <CustomTextField
-                name='barcode'
-                label={labels?.barcode}
-                value={formik?.values?.barcode}
-                maxLength='20'
-                readOnly={editMode}
-                maxAccess={maxAccess}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('barcode', '')}
-                error={formik.touched.barcode && Boolean(formik.errors.barcode)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <ResourceComboBox
-                endpointId={InventoryRepository.MeasurementUnit.qry}
-                parameters={formik?.values?.msId ? `_msId=${formik?.values?.msId}` : ''}
-                readOnly={!formik?.values?.msId}
-                name='muId'
-                label={labels?.msUnit}
-                valueField='recordId'
-                displayField={['reference', 'name']}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
-                values={formik.values}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('muId', newValue?.recordId)
-                }}
-                error={formik.touched.muId && Boolean(formik.errors.muId)}
-                maxAccess={access}
-              />
+            <Grid item xs={4}>
+              <ImageUpload ref={imageUploadRef} resourceId={ResourceIds.Barcodes} seqNo={0} recordId={formik.values.recordId} />
             </Grid>
             <Grid item xs={12}>
               <CustomNumberField
@@ -201,9 +208,6 @@ export default function BarcodesForm({ labels, access, store, recordId, msId }) 
                 onClear={() => formik.setFieldValue('posDescription', '')}
                 error={formik.touched.posDescription && Boolean(formik.errors.posDescription)}
               />
-            </Grid>
-            <Grid item xs={12}>
-              <ImageUpload ref={imageUploadRef} resourceId={ResourceIds.Barcodes} seqNo={0} recordId={recordId} />
             </Grid>
             <Grid item xs={12}>
               <FormControlLabel

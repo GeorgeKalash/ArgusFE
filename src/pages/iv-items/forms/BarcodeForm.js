@@ -98,7 +98,7 @@ const BarcodeForm = ({ store, labels, maxAccess }) => {
         store,
         msId: store?._msId
       },
-      width: 600,
+      width: 750,
       height: 500,
       title: _labels.Barcodes
     })
