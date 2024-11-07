@@ -292,7 +292,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     displayFieldWidth={1}
                     required={!formik.values.kitItem}
                     maxAccess={!editMode && maxAccess}
-                    onChange={(newValue) => {
+                    onChange={newValue => {
                       formik.setFieldValue('priceType', newValue?.key || '')
                     }}
                     error={formik.touched.priceType && formik.errors.priceType}
