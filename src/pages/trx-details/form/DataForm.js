@@ -29,7 +29,7 @@ export default function DataForm({ obj }) {
           }}
         >
           <Grid item style={{ height: 290 }}>
-            {<pre style={{ margin: 0, fontFamily: 'inherit', fontWeight: 450 }}>{JSON.stringify(data, null, 2)}</pre>}
+            {<pre style={{ margin: 0, fontFamily: 'inherit', fontWeight: 500 }}>{JSON.stringify(data, null, 2)}</pre>}
           </Grid>
         </DialogContent>
       </Fixed>
@@ -38,12 +38,4 @@ export default function DataForm({ obj }) {
 }
 
 {
-  /* <Grid data-unique-id item xs={4} sx={{ paddingBottom: '15px', height: '18vh', overflow: 'auto', m: 2 }}>
-{Object.entries(data).map(([key, value]) => (
-  <Grid key={key} style={{ display: 'flex', alignItems: 'center' }}>
-    <Grid style={{ minWidth: '100px', fontWeight: 'bold' }}>{key}:</Grid>
-    <Grid>{key && key === 'date' ? formatDateDefault(value) : value}</Grid>
-  </Grid>
-))}
-</Grid> */
 }
