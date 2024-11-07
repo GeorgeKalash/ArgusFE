@@ -9,9 +9,13 @@ import FormShell from 'src/components/Shared/FormShell'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { DataGrid } from 'src/components/Shared/DataGrid'
+import { ControlContext } from 'src/providers/ControlContext'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import CustomTextField from 'src/components/Inputs/CustomTextField'
 
 const SystemFunction = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const getGridData = async () => {
     const resSystemFunction = await getRequest({
@@ -37,6 +41,7 @@ const SystemFunction = () => {
     enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
+      search: '',
       rows: [
         {
           id: 1,
@@ -58,7 +63,7 @@ const SystemFunction = () => {
         extension: SystemRepository.SystemFunction.set2,
         record: JSON.stringify(resultObject)
       })
-      toast.success('Record Updated Successfully')
+      toast.success(platformLabels.Updated)
     }
   })
 
@@ -119,15 +124,41 @@ const SystemFunction = () => {
     }
   ]
 
+  const filteredData = formik.values.search
+    ? formik.values.rows.filter(
+        item =>
+          (item.functionId !== null && item.functionId.toString().includes(formik.values.search.toLowerCase())) ||
+          (item.sfName && item.sfName.toLowerCase().includes(formik.values.search.toLowerCase()))
+      )
+    : formik.values.rows
+
+  const handleSearchChange = event => {
+    const { value } = event.target
+    formik.setFieldValue('search', value)
+  }
+
   return (
     <FormShell form={formik} infoVisible={false} visibleClear={false} isCleared={false} isSavedClear={false}>
       <VertLayout>
+        <Fixed>
+          <CustomTextField
+            name='search'
+            value={formik.values.search}
+            label={labels.search}
+            onClear={() => {
+              formik.setFieldValue('search', '')
+              getGridData()
+            }}
+            sx={{ width: '30%' }}
+            onChange={handleSearchChange}
+          />
+        </Fixed>
         <Grow>
           <DataGrid
             onChange={value => {
               formik.setFieldValue('rows', value)
             }}
-            value={formik.values?.rows}
+            value={filteredData}
             error={formik.errors?.rows}
             columns={columns}
             allowDelete={false}
