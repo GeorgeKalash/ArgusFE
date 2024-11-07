@@ -37,16 +37,6 @@ const BarcodeForm = ({ store, labels, maxAccess }) => {
       flex: 1
     },
     {
-      field: 'scaleDescription',
-      headerName: labels.scaleDescription,
-      flex: 1
-    },
-    {
-      field: 'posDescription',
-      headerName: labels.posDescription,
-      flex: 1
-    },
-    {
       field: 'isInactive',
       headerName: labels.isInactive,
       flex: 1,
