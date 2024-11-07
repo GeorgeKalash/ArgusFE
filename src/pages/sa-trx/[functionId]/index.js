@@ -36,7 +36,7 @@ const SaTrx = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SaleRepository.SalesTransaction.snapshot,
+    endpointId: SaleRepository.SalesTransaction.qry,
     datasetId: ResourceIds.SalesInvoice,
     filter: {
       filterFn: fetchWithFilter,

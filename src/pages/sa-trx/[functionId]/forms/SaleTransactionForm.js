@@ -1078,7 +1078,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
   const amount = reCal ? _footerSummary?.net : formik.values?.header.amount || 0
   const totalVolume = reCal ? _footerSummary?.totalVolume : formik.values?.header.volume || 0
   const totalWeight = reCal ? _footerSummary?.totalWeight : formik.values?.header.weight || 0
-  const subtotal = reCal ? subTotal : formik.values?.subtotal || 0 || 0
+  const subtotal = reCal ? subTotal : formik.values?.subtotal || 0
   const vatAmount = reCal ? _footerSummary?.sumVat : formik.values?.header.vatAmount || 0
 
   function checkDiscount(typeChange, tdPct, tdAmount, currentDiscount) {
@@ -1240,6 +1240,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       )
     }
   }, [subtotal])
+  console.log('check subtotal ', subtotal)
 
   useEffect(() => {
     ;(async function () {
