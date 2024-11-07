@@ -120,7 +120,6 @@ const IvBarcodes = () => {
   }
 
   function openForm(obj) {
-    console.log(obj)
     stack({
       Component: BarcodesForm,
       props: {
