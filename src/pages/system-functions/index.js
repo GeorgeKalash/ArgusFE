@@ -63,6 +63,7 @@ const SystemFunction = () => {
         extension: SystemRepository.SystemFunction.set2,
         record: JSON.stringify(resultObject)
       })
+      await getGridData()
       toast.success(platformLabels.Updated)
     }
   })
