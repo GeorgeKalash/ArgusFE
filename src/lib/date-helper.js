@@ -137,6 +137,15 @@ const formatDate = dateString => {
   return `/Date(${timestamp})/`
 }
 
+//Used for cases that we use Json.Stringify with no initial value in fields
+const formatDateToISO = date => {
+  // Adjust date to keep the local time
+  const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+
+  //format
+  return localDate.toISOString().slice(0, 19) + '.000Z'
+}
+
 export {
   formatDateFromApi,
   formatDateToApi,
@@ -146,5 +155,6 @@ export {
   formatDateFromApiInline,
   getTimeInTimeZone,
   formatDate,
-  formatDateTimeDefault
+  formatDateTimeDefault,
+  formatDateToISO
 }

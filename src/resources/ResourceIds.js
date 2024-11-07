@@ -277,6 +277,10 @@ export const ResourceIds = {
   RemittanceReceiptVoucher: 36323,
   ItemSizes: 41117,
   OutwardsTransfer: 36324,
+  SalesInvoice: 51303,
+  SaleReturn: 51304,
+  ClientGOCOut: 51305,
+  ClientGOCIn: 51306,
   CategoryLevels: 41118,
   MetalColor: 41110,
   InventoryOpeningCosts: 41203,
@@ -284,7 +288,9 @@ export const ResourceIds = {
   LockedRecords: 23302,
   AvailabilitiesBySite: 41226,
   ProductionSheet: 42327,
+  ProdSheetDocumentTypeDefault: 42120,
   InventoryTransaction: 41209,
   GenerateFiscalYear: 41503,
+  SalesTrxForm: 51307,
   UserSecretOTPQrCode: 23201
 }

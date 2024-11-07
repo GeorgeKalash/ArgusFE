@@ -12,6 +12,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { useWindow } from 'src/windows'
 import { ThreadProgress } from 'src/components/Shared/ThreadProgress'
 import { DeliveryRepository } from 'src/repositories/DeliveryRepository'
+import { formatDateToISO } from 'src/lib/date-helper'
 
 export default function RebuildUndeliveredItemsForm({ _labels, access }) {
   const { postRequest } = useContext(RequestsContext)
@@ -21,7 +22,7 @@ export default function RebuildUndeliveredItemsForm({ _labels, access }) {
   const { formik } = useForm({
     initialValues: {
       startDate: null,
-      endDate: null,
+      endDate: null
     },
     enableReinitialize: false,
     maxAccess: access,
@@ -42,13 +43,17 @@ export default function RebuildUndeliveredItemsForm({ _labels, access }) {
           const { startDate } = this.parent
 
           return value.getTime() >= startDate?.getTime()
-        }),
+        })
     }),
     onSubmit: async obj => {
       try {
+        const copy = { ...obj }
+        copy.startDate = formatDateToISO(new Date(copy.startDate))
+        copy.endDate = formatDateToISO(new Date(copy.endDate))
+
         const res = await postRequest({
           extension: DeliveryRepository.Reduild.rebuild,
-          record: JSON.stringify(obj)
+          record: JSON.stringify(copy)
         })
 
         stack({
@@ -80,14 +85,7 @@ export default function RebuildUndeliveredItemsForm({ _labels, access }) {
   ]
 
   return (
-    <FormShell
-      form={formik}
-      actions={actions}
-      isSaved={false}
-      editMode={true}
-      isInfo={false}
-      isCleared={false}
-    >
+    <FormShell form={formik} actions={actions} isSaved={false} editMode={true} isInfo={false} isCleared={false}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
