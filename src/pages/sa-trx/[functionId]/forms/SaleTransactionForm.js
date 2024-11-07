@@ -783,6 +783,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       },
       items: modifiedList
     })
+    formik.setFieldValue('subtotal', saTrxHeader?.subtotal)
   }
 
   async function getSalesTransactionPack(transactionId) {
@@ -1237,7 +1238,6 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       )
     }
   }, [subtotal])
-  console.log('check subtotal ', subtotal)
 
   useEffect(() => {
     ;(async function () {
@@ -1580,7 +1580,8 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                   displayFieldWidth={3}
                   valueShow='clientRef'
                   secondValueShow='clientName'
-                  maxAccess={maxAccess} //editMode={editMode}
+                  maxAccess={maxAccess}
+                  editMode={editMode}
                   columnsInDropDown={[
                     { key: 'reference', value: 'Reference' },
                     { key: 'name', value: 'Name' },
