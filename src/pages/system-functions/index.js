@@ -125,11 +125,10 @@ const SystemFunction = () => {
   ]
 
   const filteredData = formik.values.search
-    ? formik.values.rows.filter(
-        item =>
-          (item.functionId !== null && item.functionId.toString().includes(formik.values.search.toLowerCase())) ||
-          (item.sfName && item.sfName.toLowerCase().includes(formik.values.search.toLowerCase()))
-      )
+  ? formik.values.rows.filter(
+      item => item.functionId.toString().includes(formik.values.search.toLowerCase()) ||
+              item.sfName?.toLowerCase().includes(formik.values.search.toLowerCase())
+    )
     : formik.values.rows
 
   const handleSearchChange = event => {
@@ -147,7 +146,6 @@ const SystemFunction = () => {
             label={labels.search}
             onClear={() => {
               formik.setFieldValue('search', '')
-              getGridData()
             }}
             sx={{ width: '30%' }}
             onChange={handleSearchChange}
