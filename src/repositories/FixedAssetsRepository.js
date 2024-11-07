@@ -25,5 +25,17 @@ export const FixedAssetsRepository = {
     get: service + 'getAST',
     set: service + 'setAST',
     del: service + 'delAST'
+  },
+  AssetsDescription: {
+    qry: service + 'qryDEP',
+    get: service + 'getDEP',
+    set: service + 'setDEP',
+    del: service + 'delDEP',
+    snapshot: service + 'snapshotDEP',
+    preview: service + 'previewDEP',
+    post: service + 'postDEP'
+  },
+  AssetsTableData: {
+    qry: service + 'qryDEA'
   }
 }

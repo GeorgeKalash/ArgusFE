@@ -362,5 +362,12 @@ export const getButtons = platformLabels => [
     color: '#231f20',
     image: 'save.png',
     main: true
+  },
+  {
+    key: 'PR',
+    label: platformLabels.PR,
+    color: '#231f20',
+    image: 'preview.png',
+    main: false
   }
 ]
