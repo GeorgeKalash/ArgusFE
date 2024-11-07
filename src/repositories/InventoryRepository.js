@@ -148,7 +148,13 @@ export const InventoryRepository = {
   RebuildInventory: {
     rebuild: service + 'rebuildFIS'
   },
-  DimensionUDT: { set: service + 'set2UDT', get: service + 'getUDT' },
+  ItemPhysProp: {
+    get: service + 'getPP'
+  },
+  DimensionUDT: {
+    set: service + 'set2UDT',
+    get: service + 'getUDT'
+  },
   Barcodes: {
     snapshot: service + 'snapshotBCD',
     get: service + 'getBCD',
