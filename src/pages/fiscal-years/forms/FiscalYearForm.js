@@ -15,7 +15,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { DataSets } from 'src/resources/DataSets'
-import { formatDateFromApi } from 'src/lib/date-helper'
+import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { ControlContext } from 'src/providers/ControlContext'
 import Typography from '@mui/material/Typography'
 
@@ -53,9 +53,15 @@ export default function FiscalYearForm({ labels, maxAccess, setStore, store }) {
       status: yup.string().required()
     }),
     onSubmit: async obj => {
+      const data = {
+        ...obj,
+        startDate: formatDateToApi(obj.startDate),
+        endDate: formatDateToApi(obj.endDate)
+      }
+
       await postRequest({
         extension: SystemRepository.FiscalYears.set,
-        record: JSON.stringify(obj)
+        record: JSON.stringify(data)
       })
 
       if (!recordId) {
