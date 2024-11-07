@@ -11,6 +11,8 @@ const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId }, ref) => 
   const [image, setImage] = useState()
   const [initialValues, setInitialData] = useState({})
 
+  console.log(recordId)
+  
   const { formik } = useForm({
     enableReinitialize: true,
     validateOnChange: true,
@@ -20,6 +22,7 @@ const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId }, ref) => 
   const uniqueRecord = recordId || ref?.current?.value
 
   useEffect(() => {
+    console.log('uniqueRecord', uniqueRecord)
     if (uniqueRecord) {
       getData()
     }
@@ -27,6 +30,7 @@ const ImageUpload = forwardRef(({ resourceId, error, seqNo, recordId }, ref) => 
 
   async function getData() {
     try {
+
       const result = await getRequest({
         extension: SystemRepository.Attachment.get,
         parameters: `_resourceId=${resourceId}&_seqNo=${seqNo}&_recordId=${uniqueRecord}`

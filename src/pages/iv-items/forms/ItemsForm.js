@@ -176,8 +176,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
             priceGroupId: res.record.pgId,
             returnPolicy: res.record.returnPolicyId,
             _name: res.record.name,
-            _reference: res.record.sku,
-            description: res.record.description
+            _reference: res.record.sku
           }))
         }
       } catch {}

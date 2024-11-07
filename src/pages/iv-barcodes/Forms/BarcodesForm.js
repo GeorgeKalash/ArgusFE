@@ -19,7 +19,7 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { useInvalidate } from 'src/hooks/resource'
 import { useBarcodeFieldBehaviours } from 'src/hooks/useBarcodeFieldBehaviours'
 
-export default function BarcodesForm({ labels, access, store, recordId, msId }) {
+export default function BarcodesForm({ labels, access, store, recordId, msId, barcode }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -45,12 +45,12 @@ export default function BarcodesForm({ labels, access, store, recordId, msId }) 
       itemName: store?._name,
       muId: null,
       msId: msId,
-      scaleDescription: store?.description,
-      posDescription: store?.description,
+      scaleDescription: null,
+      posDescription: null,
       barcode: null,
       isInactive: false
     },
-    enableReinitialize: false,
+    enableReinitialize: true,
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -63,14 +63,14 @@ export default function BarcodesForm({ labels, access, store, recordId, msId }) 
       })
 
       if (imageUploadRef.current) {
-        imageUploadRef.current.value = res.recordId
+        imageUploadRef.current.value = parseInt(res.recordId)
 
         await imageUploadRef.current.submit()
       }
 
       if (!values.recordId) {
         toast.success(platformLabels.Added)
-        formik.setFieldValue('recordId', res?.recordId)
+        formik.setFieldValue('recordId', parseInt(res?.recordId))
       } else toast.success(platformLabels.Edited)
       invalidate()
     }
@@ -81,17 +81,29 @@ export default function BarcodesForm({ labels, access, store, recordId, msId }) 
   useEffect(() => {
     ;(async function () {
       if (store && !editMode) {
-        formik.setValues({ ...formik.values, itemId: store?.recordId, sku: store?._reference, itemName: store?._name })
+        formik.setValues({
+          ...formik.values,
+          itemId: store?.recordId,
+          sku: store?._reference,
+          itemName: store?._name,
+          posDescription: store?._name,
+          scaleDescription: store?._name
+        })
 
         return
       }
-      if (recordId) {
+      if (barcode) {
         const res = await getRequest({
           extension: InventoryRepository.Barcodes.get,
-          parameters: `_barcode=${recordId}`
+          parameters: `_barcode=${barcode}`
         })
-        formik.setValues(res.record)
-        formik.setFieldValue('recordId', res?.record?.recordId)
+
+        formik.setValues({
+          ...res.record,
+          scaleDescription: res.record.scaleDescription,
+          posDescription: res.record.posDescription,
+          recordId: parseInt(res?.record.recordId)
+        })
       }
     })()
   }, [])
@@ -172,7 +184,12 @@ export default function BarcodesForm({ labels, access, store, recordId, msId }) 
               </Grid>
             </Grid>
             <Grid item xs={4}>
-              <ImageUpload ref={imageUploadRef} resourceId={ResourceIds.Barcodes} seqNo={0} recordId={formik.values.recordId} />
+              <ImageUpload
+                ref={imageUploadRef}
+                resourceId={ResourceIds.Barcodes}
+                seqNo={0}
+                recordId={formik.values.recordId}
+              />
             </Grid>
             <Grid item xs={12}>
               <CustomNumberField

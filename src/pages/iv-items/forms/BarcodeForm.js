@@ -93,7 +93,8 @@ const BarcodeForm = ({ store, labels, maxAccess }) => {
       Component: BarcodesForm,
       props: {
         labels: _labels,
-        recordId: obj?.barcode,
+        recordId: obj?.recordId,
+        barcode: obj?.barcode,
         access: maxAccess,
         store,
         msId: store?._msId

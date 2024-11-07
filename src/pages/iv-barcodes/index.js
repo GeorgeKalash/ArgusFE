@@ -120,11 +120,13 @@ const IvBarcodes = () => {
   }
 
   function openForm(obj) {
+    console.log(obj)
     stack({
       Component: BarcodesForm,
       props: {
         labels: _labels,
-        recordId: obj?.barcode,
+        recordId: obj?.recordId,
+        barcode: obj?.barcode,
         msId: obj?.msId,
         maxAccess: access
       },
