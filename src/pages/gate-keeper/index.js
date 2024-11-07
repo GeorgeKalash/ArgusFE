@@ -127,7 +127,7 @@ const GateKeeper = () => {
       },
       width: 450,
       height: 170,
-      title: platformLabels.Clear
+      title: platformLabels.Cancel
     })
   }
 
