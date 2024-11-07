@@ -104,8 +104,7 @@ const TrxDetails = () => {
     stack({
       Component: DataForm,
       props: {
-        obj,
-        maxAccess: access
+        obj
       },
       width: 600,
       height: 390,
