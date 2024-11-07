@@ -113,9 +113,7 @@ const ItemPartForm = ({ labels, maxAccess, obj }) => {
       label: labels.partName,
       name: 'partName',
       props: {
-        readOnly: true,
-        allowNegative: false,
-        decimalScale: 0
+        readOnly: true
       }
     },
     {
