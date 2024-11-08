@@ -38,7 +38,7 @@ const TrxDetails = () => {
     const formattedstartDate = formatDate(formik.values.startDate)
     const formattedendDate = formatDate(formik.values.endDate)
     getRequest({
-      extension: SystemRepository.TrxDetails.qry,
+      extension: SystemRepository.TrxDetails.qry2,
       parameters: `_countryId=${formik.values.countryId}&_moduleId=${formik.values.moduleId || 0}&_resourceId=${
         formik.values.resourceId || 0
       }&_userId=${formik.values.userId || 0}&_trxType=${formik.values.trxType || 0}&_data=${
