@@ -9,12 +9,14 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
+import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { useError } from 'src/error'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { getStorageData } from 'src/storage/storage'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import MaterialsTransferForm from './Form/MaterialsTransferForm'
+import { SystemFunction } from 'src/resources/SystemFunction'
 
 const IvMaterialsTransfer = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -68,6 +70,15 @@ const IvMaterialsTransfer = () => {
       filterFn: fetchWithFilter
     }
   })
+
+  const { proxyAction } = useDocumentTypeProxy({
+    functionId: SystemFunction.MaterialTransfer,
+    action: openForm
+  })
+
+  const add = async () => {
+    await proxyAction()
+  }
 
   const columns = [
     {
@@ -154,10 +165,6 @@ const IvMaterialsTransfer = () => {
     }
   ]
 
-  const add = () => {
-    openForm()
-  }
-
   const edit = obj => {
     openForm(obj?.recordId)
   }
@@ -165,14 +172,13 @@ const IvMaterialsTransfer = () => {
   const getPlantId = async () => {
     const userId = getStorageData('userData').userId
 
-    try {
       const res = await getRequest({
         extension: SystemRepository.UserDefaults.get,
         parameters: `_userId=${userId}&_key=plantId`
       })
 
       return res.record.value
-    } catch (e) {}
+
   }
 
   function openOutWardsWindow(plantId, recordId) {
@@ -201,14 +207,14 @@ const IvMaterialsTransfer = () => {
   }
 
   const del = async obj => {
-    try {
+
       await postRequest({
         extension: InventoryRepository.MaterialsTransfer.del,
         record: JSON.stringify(obj)
       })
       invalidate()
       toast.success(platformLabels.Deleted)
-    } catch (error) {}
+
   }
 
   const onApply = ({ search, rpbParams }) => {

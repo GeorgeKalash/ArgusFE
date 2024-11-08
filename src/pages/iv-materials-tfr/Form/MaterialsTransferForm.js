@@ -118,8 +118,8 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       copy.date = !!copy.date ? formatDateToApi(copy.date) : null
       copy.closedDate = !!copy.closedDate ? formatDateToApi(copy.closedDate) : null
       copy.receivedDate = !!copy.receivedDate ? formatDateToApi(copy.receivedDate) : null
-      copy.status = copy.status === '' ? 1 : copy.status
-      copy.wip = copy.wip === '' ? 1 : copy.wip
+      copy.status = copy.status 
+      copy.wip = copy.wip 
 
       const updatedRows = formik?.values?.transfers.map((transferDetail, index) => {
         return {
@@ -130,7 +130,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       })
       if (values.fromSiteId === values.toSiteId) {
         stackError({
-          message: `Cannot have same from and to site`
+          message: labels.errorMessage
         })
 
         return
