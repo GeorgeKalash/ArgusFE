@@ -362,5 +362,12 @@ export const getButtons = platformLabels => [
     color: '#231f20',
     image: 'save.png',
     main: true
+  },
+  {
+    key: 'Transfer',
+    label: platformLabels.Transfer,
+    color: '#4eb558',
+    image: 'exchange-refresh-icon.png',
+    main: false
   }
 ]

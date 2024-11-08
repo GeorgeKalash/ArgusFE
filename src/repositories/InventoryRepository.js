@@ -3,7 +3,8 @@ const service = 'IV.asmx/'
 export const InventoryRepository = {
   Barcode: {
     qry: service + 'qryBCD',
-    set2: service + 'set2BCD'
+    set2: service + 'set2BCD',
+    migrate: service + 'migrateBCD'
   },
   Item: {
     snapshot: service + 'snapshotIT',
