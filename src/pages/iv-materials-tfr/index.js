@@ -34,12 +34,10 @@ const IvMaterialsTransfer = () => {
       }`
     })
 
-    if (response && response?.list) {
-      response.list = response?.list?.map(item => ({
-        ...item,
-        isVerified: item?.isVerified === null ? false : item?.isVerified
-      }))
-    }
+    response.list = response?.list?.map(item => ({
+      ...item,
+      isVerified: item?.isVerified === null ? false : item?.isVerified
+    }))
 
     return { ...response, _startAt: _startAt }
   }
