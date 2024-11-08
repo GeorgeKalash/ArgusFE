@@ -294,58 +294,37 @@ const PhysicalCountItemDe = () => {
           })
         }
       },
-      async onKeyDown(e, id, addRow) {
-        console.log('e', e)
-        console.log(id)
-
-        const oldValue = previousValuesRef.current[id - 1]?.sku
-
-        //const oldValue = formik.values.rows[id - 1]?.sku
-        console.log('oldValue', oldValue, e.target.value)
-        if (e.target.value !== oldValue) {
-          if (disSkuLookup && e.code == 'Tab' && e.target.value) {
-            /* if (disableItemDuplicate) {
-            console.log('E', e.target.value.toString())
-            console.log(formik.values.rows)
-            if (formik.values.rows.find(item => item.sku == e.target.value.toString())) {
-              console.log('in', e)
-              update({
-                id: id,
-                field: 'sku',
-                value: ''
-              })
-
-              return
-            }
-          }  */ // done but opening new line
-
-            const txtRes = await getRequest({
-              extension: InventoryRepository.Items.get2,
-              parameters: `_sku=${e.target.value}`
+      async onCellPress(e, { row: { addRow, oldValue, update } }) {
+        if (!disSkuLookup) {
+          console.log(e.target.value, oldValue.sku)
+          // // const oldValue = formik.values.rows[id - 1]?.sku
+          // if (e.target.value !== oldValue.sku) {
+          const txtRes = await getRequest({
+            extension: InventoryRepository.Items.get2,
+            parameters: `_sku=${e.target.value}`
+          })
+          if (txtRes?.record) {
+            const itemId = txtRes?.record?.recordId ? txtRes?.record?.recordId : ''
+            addRow({
+              fieldName: 'sku',
+              changes: {
+                id: oldValue.id,
+                sku: e.target.value,
+                itemId: itemId,
+                itemName: txtRes?.record?.name ? txtRes?.record?.name : '',
+                priceType: txtRes?.record?.metalId ? txtRes?.record?.priceType : 0
+              }
             })
-            if (txtRes.record) {
-              const itemId = txtRes?.record?.recordId ? txtRes?.record?.recordId : ''
-              addRow({
-                fieldName: 'sku',
-                changes: {
-                  id: id,
-                  sku: e.target.value,
-                  itemId: itemId,
-                  itemName: txtRes?.record?.name ? txtRes?.record?.name : '',
-                  priceType: txtRes?.record?.metalId ? txtRes?.record?.priceType : 0
-                }
-              })
-
-              previousValuesRef.current = formik.values.rows.map(row => ({ ...row }))
-            }
+          } else {
+            update({
+              id: oldValue.id,
+              sku: ''
+            })
           }
-
-          // // update({
-          // //   itemId: itemId,
-          // //   itemName: txtRes?.record?.name ? txtRes?.record?.name : '',
-          // //   priceType: txtRes?.record?.metalId ? txtRes?.record?.priceType : 0
-          // // })
         }
+        // } else {
+        //   addRow({ changes: null })
+        // }
       }
     },
 

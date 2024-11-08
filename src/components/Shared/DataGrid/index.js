@@ -106,6 +106,76 @@ export function DataGrid({
     }
   }
 
+  const updateAndNewRow = params => {
+    const { event, api } = params
+    const allColumns = api.getColumnDefs()
+
+    const column = allColumns.find(({ name }) => name === params.colDef.field)
+
+    const addRow = async ({ changes }) => {
+      console.log(params.rowIndex === value.length - 1, column.props?.jumpToNextLine)
+      if (params.rowIndex === value.length - 1 && !changes) {
+        console.log('changes', changes)
+        addNewRow(params)
+        return
+      }
+      const index = value.findIndex(({ id }) => id === changes.id)
+      const row = value[index]
+      const updatedRow = { ...row, ...changes }
+      let rows
+
+      gridApiRef.current.setRowData(value.map(row => (row.id === updatedRow?.id ? updatedRow : row)))
+
+      if (params.rowIndex === value.length - 1 && column.props?.jumpToNextLine) {
+        console.log('add')
+        const highestIndex = value?.length
+          ? value.reduce((max, current) => (max.id > current.id ? max : current)).id + 1
+          : 1
+        const defaultValues = Object.fromEntries(
+          columns?.filter(({ name }) => name !== 'id').map(({ name, defaultValue }) => [name, defaultValue])
+        )
+        rows = [
+          ...value.map(row => (row.id === updatedRow.id ? updatedRow : row)),
+          {
+            id: highestIndex,
+            ...defaultValues
+          }
+        ]
+        onChange(rows)
+        setTimeout(() => {
+          api.startEditingCell({
+            rowIndex: index + 1,
+            colKey: column?.field
+          })
+        }, 10)
+      } else {
+        rows = [...value.map(row => (row.id === updatedRow.id ? updatedRow : row))]
+        const currentColumnIndex = allColumns?.findIndex(col => col.colId === params.column.getColId())
+        onChange(rows)
+        api.startEditingCell({
+          rowIndex: index,
+          colKey: allColumns[currentColumnIndex + 2].colId
+        })
+      }
+
+      setTimeout(() => {
+        api.startEditingCell({
+          rowIndex: index + 1,
+          colKey: column?.field
+        })
+      }, 10)
+    }
+
+    const updateRowCommit = changes => {
+      setData(changes, params)
+      commit({ changes: { ...params.node.data, changes } })
+    }
+    if (column.onCellPress)
+      column.onCellPress(event, {
+        row: { addRow: addRow, oldValue: value?.[params.rowIndex], update: updateRowCommit }
+      })
+  }
+
   const findCell = params => {
     const allColumns = params.api.getColumnDefs()
 
@@ -118,7 +188,7 @@ export function DataGrid({
   }
 
   const onCellKeyDown = params => {
-    const { event, api, node } = params
+    const { column, event, api, node } = params
 
     const allColumns = api.getColumnDefs()
     const currentColumnIndex = allColumns?.findIndex(col => col.colId === params.column.getColId())
@@ -138,6 +208,19 @@ export function DataGrid({
     }
 
     const nextCell = findCell(params)
+
+    const col = allColumns.find(({ name }) => name === params.colDef.field)
+    if (col.onCellPress)
+      if (event.key == 'Tab') {
+        if (column.colDef.component === 'resourcelookup' && col.props.jumpToNextLine) {
+          if (col.props.jumpToNextLine) {
+            addNewRow(params)
+          }
+        } else {
+          updateAndNewRow(params)
+          return
+        }
+      }
 
     if (currentColumnIndex === allColumns.length - 1 - skip && node.rowIndex === api.getDisplayedRowCount() - 1) {
       if (allowAddNewLine && !error) {
@@ -254,7 +337,8 @@ export function DataGrid({
 
       setData(changes, params)
 
-      if (column.colDef.updateOn !== 'blur') {
+      console.log('column.colDef?.props?.jumpToNextLine', column.colDef?.props?.jumpToNextLine)
+      if (column.colDef.updateOn !== 'blur' && !column.colDef?.props?.jumpToNextLine) {
         commit(changes)
         process(params, oldRow, setData)
       }
@@ -359,7 +443,7 @@ export function DataGrid({
     const allRowNodes = []
     gridApiRef.current.forEachNode(node => allRowNodes.push(node.data))
     const updatedGridData = allRowNodes.map(row => (row.id === data?.id ? data : row))
-
+    console.log(updatedGridData)
     onChange(updatedGridData)
   }
 
