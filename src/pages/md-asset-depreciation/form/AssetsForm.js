@@ -229,7 +229,7 @@ export default function AssetsForm({ obj, maxAccess: access, labels, window }) {
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_dgId=${SystemFunction.AssetsDepreciation}&_startAt=${0}&_pageSize=${50}`}
                     name='dtId'
-                    label={labels.documentType}
+                    label={labels.dtName}
                     readOnly={editMode}
                     valueField='recordId'
                     displayField='name'
@@ -255,7 +255,7 @@ export default function AssetsForm({ obj, maxAccess: access, labels, window }) {
                 <Grid item xs={12}>
                   <CustomDatePicker
                     name='date'
-                    label={labels.birthDate}
+                    label={labels.date}
                     value={formik.values?.date}
                     onChange={formik.setFieldValue}
                     onClear={() => formik.setFieldValue('date', '')}
@@ -273,7 +273,7 @@ export default function AssetsForm({ obj, maxAccess: access, labels, window }) {
                   <ResourceComboBox
                     endpointId={SystemRepository.Plant.qry}
                     name='plantId'
-                    label={labels.plant}
+                    label={labels.plantName}
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     columnsInDropDown={[
@@ -281,7 +281,6 @@ export default function AssetsForm({ obj, maxAccess: access, labels, window }) {
                       { key: 'name', value: 'Name' }
                     ]}
                     values={formik.values}
-                    required
                     readOnly={editMode}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
