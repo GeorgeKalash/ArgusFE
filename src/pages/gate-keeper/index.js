@@ -13,8 +13,18 @@ import toast from 'react-hot-toast'
 import { ControlContext } from 'src/providers/ControlContext'
 import CancelDialog from 'src/components/Shared/CancelDialog'
 import { useWindow } from 'src/windows'
+import cancelIcon from '../../../public/images/TableIcons/cancel.png'
+import Image from 'next/image'
+import { Box, IconButton } from '@mui/material'
+import toast from 'react-hot-toast'
+import { ControlContext } from 'src/providers/ControlContext'
+import CancelDialog from 'src/components/Shared/CancelDialog'
+import { useWindow } from 'src/windows'
 
 const GateKeeper = () => {
+  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { stack } = useWindow()
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
