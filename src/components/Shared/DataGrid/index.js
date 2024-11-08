@@ -54,52 +54,61 @@ export function DataGrid({
     // console.log('rowIds', rowIds.length, changes.id)
 
     // if (rowIds.length === changes.id) {
-    stageRowUpdate({
-      changes
-    })
+    console.log('in update', changes, fieldName)
+    const index = value.findIndex(({ id }) => id === changes.id)
+    console.log('index', index)
+    console.log('index', value.length - 1)
+    if (index === value.length - 1) {
+      stageRowUpdate({
+        changes
+      })
 
-    const changess = stagedChanges.current
+      const changess = stagedChanges.current
 
-    if (!changess) return apiRef.current.getRow(currentEditCell.current.id)
+      if (!changess) return apiRef.current.getRow(currentEditCell.current.id)
 
-    const row = apiRef.current.getRow(currentEditCell.current.id)
+      const row = apiRef.current.getRow(currentEditCell.current.id)
 
-    const updatedRow = await processDependenciesForColumn(
-      {
-        ...row,
-        ...changess
-      },
-      row,
-      {
-        id: currentEditCell.current.id,
-        field: currentEditCell.current.field
-      }
-    )
+      const updatedRow = await processDependenciesForColumn(
+        {
+          ...row,
+          ...changess
+        },
+        row,
+        {
+          id: currentEditCell.current.id,
+          field: currentEditCell.current.field
+        }
+      )
 
-    apiRef.current.updateRows([updatedRow])
+      apiRef.current.updateRows([updatedRow])
 
-    const highestIndex = value?.length
-      ? value.reduce((max, current) => (max[idName] > current[idName] ? max : current))[idName] + 1
-      : 1
+      //if (!error) {
+      const highestIndex = value?.length
+        ? value.reduce((max, current) => (max[idName] > current[idName] ? max : current))[idName] + 1
+        : 1
 
-    const defaultValues = Object.fromEntries(
-      columns?.filter(({ name }) => name !== idName).map(({ name, defaultValue }) => [name, defaultValue])
-    )
+      const defaultValues = Object.fromEntries(
+        columns?.filter(({ name }) => name !== idName).map(({ name, defaultValue }) => [name, defaultValue])
+      )
 
-    onChange([
-      ...value.map(row => (row[idName] === updatedRow[idName] ? updatedRow : row)), // Update existing row
-      {
-        [idName]: highestIndex, // Add new row with unique id
-        ...defaultValues
-      }
-    ])
-    console.log('test')
+      onChange([
+        ...value.map(row => (row[idName] === updatedRow[idName] ? updatedRow : row)), // Update existing row
+        {
+          [idName]: highestIndex, // Add new row with unique id
+          ...defaultValues
+        }
+      ])
+      console.log('test')
 
-    setNextEdit({
-      id: changes.id + 1,
-      field: fieldName
-    })
-    // }
+      //}
+      //const id = value[nextCell.rowIndex + 1]
+
+      setNextEdit({
+        id: changes.id + 1,
+        field: fieldName
+      })
+    }
   }
 
   function handleRowChange(row) {
@@ -224,6 +233,7 @@ export function DataGrid({
         nextCell.rowIndex -= 1
         nextCell.columnIndex = columns.length - 1
       }
+
       // }
       const field = columns[nextCell.columnIndex].field
       const id = rowIds[nextCell.rowIndex]

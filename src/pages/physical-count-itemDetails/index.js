@@ -1,6 +1,6 @@
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useState, useRef } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
@@ -73,8 +73,6 @@ const PhysicalCountItemDe = () => {
     }),
     onSubmit: values => {}
   })
-
-  console.log('formik', formik.values)
 
   async function fetchGridData(stockCountId, siteId, controllerId) {
     //getSysChecks()
@@ -218,6 +216,7 @@ const PhysicalCountItemDe = () => {
       }
     }
   } */
+  const previousValuesRef = useRef(formik.values.rows)
 
   const columns = [
     {
@@ -268,6 +267,7 @@ const PhysicalCountItemDe = () => {
               /* const newRows = formik.values.rows.filter(({ id }) => id !== newRow.id)
               formik.setFieldValue('rows', newRows) */
             }
+
             /* console.log(formik.values.rows[1])
               console.log(`${formik.values.rows[1]}`)
               formik.setFieldValue(`${formik.values.rows[1]}`, {
@@ -295,8 +295,16 @@ const PhysicalCountItemDe = () => {
         }
       },
       async onKeyDown(e, id, update, addRow) {
-        if (disSkuLookup && e.code == 'Tab') {
-          /* if (disableItemDuplicate) {
+        console.log('e', e)
+        console.log(id)
+
+        const oldValue = previousValuesRef.current[id - 1]?.sku
+
+        //const oldValue = formik.values.rows[id - 1]?.sku
+        console.log('oldValue', oldValue, e.target.value)
+        if (e.target.value !== oldValue) {
+          if (disSkuLookup && e.code == 'Tab' && e.target.value) {
+            /* if (disableItemDuplicate) {
             console.log('E', e.target.value.toString())
             console.log(formik.values.rows)
             if (formik.values.rows.find(item => item.sku == e.target.value.toString())) {
@@ -311,22 +319,27 @@ const PhysicalCountItemDe = () => {
             }
           }  */ // done but opening new line
 
-          const txtRes = await getRequest({
-            extension: InventoryRepository.Items.get2,
-            parameters: `_sku=${e.target.value}`
-          })
-          const itemId = txtRes?.record?.recordId ? txtRes?.record?.recordId : ''
+            const txtRes = await getRequest({
+              extension: InventoryRepository.Items.get2,
+              parameters: `_sku=${e.target.value}`
+            })
+            if (txtRes.record) {
+              const itemId = txtRes?.record?.recordId ? txtRes?.record?.recordId : ''
+              addRow({
+                fieldName: 'sku',
+                changes: {
+                  id: id,
+                  sku: e.target.value,
+                  itemId: itemId,
+                  itemName: txtRes?.record?.name ? txtRes?.record?.name : '',
+                  priceType: txtRes?.record?.metalId ? txtRes?.record?.priceType : 0
+                }
+              })
 
-          addRow({
-            fieldName: 'sku',
-            changes: {
-              id: id,
-              sku: e.target.value,
-              itemId: itemId,
-              itemName: txtRes?.record?.name ? txtRes?.record?.name : '',
-              priceType: txtRes?.record?.metalId ? txtRes?.record?.priceType : 0
+              previousValuesRef.current = formik.values.rows.map(row => ({ ...row }))
             }
-          })
+          }
+
           // // update({
           // //   itemId: itemId,
           // //   itemName: txtRes?.record?.name ? txtRes?.record?.name : '',
