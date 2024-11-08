@@ -150,6 +150,7 @@ export const InventoryRepository = {
     rebuild: service + 'rebuildFIS'
   },
   MaterialsTransfer: {
+    page: service + 'pageTFR',
     qry: service + 'qryTFR',
     snapshot: service + 'snapshotTFR',
     get: service + 'getTFR',

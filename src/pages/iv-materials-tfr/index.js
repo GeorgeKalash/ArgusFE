@@ -28,7 +28,7 @@ const IvMaterialsTransfer = () => {
     const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
-      extension: InventoryRepository.MaterialsTransfer.qry,
+      extension: InventoryRepository.MaterialsTransfer.page,
       parameters: `_filter=&_size=30&_startAt=${_startAt}&_sortBy=recordId desc&_pageSize=${_pageSize}&_params=${params || ''}`
     })
 
@@ -64,7 +64,7 @@ const IvMaterialsTransfer = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: InventoryRepository.MaterialsTransfer.qry,
+    endpointId: InventoryRepository.MaterialsTransfer.page,
     datasetId: ResourceIds.MaterialsTransfer,
     filter: {
       filterFn: fetchWithFilter
