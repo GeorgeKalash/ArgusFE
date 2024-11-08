@@ -117,13 +117,7 @@ const SalesInquiries = () => {
       headerName: _labels.overhead,
       flex: 1,
       type: 'number'
-    },
-    {
-      field: 'extendedPrice',
-      headerName: _labels.extendedPrice,
-      flex: 1,
-      type: 'number'
-    },
+    }
   ];
   
 
