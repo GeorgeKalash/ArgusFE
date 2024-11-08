@@ -39,12 +39,12 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId, onCha
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required(' '),
-      activeStatus: yup.string().required(' '),
-      description: yup.string().required(' '),
+      name: yup.string().required(),
+      activeStatus: yup.string().required(),
+      description: yup.string().required(),
       accountRef: yup
         .string()
-        .required(' ')
+        .required()
         .matches(/^(?=.*\d)[\d_-]+$/)
     }),
     onSubmit: async (values, { setSubmitting }) => {
@@ -72,11 +72,9 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId, onCha
       getRequest({
         extension: GeneralLedgerRepository.ChartOfAccounts.get,
         parameters: `_recordId=${recordId}`
+      }).then(res => {
+        formik.setValues(res.record)
       })
-        .then(res => {
-          formik.setValues(res.record)
-        })
-        .catch(error => {})
     }
   }, [recordId])
 
@@ -120,7 +118,6 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId, onCha
                 name='name'
                 label={labels.name}
                 value={formik.values.name}
-                readOnly={editMode}
                 required
                 rows={2}
                 maxAccess={maxAccess}

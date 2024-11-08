@@ -27,13 +27,27 @@ import dayjs from 'dayjs'
 
 export default function OutboundTranspForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
+  const { platformLabels, userDefaultsData } = useContext(ControlContext)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.DeliveryTrip,
     access,
     enabled: !recordId
   })
+
+  async function getDefaultData() {
+    const userKeys = ['plantId']
+
+    const plantIdDefault = (userDefaultsData?.list || []).reduce((acc, { key, value }) => {
+      if (userKeys.includes(key)) {
+        acc[key] = value ? parseInt(value) : null
+      }
+      
+      return acc
+    }, {})
+
+    formik.setFieldValue('plantId', parseInt(plantIdDefault?.plantId))
+  }
 
   const invalidate = useInvalidate({
     endpointId: DeliveryRepository.Trip.page
@@ -63,7 +77,15 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
       capacityVolume: null,
       wip: 1,
       wipName: '',
-      orders: []
+      orders: [{
+        id: 1,
+        soRef: null,
+        soId: null,
+        soDate: null,
+        clientName: null,
+        soVolume: null,
+        soWipStatusName: null
+      }]
     },
     maxAccess,
     enableReinitialize: false,
@@ -75,66 +97,62 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
       driverId: yup.string().required()
     }),
     onSubmit: async obj => {
-      try {
-        const copy = { ...obj }
-        delete copy.orders
+      const copy = { ...obj }
+      delete copy.orders
 
-        copy.date = formatDateToApi(copy.date)
+      copy.date = formatDateToApi(copy.date)
 
-        const combinedDateTime = getShiftedDate(copy.departureTime, copy.departureTimeField)
-        copy.departureTime = formatDateToApi(combinedDateTime)
+      const combinedDateTime = getShiftedDate(copy.departureTime, copy.departureTimeField)
+      copy.departureTime = formatDateToApi(combinedDateTime)
 
-        if (copy.arrivalTime) {
-          const arrCombinedDateTime = getShiftedDate(copy.arrivalTime, copy.arrivalTimeField)
-          copy.arrivalTime = formatDateToApi(arrCombinedDateTime)
+      if (copy.arrivalTime) {
+        const arrCombinedDateTime = getShiftedDate(copy.arrivalTime, copy.arrivalTimeField)
+        copy.arrivalTime = formatDateToApi(arrCombinedDateTime)
+      }
+
+      const headerResponse = await postRequest({
+        extension: DeliveryRepository.Trip.set,
+        record: JSON.stringify(copy)
+      })
+
+      formik.setFieldValue('recordId', headerResponse.recordId)
+
+      let filteredOrders = formik.values.orders.filter(order => order.soId !== '' && order.soId !== undefined)
+      const soIdSet = new Set()
+      let hasDuplicates = false
+
+      for (const order of filteredOrders) {
+        if (soIdSet.has(order.soId)) {
+          hasDuplicates = true
+          break
         }
+        soIdSet.add(order.soId)
+      }
 
-        const headerResponse = await postRequest({
-          extension: DeliveryRepository.Trip.set,
-          record: JSON.stringify(copy)
-        })
+      if (hasDuplicates) {
+        return
+      }
 
-        formik.setFieldValue('recordId', headerResponse.recordId)
+      filteredOrders = filteredOrders.map((order, index) => ({
+        ...order,
+        tripId: headerResponse.recordId || 0,
+        id: index + 1
+      }))
 
-        let filteredOrders = formik.values.orders.filter(order => order.soId !== '' && order.soId !== undefined)
-        const soIdSet = new Set()
-        let hasDuplicates = false
+      const data = {
+        tripId: headerResponse.recordId || 0,
+        tripOrders: filteredOrders
+      }
 
-        for (const order of filteredOrders) {
-          if (soIdSet.has(order.soId)) {
-            hasDuplicates = true
-            break
-          }
-          soIdSet.add(order.soId)
-        }
+      const response = await postRequest({
+        extension: DeliveryRepository.TripOrderPack2.set2,
+        record: JSON.stringify(data)
+      })
 
-        if (hasDuplicates) {
-          //console.log('Duplicate soId found. Operation aborted.')
+      await refetchForm(headerResponse.recordId)
+      !formik.values.recordId ? toast.success(platformLabels.Added) : toast.success(platformLabels.Edited)
 
-          return
-        }
-
-        filteredOrders = filteredOrders.map((order, index) => ({
-          ...order,
-          tripId: headerResponse.recordId || 0,
-          id: index + 1
-        }))
-
-        const data = {
-          tripId: headerResponse.recordId || 0,
-          tripOrders: filteredOrders
-        }
-
-        const response = await postRequest({
-          extension: DeliveryRepository.TripOrderPack2.set2,
-          record: JSON.stringify(data)
-        })
-
-        await refetchForm(headerResponse.recordId)
-        !formik.values.recordId ? toast.success(platformLabels.Added) : toast.success(platformLabels.Edited)
-
-        invalidate()
-      } catch (error) {}
+      invalidate()
     }
   })
 
@@ -214,40 +232,47 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
   }
 
   const onPost = async () => {
-    try {
-      const res = await postRequest({
-        extension: DeliveryRepository.Trip.post,
-        record: JSON.stringify(formik.values)
-      })
+    const res = await postRequest({
+      extension: DeliveryRepository.Trip.post,
+      record: JSON.stringify(formik.values)
+    })
 
-      toast.success(platformLabels.Posted)
-      invalidate()
+    toast.success(platformLabels.Posted)
+    invalidate()
 
-      await refetchForm(formik.values.recordId)
-    } catch (exception) {}
+    await refetchForm(formik.values.recordId)
   }
 
   const onClose = async () => {
-    try {
-      const res = await postRequest({
-        extension: DeliveryRepository.Trip.close,
-        record: JSON.stringify(formik.values)
-      })
+    const res = await postRequest({
+      extension: DeliveryRepository.Trip.close,
+      record: JSON.stringify(formik.values)
+    })
 
-      if (recordId) toast.success(platformLabels.Closed)
-      invalidate()
+    if (recordId) toast.success(platformLabels.Closed)
+    invalidate()
 
-      await refetchForm(formik.values.recordId)
-    } catch (error) {}
+    await refetchForm(formik.values.recordId)
+  }
+
+  const onReopen = async () => {
+    await postRequest({
+      extension: DeliveryRepository.Trip.reopen,
+      record: JSON.stringify(formik.values)
+    })
+
+    if (recordId) toast.success(platformLabels.Reopened)
+    invalidate()
+
+    await refetchForm(formik.values.recordId)
   }
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          await refetchForm(recordId)
-        }
-      } catch (error) {}
+      getDefaultData()
+      if (recordId) {
+        await refetchForm(recordId)
+      }
     })()
   }, [])
 
@@ -256,13 +281,19 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
       key: 'Post',
       condition: true,
       onClick: onPost,
-      disabled: isPosted || !editMode
+      disabled: isPosted || !editMode || !isClosed
     },
     {
       key: 'Close',
-      condition: true,
+      condition: !isClosed,
       onClick: () => onClose(formik.values.recordId),
       disabled: isPosted || isClosed || !editMode
+    },
+    {
+      key: 'Reopen',
+      condition: isClosed,
+      onClick: onReopen,
+      disabled: !isClosed || isPosted
     }
   ]
 
@@ -330,6 +361,22 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
     }
   ]
 
+  async function previewBtnClicked() {
+    console.log('previewBtnClicked')
+    const data = { printStatus: 2, recordId: formik.values.recordId }
+
+    await postRequest({
+      extension: DeliveryRepository.TRP.flag,
+      record: JSON.stringify(data)
+    })
+
+    invalidate()
+  }
+
+  useEffect(() => {
+    if (documentType?.dtId) formik.setFieldValue('dtId', documentType.dtId)
+  }, [documentType?.dtId])
+
   return (
     <FormShell
       resourceId={ResourceIds.Trip}
@@ -337,8 +384,10 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
       maxAccess={maxAccess}
       editMode={editMode}
       actions={actions}
+      previewBtnClicked={previewBtnClicked}
       functionId={SystemFunction.DeliveryTrip}
       disabledSubmit={isPosted || isClosed}
+      previewReport={editMode}
     >
       <VertLayout>
         <Fixed>

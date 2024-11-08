@@ -9,6 +9,7 @@ import EventIcon from '@mui/icons-material/Event'
 import { AdapterMomentHijri } from '@mui/x-date-pickers/AdapterMomentHijri'
 import moment from 'moment-hijri'
 import PopperComponent from '../Shared/Popper/PopperComponent'
+import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
 
 export default function CustomDatePickerHijri({
   variant = 'outlined',
@@ -19,16 +20,53 @@ export default function CustomDatePickerHijri({
   onChange,
   readOnly,
   disabled,
-  fullWidth = true
+  disabledDate,
+  fullWidth = true,
+  hidden = false,
+  required = false,
+  ...props
 }) {
   const [openDatePicker, setOpenDatePicker] = useState(false)
+
+  const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
+
+  const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
+
+  const _readOnly =
+    maxAccess < 2 ||
+    accessLevel === DISABLED ||
+    (readOnly && accessLevel !== MANDATORY && accessLevel !== FORCE_ENABLED)
+
+  const _hidden = accessLevel ? accessLevel === HIDDEN : hidden
+
+  const isRequired = required || accessLevel === MANDATORY
+
+  const shouldDisableDate = dates => {
+    const date = new Date(dates)
+
+    const today = new Date()
+    today.setDate(today.getDate())
+    date.setDate(date.getDate())
+
+    if (disabledDate === '>=') {
+      return date >= today
+    }
+    if (disabledDate === '<') {
+      return date < today
+    }
+    if (disabledDate === '>') {
+      return date > today
+    }
+  }
 
   const handleDateChange = newValue => {
     const timestamp = newValue ? newValue.valueOf() : null
     onChange(name, timestamp)
   }
 
-  return (
+  return _hidden ? (
+    <></>
+  ) : (
     <LocalizationProvider dateAdapter={AdapterMomentHijri}>
       <DatePicker
         variant={variant}
@@ -42,20 +80,22 @@ export default function CustomDatePickerHijri({
         open={openDatePicker}
         minDate={moment(new Date(1938, 0, 1))}
         maxDate={moment(new Date(2075, 11, 31))}
+        shouldDisableDate={disabledDate && shouldDisableDate} // Enable this prop for date disabling
         slots={{
           actionBar: props => <PickersActionBar {...props} actions={['accept', 'today']} />,
           popper: PopperComponent
         }}
         slotProps={{
           textField: {
-            readOnly: true,
+            required: isRequired,
+            readOnly: _readOnly,
             size: size,
             fullWidth: fullWidth,
             inputProps: {
-              tabIndex: readOnly ? -1 : 0 // Prevent focus on the input field
+              tabIndex: _readOnly ? -1 : 0 // Prevent focus on the input field
             },
             InputProps: {
-              endAdornment: !(readOnly || disabled) && (
+              endAdornment: !(_readOnly || disabled) && (
                 <InputAdornment position='end'>
                   {Boolean(value) && (
                     <IconButton tabIndex={-1} edge='start' onClick={() => onChange(name, null)} sx={{ mr: -2 }}>

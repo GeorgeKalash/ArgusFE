@@ -1,11 +1,6 @@
-// ** React Imports
 import { createContext, useContext, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
@@ -26,16 +21,12 @@ const MenuProvider = ({ children }) => {
     getRequest({
       extension: SystemRepository.mainMenu,
       parameters: parameters
+    }).then(async res => {
+      const builtMenu = buildMenu(res.record.folders, res.record.commandLines)
+      const builtGear = buildGear(res.record.commandLines)
+      setGear(builtGear)
+      setMenu(builtMenu)
     })
-      .then(async res => {
-        const builtMenu = buildMenu(res.record.folders, res.record.commandLines)
-        const builtGear = buildGear(res.record.commandLines)
-        setGear(builtGear)
-        setMenu(builtMenu)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
   }
 
   const buildMenu = (folders, commandLines, parentId = 0) => {
@@ -113,32 +104,24 @@ const MenuProvider = ({ children }) => {
       postRequest({
         extension: AccessControlRepository.delBMK,
         record: JSON.stringify(record)
+      }).then(res => {
+        getMenu()
+        if (typeof callBack === 'function') {
+          callBack()
+        }
+        toast.success('Removed from favorites')
       })
-        .then(res => {
-          getMenu()
-          if (typeof callBack === 'function') {
-            callBack()
-          }
-          toast.success('Removed from favorites')
-        })
-        .catch(error => {
-          setErrorMessage(error)
-        })
     } else {
       postRequest({
         extension: AccessControlRepository.setBMK,
         record: JSON.stringify(record)
+      }).then(res => {
+        getMenu()
+        if (typeof callBack === 'function') {
+          callBack()
+        }
+        toast.success('Added to favorites')
       })
-        .then(res => {
-          getMenu()
-          if (typeof callBack === 'function') {
-            callBack()
-          }
-          toast.success('Added to favorites')
-        })
-        .catch(error => {
-          setErrorMessage(error)
-        })
     }
   }
 
