@@ -188,12 +188,6 @@ export default function AssetsForm({ obj, maxAccess: access, labels, window }) {
 
   const actions = [
     {
-      key: 'PR',
-      condition: true,
-      onClick: fetchData,
-      disabled: editMode || preiewPressed
-    },
-    {
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
@@ -204,6 +198,12 @@ export default function AssetsForm({ obj, maxAccess: access, labels, window }) {
       condition: true,
       onClick: onPost,
       disabled: !editMode || formik.values.status !== 1
+    },
+    {
+      key: 'PR',
+      condition: true,
+      onClick: fetchData,
+      disabled: editMode || preiewPressed
     }
   ]
 

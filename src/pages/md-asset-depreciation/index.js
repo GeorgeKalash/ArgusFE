@@ -109,7 +109,7 @@ const IvItems = () => {
       },
       width: 1200,
       height: 660,
-      title: _labels.items
+      title: _labels.assetD
     })
   }
 
