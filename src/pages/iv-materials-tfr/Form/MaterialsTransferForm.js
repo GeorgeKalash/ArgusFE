@@ -160,7 +160,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
 
       if (!values.recordId) {
         toast.success(platformLabels.Added)
-        formik.setFieldValue('recordId', res.recordId)
+        formik.setValues(res.recordId)
 
         const res2 = await getRequest({
           extension: InventoryRepository.MaterialsTransfer.get,
@@ -468,7 +468,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
   }
 
   const onClose = async recId => {
-    const res = await postRequest({
+    await postRequest({
       extension: InventoryRepository.MaterialsTransfer.close,
       record: JSON.stringify({ recordId: recId })
     })
