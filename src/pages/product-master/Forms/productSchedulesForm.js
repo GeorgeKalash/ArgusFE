@@ -41,7 +41,7 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
           id: 1,
           productId: pId,
           seqNo: 1,
-          plantId: 0,
+          plantId: null,
           plantRef: '',
           plantName: '',
           countryId: '',
@@ -71,8 +71,9 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
 
     const data = {
       productId: pId,
-      productSchedules: obj.map(({ id, seqNo, productId, saved, ...rest }, index) => ({
+      productSchedules: obj.map(({ id, seqNo, productId, plantId, saved, ...rest }, index) => ({
         seqNo: index + 1,
+        plantId: plantId || null,
         productId: pId,
         ...rest
       }))

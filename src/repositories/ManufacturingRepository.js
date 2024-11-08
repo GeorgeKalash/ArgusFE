@@ -67,7 +67,8 @@ export const ManufacturingRepository = {
     preview: service + 'previewPQ',
     preview2: service + 'previewPQ2',
     update: service + 'updatePQ',
-    del: service + 'delPQ'
+    del: service + 'delPQ',
+    cancel: service + 'cancelPQ'
   },
   MaterialsAdjustment: {
     generate: service + 'generateADJ'

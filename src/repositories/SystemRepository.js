@@ -230,5 +230,8 @@ export const SystemRepository = {
   PlantsSchedule: {
     set2: service + 'set2PLS',
     qry: service + 'qryPLS'
+  },
+  FormattedAddress: {
+    get: service + 'formattedADD'
   }
 }

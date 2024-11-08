@@ -13,6 +13,8 @@ export const AddressFormShell = ({
   allowPost,
   optional = false,
   onSubmit,
+  isSavedClear = true,
+  isCleared = true,
   ...props
 }) => {
   const [required, setRequired] = useState(!optional)
@@ -21,7 +23,9 @@ export const AddressFormShell = ({
     recordId: address?.recordId || null,
     name: address?.name || '',
     countryId: address?.countryId || '',
+    countryName: address?.countryName || '',
     stateId: address?.stateId || '',
+    stateName: address?.stateName || '',
     cityId: address?.cityId || '',
     city: address?.city || '',
     street1: address?.street1 || '',
@@ -110,6 +114,8 @@ export const AddressFormShell = ({
       infoVisible={false}
       disabledSubmit={readOnly}
       editMode={editMode}
+      isSavedClear={isSavedClear}
+      isCleared={isCleared}
       {...props}
     >
       <AddressTab addressValidation={formik} readOnly={readOnly} required={required} {...props} />

@@ -116,7 +116,8 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
             _msId: formik.values.msId,
             _kit: formik.values.kit,
             _name: formik.values.name,
-            _reference: formik.values.sku
+            _reference: formik.values.sku,
+            description: formik.values.description
           }))
         } else {
           toast.success(platformLabels.Edited)

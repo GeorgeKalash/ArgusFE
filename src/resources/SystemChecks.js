@@ -26,9 +26,14 @@ export const SystemChecks = {
 
   // Delivery Orders
   ALLOW_DELIVERY_RETURN_OF_UNKNOWN_SKU: Module.Delivery * 100 + 1,
+
+  //Purchase
   ENABLE_PURCHASE_TAX: Module.Purchase * 100 + 1,
   ALLOW_ITEM_CREATION_FROM_PURCHASE: Module.Purchase * 100 + 2,
+
+  //Point of Sales
   POS_JUMP_TO_NEXT_LINE: Module.PointOfSale * 100 + 1,
   SINGLE_CASH_POS: Module.PointOfSale * 100 + 2,
-  POS_SKU_DISABLE_LOOKUP: Module.PointOfSale * 100 + 3
+  POS_SKU_DISABLE_LOOKUP: Module.PointOfSale * 100 + 3,
+  ENABLE_RETAIL_SCALE_BARCODE: Module.PointOfSale * 100 + 6
 }
