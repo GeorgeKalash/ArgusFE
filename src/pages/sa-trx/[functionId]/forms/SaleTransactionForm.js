@@ -215,8 +215,18 @@ export default function SaleTransactionForm({ labels, access, recordId, function
             applyVat: isVattable,
             ...rest
           })),
-
-          ...(({ header, items, ...rest }) => rest)(obj)
+          taxes: [
+            ...[
+              ...obj.taxes,
+              ...obj.items
+                .filter(({ taxDetails }) => taxDetails && taxDetails.length > 0)
+                .map(({ taxDetails, id }) => ({
+                  seqNo: id,
+                  ...taxDetails[0]
+                }))
+            ].filter(tax => obj.items.some(item => item.id === tax.seqNo))
+          ],
+          ...(({ header, items, taxes, ...rest }) => rest)(obj)
         }
 
         const saTrxRes = await postRequest({
@@ -265,6 +275,8 @@ export default function SaleTransactionForm({ labels, access, recordId, function
             const taxDetailsResponse = await getTaxDetails(itemInfo.taxId)
 
             const details = taxDetailsResponse.map(item => ({
+              invoiceId: formik.values.recordId,
+              taxSeqNo: item.seqNo,
               taxId: itemInfo.taxId,
               taxCodeId: item.taxCodeId,
               taxBase: item.taxBase,
@@ -277,6 +289,8 @@ export default function SaleTransactionForm({ labels, access, recordId, function
           const taxDetailsResponse = await getTaxDetails(formik.values.header.taxId)
 
           const details = taxDetailsResponse.map(item => ({
+            invoiceId: formik.values.recordId,
+            taxSeqNo: item.seqNo,
             taxId: formik.values.header.taxId,
             taxCodeId: item.taxCodeId,
             taxBase: item.taxBase,
@@ -285,7 +299,6 @@ export default function SaleTransactionForm({ labels, access, recordId, function
           rowTax = formik.values.header.taxId
           rowTaxDetails = details
         }
-
         const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
         setFilteredMU(filteredMeasurements)
         update({
@@ -321,7 +334,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
           mdType: MDTYPE_PCT,
           extendedPrice: parseFloat('0').toFixed(2),
           taxId: rowTax,
-          taxDetails: formik.values.isVattable ? rowTaxDetails : null,
+          taxDetails: formik.values.header.isVattable ? rowTaxDetails : null,
           siteId: formik?.values?.header?.siteId,
           siteRef: formik?.values?.header?.siteRef
         })
@@ -378,6 +391,8 @@ export default function SaleTransactionForm({ labels, access, recordId, function
               const taxDetailsResponse = await getTaxDetails(itemInfo.taxId)
 
               const details = taxDetailsResponse.map(item => ({
+                invoiceId: formik.values.recordId,
+                taxSeqNo: item.seqNo,
                 taxId: itemInfo.taxId,
                 taxCodeId: item.taxCodeId,
                 taxBase: item.taxBase,
@@ -390,6 +405,8 @@ export default function SaleTransactionForm({ labels, access, recordId, function
             const taxDetailsResponse = await getTaxDetails(formik.values.header.taxId)
 
             const details = taxDetailsResponse.map(item => ({
+              invoiceId: formik.values.recordId,
+              taxSeqNo: item.seqNo,
               taxId: formik.values.header.taxId,
               taxCodeId: item.taxCodeId,
               taxBase: item.taxBase,
@@ -753,6 +770,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
   async function fillForm(recordId, saTrxPack) {
     const saTrxHeader = saTrxPack?.header
     const saTrxItems = saTrxPack?.items
+    const saTrxTaxes = saTrxPack?.taxes
     const billAdd = await getAddress(saTrxHeader?.billAddressId)
 
     saTrxHeader?.tdType == 1 || saTrxHeader?.tdType == null
@@ -781,7 +799,8 @@ export default function SaleTransactionForm({ labels, access, recordId, function
         currentDiscount: saTrxHeader?.tdAmount,
         KGmetalPrice: saTrxHeader?.metalPrice * 1000
       },
-      items: modifiedList
+      items: modifiedList,
+      taxes: [...saTrxTaxes]
     })
     formik.setFieldValue('subtotal', saTrxHeader?.subtotal)
   }
