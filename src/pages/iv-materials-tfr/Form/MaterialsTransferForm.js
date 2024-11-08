@@ -454,7 +454,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     const res = await getData(recordId)
    
     const resNotification = await getNotificationData(recordId)
-    const res3 = await getDataGrid()
+    const res3 = await getDataGrid(recordId)
 
     formik.setValues({
       ...res.record,
@@ -527,7 +527,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
 
     if (formik.values.notificationGroupId) {
       notificationData = {
-        recordId: res.recordId,
+        recordId: formik.values.recordId,
         functionId: SystemFunction.MaterialTransfer,
         notificationGroupId: formik.values.notificationGroupId,
         date: formik.values.date,
@@ -541,7 +541,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       })
     } else if (!formik.values.notificationGroupId) {
       const data = {
-        recordId: res.recordId,
+        recordId: formik.values.recordId,
         functionId: SystemFunction.MaterialTransfer,
         notificationGroupId: 0
       }
@@ -554,7 +554,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
 
     toast.success(platformLabels.Posted)
     invalidate()
-    await refetchForm(res.recordId)
+    await refetchForm(formik.values.recordId)
   }
 
   const actions = [
@@ -611,7 +611,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     })
   }
 
-  async function getDataGrid() {
+  async function getDataGrid(recordId) {
     return await getRequest({
       extension: InventoryRepository.MaterialsTransferItems.qry,
       parameters: `_transferId=${recordId}&_functionId=${SystemFunction.MaterialTransfer}`
@@ -631,7 +631,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       if (recordId) {
         const res = await getData(recordId)
         const resNotification = await getNotificationData(recordId)
-        const res3 = await getDataGrid()
+        const res3 = await getDataGrid(recordId)
 
         formik.setValues({
           ...res.record,
