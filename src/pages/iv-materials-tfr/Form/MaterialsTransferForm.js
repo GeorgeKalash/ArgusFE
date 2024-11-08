@@ -200,7 +200,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
             extension: AccessControlRepository.Notification.set,
             record: JSON.stringify(notificationData)
           })
-        } else if (!formik.values.notificationGroupId) {
+        } else if (!formik.values.notificationGroupId && res.recordId) {
           const data = {
             recordId: res.recordId,
             functionId: SystemFunction.MaterialTransfer,
