@@ -54,24 +54,22 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: InventoryRepository.ItemProduction.get,
-            parameters: `_recordId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: InventoryRepository.ItemProduction.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          if (res?.record) {
-            const newValues = Object.keys(formik.initialValues).reduce((acc, key) => {
-              acc[key] = res.record[key] !== null ? res.record[key] : formik.initialValues[key]
+        if (res?.record) {
+          const newValues = Object.keys(formik.initialValues).reduce((acc, key) => {
+            acc[key] = res.record[key] !== null ? res.record[key] : formik.initialValues[key]
 
-              return acc
-            }, {})
+            return acc
+          }, {})
 
-            formik.setValues(newValues)
-          }
+          formik.setValues(newValues)
         }
-      } catch (exception) {}
+      }
     })()
   }, [recordId])
 
@@ -178,7 +176,6 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
                 value={formik.values.standardCost}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('standardCost', '')}
-                required
                 error={formik.touched.grossWgt && Boolean(formik.errors.grossWgt)}
               />
             </Grid>

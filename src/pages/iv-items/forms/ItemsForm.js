@@ -19,7 +19,7 @@ import { useRefBehavior } from 'src/hooks/useReferenceProxy'
 import { MasterSource } from 'src/resources/MasterSource'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 
-export default function ItemsForm({ labels, maxAccess: access, setStore, store, setFormikInitial }) {
+export default function ItemsForm({ labels, maxAccess: access, setStore, store, setFormikInitial, setObjSku }) {
   const { platformLabels } = useContext(ControlContext)
   const [showLotCategories, setShowLotCategories] = useState(false)
   const [showSerialProfiles, setShowSerialProfiles] = useState(false)
@@ -96,50 +96,48 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
         })
     }),
     onSubmit: async obj => {
-      try {
-        const response = await postRequest({
-          extension: InventoryRepository.Items.set,
-          record: JSON.stringify({ ...obj, attachment: null })
+      const response = await postRequest({
+        extension: InventoryRepository.Items.set,
+        record: JSON.stringify({ ...obj, attachment: null })
+      })
+
+      if (!obj.recordId) {
+        setOnKitItem(false)
+        toast.success(platformLabels.Added)
+        formik.setValues({
+          ...obj,
+          recordId: response.recordId
         })
-
-        if (!obj.recordId) {
-          setOnKitItem(false)
-          toast.success(platformLabels.Added)
-          formik.setValues({
-            ...obj,
-            recordId: response.recordId
-          })
-          setStore(prevStore => ({
-            ...prevStore,
-            recordId: response.recordId,
-            _msId: formik.values.msId,
-            _kit: formik.values.kitItem,
-            _name: formik.values.name,
-            _reference: formik.values.sku
-          }))
-        } else {
-          toast.success(platformLabels.Edited)
-        }
-        setFormikInitial(formik.values)
-
-        if (imageUploadRef.current) {
-          imageUploadRef.current.value = response.recordId
-
-          await imageUploadRef.current.submit()
-        }
-
-        const res = await getRequest({
-          extension: InventoryRepository.Items.get,
-          parameters: `_recordId=${response.recordId}`
-        })
-
         setStore(prevStore => ({
           ...prevStore,
-          _reference: res.record.sku
+          recordId: response.recordId,
+          _msId: formik.values.msId,
+          _kit: formik.values.kitItem,
+          _name: formik.values.name,
+          _reference: formik.values.sku
         }))
+      } else {
+        toast.success(platformLabels.Edited)
+      }
+      setFormikInitial(formik.values)
 
-        formik.setFieldValue('sku', res.record.sku)
-      } catch (error) {}
+      if (imageUploadRef.current) {
+        imageUploadRef.current.value = response.recordId
+
+        await imageUploadRef.current.submit()
+      }
+
+      const res = await getRequest({
+        extension: InventoryRepository.Items.get,
+        parameters: `_recordId=${response.recordId}`
+      })
+
+      setStore(prevStore => ({
+        ...prevStore,
+        _reference: res.record.sku
+      }))
+
+      formik.setFieldValue('sku', res.record.sku)
 
       invalidate()
     }
@@ -149,35 +147,35 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: InventoryRepository.Items.get,
-            parameters: `_recordId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: InventoryRepository.Items.get,
+          parameters: `_recordId=${recordId}`
+        })
+        setObjSku(res.record.sku)
 
-          const res2 = await getRequest({
-            extension: InventoryRepository.Category.get,
-            parameters: `_recordId=${res?.record?.categoryId}`
-          })
+        const res2 = await getRequest({
+          extension: InventoryRepository.Category.get,
+          parameters: `_recordId=${res?.record?.categoryId}`
+        })
 
-          setFormikInitial(res.record)
-          formik.setValues({ ...res.record, kitItem: !!res.record.kitItem })
-          setShowLotCategories(res.record.trackBy === 2)
-          setShowSerialProfiles(res.record.trackBy === 1)
-          setStore(prevStore => ({
-            ...prevStore,
-            nraId: res2?.record?.nraId,
-            _msId: res.record.msId,
-            _kit: res.record.kitItem,
-            measurementId: res.record.defSaleMUId,
-            priceGroupId: res.record.pgId,
-            returnPolicy: res.record.returnPolicyId,
-            _name: res.record.name,
-            _reference: res.record.sku
-          }))
-        }
-      } catch {}
+        setFormikInitial(res.record)
+
+        formik.setValues({ ...res.record, kitItem: !!res.record.kitItem })
+        setShowLotCategories(res.record.trackBy === 2)
+        setShowSerialProfiles(res.record.trackBy === 1)
+        setStore(prevStore => ({
+          ...prevStore,
+          nraId: res2?.record?.nraId,
+          _msId: res.record.msId,
+          _kit: res.record.kitItem,
+          measurementId: res.record.defSaleMUId,
+          priceGroupId: res.record.pgId,
+          returnPolicy: res.record.returnPolicyId,
+          _name: res.record.name,
+          _reference: res.record.sku
+        }))
+      }
     })()
   }, [])
 
@@ -290,7 +288,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     valueField='key'
                     displayField='value'
                     displayFieldWidth={1}
-                    required={!formik.values.kitItem}
+                    required
                     maxAccess={!editMode && maxAccess}
                     onChange={newValue => {
                       formik.setFieldValue('priceType', newValue?.key || '')

@@ -17,6 +17,7 @@ const IvItems = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const [params, setParams] = useState('')
+  const [objSku, setObjSku] = useState('')
 
   const { stack } = useWindow()
 
@@ -120,13 +121,15 @@ const IvItems = () => {
         labels: _labels,
         recordId: obj?.recordId,
         msId: obj?.msId,
-        maxAccess: access
+        maxAccess: access,
+        setObjSku
       },
       width: 1200,
       height: 660,
-      title: _labels.items + ' ' + (obj?.sku || '')
+      title: _labels.items + ' ' + objSku
     })
   }
+  console.log(objSku)
 
   const edit = obj => {
     openForm(obj)
