@@ -37,7 +37,6 @@ const TrxDetails = () => {
   const fetchData = () => {
     const formattedstartDate = formatDate(formik.values.startDate)
     const formattedendDate = formatDate(formik.values.endDate)
-
     getRequest({
       extension: SystemRepository.TrxDetails.qry,
       parameters: `_countryId=${formik.values.countryId}&_moduleId=${formik.values.moduleId || 0}&_resourceId=${
@@ -128,130 +127,129 @@ const TrxDetails = () => {
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
-            <Grid item xs={9}>
-              <Grid container spacing={2}>
-                <Grid item xs={4}>
-                  <CustomDatePicker
-                    name='startDate'
-                    max={formik.values.endDate}
-                    label={labels.startDate}
-                    value={formik?.values?.startDate}
-                    onChange={formik.setFieldValue}
-                    onClear={() => formik.setFieldValue('startDate', '')}
-                    error={!formik.values.startDate}
-                    maxAccess={access}
-                  />
-                </Grid>
-
-                <Grid item xs={4}>
-                  <ResourceComboBox
-                    datasetId={DataSets.MODULE}
-                    name='moduleId'
-                    label={labels.module}
-                    valueField='key'
-                    displayField='value'
-                    values={formik.values}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('moduleId', newValue?.key)
-                    }}
-                    maxAccess={access}
-                  />
-                </Grid>
-
-                <Grid item xs={4}>
-                  <ResourceComboBox
-                    endpointId={SystemRepository.ModuleClassRES.qry}
-                    parameters={`_moduleId=${formik.values.moduleId || 0}&_filter=`}
-                    label={'ResourceId'}
-                    name='resourceId'
-                    values={formik.values}
-                    readOnly={!formik.values.moduleId}
-                    valueField='key'
-                    displayField='value'
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('resourceId', newValue?.key)
-                    }}
-                    maxAccess={access}
-                  />
-                </Grid>
-
-                <Grid item xs={4}>
-                  <CustomDatePicker
-                    name='endDate'
-                    min={formik.values.startDate}
-                    label={labels.endDate}
-                    value={formik?.values?.endDate}
-                    onChange={formik.setFieldValue}
-                    onClear={() => formik.setFieldValue('endDate', '')}
-                    error={!formik.values.endDate}
-                    maxAccess={access}
-                  />
-                </Grid>
-
-                <Grid item xs={4}>
-                  <CustomTextField
-                    name='data'
-                    label={labels.data}
-                    value={formik.values.data}
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('data', '')}
-                    maxAccess={access}
-                  />
-                </Grid>
-
-                <Grid item xs={4}>
-                  <ResourceComboBox
-                    datasetId={DataSets.TRX_TYPE}
-                    name='trxType'
-                    label={labels.ttype}
-                    valueField='key'
-                    displayField='value'
-                    values={formik.values}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('trxType', newValue?.key)
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={6}>
-                  <Grid container spacing={1} alignItems='center'>
-                    <Grid item xs={10}>
-                      <ResourceLookup
-                        endpointId={SystemRepository.Users.snapshot}
-                        valueField='username'
-                        displayField='email'
-                        name='userId'
-                        label={labels.users}
-                        form={formik}
-                        displayFieldWidth={2}
-                        valueShow='username'
-                        secondValueShow='email'
-                        onChange={(event, newValue) => {
-                          formik.setFieldValue('userId', newValue ? newValue.recordId : '')
-                          formik.setFieldValue('email', newValue ? newValue.email : '')
-                          formik.setFieldValue('username', newValue ? newValue.username : '')
-                        }}
-                      />
-                    </Grid>
-                    <Grid item xs={2}>
-                      <Button
-                        sx={{ width: '20px', height: '35px' }}
-                        variant='contained'
-                        size='small'
-                        onClick={() => {
-                          if (formik.values.startDate && formik.values.endDate) {
-                            fetchData()
-                          }
-                        }}
-                      >
-                        <div className='button-container'>
-                          <img src='/images/buttonsIcons/preview.png' alt={platformLabels.Preview} />
-                        </div>
-                      </Button>
-                    </Grid>
-                  </Grid>
-                </Grid>
-              </Grid>
+            <Grid item xs={3}>
+              <CustomDatePicker
+                name='startDate'
+                max={formik.values.endDate}
+                label={labels.startDate}
+                value={formik?.values?.startDate}
+                onChange={formik.setFieldValue}
+                onClear={() => formik.setFieldValue('startDate', '')}
+                error={!formik.values.startDate}
+                maxAccess={access}
+              />
             </Grid>
+            <Grid item xs={3}>
+              <ResourceComboBox
+                datasetId={DataSets.MODULE}
+                name='moduleId'
+                label={labels.module}
+                valueField='key'
+                displayField='value'
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('moduleId', newValue?.key || null)
+                  !newValue && formik.setFieldValue('resourceId', null)
+                }}
+                maxAccess={access}
+              />
+            </Grid>
+            <Grid item xs={3}>
+              <ResourceComboBox
+                endpointId={SystemRepository.ModuleClassRES.qry}
+                parameters={`_moduleId=${formik.values.moduleId || 0}&_filter=`}
+                label={'ResourceId'}
+                name='resourceId'
+                values={formik.values}
+                readOnly={!formik.values.moduleId}
+                valueField='key'
+                displayField='value'
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('resourceId', newValue?.key || null)
+                }}
+                maxAccess={access}
+              />
+            </Grid>
+            <Grid item xs={3}></Grid>
+            <Grid item xs={3}>
+              <CustomDatePicker
+                name='endDate'
+                min={formik.values.startDate}
+                label={labels.endDate}
+                value={formik?.values?.endDate}
+                onChange={formik.setFieldValue}
+                onClear={() => formik.setFieldValue('endDate', null)}
+                error={!formik.values.endDate}
+                maxAccess={access}
+              />
+            </Grid>
+            <Grid item xs={3}>
+              <CustomTextField
+                name='data'
+                label={labels.data}
+                value={formik.values.data}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('data', null)}
+                maxAccess={access}
+              />
+            </Grid>
+            <Grid item xs={3}>
+              <ResourceComboBox
+                datasetId={DataSets.TRX_TYPE}
+                name='trxType'
+                label={labels.ttype}
+                valueField='key'
+                displayField='value'
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('trxType', newValue?.key || null)
+                }}
+              />
+            </Grid>
+            <Grid item xs={3}></Grid>
+            <Grid item xs={4}>
+              <ResourceLookup
+                endpointId={SystemRepository.Users.snapshot}
+                valueField='username'
+                displayField='email'
+                name='userId'
+                label={labels.users}
+                form={formik}
+                displayFieldWidth={2}
+                valueShow='username'
+                secondValueShow='email'
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('userId', newValue ? newValue.recordId : '')
+                  formik.setFieldValue('email', newValue ? newValue.email : '')
+                  formik.setFieldValue('username', newValue ? newValue.username : '')
+                }}
+              />
+            </Grid>
+            <Grid item xs={2}>
+              <Button
+                onClick={() => {
+                  if (formik.values.startDate && formik.values.endDate) {
+                    fetchData()
+                  }
+                }}
+                variant='contained'
+                sx={{
+                  mr: 1,
+                  backgroundColor: '#231f20',
+                  '&:hover': {
+                    backgroundColor: '#231f20',
+                    opacity: 0.8
+                  },
+                  width: '65px !important',
+                  height: '40px',
+                  objectFit: 'contain',
+                  minWidth: '30px !important'
+                }}
+              >
+                <img src='/images/buttonsIcons/preview.png' alt={platformLabels.Preview} />{' '}
+              </Button>
+            </Grid>
+            <Grid item xs={6}></Grid>
           </Grid>
         </Fixed>
         <Grow>
@@ -263,7 +261,6 @@ const TrxDetails = () => {
             isLoading={false}
             pagination={false}
             maxAccess={access}
-            paginationType='client'
           />
         </Grow>
       </VertLayout>
