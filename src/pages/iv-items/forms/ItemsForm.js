@@ -19,7 +19,7 @@ import { useRefBehavior } from 'src/hooks/useReferenceProxy'
 import { MasterSource } from 'src/resources/MasterSource'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 
-export default function ItemsForm({ labels, maxAccess: access, setStore, store, setFormikInitial, setObjSku }) {
+export default function ItemsForm({ labels, maxAccess: access, setStore, store, setFormikInitial }) {
   const { platformLabels } = useContext(ControlContext)
   const [showLotCategories, setShowLotCategories] = useState(false)
   const [showSerialProfiles, setShowSerialProfiles] = useState(false)
@@ -152,7 +152,6 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
           extension: InventoryRepository.Items.get,
           parameters: `_recordId=${recordId}`
         })
-        setObjSku(res.record.sku)
 
         const res2 = await getRequest({
           extension: InventoryRepository.Category.get,
