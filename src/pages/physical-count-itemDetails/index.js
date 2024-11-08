@@ -294,7 +294,7 @@ const PhysicalCountItemDe = () => {
           })
         }
       },
-      async onKeyDown(e, id, update, addRow) {
+      async onKeyDown(e, id, addRow) {
         console.log('e', e)
         console.log(id)
 
