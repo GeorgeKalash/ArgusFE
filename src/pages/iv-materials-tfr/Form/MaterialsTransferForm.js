@@ -34,7 +34,8 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
   const { stack } = useWindow()
   const { stack: stackError } = useError()
 
-  const [filters, setFilters] = useState()
+  const [measurements, setMeasurements] = useState([])
+  const [filteredMu, setFilteredMU] = useState([])
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.MaterialTransfer,
@@ -95,7 +96,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
   const { formik } = useForm({
     initialValues,
     maxAccess,
-    enableReinitialize: false,
+    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.date().required(),
@@ -271,13 +272,20 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     { totalQty: 0, totalCost: 0, totalWeight: 0 }
   )
 
-  const getMeasurementUnits = async msId => {
-    const res = await getRequest({
+  const getMeasurementUnits = async () => {
+    return await getRequest({
       extension: InventoryRepository.MeasurementUnit.qry,
-      parameters: `_msId=${msId}`
+      parameters: `_msId=0`
+    })
+  }
+
+  async function getItem(itemId) {
+    const res = await getRequest({
+      extension: InventoryRepository.Item.get,
+      parameters: `_recordId=${itemId}`
     })
 
-    return res
+    return res?.record
   }
 
   const columns = [
@@ -311,24 +319,20 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
           const { weight, metalId } = await getWeightAndMetalId(newRow?.itemId)
           const unitCost = (await getUnitCost(newRow?.itemId)) ?? 0
           const totalCost = calcTotalCost(newRow)
+          const itemInfo = await getItem(newRow.itemId)
+          const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
+          setFilteredMU(filteredMeasurements)
 
-          const res = await getMeasurementUnits(newRow?.msId)
-
-          setFilters(prev => {
-            const updatedFilters = { ...prev, [newRow.itemId]: res }
-
-            update({
-              weight,
-              unitCost,
-              totalCost,
-              msId: newRow?.msId,
-              muRef: updatedFilters?.[newRow?.itemId]?.list?.[0]?.reference,
-              muId: updatedFilters?.[newRow?.itemId]?.list?.[0]?.recordId,
-              metalId
-            })
-
-            return updatedFilters
+          update({
+            weight,
+            unitCost,
+            totalCost,
+            msId: itemInfo?.msId,
+            muRef: filteredMeasurements?.[0]?.reference,
+            muId: filteredMeasurements?.[0]?.recordId,
+            metalId
           })
+
         }
       }
     },
@@ -353,6 +357,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       label: labels.muId,
       name: 'muRef',
       props: {
+        store: filteredMu,
         displayField: 'reference',
         valueField: 'recordId',
         mapping: [
@@ -361,18 +366,14 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
           { from: 'recordId', to: 'muId' }
         ]
       },
-      propsReducer({ row, props }) {
-        return { ...props, store: filters[row.itemId]?.list ?? [] }
-      },
       async onChange({ row: { update, newRow } }) {
-        if (newRow) {
-          const qtyInBase = newRow?.qty * newRow?.muQty
+        const filteredItems = filteredMu.filter(item => item.recordId === newRow?.muId)
+        const qtyInBase = newRow?.qty * filteredItems?.muQty
 
           update({
             qtyInBase,
             muQty: newRow?.muQty
           })
-        }
       }
     },
     {
@@ -610,6 +611,9 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
 
   useEffect(() => {
     ;(async function () {
+      const muList = await getMeasurementUnits()
+      setMeasurements(muList?.list)
+
       if (recordId) {
         const res = await getData(recordId)
         const resNotification = await getNotificationData(recordId)
