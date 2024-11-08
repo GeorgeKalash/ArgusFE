@@ -246,7 +246,7 @@ const TrxDetails = () => {
                   minWidth: '30px !important'
                 }}
               >
-                <img src='/images/buttonsIcons/preview.png' alt={platformLabels.Preview} />{' '}
+                <img src='/images/buttonsIcons/preview.png' alt={platformLabels.Preview} />
               </Button>
             </Grid>
             <Grid item xs={6}></Grid>
