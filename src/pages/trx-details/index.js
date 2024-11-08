@@ -17,11 +17,13 @@ import { DataSets } from 'src/resources/DataSets'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { useWindow } from 'src/windows'
 import DataForm from './form/DataForm'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const TrxDetails = () => {
   const [data, setData] = useState([])
   const { getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const { platformLabels } = useContext(ControlContext)
 
   const formatDate = date => {
     const d = date
@@ -242,7 +244,7 @@ const TrxDetails = () => {
                         }}
                       >
                         <div className='button-container'>
-                          <img src='/images/buttonsIcons/preview.png' alt='Preview' />
+                          <img src='/images/buttonsIcons/preview.png' alt={platformLabels.Preview} />
                         </div>
                       </Button>
                     </Grid>
@@ -260,7 +262,6 @@ const TrxDetails = () => {
             onEdit={edit}
             isLoading={false}
             pagination={false}
-            pageSize={50}
             maxAccess={access}
             paginationType='client'
           />
