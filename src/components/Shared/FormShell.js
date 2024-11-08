@@ -97,18 +97,6 @@ export default function FormShell({
     })
   }
 
-  function onInventoryTransaction() {
-    stack({
-      Component: InventoryTransaction,
-      props: {
-        recordId: form.values.recordId,
-        functionId: functionId
-      },
-      width: 1000,
-      title: platformLabels.InventoryTransaction
-    })
-  }
-
   function onRecordRemarks() {
     stack({
       Component: ResourceRecordRemarks,

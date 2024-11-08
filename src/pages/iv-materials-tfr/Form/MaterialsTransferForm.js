@@ -504,7 +504,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
         recordId: formik.values.recordId
       },
       width: 950,
-      title: 'Workflow'
+      title: labels.workflow
     })
   }
 
