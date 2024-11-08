@@ -32,17 +32,7 @@ const MigrateBarcodeForm = () => {
       fromBarcodeItemId: null,
       toBarcodeItemId: null,
       fromBarcode: null,
-      toBarcode: null,
-      fromBarcodeSku: null,
-      fromBarcodeItemName: null,
-      fromBarcodeMeasUnit: null,
-      fromBarcodePosDescr: null,
-      fromBarcodeScaleDescr: null,
-      toBarcodeSku: null,
-      toBarcodeItemName: null,
-      toBarcodeMeasUnit: null,
-      toBarcodePosDescr: null,
-      toBarcodeScaleDescr: null
+      toBarcode: null
     },
     enableReinitialize: false,
     validateOnChange: true,
