@@ -438,32 +438,33 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
   ]
 
   async function getData(recordId) {
-    return await getRequest({
+    const res = await getRequest({
       extension: InventoryRepository.MaterialsTransfer.get,
       parameters: `_recordId=${recordId}`
     })
+
+    res.record.date = formatDateFromApi(res?.record?.date)
+    res.record.closedDate = formatDateFromApi(res?.record?.closedDate)
+    res.record.receivedDate = formatDateFromApi(res?.record?.receivedDate)
+
+    return res
   }
 
   async function refetchForm(recordId) {
     const res = await getData(recordId)
-    res.record.date = formatDateFromApi(res.record.date)
-    res.record.closedDate = formatDateFromApi(res.record.closedDate)
-    res.record.receivedDate = formatDateFromApi(res.record.receivedDate)
+   
     const resNotification = await getNotificationData(recordId)
     const res3 = await getDataGrid()
 
     formik.setValues({
       ...res.record,
-      transfers: res3.list.map(item => ({
+      transfers: res3?.list?.map(item => ({
         ...item,
         id: item.seqNo,
         totalCost: calcTotalCost(item),
         unitCost: item.unitCost ?? 0
       })),
-      notificationGroupId: resNotification?.record?.notificationGroupId,
-      receivedDate: !!res?.record?.receivedDate ? formatDateFromApi(res?.record?.receivedDate) : null,
-      closedDate: !!res?.record?.closedDate ? formatDateFromApi(res?.record?.closedDate) : null,
-      date: !!res?.record?.date ? formatDateFromApi(res?.record?.date) : null
+      notificationGroupId: resNotification?.record?.notificationGroupId
     })
   }
 
@@ -475,6 +476,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
 
     toast.success(platformLabels.Closed)
     invalidate()
+
     await refetchForm(formik.values.recordId)
   }
 
@@ -639,10 +641,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
             totalCost: calcTotalCost(item),
             unitCost: item.unitCost ?? 0
           })),
-          notificationGroupId: resNotification?.record?.notificationGroupId,
-          receivedDate: !!res?.record?.receivedDate ? formatDateFromApi(res?.record?.receivedDate) : null,
-          closedDate: !!res?.record?.closedDate ? formatDateFromApi(res?.record?.closedDate) : null,
-          date: !!res?.record?.date ? formatDateFromApi(res?.record?.date) : null
+          notificationGroupId: resNotification?.record?.notificationGroupId
         })
       }
     })()
