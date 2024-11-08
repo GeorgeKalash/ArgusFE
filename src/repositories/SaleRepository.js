@@ -183,5 +183,8 @@ export const SaleRepository = {
   },
   PrintedSA: {
     printed: service + 'flagORD'
+  },
+  SalesInquiries: {
+    qry: service + 'qryII'
   }
 }
