@@ -29,7 +29,9 @@ const IvMaterialsTransfer = () => {
 
     const response = await getRequest({
       extension: InventoryRepository.MaterialsTransfer.page,
-      parameters: `_filter=&_size=30&_startAt=${_startAt}&_sortBy=recordId desc&_pageSize=${_pageSize}&_params=${params || ''}`
+      parameters: `_filter=&_size=30&_startAt=${_startAt}&_sortBy=recordId desc&_pageSize=${_pageSize}&_params=${
+        params || ''
+      }`
     })
 
     if (response && response?.list) {
@@ -172,13 +174,12 @@ const IvMaterialsTransfer = () => {
   const getPlantId = async () => {
     const userId = getStorageData('userData').userId
 
-      const res = await getRequest({
-        extension: SystemRepository.UserDefaults.get,
-        parameters: `_userId=${userId}&_key=plantId`
-      })
+    const res = await getRequest({
+      extension: SystemRepository.UserDefaults.get,
+      parameters: `_userId=${userId}&_key=plantId`
+    })
 
-      return res.record.value
-
+    return res.record.value
   }
 
   function openOutWardsWindow(plantId, recordId) {
@@ -207,14 +208,12 @@ const IvMaterialsTransfer = () => {
   }
 
   const del = async obj => {
-
-      await postRequest({
-        extension: InventoryRepository.MaterialsTransfer.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-
+    await postRequest({
+      extension: InventoryRepository.MaterialsTransfer.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   const onApply = ({ search, rpbParams }) => {

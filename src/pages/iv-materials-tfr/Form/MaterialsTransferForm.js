@@ -30,7 +30,7 @@ import { AccessControlRepository } from 'src/repositories/AccessControlRepositor
 
 export default function MaterialsTransferForm({ labels, maxAccess: access, recordId, plantId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
+  const { platformLabels, userDefaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
 
@@ -52,7 +52,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     date: new Date(),
     closedDate: null,
     receivedDate: null,
-    fromSiteId: '',
+    fromSiteId: null,
     toSiteId: '',
     notes: '',
     status: 1,
@@ -93,10 +93,17 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     endpointId: InventoryRepository.MaterialsTransfer.qry
   })
 
+  async function getDefaultFromSiteId() {
+    const defaultFromSiteId = userDefaultsData?.list?.find(({ key }) => key === 'siteId')
+    formik.setFieldValue('fromSiteId', parseInt(defaultFromSiteId?.value))
+
+    console.log(defaultFromSiteId)
+  }
+
   const { formik } = useForm({
     initialValues,
     maxAccess,
-    enableReinitialize: true,
+    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.date().required(),
@@ -610,9 +617,14 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
   }
 
   useEffect(() => {
+    if (documentType?.dtId) formik.setFieldValue('dtId', documentType.dtId)
+  }, [documentType?.dtId])
+
+  useEffect(() => {
     ;(async function () {
       const muList = await getMeasurementUnits()
       setMeasurements(muList?.list)
+      getDefaultFromSiteId()
 
       if (recordId) {
         const res = await getData(recordId)
