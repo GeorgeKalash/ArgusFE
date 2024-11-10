@@ -140,8 +140,7 @@ const OutwardsCorrespondent = () => {
     {
       key: 'Correspondent',
       condition: true,
-      onClick: openCorrespondent,
-      disabled: !formik.values.countryId
+      onClick: openCorrespondent
     }
   ]
 
