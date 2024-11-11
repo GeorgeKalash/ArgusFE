@@ -147,17 +147,17 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
 
     const res2 = await getData(res?.recordId)
 
-        const res3 = await getDataGrid()
+    const res3 = await getDataGrid()
 
-        formik.setValues({
-          ...res2.record,
-          items: res3.list.map(item => ({
-            ...item,
-            id: item.seqNo,
-            orderedQty: item.orderedQty ?? 0
-          })),
-          date: !!res2?.record?.date ? formatDateFromApi(res2?.record?.date) : null
-        })
+    formik.setValues({
+      ...res2.record,
+      items: res3.list.map(item => ({
+        ...item,
+        id: item.seqNo,
+        orderedQty: item.orderedQty ?? 0
+      })),
+      date: !!res2?.record?.date ? formatDateFromApi(res2?.record?.date) : null
+    })
   }
 
   const editMode = !!formik.values.recordId
@@ -204,6 +204,7 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
       component: 'textfield',
       label: labels.itemName,
       name: 'itemName',
+      flex: 3,
       props: {
         readOnly: true
       }
