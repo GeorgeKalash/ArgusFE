@@ -209,6 +209,12 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       disabled: !editMode
     },
     {
+      key: 'Aging',
+      condition: true,
+      onClick: 'onClickAging',
+      disabled: !editMode
+    },
+    {
       key: 'RecordRemarks',
       condition: true,
       onClick: 'onRecordRemarks',
@@ -219,6 +225,11 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       condition: true,
       onClick: onPost,
       disabled: isPosted || !editMode || isCancelled
+    },
+    {
+      field: 'isVerified',
+      headerName: labels.isVerified,
+      type: 'checkbox'
     }
   ]
 

@@ -20,7 +20,7 @@ import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepositor
 import { DataGrid } from './DataGrid'
 import { useFormik } from 'formik'
 import { AuthContext } from 'src/providers/AuthContext'
-import { formatDateToApi, formatDateToApiFunction } from 'src/lib/date-helper'
+import { formatDateForGetApI, formatDateToApi } from 'src/lib/date-helper'
 import { getRate, DIRTYFIELD_AMOUNT, DIRTYFIELD_BASE_AMOUNT, DIRTYFIELD_RATE } from 'src/utils/RateCalculator'
 import { Grow } from './Layouts/Grow'
 import { Fixed } from './Layouts/Fixed'
@@ -113,8 +113,6 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
           recordId: formValues.recordId,
           reference: values.reference
         }
-
-        console.log(data)
 
         const response = await postRequest({
           extension: GeneralLedgerRepository.GeneralLedger.set2,
@@ -288,15 +286,19 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
     return Math.floor(functionId / 100)
   }
 
-  function getCurrencyApi(_currencyId) {
-    const _rateDivision = getRateDivision(functionId)
+  async function getCurrencyApi(_currencyId) {
+    try {
+      const _rateDivision = getRateDivision(functionId)
 
-    return getRequest({
-      extension: MultiCurrencyRepository.Currency.get,
-      parameters: `_currencyId=${_currencyId}&_date=${formatDateToApiFunction(
-        formValues.date
-      )}&_rateDivision=${_rateDivision}`
-    })
+      const response = await getRequest({
+        extension: MultiCurrencyRepository.Currency.get,
+        parameters: `_currencyId=${_currencyId}&_date=${formatDateForGetApI(
+          formValues.date
+        )}&_rateDivision=${_rateDivision}`
+      })
+
+      return response
+    } catch (error) {}
   }
 
   return (
@@ -366,12 +368,12 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
                     exRate: exRateValue
                   })
 
-                  if (newRow.currencyId) {
-                    const result = await getCurrencyApi(newRow?.currencyId)
+                  if (formValues.currencyId) {
+                    const result = await getCurrencyApi(formValues.currencyId)
 
-                    const result2 = result.record
-                    const exRate = exRateValue
-                    const rateCalcMethod = result2.rateCalcMethod
+                    const result2 = result?.record
+                    const exRate = result2?.exRate
+                    const rateCalcMethod = result2?.rateCalcMethod
 
                     const updatedRateRow = getRate({
                       amount: newRow?.amount,
@@ -475,11 +477,12 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
                 if (!newRow?.currencyId) {
                   return
                 }
-                if (newRow.currencyId) {
+
+                try {
                   const result = await getCurrencyApi(newRow?.currencyId)
-                  const result2 = result.record
-                  const exRate = result2.exRate
-                  const rateCalcMethod = result2.rateCalcMethod
+                  const result2 = result?.record
+                  const exRate = result2?.exRate
+                  const rateCalcMethod = result2?.rateCalcMethod
 
                   if (newRow?.amount) {
                     const amount =
@@ -498,7 +501,7 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
                     exRate: exRate,
                     rateCalcMethod: rateCalcMethod
                   })
-                }
+                } catch (error) {}
               }
             },
             {

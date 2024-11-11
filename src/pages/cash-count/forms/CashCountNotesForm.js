@@ -176,7 +176,10 @@ export default function CashCountNotesForm({
                 label: labels.qty1,
                 name: 'qty1',
                 props: {
-                  readOnly: readOnly
+                  readOnly: readOnly,
+                  decimalScale: 0,
+                  maxLength: 2,
+                  allowNegative: false
                 },
                 async onChange({ row }) {
                   sumQty(row)
@@ -187,7 +190,10 @@ export default function CashCountNotesForm({
                 label: labels.qty100,
                 name: 'qty100',
                 props: {
-                  readOnly: readOnly
+                  readOnly: readOnly,
+                  decimalScale: 0,
+                  maxLength: 3,
+                  allowNegative: false
                 },
                 async onChange({ row }) {
                   sumQty(row)
@@ -198,7 +204,9 @@ export default function CashCountNotesForm({
                 label: labels.qty1000,
                 name: 'qty1000',
                 props: {
-                  readOnly: readOnly
+                  readOnly: readOnly,
+                  decimalScale: 0,
+                  allowNegative: false
                 },
                 async onChange({ row }) {
                   sumQty(row)

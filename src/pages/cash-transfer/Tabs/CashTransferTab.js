@@ -19,7 +19,7 @@ import { LOShipmentForm } from 'src/components/Shared/LOShipmentForm'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import FormGrid from 'src/components/form/layout/FormGrid'
-import { formatDateFromApi, formatDateToApi, formatDateToApiFunction } from 'src/lib/date-helper'
+import { formatDateForGetApI, formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
@@ -40,7 +40,7 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
   const [isPosted, setIsPosted] = useState(true)
 
   const invalidate = useInvalidate({
-    endpointId: CashBankRepository.CashTransfer.snapshot
+    endpointId: CashBankRepository.CashTransfer.page
   })
 
   const [initialValues, setInitialData] = useState({
@@ -97,7 +97,17 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
       fromPlantId: yup.string().required(),
       date: yup.string().required(),
       toPlantId: yup.string().required(),
-      toCashAccountId: yup.string().required(),
+      toCashAccountId: yup
+        .string()
+        .nullable()
+        .test('', function (value) {
+          const { fromPlantId, toPlantId } = this.parent
+          if (fromPlantId == toPlantId) {
+            return !!value
+          }
+
+          return true
+        }),
       transfers: yup
         .array()
         .of(
@@ -214,26 +224,6 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
     }
   }
 
-  const onPost = async () => {
-    const { transfers, ...rest } = formik.values
-    const copy = { ...rest }
-    copy.date = formatDateToApi(copy.date)
-    copy.wip = copy.wip === '' ? 1 : copy.wip
-    copy.status = copy.status === '' ? 1 : copy.status
-    copy.baseAmount = totalLoc
-
-    const res = await postRequest({
-      extension: CashBankRepository.CashTransfer.post,
-      record: JSON.stringify(copy)
-    })
-
-    if (res?.recordId) {
-      toast.success('Record Posted Successfully')
-      invalidate()
-      setIsPosted(true)
-    }
-  }
-
   const fillCurrencyTransfer = async (transferId, data) => {
     const res = await getRequest({
       extension: CashBankRepository.CurrencyTransfer.qry,
@@ -272,7 +262,8 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
       props: {
         recordId: formik.values.recordId,
         functionId: SystemFunction.CashTransfer,
-        editMode: isClosed
+        editMode: isClosed,
+        totalBaseAmount: totalLoc
       },
       width: 1200,
       height: 670,
@@ -335,12 +326,6 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
       disabled: !isClosed
     },
     {
-      key: 'Post',
-      condition: true,
-      onClick: onPost,
-      disabled: isPosted
-    },
-    {
       key: 'Shipment',
       condition: true,
       onClick: shipmentClicked,
@@ -363,7 +348,7 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
   function getCurrencyApi(_currencyId) {
     return getRequest({
       extension: MultiCurrencyRepository.Currency.get,
-      parameters: `_currencyId=${_currencyId}&_date=${formatDateToApiFunction(formik.values.date)}&_rateDivision=${
+      parameters: `_currencyId=${_currencyId}&_date=${formatDateForGetApI(formik.values.date)}&_rateDivision=${
         RateDivision.FINANCIALS
       }`
     })
@@ -474,11 +459,9 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
                   maxAccess={maxAccess}
                   onChange={(event, newValue) => {
                     formik.setFieldValue('toPlantId', newValue ? newValue.recordId : null)
-                    if (!newValue) {
-                      formik.setFieldValue('toCashAccountId', null)
-                      formik.setFieldValue('toCARef', null)
-                      formik.setFieldValue('toCAName', null)
-                    }
+                    formik.setFieldValue('toCashAccountId', null)
+                    formik.setFieldValue('toCARef', null)
+                    formik.setFieldValue('toCAName', null)
                   }}
                   error={formik.touched.toPlantId && Boolean(formik.errors.toPlantId)}
                 />
@@ -494,7 +477,7 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
                   displayField='name'
                   name='toCashAccountId'
                   displayFieldWidth={2}
-                  required
+                  required={formik.values.fromPlantId === formik.values.toPlantId}
                   readOnly={!formik.values.toPlantId || isClosed}
                   label={labels.toCashAcc}
                   form={formik}
@@ -583,6 +566,13 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
                     })
                   }
                 }
+              },
+              {
+                component: 'numberfield',
+                label: labels.baseAmount,
+                name: 'baseAmount',
+                defaultValue: '',
+                props: { readOnly: true }
               },
               {
                 component: 'numberfield',

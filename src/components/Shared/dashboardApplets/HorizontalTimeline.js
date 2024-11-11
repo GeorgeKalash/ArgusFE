@@ -28,13 +28,13 @@ const TimelineArrow = styled.div`
   &::before {
     content: '';
     position: absolute;
-    top: -4px;
-    right: 0;
-    width: 0;
-    height: 0;
-    border-left: 10px solid #6673fd;
-    border-top: 5px solid transparent;
-    border-bottom: 5px solid transparent;
+    top: -7px;
+    right: -1px;
+    width: 15px;
+    height: 15px;
+    border-left: 17px solid #6673fd;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
   }
 `
 
@@ -84,7 +84,16 @@ const TimelineTitle = styled.h2`
 `
 
 const HorizontalTimeline = ({ data, label }) => (
-  <div style={{ display: 'flex', height: '180px', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+  <div
+    style={{
+      display: 'flex',
+      height: '180px',
+      flexDirection: 'column',
+      alignItems: 'center',
+      width: '100%',
+      color: '#f0f0f0'
+    }}
+  >
     <TimelineTitle>{label}</TimelineTitle>
     <TimelineContainer>
       <TimelineArrow />

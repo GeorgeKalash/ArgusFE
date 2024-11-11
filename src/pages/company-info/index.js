@@ -39,6 +39,7 @@ const CompanyInfo = () => {
         webSite: res.record.taxNo,
         taxNo: res.record.taxNo,
         licenseNo: res.record.licenseNo,
+        plantId: res.record.plantId,
         crNo: res.record.crNo,
         logoUrl: res.record.logoUrl,
         flName: res.record.flName
@@ -61,8 +62,8 @@ const CompanyInfo = () => {
       logoUrl: '',
       flName: ''
     },
-    onSubmit: values => {
-      post(values)
+    onSubmit: async values => {
+      await post(values)
     }
   })
 
@@ -85,6 +86,7 @@ const CompanyInfo = () => {
       form={formik}
       infoVisible={false}
       isCleared={false}
+      isSavedClear={false}
       maxAccess={maxAccess}
     >
       <VertLayout>

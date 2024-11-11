@@ -41,7 +41,7 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
           id: 1,
           productId: pId,
           seqNo: 1,
-          plantId: 0,
+          plantId: null,
           plantRef: '',
           plantName: '',
           countryId: '',
@@ -61,23 +61,24 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
         }
       ]
     },
-    onSubmit: values => {
-      post(values.schedules)
+    onSubmit: async values => {
+      await post(values.schedules)
     }
   })
 
-  const post = obj => {
+  const post = async obj => {
     const lastObject = obj[obj.length - 1]
 
     const data = {
       productId: pId,
-      productSchedules: obj.map(({ id, seqNo, productId, saved, ...rest }, index) => ({
+      productSchedules: obj.map(({ id, seqNo, productId, plantId, saved, ...rest }, index) => ({
         seqNo: index + 1,
+        plantId: plantId || null,
         productId: pId,
         ...rest
       }))
     }
-    postRequest({
+    await postRequest({
       extension: RemittanceSettingsRepository.ProductSchedules.set2,
       record: JSON.stringify(data)
     })

@@ -21,6 +21,13 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'Terminate',
+    label: platformLabels.Terminate,
+    color: '#FF0000',
+    image: 'cancelWhite.png',
+    main: false
+  },
+  {
     key: 'WorkFlow',
     label: platformLabels.WorkFlow,
     color: '#231f20',
@@ -79,10 +86,24 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
-    key: 'Beneficiary',
-    label: platformLabels.Beneficiary,
+    key: 'BeneficiaryList',
+    label: platformLabels.BeneficiaryList,
     color: '#231f20',
     image: 'beneficiary.png',
+    main: false
+  },
+  {
+    key: 'Beneficiary',
+    label: platformLabels.Beneficiary,
+    color: '#0A4164',
+    image: 'beneficiary.png',
+    main: false
+  },
+  {
+    key: 'Correspondent',
+    label: platformLabels.Correspondent,
+    image: 'person.png',
+    color: '#CECECE',
     main: false
   },
   {
@@ -95,6 +116,13 @@ export const getButtons = platformLabels => [
   {
     key: 'Invoice',
     label: platformLabels.Invoice,
+    color: '#231f20',
+    image: 'invoice.png',
+    main: false
+  },
+  {
+    key: 'Receipt Voucher',
+    label: platformLabels.ReceiptVoucher,
     color: '#231f20',
     image: 'invoice.png',
     main: false
@@ -128,10 +156,24 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'Add Client Relation',
+    label: platformLabels.addClientRelation,
+    color: '#4eb558',
+    image: 'clientRelations.png',
+    main: false
+  },
+  {
     key: 'GL',
     label: platformLabels.GL,
     color: '#231f20',
     image: 'gl.png',
+    main: false
+  },
+  {
+    key: 'SA Trx',
+    label: platformLabels.SaTrx,
+    color: '#8C0446',
+    image: 'popup-window.png',
     main: false
   },
   {
@@ -186,6 +228,7 @@ export const getButtons = platformLabels => [
     key: 'OpenRPB',
     label: platformLabels.OpenRPB,
     color: '#231F20',
+    image: 'parameters.png',
     main: false
   },
   {
@@ -198,6 +241,14 @@ export const getButtons = platformLabels => [
     key: 'GO',
     label: platformLabels.Apply,
     color: '#231F20',
+    image: 'go.png',
+    main: false
+  },
+  {
+    key: 'IV',
+    label: platformLabels.InventoryTransaction,
+    color: '#A76035',
+    image: 'popup-window.png',
     main: false
   },
   {
@@ -207,6 +258,16 @@ export const getButtons = platformLabels => [
     onClick: 'onClear',
     color: '#f44336',
     image: 'clear.png',
+    main: true
+  },
+  {
+    key: 'generate',
+    label: platformLabels.Generate,
+    condition: 'isGenerated',
+    onClick: 'onGenerate',
+    disabled: '!editMode',
+    color: 'black',
+    image: 'generate.png',
     main: true
   },
   {
@@ -233,7 +294,8 @@ export const getButtons = platformLabels => [
     onClick: 'onSaveClear',
     color: '#231f20',
     image: 'saveclear.png',
-    main: true
+    main: true,
+    disabled: 'disabledSavedClear || isPosted || isClosed'
   },
   {
     key: 'Submit',
@@ -250,6 +312,62 @@ export const getButtons = platformLabels => [
     label: platformLabels.Import,
     color: '#000',
     image: 'import.png',
+    main: false
+  },
+  {
+    key: 'Lock',
+    label: platformLabels.Lock,
+    color: '#231f20',
+    image: 'lock.png',
+    main: false
+  },
+  {
+    key: 'Unlock',
+    label: platformLabels.Unlock,
+    color: '#231f20',
+    image: 'unlock.png',
+    main: false
+  },
+  {
+    key: 'Aging',
+    label: platformLabels.Aging,
+    color: '#A95C68',
+    image: 'popup-window.png',
+    main: false
+  },
+  {
+    key: 'Client Balance',
+    label: platformLabels.ClientBalance,
+    color: '#231f20',
+    image: 'wallet-to-bank-icon.png',
+    main: false
+  },
+  {
+    key: 'OTP',
+    label: platformLabels.OTP,
+    color: '#231f20',
+    image: 'sms.png',
+    main: false
+  },
+  {
+    key: 'Metals',
+    label: platformLabels.Metals,
+    color: '#ADD8E6',
+    image: 'metals-icon.png',
+    main: false
+  },
+  {
+    key: 'generated 2 FA',
+    label: platformLabels.Generated2FA,
+    color: '#231f20',
+    image: 'save.png',
+    main: true
+  },
+  {
+    key: 'Transfer',
+    label: platformLabels.Transfer,
+    color: '#4eb558',
+    image: 'exchange-refresh-icon.png',
     main: false
   }
 ]

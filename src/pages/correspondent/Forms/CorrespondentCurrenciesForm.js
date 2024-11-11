@@ -56,12 +56,12 @@ const CorrespondentCurrenciesForm = ({ store, labels, maxAccess, expanded, editM
         }
       ]
     },
-    onSubmit: values => {
-      postCorrespondentCurrencies(values)
+    onSubmit: async values => {
+      await postCorrespondentCurrencies(values)
     }
   })
 
-  const postCorrespondentCurrencies = obj => {
+  const postCorrespondentCurrencies = async obj => {
     const correspondentCurrencies = obj?.currencies?.map(({ corId, ...rest }) => ({
       corId: recordId,
       ...rest
@@ -71,7 +71,7 @@ const CorrespondentCurrenciesForm = ({ store, labels, maxAccess, expanded, editM
       corId: recordId,
       correspondentCurrencies: correspondentCurrencies
     }
-    postRequest({
+    await postRequest({
       extension: RemittanceSettingsRepository.CorrespondentCurrency.set2,
       record: JSON.stringify(data)
     })
@@ -208,6 +208,7 @@ const CorrespondentCurrenciesForm = ({ store, labels, maxAccess, expanded, editM
       infoVisible={false}
       maxAccess={maxAccess}
       editMode={editMode}
+      isSavedClear={false}
     >
       <VertLayout>
         <Grow>

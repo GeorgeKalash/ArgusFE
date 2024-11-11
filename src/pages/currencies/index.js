@@ -14,17 +14,15 @@ import CurrencyForm from './forms/CurrencyForm'
 import { ControlContext } from 'src/providers/ControlContext'
 
 const Currencies = () => {
-  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { postRequest, getRequest } = useContext(RequestsContext)
+  const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
-
   async function fetchGridData() {
     return await getRequest({
       extension: SystemRepository.Currency.qry,
       parameters: `_filter=`
     })
   }
-
-  const { stack } = useWindow()
 
   const {
     query: { data },
@@ -38,20 +36,23 @@ const Currencies = () => {
     queryFn: fetchGridData,
     endpointId: SystemRepository.Currency.qry,
     datasetId: ResourceIds.Currencies,
-
     filter: {
       endpointId: SystemRepository.Currency.snapshot,
       filterFn: fetchWithSearch
     }
   })
 
-  async function fetchWithSearch({ filters, pagination }) {
-    return filters.qry
-      ? await getRequest({
-          extension: SystemRepository.Currency.snapshot,
-          parameters: `_filter=${filters.qry}`
-        })
-      : await fetchGridData(pagination)
+  async function fetchWithSearch({ filters }) {
+    if (!filters.qry) {
+      return fetchGridData()
+    } else {
+      const res = await getRequest({
+        extension: SystemRepository.Currency.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+
+      return res
+    }
   }
 
   const columns = [
@@ -78,14 +79,12 @@ const Currencies = () => {
   ]
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: SystemRepository.Currency.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
+    await postRequest({
+      extension: SystemRepository.Currency.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   const add = () => {

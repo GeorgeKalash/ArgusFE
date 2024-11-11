@@ -1,37 +1,39 @@
 import { useContext } from 'react'
-import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
+import GridToolbar from 'src/components/Shared/GridToolbar'
 
 const ProductionRequestLog = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const {
     query: { data },
     labels: _labels,
     refetch,
-    access
+    access,
+    invalidate
   } = useResourceQuery({
-    queryFn: fetchGridData,
     endpointId: ManufacturingRepository.LeanProductionPlanning.preview,
-    datasetId: ResourceIds.ProductionRequestLog
+    datasetId: ResourceIds.ProductionRequestLog,
+    filter: {
+      filterFn: fetchGridData,
+      default: { status: 1 }
+    }
   })
 
   const handleSubmit = () => {
     calculateLeans()
   }
-
-  const invalidate = useInvalidate({
-    endpointId: ManufacturingRepository.LeanProductionPlanning.preview
-  })
 
   async function fetchGridData() {
     return await getRequest({
@@ -44,33 +46,35 @@ const ProductionRequestLog = () => {
     {
       field: 'reference',
       headerName: _labels.reference,
-      flex: 1
-    },
-    {
-      field: 'sku',
-      headerName: _labels[3],
-      flex: 1
-    },
-    {
-      field: 'height',
-      headerName: _labels[4],
-      flex: 1
-    },
-    {
-      field: 'width',
-      headerName: _labels[5],
-      flex: 1
+      flex: .6
     },
     {
       field: 'qty',
-      headerName: _labels[6],
+      headerName: _labels.qty,
+      flex: .4
+    },
+    {
+      field: 'checked',
+      headerName: '',
+      type: 'checkbox',
+      editable: true
+    },
+    {
+      field: 'itemName',
+      headerName: _labels.description,
+      flex: 2
+    },
+    {
+      field: 'sku',
+      headerName: _labels.sku,
       flex: 1
     },
     {
-      field: 'totalThickness',
-      headerName: _labels[7],
-      flex: 1
-    }
+      field: 'date',
+      headerName: _labels.date,
+      flex: .7,
+      type: 'date'
+    },
   ]
 
   const calculateLeans = async () => {
@@ -83,12 +87,12 @@ const ProductionRequestLog = () => {
       leanProductions: checkedObjects
     }
 
-    const res = await postRequest({
+    await postRequest({
       extension: ManufacturingRepository.LeanProductionPlanning.update,
       record: JSON.stringify(resultObject)
     })
 
-    toast.success('Record Updated Successfully')
+    toast.success(platformLabels.Updated)
     invalidate()
   }
 
@@ -98,23 +102,32 @@ const ProductionRequestLog = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
   }
+
+  const actions = [
+    {
+      key: 'Refresh',
+      condition: true,
+      onClick: () => fetchGridData(),
+      disabled: false
+    }
+  ]
 
   return (
     <VertLayout>
+      <Fixed>
+        <GridToolbar actions={actions} />
+      </Fixed>
       <Grow>
         <Table
           columns={columns}
-          gridData={data ? data : { list: [] }}
+          gridData={data}
           rowId={['recordId', 'itemId', 'functionId']}
           onDelete={del}
           isLoading={false}
           maxAccess={access}
-          showCheckboxColumn={true}
-          handleCheckedRows={() => {}}
-          pageSize={50}
-          paginationType='client'
+          pagination={false}
           refetch={refetch}
         />
       </Grow>

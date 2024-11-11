@@ -33,7 +33,7 @@ const AccountsForms = ({ labels, maxAccess, setStore, store }) => {
       groupename: '',
       reference: null,
       name: '',
-      keyWords: null,
+      keywords: null,
       flName: null,
       type: null,
       BpRef: null,
@@ -49,14 +49,14 @@ const AccountsForms = ({ labels, maxAccess, setStore, store }) => {
       groupId: yup.string().required(),
       reference: yup.string().required()
     }),
-    onSubmit: values => {
-      postAccount(values)
+    onSubmit: async values => {
+      await postAccount(values)
     }
   })
 
-  const postAccount = obj => {
+  const postAccount = async obj => {
     const recordId = obj.recordId
-    postRequest({
+    await postRequest({
       extension: FinancialRepository.Account.set,
       record: JSON.stringify(obj)
     })
@@ -75,19 +75,16 @@ const AccountsForms = ({ labels, maxAccess, setStore, store }) => {
   }
 
   useEffect(() => {
-    recordId && getAccountsById(recordId)
-  }, [recordId])
-
-  const getAccountsById = recordId => {
-    const defaultParams = `_recordId=${recordId}`
-    var parameters = defaultParams
-    getRequest({
-      extension: FinancialRepository.Account.get,
-      parameters: parameters
-    }).then(res => {
-      formik.setValues(res.record)
-    })
-  }
+    ;(async function () {
+      if (recordId) {
+        const res = await getRequest({
+          extension: FinancialRepository.Account.get,
+          parameters: `_recordId=${recordId}`
+        })
+        formik.setValues(res.record)
+      }
+    })()
+  }, [])
 
   const editMode = !!formik.values.recordId
 
@@ -172,14 +169,14 @@ const AccountsForms = ({ labels, maxAccess, setStore, store }) => {
               </Grid>
               <Grid item xs={12}>
                 <CustomTextField
-                  name='keyWords'
+                  name='keywords'
                   label={labels.keyWords}
-                  value={formik.values.keyWords}
+                  value={formik.values.keywords}
                   maxAccess={maxAccess}
                   maxLength='30'
                   onChange={formik.handleChange}
-                  onClear={() => formik.setFieldValue('keyWords', '')}
-                  error={formik.touched.keyWords && Boolean(formik.errors.keyWords)}
+                  onClear={() => formik.setFieldValue('keywords', '')}
+                  error={formik.touched.keywords && Boolean(formik.errors.keywords)}
                 />
               </Grid>
               <Grid item xs={12}>

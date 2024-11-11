@@ -35,12 +35,11 @@ const CustomTextField = ({
 
   const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
 
-  const _readOnly =
-    maxAccess < 3 ||
-    accessLevel === DISABLED ||
-    (readOnly && accessLevel !== MANDATORY && accessLevel !== FORCE_ENABLED)
+  const _readOnly = editMode ? editMode && maxAccess < TrxType.EDIT : readOnly || accessLevel === DISABLED
 
   const _hidden = accessLevel ? accessLevel === HIDDEN : hidden
+
+  const required = props.required || accessLevel === MANDATORY
 
   const inputRef = useRef(null)
   const [focus, setFocus] = useState(!hasBorder)
@@ -88,8 +87,6 @@ const CustomTextField = ({
     }
   }
 
-  const required = props.required || accessLevel === MANDATORY
-
   return _hidden ? (
     <></>
   ) : (
@@ -113,7 +110,8 @@ const CustomTextField = ({
         style: {
           textAlign: numberField && 'right',
           '-moz-appearance': 'textfield' // Firefox
-        }
+        },
+        tabIndex: _readOnly ? -1 : 0 // Prevent focus if readOnly
       }}
       autoComplete={autoComplete}
       onInput={handleInput}

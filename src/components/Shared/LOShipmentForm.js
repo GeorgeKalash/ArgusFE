@@ -17,10 +17,12 @@ import { DataSets } from 'src/resources/DataSets'
 import { getFormattedNumber } from 'src/lib/numberField-helper'
 import toast from 'react-hot-toast'
 import FieldSet from './FieldSet'
+import { useError } from 'src/error'
 
-export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
+export const LOShipmentForm = ({ recordId, functionId, editMode, totalBaseAmount }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const [selectedRowId, setSelectedRowId] = useState(null)
+  const { stack: stackError } = useError()
 
   const { formik } = useForm({
     initialValues: {
@@ -47,7 +49,6 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
     validateOnChange: true,
 
     validationSchema: yup.object({
-      policyNo: yup.string().required(),
       carrierId: yup.string().required(),
       packages: yup
         .array()
@@ -124,16 +125,53 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
       newRows[formik.values.packages[index]?.packageReferences?.length].seqNo =
         formik.values.packages[index]?.packageReferences?.length + 1
     }
+
     formik.setFieldValue(`packages[${index}].packageReferences`, newRows)
   }
 
-  const handlePackageGridChange = newRows => {
-    newRows.map(row => {
-      if (!!row.seqNo) {
-        formik.setFieldValue('packages[0].packageReferences', [{ id: 1, seqNo: 1 }])
+  const handleReferenceChange = (e, id) => {
+    const newReference = e.target.value
+    const allPackages = formik.values.packages
+
+    const isDuplicate = allPackages.some(pkg =>
+      pkg.packageReferences.some((ref, idx) => ref.reference === newReference && idx !== id - 1)
+    )
+
+    if (isDuplicate) {
+      stackError({ message: labels.referenceDuplicateMessage })
+
+      let newRows = [...formik.values.packages[index].packageReferences]
+
+      const idx = id - 1
+
+      newRows[idx] = {
+        id: idx,
+        ...newRows[idx],
+        reference: ''
       }
-    })
-    formik.setFieldValue('packages', newRows)
+      formik.setFieldValue(`packages[${index}].packageReferences`, newRows)
+    }
+  };
+
+  const handlePackageGridChange = newRows => {
+    const updatedRows = newRows?.map(row => {
+      const qty = parseInt(row?.qty, 10);
+      let packageReferences = row?.packageReferences;
+  
+      if (packageReferences?.length === 0) {
+        packageReferences = [{ seqNo: 1, id: 1, reference: '' }];
+      }
+  
+      if (qty < packageReferences?.length) {
+        packageReferences = packageReferences.slice(0, qty);
+      }
+  
+      row.packageReferences = packageReferences;
+
+      return row;
+    });
+  
+    formik.setFieldValue('packages', updatedRows);
   }
 
   useEffect(() => {
@@ -200,7 +238,6 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
                 maxAccess={maxAccess}
                 maxLength='30'
                 readOnly={editMode}
-                required
                 error={formik.touched.policyNo && Boolean(formik.errors.policyNo)}
               />
             </Grid>
@@ -262,6 +299,15 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
                     <Grid container direction='row' wrap='nowrap' sx={{ pt: 5, justifyContent: 'flex-end' }}>
                       <Grid item xs={3}>
                         <CustomTextField
+                          name='totalBaseAmount'
+                          maxAccess={maxAccess}
+                          value={getFormattedNumber(totalBaseAmount)}
+                          label={labels.totalBaseAmount}
+                          readOnly={true}
+                        />
+                      </Grid>
+                      <Grid item xs={3} sx={{ pl: 3 }}>
+                        <CustomTextField
                           name='totalQty'
                           maxAccess={maxAccess}
                           value={getFormattedNumber(totalQty)}
@@ -296,7 +342,11 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
                         ]
                       }
                       maxAccess={maxAccess}
-                      allowAddNewLine={!editMode}
+                      allowAddNewLine={
+                        !editMode &&
+                        formik?.values?.packages[index]?.packageReferences?.length <
+                          parseInt(formik?.values?.packages[index]?.qty, 10)
+                      }
                       allowDelete={false}
                       columns={[
                         {
@@ -313,7 +363,9 @@ export const LOShipmentForm = ({ recordId, functionId, editMode }) => {
                             maxLength: 20,
                             mandatory: true,
                             readOnly: editMode
-                          }
+                          },
+                          onBlur: (e, id) => handleReferenceChange(e, id),
+                          onKeyDown: (e, id) => handleReferenceChange(e, id),
                         }
                       ]}
                     />

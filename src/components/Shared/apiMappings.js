@@ -17,6 +17,14 @@ import { FixedAssetsRepository } from 'src/repositories/FixedAssetsRepository'
 import { SCRepository } from 'src/repositories/SCRepository'
 import { IVReplenishementRepository } from 'src/repositories/IVReplenishementRepository'
 import { POSRepository } from 'src/repositories/POSRepository'
+import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
+import { companyStructureRepository } from 'src/repositories/companyStructureRepository'
+import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
+import { TimeAttendanceRepository } from 'src/repositories/TimeAttendanceRepository'
+import { LoanManagementRepository } from 'src/repositories/LoanManagementRepository'
+import { PayrollRepository } from 'src/repositories/PayrollRepository'
+import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
+import { CTCLRepository } from 'src/repositories/CTCLRepository'
 
 export const COMBOBOX = 1
 
@@ -138,6 +146,17 @@ export const apiMappings = {
     parameters: '_countryId=0',
     valueField: 'recordId',
     displayField: 'name'
+  },
+  [ResourceIds.Countries]: {
+    type: COMBOBOX,
+    endpoint: SystemRepository.Country.qry, //filterNationality
+    parameters: '_filter=',
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
   },
   [ResourceIds.Cities]: {
     type: LOOKUP,
@@ -466,7 +485,7 @@ export const apiMappings = {
       { key: 'name', value: 'Name' }
     ]
   },
-  [ResourceIds.Driver]: {
+  [ResourceIds.Drivers]: {
     type: COMBOBOX,
     endpoint: DeliveryRepository.Driver.qry,
     valueField: 'recordId',
@@ -599,14 +618,6 @@ export const apiMappings = {
       { key: 'name', value: 'Name' }
     ]
   },
-  [ResourceIds.GovernmentOrganizationFilter]: {
-    // true resourceId  GovOrg = 70113, Branch Workforce report working well asp
-
-    type: COMBOBOX,
-    endpoint: SystemRepository.GovernmentOrganization.qry,
-    valueField: 'recordId',
-    displayField: 'name'
-  },
   [ResourceIds.NotificationTransaction]: {
     //NotificationLabelFilter
     type: COMBOBOX,
@@ -653,7 +664,243 @@ export const apiMappings = {
       { key: 'reference', value: 'Reference' },
       { key: 'name', value: 'Name' }
     ]
-  }
+  },
+  [ResourceIds.Correspondent]: {
+    type: LOOKUP,
+    endpoint: RemittanceSettingsRepository.Correspondent.snapshot,
+    firstField: 'reference',
+    secondField: 'name',
+    valueOnSelection: 'recordId',
+    displayFieldWidth: 1,
+    firstFieldWidth: '40%',
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+  [ResourceIds.CorrespondentGroup]: {
+    type: COMBOBOX,
+    endpoint: RemittanceSettingsRepository.CorrespondentGroup.qry,
+    parameters: `_params=&_startAt=0&_pageSize=1000`,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+  [ResourceIds.Currencies]: {
+    type: COMBOBOX,
+    endpoint: SystemRepository.Currency.qry,
+    parameters: `_params=&_startAt=0&_pageSize=1000&_filter=`,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+  [ResourceIds.Interface]: {
+    type: COMBOBOX,
+    endpoint: RemittanceSettingsRepository.Interface.qry,
+    parameters: `_params=&_startAt=0&_pageSize=1000`,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+  [ResourceIds.ProductMaster]: {
+    type: LOOKUP,
+    endpoint: RemittanceSettingsRepository.ProductMaster.snapshot,
+    firstField: 'reference',
+    secondField: 'name',
+    valueOnSelection: 'recordId',
+    displayFieldWidth: 1,
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+  [ResourceIds.Beneficiary]: {
+    type: LOOKUP,
+    endpoint: RemittanceOutwardsRepository.Beneficiary.snapshot,
+    parameters: {
+      _clientId: 0,
+      _dispersalType: 0,
+      _currencyId: 0
+    },
+    secondDisplayField: false,
+    firstField: ['name', 'currencyName', 'countryName', 'dispersalTypeName'],
+    valueOnSelection: 'beneficiaryId',
+    columnsInDropDown: [
+      { key: 'name', value: 'Name' },
+      { key: 'currencyName', value: 'Currency Name' },
+      { key: 'countryName', value: 'Country Name' },
+      { key: 'dispersalTypeName', value: 'Dispersal Type Name' }
+    ]
+  },
+  [ResourceIds.ClientList]: {
+    type: LOOKUP,
+    endpoint: CTCLRepository.CtClientIndividual.snapshot,
+    parameters: {
+      _category: 1
+    },
+    secondDisplayField: false,
+    firstField: ['reference', 'name', 'cellPhone'],
+    valueOnSelection: 'recordId',
+    displayFieldWidth: 1,
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' },
+      { key: 'cellPhone', value: 'cellPhone' }
+    ]
+  },
 
-  //HR filters not migrated
+  //HR filters
+
+  [ResourceIds.EmployeeFilter]: {
+    type: LOOKUP,
+    endpoint: EmployeeRepository.Employee.snapshot,
+    parameters: {
+      _branchId: 0
+    },
+    firstField: 'reference',
+    secondField: 'fullName',
+    valueOnSelection: 'recordId',
+    displayFieldWidth: 1,
+    firstFieldWidth: '40%',
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'fullName', value: 'Name' }
+    ]
+  },
+  [ResourceIds.GovernmentOrganizationFilter]: {
+    type: COMBOBOX,
+    endpoint: SystemRepository.GovernmentOrganization.qry,
+    valueField: 'recordId',
+    displayField: ['name'],
+    columnsInDropDown: [{ key: 'name', value: 'Name' }]
+  },
+  [ResourceIds.DivisionFilter]: {
+    type: COMBOBOX,
+    endpoint: companyStructureRepository.DivisionFilters.qry,
+    valueField: 'recordId',
+    displayField: ['name'],
+    columnsInDropDown: [{ key: 'name', value: 'Name' }]
+  },
+  [ResourceIds.BranchFilter]: {
+    type: COMBOBOX,
+    endpoint: companyStructureRepository.BranchFilters.qry,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+  [ResourceIds.CompanyPosition]: {
+    type: COMBOBOX,
+    endpoint: companyStructureRepository.CompanyPositions.qry,
+    parameters: `_filter=&_size=1000&_startAt=0&_sortBy=recordId`,
+    valueField: 'recordId',
+    displayField: ['positionRef', 'name'],
+    columnsInDropDown: [
+      { key: 'positionRef', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+  [ResourceIds.DepartmentFilter]: {
+    type: COMBOBOX,
+    endpoint: companyStructureRepository.DepartmentFilters.qry,
+    parameters: `_filter=&_size=1000&_startAt=0&_type=0&_activeStatus=0&_sortBy=recordId`,
+    valueField: 'recordId',
+    displayField: ['departmentRef', 'name'],
+    columnsInDropDown: [
+      { key: 'departmentRef', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+  [ResourceIds.CertificateFilter]: {
+    type: COMBOBOX,
+    endpoint: EmployeeRepository.CertificateFilters.qry,
+    valueField: 'recordId',
+    displayField: ['name'],
+    columnsInDropDown: [{ key: 'name', value: 'Name' }]
+  },
+  [ResourceIds.HRDocTypeFilter]: {
+    type: COMBOBOX,
+    endpoint: EmployeeRepository.HRDocTypeFilters.qry,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+  [ResourceIds.SalaryChangeReasonFilter]: {
+    type: COMBOBOX,
+    endpoint: EmployeeRepository.SalaryChangeReasonFilters.qry,
+    valueField: 'recordId',
+    displayField: ['name'],
+    columnsInDropDown: [{ key: 'name', value: 'Name' }]
+  },
+  [ResourceIds.EmploymentStatusFilter]: {
+    type: COMBOBOX,
+    endpoint: EmployeeRepository.EmploymentStatusFilters.qry,
+    valueField: 'recordId',
+    displayField: ['name'],
+    columnsInDropDown: [{ key: 'name', value: 'Name' }]
+  },
+  [ResourceIds.SponsorFilter]: {
+    type: COMBOBOX,
+    endpoint: EmployeeRepository.SponsorFilters.qry,
+    valueField: 'recordId',
+    displayField: ['name'],
+    columnsInDropDown: [{ key: 'name', value: 'Name' }]
+  },
+  [ResourceIds.AttendanceScheduleFilter]: {
+    type: COMBOBOX,
+    endpoint: TimeAttendanceRepository.AttendanceScheduleFilters.qry,
+    parameters: `_filter=&_size=1000&_startAt=0&_sortBy=recordId&_scId=0`,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+  [ResourceIds.IndemnityAccuralsFilter]: {
+    type: COMBOBOX,
+    endpoint: LoanManagementRepository.IndemnityAccuralsFilters.qry,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+  [ResourceIds.LeaveScheduleFilter]: {
+    type: COMBOBOX,
+    endpoint: LoanManagementRepository.LeaveScheduleFilters.qry,
+    valueField: 'recordId',
+    displayField: ['name'],
+    columnsInDropDown: [{ key: 'name', value: 'Name' }]
+  },
+  [ResourceIds.PayrollFilter]: {
+    type: COMBOBOX,
+    endpoint: PayrollRepository.PayrollFilters.qry,
+    parameters: `_year=0&_salaryType=5&_status=0`,
+    valueField: 'recordId',
+    displayField: ['reference'],
+    columnsInDropDown: [{ key: 'reference', value: 'Reference' }]
+  },
+  [ResourceIds.BankTransferFilter]: {
+    type: COMBOBOX,
+    endpoint: PayrollRepository.BankTransferFilters.qry,
+    valueField: 'recordId',
+    displayField: ['name'],
+    columnsInDropDown: [{ key: 'name', value: 'Name' }]
+  }
 }

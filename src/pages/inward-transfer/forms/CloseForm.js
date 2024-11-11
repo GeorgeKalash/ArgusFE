@@ -19,7 +19,7 @@ import { RemittanceSettingsRepository } from 'src/repositories/RemittanceReposit
 import { ResourceIds } from 'src/resources/ResourceIds'
 import * as yup from 'yup'
 
-export default function CloseForm({ form, labels, maxAccess, window, recordId, window2 }) {
+export default function CloseForm({ form, labels, access, window, recordId, window2 }) {
   const { stack: stackError } = useError()
   const { postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -37,29 +37,25 @@ export default function CloseForm({ form, labels, maxAccess, window, recordId, w
       corName: '',
       amount: null,
       receiver_firstName: '',
-      receiver_lastName: '',
-      receiver_ttNo: ''
+      receiver_lastName: ''
     },
-    maxAccess,
+    access,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       corId: yup.string().required(),
       amount: yup.number().required(),
       receiver_firstName: yup.string().required(),
-      receiver_lastName: yup.string().required(),
-      receiver_ttNo: yup.string().required()
+      receiver_lastName: yup.string().required()
     }),
     onSubmit: () => {
-      console.log('hy')
-
       setMismatchedFields([])
       const mismatches = Object.keys(formik.values).filter(key => formik.values[key] != form.values[key])
       if (mismatches.length === 0) {
         onClose()
       } else {
         setMismatchedFields(mismatches)
-        toast.error(platformLabels.fieldsDoNotMatch)
+        stackError({ message: platformLabels.fieldsDoNotMatch })
       }
     }
   })
@@ -74,7 +70,6 @@ export default function CloseForm({ form, labels, maxAccess, window, recordId, w
       copy.sender_idExpiryDate = copy.sender_idExpiryDate ? formatDateToApi(copy?.sender_idExpiryDate) : null
       copy.receiver_idIssueDate = copy.receiver_idIssueDate ? formatDateToApi(copy?.receiver_idIssueDate) : null
       copy.receiver_idExpiryDate = copy.receiver_idExpiryDate ? formatDateToApi(copy?.receiver_idExpiryDate) : null
-      copy.expiryDate = copy.expiryDate ? formatDateToApi(copy?.expiryDate) : null
 
       await postRequest({
         extension: RemittanceOutwardsRepository.InwardsTransfer.close,
@@ -92,7 +87,13 @@ export default function CloseForm({ form, labels, maxAccess, window, recordId, w
   const getFieldError = fieldName => mismatchedFields.includes(fieldName)
 
   return (
-    <FormShell resourceId={ResourceIds.InwardTransfer} form={formik} isInfo={false}>
+    <FormShell
+      resourceId={ResourceIds.InwardTransfer}
+      form={formik}
+      isInfo={false}
+      isSavedClear={false}
+      isCleared={false}
+    >
       <VertLayout>
         <Fixed>
           <FieldSet title={labels.header} sx={{ flex: 0 }}>
@@ -109,7 +110,7 @@ export default function CloseForm({ form, labels, maxAccess, window, recordId, w
                   displayFieldWidth={2}
                   valueShow='corRef'
                   secondValueShow='corName'
-                  maxAccess={maxAccess}
+                  access={access}
                   onChange={(event, newValue) => {
                     formik.setFieldValue('corId', newValue ? newValue.recordId : '')
                     formik.setFieldValue('corName', newValue ? newValue.name : '')
@@ -163,21 +164,6 @@ export default function CloseForm({ form, labels, maxAccess, window, recordId, w
                   }
                   onChange={formik.handleChange}
                   onClear={() => formik.setFieldValue('receiver_lastName', '')}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <CustomTextField
-                  name='receiver_ttNo'
-                  label={labels.receiver_ttNo}
-                  value={formik?.values?.receiver_ttNo}
-                  maxLength='20'
-                  required
-                  error={
-                    (formik.touched.receiver_ttNo && Boolean(formik.errors.receiver_ttNo)) ||
-                    getFieldError('receiver_ttNo')
-                  }
-                  onChange={formik.handleChange}
-                  onClear={() => formik.setFieldValue('receiver_ttNo', '')}
                 />
               </Grid>
             </Grid>

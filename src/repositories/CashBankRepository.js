@@ -67,7 +67,8 @@ export const CashBankRepository = {
   },
 
   CATransaction: {
-    page: service + 'pageTRX'
+    page: service + 'pageTRX',
+    snapshot: service + 'snapshotTRX'
   },
   CAadjustment: {
     qry: service + 'qryADJ',
@@ -82,6 +83,18 @@ export const CashBankRepository = {
     page: service + 'pageCBK',
     get: service + 'getCBK',
     set: service + 'setCBK',
-    del: service + 'delCBK',
+    del: service + 'delCBK'
+  },
+  BankBranches: {
+    qry: service + 'qryBNB',
+    qry2: service + 'qryBNB2',
+    get: service + 'getBNB',
+    set: service + 'setBNB',
+    del: service + 'delBNB',
+    snapshot: service + 'snapshotBNB'
+  },
+  OpenMultiCurrencyCashTransfer: {
+    open: service + 'openTFM',
+    set: service + 'postTFM2'
   }
 }

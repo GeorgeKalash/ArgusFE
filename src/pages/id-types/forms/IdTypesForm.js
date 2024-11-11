@@ -30,6 +30,7 @@ const IdTypesForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store
     initialValues: {
       recordId: null,
       name: null,
+      flName: null,
       format: null,
       length: null,
       category: null,
@@ -47,24 +48,24 @@ const IdTypesForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store
       return errors
     },
     validationSchema: yup.object({
-      name: yup.string().required(' '),
-      format: yup.string().required(' '),
-      length: yup.string().required(' '),
-      category: yup.string().required(' '),
-      clientFileExpiryType: yup.string().required(' '),
-      isDiplomat: yup.string().required(' ')
+      name: yup.string().required(),
+      format: yup.string().required(),
+      length: yup.string().required(),
+      category: yup.string().required(),
+      clientFileExpiryType: yup.string().required(),
+      isDiplomat: yup.string().required()
     }),
-    onSubmit: values => {
-      postIdTypes(values)
+    onSubmit: async values => {
+      await postIdTypes(values)
     }
   })
 
-  const postIdTypes = obj => {
+  const postIdTypes = async obj => {
     const recordId = obj?.recordId || ''
     const date = obj?.validFrom && formatDateToApi(obj?.validFrom)
     const data = { ...obj, validFrom: date }
 
-    postRequest({
+    await postRequest({
       extension: CurrencyTradingSettingsRepository.IdTypes.set,
       record: JSON.stringify(data)
     }).then(res => {
@@ -128,11 +129,22 @@ const IdTypesForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store
         </Grid>
         <Grid item xs={12}>
           <CustomTextField
+            name='flName'
+            label={labels.flName}
+            value={formik.values.flName}
+            maxAccess={maxAccess}
+            onChange={formik.handleChange}
+            onClear={() => formik.setFieldValue('flName', '')}
+            error={formik.touched.flName && Boolean(formik.errors.flName)}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <CustomTextField
             name='format'
             label={labels.format}
             value={formik.values.format}
             required
-            maxLength='10'
+            maxLength='20'
             maxAccess={maxAccess}
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('format', '')}

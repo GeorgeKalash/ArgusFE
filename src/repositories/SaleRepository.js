@@ -49,10 +49,17 @@ export const SaleRepository = {
     set2: service + 'set2TGM'
   },
   Client: {
+    get: service + 'getCL',
     snapshot: service + 'snapshotCL'
   },
   WorkFlow: {
     graph: service + 'graph'
+  },
+  Sales: {
+    qry: service + 'qryPR',
+    get: service + 'getPR',
+    set: service + 'setPR',
+    del: service + 'delPR'
   },
   PosUsers: {
     qry: service + 'qrySP',
@@ -63,6 +70,7 @@ export const SaleRepository = {
   },
   ReturnReasons: {
     qry: service + 'qryRR',
+    page: service + 'pageRR',
     get: service + 'getRR',
     set: service + 'setRR',
     del: service + 'delRR'
@@ -75,12 +83,14 @@ export const SaleRepository = {
     page: service + 'pageCG'
   },
   ReturnPolicy: {
+    page: service + 'pageRPO',
     qry: service + 'qryRPO',
     get: service + 'getRPO',
     set: service + 'setRPO',
     del: service + 'delRPO'
   },
   PriceGroups: {
+    page: service + 'pagePG',
     qry: service + 'qryPG',
     get: service + 'getPG',
     set: service + 'setPG',
@@ -112,20 +122,69 @@ export const SaleRepository = {
   },
   SaleZoneLevel: {
     qry: service + 'qryZOL',
-    set2: service + 'set2ZOL'
+    set2: service + 'set2ZOL',
+    get: service + 'getZOL'
   },
   SaleTransaction: {
     qry: service + 'qryTR',
     get: service + 'getTR',
     set: service + 'setTR',
     del: service + 'delTR',
+    post: service + 'postTR',
     snapshot: service + 'snapshotTR'
   },
   SalesOrder: {
     qry: service + 'qryORD',
+    page: service + 'pageORD',
     get: service + 'getORD',
     set: service + 'setORD',
+    set2: service + 'set2ORD',
     del: service + 'delORD',
+    close: service + 'closeORD',
+    reopen: service + 'reopenORD',
+    cancel: service + 'terminateORD',
+    postToInvoice: service + 'transfer2ORD',
     snapshot: service + 'snapshotORD'
+  },
+  SalesOrderItem: {
+    qry: service + 'qryORI'
+  },
+  ItemConvertPrice: {
+    get: service + 'getICP',
+    get2: service + 'getICP2'
+  },
+  Address: {
+    qry: service + 'qryAD',
+    set: service + 'setAD'
+  },
+  FilterAddress: {
+    snapshot: service + 'snapshotADD'
+  },
+  FinancialIntegrators: {
+    qry: service + 'qryFII',
+    set: service + 'setFII'
+  },
+  SATrx: {
+    qry: service + 'qryTRX'
+  },
+  SalesTransaction: {
+    qry: service + 'qryTR',
+    snapshot: service + 'snapshotTRX',
+    get: service + 'getTR',
+    get2: service + 'get2TR',
+    set2: service + 'set2TRX',
+    del: service + 'delTR'
+  },
+  SalesTransactionItems: {
+    qry: service + 'qryIT'
+  },
+  Contact: {
+    contact: service + 'qryContact'
+  },
+  PrintedSA: {
+    printed: service + 'flagORD'
+  },
+  SalesInquiries: {
+    qry: service + 'qryII'
   }
 }

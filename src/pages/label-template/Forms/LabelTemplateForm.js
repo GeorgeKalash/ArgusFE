@@ -43,8 +43,8 @@ const LabelTemplateForm = ({ labels, maxAccess, store, setStore }) => {
       labelHomeX: yup.number().nullable().min(0),
       labelHomeY: yup.number().nullable().min(0)
     }),
-    onSubmit: values => {
-      postLabelTemplate(values)
+    onSubmit: async values => {
+      await postLabelTemplate(values)
     }
   })
 
@@ -90,7 +90,7 @@ const LabelTemplateForm = ({ labels, maxAccess, store, setStore }) => {
   }, [])
 
   return (
-    <FormShell form={formik} resourceId={ResourceIds.Plants} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell form={formik} resourceId={ResourceIds.LabelTemplates} maxAccess={maxAccess} editMode={editMode}>
       <Grid container spacing={2}>
         <Grid item xs={12}>
           <CustomTextField

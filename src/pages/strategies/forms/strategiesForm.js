@@ -15,10 +15,12 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 import { useInvalidate } from 'src/hooks/resource'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import { ControlContext } from 'src/providers/ControlContext'
 import { useForm } from 'src/hooks/form'
 
-const StrategiesForm = ({ labels, editMode, maxAccess, setStore, store, onChange }) => {
+const StrategiesForm = ({ labels, maxAccess, setStore, store, onChange }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const { recordId } = store
 
   const invalidate = useInvalidate({
@@ -40,10 +42,12 @@ const StrategiesForm = ({ labels, editMode, maxAccess, setStore, store, onChange
       groupId: yup.string().required(' '),
       type: yup.string().required(' ')
     }),
-    onSubmit: values => {
-      postGroups(values)
+    onSubmit: async values => {
+      await postGroups(values)
     }
   })
+
+  const editMode = !!recordId
 
   useEffect(() => {
     onChange(formik.values)
@@ -57,10 +61,11 @@ const StrategiesForm = ({ labels, editMode, maxAccess, setStore, store, onChange
         record: JSON.stringify(obj)
       })
 
-      const message = isNewRecord ? 'Record Added Successfully' : 'Record Edited Successfully'
+      const message = isNewRecord ? platformLabels.Added : platformLabels.Edited
       toast.success(message)
 
       if (isNewRecord) {
+        formik.setFieldValue('recordId', res.recordId)
         setStore(prevStore => ({
           ...prevStore,
           recordId: res.recordId

@@ -12,7 +12,7 @@ import PeriodsModuleForm from './PeriodsModuleForm'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { DataSets } from 'src/resources/DataSets'
-import { formatDateFromApi } from 'src/lib/date-helper'
+import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { ControlContext } from 'src/providers/ControlContext'
 
 const PeriodsForm = ({ labels, maxAccess, store }) => {
@@ -28,8 +28,10 @@ const PeriodsForm = ({ labels, maxAccess, store }) => {
     try {
       const data = {
         fiscalYear: recordId,
-        periods: obj.map(({ id, periodId, ...rest }) => ({
+        periods: obj.map(({ id, periodId, startDate, endDate, ...rest }) => ({
           periodId: id,
+          startDate: formatDateToApi(startDate),
+          endDate: formatDateToApi(endDate),
           ...rest
         }))
       }
@@ -63,8 +65,8 @@ const PeriodsForm = ({ labels, maxAccess, store }) => {
         )
         .required()
     }),
-    onSubmit: values => {
-      post(values.periods)
+    onSubmit: async values => {
+      await post(values.periods)
     }
   })
 

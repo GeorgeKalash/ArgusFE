@@ -6,6 +6,8 @@ import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import toast from 'react-hot-toast'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import useResourceParams from 'src/hooks/useResourceParams'
+import { ControlContext } from 'src/providers/ControlContext'
+import { Box } from '@mui/material'
 
 const OTPPhoneVerification = ({
   formValidation,
@@ -18,34 +20,34 @@ const OTPPhoneVerification = ({
   window
 }) => {
   const { postRequest } = useContext(RequestsContext)
+  const { defaultsData } = useContext(ControlContext)
 
-  const { labels: labels, access } = useResourceParams({
+  const { labels: labels } = useResourceParams({
     datasetId: ResourceIds.OTPVerify
   })
   const [otp, setOtp] = useState(['', '', '', '', '', ''])
-  const [timer, setTimer] = useState(60)
+  const [timer, setTimer] = useState(null)
+  const [sent, setSent] = useState(false)
+
   const [error, setError] = useState('')
   const [disabled, setDisabled] = useState(0)
 
   useEffect(() => {
     let interval
 
-    if (timer > 0) {
-      interval = setInterval(() => {
-        setTimer(prevTimer => prevTimer - 1)
-      }, 1000)
-    } else {
-      clearInterval(interval)
-      setError('OTP expired. Please request a new one.')
+    if (sent) {
+      if (timer > 0) {
+        interval = setInterval(() => {
+          setTimer(prevTimer => prevTimer - 1)
+        }, 1000)
+      } else {
+        clearInterval(interval)
+        setError(labels.OTPTimeNotSet)
+      }
     }
 
     return () => clearInterval(interval)
-  }, [timer])
-
-  useEffect(() => {
-    document.getElementById(`otp-input-${0}`).focus()
-    otpSMS()
-  }, [])
+  }, [timer, sent])
 
   const otpSMS = () => {
     var data = {
@@ -58,17 +60,15 @@ const OTPPhoneVerification = ({
     postRequest({
       extension: CTCLRepository.OTPRepository.sms,
       record: JSON.stringify(data)
+    }).then(res => {
+      setError(res.error)
     })
-      .then(res => {
-        setError(res.error)
-      })
-      .catch(error => {})
   }
 
   const checkSMS = value => {
     if (value.length > 1) {
       var data = {
-        clientId: formValidation.values.clientId,
+        clientId: formValidation.values.clientId || clientId,
         recordId: recordId || null,
         secret: '',
         functionId: functionId,
@@ -78,14 +78,12 @@ const OTPPhoneVerification = ({
       postRequest({
         extension: CTCLRepository.OTPRepository.checkSms,
         record: JSON.stringify(data)
+      }).then(res => {
+        toast.success('Verification Completed')
+        if (onSuccess) onSuccess()
+        if (getData) getData(formValidation?.values?.clientId)
+        window.close()
       })
-        .then(res => {
-          toast.success('Verification Completed')
-          if (onSuccess) onSuccess()
-          if (getData) getData(formValidation?.values?.clientId)
-          window.close()
-        })
-        .catch(error => {})
     } else {
       setError('All Fields Required')
     }
@@ -145,7 +143,12 @@ const OTPPhoneVerification = ({
   }
 
   const handleResendOtp = () => {
-    setTimer(60)
+    setSent(true)
+    const expiryTimeObj = defaultsData.list.find(obj => obj.key === 'otp-expiry-time')
+    const expiryTime = parseInt(expiryTimeObj?.value, 10)
+    if (!isNaN(expiryTime)) {
+      setTimer(expiryTime)
+    }
     setError('')
     setOtp(['', '', '', '', '', ''])
     document.getElementById('otp-input-0').focus()
@@ -169,6 +172,7 @@ const OTPPhoneVerification = ({
               type='text'
               id={`otp-input-${index}`}
               maxLength='1'
+              readOnly={!timer}
               onKeyUp={e => handleKeyUp(index, e)}
               value={digit}
               onChange={e => handleOtpChange(index, e)}
@@ -181,11 +185,11 @@ const OTPPhoneVerification = ({
               {labels.timeRemaining}: {timer}s
             </p>
           ) : (
-            <p className={styles.expiredTimer}>{labels.OTPExpired}</p>
+            <p className={styles.expiredTimer}>{sent && labels.OTPExpired}</p>
           )}
         </Grid>
         <button className={styles.resendButton} onClick={handleResendOtp} disabled={timer > 0}>
-          {labels.resendOTP}
+          {sent ? labels.resendOTP : labels.sendOtp}
         </button>
         <button
           className={styles.verifyButton}
@@ -194,7 +198,6 @@ const OTPPhoneVerification = ({
         >
           {labels.verifyOTP}
         </button>
-        {error && <p className={styles.errorMessage}>{error}</p>}
       </Grid>
     </div>
   )

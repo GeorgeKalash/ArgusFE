@@ -13,7 +13,6 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SCRepository } from 'src/repositories/SCRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
-import { replace } from 'stylis'
 
 const ItemForm = ({ tlId, labels, seqNo, getGridData, maxAccess, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -21,7 +20,7 @@ const ItemForm = ({ tlId, labels, seqNo, getGridData, maxAccess, window }) => {
 
   const formik = useFormik({
     initialValues: {
-      seqNo,
+      seqNo: '',
       labelTemplateId: tlId,
       itemKey: '',
       displayType: '',
@@ -37,6 +36,7 @@ const ItemForm = ({ tlId, labels, seqNo, getGridData, maxAccess, window }) => {
     enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
+      seqNo: yup.string().required(),
       itemKey: yup.string().required(),
       displayType: yup.string().required(),
       x: yup.string().required(),
@@ -45,13 +45,13 @@ const ItemForm = ({ tlId, labels, seqNo, getGridData, maxAccess, window }) => {
       displayAreaWidth: yup.string().required(),
       displayAreaHeight: yup.string().required()
     }),
-    onSubmit: values => {
-      post(values)
+    onSubmit: async values => {
+      await post(values)
     }
   })
 
-  const post = obj => {
-    postRequest({
+  const post = async obj => {
+    await postRequest({
       extension: SCRepository.Item.set,
       record: JSON.stringify(obj)
     })
@@ -80,14 +80,26 @@ const ItemForm = ({ tlId, labels, seqNo, getGridData, maxAccess, window }) => {
   }
   useEffect(() => {
     if (seqNo) getDispersalById(seqNo)
-  }, [seqNo])
+  }, [])
 
   return (
-    <FormShell form={formik} maxAccess={maxAccess} infoVisible={false}>
+    <FormShell form={formik} maxAccess={maxAccess} infoVisible={false} isSavedClear={false} isCleared={false}>
       <VertLayout>
         <Grow>
           <Grid container gap={2}>
             <Grid container xs={12} spacing={2}>
+              <Grid item xs={12}>
+                <CustomNumberField
+                  name='seqNo'
+                  label={labels.seqNo}
+                  value={formik.values?.seqNo}
+                  required
+                  onChange={formik.handleChange}
+                  onClear={() => formik.setFieldValue('seqNo', '')}
+                  error={formik.touched.seqNo && Boolean(formik.errors.seqNo)}
+                  maxAccess={maxAccess}
+                />
+              </Grid>
               <Grid item xs={12}>
                 <CustomTextField
                   name='itemKey'
@@ -152,7 +164,7 @@ const ItemForm = ({ tlId, labels, seqNo, getGridData, maxAccess, window }) => {
                   readOnly={false}
                   onChange={formik.handleChange}
                   onClear={() => formik.setFieldValue('x', '')}
-                  error={formik.touched.itemKey && Boolean(formik.errors.itemKey)}
+                  error={formik.touched.x && Boolean(formik.errors.x)}
                   maxAccess={maxAccess}
                 />
               </Grid>
@@ -180,7 +192,7 @@ const ItemForm = ({ tlId, labels, seqNo, getGridData, maxAccess, window }) => {
                   readOnly={false}
                   onChange={formik.handleChange}
                   onClear={() => formik.setFieldValue('y', '')}
-                  error={formik.touched.itemKey && Boolean(formik.errors.itemKey)}
+                  error={formik.touched.y && Boolean(formik.errors.y)}
                   maxAccess={maxAccess}
                 />
               </Grid>

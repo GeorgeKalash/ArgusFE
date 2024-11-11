@@ -124,7 +124,7 @@ const FiPaymentVouchers = () => {
     {
       field: 'isVerified',
       headerName: _labels.isVerified,
-      flex: 1
+      type: 'checkbox'
     }
   ]
 
@@ -160,7 +160,7 @@ const FiPaymentVouchers = () => {
         plantId: plantId,
         maxAccess: access
       },
-      width: 850,
+      width: 950,
       height: 700,
       title: _labels.paymentVoucher
     })
@@ -169,15 +169,7 @@ const FiPaymentVouchers = () => {
   async function openForm(recordId) {
     try {
       const plantId = await getPlantId()
-      if (plantId !== '') {
-        openOutWardsWindow(plantId, recordId)
-      } else {
-        if (plantId === '') {
-          stackError({
-            message: `The user does not have a default plant.`
-          })
-        }
-      }
+      openOutWardsWindow(plantId, recordId)
     } catch (error) {}
   }
 
@@ -212,14 +204,14 @@ const FiPaymentVouchers = () => {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar 
+        <RPBGridToolbar
           onSearch={onSearch}
-          onClear={onClear} 
-          labels={_labels} 
+          onClear={onClear}
+          labels={_labels}
           onAdd={add}
-          maxAccess={access} 
-          onApply={onApply} 
-          reportName={'FIPV'} 
+          maxAccess={access}
+          onApply={onApply}
+          reportName={'FIPV'}
         />
       </Fixed>
       <Grow>

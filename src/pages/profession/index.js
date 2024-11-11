@@ -28,17 +28,30 @@ const Professions = () => {
 
     return { ...response, _startAt: _startAt }
   }
+  
+  async function fetchWithSearch({ filters }) {
+    return await getRequest({
+      extension: RemittanceSettingsRepository.Profession.snapshot,
+      parameters: `_filter=${filters.qry}`
+    })
+  }
 
   const {
     query: { data },
     labels: _labels,
     refetch,
+    filterBy,
+    clearFilter,
     paginationParameters,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: RemittanceSettingsRepository.Profession.page,
-    datasetId: ResourceIds.Profession
+    datasetId: ResourceIds.Profession,
+    filter: {
+      endpointId: RemittanceSettingsRepository.Profession.snapshot,
+      filterFn: fetchWithSearch
+    }
   })
 
   const invalidate = useInvalidate({
@@ -102,7 +115,17 @@ const Professions = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <GridToolbar 
+          onAdd={add} 
+          maxAccess={access}
+          onSearch={value => {
+            filterBy('qry', value)
+          }}
+          onSearchClear={() => {
+            clearFilter('qry')
+          }}
+          inputSearch={true} 
+        />
       </Fixed>
       <Grow>
         <Table

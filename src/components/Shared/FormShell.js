@@ -3,7 +3,7 @@ import { useContext, useState } from 'react'
 import WindowToolbar from './WindowToolbar'
 import TransactionLog from './TransactionLog'
 import { TrxType } from 'src/resources/AccessLevels'
-import { ClientRelationForm } from './ClientRelationForm'
+import { ClientRelationList } from './ClientRelationList'
 import { useGlobalRecord, useWindow } from 'src/windows'
 import PreviewReport from './PreviewReport'
 import GeneralLedger from 'src/components/Shared/GeneralLedger'
@@ -13,36 +13,49 @@ import GlobalIntegrationGrid from './GlobalIntegrationGrid'
 import AccountBalance from './AccountBalance'
 import CashTransaction from './CashTransaction'
 import FinancialTransaction from './FinancialTransaction'
+import Aging from './Aging'
+import MetalSummary from './MetalSummary'
 import { ControlContext } from 'src/providers/ControlContext'
+import { ClientRelationForm } from './ClientRelationForm'
+import { ClientBalance } from './ClientBalance'
+import InventoryTransaction from './InventoryTransaction'
+import SalesTrxForm from './SalesTrxForm'
 
 export default function FormShell({
   form,
   isSaved = true,
   isInfo = true,
   isSavedClear = true,
+  isGenerated = false,
   isCleared = true,
   children,
   editMode,
   disabledSubmit,
+  disabledSavedClear,
   infoVisible = true,
   postVisible = false,
   resourceId,
   masterSource,
+  onGenerate,
   functionId,
   maxAccess,
   isPosted = false,
   isClosed = false,
   clientRelation = false,
+  addClientRelation = false,
   setErrorMessage,
   previewReport = false,
+  previewBtnClicked = () => {},
   setIDInfoAutoFilled,
   visibleClear,
-  actions
+  actions,
+  filteredItems = []
 }) {
   const { stack } = useWindow()
   const [selectedReport, setSelectedReport] = useState(null)
-  const { clear } = useGlobalRecord()
+  const { clear, open } = useGlobalRecord() || {}
   const { platformLabels } = useContext(ControlContext)
+  const isSavedClearVisible = isSavedClear && isSaved && isCleared
 
   const windowToolbarVisible = editMode
     ? maxAccess < TrxType.EDIT
@@ -53,16 +66,19 @@ export default function FormShell({
     : true
 
   function handleReset() {
-    if (!form.values?.recordId) {
+    if (typeof form.values?.recordId === 'undefined') {
       form.resetForm({
         values: form.initialValues
       })
     } else {
       if (typeof clear === 'function') {
         clear()
+      } else {
+        form.resetForm({
+          values: form.initialValues
+        })
       }
     }
-
     if (setIDInfoAutoFilled) {
       setIDInfoAutoFilled(false)
     }
@@ -72,7 +88,7 @@ export default function FormShell({
     stack({
       Component: Approvals,
       props: {
-        recordId: form.values.recordIdRemittance ?? form.values.recordId,
+        recordId: form.values.remittanceRecordId ?? form.values.recordId,
         functionId: form.values.functionId ?? functionId
       },
       width: 1000,
@@ -103,9 +119,35 @@ export default function FormShell({
       },
       width: 1200,
       height: 670,
-      title: platformLabels,
-      CashTransaction
+      title: platformLabels.CashTransaction
     })
+  }
+
+  async function handleSaveAndClear() {
+    const errors = await form.validateForm()
+    await form.submitForm()
+    if (Object.keys(errors).length == 0) {
+      await performPostSubmissionTasks()
+    }
+  }
+
+  function onInventoryTransaction() {
+    stack({
+      Component: InventoryTransaction,
+      props: {
+        recordId: form.values.recordId,
+        functionId: functionId
+      },
+      width: 1000,
+      title: platformLabels.InventoryTransaction
+    })
+  }
+
+  const performPostSubmissionTasks = async () => {
+    if (typeof open === 'function') {
+      await open()
+    }
+    handleReset()
   }
 
   return (
@@ -127,9 +169,11 @@ export default function FormShell({
       {windowToolbarVisible && (
         <WindowToolbar
           print={print}
-          onSave={() => form?.handleSubmit()}
+          onSave={() => {
+            form?.handleSubmit()
+          }}
           onSaveClear={() => {
-            form?.handleSubmit(), handleReset()
+            handleSaveAndClear()
           }}
           onClear={() => handleReset()}
           onPost={() => {
@@ -145,10 +189,9 @@ export default function FormShell({
               Component: TransactionLog,
               props: {
                 recordId: form.values?.recordId ?? form.values.clientId,
-                resourceId: resourceId,
-                setErrorMessage: setErrorMessage
+                resourceId: resourceId
               },
-              width: 700,
+              width: 900,
               height: 600,
               title: platformLabels.TransactionLog
             })
@@ -178,6 +221,19 @@ export default function FormShell({
               title: platformLabels.financialTransaction
             })
           }
+          onClickSATRX={() =>
+            stack({
+              Component: SalesTrxForm,
+              props: {
+                recordId: form.values?.recordId,
+                functionId: functionId,
+                itemId: 0,
+                clientId: form?.values?.header?.clientId
+              },
+              width: 1200,
+              title: platformLabels.SalesTransactions
+            })
+          }
           onClickGIA={() =>
             stack({
               Component: GlobalIntegrationGrid,
@@ -200,16 +256,41 @@ export default function FormShell({
           }
           onClientRelation={() =>
             stack({
-              Component: ClientRelationForm,
+              Component: ClientRelationList,
               props: {
                 recordId: form.values?.recordId ?? form.values.clientId,
                 name: form.values.firstName ? form.values.firstName + ' ' + form.values.lastName : form.values.name,
                 reference: form.values.reference,
-                setErrorMessage: setErrorMessage
+                category: form.values.category
               },
               width: 900,
               height: 600,
               title: platformLabels.ClientRelation
+            })
+          }
+          onClientBalance={() =>
+            stack({
+              Component: ClientBalance,
+              props: {
+                recordId: form.values?.recordId
+              },
+              width: 500,
+              height: 350,
+              title: platformLabels.ClientBalance
+            })
+          }
+          onAddClientRelation={() =>
+            stack({
+              Component: ClientRelationForm,
+              props: {
+                clientId: form.values?.recordId ?? form.values.clientId,
+                name: form.values.firstName ? form.values.firstName + ' ' + form.values.lastName : form.values.name,
+                reference: form.values.reference,
+                formValidation: form
+              },
+              width: 500,
+              height: 420,
+              title: platformLabels.addClientRelation
             })
           }
           onGenerateReport={() =>
@@ -219,28 +300,60 @@ export default function FormShell({
                 selectedReport: selectedReport,
                 recordId: form.values?.recordId,
                 functionId: form.values?.functionId,
-                resourceId: resourceId
+                resourceId: resourceId,
+                scId: form.values?.stockCountId,
+                siteId: form.values?.siteId,
+                onSuccess: previewBtnClicked
               },
               width: 1150,
               height: 700,
               title: platformLabels.PreviewReport
             })
           }
+          onClickAging={() =>
+            stack({
+              Component: Aging,
+              props: {
+                recordId: form.values?.recordId,
+                functionId
+              },
+              width: 1000,
+              height: 620,
+              title: platformLabels.Aging
+            })
+          }
+          onClickMetal={() =>
+            stack({
+              Component: MetalSummary,
+              props: {
+                filteredItems
+              },
+              width: 600,
+              height: 550,
+              title: platformLabels.Metals,
+              expandable: false
+            })
+          }
           isSaved={isSaved}
-          isSavedClear={isSavedClear}
+          isSavedClear={isSavedClearVisible}
+          onGenerate={onGenerate}
           isInfo={isInfo}
           isCleared={isCleared}
+          isGenerated={isGenerated}
           actions={actions}
           onApproval={onApproval}
+          onInventoryTransaction={onInventoryTransaction}
           onRecordRemarks={onRecordRemarks}
           transactionClicked={transactionClicked}
           editMode={editMode}
           disabledSubmit={disabledSubmit}
+          disabledSavedClear={disabledSavedClear || disabledSubmit}
           infoVisible={infoVisible}
           postVisible={postVisible}
           isPosted={isPosted}
           isClosed={isClosed}
           clientRelation={clientRelation}
+          addClientRelation={addClientRelation}
           resourceId={resourceId}
           masterSource={masterSource}
           recordId={form.values?.recordId}

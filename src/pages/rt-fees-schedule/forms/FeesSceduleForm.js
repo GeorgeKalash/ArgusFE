@@ -41,8 +41,8 @@ const FeesSceduleForm = ({ labels, maxAccess, setStore, store, onChange }) => {
       reference: yup.string().required(),
       originCurrency: yup.string().required()
     }),
-    onSubmit: values => {
-      postGroups(values)
+    onSubmit: async values => {
+      await postGroups(values)
     }
   })
 

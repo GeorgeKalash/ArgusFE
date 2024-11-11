@@ -61,5 +61,15 @@ export const CurrencyTradingSettingsRepository = {
     get2: service + 'getEXM2',
     get: service + 'getEXM',
     set2: service + 'set2EXM'
+  },
+  PurposeExchangeGroup: {
+    qry: service + 'qryPEG',
+    get: service + 'getPEG',
+    set: service + 'setPEG',
+    del: service + 'delPEG',
+    page: service + 'pagePEG'
+  },
+  Yakeen: {
+    get: service + 'getYakeenInformations'
   }
 }

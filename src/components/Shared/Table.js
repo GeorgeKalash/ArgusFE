@@ -1,4 +1,4 @@
-import React, { useContext, useRef } from 'react'
+import React, { useContext } from 'react'
 import { AgGridReact } from 'ag-grid-react'
 import 'ag-grid-community/styles/ag-grid.css'
 import 'ag-grid-community/styles/ag-theme-alpine.css'
@@ -8,7 +8,7 @@ import Image from 'next/image'
 import editIcon from '../../../public/images/TableIcons/edit.png'
 import { useState } from 'react'
 import { useEffect } from 'react'
-import 'ag-grid-enterprise'
+import 'ag-grid-community'
 import FirstPageIcon from '@mui/icons-material/FirstPage'
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore'
 import NavigateNextIcon from '@mui/icons-material/NavigateNext'
@@ -22,7 +22,7 @@ import { useWindow } from 'src/windows'
 import DeleteDialog from './DeleteDialog'
 import StrictDeleteConfirmation from './StrictDeleteConfirmation'
 import { HIDDEN, accessLevel } from 'src/services/api/maxAccess'
-import { formatDateDefault, getTimeInTimeZone } from 'src/lib/date-helper'
+import { formatDateDefault, getTimeInTimeZone, formatDateTimeDefault } from 'src/lib/date-helper'
 import { getFormattedNumber } from 'src/lib/numberField-helper'
 import { VertLayout } from './Layouts/VertLayout'
 import { Grow } from './Layouts/Grow'
@@ -33,15 +33,19 @@ const Table = ({
   globalStatus = true,
   viewCheckButtons = false,
   showCheckboxColumn = false,
+  disableSorting = false,
   rowSelection = '',
   pagination = true,
   setData,
+  checkboxFlex = '',
+  handleCheckboxChange = '',
   ...props
 }) => {
   const pageSize = props?.pageSize || 10000
   const api = props?.api ? props?.api : props?.paginationParameters || ''
   const refetch = props?.refetch
   const [gridData, setGridData] = useState({})
+  const [page, setPage] = useState(null)
   const [startAt, setStartAt] = useState(0)
   const { languageId } = useContext(AuthContext)
   const { platformLabels } = useContext(ControlContext)
@@ -63,23 +67,57 @@ const Table = ({
       if (col.type === 'date') {
         return {
           ...col,
-          valueGetter: ({ data }) => formatDateDefault(data?.[col.field])
+          valueGetter: ({ data }) => formatDateDefault(data?.[col.field]),
+          sortable: !disableSorting
+        }
+      }
+      if (col.type === 'dateTime') {
+        return {
+          ...col,
+          valueGetter: ({ data }) => data?.[col.field] && formatDateTimeDefault(data?.[col.field]),
+          sortable: !disableSorting
         }
       }
       if (col.type === 'number' || col?.type?.field === 'number') {
         return {
           ...col,
-          valueGetter: ({ data }) => getFormattedNumber(data?.[col.field], col.type?.decimal)
+          valueGetter: ({ data }) => getFormattedNumber(data?.[col.field], col.type?.decimal),
+          cellStyle: { textAlign: 'right' },
+          sortable: !disableSorting
         }
       }
       if (col.type === 'timeZone') {
         return {
           ...col,
-          valueGetter: ({ data }) => data?.[col.field] && getTimeInTimeZone(data?.[col.field])
+          valueGetter: ({ data }) => data?.[col.field] && getTimeInTimeZone(data?.[col.field]),
+          sortable: !disableSorting
+        }
+      }
+      if (col.type === 'checkbox') {
+        return {
+          ...col,
+          width: 110,
+          cellRenderer: ({ data, node }) => {
+            const handleCheckboxChange = event => {
+              const checked = event.target.checked
+              node.setDataValue(col.field, checked)
+            }
+
+            return (
+              <Checkbox
+                checked={data?.[col.field]}
+                onChange={col.editable ? handleCheckboxChange : null}
+                style={col.editable ? {} : { pointerEvents: 'none' }}
+              />
+            )
+          }
         }
       }
 
-      return col
+      return {
+        ...col,
+        sortable: !disableSorting
+      }
     })
 
   const shouldRemoveColumn = column => {
@@ -92,12 +130,23 @@ const Table = ({
   useEffect(() => {
     const areAllValuesTrue = props?.gridData?.list?.every(item => item?.checked === true)
     setChecked(areAllValuesTrue)
-    if (typeof setData === 'function') onSelectionChanged
-
-    props?.gridData &&
-      paginationType !== 'api' &&
-      pageSize &&
-      setGridData({ list: pageSize ? props?.gridData?.list?.slice(0, pageSize) : props?.gridData?.list })
+    if (typeof setData === 'function') {
+      onSelectionChanged()
+    }
+    if (props?.gridData && paginationType !== 'api' && pageSize) {
+      if (page) {
+        const start = (page - 1) * pageSize
+        const end = page * pageSize
+        const slicedGridData = props?.gridData?.list.slice(start, end)
+        setGridData({
+          ...props.gridData,
+          list: slicedGridData
+        })
+        setStartAt(start)
+      } else {
+        setGridData({ list: pageSize ? props?.gridData?.list?.slice(0, pageSize) : props?.gridData?.list })
+      }
+    }
   }, [props?.gridData])
 
   const CustomPagination = () => {
@@ -226,7 +275,7 @@ const Table = ({
 
         if (gridData && gridData?.list) {
           const originalGridData = gridData && gridData.list
-          const page = Math.ceil(gridData.count ? (startAt === 0 ? 1 : (startAt + 1) / pageSize) : 1)
+          setPage(Math.ceil(gridData.count ? (startAt === 0 ? 1 : (startAt + 1) / pageSize) : 1))
 
           var _gridData = gridData?.list
           const pageCount = Math.ceil(originalGridData?.length ? originalGridData?.length / pageSize : 1)
@@ -335,10 +384,6 @@ const Table = ({
     }
   }
 
-  const getRowClass = params => {
-    return params?.rowIndex % 2 === 0 ? 'even-row' : ''
-  }
-
   const selectAll = (params, e) => {
     const gridApi = params.api
     const allNodes = []
@@ -350,6 +395,10 @@ const Table = ({
     })
 
     setChecked(e.target.checked)
+
+    if (handleCheckboxChange) {
+      handleCheckboxChange()
+    }
 
     if (typeof setData === 'function') onSelectionChanged
   }
@@ -388,11 +437,131 @@ const Table = ({
     })
   }
 
+  const checkboxCellRenderer = params => {
+    return (
+      <Checkbox
+        checked={params.value}
+        onChange={e => {
+          const checked = e.target.checked
+          if (rowSelection !== 'single') {
+            params.node.setDataValue(params.colDef.field, checked)
+          } else {
+            params.api.forEachNode(node => {
+              if (node.id === params.node.id) {
+                node.setDataValue(params.colDef.field, checked)
+              } else if (checked) {
+                node.setDataValue(params.colDef.field, false)
+              }
+            })
+          }
+
+          if (handleCheckboxChange) {
+            handleCheckboxChange()
+          }
+        }}
+      />
+    )
+  }
+
+  const onFirstDataRendered = async params => {
+    params.api.sizeColumnsToFit()
+    await params.api.forEachNode(node => {
+      if (rowSelection === 'single') {
+        const checked = node.data?.checked || false
+        node.setDataValue('checked', checked)
+      }
+    })
+  }
+
+  const FieldWrapper = params => {
+    const [tooltipOpen, setTooltipOpen] = useState(false)
+
+    const handleClick = event => {
+      const range = document.createRange()
+      range.selectNodeContents(event.currentTarget)
+      const selection = window.getSelection()
+      selection.removeAllRanges()
+      selection.addRange(range)
+    }
+
+    const handleDoubleClick = params => {
+      navigator.clipboard.writeText(params.target.innerText).then(() => {
+        setTooltipOpen(true)
+        setTimeout(() => setTooltipOpen(false), 500)
+      })
+    }
+
+    return (
+      <Box>
+        {tooltipOpen && (
+          <Box
+            sx={{
+              zIndex: 1000,
+              position: 'fixed',
+              top: '-40px',
+              backgroundColor: 'black',
+              color: 'white',
+              paddingY: '1px',
+              paddingX: '3px',
+              borderRadius: '5px'
+            }}
+          >
+            Copied!
+          </Box>
+        )}
+        <Box
+          onClick={handleClick}
+          onDoubleClick={handleDoubleClick}
+          sx={{
+            userSelect: 'text',
+            cursor: 'pointer',
+            height: '50%',
+            width: '100%',
+            '&::selection': {
+              backgroundColor: 'none !important',
+              color: 'inherit'
+            },
+            '&:focus': {
+              outline: 'none'
+            },
+            ...(!params.colDef?.wrapText && {
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            })
+          }}
+        >
+          {params.value}
+        </Box>
+      </Box>
+    )
+  }
+
+  const columnDefs = [
+    ...(showCheckboxColumn
+      ? [
+          {
+            headerName: '',
+            field: 'checked',
+            flex: checkboxFlex,
+            cellRenderer: checkboxCellRenderer,
+            headerComponent: params =>
+              rowSelection !== 'single' && <Checkbox checked={checked} onChange={e => selectAll(params, e)} />,
+            suppressMenu: true
+          }
+        ]
+      : []),
+    ...filteredColumns.map(column => ({
+      ...column,
+      cellRenderer: column.cellRenderer ? column.cellRenderer : FieldWrapper
+    }))
+  ]
+
   if (props?.onEdit || props?.onDelete) {
     const deleteBtnVisible = maxAccess ? props?.onDelete && maxAccess > TrxType.EDIT : props?.onDelete ? true : false
 
-    if (!filteredColumns?.some(column => column.field === 'actions'))
-      filteredColumns?.push({
+    if (!columnDefs?.some(column => column.field === 'actions'))
+      columnDefs?.push({
         field: 'actions',
         headerName: '',
         width: 100,
@@ -451,53 +620,11 @@ const Table = ({
       })
   }
 
-  const checkboxCellRenderer = params => {
-    return (
-      <Checkbox
-        checked={params.value}
-        onChange={e => {
-          const checked = e.target.checked
-          if (rowSelection !== 'single') {
-            params.node.setDataValue(params.colDef.field, checked)
-          } else {
-            params.api.forEachNode(node => {
-              if (node.id === params.node.id) {
-                node.setDataValue(params.colDef.field, checked)
-              } else if (checked) {
-                node.setDataValue(params.colDef.field, false)
-              }
-            })
-          }
-        }}
-      />
-    )
+  const gridOptions = {
+    rowClassRules: {
+      'even-row': params => params.node.rowIndex % 2 === 0
+    }
   }
-
-  const onFirstDataRendered = async params => {
-    params.api.sizeColumnsToFit()
-    await params.api.forEachNode(node => {
-      if (rowSelection === 'single') {
-        const checked = node.data?.checked || false
-        node.setDataValue('checked', checked)
-      }
-    })
-  }
-
-  const columnDefs = [
-    ...(showCheckboxColumn
-      ? [
-          {
-            headerName: '',
-            field: 'checked',
-            cellRenderer: checkboxCellRenderer,
-            headerComponent: params =>
-              rowSelection !== 'single' && <Checkbox checked={checked} onChange={e => selectAll(params, e)} />,
-            suppressMenu: true // if i want to remove menu from header
-          }
-        ]
-      : []),
-    ...filteredColumns
-  ]
 
   return (
     <VertLayout>
@@ -516,6 +643,9 @@ const Table = ({
             },
             '.ag-cell': {
               borderRight: '1px solid #d0d0d0 !important'
+            },
+            '.ag-cell .MuiBox-root': {
+              padding: '0px !important'
             }
           }}
         >
@@ -528,9 +658,9 @@ const Table = ({
             paginationPageSize={pageSize}
             rowSelection={'single'}
             suppressAggFuncInHeader={true}
-            getRowClass={getRowClass}
             rowHeight={35}
             onFirstDataRendered={onFirstDataRendered}
+            gridOptions={gridOptions}
           />
         </Box>
       </Grow>

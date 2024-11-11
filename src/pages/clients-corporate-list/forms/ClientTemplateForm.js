@@ -12,7 +12,7 @@ import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { formatDateFromApi, formatDateToApiFunction } from 'src/lib/date-helper'
+import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
@@ -111,7 +111,9 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
       countryId: yup.string().required(' '),
       cityId: yup.string().required(' '),
       name1: yup.string().required(' '),
-      name: yup.string().required(' '),
+
+      // name: yup.string().required(' '),
+
       nationalityId: yup.string().required(' '),
       cellPhone: yup.string().required(' '),
       capital: yup.string().required(' '),
@@ -152,8 +154,8 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
       cellPhone: obj.cellPhone,
       oldReference: obj.oldReference,
       otp: obj.otpVerified,
-      ExpiryDate: formatDateToApiFunction(obj.expiryDate),
-      createdDate: formatDateToApiFunction(date.toISOString())
+      ExpiryDate: formatDateToApi(obj.expiryDate),
+      createdDate: formatDateToApi(date)
     }
 
     // Address
@@ -176,7 +178,7 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
       bldgNo: obj.bldgNo,
       unitNo: obj.unitNo,
       subNo: obj.subNo,
-      poBox: obj.poBox,
+      poBox: obj.poBox
     }
 
     const data = {
@@ -270,6 +272,18 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
       key: 'Client Relation',
       condition: true,
       onClick: 'onClientRelation',
+      disabled: !editMode
+    },
+    {
+      key: 'Add Client Relation',
+      condition: true,
+      onClick: 'onAddClientRelation',
+      disabled: !editMode
+    },
+    {
+      key: 'Client Balance',
+      condition: true,
+      onClick: 'onClientBalance',
       disabled: !editMode
     }
   ]
@@ -518,6 +532,7 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
                             onChange={formik.handleChange}
                             onClear={() => formik.setFieldValue('capital', '')}
                             maxAccess={maxAccess}
+                            error={formik.touched.capital && Boolean(formik.errors.capital)}
                           />
                         </Grid>
                         <Grid item xs={12}>

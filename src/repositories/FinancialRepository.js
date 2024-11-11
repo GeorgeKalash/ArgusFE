@@ -1,7 +1,6 @@
 const service = 'FI.asmx/'
 
 export const FinancialRepository = {
-  //Segment
   Segment: {
     qry: service + 'qrySEG'
   },
@@ -155,7 +154,8 @@ export const FinancialRepository = {
     qry: service + 'qryAGP',
     get: service + 'getAGP',
     set: service + 'setAGP',
-    del: service + 'delAGP'
+    del: service + 'delAGP',
+    set2: service + 'set2AGP'
   },
   FIDimension: {
     qry: service + 'qryDI',
@@ -168,5 +168,14 @@ export const FinancialRepository = {
   },
   PaymentVoucherCostCenters: {
     qry: service + 'qryPVC'
+  },
+  Apply2: {
+    qry: service + 'qryAPL2'
+  },
+  Apply3: {
+    qry: service + 'qryAPL3'
+  },
+  AgingLeg: {
+    qry: service + 'qryAGL'
   }
 }

@@ -1,11 +1,6 @@
-// ** React Imports
 import { createContext, useContext, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
@@ -18,6 +13,7 @@ const MenuProvider = ({ children }) => {
   const [menu, setMenu] = useState([])
   const [gear, setGear] = useState([])
   const [lastOpenedPage, setLastOpenedPage] = useState(null)
+  const [reloadOpenedPage, setReloadOpenedPage] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
 
   const getMenu = async () => {
@@ -25,16 +21,12 @@ const MenuProvider = ({ children }) => {
     getRequest({
       extension: SystemRepository.mainMenu,
       parameters: parameters
+    }).then(async res => {
+      const builtMenu = buildMenu(res.record.folders, res.record.commandLines)
+      const builtGear = buildGear(res.record.commandLines)
+      setGear(builtGear)
+      setMenu(builtMenu)
     })
-      .then(async res => {
-        const builtMenu = buildMenu(res.record.folders, res.record.commandLines)
-        const builtGear = buildGear(res.record.commandLines)
-        setGear(builtGear)
-        setMenu(builtMenu)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
   }
 
   const buildMenu = (folders, commandLines, parentId = 0) => {
@@ -75,29 +67,28 @@ const MenuProvider = ({ children }) => {
     return menu
   }
 
-  const buildGear = (commandLines) => {
+  const buildGear = commandLines => {
     const Gear = []
     commandLines
-          .filter(commandLine => commandLine.folderId === 0)
-          .forEach(commandLine => {
-            if (commandLine.nextAPI){
-              const GearItem={
-                id: commandLine.id,
-                title: commandLine.name,
-                path: `/${commandLine.nextAPI}`,
-                name: commandLine.name,
-                folderId:commandLine.folderId,
-                iconName: commandLine.addToBookmarks && 'FavIcon'
-              }
-        Gear.push(GearItem)}
-          })
-          
-          return Gear
-      }
-  
+      .filter(commandLine => commandLine.folderId === 0)
+      .forEach(commandLine => {
+        if (commandLine.nextAPI) {
+          const GearItem = {
+            id: commandLine.id,
+            title: commandLine.name,
+            path: `/${commandLine.nextAPI}`,
+            name: commandLine.name,
+            folderId: commandLine.folderId,
+            iconName: commandLine.addToBookmarks && 'FavIcon'
+          }
+          Gear.push(GearItem)
+        }
+      })
+
+    return Gear
+  }
 
   const handleBookmark = (item, isBookmarked, callBack = undefined) => {
-    //TEMP userData later replace with userProvider
     const userData = window.localStorage.getItem('userData')
       ? window.localStorage.getItem('userData')
       : window.sessionStorage.getItem('userData')
@@ -112,32 +103,24 @@ const MenuProvider = ({ children }) => {
       postRequest({
         extension: AccessControlRepository.delBMK,
         record: JSON.stringify(record)
+      }).then(res => {
+        getMenu()
+        if (typeof callBack === 'function') {
+          callBack()
+        }
+        toast.success('Removed from favorites')
       })
-        .then(res => {
-          getMenu()
-          if (typeof callBack === 'function') {
-            callBack()
-          }
-          toast.success('Removed from favorites')
-        })
-        .catch(error => {
-          setErrorMessage(error)
-        })
     } else {
       postRequest({
         extension: AccessControlRepository.setBMK,
         record: JSON.stringify(record)
+      }).then(res => {
+        getMenu()
+        if (typeof callBack === 'function') {
+          callBack()
+        }
+        toast.success('Added to favorites')
       })
-        .then(res => {
-          getMenu()
-          if (typeof callBack === 'function') {
-            callBack()
-          }
-          toast.success('Added to favorites')
-        })
-        .catch(error => {
-          setErrorMessage(error)
-        })
     }
   }
 
@@ -150,7 +133,9 @@ const MenuProvider = ({ children }) => {
     gear,
     handleBookmark,
     lastOpenedPage,
-    setLastOpenedPage
+    setLastOpenedPage,
+    reloadOpenedPage,
+    setReloadOpenedPage
   }
 
   return (

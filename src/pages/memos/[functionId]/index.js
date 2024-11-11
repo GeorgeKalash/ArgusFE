@@ -130,7 +130,7 @@ const Financial = () => {
     {
       field: 'isVerified',
       headerName: _labels.isVerified,
-      flex: 1
+      type: 'checkbox'
     }
   ]
 
@@ -177,7 +177,7 @@ const Financial = () => {
         functionId: functionId,
         getEndpoint
       },
-      width: 800,
+      width: 900,
       height: 670,
       title: getcorrectLabel(parseInt(functionId))
     })

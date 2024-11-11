@@ -4,6 +4,7 @@ export const AccessControlRepository = {
   maxAccess: service + 'maxAccess',
   setBMK: service + 'setBMK',
   delBMK: service + 'delBMK',
+  checkOTP: service + 'checkOTP ',
 
   NotificationGroup: {
     qry: service + 'qryNOT',
@@ -69,5 +70,23 @@ export const AccessControlRepository = {
     get: service + 'getNLB',
     set: service + 'setNLB',
     del: service + 'delNLB'
+  },
+  SGReleaseCode: {
+    qry: service + 'qryRCO',
+    set: service + 'setRCO',
+    del: service + 'delRCO'
+  },
+  DataAccessItem: {
+    qry: service + 'qryROW',
+    set: service + 'setROW',
+    del: service + 'delROW'
+  },
+  LockedRecords: {
+    qry: service + 'qryLOK',
+    del: service + 'delLOK',
+    snapshot: service + 'snapshotLOK'
+  },
+  UserOTPQrcode: {
+    secret: service + 'secretKEY'
   }
 }

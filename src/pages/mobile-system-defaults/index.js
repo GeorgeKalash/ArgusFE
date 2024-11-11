@@ -8,6 +8,7 @@ const RtIndex = () => {
       datasetId={ResourceIds.MobileSystemDefaults}
       labelKey={'mobileSystemDefaults'}
       Component={MobileSystem}
+      height={450}
     />
   )
 }

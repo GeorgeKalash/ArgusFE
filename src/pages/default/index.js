@@ -27,7 +27,6 @@ const GlobalStyle = createGlobalStyle`
     background-size: 125% 125%;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    color: #F0F0F0;
   }
 `
 
@@ -256,9 +255,7 @@ const Home = () => {
           aging: res.record.aging || []
         })
       })
-      .catch(error => {
-        console.log(error.message)
-      })
+      .catch(error => {})
   }
 
   const list1 = [

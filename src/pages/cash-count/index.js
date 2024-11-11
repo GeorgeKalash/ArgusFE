@@ -11,7 +11,6 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import CashCountForm from './forms/CashCountForm'
 import { CashCountRepository } from 'src/repositories/CashCountRepository'
-import { formatDateDefault, getTimeInTimeZone } from 'src/lib/date-helper'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { ControlContext } from 'src/providers/ControlContext'
@@ -57,7 +56,7 @@ const CashCount = () => {
       field: 'date',
       headerName: _labels.date,
       flex: 1,
-      type: 'number'
+      type: 'date'
     },
     {
       field: 'plantName',

@@ -12,7 +12,10 @@ export const AddressFormShell = ({
   readOnly,
   allowPost,
   optional = false,
-  onSubmit
+  onSubmit,
+  isSavedClear = true,
+  isCleared = true,
+  ...props
 }) => {
   const [required, setRequired] = useState(!optional)
 
@@ -20,7 +23,9 @@ export const AddressFormShell = ({
     recordId: address?.recordId || null,
     name: address?.name || '',
     countryId: address?.countryId || '',
+    countryName: address?.countryName || '',
     stateId: address?.stateId || '',
+    stateName: address?.stateName || '',
     cityId: address?.cityId || '',
     city: address?.city || '',
     street1: address?.street1 || '',
@@ -52,9 +57,9 @@ export const AddressFormShell = ({
         ((values.name || values.cityId || values.phone || values.countryId || values.street1) && optional) ||
         !optional
       ) {
-        if (!values.name) {
-          errors.name = ' '
-        }
+        // if (!values.name) {
+        //   errors.name = ' '
+        // }
         if (!values.street1) {
           errors.street1 = ' '
         }
@@ -103,8 +108,17 @@ export const AddressFormShell = ({
   }, [formik.values])
 
   return (
-    <FormShell form={formik} maxAccess={maxAccess} infoVisible={false} readOnly={readOnly} editMode={editMode}>
-      <AddressTab addressValidation={formik} readOnly={readOnly} required={required} />
+    <FormShell
+      form={formik}
+      maxAccess={maxAccess}
+      infoVisible={false}
+      disabledSubmit={readOnly}
+      editMode={editMode}
+      isSavedClear={isSavedClear}
+      isCleared={isCleared}
+      {...props}
+    >
+      <AddressTab addressValidation={formik} readOnly={readOnly} required={required} {...props} />
     </FormShell>
   )
 }

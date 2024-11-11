@@ -8,10 +8,12 @@ import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepos
 import { useForm } from 'src/hooks/form'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const IDNumberForm = ({ store, maxAccess, labels }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const editMode = !!store.recordId
 
   const { formik } = useForm({
@@ -21,8 +23,8 @@ const IDNumberForm = ({ store, maxAccess, labels }) => {
     initialValues: {
       rows: []
     },
-    onSubmit: values => {
-      postIdNumber(values.rows)
+    onSubmit: async values => {
+      await postIdNumber(values.rows)
     }
   })
 
@@ -45,6 +47,8 @@ const IDNumberForm = ({ store, maxAccess, labels }) => {
   const postIdNumber = async obj => {
     try {
       const postBody = Object.entries(obj).map(async ([key, value]) => {
+        if (value?.idNum === '') value.idNum = null
+
         return await postRequest({
           extension: BusinessPartnerRepository.MasterIDNum.set,
           record: JSON.stringify(value)
@@ -54,9 +58,9 @@ const IDNumberForm = ({ store, maxAccess, labels }) => {
       await Promise.all(postBody)
 
       if (!recordId) {
-        toast.success('Record Added Successfully')
+        toast.success(platformLabels.Added)
       } else {
-        toast.success('Record Edited Successfully')
+        toast.success(platformLabels.Edited)
       }
     } catch (error) {}
   }
@@ -92,7 +96,14 @@ const IDNumberForm = ({ store, maxAccess, labels }) => {
   }, [store.category, recordId])
 
   return (
-    <FormShell resourceId={ResourceIds.BPMasterData} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell
+      resourceId={ResourceIds.BPMasterData}
+      form={formik}
+      maxAccess={maxAccess}
+      editMode={editMode}
+      isSavedClear={false}
+      isCleared={false}
+    >
       <VertLayout>
         <Grow>
           <DataGrid
