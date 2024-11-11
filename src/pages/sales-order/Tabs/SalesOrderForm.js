@@ -247,7 +247,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
         }
         const itemPhysProp = await getItemPhysProp(newRow.itemId)
         const itemInfo = await getItem(newRow.itemId)
-        const ItemConvertPrice = await getItemConvertPrice(newRow.itemId)
+        const ItemConvertPrice = await getItemConvertPrice(newRow.itemId, update)
         let rowTax = null
         let rowTaxDetails = null
 
@@ -741,7 +741,21 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     return res?.list
   }
 
-  async function getItemConvertPrice(itemId) {
+  async function getItemConvertPrice(itemId, update) {
+    if (!formik.values.currencyId) {
+      update({
+        itemId: null,
+        itemName: null,
+        sku: null
+      })
+
+      stackError({
+        message: labels.noCurrency
+      })
+
+      return -1
+    }
+
     const res = await getRequest({
       extension: SaleRepository.ItemConvertPrice.get,
       parameters: `_itemId=${itemId}&_clientId=${formik.values.clientId}&_currencyId=${formik.values.currencyId}&_plId=${formik.values.plId}`
