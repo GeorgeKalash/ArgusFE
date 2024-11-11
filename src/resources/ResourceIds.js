@@ -293,5 +293,6 @@ export const ResourceIds = {
   GenerateFiscalYear: 41503,
   SalesTrxForm: 51307,
   UserSecretOTPQrCode: 23201,
-  MigrateBarcodeData: 41508
+  MigrateBarcodeData: 41508,
+  PhysicalCountSerialSummary: 44206
 }

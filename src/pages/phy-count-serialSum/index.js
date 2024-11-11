@@ -1,274 +1,280 @@
-import { useState, useContext } from 'react'
-import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import { RequestsContext } from 'src/providers/RequestsContext'
-import Table from 'src/components/Shared/Table'
-import { useResourceQuery } from 'src/hooks/resource'
-import { Grid, Button } from '@mui/material'
-import { ResourceIds } from 'src/resources/ResourceIds'
-import { useForm } from 'src/hooks/form'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
-import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
-import FormShell from 'src/components/Shared/FormShell'
-import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
-import { SystemRepository } from 'src/repositories/SystemRepository'
-import { DataSets } from 'src/resources/DataSets'
-import CustomTextField from 'src/components/Inputs/CustomTextField'
-import { useWindow } from 'src/windows'
-import DataForm from './form/DataForm'
+import Table from 'src/components/Shared/Table'
+import { useContext, useEffect, useState } from 'react'
+import { RequestsContext } from 'src/providers/RequestsContext'
+import { ResourceIds } from 'src/resources/ResourceIds'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Button, Grid } from '@mui/material'
 import { ControlContext } from 'src/providers/ControlContext'
+import { useResourceQuery } from 'src/hooks/resource'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import { SCRepository } from 'src/repositories/SCRepository'
+import FormShell from 'src/components/Shared/FormShell'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import { useForm } from 'src/hooks/form'
+import * as yup from 'yup'
 
-const TrxDetails = () => {
-  const [data, setData] = useState([])
+const PhysicalCountItem = () => {
   const { getRequest } = useContext(RequestsContext)
-  const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
+  const [data, setData] = useState([])
+  const [siteStore, setSiteStore] = useState([])
+  const [filteredItems, setFilteredItems] = useState([])
+  const [editMode, setEditMode] = useState(false)
 
-  const formatDate = date => {
-    const d = date
-    const month = d?.getMonth() + 1
-    const day = d?.getDate()
-    const year = d?.getFullYear()
-
-    return `${month}-${day}-${year}`
-  }
-
-  const fetchData = () => {
-    const formattedstartDate = formatDate(formik.values.startDate)
-    const formattedendDate = formatDate(formik.values.endDate)
-
-    getRequest({
-      extension: SystemRepository.TrxDetails.qry,
-      parameters: `_countryId=${formik.values.countryId}&_moduleId=${formik.values.moduleId || 0}&_resourceId=${
-        formik.values.resourceId || 0
-      }&_userId=${formik.values.userId || 0}&_trxType=${formik.values.trxType || 0}&_data=${
-        formik.values.data || 0
-      }&_startDate=${formattedstartDate}&_endDate=${formattedendDate}`
-    }).then(response => {
-      setData(response)
-    })
-  }
-
-  const { labels, access } = useResourceQuery({
-    datasetId: ResourceIds.TransactionLog
+  const {
+    labels: _labels,
+    refetch,
+    maxAccess
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: SCRepository.StockCountSerialSum.qry,
+    datasetId: ResourceIds.PhysicalCountSerialSummary
   })
-
-  const initialStartDate = new Date()
-  initialStartDate.setHours(0, 0, 0, 0)
 
   const { formik } = useForm({
     initialValues: {
-      countryId: 0,
-      currencyId: '',
-      resourceId: '',
-      data: '',
-      moduleId: '',
-      trxType: '',
-      userId: '',
-      startDate: initialStartDate,
-      endDate: initialStartDate
+      stockCountId: '',
+      siteId: '',
+      totalCostPrice: '',
+      totalWeight: ''
     },
-    access,
+    maxAccess,
     enableReinitialize: true,
-    validateOnChange: true
+    validateOnChange: true,
+    validationSchema: yup.object({
+      stockCountId: yup.string().required(),
+      siteId: yup.string().required()
+    })
   })
+
+  async function fetchGridData() {
+    if (!formik.values.stockCountId || !formik.values.siteId) return
+
+    const res = await getRequest({
+      extension: SCRepository.StockCountSerialSum.qry,
+      parameters: `_stockCountId=${formik.values?.stockCountId}&_siteId=${formik.values?.siteId}`
+    })
+
+    let sumCost = 0
+    let sumWeight = 0
+
+    res.list.map(item => {
+      sumCost += item.currentCost || 0
+      sumWeight += item.weight || 0
+    })
+
+    formik.setFieldValue('totalCostPrice', sumCost)
+    formik.setFieldValue('totalWeight', sumWeight)
+
+    setData(res ?? { list: [] })
+
+    handleClick(res.list)
+  }
+
+  const fillSiteStore = stockCountId => {
+    setSiteStore([])
+    var parameters = `_stockCountId=${stockCountId}`
+    getRequest({
+      extension: SCRepository.Sites.qry,
+      parameters: parameters
+    }).then(res => {
+      setSiteStore(res.list)
+    })
+  }
 
   const columns = [
     {
-      field: 'eventDt',
-      headerName: labels.eventDate,
-      flex: 1,
-      type: 'date'
-    },
-    {
-      field: 'userName',
-      headerName: labels.userName,
+      field: 'sku',
+      headerName: _labels.sku,
       flex: 1
     },
     {
-      field: 'ttName',
-      headerName: labels.ttName,
+      field: 'itemName',
+      headerName: _labels.itemName,
       flex: 1
     },
     {
-      field: 'resourceName',
-      headerName: labels.resourceName,
+      field: 'countedQty',
+      headerName: _labels.qty,
+      flex: 1
+    },
+    {
+      field: 'systemQty',
+      headerName: _labels.system,
+      flex: 1
+    },
+    {
+      field: 'varianceQty',
+      headerName: _labels.variation,
+      flex: 1
+    },
+    {
+      field: 'currentCost',
+      headerName: _labels.costPrice,
+      flex: 1
+    },
+    {
+      field: 'weight',
+      headerName: _labels.weight,
       flex: 1
     }
   ]
 
-  const edit = obj => {
-    openForm(obj)
+  useEffect(() => {
+    ;(async function () {
+      await fetchGridData()
+    })()
+  }, [formik.values.stockCountId, formik.values.siteId])
+
+  const clearGrid = () => {
+    formik.resetForm({
+      values: formik.initialValues
+    })
+
+    setData({ list: [] })
+    setSiteStore([])
+    setFilteredItems([])
+    setEditMode(false)
   }
 
-  function openForm(obj) {
-    stack({
-      Component: DataForm,
-      props: {
-        obj
-      },
-      width: 600,
-      height: 390,
-      expandable: false,
-      title: labels.data
-    })
+  const handleClick = async dataList => {
+    setFilteredItems([])
+
+    const filteredItemsList = dataList
+      .filter(item => item.metalId && item.metalId.toString().trim() !== '')
+      .map(item => ({
+        qty: item.countedQty,
+        metalRef: null,
+        metalId: item.metalId,
+        metalPurity: item.metalPurity,
+        weight: item.weight,
+        priceType: item.priceType
+      }))
+    setFilteredItems(filteredItemsList)
+    setEditMode(dataList.length > 0)
   }
 
   return (
     <FormShell
-      resourceId={ResourceIds.TransactionLog}
       form={formik}
-      maxAccess={access}
-      isCleared={false}
+      isInfo={false}
       isSaved={false}
+      isCleared={false}
       isSavedClear={false}
-      infoVisible={false}
+      maxAccess={maxAccess}
+      resourceId={ResourceIds.PhysicalCountSerialSummary}
+      filteredItems={filteredItems}
+      previewReport={editMode}
     >
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
-            <Grid item xs={9}>
-              <Grid container spacing={2}>
-                <Grid item xs={4}>
-                  <CustomDatePicker
-                    name='startDate'
-                    max={formik.values.endDate}
-                    label={labels.startDate}
-                    value={formik?.values?.startDate}
-                    onChange={formik.setFieldValue}
-                    onClear={() => formik.setFieldValue('startDate', '')}
-                    error={!formik.values.startDate}
-                    maxAccess={access}
-                  />
-                </Grid>
+            <Grid item xs={2}>
+              <ResourceComboBox
+                endpointId={SCRepository.StockCount.qry}
+                parameters={`_startAt=0&_pageSize=1000&_params=`}
+                name='stockCountId'
+                label={_labels.stockCount}
+                valueField='recordId'
+                displayField='reference'
+                values={formik.values}
+                required
+                readOnly={formik.values.siteId}
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('stockCountId', newValue?.recordId)
+                  formik.setFieldValue('siteId', '')
 
-                <Grid item xs={4}>
-                  <ResourceComboBox
-                    datasetId={DataSets.MODULE}
-                    name='moduleId'
-                    label={labels.module}
-                    valueField='key'
-                    displayField='value'
-                    values={formik.values}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('moduleId', newValue?.key)
-                    }}
-                    maxAccess={access}
-                  />
-                </Grid>
-
-                <Grid item xs={4}>
-                  <ResourceComboBox
-                    endpointId={SystemRepository.ModuleClassRES.qry}
-                    parameters={`_moduleId=${formik.values.moduleId || 0}&_filter=`}
-                    label={'ResourceId'}
-                    name='resourceId'
-                    values={formik.values}
-                    readOnly={!formik.values.moduleId}
-                    valueField='key'
-                    displayField='value'
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('resourceId', newValue?.key)
-                    }}
-                    maxAccess={access}
-                  />
-                </Grid>
-
-                <Grid item xs={4}>
-                  <CustomDatePicker
-                    name='endDate'
-                    min={formik.values.startDate}
-                    label={labels.endDate}
-                    value={formik?.values?.endDate}
-                    onChange={formik.setFieldValue}
-                    onClear={() => formik.setFieldValue('endDate', '')}
-                    error={!formik.values.endDate}
-                    maxAccess={access}
-                  />
-                </Grid>
-
-                <Grid item xs={4}>
-                  <CustomTextField
-                    name='data'
-                    label={labels.data}
-                    value={formik.values.data}
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('data', '')}
-                    maxAccess={access}
-                  />
-                </Grid>
-
-                <Grid item xs={4}>
-                  <ResourceComboBox
-                    datasetId={DataSets.TRX_TYPE}
-                    name='trxType'
-                    label={labels.ttype}
-                    valueField='key'
-                    displayField='value'
-                    values={formik.values}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('trxType', newValue?.key)
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={6}>
-                  <Grid container spacing={1} alignItems='center'>
-                    <Grid item xs={10}>
-                      <ResourceLookup
-                        endpointId={SystemRepository.Users.snapshot}
-                        valueField='username'
-                        displayField='email'
-                        name='userId'
-                        label={labels.users}
-                        form={formik}
-                        displayFieldWidth={2}
-                        valueShow='username'
-                        secondValueShow='email'
-                        onChange={(event, newValue) => {
-                          formik.setFieldValue('userId', newValue ? newValue.recordId : '')
-                          formik.setFieldValue('email', newValue ? newValue.email : '')
-                          formik.setFieldValue('username', newValue ? newValue.username : '')
-                        }}
-                      />
-                    </Grid>
-                    <Grid item xs={2}>
-                      <Button
-                        sx={{ width: '20px', height: '35px' }}
-                        variant='contained'
-                        size='small'
-                        onClick={() => {
-                          if (formik.values.startDate && formik.values.endDate) {
-                            fetchData()
-                          }
-                        }}
-                      >
-                        <div className='button-container'>
-                          <img src='/images/buttonsIcons/preview.png' alt={platformLabels.Preview} />
-                        </div>
-                      </Button>
-                    </Grid>
-                  </Grid>
-                </Grid>
-              </Grid>
+                  if (!newValue) {
+                    setSiteStore([])
+                    setFilteredItems([])
+                    clearGrid()
+                  } else {
+                    fillSiteStore(newValue?.recordId)
+                  }
+                }}
+                error={formik.touched.stockCountId && Boolean(formik.errors.stockCountId)}
+              />
+            </Grid>
+            <Grid item xs={2}>
+              <ResourceComboBox
+                name='siteId'
+                store={siteStore}
+                label={_labels.site}
+                valueField='siteId'
+                displayField={['siteRef', 'siteName']}
+                columnsInDropDown={[
+                  { key: 'siteRef', value: 'Reference' },
+                  { key: 'siteName', value: 'Name' }
+                ]}
+                values={formik.values}
+                required
+                readOnly={formik.values.siteId}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('siteId', newValue?.siteId)
+                }}
+                error={formik.touched.siteId && Boolean(formik.errors.siteId)}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={2}>
+              <Button
+                onClick={clearGrid}
+                sx={{
+                  backgroundColor: '#f44336',
+                  '&:hover': {
+                    backgroundColor: '#f44336',
+                    opacity: 0.8
+                  },
+                  ml: 2
+                }}
+                variant='contained'
+              >
+                <img src='/images/buttonsIcons/clear.png' alt={platformLabels.Clear} />
+              </Button>
             </Grid>
           </Grid>
         </Fixed>
         <Grow>
           <Table
             columns={columns}
-            gridData={data}
+            gridData={data ?? { list: [] }}
             rowId={['recordId']}
-            onEdit={edit}
+            setData={setData}
             isLoading={false}
+            paginationType='api'
             pagination={false}
-            maxAccess={access}
-            paginationType='client'
+            maxAccess={maxAccess}
+            textTransform={true}
           />
         </Grow>
+        <Fixed>
+          <Grid container justifyContent='flex-end' spacing={2} sx={{ pt: 5 }}>
+            <Grid item xs={2}>
+              <CustomNumberField
+                name='totalCostPrice'
+                label={_labels.totalCostPrice}
+                value={formik.values.totalCostPrice}
+                readOnly={true}
+                hidden={!(formik.values.stockCountId && formik.values.siteId)}
+              />
+            </Grid>
+            <Grid item xs={2}>
+              <CustomNumberField
+                name='totalWeight'
+                label={_labels.totalWeight}
+                value={formik.values.totalWeight}
+                readOnly={true}
+                hidden={!(formik.values.stockCountId && formik.values.siteId)}
+              />
+            </Grid>
+          </Grid>
+        </Fixed>
       </VertLayout>
     </FormShell>
   )
 }
 
-export default TrxDetails
+export default PhysicalCountItem
