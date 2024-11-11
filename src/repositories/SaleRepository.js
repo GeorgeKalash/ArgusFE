@@ -181,6 +181,7 @@ export const SaleRepository = {
   Contact: {
     contact: service + 'qryContact'
   },
+  FlagTR: service + 'flagTR',
   PrintedSA: {
     printed: service + 'flagORD'
   },
