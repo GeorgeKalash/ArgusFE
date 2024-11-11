@@ -41,7 +41,20 @@ export function WindowProvider({ children }) {
     <WindowContext.Provider value={{ stack: addToStack }}>
       {children}
       {stack.map(
-        ({ id, Component, title, width = 800, props, onClose, closable, expandable, draggable, height, styles }) => (
+        ({
+          id,
+          Component,
+          title,
+          nextToTitle,
+          width = 800,
+          props,
+          onClose,
+          closable,
+          expandable,
+          draggable,
+          height,
+          styles
+        }) => (
           <ClearContext.Provider
             key={rerenderFlag}
             value={{
@@ -51,6 +64,7 @@ export function WindowProvider({ children }) {
                 if (Object.keys(currentValue).length) {
                   closeWindow()
                   currentValue.props.recordId = null
+                  currentValue.nextTo = ''
                   addToStack(currentValue)
                 } else {
                   setRerenderFlag(!rerenderFlag)
@@ -62,6 +76,7 @@ export function WindowProvider({ children }) {
               key={id}
               sx={{ display: 'flex !important', flex: '1' }}
               Title={title}
+              nextToTitle={nextToTitle}
               controlled={true}
               onClose={() => {
                 closeWindow()
