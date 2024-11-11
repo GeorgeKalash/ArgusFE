@@ -131,7 +131,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
         itemName: '',
         seqNo: 1,
         siteId: '',
-        muId: '',
+        muId: null,
         qty: 0,
         volume: 0,
         weight: 0,
@@ -139,7 +139,6 @@ export default function SaleTransactionForm({ labels, access, recordId, function
         metalId: null,
         metalPurity: 0,
         msId: 0,
-        muId: 0,
         muRef: '',
         muQty: 0,
         baseQty: 0,
@@ -358,7 +357,8 @@ export default function SaleTransactionForm({ labels, access, recordId, function
         mapping: [
           { from: 'recordId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
-          { from: 'name', to: 'itemName' }
+          { from: 'name', to: 'itemName' },
+          { from: 'msId', to: 'msId' }
         ],
         columnsInDropDown: [
           { key: 'sku', value: 'SKU' },
@@ -506,21 +506,16 @@ export default function SaleTransactionForm({ labels, access, recordId, function
           { from: 'recordId', to: 'muId' }
         ]
       },
-
-      // propsReducer({ row, props }) {
-      //   return { ...props, store: filters[row.itemId]?.list ?? [] }
-      // },
       async onChange({ row: { update, newRow } }) {
-        try {
-          if (newRow) {
-            const qtyInBase = newRow?.qty * newRow?.muQty
+        if (newRow) {
+          const filteredItems = filteredMu.filter(item => item.recordId === newRow?.muId)
+          const qtyInBase = newRow?.qty * filteredItems?.muQty
 
-            update({
-              qtyInBase,
-              muQty: newRow?.muQty
-            })
-          }
-        } catch (exception) {}
+          update({
+            qtyInBase,
+            muQty: newRow?.muQty
+          })
+        }
       }
     },
     {
