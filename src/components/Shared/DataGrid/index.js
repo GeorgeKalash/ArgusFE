@@ -38,8 +38,6 @@ export function DataGrid({
     const updateRowCommit = changes => {
       setData(changes, params)
       commit({ changes: { ...params.node.data, changes } })
-      // gridApiRef.current.redrawRows({ rowNodes: [changes.id] }) // replace `updatedData.id` with the correct ID
-      gridApiRef.current.applyTransaction({ update: [{ ...params.node.data, changes }] })
     }
 
     if (column.onChange) {
@@ -313,6 +311,7 @@ export function DataGrid({
 
   const CustomCellEditor = params => {
     const { column, data, maxAccess } = params
+    const [currentValue, setCurrentValue] = useState(params?.node?.data) // Capture current data state
 
     const Component =
       typeof column?.colDef?.component === 'string'
@@ -334,6 +333,8 @@ export function DataGrid({
         [field]: value || undefined
       }
 
+      setCurrentValue(changes)
+
       setData(changes, params)
 
       console.log('column.colDef?.props?.jumpToNextLine', column.colDef?.props?.jumpToNextLine)
@@ -346,6 +347,8 @@ export function DataGrid({
     const updateRow = ({ changes }) => {
       const oldRow = params.data
 
+      setCurrentValue(changes || '')
+
       setData(changes, params)
 
       if (column.colDef.updateOn !== 'blur') {
@@ -357,7 +360,6 @@ export function DataGrid({
 
     const comp = column.colDef.component
 
-    console.log(gridApiRef.current.getRowNode(params.node.data.id).data)
     return (
       <Box
         sx={{
@@ -372,7 +374,7 @@ export function DataGrid({
         <Component
           id={params.node.data.id}
           {...params}
-          value={gridApiRef.current.getRowNode(params.node.data.id).data}
+          value={currentValue}
           column={{
             ...column.colDef,
             props: column.propsReducer ? column?.propsReducer({ data, props }) : props
@@ -441,7 +443,7 @@ export function DataGrid({
     const allRowNodes = []
     gridApiRef.current.forEachNode(node => allRowNodes.push(node.data))
     const updatedGridData = allRowNodes.map(row => (row.id === data?.id ? data : row))
-
+    console.log(updatedGridData)
     onChange(updatedGridData)
   }
 
@@ -536,8 +538,7 @@ export function DataGrid({
 
       const newData = { ...currentData, ...changes }
 
-      // rowNode.updateData(newData)
-      gridApiRef.current.applyTransaction({ update: [newData] })
+      rowNode.updateData(newData)
     }
   }
 
