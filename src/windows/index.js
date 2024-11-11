@@ -64,7 +64,7 @@ export function WindowProvider({ children }) {
                 if (Object.keys(currentValue).length) {
                   closeWindow()
                   currentValue.props.recordId = null
-                  currentValue.nextTo = ''
+                  currentValue.nextToTitle = ''
                   addToStack(currentValue)
                 } else {
                   setRerenderFlag(!rerenderFlag)
