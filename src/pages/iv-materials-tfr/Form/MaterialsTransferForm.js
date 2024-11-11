@@ -96,8 +96,6 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
   async function getDefaultFromSiteId() {
     const defaultFromSiteId = userDefaultsData?.list?.find(({ key }) => key === 'siteId')
     formik.setFieldValue('fromSiteId', parseInt(defaultFromSiteId?.value))
-
-    console.log(defaultFromSiteId)
   }
 
   const { formik } = useForm({
@@ -518,7 +516,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     copy.closedDate = !!copy.closedDate ? formatDateToApi(copy.closedDate) : null
     copy.receivedDate = !!copy.receivedDate ? formatDateToApi(copy.receivedDate) : null
 
-    const res = await postRequest({
+    await postRequest({
       extension: InventoryRepository.MaterialsTransfer.post,
       record: JSON.stringify(copy)
     })
@@ -585,9 +583,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     {
       key: 'Close',
       condition: !isClosed,
-      onClick: () => {
-        onClose(formik.values.recordId)
-      },
+      onClick: () => onClose(formik.values.recordId),
       disabled: isClosed || !editMode || isPosted
     },
     {
