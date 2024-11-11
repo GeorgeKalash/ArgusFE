@@ -63,11 +63,13 @@ const OutwardsCorrespondent = () => {
     },
     {
       field: 'fcAmount',
-      headerName: labels.fcAmount
+      headerName: labels.fcAmount,
+      type: 'number'
     },
     {
       field: 'amount',
-      headerName: labels.amount
+      headerName: labels.amount,
+      type: 'number'
     }
   ]
 
