@@ -89,7 +89,6 @@ const MenuProvider = ({ children }) => {
   }
 
   const handleBookmark = (item, isBookmarked, callBack = undefined) => {
-    //TEMP userData later replace with userProvider
     const userData = window.localStorage.getItem('userData')
       ? window.localStorage.getItem('userData')
       : window.sessionStorage.getItem('userData')
