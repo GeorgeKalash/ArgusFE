@@ -93,6 +93,11 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
   const [fId, setFId] = useState(SystemFunction.CurrencyPurchase)
   const { platformLabels } = useContext(ControlContext)
 
+  const resetAutoFilled = () => {
+    setIDInfoAutoFilled(false)
+    setInfoAutoFilled(false)
+  }
+
   async function checkTypes(value) {
     if (!value) {
       formik.setFieldValue('id_type', '')
@@ -149,7 +154,6 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     birthDate: null,
     resident: false,
     professionId: null,
-    source_of_income: null,
     sponsorName: null,
     idNo: null,
     id_type: null,
@@ -182,36 +186,36 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     validateOnChange: true,
     validateOnBlur: true,
     validationSchema: yup.object({
-      date: yup.string().required(' '),
-      id_type: yup.number().required(' '),
-      idNo: yup.number().required(' '),
-      birthDate: yup.string().required(' '),
-      firstName: yup.string().required(' '),
-      lastName: yup.string().required(' '),
-      expiryDate: yup.string().required(' '),
-      nationalityId: yup.string().required(' '),
-      cellPhone: yup.string().required(' '),
-      professionId: yup.string().required(' '),
+      date: yup.string().required(),
+      id_type: yup.number().required(),
+      idNo: yup.number().required(),
+      birthDate: yup.string().required(),
+      firstName: yup.string().required(),
+      lastName: yup.string().required(),
+      expiryDate: yup.string().required(),
+      nationalityId: yup.string().required(),
+      cellPhone: yup.string().required(),
+      professionId: yup.string().required(),
       operations: yup
         .array()
         .of(
           yup.object().shape({
-            currencyId: yup.string().required(' '),
-            exRate: yup.string().nullable().required(' '),
-            fcAmount: yup.number().required(' '),
-            lcAmount: yup.number().required(' ')
+            currencyId: yup.string().required(),
+            exRate: yup.string().nullable().required(),
+            fcAmount: yup.number().required(),
+            lcAmount: yup.number().required()
           })
         )
-        .required(' '),
+        .required(),
       amount: yup
         .array()
         .of(
           yup.object().shape({
-            type: yup.string().required(' '),
-            amount: yup.number().nullable().required(' ')
+            type: yup.string().required(),
+            amount: yup.number().nullable().required()
           })
         )
-        .required(' ')
+        .required()
     }),
     onSubmit: async values => {
       try {
@@ -297,7 +301,6 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
               fl_familyName: values.fl_familyName,
               birthDate: formatDateToApi(values.birthDate),
               isResident: values.resident,
-              incomeSourceId: values.source_of_income,
               sponsorName: values.sponsorName
             },
             clientID: {
@@ -493,7 +496,6 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       formik.setFieldValue('birthDate', formatDateFromApi(record?.clientIndividual?.birthDate))
       formik.setFieldValue('resident', record?.clientIndividual?.isResident)
       formik.setFieldValue('professionId', record?.clientIndividual?.professionId)
-      formik.setFieldValue('source_of_income', record?.clientIndividual?.incomeSourceId)
       formik.setFieldValue('sponsorName', record?.clientIndividual?.sponsorName)
       formik.setFieldValue('idNo', record.clientIDView.idNo)
       formik.setFieldValue('id_type', record.clientIDView.idtId)
@@ -619,7 +621,6 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
         formik.setFieldValue('resident', clientInfo.isResident)
         formik.setFieldValue('professionId', clientInfo.professionId)
         formik.setFieldValue('sponsorName', clientInfo.sponsorName)
-        formik.setFieldValue('source_of_income', clientInfo.incomeSourceId)
 
         setInfoAutoFilled(true)
       }
@@ -718,7 +719,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       actions={actions}
       form={formik}
       initialValues={initialValues}
-      setIDInfoAutoFilled={setIDInfoAutoFilled}
+      setIDInfoAutoFilled={resetAutoFilled}
       resourceId={ResourceIds.CashInvoice}
       editMode={editMode}
       isClosed={isClosed}
@@ -815,7 +816,6 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                                 formik.setFieldValue('resident', info.clientIndividual.isResident)
                                 formik.setFieldValue('professionId', info.clientMaster.professionId)
                                 formik.setFieldValue('sponsorName', info.clientIndividual.sponsorName)
-                                formik.setFieldValue('source_of_income', info.clientIndividual.incomeSourceId)
                                 formik.setFieldValue('id_type', info.clientIDView.idtId)
                                 formik.setFieldValue('nationalityId', info.clientMaster.nationalityId)
                                 formik.setFieldValue('cellPhone', info.clientMaster.cellPhone)
