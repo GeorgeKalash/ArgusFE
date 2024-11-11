@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import axios from 'axios'
 import jwt from 'jwt-decode'
 import { AuthContext } from 'src/providers/AuthContext'
@@ -34,6 +34,22 @@ const RequestsProvider = ({ showLoading = false, children }) => {
   const errorModel = useError()
   const [loading, setLoading] = useState(false)
 
+  const requestCounter = useRef(0)
+  const [allRequestsComplete, setAllRequestsComplete] = useState(true)
+
+  const incrementCounter = () => {
+    requestCounter.current += 1
+    setAllRequestsComplete(false)
+  }
+
+  const decrementCounter = () => {
+    requestCounter.current -= 1
+    if (requestCounter.current === 0) {
+      setTimeout(() => {
+        setAllRequestsComplete(true)
+      }, 100)
+    }
+  }
   let isRefreshingToken = false
   let tokenRefreshQueue = []
 
@@ -49,7 +65,7 @@ const RequestsProvider = ({ showLoading = false, children }) => {
     const accessToken = await getAccessToken()
     const disableLoading = body.disableLoading || false
     !disableLoading && !loading && setLoading(true)
-
+    incrementCounter()
     const throwError = body.throwError || false
 
     return new Promise(async (resolve, reject) => {
@@ -64,9 +80,11 @@ const RequestsProvider = ({ showLoading = false, children }) => {
       })
         .then(response => {
           if (!disableLoading) debouncedCloseLoading()
+          decrementCounter()
           resolve(response.data)
         })
         .catch(error => {
+          decrementCounter()
           debouncedCloseLoading()
           showError({
             message: error,
@@ -255,13 +273,14 @@ const RequestsProvider = ({ showLoading = false, children }) => {
     getRequest,
     postRequest,
     getIdentityRequest,
-    getMicroRequest
+    getMicroRequest,
+    loading: allRequestsComplete
   }
 
   return (
     <>
       <RequestsContext.Provider value={values}>{children}</RequestsContext.Provider>
-      {showLoading && loading && <LoadingOverlay />}
+      {/* {showLoading && loading && <LoadingOverlay />} */}
     </>
   )
 }

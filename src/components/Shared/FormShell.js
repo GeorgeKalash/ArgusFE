@@ -1,4 +1,4 @@
-import { DialogContent } from '@mui/material'
+import { Box, CircularProgress, DialogContent } from '@mui/material'
 import { useContext, useState } from 'react'
 import WindowToolbar from './WindowToolbar'
 import TransactionLog from './TransactionLog'
@@ -20,6 +20,7 @@ import { ClientRelationForm } from './ClientRelationForm'
 import { ClientBalance } from './ClientBalance'
 import InventoryTransaction from './InventoryTransaction'
 import SalesTrxForm from './SalesTrxForm'
+import { RequestsContext } from 'src/providers/RequestsContext'
 
 export default function FormShell({
   form,
@@ -149,12 +150,14 @@ export default function FormShell({
     }
     handleReset()
   }
+  const { loading } = useContext(RequestsContext)
 
   return (
     <>
       <DialogContent
         sx={{
           display: 'flex !important',
+          position: 'relative',
           flex: 1,
           flexDirection: 'column',
           overflow: 'auto',
@@ -164,6 +167,24 @@ export default function FormShell({
           }
         }}
       >
+        {!loading && editMode && (
+          <Box
+            style={{
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              left: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(250, 250, 250, 1)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 9999
+            }}
+          >
+            <CircularProgress color='inherit' />
+          </Box>
+        )}
         {children}
       </DialogContent>
       {windowToolbarVisible && (
