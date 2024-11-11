@@ -75,7 +75,7 @@ const SalesInquiries = () => {
     },
     {
       field: 'saleZoneName',
-      headerName: _labels.saleZoneName,
+      headerName: _labels.saleZone,
       flex: 1,
     },
     {
@@ -85,7 +85,7 @@ const SalesInquiries = () => {
     },
     {
       field: 'categoryName', 
-      headerName: _labels.categoryName,
+      headerName: _labels.category,
       flex: 1,
     },
     {
