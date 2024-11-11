@@ -9,7 +9,7 @@ export default function ConfirmationOnSubmit({ formik, labels, window }) {
     enableReinitialize: false,
     validateOnChange: true,
     initialValues: {
-      idNo: formik.values.id_number,
+      idNo: formik.values.idNo,
       cellPhone: formik.values.cellPhone,
       idNoRepeat: '',
       cellPhoneRepeat: ''

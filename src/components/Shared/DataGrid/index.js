@@ -122,20 +122,26 @@ export function DataGrid({
   )
 
   const findNextEditableColumn = (columnIndex, rowIndex, direction) => {
-    const limit = direction > 0 ? allColumns.length : -1;
-    const step = direction > 0 ? 1 : -1;
+    const limit = direction > 0 ? allColumns.length : -1
+    const step = direction > 0 ? 1 : -1
     for (let i = columnIndex + step; i !== limit; i += step) {
-      if (!allColumns?.[i]?.props?.readOnly && accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) !== DISABLED) {
-        return { columnIndex: i, rowIndex };
+      if (
+        !allColumns?.[i]?.props?.readOnly &&
+        accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) !== DISABLED
+      ) {
+        return { columnIndex: i, rowIndex }
       }
     }
 
     for (let i = direction > 0 ? 0 : allColumns.length - 1; i !== limit; i += step) {
-      if (!allColumns?.[i]?.props?.readOnly && accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) !== DISABLED) {
+      if (
+        !allColumns?.[i]?.props?.readOnly &&
+        accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) !== DISABLED
+      ) {
         return {
           columnIndex: i,
           rowIndex: rowIndex + direction
-        };
+        }
       }
     }
   }
@@ -195,13 +201,13 @@ export function DataGrid({
 
     const columns = gridApiRef.current.getColumnDefs()
     if (!event.shiftKey) {
-      const skipReadOnlyTab = (columnIndex, rowIndex) => findNextEditableColumn(columnIndex, rowIndex, 1);
+      const skipReadOnlyTab = (columnIndex, rowIndex) => findNextEditableColumn(columnIndex, rowIndex, 1)
       const { columnIndex, rowIndex } = skipReadOnlyTab(nextCell.columnIndex, nextCell.rowIndex)
 
       nextCell.columnIndex = columnIndex
       nextCell.rowIndex = rowIndex
     } else {
-      const skipReadOnlyShiftTab = (columnIndex, rowIndex) => findNextEditableColumn(columnIndex, rowIndex, -1);
+      const skipReadOnlyShiftTab = (columnIndex, rowIndex) => findNextEditableColumn(columnIndex, rowIndex, -1)
       const { columnIndex, rowIndex } = skipReadOnlyShiftTab(nextCell.columnIndex, nextCell.rowIndex)
 
       nextCell.columnIndex = columnIndex
@@ -256,7 +262,7 @@ export function DataGrid({
         sx={{
           width: '100%',
           height: '100%',
-          padding: '0 1000px',
+          padding: '0 0px',
           display: 'flex',
           justifyContent:
             (column.colDef.component === 'checkbox' ||
