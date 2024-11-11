@@ -158,7 +158,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
 
       if (!values.recordId) {
         toast.success(platformLabels.Added)
-        formik.setValues(res.recordId)
+        formik.setFieldValue('recordId', res.recordId)
 
         const res2 = await getRequest({
           extension: InventoryRepository.MaterialsTransfer.get,
@@ -262,20 +262,27 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     return rec.unitCost
   }
 
-  const { totalQty, totalCost, totalWeight } = formik?.values?.transfers?.reduce(
-    (acc, row) => {
-      const qtyValue = parseFloat(row?.qty) || 0
-      const totalCostValue = parseFloat(row?.totalCost) || 0
-      const weightValue = parseFloat(row?.weight) || 0
+  console.log(formik?.values?.transfers)
 
-      return {
-        totalQty: acc.totalQty + qtyValue,
-        totalCost: acc.totalCost + totalCostValue,
-        totalWeight: acc.totalWeight + weightValue
-      }
-    },
-    { totalQty: 0, totalCost: 0, totalWeight: 0 }
-  )
+  const { totalQty, totalCost, totalWeight } = formik?.values?.transfers?.reduce(
+      (acc, row) => {
+        const qtyValue = parseFloat(row?.qty) || 0;
+        const totalCostValue = parseFloat(row?.totalCost) || 0;
+        const weightValue = parseFloat(row?.weight) || 0;
+
+        return {
+          totalQty: acc?.totalQty + qtyValue,
+          totalCost: acc?.totalCost + totalCostValue,
+          totalWeight: acc?.totalWeight + weightValue
+        };
+      },
+      { totalQty: 0, totalCost: 0, totalWeight: 0 }
+    ); // Default values if transfers is not an array
+
+console.log("Total Qty:", totalQty);
+console.log("Total Cost:", totalCost);
+console.log("Total Weight:", totalWeight);
+
 
   const getMeasurementUnits = async () => {
     return await getRequest({
@@ -619,29 +626,41 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
   }, [documentType?.dtId])
 
   useEffect(() => {
-    ;(async function () {
+    (async function () {
       const muList = await getMeasurementUnits()
       setMeasurements(muList?.list)
       getDefaultFromSiteId()
-
-      if (recordId) {
+    })()
+  }, [])
+  
+  useEffect(() => {
+    if (recordId && measurements) { 
+      ;(async function () {
         const res = await getData(recordId)
         const resNotification = await getNotificationData(recordId)
         const res3 = await getDataGrid(recordId)
-
-        formik.setValues({
-          ...res.record,
-          transfers: res3.list.map(item => ({
+  
+        const updatedTransfers = res3.list.map(item => {
+          const filteredMeasurements = measurements.filter(x => x.msId === item?.msId)
+          setFilteredMU(filteredMeasurements) 
+  
+          return ({
             ...item,
             id: item.seqNo,
             totalCost: calcTotalCost(item),
-            unitCost: item.unitCost ?? 0
-          })),
-          notificationGroupId: resNotification?.record?.notificationGroupId
+            unitCost: item.unitCost ?? 0,
+          })
         })
-      }
-    })()
-  }, [])
+  
+        formik.setValues({
+          ...res.record,
+          transfers: updatedTransfers,
+          notificationGroupId: resNotification?.record?.notificationGroupId,
+        })
+      })()
+    }
+  }, [recordId, measurements])
+  
 
   return (
     <FormShell
@@ -835,7 +854,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
             </Grid>
           </Grid>
           <DataGrid
-            onChange={value => formik.setFieldValue('transfers', value)}
+            onChange={value => formik?.setFieldValue('transfers', value)}
             name='items'
             maxAccess={maxAccess}
             value={formik?.values?.transfers || []}
