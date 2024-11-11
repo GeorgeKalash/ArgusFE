@@ -3,7 +3,7 @@ export const getButtons = platformLabels => [
     key: 'Post',
     label: platformLabels.Post,
     color: '#231f20',
-    image: 'lock.png',
+    image: 'post.png',
     main: false
   },
   {
