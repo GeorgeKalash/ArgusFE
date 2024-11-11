@@ -13,6 +13,7 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import SerialForm from './SerialForm'
 import LotForm from './LotForm'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 const AvailabilityList = ({ obj, labels, access }) => {
   const { getRequest } = useContext(RequestsContext)
@@ -122,7 +123,7 @@ const AvailabilityList = ({ obj, labels, access }) => {
             <CustomTextField label={labels.name} value={obj.name} readOnly />
           </Grid>
           <Grid item xs={7}>
-            <CustomTextField label={labels.onHand} value={obj.qty} readOnly />
+            <CustomNumberField label={labels.onHand} value={obj.qty} readOnly />
           </Grid>
         </Grid>
       </Fixed>

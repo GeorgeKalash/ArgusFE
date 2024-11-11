@@ -60,39 +60,46 @@ const AvailabilitiesBySite = () => {
     {
       field: 'unitCost',
       headerName: labels.unitCost,
-      flex: 1
+      flex: 1,
+      type: 'number'
     },
     {
       field: 'unitPrice',
       headerName: labels.unitPrice,
-      flex: 1
+      flex: 1,
+      type: 'number'
     },
 
     {
       field: 'qty',
       headerName: labels.qty,
-      flex: 1
+      flex: 1,
+      type: 'number'
     },
     ,
     {
       field: 'netWeight',
       headerName: labels.netWeight,
-      flex: 1
+      flex: 1,
+      type: 'number'
     },
     {
       field: 'netVolume',
       headerName: labels.netVolume,
-      flex: 1
+      flex: 1,
+      type: 'number'
     },
     {
       field: 'netCost',
       headerName: labels.netCost,
-      flex: 1
+      flex: 1,
+      type: 'number'
     },
     {
       field: 'netPrice',
       headerName: labels.netPrice,
-      flex: 1
+      flex: 1,
+      type: 'number'
     }
   ]
 
