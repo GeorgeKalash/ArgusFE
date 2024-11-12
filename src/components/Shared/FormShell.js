@@ -47,7 +47,6 @@ export default function FormShell({
   setErrorMessage,
   previewReport = false,
   previewBtnClicked = () => {},
-  onUnpost,
   setIDInfoAutoFilled,
   visibleClear,
   actions,
@@ -152,13 +151,11 @@ export default function FormShell({
     handleReset()
   }
 
-  function onUnpostConfirmation() {
+  function onUnpostConfirmation(props) {
     stack({
       Component: StrictUnpostConfirmation,
       props: {
-        action() {
-          onUnpost()
-        }
+        ...props
       },
       width: 500,
       height: 300,

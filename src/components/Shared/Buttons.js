@@ -377,4 +377,18 @@ export const getButtons = platformLabels => [
     image: 'exchange-refresh-icon.png',
     main: false
   },
+  {
+    key: 'Locked',
+    label: platformLabels.Locked,
+    color: '#231f20',
+    image: 'lock.png',
+    main: false
+  },
+  {
+    key: 'Unlocked',
+    label: platformLabels.Unlocked,
+    color: '#231f20',
+    image: 'unlock.png',
+    main: false
+  },
 ]

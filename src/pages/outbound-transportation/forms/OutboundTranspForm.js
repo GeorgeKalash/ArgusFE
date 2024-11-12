@@ -293,13 +293,14 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
 
   const actions = [
     {
-      key: 'Post',
+      key: 'Locked',
       condition: isPosted,
       onClick: 'onUnpostConfirmation',
+      action: onUnpost,
       disabled: !editMode || !isClosed
     },
     {
-      key: 'Unpost',
+      key: 'Unlocked',
       condition: !isPosted,
       onClick: onPost,
       disabled: !editMode || !isClosed
