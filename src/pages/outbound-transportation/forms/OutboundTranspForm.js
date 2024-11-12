@@ -302,7 +302,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
       key: 'Unpost',
       condition: !isPosted,
       onClick: onPost,
-      disabled: false
+      disabled: !editMode || !isClosed
     },
     {
       key: 'Close',
