@@ -407,7 +407,6 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
       editMode={editMode}
       actions={actions}
       previewBtnClicked={previewBtnClicked}
-      onUnpost={onUnpost}
       functionId={SystemFunction.DeliveryTrip}
       disabledSubmit={isPosted || isClosed}
       previewReport={editMode}
