@@ -22,10 +22,13 @@ import { DataGrid } from 'src/components/Shared/DataGrid'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import StrictUnpostConfirmation from 'src/components/Shared/StrictUnpostConfirmation'
+import { useWindow } from 'src/windows'
 
 export default function ProductionSheetForm({ labels, maxAccess: access, recordId, plantId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { stack } = useWindow()
 
   const invalidate = useInvalidate({
     endpointId: ManufacturingRepository.ProductionSheet.qry
@@ -163,12 +166,45 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
   const editMode = !!formik.values.recordId
   const isPosted = formik.values.status === 3
 
+  const onUnpost = async () => {
+    const copy = { ...formik.values }
+    delete copy.items
+
+    const res = await postRequest({
+      extension: ManufacturingRepository.ProductionSheet.unpost,
+      record: JSON.stringify(copy)
+    })
+
+    toast.success(platformLabels.Unposted)
+    invalidate()
+
+    const res2 = await getData(res?.recordId)
+
+    const res3 = await getDataGrid()
+
+    formik.setValues({
+      ...res2.record,
+      items: res3.list.map(item => ({
+        ...item,
+        id: item.seqNo,
+        orderedQty: item.orderedQty ?? 0
+      })),
+      date: !!res2?.record?.date ? formatDateFromApi(res2?.record?.date) : null
+    })
+  }
+
   const actions = [
     {
       key: 'Post',
-      condition: true,
+      condition: isPosted,
+      onClick: () => openUnpostConfirmation(formik.values),
+      disabled: !editMode
+    },
+    {
+      key: 'Unpost',
+      condition: !isPosted,
       onClick: onPost,
-      disabled: !editMode || isPosted
+      disabled: !editMode
     },
     {
       key: 'IV',
@@ -177,6 +213,21 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
       disabled: !editMode || !isPosted
     }
   ]
+
+  function openUnpostConfirmation(obj) {
+    stack({
+      Component: StrictUnpostConfirmation,
+      props: {
+        action() {
+          onUnpost(obj)
+        }
+      },
+      width: 500,
+      height: 300,
+      expandable: false,
+      title: platformLabels.UnpostConfirmation
+    })
+  }
 
   const columns = [
     {
