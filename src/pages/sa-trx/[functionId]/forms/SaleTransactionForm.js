@@ -772,16 +772,22 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       ? setCycleButtonState({ text: '123', value: 1 })
       : setCycleButtonState({ text: '%', value: 2 })
 
-    const modifiedList = saTrxItems?.map((item, index) => ({
-      ...item,
-      id: index + 1,
-      basePrice: parseFloat(item.basePrice).toFixed(5),
-      unitPrice: parseFloat(item.unitPrice).toFixed(3),
-      upo: parseFloat(item.upo).toFixed(2),
-      vatAmount: parseFloat(item.vatAmount).toFixed(2),
-      extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
-      saTrx: true
-    }))
+    const modifiedList = saTrxItems?.map((item, index) => {
+      const filteredMeasurements = measurements.filter(x => x.msId === item?.msId)
+      setFilteredMU(filteredMeasurements)
+
+      return {
+        ...item,
+        id: index + 1,
+        basePrice: parseFloat(item.basePrice).toFixed(5),
+        unitPrice: parseFloat(item.unitPrice).toFixed(3),
+        upo: parseFloat(item.upo).toFixed(2),
+        vatAmount: parseFloat(item.vatAmount).toFixed(2),
+        extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
+        saTrx: true
+      }
+    })
+
     formik.setValues({
       recordId: recordId || null,
       ...formik.values,
@@ -831,9 +837,6 @@ export default function SaleTransactionForm({ labels, access, recordId, function
   }
 
   async function fillMetalPrice(baseMetalCuId) {
-    //get currencyId from SY.getDE? key = baseMetalCuId
-    //if a null value is returned, you stop here
-
     if (baseMetalCuId) {
       const res = await getRequest({
         extension: MultiCurrencyRepository.Currency.get,
@@ -965,7 +968,6 @@ export default function SaleTransactionForm({ labels, access, recordId, function
   }
 
   async function getItemConvertPrice2(row, header) {
-    // getICP2(string _barcode, int _clientId, int _currencyId, int _plId, double _exRate, double _rateCalcMethod)
     const res = await getRequest({
       extension: SaleRepository.ItemConvertPrice.get2,
       parameters: `_barcode=${row?.barcode}&_clientId=${header.clientId}&_currencyId=${header.currencyId}&_plId=${header.plId}&_exRate=${header.exRate}&_rateCalcMethod=${header.rateCalcMethod}`
@@ -1109,7 +1111,6 @@ export default function SaleTransactionForm({ labels, access, recordId, function
     formik.setFieldValue('header.tdType', _discountObj?.tdType)
     formik.setFieldValue('header.currentDiscount', _discountObj?.currentDiscount || 0)
     formik.setFieldValue('header.tdPct', _discountObj?.hiddenTdPct)
-    formik.setFieldValue('header.tdAmount', _discountObj?.hiddenTdAmount?.toFixed(2))
   }
 
   function recalcNewVat(tdPct) {
@@ -1258,7 +1259,22 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       const muList = await getMeasurementUnits()
       setMeasurements(muList?.list)
       setMetalPriceOperations()
-      if (recordId) {
+      if (!recordId && defaultSalesTD) {
+        setCycleButtonState({ text: '%', value: DIRTYFIELD_TDPCT })
+        formik.setFieldValue('header.tdType', 2)
+      } else {
+        setCycleButtonState({ text: '123', value: 1 })
+        formik.setFieldValue('header.tdType', 1)
+      }
+
+      getDefaultsData()
+      getUserDefaultsData()
+    })()
+  }, [])
+
+  useEffect(() => {
+    ;(async function () {
+      if (recordId && measurements) {
         const transactionPack = await getSalesTransactionPack(recordId)
         await fillForm(recordId, transactionPack)
         if (transactionPack.header.tdType === DIRTYFIELD_TDPCT) {
@@ -1270,20 +1286,9 @@ export default function SaleTransactionForm({ labels, access, recordId, function
           formik.setFieldValue('header.tdAmount', transactionPack.header.tdAmount)
           formik.setFieldValue('header.currentDiscount', transactionPack.header.tdAmount)
         }
-      } else {
-        if (defaultSalesTD) {
-          setCycleButtonState({ text: '%', value: DIRTYFIELD_TDPCT })
-          formik.setFieldValue('header.tdType', 2)
-        } else {
-          setCycleButtonState({ text: '123', value: 1 })
-          formik.setFieldValue('header.tdType', 1)
-        }
-
-        getDefaultsData()
-        getUserDefaultsData()
       }
     })()
-  }, [])
+  }, [recordId, measurements])
 
   useEffect(() => {
     defaultsDataState && setDefaultFields()
