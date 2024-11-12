@@ -20,6 +20,7 @@ import { ClientRelationForm } from './ClientRelationForm'
 import { ClientBalance } from './ClientBalance'
 import InventoryTransaction from './InventoryTransaction'
 import SalesTrxForm from './SalesTrxForm'
+import StrictUnpostConfirmation from './StrictUnpostConfirmation'
 
 export default function FormShell({
   form,
@@ -46,6 +47,7 @@ export default function FormShell({
   setErrorMessage,
   previewReport = false,
   previewBtnClicked = () => {},
+  onUnpost,
   setIDInfoAutoFilled,
   visibleClear,
   actions,
@@ -148,6 +150,21 @@ export default function FormShell({
       await open()
     }
     handleReset()
+  }
+
+  function onUnpostConfirmation() {
+    stack({
+      Component: StrictUnpostConfirmation,
+      props: {
+        action() {
+          onUnpost()
+        }
+      },
+      width: 500,
+      height: 300,
+      expandable: false,
+      title: platformLabels.UnpostConfirmation
+    })
   }
 
   return (
@@ -334,6 +351,7 @@ export default function FormShell({
               expandable: false
             })
           }
+          onUnpostConfirmation={onUnpostConfirmation}
           isSaved={isSaved}
           isSavedClear={isSavedClearVisible}
           onGenerate={onGenerate}

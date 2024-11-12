@@ -197,7 +197,7 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
     {
       key: 'Post',
       condition: isPosted,
-      onClick: () => openUnpostConfirmation(formik.values),
+      onClick: 'onUnpostConfirmation',
       disabled: !editMode
     },
     {
@@ -214,20 +214,6 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
     }
   ]
 
-  function openUnpostConfirmation(obj) {
-    stack({
-      Component: StrictUnpostConfirmation,
-      props: {
-        action() {
-          onUnpost(obj)
-        }
-      },
-      width: 500,
-      height: 300,
-      expandable: false,
-      title: platformLabels.UnpostConfirmation
-    })
-  }
 
   const columns = [
     {
@@ -322,6 +308,7 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
       maxAccess={maxAccess}
       editMode={editMode}
       disabledSubmit={isPosted}
+      onUnpost={onUnpost}
       functionId={SystemFunction.ProductionSheet}
     >
       <VertLayout>
