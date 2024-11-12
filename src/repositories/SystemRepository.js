@@ -229,5 +229,12 @@ export const SystemRepository = {
   PlantsSchedule: {
     set2: service + 'set2PLS',
     qry: service + 'qryPLS'
+  },
+  FormattedAddress: {
+    get: service + 'formattedADD'
+  },
+  TrxDetails: {
+    qry2: service + 'qryTL2',
+    get: service + 'getTL'
   }
 }

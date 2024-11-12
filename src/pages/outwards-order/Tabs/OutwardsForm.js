@@ -772,11 +772,6 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                   valueField='key'
                   displayField='value'
                   values={formik.values}
-                  onClear={() => formik.setFieldValue('status', '')}
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('status', newValue?.key || '')
-                  }}
-                  error={formik.touched.status && Boolean(formik.errors.status)}
                 />
               </FormGrid>
               <FormGrid item hideonempty xs={3}>
@@ -791,6 +786,17 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                   onClear={() => formik.setFieldValue('valueDate', '')}
                   error={formik.touched.valueDate && Boolean(formik.errors.valueDate)}
                   helperText={formik.touched.valueDate && formik.errors.valueDate}
+                />
+              </FormGrid>
+              <FormGrid item hideonempty xs={3}>
+                <ResourceComboBox
+                  datasetId={DataSets.WF_STATUS}
+                  name='wfStatus'
+                  label={labels.wfStatus}
+                  readOnly
+                  valueField='key'
+                  displayField='value'
+                  values={formik.values}
                 />
               </FormGrid>
             </Grid>
@@ -977,9 +983,6 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                       readOnly
                       decimalScale={5}
                       maxAccess={maxAccess}
-                      onChange={e => formik.setFieldValue('exRate', e.target.value)}
-                      onClear={() => formik.setFieldValue('exRate', '')}
-                      error={formik.touched.exRate && Boolean(formik.errors.exRate)}
                       maxLength={10}
                     />
                   </Grid>
@@ -992,9 +995,6 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                       required
                       readOnly
                       maxAccess={maxAccess}
-                      onChange={e => formik.setFieldValue('exRate2', e.target.value)}
-                      onClear={() => formik.setFieldValue('exRate2', '')}
-                      error={formik.touched.exRate2 && Boolean(formik.errors.exRate2)}
                       maxLength={10}
                     />
                   </Grid>
@@ -1007,11 +1007,6 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                     required
                     readOnly
                     maxAccess={maxAccess}
-                    onClear={() => formik.setFieldValue('commission', '')}
-                    error={formik.touched.commission && Boolean(formik.errors.commission)}
-                    onChange={e => {
-                      formik.setFieldValue('commission', e.target.value)
-                    }}
                     maxLength={10}
                   />
                 </Grid>
@@ -1050,9 +1045,6 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                     required
                     readOnly
                     maxAccess={maxAccess}
-                    onChange={e => formik.setFieldValue('amount', amount)}
-                    onClear={() => formik.setFieldValue('amount', '')}
-                    error={formik.touched.amount && Boolean(formik.errors.amount)}
                     maxLength={10}
                   />
                 </Grid>
@@ -1115,10 +1107,6 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                       label={labels.firstName}
                       value={formik.values?.firstName}
                       readOnly
-                      onChange={formik.handleChange}
-                      maxLength='20'
-                      onClear={() => formik.setFieldValue('firstName', '')}
-                      error={formik.touched.firstName && Boolean(formik.errors.firstName)}
                       maxAccess={maxAccess}
                     />
                   </Grid>
@@ -1128,10 +1116,6 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                       label={labels.middleName}
                       value={formik.values?.middleName}
                       readOnly
-                      onChange={formik.handleChange}
-                      maxLength='20'
-                      onClear={() => formik.setFieldValue('middleName', '')}
-                      error={formik.touched.middleName && Boolean(formik.errors.middleName)}
                       maxAccess={maxAccess}
                     />
                   </Grid>
@@ -1141,10 +1125,6 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                       label={labels.lastName}
                       value={formik.values?.lastName}
                       readOnly
-                      onChange={formik.handleChange}
-                      maxLength='20'
-                      onClear={() => formik.setFieldValue('lastName', '')}
-                      error={formik.touched.lastName && Boolean(formik.errors.lastName)}
                       maxAccess={maxAccess}
                     />
                   </Grid>
@@ -1154,10 +1134,6 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                       label={labels.familyName}
                       value={formik.values?.familyName}
                       readOnly
-                      onChange={formik.handleChange}
-                      maxLength='20'
-                      onClear={() => formik.setFieldValue('familyName', '')}
-                      error={formik.touched.familyName && Boolean(formik.errors.familyName)}
                       maxAccess={maxAccess}
                     />
                   </Grid>
@@ -1169,11 +1145,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                       label={labels.flFirstName}
                       value={formik.values?.fl_firstName}
                       readOnly
-                      onChange={formik.handleChange}
-                      maxLength='20'
                       dir='rtl'
-                      onClear={() => formik.setFieldValue('fl_firstName', '')}
-                      error={formik.touched.fl_firstName && Boolean(formik.errors.fl_firstName)}
                       maxAccess={maxAccess}
                     />
                   </Grid>
@@ -1183,11 +1155,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                       label={labels.flMiddleName}
                       value={formik.values?.fl_middleName}
                       readOnly
-                      maxLength='20'
-                      onChange={formik.handleChange}
                       dir='rtl'
-                      onClear={() => formik.setFieldValue('fl_familyName', '')}
-                      error={formik.touched.fl_middleName && Boolean(formik.errors.fl_middleName)}
                       maxAccess={maxAccess}
                     />
                   </Grid>
@@ -1197,11 +1165,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                       label={labels.flLastName}
                       value={formik.values?.fl_lastName}
                       readOnly
-                      onChange={formik.handleChange}
-                      maxLength='20'
                       dir='rtl'
-                      onClear={() => formik.setFieldValue('fl_lastName', '')}
-                      error={formik.touched.fl_lastName && Boolean(formik.errors.fl_lastName)}
                       maxAccess={maxAccess}
                     />
                   </Grid>
@@ -1211,10 +1175,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                       label={labels.flFamilyName}
                       value={formik.values?.fl_familyName}
                       readOnly
-                      onChange={formik.handleChange}
-                      maxLength='20'
                       dir='rtl'
-                      onClear={() => formik.setFieldValue('fl_familyName', '')}
                       error={formik.touched.fl_familyName && Boolean(formik.errors.fl_familyName)}
                       maxAccess={maxAccess}
                     />
@@ -1229,14 +1190,9 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                         label={labels.Nationality}
                         name='nationalityId'
                         displayField={['reference', 'name']}
-                        columnsInDropDown={[
-                          { key: 'reference', value: 'Reference' },
-                          { key: 'name', value: 'Name' }
-                        ]}
                         valueField='recordId'
                         values={formik.values}
                         readOnly
-                        error={formik.touched.nationalityId && Boolean(formik.errors.nationalityId)}
                       />
                     </Grid>
                     <Grid item xs={6} sx={{ pl: 2 }}>
@@ -1244,12 +1200,7 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                         name='idNo'
                         label={labels.IdNo}
                         value={formik.values.idNo}
-                        onChange={formik.handleChange}
                         readOnly
-                        onClear={() => formik.setFieldValue('idNo', '')}
-                        error={formik.touched.idNo && Boolean(formik.errors.idNo)}
-                        helperText={formik.touched.idNo && formik.errors.idNo}
-                        maxLength='15'
                         maxAccess={maxAccess}
                       />
                     </Grid>
@@ -1259,7 +1210,6 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                         label={labels.expiryDate}
                         value={formik.values?.expiryDate}
                         readOnly
-                        error={formik.touched.expiryDate && Boolean(formik.errors.expiryDate)}
                         maxAccess={maxAccess}
                       />
                     </Grid>
@@ -1270,15 +1220,8 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                         label={labels.cellPhone}
                         value={formik.values?.cellPhone}
                         readOnly
-                        onChange={formik.handleChange}
                         maxLength='15'
                         autoComplete='off'
-                        onBlur={e => {
-                          formik.handleBlur(e)
-                        }}
-                        onClear={() => formik.setFieldValue('cellPhone', '')}
-                        error={formik.touched.cellPhone && Boolean(formik.errors.cellPhone)}
-                        helperText={formik.touched.cellPhone && formik.errors.cellPhone}
                         maxAccess={maxAccess}
                       />
                     </Grid>
@@ -1288,14 +1231,9 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                         label={labels.profession}
                         name='professionId'
                         displayField={['reference', 'name']}
-                        columnsInDropDown={[
-                          { key: 'reference', value: 'Reference' },
-                          { key: 'name', value: 'Name' }
-                        ]}
                         valueField='recordId'
                         values={formik.values}
                         readOnly
-                        error={formik.touched.professionId && Boolean(formik.errors.professionId)}
                       />
                     </Grid>
                     <Grid item xs={6} sx={{ pl: 2 }}>

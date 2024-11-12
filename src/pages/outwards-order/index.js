@@ -77,7 +77,7 @@ const OutwardsOrder = () => {
 
   async function openForm(recordId) {
     const plantId = await getPlantId()
-    if (!recordId && !plantId) {
+    if (!plantId && !recordId) {
       stackError({
         message: _labels.PlantDefaultError
       })
@@ -156,18 +156,21 @@ const OutwardsOrder = () => {
       field: 'wipName',
       headerName: _labels.WIP,
       flex: 1
+    },
+    {
+      field: 'wfStatusName',
+      headerName: _labels.wfStatus,
+      flex: 1
     }
   ]
 
   const delOutwards = async obj => {
-    try {
-      await postRequest({
-        extension: RemittanceOutwardsRepository.OutwardsOrder.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
+    await postRequest({
+      extension: RemittanceOutwardsRepository.OutwardsOrder.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   const { proxyAction } = useDocumentTypeProxy({

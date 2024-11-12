@@ -2,7 +2,7 @@ import { Autocomplete, IconButton, CircularProgress, Paper, TextField } from '@m
 import { ControlAccessLevel, TrxType } from 'src/resources/AccessLevels'
 import { Box } from '@mui/material'
 import RefreshIcon from '@mui/icons-material/Refresh'
-import React from 'react'
+import React, { useState } from 'react'
 import PopperComponent from '../Shared/Popper/PopperComponent'
 
 const CustomComboBox = ({
@@ -37,6 +37,8 @@ const CustomComboBox = ({
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
+
+  const [hover, setHover] = useState(false)
 
   const fieldAccess =
     props.maxAccess && props.maxAccess?.record?.controls?.find(item => item.controlId === name)?.accessLevel
@@ -142,30 +144,33 @@ const CustomComboBox = ({
           label={label}
           required={_required}
           autoFocus={autoFocus}
+          onMouseEnter={() => setHover(true)}
+          onMouseLeave={() => setHover(false)}
           error={error}
           helperText={helperText}
           InputProps={{
             ...params.InputProps,
             endAdornment: (
               <React.Fragment>
-                {isLoading ? (
-                  <CircularProgress color='inherit' size={18} />
-                ) : (
-                  refresh &&
-                  !readOnly && (
-                    <IconButton
-                      onClick={fetchData}
-                      aria-label='refresh data'
-                      sx={{
-                        p: '0px !important',
-                        marginRight: '-10px'
-                      }}
-                      size='small'
-                    >
-                      <RefreshIcon />
-                    </IconButton>
-                  )
-                )}
+                {hover &&
+                  (_disabled ? null : isLoading ? (
+                    <CircularProgress color='inherit' size={18} />
+                  ) : (
+                    refresh &&
+                    !readOnly && (
+                      <IconButton
+                        onClick={fetchData}
+                        aria-label='refresh data'
+                        sx={{
+                          p: '0px !important',
+                          marginRight: '-10px'
+                        }}
+                        size='small'
+                      >
+                        <RefreshIcon />
+                      </IconButton>
+                    )
+                  ))}
                 {params.InputProps.endAdornment}
               </React.Fragment>
             )

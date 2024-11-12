@@ -14,7 +14,6 @@ const WindowToolbar = ({
   onClear,
   onInfo,
   onGenerate,
-
   onApply,
   isSaved,
   isSavedClear,
@@ -28,6 +27,7 @@ const WindowToolbar = ({
   onClickGL,
   onClickAC,
   onClickIT,
+  onClickSATRX,
   onClickAging,
   onClickMetal,
   onGenerateReport,
@@ -141,6 +141,7 @@ const WindowToolbar = ({
     onGenerate,
     onApply,
     onClickIT,
+    onClickSATRX,
     onClickAging,
     onClickMetal,
     onApproval,

@@ -127,22 +127,26 @@ const AuthProvider = ({ children }) => {
       }
       setLanguageId(loggedUser.languageId)
       window.localStorage.setItem('languageId', loggedUser.languageId)
-      if (getUS2.data.record.umcpnl === true) {
+      if (getUS2.data.record.umcpnl === true || getUS2.data.record.is2FAEnabled === true) {
         errorCallback({
           username: params.username,
           loggedUser,
           getUS2: getUS2.data.record
         })
       } else {
-        setUser(loggedUser)
-        window.sessionStorage.setItem('userData', JSON.stringify(loggedUser))
-        const returnUrl = router.query.returnUrl
-        const redirectURL = returnUrl && returnUrl !== '/' ? returnUrl : '/'
-        router.replace(redirectURL)
+        EnableLogin(loggedUser)
       }
     } catch (error) {
       if (errorCallback) errorCallback(error)
     }
+  }
+
+  const EnableLogin = loggedUser => {
+    setUser(loggedUser)
+    window.sessionStorage.setItem('userData', JSON.stringify(loggedUser))
+    const returnUrl = router.query.returnUrl
+    const redirectURL = returnUrl && returnUrl !== '/' ? returnUrl : '/'
+    router.replace(redirectURL)
   }
 
   const handleLogout = async () => {
@@ -206,6 +210,7 @@ const AuthProvider = ({ children }) => {
     logout: handleLogout,
     getAccessToken,
     encryptePWD,
+    EnableLogin,
     getAC,
     apiUrl: getAC?.data?.record.api || (typeof window !== 'undefined' ? window.localStorage.getItem('apiUrl') : '')
   }

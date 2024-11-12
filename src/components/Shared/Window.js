@@ -53,11 +53,12 @@ const Window = React.memo(
         transactionLogInfo.style.height = expanded ? '30vh' : '18vh'
       }
     }, [expanded])
-    useEffect(() => {
-      if (paperRef.current) {
-        paperRef.current.focus()
-      }
-    }, [])
+
+    // useEffect(() => {
+    //   if (paperRef.current) {
+    //     paperRef.current.focus()
+    //   }
+    // }, [])
 
     const handleExpandToggle = useCallback(() => {
       setExpanded(prev => !prev)
