@@ -2,7 +2,6 @@
   max-width: 350px;
   margin: 20px auto;
   padding: 0px;
-  /* border: 1px solid #ccc; */
   border-radius: 5px;
   text-align: center;
 }
@@ -16,19 +15,14 @@
 .inputText {
   width: 40px;
   height: 40px;
-  /* Other styles for input[type="text"] */
-
-  /* input[type="text"] { */
-    width: 40px;
-    height: 40px;
-    font-size: 16px;
-    text-align: center;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    margin-right: 5px;
-
+  width: 40px;
+  height: 40px;
+  font-size: 16px;
+  text-align: center;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin-right: 5px;
 }
-
 
 .timerContainer {
   margin-bottom: 20px;
@@ -51,6 +45,7 @@
   margin-right: 10px;
   cursor: pointer;
   border-radius: 5px;
+  margin-top: 10px;
 }
 
 .resendButton:disabled,

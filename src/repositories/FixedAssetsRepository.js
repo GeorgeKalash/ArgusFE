@@ -2,12 +2,14 @@ const service = 'FA.asmx/'
 
 export const FixedAssetsRepository = {
   Asset: {
+    page: service + 'pageCLS',
     qry: service + 'qryCLS',
     get: service + 'getCLS',
     set: service + 'setCLS',
     del: service + 'delCLS'
   },
   AssetGroup: {
+    page: service + 'pageGRP',
     qry: service + 'qryGRP',
     get: service + 'getGRP',
     set: service + 'setGRP',

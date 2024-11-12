@@ -39,7 +39,7 @@ const CtDefaults = ({ _labels, access }) => {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      'otp-expiry-time': yup.number().min(30).max(120)
+      'otp-expiry-time': yup.number().min(30).max(120).nullable(true)
     }),
     initialValues: {
       'ct-nra-individual': null,
@@ -247,7 +247,7 @@ const CtDefaults = ({ _labels, access }) => {
               decimalScale={0}
               maxAccess={access}
               onChange={e => formik.setFieldValue('otp-expiry-time', e.target.value)}
-              onClear={() => formik.setFieldValue('otp-expiry-time', null)}
+              onClear={() => formik.setFieldValue('otp-expiry-time', '')}
               error={formik.touched['otp-expiry-time'] && Boolean(formik.errors['otp-expiry-time'])}
             />
           </Grid>
