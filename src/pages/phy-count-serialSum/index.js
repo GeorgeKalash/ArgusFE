@@ -37,7 +37,7 @@ const PhysicalCountItem = () => {
     initialValues: {
       stockCountId: '',
       siteId: '',
-      totalCostPrice: '',
+      totalCountedPcs: '',
       totalWeight: ''
     },
     maxAccess,
@@ -54,23 +54,28 @@ const PhysicalCountItem = () => {
 
     const res = await getRequest({
       extension: SCRepository.StockCountSerialSum.qry,
-      parameters: `_stockCountId=${formik.values?.stockCountId}&_siteId=${formik.values?.siteId}`
+      parameters: `_stockCountId=${formik.values.stockCountId}&_siteId=${formik.values.siteId}`
     })
 
-    let sumCost = 0
+    let sumPcs = 0
     let sumWeight = 0
 
-    res.list.map(item => {
-      sumCost += item.currentCost || 0
+    const updatedList = res.list.map(item => {
+      sumPcs += item.countedPcs || 0
       sumWeight += item.weight || 0
+
+      return {
+        ...item,
+        netWeight: item.weight * item.countedPcs,
+        varianceWght: item.weight * item.variancePcs
+      }
     })
 
-    formik.setFieldValue('totalCostPrice', sumCost)
+    formik.setFieldValue('totalCountedPcs', sumPcs)
     formik.setFieldValue('totalWeight', sumWeight)
 
-    setData(res ?? { list: [] })
-
-    handleClick(res.list)
+    setData({ list: updatedList })
+    handleClick(updatedList)
   }
 
   const fillSiteStore = stockCountId => {
@@ -86,39 +91,55 @@ const PhysicalCountItem = () => {
 
   const columns = [
     {
+      field: 'srlNo',
+      headerName: _labels.srlNo,
+      flex: 1
+    },
+    {
       field: 'sku',
       headerName: _labels.sku,
       flex: 1
     },
     {
       field: 'itemName',
-      headerName: _labels.itemName,
+      headerName: _labels.name,
       flex: 1
     },
     {
-      field: 'countedQty',
-      headerName: _labels.qty,
-      flex: 1
+      field: 'countedPcs',
+      headerName: _labels.countedPcs,
+      flex: 1,
+      type: 'number'
     },
     {
-      field: 'systemQty',
-      headerName: _labels.system,
-      flex: 1
+      field: 'systemPcs',
+      headerName: _labels.systemPcs,
+      flex: 1,
+      type: 'number'
     },
     {
-      field: 'varianceQty',
-      headerName: _labels.variation,
-      flex: 1
-    },
-    {
-      field: 'currentCost',
-      headerName: _labels.costPrice,
-      flex: 1
+      field: 'variancePcs',
+      headerName: _labels.variancePcs,
+      flex: 1,
+      type: 'number'
     },
     {
       field: 'weight',
       headerName: _labels.weight,
-      flex: 1
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'netWeight',
+      headerName: 'Net Weight',
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'varianceWght',
+      headerName: 'Variance Weight',
+      flex: 1,
+      type: 'number'
     }
   ]
 
@@ -254,9 +275,9 @@ const PhysicalCountItem = () => {
           <Grid container justifyContent='flex-end' spacing={2} sx={{ pt: 5 }}>
             <Grid item xs={2}>
               <CustomNumberField
-                name='totalCostPrice'
-                label={_labels.totalCostPrice}
-                value={formik.values.totalCostPrice}
+                name='totalCountedPcs'
+                label={_labels.totalCountedPcs}
+                value={formik.values.totalCountedPcs}
                 readOnly={true}
                 hidden={!(formik.values.stockCountId && formik.values.siteId)}
               />
