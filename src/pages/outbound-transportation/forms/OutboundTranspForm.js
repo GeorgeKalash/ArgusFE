@@ -328,6 +328,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
       },
       width: 500,
       height: 300,
+      expandable: false,
       title: platformLabels.UnpostConfirmation
     })
   }
