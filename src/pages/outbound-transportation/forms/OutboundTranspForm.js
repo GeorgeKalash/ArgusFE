@@ -296,7 +296,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
       key: 'Locked',
       condition: isPosted,
       onClick: 'onUnpostConfirmation',
-      action: onUnpost,
+      onSuccess: onUnpost,
       disabled: !editMode || !isClosed
     },
     {

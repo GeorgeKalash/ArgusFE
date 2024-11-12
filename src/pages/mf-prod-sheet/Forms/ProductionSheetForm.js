@@ -195,13 +195,14 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
 
   const actions = [
     {
-      key: 'Post',
+      key: 'Locked',
       condition: isPosted,
       onClick: 'onUnpostConfirmation',
+      onSuccess: onUnpost,
       disabled: !editMode
     },
     {
-      key: 'Unpost',
+      key: 'Unlocked',
       condition: !isPosted,
       onClick: onPost,
       disabled: !editMode
@@ -308,7 +309,6 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
       maxAccess={maxAccess}
       editMode={editMode}
       disabledSubmit={isPosted}
-      onUnpost={onUnpost}
       functionId={SystemFunction.ProductionSheet}
     >
       <VertLayout>
