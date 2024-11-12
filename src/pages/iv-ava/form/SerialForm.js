@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import Table from 'src/components/Shared/Table'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -19,11 +19,14 @@ const SerialForm = ({ labels, obj }) => {
     setData(response)
   }
 
-  const { refetch, access, paginationParameters } = useResourceQuery({
-    datasetId: ResourceIds.AvailabilitiesGrid,
+  const { refetch, paginationParameters } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: InventoryRepository.AvailabilitySerial.qry
   })
+
+  useEffect(() => {
+    fetchGridData()
+  }, [])
 
   const columns = [
     {
@@ -58,7 +61,6 @@ const SerialForm = ({ labels, obj }) => {
           isLoading={false}
           pageSize={50}
           paginationType='api'
-          maxAccess={access}
           paginationParameters={paginationParameters}
           refetch={refetch}
         />

@@ -103,8 +103,7 @@ const AvailabilityList = ({ obj, labels, access }) => {
       Component: LotForm,
       props: {
         labels,
-        obj,
-        maxAccess: access
+        obj
       },
       width: 1150,
       height: 450,

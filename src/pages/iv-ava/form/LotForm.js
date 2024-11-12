@@ -5,7 +5,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-const LotForm = ({ labels, maxAccess, obj }) => {
+const LotForm = ({ labels, obj }) => {
   const { getRequest } = useContext(RequestsContext)
 
   const [data, setData] = useState([])
@@ -99,15 +99,7 @@ const LotForm = ({ labels, maxAccess, obj }) => {
   return (
     <VertLayout>
       <Grow>
-        <Table
-          columns={columns}
-          gridData={data}
-          rowId={['lotId']}
-          isLoading={false}
-          pageSize={50}
-          pagination={false}
-          maxAccess={maxAccess}
-        />
+        <Table columns={columns} gridData={data} rowId={['lotId']} isLoading={false} pageSize={50} pagination={false} />
       </Grow>
     </VertLayout>
   )
