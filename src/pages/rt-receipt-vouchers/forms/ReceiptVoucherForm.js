@@ -157,18 +157,20 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
         return
       }
 
-      const response = await postRequest({
+      postRequest({
         extension: RemittanceOutwardsRepository.ReceiptVouchers.set2,
         record: JSON.stringify(data)
+      }).then(res => {
+        if (!obj.recordId) {
+          toast.success(platformLabels.Added)
+          formik.setFieldValue('recordId', res.recordId)
+          getData(res.recordId)
+          viewOTP()
+        } else {
+          toast.success(platformLabels.Edited)
+        }
       })
 
-      if (!obj.recordId) {
-        toast.success(platformLabels.Added)
-        formik.setFieldValue('recordId', response.recordId)
-        getData(response.recordId)
-      } else {
-        toast.success(platformLabels.Edited)
-      }
       invalidate()
     }
   })
@@ -177,6 +179,77 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
   const isPosted = formik.values.status === 3
   const isClosed = formik.values.wip === 2
   const isOTPVerified = formik.values.otpVerified
+
+  function viewOTP() {
+    stack({
+      Component: OTPPhoneVerification,
+      props: {
+        formValidation: formik,
+        recordId: formik.values.recordId,
+        functionId: SystemFunction.RemittanceReceiptVoucher,
+        onSuccess: () => {
+          onClose(formik.values.recordId)
+        }
+      },
+      width: 400,
+      height: 400,
+      title: labels.OTPVerification
+    })
+  }
+
+  const onClose = () => {
+    const data = {
+      recordId: formik.values.recordId
+    }
+    postRequest({
+      extension: RemittanceOutwardsRepository.ReceiptVouchers.close,
+      record: JSON.stringify(data)
+    }).then(res => {
+      if (res?.recordId) {
+        toast.success(platformLabels.Closed)
+        invalidate()
+        getData(res?.recordId)
+        formik.values.releaseStatus === 3 && onPost()
+      }
+    })
+  }
+
+  const onPost = async () => {
+    const data = {
+      recordId: formik.values.recordId,
+      plantId: formik.values.plantId,
+      reference: formik.values.reference,
+      accountId: formik.values.accountId,
+      date: formatDateToApi(formik.values.date),
+      dtId: formik.values.dtId,
+      amount: formik.values.amount,
+      owoId: formik.values.owoId,
+      status: formik.values.status,
+      clientId: formik.values.clientId
+    }
+
+    const totalCashAmount = formik.values.cash
+      .reduce((sum, current) => sum + parseFloat(current.amount || 0), 0)
+      .toFixed(2)
+
+    if (totalCashAmount !== formik.values.amount.toFixed(2)) {
+      toast.error('The total amount does not match the sum of amounts in the grid.')
+
+      return
+    }
+
+    const res = await postRequest({
+      extension: RemittanceOutwardsRepository.ReceiptVouchers.post,
+      record: JSON.stringify(data)
+    })
+
+    if (res) {
+      toast.success(platformLabels.Posted)
+      openDialog(res.recordId)
+      invalidate()
+      getData()
+    }
+  }
 
   const getDefaultDT = async () => {
     const userData = getStorageData('userData')
@@ -231,76 +304,6 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
     }
   }
 
-  const onPost = async () => {
-    const data = {
-      recordId: formik.values.recordId,
-      plantId: formik.values.plantId,
-      reference: formik.values.reference,
-      accountId: formik.values.accountId,
-      date: formatDateToApi(formik.values.date),
-      dtId: formik.values.dtId,
-      amount: formik.values.amount,
-      owoId: formik.values.owoId,
-      status: formik.values.status,
-      clientId: formik.values.clientId
-    }
-
-    const totalCashAmount = formik.values.cash
-      .reduce((sum, current) => sum + parseFloat(current.amount || 0), 0)
-      .toFixed(2)
-
-    if (totalCashAmount !== formik.values.amount.toFixed(2)) {
-      toast.error('The total amount does not match the sum of amounts in the grid.')
-
-      return
-    }
-
-    const res = await postRequest({
-      extension: RemittanceOutwardsRepository.ReceiptVouchers.post,
-      record: JSON.stringify(data)
-    })
-
-    if (res) {
-      toast.success(platformLabels.Posted)
-      openDialog(res.recordId)
-      invalidate()
-      getData()
-    }
-  }
-
-  const onClose = () => {
-    const data = {
-      recordId: formik.values.recordId
-    }
-    postRequest({
-      extension: RemittanceOutwardsRepository.ReceiptVouchers.close,
-      record: JSON.stringify(data)
-    }).then(res => {
-      if (res?.recordId) {
-        toast.success(platformLabels.Closed)
-        invalidate()
-        getData(res?.recordId)
-      }
-    })
-  }
-
-  function viewOTP() {
-    stack({
-      Component: OTPPhoneVerification,
-      props: {
-        formValidation: formik,
-        recordId: formik.values.recordId,
-        functionId: SystemFunction.RemittanceReceiptVoucher,
-        onSuccess: () => {
-          onClose(formik.values.recordId)
-        }
-      },
-      width: 400,
-      height: 400,
-      title: labels.OTPVerification
-    })
-  }
-
   async function onReopen() {
     const obj = formik.values
 
@@ -315,7 +318,7 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
       clientId: formik.values.clientId
     }
 
-    const res = await postRequest({
+    await postRequest({
       extension: RemittanceOutwardsRepository.ReceiptVouchers.reopen,
       record: JSON.stringify(data)
     }).then(res => {
