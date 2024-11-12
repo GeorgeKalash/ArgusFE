@@ -294,14 +294,14 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
   const actions = [
     {
       key: 'Post',
-      condition: !isPosted,
-      onClick: onPost,
+      condition: isPosted,
+      onClick: () => openUnpostConfirmation(formik.values),
       disabled: !editMode || !isClosed
     },
     {
       key: 'Unpost',
-      condition: isPosted,
-      onClick: () => openUnpostConfirmation(formik.values),
+      condition: !isPosted,
+      onClick: onPost,
       disabled: false
     },
     {
