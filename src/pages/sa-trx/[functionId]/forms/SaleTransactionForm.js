@@ -1036,8 +1036,8 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       qty: itemPriceRow?.qty,
       extendedPrice: parseFloat(itemPriceRow?.extendedPrice),
       baseLaborPrice: itemPriceRow?.baseLaborPrice,
-      vatAmount: parseFloat(itemPriceRow?.vatAmount),
-      tdPct: formik?.values?.header?.tdPct,
+      vatAmount: parseFloat(newRow?.vatAmount),
+      tdPct: formik?.values?.header?.tdPct || 0,
       taxDetails: formik.values.header.isVatChecked ? null : newRow.taxDetails
     })
 
