@@ -185,29 +185,14 @@ const SaTrx = () => {
     }
   }
 
-  async function getDefaultSalesTD() {
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.Defaults.get,
-        parameters: `_filter=&_key=salesTD`
-      })
-
-      return res?.record?.value
-    } catch (error) {
-      return ''
-    }
-  }
-
   async function openForm(recordId) {
-    const defaultSalesTD = await getDefaultSalesTD()
     stack({
       Component: SaleTransactionForm,
       props: {
         labels: labels,
         recordId: recordId,
         access,
-        functionId: functionId,
-        defaultSalesTD
+        functionId: functionId
       },
       width: 1330,
       height: 720,
