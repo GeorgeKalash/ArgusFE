@@ -42,6 +42,7 @@ const PhysicalCountSerial = () => {
       totalVariancePcs: '',
       totalVarianceWeight: '',
       date: '',
+      reference: '',
       search: ''
     },
     maxAccess,
@@ -238,6 +239,7 @@ const PhysicalCountSerial = () => {
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('stockCountId', newValue?.recordId)
+                  formik.setFieldValue('reference', newValue.reference)
                   formik.setFieldValue('date', formatDateFromApi(newValue?.date))
                   formik.setFieldValue('siteId', '')
 
@@ -245,6 +247,7 @@ const PhysicalCountSerial = () => {
                     setSiteStore([])
                     setFilteredItems([])
                     formik.setFieldValue('date', '')
+                    formik.setFieldValue('reference', '')
                     clearGrid()
                   } else {
                     fillSiteStore(newValue?.recordId)
@@ -258,6 +261,15 @@ const PhysicalCountSerial = () => {
                 name='date'
                 label={_labels.date}
                 value={formik.values.date}
+                readOnly={true}
+                error={false}
+              />
+            </Grid>
+            <Grid item xs={2}>
+              <CustomTextField
+                name='reference'
+                label={_labels.reference}
+                value={formik.values.reference}
                 readOnly={true}
                 error={false}
               />
@@ -284,6 +296,8 @@ const PhysicalCountSerial = () => {
                   maxAccess={maxAccess}
                 />
               </Grid>
+            </Grid>
+            <Grid container item xs={12} spacing={2}>
               <Grid item xs={2}>
                 <CustomTextField
                   name='search'
