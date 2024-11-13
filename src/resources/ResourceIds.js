@@ -293,7 +293,7 @@ export const ResourceIds = {
   GenerateFiscalYear: 41503,
   UserSecretOTPQrCode: 23201,
   CountryRiskLevel: 36132,
-  SalesTrxForm: 51307
+  SalesTrxForm: 51307,
   AvailabilitiesGrid: 41206,
   SiteDashboard: 41225,
   IVparts: 41222,
