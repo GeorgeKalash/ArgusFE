@@ -9,6 +9,7 @@ export const FixedAssetsRepository = {
     del: service + 'delCLS'
   },
   AssetGroup: {
+    page: service + 'pageGRP',
     qry: service + 'qryGRP',
     get: service + 'getGRP',
     set: service + 'setGRP',

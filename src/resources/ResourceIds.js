@@ -291,7 +291,12 @@ export const ResourceIds = {
   ProdSheetDocumentTypeDefault: 42120,
   InventoryTransaction: 41209,
   GenerateFiscalYear: 41503,
-  SalesTrxForm: 51307,
   UserSecretOTPQrCode: 23201,
-  Depreciation: 43402
+  CountryRiskLevel: 36132,
+  SalesTrxForm: 51307,
+  AvailabilitiesGrid: 41206,
+  SiteDashboard: 41225,
+  IVparts: 41222,
+  SalesInquiries: 51300,
+  MigrateBarcodeData: 41508
 }
