@@ -1,14 +1,15 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useState } from 'react'
 import axios from 'axios'
 import jwt from 'jwt-decode'
 import { AuthContext } from 'src/providers/AuthContext'
 import { useError } from 'src/error'
 import { Box, CircularProgress } from '@mui/material'
 import { debounce } from 'lodash'
+import { RequestsLoadingContext } from 'src/pages/_app'
 
 const RequestsContext = createContext()
 
-function LoadingOverlay() {
+export function LoadingOverlay() {
   return (
     <Box
       style={{
@@ -30,6 +31,8 @@ function LoadingOverlay() {
 }
 
 const RequestsProvider = ({ showLoading = false, children }) => {
+  const { updateIsLoadingRequests } = useContext(RequestsLoadingContext)
+
   const { user, setUser, apiUrl } = useContext(AuthContext)
   const errorModel = useError()
   const [loading, setLoading] = useState(false)
@@ -49,6 +52,8 @@ const RequestsProvider = ({ showLoading = false, children }) => {
     const accessToken = await getAccessToken()
     const disableLoading = body.disableLoading || false
     !disableLoading && !loading && setLoading(true)
+
+    updateIsLoadingRequests(true)
 
     const throwError = body.throwError || false
 
@@ -73,6 +78,11 @@ const RequestsProvider = ({ showLoading = false, children }) => {
             height: error.response?.status === 404 || error.response?.status === 500 ? 400 : ''
           })
           if (throwError) reject(error)
+        })
+        .finally(() => {
+          setTimeout(() => {
+            updateIsLoadingRequests(false)
+          }, 500)
         })
     })
   }

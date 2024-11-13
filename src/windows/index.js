@@ -1,12 +1,15 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import Window from 'src/components/Shared/Window'
 import useResourceParams from 'src/hooks/useResourceParams'
+import { RequestsLoadingContext } from 'src/pages/_app'
+import { LoadingOverlay } from 'src/providers/RequestsContext'
 import { v4 as uuidv4 } from 'uuid'
 
 const WindowContext = React.createContext(null)
 const ClearContext = React.createContext(null)
 
 export function WindowProvider({ children }) {
+  const { isLoadingRequests } = useContext(RequestsLoadingContext)
   const [stack, setStack] = useState([])
   const [rerenderFlag, setRerenderFlag] = useState(false)
   const closedWindow = useRef(null)
@@ -37,6 +40,10 @@ export function WindowProvider({ children }) {
     setStack(stack => [...stack, { ...options, id: uuidv4() }])
   }
 
+  // function to check if number of true is equal to number of false
+  const isLoading =
+    isLoadingRequests.filter(item => item === true).length !== isLoadingRequests.filter(item => item === false).length
+
   return (
     <WindowContext.Provider value={{ stack: addToStack }}>
       {children}
@@ -58,29 +65,32 @@ export function WindowProvider({ children }) {
               }
             }}
           >
-            <Window
-              key={id}
-              sx={{ display: 'flex !important', flex: '1' }}
-              Title={title}
-              controlled={true}
-              onClose={() => {
-                closeWindow()
-                if (onClose) onClose()
-              }}
-              width={width}
-              height={height}
-              expandable={expandable}
-              draggable={draggable}
-              closable={closable}
-              styles={styles}
-            >
-              <Component
-                {...props}
-                window={{
-                  close: () => closeWindowById(id)
+            {isLoading && <LoadingOverlay />}
+            <div style={{ display: isLoading ? 'none' : 'block' }}>
+              <Window
+                key={id}
+                sx={{ display: 'flex !important', flex: '1' }}
+                Title={title}
+                controlled={true}
+                onClose={() => {
+                  closeWindow()
+                  if (onClose) onClose()
                 }}
-              />
-            </Window>
+                width={width}
+                height={height}
+                expandable={expandable}
+                draggable={draggable}
+                closable={closable}
+                styles={styles}
+              >
+                <Component
+                  {...props}
+                  window={{
+                    close: () => closeWindowById(id)
+                  }}
+                />
+              </Window>
+            </div>
           </ClearContext.Provider>
         )
       )}
