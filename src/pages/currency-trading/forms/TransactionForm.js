@@ -585,7 +585,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     stack({
       Component: OTPPhoneVerification,
       props: {
-        formValidation: formik,
+        values: formik.values,
         recordId: recId,
         clientId: receivedClient,
         functionId: formik.values.functionId,
