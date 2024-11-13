@@ -9,16 +9,7 @@ import useResourceParams from 'src/hooks/useResourceParams'
 import { ControlContext } from 'src/providers/ControlContext'
 import { Box } from '@mui/material'
 
-const OTPPhoneVerification = ({
-  formValidation,
-  recordId,
-  clientId,
-  functionId,
-  onClose,
-  getData,
-  onSuccess,
-  window
-}) => {
+const OTPPhoneVerification = ({ values, recordId, clientId, functionId, onClose, getData, onSuccess, window }) => {
   const { postRequest } = useContext(RequestsContext)
   const { defaultsData } = useContext(ControlContext)
 
@@ -51,10 +42,10 @@ const OTPPhoneVerification = ({
 
   const otpSMS = () => {
     var data = {
-      clientId: formValidation.values.clientId || clientId,
+      clientId: values.clientId || clientId,
       secret: '',
       functionId: functionId,
-      deviceId: formValidation.values.cellPhone,
+      deviceId: values.cellPhone,
       otp: null
     }
     postRequest({
@@ -68,11 +59,11 @@ const OTPPhoneVerification = ({
   const checkSMS = value => {
     if (value.length > 1) {
       var data = {
-        clientId: formValidation.values.clientId || clientId,
+        clientId: values.clientId || clientId,
         recordId: recordId || null,
         secret: '',
         functionId: functionId,
-        deviceId: formValidation.values.cellPhone,
+        deviceId: values.cellPhone,
         otp: value
       }
       postRequest({
@@ -81,7 +72,7 @@ const OTPPhoneVerification = ({
       }).then(res => {
         toast.success('Verification Completed')
         if (onSuccess) onSuccess()
-        if (getData) getData(formValidation?.values?.clientId)
+        if (getData) getData(values.clientId)
         window.close()
       })
     } else {
