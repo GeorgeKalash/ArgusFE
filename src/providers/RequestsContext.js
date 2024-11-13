@@ -5,7 +5,7 @@ import { AuthContext } from 'src/providers/AuthContext'
 import { useError } from 'src/error'
 import { Box, CircularProgress } from '@mui/material'
 import { debounce } from 'lodash'
-import { RequestsLoadingContext } from 'src/pages/_app'
+import { CurrentWindowContext, RequestsLoadingContext } from 'src/pages/_app'
 
 const RequestsContext = createContext()
 
@@ -32,6 +32,7 @@ export function LoadingOverlay() {
 
 const RequestsProvider = ({ showLoading = false, children }) => {
   const { updateIsLoadingRequests } = useContext(RequestsLoadingContext)
+  const { currentWindowId } = useContext(CurrentWindowContext)
 
   const { user, setUser, apiUrl } = useContext(AuthContext)
   const errorModel = useError()
@@ -53,7 +54,7 @@ const RequestsProvider = ({ showLoading = false, children }) => {
     const disableLoading = body.disableLoading || false
     !disableLoading && !loading && setLoading(true)
 
-    updateIsLoadingRequests(true)
+    currentWindowId && updateIsLoadingRequests(currentWindowId, true)
 
     const throwError = body.throwError || false
 
@@ -80,9 +81,10 @@ const RequestsProvider = ({ showLoading = false, children }) => {
           if (throwError) reject(error)
         })
         .finally(() => {
-          setTimeout(() => {
-            updateIsLoadingRequests(false)
-          }, 500)
+          currentWindowId &&
+            setTimeout(() => {
+              updateIsLoadingRequests(currentWindowId, false)
+            }, 250)
         })
     })
   }
