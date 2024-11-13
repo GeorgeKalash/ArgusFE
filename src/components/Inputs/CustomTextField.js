@@ -4,6 +4,7 @@ import ClearIcon from '@mui/icons-material/Clear'
 import { useEffect, useRef, useState } from 'react'
 import SearchIcon from '@mui/icons-material/Search'
 import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
+import { TrxType } from 'src/resources/AccessLevels'
 
 const CustomTextField = ({
   type = 'text', //any valid HTML5 input type

@@ -4,6 +4,7 @@ import { Button, IconButton, InputAdornment, TextField } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
 import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
 import { getNumberWithoutCommas } from 'src/lib/numberField-helper'
+import { TrxType } from 'src/resources/AccessLevels'
 
 const CustomNumberField = ({
   variant = 'outlined',
