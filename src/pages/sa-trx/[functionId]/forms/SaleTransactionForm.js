@@ -343,6 +343,9 @@ export default function SaleTransactionForm({ labels, access, recordId, function
           'header.mdAmount',
           formik.values.header.currentDiscount ? formik.values.header.currentDiscount : 0
         )
+      },
+      async onClear({ row: { update, newRow } }) {
+        console.log('fire clear')
       }
     },
     {
@@ -976,6 +979,8 @@ export default function SaleTransactionForm({ labels, access, recordId, function
   }
 
   async function getItemPhysProp(itemId) {
+    if (!itemId) return
+
     const res = await getRequest({
       extension: InventoryRepository.ItemPhysProp.get,
       parameters: `_itemId=${itemId}`
@@ -985,6 +990,8 @@ export default function SaleTransactionForm({ labels, access, recordId, function
   }
 
   async function getItem(itemId) {
+    if (!itemId) return
+
     const res = await getRequest({
       extension: InventoryRepository.Item.get,
       parameters: `_recordId=${itemId}`
@@ -994,6 +1001,8 @@ export default function SaleTransactionForm({ labels, access, recordId, function
   }
 
   async function getTaxDetails(taxId) {
+    if (!taxId) return
+
     const res = await getRequest({
       extension: FinancialRepository.TaxDetailPack.qry,
       parameters: `_taxId=${taxId}`
@@ -1003,6 +1012,8 @@ export default function SaleTransactionForm({ labels, access, recordId, function
   }
 
   async function getItemConvertPrice(itemId) {
+    if (!itemId) return
+
     const res = await getRequest({
       extension: SaleRepository.ItemConvertPrice.get,
       parameters: `_itemId=${itemId}&_clientId=${formik.values.header.clientId}&_currencyId=${formik.values.header.currencyId}&_plId=${formik.values.header.plId}`
@@ -1012,6 +1023,8 @@ export default function SaleTransactionForm({ labels, access, recordId, function
   }
 
   async function getItemConvertPrice2(row, header) {
+    if (!row?.barcode) return
+
     const res = await getRequest({
       extension: SaleRepository.ItemConvertPrice.get2,
       parameters: `_barcode=${row?.barcode}&_clientId=${header.clientId}&_currencyId=${header.currencyId}&_plId=${header.plId}&_exRate=${header.exRate}&_rateCalcMethod=${header.rateCalcMethod}`
