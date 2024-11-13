@@ -8,7 +8,6 @@ import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { DataSets } from 'src/resources/DataSets'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import { validateNumberField } from 'src/lib/numberField-helper'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -67,10 +66,10 @@ export default function CurrencyForm({ labels, maxAccess, recordId }) {
           ...obj,
           recordId: response.recordId
         })
+        setEditMode(true)
       } else {
         toast.success(platformLabels.Edited)
       }
-      setEditMode(true)
       invalidate()
     }
   })
