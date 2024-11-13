@@ -34,7 +34,6 @@ const PhysicalCountSerial = () => {
 
   const { formik } = useForm({
     initialValues: {
-      recordId: 'N/A',
       stockCountId: '',
       siteId: '',
       totalCountedPcs: '',
