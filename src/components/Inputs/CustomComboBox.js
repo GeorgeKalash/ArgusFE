@@ -40,6 +40,8 @@ const CustomComboBox = ({
 
   const [hover, setHover] = useState(false)
 
+  const [focus, setAutoFocus] = useState(autoFocus)
+
   const fieldAccess =
     props.maxAccess && props.maxAccess?.record?.controls?.find(item => item.controlId === name)?.accessLevel
   const _readOnly = editMode ? editMode && maxAccess < TrxType.EDIT : readOnly
@@ -92,7 +94,10 @@ const CustomComboBox = ({
         }
       }}
       isOptionEqualToValue={(option, value) => option[valueField] === value[valueField]}
-      onChange={onChange}
+      onChange={(event, newValue) => {
+        onChange(name, newValue)
+        setAutoFocus(true)
+      }}
       fullWidth={fullWidth}
       readOnly={_readOnly}
       freeSolo={_readOnly}
@@ -143,7 +148,7 @@ const CustomComboBox = ({
           variant={variant}
           label={label}
           required={_required}
-          autoFocus={autoFocus}
+          autoFocus={focus}
           onMouseEnter={() => setHover(true)}
           onMouseLeave={() => setHover(false)}
           error={error}
@@ -161,6 +166,7 @@ const CustomComboBox = ({
                       <IconButton
                         onClick={fetchData}
                         aria-label='refresh data'
+                        tabIndex={-1}
                         sx={{
                           p: '0px !important',
                           marginRight: '-10px'

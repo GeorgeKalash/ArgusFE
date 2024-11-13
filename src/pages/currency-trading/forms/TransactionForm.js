@@ -145,6 +145,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     clientName: null,
     clientType: '1',
     firstName: null,
+    lastName: null,
     middleName: null,
     familyName: null,
     fl_firstName: null,
@@ -200,10 +201,79 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
         .array()
         .of(
           yup.object().shape({
-            currencyId: yup.string().required(),
-            exRate: yup.string().nullable().required(),
-            fcAmount: yup.number().required(),
-            lcAmount: yup.number().required()
+            currencyId: yup.string().test({
+              name: 'currencyId-last-row-check',
+              message: 'currencyId is required',
+              test(value, context) {
+                const { parent } = context
+
+                if (parent.id == 1 && value) return true
+                if (parent.id == 1 && !value) return false
+                if (
+                  parent.id > 1 &&
+                  (!parent.fcAmount || parent.fcAmount == 0) &&
+                  (!parent.lcAmount || parent.lcAmount == 0) &&
+                  (!parent.exRate || parent.exRate == 0)
+                )
+                  return true
+
+                return value
+              }
+            }),
+            exRate: yup.string().test({
+              name: 'exRate-last-row-check',
+              message: 'exRate is required',
+              test(value, context) {
+                const { parent } = context
+                if (parent.id == 1 && value) return true
+                if (parent.id == 1 && !value) return false
+                if (
+                  parent.id > 1 &&
+                  !parent.currencyId &&
+                  (!parent.lcAmount || parent.lcAmount == 0) &&
+                  (!parent.fcAmount || parent.fcAmount == 0)
+                )
+                  return true
+
+                return value
+              }
+            }),
+            fcAmount: yup.string().test({
+              name: 'fcAmount-last-row-check',
+              message: 'fcAmount is required',
+              test(value, context) {
+                const { parent } = context
+                if (parent.id == 1 && value) return true
+                if (parent.id == 1 && !value) return false
+                if (
+                  parent.id > 1 &&
+                  !parent.currencyId &&
+                  (!parent.lcAmount || parent.lcAmount == 0) &&
+                  (!parent.exRate || parent.exRate == 0)
+                )
+                  return true
+
+                return value
+              }
+            }),
+            lcAmount: yup.string().test({
+              name: 'fcAmount-last-row-check',
+              message: 'lcAmount is required',
+              test(value, context) {
+                const { parent } = context
+                if (parent.id == 1 && value) return true
+                if (parent.id == 1 && !value) return false
+                if (
+                  parent.id > 1 &&
+                  !parent.currencyId &&
+                  (!parent.fcAmount || parent.fcAmount == 0) &&
+                  (!parent.exRate || parent.exRate == 0)
+                )
+                  return true
+
+                return value
+              }
+            })
           })
         )
         .required(),
@@ -218,10 +288,17 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
         .required()
     }),
     onSubmit: async values => {
+      const lastRow = values.operations[values.operations.length - 1]
+      const isLastRowMandatoryOnly = !lastRow.currencyId && !lastRow.currencyId && !lastRow.exRate && !lastRow.fcAmount
+      let operations = values.operations
+      if (isLastRowMandatoryOnly) {
+        operations = values.operations?.filter((item, index) => index !== values.operations.length - 1)
+      }
+
       try {
         if (
           ((!values?.idNoConfirm && values?.clientId) ||
-            (!values?.confirmIdNo && !values?.clientId && !values.cellPhoneConfirm)) &&
+            (!values?.clientId && !values.cellPhoneConfirm && !values?.idNoConfirm)) &&
           !editMode
         ) {
           stack({
@@ -230,7 +307,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
               formik: formik,
               labels: labels
             },
-            title: labels.fetch,
+            title: labels.confirmation,
             width: 400,
             height: 400
           })
@@ -269,7 +346,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
               amount: total,
               notes: values.remarks
             },
-            items: values.operations.map(({ id, ...rest }) => ({
+            items: operations.map(({ id, ...rest }) => ({
               seqNo: id,
               ...rest
             })),
@@ -368,6 +445,15 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       } catch (error) {}
     }
   })
+
+  const emptyRows = formik.values.operations.filter(
+    row =>
+      !row.currencyId &&
+      !row.currencyRef &&
+      !row.exRate &&
+      (!row.fcAmount || row.fcAmount == 0) &&
+      (!row.lcAmount || row.lcAmount == 0)
+  )
 
   const dir = JSON.parse(window.localStorage.getItem('settings'))?.direction
 
@@ -495,7 +581,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       formik.setFieldValue('fl_familyName', record?.clientIndividual?.fl_familyName)
       formik.setFieldValue('birthDate', formatDateFromApi(record?.clientIndividual?.birthDate))
       formik.setFieldValue('resident', record?.clientIndividual?.isResident)
-      formik.setFieldValue('professionId', record?.clientIndividual?.professionId)
+      formik.setFieldValue('professionId', record?.clientMaster?.professionId)
       formik.setFieldValue('sponsorName', record?.clientIndividual?.sponsorName)
       formik.setFieldValue('idNo', record.clientIDView.idNo)
       formik.setFieldValue('id_type', record.clientIDView.idtId)
@@ -570,7 +656,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
   }
 
   const total = formik.values.operations.reduce((sumLc, row) => {
-    const curValue = parseFloat(row.lcAmount.toString().replace(/,/g, '')) || 0
+    const curValue = parseFloat(row.lcAmount?.toString()?.replace(/,/g, '')) || 0
 
     return sumLc + curValue
   }, 0)
@@ -599,43 +685,34 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     })
   }
 
-  async function fetchClientInfo({ clientId }) {
-    try {
-      const response = await getRequest({
-        extension: RTCLRepository.Client.get,
-        parameters: `_clientId=${clientId}`
-      })
-      setInfoAutoFilled(false)
-      const clientInfo = response && response.record
-      if (!!clientInfo) {
-        formik.setFieldValue('clientId', clientInfo.clientId)
-        formik.setFieldValue('firstName', clientInfo.firstName)
-        formik.setFieldValue('middleName', clientInfo.middleName)
-        formik.setFieldValue('lastName', clientInfo.lastName)
-        formik.setFieldValue('familyName', clientInfo.familyName)
-        formik.setFieldValue('fl_firstName', clientInfo.fl_firstName)
-        formik.setFieldValue('fl_lastName', clientInfo.fl_lastName)
-        formik.setFieldValue('fl_middleName', clientInfo.fl_middleName)
-        formik.setFieldValue('fl_familyName', clientInfo.fl_familyName)
-        formik.setFieldValue('birthDate', formatDateFromApi(clientInfo.birthDate))
-        formik.setFieldValue('resident', clientInfo.isResident)
-        formik.setFieldValue('professionId', clientInfo.professionId)
-        formik.setFieldValue('sponsorName', clientInfo.sponsorName)
-
-        setInfoAutoFilled(true)
-      }
-    } catch (error) {
-      console.error('An error occurred:', error.message)
-    }
-  }
-
-  async function fetchIDInfo({ idNumber }) {
+  async function fetchClientInfo({ numberId }) {
     const response = await getRequest({
-      extension: CTCLRepository.IDNumber.get,
-      parameters: `_idNo=${idNumber}`
+      extension: CTCLRepository.CtClientIndividual.get2,
+      parameters: `_numberId=${numberId}`
     })
+    setInfoAutoFilled(false)
+    const clientInfo = response && response.record
+    if (!!clientInfo) {
+      formik.setFieldValue('clientId', clientInfo.clientIndividual.clientId)
+      formik.setFieldValue('firstName', clientInfo.clientIndividual.firstName)
+      formik.setFieldValue('middleName', clientInfo.clientIndividual.middleName)
+      formik.setFieldValue('lastName', clientInfo.clientIndividual.lastName)
+      formik.setFieldValue('familyName', clientInfo.clientIndividual.familyName)
+      formik.setFieldValue('fl_firstName', clientInfo.clientIndividual.fl_firstName)
+      formik.setFieldValue('fl_lastName', clientInfo.clientIndividual.fl_lastName)
+      formik.setFieldValue('fl_middleName', clientInfo.clientIndividual.fl_middleName)
+      formik.setFieldValue('fl_familyName', clientInfo.clientIndividual.fl_familyName)
+      formik.setFieldValue('birthDate', formatDateFromApi(clientInfo.clientIndividual.birthDate))
+      formik.setFieldValue('resident', clientInfo.clientIndividual.isResident)
+      formik.setFieldValue('sponsorName', clientInfo.clientIndividual.sponsorName)
+      formik.setFieldValue('otp', clientInfo.client.otp)
+      formik.setFieldValue('expiryDate', formatDateFromApi(clientInfo.client.expiryDate))
+      formik.setFieldValue('professionId', clientInfo.client.professionId)
+      formik.setFieldValue('nationalityId', clientInfo.client.nationalityId)
+      formik.setFieldValue('cellPhone', clientInfo.client.cellPhone)
 
-    return response.record
+      setInfoAutoFilled(true)
+    }
   }
 
   async function fetchInfoByKey({ key }) {
@@ -852,18 +929,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
 
                             if (e.target.value && e.target.value != idNumberOne) {
                               checkTypes(e.target.value)
-
-                              fetchIDInfo({ idNumber: e.target.value })
-                                .then(IDInfo => {
-                                  if (!!IDInfo) {
-                                    formik.setFieldValue('id_type', IDInfo.idtId)
-                                    formik.setFieldValue('expiryDate', formatDateFromApi(IDInfo.idExpiryDate))
-                                    if (IDInfo.clientId != null) {
-                                      fetchClientInfo({ clientId: IDInfo.clientId })
-                                    }
-                                  }
-                                })
-                                .catch(error => {})
+                              fetchClientInfo({ numberId: e.target.value })
                             }
                           }}
                           onFocus={value => {
@@ -1125,7 +1191,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                   <DataGrid
                     onChange={value => formik.setFieldValue('operations', value)}
                     value={formik.values.operations}
-                    error={formik.errors.operations}
+                    error={emptyRows.length < 1 ? formik.errors.operations : true}
                     height={200}
                     disabled={isClosed}
                     maxAccess={maxAccess}
@@ -1159,6 +1225,8 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                           if (!newRow?.currencyId) {
                             update({
                               currencyId: '',
+                              currencyName: '',
+                              currencyRef: '',
                               exRate: '',
                               defaultRate: '',
                               rateCalcMethod: '',
@@ -1171,7 +1239,6 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                           const exchange = await fetchRate({ currencyId: newRow?.currencyId })
                           if (!exchange?.rate) {
                             update({
-                              currencyId: '',
                               exRate: '',
                               defaultRate: '',
                               rateCalcMethod: '',
@@ -1231,6 +1298,12 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                       },
                       {
                         component: 'numberfield',
+                        label: labels.defaultRate,
+                        name: 'defaultRate',
+                        props: { readOnly: true }
+                      },
+                      {
+                        component: 'numberfield',
                         name: 'exRate',
                         label: labels.Rate,
                         props: {
@@ -1242,33 +1315,41 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                           const lcAmount = newRow.lcAmount
                           const rateCalcMethod = newRow.rateCalcMethod
                           const exRate = newRow.exRate
+                          if (exRate)
+                            if (exRate >= newRow.minRate && exRate <= newRow.maxRate) {
+                              if (fcAmount) {
+                                const lcAmount =
+                                  rateCalcMethod === 1
+                                    ? fcAmount * exRate
+                                    : rateCalcMethod === 2
+                                    ? fcAmount / exRate
+                                    : 0
+                                !isNaN(lcAmount) &&
+                                  update({
+                                    lcAmount: lcAmount.toFixed(2)
+                                  })
+                              } else if (lcAmount) {
+                                const fcAmount =
+                                  rateCalcMethod === 2
+                                    ? lcAmount * exRate
+                                    : rateCalcMethod === 1
+                                    ? lcAmount / exRate
+                                    : 0
+                                !isNaN(fcAmount) &&
+                                  update({
+                                    fcAmount: fcAmount.toFixed(2)
+                                  })
+                              }
+                            } else {
+                              stackError({
+                                message: `Rate not in the [${newRow.minRate}-${newRow.maxRate}]range.`
+                              })
+                              update({
+                                exRate: ''
+                              })
 
-                          if (exRate >= newRow.minRate && exRate <= newRow.maxRate) {
-                            if (fcAmount) {
-                              const lcAmount =
-                                rateCalcMethod === 1 ? fcAmount * exRate : rateCalcMethod === 2 ? fcAmount / exRate : 0
-                              !isNaN(lcAmount) &&
-                                update({
-                                  lcAmount: lcAmount.toFixed(2)
-                                })
-                            } else if (lcAmount) {
-                              const fcAmount =
-                                rateCalcMethod === 2 ? lcAmount * exRate : rateCalcMethod === 1 ? lcAmount / exRate : 0
-                              !isNaN(fcAmount) &&
-                                update({
-                                  fcAmount: fcAmount.toFixed(2)
-                                })
+                              return
                             }
-                          } else {
-                            stackError({
-                              message: `Rate not in the [${newRow.minRate}-${newRow.maxRate}]range.`
-                            })
-                            update({
-                              exRate: ''
-                            })
-
-                            return
-                          }
                         },
 
                         defaultValue: ''
