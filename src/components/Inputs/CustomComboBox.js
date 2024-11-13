@@ -51,7 +51,9 @@ const CustomComboBox = ({
 
   const value = neverPopulate ? '' : _value
 
-  return (
+  return _hidden ? (
+    <></>
+  ) : (
     <Autocomplete
       name={name}
       value={store?.[defaultIndex] || value}
