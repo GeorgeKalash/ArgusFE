@@ -10,7 +10,6 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
 import { DeliveryRepository } from 'src/repositories/DeliveryRepository'
-import { useError } from 'src/error'
 import OutboundTranspForm from './forms/OutboundTranspForm'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 
@@ -143,14 +142,12 @@ const OutboundTransp = () => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: DeliveryRepository.Trip.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
+    await postRequest({
+      extension: DeliveryRepository.Trip.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   const onSearch = value => {

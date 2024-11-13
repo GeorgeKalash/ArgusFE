@@ -14,9 +14,12 @@ import AccountBalance from './AccountBalance'
 import CashTransaction from './CashTransaction'
 import FinancialTransaction from './FinancialTransaction'
 import Aging from './Aging'
+import MetalSummary from './MetalSummary'
 import { ControlContext } from 'src/providers/ControlContext'
 import { ClientRelationForm } from './ClientRelationForm'
 import { ClientBalance } from './ClientBalance'
+import InventoryTransaction from './InventoryTransaction'
+import SalesTrxForm from './SalesTrxForm'
 
 export default function FormShell({
   form,
@@ -42,9 +45,11 @@ export default function FormShell({
   addClientRelation = false,
   setErrorMessage,
   previewReport = false,
+  previewBtnClicked = () => {},
   setIDInfoAutoFilled,
   visibleClear,
-  actions
+  actions,
+  filteredItems = []
 }) {
   const { stack } = useWindow()
   const [selectedReport, setSelectedReport] = useState(null)
@@ -126,6 +131,18 @@ export default function FormShell({
     }
   }
 
+  function onInventoryTransaction() {
+    stack({
+      Component: InventoryTransaction,
+      props: {
+        recordId: form.values.recordId,
+        functionId: functionId
+      },
+      width: 1000,
+      title: platformLabels.InventoryTransaction
+    })
+  }
+
   const performPostSubmissionTasks = async () => {
     if (typeof open === 'function') {
       await open()
@@ -172,10 +189,9 @@ export default function FormShell({
               Component: TransactionLog,
               props: {
                 recordId: form.values?.recordId ?? form.values.clientId,
-                resourceId: resourceId,
-                setErrorMessage: setErrorMessage
+                resourceId: resourceId
               },
-              width: 700,
+              width: 900,
               height: 600,
               title: platformLabels.TransactionLog
             })
@@ -203,6 +219,19 @@ export default function FormShell({
               width: 1000,
               height: 620,
               title: platformLabels.financialTransaction
+            })
+          }
+          onClickSATRX={() =>
+            stack({
+              Component: SalesTrxForm,
+              props: {
+                recordId: form.values?.recordId,
+                functionId: functionId,
+                itemId: 0,
+                clientId: form?.values?.header?.clientId
+              },
+              width: 1200,
+              title: platformLabels.SalesTransactions
             })
           }
           onClickGIA={() =>
@@ -271,7 +300,10 @@ export default function FormShell({
                 selectedReport: selectedReport,
                 recordId: form.values?.recordId,
                 functionId: form.values?.functionId,
-                resourceId: resourceId
+                resourceId: resourceId,
+                scId: form.values?.stockCountId,
+                siteId: form.values?.siteId,
+                onSuccess: previewBtnClicked
               },
               width: 1150,
               height: 700,
@@ -290,6 +322,18 @@ export default function FormShell({
               title: platformLabels.Aging
             })
           }
+          onClickMetal={() =>
+            stack({
+              Component: MetalSummary,
+              props: {
+                filteredItems
+              },
+              width: 600,
+              height: 550,
+              title: platformLabels.Metals,
+              expandable: false
+            })
+          }
           isSaved={isSaved}
           isSavedClear={isSavedClearVisible}
           onGenerate={onGenerate}
@@ -298,6 +342,7 @@ export default function FormShell({
           isGenerated={isGenerated}
           actions={actions}
           onApproval={onApproval}
+          onInventoryTransaction={onInventoryTransaction}
           onRecordRemarks={onRecordRemarks}
           transactionClicked={transactionClicked}
           editMode={editMode}

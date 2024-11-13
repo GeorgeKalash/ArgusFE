@@ -19,7 +19,7 @@ import { LOShipmentForm } from 'src/components/Shared/LOShipmentForm'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import FormGrid from 'src/components/form/layout/FormGrid'
-import { formatDateFromApi, formatDateToApi, formatDateToApiFunction } from 'src/lib/date-helper'
+import { formatDateForGetApI, formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
@@ -348,7 +348,7 @@ export default function CashTransferTab({ labels, recordId, access, plantId, cas
   function getCurrencyApi(_currencyId) {
     return getRequest({
       extension: MultiCurrencyRepository.Currency.get,
-      parameters: `_currencyId=${_currencyId}&_date=${formatDateToApiFunction(formik.values.date)}&_rateDivision=${
+      parameters: `_currencyId=${_currencyId}&_date=${formatDateForGetApI(formik.values.date)}&_rateDivision=${
         RateDivision.FINANCIALS
       }`
     })

@@ -8,7 +8,7 @@ import FieldSet from 'src/components/Shared/FieldSet'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useError } from 'src/error'
-import { formatDateFromApi, formatDateToApiFunction } from 'src/lib/date-helper'
+import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
@@ -38,25 +38,8 @@ import CustomDatePickerHijri from 'src/components/Inputs/CustomDatePickerHijri'
 
 const FormContext = React.createContext(null)
 
-export async function Country(getRequest) {
-  var parameters = `_filter=&_key=countryId`
-
-  const res = await getRequest({
-    extension: SystemRepository.Defaults.get,
-    parameters: parameters
-  })
-
-  return res.record.value
-}
-
 function FormField({ type, name, Component, valueField, onFocus, language, phone, ...rest }) {
   const { formik, labels } = useContext(FormContext)
-  const { getRequest } = useContext(RequestsContext)
-
-  const getCountry = async () => {
-    const countryId = await Country(getRequest)
-    formik.setFieldValue('issue_country', parseInt(countryId))
-  }
 
   return (
     <Component
@@ -74,13 +57,10 @@ function FormField({ type, name, Component, valueField, onFocus, language, phone
         phone: phone
       }}
       onChange={(e, v) => {
-        if (name === 'id_type' && v && v['type'] && (v['type'] === 1 || v['type'] === 2)) {
-          getCountry()
-        }
         formik.setFieldValue(name, v ? v[valueField] ?? v : e.target.value)
       }}
       onFocus={e => {
-        if (onFocus && (name == 'id_number' || name == 'search')) {
+        if (onFocus && (name == 'idNo' || name == 'search')) {
           onFocus(e.target.value)
         }
         if (onFocus && name == 'cellPhone') {
@@ -113,20 +93,18 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
   const [fId, setFId] = useState(SystemFunction.CurrencyPurchase)
   const { platformLabels } = useContext(ControlContext)
 
+  const resetAutoFilled = () => {
+    setIDInfoAutoFilled(false)
+    setInfoAutoFilled(false)
+  }
+
   async function checkTypes(value) {
     if (!value) {
       formik.setFieldValue('id_type', '')
     }
     const idType = await getValue(value)
     if (idType) {
-      formik.setFieldValue('id_type', idType)
-      if (idType) {
-        const res = idTypeStore.filter(item => item.recordId === idType)[0]
-        if (res.type === 1 || res.type === 2) {
-          const countryId = await Country(getRequest)
-          formik.setFieldValue('issue_country', parseInt(countryId))
-        }
-      }
+      formik.setFieldValue('id_type', idType.recordId)
     }
   }
 
@@ -173,18 +151,16 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     fl_lastName: null,
     fl_middleName: null,
     fl_familyName: null,
-    birth_date: null,
+    birthDate: null,
     resident: false,
-    profession: null,
-    source_of_income: null,
-    sponsor: null,
-    id_number: null,
-    issue_country: null,
+    professionId: null,
+    sponsorName: null,
+    idNo: null,
     id_type: null,
-    expiry_date: null,
+    expiryDate: null,
     remarks: null,
     purpose_of_exchange: null,
-    nationality: null,
+    nationalityId: null,
     cellPhone: null,
     status: '1',
     type: -1,
@@ -210,37 +186,36 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     validateOnChange: true,
     validateOnBlur: true,
     validationSchema: yup.object({
-      date: yup.string().required(' '),
-      id_type: yup.number().required(' '),
-      id_number: yup.number().required(' '),
-      birth_date: yup.string().required(' '),
-      firstName: yup.string().required(' '),
-      lastName: yup.string().required(' '),
-      expiry_date: yup.string().required(' '),
-      issue_country: yup.string().required(' '),
-      nationality: yup.string().required(' '),
-      cellPhone: yup.string().required(' '),
-      profession: yup.string().required(' '),
+      date: yup.string().required(),
+      id_type: yup.number().required(),
+      idNo: yup.number().required(),
+      birthDate: yup.string().required(),
+      firstName: yup.string().required(),
+      lastName: yup.string().required(),
+      expiryDate: yup.string().required(),
+      nationalityId: yup.string().required(),
+      cellPhone: yup.string().required(),
+      professionId: yup.string().required(),
       operations: yup
         .array()
         .of(
           yup.object().shape({
-            currencyId: yup.string().required(' '),
-            exRate: yup.string().nullable().required(' '),
-            fcAmount: yup.number().required(' '),
-            lcAmount: yup.number().required(' ')
+            currencyId: yup.string().required(),
+            exRate: yup.string().nullable().required(),
+            fcAmount: yup.number().required(),
+            lcAmount: yup.number().required()
           })
         )
-        .required(' '),
+        .required(),
       amount: yup
         .array()
         .of(
           yup.object().shape({
-            type: yup.string().required(' '),
-            amount: yup.number().nullable().required(' ')
+            type: yup.string().required(),
+            amount: yup.number().nullable().required()
           })
         )
-        .required(' ')
+        .required()
     }),
     onSubmit: async values => {
       try {
@@ -284,7 +259,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
               dtId,
               reference: values.reference,
               status: values.status,
-              date: formatDateToApiFunction(values.date),
+              date: formatDateToApi(values.date),
               functionId: values.functionId,
               plantId: plantId ? plantId : values.plantId,
               clientId,
@@ -304,14 +279,15 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
               name: null,
               flName: null,
               keyword: null,
-              nationalityId: values.nationality,
+              nationalityId: values.nationalityId,
               status: 1,
               addressId: null,
               cellPhone: values.cellPhone,
               oldReference: null,
               otp: false,
-              createdDate: formatDateToApiFunction(values.date),
-              expiryDate: null
+              createdDate: formatDateToApi(values.date),
+              expiryDate: null,
+              professionId: values.professionId
             },
             clientIndividual: {
               clientId,
@@ -323,18 +299,15 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
               fl_lastName: values.fl_lastName,
               fl_middleName: values.fl_middleName,
               fl_familyName: values.fl_familyName,
-              birthDate: formatDateToApiFunction(values.birth_date),
+              birthDate: formatDateToApi(values.birthDate),
               isResident: values.resident,
-              professionId: values.profession,
-              incomeSourceId: values.source_of_income,
-              sponsorName: values.sponsor
+              sponsorName: values.sponsorName
             },
             clientID: {
-              idNo: values.id_number,
+              idNo: values.idNo,
               clientId,
-              idCountryId: values.issue_country,
               idtId: values.id_type,
-              idExpiryDate: formatDateToApiFunction(values.expiry_date),
+              idExpiryDate: formatDateToApi(values.expiryDate),
               idIssueDate: null,
               idCityId: null,
               isDiplomat: false
@@ -349,7 +322,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
               }))
           }
 
-          const hasKYC = await fetchInfoByKey({ key: values.id_number })
+          const hasKYC = await fetchInfoByKey({ key: values.idNo })
 
           let totalBaseAmount = ''
           if (total > baseAmount.value && !recordId) {
@@ -449,6 +422,9 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
               : ''
         })
 
+        if (!res.record?.value) {
+          stackError({ message: platformLabels.rateTypeUndefined })
+        }
         setRateType(res.record.value)
 
         formik.setFieldValue('functionId', type)
@@ -517,18 +493,16 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       formik.setFieldValue('fl_lastName', record?.clientIndividual?.fl_lastName)
       formik.setFieldValue('fl_middleName', record?.clientIndividual?.fl_middleName)
       formik.setFieldValue('fl_familyName', record?.clientIndividual?.fl_familyName)
-      formik.setFieldValue('birth_date', formatDateFromApi(record?.clientIndividual?.birthDate))
+      formik.setFieldValue('birthDate', formatDateFromApi(record?.clientIndividual?.birthDate))
       formik.setFieldValue('resident', record?.clientIndividual?.isResident)
-      formik.setFieldValue('profession', record?.clientIndividual?.professionId)
-      formik.setFieldValue('source_of_income', record?.clientIndividual?.incomeSourceId)
-      formik.setFieldValue('sponsor', record?.clientIndividual?.sponsorName)
-      formik.setFieldValue('id_number', record.clientIDView.idNo)
-      formik.setFieldValue('issue_country', record.clientIDView.idCountryId)
+      formik.setFieldValue('professionId', record?.clientIndividual?.professionId)
+      formik.setFieldValue('sponsorName', record?.clientIndividual?.sponsorName)
+      formik.setFieldValue('idNo', record.clientIDView.idNo)
       formik.setFieldValue('id_type', record.clientIDView.idtId)
-      formik.setFieldValue('expiry_date', formatDateFromApi(record.clientIDView.idExpiryDate))
+      formik.setFieldValue('expiryDate', formatDateFromApi(record.clientIDView.idExpiryDate))
       formik.setFieldValue('remarks', record.headerView.notes)
       formik.setFieldValue('purpose_of_exchange', record.headerView.poeId)
-      formik.setFieldValue('nationality', record.clientMaster.nationalityId)
+      formik.setFieldValue('nationalityId', record.clientMaster.nationalityId)
       formik.setFieldValue('cellPhone', record.clientMaster.cellPhone)
       formik.setFieldValue('status', record.headerView.status)
       formik.setFieldValue('cashAccountId', record.headerView.cashAccountId)
@@ -569,7 +543,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
 
       const data = {
         recordId: values?.recordId || null,
-        date: formatDateToApiFunction(values.date),
+        date: formatDateToApi(values.date),
         reference: values.reference,
         status: values.status,
         functionId: values.functionId,
@@ -643,11 +617,10 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
         formik.setFieldValue('fl_lastName', clientInfo.fl_lastName)
         formik.setFieldValue('fl_middleName', clientInfo.fl_middleName)
         formik.setFieldValue('fl_familyName', clientInfo.fl_familyName)
-        formik.setFieldValue('birth_date', formatDateFromApi(clientInfo.birthDate))
+        formik.setFieldValue('birthDate', formatDateFromApi(clientInfo.birthDate))
         formik.setFieldValue('resident', clientInfo.isResident)
-        formik.setFieldValue('profession', clientInfo.professionId)
-        formik.setFieldValue('sponsor', clientInfo.sponsorName)
-        formik.setFieldValue('source_of_income', clientInfo.incomeSourceId)
+        formik.setFieldValue('professionId', clientInfo.professionId)
+        formik.setFieldValue('sponsorName', clientInfo.sponsorName)
 
         setInfoAutoFilled(true)
       }
@@ -680,7 +653,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
 
       const data = {
         recordId: values?.recordId || null,
-        date: formatDateToApiFunction(values.date),
+        date: formatDateToApi(values.date),
         reference: values.reference,
         status: values.status,
         functionId: values.functionId,
@@ -746,7 +719,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       actions={actions}
       form={formik}
       initialValues={initialValues}
-      setIDInfoAutoFilled={setIDInfoAutoFilled}
+      setIDInfoAutoFilled={resetAutoFilled}
       resourceId={ResourceIds.CashInvoice}
       editMode={editMode}
       isClosed={isClosed}
@@ -758,7 +731,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
           <FormProvider formik={formik} labels={labels} maxAccess={maxAccess}>
             <Grid container sx={{ zIndex: 0 }}>
               <FieldSet title='Transaction'>
-                <Grid container spacing={4}>
+                <Grid container spacing={2}>
                   <Grid item xs={4}>
                     <FormField name='reference' maxAccess={maxAccess} Component={CustomTextField} readOnly={editMode} />
                   </Grid>
@@ -829,7 +802,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                               if (!!info) {
                                 setIDInfoAutoFilled(false)
 
-                                formik.setFieldValue('id_number', info.clientIDView.idNo)
+                                formik.setFieldValue('idNo', info.clientIDView.idNo)
                                 formik.setFieldValue('firstName', info.clientIndividual.firstName)
                                 formik.setFieldValue('clientId', info.clientId)
                                 formik.setFieldValue('middleName', info.clientIndividual.middleName)
@@ -839,16 +812,14 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                                 formik.setFieldValue('fl_lastName', info.clientIndividual.fl_lastName)
                                 formik.setFieldValue('fl_middleName', info.clientIndividual.fl_middleName)
                                 formik.setFieldValue('fl_familyName', info.clientIndividual.fl_familyName)
-                                formik.setFieldValue('birth_date', formatDateFromApi(info.clientIndividual.birthDate))
+                                formik.setFieldValue('birthDate', formatDateFromApi(info.clientIndividual.birthDate))
                                 formik.setFieldValue('resident', info.clientIndividual.isResident)
-                                formik.setFieldValue('profession', info.clientIndividual.professionId)
-                                formik.setFieldValue('sponsor', info.clientIndividual.sponsorName)
-                                formik.setFieldValue('source_of_income', info.clientIndividual.incomeSourceId)
-                                formik.setFieldValue('issue_country', info.clientIDView.idCountryId)
+                                formik.setFieldValue('professionId', info.clientMaster.professionId)
+                                formik.setFieldValue('sponsorName', info.clientIndividual.sponsorName)
                                 formik.setFieldValue('id_type', info.clientIDView.idtId)
-                                formik.setFieldValue('nationality', info.clientMaster.nationalityId)
+                                formik.setFieldValue('nationalityId', info.clientMaster.nationalityId)
                                 formik.setFieldValue('cellPhone', info.clientMaster.cellPhone)
-                                formik.setFieldValue('expiry_date', formatDateFromApi(info.clientIDView.idExpiryDate))
+                                formik.setFieldValue('expiryDate', formatDateFromApi(info.clientIDView.idExpiryDate))
 
                                 setIDInfoAutoFilled(true)
                               }
@@ -866,13 +837,296 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                   </Grid>
                 </Grid>
               </FieldSet>
+
+              <FieldSet title='Individual'>
+                <Grid container>
+                  <Grid item xs={4}>
+                    <Grid container spacing={2} xs={12} sx={{ px: 2 }}>
+                      <Grid item xs={12}>
+                        <FormField
+                          name='idNo'
+                          type={showAsPasswordIDNumber && formik.values['idNo'] ? 'password' : 'text'}
+                          Component={CustomTextField}
+                          onBlur={e => {
+                            setShowAsPasswordIDNumber(true)
+
+                            if (e.target.value && e.target.value != idNumberOne) {
+                              checkTypes(e.target.value)
+
+                              fetchIDInfo({ idNumber: e.target.value })
+                                .then(IDInfo => {
+                                  if (!!IDInfo) {
+                                    formik.setFieldValue('id_type', IDInfo.idtId)
+                                    formik.setFieldValue('expiryDate', formatDateFromApi(IDInfo.idExpiryDate))
+                                    if (IDInfo.clientId != null) {
+                                      fetchClientInfo({ clientId: IDInfo.clientId })
+                                    }
+                                  }
+                                })
+                                .catch(error => {})
+                            }
+                          }}
+                          onFocus={value => {
+                            setShowAsPasswordIDNumber(false)
+                            value && setIdNumber(value)
+                          }}
+                          readOnly={editMode || isClosed || idInfoAutoFilled}
+                          required
+                        />
+                      </Grid>
+                      <Grid item xs={6}>
+                        <CustomDatePicker
+                          name='birthDate'
+                          label={labels.birthDate}
+                          value={formik.values?.birthDate}
+                          required={true}
+                          onChange={formik.setFieldValue}
+                          onClear={() => formik.setFieldValue('birthDate', '')}
+                          error={formik.touched.birthDate && Boolean(formik.errors.birthDate)}
+                          readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
+                          maxAccess={maxAccess}
+                        />
+                      </Grid>
+                      <Grid item xs={6}>
+                        <CustomDatePickerHijri
+                          name='birthdatehijri'
+                          label={labels.birthDateHijri}
+                          value={formik.values?.birthDate}
+                          onChange={(name, value) => {
+                            formik.setFieldValue('birthDate', value)
+                          }}
+                          readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
+                          onClear={() => formik.setFieldValue('birthDate', '')}
+                        />
+                      </Grid>
+                      <Grid item xs={6}>
+                        <FormField
+                          name='id_type'
+                          Component={ResourceComboBox}
+                          endpointId={CurrencyTradingSettingsRepository.IdTypes.qry}
+                          valueField='recordId'
+                          displayField='name'
+                          readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
+                          required
+                        />
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Button
+                          variant='contained'
+                          onClick={() =>
+                            stack({
+                              Component: Confirmation,
+                              props: {
+                                idTypeStore: idTypeStore,
+                                clientformik: formik,
+                                labels: labels
+                              },
+                              title: labels.fetch,
+                              width: 400,
+                              height: 400
+                            })
+                          }
+                          disabled={
+                            !formik?.values?.id_type ||
+                            !formik?.values?.birthDate ||
+                            !formik.values.idNo ||
+                            (formik.values?.expiryDate && new Date(formik.values?.expiryDate) >= new Date())
+                              ? true
+                              : false
+                          }
+                        >
+                          {labels.fetch}
+                        </Button>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <CustomDatePicker
+                          name='expiryDate'
+                          label={labels.expiryDate}
+                          value={formik.values?.expiryDate}
+                          required={true}
+                          onChange={formik.setFieldValue}
+                          onClear={() => formik.setFieldValue('expiryDate', '')}
+                          error={formik.touched.expiryDate && Boolean(formik.errors.expiryDate)}
+                          readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
+                          maxAccess={maxAccess}
+                        />
+                      </Grid>
+                    </Grid>
+                  </Grid>
+
+                  <Grid container rowGap={2} xs={8} sx={{ pl: 4, alignContent: 'start' }}>
+                    <Grid xs={12} container spacing={2} sx={{ direction: dir }}>
+                      <Grid item xs={3}>
+                        <FormField
+                          name='firstName'
+                          Component={CustomTextField}
+                          readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
+                          required
+                          language='english'
+                        />
+                      </Grid>
+                      <Grid item xs={3}>
+                        <FormField
+                          name='middleName'
+                          language='english'
+                          Component={CustomTextField}
+                          readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
+                        />
+                      </Grid>
+                      <Grid item xs={3}>
+                        <FormField
+                          name='lastName'
+                          Component={CustomTextField}
+                          readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
+                          required
+                          language='english'
+                        />
+                      </Grid>
+                      <Grid item xs={3}>
+                        <FormField
+                          name='familyName'
+                          language='english'
+                          Component={CustomTextField}
+                          readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
+                        />
+                      </Grid>
+                    </Grid>
+                    <Grid xs={12} container spacing={2} sx={{ flexDirection: 'row-reverse', direction: dir }}>
+                      <Grid item xs={3}>
+                        <FormField
+                          name='fl_firstName'
+                          Component={CustomTextField}
+                          readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
+                          language='arabic'
+                        />
+                      </Grid>
+                      <Grid item xs={3}>
+                        <FormField
+                          name='fl_middleName'
+                          Component={CustomTextField}
+                          readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
+                          language='arabic'
+                        />
+                      </Grid>
+                      <Grid item xs={3}>
+                        <FormField
+                          name='fl_lastName'
+                          Component={CustomTextField}
+                          readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
+                        />
+                      </Grid>
+                      <Grid item xs={3}>
+                        <FormField
+                          name='fl_familyName'
+                          Component={CustomTextField}
+                          readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
+                          language='arabic'
+                        />
+                      </Grid>
+                    </Grid>
+
+                    <Grid container spacing={2} xs={12}>
+                      <Grid item xs={4}>
+                        <FormField
+                          type={showAsPasswordPhone && formik.values['cellPhone'] ? 'password' : 'text'}
+                          name='cellPhone'
+                          Component={CustomTextField}
+                          phone={true}
+                          required
+                          readOnly={editMode || isClosed || idInfoAutoFilled}
+                          onBlur={e => {
+                            setShowAsPasswordPhone(true)
+                          }}
+                          onFocus={value => {
+                            setShowAsPasswordPhone(false)
+                          }}
+                        />
+                      </Grid>
+                      <Grid item xs={4}>
+                        <FormField
+                          name='nationalityId'
+                          Component={ResourceComboBox}
+                          endpointId={SystemRepository.Country.qry}
+                          valueField='recordId'
+                          displayField={['reference', 'name', 'flName']}
+                          columnsInDropDown={[
+                            { key: 'reference', value: 'Reference' },
+                            { key: 'name', value: 'Name' },
+                            { key: 'flName', value: 'Foreign Language Name' }
+                          ]}
+                          readOnly={editMode || isClosed || idInfoAutoFilled}
+                          required
+                        />
+                      </Grid>
+                      <Grid item xs={4}>
+                        <FormField
+                          name='professionId'
+                          Component={ResourceComboBox}
+                          endpointId={RemittanceSettingsRepository.Profession.qry}
+                          required
+                          valueField='recordId'
+                          displayField={['reference', 'name']}
+                          columnsInDropDown={[
+                            { key: 'reference', value: 'Reference' },
+                            { key: 'name', value: 'Name' }
+                          ]}
+                          readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
+                        />
+                      </Grid>
+
+                      <Grid item xs={4}>
+                        <FormField
+                          name='purpose_of_exchange'
+                          Component={ResourceComboBox}
+                          endpointId={CurrencyTradingSettingsRepository.PurposeExchange.qry}
+                          valueField='recordId'
+                          displayField={['reference', 'name']}
+                          columnsInDropDown={[
+                            { key: 'reference', value: 'Reference' },
+                            { key: 'name', value: 'Name' }
+                          ]}
+                          readOnly={editMode || isClosed}
+                        />
+                      </Grid>
+
+                      <Grid item xs={2}>
+                        <FormControlLabel
+                          name='resident'
+                          checked={formik.values.resident}
+                          onChange={formik.handleChange}
+                          control={<Checkbox defaultChecked />}
+                          label='Resident'
+                          disabled={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
+                        />
+                      </Grid>
+                      <Grid item xs={2}>
+                        <FormControlLabel
+                          name='otp'
+                          checked={formik.values.otp}
+                          onChange={formik.handleChange}
+                          control={<Checkbox defaultChecked />}
+                          label='Otp'
+                          disabled={true}
+                        />
+                      </Grid>
+                      <Grid item xs={6}>
+                        <FormField name='sponsorName' Component={CustomTextField} readOnly={editMode || isClosed} />
+                      </Grid>
+
+                      <Grid item xs={6}>
+                        <FormField name='remarks' Component={CustomTextField} readOnly={editMode || isClosed} />
+                      </Grid>
+                    </Grid>
+                  </Grid>
+                </Grid>
+              </FieldSet>
               <FieldSet title='Operations'>
                 <Grid width={'100%'}>
                   <DataGrid
                     onChange={value => formik.setFieldValue('operations', value)}
                     value={formik.values.operations}
                     error={formik.errors.operations}
-                    height={300}
+                    height={200}
                     disabled={isClosed}
                     maxAccess={maxAccess}
                     name='operations'
@@ -1046,328 +1300,10 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                   />
                 </Grid>
               </FieldSet>
-              <FieldSet title='Individual'>
-                <Grid container spacing={4} sx={{ pt: 5 }}>
-                  <Grid container rowGap={3} xs={4} sx={{ px: 2 }}>
-                    <Grid item xs={7}>
-                      <FormField
-                        name='id_number'
-                        type={showAsPasswordIDNumber && formik.values['id_number'] ? 'password' : 'text'}
-                        Component={CustomTextField}
-                        onBlur={e => {
-                          setShowAsPasswordIDNumber(true)
-
-                          if (e.target.value && e.target.value != idNumberOne) {
-                            checkTypes(e.target.value)
-
-                            fetchIDInfo({ idNumber: e.target.value })
-                              .then(IDInfo => {
-                                if (!!IDInfo) {
-                                  formik.setFieldValue('issue_country', IDInfo.idCountryId)
-                                  formik.setFieldValue('id_type', IDInfo.idtId)
-                                  formik.setFieldValue('expiry_date', formatDateFromApi(IDInfo.idExpiryDate))
-                                  if (IDInfo.clientId != null) {
-                                    fetchClientInfo({ clientId: IDInfo.clientId })
-                                  }
-                                }
-                              })
-                              .catch(error => {})
-                          }
-                        }}
-                        onFocus={value => {
-                          setShowAsPasswordIDNumber(false)
-                          value && setIdNumber(value)
-                        }}
-                        readOnly={editMode || isClosed || idInfoAutoFilled}
-                        required
-                      />
-                    </Grid>
-                    <Grid item xs={7}>
-                      <CustomDatePicker
-                        name='birth_date'
-                        label={labels.birth_date}
-                        value={formik.values?.birth_date}
-                        required={true}
-                        onChange={formik.setFieldValue}
-                        onClear={() => formik.setFieldValue('birth_date', '')}
-                        error={formik.touched.birth_date && Boolean(formik.errors.birth_date)}
-                        readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
-                        maxAccess={maxAccess}
-                      />
-                    </Grid>
-
-                    <Grid item xs={7}>
-                      <CustomDatePickerHijri
-                        name='birthdatehijri'
-                        label={labels.birthDateHijri}
-                        value={formik.values?.birth_date}
-                        onChange={(name, value) => {
-                          formik.setFieldValue('birth_date', value)
-                        }}
-                        readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
-                        onClear={() => formik.setFieldValue('birth_date', '')}
-                      />
-                    </Grid>
-                    <Grid container xs={12}>
-                      <Grid item xs={7}>
-                        <FormField
-                          name='id_type'
-                          Component={ResourceComboBox}
-                          endpointId={CurrencyTradingSettingsRepository.IdTypes.qry}
-                          valueField='recordId'
-                          displayField='name'
-                          readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
-                          required
-                        />
-                      </Grid>
-                      <Grid item xs={5}>
-                        <Button
-                          variant='contained'
-                          onClick={() =>
-                            stack({
-                              Component: Confirmation,
-                              props: {
-                                idTypeStore: idTypeStore,
-                                formik: formik,
-                                labels: labels
-                              },
-                              title: labels.fetch,
-                              width: 400,
-                              height: 400
-                            })
-                          }
-                          disabled={
-                            !formik?.values?.id_type ||
-                            !formik?.values?.birth_date ||
-                            !formik.values?.id_number ||
-                            editMode ||
-                            isClosed
-                              ? true
-                              : false
-                          }
-                        >
-                          {labels.fetch} {formik?.values?.birth_Date}
-                        </Button>
-                      </Grid>
-                    </Grid>
-                    <Grid item xs={7}>
-                      <CustomDatePicker
-                        name='expiry_date'
-                        label={labels.expiry_date}
-                        value={formik.values?.expiry_date}
-                        required={true}
-                        onChange={formik.setFieldValue}
-                        onClear={() => formik.setFieldValue('expiry_date', '')}
-                        error={formik.touched.expiry_date && Boolean(formik.errors.expiry_date)}
-                        readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
-                        maxAccess={maxAccess}
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <FormField
-                        name='issue_country'
-                        Component={ResourceComboBox}
-                        endpointId={SystemRepository.Country.qry}
-                        valueField='recordId'
-                        displayField={['reference', 'name', 'flName']}
-                        columnsInDropDown={[
-                          { key: 'reference', value: 'Reference' },
-                          { key: 'name', value: 'Name' },
-                          { key: 'flName', value: 'Foreign Language Name' }
-                        ]}
-                        readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
-                        required
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <FormField
-                        name='nationality'
-                        Component={ResourceComboBox}
-                        endpointId={SystemRepository.Country.qry}
-                        valueField='recordId'
-                        displayField={['reference', 'name', 'flName']}
-                        columnsInDropDown={[
-                          { key: 'reference', value: 'Reference' },
-                          { key: 'name', value: 'Name' },
-                          { key: 'flName', value: 'Foreign Language Name' }
-                        ]}
-                        readOnly={editMode || isClosed || idInfoAutoFilled}
-                        required
-                      />
-                    </Grid>
-
-                    <Grid item xs={12}>
-                      <FormField
-                        type={showAsPasswordPhone && formik.values['cellPhone'] ? 'password' : 'text'}
-                        name='cellPhone'
-                        Component={CustomTextField}
-                        phone={true}
-                        required
-                        readOnly={editMode || isClosed || idInfoAutoFilled}
-                        onBlur={e => {
-                          setShowAsPasswordPhone(true)
-                        }}
-                        onFocus={value => {
-                          setShowAsPasswordPhone(false)
-                        }}
-                      />
-                    </Grid>
-                    <Grid item xs={7}>
-                      <FormControlLabel
-                        name='resident'
-                        checked={formik.values.resident}
-                        onChange={formik.handleChange}
-                        control={<Checkbox defaultChecked />}
-                        label='Resident'
-                        disabled={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
-                      />
-                    </Grid>
-                    <Grid item xs={2}>
-                      <FormControlLabel
-                        name='otp'
-                        checked={formik.values.otp}
-                        onChange={formik.handleChange}
-                        control={<Checkbox defaultChecked />}
-                        label='Otp'
-                        disabled={true}
-                      />
-                    </Grid>
-                  </Grid>
-
-                  <Grid container rowGap={3} xs={8} sx={{ px: 2, alignContent: 'start' }}>
-                    <Grid xs={12} container spacing={2} sx={{ direction: dir }}>
-                      <Grid item xs={3}>
-                        <FormField
-                          name='firstName'
-                          Component={CustomTextField}
-                          readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
-                          required
-                          language='english'
-                        />
-                      </Grid>
-                      <Grid item xs={3}>
-                        <FormField
-                          name='middleName'
-                          language='english'
-                          Component={CustomTextField}
-                          readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
-                        />
-                      </Grid>
-                      <Grid item xs={3}>
-                        <FormField
-                          name='lastName'
-                          Component={CustomTextField}
-                          readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
-                          required
-                          language='english'
-                        />
-                      </Grid>
-                      <Grid item xs={3}>
-                        <FormField
-                          name='familyName'
-                          language='english'
-                          Component={CustomTextField}
-                          readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
-                        />
-                      </Grid>
-                    </Grid>
-                    <Grid xs={12} container spacing={2} sx={{ flexDirection: 'row-reverse', direction: dir }}>
-                      <Grid item xs={3}>
-                        <FormField
-                          name='fl_firstName'
-                          Component={CustomTextField}
-                          readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
-                          language='arabic'
-                        />
-                      </Grid>
-                      <Grid item xs={3}>
-                        <FormField
-                          name='fl_middleName'
-                          Component={CustomTextField}
-                          readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
-                          language='arabic'
-                        />
-                      </Grid>
-                      <Grid item xs={3}>
-                        <FormField
-                          name='fl_lastName'
-                          Component={CustomTextField}
-                          readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
-                        />
-                      </Grid>
-                      <Grid item xs={3}>
-                        <FormField
-                          name='fl_familyName'
-                          Component={CustomTextField}
-                          readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
-                          language='arabic'
-                        />
-                      </Grid>
-                    </Grid>
-                    <Grid container rowGap={3} xs={4}></Grid>
-
-                    <Grid container rowGap={3} xs={8}>
-                      <Grid item xs={12}>
-                        <FormField name='sponsor' Component={CustomTextField} readOnly={editMode || isClosed} />
-                      </Grid>
-
-                      <Grid item xs={12}>
-                        <FormField
-                          name='purpose_of_exchange'
-                          Component={ResourceComboBox}
-                          endpointId={CurrencyTradingSettingsRepository.PurposeExchange.qry}
-                          valueField='recordId'
-                          displayField={['reference', 'name']}
-                          columnsInDropDown={[
-                            { key: 'reference', value: 'Reference' },
-                            { key: 'name', value: 'Name' }
-                          ]}
-                          readOnly={editMode || isClosed}
-                        />
-                      </Grid>
-
-                      <Grid item xs={12}>
-                        <FormField
-                          name='source_of_income'
-                          Component={ResourceComboBox}
-                          endpointId={RemittanceSettingsRepository.SourceOfIncome.qry}
-                          valueField='recordId'
-                          displayField={['reference', 'name']}
-                          columnsInDropDown={[
-                            { key: 'reference', value: 'Reference' },
-                            { key: 'name', value: 'Name' }
-                          ]}
-                          readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
-                        />
-                      </Grid>
-
-                      <Grid item xs={12}>
-                        <FormField
-                          name='profession'
-                          Component={ResourceComboBox}
-                          endpointId={RemittanceSettingsRepository.Profession.qry}
-                          required
-                          valueField='recordId'
-                          displayField={['reference', 'name']}
-                          columnsInDropDown={[
-                            { key: 'reference', value: 'Reference' },
-                            { key: 'name', value: 'Name' }
-                          ]}
-                          readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
-                        />
-                      </Grid>
-
-                      <Grid item xs={12}>
-                        <FormField name='remarks' Component={CustomTextField} readOnly={editMode || isClosed} />
-                      </Grid>
-                    </Grid>
-                  </Grid>
-                </Grid>
-              </FieldSet>
               <FieldSet title='Amount'>
-                <Grid container xs={12} spacing={4}>
-                  <Grid item xs={9} spacing={4}>
-                    <Grid container xs={12} spacing={4}>
+                <Grid container xs={12}>
+                  <Grid item xs={9}>
+                    <Grid container xs={12} spacing={2}>
                       <Grid width={'100%'}>
                         <DataGrid
                           height={200}

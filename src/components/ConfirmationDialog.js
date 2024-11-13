@@ -10,7 +10,8 @@ const ConfirmationDialog = ({ openCondition, closeCondition, DialogText, okButto
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        height: '120px'
+        height: '120px',
+        zIndex: 2
       }}
     >
       <Box
@@ -37,7 +38,7 @@ const ConfirmationDialog = ({ openCondition, closeCondition, DialogText, okButto
       </Box>
     </Box>
   ) : (
-    <Dialog open={openCondition} onClose={closeCondition} fullWidth={true} maxWidth='xs'>
+    <Dialog sx={{ zIndex: 2 }} open={openCondition} onClose={closeCondition} fullWidth={true} maxWidth='xs'>
       <DialogTitle>{platformLabels.Confirmation}</DialogTitle>
       <DialogContent>
         <DialogContentText>{DialogText}</DialogContentText>

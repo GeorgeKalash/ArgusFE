@@ -3,7 +3,14 @@ export const getButtons = platformLabels => [
     key: 'Post',
     label: platformLabels.Post,
     color: '#231f20',
-    image: 'post.png',
+    image: 'lock.png',
+    main: false
+  },
+  {
+    key: 'Unpost',
+    label: platformLabels.Unpost,
+    color: '#231f20',
+    image: 'unlock.png',
     main: false
   },
   {
@@ -17,6 +24,13 @@ export const getButtons = platformLabels => [
     key: 'Cancel',
     label: platformLabels.Cancel,
     color: '#0A4164',
+    image: 'cancelWhite.png',
+    main: false
+  },
+  {
+    key: 'Terminate',
+    label: platformLabels.Terminate,
+    color: '#FF0000',
     image: 'cancelWhite.png',
     main: false
   },
@@ -163,6 +177,13 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'SA Trx',
+    label: platformLabels.SaTrx,
+    color: '#8C0446',
+    image: 'popup-window.png',
+    main: false
+  },
+  {
     key: 'FI Trx',
     label: platformLabels.FinTrx,
     color: '#3E048C',
@@ -214,6 +235,7 @@ export const getButtons = platformLabels => [
     key: 'OpenRPB',
     label: platformLabels.OpenRPB,
     color: '#231F20',
+    image: 'parameters.png',
     main: false
   },
   {
@@ -226,6 +248,14 @@ export const getButtons = platformLabels => [
     key: 'GO',
     label: platformLabels.Apply,
     color: '#231F20',
+    image: 'go.png',
+    main: false
+  },
+  {
+    key: 'IV',
+    label: platformLabels.InventoryTransaction,
+    color: '#A76035',
+    image: 'popup-window.png',
     main: false
   },
   {
@@ -272,7 +302,7 @@ export const getButtons = platformLabels => [
     color: '#231f20',
     image: 'saveclear.png',
     main: true,
-    disabled: 'disabledSavedClear'
+    disabled: 'disabledSavedClear || isPosted || isClosed'
   },
   {
     key: 'Submit',
@@ -322,9 +352,29 @@ export const getButtons = platformLabels => [
   {
     key: 'OTP',
     label: platformLabels.OTP,
-    color: 'transparent',
-    image: 'Close.png',
-    border: '1px solid #01a437',
+    color: '#231f20',
+    image: 'sms.png',
     main: false
-  }
+  },
+  {
+    key: 'Metals',
+    label: platformLabels.Metals,
+    color: '#ADD8E6',
+    image: 'metals-icon.png',
+    main: false
+  },
+  {
+    key: 'generated 2 FA',
+    label: platformLabels.Generated2FA,
+    color: '#231f20',
+    image: 'save.png',
+    main: true
+  },
+  {
+    key: 'Transfer',
+    label: platformLabels.Transfer,
+    color: '#4eb558',
+    image: 'exchange-refresh-icon.png',
+    main: false
+  },
 ]

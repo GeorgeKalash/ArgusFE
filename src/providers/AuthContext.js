@@ -35,41 +35,42 @@ const AuthProvider = ({ children }) => {
   const [getAC, setGetAC] = useState({})
   const [languageId, setLanguageId] = useState(1)
   const router = useRouter()
+
+  const initAuth = async () => {
+    const userData = window.localStorage.getItem('userData') || window.sessionStorage.getItem('userData')
+    const savedLanguageId = window.localStorage.getItem('languageId')
+    if (userData) {
+      setUser(JSON.parse(userData))
+      if (savedLanguageId) {
+        setLanguageId(parseInt(savedLanguageId))
+      }
+    } else {
+      if (savedLanguageId) {
+        setLanguageId(parseInt(savedLanguageId))
+      }
+    }
+  }
+
+  const fetchData = async () => {
+    const matchHostname = window.location.hostname.match(/^(.+)\.softmachine\.co$/)
+
+    const accountName = matchHostname ? matchHostname[1] : 'byc-deploy'
+
+    try {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=${accountName}`)
+
+      setCompanyName(response.data.record.companyName)
+      setGetAC(response)
+      window.localStorage.setItem('apiUrl', response.data.record.api)
+    } catch (error) {
+      console.error('Error fetching data:', error)
+    }
+
+    setLoading(false)
+  }
+
   useEffect(() => {
-    const initAuth = async () => {
-      const userData = window.localStorage.getItem('userData') || window.sessionStorage.getItem('userData')
-      const savedLanguageId = window.localStorage.getItem('languageId')
-      if (userData) {
-        setUser(JSON.parse(userData))
-        if (savedLanguageId) {
-          setLanguageId(parseInt(savedLanguageId))
-        }
-      } else {
-        if (savedLanguageId) {
-          setLanguageId(parseInt(savedLanguageId))
-        }
-      }
-    }
     initAuth()
-
-    const fetchData = async () => {
-      const matchHostname = window.location.hostname.match(/^(.+)\.softmachine\.co$/)
-
-      const accountName = matchHostname ? matchHostname[1] : 'byc-deploy'
-
-      try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=${accountName}`)
-
-        setCompanyName(response.data.record.companyName)
-        setGetAC(response)
-        window.localStorage.setItem('apiUrl', response.data.record.api)
-      } catch (error) {
-        console.error('Error fetching data:', error)
-      }
-
-      setLoading(false)
-    }
-
     fetchData()
   }, [])
 
@@ -126,22 +127,26 @@ const AuthProvider = ({ children }) => {
       }
       setLanguageId(loggedUser.languageId)
       window.localStorage.setItem('languageId', loggedUser.languageId)
-      if (getUS2.data.record.umcpnl === true) {
+      if (getUS2.data.record.umcpnl === true || getUS2.data.record.is2FAEnabled === true) {
         errorCallback({
           username: params.username,
           loggedUser,
           getUS2: getUS2.data.record
         })
       } else {
-        setUser(loggedUser)
-        window.sessionStorage.setItem('userData', JSON.stringify(loggedUser))
-        const returnUrl = router.query.returnUrl
-        const redirectURL = returnUrl && returnUrl !== '/' ? returnUrl : '/'
-        router.replace(redirectURL)
+        EnableLogin(loggedUser)
       }
     } catch (error) {
       if (errorCallback) errorCallback(error)
     }
+  }
+
+  const EnableLogin = loggedUser => {
+    setUser(loggedUser)
+    window.sessionStorage.setItem('userData', JSON.stringify(loggedUser))
+    const returnUrl = router.query.returnUrl
+    const redirectURL = returnUrl && returnUrl !== '/' ? returnUrl : '/'
+    router.replace(redirectURL)
   }
 
   const handleLogout = async () => {
@@ -149,7 +154,8 @@ const AuthProvider = ({ children }) => {
     window.localStorage.removeItem('userData')
     window.sessionStorage.removeItem('userData')
     await router.push('/login')
-    router.reload()
+    initAuth()
+    fetchData()
   }
 
   const getAccessToken = async () => {
@@ -204,6 +210,7 @@ const AuthProvider = ({ children }) => {
     logout: handleLogout,
     getAccessToken,
     encryptePWD,
+    EnableLogin,
     getAC,
     apiUrl: getAC?.data?.record.api || (typeof window !== 'undefined' ? window.localStorage.getItem('apiUrl') : '')
   }
