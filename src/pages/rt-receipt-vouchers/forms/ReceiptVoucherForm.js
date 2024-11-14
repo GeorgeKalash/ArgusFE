@@ -27,6 +27,7 @@ import { useWindow } from 'src/windows'
 import POSForm from './POSForm'
 import NormalDialog from 'src/components/Shared/NormalDialog'
 import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
+import CashGrid from 'src/components/Shared/CashGrid'
 
 export default function ReceiptVoucherForm({ labels, access, recordId, cashAccountId, form }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -558,18 +559,17 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
             </Grid>
           </Grid>
         </Fixed>
-        <Grow>
-          <DataGrid
-            onChange={value => formik.setFieldValue('cash', value)}
-            value={formik.values.cash}
-            error={formik.errors.cash}
-            maxAccess={maxAccess}
-            allowDelete={!isPosted}
-            allowAddNewLine={!isPosted}
-            columns={columns}
-            name='cash'
-          />
-        </Grow>
+        <CashGrid
+          onChange={value => formik.setFieldValue('cash', value)}
+          value={formik.values.cash}
+          error={formik.errors.cash}
+          labels={labels}
+          maxAccess={maxAccess}
+          allowDelete={!isPosted}
+          allowAddNewLine={!isPosted}
+          amount={formik.values.header.amount}
+          name='cash'
+        />
       </VertLayout>
     </FormShell>
   )

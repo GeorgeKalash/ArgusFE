@@ -35,7 +35,8 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomDatePickerHijri from 'src/components/Inputs/CustomDatePickerHijri'
-
+import CashGrid from 'src/components/Shared/CashGrid'
+import { initialValueCash, validateCash } from 'src/utils/CashFormik'
 const FormContext = React.createContext(null)
 
 function FormField({ type, name, Component, valueField, onFocus, language, phone, ...rest }) {
@@ -127,19 +128,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
         maxRate: ''
       }
     ],
-    amount: [
-      {
-        id: 1,
-        cashAccountId: '',
-        type: '',
-        typeName: '',
-        ccName: '',
-        amount: '',
-        ccId: '',
-        bankFees: '',
-        receiptRef: ''
-      }
-    ],
+    amount: initialValueCash,
     date: new Date(),
     clientId: null,
     clientName: null,
@@ -187,6 +176,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     validateOnChange: true,
     validateOnBlur: true,
     validationSchema: yup.object({
+      amount: validateCash,
       date: yup.string().required(),
       id_type: yup.number().required(),
       idNo: yup.number().required(),
@@ -276,18 +266,10 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
             })
           })
         )
-        .required(),
-      amount: yup
-        .array()
-        .of(
-          yup.object().shape({
-            type: yup.string().required(),
-            amount: yup.number().nullable().required()
-          })
-        )
         .required()
     }),
     onSubmit: async values => {
+      console.log('values')
       const lastRow = values.operations[values.operations.length - 1]
       const isLastRowMandatoryOnly = !lastRow.currencyId && !lastRow.currencyId && !lastRow.exRate && !lastRow.fcAmount
       let operations = values.operations
@@ -455,6 +437,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
   )
 
   const dir = JSON.parse(window.localStorage.getItem('settings'))?.direction
+  console.log(formik)
 
   const onClose = async recId => {
     const res = await getRequest({
@@ -860,9 +843,9 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                   </Grid>
 
                   <Grid item xs={4}>
-                    <FormField
+                    <CustomTextField
                       name='search'
-                      Component={CustomTextField}
+                      label={labels.search}
                       onBlur={e => {
                         e.target.value &&
                           search != e.target.value &&
@@ -898,8 +881,8 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                             })
                       }}
                       readOnly={editMode || isClosed}
-                      onFocus={value => {
-                        setSearch(value)
+                      onFocus={e => {
+                        setSearch(e.target.value)
                       }}
                       required
                     />
@@ -912,20 +895,23 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                   <Grid item xs={4}>
                     <Grid container spacing={2} xs={12} sx={{ px: 2 }}>
                       <Grid item xs={12}>
-                        <FormField
+                        <CustomTextField
                           name='idNo'
+                          label={labels.idNo}
                           type={showAsPasswordIDNumber && formik.values['idNo'] ? 'password' : 'text'}
-                          Component={CustomTextField}
+                          onChange={e => formik.setFieldValue('idNo', e.target.value)}
                           onBlur={e => {
+                            console.log(e.target.value, idNumberOne)
                             setShowAsPasswordIDNumber(true)
                             if (e.target.value && e.target.value != idNumberOne) {
                               checkTypes(e.target.value)
                               fetchClientInfo({ numberId: e.target.value })
                             }
                           }}
-                          onFocus={value => {
+                          onKeyDown={() => {}}
+                          onFocus={e => {
                             setShowAsPasswordIDNumber(false)
-                            setIdNumber(value)
+                            setIdNumber(e.target.value)
                           }}
                           readOnly={editMode || isClosed || idInfoAutoFilled}
                           required
@@ -1381,60 +1367,13 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                   <Grid item xs={9}>
                     <Grid container xs={12} spacing={2}>
                       <Grid width={'100%'}>
-                        <DataGrid
+                        <CashGrid
                           height={200}
                           onChange={value => formik.setFieldValue('amount', value)}
                           value={formik.values.amount}
                           error={formik.errors.amount}
+                          amount={total}
                           disabled={isClosed}
-                          columns={[
-                            {
-                              component: 'resourcecombobox',
-                              label: labels.type,
-                              name: 'type',
-                              props: {
-                                datasetId: DataSets.CA_CASH_ACCOUNT_TYPE,
-                                displayField: 'value',
-                                valueField: 'key',
-                                mapping: [
-                                  { from: 'key', to: 'type' },
-                                  { from: 'value', to: 'typeName' }
-                                ],
-                                filter: item =>
-                                  formik.values.functionId === SystemFunction.CurrencyPurchase ? item.key === '2' : true
-                              }
-                            },
-                            {
-                              component: 'numberfield',
-                              name: 'amount',
-                              label: labels.amount
-                            },
-                            {
-                              component: 'resourcecombobox',
-                              name: 'creditCards',
-                              editable: false,
-                              label: labels.creditCard,
-                              props: {
-                                endpointId: CashBankRepository.CreditCard.qry,
-                                valueField: 'recordId',
-                                displayField: 'name',
-                                mapping: [
-                                  { from: 'recordId', to: 'ccId' },
-                                  { from: 'name', to: 'ccName' }
-                                ]
-                              }
-                            },
-                            {
-                              component: 'numberfield',
-                              label: labels.receiptRef,
-                              name: 'bankFees'
-                            },
-                            {
-                              component: 'numberfield',
-                              label: labels.receiptRef,
-                              name: 'receiptRef'
-                            }
-                          ]}
                         />
                       </Grid>
                     </Grid>
