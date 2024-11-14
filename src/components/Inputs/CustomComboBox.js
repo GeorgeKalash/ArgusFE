@@ -2,8 +2,9 @@ import { Autocomplete, IconButton, CircularProgress, Paper, TextField } from '@m
 import { ControlAccessLevel, TrxType } from 'src/resources/AccessLevels'
 import { Box } from '@mui/material'
 import RefreshIcon from '@mui/icons-material/Refresh'
-import React from 'react'
+import React, { useState } from 'react'
 import PopperComponent from '../Shared/Popper/PopperComponent'
+import { DISABLED } from 'src/services/api/maxAccess'
 
 const CustomComboBox = ({
   type = 'text',
@@ -38,9 +39,13 @@ const CustomComboBox = ({
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
 
+  const [hover, setHover] = useState(false)
+
+  const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
+
   const fieldAccess =
     props.maxAccess && props.maxAccess?.record?.controls?.find(item => item.controlId === name)?.accessLevel
-  const _readOnly = editMode ? editMode && maxAccess < TrxType.EDIT : readOnly
+  const _readOnly = editMode ? editMode && maxAccess < TrxType.EDIT : accessLevel > DISABLED ? false : readOnly
   const _disabled = disabled || fieldAccess === ControlAccessLevel.Disabled
   const _required = required || fieldAccess === ControlAccessLevel.Mandatory
   const _hidden = fieldAccess === ControlAccessLevel.Hidden
@@ -142,30 +147,33 @@ const CustomComboBox = ({
           label={label}
           required={_required}
           autoFocus={autoFocus}
+          onMouseEnter={() => setHover(true)}
+          onMouseLeave={() => setHover(false)}
           error={error}
           helperText={helperText}
           InputProps={{
             ...params.InputProps,
-            endAdornment: !_disabled && (
+            endAdornment: (
               <React.Fragment>
-                {isLoading ? (
-                  <CircularProgress color='inherit' size={18} />
-                ) : (
-                  refresh &&
-                  !readOnly && (
-                    <IconButton
-                      onClick={fetchData}
-                      aria-label='refresh data'
-                      sx={{
-                        p: '0px !important',
-                        marginRight: '-10px'
-                      }}
-                      size='small'
-                    >
-                      <RefreshIcon />
-                    </IconButton>
-                  )
-                )}
+                {hover &&
+                  (_disabled ? null : isLoading ? (
+                    <CircularProgress color='inherit' size={18} />
+                  ) : (
+                    refresh &&
+                    !readOnly && (
+                      <IconButton
+                        onClick={fetchData}
+                        aria-label='refresh data'
+                        sx={{
+                          p: '0px !important',
+                          marginRight: '-10px'
+                        }}
+                        size='small'
+                      >
+                        <RefreshIcon />
+                      </IconButton>
+                    )
+                  ))}
                 {params.InputProps.endAdornment}
               </React.Fragment>
             )
