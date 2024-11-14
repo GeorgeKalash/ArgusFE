@@ -54,7 +54,7 @@ const RequestsProvider = ({ showLoading = false, children }) => {
     const disableLoading = body.disableLoading || false
     !disableLoading && !loading && setLoading(true)
 
-    currentWindowId && updateIsLoadingRequests(currentWindowId, true)
+    updateIsLoadingRequests(currentWindowId, true)
 
     const throwError = body.throwError || false
 

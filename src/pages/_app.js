@@ -118,11 +118,17 @@ const App = props => {
   const [currentWindowId, setCurrentWindowId] = useState(null)
 
   const updateIsLoadingRequests = (id, loading) => {
+    if (!id) return
     setIsLoadingRequests(prev => {
       const prevRequests = prev[id] || []
 
       return { ...prev, [id]: [...prevRequests, loading] }
     })
+  }
+
+  const closeWindowById = id => {
+    const { [id]: _, ...loadingRequests } = isLoadingRequests
+    setIsLoadingRequests(loadingRequests)
   }
 
   const updateCurrentWindowId = id => {
@@ -157,7 +163,7 @@ const App = props => {
         </Head>
         <AuthProvider>
           <GuestGuard fallback={<Spinner />}>
-            <RequestsLoadingContext.Provider value={{ isLoadingRequests, updateIsLoadingRequests }}>
+            <RequestsLoadingContext.Provider value={{ isLoadingRequests, updateIsLoadingRequests, closeWindowById }}>
               <CurrentWindowContext.Provider value={{ currentWindowId, updateCurrentWindowId }}>
                 <RequestsProvider>
                   <ErrorProvider>

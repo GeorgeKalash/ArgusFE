@@ -3,15 +3,16 @@ import Window from 'src/components/Shared/Window'
 import useResourceParams from 'src/hooks/useResourceParams'
 import { CurrentWindowContext, RequestsLoadingContext } from 'src/pages/_app'
 import { LoadingOverlay } from 'src/providers/RequestsContext'
+import ChildComponent from 'src/utils/ChildComponent'
 import { v4 as uuidv4 } from 'uuid'
 
 const WindowContext = React.createContext(null)
 const ClearContext = React.createContext(null)
 
 export function WindowProvider({ children }) {
-  const { isLoadingRequests } = useContext(RequestsLoadingContext)
+  const { isLoadingRequests, closeWindowById: closeLoadingWindowById } = useContext(RequestsLoadingContext)
   const { currentWindowId, updateCurrentWindowId } = useContext(CurrentWindowContext)
-  updateCurrentWindowId(children.type.name)
+
   const [stack, setStack] = useState([])
   const [rerenderFlag, setRerenderFlag] = useState(false)
   const closedWindow = useRef(null)
@@ -26,6 +27,7 @@ export function WindowProvider({ children }) {
     const currentValue = { ...stack[stack.length - 1] }
     closedWindow.current = currentValue
     setStack(stack.filter(({ id }) => givenId != id))
+    closeLoadingWindowById(currentWindowId)
   }
 
   function openWindow(id) {
@@ -42,9 +44,11 @@ export function WindowProvider({ children }) {
     setStack(stack => [...stack, { ...options, id: uuidv4() }])
   }
 
-  const isLoading =
-    isLoadingRequests[currentWindowId]?.filter(item => item === true).length !==
-    isLoadingRequests[currentWindowId]?.filter(item => item === false).length
+  const isLoading = windowId =>
+    isLoadingRequests[windowId]?.filter(item => item === true).length !==
+    isLoadingRequests[windowId]?.filter(item => item === false).length
+
+  const hasLoadedBefore = stack?.some(item => isLoadingRequests?.[item.Component.name])
 
   return (
     <WindowContext.Provider value={{ stack: addToStack }}>
@@ -67,14 +71,15 @@ export function WindowProvider({ children }) {
               }
             }}
           >
-            {isLoading && <LoadingOverlay />}
-            <div style={{ display: isLoading ? 'none' : 'block' }}>
+            {isLoading(Component.name) && <LoadingOverlay />}
+            <div style={{ display: !isLoading(Component.name) && hasLoadedBefore ? 'block' : 'none' }}>
               <Window
                 key={id}
                 sx={{ display: 'flex !important', flex: '1' }}
                 Title={title}
                 controlled={true}
                 onClose={() => {
+                  closeLoadingWindowById(Component.name)
                   closeWindow()
                   if (onClose) onClose()
                 }}
@@ -85,11 +90,11 @@ export function WindowProvider({ children }) {
                 closable={closable}
                 styles={styles}
               >
-                <Component
-                  {...props}
-                  window={{
-                    close: () => closeWindowById(id)
-                  }}
+                <ChildComponent
+                  props={props}
+                  Component={Component}
+                  closeWindowById={() => closeWindowById(id)}
+                  updateCurrentWindowId={updateCurrentWindowId}
                 />
               </Window>
             </div>
