@@ -47,7 +47,10 @@ const CustomDateTimePicker = ({
 
   const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
 
-  const _readOnly = editMode ? editMode && maxAccess < TrxType.EDIT : accessLevel > DISABLED ? false : readOnly
+  const _readOnly =
+    maxAccess < TrxType.ADD ||
+    accessLevel === DISABLED ||
+    (readOnly && accessLevel !== MANDATORY && accessLevel !== FORCE_ENABLED)
 
   const _hidden = accessLevel ? accessLevel === HIDDEN : hidden
 
@@ -72,7 +75,7 @@ const CustomDateTimePicker = ({
   const newDate = new Date(disabledRangeDate.date)
   newDate.setDate(newDate.getDate() + disabledRangeDate.day)
 
-  const isRequired = required || accessLevel === MANDATORY
+  const isRequired = (required || accessLevel === MANDATORY) && !_readOnly
 
   const getDefaultValue = () => {
     let value
