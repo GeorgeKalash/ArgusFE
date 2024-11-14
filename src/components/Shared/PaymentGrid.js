@@ -1,14 +1,18 @@
 import React from 'react'
 import { DataSets } from 'src/resources/DataSets'
 import { DataGrid } from './DataGrid'
+import { useResourceQuery } from 'src/hooks/resource'
+import { ResourceIds } from 'src/resources/ResourceIds'
 
-export default function CashGrid({ isPosted, labels, value, amount, ...rest }) {
-  // console.log(rest)
+export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
+  const { labels: labels } = useResourceQuery({
+    datasetId: ResourceIds?.POSPayment
+  })
 
   const columns = [
     {
       component: 'resourcecombobox',
-      label: labels?.type,
+      label: labels.type,
       name: 'type',
       props: {
         datasetId: DataSets.CA_CASH_ACCOUNT_TYPE,
@@ -63,7 +67,7 @@ export default function CashGrid({ isPosted, labels, value, amount, ...rest }) {
     {
       component: 'numberfield',
       name: 'returnedAmount',
-      label: labels?.returnedAmount,
+      label: labels.returnedAmount,
       defaultValue: '',
       props: {
         readOnly: true
@@ -80,7 +84,7 @@ export default function CashGrid({ isPosted, labels, value, amount, ...rest }) {
     },
     {
       component: 'numberfield',
-      header: labels?.bankFees,
+      header: labels.bankFees,
       name: 'bankFees',
       label: labels?.bankFees,
       props: {
@@ -98,7 +102,7 @@ export default function CashGrid({ isPosted, labels, value, amount, ...rest }) {
     },
     {
       component: 'resourcecombobox',
-      label: 'labels?.posStatusName',
+      label: labels?.posStatusName,
       name: 'posStatusName',
       props: {
         readOnly: true,
@@ -114,7 +118,7 @@ export default function CashGrid({ isPosted, labels, value, amount, ...rest }) {
     {
       component: 'button',
       name: 'POS',
-      label: ' labels?.POS',
+      label: labels.pos,
       onClick: (e, row, update, updateRow) => {
         stack({
           Component: POSForm,

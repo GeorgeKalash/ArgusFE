@@ -27,9 +27,12 @@ import { useWindow } from 'src/windows'
 import POSForm from './POSForm'
 import NormalDialog from 'src/components/Shared/NormalDialog'
 import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
-import CashGrid from 'src/components/Shared/CashGrid'
+import PaymentGrid from 'src/components/Shared/PaymentGrid'
+import { initialValuePayment, usePaymentValidationSchema } from 'src/utils/PaymentFormik'
 
 export default function ReceiptVoucherForm({ labels, access, recordId, cashAccountId, form }) {
+  const validationSchema = usePaymentValidationSchema('cash')
+
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -65,68 +68,14 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
         clientId: null,
         cellPhone: null
       },
-      cash: [
-        {
-          id: 1,
-          seqNo: 0,
-          cashAccountId: cashAccountId,
-          cashAccount: '',
-          posStatus: 1,
-          posStatusName: '',
-          type: '',
-          amount: '',
-          paidAmount: 0,
-          returnedAmount: 0,
-          bankFees: '',
-          receiptRef: ''
-        }
-      ]
+      cash: initialValuePayment
     },
 
     validationSchema: yup.object({
       header: yup.object({
         owoId: yup.string().required()
       }),
-      cash: yup
-        .array()
-        .of(
-          yup.object().shape({
-            type: yup
-              .string()
-              .required('Type is required')
-              .test('unique', 'Type must be unique', function (value) {
-                const { options } = this
-                if (!this.parent.outwardId) {
-                  const arrayOfTypes = options.context.cash.map(row => row.type)
-                  if (value == 2) {
-                    const countOfType1 = arrayOfTypes.filter(item => item === '2').length
-                    if (countOfType1 > 1) {
-                      return false
-                    }
-                  }
-                }
-
-                return true
-              }),
-            paidAmount: yup.string().test('Paid Amount', 'Paid Amount is required', function (value) {
-              if (this.parent.type == '2') {
-                return !!value
-              }
-
-              return true
-            }),
-            returnedAmount: yup.string().test('Returned Amount', 'Returned Amount is required', function (value) {
-              if (this.parent.type == '2') {
-                return !!value
-              }
-
-              return true
-            }),
-            amount: yup.string().nullable().required('Amount is required')
-          })
-        )
-
-        .required('Cash array is required')
+      cash: validationSchema
     }),
     onSubmit: async obj => {
       const cash = formik.values.cash.map((cash, index) => ({
@@ -559,7 +508,7 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
             </Grid>
           </Grid>
         </Fixed>
-        <CashGrid
+        <PaymentGrid
           onChange={value => formik.setFieldValue('cash', value)}
           value={formik.values.cash}
           error={formik.errors.cash}

@@ -1,25 +1,25 @@
 import * as yup from 'yup'
 
-const initialValueCash = () => {
-  return [
-    {
-      id: 1,
-      seqNo: 0,
-      cashAccountId: cashAccountId,
-      cashAccount: '',
-      posStatus: 1,
-      posStatusName: '',
-      type: '',
-      amount: '',
-      paidAmount: 0,
-      returnedAmount: 0,
-      bankFees: '',
-      receiptRef: ''
-    }
-  ]
-}
+const initialValuePayment = [
+  {
+    id: 1,
+    seqNo: 0,
+    cashAccountId: null,
+    cashAccount: '',
+    posStatus: 1,
+    posStatusName: '',
+    type: '',
+    amount: '',
+    paidAmount: 0,
+    returnedAmount: 0,
+    bankFees: '',
+    receiptRef: ''
+  }
+]
 
-const validateCash = () => {
+export { initialValuePayment }
+
+export function usePaymentValidationSchema(name) {
   return yup
     .array()
     .of(
@@ -29,13 +29,11 @@ const validateCash = () => {
           .required('Type is required')
           .test('unique', 'Type must be unique', function (value) {
             const { options } = this
-            if (!this.parent.outwardId) {
-              const arrayOfTypes = options.context.cash.map(row => row.type)
-              if (value == 2) {
-                const countOfType1 = arrayOfTypes.filter(item => item === '2').length
-                if (countOfType1 > 1) {
-                  return false
-                }
+            const arrayOfTypes = options.context?.[name].map(row => row.type)
+            if (value == 2) {
+              const countOfType1 = arrayOfTypes.filter(item => item === '2').length
+              if (countOfType1 > 1) {
+                return false
               }
             }
 
@@ -60,5 +58,3 @@ const validateCash = () => {
     )
     .required('Cash array is required')
 }
-
-export { initialValueCash, validateCash }

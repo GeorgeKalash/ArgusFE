@@ -16,8 +16,6 @@ import { RTCLRepository } from 'src/repositories/RTCLRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useWindow } from 'src/windows'
 import * as yup from 'yup'
-import { DataSets } from 'src/resources/DataSets'
-import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import useIdType from 'src/hooks/useIdType'
 import { useInvalidate } from 'src/hooks/resource'
 import ConfirmationOnSubmit from 'src/pages/currency-trading/forms/ConfirmationOnSubmit'
@@ -35,8 +33,9 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomDatePickerHijri from 'src/components/Inputs/CustomDatePickerHijri'
-import CashGrid from 'src/components/Shared/CashGrid'
-import { initialValueCash, validateCash } from 'src/utils/CashFormik'
+import PaymentGrid from 'src/components/Shared/PaymentGrid'
+import { initialValuePayment, usePaymentValidationSchema } from 'src/utils/PaymentFormik'
+
 const FormContext = React.createContext(null)
 
 function FormField({ type, name, Component, valueField, onFocus, language, phone, ...rest }) {
@@ -81,6 +80,8 @@ function FormProvider({ formik, maxAccess, labels, children }) {
 }
 
 export default function TransactionForm({ recordId, labels, access, plantId }) {
+  const validationSchema = usePaymentValidationSchema('amount')
+
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [infoAutoFilled, setInfoAutoFilled] = useState(false)
   const [idInfoAutoFilled, setIDInfoAutoFilled] = useState(false)
@@ -128,7 +129,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
         maxRate: ''
       }
     ],
-    amount: initialValueCash,
+    amount: initialValuePayment,
     date: new Date(),
     clientId: null,
     clientName: null,
@@ -176,7 +177,6 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     validateOnChange: true,
     validateOnBlur: true,
     validationSchema: yup.object({
-      amount: validateCash,
       date: yup.string().required(),
       id_type: yup.number().required(),
       idNo: yup.number().required(),
@@ -266,7 +266,8 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
             })
           })
         )
-        .required()
+        .required(),
+      amount: validationSchema
     }),
     onSubmit: async values => {
       console.log('values')
@@ -846,6 +847,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                     <CustomTextField
                       name='search'
                       label={labels.search}
+                      value={formik.values?.['idNo']}
                       onBlur={e => {
                         e.target.value &&
                           search != e.target.value &&
@@ -880,6 +882,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                               console.error('Error fetching ID info:', error)
                             })
                       }}
+                      onClear={() => formik.setFieldValue('idNo', '')}
                       readOnly={editMode || isClosed}
                       onFocus={e => {
                         setSearch(e.target.value)
@@ -898,12 +901,13 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                         <CustomTextField
                           name='idNo'
                           label={labels.idNo}
+                          value={formik.values?.['idNo']}
                           type={showAsPasswordIDNumber && formik.values['idNo'] ? 'password' : 'text'}
-                          onChange={e => formik.setFieldValue('idNo', e.target.value)}
+                          onChange={e => formik.setFieldValue('idNo', e?.target?.value)}
                           onBlur={e => {
                             console.log(e.target.value, idNumberOne)
-                            setShowAsPasswordIDNumber(true)
                             if (e.target.value && e.target.value != idNumberOne) {
+                              setShowAsPasswordIDNumber(true)
                               checkTypes(e.target.value)
                               fetchClientInfo({ numberId: e.target.value })
                             }
@@ -913,6 +917,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                             setShowAsPasswordIDNumber(false)
                             setIdNumber(e.target.value)
                           }}
+                          onClear={() => formik.setFieldValue('idNo', '')}
                           readOnly={editMode || isClosed || idInfoAutoFilled}
                           required
                         />
@@ -1367,7 +1372,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                   <Grid item xs={9}>
                     <Grid container xs={12} spacing={2}>
                       <Grid width={'100%'}>
-                        <CashGrid
+                        <PaymentGrid
                           height={200}
                           onChange={value => formik.setFieldValue('amount', value)}
                           value={formik.values.amount}

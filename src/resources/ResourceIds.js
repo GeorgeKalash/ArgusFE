@@ -298,5 +298,6 @@ export const ResourceIds = {
   SiteDashboard: 41225,
   IVparts: 41222,
   SalesInquiries: 51300,
-  MigrateBarcodeData: 41508
+  MigrateBarcodeData: 41508,
+  POSPayment: 36601
 }
