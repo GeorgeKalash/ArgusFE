@@ -106,7 +106,6 @@ const GridToolbar = ({
                   }}
                   onSearch={onSearch}
                   search={true}
-                  height={35}
                 />
               </Grid>
             )}

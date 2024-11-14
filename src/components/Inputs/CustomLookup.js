@@ -277,7 +277,15 @@ const CustomLookup = ({
                 '& .MuiOutlinedInput-root': {
                   '& fieldset': {
                     border: !hasBorder && 'none'
-                  }
+                  },
+                  height: '33px !important'
+                },
+                '& .MuiInputLabel-root': {
+                  fontSize: '0.90rem',
+                  top: firstValue ? '0px' : '-3px'
+                },
+                '& .MuiInputBase-input': {
+                  fontSize: '0.90rem'
                 },
                 width: '100%'
               }}
@@ -315,7 +323,21 @@ const CustomLookup = ({
               '& .MuiInputBase-root': {
                 borderTopLeftRadius: 0,
                 borderBottomLeftRadius: 0
-              }
+              },
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': {
+                  border: !hasBorder && 'none'
+                },
+                height: '33px !important'
+              },
+              '& .MuiInputLabel-root': {
+                fontSize: '0.90rem',
+                top: firstValue ? '0px' : '-3px'
+              },
+              '& .MuiInputBase-input': {
+                fontSize: '0.90rem'
+              },
+              width: '100%'
             }}
           />
         </Grid>

@@ -142,9 +142,11 @@ const CustomNumberField = ({
         readOnly: _readOnly,
         endAdornment: (!readOnly || allowClear) && !unClearable && !props.disabled && (value || value === 0) && (
           <InputAdornment position='end'>
-            {
-              props.ShowDiscountIcons && <IconButton onClick={handleButtonClick}>{props.isPercentIcon ? <PercentIcon /> : <PinIcon sx={{ minWidth: '40px', height: '70px' }}/>}</IconButton>
-            }
+            {props.ShowDiscountIcons && (
+              <IconButton onClick={handleButtonClick}>
+                {props.isPercentIcon ? <PercentIcon /> : <PinIcon sx={{ minWidth: '40px', height: '70px' }} />}
+              </IconButton>
+            )}
             {displayButtons && (
               <IconButton tabIndex={-1} edge='end' onClick={onClear} aria-label='clear input'>
                 <ClearIcon sx={{ border: '0px', fontSize: 20 }} />
@@ -160,7 +162,20 @@ const CustomNumberField = ({
         '& .MuiOutlinedInput-root': {
           '& fieldset': {
             border: !hasBorder && 'none'
-          }
+          },
+          height: `33px !important`
+        },
+        '& .MuiInputLabel-root': {
+          fontSize: '0.90rem',
+          top: value ? '0px' : '-3px'
+        },
+        '& .MuiInputBase-input': {
+          fontSize: '0.90rem'
+        },
+        '& .MuiAutocomplete-clearIndicator': {
+          pl: '0px !important',
+          marginRight: '-10px',
+          visibility: 'visible'
         }
       }}
       {...props}

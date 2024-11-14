@@ -1,4 +1,3 @@
-// ** MUI Imports
 import { TextField, InputAdornment, IconButton, Box } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
 import { useEffect, useRef } from 'react'
@@ -58,7 +57,7 @@ const CustomTextArea = ({
     <Box sx={{ width: '100%' }}>
       <TextField
         multiline
-        rows={rows} // You can adjust the number of rows as needed
+        rows={rows}
         inputRef={inputRef}
         name={name}
         type={type}
@@ -68,14 +67,23 @@ const CustomTextArea = ({
         fullWidth={fullWidth}
         autoFocus={autoFocus}
         inputProps={{
-          tabIndex: _readOnly ? -1 : 0, // Add tabIndex here
+          tabIndex: _readOnly ? -1 : 0,
           readOnly: _readOnly,
           maxLength: maxLength,
           inputMode: 'numeric',
-          pattern: numberField && '[0-9]*', // Allow only numeric input
+          pattern: numberField && '[0-9]*',
           style: {
             textAlign: numberField && 'right',
             paddingRight: paddingRight
+          }
+        }}
+        sx={{
+          '& .MuiInputLabel-root': {
+            fontSize: '0.90rem',
+            top: value ? '0px' : '-3px'
+          },
+          '& .MuiInputBase-input': {
+            fontSize: '0.90rem'
           }
         }}
         autoComplete={autoComplete}
@@ -85,7 +93,7 @@ const CustomTextArea = ({
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 {!readOnly && value && (
                   <IconButton tabIndex={-1} edge='end' onClick={onClear} aria-label='clear input'>
-                    <ClearIcon sx={{ border: '0px', fontSize: 20 }} />
+                    <ClearIcon sx={{ border: '0px', fontSize: 17 }} />
                   </IconButton>
                 )}
                 {viewAdd && (

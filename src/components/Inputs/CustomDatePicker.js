@@ -99,8 +99,16 @@ const CustomDatePicker = ({
         sx={{
           '& .MuiOutlinedInput-root': {
             '& fieldset': {
-              border: !hasBorder && 'none' // Hide border
-            }
+              border: !hasBorder && 'none'
+            },
+            height: `33px !important`
+          },
+          '& .MuiInputLabel-root': {
+            fontSize: '0.90rem',
+            top: value ? '0px' : '-3px'
+          },
+          '& .MuiInputBase-input': {
+            fontSize: '0.90rem'
           }
         }}
         autoFocus={autoFocus}
@@ -127,12 +135,12 @@ const CustomDatePicker = ({
               endAdornment: !(_readOnly || disabled) && (
                 <InputAdornment position='end'>
                   {value && (
-                    <IconButton tabIndex={-1} edge='start' onClick={() => onChange(name, null)} sx={{ mr: -2 }}>
-                      <ClearIcon sx={{ border: '0px', fontSize: 20 }} />
+                    <IconButton tabIndex={-1} edge='start' onClick={() => onChange(name, null)} sx={{ mr: -3 }}>
+                      <ClearIcon sx={{ border: '0px', fontSize: 17 }} />
                     </IconButton>
                   )}
                   <IconButton tabIndex={-1} onClick={() => setOpenDatePicker(true)} sx={{ mr: -2 }}>
-                    <EventIcon />
+                    <EventIcon sx={{ border: '0px', fontSize: 17 }} />
                   </IconButton>
                 </InputAdornment>
               )

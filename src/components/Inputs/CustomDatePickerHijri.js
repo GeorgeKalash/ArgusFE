@@ -84,6 +84,21 @@ export default function CustomDatePickerHijri({
           actionBar: props => <PickersActionBar {...props} actions={['accept', 'today']} />,
           popper: PopperComponent
         }}
+        sx={{
+          '& .MuiOutlinedInput-root': {
+            '& fieldset': {
+              border: !hasBorder && 'none'
+            },
+            height: '33px !important'
+          },
+          '& .MuiInputLabel-root': {
+            fontSize: '0.90rem',
+            top: value ? '0px' : '-3px'
+          },
+          '& .MuiInputBase-input': {
+            fontSize: '0.90rem'
+          }
+        }}
         slotProps={{
           textField: {
             required: isRequired,
@@ -97,7 +112,7 @@ export default function CustomDatePickerHijri({
               endAdornment: !(_readOnly || disabled) && (
                 <InputAdornment position='end'>
                   {Boolean(value) && (
-                    <IconButton tabIndex={-1} edge='start' onClick={() => onChange(name, null)} sx={{ mr: -2 }}>
+                    <IconButton tabIndex={-1} edge='start' onClick={() => onChange(name, null)} sx={{ mr: -3 }}>
                       <ClearIcon sx={{ border: '0px', fontSize: 20 }} />
                     </IconButton>
                   )}

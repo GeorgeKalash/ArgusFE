@@ -124,12 +124,12 @@ const CustomTextField = ({
           <InputAdornment position='end'>
             {search && (
               <IconButton tabIndex={-1} edge='start' onClick={() => onSearch(value)} aria-label='search input'>
-                <SearchIcon sx={{ border: '0px', fontSize: 20 }} />
+                <SearchIcon sx={{ border: '0px', fontSize: 17 }} />
               </IconButton>
             )}
             {!clearable && !readOnly && (value || value === 0) && (
               <IconButton tabIndex={-1} edge='end' onClick={onClear} aria-label='clear input'>
-                <ClearIcon sx={{ border: '0px', fontSize: 20 }} />
+                <ClearIcon sx={{ border: '0px', fontSize: 17 }} />
               </IconButton>
             )}
           </InputAdornment>
@@ -140,7 +140,14 @@ const CustomTextField = ({
           '& fieldset': {
             border: !hasBorder && 'none'
           },
-          height: `${props.height}px !important`
+          height: `33px !important`
+        },
+        '& .MuiInputLabel-root': {
+          fontSize: '0.90rem',
+          top: value ? '0px' : '-3px'
+        },
+        '& .MuiInputBase-input': {
+          fontSize: '0.90rem'
         }
       }}
       required={required}
