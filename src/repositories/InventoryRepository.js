@@ -214,9 +214,6 @@ export const InventoryRepository = {
     qry: service + 'qryITP',
     set2: service + 'set2ITP'
   },
-  Parts: {
-    snapshot: service + 'snapshotPRT'
-  },
   Availability: {
     qry: service + 'qryAVA'
   },
@@ -224,6 +221,7 @@ export const InventoryRepository = {
     qry: service + 'qryPRT',
     del: service + 'delPRT',
     get: service + 'getPRT',
-    set: service + 'setPRT'
+    set: service + 'setPRT',
+    snapshot: service + 'snapshotPRT'
   }
 }
