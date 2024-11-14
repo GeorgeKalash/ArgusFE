@@ -9,7 +9,7 @@ import { CurrentWindowContext, RequestsLoadingContext } from 'src/pages/_app'
 
 const RequestsContext = createContext()
 
-export function LoadingOverlay() {
+function LoadingOverlay() {
   return (
     <Box
       style={{
@@ -31,8 +31,12 @@ export function LoadingOverlay() {
 }
 
 const RequestsProvider = ({ showLoading = false, children }) => {
-  const { updateIsLoadingRequests } = useContext(RequestsLoadingContext)
+  const { updateIsLoadingRequests, isLoadingRequests } = useContext(RequestsLoadingContext)
   const { currentWindowId } = useContext(CurrentWindowContext)
+
+  const isCurrentWindowLoading =
+    isLoadingRequests[currentWindowId]?.filter(item => item === true).length !==
+    isLoadingRequests[currentWindowId]?.filter(item => item === false).length
 
   const { user, setUser, apiUrl } = useContext(AuthContext)
   const errorModel = useError()
@@ -273,7 +277,7 @@ const RequestsProvider = ({ showLoading = false, children }) => {
   return (
     <>
       <RequestsContext.Provider value={values}>{children}</RequestsContext.Provider>
-      {showLoading && loading && <LoadingOverlay />}
+      {showLoading && (loading || isCurrentWindowLoading) && <LoadingOverlay />}
     </>
   )
 }

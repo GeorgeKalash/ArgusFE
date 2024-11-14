@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useRef, useState } from 'react'
 import Window from 'src/components/Shared/Window'
 import useResourceParams from 'src/hooks/useResourceParams'
 import { CurrentWindowContext, RequestsLoadingContext } from 'src/pages/_app'
-import { LoadingOverlay } from 'src/providers/RequestsContext'
 import ChildComponent from 'src/utils/ChildComponent'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -71,8 +70,9 @@ export function WindowProvider({ children }) {
               }
             }}
           >
-            {isLoading(Component.name) && <LoadingOverlay />}
-            <div style={{ display: !isLoading(Component.name) && hasLoadedBefore ? 'block' : 'none' }}>
+            <div
+              style={{ display: !props.recordId || (!isLoading(Component.name) && hasLoadedBefore) ? 'block' : 'none' }}
+            >
               <Window
                 key={id}
                 sx={{ display: 'flex !important', flex: '1' }}
