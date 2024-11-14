@@ -1,7 +1,7 @@
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
@@ -16,6 +16,7 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 const ItemPartForm = ({ labels, maxAccess, obj }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const [numRows, setNumRows] = useState(0)
 
   const isRowEmpty = row => {
     return !row.partId
@@ -30,13 +31,17 @@ const ItemPartForm = ({ labels, maxAccess, obj }) => {
         .array()
         .of(
           yup.object().shape({
-            qty: yup.number().test(function (value) {
-              return isRowEmpty(this.parent) || value > 0
-            }),
             partRef: yup.string().test(function (value) {
               const rowIndex = this.options.index
 
-              return rowIndex === 0 || value
+              if (numRows > 1) {
+                return !!value
+              }
+
+              return true
+            }),
+            qty: yup.number().test(function (value) {
+              return isRowEmpty(this.parent) || value > 0
             })
           })
         )
@@ -142,6 +147,10 @@ const ItemPartForm = ({ labels, maxAccess, obj }) => {
       })
     })
   }, [obj.recordId])
+
+  useEffect(() => {
+    setNumRows(formik.values.items.length)
+  }, [formik.values.items])
 
   return (
     <FormShell
