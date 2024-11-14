@@ -35,20 +35,21 @@ export default function SalesForm({ labels, maxAccess, recordId, store }) {
       tdPct: yup.number().test(function (value) {
         const { maxDiscount } = this.parent
         console.log('maxDiscount', maxDiscount, value)
+
         return value <= maxDiscount && value < 100
       }),
       maxDiscount: yup.number().nullable().max(100) // Max value validation for secondField
     }),
     onSubmit: async obj => {
-      // const response = await postRequest({
-      //   extension: SaleRepository.Client.set,
-      //   record: JSON.stringify(obj)
-      // })
-      // if (!obj.recordId) {
-      //   toast.success(platformLabels.Added)
-      //   formik.setFieldValue('recordId', response.recordId)
-      // } else toast.success(platformLabels.Edited)
-      // invalidate()
+      const response = await postRequest({
+        extension: SaleRepository.Client.set,
+        record: JSON.stringify(obj)
+      })
+      if (!obj.recordId) {
+        toast.success(platformLabels.Added)
+        formik.setFieldValue('recordId', response.recordId)
+      } else toast.success(platformLabels.Edited)
+      invalidate()
     }
   })
   const editMode = !!formik.values.recordId
@@ -69,6 +70,7 @@ export default function SalesForm({ labels, maxAccess, recordId, store }) {
   }, [])
 
   console.log(formik)
+
   return (
     <FormShell resourceId={ResourceIds.ClientGroups} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>

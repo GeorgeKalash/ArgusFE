@@ -1,9 +1,7 @@
-import { useContext } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import Table from 'src/components/Shared/Table'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useResourceQuery } from 'src/hooks/resource'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { SaleRepository } from 'src/repositories/SaleRepository'
@@ -15,6 +13,7 @@ const PriceTab = ({ labels, maxAccess, store }) => {
   const { getRequest } = useContext(RequestsContext)
   const { recordId } = store
   const { stack } = useWindow()
+  const [data, setData] = useState([])
 
   const columns = [
     {
@@ -49,28 +48,29 @@ const PriceTab = ({ labels, maxAccess, store }) => {
       extension: SaleRepository.Price.qry,
       parameters: parameters
     })
+    setData(response)
 
     return { ...response, _startAt: _startAt }
   }
 
-  const {
-    query: { data }
-  } = useResourceQuery({
-    queryFn: fetchGridData,
-    endpointId: SaleRepository.Price.qry,
-    datasetId: ResourceIds.PriceList
-  })
+  useEffect(() => {
+    ;(async function () {
+      if (recordId) {
+        fetchGridData()
+      }
+    })()
+  }, [])
 
   const add = () => {
-    openForm()
+    openForm('')
   }
 
-  function openForm(recordId) {
+  function openForm(obj) {
     stack({
       Component: PriceForm,
       props: {
         labels: labels,
-        recordId: recordId ? recordId : null,
+        obj,
         maxAccess: maxAccess
       },
       width: 500,
@@ -80,7 +80,8 @@ const PriceTab = ({ labels, maxAccess, store }) => {
   }
 
   const Edit = obj => {
-    openForm(obj?.recordId)
+    console.log(obj, 'objjjjjjjjjj')
+    openForm(obj)
   }
 
   const Delete = async obj => {
@@ -101,7 +102,7 @@ const PriceTab = ({ labels, maxAccess, store }) => {
         <Table
           columns={columns}
           gridData={data}
-          rowId={['recordId']}
+          rowId={['clientId', 'categoryId', 'currencyId', 'priceType']}
           onEdit={Edit}
           onDelete={Delete}
           isLoading={false}

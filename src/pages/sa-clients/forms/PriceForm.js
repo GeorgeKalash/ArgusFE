@@ -14,8 +14,9 @@ import { SaleRepository } from 'src/repositories/SaleRepository'
 import { useInvalidate } from 'src/hooks/resource'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import { DataSets } from 'src/resources/DataSets'
 
-export default function PriceForm({ labels, maxAccess, recordId }) {
+export default function PriceForm({ labels, maxAccess, obj, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -25,16 +26,18 @@ export default function PriceForm({ labels, maxAccess, recordId }) {
 
   const { formik } = useForm({
     initialValues: {
-      recordId: null,
-      ctId: null,
+      categoryId: null,
       currencyId: null,
-      clientId: null
+      priceType: '',
+      value: ''
     },
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      // name: yup.string().required(),
-      // reference: yup.string().required()
+      categoryId: yup.string().required(),
+      currencyId: yup.string().required(),
+      value: yup.number().required(),
+      priceType: yup.string().required()
     }),
     onSubmit: async obj => {
       try {
@@ -53,18 +56,16 @@ export default function PriceForm({ labels, maxAccess, recordId }) {
     }
   })
 
-  console.log(formik)
-
   const editMode = !!formik.values.recordId
 
   useEffect(() => {
-    console.log(recordId)
     ;(async function () {
-      if (recordId) {
+      if (obj.clientId) {
         const res = await getRequest({
           extension: SaleRepository.Price.get,
-          parameters: `_recordId=${recordId}`
+          parameters: `_clientId=${obj.clientId}&_categoryId=${obj.categoryId}&_currencyId=${obj.currencyId}&_priceType=${obj.priceType}`
         })
+        console.log(res.record, 'aaaaaaaaaa')
 
         formik.setValues(res.record)
       }
@@ -72,14 +73,21 @@ export default function PriceForm({ labels, maxAccess, recordId }) {
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.ClientGroups} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell
+      resourceId={ResourceIds.ClientGroups}
+      form={formik}
+      maxAccess={maxAccess}
+      editMode={editMode}
+      infoVisible={false}
+      isCleared={false}
+    >
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={SaleRepository.PaymentTerms.qry}
-                name='ptId'
+                name='categoryId'
                 label={labels.paymentTerm}
                 valueField='recordId'
                 displayField={['reference', 'name']}
@@ -93,42 +101,44 @@ export default function PriceForm({ labels, maxAccess, recordId }) {
                 onChange={(event, newValue) => {
                   formik.setFieldValue('ptId', newValue?.recordId)
                 }}
+                error={formik.touched.categoryId && Boolean(formik.errors.categoryId)}
               />
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
-                values={formik.values}
                 endpointId={SystemRepository.Currency.qry}
                 name='currencyId'
                 label={labels.currency}
                 valueField='recordId'
-                displayField={'name'}
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' },
+                  { key: 'flName', value: 'FL Name' }
+                ]}
+                values={formik.values}
+                required
+                maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('currencyId', newValue?.recordId || '')
+                  formik.setFieldValue('currencyId', newValue?.recordId || null)
                 }}
                 error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
-                maxAccess={maxAccess}
-                required
               />
             </Grid>
 
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={SaleRepository.PriceLevel.qry}
-                name='plId'
-                label={labels.priceLevel}
-                valueField='recordId'
-                displayField={['reference', 'name']}
-                displayFieldWidth={1}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
-                values={formik?.values}
+                datasetId={DataSets.PRICE_TYPE}
+                name='priceType'
+                label={labels.pT}
+                valueField='key'
+                displayField='value'
+                values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('plId', newValue?.recordId)
+                  formik.setFieldValue('priceType', newValue?.key)
                 }}
+                error={formik.touched.priceType && Boolean(formik.errors.priceType)}
               />
             </Grid>
 
@@ -138,8 +148,10 @@ export default function PriceForm({ labels, maxAccess, recordId }) {
                 label={labels.value}
                 value={formik.values.value}
                 maxAccess={maxAccess}
+                allowNegative={false}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('value', '')}
+                error={formik.touched.value && Boolean(formik.errors.value)}
               />
             </Grid>
           </Grid>
