@@ -111,10 +111,23 @@ const CustomComboBox = ({
           return (
             <Box>
               {props.id.endsWith('-0') && (
-                <li className={props.className}>
+                <li className={props.className} style={{ borderBottom: '1px solid #ccc' }}>
                   {columnsInDropDown.map((header, i) => {
                     return (
-                      <Box key={i} sx={{ flex: 1, fontWeight: 'bold' }}>
+                      <Box
+                        key={i}
+                        sx={{
+                          flex: 1,
+                          fontWeight: 'bold',
+                          width: header.width || 'auto',
+                          fontSize: '0.7rem',
+                          height: '15px',
+                          display: 'flex',
+                          borderRight: i < columnsInDropDown.length - 1 ? '1px solid #ccc' : 'none',
+                          padding: '0px !important',
+                          margin: '0px !important'
+                        }}
+                      >
                         {header.value.toUpperCase()}
                       </Box>
                     )
@@ -124,7 +137,17 @@ const CustomComboBox = ({
               <li {...props}>
                 {columnsInDropDown.map((header, i) => {
                   return (
-                    <Box key={i} sx={{ flex: 1 }}>
+                    <Box
+                      key={i}
+                      sx={{
+                        flex: 1,
+                        width: header.width || 'auto',
+                        fontSize: '0.88rem',
+                        height: '20px',
+                        display: 'flex',
+                        borderRight: i < columnsInDropDown.length - 1 ? '1px solid #ccc' : 'none'
+                      }}
+                    >
                       {option[header.key]}
                     </Box>
                   )
@@ -136,7 +159,7 @@ const CustomComboBox = ({
           return (
             <Box>
               <li {...props}>
-                <Box sx={{ flex: 1 }}>{option[displayField]}</Box>
+                <Box sx={{ flex: 1, fontSize: '0.88rem', height: '20px', display: 'flex' }}>{option[displayField]}</Box>
               </li>
             </Box>
           )
@@ -173,7 +196,6 @@ const CustomComboBox = ({
                           p: '0px !important',
                           marginRight: '-10px'
                         }}
-                        size='small'
                       >
                         <RefreshIcon />
                       </IconButton>
@@ -187,7 +209,15 @@ const CustomComboBox = ({
             '& .MuiOutlinedInput-root': {
               '& fieldset': {
                 border: !hasBorder && 'none'
-              }
+              },
+              height: `33px !important`
+            },
+            '& .MuiInputLabel-root': {
+              fontSize: '0.90rem',
+              top: value ? '0px' : '-3px'
+            },
+            '& .MuiInputBase-input': {
+              fontSize: '0.90rem'
             },
             '& .MuiAutocomplete-clearIndicator': {
               pl: '0px !important',

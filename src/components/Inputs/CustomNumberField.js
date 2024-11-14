@@ -161,8 +161,21 @@ const CustomNumberField = ({
       sx={{
         '& .MuiOutlinedInput-root': {
           '& fieldset': {
-            border: !hasBorder && 'none' // Hide border
-          }
+            border: !hasBorder && 'none'
+          },
+          height: `33px !important`
+        },
+        '& .MuiInputLabel-root': {
+          fontSize: '0.90rem',
+          top: value ? '0px' : '-3px'
+        },
+        '& .MuiInputBase-input': {
+          fontSize: '0.90rem'
+        },
+        '& .MuiAutocomplete-clearIndicator': {
+          pl: '0px !important',
+          marginRight: '-10px',
+          visibility: 'visible'
         }
       }}
       {...props}
