@@ -99,11 +99,17 @@ const CustomNumberField = ({
     if (value) formatNumber({ target: { value } })
   }, [])
 
+  const handleFocus = e => {
+    if (e.target.value === '0') {
+      e.target.value = ''
+      onChange({ ...e, target: { ...e.target, value: '' } })
+    }
+  }
+
   return _hidden ? (
     <></>
   ) : (
     <NumericFormat
-      hey={value}
       label={label}
       allowLeadingZeros
       allowNegative={allowNegative}
@@ -120,8 +126,9 @@ const CustomNumberField = ({
       onInput={handleInput}
       InputProps={{
         inputProps: {
-          tabIndex: readOnly ? -1 : 0, // Prevent focus on the input field
-          onKeyPress: handleKeyPress
+          tabIndex: readOnly ? -1 : 0,
+          onKeyPress: handleKeyPress,
+          onFocus: handleFocus
         },
         autoComplete: 'off',
         readOnly: _readOnly,
@@ -160,7 +167,7 @@ const CustomNumberField = ({
       sx={{
         '& .MuiOutlinedInput-root': {
           '& fieldset': {
-            border: !hasBorder && 'none' // Hide border
+            border: !hasBorder && 'none'
           }
         }
       }}
