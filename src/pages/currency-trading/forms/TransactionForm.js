@@ -268,7 +268,6 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       amount: formikSettings?.paymentValidation
     }),
     onSubmit: async values => {
-      console.log('values')
       const lastRow = values.operations[values.operations.length - 1]
       const isLastRowMandatoryOnly = !lastRow.currencyId && !lastRow.currencyId && !lastRow.exRate && !lastRow.fcAmount
       let operations = values.operations
@@ -436,7 +435,6 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
   )
 
   const dir = JSON.parse(window.localStorage.getItem('settings'))?.direction
-  console.log(formik)
 
   const onClose = async recId => {
     const res = await getRequest({
@@ -639,7 +637,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
   }, 0)
 
   const receivedTotal = formik.values.amount.reduce((acc, { amount }) => {
-    return acc + (amount || 0)
+    return acc + parseFloat(amount?.toString()?.replace(/,/g, '')) || 0
   }, 0)
 
   const balance = total - receivedTotal
