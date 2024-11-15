@@ -4,7 +4,7 @@ import ClearIcon from '@mui/icons-material/Clear'
 import { useEffect, useState } from 'react'
 import { DISABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
 import PopperComponent from '../Shared/Popper/PopperComponent'
-import CircularProgress from '@mui/material/CircularProgress' // Import CircularProgress from MUI or use any other spinner component
+import CircularProgress from '@mui/material/CircularProgress'
 import { TrxType } from 'src/resources/AccessLevels'
 
 const CustomLookup = ({
@@ -40,6 +40,7 @@ const CustomLookup = ({
   isLoading,
   minChars,
   userTypes = true,
+  onBlur = () => {},
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
@@ -162,10 +163,10 @@ const CustomLookup = ({
               onBlur={e => {
                 if (!store.some(item => item[valueField] === inputValue) && e.target.value !== firstValue) {
                   setInputValue('')
-
                   // onChange(name, '')
                   setFreeSolo(true)
                 }
+                onBlur(e)
               }}
               onFocus={() => {
                 setStore([]), setFreeSolo(true)
@@ -175,7 +176,7 @@ const CustomLookup = ({
               label={label}
               required={isRequired}
               onKeyUp={e => {
-                onKeyUp
+                onKeyUp(e)
                 e.target.value >= minChars ? setFreeSolo(true) : setFreeSolo(false)
               }}
               inputProps={{

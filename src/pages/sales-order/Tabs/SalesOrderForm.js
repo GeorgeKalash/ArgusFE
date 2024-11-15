@@ -223,7 +223,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       flex: 2,
       props: {
         endpointId: InventoryRepository.Item.snapshot,
-        parameters: '_categoryId=0&_msId=0&_startAt=0&_size=1000',
+        parameters: { _categoryId: 0, _msId: 0, _startAt: 0, _size: 1000 },
         displayField: 'sku',
         valueField: 'recordId',
         mapping: [
