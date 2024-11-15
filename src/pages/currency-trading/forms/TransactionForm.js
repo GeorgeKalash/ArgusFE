@@ -34,7 +34,6 @@ import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomDatePickerHijri from 'src/components/Inputs/CustomDatePickerHijri'
 import PaymentGrid from 'src/components/Shared/PaymentGrid'
-import { initialValuePayment, usePaymentValidationSchema } from 'src/utils/PaymentFormik'
 
 const FormContext = React.createContext(null)
 
@@ -80,8 +79,6 @@ function FormProvider({ formik, maxAccess, labels, children }) {
 }
 
 export default function TransactionForm({ recordId, labels, access, plantId }) {
-  const validationSchema = usePaymentValidationSchema('amount')
-
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [infoAutoFilled, setInfoAutoFilled] = useState(false)
   const [idInfoAutoFilled, setIDInfoAutoFilled] = useState(false)
@@ -94,6 +91,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
   const [search, setSearch] = useState(null)
   const [fId, setFId] = useState(SystemFunction.CurrencyPurchase)
   const { platformLabels } = useContext(ControlContext)
+  const [formikSettings, setFormik] = useState({})
 
   const resetAutoFilled = () => {
     setIDInfoAutoFilled(false)
@@ -129,7 +127,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
         maxRate: ''
       }
     ],
-    amount: initialValuePayment,
+    amount: formikSettings.initialValuePayment || [],
     date: new Date(),
     clientId: null,
     clientName: null,
@@ -267,7 +265,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
           })
         )
         .required(),
-      amount: validationSchema
+      amount: formikSettings?.paymentValidation
     }),
     onSubmit: async values => {
       console.log('values')
@@ -1377,6 +1375,8 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                           onChange={value => formik.setFieldValue('amount', value)}
                           value={formik.values.amount}
                           error={formik.errors.amount}
+                          name={'amount'}
+                          setFormik={setFormik}
                           amount={total}
                           disabled={isClosed}
                         />

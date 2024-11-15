@@ -1,13 +1,73 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { DataSets } from 'src/resources/DataSets'
 import { DataGrid } from './DataGrid'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import * as yup from 'yup'
 
 export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
   const { labels: labels } = useResourceQuery({
     datasetId: ResourceIds?.POSPayment
   })
+
+  useEffect(() => {
+    const initialValuePayment = [
+      {
+        id: 1,
+        seqNo: 0,
+        cashAccountId: null,
+        cashAccount: '',
+        posStatus: 1,
+        posStatusName: '',
+        type: '',
+        amount: '',
+        paidAmount: 0,
+        returnedAmount: 0,
+        bankFees: '',
+        receiptRef: ''
+      }
+    ]
+
+    const paymentValidation = yup
+      .array()
+      .of(
+        yup.object().shape({
+          type: yup
+            .string()
+            .required('Type is required')
+            .test('unique', 'Type must be unique', function (value) {
+              const { options } = this
+              const arrayOfTypes = options.context?.[rest.name].map(row => row.type)
+              if (value == 2) {
+                const countOfType1 = arrayOfTypes.filter(item => item === '2').length
+                if (countOfType1 > 1) {
+                  return false
+                }
+              }
+
+              return true
+            }),
+          paidAmount: yup.string().test('Paid Amount', 'Paid Amount is required', function (value) {
+            if (this.parent.type == '2') {
+              return !!value
+            }
+
+            return true
+          }),
+          returnedAmount: yup.string().test('Returned Amount', 'Returned Amount is required', function (value) {
+            if (this.parent.type == '2') {
+              return !!value
+            }
+
+            return true
+          }),
+          amount: yup.string().nullable().required('Amount is required')
+        })
+      )
+      .required('Cash array is required')
+
+    rest.setFormik({ ...initialValuePayment, paymentValidation })
+  }, [rest.name])
 
   const columns = [
     {

@@ -19,25 +19,22 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { DataSets } from 'src/resources/DataSets'
 import { getStorageData } from 'src/storage/storage'
-import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
+import { formatDateFromApi } from 'src/lib/date-helper'
 import { ControlContext } from 'src/providers/ControlContext'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
-import { DataGrid } from 'src/components/Shared/DataGrid'
 import { useWindow } from 'src/windows'
 import POSForm from './POSForm'
 import NormalDialog from 'src/components/Shared/NormalDialog'
 import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
 import PaymentGrid from 'src/components/Shared/PaymentGrid'
-import { initialValuePayment, usePaymentValidationSchema } from 'src/utils/PaymentFormik'
 
 export default function ReceiptVoucherForm({ labels, access, recordId, cashAccountId, form }) {
-  const validationSchema = usePaymentValidationSchema('cash')
-
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
+  const [formikSettings, setFormik] = useState({})
 
-  const { documentType, maxAccess, changeDT } = useDocumentType({
+  const { documentType, maxAccess } = useDocumentType({
     functionId: SystemFunction.RemittanceReceiptVoucher,
     access: access,
     enabled: !recordId
@@ -68,14 +65,14 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
         clientId: null,
         cellPhone: null
       },
-      cash: initialValuePayment
+      cash: formikSettings.initialValuePayment || []
     },
 
     validationSchema: yup.object({
       header: yup.object({
         owoId: yup.string().required()
       }),
-      cash: validationSchema
+      cash: formikSettings?.paymentValidation
     }),
     onSubmit: async obj => {
       const cash = formik.values.cash.map((cash, index) => ({
