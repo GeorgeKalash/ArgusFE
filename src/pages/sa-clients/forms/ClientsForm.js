@@ -95,6 +95,7 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
       if (recordId) {
         const defaultParams = `_recordId=${recordId}`
         var parameters = defaultParams
+
         const res = await getRequest({
           extension: SaleRepository.Client.get,
           parameters: parameters

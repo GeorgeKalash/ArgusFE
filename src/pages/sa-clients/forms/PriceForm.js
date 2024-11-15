@@ -15,17 +15,20 @@ import { useInvalidate } from 'src/hooks/resource'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { DataSets } from 'src/resources/DataSets'
+import { InventoryRepository } from 'src/repositories/InventoryRepository'
 
-export default function PriceForm({ labels, maxAccess, obj, window }) {
+export default function PriceForm({ labels, maxAccess, obj, window, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: SaleRepository.Price.qry
   })
+  console.log(recordId, 'recccc')
 
   const { formik } = useForm({
     initialValues: {
+      clientId: recordId,
       categoryId: null,
       currencyId: null,
       priceType: '',
@@ -40,19 +43,14 @@ export default function PriceForm({ labels, maxAccess, obj, window }) {
       priceType: yup.string().required()
     }),
     onSubmit: async obj => {
-      try {
-        const response = await postRequest({
-          extension: SaleRepository.Client.set,
-          record: JSON.stringify(obj)
-        })
+      const response = await postRequest({
+        extension: SaleRepository.Price.set,
+        record: JSON.stringify(obj)
+      })
 
-        if (!obj.recordId) {
-          toast.success(platformLabels.Added)
-          formik.setFieldValue('recordId', response.recordId)
-        } else toast.success(platformLabels.Edited)
-
-        invalidate()
-      } catch (error) {}
+      toast.success(platformLabels.Updated)
+      window.close()
+      invalidate()
     }
   })
 
@@ -74,7 +72,7 @@ export default function PriceForm({ labels, maxAccess, obj, window }) {
 
   return (
     <FormShell
-      resourceId={ResourceIds.ClientGroups}
+      resourceId={ResourceIds.Client}
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}
@@ -86,20 +84,17 @@ export default function PriceForm({ labels, maxAccess, obj, window }) {
           <Grid container spacing={4}>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={SaleRepository.PaymentTerms.qry}
+                endpointId={InventoryRepository.Category.qry}
+                parameters='_pagesize=30&_startAt=0&_name='
                 name='categoryId'
-                label={labels.paymentTerm}
+                label={labels.category}
                 valueField='recordId'
-                displayField={['reference', 'name']}
+                displayField={'name'}
                 displayFieldWidth={1}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
                 values={formik?.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('ptId', newValue?.recordId)
+                  formik.setFieldValue('categoryId', newValue?.recordId)
                 }}
                 error={formik.touched.categoryId && Boolean(formik.errors.categoryId)}
               />

@@ -8,12 +8,13 @@ import { SaleRepository } from 'src/repositories/SaleRepository'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import PriceForm from './PriceForm'
 import { useWindow } from 'src/windows'
+import { useResourceQuery } from 'src/hooks/resource'
+import { ResourceIds } from 'src/resources/ResourceIds'
 
 const PriceTab = ({ labels, maxAccess, store }) => {
   const { getRequest } = useContext(RequestsContext)
   const { recordId } = store
   const { stack } = useWindow()
-  const [data, setData] = useState([])
 
   const columns = [
     {
@@ -48,18 +49,20 @@ const PriceTab = ({ labels, maxAccess, store }) => {
       extension: SaleRepository.Price.qry,
       parameters: parameters
     })
-    setData(response)
 
     return { ...response, _startAt: _startAt }
   }
 
-  useEffect(() => {
-    ;(async function () {
-      if (recordId) {
-        fetchGridData()
-      }
-    })()
-  }, [])
+  const {
+    query: { data },
+    labels: _labels,
+    refetch,
+    invalidate
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: SaleRepository.Price.qry,
+    datasetId: ResourceIds.Client
+  })
 
   const add = () => {
     openForm('')
@@ -71,7 +74,8 @@ const PriceTab = ({ labels, maxAccess, store }) => {
       props: {
         labels: labels,
         obj,
-        maxAccess: maxAccess
+        maxAccess: maxAccess,
+        recordId
       },
       width: 500,
       height: 400,
@@ -105,6 +109,7 @@ const PriceTab = ({ labels, maxAccess, store }) => {
           rowId={['clientId', 'categoryId', 'currencyId', 'priceType']}
           onEdit={Edit}
           onDelete={Delete}
+          refetch={refetch}
           isLoading={false}
           maxAccess={maxAccess}
           pagination={true}
