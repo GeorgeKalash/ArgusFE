@@ -14,7 +14,7 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 
-export default function AddressFilterForm({ labels, shipment, bill, form, window }) {
+export default function AddressFilterForm({ labels, shipment, bill, deliveryOrder, form, window }) {
   const [data, setData] = useState([])
   const { getRequest } = useContext(RequestsContext)
 
@@ -27,6 +27,7 @@ export default function AddressFilterForm({ labels, shipment, bill, form, window
       if (!checkedADD.addressId) {
         form.setFieldValue('shipAddress', '')
         form.setFieldValue('BillAddress', '')
+        form.setFieldValue('address', '')
         window.close()
 
         return
@@ -44,6 +45,13 @@ export default function AddressFilterForm({ labels, shipment, bill, form, window
           form.setFieldValue('billAddressId', checkedADD.addressId)
           form.setFieldValue('billToAddressId', checkedADD.addressId)
         }
+      }
+
+      if (deliveryOrder) {
+        const address = await getAddress(checkedADD.addressId)
+        form.setFieldValue('address', address)
+        form.setFieldValue('addressId', checkedADD.addressId)
+        form.setFieldValue('addressId', checkedADD.addressId)
       }
 
       window.close()

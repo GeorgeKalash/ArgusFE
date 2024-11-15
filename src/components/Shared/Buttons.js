@@ -377,4 +377,17 @@ export const getButtons = platformLabels => [
     image: 'exchange-refresh-icon.png',
     main: false
   },
+  {
+    key: 'generateIV',
+    label: platformLabels.GenerateInvoice,
+    color: 'black',
+    image: 'generate.png',
+    main: false
+  },
+  {
+    key: 'Generate Invoice',
+    label: platformLabels.GenerateInvoice,
+    color: '#231f20',
+    main: false
+  },
 ]

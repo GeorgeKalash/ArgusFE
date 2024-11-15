@@ -298,5 +298,6 @@ export const ResourceIds = {
   UserSecretOTPQrCode: 23201,
   IVparts: 41222,
   SalesInquiries: 51300,
-  MigrateBarcodeData: 41508
+  MigrateBarcodeData: 41508,
+  DeliveriesOrders: 52301
 }
