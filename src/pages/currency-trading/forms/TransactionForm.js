@@ -903,7 +903,6 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                           type={showAsPasswordIDNumber && formik.values['idNo'] ? 'password' : 'text'}
                           onChange={e => formik.setFieldValue('idNo', e?.target?.value)}
                           onBlur={e => {
-                            console.log(e.target.value, idNumberOne)
                             if (e.target.value && e.target.value != idNumberOne) {
                               setShowAsPasswordIDNumber(true)
                               checkTypes(e.target.value)
