@@ -950,7 +950,12 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                   </Grid>
                   <Grid item xs={12}>
                     <Button
-                      sx={{ backgroundColor: '#908c8c', color: '#000000' }}
+                      sx={{
+                        backgroundColor: '#908c8c',
+                        color: '#000000',
+                        height: '33px',
+                        objectFit: 'contain'
+                      }}
                       disabled={
                         !(plantId && formik.values.countryId && formik.values.currencyId && formik.values.dispersalType)
                       }
@@ -1336,7 +1341,9 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
                       '&:disabled': {
                         backgroundColor: '#eaeaea',
                         color: '#000000'
-                      }
+                      },
+                      height: '33px',
+                      objectFit: 'contain'
                     }}
                     disabled={!formik.values.beneficiaryId}
                     onClick={() => openBankWindow()}

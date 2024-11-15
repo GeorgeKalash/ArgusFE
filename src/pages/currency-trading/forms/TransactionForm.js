@@ -36,6 +36,7 @@ import CustomDatePickerHijri from 'src/components/Inputs/CustomDatePickerHijri'
 import PaymentGrid from 'src/components/Shared/PaymentGrid'
 import { DataSets } from 'src/resources/DataSets'
 import OTPAuthentication from 'src/components/Shared/OTPAuthentication'
+import CustomRadioButton from 'src/components/Inputs/CustomRadioButton'
 
 export default function TransactionForm({ recordId, labels, access, plantId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -442,8 +443,6 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
   const isClosed = formik.values.wip === 2
   const isPosted = formik.values.status === 3
   const isReleased = formik.values.status === 4
-
-  console.log(isPosted, 'isPosted')
 
   async function setOperationType(type) {
     if (type) {
@@ -880,6 +879,14 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                         setFId(e.target.value)
                         formik.setFieldValue('reference', '')
                       }}
+                      sx={{
+                        '.MuiFormControlLabel-label': {
+                          fontSize: '0.9rem'
+                        },
+                        '.MuiSvgIcon-root': {
+                          fontSize: '1.2rem'
+                        }
+                      }}
                     >
                       <FormControlLabel
                         value={SystemFunction.CurrencyPurchase}
@@ -916,7 +923,19 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                     />
                   </Grid>
                   <Grid item xs={6}>
-                    <RadioGroup row value={formik.values.clientType} onChange={formik.onChange}>
+                    <RadioGroup
+                      row
+                      value={formik.values.clientType}
+                      onChange={formik.onChange}
+                      sx={{
+                        '.MuiFormControlLabel-label': {
+                          fontSize: '0.9rem'
+                        },
+                        '.MuiSvgIcon-root': {
+                          fontSize: '1.2rem'
+                        }
+                      }}
+                    >
                       <FormControlLabel value={'1'} control={<Radio />} label={labels.individual} />
                       <FormControlLabel value={'2'} control={<Radio />} label={labels.corporate} disabled />
                     </RadioGroup>
@@ -1308,6 +1327,14 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                       </Grid>
                       <Grid item xs={2}>
                         <FormControlLabel
+                          sx={{
+                            '.MuiFormControlLabel-label': {
+                              fontSize: '0.9rem'
+                            },
+                            '.MuiSvgIcon-root': {
+                              fontSize: '1.2rem'
+                            }
+                          }}
                           name='resident'
                           checked={formik.values.resident}
                           onChange={formik.handleChange}
@@ -1318,6 +1345,14 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                       </Grid>
                       <Grid item xs={2}>
                         <FormControlLabel
+                          sx={{
+                            '.MuiFormControlLabel-label': {
+                              fontSize: '0.9rem'
+                            },
+                            '.MuiSvgIcon-root': {
+                              fontSize: '1.2rem'
+                            }
+                          }}
                           name='otp'
                           checked={formik.values.otp}
                           onChange={formik.handleChange}
@@ -1337,7 +1372,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                   onChange={value => formik.setFieldValue('operations', value)}
                   value={formik.values.operations}
                   error={emptyRows.length < 1 ? formik.errors.operations : true}
-                  height={200}
+                  height={175}
                   disabled={isClosed}
                   maxAccess={maxAccess}
                   name='operations'
@@ -1527,7 +1562,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                 <Grid container spacing={2}>
                   <Grid item xs={9}>
                     <PaymentGrid
-                      height={200}
+                      height={175}
                       onChange={value => formik.setFieldValue('amount', value)}
                       value={formik.values.amount}
                       error={formik.errors.amount}

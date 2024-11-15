@@ -86,9 +86,6 @@ export default function CustomDatePickerHijri({
         }}
         sx={{
           '& .MuiOutlinedInput-root': {
-            '& fieldset': {
-              border: !hasBorder && 'none'
-            },
             height: '33px !important'
           },
           '& .MuiInputLabel-root': {
@@ -106,18 +103,18 @@ export default function CustomDatePickerHijri({
             size: size,
             fullWidth: fullWidth,
             inputProps: {
-              tabIndex: _readOnly ? -1 : 0 // Prevent focus on the input field
+              tabIndex: _readOnly ? -1 : 0
             },
             InputProps: {
               endAdornment: !(_readOnly || disabled) && (
                 <InputAdornment position='end'>
                   {Boolean(value) && (
                     <IconButton tabIndex={-1} edge='start' onClick={() => onChange(name, null)} sx={{ mr: -3 }}>
-                      <ClearIcon sx={{ border: '0px', fontSize: 20 }} />
+                      <ClearIcon sx={{ border: '0px', fontSize: 17 }} />
                     </IconButton>
                   )}
                   <IconButton tabIndex={-1} onClick={() => setOpenDatePicker(true)} sx={{ mr: -2 }}>
-                    <EventIcon />
+                    <EventIcon sx={{ border: '0px', fontSize: 18 }} />
                   </IconButton>
                 </InputAdornment>
               )
