@@ -7,7 +7,7 @@ function DataGridButton({ data, column: { props, ...column }, update, updateRow,
         opacity: 1,
         '&:hover': { opacity: 0.7 },
         width: 15,
-        height: 35,
+        height: '33px',
         objectFit: 'contain'
       }}
       autoFocus={isEditMode}
@@ -15,8 +15,6 @@ function DataGridButton({ data, column: { props, ...column }, update, updateRow,
         column?.onClick(e, data, update, updateRow)
       }}
       variant={!!props?.imgSrc ? '' : 'contained'}
-
-      // disabled={!data?.[field]}
     >
       {!!props?.imgSrc ? (
         <img src={props?.imgSrc} alt='popup' />
