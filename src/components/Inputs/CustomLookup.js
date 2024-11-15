@@ -163,9 +163,10 @@ const CustomLookup = ({
               onBlur={e => {
                 if (!store.some(item => item[valueField] === inputValue) && e.target.value !== firstValue) {
                   setInputValue('')
-                  // onChange(name, '')
+
                   setFreeSolo(true)
                 }
+
                 onBlur(e)
               }}
               onFocus={() => {
@@ -177,6 +178,7 @@ const CustomLookup = ({
               required={isRequired}
               onKeyUp={e => {
                 onKeyUp(e)
+
                 e.target.value >= minChars ? setFreeSolo(true) : setFreeSolo(false)
               }}
               inputProps={{
