@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -27,11 +27,14 @@ import { useWindow } from 'src/windows'
 import POSForm from './POSForm'
 import NormalDialog from 'src/components/Shared/NormalDialog'
 import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
+import WindowToolbar from 'src/components/Shared/WindowToolbar'
+import PreviewReport from 'src/components/Shared/PreviewReport'
 
 export default function ReceiptVoucherForm({ labels, access, recordId, cashAccountId, form }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
+  const [selectedReport, setSelectedReport] = useState(null)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.RemittanceReceiptVoucher,
@@ -251,7 +254,8 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
             owoId: form.values.recordId,
             owoRef: form.values.reference,
             clientId: form.values.clientId,
-            cellPhone: form.values.cellPhone
+            cellPhone: form.values.cellPhone,
+            plantId: form.values.plantId
           }
         }))
       }
@@ -304,14 +308,39 @@ export default function ReceiptVoucherForm({ labels, access, recordId, cashAccou
   }
 
   function openDialog(recordId) {
+    let parts = recordId.split(',')
+    let Id = parts[0]
+    let Reference = parts[1]
     stack({
       Component: NormalDialog,
       props: {
-        DialogText: `${platformLabels.Posted} ${recordId}`
-      },
-      width: 600,
-      height: 200,
-      title: platformLabels.Post
+        DialogText: `${platformLabels.Posted} ${Reference}`,
+        bottomSection: (
+          <Fixed>
+            <WindowToolbar
+              previewReport={true}
+              onGenerateReport={() =>
+                stack({
+                  Component: PreviewReport,
+                  props: {
+                    selectedReport: selectedReport,
+                    recordId: Id,
+                    functionId: SystemFunction.OutwardsTransfer,
+                    resourceId: ResourceIds.OutwardsTransfer
+                  },
+                  width: 1150,
+                  height: 700,
+                  title: platformLabels.PreviewReport
+                })
+              }
+              setSelectedReport={setSelectedReport}
+            />
+          </Fixed>
+        ),
+        width: 600,
+        height: 200,
+        title: platformLabels.Post
+      }
     })
   }
 
