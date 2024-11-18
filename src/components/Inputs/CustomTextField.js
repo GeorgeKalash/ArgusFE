@@ -19,7 +19,7 @@ const CustomTextField = ({
   clearable = false,
   autoComplete = 'off',
   numberField = false,
-  editMode = false,
+  editMode = true,
   maxLength = '1000',
   position,
   dir = 'ltr',
@@ -36,7 +36,7 @@ const CustomTextField = ({
 
   const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
 
-  const _readOnly = editMode ? editMode && maxAccess < TrxType.EDIT : readOnly || accessLevel === DISABLED
+  const _readOnly = editMode ? editMode && maxAccess < TrxType.EDIT : accessLevel > DISABLED ? false : readOnly
 
   const _hidden = accessLevel ? accessLevel === HIDDEN : hidden
 

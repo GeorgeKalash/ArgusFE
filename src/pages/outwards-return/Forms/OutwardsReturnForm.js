@@ -156,7 +156,7 @@ export default function OutwardsReturnForm({
     stack({
       Component: OTPPhoneVerification,
       props: {
-        formValidation: formik,
+        values: formik.values,
         recordId: recId,
         functionId: SystemFunction.OutwardsReturn
       },
