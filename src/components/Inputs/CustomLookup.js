@@ -172,7 +172,6 @@ const CustomLookup = ({
               onFocus={() => {
                 setStore([]), setFreeSolo(true)
               }}
-              onClick={() => setFreeSolo(true)}
               type={type}
               variant={variant}
               label={label}
