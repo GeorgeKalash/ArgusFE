@@ -1,15 +1,12 @@
 import { useState } from 'react'
-
 import { InputAdornment, IconButton } from '@mui/material'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import ClearIcon from '@mui/icons-material/Clear'
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import { PickersActionBar } from '@mui/x-date-pickers/PickersActionBar'
-
 import { TimePicker } from '@mui/x-date-pickers/TimePicker'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import PopperComponent from '../Shared/Popper/PopperComponent'
-
 import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
 
 const CustomTimePicker = ({
@@ -60,7 +57,9 @@ const CustomTimePicker = ({
         sx={{
           '& .MuiOutlinedInput-root': {
             '& fieldset': {
-              border: !hasBorder && 'none'
+              border: !hasBorder && 'none',
+              borderColor: '#959d9e',
+              borderRadius: '6px'
             },
             height: '33px !important'
           },
@@ -69,7 +68,8 @@ const CustomTimePicker = ({
             top: value ? '0px' : '-3px'
           },
           '& .MuiInputBase-input': {
-            fontSize: '0.90rem'
+            fontSize: '0.90rem',
+            color: 'black'
           }
         }}
         autoFocus={autoFocus}

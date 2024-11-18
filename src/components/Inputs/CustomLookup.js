@@ -112,7 +112,17 @@ const CustomLookup = ({
                       {columnsInDropDown.map(
                         (header, i) =>
                           columnsInDropDown.length > 1 && (
-                            <Box key={i} sx={{ flex: 1, fontWeight: 'bold' }}>
+                            <Box
+                              key={i}
+                              sx={{
+                                flex: 1,
+                                fontWeight: 'bold',
+                                width: header.width || 'auto',
+                                fontSize: '0.7rem',
+                                height: '15px',
+                                display: 'flex'
+                              }}
+                            >
                               {header.value.toUpperCase()}
                             </Box>
                           )
@@ -121,7 +131,16 @@ const CustomLookup = ({
                   )}
                   <li {...props}>
                     {columnsInDropDown.map((header, i) => (
-                      <Box key={i} sx={{ flex: 1 }}>
+                      <Box
+                        key={i}
+                        sx={{
+                          flex: 1,
+                          width: header.width || 'auto',
+                          fontSize: '0.88rem',
+                          height: '20px',
+                          display: 'flex'
+                        }}
+                      >
                         {option[header.key]}
                       </Box>
                     ))}
@@ -133,7 +152,11 @@ const CustomLookup = ({
                 <Box>
                   {props.id.endsWith('-0') && (
                     <li className={props.className}>
-                      {secondDisplayField && <Box sx={{ flex: 1, fontWeight: 'bold' }}>{valueField.toUpperCase()}</Box>}
+                      {secondDisplayField && (
+                        <Box sx={{ flex: 1, fontSize: '0.88rem', height: '20px', display: 'flex', fontWeight: 'bold' }}>
+                          {valueField.toUpperCase()}
+                        </Box>
+                      )}
                       {secondDisplayField && (
                         <Box sx={{ flex: 1, fontWeight: 'bold' }}>{displayField.toUpperCase()}</Box>
                       )}
@@ -141,7 +164,11 @@ const CustomLookup = ({
                   )}
                   <li {...props}>
                     <Box sx={{ flex: 1 }}>{option[valueField]}</Box>
-                    {secondDisplayField && <Box sx={{ flex: 1 }}>{option[displayField]}</Box>}
+                    {secondDisplayField && (
+                      <Box sx={{ flex: 1, fontSize: '0.88rem', height: '20px', display: 'flex' }}>
+                        {option[displayField]}
+                      </Box>
+                    )}
                   </li>
                 </Box>
               )
@@ -245,7 +272,10 @@ const CustomLookup = ({
                 }),
                 '& .MuiOutlinedInput-root': {
                   '& fieldset': {
-                    border: !hasBorder && 'none'
+                    border: !hasBorder && 'none',
+                    borderColor: '#959d9e',
+                    borderTopLeftRadius: '6px',
+                    borderBottomLeftRadius: '6px'
                   },
                   height: '33px !important'
                 },
@@ -254,7 +284,8 @@ const CustomLookup = ({
                   top: firstValue ? '0px' : '-3px'
                 },
                 '& .MuiInputBase-input': {
-                  fontSize: '0.90rem'
+                  fontSize: '0.90rem',
+                  color: 'black'
                 },
                 width: '100%'
               }}
@@ -291,7 +322,10 @@ const CustomLookup = ({
               },
               '& .MuiOutlinedInput-root': {
                 '& fieldset': {
-                  border: !hasBorder && 'none'
+                  border: !hasBorder && 'none',
+                  borderColor: '#959d9e',
+                  borderTopRightRadius: '6px',
+                  borderBottomRightRadius: '6px'
                 },
                 height: '33px !important'
               },
@@ -300,7 +334,8 @@ const CustomLookup = ({
                 top: firstValue ? '0px' : '-3px'
               },
               '& .MuiInputBase-input': {
-                fontSize: '0.90rem'
+                fontSize: '0.90rem',
+                color: 'black'
               },
               width: '100%'
             }}
