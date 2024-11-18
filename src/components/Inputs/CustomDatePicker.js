@@ -53,6 +53,7 @@ const CustomDatePicker = ({
   const _readOnly = editMode ? editMode && maxAccess < TrxType.EDIT : accessLevel > DISABLED ? false : readOnly
 
   const _hidden = accessLevel ? accessLevel === HIDDEN : hidden
+  const [isFocused, setIsFocused] = useState(false)
 
   const shouldDisableDate = dates => {
     const date = new Date(dates)
@@ -93,6 +94,8 @@ const CustomDatePicker = ({
         size={size}
         value={value}
         label={label}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
         minDate={!!min ? min : disabledRangeDate.date}
         maxDate={!!max ? max : newDate}
         fullWidth={fullWidth}
@@ -107,7 +110,7 @@ const CustomDatePicker = ({
           },
           '& .MuiInputLabel-root': {
             fontSize: '0.90rem',
-            top: value ? '0px' : '-3px'
+            top: isFocused || value ? '0px' : '-3px'
           },
           '& .MuiInputBase-input': {
             fontSize: '0.90rem',

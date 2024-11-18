@@ -1,10 +1,10 @@
-import React, { useEffect } from 'react'
 import PercentIcon from '@mui/icons-material/Percent'
 import PinIcon from '@mui/icons-material/Pin'
+import React, { useEffect, useState } from 'react'
 import { NumericFormat } from 'react-number-format'
-import { Button, IconButton, InputAdornment, TextField } from '@mui/material'
+import { IconButton, InputAdornment, TextField } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
-import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
+import { DISABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
 import { getNumberWithoutCommas } from 'src/lib/numberField-helper'
 import { TrxType } from 'src/resources/AccessLevels'
 
@@ -47,6 +47,7 @@ const CustomNumberField = ({
   const _hidden = accessLevel ? accessLevel === HIDDEN : hidden
 
   const required = props.required || accessLevel === MANDATORY
+  const [isFocused, setIsFocused] = useState(false)
 
   const handleKeyPress = e => {
     const regex = /[0-9.-]/
@@ -129,6 +130,8 @@ const CustomNumberField = ({
       helperText={helperText}
       required={required}
       onInput={handleInput}
+      onFocus={() => setIsFocused(true)}
+      onBlur={() => setIsFocused(false)}
       InputProps={{
         inputProps: {
           onFocus: handleFocus,
@@ -149,7 +152,7 @@ const CustomNumberField = ({
             )}
             {displayButtons && (
               <IconButton tabIndex={-1} edge='end' onClick={onClear} aria-label='clear input'>
-                <ClearIcon sx={{ border: '0px', fontSize: 20 }} />
+                <ClearIcon sx={{ border: '0px', fontSize: 17 }} />
               </IconButton>
             )}
           </InputAdornment>
@@ -169,7 +172,7 @@ const CustomNumberField = ({
         },
         '& .MuiInputLabel-root': {
           fontSize: '0.90rem',
-          top: value ? '0px' : '-3px'
+          top: isFocused || value ? '0px' : '-3px'
         },
         '& .MuiInputBase-input': {
           fontSize: '0.90rem',

@@ -45,6 +45,7 @@ const CustomTextField = ({
 
   const inputRef = useRef(null)
   const [focus, setFocus] = useState(!hasBorder)
+  const [isFocused, setIsFocused] = useState(false)
 
   useEffect(() => {
     if (inputRef.current && inputRef.current.selectionStart !== undefined && focus && value && value?.length < 1) {
@@ -102,6 +103,8 @@ const CustomTextField = ({
       size={size}
       fullWidth={fullWidth}
       autoFocus={focus}
+      onFocus={() => setIsFocused(true)}
+      onBlur={() => setIsFocused(false)}
       inputProps={{
         autoComplete: 'off',
         readOnly: _readOnly,
@@ -146,8 +149,7 @@ const CustomTextField = ({
         },
         '& .MuiInputLabel-root': {
           fontSize: '0.90rem',
-          top: value ? '0px' : '-3px',
-          color: 'black'
+          top: isFocused || value ? '0px' : '-3px'
         },
         '& .MuiInputBase-input': {
           fontSize: '0.90rem'

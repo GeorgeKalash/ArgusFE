@@ -39,6 +39,7 @@ export default function CustomDatePickerHijri({
   const _hidden = accessLevel ? accessLevel === HIDDEN : hidden
 
   const isRequired = required || accessLevel === MANDATORY
+  const [isFocused, setIsFocused] = useState(false)
 
   const shouldDisableDate = dates => {
     const date = new Date(dates)
@@ -79,6 +80,8 @@ export default function CustomDatePickerHijri({
         open={openDatePicker}
         minDate={moment(new Date(1938, 0, 1))}
         maxDate={moment(new Date(2075, 11, 31))}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
         shouldDisableDate={disabledDate && shouldDisableDate} // Enable this prop for date disabling
         slots={{
           actionBar: props => <PickersActionBar {...props} actions={['accept', 'today']} />,
@@ -94,7 +97,7 @@ export default function CustomDatePickerHijri({
           },
           '& .MuiInputLabel-root': {
             fontSize: '0.90rem',
-            top: value ? '0px' : '-3px'
+            top: isFocused || value ? '0px' : '-3px'
           },
           '& .MuiInputBase-input': {
             fontSize: '0.90rem',

@@ -1,6 +1,6 @@
 import { TextField, InputAdornment, IconButton, Box } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
 import Image from 'next/image'
 import DropDownArrow from '/public/images/buttonsIcons/bottom-arrow.png'
@@ -41,6 +41,7 @@ const CustomTextArea = ({
   const _hidden = accessLevel ? accessLevel === HIDDEN : hidden
 
   const inputRef = useRef(null)
+  const [isFocused, setIsFocused] = useState(false)
 
   useEffect(() => {
     // Save the cursor position before the value changes
@@ -66,6 +67,8 @@ const CustomTextArea = ({
         size={size}
         fullWidth={fullWidth}
         autoFocus={autoFocus}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
         inputProps={{
           tabIndex: _readOnly ? -1 : 0,
           readOnly: _readOnly,
@@ -86,7 +89,7 @@ const CustomTextArea = ({
           },
           '& .MuiInputLabel-root': {
             fontSize: '0.90rem',
-            top: value ? '0px' : '-3px'
+            top: isFocused || value ? '0px' : '-3px'
           },
           '& .MuiInputBase-input': {
             fontSize: '0.90rem',

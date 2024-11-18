@@ -43,6 +43,7 @@ const CustomComboBox = ({
   const [hover, setHover] = useState(false)
 
   const [focus, setAutoFocus] = useState(autoFocus)
+  const [isFocused, setIsFocused] = useState(false)
 
   const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
 
@@ -206,6 +207,8 @@ const CustomComboBox = ({
           autoFocus={focus}
           onMouseEnter={() => setHover(true)}
           onMouseLeave={() => setHover(false)}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
           error={error}
           helperText={helperText}
           onBlur={e => {
@@ -220,7 +223,7 @@ const CustomComboBox = ({
               <React.Fragment>
                 {hover &&
                   (_disabled ? null : isLoading ? (
-                    <CircularProgress color='inherit' size={18} />
+                    <CircularProgress color='inherit' size={17} />
                   ) : (
                     refresh &&
                     !readOnly && (
@@ -233,7 +236,7 @@ const CustomComboBox = ({
                           marginRight: '-10px'
                         }}
                       >
-                        <RefreshIcon />
+                        <RefreshIcon size={17} />
                       </IconButton>
                     )
                   ))}
@@ -252,7 +255,7 @@ const CustomComboBox = ({
             },
             '& .MuiInputLabel-root': {
               fontSize: '0.90rem',
-              top: value ? '0px' : '-3px'
+              top: isFocused || value ? '0px' : '-3px'
             },
             '& .MuiInputBase-input': {
               fontSize: '0.90rem',
