@@ -82,7 +82,7 @@ export const ResourceLookup = ({
   }, [_firstValue])
 
   const onKeyUp = e => {
-    if (e.target.value?.length > 0) {
+    if (e.target.value?.length > 0 && e.key != 'ArrowDown' && e.key != 'ArrowUp') {
       setStore([])
     } else {
     }
