@@ -156,10 +156,7 @@ const CustomComboBox = ({
                           width: header.width || 'auto',
                           fontSize: '0.7rem',
                           height: '15px',
-                          display: 'flex',
-                          borderRight: i < columnsInDropDown.length - 1 ? '1px solid #ccc' : 'none',
-                          padding: '0px !important',
-                          margin: '0px !important'
+                          display: 'flex'
                         }}
                       >
                         {header.value.toUpperCase()}
@@ -178,8 +175,7 @@ const CustomComboBox = ({
                         width: header.width || 'auto',
                         fontSize: '0.88rem',
                         height: '20px',
-                        display: 'flex',
-                        borderRight: i < columnsInDropDown.length - 1 ? '1px solid #ccc' : 'none'
+                        display: 'flex'
                       }}
                     >
                       {option[header.key]}
@@ -248,7 +244,9 @@ const CustomComboBox = ({
           sx={{
             '& .MuiOutlinedInput-root': {
               '& fieldset': {
-                border: !hasBorder && 'none'
+                border: !hasBorder && 'none',
+                borderColor: '#959d9e',
+                borderRadius: '6px'
               },
               height: `33px !important`
             },
@@ -257,7 +255,8 @@ const CustomComboBox = ({
               top: value ? '0px' : '-3px'
             },
             '& .MuiInputBase-input': {
-              fontSize: '0.90rem'
+              fontSize: '0.90rem',
+              color: 'black'
             },
             '& .MuiAutocomplete-clearIndicator': {
               pl: '0px !important',

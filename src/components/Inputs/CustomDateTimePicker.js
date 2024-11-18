@@ -114,16 +114,19 @@ const CustomDateTimePicker = ({
         sx={{
           '& .MuiOutlinedInput-root': {
             '& fieldset': {
-              border: !hasBorder && 'none'
+              border: !hasBorder && 'none',
+              borderColor: '#959d9e',
+              borderRadius: '6px'
             },
-            height: '33px !important'
+            height: `33px !important`
           },
           '& .MuiInputLabel-root': {
             fontSize: '0.90rem',
             top: value ? '0px' : '-3px'
           },
           '& .MuiInputBase-input': {
-            fontSize: '0.90rem'
+            fontSize: '0.90rem',
+            color: 'black'
           }
         }}
         autoFocus={autoFocus}

@@ -78,12 +78,19 @@ const CustomTextArea = ({
           }
         }}
         sx={{
+          '& .MuiOutlinedInput-root': {
+            '& fieldset': {
+              borderColor: '#959d9e',
+              borderRadius: '6px'
+            }
+          },
           '& .MuiInputLabel-root': {
             fontSize: '0.90rem',
             top: value ? '0px' : '-3px'
           },
           '& .MuiInputBase-input': {
-            fontSize: '0.90rem'
+            fontSize: '0.90rem',
+            color: 'black'
           }
         }}
         autoComplete={autoComplete}

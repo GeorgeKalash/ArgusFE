@@ -138,13 +138,16 @@ const CustomTextField = ({
       sx={{
         '& .MuiOutlinedInput-root': {
           '& fieldset': {
-            border: !hasBorder && 'none'
+            border: !hasBorder && 'none',
+            borderColor: '#959d9e',
+            borderRadius: '6px'
           },
           height: `33px !important`
         },
         '& .MuiInputLabel-root': {
           fontSize: '0.90rem',
-          top: value ? '0px' : '-3px'
+          top: value ? '0px' : '-3px',
+          color: 'black'
         },
         '& .MuiInputBase-input': {
           fontSize: '0.90rem'

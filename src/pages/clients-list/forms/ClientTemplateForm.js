@@ -965,6 +965,15 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                       <Grid item xs={2}>
                         <Button
                           variant='contained'
+                          sx={{
+                            '&:hover': {
+                              opacity: 0.8
+                            },
+                            width: 'auto',
+                            height: '33px',
+                            objectFit: 'contain',
+                            minWidth: 'auto'
+                          }}
                           onClick={() =>
                             stack({
                               Component: Confirmation,

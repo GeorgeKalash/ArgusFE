@@ -86,14 +86,19 @@ export default function CustomDatePickerHijri({
         }}
         sx={{
           '& .MuiOutlinedInput-root': {
-            height: '33px !important'
+            '& fieldset': {
+              borderColor: '#959d9e',
+              borderRadius: '6px'
+            },
+            height: `33px !important`
           },
           '& .MuiInputLabel-root': {
             fontSize: '0.90rem',
             top: value ? '0px' : '-3px'
           },
           '& .MuiInputBase-input': {
-            fontSize: '0.90rem'
+            fontSize: '0.90rem',
+            color: 'black'
           }
         }}
         slotProps={{
