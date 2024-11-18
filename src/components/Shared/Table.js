@@ -392,9 +392,9 @@ const Table = ({
   }
 
   const onSelectionChanged = params => {
-    const gridApi = params.api
-    const selectedNodes = gridApi.getSelectedNodes()
-    const selectedData = selectedNodes.map(node => node.data)
+    const gridApi = params?.api
+    const selectedNodes = gridApi?.getSelectedNodes()
+    const selectedData = selectedNodes?.map(node => node.data)
     setData(selectedData)
   }
 
