@@ -52,6 +52,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
   const [idTypes, setIdTypes] = useState({})
   const [nationalities, setNationalities] = useState({})
   const [isValidatePhoneClicked, setIsValidatePhoneClicked] = useState(false)
+  const [imageUrl, setImageUrl] = useState(null)
 
   const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
@@ -195,8 +196,6 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       formik.setFieldValue('idtName', idType.name)
     }
   }
-
-  const dir = JSON.parse(window.localStorage.getItem('settings'))?.direction
 
   async function getCountry() {
     var parameters = `_filter=&_key=countryId`
@@ -729,6 +728,16 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
 
   const refreshProf = () => {
     setNewProf(!newProf)
+  }
+
+  const handleClickDigitalId = () => {
+    const parameters = `_number=${formik.values.idNo}&_idType=${formik.values.idtId}`
+    getRequest({
+      extension: CurrencyTradingSettingsRepository.Absher.get,
+      parameters
+    }).then(res => {
+      setImageUrl(res.record.imageContent)
+    })
   }
 
   useEffect(() => {
@@ -1279,21 +1288,25 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                   <Grid container spacing={2}>
                     <Grid item xs='auto'>
                       <Button variant='contained' color='primary'>
-                        {labels.preview}
-                      </Button>
-                    </Grid>
-                    <Grid item xs='auto'>
-                      <Button variant='contained' color='primary'>
                         {labels.scanner}
                       </Button>
                     </Grid>
                     <Grid item xs='auto'>
-                      <Button variant='contained' color='primary'>
+                      <Button variant='contained' color='primary' onClick={handleClickDigitalId}>
                         {labels.digitalId}
                       </Button>
                     </Grid>
                   </Grid>
                 </Grid>
+                {imageUrl && (
+                  <Grid item xs={12}>
+                    <img
+                      src={`data:image/png;base64,${imageUrl}`}
+                      alt='Id image'
+                      style={{ objectFit: 'cover', width: '100%', height: '95%' }}
+                    />
+                  </Grid>
+                )}
               </Grid>
             </Grid>
             <Grid item xs={6}>
