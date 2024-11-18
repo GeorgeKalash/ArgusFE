@@ -172,6 +172,7 @@ const CustomLookup = ({
               onFocus={() => {
                 setStore([]), setFreeSolo(true)
               }}
+              onClick={() => setFreeSolo(true)}
               type={type}
               variant={variant}
               label={label}
@@ -179,7 +180,7 @@ const CustomLookup = ({
               onKeyUp={e => {
                 onKeyUp(e)
 
-                e.target.value >= minChars ? setFreeSolo(true) : setFreeSolo(false)
+                if (e.key !== 'Enter') e.target.value >= minChars ? setFreeSolo(true) : setFreeSolo(false)
               }}
               inputProps={{
                 ...params.inputProps,
