@@ -30,15 +30,22 @@ export default function SalesForm({ labels, maxAccess, recordId, store }) {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required(),
-      reference: yup.string().required(),
-      tdPct: yup.number().test(function (value) {
-        const { maxDiscount } = this.parent
-        console.log('maxDiscount', maxDiscount, value)
+      tdPct: yup
+        .number()
+        .nullable()
+        .transform((value, originalValue) => (originalValue === '' ? null : value))
+        .test('tdPct-smaller-than-maxDiscount', 'Discount % must be smaller than Max Discount.', function (value) {
+          const { maxDiscount } = this.parent
+          if (value != null && maxDiscount != null) {
+            return value < maxDiscount
+          }
 
-        return value <= maxDiscount && value < 100
-      }),
-      maxDiscount: yup.number().nullable().max(100) // Max value validation for secondField
+          return true
+        }),
+      maxDiscount: yup
+        .number()
+        .nullable()
+        .transform((value, originalValue) => (originalValue === '' ? null : value))
     }),
     onSubmit: async obj => {
       const response = await postRequest({
@@ -108,7 +115,6 @@ export default function SalesForm({ labels, maxAccess, recordId, store }) {
                 }}
                 error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
                 maxAccess={maxAccess}
-                required
               />
             </Grid>
 

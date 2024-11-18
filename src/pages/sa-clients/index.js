@@ -80,7 +80,7 @@ const SAClients = () => {
     ,
     {
       field: 'cgName',
-      headerName: _labels.clientGroup,
+      headerName: _labels.cGroup,
       flex: 1
     },
     {
@@ -137,9 +137,9 @@ const SAClients = () => {
         recordId: recordId ? recordId : null,
         maxAccess: access
       },
-      width: 600,
-      height: 800,
-      title: _labels.Accounts
+      width: 700,
+      height: 700,
+      title: _labels.clients
     })
   }
 

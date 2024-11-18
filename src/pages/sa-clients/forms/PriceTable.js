@@ -10,11 +10,14 @@ import PriceForm from './PriceForm'
 import { useWindow } from 'src/windows'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const PriceTab = ({ labels, maxAccess, store }) => {
   const { getRequest } = useContext(RequestsContext)
   const { recordId } = store
   const { stack } = useWindow()
+  const { platformLabels } = useContext(ControlContext)
+  const [data, setData] = useState([])
 
   const columns = [
     {
@@ -49,20 +52,14 @@ const PriceTab = ({ labels, maxAccess, store }) => {
       extension: SaleRepository.Price.qry,
       parameters: parameters
     })
+    setData(response)
 
     return { ...response, _startAt: _startAt }
   }
 
-  const {
-    query: { data },
-    labels: _labels,
-    refetch,
-    invalidate
-  } = useResourceQuery({
-    queryFn: fetchGridData,
-    endpointId: SaleRepository.Price.qry,
-    datasetId: ResourceIds.Client
-  })
+  useEffect(() => {
+    fetchGridData()
+  }, [])
 
   const add = () => {
     openForm('')
@@ -75,16 +72,16 @@ const PriceTab = ({ labels, maxAccess, store }) => {
         labels: labels,
         obj,
         maxAccess: maxAccess,
-        recordId
+        recordId,
+        fetchGridData
       },
       width: 500,
       height: 400,
-      title: labels.Accounts
+      title: labels.editPrice
     })
   }
 
   const Edit = obj => {
-    console.log(obj, 'objjjjjjjjjj')
     openForm(obj)
   }
 
@@ -109,10 +106,9 @@ const PriceTab = ({ labels, maxAccess, store }) => {
           rowId={['clientId', 'categoryId', 'currencyId', 'priceType']}
           onEdit={Edit}
           onDelete={Delete}
-          refetch={refetch}
           isLoading={false}
           maxAccess={maxAccess}
-          pagination={true}
+          pagination={false}
         />
       </Grow>
     </VertLayout>

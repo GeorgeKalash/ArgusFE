@@ -33,7 +33,6 @@ const ClientsAddressForm = ({ getAddressGridData, clientId, recordId, window, pr
           toast.success(platformLabels.Added)
         } else {
           toast.success(platformLabels.Edited)
-          console.log('Edddddddddddddddddd')
         }
         window.close()
       })

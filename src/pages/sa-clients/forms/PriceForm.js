@@ -11,20 +11,14 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SaleRepository } from 'src/repositories/SaleRepository'
-import { useInvalidate } from 'src/hooks/resource'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { DataSets } from 'src/resources/DataSets'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 
-export default function PriceForm({ labels, maxAccess, obj, window, recordId }) {
+export default function PriceForm({ labels, maxAccess, obj, window, recordId, fetchGridData }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-
-  const invalidate = useInvalidate({
-    endpointId: SaleRepository.Price.qry
-  })
-  console.log(recordId, 'recccc')
 
   const { formik } = useForm({
     initialValues: {
@@ -43,14 +37,14 @@ export default function PriceForm({ labels, maxAccess, obj, window, recordId }) 
       priceType: yup.string().required()
     }),
     onSubmit: async obj => {
-      const response = await postRequest({
+      await postRequest({
         extension: SaleRepository.Price.set,
         record: JSON.stringify(obj)
       })
 
       toast.success(platformLabels.Updated)
       window.close()
-      invalidate()
+      fetchGridData()
     }
   })
 
@@ -91,6 +85,7 @@ export default function PriceForm({ labels, maxAccess, obj, window, recordId }) 
                 valueField='recordId'
                 displayField={'name'}
                 displayFieldWidth={1}
+                required
                 values={formik?.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
@@ -125,8 +120,9 @@ export default function PriceForm({ labels, maxAccess, obj, window, recordId }) 
               <ResourceComboBox
                 datasetId={DataSets.PRICE_TYPE}
                 name='priceType'
-                label={labels.pT}
+                label={labels.priceType}
                 valueField='key'
+                required
                 displayField='value'
                 values={formik.values}
                 maxAccess={maxAccess}
@@ -142,6 +138,7 @@ export default function PriceForm({ labels, maxAccess, obj, window, recordId }) 
                 name='value'
                 label={labels.value}
                 value={formik.values.value}
+                required
                 maxAccess={maxAccess}
                 allowNegative={false}
                 onChange={formik.handleChange}

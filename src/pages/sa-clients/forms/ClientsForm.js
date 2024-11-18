@@ -83,6 +83,7 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
           }))
           formik.setFieldValue('recordId', res.recordId)
           toast.success(platformLabels.Added)
+          getData(res.recordId)
         } else toast.success(platformLabels.Edited)
 
         invalidate()
@@ -109,6 +110,28 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
       }
     })()
   }, [])
+
+  useEffect(() => {
+    ;(async function () {
+      await getData(recordId)
+    })()
+  }, [])
+
+  const getData = async recordId => {
+    try {
+      if (recordId) {
+        const res = await getRequest({
+          extension: SaleRepository.Client.get,
+          parameters: `_recordId=${recordId}`
+        })
+
+        formik.setValues({
+          ...res.record,
+          acquisitionDate: formatDateFromApi(res.record.acquisitionDate)
+        })
+      }
+    } catch (exception) {}
+  }
 
   const editMode = !!formik.values.recordId
 
@@ -144,7 +167,7 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
                 endpointId={SaleRepository.ClientGroups.qry}
                 name='cgId'
                 required
-                label={labels.clientGroup}
+                label={labels.cGroup}
                 valueField='recordId'
                 displayField='name'
                 values={formik.values}
@@ -206,7 +229,7 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
               <ResourceLookup
                 endpointId={FinancialRepository.Account.snapshot}
                 name='accountId'
-                label={labels.accountRef}
+                label={labels.account}
                 valueField='reference'
                 displayField='name'
                 valueShow='accountRef'
@@ -272,7 +295,6 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
                 valueField='key'
                 displayField='value'
                 values={formik.values}
-                required
                 onChange={newValue => {
                   formik.setFieldValue('languageId', newValue?.key ?? '')
                 }}
@@ -293,7 +315,7 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
               <ResourceLookup
                 endpointId={BusinessPartnerRepository.MasterData.snapshot}
                 name='bpId'
-                label={labels.BPRef}
+                label={labels.bpRef}
                 valueField='reference'
                 displayField='name'
                 valueShow='bpRef'
