@@ -67,8 +67,23 @@ export default function ConsignmentSitesForm({ labels, maxAccess, recordId }) {
     })()
   }, [])
 
+  const actions = [
+    {
+      key: 'ClientSalesTransaction',
+      condition: true,
+      onClick: 'onClientSalesTransaction',
+      disabled: !editMode
+    }
+  ]
+
   return (
-    <FormShell resourceId={ResourceIds.ConsignmentSites} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell
+      actions={actions}
+      resourceId={ResourceIds.ConsignmentSites}
+      form={formik}
+      maxAccess={maxAccess}
+      editMode={editMode}
+    >
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>

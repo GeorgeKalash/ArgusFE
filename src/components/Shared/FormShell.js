@@ -20,6 +20,7 @@ import { ClientRelationForm } from './ClientRelationForm'
 import { ClientBalance } from './ClientBalance'
 import InventoryTransaction from './InventoryTransaction'
 import SalesTrxForm from './SalesTrxForm'
+import ClientSalesTransaction from './ClientSalesTransaction'
 
 export default function FormShell({
   form,
@@ -277,6 +278,17 @@ export default function FormShell({
               width: 500,
               height: 350,
               title: platformLabels.ClientBalance
+            })
+          }
+          onClientSalesTransaction={() =>
+            stack({
+              Component: ClientSalesTransaction,
+              props: {
+                formik: form
+              },
+              width: 500,
+              height: 350,
+              title: platformLabels.ClientSalesTransaction
             })
           }
           onAddClientRelation={() =>

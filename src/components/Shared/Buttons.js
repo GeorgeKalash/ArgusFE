@@ -377,4 +377,11 @@ export const getButtons = platformLabels => [
     image: 'exchange-refresh-icon.png',
     main: false
   },
+  {
+    key: 'ClientSalesTransaction',
+    label: platformLabels.ClientSalesTransaction,
+    color: '#7899',
+    image: 'exchange-refresh-icon.png',
+    main: false
+  }
 ]
