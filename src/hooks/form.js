@@ -10,6 +10,8 @@ export function useForm({ maxAccess, validate = () => {}, ...formikProps }) {
       ;(maxAccess?.record?.controls ?? []).forEach(obj => {
         const { controlId, accessLevel } = obj
 
+        console.log(controlId, accessLevel, values)
+
         if (accessLevel === MANDATORY) {
           if (!values[controlId])
             maxAccessErrors = {

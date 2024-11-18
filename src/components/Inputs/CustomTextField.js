@@ -3,7 +3,7 @@ import { TextField, InputAdornment, IconButton } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
 import { useEffect, useRef, useState } from 'react'
 import SearchIcon from '@mui/icons-material/Search'
-import { DISABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
+import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
 import { TrxType } from 'src/resources/AccessLevels'
 
 const CustomTextField = ({
@@ -19,7 +19,7 @@ const CustomTextField = ({
   clearable = false,
   autoComplete = 'off',
   numberField = false,
-  editMode = false,
+  editMode = true,
   maxLength = '1000',
   position,
   dir = 'ltr',
@@ -36,7 +36,7 @@ const CustomTextField = ({
 
   const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
 
-  const _readOnly = editMode ? editMode && maxAccess < TrxType.EDIT : readOnly || accessLevel === DISABLED
+  const _readOnly = editMode ? editMode && maxAccess < TrxType.EDIT : accessLevel > DISABLED ? false : readOnly
 
   const _hidden = accessLevel ? accessLevel === HIDDEN : hidden
 
