@@ -1,15 +1,12 @@
 import { useState } from 'react'
-
 import { InputAdornment, IconButton } from '@mui/material'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import ClearIcon from '@mui/icons-material/Clear'
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import { PickersActionBar } from '@mui/x-date-pickers/PickersActionBar'
-
 import { TimePicker } from '@mui/x-date-pickers/TimePicker'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import PopperComponent from '../Shared/Popper/PopperComponent'
-
 import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
 import { TrxType } from 'src/resources/AccessLevels'
 
@@ -34,6 +31,7 @@ const CustomTimePicker = ({
   ...props
 }) => {
   const [openTimePicker, setOpenTimePicker] = useState(false)
+  const [isFocused, setIsFocused] = useState(false)
 
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
 
@@ -55,11 +53,24 @@ const CustomTimePicker = ({
         value={value}
         label={label}
         fullWidth={fullWidth}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
         sx={{
           '& .MuiOutlinedInput-root': {
             '& fieldset': {
-              border: !hasBorder && 'none'
-            }
+              border: !hasBorder && 'none',
+              borderColor: '#959d9e',
+              borderRadius: '6px'
+            },
+            height: '33px !important'
+          },
+          '& .MuiInputLabel-root': {
+            fontSize: '0.90rem',
+            top: isFocused || value ? '0px' : '-3px'
+          },
+          '& .MuiInputBase-input': {
+            fontSize: '0.90rem',
+            color: 'black'
           }
         }}
         autoFocus={autoFocus}
@@ -79,7 +90,7 @@ const CustomTimePicker = ({
               endAdornment: !(_readOnly || disabled) && (
                 <InputAdornment position='end'>
                   {value && (
-                    <IconButton tabIndex={-1} edge='start' onClick={() => onChange(name, null)} sx={{ mr: -2 }}>
+                    <IconButton tabIndex={-1} edge='start' onClick={() => onChange(name, null)} sx={{ mr: -3 }}>
                       <ClearIcon sx={{ border: '0px', fontSize: 20 }} />
                     </IconButton>
                   )}
