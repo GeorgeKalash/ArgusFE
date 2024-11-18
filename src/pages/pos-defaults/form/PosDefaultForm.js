@@ -11,6 +11,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { ControlContext } from 'src/providers/ControlContext'
 import { DataSets } from 'src/resources/DataSets'
+import FormShell from 'src/components/Shared/FormShell'
 
 const PosDefaultForm = ({ _labels, access }) => {
   const { postRequest } = useContext(RequestsContext)
@@ -68,29 +69,28 @@ const PosDefaultForm = ({ _labels, access }) => {
   }
 
   return (
-    <VertLayout>
-      <Grow>
-        <Grid container spacing={4} sx={{ pt: '0.5rem' }}>
-          <Grid item xs={12} sx={{ marginLeft: '0.5rem', marginRight: '0.5rem' }}>
-            <ResourceComboBox
-              datasetId={DataSets.POS_ITEM_PRIMARY}
-              name='posItemPK'
-              label={_labels.posItem}
-              valueField='key'
-              displayField='value'
-              values={formik.values}
-              maxAccess={access}
-              onChange={(event, newValue) => {
-                formik.setFieldValue('posItemPK', newValue?.key)
-              }}
-            />
+    <FormShell form={formik} isInfo={false} isCleared={false}>
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={4}>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.POS_ITEM_PRIMARY}
+                name='posItemPK'
+                label={_labels.posItem}
+                valueField='key'
+                displayField='value'
+                values={formik.values}
+                maxAccess={access}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('posItemPK', newValue?.key)
+                }}
+              />
+            </Grid>
           </Grid>
-        </Grid>
-      </Grow>
-      <Fixed>
-        <WindowToolbar onSave={handleSubmit} isSaved={true} />
-      </Fixed>
-    </VertLayout>
+        </Grow>
+      </VertLayout>
+    </FormShell>
   )
 }
 
