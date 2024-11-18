@@ -1,12 +1,17 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import Window from 'src/components/Shared/Window'
 import useResourceParams from 'src/hooks/useResourceParams'
+import { CurrentWindowContext, RequestsLoadingContext } from 'src/pages/_app'
+import ChildComponent from 'src/utils/ChildComponent'
 import { v4 as uuidv4 } from 'uuid'
 
 const WindowContext = React.createContext(null)
 const ClearContext = React.createContext(null)
 
 export function WindowProvider({ children }) {
+  const { isLoadingRequests, closeWindowById: closeLoadingWindowById } = useContext(RequestsLoadingContext)
+  const { currentWindowId, updateCurrentWindowId } = useContext(CurrentWindowContext)
+
   const [stack, setStack] = useState([])
   const [rerenderFlag, setRerenderFlag] = useState(false)
   const closedWindow = useRef(null)
@@ -21,6 +26,7 @@ export function WindowProvider({ children }) {
     const currentValue = { ...stack[stack.length - 1] }
     closedWindow.current = currentValue
     setStack(stack.filter(({ id }) => givenId != id))
+    closeLoadingWindowById(currentWindowId)
   }
 
   function openWindow(id) {
@@ -36,6 +42,12 @@ export function WindowProvider({ children }) {
   function addToStack(options) {
     setStack(stack => [...stack, { ...options, id: uuidv4() }])
   }
+
+  const isLoading = windowId =>
+    isLoadingRequests[windowId]?.filter(item => item === true).length !==
+    isLoadingRequests[windowId]?.filter(item => item === false).length
+
+  const hasLoadedBefore = stack?.some(item => isLoadingRequests?.[item.Component.name])
 
   return (
     <WindowContext.Provider value={{ stack: addToStack }}>
@@ -58,29 +70,34 @@ export function WindowProvider({ children }) {
               }
             }}
           >
-            <Window
-              key={id}
-              sx={{ display: 'flex !important', flex: '1' }}
-              Title={title}
-              controlled={true}
-              onClose={() => {
-                closeWindow()
-                if (onClose) onClose()
-              }}
-              width={width}
-              height={height}
-              expandable={expandable}
-              draggable={draggable}
-              closable={closable}
-              styles={styles}
+            <div
+              style={{ display: !props.recordId || (!isLoading(Component.name) && hasLoadedBefore) ? 'block' : 'none' }}
             >
-              <Component
-                {...props}
-                window={{
-                  close: () => closeWindowById(id)
+              <Window
+                key={id}
+                sx={{ display: 'flex !important', flex: '1' }}
+                Title={title}
+                controlled={true}
+                onClose={() => {
+                  closeLoadingWindowById(Component.name)
+                  closeWindow()
+                  if (onClose) onClose()
                 }}
-              />
-            </Window>
+                width={width}
+                height={height}
+                expandable={expandable}
+                draggable={draggable}
+                closable={closable}
+                styles={styles}
+              >
+                <ChildComponent
+                  props={props}
+                  Component={Component}
+                  closeWindowById={() => closeWindowById(id)}
+                  updateCurrentWindowId={updateCurrentWindowId}
+                />
+              </Window>
+            </div>
           </ClearContext.Provider>
         )
       )}

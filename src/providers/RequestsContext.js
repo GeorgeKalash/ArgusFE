@@ -1,10 +1,11 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useState } from 'react'
 import axios from 'axios'
 import jwt from 'jwt-decode'
 import { AuthContext } from 'src/providers/AuthContext'
 import { useError } from 'src/error'
 import { Box, CircularProgress } from '@mui/material'
 import { debounce } from 'lodash'
+import { CurrentWindowContext, RequestsLoadingContext } from 'src/pages/_app'
 
 const RequestsContext = createContext()
 
@@ -30,6 +31,13 @@ function LoadingOverlay() {
 }
 
 const RequestsProvider = ({ showLoading = false, children }) => {
+  const { updateIsLoadingRequests, isLoadingRequests } = useContext(RequestsLoadingContext)
+  const { currentWindowId } = useContext(CurrentWindowContext)
+
+  const isCurrentWindowLoading =
+    isLoadingRequests[currentWindowId]?.filter(item => item === true).length !==
+    isLoadingRequests[currentWindowId]?.filter(item => item === false).length
+
   const { user, setUser, apiUrl } = useContext(AuthContext)
   const errorModel = useError()
   const [loading, setLoading] = useState(false)
@@ -49,6 +57,8 @@ const RequestsProvider = ({ showLoading = false, children }) => {
     const accessToken = await getAccessToken()
     const disableLoading = body.disableLoading || false
     !disableLoading && !loading && setLoading(true)
+
+    updateIsLoadingRequests(currentWindowId, true)
 
     const throwError = body.throwError || false
 
@@ -73,6 +83,12 @@ const RequestsProvider = ({ showLoading = false, children }) => {
             height: error.response?.status === 404 || error.response?.status === 500 ? 400 : ''
           })
           if (throwError) reject(error)
+        })
+        .finally(() => {
+          currentWindowId &&
+            setTimeout(() => {
+              updateIsLoadingRequests(currentWindowId, false)
+            }, 250)
         })
     })
   }
@@ -261,7 +277,7 @@ const RequestsProvider = ({ showLoading = false, children }) => {
   return (
     <>
       <RequestsContext.Provider value={values}>{children}</RequestsContext.Provider>
-      {showLoading && loading && <LoadingOverlay />}
+      {showLoading && (loading || isCurrentWindowLoading) && <LoadingOverlay />}
     </>
   )
 }
