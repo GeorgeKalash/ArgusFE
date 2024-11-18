@@ -13,7 +13,7 @@ import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 import { FixedAssetsRepository } from 'src/repositories/FixedAssetsRepository'
 import AssetsForm from './form/AssetsForm'
 
-const IvItems = () => {
+const AssetsDescription = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const [params, setParams] = useState('')
@@ -185,4 +185,4 @@ const IvItems = () => {
   )
 }
 
-export default IvItems
+export default AssetsDescription

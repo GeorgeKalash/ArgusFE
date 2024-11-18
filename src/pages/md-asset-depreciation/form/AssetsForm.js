@@ -12,7 +12,7 @@ import * as yup from 'yup'
 import { FixedAssetsRepository } from 'src/repositories/FixedAssetsRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import { Grid, Button } from '@mui/material'
+import { Grid } from '@mui/material'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import FormShell from 'src/components/Shared/FormShell'
 import { SystemRepository } from 'src/repositories/SystemRepository'
@@ -35,7 +35,7 @@ export default function AssetsForm({ obj, maxAccess: access, labels, window }) {
   })
 
   const invalidate = useInvalidate({
-    endpointId: FixedAssetsRepository.AssetsDescription.qry
+    endpointId: FixedAssetsRepository.AssetsDescription.snapshot
   })
 
   const formatDate = date => {
@@ -54,7 +54,6 @@ export default function AssetsForm({ obj, maxAccess: access, labels, window }) {
     setPreviewPressed(true)
     setData(response)
   }
-  console.log(obj?.recordId, 'ssssssssssssssss')
 
   const { formik } = useForm({
     maxAccess,
@@ -86,6 +85,7 @@ export default function AssetsForm({ obj, maxAccess: access, labels, window }) {
         formik.setFieldValue('recordId', response.recordId)
         getData(response.recordId)
       } else toast.success(platformLabels.Edited)
+      invalidate()
     }
   })
 
