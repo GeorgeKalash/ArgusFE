@@ -60,10 +60,10 @@ function FormField({ type, name, Component, valueField, onFocus, language, phone
       }}
       onFocus={e => {
         if (onFocus && (name == 'idNo' || name == 'search')) {
-          onFocus(e.target.value)
+          onFocus(e)
         }
         if (onFocus && name == 'cellPhone') {
-          onFocus(e.target.value)
+          onFocus(e)
         }
       }}
       onClear={() => {
@@ -840,14 +840,16 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                   </Grid>
 
                   <Grid item xs={4}>
-                    <CustomTextField
+                    <FormField
                       name='search'
-                      label={labels.search}
-                      value={formik.values?.['idNo']}
+                      Component={CustomTextField}
                       onBlur={e => {
-                        e.target.value &&
-                          search != e.target.value &&
-                          fetchInfoByKey({ key: e.target.value })
+                        const value = e.target.value
+                        setSearch(value)
+
+                        value &&
+                          search != value &&
+                          fetchInfoByKey({ key: value })
                             .then(info => {
                               if (!!info) {
                                 setIDInfoAutoFilled(false)
@@ -878,11 +880,11 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                               console.error('Error fetching ID info:', error)
                             })
                       }}
-                      onClear={() => formik.setFieldValue('idNo', '')}
-                      readOnly={editMode || isClosed}
-                      onFocus={e => {
-                        setSearch(e.target.value)
+                      onClear={() => {
+                        formik.setFieldValue('search', '')
+                        setSearch('')
                       }}
+                      readOnly={editMode || isClosed}
                       required
                     />
                   </Grid>
@@ -894,25 +896,26 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                   <Grid item xs={4}>
                     <Grid container spacing={2} xs={12} sx={{ px: 2 }}>
                       <Grid item xs={12}>
-                        <CustomTextField
+                        <FormField
                           name='idNo'
-                          label={labels.idNo}
-                          value={formik.values?.['idNo']}
                           type={showAsPasswordIDNumber && formik.values['idNo'] ? 'password' : 'text'}
-                          onChange={e => formik.setFieldValue('idNo', e?.target?.value)}
+                          Component={CustomTextField}
                           onBlur={e => {
-                            if (e.target.value && e.target.value != idNumberOne) {
+                            const value = e.target.value
+                            setIdNumber(value)
+                            if (value && value !== idNumberOne) {
                               setShowAsPasswordIDNumber(true)
-                              checkTypes(e.target.value)
-                              fetchClientInfo({ numberId: e.target.value })
+                              checkTypes(value)
+                              fetchClientInfo({ numberId: value })
                             }
                           }}
-                          onKeyDown={() => {}}
                           onFocus={e => {
                             setShowAsPasswordIDNumber(false)
-                            setIdNumber(e.target.value)
                           }}
-                          onClear={() => formik.setFieldValue('idNo', '')}
+                          onClear={() => {
+                            formik.setFieldValue('idNo', '')
+                            setIdNumber('')
+                          }}
                           readOnly={editMode || isClosed || idInfoAutoFilled}
                           required
                         />
