@@ -801,8 +801,8 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     !reCal && setReCal(true)
 
     const itemPriceRow = getIPR({
-      priceType: newRow?.priceType,
-      basePrice: newRow?.basePrice,
+      priceType: newRow?.priceType || 0,
+      basePrice: newRow?.basePrice || 0,
       volume: newRow?.volume,
       weight: parseFloat(newRow?.weight),
       unitPrice: parseFloat(newRow?.unitPrice || 0),
@@ -814,7 +814,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
       baseLaborPrice: 0,
       totalWeightPerG: 0,
       mdValue: parseFloat(newRow?.mdValue),
-      tdPct: formik?.values?.tdPct,
+      tdPct: formik?.values?.tdPct || 0,
       dirtyField: dirtyField
     })
 
