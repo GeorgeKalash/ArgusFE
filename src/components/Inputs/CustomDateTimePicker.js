@@ -41,6 +41,7 @@ const CustomDateTimePicker = ({
   } ${formatTime}`
 
   const [openDatePicker, setOpenDatePicker] = useState(false)
+  const [isFocused, setIsFocused] = useState(false)
 
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
 
@@ -124,7 +125,7 @@ const CustomDateTimePicker = ({
           },
           '& .MuiInputLabel-root': {
             fontSize: '0.90rem',
-            top: value ? '0px' : '-3px'
+            top: isFocused || value ? '0px' : '-3px'
           },
           '& .MuiInputBase-input': {
             fontSize: '0.90rem',
@@ -132,6 +133,8 @@ const CustomDateTimePicker = ({
           }
         }}
         autoFocus={autoFocus}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
         format={dateFormat}
         onChange={newValue => onChange(name, newValue)}
         onClose={() => setOpenDatePicker(false)}

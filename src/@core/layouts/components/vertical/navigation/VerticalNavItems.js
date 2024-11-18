@@ -133,7 +133,7 @@ const VerticalNavItems = props => {
           </div>
         </div>
         {isOpen && isFolder && (
-          <div className='children' sx={{ paddingLeft: navCollapsed ? '0px' : '12px' }}>
+          <div className='children' style={{ paddingLeft: navCollapsed ? '0px' : '12px' }}>
             {node.children.map(child => renderNode(child))}
           </div>
         )}

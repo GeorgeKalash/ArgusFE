@@ -30,6 +30,7 @@ const CustomTimePicker = ({
   ...props
 }) => {
   const [openTimePicker, setOpenTimePicker] = useState(false)
+  const [isFocused, setIsFocused] = useState(false)
 
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
 
@@ -54,6 +55,8 @@ const CustomTimePicker = ({
         value={value}
         label={label}
         fullWidth={fullWidth}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
         sx={{
           '& .MuiOutlinedInput-root': {
             '& fieldset': {
@@ -65,7 +68,7 @@ const CustomTimePicker = ({
           },
           '& .MuiInputLabel-root': {
             fontSize: '0.90rem',
-            top: value ? '0px' : '-3px'
+            top: isFocused || value ? '0px' : '-3px'
           },
           '& .MuiInputBase-input': {
             fontSize: '0.90rem',

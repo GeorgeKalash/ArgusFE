@@ -45,6 +45,7 @@ const CustomLookup = ({
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
   const [freeSolo, setFreeSolo] = useState(false)
   const [focus, setAutoFocus] = useState(autoFocus)
+  const [isFocused, setIsFocused] = useState(false)
 
   const [inputValue, setInputValue] = useState(firstValue || '')
 
@@ -71,6 +72,8 @@ const CustomLookup = ({
     <Grid container spacing={0} sx={{ width: '100%' }}>
       <Grid item xs={secondDisplayField ? 6 : 12}>
         <Autocomplete
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
           name={name}
           key={firstValue || null}
           value={firstValue}
@@ -240,7 +243,7 @@ const CustomLookup = ({
                         }}
                         aria-label='clear input'
                       >
-                        <ClearIcon sx={{ border: '0px', fontSize: 20 }} />
+                        <ClearIcon sx={{ border: '0px', fontSize: 17 }} />
                       </IconButton>
                     </InputAdornment>
 
@@ -252,7 +255,7 @@ const CustomLookup = ({
                           edge='end'
                           style={{ pointerEvents: 'none' }}
                         >
-                          <SearchIcon style={{ cursor: 'pointer', border: '0px', fontSize: 20 }} />
+                          <SearchIcon style={{ cursor: 'pointer', border: '0px', fontSize: 17 }} />
                         </IconButton>
                       </InputAdornment>
                     ) : (
@@ -281,7 +284,7 @@ const CustomLookup = ({
                 },
                 '& .MuiInputLabel-root': {
                   fontSize: '0.90rem',
-                  top: firstValue ? '0px' : '-3px'
+                  top: isFocused || firstValue ? '0px' : '-3px'
                 },
                 '& .MuiInputBase-input': {
                   fontSize: '0.90rem',
