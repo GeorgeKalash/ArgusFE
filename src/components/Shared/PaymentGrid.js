@@ -118,9 +118,11 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
           rowAmount = returnedAmount > 0 ? newRow.paidAmount - returnedAmount : newRow.paidAmount
         }
 
+        console.log(newRow.type)
+
         update({
-          returnedAmount: returnedAmount,
-          amount: parseFloat(rowAmount).toFixed(2)
+          returnedAmount: Number(newRow.type) < 2 ? returnedAmount : 0,
+          amount: newRow.type > 1 ? parseFloat(rowAmount).toFixed(2) : newRow.paidAmount
         })
       }
     },
