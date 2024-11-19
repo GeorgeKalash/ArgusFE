@@ -35,7 +35,6 @@ export default function FormShell({
   infoVisible = true,
   postVisible = false,
   resourceId,
-  masterSource,
   onGenerate,
   functionId,
   maxAccess,
@@ -187,7 +186,7 @@ export default function FormShell({
                   Component: GlobalIntegrationGrid,
                   props: {
                     masterId: form.values?.recordId,
-                    masterSource: masterSource
+                    masterSource: action?.masterSource
                   },
                   width: 700,
                   height: 500,
@@ -412,7 +411,6 @@ export default function FormShell({
           clientRelation={clientRelation}
           addClientRelation={addClientRelation}
           resourceId={resourceId}
-          masterSource={masterSource}
           recordId={form.values?.recordId}
           selectedReport={selectedReport}
           setSelectedReport={setSelectedReport}

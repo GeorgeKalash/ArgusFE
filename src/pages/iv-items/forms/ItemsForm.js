@@ -194,6 +194,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       key: 'Integration Account',
       condition: true,
       onClick: 'onClickGIA',
+      masterSource: MasterSource.Item,
       disabled: !editMode
     }
   ]
@@ -212,7 +213,6 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
   return (
     <FormShell
       resourceId={ResourceIds.Items}
-      masterSource={MasterSource.Item}
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}
