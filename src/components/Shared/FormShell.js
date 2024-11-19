@@ -288,8 +288,8 @@ export default function FormShell({
                 functionId: functionId,
                 clientId: form?.values?.header?.clientId
               },
-              width: 500,
-              height: 350,
+              width: 600,
+              height: 450,
               title: platformLabels.ClientSalesTransaction
             })
           }
