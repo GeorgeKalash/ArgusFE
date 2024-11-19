@@ -35,13 +35,26 @@ export function DataGrid({
   const process = (params, oldRow, setData) => {
     const column = columns.find(({ name }) => name === params.colDef.field)
 
-    const updateRowCommit = changes => {
+    const updateCommit = changes => {
       setData(changes, params)
       commit({ changes: { ...params.node.data, changes } })
     }
+    const updateRowCommit = changes => {
+      const rowToUpdate = value?.find(item => item?.id === changes.id)
+
+      const updatedRow = { ...rowToUpdate, ...changes.changes }
+
+      gridApiRef.current.applyTransaction({
+        update: [updatedRow]
+      })
+
+      commit({ changes: updatedRow })
+    }
 
     if (column.onChange) {
-      column.onChange({ row: { oldRow: oldRow, newRow: params.node.data, update: updateRowCommit } })
+      column.onChange({
+        row: { oldRow: oldRow, newRow: params.node.data, update: updateCommit, updateRow: updateRowCommit }
+      })
     }
   }
 

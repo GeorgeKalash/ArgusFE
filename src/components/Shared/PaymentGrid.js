@@ -99,7 +99,7 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
       name: 'paidAmount',
       label: labels?.paidAmount,
       defaultValue: '',
-      async onChange({ row: { update, newRow } }) {
+      async onChange({ row: { update, newRow, updateRow } }) {
         const sumAmount = value.slice(0, -1).reduce((sum, row) => {
           const curValue = parseFloat(row.amount.toString().replace(/,/g, '')) || 0
 
@@ -118,12 +118,30 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
           rowAmount = returnedAmount > 0 ? newRow.paidAmount - returnedAmount : newRow.paidAmount
         }
 
-        console.log(newRow.type)
+        const returns =
+          value
+            ?.reduce((sum, current) => (current.id !== newRow.id ? sum + parseFloat(current.paidAmount || 0) : sum), 0)
+            ?.toFixed(2) || 0
+        if (newRow?.type !== '2') {
+          update({
+            returnedAmount: 0,
+            amount: newRow.paidAmount
+          })
 
-        update({
-          returnedAmount: Number(newRow.type) < 2 ? returnedAmount : 0,
-          amount: newRow.type > 1 ? parseFloat(rowAmount).toFixed(2) : newRow.paidAmount
-        })
+          const index = value?.find(item => item?.type === '2')?.id
+
+          updateRow({
+            id: index,
+            changes: {
+              returnedAmount: amount - returns - (newRow.paidAmount || 0)
+            }
+          })
+        } else {
+          update({
+            returnedAmount: amount - returns - (newRow.paidAmount || 0),
+            amount: newRow.paidAmount
+          })
+        }
       }
     },
     {
