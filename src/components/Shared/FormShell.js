@@ -284,7 +284,9 @@ export default function FormShell({
             stack({
               Component: ClientSalesTransaction,
               props: {
-                formik: form
+                recordId: form.values?.recordId,
+                functionId: functionId,
+                clientId: form?.values?.header?.clientId
               },
               width: 500,
               height: 350,

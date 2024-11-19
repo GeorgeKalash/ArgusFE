@@ -9,27 +9,26 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { useResourceQuery } from 'src/hooks/resource'
 import { Grow } from './Layouts/Grow'
 import { VertLayout } from './Layouts/VertLayout'
+import { SaleRepository } from 'src/repositories/SaleRepository'
 
-const ClientSalesTransaction = ({ formik }) => {
+const ClientSalesTransaction = ({ functionId, recordId, clientId }) => {
   const { getRequest } = useContext(RequestsContext)
-  const [gridData, setGridData] = useState({})
-
-  console.log(formik.values.clientId, 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
 
   async function fetchGridData() {
-    const data = await getRequest({
-      extension: CashBankRepository.AccountBalance.qry,
-      parameters: `_clientId=${formik.values.clientId}`
+    return await getRequest({
+      extension: SaleRepository.SATrx.qry2,
+      parameters: `_functionId=${functionId}&_recordId=${recordId}&_clientId=${clientId}`
     })
-    setGridData(data)
   }
 
-  useEffect(() => {
-    fetchGridData()
-  }, [])
-
-  const { labels: _labels, access } = useResourceQuery({
-    datasetId: ResourceIds.AccountBalance
+  const {
+    query: { data },
+    labels: _labels,
+    access
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: SaleRepository.SATrx.qry2,
+    datasetId: ResourceIds.ClientSalesTransaction
   })
 
   const columns = [
@@ -63,9 +62,9 @@ const ClientSalesTransaction = ({ formik }) => {
       <Grow>
         <Table
           columns={columns}
-          gridData={gridData}
+          gridData={data}
           rowId={['clientId']}
-          isLoading={!gridData}
+          isLoading={!data}
           maxAccess={access}
           pagination={false}
         />
