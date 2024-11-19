@@ -19,6 +19,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { ControlContext } from 'src/providers/ControlContext'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function BPMasterDataForm({ labels, maxAccess, setEditMode, store, setStore }) {
   const { recordId } = store
@@ -363,29 +364,21 @@ export default function BPMasterDataForm({ labels, maxAccess, setEditMode, store
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        name='isInactive'
-                        maxAccess={maxAccess}
-                        checked={formik.values?.isInactive}
-                        onChange={formik.handleChange}
-                      />
-                    }
+                  <CustomCheckBox
+                    name='isInactive'
+                    value={formik.values.isInactive}
+                    onChange={event => formik.setFieldValue('isInactive', event.target.checked)}
                     label={labels.inactive}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        name='isBlackListed'
-                        maxAccess={maxAccess}
-                        checked={formik.values?.isBlackListed}
-                        onChange={formik.handleChange}
-                      />
-                    }
+                  <CustomCheckBox
+                    name='isBlackListed'
+                    value={formik.values?.isBlackListed}
+                    onChange={event => formik.setFieldValue('isBlackListed', event.target.checked)}
                     label={labels.isBlackListed}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
               </Grid>
