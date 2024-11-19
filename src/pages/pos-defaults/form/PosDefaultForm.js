@@ -1,14 +1,12 @@
-import { useEffect, useState, useContext } from 'react'
+import { useEffect, useContext } from 'react'
 import { Grid } from '@mui/material'
 import { useFormik } from 'formik'
 import toast from 'react-hot-toast'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { ControlContext } from 'src/providers/ControlContext'
 import { DataSets } from 'src/resources/DataSets'
 import FormShell from 'src/components/Shared/FormShell'
@@ -17,8 +15,15 @@ const PosDefaultForm = ({ _labels, access }) => {
   const { postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
 
-  const [initialValues, setInitialValues] = useState({
-    posItemPK: null
+  const formik = useFormik({
+    enableReinitialize: true,
+    validateOnChange: true,
+    initialValues: {
+      posItemPK: null
+    },
+    onSubmit: values => {
+      postPosDefault(values)
+    }
   })
 
   useEffect(() => {
@@ -32,17 +37,8 @@ const PosDefaultForm = ({ _labels, access }) => {
       return obj.key === 'posItemPK'
     })
     filteredList?.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
-    setInitialValues(myObject)
+    formik.setValues(myObject)
   }
-
-  const formik = useFormik({
-    enableReinitialize: true,
-    validateOnChange: true,
-    initialValues,
-    onSubmit: values => {
-      postPosDefault(values)
-    }
-  })
 
   const postPosDefault = obj => {
     const data = []
@@ -62,10 +58,6 @@ const PosDefaultForm = ({ _labels, access }) => {
       if (res) toast.success(platformLabels.Edited)
       updateDefaults(data)
     })
-  }
-
-  const handleSubmit = () => {
-    formik.handleSubmit()
   }
 
   return (
