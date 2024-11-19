@@ -517,7 +517,8 @@ export function DataGrid({
   }
 
   const onCellFocused = params => {
-    if (params.rowIndex >= 0 && params.column) {
+    const index = allColumns?.findIndex(col => col.colId === params.column.getColId())
+    if (params.rowIndex === 0 && params.column && allColumns[0]?.name === params.column?.getColId()) {
       params.api.startEditingCell({
         rowIndex: params.rowIndex,
         colKey: params.column.getId()
