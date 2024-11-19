@@ -6,6 +6,7 @@ import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/max
 import Image from 'next/image'
 import DropDownArrow from '/public/images/buttonsIcons/bottom-arrow.png'
 import AddAction from '/public/images/buttonsIcons/add.png'
+import { TrxType } from 'src/resources/AccessLevels'
 
 const CustomTextArea = ({
   type = 'text', //any valid HTML5 input type
@@ -36,10 +37,7 @@ const CustomTextArea = ({
 
   const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
 
-  const _readOnly =
-    maxAccess < 2 ||
-    accessLevel === DISABLED ||
-    (readOnly && accessLevel !== MANDATORY && accessLevel !== FORCE_ENABLED)
+  const _readOnly = editMode ? editMode && maxAccess < TrxType.EDIT : accessLevel > DISABLED ? false : readOnly
 
   const _hidden = accessLevel ? accessLevel === HIDDEN : hidden
 

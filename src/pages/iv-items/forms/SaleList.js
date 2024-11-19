@@ -220,6 +220,7 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
                 columnsInDropDown={[{ key: 'currencyName', value: 'Name' }]}
                 values={formik.values}
                 maxAccess={maxAccess}
+                required
                 onChange={(event, newValue) => {
                   formik.setFieldValue('currencyId', newValue?.currencyId || 0)
                 }}
