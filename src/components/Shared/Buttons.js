@@ -380,8 +380,8 @@ export const getButtons = platformLabels => [
   {
     key: 'ClientSalesTransaction',
     label: platformLabels.ClientSalesTransaction,
-    color: '#7899',
-    image: 'exchange-refresh-icon.png',
+    color: '#8C0446',
+    image: 'popup-window.png',
     main: false
   }
 ]
