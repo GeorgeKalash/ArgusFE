@@ -10,7 +10,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import FormShell from 'src/components/Shared/FormShell'
 
-const SecurityGrpTab = ({ labels, maxAccess, storeRecordId, window }) => {
+const SecurityGrpTab = ({ labels, maxAccess, storeRecordId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
