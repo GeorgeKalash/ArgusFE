@@ -534,10 +534,10 @@ export default function OutwardsReturnForm({
                 valueField='key'
                 displayField='value'
                 values={formik.values}
-                onChange={(event, newValue) => {
+                onChange={(newValue) => {
                   formik.setFieldValue('settlementStatus', newValue ? newValue?.key : '')
                 }}
-                defaultIndex={formik?.values?.interfaceId ? 0 : null}
+                defaultIndex={formik?.values?.interfaceId && 0}
                 required
                 readOnly={
                   isOpenOutwards ? !!formik.values.interfaceId : isPosted || isClosed || !!formik.values.interfaceId

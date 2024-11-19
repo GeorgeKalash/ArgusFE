@@ -2,7 +2,7 @@ import { Autocomplete, IconButton, CircularProgress, Paper, TextField } from '@m
 import { ControlAccessLevel, TrxType } from 'src/resources/AccessLevels'
 import { Box } from '@mui/material'
 import RefreshIcon from '@mui/icons-material/Refresh'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import PopperComponent from '../Shared/Popper/PopperComponent'
 import { DISABLED } from 'src/services/api/maxAccess'
 
@@ -10,7 +10,7 @@ const CustomComboBox = ({
   type = 'text',
   name,
   label,
-  value: _value,
+  value,
   valueField = 'key',
   displayField = 'value',
   store = [],
@@ -52,14 +52,18 @@ const CustomComboBox = ({
   const _required = required || fieldAccess === ControlAccessLevel.Mandatory
   const _hidden = fieldAccess === ControlAccessLevel.Hidden
 
-  const value = neverPopulate ? '' : _value
+  useEffect(() => {
+    if (!value && store?.length > 0 && typeof defaultIndex === 'number' && defaultIndex === 0) {
+      onChange(store?.[defaultIndex])
+    }
+  }, [defaultIndex])
 
   return _hidden ? (
     <></>
   ) : (
     <Autocomplete
       name={name}
-      value={store?.[defaultIndex] || value}
+      value={value}
       size={size}
       options={store}
       key={value}
