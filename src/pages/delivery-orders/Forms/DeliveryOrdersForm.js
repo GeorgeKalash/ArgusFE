@@ -178,7 +178,8 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
     const res = await getDeliveryOrder(recordId)
 
     res.record.date = formatDateFromApi(res.record.date)
-    await getOrders(res.record)
+    const doItems = await getOrders(res?.record)
+    await fillForm(res, doItems)
   }
 
   async function getDeliveryOrder(recordId) {
@@ -188,17 +189,32 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
     })
   }
 
-  const getOrders = async data => {
+  async function getAddress(addressId) {
+    if (!addressId) return null
+
     const res = await getRequest({
+      extension: SystemRepository.FormattedAddress.get,
+      parameters: `_addressId=${addressId}`
+    })
+
+    return res?.record?.formattedAddress.replace(/(\r\n|\r|\n)+/g, '\r\n')
+  }
+
+  const getOrders = async data => {
+    return await getRequest({
       extension: DeliveryRepository.OrderItem.qry,
       parameters: `_tripId=${data.recordId}&_doId=${data.recordId}`
     })
+  }
+
+  async function fillForm(doHeader, doItems) {
+    const address = await getAddress(doHeader?.record?.addressId)
 
     let ordersList = []
 
-    if (res.list != []) {
+    if (doItems.list != []) {
       ordersList = await Promise.all(
-        res.list.map((item, index) => {
+        doItems.list.map((item, index) => {
           return {
             ...item,
             id: index + 1,
@@ -209,7 +225,8 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
     }
 
     formik.setValues({
-      ...data,
+      ...doHeader?.record,
+      address: address,
       orders: ordersList
     })
   }
@@ -442,6 +459,12 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
     if (documentType?.dtId) formik.setFieldValue('dtId', documentType.dtId)
   }, [documentType?.dtId])
 
+  function setAddressValues(obj) {
+    Object.entries(obj).forEach(([key, value]) => {
+      formik.setFieldValue(key, value)
+    })
+  }
+
   function openAddressFilterForm(deliveryOrder) {
     stack({
       Component: AddressFilterForm,
@@ -449,7 +472,8 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
         maxAccess,
         labels,
         deliveryOrder,
-        form: formik
+        form: formik.values,
+        handleAddressValues: setAddressValues
       },
       width: 950,
       height: 600,
