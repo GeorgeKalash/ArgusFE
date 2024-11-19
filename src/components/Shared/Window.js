@@ -21,6 +21,7 @@ const Window = React.memo(
     expandable = true,
     closable = true,
     Title,
+    nextToTitle,
     onSave,
     onClear,
     onInfo,
@@ -119,7 +120,7 @@ const Window = React.memo(
                 >
                   <Box>
                     <Typography sx={{ fontSize: '1.2rem', fontWeight: 600, color: 'white !important' }}>
-                      {Title}
+                      {nextToTitle ? Title + ' ' + nextToTitle : Title}
                     </Typography>
                   </Box>
                   <Box>

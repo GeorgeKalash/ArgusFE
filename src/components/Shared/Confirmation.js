@@ -53,7 +53,7 @@ const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refr
 
     const hijriDate = moment(formatDateForGetApI(obj.birthDate), 'YYYY-MM-DD').format('iYYYY-iMM-iDD')
 
-    const defaultParams = `_number=${obj.idNo}&_date=${hijriDate}&_yakeenType=${type}`
+    const defaultParams = `_number=${obj.idNo}&_date=${hijriDate}&_idType=${type}`
     var parameters = defaultParams
     getRequest({
       extension: CurrencyTradingSettingsRepository.Yakeen.get,

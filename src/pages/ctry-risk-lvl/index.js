@@ -3,28 +3,27 @@ import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { PointofSaleRepository } from 'src/repositories/PointofSaleRepository'
-import PosUsersForm from './forms/PosUsersForm'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { useWindow } from 'src/windows'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
+import CountryRiskLevelForm from './Forms/CountryRiskLevelForm'
+import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 
-const PosUsers = () => {
+const CountryRiskLevel = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: PointofSaleRepository.PosUsers.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_posId=0&_params=`
+      extension: RemittanceSettingsRepository.CountryRisk.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
 
     return { ...response, _startAt: _startAt }
@@ -32,31 +31,31 @@ const PosUsers = () => {
 
   const {
     query: { data },
-    labels: labels,
+    labels: _labels,
     paginationParameters,
     refetch,
     access,
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: PointofSaleRepository.PosUsers.qry,
-    datasetId: ResourceIds.POSUsers
+    endpointId: RemittanceSettingsRepository.CountryRisk.page,
+    datasetId: ResourceIds.CountryRiskLevel
   })
 
   const columns = [
     {
-      field: 'email',
-      headerName: labels.email,
+      field: 'countryRef',
+      headerName: _labels.countryRef,
       flex: 1
     },
     {
-      field: 'posRef',
-      headerName: labels.posRef,
+      field: 'countryName',
+      headerName: _labels.countryName,
       flex: 1
     },
     {
-      field: 'spName',
-      headerName: labels.spName,
+      field: 'riskLevelName',
+      headerName: _labels.riskLevelName,
       flex: 1
     }
   ]
@@ -65,32 +64,31 @@ const PosUsers = () => {
     openForm()
   }
 
-  const popup = obj => {
-    openForm(obj)
+  const edit = obj => {
+    openForm(obj?.countryId)
+  }
+
+  function openForm(recordId) {
+    stack({
+      Component: CountryRiskLevelForm,
+      props: {
+        labels: _labels,
+        recordId,
+        maxAccess: access
+      },
+      width: 500,
+      height: 300,
+      title: _labels.countryRiskLevel
+    })
   }
 
   const del = async obj => {
     await postRequest({
-      extension: PointofSaleRepository.PosUsers.del,
+      extension: RemittanceSettingsRepository.CountryRisk.del,
       record: JSON.stringify(obj)
     })
     invalidate()
     toast.success(platformLabels.Deleted)
-  }
-
-  function openForm(record) {
-    stack({
-      Component: PosUsersForm,
-      props: {
-        labels: labels,
-        record,
-        recordId: record?.userId,
-        maxAccess: access
-      },
-      width: 600,
-      height: 300,
-      title: labels.PosUsers
-    })
   }
 
   return (
@@ -102,19 +100,19 @@ const PosUsers = () => {
         <Table
           columns={columns}
           gridData={data}
-          rowId={['userId']}
-          onEdit={popup}
+          rowId={['recordId']}
+          onEdit={edit}
           onDelete={del}
           isLoading={false}
           pageSize={50}
           paginationType='api'
-          maxAccess={access}
-          refetch={refetch}
           paginationParameters={paginationParameters}
+          refetch={refetch}
+          maxAccess={access}
         />
       </Grow>
     </VertLayout>
   )
 }
 
-export default PosUsers
+export default CountryRiskLevel
