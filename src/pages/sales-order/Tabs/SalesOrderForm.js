@@ -968,7 +968,11 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     const soItems = await getSalesOrderItems(recordId)
     await fillForm(soHeader, soItems)
   }
-
+  function setAddressValues(obj) {
+    Object.entries(obj).forEach(([key, value]) => {
+      formik.setFieldValue(key, value)
+    })
+  }
   function openAddressFilterForm(clickShip, clickBill) {
     stack({
       Component: AddressFilterForm,
@@ -977,7 +981,8 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
         labels,
         shipment: clickShip,
         bill: clickBill,
-        form: formik
+        form: formik.values,
+        handleAddressValues: setAddressValues
       },
       width: 950,
       height: 600,
