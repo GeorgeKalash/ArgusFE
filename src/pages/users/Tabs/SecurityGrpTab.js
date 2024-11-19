@@ -91,7 +91,7 @@ const SecurityGrpTab = ({ labels, maxAccess, storeRecordId, window }) => {
                 {
                   component: 'resourcecombobox',
                   name: 'sgId',
-                  label: labels.sgId,
+                  label: labels.group,
                   props: {
                     endpointId: AccessControlRepository.SecurityGroupUser.qry,
                     parameters: `_userId=0&_filter=&_sgId=0`,
