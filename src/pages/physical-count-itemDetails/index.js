@@ -76,6 +76,7 @@ const PhysicalCountItemDe = () => {
 
   async function fetchGridData(stockCountId, siteId, controllerId) {
     //getSysChecks()
+    
     getDTDsku(stockCountId)
 
     await getRequest({
@@ -216,6 +217,7 @@ const PhysicalCountItemDe = () => {
       }
     }
   } */
+
   const previousValuesRef = useRef(formik.values.rows)
 
   const columns = [
@@ -297,8 +299,10 @@ const PhysicalCountItemDe = () => {
       async onCellPress(e, { row: { addRow, oldValue, update } }) {
         if (!disSkuLookup) {
           console.log(e.target.value, oldValue.sku)
+
           // // const oldValue = formik.values.rows[id - 1]?.sku
           // if (e.target.value !== oldValue.sku) {
+
           const txtRes = await getRequest({
             extension: InventoryRepository.Items.get2,
             parameters: `_sku=${e.target.value}`
@@ -322,6 +326,7 @@ const PhysicalCountItemDe = () => {
             })
           }
         }
+
         // } else {
         //   addRow({ changes: null })
         // }
@@ -468,9 +473,11 @@ const PhysicalCountItemDe = () => {
       form={formik}
       isInfo={false}
       isSavedClear={false}
+
       //actions={actions}
       maxAccess={maxAccess}
       resourceId={ResourceIds.IVPhysicalCountItemDetails}
+
       //filteredItems={filteredItems}
       previewReport={editMode}
     >
