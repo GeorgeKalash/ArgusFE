@@ -84,6 +84,9 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
         ],
         readOnly: isPosted
       },
+      propsReducer({ row, props }) {
+        return { ...props, readOnly: row.paidAmount > 0 }
+      },
       async onChange({ row: { update, newRow } }) {
         const sumAmount = value.slice(0, -1).reduce((sum, row) => {
           const curValue = parseFloat(row.amount.toString().replace(/,/g, '')) || 0

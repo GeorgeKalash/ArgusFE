@@ -356,7 +356,7 @@ export function DataGrid({
           value={currentValue}
           column={{
             ...column.colDef,
-            props: column.propsReducer ? column?.propsReducer({ data, props }) : props
+            props: column?.colDef?.propsReducer ? column?.colDef?.propsReducer({ row: data, props }) : props
           }}
           updateRow={updateRow}
           update={update}
