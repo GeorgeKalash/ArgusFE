@@ -42,6 +42,7 @@ const GateKeeper = () => {
   const {
     query: { data },
     labels: _labels,
+    paginationParameters,
     refetch,
     access,
     invalidate

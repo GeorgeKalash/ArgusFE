@@ -929,7 +929,13 @@ export default function SaleTransactionForm({ labels, access, recordId, function
 
   async function fillClientData(clientObject) {
     const clientId = clientObject?.recordId
-    if (!clientId) return
+    if (!clientId) {
+      formik.setFieldValue('header.clientId', null)
+      formik.setFieldValue('header.clientName', null)
+      formik.setFieldValue('header.clientRef', null)
+
+      return
+    }
 
     try {
       const res = await getRequest({
@@ -1223,16 +1229,21 @@ export default function SaleTransactionForm({ labels, access, recordId, function
     const saTrxpack = await getSalesTransactionPack(recordId)
     await fillForm(recordId, saTrxpack)
   }
+  function setAddressValues(obj) {
+    Object.entries(obj).forEach(([key, value]) => {
+      formik.setFieldValue(`header.${key}`, value)
+    })
+  }
 
-  function openAddressFilterForm(clickShip, clickBill) {
+  function openAddressFilterForm() {
     stack({
       Component: AddressFilterForm,
       props: {
         maxAccess,
         labels,
-        shipment: clickShip,
-        bill: clickBill,
-        form: formik
+        bill: true,
+        form: formik.values.header,
+        handleAddressValues: setAddressValues
       },
       width: 950,
       height: 600,
@@ -1620,7 +1631,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                     viewDropDown={formik.values.header.clientId}
                     onChange={e => formik.setFieldValue('header.BillAddress', e.target.value)}
                     onClear={() => formik.setFieldValue('header.BillAddress', '')}
-                    onDropDown={() => openAddressFilterForm(false, true)}
+                    onDropDown={() => openAddressFilterForm()}
                   />
                 </Grid>
               </Grid>
