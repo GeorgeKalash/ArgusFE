@@ -92,8 +92,8 @@ export const ResourceLookup = ({
     }
   }
 
-  const onBlur = () => {
-    selectFirstOption()
+  const onBlur = (e, HighlightedOption) => {
+    !HighlightedOption && selectFirstOption()
   }
 
   const selectFirstOption = () => {

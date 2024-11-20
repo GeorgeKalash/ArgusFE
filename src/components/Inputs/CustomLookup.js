@@ -1,7 +1,7 @@
 import { Box, Grid, Autocomplete, TextField, IconButton, InputAdornment, Paper } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search'
 import ClearIcon from '@mui/icons-material/Clear'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
 import PopperComponent from '../Shared/Popper/PopperComponent'
 import CircularProgress from '@mui/material/CircularProgress'
@@ -46,6 +46,8 @@ const CustomLookup = ({
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
   const [freeSolo, setFreeSolo] = useState(false)
   const [focus, setAutoFocus] = useState(autoFocus)
+
+  const valueHighlightedOption = useRef(null)
 
   const [inputValue, setInputValue] = useState(firstValue || '')
 
@@ -96,6 +98,14 @@ const CustomLookup = ({
             setInputValue(newValue ? newValue[valueField] : '')
             onChange(name, newValue)
             setAutoFocus(true)
+          }}
+          onHighlightChange={(event, newValue) => {
+            valueHighlightedOption.current = newValue
+          }}
+          onKeyDown={event => {
+            if (event.key === 'Tab') {
+              onChange('', valueHighlightedOption.current)
+            }
           }}
           PopperComponent={PopperComponent}
           PaperComponent={({ children }) =>
@@ -167,7 +177,7 @@ const CustomLookup = ({
                   setFreeSolo(true)
                 }
 
-                onBlur(e)
+                onBlur(e, valueHighlightedOption.current)
               }}
               onFocus={() => {
                 setStore([]), setFreeSolo(true)
