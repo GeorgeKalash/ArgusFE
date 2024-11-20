@@ -115,10 +115,12 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
   const initialValues = {
     recordId: null,
     reference: null,
+    nationalityId: null,
     operations: [
       {
         id: 1,
         currencyId: '',
+        oldNote: false,
         fcAmount: '',
         defaultRate: '',
         exRate: '',
@@ -197,6 +199,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       nationalityId: yup.string().required(),
       cellPhone: yup.string().required(),
       professionId: yup.string().required(),
+      nationalityId: yup.number().required(),
       operations: yup
         .array()
         .of(
@@ -334,6 +337,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
             recordId: values?.recordId || null,
             dtId,
             reference: values.reference,
+            nationalityId: values.nationalityId,
             status: values.status,
             date: formatDateToApi(values.date),
             functionId: values.functionId,
@@ -467,6 +471,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     const data = {
       recordId: result.headerView?.recordId,
       reference: result.headerView?.reference,
+      nationalityId: result.headerView?.nationalityId,
       status: result.headerView?.status,
       functionId: result.headerView?.functionId,
       plantId: result.headerView?.plantId,
@@ -546,6 +551,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     if (record) {
       formik.setFieldValue('recordId', record.headerView.recordId)
       formik.setFieldValue('reference', record.headerView.reference)
+      formik.setFieldValue('nationalityId', record.headerView.nationalityId)
       formik.setFieldValue(
         'operations',
         record.items.map(({ seqNo, ...rest }) => ({
@@ -627,6 +633,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       recordId: values?.recordId || null,
       date: formatDateToApi(values.date),
       reference: values.reference,
+      nationalityType: values.nationalityId,
       status: values.status,
       functionId: values.functionId,
       plantId: plantId ? plantId : values.plantId,
@@ -645,9 +652,10 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     })
     if (res.recordId) {
       toast.success(platformLabels.Reopened)
-      invalidate()
-      await getData(res.recordId)
+      const receivedClient = await getData(res.recordId)
+      isPosted && viewOTP(res.recordId, receivedClient)
     }
+    invalidate()
   }
 
   const total = formik.values.operations.reduce((sumLc, row) => {
@@ -725,6 +733,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       recordId: values?.recordId || null,
       date: formatDateToApi(values.date),
       reference: values.reference,
+      nationalityId: values.nationalityId,
       status: values.status,
       functionId: values.functionId,
       plantId: plantId ? plantId : values.plantId,
@@ -768,6 +777,12 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       condition: isClosed,
       onClick: onReopen,
       disabled: !isClosed
+    },
+    {
+      key: 'OTP',
+      condition: true,
+      onClick: viewOTP,
+      disabled: isPosted
     },
     {
       key: 'Approval',
@@ -880,7 +895,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                         required
                       />
                     </Grid>
-                    <Grid item xs={6}>
+                    <Grid item xs={3}>
                       <RadioGroup
                         row
                         value={formik.values.functionId}
@@ -903,6 +918,26 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                           disabled={formik?.values?.operations[0]?.currencyId != '' ? true : false}
                         />
                       </RadioGroup>
+                    </Grid>
+                    <Grid item xs={3}>
+                      <ResourceComboBox
+                        datasetId={DataSets.NATIONALITY}
+                        name='nationalityId'
+                        label={labels.nationalityType}
+                        valueField='key'
+                        displayField='value'
+                        values={formik.values}
+                        required
+                        onChange={(event, newValue) => {
+                          if (newValue) {
+                            formik.setFieldValue('nationalityId', newValue?.key)
+                          } else {
+                            formik.setFieldValue('nationalityId', '')
+                          }
+                        }}
+                        maxAccess={maxAccess}
+                        error={formik.touched.nationalityId && Boolean(formik.errors.nationalityId)}
+                      />
                     </Grid>
                     <Grid item xs={6}>
                       <RadioGroup row value={formik.values.clientType} onChange={formik.onChange}>
@@ -1029,9 +1064,23 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                     <Grid item xs={8}>
                       <Grid container spacing={2}>
                         <Grid item xs={3}>
+                          {/* <CustomTextField
+                            name='firstName'
+                            label={labels.firstName}
+                            value={formik.values.firstName}
+                            readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
+                            required
+                            maxLength='20'
+                            onChange={formik.handleChange}
+                            forceUpperCase={true}
+                            onClear={() => formik.setFieldValue('firstName', '')}
+                            error={formik.touched.firstName && Boolean(formik.errors.firstName)}
+                            maxAccess={maxAccess}
+                          /> */}
                           <FormField
                             name='firstName'
                             Component={CustomTextField}
+                            forceUpperCase={true}
                             readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                             required
                             language='english'
@@ -1042,6 +1091,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                             name='middleName'
                             language='english'
                             Component={CustomTextField}
+                            forceUpperCase={true}
                             readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                           />
                         </Grid>
@@ -1049,6 +1099,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                           <FormField
                             name='lastName'
                             Component={CustomTextField}
+                            forceUpperCase={true}
                             readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                             required
                             language='english'
@@ -1059,6 +1110,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                             name='familyName'
                             language='english'
                             Component={CustomTextField}
+                            forceUpperCase={true}
                             readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                           />
                         </Grid>
@@ -1144,6 +1196,12 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                             readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                           />
                         </Grid>
+                        <Grid item xs={6}>
+                          <FormField name='sponsorName' Component={CustomTextField} readOnly={editMode || isClosed} />
+                        </Grid>
+                        <Grid item xs={6}>
+                          <FormField name='remarks' Component={CustomTextField} readOnly={editMode || isClosed} />
+                        </Grid>
                         <Grid item xs={4}>
                           <FormField
                             name='purpose_of_exchange'
@@ -1160,14 +1218,6 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                         </Grid>
                         <Grid item xs={2}>
                           <FormControlLabel
-                            sx={{
-                              '.MuiFormControlLabel-label': {
-                                fontSize: '0.9rem'
-                              },
-                              '.MuiSvgIcon-root': {
-                                fontSize: '1.2rem'
-                              }
-                            }}
                             name='resident'
                             checked={formik.values.resident}
                             onChange={formik.handleChange}
@@ -1178,14 +1228,6 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                         </Grid>
                         <Grid item xs={2}>
                           <FormControlLabel
-                            sx={{
-                              '.MuiFormControlLabel-label': {
-                                fontSize: '0.9rem'
-                              },
-                              '.MuiSvgIcon-root': {
-                                fontSize: '1.2rem'
-                              }
-                            }}
                             name='otp'
                             checked={formik.values.otp}
                             onChange={formik.handleChange}
@@ -1193,12 +1235,6 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                             label='Otp'
                             disabled={true}
                           />
-                        </Grid>
-                        <Grid item xs={6}>
-                          <FormField name='sponsorName' Component={CustomTextField} readOnly={editMode || isClosed} />
-                        </Grid>
-                        <Grid item xs={6}>
-                          <FormField name='remarks' Component={CustomTextField} readOnly={editMode || isClosed} />
                         </Grid>
                       </Grid>
                     </Grid>
@@ -1295,6 +1331,11 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                         },
 
                         flex: 1.5
+                      },
+                      {
+                        component: 'checkbox',
+                        name: 'oldNote',
+                        label: labels.oldNote
                       },
                       {
                         component: 'numberfield',
