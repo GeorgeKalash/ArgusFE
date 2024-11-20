@@ -54,6 +54,7 @@ import { RateDivision } from 'src/resources/RateDivision'
 import { useError } from 'src/error'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import StrictUnpostConfirmation from 'src/components/Shared/StrictUnpostConfirmation'
+import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
 
 export default function SaleTransactionForm({ labels, access, recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -1251,6 +1252,21 @@ export default function SaleTransactionForm({ labels, access, recordId, function
     })
   }
 
+  function openAddressForm() {
+    stack({
+      Component: AddressFormShell,
+      props: {
+        address: address,
+        setAddress: setAddress,
+        isCleared: false,
+        isSavedClear: false
+      },
+      width: 850,
+      height: 620,
+      title: labels.address
+    })
+  }
+
   function getDTD(dtId) {
     const res = getRequest({
       extension: SaleRepository.DocumentTypeDefault.get,
@@ -1622,7 +1638,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
             <Grid container xs={3} direction='column' spacing={2} sx={{ flexWrap: 'nowrap', pl: '5px' }}>
               <Grid container xs={12} direction='row' spacing={2} sx={{ flexWrap: 'nowrap' }}>
                 <Grid item xs={12}>
-                  <CustomTextArea
+                <CustomTextArea
                     name='billAddress'
                     label={labels.billTo}
                     value={formik.values.header.billAddress}
@@ -1631,9 +1647,11 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                     readOnly={!formik.values.header.clientId || isPosted}
                     maxAccess={maxAccess}
                     viewDropDown={formik.values.header.clientId}
+                    viewAdd={formik.values.header.clientId && !editMode}
                     onChange={e => formik.setFieldValue('header.BillAddress', e.target.value)}
                     onClear={() => formik.setFieldValue('header.BillAddress', '')}
                     onDropDown={() => openAddressFilterForm()}
+                    handleAddAction={() => openAddressForm()}
                   />
                 </Grid>
               </Grid>
@@ -1666,6 +1684,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                   onChange={(event, newValue) => {
                     fillClientData(newValue)
                   }}
+                  secondFieldName={'header.clientName'}
                   onSecondValueChange={(name, value) => {
                     formik.setFieldValue('header.clientName', value)
                   }}
