@@ -163,7 +163,7 @@ export default function PlantSupervisorsForm({ _labels: labels, maxAccess }) {
                   plantId: formik.values.plantId
                 }}
                 allowAddNewLine={true}
-                allowDelete={true}
+                allowDelete={false}
               />
             </Grid>
           </Grid>
