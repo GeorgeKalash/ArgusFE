@@ -383,19 +383,6 @@ export default function FormShell({
     handleReset()
   }
 
-  function onUnpostConfirmation(props) {
-    stack({
-      Component: StrictUnpostConfirmation,
-      props: {
-        ...props
-      },
-      width: 500,
-      height: 300,
-      expandable: false,
-      title: platformLabels.UnpostConfirmation
-    })
-  }
-
   return (
     <>
       <DialogContent
