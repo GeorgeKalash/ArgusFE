@@ -3,7 +3,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import GlEoyClosingForm from './form/GLClosingForm'
 
 const GlEoyClosing = () => {
-  return <ImmediateWindow datasetId={ResourceIds.GlEoyClosing} labelKey={'sync'} Component={GlEoyClosingForm} />
+  return <ImmediateWindow datasetId={ResourceIds.GlEoyClosing} labelKey={'eoy'} Component={GlEoyClosingForm} />
 }
 
 export default GlEoyClosing

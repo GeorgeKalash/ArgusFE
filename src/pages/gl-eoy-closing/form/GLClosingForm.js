@@ -31,7 +31,7 @@ export default function GlEoyClosingForm({ _labels, access }) {
       const { recordId, ...rest } = obj
 
       await postRequest({
-        extension: RGGeneralRepository.OriginBalance.GLDOE,
+        extension: RGGeneralRepository.EoyClosing.GLEOY,
         record: JSON.stringify(rest)
       })
 
@@ -44,7 +44,7 @@ export default function GlEoyClosingForm({ _labels, access }) {
 
   return (
     <FormShell
-      resourceId={ResourceIds.GlSync}
+      resourceId={ResourceIds.GlEoyClosing}
       form={formik}
       maxAccess={access}
       editMode={true}
