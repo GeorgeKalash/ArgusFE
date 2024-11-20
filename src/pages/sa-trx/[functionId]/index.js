@@ -19,7 +19,7 @@ import Table from 'src/components/Shared/Table'
 
 const SaTrx = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
+  const { platformLabels, defaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
   const router = useRouter()
@@ -142,16 +142,9 @@ const SaTrx = () => {
   }
 
   async function getDefaultSalesCurrency() {
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.Defaults.get,
-        parameters: `_filter=&_key=currencyId`
-      })
+    const defaultCurrency = defaultsData?.list?.find(({ key }) => key === 'currencyId')
 
-      return res?.record?.value
-    } catch (error) {
-      return ''
-    }
+    return defaultCurrency?.value ? parseInt(defaultCurrency.value) : null
   }
 
   const { proxyAction } = useDocumentTypeProxy({
@@ -205,14 +198,12 @@ const SaTrx = () => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: SaleRepository.SalesTransaction.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
+    await postRequest({
+      extension: SaleRepository.SalesTransaction.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   const onApply = ({ search, rpbParams }) => {
