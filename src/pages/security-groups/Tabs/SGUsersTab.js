@@ -34,6 +34,41 @@ const SGUsersTab = ({ labels, maxAccess, storeRecordId }) => {
     }
   })
 
+  const columns = [
+    [
+      {
+        component: 'resourcecombobox',
+        name: 'sgId',
+        label: labels.name,
+        props: {
+          endpointId: AccessControlRepository.SecurityGroupUser.qry,
+          parameters: `_userId=0&_filter=&_sgId=0`,
+          valueField: 'sgId',
+          displayField: 'fullName',
+          columnsInDropDown: [
+            { key: 'fullName', value: 'Name' },
+            { key: 'email', value: 'Email' }
+          ],
+          mapping: [
+            { from: 'sgId', to: 'sgId' },
+            { from: 'sgName', to: 'sgName' },
+            { from: 'email', to: 'email' },
+            { from: 'userId', to: 'userId' },
+            { from: 'fullName', to: 'fullName' }
+          ]
+        }
+      },
+      {
+        component: 'textfield',
+        label: labels.email,
+        name: 'email',
+        props: {
+          readOnly: true
+        }
+      }
+    ]
+  ]
+
   const postGroups = async obj => {
     const groups = obj?.groups?.length
       ? obj.groups
@@ -75,57 +110,24 @@ const SGUsersTab = ({ labels, maxAccess, storeRecordId }) => {
   }, [])
 
   return (
-    <>
-      <FormShell
-        form={formik}
-        resourceId={ResourceIds.Users}
-        maxAccess={maxAccess}
-        infoVisible={false}
-        editMode={!!recordId}
-      >
-        <VertLayout>
-          <Grow>
-            <DataGrid
-              onChange={value => formik.setFieldValue('groups', value)}
-              value={formik.values.groups}
-              error={formik.errors.groups}
-              columns={[
-                {
-                  component: 'resourcecombobox',
-                  name: 'sgId',
-                  label: labels.name,
-                  props: {
-                    endpointId: AccessControlRepository.SecurityGroupUser.qry,
-                    parameters: `_userId=0&_filter=&_sgId=0`,
-                    valueField: 'sgId',
-                    displayField: 'fullName',
-                    columnsInDropDown: [
-                      { key: 'fullName', value: 'Name' },
-                      { key: 'email', value: 'Email' }
-                    ],
-                    mapping: [
-                      { from: 'sgId', to: 'sgId' },
-                      { from: 'sgName', to: 'sgName' },
-                      { from: 'email', to: 'email' },
-                      { from: 'userId', to: 'userId' },
-                      { from: 'fullName', to: 'fullName' }
-                    ]
-                  }
-                },
-                {
-                  component: 'textfield',
-                  label: labels.email,
-                  name: 'email',
-                  props: {
-                    readOnly: true
-                  }
-                }
-              ]}
-            />
-          </Grow>
-        </VertLayout>
-      </FormShell>
-    </>
+    <FormShell
+      form={formik}
+      resourceId={ResourceIds.Users}
+      maxAccess={maxAccess}
+      infoVisible={false}
+      editMode={!!recordId}
+    >
+      <VertLayout>
+        <Grow>
+          <DataGrid
+            onChange={value => formik.setFieldValue('groups', value)}
+            value={formik.values.groups}
+            error={formik.errors.groups}
+            columns={columns}
+          />
+        </Grow>
+      </VertLayout>
+    </FormShell>
   )
 }
 
