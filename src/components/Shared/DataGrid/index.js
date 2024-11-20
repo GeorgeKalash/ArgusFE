@@ -39,6 +39,7 @@ export function DataGrid({
       setData(changes, params)
       commit({ changes: { ...params.node.data, changes } })
     }
+
     const updateRowCommit = changes => {
       const rowToUpdate = value?.find(item => item?.id === changes.id)
 
@@ -63,7 +64,7 @@ export function DataGrid({
     gridApiRef.current.applyTransaction({ remove: [params.data] })
     if (newRows?.length < 1) setReady(true)
 
-    onChange(newRows)
+    onChange(newRows, 'delete')
   }
 
   function openDelete(params) {

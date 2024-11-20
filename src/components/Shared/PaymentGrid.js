@@ -4,6 +4,7 @@ import { DataGrid } from './DataGrid'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import * as yup from 'yup'
+import { ConstructionOutlined } from '@mui/icons-material'
 
 export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
   const { labels: labels } = useResourceQuery({
@@ -69,6 +70,21 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
     rest.setFormik({ ...initialValuePayment, paymentValidation })
   }, [rest.name])
 
+  const calculate = values => {
+    console.log('values', amount, values)
+    const totalReturnedAmount =
+      values?.reduce((sum, current) => sum + parseFloat(current.paidAmount || 0), 0)?.toFixed(2) || 0
+    const totalAmount = values?.reduce((sum, current) => sum + parseFloat(current.amount || 0), 0)?.toFixed(2) || 0
+
+    console.log('rateCalculate', amount, totalReturnedAmount)
+
+    const val = values.map(item =>
+      item.type === '2' ? { ...item, returnedAmount: totalAmount - totalReturnedAmount } : item
+    )
+
+    rest.onChange(val)
+  }
+
   const columns = [
     {
       component: 'resourcecombobox',
@@ -93,7 +109,9 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
 
           return sum + curValue
         }, 0)
+
         const currentAmount = (parseFloat(amount) - parseFloat(sumAmount)).toFixed(2)
+
         update({ amount: currentAmount, POS: newRow.type === '1' })
       }
     },
@@ -125,6 +143,7 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
           value
             ?.reduce((sum, current) => (current.id !== newRow.id ? sum + parseFloat(current.paidAmount || 0) : sum), 0)
             ?.toFixed(2) || 0
+
         if (newRow?.type !== '2') {
           update({
             returnedAmount: 0,
@@ -213,5 +232,25 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
     }
   ]
 
-  return <DataGrid columns={columns} value={value} {...rest} />
+  return (
+    <DataGrid
+      {...rest}
+      columns={columns}
+      // onChange={() => {
+      //   props.onchange, setDelete(true)
+      // }}
+      onChange={(value, action) => {
+        console.log('onChange Triggered:', value, action)
+        rest.onChange(value, action)
+
+        if (action === 'delete' && Array.isArray(value)) {
+          console.log('Running rateCalculate...', value)
+          calculate(value)
+        } else {
+          console.warn('Invalid value or action for rateCalculate:', value, action)
+        }
+      }}
+      value={value}
+    />
+  )
 }
