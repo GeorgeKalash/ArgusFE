@@ -1413,6 +1413,8 @@ export default function SaleTransactionForm({ labels, access, recordId, function
     invalidate()
   }
 
+  console.log(formik)
+
   return (
     <FormShell
       resourceId={getResourceId(parseInt(functionId))}
@@ -1640,19 +1642,14 @@ export default function SaleTransactionForm({ labels, access, recordId, function
               <Grid item xs={12}>
                 <ResourceLookup
                   endpointId={SaleRepository.Client.snapshot}
-                  valueField='reference'
-                  displayField='name'
                   name='clientId'
                   label={labels.client}
-                  form={formik}
-                  formObject={formik.values.header}
-                  required
-                  readOnly={isPosted}
-                  displayFieldWidth={3}
+                  valueField='reference'
+                  displayField='name'
                   valueShow='clientRef'
                   secondValueShow='clientName'
-                  maxAccess={maxAccess}
-                  editMode={editMode}
+                  formObject={formik.values.header}
+                  form={formik}
                   columnsInDropDown={[
                     { key: 'reference', value: 'Reference' },
                     { key: 'name', value: 'Name' },
@@ -1660,10 +1657,18 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                     { key: 'keywords', value: 'Keywords' },
                     { key: 'cgName', value: 'Client Group' }
                   ]}
-                  onChange={async (event, newValue) => {
+                  onChange={(event, newValue) => {
                     fillClientData(newValue)
                   }}
+                  onSecondValueChange={(name, value) => {
+                    formik.setFieldValue('header.clientName', value)
+                  }}
                   errorCheck={'clientId'}
+                  maxAccess={maxAccess}
+                  required
+                  readOnly={isPosted}
+                  displayFieldWidth={3}
+                  editMode={editMode}
                 />
               </Grid>
 
