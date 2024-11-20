@@ -71,15 +71,12 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
   }, [rest.name])
 
   const calculate = values => {
-    console.log('values', amount, values)
-    const totalReturnedAmount =
-      values?.reduce((sum, current) => sum + parseFloat(current.paidAmount || 0), 0)?.toFixed(2) || 0
-    const totalAmount = values?.reduce((sum, current) => sum + parseFloat(current.amount || 0), 0)?.toFixed(2) || 0
-
-    console.log('rateCalculate', amount, totalReturnedAmount)
+    const totalReturnedAmount = values.reduce((sum, current) => sum + parseFloat(current.paidAmount || 0), 0)
 
     const val = values.map(item =>
-      item.type === '2' ? { ...item, returnedAmount: totalAmount - totalReturnedAmount } : item
+      item.type === '2'
+        ? { ...item, returnedAmount: (parseFloat(amount || 0) - parseFloat(totalReturnedAmount)).toFixed(2) }
+        : item
     )
 
     rest.onChange(val)
@@ -155,13 +152,13 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
           updateRow({
             id: index,
             changes: {
-              returnedAmount: amount - returns - (newRow.paidAmount || 0)
+              returnedAmount: (amount - returns - (newRow.paidAmount || 0)).toFixed(2)
             }
           })
         } else {
           update({
-            returnedAmount: amount - returns - (newRow.paidAmount || 0),
-            amount: newRow.paidAmount
+            returnedAmount: (amount - returns - (newRow.paidAmount || 0)).toFixed(2),
+            amount: parseFloat(newRow.paidAmount || 0)
           })
         }
       }
