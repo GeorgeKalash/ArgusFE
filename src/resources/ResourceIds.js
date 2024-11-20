@@ -299,5 +299,6 @@ export const ResourceIds = {
   IVparts: 41222,
   SalesInquiries: 51300,
   MigrateBarcodeData: 41508,
-  ClientSalesTransaction: 51345
+  ClientSalesTransaction: 51345,
+  POSDefaults: 54103
 }
