@@ -380,7 +380,7 @@ export const getButtons = platformLabels => [
   {
     key: 'ClientSalesTransaction',
     label: platformLabels.ClientSalesTransaction,
-    color: '#8C0446',
+    color: 'blue',
     image: 'popup-window.png',
     main: false
   }
