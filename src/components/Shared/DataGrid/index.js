@@ -517,12 +517,12 @@ export function DataGrid({
   }
 
   const onCellFocused = params => {
-    if (params.rowIndex === 0 && params.column && allColumns?.[0]?.name === params.column?.getColId()) {
-      params.api.startEditingCell({
-        rowIndex: params.rowIndex,
-        colKey: params.column.getId()
-      })
-    }
+    // if (params.rowIndex === 0 && params.column && allColumns?.[0]?.name === params.column?.getColId()) {
+    //   params.api.startEditingCell({
+    //     rowIndex: params.rowIndex,
+    //     colKey: params.column.getId()
+    //   })
+    // }
   }
 
   return (
@@ -544,7 +544,7 @@ export function DataGrid({
               rowData={value}
               columnDefs={columnDefs}
               suppressRowClickSelection={false}
-              suppressHeaderFocus={true}
+              // suppressHeaderFocus={true}
               stopEditingWhenCellsLoseFocus={false}
               rowSelection='single'
               editType='cell'
@@ -562,7 +562,7 @@ export function DataGrid({
               tabToPreviousCell={() => true}
               onRowClicked={handleRowClick}
               onCellEditingStopped={onCellEditingStopped}
-              onCellFocused={onCellFocused}
+              // onCellFocused={onCellFocused}
             />
           )}
         </Box>
