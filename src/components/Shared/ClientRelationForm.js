@@ -82,21 +82,22 @@ export const ClientRelationForm = ({ seqNo, clientId, formValidation }) => {
       await postRequest({
         extension: RTCLRepository.ClientRelation.set3,
         record: JSON.stringify(data)
-      }).then(res => {
-        stack({
-          Component: OTPPhoneVerification,
-          props: {
-            clientId: formValidation.values.recordId,
-            recordId: formValidation.values.recordId,
-            formValidation: formValidation,
-            functionId: SystemFunction.ClientRelation,
-            onSuccess: verified
-          },
-          width: 400,
-          height: 400,
-          title: _labels.OTPVerification
-        })
-        toast.success('Record Successfully')
+      })
+        .then(res => {
+          stack({
+            Component: OTPPhoneVerification,
+            props: {
+              clientId: formValidation.values.recordId,
+              recordId: formValidation.values.recordId,
+              values: formValidation.values,
+              functionId: SystemFunction.ClientRelation,
+              onSuccess: verified
+            },
+            width: 400,
+            height: 400,
+            title: _labels.OTPVerification
+          })
+          toast.success('Record Successfully')
       })
     }
   })

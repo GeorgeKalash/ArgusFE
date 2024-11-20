@@ -53,8 +53,9 @@ import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepositor
 import { RateDivision } from 'src/resources/RateDivision'
 import { useError } from 'src/error'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
+import StrictUnpostConfirmation from 'src/components/Shared/StrictUnpostConfirmation'
 
-export default function SaleTransactionForm({ labels, access, recordId, functionId, defaultSalesTD, window }) {
+export default function SaleTransactionForm({ labels, access, recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
   const { stack } = useWindow()
@@ -705,16 +706,39 @@ export default function SaleTransactionForm({ labels, access, recordId, function
   }
 
   const onPost = async () => {
-    const res = await postRequest({
+    await postRequest({
       extension: SaleRepository.SaleTransaction.post,
       record: JSON.stringify(formik.values.header)
     })
 
-    if (res) {
-      toast.success(platformLabels.Posted)
-      invalidate()
-      window.close()
-    }
+    toast.success(platformLabels.Posted)
+    invalidate()
+    window.close()
+  }
+
+  const onUnpost = async () => {
+    const res = await postRequest({
+      extension: SaleRepository.SaleTransaction.unpost,
+      record: JSON.stringify(formik.values.header)
+    })
+
+    await refetchForm(res.recordId)
+    toast.success(platformLabels.Posted)
+    invalidate()
+  }
+  function openUnpostConfirmation(obj) {
+    stack({
+      Component: StrictUnpostConfirmation,
+      props: {
+        action() {
+          onUnpost(obj)
+        }
+      },
+      width: 500,
+      height: 300,
+      expandable: false,
+      title: platformLabels.UnpostConfirmation
+    })
   }
 
   const actions = [
@@ -756,9 +780,15 @@ export default function SaleTransactionForm({ labels, access, recordId, function
     },
     {
       key: 'Post',
-      condition: true,
+      condition: isPosted,
+      onClick: () => openUnpostConfirmation(formik.values),
+      disabled: !isPosted
+    },
+    {
+      key: 'Unpost',
+      condition: !isPosted,
       onClick: onPost,
-      disabled: isPosted || !editMode
+      disabled: !editMode
     }
   ]
 
@@ -768,20 +798,41 @@ export default function SaleTransactionForm({ labels, access, recordId, function
     const saTrxTaxes = saTrxPack?.taxes
     const billAdd = await getAddress(saTrxHeader?.billAddressId)
 
-    saTrxHeader?.tdType == 1 || saTrxHeader?.tdType == null
+    saTrxHeader?.tdType === 1 || saTrxHeader?.tdType == null
       ? setCycleButtonState({ text: '123', value: 1 })
       : setCycleButtonState({ text: '%', value: 2 })
 
-    const modifiedList = saTrxItems?.map((item, index) => ({
-      ...item,
-      id: index + 1,
-      basePrice: parseFloat(item.basePrice).toFixed(5),
-      unitPrice: parseFloat(item.unitPrice).toFixed(3),
-      upo: parseFloat(item.upo).toFixed(2),
-      vatAmount: parseFloat(item.vatAmount).toFixed(2),
-      extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
-      saTrx: true
-    }))
+    const modifiedList = await Promise.all(
+      saTrxItems?.map(async (item, index) => {
+        const filteredMeasurements = measurements.filter(x => x.msId === item?.msId)
+        setFilteredMU(filteredMeasurements)
+
+        const taxDetailsResponse = saTrxHeader.isVattable ? await getTaxDetails(item.taxId) : null
+
+        const updatedSaTrxTaxes =
+          saTrxTaxes?.map(tax => {
+            const matchingTaxDetail = taxDetailsResponse?.find(responseTax => responseTax.seqNo === tax.taxSeqNo)
+
+            return {
+              ...tax,
+              taxBase: matchingTaxDetail ? matchingTaxDetail.taxBase : tax.taxBase
+            }
+          }) || null
+
+        return {
+          ...item,
+          id: index + 1,
+          basePrice: parseFloat(item.basePrice).toFixed(5),
+          unitPrice: parseFloat(item.unitPrice).toFixed(3),
+          upo: parseFloat(item.upo).toFixed(2),
+          vatAmount: parseFloat(item.vatAmount).toFixed(2),
+          extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
+          saTrx: true,
+          taxDetails: updatedSaTrxTaxes
+        }
+      })
+    )
+
     formik.setValues({
       recordId: recordId || null,
       ...formik.values,
@@ -799,7 +850,6 @@ export default function SaleTransactionForm({ labels, access, recordId, function
     })
     formik.setFieldValue('subtotal', saTrxHeader?.subtotal)
   }
-
   async function getSalesTransactionPack(transactionId) {
     const res = await getRequest({
       extension: SaleRepository.SalesTransaction.get2,
@@ -831,9 +881,6 @@ export default function SaleTransactionForm({ labels, access, recordId, function
   }
 
   async function fillMetalPrice(baseMetalCuId) {
-    //get currencyId from SY.getDE? key = baseMetalCuId
-    //if a null value is returned, you stop here
-
     if (baseMetalCuId) {
       const res = await getRequest({
         extension: MultiCurrencyRepository.Currency.get,
@@ -965,7 +1012,6 @@ export default function SaleTransactionForm({ labels, access, recordId, function
   }
 
   async function getItemConvertPrice2(row, header) {
-    // getICP2(string _barcode, int _clientId, int _currencyId, int _plId, double _exRate, double _rateCalcMethod)
     const res = await getRequest({
       extension: SaleRepository.ItemConvertPrice.get2,
       parameters: `_barcode=${row?.barcode}&_clientId=${header.clientId}&_currencyId=${header.currencyId}&_plId=${header.plId}&_exRate=${header.exRate}&_rateCalcMethod=${header.rateCalcMethod}`
@@ -1034,8 +1080,8 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       qty: itemPriceRow?.qty,
       extendedPrice: parseFloat(itemPriceRow?.extendedPrice),
       baseLaborPrice: itemPriceRow?.baseLaborPrice,
-      vatAmount: parseFloat(itemPriceRow?.vatAmount),
-      tdPct: formik?.values?.header?.tdPct,
+      vatAmount: parseFloat(newRow?.vatAmount),
+      tdPct: formik?.values?.header?.tdPct || 0,
       taxDetails: formik.values.header.isVatChecked ? null : newRow.taxDetails
     })
 
@@ -1109,7 +1155,6 @@ export default function SaleTransactionForm({ labels, access, recordId, function
     formik.setFieldValue('header.tdType', _discountObj?.tdType)
     formik.setFieldValue('header.currentDiscount', _discountObj?.currentDiscount || 0)
     formik.setFieldValue('header.tdPct', _discountObj?.hiddenTdPct)
-    formik.setFieldValue('header.tdAmount', _discountObj?.hiddenTdAmount?.toFixed(2))
   }
 
   function recalcNewVat(tdPct) {
@@ -1123,7 +1168,6 @@ export default function SaleTransactionForm({ labels, access, recordId, function
         tdPct: tdPct,
         taxDetails: item.taxDetails
       })
-
       formik.setFieldValue(`items[${index}].vatAmount`, parseFloat(vatCalcRow?.vatAmount).toFixed(2))
     })
   }
@@ -1179,16 +1223,21 @@ export default function SaleTransactionForm({ labels, access, recordId, function
     const saTrxpack = await getSalesTransactionPack(recordId)
     await fillForm(recordId, saTrxpack)
   }
+  function setAddressValues(obj) {
+    Object.entries(obj).forEach(([key, value]) => {
+      formik.setFieldValue(`header.${key}`, value)
+    })
+  }
 
-  function openAddressFilterForm(clickShip, clickBill) {
+  function openAddressFilterForm() {
     stack({
       Component: AddressFilterForm,
       props: {
         maxAccess,
         labels,
-        shipment: clickShip,
-        bill: clickBill,
-        form: formik
+        bill: true,
+        form: formik.values.header,
+        handleAddressValues: setAddressValues
       },
       width: 950,
       height: 600,
@@ -1258,7 +1307,23 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       const muList = await getMeasurementUnits()
       setMeasurements(muList?.list)
       setMetalPriceOperations()
-      if (recordId) {
+      const defaultObj = await getDefaultsData()
+      getUserDefaultsData()
+      if (!recordId) {
+        if (defaultObj.salesTD == 'True') {
+          setCycleButtonState({ text: '%', value: DIRTYFIELD_TDPCT })
+          formik.setFieldValue('header.tdType', 2)
+        } else {
+          setCycleButtonState({ text: '123', value: 1 })
+          formik.setFieldValue('header.tdType', 1)
+        }
+      }
+    })()
+  }, [])
+
+  useEffect(() => {
+    ;(async function () {
+      if (recordId && measurements) {
         const transactionPack = await getSalesTransactionPack(recordId)
         await fillForm(recordId, transactionPack)
         if (transactionPack.header.tdType === DIRTYFIELD_TDPCT) {
@@ -1270,20 +1335,9 @@ export default function SaleTransactionForm({ labels, access, recordId, function
           formik.setFieldValue('header.tdAmount', transactionPack.header.tdAmount)
           formik.setFieldValue('header.currentDiscount', transactionPack.header.tdAmount)
         }
-      } else {
-        if (defaultSalesTD) {
-          setCycleButtonState({ text: '%', value: DIRTYFIELD_TDPCT })
-          formik.setFieldValue('header.tdType', 2)
-        } else {
-          setCycleButtonState({ text: '123', value: 1 })
-          formik.setFieldValue('header.tdType', 1)
-        }
-
-        getDefaultsData()
-        getUserDefaultsData()
       }
     })()
-  }, [])
+  }, [recordId, measurements])
 
   useEffect(() => {
     defaultsDataState && setDefaultFields()
@@ -1306,9 +1360,12 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       )
     })
     filteredList.forEach(obj => {
-      myObject[obj.key] = obj.value ? parseInt(obj.value) : null
+      myObject[obj.key] =
+        obj.value === 'True' || obj.value === 'False' ? obj.value : obj.value ? parseInt(obj.value) : null
     })
     setDefaultsDataState(myObject)
+
+    return myObject
   }
 
   async function getUserDefaultsData() {
@@ -1568,7 +1625,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                     viewDropDown={formik.values.header.clientId}
                     onChange={e => formik.setFieldValue('header.BillAddress', e.target.value)}
                     onClear={() => formik.setFieldValue('header.BillAddress', '')}
-                    onDropDown={() => openAddressFilterForm(false, true)}
+                    onDropDown={() => openAddressFilterForm()}
                   />
                 </Grid>
               </Grid>
@@ -1798,12 +1855,12 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                       let tdPct = Number(e.target.value)
                       let tdAmount = Number(e.target.value)
 
-                      if (formik.values.header.tdType == DIRTYFIELD_TDPCT) {
+                      if (formik.values.header.tdType == DIRTYFIELD_TDPLAIN) {
                         tdPct = (parseFloat(discountAmount) / parseFloat(subtotal)) * 100
                         formik.setFieldValue('header.tdPct', tdPct)
                       }
 
-                      if (formik.values.header.tdType == DIRTYFIELD_TDPLAIN) {
+                      if (formik.values.header.tdType == DIRTYFIELD_TDPCT) {
                         tdAmount = (parseFloat(discountAmount) * parseFloat(subtotal)) / 100
                         formik.setFieldValue('header.tdAmount', tdAmount)
                       }

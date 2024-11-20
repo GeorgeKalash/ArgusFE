@@ -79,14 +79,12 @@ const SalesForm = ({ labels, maxAccess, store, cId, plId, record, muId }) => {
   useEffect(() => {
     ;(async function () {
       if (record && formik.values.plId) {
-        try {
-          const res = await getRequest({
-            extension: SaleRepository.Sales.get,
-            parameters: `_itemId=${itemId}&_plId=${formik.values.plId}&_currencyId=${formik.values.currencyId}&_muId=${formik.values.muId}`
-          })
+        const res = await getRequest({
+          extension: SaleRepository.Sales.get,
+          parameters: `_itemId=${itemId}&_plId=${formik.values.plId}&_currencyId=${formik.values.currencyId}&_muId=${formik.values.muId}`
+        })
 
-          formik.setValues(res?.record)
-        } catch (error) {}
+        formik.setValues(res?.record)
       }
     })()
   }, [record])
