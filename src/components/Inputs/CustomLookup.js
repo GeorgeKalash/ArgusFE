@@ -103,7 +103,7 @@ const CustomLookup = ({
             valueHighlightedOption.current = newValue
           }}
           onKeyDown={event => {
-            if (event.key === 'Tab') {
+            if (event.key === 'Tab' && valueHighlightedOption?.current) {
               onChange('', valueHighlightedOption.current)
             }
           }}
