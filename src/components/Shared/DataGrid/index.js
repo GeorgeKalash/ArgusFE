@@ -41,7 +41,7 @@ export function DataGrid({
     }
 
     const updateRowCommit = changes => {
-      const rowToUpdate = value?.find(item => item?.id === changes.id)
+      const rowToUpdate = value?.find(item => item?.id === changes?.id)
 
       const updatedRow = { ...rowToUpdate, ...changes.changes }
 
