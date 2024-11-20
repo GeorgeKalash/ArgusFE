@@ -22,6 +22,8 @@ const ClientSalesTransaction = ({ functionId, recordId, clientId }) => {
     labels: _labels,
     access
   } = useResourceQuery({
+    endpointId: SaleRepository.SATrx.qry2,
+
     filter: {
       filterFn: fetchGridData,
       default: { functionId }
