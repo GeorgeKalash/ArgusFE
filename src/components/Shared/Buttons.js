@@ -3,7 +3,14 @@ export const getButtons = platformLabels => [
     key: 'Post',
     label: platformLabels.Post,
     color: '#231f20',
-    image: 'post.png',
+    image: 'lock.png',
+    main: false
+  },
+  {
+    key: 'Unpost',
+    label: platformLabels.Unpost,
+    color: '#231f20',
+    image: 'unlock.png',
     main: false
   },
   {
@@ -362,5 +369,12 @@ export const getButtons = platformLabels => [
     color: '#231f20',
     image: 'save.png',
     main: true
-  }
+  },
+  {
+    key: 'Transfer',
+    label: platformLabels.Transfer,
+    color: '#4eb558',
+    image: 'exchange-refresh-icon.png',
+    main: false
+  },
 ]

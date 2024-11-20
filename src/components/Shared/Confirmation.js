@@ -27,9 +27,9 @@ const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refr
     enableReinitialize: false,
     validateOnChange: true,
     initialValues: {
-      idtId: clientformik.values?.idtId ? clientformik.values.idtId : clientformik.values?.id_type,
-      birthDate: clientformik.values?.birthDate ? clientformik.values.birthDate : clientformik.values?.birth_date,
-      idNo: clientformik.values?.idNo ? clientformik.values.idNo : clientformik.values?.id_number,
+      idtId: clientformik.values?.idtId ? clientformik.values.idtId : clientformik.values?.id_type?.recordId,
+      birthDate: clientformik.values?.birthDate,
+      idNo: clientformik.values?.idNo,
       idNoRepeat: ''
     },
 
@@ -48,11 +48,12 @@ const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refr
   })
 
   const postFetchDefault = obj => {
-    const type = idTypes?.list?.filter(item => item?.recordId == obj?.idtId)?.[0]?.type
+    const type =
+      idTypes?.list?.filter(item => item?.recordId == obj?.idtId)?.[0]?.type || clientformik.values?.id_type?.type
 
     const hijriDate = moment(formatDateForGetApI(obj.birthDate), 'YYYY-MM-DD').format('iYYYY-iMM-iDD')
 
-    const defaultParams = `_number=${obj.idNo}&_date=${hijriDate}&_yakeenType=${type}`
+    const defaultParams = `_number=${obj.idNo}&_date=${hijriDate}&_idType=${type}`
     var parameters = defaultParams
     getRequest({
       extension: CurrencyTradingSettingsRepository.Yakeen.get,
@@ -95,7 +96,10 @@ const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refr
                 name='idTypeName'
                 label={labels.id_type}
                 readOnly={true}
-                value={idTypes?.list?.find(item => item.recordId === clientformik.values.idtId)?.name}
+                value={
+                  idTypes?.list?.find(item => item.recordId === formik.values.idtId)?.name ||
+                  clientformik.values?.id_type?.name
+                }
               />
             </Grid>
             <Grid item xs={12}>
@@ -119,7 +123,7 @@ const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refr
                 name='idNo'
                 label={labels.id_number}
                 type={showAsPassword && 'password'}
-                value={clientformik.values?.idNo ? formik.values?.idNo : formik.values?.id_number}
+                value={formik.values?.idNo ? formik.values?.idNo : formik.values?.id_number}
                 required
                 onChange={e => {
                   formik.handleChange(e)

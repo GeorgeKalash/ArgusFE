@@ -11,6 +11,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import PopperComponent from '../Shared/Popper/PopperComponent'
 
 import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
+import { TrxType } from 'src/resources/AccessLevels'
 
 const CustomTimePicker = ({
   name,
@@ -38,10 +39,7 @@ const CustomTimePicker = ({
 
   const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
 
-  const _readOnly =
-    maxAccess < 3 ||
-    accessLevel === DISABLED ||
-    (readOnly && accessLevel !== MANDATORY && accessLevel !== FORCE_ENABLED)
+  const _readOnly = editMode ? editMode && maxAccess < TrxType.EDIT : accessLevel > DISABLED ? false : readOnly
 
   const _hidden = accessLevel ? accessLevel === HIDDEN : hidden
 
