@@ -1,8 +1,8 @@
-import { FormControlLabel, Checkbox } from '@mui/material'
+import { FormControlLabel, Radio } from '@mui/material'
 import { useEffect, useRef, useState } from 'react'
 import { DISABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
 
-const CustomCheckBox = ({
+const CustomRadioButton = ({
   value,
   readOnly = false,
   editMode = false,
@@ -12,6 +12,7 @@ const CustomCheckBox = ({
   label,
   onChange,
   maxAccess,
+  groupValue,
   disabled = false,
   ...props
 }) => {
@@ -28,9 +29,10 @@ const CustomCheckBox = ({
   return _hidden ? null : (
     <FormControlLabel
       control={
-        <Checkbox
+        <Radio
           name={name}
-          checked={value}
+          value={value}
+          checked={groupValue === value}
           onChange={handleChange}
           disabled={readOnly || disabled}
           inputProps={{ 'aria-label': label }}
@@ -44,4 +46,4 @@ const CustomCheckBox = ({
   )
 }
 
-export default CustomCheckBox
+export default CustomRadioButton
