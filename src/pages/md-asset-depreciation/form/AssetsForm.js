@@ -75,8 +75,8 @@ export default function AssetsForm({ obj, maxAccess: access, labels, window }) {
       }
 
       const response = await postRequest({
-        extension: FixedAssetsRepository.AssetsDescription.set,
-        record: JSON.stringify(formattedObj)
+        extension: FixedAssetsRepository.AssetsDescription.set2,
+        record: JSON.stringify({ header: formattedObj, items: data.list || [] })
       })
 
       if (!obj.recordId) {

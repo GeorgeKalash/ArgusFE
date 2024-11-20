@@ -30,6 +30,7 @@ export const FixedAssetsRepository = {
   AssetsDescription: {
     qry: service + 'qryDEP',
     get: service + 'getDEP',
+    set2: service + 'set2DEP',
     set: service + 'setDEP',
     del: service + 'delDEP',
     snapshot: service + 'snapshotDEP',
