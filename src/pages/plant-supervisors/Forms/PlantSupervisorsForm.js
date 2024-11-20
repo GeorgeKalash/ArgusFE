@@ -103,6 +103,12 @@ export default function PlantSupervisorsForm({ _labels: labels, maxAccess }) {
 
   const columns = [
     {
+      field: 'textfield',
+      header: labels.email,
+      name: 'email',
+      readOnly: true
+    },
+    {
       field: 'combobox',
       header: labels.user,
       nameId: 'supervisorId',
@@ -119,12 +125,6 @@ export default function PlantSupervisorsForm({ _labels: labels, maxAccess }) {
         { key: 'username', value: 'Name' },
         { key: 'email', value: 'Email' }
       ]
-    },
-    {
-      field: 'textfield',
-      header: labels.email,
-      name: 'email',
-      readOnly: true
     }
   ]
 
