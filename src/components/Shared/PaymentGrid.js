@@ -37,6 +37,7 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
             .required('Type is required')
             .test('unique', 'Type must be unique', function (value) {
               const { options } = this
+
               const arrayOfTypes = options.context?.[rest.name].map(row => row.type)
               if (value == 2) {
                 const countOfType1 = arrayOfTypes.filter(item => item === '2').length
@@ -235,18 +236,10 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
     <DataGrid
       {...rest}
       columns={columns}
-      // onChange={() => {
-      //   props.onchange, setDelete(true)
-      // }}
       onChange={(value, action) => {
-        console.log('onChange Triggered:', value, action)
         rest.onChange(value, action)
-
         if (action === 'delete' && Array.isArray(value)) {
-          console.log('Running rateCalculate...', value)
           calculate(value)
-        } else {
-          console.warn('Invalid value or action for rateCalculate:', value, action)
         }
       }}
       value={value}
