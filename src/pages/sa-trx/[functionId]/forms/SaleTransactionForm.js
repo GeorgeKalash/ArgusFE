@@ -369,7 +369,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
           const itemPhysProp = await getItemPhysProp(newRow.itemId)
           const itemInfo = await getItem(newRow.itemId)
           const ItemConvertPrice = await getItemConvertPrice(newRow.itemId)
-          await barcodeSkuSelection(update, newRow, ItemConvertPrice, itemPhysProp, itemInfo, false)
+          await barcodeSkuSelection(update, ItemConvertPrice, itemPhysProp, itemInfo, false)
         } catch (exception) {
           console.log(exception)
         }
@@ -751,10 +751,10 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       header: {
         ...formik.values.header,
         ...saTrxHeader,
-        tdAmount: saTrxHeader?.tdType == 1 || saTrxHeader?.tdType == null ? saTrxHeader?.tdAmount : saTrxHeader?.tdPct,
         amount: parseFloat(saTrxHeader?.amount).toFixed(2),
         billAddress: billAdd,
-        currentDiscount: saTrxHeader?.tdAmount,
+        currentDiscount:
+          saTrxHeader?.tdType == 1 || saTrxHeader?.tdType == null ? saTrxHeader?.tdAmount : saTrxHeader?.tdPct,
         KGmetalPrice: saTrxHeader?.metalPrice * 1000
       },
       items: modifiedList,
@@ -762,6 +762,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
     })
     formik.setFieldValue('subtotal', saTrxHeader?.subtotal)
   }
+  console.log('check formik ', formik)
 
   async function getSalesTransactionPack(transactionId) {
     const res = await getRequest({
@@ -786,7 +787,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
     if (baseMetalCuId) {
       const res = await getRequest({
         extension: MultiCurrencyRepository.Currency.get,
-        parameters: `_currencyId=${baseMetalCuId}&&_date=${formatDateForGetApI(
+        parameters: `_currencyId=${baseMetalCuId}&_date=${formatDateForGetApI(
           formik.values.header.date
         )}&_rateDivision=${RateDivision.SALES}`
       })
@@ -921,7 +922,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
   async function getItemConvertPrice2(row) {
     const res = await getRequest({
       extension: SaleRepository.ItemConvertPrice.get2,
-      parameters: `_barcode=${row?.barcode}&_clientId=${formik.header.values.clientId}&_currencyId=${formik.header.values.currencyId}&_plId=${formik.header.values.plId}&_exRate=${formik.header.values.exRate}&_rateCalcMethod=${formik.header.values.rateCalcMethod}`
+      parameters: `_barcode=${row?.barcode}&_clientId=${formik.values.header.clientId}&_currencyId=${formik.values.header.currencyId}&_plId=${formik.values.header.plId}&_exRate=${formik.values.header.exRate}&_rateCalcMethod=${formik.values.header.rateCalcMethod}`
     })
 
     return res?.record
@@ -931,30 +932,36 @@ export default function SaleTransactionForm({ labels, access, recordId, function
     setReCal(true)
     let currentTdAmount
     let currentPctAmount
+    let currentDiscountAmount
 
     if (cycleButtonState.value == 1) {
       currentPctAmount =
         formik.values.header.currentDiscount < 0 || formik.values.header.currentDiscount > 100
           ? 0
           : formik.values.header.currentDiscount
-
       currentTdAmount = (parseFloat(currentPctAmount) * parseFloat(formik.values.header.subtotal)) / 100
+      currentDiscountAmount = currentPctAmount
+
       formik.setFieldValue('header.tdAmount', currentTdAmount)
       formik.setFieldValue('header.tdPct', currentPctAmount)
+      formik.setFieldValue('header.currentDiscount', currentPctAmount)
     } else {
       currentTdAmount =
         formik.values.header.currentDiscount < 0 || formik.values.header.subtotal < formik.values.header.currentDiscount
           ? 0
           : formik.values.header.currentDiscount
       currentPctAmount = (parseFloat(currentTdAmount) / parseFloat(formik.values.header.subtotal)) * 100
+      currentDiscountAmount = currentTdAmount
+
       formik.setFieldValue('header.tdPct', currentPctAmount)
       formik.setFieldValue('header.tdAmount', currentTdAmount)
+      formik.setFieldValue('currentDiscount', currentTdAmount)
     }
     setCycleButtonState(prevState => {
       const newState = prevState.text === '%' ? { text: '123', value: 1 } : { text: '%', value: 2 }
 
       formik.setFieldValue('header.tdType', newState.value)
-      recalcGridVat(newState.value, currentPctAmount, currentTdAmount, formik.values.header.currentDiscount)
+      recalcGridVat(newState.value, currentPctAmount, currentTdAmount, currentDiscountAmount)
 
       return newState
     })
@@ -970,26 +977,57 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       weight: parseFloat(newRow?.weight),
       unitPrice: parseFloat(newRow?.unitPrice || 0),
       upo: parseFloat(newRow?.upo) ? parseFloat(newRow?.upo) : 0,
-      qty: newRow?.qty,
+      qty: parseFloat(newRow?.qty),
       extendedPrice: parseFloat(newRow?.extendedPrice),
       mdAmount: parseFloat(newRow?.mdAmount),
       mdType: newRow?.mdType,
       mdValue: parseFloat(newRow?.mdValue),
       baseLaborPrice: newRow?.baseLaborPrice,
       totalWeightPerG: newRow?.totalWeightPerG,
-      tdPct: formik?.values?.header?.tdPct,
+      tdPct: formik?.values?.header?.tdPct || 0,
       dirtyField: dirtyField
     })
+    console.log(
+      'onselect one ',
+      {
+        priceType: newRow?.priceType,
+        basePrice: parseFloat(newRow?.basePrice || 0),
+        volume: newRow?.volume,
+        weight: parseFloat(newRow?.weight),
+        unitPrice: parseFloat(newRow?.unitPrice || 0),
+        upo: parseFloat(newRow?.upo) ? parseFloat(newRow?.upo) : 0,
+        qty: newRow?.qty,
+        extendedPrice: parseFloat(newRow?.extendedPrice),
+        mdAmount: parseFloat(newRow?.mdAmount),
+        mdType: newRow?.mdType,
+        mdValue: parseFloat(newRow?.mdValue),
+        baseLaborPrice: newRow?.baseLaborPrice,
+        totalWeightPerG: newRow?.totalWeightPerG,
+        tdPct: formik?.values?.header?.tdPct || 0,
+        dirtyField: dirtyField
+      },
+      itemPriceRow
+    )
 
     const vatCalcRow = getVatCalc({
+      basePrice: itemPriceRow?.basePrice,
+      unitPrice: itemPriceRow?.unitPrice,
+      qty: parseFloat(itemPriceRow?.qty),
+      extendedPrice: parseFloat(itemPriceRow?.extendedPrice),
+      baseLaborPrice: itemPriceRow?.baseLaborPrice,
+      vatAmount: parseFloat(itemPriceRow?.vatAmount),
+      tdPct: formik?.values?.header?.tdPct,
+      taxDetails: formik.values.header.isVattable ? newRow.taxDetails : null
+    })
+    console.log('onselect ', {
       basePrice: itemPriceRow?.basePrice,
       unitPrice: itemPriceRow?.unitPrice,
       qty: itemPriceRow?.qty,
       extendedPrice: parseFloat(itemPriceRow?.extendedPrice),
       baseLaborPrice: itemPriceRow?.baseLaborPrice,
-      vatAmount: parseFloat(newRow?.vatAmount),
-      tdPct: formik?.values?.header?.tdPct || 0,
-      taxDetails: formik.values.header.isVatChecked ? null : newRow.taxDetails
+      vatAmount: parseFloat(itemPriceRow?.vatAmount),
+      tdPct: formik?.values?.header?.tdPct,
+      taxDetails: formik.values.header.isVattable ? newRow.taxDetails : null
     })
 
     let commonData = {
@@ -1233,15 +1271,6 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       if (recordId && measurements) {
         const transactionPack = await getSalesTransactionPack(recordId)
         await fillForm(recordId, transactionPack)
-        if (transactionPack.header.tdType === DIRTYFIELD_TDPCT) {
-          setCycleButtonState({ text: '%', value: DIRTYFIELD_TDPCT })
-          formik.setFieldValue('header.tdAmount', transactionPack.header.tdPct)
-          formik.setFieldValue('header.currentDiscount', transactionPack.header.tdPct)
-        } else {
-          setCycleButtonState({ text: '123', value: DIRTYFIELD_TDPLAIN })
-          formik.setFieldValue('header.tdAmount', transactionPack.header.tdAmount)
-          formik.setFieldValue('header.currentDiscount', transactionPack.header.tdAmount)
-        }
       }
     })()
   }, [recordId, measurements])
