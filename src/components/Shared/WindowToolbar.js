@@ -118,7 +118,8 @@ const WindowToolbar = ({
     editMode,
     onSave,
     onSaveClear,
-    onClear
+    onClear,
+    onInfo
   }
 
   const buttons = getButtons(platformLabels)
