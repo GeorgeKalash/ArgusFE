@@ -277,7 +277,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
         };
       },
       { totalQty: 0, totalCost: 0, totalWeight: 0 }
-    ); // Default values if transfers is not an array
+    );
 
 console.log("Total Qty:", totalQty);
 console.log("Total Cost:", totalCost);
@@ -326,7 +326,7 @@ console.log("Total Weight:", totalWeight);
           { key: 'flName', value: 'flName' }
         ]
       },
-      async onChange({ row: { update, oldRow, newRow } }) {
+      async onChange({ row: { update, newRow } }) {
         if (newRow?.itemId) {
           const { weight, metalId } = await getWeightAndMetalId(newRow?.itemId)
           const unitCost = (await getUnitCost(newRow?.itemId)) ?? 0
@@ -400,7 +400,7 @@ console.log("Total Weight:", totalWeight);
       component: 'numberfield',
       label: labels.qty,
       name: 'qty',
-      async onChange({ row: { update, oldRow, newRow } }) {
+      async onChange({ row: { update, newRow } }) {
         if (newRow) {
           const totalCost = calcTotalCost(newRow)
           const qtyInBase = newRow?.qty * newRow?.muQty
@@ -416,7 +416,7 @@ console.log("Total Weight:", totalWeight);
       component: 'numberfield',
       label: labels.unitCost,
       name: 'unitCost',
-      async onChange({ row: { update, oldRow, newRow } }) {
+      async onChange({ row: { update, newRow } }) {
         if (newRow) {
           const totalCost = calcTotalCost(newRow)
 
@@ -430,7 +430,7 @@ console.log("Total Weight:", totalWeight);
       component: 'numberfield',
       label: labels.totalCost,
       name: 'totalCost',
-      async onChange({ row: { update, newRow, oldRow } }) {
+      async onChange({ row: { update, newRow } }) {
         if (newRow?.totalCost) {
           const unitCost = calcUnitCost(newRow, newRow.totalCost)
 
