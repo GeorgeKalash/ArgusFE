@@ -124,7 +124,8 @@ export const ManufacturingRepository = {
     get2: service + 'get2PST',
     del: service + 'delPST',
     post: service + 'postPST',
-    snapshot: service + 'snapshotPST'
+    unpost: service + 'unpostPST',
+    snapshot: service + 'snapshotPST',
   },
   ProductionSheetItem: {
     qry: service + 'qryPSI',
