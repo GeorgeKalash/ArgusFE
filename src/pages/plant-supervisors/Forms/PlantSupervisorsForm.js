@@ -36,7 +36,7 @@ export default function PlantSupervisorsForm({ _labels: labels, maxAccess }) {
       plantId: yup.string().required(),
       rows: yup.array().of(
         yup.object({
-          supervisorId: yup.string().required()
+          username: yup.string().required()
         })
       )
     }),
@@ -143,7 +143,7 @@ export default function PlantSupervisorsForm({ _labels: labels, maxAccess }) {
             value={formik.values.rows}
             error={formik.errors.rows}
             columns={columns}
-            allowDelete={false}
+            allowDelete={true}
             allowAddNewLine={true}
           />
         </Grow>
