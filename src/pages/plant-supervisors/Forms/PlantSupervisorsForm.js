@@ -121,6 +121,7 @@ export default function PlantSupervisorsForm({ _labels: labels, maxAccess }) {
         { from: 'username', to: 'name' },
         { from: 'email', to: 'email' }
       ],
+      widthDropDown: 300,
       columnsInDropDown: [
         { key: 'username', value: 'Name' },
         { key: 'email', value: 'Email' }
