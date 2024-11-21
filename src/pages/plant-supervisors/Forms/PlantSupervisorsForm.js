@@ -71,6 +71,13 @@ export default function PlantSupervisorsForm({ _labels: labels, maxAccess }) {
       }))
 
       formik.setFieldValue('rows', mappedRows)
+    } else {
+      formik.setFieldValue('rows', [
+        {
+          id: 1,
+          supervisorId: ''
+        }
+      ])
     }
   }
 
