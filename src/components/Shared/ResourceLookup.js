@@ -1,12 +1,12 @@
 import React, { useContext, useState, useEffect } from 'react'
 import CustomLookup from '../Inputs/CustomLookup'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import ErrorWindow from './ErrorWindow'
 
 export const ResourceLookup = ({
   endpointId,
   parameters,
   form,
+  formObject = null,
   name,
   firstValue,
   secondValue,
@@ -54,24 +54,50 @@ export const ResourceLookup = ({
   }
   const check = errorCheck ? errorCheck : name
 
-  const _firstValue = firstValue || (valueShow ? form.values[valueShow] : form.values[name])
-  const _secondValue = secondValue || (secondValueShow ? form.values[secondValueShow] : form.values[name])
+  const _firstValue =
+    firstValue ||
+    (valueShow
+      ? formObject != null
+        ? formObject[valueShow]
+        : form.values[valueShow]
+      : formObject != null
+      ? formObject[name]
+      : form.values[name])
+
+  const _secondValue =
+    secondValue ||
+    (secondValueShow
+      ? formObject != null
+        ? formObject[secondValueShow]
+        : form.values[secondValueShow]
+      : formObject != null
+      ? formObject[name]
+      : form.values[name])
 
   const error = form?.touched && form.touched[check] && Boolean(form.errors[check])
   const helperText = viewHelperText && form?.touched && form.touched[check] && form.errors[check]
+
   useEffect(() => {
     setStore([])
   }, [_firstValue])
 
   const onKeyUp = e => {
-    if (e.target.value?.length > 0) {
+    if (e.target.value?.length > 0 && e.key != 'ArrowDown' && e.key != 'ArrowUp') {
       setStore([])
     } else {
     }
+
+    if (e.key === 'Enter') {
+      selectFirstOption()
+    }
   }
 
-  const onKeyDown = e => {
-    if ((e.key === 'Tab' || e.key === 'Enter') && autoSelectFistValue && store?.[0]) {
+  const onBlur = () => {
+    selectFirstOption()
+  }
+
+  const selectFirstOption = () => {
+    if (autoSelectFistValue && store?.[0]) {
       rest.onChange('', store[0])
     }
   }
@@ -87,7 +113,7 @@ export const ResourceLookup = ({
           secondValue: _secondValue,
           error,
           onKeyUp,
-          onKeyDown,
+          onBlur,
           name,
           isLoading,
           renderOption,

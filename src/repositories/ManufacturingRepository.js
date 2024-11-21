@@ -68,7 +68,8 @@ export const ManufacturingRepository = {
     preview2: service + 'previewPQ2',
     update: service + 'updatePQ',
     snapshot: service + 'snapshotPQ',
-    del: service + 'delPQ'
+    del: service + 'delPQ',
+    cancel: service + 'cancelPQ'
   },
   MaterialsAdjustment: {
     generate: service + 'generateADJ'
@@ -131,5 +132,12 @@ export const ManufacturingRepository = {
     set: service + 'setPSI',
     get: service + 'getPSI',
     del: service + 'delPSI'
+  },
+  DocumentTypeDefault: {
+    qry: service + 'qryDTD',
+    get: service + 'getDTD',
+    set: service + 'setDTD',
+    del: service + 'delDTD',
+    page: service + 'pageDTD'
   }
 }

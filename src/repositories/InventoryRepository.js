@@ -3,7 +3,8 @@ const service = 'IV.asmx/'
 export const InventoryRepository = {
   Barcode: {
     qry: service + 'qryBCD',
-    set2: service + 'set2BCD'
+    set2: service + 'set2BCD',
+    migrate: service + 'migrateBCD'
   },
   Item: {
     snapshot: service + 'snapshotIT',
@@ -148,7 +149,13 @@ export const InventoryRepository = {
   RebuildInventory: {
     rebuild: service + 'rebuildFIS'
   },
-  DimensionUDT: { set: service + 'set2UDT', get: service + 'getUDT' },
+  ItemPhysProp: {
+    get: service + 'getPP'
+  },
+  DimensionUDT: {
+    set: service + 'set2UDT',
+    get: service + 'getUDT'
+  },
   Barcodes: {
     snapshot: service + 'snapshotBCD',
     get: service + 'getBCD',
@@ -195,5 +202,18 @@ export const InventoryRepository = {
   },
   Transaction: {
     qry2: service + 'qry2TRX',
+    qry3: service + 'qry3TRX',
   },
+  GenerateFiscalYear: {
+    gen: service + 'genFIS'
+  },
+  Availability: {
+    qry: service + 'qryAVA'
+  },
+  Parts: {
+    qry: service + 'qryPRT',
+    del: service + 'delPRT',
+    get: service + 'getPRT',
+    set: service + 'setPRT'
+  }
 }

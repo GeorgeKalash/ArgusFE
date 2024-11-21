@@ -124,7 +124,7 @@ const ProductionRequestLog = () => {
     {
       key: 'Refresh',
       condition: true,
-      onClick: () => fetchGridData(),
+      onClick: () => refetch(),
       disabled: false
     }
   ]

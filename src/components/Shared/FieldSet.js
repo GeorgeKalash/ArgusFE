@@ -5,9 +5,11 @@ const FieldSet = ({ children, title, ...props }) => {
     <Grid
       container
       spacing={2}
+      xs={12}
       sx={{
         border: '2px solid #0111',
         padding: '10px',
+        paddingTop: '15px',
         position: 'relative',
         marginY: '10px',
         marginLeft: '0px',
