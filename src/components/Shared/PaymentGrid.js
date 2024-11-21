@@ -4,7 +4,6 @@ import { DataGrid } from './DataGrid'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import * as yup from 'yup'
-import { ConstructionOutlined } from '@mui/icons-material'
 
 export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
   const { labels: labels } = useResourceQuery({
