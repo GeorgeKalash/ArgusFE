@@ -130,6 +130,12 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
             ?.reduce((sum, current) => (current.id !== newRow.id ? sum + parseFloat(current.paidAmount || 0) : sum), 0)
             ?.toFixed(2) || 0
 
+        const returnValue = (
+          parseFloat(newRow.paidAmount || 0) +
+          parseFloat(totalPaidAmount || 0) -
+          parseFloat(amount || 0)
+        ).toFixed(2)
+
         if (newRow?.type !== '2') {
           update({
             returnedAmount: 0,
@@ -143,11 +149,7 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
           updateRow({
             id: index,
             changes: {
-              returnedAmount: (
-                parseFloat(newRow.paidAmount || 0) +
-                parseFloat(totalPaidAmount || 0) -
-                parseFloat(amount || 0)
-              ).toFixed(2),
+              returnedAmount: returnValue,
               amount:
                 amount +
                 parseFloat(cashAmount || 0) -
@@ -157,11 +159,7 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
           })
         } else {
           update({
-            returnedAmount: (
-              parseFloat(newRow.paidAmount || 0) +
-              parseFloat(totalPaidAmount || 0) -
-              parseFloat(amount || 0)
-            ).toFixed(2),
+            returnedAmount: returnValue,
             amount: parseFloat(amount || 0) - parseFloat(totalPaidAmount || 0)
           })
         }
