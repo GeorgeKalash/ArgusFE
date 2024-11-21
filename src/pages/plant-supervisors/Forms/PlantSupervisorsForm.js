@@ -116,7 +116,9 @@ export default function PlantSupervisorsForm({ _labels: labels, maxAccess }) {
       component: 'textfield',
       label: labels?.email,
       name: 'email',
-      props: { readOnly: true }
+      props: {
+        readOnly: true
+      }
     },
   ]
 
