@@ -935,7 +935,13 @@ export default function SaleTransactionForm({ labels, access, recordId, function
 
   async function fillClientData(clientObject) {
     const clientId = clientObject?.recordId
-    if (!clientId) return
+    if (!clientId) {
+      formik.setFieldValue('header.clientId', null)
+      formik.setFieldValue('header.clientName', null)
+      formik.setFieldValue('header.clientRef', null)
+
+      return
+    }
 
     try {
       const res = await getRequest({
