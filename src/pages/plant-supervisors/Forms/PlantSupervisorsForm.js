@@ -111,7 +111,7 @@ export default function PlantSupervisorsForm({ _labels: labels, maxAccess }) {
   ]
 
   return (
-    <FormShell resourceId={ResourceIds.PlantSupervisors} form={formik} maxAccess={maxAccess} editMode={false}>
+    <FormShell resourceId={ResourceIds.PlantSupervisors} isInfo={false} form={formik} maxAccess={maxAccess} editMode={false}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
