@@ -177,7 +177,7 @@ const IvMaterialsTransfer = () => {
       parameters: `_userId=${userId}&_key=plantId`
     })
 
-    return res.record.value
+    return res?.record?.value
   }
 
   function openOutWardsWindow(plantId, recordId) {
