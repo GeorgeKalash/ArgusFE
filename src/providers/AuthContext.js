@@ -56,7 +56,6 @@ const AuthProvider = ({ children }) => {
 
     const accountName = matchHostname ? matchHostname[1] : 'anthonys'
 
-
     try {
       const response = await axios.get(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=${accountName}`)
 
