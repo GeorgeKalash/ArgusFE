@@ -131,6 +131,7 @@ export const SaleRepository = {
     set: service + 'setTR',
     del: service + 'delTR',
     post: service + 'postTR',
+    unpost: service + 'unpostTRX',
     snapshot: service + 'snapshotTR'
   },
   SalesOrder: {
@@ -181,6 +182,7 @@ export const SaleRepository = {
   Contact: {
     contact: service + 'qryContact'
   },
+  FlagTR: service + 'flagTR',
   PrintedSA: {
     printed: service + 'flagORD'
   },

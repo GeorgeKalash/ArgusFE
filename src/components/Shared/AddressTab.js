@@ -86,7 +86,7 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true, defa
               maxAccess={maxAccess}
             />
           </FormGrid>
-          <FormGrid item hideonempty xs={4} HideGridOnEmpty>
+          <FormGrid item hideonempty xs={4}>
             <ResourceComboBox
               padding={5}
               endpointId={addressValidation.values.countryId && SystemRepository.State.qry}
@@ -107,7 +107,6 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true, defa
               }}
               error={addressValidation.touched.stateId && Boolean(addressValidation.errors.stateId)}
               maxAccess={maxAccess}
-              HideParentGrid={true}
             />
           </FormGrid>
           <FormGrid item hideonempty xs={4}>
@@ -261,7 +260,7 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true, defa
             />
           </FormGrid>
           <FormGrid item hideonempty xs={12}>
-            <FormGrid container hideonempty spacing={2} HideParentGrid>
+            <FormGrid container hideonempty spacing={2}>
               <FormGrid item hideonempty xs={4}>
                 <CustomTextField
                   name='phone'

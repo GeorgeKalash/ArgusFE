@@ -2,9 +2,9 @@ import { Box, Grid, Autocomplete, TextField, IconButton, InputAdornment, Paper }
 import SearchIcon from '@mui/icons-material/Search'
 import ClearIcon from '@mui/icons-material/Clear'
 import { useEffect, useState } from 'react'
-import { DISABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
+import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
 import PopperComponent from '../Shared/Popper/PopperComponent'
-import CircularProgress from '@mui/material/CircularProgress' // Import CircularProgress from MUI or use any other spinner component
+import CircularProgress from '@mui/material/CircularProgress'
 import { TrxType } from 'src/resources/AccessLevels'
 
 const CustomLookup = ({
@@ -40,6 +40,7 @@ const CustomLookup = ({
   isLoading,
   minChars,
   userTypes = true,
+  onBlur = () => {},
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
@@ -56,7 +57,7 @@ const CustomLookup = ({
 
   const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
 
-  const _readOnly = editMode ? editMode && maxAccess < TrxType.EDIT : readOnly || accessLevel === DISABLED
+  const _readOnly = editMode ? editMode && maxAccess < TrxType.EDIT : accessLevel > DISABLED ? false : readOnly
 
   const _hidden = accessLevel ? accessLevel === HIDDEN : hidden
 
@@ -163,9 +164,10 @@ const CustomLookup = ({
                 if (!store.some(item => item[valueField] === inputValue) && e.target.value !== firstValue) {
                   setInputValue('')
 
-                  // onChange(name, '')
                   setFreeSolo(true)
                 }
+
+                onBlur(e)
               }}
               onFocus={() => {
                 setStore([]), setFreeSolo(true)
@@ -175,8 +177,9 @@ const CustomLookup = ({
               label={label}
               required={isRequired}
               onKeyUp={e => {
-                onKeyUp
-                e.target.value >= minChars ? setFreeSolo(true) : setFreeSolo(false)
+                onKeyUp(e)
+
+                if (e.key !== 'Enter') e.target.value >= minChars ? setFreeSolo(true) : setFreeSolo(false)
               }}
               inputProps={{
                 ...params.inputProps,
