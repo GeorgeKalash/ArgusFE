@@ -50,8 +50,6 @@ const UserDefinedForm = ({ labels }) => {
     }
   })
 
-  // const [stagingDimCount, setStagingDimCount] = useState(formik.values.ivtDimCount || null)
-
   useEffect(() => {
     getDataResult()
   }, [])
