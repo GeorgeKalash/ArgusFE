@@ -27,7 +27,7 @@ const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refr
     enableReinitialize: false,
     validateOnChange: true,
     initialValues: {
-      idtId: clientformik.values?.idtId ? clientformik.values.idtId : clientformik.values?.id_type?.recordId,
+      idtId: clientformik.values?.idtId ? clientformik.values.idtId : clientformik.values?.id_type,
       birthDate: clientformik.values?.birthDate,
       idNo: clientformik.values?.idNo,
       idNoRepeat: ''
@@ -48,12 +48,9 @@ const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refr
   })
 
   const postFetchDefault = obj => {
-    const type =
-      idTypes?.list?.filter(item => item?.recordId == obj?.idtId)?.[0]?.type || clientformik.values?.id_type?.type
-
     const hijriDate = moment(formatDateForGetApI(obj.birthDate), 'YYYY-MM-DD').format('iYYYY-iMM-iDD')
 
-    const defaultParams = `_number=${obj.idNo}&_date=${hijriDate}&_idType=${type}`
+    const defaultParams = `_number=${obj.idNo}&_date=${hijriDate}&_idType=${obj.idtId}`
     var parameters = defaultParams
     getRequest({
       extension: CurrencyTradingSettingsRepository.Yakeen.get,
