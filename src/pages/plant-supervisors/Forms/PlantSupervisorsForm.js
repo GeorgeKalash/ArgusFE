@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -17,7 +17,6 @@ import { DataGrid } from 'src/components/Shared/DataGrid'
 export default function PlantSupervisorsForm({ _labels: labels, maxAccess }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const [userStore, setUserStore] = useState([])
 
   const { formik } = useForm({
     initialValues: {
@@ -58,8 +57,6 @@ export default function PlantSupervisorsForm({ _labels: labels, maxAccess }) {
     }
   })
 
-  console.log(formik.errors)
-
   const editMode = !!formik.values.recordId
 
   const fetchSupervisors = async () => {
@@ -93,7 +90,6 @@ export default function PlantSupervisorsForm({ _labels: labels, maxAccess }) {
 
 
   const columns = [
-
     {
       component: 'resourcecombobox',
       name: 'username',
