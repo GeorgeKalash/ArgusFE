@@ -48,7 +48,6 @@ export default function GlEoyClosingForm({ _labels, access }) {
       maxAccess={access}
       editMode={true}
       isSavedClear={false}
-      isCleared={false}
     >
       <VertLayout>
         <Grow>
