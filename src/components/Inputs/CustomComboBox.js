@@ -2,14 +2,15 @@ import { Autocomplete, IconButton, CircularProgress, Paper, TextField } from '@m
 import { ControlAccessLevel, TrxType } from 'src/resources/AccessLevels'
 import { Box } from '@mui/material'
 import RefreshIcon from '@mui/icons-material/Refresh'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import PopperComponent from '../Shared/Popper/PopperComponent'
+import { DISABLED } from 'src/services/api/maxAccess'
 
 const CustomComboBox = ({
   type = 'text',
   name,
   label,
-  value: _value,
+  value,
   valueField = 'key',
   displayField = 'value',
   store = [],
@@ -38,19 +39,31 @@ const CustomComboBox = ({
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
 
+  const [hover, setHover] = useState(false)
+
+  const [focus, setAutoFocus] = useState(autoFocus)
+
+  const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
+
   const fieldAccess =
     props.maxAccess && props.maxAccess?.record?.controls?.find(item => item.controlId === name)?.accessLevel
-  const _readOnly = editMode ? editMode && maxAccess < TrxType.EDIT : readOnly
+  const _readOnly = editMode ? editMode && maxAccess < TrxType.EDIT : accessLevel > DISABLED ? false : readOnly
   const _disabled = disabled || fieldAccess === ControlAccessLevel.Disabled
   const _required = required || fieldAccess === ControlAccessLevel.Mandatory
   const _hidden = fieldAccess === ControlAccessLevel.Hidden
 
-  const value = neverPopulate ? '' : _value
+  useEffect(() => {
+    if (!value && store?.length > 0 && typeof defaultIndex === 'number' && defaultIndex === 0) {
+      onChange(store?.[defaultIndex])
+    }
+  }, [defaultIndex])
 
-  return (
+  return _hidden ? (
+    <></>
+  ) : (
     <Autocomplete
       name={name}
-      value={store?.[defaultIndex] || value}
+      value={value}
       size={size}
       options={store}
       key={value}
@@ -90,7 +103,10 @@ const CustomComboBox = ({
         }
       }}
       isOptionEqualToValue={(option, value) => option[valueField] === value[valueField]}
-      onChange={onChange}
+      onChange={(event, newValue) => {
+        onChange(name, newValue)
+        setAutoFocus(true)
+      }}
       fullWidth={fullWidth}
       readOnly={_readOnly}
       freeSolo={_readOnly}
@@ -141,31 +157,35 @@ const CustomComboBox = ({
           variant={variant}
           label={label}
           required={_required}
-          autoFocus={autoFocus}
+          autoFocus={focus}
+          onMouseEnter={() => setHover(true)}
+          onMouseLeave={() => setHover(false)}
           error={error}
           helperText={helperText}
           InputProps={{
             ...params.InputProps,
-            endAdornment: !_disabled && (
+            endAdornment: (
               <React.Fragment>
-                {isLoading ? (
-                  <CircularProgress color='inherit' size={18} />
-                ) : (
-                  refresh &&
-                  !readOnly && (
-                    <IconButton
-                      onClick={fetchData}
-                      aria-label='refresh data'
-                      sx={{
-                        p: '0px !important',
-                        marginRight: '-10px'
-                      }}
-                      size='small'
-                    >
-                      <RefreshIcon />
-                    </IconButton>
-                  )
-                )}
+                {hover &&
+                  (_disabled ? null : isLoading ? (
+                    <CircularProgress color='inherit' size={18} />
+                  ) : (
+                    refresh &&
+                    !readOnly && (
+                      <IconButton
+                        onClick={fetchData}
+                        aria-label='refresh data'
+                        tabIndex={-1}
+                        sx={{
+                          p: '0px !important',
+                          marginRight: '-10px'
+                        }}
+                        size='small'
+                      >
+                        <RefreshIcon />
+                      </IconButton>
+                    )
+                  ))}
                 {params.InputProps.endAdornment}
               </React.Fragment>
             )
