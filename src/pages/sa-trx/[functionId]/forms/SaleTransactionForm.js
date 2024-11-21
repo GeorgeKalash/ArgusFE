@@ -532,7 +532,16 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       label: labels.quantity,
       name: 'qty',
       updateOn: 'blur',
-      onChange({ row: { update, newRow } }) {
+      async onChange({ row: { update, newRow } }) {
+        const ItemConvertPrice = await getItemConvertPrice(newRow.itemId)
+        const unitPrice = parseFloat(newRow.unitPrice || 0).toFixed(3);
+        const minPrice = parseFloat(ItemConvertPrice?.minPrice || 0).toFixed(3);
+
+        if (minPrice > 0 && unitPrice < minPrice) {
+          stackError({
+            message: `The unit price (${unitPrice}) is below the minimum price (${minPrice}). Please review.`,
+          });
+        }
         getItemPriceRow(update, newRow, DIRTYFIELD_QTY)
       }
     },
