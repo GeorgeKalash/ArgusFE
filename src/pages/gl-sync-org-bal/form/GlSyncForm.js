@@ -44,14 +44,7 @@ export default function GlSyncForm({ _labels, access }) {
   })
 
   return (
-    <FormShell
-      resourceId={ResourceIds.GlSync}
-      form={formik}
-      maxAccess={access}
-      editMode={true}
-      isSavedClear={false}
-      isCleared={false}
-    >
+    <FormShell resourceId={ResourceIds.GlSync} form={formik} maxAccess={access} editMode={true} isSavedClear={false}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -88,6 +81,7 @@ export default function GlSyncForm({ _labels, access }) {
                 onChange={(event, newValue) => {
                   formik.setFieldValue('currencyId', newValue?.recordId || null)
                 }}
+                error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
               />
             </Grid>
             <Grid item xs={12}>
