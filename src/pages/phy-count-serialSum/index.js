@@ -17,6 +17,9 @@ import * as yup from 'yup'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi } from 'src/lib/date-helper'
+import { useWindow } from 'src/windows'
+import ClearDialog from 'src/components/Shared/ClearDialog'
+import ClearFilteringPhy from 'src/components/Shared/ClearFilteringPhy'
 
 const PhysicalCountSerial = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -67,24 +70,26 @@ const PhysicalCountSerial = () => {
       parameters: `_stockCountId=${formik.values.stockCountId}&_siteId=${formik.values.siteId}`
     })
 
+    const updatedList = res.list.map(item => {
+      return {
+        ...item,
+        netWeight: item.weight * item.countedPcs,
+        varianceWght: item.weight * item.variancePcs
+      }
+    })
+
     let sumPcs = 0
     let sumWeight = 0
     let sumSystemPcs = 0
     let sumVariancePcs = 0
     let sumVarianceWght = 0
 
-    const updatedList = res.list.map(item => {
+    updatedList.forEach(item => {
       sumPcs += item.countedPcs || 0
-      sumWeight += item.weight || 0
+      sumWeight += item.netWeight || 0
       sumSystemPcs += item.systemPcs || 0
       sumVariancePcs += item.variancePcs || 0
-      sumVarianceWght = sumWeight * sumVariancePcs
-
-      return {
-        ...item,
-        netWeight: item.weight * item.countedPcs,
-        varianceWght: item.weight * item.variancePcs
-      }
+      sumVarianceWght += item.varianceWght || 0
     })
 
     formik.setFieldValue('totalCountedPcs', sumPcs)
@@ -170,14 +175,29 @@ const PhysicalCountSerial = () => {
   }, [formik.values.stockCountId, formik.values.siteId])
 
   const clearGrid = () => {
-    formik.resetForm({
-      values: formik.initialValues
-    })
+    openClear()
+  }
 
-    setData({ list: [] })
-    setSiteStore([])
-    setFilteredItems([])
-    setEditMode(false)
+  const { stack } = useWindow()
+
+  function openClear() {
+    stack({
+      Component: ClearFilteringPhy,
+      props: {
+        open: [true, {}],
+        fullScreen: false,
+        onConfirm: () => {
+          formik.resetForm()
+          setData({ list: [] })
+          setSiteStore([])
+          setFilteredItems([])
+          setEditMode(false)
+        }
+      },
+      width: 450,
+      height: 170,
+      title: platformLabels.Clear
+    })
   }
 
   const handleClick = async dataList => {
@@ -239,7 +259,7 @@ const PhysicalCountSerial = () => {
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('stockCountId', newValue?.recordId)
-                  formik.setFieldValue('reference', newValue.reference)
+                  formik.setFieldValue('reference', newValue?.reference)
                   formik.setFieldValue('date', formatDateFromApi(newValue?.date))
                   formik.setFieldValue('siteId', '')
 
@@ -307,7 +327,7 @@ const PhysicalCountSerial = () => {
                     formik.setFieldValue('search', '')
                   }}
                   onChange={handleSearchChange}
-                  readOnly={data.length === 0}
+                  readOnly={data?.list?.length === 0 || data?.length === 0}
                 />
               </Grid>
               <Grid item xs={2}>

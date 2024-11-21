@@ -10,7 +10,7 @@ const ConfirmationDialog = ({ openCondition, closeCondition, DialogText, okButto
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        height: '120px'
+        height: '140px'
       }}
     >
       <Box
