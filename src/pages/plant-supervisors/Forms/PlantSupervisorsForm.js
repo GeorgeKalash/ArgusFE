@@ -11,8 +11,8 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
+import { DataGrid } from 'src/components/Shared/DataGrid'
 
 export default function PlantSupervisorsForm({ _labels: labels, maxAccess }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -58,6 +58,8 @@ export default function PlantSupervisorsForm({ _labels: labels, maxAccess }) {
     }
   })
 
+  console.log(formik.errors)
+
   const editMode = !!formik.values.recordId
 
   const fetchSupervisors = async () => {
@@ -89,44 +91,37 @@ export default function PlantSupervisorsForm({ _labels: labels, maxAccess }) {
     fetchSupervisors()
   }, [formik.values.plantId])
 
-  const fetchUsers = async () => {
-    const res = await getRequest({
-      extension: SystemRepository.Users.qry,
-      parameters: `_startAt=0&_pageSize=100&_size=50&_sortBy=fullName&_filter=`
-    })
-    setUserStore(res.list || [])
-  }
-
-  useEffect(() => {
-    fetchUsers()
-  }, [])
 
   const columns = [
+
     {
-      field: 'textfield',
-      header: labels.email,
-      name: 'email',
-      readOnly: true
+      component: 'resourcecombobox',
+      name: 'username',
+      label: labels.user,
+      props: {
+        endpointId: SystemRepository.Users.qry,
+        parameters: `_startAt=0&_pageSize=100&_size=50&_sortBy=fullName&_filter=`,
+        valueField: 'recordId',
+        displayField: 'username',
+        mapping: [
+          { from: 'recordId', to: 'supervisorId' },
+          { from: 'email', to: 'email' },
+          { from: 'username', to: 'username' }
+        ],
+        columnsInDropDown: [
+          { key: 'email', value: 'Email' },
+          { key: 'username', value: 'Name' }
+        ],
+        displayFieldWidth: 2
+      },
+      
     },
     {
-      field: 'combobox',
-      header: labels.user,
-      nameId: 'supervisorId',
-      name: 'username',
-      mandatory: true,
-      store: userStore,
-      valueField: 'recordId',
-      displayField: 'username',
-      fieldsToUpdate: [
-        { from: 'username', to: 'name' },
-        { from: 'email', to: 'email' }
-      ],
-      widthDropDown: 300,
-      columnsInDropDown: [
-        { key: 'username', value: 'Name' },
-        { key: 'email', value: 'Email' }
-      ]
-    }
+      component: 'textfield',
+      label: labels?.email,
+      name: 'email',
+      props: { readOnly: true }
+    },
   ]
 
   return (
@@ -154,20 +149,18 @@ export default function PlantSupervisorsForm({ _labels: labels, maxAccess }) {
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
               />
             </Grid>
-            <Grid item xs={12}>
-              <InlineEditGrid
-                gridValidation={formik}
-                maxAccess={maxAccess}
-                columns={columns}
-                defaultRow={{
-                  supervisorId: '',
-                  plantId: formik.values.plantId
-                }}
-                allowAddNewLine={true}
-                allowDelete={false}
-              />
-            </Grid>
+              
           </Grid>
+          <DataGrid
+                onChange={value => {
+                  formik.setFieldValue('rows', value)
+                }}
+                value={formik.values.rows}
+                error={formik.errors.rows}
+                columns={columns}
+                allowDelete={false}
+                allowAddNewLine={false}
+              />
         </Grow>
       </VertLayout>
     </FormShell>
