@@ -384,7 +384,9 @@ export default function SaleTransactionForm({ labels, access, recordId, function
           const basePrice = (metalPrice * metalPurity) / 1000
           const basePriceValue = postMetalToFinancials === false ? basePrice : 0
           const TotPricePerG = basePriceValue
-
+          const unitPrice = parseFloat(newRow.unitPrice || 0).toFixed(3);
+          const minPrice = parseFloat(ItemConvertPrice?.minPrice || 0).toFixed(3);
+          formik.setFieldValue(`items[${newRow.id - 1}].minPrice`, minPrice);
           let rowTax = null
           let rowTaxDetails = null
 
@@ -419,7 +421,11 @@ export default function SaleTransactionForm({ labels, access, recordId, function
           }
 
           const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
-
+          if (minPrice > 0 && unitPrice < minPrice) {
+            stackError({
+              message: `The unit price (${unitPrice}) is below the minimum price (${minPrice}). Please review.`,
+            });
+          }
           setFilteredMU(filteredMeasurements)
           update({
             isMetal: isMetal,
@@ -451,6 +457,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
             extendedPrice: parseFloat('0').toFixed(2),
             mdValue: 0,
             taxId: rowTax,
+            minPrice,
             taxDetails: rowTaxDetails
           })
 
@@ -1014,6 +1021,8 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       extension: SaleRepository.ItemConvertPrice.get,
       parameters: `_itemId=${itemId}&_clientId=${formik.values.header.clientId}&_currencyId=${formik.values.header.currencyId}&_plId=${formik.values.header.plId}`
     })
+
+    console.log(res)
 
     return res?.record
   }
