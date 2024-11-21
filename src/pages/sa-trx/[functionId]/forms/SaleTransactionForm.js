@@ -230,6 +230,8 @@ export default function SaleTransactionForm({ labels, access, recordId, function
           ...(({ header, items, taxes, ...rest }) => rest)(obj)
         }
 
+        console.log(payload)
+
         const saTrxRes = await postRequest({
           extension: SaleRepository.SalesTransaction.set2,
           record: JSON.stringify(payload)
@@ -533,15 +535,6 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       name: 'qty',
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
-        const ItemConvertPrice = await getItemConvertPrice(newRow.itemId)
-        const unitPrice = parseFloat(newRow.unitPrice || 0).toFixed(3);
-        const minPrice = parseFloat(ItemConvertPrice?.minPrice || 0).toFixed(3);
-
-        if (minPrice > 0 && unitPrice < minPrice) {
-          stackError({
-            message: `The unit price (${unitPrice}) is below the minimum price (${minPrice}). Please review.`,
-          });
-        }
         getItemPriceRow(update, newRow, DIRTYFIELD_QTY)
       }
     },
@@ -594,6 +587,15 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       name: 'unitPrice',
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
+        const ItemConvertPrice = await getItemConvertPrice(newRow.itemId)
+        const unitPrice = parseFloat(newRow.unitPrice || 0).toFixed(3);
+        const minPrice = parseFloat(ItemConvertPrice?.minPrice || 0).toFixed(3);
+
+        if (minPrice > 0 && unitPrice < minPrice) {
+          stackError({
+            message: `The unit price (${unitPrice}) is below the minimum price (${minPrice}).`,
+          });
+        }
         getItemPriceRow(update, newRow, DIRTYFIELD_UNIT_PRICE)
       }
     },
@@ -1030,8 +1032,6 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       extension: SaleRepository.ItemConvertPrice.get,
       parameters: `_itemId=${itemId}&_clientId=${formik.values.header.clientId}&_currencyId=${formik.values.header.currencyId}&_plId=${formik.values.header.plId}`
     })
-
-    console.log(res)
 
     return res?.record
   }
