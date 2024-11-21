@@ -54,6 +54,8 @@ const CustomLookup = ({
 
   const autocompleteRef = useRef(null)
 
+  const clear = useRef(false)
+
   const [inputValue, setInputValue] = useState(firstValue || '')
 
   useEffect(() => {
@@ -207,7 +209,7 @@ const CustomLookup = ({
               required={isRequired}
               onKeyUp={e => {
                 onKeyUp(e)
-                if (e.key !== 'Enter') e.target?.value?.length <= minChars ? setFreeSolo(true) : setFreeSolo(false)
+                if (e.key !== 'Enter') e.target?.value?.length >= minChars ? setFreeSolo(true) : setFreeSolo(false)
               }}
               inputProps={{
                 ...params.inputProps,
