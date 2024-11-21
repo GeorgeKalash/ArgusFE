@@ -172,7 +172,7 @@ const PhysicalCountSerial = () => {
     ;(async function () {
       await fetchGridData()
     })()
-  }, [formik.values.stockCountId, formik.values.siteId])
+  }, [formik.values.siteId])
 
   const clearGrid = () => {
     openClear()
