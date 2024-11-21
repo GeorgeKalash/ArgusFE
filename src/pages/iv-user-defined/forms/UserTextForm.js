@@ -101,13 +101,6 @@ const UserTextForm = () => {
     formik.handleSubmit()
   }
 
-  const [stagingDimCount, setStagingDimCount] = useState(formik.values.ivtUDTCount || null)
-
-  const handleDimCountChange = event => {
-    const value = event.target.value
-    setStagingDimCount(value)
-  }
-
   function clearExcessFields(currentCount) {
     for (let i = 1; i <= counter; i++) {
       const dimKey = `ivtUDT${i}`
@@ -117,8 +110,8 @@ const UserTextForm = () => {
     }
   }
 
-  const handleDimCountBlur = () => {
-    let value = parseInt(stagingDimCount, 10)
+  const handleDimCountBlur = e => {
+    let value = parseInt(e.target.value, 10)
     if (value > counter || !value || value < 1) {
       setErrored(true)
 
@@ -126,8 +119,8 @@ const UserTextForm = () => {
     }
     setErrored(false)
 
-    setStagingDimCount(value)
     formik.setFieldValue('ivtUDTCount', value)
+
     clearExcessFields(value)
   }
 
@@ -139,8 +132,7 @@ const UserTextForm = () => {
             <CustomNumberField
               name='ivtUDTCount'
               label={_labels.propertiesCount}
-              value={stagingDimCount === null ? formik.values.ivtUDTCount : stagingDimCount}
-              onChange={handleDimCountChange}
+              value={formik.values.ivtUDTCount}
               onBlur={handleDimCountBlur}
               unClearable={true}
               min={1}

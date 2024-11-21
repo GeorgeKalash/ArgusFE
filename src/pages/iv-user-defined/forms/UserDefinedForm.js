@@ -49,7 +49,8 @@ const UserDefinedForm = ({ labels }) => {
       await postDimensionSettings(values)
     }
   })
-  const [stagingDimCount, setStagingDimCount] = useState(formik.values.ivtDimCount || null)
+
+  // const [stagingDimCount, setStagingDimCount] = useState(formik.values.ivtDimCount || null)
 
   useEffect(() => {
     getDataResult()
@@ -96,11 +97,6 @@ const UserDefinedForm = ({ labels }) => {
     formik.handleSubmit()
   }
 
-  const handleDimCountChange = event => {
-    const value = event.target.value
-    setStagingDimCount(value)
-  }
-
   function clearExcessFields(currentCount) {
     for (let i = 1; i <= counter; i++) {
       const dimKey = `ivtDimension${i}`
@@ -110,8 +106,8 @@ const UserDefinedForm = ({ labels }) => {
     }
   }
 
-  const handleDimCountBlur = () => {
-    let value = parseInt(stagingDimCount, 10)
+  const handleDimCountBlur = e => {
+    let value = parseInt(e.target.value, 10)
     if (value > counter || !value || value < 1) {
       setErrored(true)
 
@@ -119,8 +115,8 @@ const UserDefinedForm = ({ labels }) => {
     }
     setErrored(false)
 
-    setStagingDimCount(value)
     formik.setFieldValue('ivtDimCount', value)
+
     clearExcessFields(value)
   }
 
@@ -132,8 +128,7 @@ const UserDefinedForm = ({ labels }) => {
             <CustomNumberField
               name='ivtDimCount'
               label={labels.propertiesCount}
-              value={stagingDimCount === null ? formik.values.ivtDimCount : stagingDimCount}
-              onChange={handleDimCountChange}
+              value={formik.values.ivtDimCount}
               maxLength={2}
               decimalScale={0}
               onBlur={handleDimCountBlur}
