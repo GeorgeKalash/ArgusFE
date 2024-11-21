@@ -9,19 +9,20 @@ import { SaleRepository } from 'src/repositories/SaleRepository'
 
 const ClientSalesTransaction = ({ functionId, recordId, clientId }) => {
   const { getRequest } = useContext(RequestsContext)
-
+  const [data, setData] = useState([])
   async function fetchGridData() {
-    return await getRequest({
+    const response = await getRequest({
       extension: SaleRepository.SATrx.qry2,
       parameters: `_functionId=${functionId}&_recordId=${recordId || 0}&_clientId=${clientId}`
     })
+    setData(response || [])
   }
 
-  const {
-    query: { data },
-    labels: _labels,
-    access
-  } = useResourceQuery({
+  useEffect(() => {
+    fetchGridData()
+  }, [])
+
+  const { labels: _labels, access } = useResourceQuery({
     endpointId: SaleRepository.SATrx.qry2,
 
     filter: {
