@@ -208,6 +208,11 @@ export const InventoryRepository = {
   GenerateFiscalYear: {
     gen: service + 'genFIS'
   },
+  CurrentCost: {
+    get: service + 'getCOS',
+    qry: service + 'qryCOS',
+    snapshot: service + 'snapshotCOS'
+  },
   Availability: {
     qry: service + 'qryAVA'
   },
