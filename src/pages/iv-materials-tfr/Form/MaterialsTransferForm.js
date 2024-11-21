@@ -73,7 +73,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
         itemId: null,
         qty: null,
         componentSeqNo: 0,
-        qtyInBase: '',
+        qtyInBase: 0,
         muId: null,
         muQty: '',
         muRef: '',
@@ -124,8 +124,8 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       copy.date = !!copy.date ? formatDateToApi(copy.date) : null
       copy.closedDate = !!copy.closedDate ? formatDateToApi(copy.closedDate) : null
       copy.receivedDate = !!copy.receivedDate ? formatDateToApi(copy.receivedDate) : null
-      copy.status = copy.status 
-      copy.wip = copy.wip 
+      copy.status = copy.status
+      copy.wip = copy.wip
 
       const updatedRows = formik?.values?.transfers.map((transferDetail, index) => {
         return {
@@ -265,24 +265,23 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
   console.log(formik?.values?.transfers)
 
   const { totalQty, totalCost, totalWeight } = formik?.values?.transfers?.reduce(
-      (acc, row) => {
-        const qtyValue = parseFloat(row?.qty) || 0;
-        const totalCostValue = parseFloat(row?.totalCost) || 0;
-        const weightValue = parseFloat(row?.weight) || 0;
+    (acc, row) => {
+      const qtyValue = parseFloat(row?.qty) || 0
+      const totalCostValue = parseFloat(row?.totalCost) || 0
+      const weightValue = parseFloat(row?.weight) || 0
 
-        return {
-          totalQty: acc?.totalQty + qtyValue,
-          totalCost: acc?.totalCost + totalCostValue,
-          totalWeight: acc?.totalWeight + weightValue
-        };
-      },
-      { totalQty: 0, totalCost: 0, totalWeight: 0 }
-    );
+      return {
+        totalQty: acc?.totalQty + qtyValue,
+        totalCost: acc?.totalCost + totalCostValue,
+        totalWeight: acc?.totalWeight + weightValue
+      }
+    },
+    { totalQty: 0, totalCost: 0, totalWeight: 0 }
+  )
 
-console.log("Total Qty:", totalQty);
-console.log("Total Cost:", totalCost);
-console.log("Total Weight:", totalWeight);
-
+  console.log('Total Qty:', totalQty)
+  console.log('Total Cost:', totalCost)
+  console.log('Total Weight:', totalWeight)
 
   const getMeasurementUnits = async () => {
     return await getRequest({
@@ -344,7 +343,6 @@ console.log("Total Weight:", totalWeight);
             muId: filteredMeasurements?.[0]?.recordId,
             metalId
           })
-
         }
       }
     },
@@ -380,12 +378,12 @@ console.log("Total Weight:", totalWeight);
       },
       async onChange({ row: { update, newRow } }) {
         const filteredItems = filteredMu.filter(item => item.recordId === newRow?.muId)
-        const qtyInBase = newRow?.qty * filteredItems?.muQty
+        const qtyInBase = newRow?.qty * filteredItems?.muQty ?? 0
 
-          update({
-            qtyInBase,
-            muQty: newRow?.muQty
-          })
+        update({
+          qtyInBase,
+          muQty: newRow?.muQty
+        })
       }
     },
     {
@@ -403,7 +401,7 @@ console.log("Total Weight:", totalWeight);
       async onChange({ row: { update, newRow } }) {
         if (newRow) {
           const totalCost = calcTotalCost(newRow)
-          const qtyInBase = newRow?.qty * newRow?.muQty
+          const qtyInBase = newRow?.qty * newRow?.muQty ?? 0
 
           update({
             totalCost,
@@ -457,7 +455,7 @@ console.log("Total Weight:", totalWeight);
 
   async function refetchForm(recordId) {
     const res = await getData(recordId)
-   
+
     const resNotification = await getNotificationData(recordId)
     const res3 = await getDataGrid(recordId)
 
@@ -626,41 +624,40 @@ console.log("Total Weight:", totalWeight);
   }, [documentType?.dtId])
 
   useEffect(() => {
-    (async function () {
+    ;(async function () {
       const muList = await getMeasurementUnits()
       setMeasurements(muList?.list)
       getDefaultFromSiteId()
     })()
   }, [])
-  
+
   useEffect(() => {
-    if (recordId && measurements) { 
+    if (recordId && measurements) {
       ;(async function () {
         const res = await getData(recordId)
         const resNotification = await getNotificationData(recordId)
         const res3 = await getDataGrid(recordId)
-  
+
         const updatedTransfers = res3.list.map(item => {
           const filteredMeasurements = measurements.filter(x => x.msId === item?.msId)
-          setFilteredMU(filteredMeasurements) 
-  
-          return ({
+          setFilteredMU(filteredMeasurements)
+
+          return {
             ...item,
             id: item.seqNo,
             totalCost: calcTotalCost(item),
-            unitCost: item.unitCost ?? 0,
-          })
+            unitCost: item.unitCost ?? 0
+          }
         })
-  
+
         formik.setValues({
           ...res.record,
           transfers: updatedTransfers,
-          notificationGroupId: resNotification?.record?.notificationGroupId,
+          notificationGroupId: resNotification?.record?.notificationGroupId
         })
       })()
     }
   }, [recordId, measurements])
-  
 
   return (
     <FormShell
@@ -854,7 +851,16 @@ console.log("Total Weight:", totalWeight);
             </Grid>
           </Grid>
           <DataGrid
-            onChange={value => formik?.setFieldValue('transfers', value)}
+            onChange={value => {
+              const data = value?.map(transfer => {
+                return {
+                  ...transfer,
+                  qtyInBase: 0
+                }
+              })
+
+              formik?.setFieldValue('transfers', data)
+            }}
             name='items'
             maxAccess={maxAccess}
             value={formik?.values?.transfers || []}
