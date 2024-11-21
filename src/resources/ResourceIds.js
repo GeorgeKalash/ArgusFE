@@ -292,11 +292,13 @@ export const ResourceIds = {
   InventoryTransaction: 41209,
   GenerateFiscalYear: 41503,
   UserSecretOTPQrCode: 23201,
+  CurrentCosts: 41207,
   CountryRiskLevel: 36132,
   SalesTrxForm: 51307,
   AvailabilitiesGrid: 41206,
   SiteDashboard: 41225,
   IVparts: 41222,
   SalesInquiries: 51300,
-  MigrateBarcodeData: 41508
+  MigrateBarcodeData: 41508,
+  POSDefaults: 54103
 }
