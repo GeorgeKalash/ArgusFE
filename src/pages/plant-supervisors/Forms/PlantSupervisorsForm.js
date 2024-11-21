@@ -24,6 +24,7 @@ export default function PlantSupervisorsForm({ _labels: labels, maxAccess }) {
       plantId: '',
       rows: [
         {
+          id: 1,
           supervisorId: ''
         }
       ]
@@ -57,8 +58,6 @@ export default function PlantSupervisorsForm({ _labels: labels, maxAccess }) {
     }
   })
 
-  const editMode = !!formik.values.recordId
-
   const fetchSupervisors = async () => {
     if (formik.values.plantId) {
       const res = await getRequest({
@@ -66,28 +65,18 @@ export default function PlantSupervisorsForm({ _labels: labels, maxAccess }) {
         parameters: `_plantId=${formik.values.plantId}`
       })
 
-      if (res?.list?.length > 0) {
-        const mappedRows = res.list.map(item => ({
-          supervisorId: item.supervisorId,
-          username: item.username,
-          email: item.email,
-          plantId: item.plantId
-        }))
-        formik.setFieldValue('rows', mappedRows)
-      } else {
-        formik.setFieldValue('rows', [
-          {
-            supervisorId: ''
-          }
-        ])
-      }
+      const mappedRows = res?.list?.map((item, index) => ({
+        ...item,
+        id: index + 1
+      }))
+
+      formik.setFieldValue('rows', mappedRows)
     }
   }
 
   useEffect(() => {
     fetchSupervisors()
   }, [formik.values.plantId])
-
 
   const columns = [
     {
@@ -109,8 +98,7 @@ export default function PlantSupervisorsForm({ _labels: labels, maxAccess }) {
           { key: 'username', value: 'Name' }
         ],
         displayFieldWidth: 2
-      },
-      
+      }
     },
     {
       component: 'textfield',
@@ -119,11 +107,11 @@ export default function PlantSupervisorsForm({ _labels: labels, maxAccess }) {
       props: {
         readOnly: true
       }
-    },
+    }
   ]
 
   return (
-    <FormShell resourceId={ResourceIds.PlantSupervisors} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell resourceId={ResourceIds.PlantSupervisors} form={formik} maxAccess={maxAccess} editMode={false}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -147,18 +135,17 @@ export default function PlantSupervisorsForm({ _labels: labels, maxAccess }) {
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
               />
             </Grid>
-              
           </Grid>
           <DataGrid
-                onChange={value => {
-                  formik.setFieldValue('rows', value)
-                }}
-                value={formik.values.rows}
-                error={formik.errors.rows}
-                columns={columns}
-                allowDelete={false}
-                allowAddNewLine={false}
-              />
+            onChange={value => {
+              formik.setFieldValue('rows', value)
+            }}
+            value={formik.values.rows}
+            error={formik.errors.rows}
+            columns={columns}
+            allowDelete={false}
+            allowAddNewLine={true}
+          />
         </Grow>
       </VertLayout>
     </FormShell>
