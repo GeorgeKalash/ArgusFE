@@ -35,7 +35,6 @@ import { ControlContext } from 'src/providers/ControlContext'
 import CustomDatePickerHijri from 'src/components/Inputs/CustomDatePickerHijri'
 import PaymentGrid from 'src/components/Shared/PaymentGrid'
 import { DataSets } from 'src/resources/DataSets'
-import { CashBankRepository } from 'src/repositories/CashBankRepository'
 
 export default function TransactionForm({ recordId, labels, access, plantId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -135,101 +134,100 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     enableReinitialize: false,
     validateOnChange: true,
     validateOnBlur: true,
+    validationSchema: yup.object({
+      date: yup.string().required(),
+      id_type: yup.number().required(),
+      idNo: yup.number().required(),
+      birthDate: yup.string().required(),
+      firstName: yup.string().required(),
+      lastName: yup.string().required(),
+      expiryDate: yup.string().required(),
+      nationalityId: yup.string().required(),
+      cellPhone: yup.string().required(),
+      professionId: yup.string().required(),
+      nationalityType: yup.number().required(),
+      operations: yup
+        .array()
+        .of(
+          yup.object().shape({
+            currencyId: yup.string().test({
+              name: 'currencyId-last-row-check',
+              message: 'currencyId is required',
+              test(value, context) {
+                const { parent } = context
 
-    // validationSchema: yup.object({
-    //   date: yup.string().required(),
-    //   id_type: yup.number().required(),
-    //   idNo: yup.number().required(),
-    //   birthDate: yup.string().required(),
-    //   firstName: yup.string().required(),
-    //   lastName: yup.string().required(),
-    //   expiryDate: yup.string().required(),
-    //   nationalityId: yup.string().required(),
-    //   cellPhone: yup.string().required(),
-    //   professionId: yup.string().required(),
-    //   nationalityType: yup.number().required(),
-    //   operations: yup
-    //     .array()
-    //     .of(
-    //       yup.object().shape({
-    //         currencyId: yup.string().test({
-    //           name: 'currencyId-last-row-check',
-    //           message: 'currencyId is required',
-    //           test(value, context) {
-    //             const { parent } = context
+                if (parent.id == 1 && value) return true
+                if (parent.id == 1 && !value) return false
+                if (
+                  parent.id > 1 &&
+                  (!parent.fcAmount || parent.fcAmount == 0) &&
+                  (!parent.lcAmount || parent.lcAmount == 0) &&
+                  (!parent.exRate || parent.exRate == 0)
+                )
+                  return true
 
-    //             if (parent.id == 1 && value) return true
-    //             if (parent.id == 1 && !value) return false
-    //             if (
-    //               parent.id > 1 &&
-    //               (!parent.fcAmount || parent.fcAmount == 0) &&
-    //               (!parent.lcAmount || parent.lcAmount == 0) &&
-    //               (!parent.exRate || parent.exRate == 0)
-    //             )
-    //               return true
+                return value
+              }
+            }),
+            exRate: yup.string().test({
+              name: 'exRate-last-row-check',
+              message: 'exRate is required',
+              test(value, context) {
+                const { parent } = context
+                if (parent.id == 1 && value) return true
+                if (parent.id == 1 && !value) return false
+                if (
+                  parent.id > 1 &&
+                  !parent.currencyId &&
+                  (!parent.lcAmount || parent.lcAmount == 0) &&
+                  (!parent.fcAmount || parent.fcAmount == 0)
+                )
+                  return true
 
-    //             return value
-    //           }
-    //         }),
-    //         exRate: yup.string().test({
-    //           name: 'exRate-last-row-check',
-    //           message: 'exRate is required',
-    //           test(value, context) {
-    //             const { parent } = context
-    //             if (parent.id == 1 && value) return true
-    //             if (parent.id == 1 && !value) return false
-    //             if (
-    //               parent.id > 1 &&
-    //               !parent.currencyId &&
-    //               (!parent.lcAmount || parent.lcAmount == 0) &&
-    //               (!parent.fcAmount || parent.fcAmount == 0)
-    //             )
-    //               return true
+                return value
+              }
+            }),
+            fcAmount: yup.string().test({
+              name: 'fcAmount-last-row-check',
+              message: 'fcAmount is required',
+              test(value, context) {
+                const { parent } = context
+                if (parent.id == 1 && value) return true
+                if (parent.id == 1 && !value) return false
+                if (
+                  parent.id > 1 &&
+                  !parent.currencyId &&
+                  (!parent.lcAmount || parent.lcAmount == 0) &&
+                  (!parent.exRate || parent.exRate == 0)
+                )
+                  return true
 
-    //             return value
-    //           }
-    //         }),
-    //         fcAmount: yup.string().test({
-    //           name: 'fcAmount-last-row-check',
-    //           message: 'fcAmount is required',
-    //           test(value, context) {
-    //             const { parent } = context
-    //             if (parent.id == 1 && value) return true
-    //             if (parent.id == 1 && !value) return false
-    //             if (
-    //               parent.id > 1 &&
-    //               !parent.currencyId &&
-    //               (!parent.lcAmount || parent.lcAmount == 0) &&
-    //               (!parent.exRate || parent.exRate == 0)
-    //             )
-    //               return true
+                return value
+              }
+            }),
+            lcAmount: yup.string().test({
+              name: 'fcAmount-last-row-check',
+              message: 'lcAmount is required',
+              test(value, context) {
+                const { parent } = context
+                if (parent.id == 1 && value) return true
+                if (parent.id == 1 && !value) return false
+                if (
+                  parent.id > 1 &&
+                  !parent.currencyId &&
+                  (!parent.fcAmount || parent.fcAmount == 0) &&
+                  (!parent.exRate || parent.exRate == 0)
+                )
+                  return true
 
-    //             return value
-    //           }
-    //         }),
-    //         lcAmount: yup.string().test({
-    //           name: 'fcAmount-last-row-check',
-    //           message: 'lcAmount is required',
-    //           test(value, context) {
-    //             const { parent } = context
-    //             if (parent.id == 1 && value) return true
-    //             if (parent.id == 1 && !value) return false
-    //             if (
-    //               parent.id > 1 &&
-    //               !parent.currencyId &&
-    //               (!parent.fcAmount || parent.fcAmount == 0) &&
-    //               (!parent.exRate || parent.exRate == 0)
-    //             )
-    //               return true
-
-    //             return value
-    //           }
-    //         })
-    //       })
-    //     )
-    //     .required(),
-    //   amount: formikSettings?.paymentValidation
-    // }),
+                return value
+              }
+            })
+          })
+        )
+        .required(),
+      amount: formikSettings?.paymentValidation
+    }),
     onSubmit: async values => {
       const lastRow = values.operations[values.operations.length - 1]
       const isLastRowMandatoryOnly = !lastRow.currencyId && !lastRow.currencyId && !lastRow.exRate && !lastRow.fcAmount
@@ -527,7 +525,6 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       formik.setFieldValue('remarks', record.headerView.notes)
       formik.setFieldValue('purpose_of_exchange', record.headerView.poeId)
       formik.setFieldValue('nationalityId', record.clientMaster.nationalityId)
-      formik.setFieldValue('nationalityType', record.clientMaster.nationalityType)
       formik.setFieldValue('cellPhone', record.clientMaster.cellPhone)
       formik.setFieldValue('status', record.headerView.status)
       formik.setFieldValue('cashAccountId', record.headerView.cashAccountId)
@@ -1308,15 +1305,192 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
             </Grid>
             <Grid item xs={12}>
               <FieldSet title='Operations'>
-                <PaymentGrid
+                <DataGrid
+                  onChange={value => formik.setFieldValue('operations', value)}
+                  value={formik.values.operations}
+                  error={emptyRows.length < 1 ? formik.errors.operations : true}
                   height={200}
-                  onChange={value => formik.setFieldValue('amount', value)}
-                  value={formik.values.amount}
-                  error={formik.errors.amount}
-                  name={'amount'}
-                  setFormik={setFormik}
-                  amount={total}
                   disabled={isClosed}
+                  maxAccess={maxAccess}
+                  name='operations'
+                  bg={
+                    formik.values.functionId &&
+                    (parseInt(formik.values.functionId) === SystemFunction.CurrencySale
+                      ? '#C7F6C7'
+                      : 'rgb(245, 194, 193)')
+                  }
+                  columns={[
+                    {
+                      component: 'resourcecombobox',
+                      label: labels.currency,
+                      name: 'currencyId',
+                      props: {
+                        endpointId: SystemRepository.Currency.qry,
+                        displayField: ['reference', 'name'],
+                        valueField: 'recordId',
+                        mapping: [
+                          { from: 'recordId', to: 'currencyId' },
+                          { from: 'name', to: 'currencyName' },
+                          { from: 'reference', to: 'currencyRef' }
+                        ],
+                        columnsInDropDown: [
+                          { key: 'reference', value: 'Reference' },
+                          { key: 'name', value: 'Name' }
+                        ]
+                      },
+                      async onChange({ row: { update, oldRow, newRow } }) {
+                        if (!newRow?.currencyId) {
+                          update({
+                            currencyId: '',
+                            currencyName: '',
+                            currencyRef: '',
+                            exRate: '',
+                            defaultRate: '',
+                            rateCalcMethod: '',
+                            minRate: '',
+                            maxRate: ''
+                          })
+
+                          return
+                        }
+                        const exchange = await fetchRate({ currencyId: newRow?.currencyId })
+                        if (!exchange?.rate) {
+                          update({
+                            exRate: '',
+                            defaultRate: '',
+                            rateCalcMethod: '',
+                            minRate: '',
+                            maxRate: ''
+                          })
+                          stackError({
+                            message: `Rate not defined for ${newRow.currencyName}.`
+                          })
+
+                          return
+                        }
+                        if (exchange && newRow.fcAmount) {
+                          const exRate = exchange.rate
+                          const rateCalcMethod = exchange.rateCalcMethod
+
+                          const lcAmount =
+                            rateCalcMethod === 1
+                              ? newRow.fcAmount * exRate
+                              : rateCalcMethod === 2
+                              ? newRow.fcAmount / exRate
+                              : 0
+
+                          !isNaN(lcAmount) && update({ lcAmount: lcAmount })
+                        }
+
+                        update({
+                          currencyId: newRow.currencyId,
+                          exRate: exchange?.rate,
+                          defaultRate: exchange?.rate,
+                          rateCalcMethod: exchange?.rateCalcMethod,
+                          minRate: exchange?.minRate,
+                          maxRate: exchange?.maxRate
+                        })
+                      },
+
+                      flex: 1.5
+                    },
+                    {
+                      component: 'numberfield',
+                      label: labels.fcAmount,
+                      name: 'fcAmount',
+                      async onChange({ row: { update, newRow } }) {
+                        const fcAmount = newRow.fcAmount
+                        const rateCalcMethod = newRow.rateCalcMethod
+                        const exRate = newRow.exRate
+
+                        const lcAmount =
+                          rateCalcMethod === 1 ? fcAmount * exRate : rateCalcMethod === 2 ? fcAmount / exRate : 0
+
+                        !isNaN(lcAmount) &&
+                          update({
+                            lcAmount: lcAmount?.toFixed(2)
+                          })
+                      },
+                      defaultValue: ''
+                    },
+                    {
+                      component: 'numberfield',
+                      label: labels.defaultRate,
+                      name: 'defaultRate',
+                      props: { readOnly: true }
+                    },
+                    {
+                      component: 'numberfield',
+                      name: 'exRate',
+                      label: labels.Rate,
+                      props: {
+                        readOnly: false
+                      },
+                      updateOn: 'blur',
+                      async onChange({ row: { update, newRow } }) {
+                        const fcAmount = newRow.fcAmount
+                        const lcAmount = newRow.lcAmount
+                        const rateCalcMethod = newRow.rateCalcMethod
+                        const exRate = newRow.exRate
+                        if (exRate)
+                          if (exRate >= newRow.minRate && exRate <= newRow.maxRate) {
+                            if (fcAmount) {
+                              const lcAmount =
+                                rateCalcMethod === 1 ? fcAmount * exRate : rateCalcMethod === 2 ? fcAmount / exRate : 0
+                              !isNaN(lcAmount) &&
+                                update({
+                                  lcAmount: lcAmount.toFixed(2)
+                                })
+                            } else if (lcAmount) {
+                              const fcAmount =
+                                rateCalcMethod === 2 ? lcAmount * exRate : rateCalcMethod === 1 ? lcAmount / exRate : 0
+                              !isNaN(fcAmount) &&
+                                update({
+                                  fcAmount: fcAmount.toFixed(2)
+                                })
+                            } else {
+                              update({
+                                exRate: newRow?.exRate
+                              })
+                            }
+                          } else {
+                            stackError({
+                              message: `Rate not in the [${newRow.minRate}-${newRow.maxRate}]range.`
+                            })
+                            update({
+                              exRate: ''
+                            })
+
+                            return
+                          }
+                      },
+
+                      defaultValue: ''
+                    },
+                    {
+                      component: 'numberfield',
+                      name: 'lcAmount',
+                      label: labels.lcAmount,
+                      props: {
+                        readOnly: false
+                      },
+                      async onChange({ row: { update, newRow } }) {
+                        const lcAmount = newRow.lcAmount
+                        const rateCalcMethod = newRow.rateCalcMethod
+                        const exRate = newRow.exRate
+
+                        const fcAmount =
+                          rateCalcMethod === 2 ? lcAmount * exRate : rateCalcMethod === 1 ? lcAmount / exRate : 0
+
+                        if (fcAmount && newRow.exRate)
+                          update({
+                            fcAmount: fcAmount.toFixed(2)
+                          })
+                      },
+
+                      defaultValue: ''
+                    }
+                  ]}
                 />
               </FieldSet>
             </Grid>
@@ -1324,60 +1498,15 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
               <FieldSet title='Amount'>
                 <Grid container spacing={2}>
                   <Grid item xs={9}>
-                    <DataGrid
-                      height={175}
+                    <PaymentGrid
+                      height={200}
                       onChange={value => formik.setFieldValue('amount', value)}
                       value={formik.values.amount}
                       error={formik.errors.amount}
+                      name={'amount'}
+                      setFormik={setFormik}
+                      amount={total}
                       disabled={isClosed}
-                      columns={[
-                        {
-                          component: 'resourcecombobox',
-                          label: labels.type,
-                          name: 'type',
-                          props: {
-                            datasetId: DataSets.CA_CASH_ACCOUNT_TYPE,
-                            displayField: 'value',
-                            valueField: 'key',
-                            mapping: [
-                              { from: 'key', to: 'type' },
-                              { from: 'value', to: 'typeName' }
-                            ],
-                            filter: item =>
-                              formik.values.functionId === SystemFunction.CurrencyPurchase ? item.key === '2' : true
-                          }
-                        },
-                        {
-                          component: 'numberfield',
-                          name: 'amount',
-                          label: labels.amount
-                        },
-                        {
-                          component: 'resourcecombobox',
-                          name: 'creditCards',
-                          editable: false,
-                          label: labels.creditCard,
-                          props: {
-                            endpointId: CashBankRepository.CreditCard.qry,
-                            valueField: 'recordId',
-                            displayField: 'name',
-                            mapping: [
-                              { from: 'recordId', to: 'ccId' },
-                              { from: 'name', to: 'ccName' }
-                            ]
-                          }
-                        },
-                        {
-                          component: 'numberfield',
-                          label: labels.receiptRef,
-                          name: 'bankFees'
-                        },
-                        {
-                          component: 'numberfield',
-                          label: labels.receiptRef,
-                          name: 'receiptRef'
-                        }
-                      ]}
                     />
                   </Grid>
                   <Grid item xs={3}>
