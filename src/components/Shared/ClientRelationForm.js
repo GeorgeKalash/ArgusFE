@@ -88,7 +88,7 @@ export const ClientRelationForm = ({ seqNo, clientId, formValidation }) => {
           props: {
             clientId: formValidation.values.recordId,
             recordId: formValidation.values.recordId,
-            formValidation: formValidation,
+            values: formValidation.values,
             functionId: SystemFunction.ClientRelation,
             onSuccess: verified
           },

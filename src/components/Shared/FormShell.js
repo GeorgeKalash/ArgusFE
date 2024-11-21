@@ -20,6 +20,7 @@ import { ClientRelationForm } from './ClientRelationForm'
 import { ClientBalance } from './ClientBalance'
 import InventoryTransaction from './InventoryTransaction'
 import SalesTrxForm from './SalesTrxForm'
+import StrictUnpostConfirmation from './StrictUnpostConfirmation'
 
 export default function FormShell({
   form,
@@ -265,6 +266,48 @@ export default function FormShell({
                   width: 1150,
                   height: 700,
                   title: platformLabels.PreviewReport
+                })
+              }
+              break
+            case 'onClickAging':
+              action.onClick = () => {
+                stack({
+                  Component: Aging,
+                  props: {
+                    recordId: form.values?.recordId,
+                    functionId
+                  },
+                  width: 1000,
+                  height: 620,
+                  title: platformLabels.Aging
+                })
+              }
+              break
+            case 'onClickMetal':
+              action.onClick = () => {
+                stack({
+                  Component: MetalSummary,
+                  props: {
+                    filteredItems
+                  },
+                  width: 600,
+                  height: 550,
+                  title: platformLabels.Metals,
+                  expandable: false
+                })
+              }
+              break
+            case 'onUnpostConfirmation':
+              action.onClick = () => {
+                stack({
+                  Component: StrictUnpostConfirmation,
+                  props: {
+                    onSuccess: action.onSuccess
+                  },
+                  width: 500,
+                  height: 300,
+                  expandable: false,
+                  title: platformLabels.UnpostConfirmation
                 })
               }
               break

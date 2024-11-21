@@ -42,7 +42,14 @@ export const getButtons = platformLabels => [
     key: 'Post',
     label: platformLabels.Post,
     color: '#231f20',
-    image: 'post.png',
+    image: 'lock.png',
+    main: false
+  },
+  {
+    key: 'Unpost',
+    label: platformLabels.Unpost,
+    color: '#231f20',
+    image: 'unlock.png',
     main: false
   },
   {
@@ -369,5 +376,19 @@ export const getButtons = platformLabels => [
     color: '#4eb558',
     image: 'exchange-refresh-icon.png',
     main: false
-  }
+  },
+  {
+    key: 'Locked',
+    label: platformLabels.Locked,
+    color: '#231f20',
+    image: 'lock.png',
+    main: false
+  },
+  {
+    key: 'Unlocked',
+    label: platformLabels.Unlocked,
+    color: '#231f20',
+    image: 'unlock.png',
+    main: false
+  },
 ]

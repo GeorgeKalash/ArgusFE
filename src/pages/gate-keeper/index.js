@@ -42,6 +42,7 @@ const GateKeeper = () => {
   const {
     query: { data },
     labels: _labels,
+    paginationParameters,
     refetch,
     access,
     invalidate
@@ -93,10 +94,7 @@ const GateKeeper = () => {
 
         return (
           <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
-            <IconButton
-              size='small'
-              onClick={() => openCancel(data)}
-            >
+            <IconButton size='small' onClick={() => openCancel(data)}>
               <Image src={cancelIcon} width={18} height={18} alt={_labels.cancel} />
             </IconButton>
           </Box>
@@ -105,7 +103,7 @@ const GateKeeper = () => {
     }
   ]
 
-  const del = async (data) => {
+  const del = async data => {
     await postRequest({
       extension: ManufacturingRepository.LeanProductionPlanning.cancel,
       record: JSON.stringify(data)
