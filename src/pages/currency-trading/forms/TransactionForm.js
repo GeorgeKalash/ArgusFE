@@ -16,8 +16,6 @@ import { RTCLRepository } from 'src/repositories/RTCLRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useWindow } from 'src/windows'
 import * as yup from 'yup'
-import { DataSets } from 'src/resources/DataSets'
-import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import useIdType from 'src/hooks/useIdType'
 import { useInvalidate } from 'src/hooks/resource'
 import ConfirmationOnSubmit from 'src/pages/currency-trading/forms/ConfirmationOnSubmit'
@@ -35,6 +33,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomDatePickerHijri from 'src/components/Inputs/CustomDatePickerHijri'
+import PaymentGrid from 'src/components/Shared/PaymentGrid'
 
 export default function TransactionForm({ recordId, labels, access, plantId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -49,6 +48,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
   const [search, setSearch] = useState(null)
   const [fId, setFId] = useState(SystemFunction.CurrencyPurchase)
   const { platformLabels } = useContext(ControlContext)
+  const [formikSettings, setFormik] = useState({})
 
   const resetAutoFilled = () => {
     setIDInfoAutoFilled(false)
@@ -85,19 +85,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
         maxRate: ''
       }
     ],
-    amount: [
-      {
-        id: 1,
-        cashAccountId: '',
-        type: '',
-        typeName: '',
-        ccName: '',
-        amount: '',
-        ccId: '',
-        bankFees: '',
-        receiptRef: ''
-      }
-    ],
+    amount: formikSettings.initialValuePayment || [],
     date: new Date(),
     clientId: null,
     clientName: null,
@@ -237,15 +225,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
           })
         )
         .required(),
-      amount: yup
-        .array()
-        .of(
-          yup.object().shape({
-            type: yup.string().required(),
-            amount: yup.number().nullable().required()
-          })
-        )
-        .required()
+      amount: formikSettings?.paymentValidation
     }),
     onSubmit: async values => {
       const lastRow = values.operations[values.operations.length - 1]
@@ -618,7 +598,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
   }, 0)
 
   const receivedTotal = formik.values.amount.reduce((acc, { amount }) => {
-    return acc + (amount || 0)
+    return acc + parseFloat(amount?.toString()?.replace(/,/g, '')) || 0
   }, 0)
 
   const balance = total - receivedTotal
@@ -930,18 +910,22 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                           required
                           maxLength='20'
                           onBlur={e => {
-                            setShowAsPasswordIDNumber(true)
-                            if (e.target.value && e.target.value != idNumberOne) {
-                              checkTypes(e.target.value)
-                              fetchClientInfo({ numberId: e.target.value })
+                            const value = e.target.value
+                            setIdNumber(value)
+                            if (value && value !== idNumberOne) {
+                              setShowAsPasswordIDNumber(true)
+                              checkTypes(value)
+                              fetchClientInfo({ numberId: value })
                             }
                           }}
-                          onFocus={value => {
+                          onFocus={e => {
                             setShowAsPasswordIDNumber(false)
-                            setIdNumber(value)
+                          }}
+                          onClear={() => {
+                            formik.setFieldValue('idNo', '')
+                            setIdNumber('')
                           }}
                           onChange={formik.handleChange}
-                          onClear={() => formik.setFieldValue('idNo', '')}
                           error={formik.touched.idNo && Boolean(formik.errors.idNo)}
                           maxAccess={maxAccess}
                         />
