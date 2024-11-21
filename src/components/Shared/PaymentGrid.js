@@ -75,6 +75,7 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
     const cashAmount = value?.find(item => item?.type === '2')?.paidAmount
 
     const amountValue = amount + parseFloat(cashAmount || 0) - parseFloat(totalPaidAmount || 0)
+
     const val = values.map(item =>
       item.type === '2'
         ? {
