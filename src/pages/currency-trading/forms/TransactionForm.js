@@ -498,18 +498,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
   const [showAsPasswordIDNumber, setShowAsPasswordIDNumber] = useState(false)
   const [showAsPasswordPhone, setShowAsPasswordPhone] = useState(false)
 
-  const fillType = () => {
-    var parameters = `_filter=`
-    getRequest({
-      extension: CurrencyTradingSettingsRepository.IdTypes.qry,
-      parameters: parameters
-    }).then(res => {
-      setIdTypeStore(res.list)
-    })
-  }
-
   useEffect(() => {
-    fillType()
     ;(async function () {
       setOperationType(formik.values.functionId)
       if (recordId) await getData(recordId)
@@ -949,6 +938,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                         <FormField
                           name='id_type'
                           Component={ResourceComboBox}
+                          setData={setIdTypeStore}
                           endpointId={CurrencyTradingSettingsRepository.IdTypes.qry}
                           valueField='recordId'
                           displayField='name'
@@ -963,7 +953,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                             stack({
                               Component: Confirmation,
                               props: {
-                                idTypeStore: idTypeStore,
+                                idTypes: idTypeStore,
                                 clientformik: formik,
                                 labels: labels
                               },
