@@ -207,8 +207,7 @@ const CustomLookup = ({
               required={isRequired}
               onKeyUp={e => {
                 onKeyUp(e)
-
-                if (e.key !== 'Enter') e.target.value >= minChars ? setFreeSolo(true) : setFreeSolo(false)
+                if (e.key !== 'Enter') e.target?.value?.length <= minChars ? setFreeSolo(true) : setFreeSolo(false)
               }}
               inputProps={{
                 ...params.inputProps,
@@ -238,7 +237,7 @@ const CustomLookup = ({
                           setInputValue('')
                           onChange(name, '')
                           setStore([])
-                          setFreeSolo(true)
+                          setFreeSolo(false)
                         }}
                         aria-label='clear input'
                       >
