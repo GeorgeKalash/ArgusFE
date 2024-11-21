@@ -354,21 +354,6 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
     }
   ]
 
-  function openUnpostConfirmation(obj) {
-    stack({
-      Component: StrictUnpostConfirmation,
-      props: {
-        action() {
-          onUnpost(obj)
-        }
-      },
-      width: 500,
-      height: 300,
-      expandable: false,
-      title: platformLabels.UnpostConfirmation
-    })
-  }
-
   const columns = [
     {
       component: 'resourcecombobox',
