@@ -82,18 +82,17 @@ export const ResourceLookup = ({
   }, [_firstValue])
 
   const onKeyUp = e => {
-    if (e.target.value?.length > 0 && e.key != 'ArrowDown' && e.key != 'ArrowUp') {
-      setStore([])
-    } else {
-    }
-
     if (e.key === 'Enter') {
       selectFirstOption()
     }
   }
 
+  const onFocus = () => {
+    setStore([])
+  }
+
   const onBlur = (e, HighlightedOption) => {
-    !HighlightedOption && selectFirstOption()
+    !HighlightedOption ? selectFirstOption() : rest.onChange('', HighlightedOption)
   }
 
   const selectFirstOption = () => {
@@ -113,6 +112,7 @@ export const ResourceLookup = ({
           secondValue: _secondValue,
           error,
           onKeyUp,
+          onFocus,
           onBlur,
           name,
           isLoading,

@@ -41,6 +41,7 @@ const CustomLookup = ({
   minChars,
   userTypes = true,
   onBlur = () => {},
+  onFocus = () => {},
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
@@ -49,7 +50,25 @@ const CustomLookup = ({
 
   const valueHighlightedOption = useRef(null)
 
+  const selectFirstValue = useRef(null)
+
+  const autocompleteRef = useRef(null)
+
   const [inputValue, setInputValue] = useState(firstValue || '')
+
+  useEffect(() => {
+    function handleBlur(event) {
+      if (autocompleteRef.current && !autocompleteRef.current.contains(event.target)) {
+        selectFirstValue.current = 'click'
+      }
+    }
+
+    document.addEventListener('mousedown', handleBlur)
+
+    return () => {
+      document.removeEventListener('mousedown', handleBlur)
+    }
+  }, [])
 
   useEffect(() => {
     if (!firstValue) {
@@ -71,6 +90,7 @@ const CustomLookup = ({
     <Grid container spacing={0} sx={{ width: '100%' }}>
       <Grid item xs={secondDisplayField ? 6 : 12}>
         <Autocomplete
+          ref={autocompleteRef}
           name={name}
           key={firstValue || null}
           value={firstValue}
@@ -101,11 +121,6 @@ const CustomLookup = ({
           }}
           onHighlightChange={(event, newValue) => {
             valueHighlightedOption.current = newValue
-          }}
-          onKeyDown={event => {
-            if (event.key === 'Tab' && valueHighlightedOption?.current) {
-              onChange('', valueHighlightedOption.current)
-            }
           }}
           PopperComponent={PopperComponent}
           PaperComponent={({ children }) =>
@@ -177,10 +192,14 @@ const CustomLookup = ({
                   setFreeSolo(true)
                 }
 
-                onBlur(e, valueHighlightedOption.current)
+                if (selectFirstValue.current !== 'click') {
+                  onBlur(e, valueHighlightedOption?.current)
+                }
               }}
-              onFocus={() => {
+              onFocus={e => {
                 setStore([]), setFreeSolo(true)
+                selectFirstValue.current = ''
+                onFocus(e)
               }}
               type={type}
               variant={variant}
