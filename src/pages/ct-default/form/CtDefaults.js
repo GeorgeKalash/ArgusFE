@@ -29,7 +29,8 @@ const CtDefaults = ({ _labels, access }) => {
     'ct_credit_purchase_ratetype_id',
     'ct_credit_eval_ratetype_id',
     'ct_minOtp_CIVAmount',
-    'otp-expiry-time'
+    'otp-expiry-time',
+    'phone_verification_days'
   ]
   useEffect(() => {
     getDataResult()
@@ -39,7 +40,8 @@ const CtDefaults = ({ _labels, access }) => {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      'otp-expiry-time': yup.number().min(30).max(120).nullable(true)
+      'otp-expiry-time': yup.number().min(30).max(120).nullable(true),
+      phone_verification_days: yup.number().min(0).max(180).nullable(true)
     }),
     initialValues: {
       'ct-nra-individual': null,
@@ -50,7 +52,8 @@ const CtDefaults = ({ _labels, access }) => {
       ct_credit_sales_ratetype_id: null,
       ct_credit_purchase_ratetype_id: null,
       ct_credit_eval_ratetype_id: null,
-      ct_minOtp_CIVAmount: null
+      ct_minOtp_CIVAmount: null,
+      phone_verification_days: null
     },
     onSubmit: async values => {
       await postRtDefault(values)
@@ -249,6 +252,18 @@ const CtDefaults = ({ _labels, access }) => {
               onChange={e => formik.setFieldValue('otp-expiry-time', e.target.value)}
               onClear={() => formik.setFieldValue('otp-expiry-time', '')}
               error={formik.touched['otp-expiry-time'] && Boolean(formik.errors['otp-expiry-time'])}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomNumberField
+              name='phone_verification_days'
+              label={_labels.phone}
+              value={formik.values.phone_verification_days}
+              maxAccess={access}
+              onChange={e => formik.setFieldValue('phone_verification_days', e.target.value)}
+              onClear={() => formik.setFieldValue('phone_verification_days', '')}
+              error={formik.touched.phone_verification_days && Boolean(formik.errors.phone_verification_days)}
+              allowNegative={false}
             />
           </Grid>
         </Grid>
