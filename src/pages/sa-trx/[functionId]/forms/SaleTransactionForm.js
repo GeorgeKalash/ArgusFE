@@ -335,6 +335,8 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       name: 'barcode',
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
+        if (!newRow?.barcode) return
+
         const ItemConvertPrice = await getItemConvertPrice2(newRow)
         const itemPhysProp = await getItemPhysProp(ItemConvertPrice?.itemId)
         const itemInfo = await getItem(ItemConvertPrice?.itemId)
@@ -1741,21 +1743,20 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                     onChange={e => {
                       let discount = Number(e.target.value)
                       if (formik.values.header.tdType == DIRTYFIELD_TDPCT) {
+                        if (discount < 0 || discount > 100) discount = 0
+                        formik.setFieldValue('header.tdPct', discount)
+                      } else {
                         if (discount < 0 || formik.values.header.subtotal < discount) {
                           discount = 0
                         }
                         formik.setFieldValue('header.tdAmount', discount)
-                      } else {
-                        if (discount < 0 || discount > 100) discount = 0
-                        formik.setFieldValue('header.tdPct', discount)
                       }
                       formik.setFieldValue('header.currentDiscount', discount)
                     }}
                     onBlur={async e => {
-                      setReCal(true)
-                      let discountAmount = Number(e.target.value)
-                      let tdPct = Number(e.target.value)
-                      let tdAmount = Number(e.target.value)
+                      let discountAmount = Number(e.target.value.replace(/,/g, ''))
+                      let tdPct = Number(e.target.value.replace(/,/g, ''))
+                      let tdAmount = Number(e.target.value.replace(/,/g, ''))
 
                       if (formik.values.header.tdType == DIRTYFIELD_TDPLAIN) {
                         tdPct = (parseFloat(discountAmount) / parseFloat(subtotal)) * 100
@@ -1766,8 +1767,9 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                         tdAmount = (parseFloat(discountAmount) * parseFloat(subtotal)) / 100
                         formik.setFieldValue('header.tdAmount', tdAmount)
                       }
+                      setReCal(true)
 
-                      await recalcGridVat(formik.values.header.tdType, tdPct, tdAmount, Number(e.target.value))
+                      await recalcGridVat(formik.values.header.tdType, tdPct, tdAmount, discountAmount)
                     }}
                     onClear={() => {
                       formik.setFieldValue('header.tdAmount', 0)

@@ -10,8 +10,6 @@ import { DISABLED, HIDDEN, accessLevel } from 'src/services/api/maxAccess'
 import { useWindow } from 'src/windows'
 import DeleteDialog from '../DeleteDialog'
 
-import ClearIcon from '@mui/icons-material/Clear'
-
 export function DataGrid({
   name, // maxAccess
   columns,
@@ -20,7 +18,6 @@ export function DataGrid({
   maxAccess,
   height,
   onChange,
-  onClear,
   disabled = false,
   allowDelete = true,
   allowAddNewLine = true,
@@ -327,34 +324,6 @@ export function DataGrid({
       }
     }
 
-    function clearCell({ field, value }) {
-      // const oldRow = params.data
-
-      const data = {
-        [field]: value || undefined
-      }
-
-      // setCurrentValue(changes)
-      //commit(changes)
-      // process(params, oldRow, setData)
-
-      const allRowNodes = []
-      gridApiRef.current.forEachNode(node => allRowNodes.push(node.data))
-      const updatedGridData = allRowNodes.map(row => (row.id === data?.id ? data : row))
-
-      onClear(updatedGridData)
-
-      const column = columns.find(({ name }) => name === params.colDef.field)
-
-      const updateRowCommit = changes => {
-        setData(changes, params)
-        commit({ changes: { ...params.node.data, changes } })
-      }
-      if (column.onClear) {
-        column.onClear({ row: { oldRow: oldRow, newRow: params.node.data, update: updateRowCommit } })
-      }
-    }
-
     const comp = column.colDef.component
 
     return (
@@ -379,9 +348,6 @@ export function DataGrid({
           updateRow={updateRow}
           update={update}
         />
-        <IconButton onClick={clearCell} aria-label='Clear Cell'>
-          <ClearIcon />
-        </IconButton>
       </Box>
     )
   }

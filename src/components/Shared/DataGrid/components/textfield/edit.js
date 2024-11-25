@@ -63,9 +63,9 @@ export default function TextFieldEdit({ id, column: { props, field, ...column },
       InputProps={{
         endAdornment: (
           <InputAdornment position='end'>
-            {/* <IconButton onClick={() => update({ id, field, value: '' })}>
+            <IconButton onClick={() => update({ id, field, value: '' })}>
               <ClearIcon />
-            </IconButton> */}
+            </IconButton>
             {props?.ShowDiscountIcons && (
               <IconButton onClick={handleIconClick}>{isPercentIcon ? <PercentIcon /> : <PinIcon />}</IconButton>
             )}
