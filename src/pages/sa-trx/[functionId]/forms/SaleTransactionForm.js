@@ -206,6 +206,19 @@ export default function SaleTransactionForm({ labels, access, recordId, function
     }),
     onSubmit: async obj => {
       try {
+        if (obj.header.serializedAddress) {
+          const addressData = {
+            clientId: obj.header.clientId,
+            address: address
+          }
+  
+          const addressRes = await postRequest({
+            extension: SaleRepository.Address.set,
+            record: JSON.stringify(addressData)
+          })
+          obj.header.billAddressId = addressRes.recordId
+        }
+
         const payload = {
           header: {
             ...obj.header,
@@ -1302,6 +1315,19 @@ export default function SaleTransactionForm({ labels, access, recordId, function
     })
   }
 
+  useEffect(() => {
+    let billAdd = ''
+    const { name, street1, street2, city, phone, phone2, email1 } = address
+    if (name || street1 || street2 || city || phone || phone2 || email1) {
+      billAdd = `${name || ''}\n${street1 || ''}\n${street2 || ''}\n${city || ''}\n${phone || ''}\n${phone2 || ''}\n${
+        email1 || ''
+      }`
+    }
+
+    formik.setFieldValue('header.billAddress', billAdd)
+    formik.setFieldValue('header.serializedAddress', billAdd)
+  }, [address])
+
   function getDTD(dtId) {
     const res = getRequest({
       extension: SaleRepository.DocumentTypeDefault.get,
@@ -1681,8 +1707,8 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                     maxAccess={maxAccess}
                     viewDropDown={formik.values.header.clientId}
                     viewAdd={formik.values.header.clientId && !editMode}
-                    onChange={e => formik.setFieldValue('header.BillAddress', e.target.value)}
-                    onClear={() => formik.setFieldValue('header.BillAddress', '')}
+                    onChange={e => formik.setFieldValue('header.billAddress', e.target.value)}
+                    onClear={() => formik.setFieldValue('header.billAddress', '')}
                     onDropDown={() => openAddressFilterForm()}
                     handleAddAction={() => openAddressForm()}
                   />
