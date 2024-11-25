@@ -14,7 +14,14 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 
-export default function AddressFilterForm({ labels, shipment, bill, form, window }) {
+export default function AddressFilterForm({
+  labels,
+  shipment = false,
+  bill = false,
+  form,
+  handleAddressValues,
+  window
+}) {
   const [data, setData] = useState([])
   const { getRequest } = useContext(RequestsContext)
 
@@ -25,8 +32,7 @@ export default function AddressFilterForm({ labels, shipment, bill, form, window
     onSubmit: async obj => {
       const checkedADD = data?.list?.find(obj => obj.checked)
       if (!checkedADD.addressId) {
-        form.setFieldValue('shipAddress', '')
-        form.setFieldValue('BillAddress', '')
+        handleAddressValues({ shipAddress: '', BillAddress: '' })
         window.close()
 
         return
@@ -34,16 +40,19 @@ export default function AddressFilterForm({ labels, shipment, bill, form, window
 
       if (shipment || bill) {
         const address = await getAddress(checkedADD.addressId)
-        if (shipment) {
-          form.setFieldValue('shipAddress', address)
-          form.setFieldValue('shipAddressId', checkedADD.addressId)
-          form.setFieldValue('shipToAddressId', checkedADD.addressId)
-        }
-        if (bill) {
-          form.setFieldValue('billAddress', address)
-          form.setFieldValue('billAddressId', checkedADD.addressId)
-          form.setFieldValue('billToAddressId', checkedADD.addressId)
-        }
+        if (shipment)
+          handleAddressValues({
+            shipAddress: address,
+            shipAddressId: checkedADD.addressId,
+            shipToAddressId: checkedADD.addressId
+          })
+
+        if (bill)
+          handleAddressValues({
+            billAddress: address,
+            billAddressId: checkedADD.addressId,
+            billToAddressId: checkedADD.addressId
+          })
       }
 
       window.close()
@@ -74,7 +83,7 @@ export default function AddressFilterForm({ labels, shipment, bill, form, window
       const res = await getRequest({
         extension: SaleRepository.FilterAddress.snapshot,
         parameters: `_countryId=${formik.values.countryId}&_cityId=${formik.values.cityId}&_clientId=${
-          form.values.clientId
+          form.clientId
         }&_filter=${formik.values.search || ''}`
       })
       if (res?.list?.length > 0) {
@@ -97,7 +106,7 @@ export default function AddressFilterForm({ labels, shipment, bill, form, window
   const LoadAllAddresses = async () => {
     const res = await getRequest({
       extension: SaleRepository.Address.qry,
-      parameters: `_params=1|${form.values.clientId}`
+      parameters: `_params=1|${form.clientId}`
     })
 
     if (res?.list?.length > 0) {

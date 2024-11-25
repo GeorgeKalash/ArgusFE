@@ -10,6 +10,7 @@ import { AdapterMomentHijri } from '@mui/x-date-pickers/AdapterMomentHijri'
 import moment from 'moment-hijri'
 import PopperComponent from '../Shared/Popper/PopperComponent'
 import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
+import { TrxType } from 'src/resources/AccessLevels'
 
 export default function CustomDatePickerHijri({
   variant = 'outlined',
@@ -24,6 +25,7 @@ export default function CustomDatePickerHijri({
   fullWidth = true,
   hidden = false,
   required = false,
+  editMode = false,
   ...props
 }) {
   const [openDatePicker, setOpenDatePicker] = useState(false)
@@ -32,10 +34,7 @@ export default function CustomDatePickerHijri({
 
   const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
 
-  const _readOnly =
-    maxAccess < 2 ||
-    accessLevel === DISABLED ||
-    (readOnly && accessLevel !== MANDATORY && accessLevel !== FORCE_ENABLED)
+  const _readOnly = editMode ? editMode && maxAccess < TrxType.EDIT : accessLevel > DISABLED ? false : readOnly
 
   const _hidden = accessLevel ? accessLevel === HIDDEN : hidden
 
