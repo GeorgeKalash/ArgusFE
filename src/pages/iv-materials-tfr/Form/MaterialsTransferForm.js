@@ -872,7 +872,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
         <Fixed>
           <Grid container direction='row' wrap='nowrap' sx={{ justifyContent: 'space-between' }}>
             <Grid container xs={3} direction='column' wrap='nowrap' sx={{ pt: 5, justifyContent: 'flex-start' }}>
-              <Grid item xs={3} sx={{ pl: 3 }}>
+              <Grid item xs={3}>
                 <CustomTextField
                   name='totalQty'
                   maxAccess={maxAccess}
@@ -881,7 +881,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
                   readOnly
                 />
               </Grid>
-              <Grid item xs={3} sx={{ pl: 3, mt: 2 }}>
+              <Grid item xs={3} sx={{ mt: 2 }}>
                 <CustomTextField
                   name='totalCost'
                   maxAccess={maxAccess}
@@ -890,7 +890,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
                   readOnly
                 />
               </Grid>
-              <Grid item xs={3} sx={{ pl: 3, mt: 2 }}>
+              <Grid item xs={3} sx={{ mt: 2 }}>
                 <CustomTextField
                   name='totalWeight'
                   maxAccess={maxAccess}
