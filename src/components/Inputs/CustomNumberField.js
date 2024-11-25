@@ -27,7 +27,6 @@ const CustomNumberField = ({
   thousandSeparator = ',',
   min,
   max,
-  step = 1,
   allowNegative = true,
   arrow = false,
   displayCycleButton = false,
@@ -126,7 +125,6 @@ const CustomNumberField = ({
         inputProps: {
           min: min,
           max: max,
-          step: step,
           type: arrow ? 'number' : 'text',
           tabIndex: readOnly ? -1 : 0,
           onKeyPress: handleKeyPress

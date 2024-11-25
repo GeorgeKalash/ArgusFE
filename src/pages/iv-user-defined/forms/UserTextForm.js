@@ -135,11 +135,9 @@ const UserTextForm = () => {
               value={formik.values.ivtUDTCount}
               onBlur={handleDimCountBlur}
               unClearable={true}
-              min={1}
-              max={20}
-              arrow={true}
               maxLength={2}
               decimalScale={0}
+              allowNegative={false}
               error={errored || (formik.touched.ivtUDTCount && Boolean(formik.errors.ivtUDTCount))}
             />
           </Grid>

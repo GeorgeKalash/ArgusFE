@@ -131,10 +131,7 @@ const UserDefinedForm = ({ labels }) => {
               decimalScale={0}
               onBlur={handleDimCountBlur}
               unClearable={true}
-              min={1}
-              max={counter}
               allowNegative={false}
-              arrow={true}
               error={errored || (formik.touched.ivtDimCount && Boolean(formik.errors.ivtDimCount))}
             />
           </Grid>
