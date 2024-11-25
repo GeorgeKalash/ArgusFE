@@ -428,10 +428,10 @@ export default function SaleTransactionForm({ labels, access, recordId, function
           }
 
           const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
-          if (minPrice > 0 && unitPrice < minPrice) {
-            stackError({
-              message: `${labels.minPriceError}: ${minPrice}`
-            })
+          if (parseFloat(unitPrice) < parseFloat(minPrice)) {
+            ShowMinPriceValueErrorMessage(minPrice, unitPrice)
+
+            return false
           }
           setFilteredMU(filteredMeasurements)
           update({
@@ -596,10 +596,8 @@ export default function SaleTransactionForm({ labels, access, recordId, function
         const unitPrice = parseFloat(newRow.unitPrice || 0).toFixed(3)
         const minPrice = parseFloat(ItemConvertPrice?.minPrice || 0).toFixed(3)
 
-        if (minPrice > 0 && unitPrice < minPrice) {
-          stackError({
-            message: `${labels.minPriceError}: ${minPrice}`
-          })
+        if (parseFloat(minPrice) > 0 && parseFloat(unitPrice) < parseFloat(minPrice)) {
+          ShowMinPriceValueErrorMessage(minPrice, unitPrice)
         }
         getItemPriceRow(update, newRow, DIRTYFIELD_UNIT_PRICE)
       }
@@ -1227,6 +1225,14 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       getItemPriceRow(update, rowData, DIRTYFIELD_MDAMOUNT)
       stackError({
         message: labels.clientMaxDiscount + ' ' + clientMaxDiscountValue
+      })
+    }
+  }
+
+  function ShowMinPriceValueErrorMessage(minPrice, unitPrice) {
+    if (parseFloat(minPrice) > 0 && parseFloat(unitPrice) < parseFloat(minPrice)) {
+      stackError({
+        message: `${labels.minPriceError}: ${minPrice}`
       })
     }
   }
