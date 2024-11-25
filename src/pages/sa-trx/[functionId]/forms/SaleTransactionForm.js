@@ -762,7 +762,6 @@ export default function SaleTransactionForm({ labels, access, recordId, function
     })
     formik.setFieldValue('subtotal', saTrxHeader?.subtotal)
   }
-  console.log('check formik ', formik)
 
   async function getSalesTransactionPack(transactionId) {
     const res = await getRequest({
@@ -987,42 +986,11 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       tdPct: formik?.values?.header?.tdPct || 0,
       dirtyField: dirtyField
     })
-    console.log(
-      'onselect one ',
-      {
-        priceType: newRow?.priceType,
-        basePrice: parseFloat(newRow?.basePrice || 0),
-        volume: newRow?.volume,
-        weight: parseFloat(newRow?.weight),
-        unitPrice: parseFloat(newRow?.unitPrice || 0),
-        upo: parseFloat(newRow?.upo) ? parseFloat(newRow?.upo) : 0,
-        qty: newRow?.qty,
-        extendedPrice: parseFloat(newRow?.extendedPrice),
-        mdAmount: parseFloat(newRow?.mdAmount),
-        mdType: newRow?.mdType,
-        mdValue: parseFloat(newRow?.mdValue),
-        baseLaborPrice: newRow?.baseLaborPrice,
-        totalWeightPerG: newRow?.totalWeightPerG,
-        tdPct: formik?.values?.header?.tdPct || 0,
-        dirtyField: dirtyField
-      },
-      itemPriceRow
-    )
 
     const vatCalcRow = getVatCalc({
       basePrice: itemPriceRow?.basePrice,
       unitPrice: itemPriceRow?.unitPrice,
       qty: parseFloat(itemPriceRow?.qty),
-      extendedPrice: parseFloat(itemPriceRow?.extendedPrice),
-      baseLaborPrice: itemPriceRow?.baseLaborPrice,
-      vatAmount: parseFloat(itemPriceRow?.vatAmount),
-      tdPct: formik?.values?.header?.tdPct,
-      taxDetails: formik.values.header.isVattable ? newRow.taxDetails : null
-    })
-    console.log('onselect ', {
-      basePrice: itemPriceRow?.basePrice,
-      unitPrice: itemPriceRow?.unitPrice,
-      qty: itemPriceRow?.qty,
       extendedPrice: parseFloat(itemPriceRow?.extendedPrice),
       baseLaborPrice: itemPriceRow?.baseLaborPrice,
       vatAmount: parseFloat(itemPriceRow?.vatAmount),
