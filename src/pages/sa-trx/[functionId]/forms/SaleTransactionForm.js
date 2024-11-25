@@ -386,9 +386,14 @@ export default function SaleTransactionForm({ labels, access, recordId, function
           const basePrice = (metalPrice * metalPurity) / 1000
           const basePriceValue = postMetalToFinancials === false ? basePrice : 0
           const TotPricePerG = basePriceValue
-          const unitPrice = parseFloat(newRow.unitPrice || 0).toFixed(3);
-          const minPrice = parseFloat(ItemConvertPrice?.minPrice || 0).toFixed(3);
-          formik.setFieldValue(`items[${newRow.id - 1}].minPrice`, minPrice);
+
+          const unitPrice =
+            ItemConvertPrice?.priceType === 3
+              ? weight * TotPricePerG
+              : parseFloat(ItemConvertPrice?.unitPrice || 0).toFixed(3)
+
+          const minPrice = parseFloat(ItemConvertPrice?.minPrice || 0).toFixed(3)
+          formik.setFieldValue(`items[${newRow.id - 1}].minPrice`, minPrice)
           let rowTax = null
           let rowTaxDetails = null
 
@@ -425,8 +430,8 @@ export default function SaleTransactionForm({ labels, access, recordId, function
           const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
           if (minPrice > 0 && unitPrice < minPrice) {
             stackError({
-              message: `${labels.minPriceError}: ${minPrice}`,
-            });
+              message: `${labels.minPriceError}: ${minPrice}`
+            })
           }
           setFilteredMU(filteredMeasurements)
           update({
@@ -588,13 +593,13 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         const ItemConvertPrice = await getItemConvertPrice(newRow.itemId)
-        const unitPrice = parseFloat(newRow.unitPrice || 0).toFixed(3);
-        const minPrice = parseFloat(ItemConvertPrice?.minPrice || 0).toFixed(3);
+        const unitPrice = parseFloat(newRow.unitPrice || 0).toFixed(3)
+        const minPrice = parseFloat(ItemConvertPrice?.minPrice || 0).toFixed(3)
 
         if (minPrice > 0 && unitPrice < minPrice) {
           stackError({
-            message: `${labels.minPriceError}: ${minPrice}`,
-          });
+            message: `${labels.minPriceError}: ${minPrice}`
+          })
         }
         getItemPriceRow(update, newRow, DIRTYFIELD_UNIT_PRICE)
       }
@@ -1654,7 +1659,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
             <Grid container xs={3} direction='column' spacing={2} sx={{ flexWrap: 'nowrap', pl: '5px' }}>
               <Grid container xs={12} direction='row' spacing={2} sx={{ flexWrap: 'nowrap' }}>
                 <Grid item xs={12}>
-                <CustomTextArea
+                  <CustomTextArea
                     name='billAddress'
                     label={labels.billTo}
                     value={formik.values.header.billAddress}
