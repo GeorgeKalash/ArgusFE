@@ -75,7 +75,6 @@ export default function AssetsForm({ recordId, maxAccess: access, labels, window
       if (!recordId) {
         toast.success(platformLabels.Added)
 
-        formik.setFieldValue('recordId', response.recordId)
         getData(response.recordId)
       } else toast.success(platformLabels.Edited)
       invalidate()
@@ -105,15 +104,7 @@ export default function AssetsForm({ recordId, maxAccess: access, labels, window
   useEffect(() => {
     ;(async function () {
       if (recordId) {
-        const res1 = await getRequest({
-          extension: FixedAssetsRepository.AssetsDescription.get,
-          parameters: `_recordId=${recordId}`
-        })
-
-        formik.setValues({
-          ...res1.record,
-          date: formatDateFromApi(res1.record.date)
-        })
+        await getData(recordId)
 
         const res2 = await getRequest({
           extension: FixedAssetsRepository.AssetsTableData.qry,
@@ -124,6 +115,22 @@ export default function AssetsForm({ recordId, maxAccess: access, labels, window
       }
     })()
   }, [])
+
+  const getData = async recordId => {
+    try {
+      if (recordId) {
+        const res = await getRequest({
+          extension: FixedAssetsRepository.AssetsDescription.get,
+          parameters: `_recordId=${recordId}`
+        })
+
+        formik.setValues({
+          ...res.record,
+          date: formatDateFromApi(res.record.date)
+        })
+      }
+    } catch (exception) {}
+  }
 
   const columns = [
     {
