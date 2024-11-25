@@ -143,6 +143,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
         msId: 0,
         muRef: '',
         muQty: 0,
+        minPrice: 0,
         baseQty: 0,
         mdType: MDTYPE_PCT,
         basePrice: 0,
@@ -214,6 +215,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
           items: obj.items.map(({ id, isVattable, taxDetails, ...rest }) => ({
             seqNo: id,
             applyVat: isVattable,
+            minPrice: parseFloat(rest.minPrice),
             ...rest
           })),
           taxes: [
@@ -229,8 +231,6 @@ export default function SaleTransactionForm({ labels, access, recordId, function
           ],
           ...(({ header, items, taxes, ...rest }) => rest)(obj)
         }
-
-        console.log(payload)
 
         const saTrxRes = await postRequest({
           extension: SaleRepository.SalesTransaction.set2,
@@ -425,7 +425,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
           const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
           if (minPrice > 0 && unitPrice < minPrice) {
             stackError({
-              message: `The unit price (${unitPrice}) is below the minimum price (${minPrice}). Please review.`,
+              message: `${labels.minPriceError}: ${minPrice}`,
             });
           }
           setFilteredMU(filteredMeasurements)
@@ -593,7 +593,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
 
         if (minPrice > 0 && unitPrice < minPrice) {
           stackError({
-            message: `The unit price (${unitPrice}) is below the minimum price (${minPrice}).`,
+            message: `${labels.minPriceError}: ${minPrice}`,
           });
         }
         getItemPriceRow(update, newRow, DIRTYFIELD_UNIT_PRICE)
@@ -1452,8 +1452,6 @@ export default function SaleTransactionForm({ labels, access, recordId, function
 
     invalidate()
   }
-
-  console.log(formik)
 
   return (
     <FormShell
