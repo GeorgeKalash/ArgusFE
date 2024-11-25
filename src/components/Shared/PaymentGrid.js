@@ -160,7 +160,7 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
         } else {
           update({
             returnedAmount: returnValue,
-            amount: parseFloat(amount || 0) - parseFloat(totalPaidAmount || 0)
+            amount: (parseFloat(amount || 0) - parseFloat(totalPaidAmount || 0)).toFixed(2)
           })
         }
       }
