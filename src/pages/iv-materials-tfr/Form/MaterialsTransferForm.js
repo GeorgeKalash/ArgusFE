@@ -52,7 +52,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     date: new Date(),
     closedDate: null,
     receivedDate: null,
-    fromSiteId: null,
+    fromSiteId: '',
     toSiteId: '',
     notes: '',
     status: 1,
@@ -95,7 +95,8 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
 
   async function getDefaultFromSiteId() {
     const defaultFromSiteId = userDefaultsData?.list?.find(({ key }) => key === 'siteId')
-    formik.setFieldValue('fromSiteId', parseInt(defaultFromSiteId?.value))
+
+    if (defaultFromSiteId?.value) formik.setFieldValue('fromSiteId', parseInt(defaultFromSiteId?.value || ''))
   }
 
   const { formik } = useForm({
@@ -763,7 +764,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
                     required
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('fromSiteId', newValue?.recordId)
+                      formik.setFieldValue('fromSiteId', newValue?.recordId || '')
                     }}
                     error={formik.touched.fromSiteId && Boolean(formik.errors.fromSiteId)}
                   />
