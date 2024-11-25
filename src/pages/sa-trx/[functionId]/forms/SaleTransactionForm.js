@@ -1705,7 +1705,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                   onChange={(event, newValue) => {
                     fillClientData(newValue)
                   }}
-                  secondFieldLabel={'header.clientName'}
+                  secondFieldName={'header.clientName'}
                   onSecondValueChange={(name, value) => {
                     formik.setFieldValue('header.clientName', value)
                   }}
