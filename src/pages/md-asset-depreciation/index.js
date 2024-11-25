@@ -99,12 +99,12 @@ const AssetsDescription = () => {
     }
   ]
 
-  function openForm(obj) {
+  function openForm(recordId) {
     stack({
       Component: AssetsForm,
       props: {
         labels: _labels,
-        obj,
+        recordId,
         maxAccess: access
       },
       width: 1200,

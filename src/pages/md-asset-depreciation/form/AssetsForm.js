@@ -22,7 +22,7 @@ import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { useInvalidate } from 'src/hooks/resource'
 
-export default function AssetsForm({ obj, maxAccess: access, labels, window }) {
+export default function AssetsForm({ recordId, maxAccess: access, labels, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const [data, setData] = useState([])
@@ -31,7 +31,7 @@ export default function AssetsForm({ obj, maxAccess: access, labels, window }) {
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.AssetsDepreciation,
     access: access,
-    enabled: !obj?.recordId
+    enabled: !recordId
   })
 
   const invalidate = useInvalidate({
@@ -79,7 +79,7 @@ export default function AssetsForm({ obj, maxAccess: access, labels, window }) {
         record: JSON.stringify({ header: formattedObj, items: data.list || [] })
       })
 
-      if (!obj.recordId) {
+      if (!recordId) {
         toast.success(platformLabels.Added)
 
         formik.setFieldValue('recordId', response.recordId)
@@ -104,7 +104,7 @@ export default function AssetsForm({ obj, maxAccess: access, labels, window }) {
 
   useEffect(() => {
     ;(async function () {
-      await getData(obj?.recordId)
+      await getData(recordId)
     })()
   }, [])
 
@@ -126,10 +126,10 @@ export default function AssetsForm({ obj, maxAccess: access, labels, window }) {
 
   useEffect(() => {
     ;(async function () {
-      if (obj?.recordId) {
+      if (recordId) {
         const res = await getRequest({
           extension: FixedAssetsRepository.AssetsTableData.qry,
-          parameters: `_depId=${obj.recordId}`
+          parameters: `_depId=${recordId}`
         })
         setData(res)
       }
