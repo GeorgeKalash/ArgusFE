@@ -39,7 +39,6 @@ const CustomLookup = ({
   hidden = false,
   isLoading,
   minChars,
-  userTypes = true,
   onBlur = () => {},
   onFocus = () => {},
   ...props
@@ -96,7 +95,7 @@ const CustomLookup = ({
           name={name}
           key={firstValue || null}
           value={firstValue}
-          {...(userTypes && !firstValue && { inputValue: inputValue })}
+          {...(!firstValue && { inputValue: inputValue })}
           size={size}
           options={store}
           filterOptions={options => {
@@ -239,7 +238,7 @@ const CustomLookup = ({
                           setInputValue('')
                           onChange(name, '')
                           setStore([])
-                          setFreeSolo(false)
+                          setFreeSolo(true)
                         }}
                         aria-label='clear input'
                       >
