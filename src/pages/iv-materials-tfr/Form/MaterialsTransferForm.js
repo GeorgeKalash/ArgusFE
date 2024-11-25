@@ -83,6 +83,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
         trackBy: null,
         lotCategoryId: null,
         metalId: null,
+        metalRef: '',
         totalCost: 0,
         priceType: null
       }
@@ -229,7 +230,8 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
 
     return {
       weight: res?.record?.weight ?? 0,
-      metalId: res?.record?.metalId
+      metalId: res?.record?.metalId,
+      metalRef: res?.record?.metalRef
     }
   }
 
@@ -328,7 +330,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       },
       async onChange({ row: { update, newRow } }) {
         if (newRow?.itemId) {
-          const { weight, metalId } = await getWeightAndMetalId(newRow?.itemId)
+          const { weight, metalId, metalRef } = await getWeightAndMetalId(newRow?.itemId)
           const unitCost = (await getUnitCost(newRow?.itemId)) ?? 0
           const totalCost = calcTotalCost(newRow)
           const itemInfo = await getItem(newRow.itemId)
@@ -342,7 +344,8 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
             msId: itemInfo?.msId,
             muRef: filteredMeasurements?.[0]?.reference,
             muId: filteredMeasurements?.[0]?.recordId,
-            metalId
+            metalId,
+            metalRef
           })
         }
       }
@@ -358,7 +361,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     {
       component: 'numberfield',
       label: labels.metalRef,
-      name: 'metalId',
+      name: 'metalRef',
       props: {
         readOnly: true
       }
