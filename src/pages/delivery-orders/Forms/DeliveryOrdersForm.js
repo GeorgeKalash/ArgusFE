@@ -130,7 +130,12 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
     validationSchema: yup.object({
       plantId: yup.number().required(),
       vehicleId: yup.string().required(),
-      driverId: yup.string().required()
+      driverId: yup.string().required(),
+      orders: yup.array().of(
+        yup.object({
+          reference: yup.string().required()
+        })
+      )
     }),
     onSubmit: async obj => {
       const copy = { ...obj }
