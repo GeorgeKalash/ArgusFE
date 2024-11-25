@@ -166,7 +166,8 @@ export const SaleRepository = {
     set: service + 'setFII'
   },
   SATrx: {
-    qry: service + 'qryTRX'
+    qry: service + 'qryTRX',
+    qry2: service + 'qryTRX2'
   },
   SalesTransaction: {
     qry: service + 'qryTR',
