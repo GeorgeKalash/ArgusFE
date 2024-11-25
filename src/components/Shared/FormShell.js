@@ -118,7 +118,6 @@ export default function FormShell({
                 stack({
                   Component: ClientSalesTransaction,
                   props: {
-                    recordId: form.values?.recordId,
                     functionId: functionId,
                     clientId: form?.values?.header?.clientId
                   },

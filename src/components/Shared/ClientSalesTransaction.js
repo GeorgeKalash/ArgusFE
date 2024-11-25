@@ -7,13 +7,13 @@ import { Grow } from './Layouts/Grow'
 import { VertLayout } from './Layouts/VertLayout'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 
-const ClientSalesTransaction = ({ functionId, recordId, clientId }) => {
+const ClientSalesTransaction = ({ functionId, clientId }) => {
   const { getRequest } = useContext(RequestsContext)
   const [data, setData] = useState([])
   async function fetchGridData() {
     const response = await getRequest({
       extension: SaleRepository.SATrx.qry2,
-      parameters: `_functionId=${functionId}&_recordId=${recordId || 0}&_clientId=${clientId}`
+      parameters: `_functionId=${functionId}&_recordId=${0}&_clientId=${clientId}`
     })
     setData(response || [])
   }
