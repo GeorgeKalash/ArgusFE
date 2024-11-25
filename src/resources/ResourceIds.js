@@ -302,5 +302,6 @@ export const ResourceIds = {
   MigrateBarcodeData: 41508,
   ClientSalesTransaction: 51345,
   POSDefaults: 54103,
-  GlSync: 30501
+  GlSync: 30501,
+  FyOpening: 30503
 }
