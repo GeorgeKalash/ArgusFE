@@ -65,12 +65,20 @@ export default function PlantSupervisorsForm({ _labels: labels, maxAccess }) {
         parameters: `_plantId=${formik.values.plantId}`
       })
 
-      const mappedRows = res?.list?.map((item, index) => ({
-        ...item,
-        id: index + 1
-      }))
-
-      formik.setFieldValue('rows', mappedRows)
+      if (res?.list?.length > 0) {
+        const mappedRows = res?.list?.map((item, index) => ({
+          ...item,
+          id: index + 1
+        }))
+        formik.setFieldValue('rows', mappedRows)
+      } else {
+        formik.setFieldValue('rows', [
+          {
+            id: 1,
+            supervisorId: ''
+          }
+        ])
+      }
     } else {
       formik.setFieldValue('rows', [
         {
@@ -118,7 +126,13 @@ export default function PlantSupervisorsForm({ _labels: labels, maxAccess }) {
   ]
 
   return (
-    <FormShell resourceId={ResourceIds.PlantSupervisors} isInfo={false} form={formik} maxAccess={maxAccess} editMode={false}>
+    <FormShell
+      resourceId={ResourceIds.PlantSupervisors}
+      isInfo={false}
+      form={formik}
+      maxAccess={maxAccess}
+      editMode={false}
+    >
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
