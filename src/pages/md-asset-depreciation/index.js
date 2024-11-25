@@ -114,7 +114,7 @@ const AssetsDescription = () => {
   }
 
   const edit = obj => {
-    openForm(obj)
+    openForm(obj?.recordId)
   }
 
   const add = () => {

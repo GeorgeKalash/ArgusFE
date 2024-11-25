@@ -25,8 +25,6 @@ import { useInvalidate } from 'src/hooks/resource'
 export default function AssetsForm({ recordId, maxAccess: access, labels, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const [data, setData] = useState([])
-  const [preiewPressed, setPreviewPressed] = useState(false)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.AssetsDepreciation,
@@ -46,14 +44,6 @@ export default function AssetsForm({ recordId, maxAccess: access, labels, window
 
     return `${month}-${day}-${year}`
   }
-  async function fetchData() {
-    const response = await getRequest({
-      extension: FixedAssetsRepository.AssetsDescription.preview,
-      parameters: `_asOfDate=${formatDate(formik.values.date)}`
-    })
-    setPreviewPressed(true)
-    setData(response)
-  }
 
   const { formik } = useForm({
     maxAccess,
@@ -64,19 +54,22 @@ export default function AssetsForm({ recordId, maxAccess: access, labels, window
       notes: '',
       status: 1,
       dtId: documentType?.dtId,
-      plantId: ''
+      plantId: '',
+      asset: []
     },
     validateOnChange: true,
     validationSchema: yup.object({}),
     onSubmit: async obj => {
+      const { asset, ...rest } = obj
+
       const formattedObj = {
-        ...obj,
+        ...rest,
         date: formatDateToApi(obj.date)
       }
 
       const response = await postRequest({
         extension: FixedAssetsRepository.AssetsDescription.set2,
-        record: JSON.stringify({ header: formattedObj, items: data.list || [] })
+        record: JSON.stringify({ header: formattedObj, items: formik.values.asset.list || [] })
       })
 
       if (!recordId) {
@@ -88,6 +81,13 @@ export default function AssetsForm({ recordId, maxAccess: access, labels, window
       invalidate()
     }
   })
+  async function fetchData() {
+    const response = await getRequest({
+      extension: FixedAssetsRepository.AssetsDescription.preview,
+      parameters: `_asOfDate=${formatDate(formik.values.date)}`
+    })
+    formik.setFieldValue('asset', response)
+  }
 
   const editMode = !!formik.values.recordId
 
@@ -104,34 +104,23 @@ export default function AssetsForm({ recordId, maxAccess: access, labels, window
 
   useEffect(() => {
     ;(async function () {
-      await getData(recordId)
-    })()
-  }, [])
-
-  const getData = async recordId => {
-    try {
       if (recordId) {
-        const res = await getRequest({
+        const res1 = await getRequest({
           extension: FixedAssetsRepository.AssetsDescription.get,
           parameters: `_recordId=${recordId}`
         })
 
         formik.setValues({
-          ...res.record,
-          date: formatDateFromApi(res.record.date)
+          ...res1.record,
+          date: formatDateFromApi(res1.record.date)
         })
-      }
-    } catch (exception) {}
-  }
 
-  useEffect(() => {
-    ;(async function () {
-      if (recordId) {
-        const res = await getRequest({
+        const res2 = await getRequest({
           extension: FixedAssetsRepository.AssetsTableData.qry,
           parameters: `_depId=${recordId}`
         })
-        setData(res)
+
+        formik.setFieldValue('asset', res2)
       }
     })()
   }, [])
@@ -185,6 +174,7 @@ export default function AssetsForm({ recordId, maxAccess: access, labels, window
       flex: 1
     }
   ]
+  const isStatusNotOne = formik.values.status !== 1
 
   const actions = [
     {
@@ -197,15 +187,17 @@ export default function AssetsForm({ recordId, maxAccess: access, labels, window
       key: 'Post',
       condition: true,
       onClick: onPost,
-      disabled: !editMode || formik.values.status !== 1
+      disabled: !editMode || isStatusNotOne
     },
     {
       key: 'PR',
       condition: true,
       onClick: fetchData,
-      disabled: editMode || preiewPressed
+      disabled: editMode || formik.values.asset.count > 0
     }
   ]
+
+  console.log(formik.values.asset, 'dataaaaaaaaaa')
 
   return (
     <FormShell
@@ -216,8 +208,8 @@ export default function AssetsForm({ recordId, maxAccess: access, labels, window
       maxAccess={maxAccess}
       functionId={SystemFunction.AssetsDepreciation}
       previewReport={true}
-      disabledSubmit={formik.values.status !== 1}
-      isCleared={!formik.values.status !== 1}
+      disabledSubmit={isStatusNotOne}
+      isCleared={!isStatusNotOne}
     >
       <VertLayout>
         <Fixed>
@@ -311,7 +303,7 @@ export default function AssetsForm({ recordId, maxAccess: access, labels, window
         <Grow>
           <Table
             columns={columns}
-            gridData={data}
+            gridData={formik.values.asset}
             rowId={['recordId']}
             isLoading={false}
             maxAccess={access}
