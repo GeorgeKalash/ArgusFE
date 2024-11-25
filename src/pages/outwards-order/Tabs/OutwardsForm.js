@@ -265,15 +265,10 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
   }
 
   const vatAmount = (formik.values.commission * formik.values.vatRate) / 100
-  console.log(formik.values.vatRate)
-  console.log(formik.values.lcAmount)
-  console.log(formik.values.commission)
-  console.log(vatAmount)
 
   const amount = parseFloat(
     parseFloat(formik.values.lcAmount) + (formik.values.commission + vatAmount - formik.values.tdAmount)
   )
-  console.log(amount)
 
   const onProductSubmit = productData => {
     formik.setFieldValue('products', productData?.list)
@@ -531,7 +526,6 @@ export default function OutwardsForm({ labels, access, recordId, plantId, userId
 
   async function openRV() {
     window.close()
-
     const cashAccountId = await getCashAccountId()
     stack({
       Component: ReceiptVoucherForm,

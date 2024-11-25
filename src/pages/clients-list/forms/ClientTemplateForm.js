@@ -353,7 +353,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       Component: OTPPhoneVerification,
       props: {
         recordId: formik.values.recordId,
-        formValidation: formik,
+        values: formik.values,
         functionId: formik.values.functionId,
         setEditMode: setEditMode,
         getData: getClient
