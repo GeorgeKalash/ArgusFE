@@ -811,6 +811,12 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       condition: !isPosted,
       onClick: onPost,
       disabled: !editMode
+    },
+    {
+      key: 'ClientSalesTransaction',
+      condition: true,
+      onClick: 'onClientSalesTransaction',
+      disabled: !formik.values.header?.clientId
     }
   ]
 
