@@ -353,7 +353,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
       Component: OTPPhoneVerification,
       props: {
         recordId: formik.values.recordId,
-        formValidation: formik,
+        values: formik.values,
         functionId: formik.values.functionId,
         setEditMode: setEditMode,
         getData: getClient
@@ -800,7 +800,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                       <Grid item xs={5}>
                         <CustomTextField
                           name='idNo'
-                          label={labels.id_number}
+                          label={labels.idNo}
                           type={showAsPassword ? 'password' : ''}
                           value={formik.values?.idNo}
                           required

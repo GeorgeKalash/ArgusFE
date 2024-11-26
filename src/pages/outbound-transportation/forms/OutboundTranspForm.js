@@ -24,10 +24,13 @@ import { SaleRepository } from 'src/repositories/SaleRepository'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import CustomTimePicker from 'src/components/Inputs/CustomTimePicker'
 import dayjs from 'dayjs'
+import StrictUnpostConfirmation from 'src/components/Shared/StrictUnpostConfirmation'
+import { useWindow } from 'src/windows'
 
 export default function OutboundTranspForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { stack } = useWindow()
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.DeliveryTrip,
@@ -243,6 +246,18 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
     await refetchForm(formik.values.recordId)
   }
 
+  const onUnpost = async () => {
+    await postRequest({
+      extension: DeliveryRepository.Trip.unpost,
+      record: JSON.stringify(formik.values)
+    })
+
+    toast.success(platformLabels.Unposted)
+    invalidate()
+
+    await refetchForm(formik.values.recordId)
+  }
+
   const onClose = async () => {
     const res = await postRequest({
       extension: DeliveryRepository.Trip.close,
@@ -278,10 +293,17 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
 
   const actions = [
     {
-      key: 'Post',
-      condition: true,
+      key: 'Locked',
+      condition: isPosted,
+      onClick: 'onUnpostConfirmation',
+      onSuccess: onUnpost,
+      disabled: !editMode || !isClosed
+    },
+    {
+      key: 'Unlocked',
+      condition: !isPosted,
       onClick: onPost,
-      disabled: isPosted || !editMode || !isClosed
+      disabled: !editMode || !isClosed
     },
     {
       key: 'Close',
@@ -296,6 +318,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
       disabled: !isClosed || isPosted
     }
   ]
+
 
   const columns = [
     {
@@ -362,7 +385,6 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
   ]
 
   async function previewBtnClicked() {
-    console.log('previewBtnClicked')
     const data = { printStatus: 2, recordId: formik.values.recordId }
 
     await postRequest({

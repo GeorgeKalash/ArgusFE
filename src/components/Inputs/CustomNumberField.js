@@ -4,6 +4,7 @@ import { Button, IconButton, InputAdornment, TextField } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
 import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
 import { getNumberWithoutCommas } from 'src/lib/numberField-helper'
+import { TrxType } from 'src/resources/AccessLevels'
 
 const CustomNumberField = ({
   variant = 'outlined',
@@ -17,15 +18,17 @@ const CustomNumberField = ({
   decimalScale = 2,
   onClear,
   hidden = false,
+  unClearable = false,
   error,
   helperText,
   hasBorder = true,
   editMode = false,
   maxLength = 1000,
   thousandSeparator = ',',
-  min = '',
-  max = '',
+  min,
+  max,
   allowNegative = true,
+  arrow = false,
   displayCycleButton = false,
   handleCycleButtonClick,
   cycleButtonLabel = '',
@@ -37,7 +40,7 @@ const CustomNumberField = ({
 
   const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
 
-  const _readOnly = editMode ? editMode && maxAccess < TrxType.EDIT : readOnly || accessLevel === DISABLED
+  const _readOnly = editMode ? editMode && maxAccess < TrxType.EDIT : accessLevel > DISABLED ? false : readOnly
 
   const _hidden = accessLevel ? accessLevel === HIDDEN : hidden
 
@@ -120,12 +123,15 @@ const CustomNumberField = ({
       onInput={handleInput}
       InputProps={{
         inputProps: {
-          tabIndex: readOnly ? -1 : 0, // Prevent focus on the input field
+          min: min,
+          max: max,
+          type: arrow ? 'number' : 'text',
+          tabIndex: readOnly ? -1 : 0,
           onKeyPress: handleKeyPress
         },
         autoComplete: 'off',
         readOnly: _readOnly,
-        endAdornment: (!_readOnly || allowClear) && !props.disabled && (value || value === 0) && (
+        endAdornment: (!readOnly || allowClear) && !unClearable && !props.disabled && (value || value === 0) && (
           <InputAdornment position='end'>
             {displayCycleButton && (
               <Button
@@ -160,7 +166,7 @@ const CustomNumberField = ({
       sx={{
         '& .MuiOutlinedInput-root': {
           '& fieldset': {
-            border: !hasBorder && 'none' // Hide border
+            border: !hasBorder && 'none'
           }
         }
       }}
