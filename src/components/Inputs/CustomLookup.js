@@ -305,7 +305,7 @@ const CustomLookup = ({
               inputProps: {
                 tabIndex: _readOnly || secondFieldName === '' ? -1 : 0 // Prevent focus on the input field
               },
-              readOnly: !!secondFieldName ? false : true
+              readOnly: !!secondFieldName && !_readOnly ? false : true
             }}
             error={error}
             helperText={helperText}
