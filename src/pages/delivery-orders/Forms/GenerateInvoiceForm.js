@@ -18,7 +18,6 @@ import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { DeliveryRepository } from 'src/repositories/DeliveryRepository'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
-import { useWindow } from 'src/windows'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { useError } from 'src/error'
 
@@ -26,7 +25,6 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData } = useContext(ControlContext)
   const { stack: stackError } = useError()
-  const { stack } = useWindow()
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.SalesInvoice,
@@ -159,9 +157,6 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
               />
             </Grid>
             <Grid item xs={12}>
-              <CustomTextField name='reference' label={labels.reference} value={formik.values.reference} readOnly />
-            </Grid>
-            <Grid item xs={12}>
               <ResourceLookup
                 endpointId={SaleRepository.Client.snapshot}
                 valueField='reference'
@@ -179,8 +174,16 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
             <Grid item xs={12}>
               <CustomTextField
                 name='currencyName'
-                label={labels.currencyName}
+                label={labels.currency}
                 value={formik.values.currencyName}
+                readOnly
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='reference'
+                label={labels.deliveryOrderReference}
+                value={formik.values.reference}
                 readOnly
               />
             </Grid>
