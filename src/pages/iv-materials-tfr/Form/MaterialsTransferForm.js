@@ -167,8 +167,6 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
         lots: []
       }
 
-      let notificationData
-
       const res = await postRequest({
         extension: InventoryRepository.MaterialsTransfer.set2,
         record: JSON.stringify(resultObject)
@@ -522,8 +520,6 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       record: JSON.stringify(copy)
     })
 
-    let notificationData
-
     if (formik.values.notificationGroupId) {
       handleNotificationSubmission(formik.values.recordId, formik.values.reference, formik, 3)
     } else if (!formik.values.notificationGroupId) {
@@ -540,6 +536,25 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     }
 
     toast.success(platformLabels.Posted)
+    invalidate()
+    await refetchForm(formik.values.recordId)
+  }
+
+
+  const onUnpost = async () => {
+    const copy = { ...formik.values }
+    delete copy.transfers
+    delete copy.notificationGroupId
+    copy.date = !!copy.date ? formatDateToApi(copy.date) : null
+    copy.closedDate = !!copy.closedDate ? formatDateToApi(copy.closedDate) : null
+    copy.receivedDate = !!copy.receivedDate ? formatDateToApi(copy.receivedDate) : null
+
+    await postRequest({
+      extension: InventoryRepository.MaterialsTransfer.unpost,
+      record: JSON.stringify(copy)
+    })
+
+    toast.success(platformLabels.Unposted)
     invalidate()
     await refetchForm(formik.values.recordId)
   }
@@ -575,12 +590,6 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       condition: !isPosted,
       onClick: onPost,
       disabled: !editMode || !isClosed
-    },
-    {
-      key: 'Post',
-      condition: true,
-      onClick: onPost,
-      disabled: isPosted || !editMode || !isClosed
     },
     {
       key: 'Close',
