@@ -1463,7 +1463,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                     editMode={editMode}
                     maxAccess={maxAccess}
                     onClear={() => formik.setFieldValue('header.date', '')}
-                    error={formik.touched.date && Boolean(formik.errors.date)}
+                    error={formik.touched?.header?.date && Boolean(formik.errors?.header?.date)}
                   />
                 </Grid>
                 <Grid item xs={4}>
@@ -1512,7 +1512,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                       formik.setFieldValue('header.siteRef', newValue ? newValue.reference : null)
                       formik.setFieldValue('header.siteName', newValue ? newValue.name : null)
                     }}
-                    error={formik.touched.siteId && Boolean(formik.errors.siteId)}
+                    error={formik.touched?.header?.siteId && Boolean(formik.errors?.header?.siteId)}
                   />
                 </Grid>
               </Grid>
@@ -1617,7 +1617,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                   onChange={(event, newValue) => {
                     formik.setFieldValue('header.currencyId', newValue?.recordId || null)
                   }}
-                  error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
+                  error={formik.touched?.header?.currencyId && Boolean(formik.errors?.header?.currencyId)}
                 />
               </Grid>
               <Grid item xs={7}>
