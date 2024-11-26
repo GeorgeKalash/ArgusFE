@@ -100,6 +100,22 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     if (defaultFromSiteId?.value) formik.setFieldValue('fromSiteId', parseInt(defaultFromSiteId?.value || ''))
   }
 
+  async function handleNotificationSubmission(recordId, reference, formik, status) {
+    const notificationData = {
+      recordId: recordId,
+      functionId: SystemFunction.MaterialTransfer,
+      notificationGroupId: formik.values.notificationGroupId,
+      date: formik.values.date,
+      reference: reference,
+      status: status
+    }
+
+    await postRequest({
+      extension: AccessControlRepository.Notification.set,
+      record: JSON.stringify(notificationData)
+    })
+  }
+
   const { formik } = useForm({
     initialValues,
     maxAccess,
@@ -170,36 +186,12 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
         formik.setFieldValue('reference', res2.record.reference)
 
         if (!!formik.values.notificationGroupId) {
-          notificationData = {
-            recordId: res.recordId,
-            functionId: SystemFunction.MaterialTransfer,
-            notificationGroupId: formik.values.notificationGroupId,
-            date: formik.values.date,
-            reference: res2.record.reference,
-            status: 1
-          }
-
-          await postRequest({
-            extension: AccessControlRepository.Notification.set,
-            record: JSON.stringify(notificationData)
-          })
+          handleNotificationSubmission(res.recordId, res2.record.reference, formik, 1)
         }
         invalidate()
       } else {
         if (formik.values.notificationGroupId) {
-          notificationData = {
-            recordId: res.recordId,
-            functionId: SystemFunction.MaterialTransfer,
-            notificationGroupId: formik.values.notificationGroupId,
-            date: formik.values.date,
-            reference: formik.values.reference,
-            status: 1
-          }
-
-          await postRequest({
-            extension: AccessControlRepository.Notification.set,
-            record: JSON.stringify(notificationData)
-          })
+          handleNotificationSubmission(res.recordId, formik.values.reference, formik, 1)
         } else if (!formik.values.notificationGroupId && res.recordId) {
           const data = {
             recordId: res.recordId,
@@ -533,19 +525,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     let notificationData
 
     if (formik.values.notificationGroupId) {
-      notificationData = {
-        recordId: formik.values.recordId,
-        functionId: SystemFunction.MaterialTransfer,
-        notificationGroupId: formik.values.notificationGroupId,
-        date: formik.values.date,
-        reference: formik.values.reference,
-        status: 3
-      }
-
-      await postRequest({
-        extension: AccessControlRepository.Notification.set,
-        record: JSON.stringify(notificationData)
-      })
+      handleNotificationSubmission(formik.values.recordId, formik.values.reference, formik, 3)
     } else if (!formik.values.notificationGroupId) {
       const data = {
         recordId: formik.values.recordId,
@@ -582,6 +562,19 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       condition: true,
       onClick: 'onInventoryTransaction',
       disabled: !editMode || !isPosted
+    },
+    {
+      key: 'Locked',
+      condition: isPosted,
+      onClick: 'onUnpostConfirmation',
+      onSuccess: onUnpost,
+      disabled: !editMode || !isClosed
+    },
+    {
+      key: 'Unlocked',
+      condition: !isPosted,
+      onClick: onPost,
+      disabled: !editMode || !isClosed
     },
     {
       key: 'Post',
