@@ -91,7 +91,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
   }
 
   const invalidate = useInvalidate({
-    endpointId: InventoryRepository.MaterialsTransfer.qry
+    endpointId: InventoryRepository.MaterialsTransfer.page
   })
 
   async function getDefaultFromSiteId() {
