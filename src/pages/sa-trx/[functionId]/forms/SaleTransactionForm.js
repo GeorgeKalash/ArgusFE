@@ -406,7 +406,6 @@ export default function SaleTransactionForm({ labels, access, recordId, function
               : parseFloat(ItemConvertPrice?.unitPrice || 0).toFixed(3)
 
           const minPrice = parseFloat(ItemConvertPrice?.minPrice || 0).toFixed(3)
-          formik.setFieldValue(`items[${newRow.id - 1}].minPrice`, minPrice)
           let rowTax = null
           let rowTaxDetails = null
 
@@ -443,8 +442,6 @@ export default function SaleTransactionForm({ labels, access, recordId, function
           const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
           if (parseFloat(unitPrice) < parseFloat(minPrice)) {
             ShowMinPriceValueErrorMessage(minPrice, unitPrice)
-
-            return false
           }
           setFilteredMU(filteredMeasurements)
           update({
