@@ -51,10 +51,6 @@ const CustomTextField = ({
     }
   }, [value])
 
-  console.log(maxAccess, 'maxAaaaaaa')
-  console.log(_readOnly, 'readddddddd')
-  console.log(accessLevel, 'accessLevel')
-
   useEffect(() => {
     if (inputRef.current && typeof inputRef.current.selectionStart !== undefined && position) {
       inputRef.current.setSelectionRange(position, position)

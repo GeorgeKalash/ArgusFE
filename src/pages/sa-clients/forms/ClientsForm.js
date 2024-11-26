@@ -33,7 +33,6 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
     readOnlyOnEditMode: store.recordId,
     name: 'reference'
   })
-  console.log(maxAccess, 'maxxaaaaa')
 
   const invalidate = useInvalidate({
     endpointId: SaleRepository.Client.page
