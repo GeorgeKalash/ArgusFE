@@ -142,8 +142,6 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       copy.date = !!copy.date ? formatDateToApi(copy.date) : null
       copy.closedDate = !!copy.closedDate ? formatDateToApi(copy.closedDate) : null
       copy.receivedDate = !!copy.receivedDate ? formatDateToApi(copy.receivedDate) : null
-      copy.status = copy.status
-      copy.wip = copy.wip
 
       const updatedRows = formik?.values?.transfers.map((transferDetail, index) => {
         return {
