@@ -95,7 +95,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
   })
 
   async function getDefaultFromSiteId() {
-    if (editMode) return;
+    if (editMode) return
 
     const defaultFromSiteId = userDefaultsData?.list?.find(({ key }) => key === 'siteId')
 
@@ -103,24 +103,19 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
   }
 
   async function handleNotificationSubmission(recordId, reference, formik, status) {
-    try {
-      const notificationData = {
-        recordId: recordId,
-        functionId: SystemFunction.MaterialTransfer,
-        notificationGroupId: formik.values.notificationGroupId,
-        date: formik.values.date,
-        reference: reference,
-        status: status
-      }
-  
-      await postRequest({
-        extension: AccessControlRepository.Notification.set,
-        record: JSON.stringify(notificationData)
-      })
-    } catch (error) {
-      console.log(error)
+    const notificationData = {
+      recordId: recordId,
+      functionId: SystemFunction.MaterialTransfer,
+      notificationGroupId: formik.values.notificationGroupId,
+      date: formik.values.date,
+      reference: reference,
+      status: status
     }
 
+    await postRequest({
+      extension: AccessControlRepository.Notification.set,
+      record: JSON.stringify(notificationData)
+    })
   }
 
   const { formik } = useForm({
@@ -252,8 +247,6 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     return rec.unitCost
   }
 
-  console.log(formik?.values?.transfers)
-
   const { totalQty, totalCost, totalWeight } = formik?.values?.transfers?.reduce(
     (acc, row) => {
       const qtyValue = parseFloat(row?.qty) || 0
@@ -268,10 +261,6 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     },
     { totalQty: 0, totalCost: 0, totalWeight: 0 }
   )
-
-  console.log('Total Qty:', totalQty)
-  console.log('Total Cost:', totalCost)
-  console.log('Total Weight:', totalWeight)
 
   const getMeasurementUnits = async () => {
     return await getRequest({
