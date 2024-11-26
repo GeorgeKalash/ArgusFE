@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -203,8 +203,6 @@ export default function AssetsForm({ recordId, maxAccess: access, labels, window
       disabled: editMode || formik.values.asset.count > 0
     }
   ]
-
-  console.log(formik.values.asset, 'dataaaaaaaaaa')
 
   return (
     <FormShell
