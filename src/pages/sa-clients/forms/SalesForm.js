@@ -34,7 +34,7 @@ export default function SalesForm({ labels, maxAccess, recordId, store }) {
         .number()
         .nullable()
         .transform((value, originalValue) => (originalValue === '' ? null : value))
-        .test('tdPct-smaller-than-maxDiscount', 'Discount % must be smaller than Max Discount.', function (value) {
+        .test(function (value) {
           const { maxDiscount } = this.parent
           if (value != null && maxDiscount != null) {
             return value < maxDiscount
@@ -144,7 +144,9 @@ export default function SalesForm({ labels, maxAccess, recordId, store }) {
                 maxAccess={maxAccess}
                 onChange={e => {
                   formik.handleChange(e)
-                  formik.setFieldValue('maxDiscount', e.target.value)
+                  if (!formik.values.maxDiscount) {
+                    formik.setFieldValue('maxDiscount', e.target.value)
+                  }
                 }}
                 onClear={() => formik.setFieldValue('tdPct', '')}
                 error={formik.touched.tdPct && Boolean(formik.errors.tdPct)}
