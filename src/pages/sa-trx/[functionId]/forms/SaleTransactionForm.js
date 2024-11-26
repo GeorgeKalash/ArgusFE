@@ -228,7 +228,6 @@ export default function SaleTransactionForm({ labels, access, recordId, function
           items: obj.items.map(({ id, isVattable, taxDetails, ...rest }) => ({
             seqNo: id,
             applyVat: isVattable,
-            minPrice: parseFloat(rest.minPrice),
             ...rest
           })),
           taxes: [
