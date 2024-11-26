@@ -803,11 +803,11 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
     const itemPriceRow = getIPR({
       priceType: newRow?.priceType || 0,
       basePrice: parseFloat(newRow?.basePrice) || 0,
-      volume: newRow?.volume,
+      volume: parseFloat(newRow?.volume),
       weight: parseFloat(newRow?.weight),
       unitPrice: parseFloat(newRow?.unitPrice || 0),
       upo: parseFloat(newRow?.upo) ? parseFloat(newRow?.upo) : 0,
-      qty: newRow?.qty,
+      qty: parseFloat(newRow?.qty),
       extendedPrice: parseFloat(newRow?.extendedPrice),
       mdAmount: parseFloat(newRow?.mdAmount),
       mdType: newRow?.mdType,
