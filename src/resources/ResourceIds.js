@@ -286,6 +286,7 @@ export const ResourceIds = {
   InventoryOpeningCosts: 41203,
   OpenMultiCurrencyCashTransfer: 33315,
   LockedRecords: 23302,
+  UserDefined: 41114,
   AvailabilitiesBySite: 41226,
   ProductionSheet: 42327,
   ProdSheetDocumentTypeDefault: 42120,
