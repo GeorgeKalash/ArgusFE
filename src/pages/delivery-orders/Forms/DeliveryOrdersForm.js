@@ -133,7 +133,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
       driverId: yup.string().required(),
       orders: yup.array().of(
         yup.object({
-          reference: yup.string().required()
+          mwRef: yup.string().required()
         })
       )
     }),
@@ -147,7 +147,8 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
         ...order,
         doId: recordId || 0,
         doSeqNo: index + 1,
-        id: index + 1
+        id: index + 1,
+        reference: order.mwRef 
       }))
 
       const data = {
@@ -363,7 +364,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
     {
       component: 'resourcecombobox',
       label: labels.reference,
-      name: 'reference',
+      name: 'mwRef',
       props: {
         endpointId: formik?.values?.clientId && DeliveryRepository.MW.qry,
         parameters: formik?.values?.clientId && `_clientId=${formik?.values?.clientId}`,
@@ -375,6 +376,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
           { from: 'reference', to: 'reference' },
           { from: 'itemName', to: 'itemName' },
           { from: 'seqNo', to: 'mwSeqNo' },
+          { from: 'qty', to: 'qty' },
           { from: 'functionId', to: 'mwFunctionId' },
           { from: 'reference', to: 'mwRef' },
           { from: 'itemId', to: 'itemId' },
@@ -387,7 +389,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
           { key: 'reference', value: 'Reference' },
           { key: 'itemName', value: 'Name' },
           { key: 'sku', value: 'SKU' },
-          { key: 'dropDownQty', value: 'Qty' }
+          { key: 'qty', value: 'Qty' }
         ],
         displayFieldWidth: 3
       }
@@ -646,6 +648,23 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
                       />
                     }
                     label={labels.exWorks}
+                  />
+                </Grid>
+                <Grid item xs={4}>
+                  <ResourceComboBox
+                    endpointId={SaleRepository.SalesZone.qry}
+                    parameters={`_startAt=0&_pageSize=1000&_sortField="recordId"&_filter=`}
+                    name='szId'
+                    label={labels.saleZone}
+                    readOnly={isPosted}
+                    columnsInDropDown={[{ key: 'name', value: 'Name' }]}
+                    valueField='recordId'
+                    displayField='name'
+                    values={formik.values}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('szId', newValue ? newValue.recordId : null)
+                    }}
+                    error={formik.touched.szId && Boolean(formik.errors.szId)}
                   />
                 </Grid>
               </Grid>
