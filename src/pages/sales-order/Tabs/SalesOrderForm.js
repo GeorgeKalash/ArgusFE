@@ -802,7 +802,7 @@ export default function SalesOrderForm({ labels, access, recordId, currency, win
 
     const itemPriceRow = getIPR({
       priceType: newRow?.priceType || 0,
-      basePrice: newRow?.basePrice || 0,
+      basePrice: parseFloat(newRow?.basePrice) || 0,
       volume: newRow?.volume,
       weight: parseFloat(newRow?.weight),
       unitPrice: parseFloat(newRow?.unitPrice || 0),
