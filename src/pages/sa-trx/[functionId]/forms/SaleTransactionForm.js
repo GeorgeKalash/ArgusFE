@@ -54,6 +54,7 @@ import { RateDivision } from 'src/resources/RateDivision'
 import { useError } from 'src/error'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import StrictUnpostConfirmation from 'src/components/Shared/StrictUnpostConfirmation'
+import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
 
 export default function SaleTransactionForm({ labels, access, recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -142,6 +143,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
         msId: 0,
         muRef: '',
         muQty: 0,
+        minPrice: 0,
         baseQty: 0,
         mdType: MDTYPE_PCT,
         basePrice: 0,
@@ -204,6 +206,19 @@ export default function SaleTransactionForm({ labels, access, recordId, function
     }),
     onSubmit: async obj => {
       try {
+        if (obj.header.serializedAddress) {
+          const addressData = {
+            clientId: obj.header.clientId,
+            address: address
+          }
+  
+          const addressRes = await postRequest({
+            extension: SaleRepository.Address.set,
+            record: JSON.stringify(addressData)
+          })
+          obj.header.billAddressId = addressRes.recordId
+        }
+
         const payload = {
           header: {
             ...obj.header,
@@ -384,6 +399,12 @@ export default function SaleTransactionForm({ labels, access, recordId, function
           const basePriceValue = postMetalToFinancials === false ? basePrice : 0
           const TotPricePerG = basePriceValue
 
+          const unitPrice =
+            ItemConvertPrice?.priceType === 3
+              ? weight * TotPricePerG
+              : parseFloat(ItemConvertPrice?.unitPrice || 0).toFixed(3)
+
+          const minPrice = parseFloat(ItemConvertPrice?.minPrice || 0).toFixed(3)
           let rowTax = null
           let rowTaxDetails = null
 
@@ -418,7 +439,9 @@ export default function SaleTransactionForm({ labels, access, recordId, function
           }
 
           const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
-
+          if (parseFloat(unitPrice) < parseFloat(minPrice)) {
+            ShowMinPriceValueErrorMessage(minPrice, unitPrice)
+          }
           setFilteredMU(filteredMeasurements)
           update({
             isMetal: isMetal,
@@ -434,10 +457,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                 : 0,
             baseLaborPrice: 0,
             TotPricePerG: TotPricePerG,
-            unitPrice:
-              ItemConvertPrice?.priceType === 3
-                ? weight * TotPricePerG
-                : parseFloat(ItemConvertPrice?.unitPrice || 0).toFixed(3),
+            unitPrice: unitPrice,
             upo: parseFloat(ItemConvertPrice?.upo || 0).toFixed(2),
             priceType: ItemConvertPrice?.priceType || 1,
             qty: 0,
@@ -450,6 +470,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
             extendedPrice: parseFloat('0').toFixed(2),
             mdValue: 0,
             taxId: rowTax,
+            minPrice,
             taxDetails: rowTaxDetails
           })
 
@@ -524,7 +545,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       label: labels.quantity,
       name: 'qty',
       updateOn: 'blur',
-      onChange({ row: { update, newRow } }) {
+      async onChange({ row: { update, newRow } }) {
         getItemPriceRow(update, newRow, DIRTYFIELD_QTY)
       }
     },
@@ -576,7 +597,13 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       label: labels.unitPrice,
       name: 'unitPrice',
       updateOn: 'blur',
-      async onChange({ row: { update, newRow } }) {
+      async onChange({ row: { update, oldRow, newRow } }) {
+        const unitPrice = parseFloat(newRow.unitPrice || 0).toFixed(3)
+        const minPrice = parseFloat(oldRow?.minPrice || 0).toFixed(3)
+
+        if (parseFloat(minPrice) > 0 && parseFloat(unitPrice) < parseFloat(minPrice)) {
+          ShowMinPriceValueErrorMessage(minPrice, unitPrice)
+        }
         getItemPriceRow(update, newRow, DIRTYFIELD_UNIT_PRICE)
       }
     },
@@ -789,6 +816,12 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       condition: !isPosted,
       onClick: onPost,
       disabled: !editMode
+    },
+    {
+      key: 'ClientSalesTransaction',
+      condition: true,
+      onClick: 'onClientSalesTransaction',
+      disabled: !formik.values.header?.clientId
     }
   ]
 
@@ -1207,6 +1240,14 @@ export default function SaleTransactionForm({ labels, access, recordId, function
     }
   }
 
+  function ShowMinPriceValueErrorMessage(minPrice, unitPrice) {
+    if (parseFloat(minPrice) > 0 && parseFloat(unitPrice) < parseFloat(minPrice)) {
+      stackError({
+        message: `${labels.minPriceError}: ${minPrice}`
+      })
+    }
+  }
+
   function checkMdAmountPct(rowData, update) {
     const maxClientAmountDiscount = rowData.unitPrice * (formik.values.header.maxDiscount / 100)
     if (!formik.values.header.maxDiscount) return
@@ -1250,6 +1291,34 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       title: labels.AddressFilter
     })
   }
+
+  function openAddressForm() {
+    stack({
+      Component: AddressFormShell,
+      props: {
+        address: address,
+        setAddress: setAddress,
+        isCleared: false,
+        isSavedClear: false
+      },
+      width: 850,
+      height: 620,
+      title: labels.address
+    })
+  }
+
+  useEffect(() => {
+    let billAdd = ''
+    const { name, street1, street2, city, phone, phone2, email1 } = address
+    if (name || street1 || street2 || city || phone || phone2 || email1) {
+      billAdd = `${name || ''}\n${street1 || ''}\n${street2 || ''}\n${city || ''}\n${phone || ''}\n${phone2 || ''}\n${
+        email1 || ''
+      }`
+    }
+
+    formik.setFieldValue('header.billAddress', billAdd)
+    formik.setFieldValue('header.serializedAddress', billAdd)
+  }, [address])
 
   function getDTD(dtId) {
     const res = getRequest({
@@ -1629,9 +1698,11 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                     readOnly={!formik.values.header.clientId || isPosted}
                     maxAccess={maxAccess}
                     viewDropDown={formik.values.header.clientId}
-                    onChange={e => formik.setFieldValue('header.BillAddress', e.target.value)}
-                    onClear={() => formik.setFieldValue('header.BillAddress', '')}
+                    viewAdd={formik.values.header.clientId && !editMode}
+                    onChange={e => formik.setFieldValue('header.billAddress', e.target.value)}
+                    onClear={() => formik.setFieldValue('header.billAddress', '')}
                     onDropDown={() => openAddressFilterForm()}
+                    handleAddAction={() => openAddressForm()}
                   />
                 </Grid>
               </Grid>
@@ -1646,19 +1717,14 @@ export default function SaleTransactionForm({ labels, access, recordId, function
               <Grid item xs={12}>
                 <ResourceLookup
                   endpointId={SaleRepository.Client.snapshot}
-                  valueField='reference'
-                  displayField='name'
                   name='clientId'
                   label={labels.client}
-                  form={formik}
-                  formObject={formik.values.header}
-                  required
-                  readOnly={isPosted}
-                  displayFieldWidth={3}
+                  valueField='reference'
+                  displayField='name'
                   valueShow='clientRef'
                   secondValueShow='clientName'
-                  maxAccess={maxAccess}
-                  editMode={editMode}
+                  formObject={formik.values.header}
+                  form={formik}
                   columnsInDropDown={[
                     { key: 'reference', value: 'Reference' },
                     { key: 'name', value: 'Name' },
@@ -1666,10 +1732,19 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                     { key: 'keywords', value: 'Keywords' },
                     { key: 'cgName', value: 'Client Group' }
                   ]}
-                  onChange={async (event, newValue) => {
+                  onChange={(event, newValue) => {
                     fillClientData(newValue)
                   }}
+                  secondFieldName={'header.clientName'}
+                  onSecondValueChange={(name, value) => {
+                    formik.setFieldValue('header.clientName', value)
+                  }}
                   errorCheck={'clientId'}
+                  maxAccess={maxAccess}
+                  required
+                  readOnly={isPosted}
+                  displayFieldWidth={3}
+                  editMode={editMode}
                 />
               </Grid>
 

@@ -88,5 +88,9 @@ export const AccessControlRepository = {
   },
   UserOTPQrcode: {
     secret: service + 'secretKEY'
+  },
+  PlantSupervisors: {
+    qry: service + 'qryPLS',
+    set2: service + 'set2PLS'
   }
 }
