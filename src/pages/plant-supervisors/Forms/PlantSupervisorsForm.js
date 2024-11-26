@@ -22,12 +22,7 @@ export default function PlantSupervisorsForm({ _labels: labels, maxAccess }) {
     initialValues: {
       recordId: null,
       plantId: '',
-      rows: [
-        {
-          id: 1,
-          supervisorId: ''
-        }
-      ]
+      rows: []
     },
     maxAccess,
     enableReinitialize: true,
@@ -59,6 +54,12 @@ export default function PlantSupervisorsForm({ _labels: labels, maxAccess }) {
   })
 
   const fetchSupervisors = async () => {
+    if (!formik.values.plantId) {
+      formik.setFieldValue('rows', []); 
+
+      return;
+    }
+
     if (formik.values.plantId) {
       const res = await getRequest({
         extension: AccessControlRepository.PlantSupervisors.qry,
@@ -79,8 +80,6 @@ export default function PlantSupervisorsForm({ _labels: labels, maxAccess }) {
           }
         ])
       }
-    } else {
-      formik.setFieldValue('rows', [])
     }
   }
 
@@ -154,7 +153,7 @@ export default function PlantSupervisorsForm({ _labels: labels, maxAccess }) {
           </Grid>
           <DataGrid
             onChange={value => {
-              formik.setFieldValue('rows', value)
+              formik.setFieldValue('rows', formik.values.plantId ? value : [])
             }}
             value={formik.values.rows}
             error={formik.errors.rows}
