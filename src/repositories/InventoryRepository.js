@@ -166,9 +166,6 @@ export const InventoryRepository = {
   Cost: {
     get: service + 'getCOS',
   },
-  Transaction: {
-    qry2: service + 'qry2TRX',
-  },
   DimensionUDT: { set: service + 'set2UDT', get: service + 'getUDT' },
   ItemPhysProp: {
     get: service + 'getPP'
