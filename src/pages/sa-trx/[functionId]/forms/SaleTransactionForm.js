@@ -63,6 +63,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
   const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
   const [cycleButtonState, setCycleButtonState] = useState({ text: '%', value: DIRTYFIELD_TDPCT })
   const [measurements, setMeasurements] = useState([])
+  const [address, setAddress] = useState({})
   const [filteredMu, setFilteredMU] = useState([])
   const [metalPriceVisibility, setmetalPriceVisibility] = useState(false)
   const [defaultsDataState, setDefaultsDataState] = useState(null)
@@ -314,6 +315,16 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       ShowMinPriceValueErrorMessage(minPrice, unitPrice)
     }
     setFilteredMU(filteredMeasurements)
+
+    if (setItemInfo) {
+      update({
+        sku: ItemConvertPrice?.sku,
+        barcode: ItemConvertPrice?.barcode,
+        itemName: ItemConvertPrice?.itemName,
+        itemId: ItemConvertPrice?.itemId
+      })
+    }
+
     update({
       isMetal: isMetal,
       metalId: metalId,
@@ -741,7 +752,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
     }
   ]
 
-  async function fillForm(recordId, saTrxPack) {
+  async function fillForm(saTrxPack) {
     const saTrxHeader = saTrxPack?.header
     const saTrxItems = saTrxPack?.items
     const saTrxTaxes = saTrxPack?.taxes
@@ -781,10 +792,9 @@ export default function SaleTransactionForm({ labels, access, recordId, function
         }
       })
     )
-
     formik.setValues({
-      recordId: recordId || null,
       ...formik.values,
+      recordId: saTrxHeader.recordId || null,
       header: {
         ...formik.values.header,
         ...saTrxHeader,
@@ -797,7 +807,6 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       items: modifiedList,
       taxes: [...saTrxTaxes]
     })
-    formik.setFieldValue('subtotal', saTrxHeader?.subtotal)
   }
 
   async function getSalesTransactionPack(transactionId) {
@@ -1009,13 +1018,13 @@ export default function SaleTransactionForm({ labels, access, recordId, function
     const itemPriceRow = getIPR({
       priceType: newRow?.priceType,
       basePrice: parseFloat(newRow?.basePrice || 0),
-      volume: newRow?.volume,
+      volume: parseFloat(newRow?.volume),
       weight: parseFloat(newRow?.weight),
       unitPrice: parseFloat(newRow?.unitPrice || 0),
       upo: parseFloat(newRow?.upo) ? parseFloat(newRow?.upo) : 0,
       qty: parseFloat(newRow?.qty),
       extendedPrice: parseFloat(newRow?.extendedPrice),
-      mdAmount: parseFloat(newRow?.mdAmount),
+      mdAmount: parseFloat(newRow?.mdAmount) || 0,
       mdType: newRow?.mdType,
       mdValue: parseFloat(newRow?.mdValue),
       baseLaborPrice: newRow?.baseLaborPrice,
@@ -1023,6 +1032,8 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       tdPct: formik?.values?.header?.tdPct || 0,
       dirtyField: dirtyField
     })
+
+    if (newRow.taxDetails.length > 0) newRow.taxDetails = [newRow.taxDetails[0]]
 
     const vatCalcRow = getVatCalc({
       basePrice: itemPriceRow?.basePrice,
@@ -1086,7 +1097,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
   const amount = reCal ? _footerSummary?.net : formik.values?.header.amount || 0
   const totalVolume = reCal ? _footerSummary?.totalVolume : formik.values?.header.volume || 0
   const totalWeight = reCal ? _footerSummary?.totalWeight : formik.values?.header.weight || 0
-  const subtotal = reCal ? subTotal : formik.values?.subtotal || 0
+  const subtotal = reCal ? subTotal : formik.values?.header.subtotal || 0
   const vatAmount = reCal ? _footerSummary?.sumVat : formik.values?.header.vatAmount || 0
 
   function checkDiscount(typeChange, tdPct, tdAmount, currentDiscount) {
@@ -1105,17 +1116,21 @@ export default function SaleTransactionForm({ labels, access, recordId, function
     formik.setFieldValue('header.tdType', _discountObj?.tdType)
     formik.setFieldValue('header.currentDiscount', _discountObj?.currentDiscount || 0)
     formik.setFieldValue('header.tdPct', _discountObj?.hiddenTdPct)
+
+    return _discountObj?.hiddenTdPct
   }
 
   function recalcNewVat(tdPct) {
     formik.values.items.map((item, index) => {
+      if (item.taxDetails.length > 0) item.taxDetails = [item.taxDetails[0]]
+
       const vatCalcRow = getVatCalc({
         basePrice: parseFloat(item?.basePrice),
-        qty: item?.qty,
+        qty: parseFloat(item?.qty),
         extendedPrice: parseFloat(item?.extendedPrice),
         baseLaborPrice: parseFloat(item?.baseLaborPrice),
         vatAmount: parseFloat(item?.vatAmount),
-        tdPct: tdPct,
+        tdPct: parseFloat(tdPct),
         taxDetails: item.taxDetails
       })
       formik.setFieldValue(`items[${index}].vatAmount`, parseFloat(vatCalcRow?.vatAmount).toFixed(2))
@@ -1123,8 +1138,8 @@ export default function SaleTransactionForm({ labels, access, recordId, function
   }
 
   async function recalcGridVat(typeChange, tdPct, tdAmount, currentDiscount) {
-    checkDiscount(typeChange, tdPct, tdAmount, currentDiscount)
-    recalcNewVat(tdPct)
+    const currentTdPct = checkDiscount(typeChange, tdPct, tdAmount, currentDiscount)
+    recalcNewVat(currentTdPct)
   }
 
   function ShowMdAmountErrorMessage(actualDiscount, clientMaxDiscount, rowData, update) {
@@ -1179,7 +1194,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
 
   async function refetchForm(recordId) {
     const saTrxpack = await getSalesTransactionPack(recordId)
-    await fillForm(recordId, saTrxpack)
+    await fillForm(saTrxpack)
   }
   function setAddressValues(obj) {
     Object.entries(obj).forEach(([key, value]) => {
@@ -1311,7 +1326,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
     ;(async function () {
       if (recordId && measurements) {
         const transactionPack = await getSalesTransactionPack(recordId)
-        await fillForm(recordId, transactionPack)
+        await fillForm(transactionPack)
       }
     })()
   }, [recordId, measurements])
@@ -1641,7 +1656,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                   onSecondValueChange={(name, value) => {
                     formik.setFieldValue('header.clientName', value)
                   }}
-                  errorCheck={'clientId'}
+                  errorCheck={'header.clientId'}
                   maxAccess={maxAccess}
                   required
                   readOnly={isPosted}
@@ -1818,7 +1833,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                     readOnly={isPosted}
                     handleCycleButtonClick={handleCycleButtonClick}
                     onChange={e => {
-                      let discount = Number(e.target.value)
+                      let discount = Number(e.target.value.replace(/,/g, ''))
                       if (formik.values.header.tdType == DIRTYFIELD_TDPCT) {
                         if (discount < 0 || discount > 100) discount = 0
                         formik.setFieldValue('header.tdPct', discount)
