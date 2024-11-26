@@ -10,6 +10,7 @@ import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/max
 
 import PopperComponent from '../Shared/Popper/PopperComponent'
 import { DateTimePicker } from '@mui/x-date-pickers'
+import { TrxType } from 'src/resources/AccessLevels'
 
 const CustomDateTimePicker = ({
   name,
@@ -46,10 +47,7 @@ const CustomDateTimePicker = ({
 
   const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
 
-  const _readOnly =
-    maxAccess < 3 ||
-    accessLevel === DISABLED ||
-    (readOnly && accessLevel !== MANDATORY && accessLevel !== FORCE_ENABLED)
+  const _readOnly = editMode ? editMode && maxAccess < TrxType.EDIT : accessLevel > DISABLED ? false : readOnly
 
   const _hidden = accessLevel ? accessLevel === HIDDEN : hidden
 
@@ -128,7 +126,7 @@ const CustomDateTimePicker = ({
         disabled={disabled}
         readOnly={_readOnly}
         clearable
-        shouldDisableDate={disabledDate && shouldDisableDate} 
+        shouldDisableDate={disabledDate && shouldDisableDate}
         slotProps={{
           textField: {
             required: isRequired,

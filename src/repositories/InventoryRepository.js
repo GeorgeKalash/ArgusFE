@@ -214,6 +214,11 @@ export const InventoryRepository = {
     qry: service + 'qryITP',
     set2: service + 'set2ITP'
   },
+  CurrentCost: {
+    get: service + 'getCOS',
+    qry: service + 'qryCOS',
+    snapshot: service + 'snapshotCOS'
+  },
   Availability: {
     qry: service + 'qryAVA'
   },
