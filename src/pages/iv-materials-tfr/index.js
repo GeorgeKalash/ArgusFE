@@ -20,7 +20,7 @@ import { SystemFunction } from 'src/resources/SystemFunction'
 
 const IvMaterialsTransfer = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
+  const { platformLabels, userDefaultsData } = useContext(ControlContext)
   const { stack: stackError } = useError()
   const { stack } = useWindow()
 
@@ -170,15 +170,10 @@ const IvMaterialsTransfer = () => {
     openForm(obj?.recordId)
   }
 
-  const getPlantId = async () => {
-    const userId = getStorageData('userData').userId
+  async function getPlantId() {
+    const defaultPlant = userDefaultsData?.list?.find(({ key }) => key === 'plantId')
 
-    const res = await getRequest({
-      extension: SystemRepository.UserDefaults.get,
-      parameters: `_userId=${userId}&_key=plantId`
-    })
-
-    return res?.record?.value
+    return defaultPlant?.value ? parseInt(defaultPlant.value) : null
   }
 
   function openOutWardsWindow(plantId, recordId) {
