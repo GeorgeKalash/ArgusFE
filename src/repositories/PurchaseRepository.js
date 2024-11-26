@@ -55,6 +55,11 @@ export const PurchaseRepository = {
     get: service + 'getIVC',
     set: service + 'setIVC',
     del: service + 'delIVC',
-    snapshot: service + 'snapshotIVC'
+    snapshot: service + 'snapshotIVC',
+    set2: service + 'set2IVC'
+  },
+  PurchaseReturnHeader: {
+    qry: service + 'qryIVR',
+    snapshot: service + 'snapshotIVR'
   }
 }
