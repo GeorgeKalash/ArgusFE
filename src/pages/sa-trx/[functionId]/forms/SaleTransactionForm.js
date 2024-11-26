@@ -54,7 +54,6 @@ import { RateDivision } from 'src/resources/RateDivision'
 import { useError } from 'src/error'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import StrictUnpostConfirmation from 'src/components/Shared/StrictUnpostConfirmation'
-import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
 
 export default function SaleTransactionForm({ labels, access, recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -206,18 +205,6 @@ export default function SaleTransactionForm({ labels, access, recordId, function
     }),
     onSubmit: async obj => {
       try {
-        if (obj.header.serializedAddress) {
-          const addressData = {
-            clientId: obj.header.clientId,
-            address: address
-          }
-  
-          const addressRes = await postRequest({
-            extension: SaleRepository.Address.set,
-            record: JSON.stringify(addressData)
-          })
-          obj.header.billAddressId = addressRes.recordId
-        }
 
         const payload = {
           header: {
@@ -439,9 +426,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
           }
 
           const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
-          if (parseFloat(unitPrice) < parseFloat(minPrice)) {
-            ShowMinPriceValueErrorMessage(minPrice, unitPrice)
-          }
+
           setFilteredMU(filteredMeasurements)
           update({
             isMetal: isMetal,
@@ -457,7 +442,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                 : 0,
             baseLaborPrice: 0,
             TotPricePerG: TotPricePerG,
-            unitPrice: 
+            unitPrice:
               ItemConvertPrice?.priceType === 3
                 ? weight * TotPricePerG
                 : parseFloat(ItemConvertPrice?.unitPrice || 0).toFixed(3),
@@ -473,7 +458,6 @@ export default function SaleTransactionForm({ labels, access, recordId, function
             extendedPrice: parseFloat('0').toFixed(2),
             mdValue: 0,
             taxId: rowTax,
-            minPrice,
             taxDetails: rowTaxDetails
           })
 
@@ -548,7 +532,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       label: labels.quantity,
       name: 'qty',
       updateOn: 'blur',
-      async onChange({ row: { update, newRow } }) {
+      onChange({ row: { update, newRow } }) {
         getItemPriceRow(update, newRow, DIRTYFIELD_QTY)
       }
     },
@@ -599,13 +583,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       component: 'numberfield',
       label: labels.unitPrice,
       name: 'unitPrice',
-      async onChange({ row: { update, oldRow, newRow } }) {
-        const unitPrice = parseFloat(newRow.unitPrice || 0).toFixed(3)
-        const minPrice = parseFloat(oldRow?.minPrice || 0).toFixed(3)
-
-        if (parseFloat(minPrice) > 0 && parseFloat(unitPrice) < parseFloat(minPrice)) {
-          ShowMinPriceValueErrorMessage(minPrice, unitPrice)
-        }
+      async onChange({ row: { update, newRow } }) {
         getItemPriceRow(update, newRow, DIRTYFIELD_UNIT_PRICE)
       }
     },
@@ -1238,14 +1216,6 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       getItemPriceRow(update, rowData, DIRTYFIELD_MDAMOUNT)
       stackError({
         message: labels.clientMaxDiscount + ' ' + clientMaxDiscountValue
-      })
-    }
-  }
-
-  function ShowMinPriceValueErrorMessage(minPrice, unitPrice) {
-    if (parseFloat(minPrice) > 0 && parseFloat(unitPrice) < parseFloat(minPrice)) {
-      stackError({
-        message: `${labels.minPriceError}: ${minPrice}`
       })
     }
   }
