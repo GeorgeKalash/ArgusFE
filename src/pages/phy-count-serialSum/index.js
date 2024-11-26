@@ -28,6 +28,7 @@ const PhysicalCountSerial = () => {
   const [siteStore, setSiteStore] = useState([])
   const [filteredItems, setFilteredItems] = useState([])
   const [editMode, setEditMode] = useState(false)
+  const { stack } = useWindow()
 
   const { labels: _labels, maxAccess } = useResourceQuery({
     queryFn: fetchGridData,
@@ -177,8 +178,6 @@ const PhysicalCountSerial = () => {
   const clearGrid = () => {
     openClear()
   }
-
-  const { stack } = useWindow()
 
   function openClear() {
     stack({
