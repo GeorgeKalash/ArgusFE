@@ -332,19 +332,19 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
       condition: isPosted,
       onClick: 'onUnpostConfirmation',
       onSuccess: onUnpost,
-      disabled: !editMode || !isCancelled
+      disabled: !editMode || isCancelled
     },
     {
       key: 'Unlocked',
       condition: !isPosted,
       onClick: onPost,
-      disabled: !editMode || !isCancelled
+      disabled: !editMode || isCancelled
     },
     {
       key: 'Cancel',
       condition: true,
       onClick: onCancel,
-      disabled: !editMode || isPosted || isCancelled
+      disabled: !editMode || !isPosted || isCancelled
     },
     {
       key: 'WorkFlow',
