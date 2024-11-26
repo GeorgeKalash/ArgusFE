@@ -457,10 +457,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                 : 0,
             baseLaborPrice: 0,
             TotPricePerG: TotPricePerG,
-            unitPrice:
-              ItemConvertPrice?.priceType === 3
-                ? weight * TotPricePerG
-                : parseFloat(ItemConvertPrice?.unitPrice || 0).toFixed(3),
+            unitPrice: unitPrice,
             upo: parseFloat(ItemConvertPrice?.upo || 0).toFixed(2),
             priceType: ItemConvertPrice?.priceType || 1,
             qty: 0,
