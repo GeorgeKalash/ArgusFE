@@ -44,6 +44,7 @@ export default function SalesForm({ labels, maxAccess, recordId, store }) {
         }),
       maxDiscount: yup
         .number()
+        .max(100)
         .nullable()
         .transform((value, originalValue) => (originalValue === '' ? null : value))
     }),
@@ -75,8 +76,6 @@ export default function SalesForm({ labels, maxAccess, recordId, store }) {
       } catch (error) {}
     })()
   }, [])
-
-  console.log(formik)
 
   return (
     <FormShell resourceId={ResourceIds.ClientGroups} form={formik} maxAccess={maxAccess} editMode={editMode}>

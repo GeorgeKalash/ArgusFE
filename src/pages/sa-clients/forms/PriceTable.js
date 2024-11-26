@@ -58,7 +58,9 @@ const PriceTab = ({ labels, maxAccess, store }) => {
   }
 
   useEffect(() => {
-    fetchGridData()
+    if (recordId) {
+      fetchGridData()
+    }
   }, [])
 
   const add = () => {

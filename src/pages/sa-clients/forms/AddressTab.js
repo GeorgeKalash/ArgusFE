@@ -66,7 +66,6 @@ const AddressTab = ({ store, maxAccess, labels, editMode, ...props }) => {
   }
 
   const editAddress = obj => {
-    console.log(obj, 'objssss')
     openForm(obj.recordId)
   }
 

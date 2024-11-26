@@ -51,6 +51,7 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
       accountName: '',
       bpId: null,
       BpRef: null,
+      bpName: null,
       szId: null,
       spId: null,
       acquisitionDate: new Date(),
@@ -63,7 +64,8 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),
-      cgId: yup.string().required()
+      cgId: yup.string().required(),
+      reference: yup.string().required()
     }),
     onSubmit: async values => {
       await postAccount(values)
@@ -172,7 +174,6 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
                 displayField='name'
                 values={formik.values}
                 onChange={(event, newValue) => {
-                  console.log(newValue?.recordId)
                   formik.setFieldValue('cgId', newValue?.recordId || '')
                   changeDT(newValue)
                 }}
@@ -235,7 +236,6 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
                 valueShow='accountRef'
                 secondValueShow='accountName'
                 form={formik}
-                filter={{ type: formik.values.accountType }}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('accountId', newValue?.recordId || '')
                   formik.setFieldValue('accountRef', newValue?.reference || '')
@@ -295,7 +295,7 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
                 valueField='key'
                 displayField='value'
                 values={formik.values}
-                onChange={newValue => {
+                onChange={(event, newValue) => {
                   formik.setFieldValue('languageId', newValue?.key ?? '')
                 }}
                 error={formik.touched.languageId && Boolean(formik.errors.languageId)}
@@ -309,27 +309,6 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
                 onChange={formik.setFieldValue}
                 onClear={() => formik.setFieldValue('acquisitionDate', '')}
                 error={formik.touched.acquisitionDate && Boolean(formik.errors.acquisitionDate)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <ResourceLookup
-                endpointId={BusinessPartnerRepository.MasterData.snapshot}
-                name='bpId'
-                label={labels.bpRef}
-                valueField='reference'
-                displayField='name'
-                valueShow='bpRef'
-                secondDisplayField={false}
-                form={formik}
-                onChange={(event, newValue) => {
-                  formik.setValues({
-                    ...formik.values,
-                    bpId: newValue?.recordId || '',
-                    bpRef: newValue?.reference || '',
-                    bpName: newValue?.name || ''
-                  })
-                }}
-                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
@@ -382,6 +361,27 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
                   formik.setFieldValue('taxId', newValue?.recordId || '')
                 }}
                 error={formik.touched.taxId && formik.errors.taxId}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceLookup
+                endpointId={BusinessPartnerRepository.MasterData.snapshot}
+                name='bpRef'
+                label={labels.bpRef}
+                valueField='reference'
+                displayField='name'
+                valueShow='bpRef'
+                secondValueShow='bpName'
+                form={formik}
+                onChange={(event, newValue) => {
+                  formik.setValues({
+                    ...formik.values,
+                    bpId: newValue?.recordId || '',
+                    bpRef: newValue?.reference || '',
+                    bpName: newValue?.name || ''
+                  })
+                }}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>

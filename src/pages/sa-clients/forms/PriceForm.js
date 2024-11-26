@@ -57,7 +57,6 @@ export default function PriceForm({ labels, maxAccess, obj, window, recordId, fe
           extension: SaleRepository.Price.get,
           parameters: `_clientId=${obj.clientId}&_categoryId=${obj.categoryId}&_currencyId=${obj.currencyId}&_priceType=${obj.priceType}`
         })
-        console.log(res.record, 'aaaaaaaaaa')
 
         formik.setValues(res.record)
       }
@@ -75,7 +74,7 @@ export default function PriceForm({ labels, maxAccess, obj, window, recordId, fe
     >
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={InventoryRepository.Category.qry}
