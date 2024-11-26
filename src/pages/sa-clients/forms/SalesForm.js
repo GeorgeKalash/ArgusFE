@@ -144,6 +144,8 @@ export default function SalesForm({ labels, maxAccess, recordId, store }) {
                 maxAccess={maxAccess}
                 onChange={e => {
                   formik.handleChange(e)
+                }}
+                onBlur={e => {
                   if (!formik.values.maxDiscount) {
                     formik.setFieldValue('maxDiscount', e.target.value)
                   }

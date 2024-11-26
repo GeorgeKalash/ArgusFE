@@ -16,22 +16,24 @@ import { MasterSource } from 'src/resources/MasterSource'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
-import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
+import { useRefBehavior } from 'src/hooks/useReferenceProxy'
 
 const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { recordId } = store
 
-  const { maxAccess, changeDT } = useDocumentType({
+  const { changeDT, maxAccess } = useRefBehavior({
     access: access,
-    enabled: !recordId
+    readOnlyOnEditMode: store.recordId,
+    name: 'reference'
   })
+  console.log(maxAccess, 'maxxaaaaa')
 
   const invalidate = useInvalidate({
     endpointId: SaleRepository.Client.page
@@ -51,21 +53,19 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
       accountName: '',
       bpId: null,
       BpRef: null,
-      bpName: null,
       szId: null,
       spId: null,
       acquisitionDate: new Date(),
       isSubjectToVAT: null,
       vatNumber: '',
       taxId: null,
-      inactive: false
+      isInactive: false
     },
     maxAccess: maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),
-      cgId: yup.string().required(),
-      reference: yup.string().required()
+      cgId: yup.string().required()
     }),
     onSubmit: async values => {
       await postAccount(values)
@@ -369,16 +369,14 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
                 name='bpRef'
                 label={labels.bpRef}
                 valueField='reference'
-                displayField='name'
                 valueShow='bpRef'
-                secondValueShow='bpName'
+                secondDisplayField={false}
                 form={formik}
                 onChange={(event, newValue) => {
                   formik.setValues({
                     ...formik.values,
                     bpId: newValue?.recordId || '',
-                    bpRef: newValue?.reference || '',
-                    bpName: newValue?.name || ''
+                    bpRef: newValue?.reference || ''
                   })
                 }}
                 maxAccess={maxAccess}
@@ -388,11 +386,11 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
               <FormControlLabel
                 control={
                   <Checkbox
-                    name='inactive'
+                    name='isInactive'
                     maxAccess={maxAccess}
-                    checked={formik.values?.inactive}
+                    checked={formik.values?.isInactive}
                     onChange={event => {
-                      formik.setFieldValue('inactive', event.target.checked)
+                      formik.setFieldValue('isInactive', event.target.checked)
                     }}
                   />
                 }

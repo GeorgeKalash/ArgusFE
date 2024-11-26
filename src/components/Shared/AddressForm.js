@@ -8,7 +8,6 @@ import { ControlContext } from 'src/providers/ControlContext'
 const AddressForm = ({ recordId, address, setAddress = () => {}, editMode, onSubmit, ...props }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  console.log('Props:', props)
 
   function onAddressSubmit(post) {
     const data = { ...post, recordId: recordId }
