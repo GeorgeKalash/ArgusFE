@@ -378,6 +378,13 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'ClientSalesTransaction',
+    label: platformLabels.ClientSalesTransaction,
+    color: 'blue',
+    image: 'popup-window.png',
+    main: false
+  },
+  {
     key: 'Locked',
     label: platformLabels.Locked,
     color: '#231f20',
@@ -390,5 +397,5 @@ export const getButtons = platformLabels => [
     color: '#231f20',
     image: 'unlock.png',
     main: false
-  },
+  }
 ]
