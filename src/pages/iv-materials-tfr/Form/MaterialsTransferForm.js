@@ -27,6 +27,7 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { getFormattedNumber } from 'src/lib/numberField-helper'
 import { useError } from 'src/error'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
+import SkuForm from './SkuForm'
 
 export default function MaterialsTransferForm({ labels, maxAccess: access, recordId, plantId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -324,6 +325,27 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
             metalRef
           })
         }
+      }
+    },
+    {
+      component: 'button',
+      name: 'enableSku',
+      defaultValue: false,
+      props: {
+        imgSrc: '/images/buttonsIcons/popup-black.png'
+      },
+      label: labels.sku,
+      onClick: (e, row, update, newRow) => {
+        stack({
+          Component: SkuForm,
+          props: {
+            labels, 
+            maxAccess,
+            itemId: row?.itemId
+          },
+          width: 1200,
+          title: platformLabels.SalesTransactions
+        })
       }
     },
     {
