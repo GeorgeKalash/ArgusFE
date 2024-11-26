@@ -291,7 +291,6 @@ export const ResourceIds = {
   AvailabilitiesBySite: 41226,
   ProductionSheet: 42327,
   ProdSheetDocumentTypeDefault: 42120,
-  InventoryTransaction: 41209,
   GenerateFiscalYear: 41503,
   UserSecretOTPQrCode: 23201,
   CurrentCosts: 41207,
