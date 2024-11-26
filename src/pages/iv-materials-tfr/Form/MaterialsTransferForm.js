@@ -359,7 +359,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       }
     },
     {
-      component: 'numberfield',
+      component: 'textfield',
       label: labels.metalRef,
       name: 'metalRef',
       props: {
