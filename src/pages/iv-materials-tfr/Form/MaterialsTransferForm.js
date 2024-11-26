@@ -95,25 +95,32 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
   })
 
   async function getDefaultFromSiteId() {
+    if (editMode) return;
+
     const defaultFromSiteId = userDefaultsData?.list?.find(({ key }) => key === 'siteId')
 
     if (defaultFromSiteId?.value) formik.setFieldValue('fromSiteId', parseInt(defaultFromSiteId?.value || ''))
   }
 
   async function handleNotificationSubmission(recordId, reference, formik, status) {
-    const notificationData = {
-      recordId: recordId,
-      functionId: SystemFunction.MaterialTransfer,
-      notificationGroupId: formik.values.notificationGroupId,
-      date: formik.values.date,
-      reference: reference,
-      status: status
+    try {
+      const notificationData = {
+        recordId: recordId,
+        functionId: SystemFunction.MaterialTransfer,
+        notificationGroupId: formik.values.notificationGroupId,
+        date: formik.values.date,
+        reference: reference,
+        status: status
+      }
+  
+      await postRequest({
+        extension: AccessControlRepository.Notification.set,
+        record: JSON.stringify(notificationData)
+      })
+    } catch (error) {
+      console.log(error)
     }
 
-    await postRequest({
-      extension: AccessControlRepository.Notification.set,
-      record: JSON.stringify(notificationData)
-    })
   }
 
   const { formik } = useForm({
@@ -174,16 +181,8 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
         toast.success(platformLabels.Added)
         formik.setFieldValue('recordId', res.recordId)
 
-        const res2 = await getRequest({
-          extension: InventoryRepository.MaterialsTransfer.get,
-          parameters: `_recordId=${res.recordId}`
-        })
+        await refetchForm(res.recordId)
 
-        formik.setFieldValue('reference', res2.record.reference)
-
-        if (!!formik.values.notificationGroupId) {
-          handleNotificationSubmission(res.recordId, res2.record.reference, formik, 1)
-        }
         invalidate()
       } else {
         if (formik.values.notificationGroupId) {
@@ -448,18 +447,22 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
   async function refetchForm(recordId) {
     const res = await getData(recordId)
 
-    const resNotification = await getNotificationData(recordId)
+    if (!!formik.values.notificationGroupId) {
+      handleNotificationSubmission(recordId, res.record.reference, formik, 1)
+    }
+
     const res3 = await getDataGrid(recordId)
 
     formik.setValues({
       ...res.record,
+      recordId,
       transfers: res3?.list?.map(item => ({
         ...item,
         id: item.seqNo,
         totalCost: calcTotalCost(item),
         unitCost: item.unitCost ?? 0
       })),
-      notificationGroupId: resNotification?.record?.notificationGroupId
+      notificationGroupId: formik.values.notificationGroupId
     })
   }
 
@@ -537,7 +540,6 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     invalidate()
     await refetchForm(formik.values.recordId)
   }
-
 
   const onUnpost = async () => {
     const copy = { ...formik.values }
