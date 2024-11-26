@@ -24,6 +24,7 @@ export const DeliveryRepository = {
     snapshot: service + 'snapshotTRP',
     reopen: service + 'reopenTRP',
     post: service + 'postTRP',
+    unpost: service + 'unpostTRP',
     close: service + 'closeTRP'
   },
   TripOrderPack2: {

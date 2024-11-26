@@ -250,6 +250,7 @@ export const apiMappings = {
   [ResourceIds.PlantGroups]: {
     type: COMBOBOX,
     endpoint: SystemRepository.PlantGroup.qry,
+    parameters: '_params=',
     valueField: 'recordId',
     displayField: ['reference', 'name'],
     columnsInDropDown: [

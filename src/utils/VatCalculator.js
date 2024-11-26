@@ -47,6 +47,7 @@ const calcVatAmountPerTaxDetail = (vatCalcRow, taxDetail) => {
 const calcVatAmount = vatCalcRow => {
   let vatAmount = 0
 
+  console.log('check values1 ', vatCalcRow)
   if (vatCalcRow.taxDetails != null) {
     for (let i = 0; i < vatCalcRow.taxDetails.length; i++) {
       vatAmount += calcVatAmountPerTaxDetail(vatCalcRow, vatCalcRow.taxDetails[i])
