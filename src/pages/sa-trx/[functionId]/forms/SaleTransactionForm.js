@@ -600,11 +600,9 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       component: 'numberfield',
       label: labels.unitPrice,
       name: 'unitPrice',
-      updateOn: 'blur',
-      async onChange({ row: { update, newRow } }) {
-        const ItemConvertPrice = await getItemConvertPrice(newRow.itemId)
+      async onChange({ row: { update, oldRow, newRow } }) {
         const unitPrice = parseFloat(newRow.unitPrice || 0).toFixed(3)
-        const minPrice = parseFloat(ItemConvertPrice?.minPrice || 0).toFixed(3)
+        const minPrice = parseFloat(oldRow?.minPrice || 0).toFixed(3)
 
         if (parseFloat(minPrice) > 0 && parseFloat(unitPrice) < parseFloat(minPrice)) {
           ShowMinPriceValueErrorMessage(minPrice, unitPrice)
