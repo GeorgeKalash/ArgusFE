@@ -35,6 +35,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import CustomDatePickerHijri from 'src/components/Inputs/CustomDatePickerHijri'
 import PaymentGrid from 'src/components/Shared/PaymentGrid'
 import { DataSets } from 'src/resources/DataSets'
+import OTPAuthentication from 'src/components/Shared/OTPAuthentication'
 
 export default function TransactionForm({ recordId, labels, access, plantId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -442,6 +443,8 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
   const isPosted = formik.values.status === 3
   const isReleased = formik.values.status === 4
 
+  console.log(isPosted, 'isPosted')
+
   async function setOperationType(type) {
     if (type) {
       const res = await getRequest({
@@ -684,7 +687,25 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     })
   }
 
+  function viewAuthOTP(loggedUser) {
+    stack({
+      Component: OTPAuthentication,
+      props: {
+        formValidation: formik,
+        loggedUser,
+        onClose: () => auth.EnableLogin(loggedUser)
+      },
+      expandable: false,
+      width: 400,
+      height: 400,
+      spacing: false,
+      title: platformLabels.OTPVerification
+    })
+  }
+
   const onPost = async () => {
+    !formik.values.otp && viewAuthOTP()
+
     const values = formik.values
 
     const data = {
@@ -722,7 +743,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       key: 'Post',
       condition: true,
       onClick: onPost,
-      disabled: !isPosted
+      disabled: isPosted
     },
     {
       key: 'Close',
@@ -741,7 +762,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
       key: 'OTP',
       condition: true,
       onClick: viewOTP,
-      disabled: isPosted
+      disabled: isPosted && !isReleased
     },
     {
       key: 'Approval',
@@ -1061,6 +1082,21 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                           maxAccess={maxAccess}
                         />
                       </Grid>
+
+                      <Grid item xs={3}>
+                        <CustomTextField
+                          name='familyName'
+                          label={labels.familyName}
+                          value={formik.values.familyName}
+                          readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
+                          maxLength='20'
+                          onChange={formik.handleChange}
+                          forceUpperCase={true}
+                          onClear={() => formik.setFieldValue('familyName', '')}
+                          error={formik.touched.familyName && Boolean(formik.errors.familyName)}
+                          maxAccess={maxAccess}
+                        />
+                      </Grid>
                       <Grid item xs={3}>
                         <CustomTextField
                           name='lastName'
@@ -1073,20 +1109,6 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                           forceUpperCase={true}
                           onClear={() => formik.setFieldValue('lastName', '')}
                           error={formik.touched.lastName && Boolean(formik.errors.lastName)}
-                          maxAccess={maxAccess}
-                        />
-                      </Grid>
-                      <Grid item xs={3}>
-                        <CustomTextField
-                          name='familyName'
-                          label={labels.familyName}
-                          value={formik.values.familyName}
-                          readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
-                          maxLength='20'
-                          onChange={formik.handleChange}
-                          forceUpperCase={true}
-                          onClear={() => formik.setFieldValue('familyName', '')}
-                          error={formik.touched.familyName && Boolean(formik.errors.familyName)}
                           maxAccess={maxAccess}
                         />
                       </Grid>
@@ -1124,21 +1146,6 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                           </Grid>
                           <Grid item xs={3}>
                             <CustomTextField
-                              name='fl_lastName'
-                              label={labels.fl_lastName}
-                              value={formik.values.fl_lastName}
-                              readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
-                              dir='rtl'
-                              language='arabic'
-                              onChange={formik.handleChange}
-                              forceUpperCase={true}
-                              onClear={() => formik.setFieldValue('fl_lastName', '')}
-                              error={formik.touched.fl_lastName && Boolean(formik.errors.fl_lastName)}
-                              maxAccess={maxAccess}
-                            />
-                          </Grid>
-                          <Grid item xs={3}>
-                            <CustomTextField
                               name='fl_familyName'
                               label={labels.fl_familyName}
                               value={formik.values.fl_familyName}
@@ -1149,6 +1156,21 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                               forceUpperCase={true}
                               onClear={() => formik.setFieldValue('fl_familyName', '')}
                               error={formik.touched.fl_familyName && Boolean(formik.errors.fl_familyName)}
+                              maxAccess={maxAccess}
+                            />
+                          </Grid>
+                          <Grid item xs={3}>
+                            <CustomTextField
+                              name='fl_lastName'
+                              label={labels.fl_lastName}
+                              value={formik.values.fl_lastName}
+                              readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
+                              dir='rtl'
+                              language='arabic'
+                              onChange={formik.handleChange}
+                              forceUpperCase={true}
+                              onClear={() => formik.setFieldValue('fl_lastName', '')}
+                              error={formik.touched.fl_lastName && Boolean(formik.errors.fl_lastName)}
                               maxAccess={maxAccess}
                             />
                           </Grid>
