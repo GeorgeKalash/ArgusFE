@@ -16,7 +16,6 @@ export default function ResourceLookupEdit({ id, column: { props, field }, value
       hasBorder={false}
       displayFieldWidth={props.displayFieldWidth}
       firstFieldWidth='100%'
-      userTypes={false}
       valueField={props.valueField}
       displayField={props.displayField}
       columnsInDropDown={props.columnsInDropDown}
