@@ -16,7 +16,6 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 const ItemPartForm = ({ labels, maxAccess, obj }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const [numRows, setNumRows] = useState(0)
 
   const isRowEmpty = row => {
     return !row.partId
@@ -32,9 +31,9 @@ const ItemPartForm = ({ labels, maxAccess, obj }) => {
         .of(
           yup.object().shape({
             partRef: yup.string().test(function (value) {
-              const rowIndex = this.options.index
+              const rowIndex = this.options.from[1]?.value?.items?.length
 
-              if (numRows > 1) {
+              if (rowIndex > 1) {
                 return !!value
               }
 
@@ -147,10 +146,6 @@ const ItemPartForm = ({ labels, maxAccess, obj }) => {
       })
     })
   }, [obj.recordId])
-
-  useEffect(() => {
-    setNumRows(formik.values.items.length)
-  }, [formik.values.items])
 
   return (
     <FormShell
