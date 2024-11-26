@@ -142,7 +142,6 @@ export default function SaleTransactionForm({ labels, access, recordId, function
         msId: 0,
         muRef: '',
         muQty: 0,
-        minPrice: 0,
         baseQty: 0,
         mdType: MDTYPE_PCT,
         basePrice: 0,
@@ -205,7 +204,6 @@ export default function SaleTransactionForm({ labels, access, recordId, function
     }),
     onSubmit: async obj => {
       try {
-
         const payload = {
           header: {
             ...obj.header,
@@ -386,12 +384,6 @@ export default function SaleTransactionForm({ labels, access, recordId, function
           const basePriceValue = postMetalToFinancials === false ? basePrice : 0
           const TotPricePerG = basePriceValue
 
-          const unitPrice =
-            ItemConvertPrice?.priceType === 3
-              ? weight * TotPricePerG
-              : parseFloat(ItemConvertPrice?.unitPrice || 0).toFixed(3)
-
-          const minPrice = parseFloat(ItemConvertPrice?.minPrice || 0).toFixed(3)
           let rowTax = null
           let rowTaxDetails = null
 
@@ -583,6 +575,7 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       component: 'numberfield',
       label: labels.unitPrice,
       name: 'unitPrice',
+      updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         getItemPriceRow(update, newRow, DIRTYFIELD_UNIT_PRICE)
       }
@@ -796,12 +789,6 @@ export default function SaleTransactionForm({ labels, access, recordId, function
       condition: !isPosted,
       onClick: onPost,
       disabled: !editMode
-    },
-    {
-      key: 'ClientSalesTransaction',
-      condition: true,
-      onClick: 'onClientSalesTransaction',
-      disabled: !formik.values.header?.clientId
     }
   ]
 
@@ -1264,34 +1251,6 @@ export default function SaleTransactionForm({ labels, access, recordId, function
     })
   }
 
-  function openAddressForm() {
-    stack({
-      Component: AddressFormShell,
-      props: {
-        address: address,
-        setAddress: setAddress,
-        isCleared: false,
-        isSavedClear: false
-      },
-      width: 850,
-      height: 620,
-      title: labels.address
-    })
-  }
-
-  useEffect(() => {
-    let billAdd = ''
-    const { name, street1, street2, city, phone, phone2, email1 } = address
-    if (name || street1 || street2 || city || phone || phone2 || email1) {
-      billAdd = `${name || ''}\n${street1 || ''}\n${street2 || ''}\n${city || ''}\n${phone || ''}\n${phone2 || ''}\n${
-        email1 || ''
-      }`
-    }
-
-    formik.setFieldValue('header.billAddress', billAdd)
-    formik.setFieldValue('header.serializedAddress', billAdd)
-  }, [address])
-
   function getDTD(dtId) {
     const res = getRequest({
       extension: SaleRepository.DocumentTypeDefault.get,
@@ -1670,11 +1629,9 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                     readOnly={!formik.values.header.clientId || isPosted}
                     maxAccess={maxAccess}
                     viewDropDown={formik.values.header.clientId}
-                    viewAdd={formik.values.header.clientId && !editMode}
-                    onChange={e => formik.setFieldValue('header.billAddress', e.target.value)}
-                    onClear={() => formik.setFieldValue('header.billAddress', '')}
+                    onChange={e => formik.setFieldValue('header.BillAddress', e.target.value)}
+                    onClear={() => formik.setFieldValue('header.BillAddress', '')}
                     onDropDown={() => openAddressFilterForm()}
-                    handleAddAction={() => openAddressForm()}
                   />
                 </Grid>
               </Grid>
@@ -1689,14 +1646,19 @@ export default function SaleTransactionForm({ labels, access, recordId, function
               <Grid item xs={12}>
                 <ResourceLookup
                   endpointId={SaleRepository.Client.snapshot}
-                  name='clientId'
-                  label={labels.client}
                   valueField='reference'
                   displayField='name'
+                  name='clientId'
+                  label={labels.client}
+                  form={formik}
+                  formObject={formik.values.header}
+                  required
+                  readOnly={isPosted}
+                  displayFieldWidth={3}
                   valueShow='clientRef'
                   secondValueShow='clientName'
-                  formObject={formik.values.header}
-                  form={formik}
+                  maxAccess={maxAccess}
+                  editMode={editMode}
                   columnsInDropDown={[
                     { key: 'reference', value: 'Reference' },
                     { key: 'name', value: 'Name' },
@@ -1704,19 +1666,10 @@ export default function SaleTransactionForm({ labels, access, recordId, function
                     { key: 'keywords', value: 'Keywords' },
                     { key: 'cgName', value: 'Client Group' }
                   ]}
-                  onChange={(event, newValue) => {
+                  onChange={async (event, newValue) => {
                     fillClientData(newValue)
                   }}
-                  secondFieldName={'header.clientName'}
-                  onSecondValueChange={(name, value) => {
-                    formik.setFieldValue('header.clientName', value)
-                  }}
                   errorCheck={'clientId'}
-                  maxAccess={maxAccess}
-                  required
-                  readOnly={isPosted}
-                  displayFieldWidth={3}
-                  editMode={editMode}
                 />
               </Grid>
 
