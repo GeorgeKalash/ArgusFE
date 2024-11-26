@@ -214,7 +214,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
 
   const getWeightAndMetalId = async itemId => {
     const res = await getRequest({
-      extension: InventoryRepository.PP.get,
+      extension: InventoryRepository.Physical.get,
       parameters: '_itemId=' + itemId
     })
 

@@ -163,9 +163,6 @@ export const InventoryRepository = {
   MaterialsTransferItems: {
     qry: service + 'qryTFI',
   },
-  PP: {
-    get: service + 'getPP',
-  },
   Cost: {
     get: service + 'getCOS',
   },
